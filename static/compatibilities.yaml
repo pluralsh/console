@@ -30785,55 +30785,72 @@ addons:
   release_url: https://github.com/Dynatrace/dynatrace-operator/releases/tag/v{vsn}
   helm_repository_url: https://raw.githubusercontent.com/Dynatrace/dynatrace-operator/main/config/helm/repos/stable
   versions:
-  - version: 1.8.1
-    kube: ['1.35']
+  - version: 1.10.2
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.8.1
-    images: []
+    chart_version: 1.10.2
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.10.2']
+  - version: 1.10.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.10.0
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.10.0']
+  - version: 1.9.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.9.0
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.9.0']
   - version: 1.8.0
     kube: ['1.35']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.8.0
-    images: []
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.8.0']
   - version: 1.7.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.7.0
-    images: []
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.7.0']
   - version: 1.4.0
     kube: ['1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.4.0
-    images: []
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.4.0']
   - version: 1.3.0
     kube: ['1.24']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.3.0
-    images: []
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.3.0']
   - version: 1.0.0
     kube: ['1.23', '1.22']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.0.0
-    images: []
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.0.0']
   - version: 0.12.0
     kube: ['1.21']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 0.12.0
-    images: []
+    images: ['docker.io/dynatrace/dynatrace-operator:v0.12.0']
   - version: 0.6.0
     kube: ['1.20', '1.19']
     requirements: []
