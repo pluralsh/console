@@ -57,6 +57,21 @@ class PsmdbOperatorTests(unittest.TestCase):
         rows = scraper.parse_platform_matrix(colon_fixture, CHARTS)
         self.assertEqual(rows[0]["version"], "1.23.0")
 
+    def test_later_table_in_platform_section_is_ignored(self):
+        extra = FIXTURE + """
+
+### Notes
+
+| Operator | GKE | EKS | AKS |
+|:--|:--|:--|:--|
+| future | latest | latest | latest |
+"""
+        rows = scraper.parse_platform_matrix(extra, CHARTS)
+        self.assertEqual(
+            [row["version"] for row in rows],
+            ["1.23.0", "1.22.0", "1.21.2"],
+        )
+
     def test_missing_platform_section_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "section not found"):
             scraper.parse_platform_matrix("# no matrix", CHARTS)
