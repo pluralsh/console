@@ -3,31 +3,27 @@ git_url: https://github.com/argoproj/argo-rollouts
 release_url: https://github.com/argoproj/argo-rollouts/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 versions:
-- version: 1.8.3
+- version: 1.10.0
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.43.0
+  images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
+- version: 1.9.1
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.42.0
+  images: ['quay.io/argoproj/argo-rollouts:v1.9.1']
+- version: 1.9.0
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: ["No Helm chart changelog was provided in the notes you pasted\
-        \ (only application GitHub release notes). Treat this as an application-only\
-        \ summary; verify the Helm chart version you\u2019ll deploy and diff `values.yaml`\
-        \ separately."]
-    features: ['Prometheus metric provider: adds range query support, enabling analyses
-        over a time range instead of single-point queries.', 'Analysis/New Relic:
-        can now set a timeout and the provider returns the resolved query as metadata
-        (useful for debugging/traceability).', 'Datadog metric provider: supports
-        multi-account configurations and adds support for providing credentials to
-        download plugins.', 'Controller: adds an (alpha) canary steps plugin mechanism
-        for extending canary step behavior.', 'Controller: canary ingress support
-        allows specifying full annotations for nginx canary ingresses (more flexibility
-        for NGINX users).', 'Controller: enables pprof profiling support for debugging
-        performance issues.', 'Analysis: adds ConsecutiveSuccessLimit to Analysis
-        (lets you require N consecutive successful measurements).', 'Metrics/observability:
-        new Prometheus `build_info` metric is emitted.']
-    breaking_changes: []
-  chart_version: 2.40.5
-  images: ['quay.io/argoproj/argo-rollouts:v1.8.3']
+  summary: null
+  chart_version: 2.41.0
+  images: ['quay.io/argoproj/argo-rollouts:v1.9.0']
 - version: 1.8.0
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
