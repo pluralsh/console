@@ -79,6 +79,7 @@ class ScyllaDBOperatorScraperTest(unittest.TestCase):
         self.assertEqual(rows[0]["kube"], ["1.33", "1.34", "1.35", "1.36"])
         self.assertEqual(rows[0]["chart_version"], "1.22.0")
         self.assertEqual(rows[0]["images"], ["docker.io/scylladb/scylla-operator:1.22.0"])
+        self.assertEqual(rows[1]["kube"], ["1.32", "1.33", "1.34", "1.35"])
 
 
 if __name__ == "__main__":
