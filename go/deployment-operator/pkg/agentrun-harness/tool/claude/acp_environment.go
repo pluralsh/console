@@ -21,15 +21,18 @@ func (agent *Agent) env(config toolv1.Config) []string {
 		fmt.Sprintf("%s=%s", claudeConfigEnv, agent.configPath(config)),
 		fmt.Sprintf("%s=%s", claudeExecutableEnv, nativeClaudeBinary),
 	}
+
 	if config.Run.IsProxyEnabled() {
 		return append(env,
 			fmt.Sprintf("%s=%s", anthropicAuthEnv, agent.consoleToken),
 			fmt.Sprintf("%s=%s/ext/ai/anthropic", anthropicBaseURLEnv, agent.consoleURL),
 		)
 	}
+
 	env = append(env, fmt.Sprintf("%s=%s", anthropicAPIKeyEnv, claude.ApiKey))
 	if claude.Endpoint != nil {
 		env = append(env, fmt.Sprintf("%s=%s", anthropicBaseURLEnv, *claude.Endpoint))
 	}
+
 	return env
 }

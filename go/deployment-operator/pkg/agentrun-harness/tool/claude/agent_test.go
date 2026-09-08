@@ -21,6 +21,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 	run.Skills = []agentrunv1.AgentSkill{{Name: "guide", Contents: "inspect changes"}}
 	agent := NewAgent(toolv1.Config{WorkDir: workDir, RepositoryDir: repositoryDir, Run: run})
 	request := toolv1.FileSystemRequest{Phase: toolv1.ConfigurePhaseInitial, WorkDir: workDir, RepositoryDir: repositoryDir}
+
 	if err := agent.Prepare(context.Background(), request); err != nil {
 		t.Fatal(err)
 	}
@@ -36,9 +37,11 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 			t.Fatalf("prompt %q = %q", promptPath, prompt)
 		}
 	}
+
 	if _, err := os.Stat(filepath.Join(workDir, claudeConfigDir, claudeSkillsDir, "guide", "SKILL.md")); err != nil {
 		t.Fatal(err)
 	}
+
 	settings, err := agent.ResolveSettings(run)
 	if err != nil {
 		t.Fatal(err)
@@ -46,15 +49,18 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{Phase: toolv1.ConfigurePhaseInitial, ConsoleURL: "https://console.example", ConsoleToken: "console-token", Settings: settings}); err != nil {
 		t.Fatal(err)
 	}
+
 	native, err := os.ReadFile(filepath.Join(workDir, claudeConfigDir, "settings.local.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	for _, want := range []string{`"model": "claude-sonnet-4-6"`, `"availableModels": [`, `"Write"`, `"BASH_DEFAULT_TIMEOUT_MS"`} {
 		if !strings.Contains(string(native), want) {
 			t.Fatalf("native settings missing %q: %s", want, native)
 		}
 	}
+
 	if _, err := os.Stat(filepath.Join(workDir, ".mcp.json")); err != nil {
 		t.Fatal(err)
 	}
@@ -65,6 +71,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{Phase: toolv1.ConfigurePhaseBabysit}); err != nil {
 		t.Fatal(err)
 	}
+
 	afterBabysit, err := os.ReadFile(filepath.Join(workDir, claudeConfigDir, "settings.local.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -72,6 +79,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 	if string(native) != string(afterBabysit) {
 		t.Fatal("babysit configuration unexpectedly rewrote native settings")
 	}
+
 	projectDir := filepath.Join(workDir, claudeConfigDir, claudeProjectsDir, "project")
 	if err := os.MkdirAll(projectDir, 0755); err != nil {
 		t.Fatal(err)
@@ -79,6 +87,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(projectDir, "session.jsonl"), []byte("state"), 0644); err != nil {
 		t.Fatal(err)
 	}
+
 	outputDir := t.TempDir()
 	result, err := agent.Export(context.Background(), toolv1.ExportRequest{SessionID: "session", OutputDir: outputDir})
 	if err != nil {
@@ -87,6 +96,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 	if result.SessionSource.Path != outputDir || result.SessionSource.ArchivePath != claudeProjectsDir {
 		t.Fatalf("session source = %#v", result.SessionSource)
 	}
+
 	if content, err := os.ReadFile(filepath.Join(outputDir, "project", "session.jsonl")); err != nil || string(content) != "state" {
 		t.Fatalf("staged session = %q, %v", content, err)
 	}
