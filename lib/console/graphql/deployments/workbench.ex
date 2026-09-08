@@ -528,6 +528,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_knowledge/3
     end
 
+    connection field :workbench_dashboards, node_type: :workbench_dashboard do
+      middleware Nested, check: true, msg: "workbench dashboards cannot be fetched through a policy"
+      resolve &Deployments.list_dashboards/3
+    end
+
     field :eval, :workbench_eval, description: "eval configuration for this workbench (at most one; null if none configured)" do
       middleware Nested, check: true, msg: "workbench eval configuration cannot be fetched through a policy"
       resolve dataloader(Deployments)
@@ -617,16 +622,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve: dataloader(Deployments),
       description: "chatbot integration metadata for this job, when present"
 
-    field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
-    field :url,          non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
-    field :flow,         :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
-    field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
-    field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
-    field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
+    field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
+    field :url,           non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
+    field :flow,          :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
+    field :user,          :user, resolve: dataloader(User), description: "the user who created this run"
+    field :result,        :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
+    field :eval_result,   :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
+    field :associations,  list_of(:workbench_job_association), resolve: dataloader(Deployments), description: "dashboards and monitors associated with this workbench job"
 
-    field :alert,           :alert,        resolve: dataloader(Deployments), description: "the alert this run was spawned from"
-    field :issue,           :issue,        resolve: dataloader(Deployments), description: "the issue this run was spawned from"
+    field :alert,           :alert,         resolve: dataloader(Deployments), description: "the alert this run was spawned from"
+    field :issue,           :issue,         resolve: dataloader(Deployments), description: "the issue this run was spawned from"
     field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do
@@ -670,6 +676,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
+
+    timestamps()
+  end
+
+  object :workbench_job_association do
+    field :id, non_null(:string), description: "the id of the association"
+    field :dashboard, :workbench_dashboard, resolve: dataloader(Deployments), description: "the associated dashboard"
+    field :monitor, :monitor, resolve: dataloader(Deployments), description: "the associated monitor"
 
     timestamps()
   end

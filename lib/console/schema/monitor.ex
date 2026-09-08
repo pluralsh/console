@@ -1,6 +1,7 @@
 defmodule Console.Schema.Monitor do
   use Console.Schema.Base
-  alias Console.Schema.{Alert, Service, Workbench}
+  alias Console.Schema.{Alert, Service, User, Workbench}
+  alias Console.Schema.WorkbenchJob.Modes
 
   defenum Type, log: 0
   defenum Operator, or: 0, and: 1
@@ -16,6 +17,9 @@ defmodule Console.Schema.Monitor do
     field :evaluation_cron, :string
     field :next_run_at,     :utc_datetime_usec
     field :last_run_at,     :utc_datetime_usec
+    field :prompt,          :string
+
+    embeds_one :modes, Modes, on_replace: :update
 
     embeds_one :query, Query, on_replace: :update do
       embeds_one :log, LogQuery, on_replace: :update do
@@ -38,6 +42,7 @@ defmodule Console.Schema.Monitor do
 
     belongs_to :workbench, Workbench
     belongs_to :service,   Service
+    belongs_to :user,      User
     has_one    :alert,     Alert, foreign_key: :monitor_id, references: :id
 
     timestamps()
@@ -69,6 +74,8 @@ defmodule Console.Schema.Monitor do
     last_run_at
     service_id
     workbench_id
+    user_id
+    prompt
     state
   )a
 
@@ -77,7 +84,11 @@ defmodule Console.Schema.Monitor do
     |> cast(attrs, @valid)
     |> then(fn cs -> cast_embed(cs, :query, with: &query_changeset(&1, &2, get_field(cs, :type))) end)
     |> cast_embed(:threshold, with: &threshold_changeset/2)
+    |> cast_embed(:modes)
     |> foreign_key_constraint(:service_id)
+    |> foreign_key_constraint(:workbench_id)
+    |> foreign_key_constraint(:user_id)
+    |> validate_length(:prompt, max: 2048)
     |> validate_change(:evaluation_cron, &validate_crontab/2)
     |> determine_next_run(:evaluation_cron)
     |> validate_required(~w(name severity type query threshold evaluation_cron service_id)a)

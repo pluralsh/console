@@ -334,17 +334,26 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
+  alias Console.Repo
   alias Console.Schema.Alert
   alias Console.Deployments.Workbenches
   require EEx
 
   def process(%@for{item: %Alert{state: :firing, state_changed: true, workbench_id: wid, id: id} = alert}) when is_binary(wid) do
     Console.debounce({:alert_created, wid, id}, fn ->
-      alert = Console.Repo.preload(alert, [:tags, :workbench_webhook])
-      Workbenches.create_workbench_bot_job(%{
-          prompt: String.trim(prompt(alert: alert)),
-          alert_id: id,
-        }, wid, alert.workbench_webhook)
+      alert = Repo.preload(alert, [:tags, :workbench_webhook, monitor: [user: :groups]])
+      attrs = %{
+        prompt: String.trim(prompt(alert: alert)),
+        alert_id: id,
+      }
+
+      case alert.monitor || alert.workbench_webhook do
+        nil ->
+          {:error, "alert does not have a monitor or workbench webhook"}
+
+        source ->
+          Workbenches.create_workbench_bot_job(attrs, wid, source)
+      end
     end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok

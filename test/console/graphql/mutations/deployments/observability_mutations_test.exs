@@ -265,4 +265,108 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
       refute refetch(monitor)
     end
   end
+
+  describe "dashboard mutations" do
+    test "it can create a dashboard with graph and input datasources" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createDashboard" => dashboard}}} =
+        run_query(
+          """
+          mutation Create($attrs: DashboardAttributes!) {
+            createDashboard(attributes: $attrs) {
+              id
+              name
+              graphs {
+                identifier
+                type
+                layout { x y w h }
+                datasource { type tool input }
+              }
+              inputs {
+                name
+                type
+                datasource { type tool input }
+              }
+            }
+          }
+          """,
+          %{
+            "attrs" => %{
+              "workbenchId" => workbench.id,
+              "name" => "Operations",
+              "graphs" => [
+                %{
+                  "identifier" => "requests",
+                  "type" => "TIMESERIES",
+                  "layout" => %{"x" => 0, "y" => 0, "w" => 2, "h" => 2},
+                  "datasource" => %{
+                    "type" => "METRICS",
+                    "tool" => "prometheus_query",
+                    "input" => Jason.encode!(%{"query" => "up"})
+                  }
+                }
+              ],
+              "inputs" => [
+                %{
+                  "name" => "namespace",
+                  "type" => "SELECT",
+                  "datasource" => %{
+                    "type" => "LABELS",
+                    "tool" => "workbench_observability_metric_label_search_prometheus",
+                    "input" => Jason.encode!(%{"metric" => "kube_pod_info", "label" => "namespace"})
+                  }
+                }
+              ]
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert dashboard["name"] == "Operations"
+      assert [graph] = dashboard["graphs"]
+      assert graph["datasource"]["type"] == "METRICS"
+      assert graph["datasource"]["input"] == %{"query" => "up"}
+      assert [input] = dashboard["inputs"]
+      assert input["datasource"]["type"] == "LABELS"
+    end
+
+    test "it can update a dashboard" do
+      dashboard = insert(:dashboard)
+
+      {:ok, %{data: %{"updateDashboard" => updated}}} =
+        run_query(
+          """
+          mutation Update($id: ID!, $attrs: DashboardAttributes!) {
+            updateDashboard(id: $id, attributes: $attrs) {
+              id
+              name
+            }
+          }
+          """,
+          %{"id" => dashboard.id, "attrs" => %{"name" => "Updated"}},
+          %{current_user: admin_user()}
+        )
+
+      assert updated == %{"id" => dashboard.id, "name" => "Updated"}
+    end
+
+    test "it can delete a dashboard" do
+      dashboard = insert(:dashboard)
+
+      {:ok, %{data: %{"deleteDashboard" => deleted}}} =
+        run_query(
+          """
+          mutation Delete($id: ID!) {
+            deleteDashboard(id: $id) { id }
+          }
+          """,
+          %{"id" => dashboard.id},
+          %{current_user: admin_user()}
+        )
+
+      assert deleted["id"] == dashboard.id
+      refute refetch(dashboard)
+    end
+  end
 end

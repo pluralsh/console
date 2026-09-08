@@ -14,6 +14,7 @@ defmodule Console.Deployments.Observability do
     Project,
     Service,
     Monitor,
+    Dashboard,
     AlertResolution,
     DeploymentSettings,
     ObservabilityProvider,
@@ -30,10 +31,11 @@ defmodule Console.Deployments.Observability do
   require Logger
 
   @type error :: Console.error
-  @type provider_resp :: {:ok, ObservabilityProvider.t} | error
-  @type webhook_resp  :: {:ok, ObservabilityWebhook.t} | error
-  @type monitor_resp  :: {:ok, Monitor.t} | error
-  @type alert_resp    :: {:ok, Alert.t} | error
+  @type provider_resp  :: {:ok, ObservabilityProvider.t} | error
+  @type webhook_resp   :: {:ok, ObservabilityWebhook.t} | error
+  @type monitor_resp   :: {:ok, Monitor.t} | error
+  @type dashboard_resp :: {:ok, Dashboard.t} | error
+  @type alert_resp     :: {:ok, Alert.t} | error
 
   @spec get_provider(binary) :: ObservabilityProvider.t | nil
   def get_provider(id), do: Repo.get(ObservabilityProvider, id)
@@ -66,6 +68,32 @@ defmodule Console.Deployments.Observability do
   def get_monitor!(id), do: Repo.get!(Monitor, id)
   def get_monitor(id), do: Repo.get(Monitor, id)
 
+  def get_dashboard!(id), do: Repo.get!(Dashboard, id)
+  def get_dashboard(id), do: Repo.get(Dashboard, id)
+
+  @spec create_dashboard(map, User.t()) :: dashboard_resp
+  def create_dashboard(attrs, %User{} = user) do
+    %Dashboard{}
+    |> Dashboard.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @spec update_dashboard(map, binary, User.t()) :: dashboard_resp
+  def update_dashboard(attrs, id, %User{} = user) do
+    get_dashboard!(id)
+    |> Dashboard.changeset(attrs |> Map.delete(:workbench_id) |> Map.delete("workbench_id"))
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @spec delete_dashboard(binary, User.t()) :: dashboard_resp
+  def delete_dashboard(id, %User{} = user) do
+    get_dashboard!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
   @spec get_alert!(binary) :: Alert.t | nil
   def get_alert!(id), do: Repo.get!(Alert, id)
 
@@ -73,9 +101,13 @@ defmodule Console.Deployments.Observability do
   Create a new monitor, cannot be done if the user doesn't have read access to the service it belongs to
   """
   @spec create_monitor(map, User.t) :: monitor_resp
-  def create_monitor(attrs, %User{} = user) do
+  def create_monitor(attrs, %User{id: user_id} = user) do
     %Monitor{}
-    |> Monitor.changeset(Map.put(attrs, :last_run_at, Timex.now()))
+    |> Monitor.changeset(
+      attrs
+      |> Map.put(:last_run_at, Timex.now())
+      |> Map.put(:user_id, user_id)
+    )
     |> allow(user, :read)
     |> when_ok(:insert)
   end

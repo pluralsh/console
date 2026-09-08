@@ -7,6 +7,7 @@ defmodule Console.Schema.WorkbenchJob do
     WorkbenchEvalResult,
     WorkbenchJobResult,
     WorkbenchJobActivity,
+    WorkbenchJobAssociation,
     AIUsage,
     User,
     Alert,
@@ -113,6 +114,9 @@ defmodule Console.Schema.WorkbenchJob do
     has_one  :eval_result,     WorkbenchEvalResult, on_replace: :update
     has_one  :chatbot_message, ChatbotMessage, on_replace: :update
     has_many :activities,      WorkbenchJobActivity, on_replace: :delete
+    has_many :associations,    WorkbenchJobAssociation, on_replace: :delete
+    has_many :dashboards,      through: [:associations, :dashboard]
+    has_many :monitors,        through: [:associations, :monitor]
     has_many :pull_requests,   PullRequest, on_replace: :delete
     has_many :queued_prompts,  QueuedPrompt, on_replace: :delete
 

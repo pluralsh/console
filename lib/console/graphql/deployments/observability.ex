@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Deployments.Observability do
   use Console.GraphQl.Schema.Base
-  alias Console.GraphQl.Resolvers.{Deployments}
-  alias Console.Schema.{ObservabilityWebhook, ObservabilityProvider, Alert, Monitor}
+  alias Console.GraphQl.Resolvers.{Deployments, User}
+  alias Console.Schema.{ObservabilityWebhook, ObservabilityProvider, Alert, Monitor, Dashboard}
 
   ecto_enum :observability_provider_type, ObservabilityProvider.Type
   ecto_enum :observability_webhook_type,  ObservabilityWebhook.Type
@@ -10,6 +10,9 @@ defmodule Console.GraphQl.Deployments.Observability do
   ecto_enum :monitor_type,                Monitor.Type
   ecto_enum :monitor_aggregate,           Monitor.Aggregate
   ecto_enum :monitor_operator,            Monitor.Operator
+  ecto_enum :dashboard_graph_type,        Dashboard.Graph.Type
+  ecto_enum :dashboard_input_type,        Dashboard.Input.Type
+  ecto_enum :dashboard_datasource_type,   Dashboard.Datasource.Type
 
   @desc "Attributes for creating or updating an external observability provider"
   input_object :observability_provider_attributes do
@@ -62,6 +65,12 @@ defmodule Console.GraphQl.Deployments.Observability do
       description: "ID of the service deployment this monitor should be attached to"
 
     field :workbench_id, :id, description: "ID of the workbench this monitor should be attached to"
+
+    field :prompt, :string,
+      description: "Prompt used when the monitor starts a workbench investigation"
+
+    field :modes, :workbench_job_modes_attributes,
+      description: "Mode-specific options for monitor-triggered workbench jobs"
 
     field :name, non_null(:string),
       description: "Short name used to identify this monitor"
@@ -128,6 +137,60 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :value, non_null(:string),
       description: "Facet value to match for the given key"
+  end
+
+  @desc "Attributes used to create or update a dashboard"
+  input_object :dashboard_attributes do
+    field :workbench_id, :id,
+      description: "ID of the workbench that owns this dashboard"
+
+    field :name, :string, description: "Dashboard name, unique within its workbench"
+    field :description, :string, description: "Optional dashboard description"
+    field :graphs, list_of(:dashboard_graph_attributes), description: "Graphs arranged on the dashboard grid"
+    field :inputs, list_of(:dashboard_input_attributes), description: "User-configurable dashboard variables"
+  end
+
+  input_object :dashboard_time_range_attributes do
+    field :start, non_null(:datetime), description: "Inclusive start of the query range"
+    field :end, non_null(:datetime), description: "Inclusive end of the query range"
+  end
+
+  input_object :dashboard_graph_attributes do
+    field :identifier, non_null(:string), description: "Stable identifier unique within the dashboard"
+    field :title, :string, description: "Graph title"
+    field :description, :string, description: "Optional graph description"
+    field :type, non_null(:dashboard_graph_type), description: "Graph visualization type"
+    field :markdown, :string, description: "Markdown content for markdown graphs"
+    field :options, :json, description: "Visualization-specific display options"
+    field :layout, non_null(:dashboard_graph_layout_attributes), description: "Grid position and size"
+    field :datasource, :dashboard_datasource_attributes, description: "Tool call used to fetch external data"
+  end
+
+  input_object :dashboard_graph_layout_attributes do
+    field :x, non_null(:integer), description: "Zero-based horizontal grid coordinate"
+    field :y, non_null(:integer), description: "Zero-based vertical grid coordinate"
+    field :w, non_null(:integer), description: "Width in grid columns"
+    field :h, non_null(:integer), description: "Height in grid rows"
+  end
+
+  input_object :dashboard_datasource_attributes do
+    field :type, non_null(:dashboard_datasource_type),
+      description: "Kind of data returned by the datasource"
+
+    field :tool, non_null(:string), description: "Observability tool used to render the graph"
+    field :input, non_null(:json), description: "Input passed to the observability tool"
+  end
+
+  input_object :dashboard_input_attributes do
+    field :name, non_null(:string), description: "Variable name referenced by graph datasource inputs"
+    field :label, :string, description: "Human-readable input label"
+    field :description, :string, description: "Optional input description"
+    field :type, non_null(:dashboard_input_type), description: "Input control type"
+    field :default, :string, description: "Default input value"
+    field :options, list_of(:string), description: "Allowed values for select inputs"
+    field :required, :boolean, description: "Whether a value is required when rendering"
+    field :datasource, :dashboard_datasource_attributes,
+      description: "Tool query used to populate input options, such as metric label search"
   end
 
   @desc "Attributes used to persist a human‑authored resolution for an alert"
@@ -237,6 +300,12 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :next_run_at, :datetime,
       description: "Next scheduled time this monitor will be evaluated, if any"
 
+    field :prompt, :string,
+      description: "Prompt used when this monitor starts a workbench investigation"
+
+    field :modes, :workbench_job_modes,
+      description: "Mode-specific options for monitor-triggered workbench jobs"
+
     field :query, non_null(:monitor_query),
       description: "Underlying query configuration used to fetch data for this monitor"
 
@@ -251,7 +320,88 @@ defmodule Console.GraphQl.Deployments.Observability do
       description: "The workbench this monitor is attached to",
       resolve: dataloader(Deployments)
 
+    field :user, :user,
+      description: "The user whose identity is used for monitor-triggered workbench jobs",
+      resolve: dataloader(User)
+
     timestamps()
+  end
+
+  @desc "A workbench-owned collection of observability graphs"
+  object :workbench_dashboard do
+    field :id, non_null(:id), description: "Stable identifier for this dashboard"
+    field :name, non_null(:string), description: "Dashboard name"
+    field :description, :string, description: "Optional dashboard description"
+    field :graphs, list_of(:workbench_dashboard_graph), description: "Graphs arranged on the dashboard grid"
+    field :inputs, list_of(:workbench_dashboard_input), description: "User-configurable dashboard variables"
+    field :workbench, :workbench, resolve: dataloader(Deployments)
+
+    field :graph, :workbench_dashboard_graph_result do
+      arg :identifier, non_null(:string), description: "Identifier of the graph to query"
+      arg :input, non_null(:json), description: "Dashboard input values used for variable substitution"
+      arg :time_range, non_null(:dashboard_time_range_attributes), description: "Time range applied to the datasource query"
+
+      resolve &Deployments.dashboard_graph/3
+    end
+
+    field :input, list_of(:string) do
+      arg :identifier, non_null(:string), description: "Name of the dashboard input to populate"
+      arg :input, non_null(:json), description: "Dashboard input values used for variable substitution"
+      arg :time_range, non_null(:dashboard_time_range_attributes), description: "Time range applied to the datasource query"
+
+      resolve &Deployments.dashboard_input/3
+    end
+
+    timestamps()
+  end
+
+  object :workbench_dashboard_graph_result do
+    field :metrics, list_of(:workbench_job_activity_metric),
+      description: "Metric points returned by a metrics datasource"
+
+    field :logs, list_of(:workbench_job_activity_log),
+      description: "Log entries returned by a logs datasource"
+
+    field :traces, list_of(:workbench_job_activity_trace),
+      description: "Trace spans returned by a traces datasource"
+  end
+
+  object :workbench_dashboard_graph do
+    field :identifier, non_null(:string), description: "Stable identifier unique within the dashboard"
+    field :title, :string, description: "Graph title"
+    field :description, :string, description: "Optional graph description"
+    field :type, non_null(:dashboard_graph_type), description: "Graph visualization type"
+    field :markdown, :string, description: "Markdown content for markdown graphs"
+    field :options, :json, description: "Visualization-specific display options"
+    field :layout, non_null(:workbench_dashboard_graph_layout), description: "Grid position and size"
+    field :datasource, :workbench_dashboard_datasource, description: "Tool call used to fetch external data"
+  end
+
+  object :workbench_dashboard_graph_layout do
+    field :x, non_null(:integer), description: "Zero-based horizontal grid coordinate"
+    field :y, non_null(:integer), description: "Zero-based vertical grid coordinate"
+    field :w, non_null(:integer), description: "Width in grid columns"
+    field :h, non_null(:integer), description: "Height in grid rows"
+  end
+
+  object :workbench_dashboard_datasource do
+    field :type, non_null(:dashboard_datasource_type),
+      description: "Kind of data returned by the datasource"
+
+    field :tool, non_null(:string), description: "Observability tool used to render the graph"
+    field :input, non_null(:json), description: "Input passed to the observability tool"
+  end
+
+  object :workbench_dashboard_input do
+    field :name, non_null(:string), description: "Variable name referenced by graph datasource inputs"
+    field :label, :string, description: "Human-readable input label"
+    field :description, :string, description: "Optional input description"
+    field :type, non_null(:dashboard_input_type), description: "Input control type"
+    field :default, :string, description: "Default input value"
+    field :options, list_of(:string), description: "Allowed values for select inputs"
+    field :required, :boolean, description: "Whether a value is required when rendering"
+    field :datasource, :workbench_dashboard_datasource,
+      description: "Tool query used to populate input options, such as metric label search"
   end
 
   @desc "A single key/value facet used when filtering log queries"
@@ -422,6 +572,7 @@ defmodule Console.GraphQl.Deployments.Observability do
   connection node_type: :observability_webhook
   connection node_type: :alert
   connection node_type: :monitor
+  connection node_type: :workbench_dashboard
 
   @desc "Queries for fetching observability providers and webhooks"
   object :observability_provider_queries do
@@ -463,6 +614,15 @@ defmodule Console.GraphQl.Deployments.Observability do
       arg :id, non_null(:id), description: "ID of the monitor to fetch"
 
       resolve &Deployments.get_monitor/2
+    end
+
+    field :workbench_dashboard, :workbench_dashboard do
+      @desc "Fetch a single dashboard by ID"
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :read
+      arg :id, non_null(:id), description: "ID of the dashboard to fetch"
+
+      resolve &Deployments.get_dashboard/2
     end
   end
 
@@ -544,6 +704,34 @@ defmodule Console.GraphQl.Deployments.Observability do
         description: "ID of the monitor to delete"
 
       resolve &Deployments.delete_monitor/2
+    end
+
+    field :create_dashboard, :workbench_dashboard do
+      @desc "Create a dashboard for a workbench"
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :attributes, non_null(:dashboard_attributes)
+
+      resolve &Deployments.create_dashboard/2
+    end
+
+    field :update_dashboard, :workbench_dashboard do
+      @desc "Update an existing dashboard"
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:dashboard_attributes)
+
+      resolve &Deployments.update_dashboard/2
+    end
+
+    field :delete_dashboard, :workbench_dashboard do
+      @desc "Delete an existing dashboard"
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_dashboard/2
     end
   end
 end

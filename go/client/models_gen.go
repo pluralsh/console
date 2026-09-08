@@ -3376,10 +3376,82 @@ type Dashboard struct {
 	Spec DashboardSpec `json:"spec"`
 }
 
+// Attributes used to create or update a dashboard
+type DashboardAttributes struct {
+	// ID of the workbench that owns this dashboard
+	WorkbenchID *string `json:"workbenchId,omitempty"`
+	// Dashboard name, unique within its workbench
+	Name *string `json:"name,omitempty"`
+	// Optional dashboard description
+	Description *string `json:"description,omitempty"`
+	// Graphs arranged on the dashboard grid
+	Graphs []*DashboardGraphAttributes `json:"graphs,omitempty"`
+	// User-configurable dashboard variables
+	Inputs []*DashboardInputAttributes `json:"inputs,omitempty"`
+}
+
+type DashboardDatasourceAttributes struct {
+	// Kind of data returned by the datasource
+	Type DashboardDatasourceType `json:"type"`
+	// Observability tool used to render the graph
+	Tool string `json:"tool"`
+	// Input passed to the observability tool
+	Input string `json:"input"`
+}
+
 type DashboardGraph struct {
 	Name    string             `json:"name"`
 	Queries []*DashboardMetric `json:"queries,omitempty"`
 	Format  *string            `json:"format,omitempty"`
+}
+
+type DashboardGraphAttributes struct {
+	// Stable identifier unique within the dashboard
+	Identifier string `json:"identifier"`
+	// Graph title
+	Title *string `json:"title,omitempty"`
+	// Optional graph description
+	Description *string `json:"description,omitempty"`
+	// Graph visualization type
+	Type DashboardGraphType `json:"type"`
+	// Markdown content for markdown graphs
+	Markdown *string `json:"markdown,omitempty"`
+	// Visualization-specific display options
+	Options *string `json:"options,omitempty"`
+	// Grid position and size
+	Layout DashboardGraphLayoutAttributes `json:"layout"`
+	// Tool call used to fetch external data
+	Datasource *DashboardDatasourceAttributes `json:"datasource,omitempty"`
+}
+
+type DashboardGraphLayoutAttributes struct {
+	// Zero-based horizontal grid coordinate
+	X int64 `json:"x"`
+	// Zero-based vertical grid coordinate
+	Y int64 `json:"y"`
+	// Width in grid columns
+	W int64 `json:"w"`
+	// Height in grid rows
+	H int64 `json:"h"`
+}
+
+type DashboardInputAttributes struct {
+	// Variable name referenced by graph datasource inputs
+	Name string `json:"name"`
+	// Human-readable input label
+	Label *string `json:"label,omitempty"`
+	// Optional input description
+	Description *string `json:"description,omitempty"`
+	// Input control type
+	Type DashboardInputType `json:"type"`
+	// Default input value
+	Default *string `json:"default,omitempty"`
+	// Allowed values for select inputs
+	Options []*string `json:"options,omitempty"`
+	// Whether a value is required when rendering
+	Required *bool `json:"required,omitempty"`
+	// Tool query used to populate input options, such as metric label search
+	Datasource *DashboardDatasourceAttributes `json:"datasource,omitempty"`
 }
 
 type DashboardLabel struct {
@@ -3399,6 +3471,13 @@ type DashboardSpec struct {
 	Timeslices  []*string         `json:"timeslices,omitempty"`
 	Labels      []*DashboardLabel `json:"labels,omitempty"`
 	Graphs      []*DashboardGraph `json:"graphs,omitempty"`
+}
+
+type DashboardTimeRangeAttributes struct {
+	// Inclusive start of the query range
+	Start string `json:"start"`
+	// Inclusive end of the query range
+	End string `json:"end"`
 }
 
 // Datadog API credentials
@@ -4579,6 +4658,16 @@ type IssueConnection struct {
 	Edges    []*IssueEdge `json:"edges,omitempty"`
 }
 
+type IssueCountByProvider struct {
+	Provider IssueWebhookProvider `json:"provider"`
+	Count    int64                `json:"count"`
+}
+
+type IssueCountByStatus struct {
+	Status IssueStatus `json:"status"`
+	Count  int64       `json:"count"`
+}
+
 type IssueEdge struct {
 	Node   *Issue  `json:"node,omitempty"`
 	Cursor *string `json:"cursor,omitempty"`
@@ -5142,6 +5231,10 @@ type Monitor struct {
 	EvaluationCron string `json:"evaluationCron"`
 	// Next scheduled time this monitor will be evaluated, if any
 	NextRunAt *string `json:"nextRunAt,omitempty"`
+	// Prompt used when this monitor starts a workbench investigation
+	Prompt *string `json:"prompt,omitempty"`
+	// Mode-specific options for monitor-triggered workbench jobs
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// Underlying query configuration used to fetch data for this monitor
 	Query MonitorQuery `json:"query"`
 	// Threshold configuration that determines when the monitor should fire
@@ -5149,9 +5242,11 @@ type Monitor struct {
 	// The service deployment this monitor is attached to
 	Service *ServiceDeployment `json:"service,omitempty"`
 	// The workbench this monitor is attached to
-	Workbench  *Workbench `json:"workbench,omitempty"`
-	InsertedAt *string    `json:"insertedAt,omitempty"`
-	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// The user whose identity is used for monitor-triggered workbench jobs
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 // Attributes used to create or update an observability monitor
@@ -5160,6 +5255,10 @@ type MonitorAttributes struct {
 	ServiceID string `json:"serviceId"`
 	// ID of the workbench this monitor should be attached to
 	WorkbenchID *string `json:"workbenchId,omitempty"`
+	// Prompt used when the monitor starts a workbench investigation
+	Prompt *string `json:"prompt,omitempty"`
+	// Mode-specific options for monitor-triggered workbench jobs
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// Short name used to identify this monitor
 	Name string `json:"name"`
 	// Optional free‑form description of what this monitor is checking
@@ -10293,13 +10392,14 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings      []*PolicyBinding              `json:"writeBindings,omitempty"`
-	WorkbenchPolicies  *WorkbenchPolicyConnection    `json:"workbenchPolicies,omitempty"`
-	Runs               *WorkbenchJobConnection       `json:"runs,omitempty"`
-	Crons              *WorkbenchCronConnection      `json:"crons,omitempty"`
-	Prompts            *WorkbenchPromptConnection    `json:"prompts,omitempty"`
-	WorkbenchSkills    *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
-	WorkbenchKnowledge *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
+	WriteBindings       []*PolicyBinding              `json:"writeBindings,omitempty"`
+	WorkbenchPolicies   *WorkbenchPolicyConnection    `json:"workbenchPolicies,omitempty"`
+	Runs                *WorkbenchJobConnection       `json:"runs,omitempty"`
+	Crons               *WorkbenchCronConnection      `json:"crons,omitempty"`
+	Prompts             *WorkbenchPromptConnection    `json:"prompts,omitempty"`
+	WorkbenchSkills     *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
+	WorkbenchKnowledge  *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
+	WorkbenchDashboards *WorkbenchDashboardConnection `json:"workbenchDashboards,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -10307,6 +10407,7 @@ type Workbench struct {
 	Chatbots    *WorkbenchChatbotConnection    `json:"chatbots,omitempty"`
 	Alerts      *AlertConnection               `json:"alerts,omitempty"`
 	Issues      *IssueConnection               `json:"issues,omitempty"`
+	IssueCounts *WorkbenchIssueCounts          `json:"issueCounts,omitempty"`
 	// users that have read or write access to this workbench
 	Users      []*User                  `json:"users,omitempty"`
 	AllSkills  []*UnifiedWorkbenchSkill `json:"allSkills,omitempty"`
@@ -10558,6 +10659,102 @@ type WorkbenchCronEdge struct {
 	Cursor *string        `json:"cursor,omitempty"`
 }
 
+// A workbench-owned collection of observability graphs
+type WorkbenchDashboard struct {
+	// Stable identifier for this dashboard
+	ID string `json:"id"`
+	// Dashboard name
+	Name string `json:"name"`
+	// Optional dashboard description
+	Description *string `json:"description,omitempty"`
+	// Graphs arranged on the dashboard grid
+	Graphs []*WorkbenchDashboardGraph `json:"graphs,omitempty"`
+	// User-configurable dashboard variables
+	Inputs     []*WorkbenchDashboardInput     `json:"inputs,omitempty"`
+	Workbench  *Workbench                     `json:"workbench,omitempty"`
+	Graph      *WorkbenchDashboardGraphResult `json:"graph,omitempty"`
+	Input      []*string                      `json:"input,omitempty"`
+	InsertedAt *string                        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                        `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchDashboardConnection struct {
+	PageInfo PageInfo                  `json:"pageInfo"`
+	Edges    []*WorkbenchDashboardEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchDashboardDatasource struct {
+	// Kind of data returned by the datasource
+	Type DashboardDatasourceType `json:"type"`
+	// Observability tool used to render the graph
+	Tool string `json:"tool"`
+	// Input passed to the observability tool
+	Input string `json:"input"`
+}
+
+type WorkbenchDashboardEdge struct {
+	Node   *WorkbenchDashboard `json:"node,omitempty"`
+	Cursor *string             `json:"cursor,omitempty"`
+}
+
+type WorkbenchDashboardGraph struct {
+	// Stable identifier unique within the dashboard
+	Identifier string `json:"identifier"`
+	// Graph title
+	Title *string `json:"title,omitempty"`
+	// Optional graph description
+	Description *string `json:"description,omitempty"`
+	// Graph visualization type
+	Type DashboardGraphType `json:"type"`
+	// Markdown content for markdown graphs
+	Markdown *string `json:"markdown,omitempty"`
+	// Visualization-specific display options
+	Options *string `json:"options,omitempty"`
+	// Grid position and size
+	Layout WorkbenchDashboardGraphLayout `json:"layout"`
+	// Tool call used to fetch external data
+	Datasource *WorkbenchDashboardDatasource `json:"datasource,omitempty"`
+}
+
+type WorkbenchDashboardGraphLayout struct {
+	// Zero-based horizontal grid coordinate
+	X int64 `json:"x"`
+	// Zero-based vertical grid coordinate
+	Y int64 `json:"y"`
+	// Width in grid columns
+	W int64 `json:"w"`
+	// Height in grid rows
+	H int64 `json:"h"`
+}
+
+type WorkbenchDashboardGraphResult struct {
+	// Metric points returned by a metrics datasource
+	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
+	// Log entries returned by a logs datasource
+	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+	// Trace spans returned by a traces datasource
+	Traces []*WorkbenchJobActivityTrace `json:"traces,omitempty"`
+}
+
+type WorkbenchDashboardInput struct {
+	// Variable name referenced by graph datasource inputs
+	Name string `json:"name"`
+	// Human-readable input label
+	Label *string `json:"label,omitempty"`
+	// Optional input description
+	Description *string `json:"description,omitempty"`
+	// Input control type
+	Type DashboardInputType `json:"type"`
+	// Default input value
+	Default *string `json:"default,omitempty"`
+	// Allowed values for select inputs
+	Options []*string `json:"options,omitempty"`
+	// Whether a value is required when rendering
+	Required *bool `json:"required,omitempty"`
+	// Tool query used to populate input options, such as metric label search
+	Datasource *WorkbenchDashboardDatasource `json:"datasource,omitempty"`
+}
+
 type WorkbenchEdge struct {
 	Node   *Workbench `json:"node,omitempty"`
 	Cursor *string    `json:"cursor,omitempty"`
@@ -10664,6 +10861,11 @@ type WorkbenchInfrastructureAttributes struct {
 	Sentinels *bool `json:"sentinels,omitempty"`
 }
 
+type WorkbenchIssueCounts struct {
+	Providers []*IssueCountByProvider `json:"providers,omitempty"`
+	Statuses  []*IssueCountByStatus   `json:"statuses,omitempty"`
+}
+
 type WorkbenchJob struct {
 	// the id of the run
 	ID string `json:"id"`
@@ -10699,6 +10901,8 @@ type WorkbenchJob struct {
 	EvalResult *WorkbenchEvalResult `json:"evalResult,omitempty"`
 	// pull requests associated with this workbench job
 	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
+	// dashboards and monitors associated with this workbench job
+	Associations []*WorkbenchJobAssociation `json:"associations,omitempty"`
 	// the alert this run was spawned from
 	Alert *Alert `json:"alert,omitempty"`
 	// the issue this run was spawned from
@@ -10783,6 +10987,15 @@ type WorkbenchJobActivityJobUpdate struct {
 	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
 }
 
+type WorkbenchJobActivityKubeDrain struct {
+	// the target cluster handle
+	Handle *string `json:"handle,omitempty"`
+	// the target node name
+	Node *string `json:"node,omitempty"`
+	// why this node drain is needed and its expected impact
+	Explanation *string `json:"explanation,omitempty"`
+}
+
 type WorkbenchJobActivityKubeExec struct {
 	// the target cluster handle
 	Handle *string `json:"handle,omitempty"`
@@ -10839,6 +11052,8 @@ type WorkbenchJobActivityResult struct {
 	FunctionCall *WorkbenchJobActivityFunctionCall `json:"functionCall,omitempty"`
 	// kubernetes request approval payload when present
 	KubeRequest *WorkbenchJobActivityKubeRequest `json:"kubeRequest,omitempty"`
+	// kubernetes node drain approval payload when present
+	KubeDrain *WorkbenchJobActivityKubeDrain `json:"kubeDrain,omitempty"`
 	// kubernetes exec payload when present
 	KubeExec *WorkbenchJobActivityKubeExec `json:"kubeExec,omitempty"`
 	// job update (diff, theory, conclusion) when present
@@ -10874,6 +11089,17 @@ type WorkbenchJobActivityTrace struct {
 	Start    *string        `json:"start,omitempty"`
 	End      *string        `json:"end,omitempty"`
 	Tags     map[string]any `json:"tags,omitempty"`
+}
+
+type WorkbenchJobAssociation struct {
+	// the id of the association
+	ID string `json:"id"`
+	// the associated dashboard
+	Dashboard *WorkbenchDashboard `json:"dashboard,omitempty"`
+	// the associated monitor
+	Monitor    *Monitor `json:"monitor,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobAttributes struct {
@@ -10945,6 +11171,8 @@ type WorkbenchJobKubernetesModes struct {
 	Delete *bool `json:"delete,omitempty"`
 	// whether kubernetes exec actions are enabled
 	Exec *bool `json:"exec,omitempty"`
+	// whether kubernetes node drain actions are enabled
+	Drain *bool `json:"drain,omitempty"`
 	// namespaces the agent can never act in
 	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
 	// if set, actions are only allowed in these namespaces
@@ -10958,6 +11186,8 @@ type WorkbenchJobKubernetesModesAttributes struct {
 	Delete *bool `json:"delete,omitempty"`
 	// whether kubernetes exec actions are enabled
 	Exec *bool `json:"exec,omitempty"`
+	// whether kubernetes node drain actions are enabled
+	Drain *bool `json:"drain,omitempty"`
 	// namespaces the agent can never act in
 	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
 	// if set, actions are only allowed in these namespaces
@@ -14049,6 +14279,199 @@ func (e ContextSource) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type DashboardDatasourceType string
+
+const (
+	DashboardDatasourceTypeLogs    DashboardDatasourceType = "LOGS"
+	DashboardDatasourceTypeMetrics DashboardDatasourceType = "METRICS"
+	DashboardDatasourceTypeTraces  DashboardDatasourceType = "TRACES"
+	DashboardDatasourceTypeLabels  DashboardDatasourceType = "LABELS"
+)
+
+var AllDashboardDatasourceType = []DashboardDatasourceType{
+	DashboardDatasourceTypeLogs,
+	DashboardDatasourceTypeMetrics,
+	DashboardDatasourceTypeTraces,
+	DashboardDatasourceTypeLabels,
+}
+
+func (e DashboardDatasourceType) IsValid() bool {
+	switch e {
+	case DashboardDatasourceTypeLogs, DashboardDatasourceTypeMetrics, DashboardDatasourceTypeTraces, DashboardDatasourceTypeLabels:
+		return true
+	}
+	return false
+}
+
+func (e DashboardDatasourceType) String() string {
+	return string(e)
+}
+
+func (e *DashboardDatasourceType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DashboardDatasourceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DashboardDatasourceType", str)
+	}
+	return nil
+}
+
+func (e DashboardDatasourceType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DashboardDatasourceType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DashboardDatasourceType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DashboardGraphType string
+
+const (
+	DashboardGraphTypeTimeseries DashboardGraphType = "TIMESERIES"
+	DashboardGraphTypeGauge      DashboardGraphType = "GAUGE"
+	DashboardGraphTypeLogs       DashboardGraphType = "LOGS"
+	DashboardGraphTypeMarkdown   DashboardGraphType = "MARKDOWN"
+	DashboardGraphTypeTable      DashboardGraphType = "TABLE"
+	DashboardGraphTypeStat       DashboardGraphType = "STAT"
+	DashboardGraphTypeBar        DashboardGraphType = "BAR"
+	DashboardGraphTypePie        DashboardGraphType = "PIE"
+	DashboardGraphTypeHeatmap    DashboardGraphType = "HEATMAP"
+	DashboardGraphTypeTraces     DashboardGraphType = "TRACES"
+)
+
+var AllDashboardGraphType = []DashboardGraphType{
+	DashboardGraphTypeTimeseries,
+	DashboardGraphTypeGauge,
+	DashboardGraphTypeLogs,
+	DashboardGraphTypeMarkdown,
+	DashboardGraphTypeTable,
+	DashboardGraphTypeStat,
+	DashboardGraphTypeBar,
+	DashboardGraphTypePie,
+	DashboardGraphTypeHeatmap,
+	DashboardGraphTypeTraces,
+}
+
+func (e DashboardGraphType) IsValid() bool {
+	switch e {
+	case DashboardGraphTypeTimeseries, DashboardGraphTypeGauge, DashboardGraphTypeLogs, DashboardGraphTypeMarkdown, DashboardGraphTypeTable, DashboardGraphTypeStat, DashboardGraphTypeBar, DashboardGraphTypePie, DashboardGraphTypeHeatmap, DashboardGraphTypeTraces:
+		return true
+	}
+	return false
+}
+
+func (e DashboardGraphType) String() string {
+	return string(e)
+}
+
+func (e *DashboardGraphType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DashboardGraphType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DashboardGraphType", str)
+	}
+	return nil
+}
+
+func (e DashboardGraphType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DashboardGraphType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DashboardGraphType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DashboardInputType string
+
+const (
+	DashboardInputTypeText        DashboardInputType = "TEXT"
+	DashboardInputTypeNumber      DashboardInputType = "NUMBER"
+	DashboardInputTypeBoolean     DashboardInputType = "BOOLEAN"
+	DashboardInputTypeSelect      DashboardInputType = "SELECT"
+	DashboardInputTypeMultiSelect DashboardInputType = "MULTI_SELECT"
+	DashboardInputTypeTimeRange   DashboardInputType = "TIME_RANGE"
+)
+
+var AllDashboardInputType = []DashboardInputType{
+	DashboardInputTypeText,
+	DashboardInputTypeNumber,
+	DashboardInputTypeBoolean,
+	DashboardInputTypeSelect,
+	DashboardInputTypeMultiSelect,
+	DashboardInputTypeTimeRange,
+}
+
+func (e DashboardInputType) IsValid() bool {
+	switch e {
+	case DashboardInputTypeText, DashboardInputTypeNumber, DashboardInputTypeBoolean, DashboardInputTypeSelect, DashboardInputTypeMultiSelect, DashboardInputTypeTimeRange:
+		return true
+	}
+	return false
+}
+
+func (e DashboardInputType) String() string {
+	return string(e)
+}
+
+func (e *DashboardInputType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DashboardInputType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DashboardInputType", str)
+	}
+	return nil
+}
+
+func (e DashboardInputType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DashboardInputType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DashboardInputType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type Delta string
 
 const (
@@ -14741,6 +15164,116 @@ func (e *InsightFreshness) UnmarshalJSON(b []byte) error {
 }
 
 func (e InsightFreshness) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type IssueSort string
+
+const (
+	IssueSortInsertedAt IssueSort = "INSERTED_AT"
+	IssueSortTitle      IssueSort = "TITLE"
+)
+
+var AllIssueSort = []IssueSort{
+	IssueSortInsertedAt,
+	IssueSortTitle,
+}
+
+func (e IssueSort) IsValid() bool {
+	switch e {
+	case IssueSortInsertedAt, IssueSortTitle:
+		return true
+	}
+	return false
+}
+
+func (e IssueSort) String() string {
+	return string(e)
+}
+
+func (e *IssueSort) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IssueSort(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IssueSort", str)
+	}
+	return nil
+}
+
+func (e IssueSort) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *IssueSort) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e IssueSort) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type IssueSortDirection string
+
+const (
+	IssueSortDirectionAsc  IssueSortDirection = "ASC"
+	IssueSortDirectionDesc IssueSortDirection = "DESC"
+)
+
+var AllIssueSortDirection = []IssueSortDirection{
+	IssueSortDirectionAsc,
+	IssueSortDirectionDesc,
+}
+
+func (e IssueSortDirection) IsValid() bool {
+	switch e {
+	case IssueSortDirectionAsc, IssueSortDirectionDesc:
+		return true
+	}
+	return false
+}
+
+func (e IssueSortDirection) String() string {
+	return string(e)
+}
+
+func (e *IssueSortDirection) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IssueSortDirection(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IssueSortDirection", str)
+	}
+	return nil
+}
+
+func (e IssueSortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *IssueSortDirection) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e IssueSortDirection) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -907,6 +907,40 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
   end
 
   describe "AlertCreated" do
+    test "creates monitor investigations with the monitor actor, prompt, and modes" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      actor = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: nil)
+
+      monitor =
+        insert(:monitor,
+          workbench: workbench,
+          user: actor,
+          prompt: "Focus on the checkout deployment.",
+          modes: %{plan: true, coding: %{review: true}}
+        )
+
+      alert =
+        insert(:alert,
+          monitor: monitor,
+          workbench: workbench,
+          project: workbench.project,
+          title: "Checkout errors",
+          message: "Error rate above threshold"
+        )
+
+      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
+      {:ok, job} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.user_id == actor.id
+      assert job.alert_id == alert.id
+      assert job.modes.plan
+      assert job.modes.coding.review
+      assert job.prompt =~ "Focus on the checkout deployment."
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
     test "creates a workbench job owned by the workbench bot user when alert targets a workbench" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       bot = insert(:user, roles: %{admin: true})

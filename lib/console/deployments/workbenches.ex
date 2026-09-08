@@ -27,6 +27,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchPolicy,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
+    Monitor,
     PullRequest,
     FlowWorkbench,
     StackRun,
@@ -878,15 +879,21 @@ defmodule Console.Deployments.Workbenches do
   defp budget_available?(%Workbench{budget: %Budget{} = budget}), do: Budget.available?(budget)
   defp budget_available?(%Workbench{}), do: true
 
-  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
-    hook = Repo.preload(hook, [:user])
+  @spec create_workbench_bot_job(map, binary, WorkbenchWebhook.t() | Monitor.t()) :: job_resp
+  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{} = hook),
+    do: create_workbench_bot_job(attrs, workbench_id, hook, "workbench webhook")
+  def create_workbench_bot_job(attrs, workbench_id, %Monitor{} = monitor),
+    do: create_workbench_bot_job(attrs, workbench_id, monitor, "monitor")
+
+  defp create_workbench_bot_job(attrs, workbench_id, %{modes: modes} = source, source_name) do
+    source = Repo.preload(source, [:user])
     bench = get_workbench!(workbench_id) |> Repo.preload([:bot_user])
     start_transaction()
     |> add_operation(:actor, fn _ ->
-      case {hook, bench} do
-        {%WorkbenchWebhook{user: %User{} = user}, _} -> {:ok, Console.Services.Rbac.preload(user)}
+      case {source, bench} do
+        {%{user: %User{} = user}, _} -> {:ok, Console.Services.Rbac.preload(user)}
         {_, %Workbench{bot_user: %User{} = bot_user}} -> {:ok, Console.Services.Rbac.preload(bot_user)}
-        _ -> {:error, "workbench webhook does not have a bot user"}
+        _ -> {:error, "#{source_name} does not have a bot user"}
       end
     end)
     |> add_operation(:job, fn %{actor: user} ->
