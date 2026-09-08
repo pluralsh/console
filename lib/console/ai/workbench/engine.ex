@@ -24,7 +24,8 @@ defmodule Console.AI.Workbench.Engine do
     Heartbeat,
     Canvas,
     Activity,
-    Tools
+    Tools,
+    Tracking
   }
   alias Console.AI.Tools.Workbench.{
     Codemode,
@@ -47,11 +48,9 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.AI.Tools.Workbench.Infrastructure.KubeDrain, as: KubeDrainTool
   alias Console.AI.Tool.Approval, as: Approval
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
-  alias OpentelemetryProcessPropagator.Task, as: TracedTask
 
   require EEx
   require Logger
-  require OpenTelemetry.Tracer
 
   defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200, verifiable: false]
 
@@ -93,13 +92,13 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   def run(%__MODULE__{job: job} = engine) do
-    OpenTelemetry.Tracer.with_span "workbench.run", %{attributes: run_attributes(job)} do
+    Tracking.with_run(job, fn ->
       Console.AI.Provider.external_errors()
 
       list_activities(job)
       |> then(& verifiable(%{engine | activities: &1}))
       |> loop()
-    end
+    end)
   end
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})
@@ -153,37 +152,6 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%KubeDrain{node: node}), do: "launched kubernetes node drain against #{node}, waiting for the result"
   defp tool_fmt(pass), do: pass
 
-  defp run_attributes(%WorkbenchJob{id: id, type: type}) do
-    %{
-      "workbench.job.id" => id,
-      "workbench.job.type" => to_string(type)
-    }
-  end
-
-  defp activity_span_name(%Subagent{subagent: type}), do: "workbench.activity.subagent.#{type}"
-  defp activity_span_name(%SkillBackfill{}), do: "workbench.activity.skill_backfill"
-  defp activity_span_name(%CanvasTool{}), do: "workbench.activity.canvas"
-  defp activity_span_name(%Notes{}), do: "workbench.activity.notes"
-  defp activity_span_name(%FunctionCall{}), do: "workbench.activity.function_call"
-  defp activity_span_name(%KubeRequest{}), do: "workbench.activity.kubernetes_request"
-  defp activity_span_name(%KubeDrain{}), do: "workbench.activity.kubernetes_drain"
-  defp activity_span_name(%KubeShell{}), do: "workbench.activity.kubernetes_exec"
-  defp activity_span_name(_), do: "workbench.activity"
-
-  defp activity_attributes(action, %__MODULE__{job: %WorkbenchJob{id: id}}) do
-    Map.merge(%{"workbench.job.id" => id}, action_attributes(action))
-  end
-
-  defp action_attributes(%Subagent{subagent: type}), do: %{"workbench.activity.kind" => "subagent", "workbench.subagent" => to_string(type)}
-  defp action_attributes(%SkillBackfill{}), do: %{"workbench.activity.kind" => "skill_backfill"}
-  defp action_attributes(%CanvasTool{}), do: %{"workbench.activity.kind" => "canvas"}
-  defp action_attributes(%Notes{}), do: %{"workbench.activity.kind" => "notes"}
-  defp action_attributes(%FunctionCall{}), do: %{"workbench.activity.kind" => "function_call"}
-  defp action_attributes(%KubeRequest{}), do: %{"workbench.activity.kind" => "kubernetes_request"}
-  defp action_attributes(%KubeDrain{}), do: %{"workbench.activity.kind" => "kubernetes_drain"}
-  defp action_attributes(%KubeShell{}), do: %{"workbench.activity.kind" => "kubernetes_exec"}
-  defp action_attributes(_), do: %{}
-
   defp reducer(messages, %Acc{messages: msgs}) do
     Enum.reduce_while(messages, {[], []}, fn
       %Complete{} = complete, _ -> {:halt, complete}
@@ -229,7 +197,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp run_activities(actions, engine, opts \\ []) do
-    TracedTask.async_stream(
+    Tracking.async_stream(
       actions,
       &spawn_activity(&1, engine),
       Keyword.merge([max_concurrency: 10, timeout: :timer.hours(4)], opts)
@@ -245,10 +213,10 @@ defmodule Console.AI.Workbench.Engine do
 
   @supported_subagents ~w(infrastructure integration coding observability memory skill history search verify)a
 
-  defp spawn_activity(action, %__MODULE__{} = engine) do
-    OpenTelemetry.Tracer.with_span activity_span_name(action), %{attributes: activity_attributes(action, engine)} do
+  defp spawn_activity(action, %__MODULE__{job: job} = engine) do
+    Tracking.with_activity(action, job, fn ->
       do_spawn_activity(action, engine)
-    end
+    end)
   end
 
   defp do_spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
