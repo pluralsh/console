@@ -1,0 +1,46 @@
+name: Regenerate ECK compatibility aggregate
+
+on:
+  push:
+    branches:
+      - feat/eck-operator-compatibility
+    paths:
+      - '.github/workflows/eck-regenerate-aggregate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feat/eck-operator-compatibility
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: pip install pyyaml
+      - name: Regenerate aggregate
+        run: |
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+
+          aggregate_path = Path('static/compatibilities.yaml')
+          addon_path = Path('static/compatibilities/eck-operator.yaml')
+          aggregate = yaml.safe_load(aggregate_path.read_text()) or {'addons': []}
+          addon = yaml.safe_load(addon_path.read_text())
+          addon['name'] = 'eck-operator'
+          aggregate['addons'] = [a for a in aggregate.get('addons', []) if a.get('name') != 'eck-operator']
+          aggregate['addons'].append(addon)
+          aggregate_path.write_text(yaml.dump(aggregate, default_flow_style=False, sort_keys=False))
+          PY
+      - name: Commit aggregate
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add static/compatibilities.yaml
+          git diff --cached --quiet && exit 0
+          git commit -m 'chore: regenerate compatibility aggregate for ECK'
+          git push origin HEAD:feat/eck-operator-compatibility
