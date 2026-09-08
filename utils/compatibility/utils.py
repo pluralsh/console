@@ -506,7 +506,7 @@ def clean_kube_version(vsn):
         return None
     return f"{as_semver.major}.{as_semver.minor}"
 
-def update_compatibility_info(filepath, new_versions):
+def update_compatibility_info(filepath, new_versions, require_images=False):
     app_name = filepath.split("/")[-1].split(".")[0]
     try:
         data = read_yaml(filepath)
@@ -522,6 +522,8 @@ def update_compatibility_info(filepath, new_versions):
                     if "chart_version" in version:
                         print(f"Updating images for {app_name} {version['version']}")
                         imgs = get_chart_images(url, data.get('chart_name', app_name), version["chart_version"], data.get('helm_values'))
+                        if require_images and not imgs:
+                            raise ValueError(f"No chart images resolved for {app_name} {version['version']}")
                         if imgs:
                             version["images"] = imgs
         else:

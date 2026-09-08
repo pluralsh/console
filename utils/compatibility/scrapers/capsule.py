@@ -116,4 +116,4 @@ def scrape():
         version["chart_version"] = chart_version_for(version["version"])
     # Resolve every chart before updating the table. A failed request or a
     # changed upstream format must not result in a partial compatibility write.
-    update_compatibility_info(TARGET_FILE, versions)
+    update_compatibility_info(TARGET_FILE, versions, require_images=True)

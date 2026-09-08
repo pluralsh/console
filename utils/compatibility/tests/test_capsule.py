@@ -128,6 +128,38 @@ class CapsuleTests(unittest.TestCase):
             chart.assert_not_called()
             update.assert_not_called()
 
+    def test_later_render_failure_leaves_file_unchanged(self):
+        for failed_render in (
+            subprocess.CompletedProcess([], 1, stdout="", stderr="chart download failed"),
+            subprocess.CompletedProcess([], 0, stdout="kind: ConfigMap\n", stderr=""),
+        ):
+            with self.subTest(returncode=failed_render.returncode), tempfile.TemporaryDirectory() as directory:
+                target = Path(directory) / "capsule.yaml"
+                original = yaml.safe_dump({"icon": "capsule.png", "helm_repository_url": capsule.CHART_URL, "versions": []})
+                target.write_text(original)
+                rendered = subprocess.CompletedProcess([], 0, stdout="spec:\n  image: ghcr.io/projectcapsule/capsule:0.14.4\n", stderr="")
+                with patch.object(capsule, "TARGET_FILE", str(target)), \
+                     patch.object(capsule, "fetch_releases", return_value=[release("0.14.4"), release("0.13.0", "1.35")]), \
+                     patch.object(capsule, "chart_version_for", side_effect=lambda version: version), \
+                     patch("utils.subprocess.run", side_effect=[rendered, failed_render]) as render, \
+                     patch("utils.write_yaml") as write, \
+                     patch("utils.summarization_enabled") as summarize, \
+                     patch("utils.traceback.print_exc"):
+                    capsule.scrape()
+                    self.assertEqual(render.call_count, 2)
+                    write.assert_not_called()
+                    summarize.assert_not_called()
+                self.assertEqual(target.read_text(), original)
+
+    def test_shared_writer_keeps_optional_image_behavior_by_default(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "other.yaml"
+            target.write_text(yaml.safe_dump({"helm_repository_url": capsule.CHART_URL, "versions": []}))
+            with patch("utils.get_chart_images", return_value=None), \
+                 patch("utils.summarization_enabled", return_value=False):
+                capsule.update_compatibility_info(str(target), [{"version": "0.14.4", "kube": ["1.36"], "chart_version": "0.14.4"}])
+            self.assertEqual(yaml.safe_load(target.read_text())["versions"][0]["version"], "0.14.4")
+
     def test_shared_writer_preserves_metadata_and_records_chart_images(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / "capsule.yaml"
