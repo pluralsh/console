@@ -50,7 +50,7 @@ def extract_rows(content, ceiling):
             raise ValueError(f"Unsupported MetalLB constraint: {constraint!r}")
         floor, maximum = int(match.group(2)), int(ceiling.split(".")[1])
         if floor > maximum:
-            raise ValueError("Chart requires Kubernetes beyond the configured ceiling")
+            continue
         row = OrderedDict([
             ("version", app),
             ("kube", [f"1.{minor}" for minor in range(maximum, floor - 1, -1)]),

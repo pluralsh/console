@@ -79,3 +79,30 @@ def test_bad_later_row_does_not_partially_write(monkeypatch):
     with pytest.raises(ValueError):
         scraper.scrape()
     writer.assert_not_called()
+
+
+def test_future_minimum_does_not_block_eligible_releases():
+    content = index(chart(app="v0.17.0", version="0.17.0", kubeVersion=">=1.37.0-0"), chart())
+    rows = scraper.extract_rows(content, "1.36")
+    assert [row["version"] for row in rows] == ["0.16.1"]
+    assert rows[0]["kube"] == [f"1.{minor}" for minor in range(36, 18, -1)]
+
+
+def test_successful_scrape_fetches_and_writes_with_current_ceiling(monkeypatch):
+    response = Mock(content=index(chart()))
+    get = Mock(return_value=response)
+    monkeypatch.setattr(scraper.requests, "get", get)
+    ceiling = Mock(return_value="1.20")
+    monkeypatch.setattr(scraper, "current_kube_version", ceiling)
+    writer = Mock()
+    monkeypatch.setattr(scraper, "update_compatibility_info", writer)
+
+    scraper.scrape()
+
+    get.assert_called_once_with(scraper.INDEX_URL, timeout=30)
+    response.raise_for_status.assert_called_once_with()
+    ceiling.assert_called_once_with()
+    writer.assert_called_once_with("../../static/compatibilities/metallb.yaml", [{
+        "version": "0.16.1", "chart_version": "0.16.1", "kube": ["1.20", "1.19"],
+        "images": [], "requirements": [], "incompatibilities": [],
+    }])
