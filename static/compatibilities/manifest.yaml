@@ -23,6 +23,7 @@ names:
 - karpenter
 - keda
 - kube-prometheus-stack
+- kube-state-metrics
 - kyverno
 - linkerd
 - longhorn
