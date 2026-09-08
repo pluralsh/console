@@ -21,7 +21,6 @@ import {
   MembershipExpandPanel,
   MembershipUserRow,
   MEMBERSHIP_FETCH_LIMIT,
-  MEMBERSHIP_VISIBLE_ROWS,
 } from '../MembershipExpandPanel'
 import { formatGroupMembersCopy } from '../membershipCopy'
 import { GroupMembers } from './GroupMembers'
@@ -132,15 +131,8 @@ const ColActions = columnHelper.accessor((group) => group, {
   },
 })
 
-export function GroupMembersExpand({
-  row,
-  editable,
-  setGroupEdit,
-}: {
-  row: Row<GroupFragment>
-} & GroupsListMeta) {
+export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
   const group = row.original
-  const [viewOpen, setViewOpen] = useState(false)
   const [fetchMembers] = useGroupMembersLazyQuery()
   const { data, loading, error } = useGroupMembersQuery({
     variables: { id: group.id, first: MEMBERSHIP_FETCH_LIMIT },
@@ -158,14 +150,6 @@ export function GroupMembersExpand({
             ? Promise.resolve(formatGroupMembersCopy(group, users))
             : getGroupMembersCopyText(fetchMembers, group)
         }
-        viewAll={
-          (group.memberCount ?? 0) > MEMBERSHIP_VISIBLE_ROWS
-            ? {
-                onClick: () =>
-                  editable ? setGroupEdit(group) : setViewOpen(true),
-              }
-            : undefined
-        }
       >
         {users.map((user) => (
           <MembershipUserRow
@@ -176,13 +160,6 @@ export function GroupMembersExpand({
           />
         ))}
       </MembershipExpandPanel>
-      {!editable && (
-        <ViewGroupMembersModal
-          group={group}
-          open={viewOpen}
-          onClose={() => setViewOpen(false)}
-        />
-      )}
     </>
   )
 }

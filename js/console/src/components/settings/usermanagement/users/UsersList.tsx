@@ -46,7 +46,7 @@ export function UsersList() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        renderExpanded={UserGroupsExpand}
+        renderExpanded={({ row }) => <UserGroupsExpand row={row} />}
         emptyStateProps={{
           message: !throttledQ
             ? "Looks like you don't have any users yet."

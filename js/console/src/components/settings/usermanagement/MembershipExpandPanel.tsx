@@ -18,9 +18,9 @@ import {
 } from 'react'
 import styled from 'styled-components'
 
-export const MEMBERSHIP_VISIBLE_ROWS = 5
 export const MEMBERSHIP_FETCH_LIMIT = 30
 
+const MEMBERSHIP_VISIBLE_ROWS = 5
 const MEMBERSHIP_ROW_HEIGHT = 68
 const MEMBERSHIP_LIST_MAX_HEIGHT =
   MEMBERSHIP_VISIBLE_ROWS * MEMBERSHIP_ROW_HEIGHT
@@ -96,14 +96,12 @@ export function MembershipExpandPanel({
   getCopyText,
   loading,
   emptyMessage,
-  viewAll,
   children,
 }: {
   copyText?: string
   getCopyText?: () => Promise<string>
   loading?: boolean
   emptyMessage?: string
-  viewAll?: { onClick: () => void }
   children?: ReactNode
 }) {
   const { copied, copying, handleCopy } = useCopyList(
@@ -118,11 +116,17 @@ export function MembershipExpandPanel({
     <WrapperSC onClick={(e) => e.stopPropagation()}>
       <Flex
         direction="column"
-        gap="xsmall"
         grow={1}
         minWidth={0}
+        minHeight={0}
       >
-        <ListSC>
+        <ListSC
+          onWheel={(e) => {
+            if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight) {
+              e.stopPropagation()
+            }
+          }}
+        >
           {loading && (
             <Flex
               justify="center"
@@ -138,14 +142,6 @@ export function MembershipExpandPanel({
           )}
           {children}
         </ListSC>
-        {viewAll && (
-          <SeeFullListSC
-            type="button"
-            onClick={viewAll.onClick}
-          >
-            See full list
-          </SeeFullListSC>
-        )}
       </Flex>
       <Button
         small
@@ -182,7 +178,7 @@ export function MembershipUserRow({
           url={avatar ?? undefined}
           name={name ?? undefined}
           spacing={avatar ? 'none' : undefined}
-          size="xsmall"
+          size="xxsmall"
         />
         <Body2P
           $color="text-light"
@@ -216,7 +212,10 @@ export const MembershipListRowSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing.small,
-  minHeight: MEMBERSHIP_ROW_HEIGHT,
+  boxSizing: 'border-box',
+  height: MEMBERSHIP_ROW_HEIGHT,
+  flexShrink: 0,
+  overflow: 'hidden',
   padding: `${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.small}px`,
   backgroundColor: theme.colors['fill-zero'],
   borderBottom: theme.borders.default,
@@ -235,21 +234,14 @@ const WrapperSC = styled.div(({ theme }) => ({
 }))
 
 const ListSC = styled.div(({ theme }) => ({
+  boxSizing: 'content-box',
   maxHeight: MEMBERSHIP_LIST_MAX_HEIGHT,
-  overflow: 'auto',
+  minHeight: 0,
+  overflowX: 'hidden',
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
   border: theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
-}))
-
-const SeeFullListSC = styled.button(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  background: 'none',
-  border: 'none',
-  padding: 0,
-  cursor: 'pointer',
-  width: 'fit-content',
-  '&:hover': { color: theme.colors['text-light'] },
 }))
 
 const HoverActionsSC = styled.div(({ theme }) => ({

@@ -60,12 +60,7 @@ export function GroupsList({
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        renderExpanded={({ row }) => (
-          <GroupMembersExpand
-            row={row}
-            {...meta}
-          />
-        )}
+        renderExpanded={({ row }) => <GroupMembersExpand row={row} />}
         emptyStateProps={{
           ...(!throttledQ
             ? {
