@@ -6,7 +6,7 @@ chart_name: tigera-operator
 eolApiSlug: calico
 versions:
 - version: 3.32.2
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
@@ -18,7 +18,7 @@ versions:
   chart_version: 3.32.2
   images: ['quay.io/tigera/operator:v1.42.6']
 - version: 3.32.0
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
@@ -33,7 +33,7 @@ versions:
   chart_version: 3.32.0
   images: ['quay.io/tigera/operator:v1.42.0']
 - version: 3.31.0
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
@@ -48,7 +48,7 @@ versions:
   chart_version: 3.31.0
   images: ['quay.io/tigera/operator:v1.40.0']
 - version: 3.30.0
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
@@ -64,7 +64,7 @@ versions:
   images: ['quay.io/tigera/operator:v1.38.0']
   eolAt: '2026-04-30'
 - version: 3.29.0
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary:
@@ -92,7 +92,7 @@ versions:
   images: ['quay.io/tigera/operator:v1.34.0']
   eolAt: '2025-05-05'
 - version: 3.27.0
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   summary:
@@ -106,7 +106,7 @@ versions:
   images: ['quay.io/tigera/operator:v1.32.3']
   eolAt: '2024-10-29'
 - version: 3.26.0
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:
@@ -119,7 +119,7 @@ versions:
   images: ['quay.io/tigera/operator:v1.30.0']
   eolAt: '2024-05-11'
 - version: 3.25.0
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary:
@@ -133,7 +133,7 @@ versions:
   images: ['quay.io/tigera/operator:v1.29.0']
   eolAt: '2023-12-15'
 - version: 3.24.1
-  kube: ['1.30', '1.29', '1.28', '1.27']
+  kube: ['1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
   summary:

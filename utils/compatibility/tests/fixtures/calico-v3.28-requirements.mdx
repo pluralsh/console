@@ -1,0 +1,70 @@
+---
+description: Review requirements before installing Calico to ensure success.
+---
+
+import ReqsSys from "@site/calico_versioned_docs/version-3.28/_includes/components/ReqsSys";
+import ReqsKernel from "@site/calico_versioned_docs/version-3.28/_includes/components/ReqsKernel";
+
+# System requirements
+
+<ReqsSys orch='Kubernetes' />
+
+## Kubernetes requirements
+
+#### Supported versions
+
+We test $[prodname] $[version] against the following Kubernetes versions. Other versions may work, but we are not actively testing them.
+
+- v1.27
+- v1.28
+- v1.29
+- v1.30
+
+Due to changes in the Kubernetes API, $[prodname] $[version] will not work
+on Kubernetes v1.20 or below. v1.21 may work, but is no longer tested.
+Newer versions may also work, but we recommend upgrading to a version of $[prodname]
+that is tested against the newer Kubernetes version.
+
+#### CNI plug-in enabled
+
+$[prodname] must be installed as a CNI plugin in the container runtime.
+
+This installation must use the Kubernetes default CNI configuration directory (`/etc/cni/net.d`) and binary directory (`/opt/cni/bin`).
+
+#### Other network providers
+
+Generally, you cannot use $[prodname] together with another network provider.
+
+Notable exceptions include the following:
+
+* [flannel](flannel/index.mdx)
+* Platform-specific CNIs, such as the [AWS VPC CNI](https://github.com/aws/amazon-vpc-cni-k8s/blob/master/README.md) and [Azure VNET CNI](https://github.com/Azure/azure-container-networking/blob/master/docs/cni.md) plugins.
+
+If you're working with a cluster that already uses another CNI, you cannot migrate to $[prodname].
+
+#### Supported kube-proxy modes
+
+$[prodname] supports the following kube-proxy modes:
+
+- `iptables` (default)
+- `ipvs` Requires Kubernetes &#8805;  v1.9.3. Refer to
+  [Use IPVS kube-proxy](../../networking/configuring/use-ipvs.mdx) for more details.
+
+#### IP pool configuration
+
+The IP range selected for pod IP addresses cannot overlap with any other
+IP ranges in your network, including:
+
+- The Kubernetes service cluster IP range
+- The range from which host IPs are allocated
+
+## Application layer policy requirements
+
+- [MutatingAdmissionWebhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook) enabled
+- Istio [v1.9](https://istio.io/v1.9/) or [v1.10](https://archive.istio.io/v1.10/)
+
+Note that Kubernetes version 1.16+ requires Istio version 1.2 or greater.
+Note that Istio version 1.9 requires Kubernetes version 1.17-1.20.
+Note that Istio version 1.10 is supported on Kubernetes version 1.18-1.21, but has been tested on Kubernetes version 1.22.
+
+<ReqsKernel />

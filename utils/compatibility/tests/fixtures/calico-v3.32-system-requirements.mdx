@@ -1,0 +1,258 @@
+import If from '@site/src/___new___/components/If';
+import Link from '@docusaurus/Link';
+
+## Node requirements
+
+* x86-64, arm64, ppc64le, or s390x processor
+
+<If condition={props.platform !== 'openstack'}>
+* Calico must be able to manage `cali*` interfaces on the host.
+  When IPIP is enabled (the default), Calico also needs to be able to manage `tunl*` interfaces.
+  When VXLAN is enabled, Calico also needs to be able to manage the `vxlan.calico` interface.
+</If>
+<If condition={props.platform === 'openstack'}>
+* Calico must be able to manage `tap*` interfaces on the host.
+</If>
+
+* Linux kernel 5.10 or later with [required dependencies](#kernel-dependencies).
+  The following distributions have the required kernel, its dependencies, and are known to work well with $[prodname].
+  <If condition={props.platform === 'kubernetes'}>
+  * Ubuntu 20.04 or later
+  * RHEL 8 or later
+  * Debian 10 or later
+  * BottleRocket 1.47 or later
+  * Talos 1.6 or later
+  </If>
+  <If condition={props.platform === 'openshift'}>
+  * RHEL 8 or later
+  </If>
+  <If condition={props.platform === 'host'}>
+  * Ubuntu 20.04 or later
+  * RHEL 8 or later
+  * Debian 10 or later
+  * BottleRocket 1.47 or later
+  * Talos 1.6 or later
+  </If>
+  <If condition={props.platform === 'openstack'}>
+  * Ubuntu 20.04 or later
+  * RHEL 8 or later
+  </If>
+
+:::note
+
+Many Linux distributions, such as most of the above, include NetworkManager.
+By default, NetworkManager does not allow Calico to manage interfaces.
+If your nodes have NetworkManager, complete the steps in [Preventing NetworkManager from controlling Calico interfaces](../../operations/troubleshoot/troubleshooting.mdx#configure-networkmanager) before installing Calico.
+
+:::
+
+* If your Linux distribution comes with installed Firewalld or another iptables manager it should be disabled.
+  These may interfere with rules added by Calico and result in unexpected behavior.
+
+:::note
+
+If a host firewall is needed, it can be configured by Calico HostEndpoint and GlobalNetworkPolicy.
+More information about configuration at [Policy for hosts and VMs](../../network-policy/hosts/index.mdx).
+
+:::
+
+## Key/value store
+
+Calico requires a key/value store accessible by all Calico components.
+<If condition={props.platform === 'kubernetes'}>On Kubernetes, you can configure Calico to access an etcdv3 cluster directly or to use the Kubernetes API datastore.</If>
+<If condition={props.platform === 'openstack'}>For production you will likely want multiple nodes for greater performance and reliability. If you don’t already have an etcdv3 cluster to connect to, please refer to the [upstream etcd docs](https://coreos.com/etcd/) for detailed advice and setup.</If>
+<If condition={props.platform === 'host'}>The key/value store must be etcdv3.</If>
+<If condition={props.platform === 'openshift'}>With OpenShift, the Kubernetes API datastore is used for the key/value store.</If>
+## Network requirements
+
+Ensure that your hosts and firewalls allow the necessary traffic based on your configuration.
+
+<table >
+  <thead>
+    <tr className='header'>
+      <th>Configuration</th>
+      <th>Host(s)</th>
+      <th>Connection type</th>
+      <th>Port/protocol</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className='odd'>
+      <td>$[prodname] networking (BGP)</td>
+      <td>All</td>
+      <td>Bidirectional</td>
+      <td>TCP 179</td>
+    </tr>
+    <tr className='even'>
+      <td>$[prodname] networking with IP-in-IP enabled (default)</td>
+      <td>All</td>
+      <td>Bidirectional</td>
+      <td>
+        IP-in-IP, often represented by its protocol number <code>4</code>
+      </td>
+    </tr>
+    <If condition={!(props.platform === 'openstack' || props.platform === 'host')}>
+    <tr>
+      <td>$[prodname] networking with VXLAN enabled</td>
+      <td>All</td>
+      <td>Bidirectional</td>
+      <td>UDP 4789</td>
+    </tr>
+    <tr>
+      <td>$[prodname] networking with Typha enabled</td>
+      <td>Typha agent hosts</td>
+      <td>Incoming</td>
+      <td>TCP 5473 (default)</td>
+    </tr>
+    </If>
+    <If condition={!(props.platform === 'openstack' || props.platform === 'openshift' || props.platform === 'host')}>
+    <tr>
+      <td>$[prodname] networking with IPv4 WireGuard enabled</td>
+      <td>All</td>
+      <td>Bidirectional</td>
+      <td>UDP 51820 (default)</td>
+    </tr>
+    <tr>
+      <td>$[prodname] networking with IPv6 WireGuard enabled</td>
+      <td>All</td>
+      <td>Bidirectional</td>
+      <td>UDP 51821 (default)</td>
+    </tr>
+    <tr>
+      <td>flannel networking (VXLAN)</td>
+      <td>All</td>
+      <td>Bidirectional</td>
+      <td>UDP 4789</td>
+    </tr>
+    </If>
+    <If condition={props.platform === 'kubernetes' || props.platform === 'openshift'}>
+    <tr>
+      <td>All</td>
+      <td>kube-apiserver host</td>
+      <td>Incoming</td>
+      <td>Often TCP 443 or 6443*</td>
+    </tr>
+    </If>
+    <If condition={props.platform !== 'openshift'}>
+    <tr>
+      <td><If condition={props.platform === 'kubernetes'}>etcd datastore</If><If condition={props.platform !== 'kubernetes'}>All</If></td>
+      <td>etcd hosts</td>
+      <td>Incoming</td>
+      <td>
+        <Link href='http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.txt'>
+          Officially
+        </Link>{' '}
+        TCP 2379 but can vary
+      </td>
+    </tr>
+    </If>
+  </tbody>
+</table>
+
+<If condition={props.platform === 'kubernetes' || props.platform === 'openshift'}>
+\* *The value passed to kube-apiserver using the `--secure-port` flag.
+If you cannot locate this, check the `targetPort` value returned by `kubectl get svc kubernetes -o yaml`.*
+</If>
+<If condition={props.platform === 'openstack'}>
+\* *If your compute hosts connect directly and don’t use IP-in-IP, you don’t need to allow IP-in-IP traffic.*
+</If>
+## Privileges
+
+Ensure that Calico has the `CAP_SYS_ADMIN` privilege.
+
+The simplest way to provide the necessary privilege is to run Calico as root or in a privileged container.
+
+<If condition={props.platform === 'kubernetes'}>
+When installed as a Kubernetes daemon set, Calico meets this requirement by running as a privileged container.
+This requires that the kubelet be allowed to run privileged containers.
+There are two ways this can be achieved.
+
+* Specify `--allow-privileged` on the kubelet (deprecated).
+* Use a [pod security policy](https://kubernetes.io/docs/concepts/policy/pod-security-policy/).
+</If>
+
+<If condition={props.platform === 'kubernetes'}>
+## Kubernetes requirements
+
+#### Supported versions
+
+We test $[prodname] $[version] against the following Kubernetes versions. Other versions may work, but we are not actively testing them.
+
+* 1.34
+* 1.35
+* 1.36
+
+Due to changes in the Kubernetes API, $[prodname] $[version] will not work
+on Kubernetes v1.20 or below. v1.21 may work, but is no longer tested.
+Newer versions may also work, but we recommend upgrading to a version of $[prodname]
+that is tested against the newer Kubernetes version.
+
+#### CNI plug-in enabled
+
+$[prodname] must be installed as a CNI plugin in the container runtime.
+
+This installation must use the Kubernetes default CNI configuration directory (`/etc/cni/net.d`) and binary directory (`/opt/cni/bin`).
+
+#### Other network providers
+
+Generally, you cannot use $[prodname] together with another network provider.
+
+Notable exceptions include the following:
+
+* [flannel](../../getting-started/kubernetes/flannel/index.mdx)
+* Platform-specific CNIs, such as the [AWS VPC CNI](https://github.com/aws/amazon-vpc-cni-k8s/blob/master/README.md) and [Azure VNet CNI](https://github.com/Azure/azure-container-networking/blob/master/docs/cni.md) plugins.
+
+If you're working with a cluster that already uses another CNI, you cannot migrate to $[prodname].
+
+#### Supported kube-proxy modes
+
+$[prodname] supports the following kube-proxy modes:
+
+- `iptables` (default)
+- `ipvs`: Requires Kubernetes &#8805;  v1.9.3. Refer to [Use IPVS kube-proxy](../../networking/configuring/use-ipvs.mdx) for more details.
+- `nftables`: Requires Kubernetes &#8805;  v1.31.0. Refer to [Calico nftables data plane](../../getting-started/kubernetes/nftables.mdx) for more details.
+
+#### IP pool configuration
+
+The IP range selected for pod IP addresses cannot overlap with any other
+IP ranges in your network, including:
+
+- The Kubernetes service cluster IP range
+- The range from which host IPs are allocated
+</If>
+
+<If condition={props.platform === 'openshift'}>
+## OpenShift requirements
+
+$[prodname] supports the [OpenShift Container Platform](https://docs.openshift.com/).
+</If>
+
+<If condition={props.platform === 'openstack'}>
+## OpenStack requirements
+
+The Calico Neutron driver is written in Python 3 and so requires an OpenStack release that runs with Python 3.
+Subject to that, we aim to develop and maintain the Neutron driver for Calico so that its master code works with OpenStack master or any previous Python 3 release, on any operating system, independently of the deployment mechanism that is used to install it.
+
+However, we recommend using OpenStack Caracal or later, and our active support and testing of Calico $[version] with OpenStack is with Caracal.
+</If>
+
+## Kernel dependencies
+
+:::tip
+
+If you are using one of the recommended distributions, you will already satisfy these.
+
+:::
+
+Due to the large number of distributions and kernel version out there, it’s hard to be precise about the names of the particular kernel modules that are required to run Calico.
+However, in general, you’ll need:
+
+* The `iptables` modules (both the “legacy” and “nft” variants are supported). These are typically broken up into many small modules, one for each type of match criteria and one for each type of action. Calico requires:
+  * The “base” modules (including the IPv6 versions if IPv6 is enabled in your cluster).
+  * At least the following match criteria: `set`, `rpfilter`, `addrtype`, `comment`, `conntrack`, `icmp`, `tcp`, `udp`, `ipvs`, `icmpv6` (if IPv6 is enabled in your kernel), `mark`, `multiport`, `rpfilter`, `sctp`, `ipvs` (if using `kube-proxy` in IPVS mode).
+  * At least the following actions: `REJECT`, `ACCEPT`, `DROP`, `LOG`.
+* IP sets support.
+* Netfilter Conntrack support compiled in (with SCTP support if using SCTP).
+* IPVS support if using `kube-proxy` in IPVS mode.
+* IPIP, VXLAN, WireGuard support, if using Calico networking in one of those modes.
+* eBPF (including the `tc` hook support) and XDP (if you want to use the eBPF data plane).
