@@ -1,10 +1,17 @@
 # Compatibility scraper tests
 
-From `utils/compatibility`, with `requirements.txt` installed:
+From `utils/compatibility`, install the same constrained dependencies as CI:
 
 ```sh
+python -m pip install -r requirements.txt -c tests/constraints.txt
 python -m unittest discover -s tests -v
 ```
+
+`constraints.txt` pins the tested direct and transitive dependency versions for
+Python 3.13. To refresh it, install `requirements.txt` in a clean Python 3.13
+environment, run the tests, and regenerate it with `python -m pip freeze`.
+Review the version changes and rerun the tests using the new constraints before
+committing. These test constraints do not change the daily updater's dependencies.
 
 The tests run offline, with HTTP and Helm replaced at their external boundaries.
 The integration test uses the real YAML writer, version reducer, and image parser.
