@@ -147,9 +147,9 @@ func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
 	return true, nil
 }
 
-// updateFromOrigin fetches origin and fast-forwards the working copy. Prebake
-// images are often built on a cron and lag HEAD; a fetch+ff is still cheaper
-// than cloning from scratch. Failures keep the local copy.
+// updateFromOrigin refreshes the copied prebake checkout, then applies the
+// agent run branch. The run branch is not expected to exist in the image; it
+// is fetched from origin like `git clone --branch`. Failures keep the local copy.
 func (in *environment) updateFromOrigin(repoDirPath string) {
 	if out, err := exec.NewExecutable("git",
 		exec.WithArgs([]string{"fetch", "origin"}),
@@ -159,32 +159,23 @@ func (in *environment) updateFromOrigin(repoDirPath string) {
 		return
 	}
 
-	if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
-		klog.InfoS("prebake checkout failed, using fetched copy", "dir", repoDirPath, "err", err)
-		return
-	}
-
-	branch := strings.TrimSpace(lo.FromPtr(in.agentRun.Branch))
-	if branch == "" {
-		current, err := exec.NewExecutable("git",
-			exec.WithArgs([]string{"branch", "--show-current"}),
-			exec.WithDir(repoDirPath),
-		).RunWithOutput(context.Background())
-		if err != nil {
-			klog.InfoS("prebake could not determine current branch, using fetched copy", "dir", repoDirPath, "err", err)
-			return
-		}
-		branch = strings.TrimSpace(string(current))
-	}
-	if branch == "" {
-		return
-	}
-
-	if out, err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"merge", "--ff-only", "origin/" + branch}),
+	current, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"branch", "--show-current"}),
 		exec.WithDir(repoDirPath),
-	).RunWithOutput(context.Background()); err != nil {
-		klog.InfoS("prebake fast-forward failed, using local copy", "dir", repoDirPath, "branch", branch, "err", err, "out", string(out))
+	).RunWithOutput(context.Background())
+	if err != nil {
+		klog.InfoS("prebake could not determine current branch, using fetched copy", "dir", repoDirPath, "err", err)
+	} else if branch := strings.TrimSpace(string(current)); branch != "" {
+		if out, err := exec.NewExecutable("git",
+			exec.WithArgs([]string{"merge", "--ff-only", "origin/" + branch}),
+			exec.WithDir(repoDirPath),
+		).RunWithOutput(context.Background()); err != nil {
+			klog.InfoS("prebake fast-forward failed, using local copy", "dir", repoDirPath, "branch", branch, "err", err, "out", string(out))
+		}
+	}
+
+	if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
+		klog.InfoS("prebake checkout of run branch failed, using prebake branch", "dir", repoDirPath, "err", err)
 	}
 }
 

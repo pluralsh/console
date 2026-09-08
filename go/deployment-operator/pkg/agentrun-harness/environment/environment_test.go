@@ -174,6 +174,63 @@ func TestCloneRepositoryPullsPrebakeFromOrigin(t *testing.T) {
 	}
 }
 
+func TestCloneRepositoryChecksOutRunBranchFromOrigin(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "main")
+	runGit(t, origin, "checkout", "-b", "feature")
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("feature\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "feature")
+	runGit(t, origin, "checkout", "main")
+
+	prebakeDir := t.TempDir()
+	prebakedCopy := filepath.Join(prebakeDir, "console")
+	if err := fs.CopyDir(origin, prebakedCopy); err != nil {
+		t.Fatalf("copy prebake fixture: %v", err)
+	}
+	writePrebakeManifest(t, prebakeDir, prebake.Manifest{
+		Version: 1,
+		Repositories: []prebake.ManifestRepo{{
+			URL:  origin,
+			Path: "console",
+		}},
+	})
+	t.Setenv(prebake.EnvDir, prebakeDir)
+
+	feature := "feature"
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{Repository: origin, Branch: &feature},
+		dir:      workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	dest := filepath.Join(workDir, "repository")
+	contents, err := os.ReadFile(filepath.Join(dest, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "feature\n" {
+		t.Fatalf("copied README = %q, want feature after checking out run branch", contents)
+	}
+	current, err := exec.Command("git", "-C", dest, "branch", "--show-current").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(current)); got != "feature" {
+		t.Fatalf("branch = %q, want feature", got)
+	}
+}
+
 func TestCloneRepositoryFallsBackToGitClone(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
