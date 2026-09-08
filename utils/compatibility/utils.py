@@ -235,7 +235,8 @@ def find_nested_images(objs: Any) -> List[str]:
 
         if isinstance(x, dict):
             for k, v in x.items():
-                if k == "image":
+                # CRD schemas also use "image" keys whose values are mappings.
+                if k == "image" and isinstance(v, str) and _looks_like_image(v):
                     images.add(v)
                     continue
                 walk(v)
@@ -489,7 +490,11 @@ def reduce_versions(versions):
             # Include chart_version if it exists in the original data
             if "chart_version" in data:
                 version_info["chart_version"] = data["chart_version"]
+            # Official release manifests can provide images without a Helm chart.
+            if "images" in data or "chart_version" in data:
                 version_info["images"] = data.get("images", [])
+            if "eolAt" in data:
+                version_info["eolAt"] = data["eolAt"]
 
             reduced_versions.append(version_info)
 

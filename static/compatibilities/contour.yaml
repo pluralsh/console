@@ -4,19 +4,18 @@ release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
 helm_repository_url: https://charts.bitnami.com/bitnami
 eolApiSlug: contour
 versions:
-- version: 1.32.1
-  kube: ['1.33', '1.32', '1.31']
+- version: 1.33.7
+  kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Envoy dependency bumped from v1.34.1 to v1.34.4, bringing in upstream
-        fixes and changes from Envoy 1.34.4.', Go toolchain/runtime bumped from v1.24.3
-        to v1.24.6.]
-    breaking_changes: []
-  chart_version: 21.1.4
-  images: ['docker.io/bitnami/contour:1.32.1-debian-12-r0', 'docker.io/bitnami/envoy:1.34.5-debian-12-r0']
+  summary: null
+  images: ['docker.io/envoyproxy/envoy:distroless-v1.38.4', 'ghcr.io/projectcontour/contour:v1.33.7']
+- version: 1.33.0
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  images: ['docker.io/envoyproxy/envoy:distroless-v1.35.2', 'ghcr.io/projectcontour/contour:v1.33.0']
 - version: 1.32.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
