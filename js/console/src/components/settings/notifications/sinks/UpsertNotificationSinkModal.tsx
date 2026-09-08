@@ -1,6 +1,7 @@
 import { ComponentProps, FormEvent, useCallback, useMemo } from 'react'
 import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
 
+import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { Body2P } from 'components/utils/typography/Text'
 import { useTheme } from 'styled-components'
@@ -65,7 +66,7 @@ function UpsertNotificationSinkModal({
         ? SinkType.Slack
         : SinkType.Teams
 
-  const [mutation, { loading }] = useUpsertNotificationSinkMutation({
+  const [mutation, { loading, error }] = useUpsertNotificationSinkMutation({
     onCompleted: () => onClose?.(),
     update: (cache, { data }) =>
       updateCache(cache, {
@@ -164,6 +165,7 @@ function UpsertNotificationSinkModal({
           </InlineLink>{' '}
           webhook url to send this event alert to your team.
         </Body2P>
+        {error && <GqlError error={error} />}
         <FormField label={mode === 'edit' ? `Webhook url` : 'Add sink'}>
           <div css={{ display: 'flex', gap: theme.spacing.xxsmall }}>
             {mode !== 'edit' && (
