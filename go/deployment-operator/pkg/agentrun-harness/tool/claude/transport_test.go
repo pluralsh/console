@@ -46,7 +46,7 @@ func TestTransportLaunchUsesACPAdapterAndClaudeEnvironment(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{claudeConfigEnv + "=" + filepath.Join(config.WorkDir, claudeConfigDir), claudeExecutableEnv + "=" + nativeClaudeBinary, anthropicAPIKeyEnv + "=api-key", anthropicBaseURLEnv + "=" + endpoint} {
+	for _, want := range []string{claudeConfigEnv + "=" + filepath.Join(config.WorkDir, claudeConfigDir), claudeExecutableEnv + "=" + nativeClaudeBinary, claudeSandboxEnv + "=1", anthropicAPIKeyEnv + "=api-key", anthropicBaseURLEnv + "=" + endpoint} {
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("environment missing %q: %s", want, content)
 		}
@@ -110,7 +110,7 @@ func TestTransportTurnRejectsCancelledAndUnsupportedMode(t *testing.T) {
 func writeClaudeACPBinary(t *testing.T, binDir string) {
 	t.Helper()
 	path := filepath.Join(binDir, claudeACPBinary)
-	script := "#!/bin/sh\nprintf 'CLAUDE_CONFIG_DIR=%s\\nCLAUDE_CODE_EXECUTABLE=%s\\nANTHROPIC_API_KEY=%s\\nANTHROPIC_AUTH_TOKEN=%s\\nANTHROPIC_BASE_URL=%s\\n' \"$CLAUDE_CONFIG_DIR\" \"$CLAUDE_CODE_EXECUTABLE\" \"$ANTHROPIC_API_KEY\" \"$ANTHROPIC_AUTH_TOKEN\" \"$ANTHROPIC_BASE_URL\" > \"$CLAUDE_ENV_FILE\"\n"
+	script := "#!/bin/sh\nprintf 'CLAUDE_CONFIG_DIR=%s\\nCLAUDE_CODE_EXECUTABLE=%s\\nIS_SANDBOX=%s\\nANTHROPIC_API_KEY=%s\\nANTHROPIC_AUTH_TOKEN=%s\\nANTHROPIC_BASE_URL=%s\\n' \"$CLAUDE_CONFIG_DIR\" \"$CLAUDE_CODE_EXECUTABLE\" \"$IS_SANDBOX\" \"$ANTHROPIC_API_KEY\" \"$ANTHROPIC_AUTH_TOKEN\" \"$ANTHROPIC_BASE_URL\" > \"$CLAUDE_ENV_FILE\"\n"
 	if err := os.WriteFile(path, []byte(script), 0755); err != nil {
 		t.Fatal(err)
 	}

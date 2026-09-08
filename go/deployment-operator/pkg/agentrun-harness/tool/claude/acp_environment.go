@@ -9,6 +9,7 @@ import (
 const (
 	claudeConfigEnv     = "CLAUDE_CONFIG_DIR"
 	claudeExecutableEnv = "CLAUDE_CODE_EXECUTABLE"
+	claudeSandboxEnv    = "IS_SANDBOX"
 	anthropicAPIKeyEnv  = "ANTHROPIC_API_KEY"
 	anthropicAuthEnv    = "ANTHROPIC_AUTH_TOKEN"
 	anthropicBaseURLEnv = "ANTHROPIC_BASE_URL"
@@ -20,6 +21,9 @@ func (agent *Agent) env(config toolv1.Config) []string {
 	env := []string{
 		fmt.Sprintf("%s=%s", claudeConfigEnv, agent.configPath(config)),
 		fmt.Sprintf("%s=%s", claudeExecutableEnv, nativeClaudeBinary),
+		// DIND runs the harness as root. The ACP adapter only advertises its
+		// unattended bypass mode to root inside an explicitly marked sandbox.
+		fmt.Sprintf("%s=1", claudeSandboxEnv),
 	}
 
 	if config.Run.IsProxyEnabled() {
