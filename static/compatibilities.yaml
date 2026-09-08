@@ -34,6 +34,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+  name: kubevirt
 - icon: https://avatars.githubusercontent.com/u/30269780?s=200&v=4
   git_url: https://github.com/argoproj/argo-rollouts
   release_url: https://github.com/argoproj/argo-rollouts/releases/tag/v{vsn}
@@ -176,6 +177,7 @@ addons:
     summary: null
     chart_version: 2.2.0
     images: ['quay.io/argoproj/argo-rollouts:v1.1.0']
+  name: argo-rollouts
 - icon: https://kubernetes.io/images/blog-logging/2018-04-10-container-storage-interface-beta/csi-logo.png
   git_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
@@ -952,6 +954,7 @@ addons:
       'public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.8.0-eks-1-28-4',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.10.0-eks-1-28-4',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.8.0-eks-1-28-4']
+  name: aws-ebs-csi-driver
 - icon: https://cdn.worldvectorlogo.com/logos/amazon-elastic-file-system.svg
   git_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver
   release_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases/tag/v{vsn}
@@ -1182,6 +1185,7 @@ addons:
     images: ['amazon/aws-efs-csi-driver:v1.7.4', 'public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.3-eks-1-29-2',
       'public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-29-2',
       'public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.9.3-eks-1-29-2']
+  name: aws-efs-csi-driver
 - icon: https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/e5d625f96415fd44e6399e9c75e2bd985f5a2288/docs/assets/images/aws_load_balancer_icon.svg
   git_url: https://github.com/kubernetes-sigs/aws-load-balancer-controller
   release_url: https://github.com/kubernetes-sigs/aws-load-balancer-controller/releases/tag/v{vsn}
@@ -1770,6 +1774,7 @@ addons:
     summary: null
     chart_version: 1.0.6
     images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.0.0']
+  name: aws-load-balancer-controller
 - name: bigbang
   icon: https://artifacthub.io/image/0ca7dd5c-47ec-4d6a-87b7-2f2b74a3cca5
   git_url: https://repo1.dso.mil/big-bang/bigbang
@@ -11372,6 +11377,7 @@ addons:
     summary: null
     chart_version: 1.1.15
     images: []
+  name: amazon-vpc-cni-k8s
 - icon: https://docs.tigera.io/img/calico-logo.webp
   git_url: https://github.com/projectcalico/calico
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
@@ -15089,6 +15095,7 @@ addons:
     summary: null
     chart_version: 1.15.1
     images: ['coredns/coredns:1.8.0']
+  name: coredns
 - icon: https://avatars.githubusercontent.com/u/112438027?s=200&v=4
   git_url: https://github.com/cloudnative-pg/cloudnative-pg
   release_url: https://github.com/cloudnative-pg/cloudnative-pg/releases/tag/v{vsn}
@@ -15441,6 +15448,7 @@ addons:
     summary: null
     chart_version: 0.13.0
     images: ['ghcr.io/cloudnative-pg/cloudnative-pg:1.15.0']
+  name: cloudnative-pg
 - icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
   git_url: https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
   release_url: https://github.com/kubernetes/autoscaler/releases/tag/cluster-autoscaler-{vsn}
@@ -15830,6 +15838,7 @@ addons:
     summary: null
     chart_version: 9.4.0
     images: ['us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v1.18.1']
+  name: cluster-autoscaler
 - icon: https://raw.githubusercontent.com/kubernetes-sigs/descheduler/master/assets/logo/descheduler-stacked-color.png
   git_url: https://github.com/kubernetes-sigs/descheduler
   release_url: https://github.com/kubernetes-sigs/descheduler/releases/tag/v{vsn}
@@ -16385,6 +16394,7 @@ addons:
     summary: null
     chart_version: 0.18.2
     images: ['us.gcr.io/k8s-artifacts-prod/descheduler/descheduler:v0.18.0']
+  name: descheduler
 - icon: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/img/external-dns.png?raw=true
   git_url: https://github.com/kubernetes-sigs/external-dns
   release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
@@ -16823,6 +16833,7 @@ addons:
     summary: null
     chart_version: 1.2.0
     images: ['k8s.gcr.io/external-dns/external-dns:v0.9.0']
+  name: external-dns
 - icon: https://raw.githubusercontent.com/external-secrets/external-secrets/main/assets/eso-logo-large.png
   git_url: https://github.com/external-secrets/external-secrets
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
@@ -17658,6 +17669,7 @@ addons:
     summary: null
     chart_version: 0.3.11
     images: ['ghcr.io/external-secrets/external-secrets:v0.3.11']
+  name: external-secrets
 - icon: https://avatars.githubusercontent.com/u/52158677?s=200&v=4
   git_url: https://github.com/fluxcd/flux2
   release_url: https://github.com/fluxcd/flux2/releases/tag/v{vsn}
@@ -18341,6 +18353,7 @@ addons:
     chart_version: 4.2.5
     images: ['registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47']
+  name: ingress-nginx
 - icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/istio/plural/icons/istio.png?raw=true
   git_url: https://github.com/istio/istio
   release_url: https://github.com/istio/istio/releases/tag/{vsn}
@@ -19125,6 +19138,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+  name: karpenter
 - icon: https://avatars.githubusercontent.com/u/49917779?s=48&v=4
   git_url: https://github.com/kedacore/keda
   release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
@@ -21039,6 +21053,7 @@ addons:
       'quay.io/prometheus/node-exporter:v1.7.0', 'quay.io/prometheus/prometheus:v2.48.0',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
+  name: kube-prometheus-stack
 - icon: https://avatars.githubusercontent.com/u/68448710?s=48&v=4
   git_url: https://github.com/kyverno/kyverno
   release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
@@ -21744,6 +21759,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+  name: linkerd
 - icon: https://avatars.githubusercontent.com/u/51335366?s=48&v=4
   git_url: https://github.com/longhorn/longhorn
   release_url: https://github.com/longhorn/longhorn/releases/tag/v{vsn}
@@ -22320,6 +22336,7 @@ addons:
     summary: null
     chart_version: 1.0.0
     images: ['longhornio/longhorn-manager:v1.0.0', 'longhornio/longhorn-ui:v1.0.0']
+  name: longhorn
 - icon: https://avatars.githubusercontent.com/u/36015203?s=400&v=4
   git_url: https://github.com/kubernetes-sigs/metrics-server
   release_url: https://github.com/kubernetes-sigs/metrics-server/releases/tag/v{vsn}
@@ -22436,6 +22453,7 @@ addons:
     summary: null
     chart_version: 3.5.0
     images: ['k8s.gcr.io/metrics-server/metrics-server:v0.5.0']
+  name: metrics-server
 - icon: https://avatars.githubusercontent.com/u/49998002?s=48&v=4
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
@@ -22681,6 +22699,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+  name: opentelemetry-operator
 - icon: https://avatars.githubusercontent.com/u/22860722?s=48&v=4
   git_url: https://github.com/rook/rook
   release_url: https://github.com/rook/rook/releases/tag/v{vsn}
@@ -23137,6 +23156,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+  name: rook
 - icon: https://avatars.githubusercontent.com/u/34767428?s=48&v=4
   git_url: https://github.com/strimzi/strimzi-kafka-operator
   release_url: https://github.com/strimzi/strimzi-kafka-operator/releases/tag/{vsn}
@@ -23392,6 +23412,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+  name: strimzi-kafka
 - icon: https://github.com/traefik/traefik/raw/master/docs/content/assets/img/traefik.logo-dark.png
   git_url: https://github.com/traefik/traefik
   release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
@@ -23908,6 +23929,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+  name: velero
 - icon: https://avatars.githubusercontent.com/u/33043890?s=48&v=4
   git_url: https://github.com/vitessio/vitess
   release_url: https://github.com/vitessio/vitess/releases/tag/v{vsn}
@@ -26262,6 +26284,7 @@ addons:
     summary: null
     chart_version: 0.3.0
     images: ['quay.io/argoproj/argocli:v3.0.7', 'quay.io/argoproj/workflow-controller:v3.0.7']
+  name: argo-workflows
 - icon: https://avatars.githubusercontent.com/u/16866914
   git_url: https://github.com/vectordotdev/vector/
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
@@ -26997,6 +27020,7 @@ addons:
     summary: null
     chart_version: 0.1.0-alpha.4
     images: ['timberio/vector:0.16.1-distroless-libc']
+  name: vector
 - git_url: https://github.com/VictoriaMetrics/operator
   release_url: https://github.com/VictoriaMetrics/operator/releases/tag/v{vsn}
   helm_repository_url: https://victoriametrics.github.io/helm-charts
@@ -28524,6 +28548,7 @@ addons:
     summary: null
     chart_version: 0.1.1
     images: ['victoriametrics/operator:v0.2.1']
+  name: victoria-metrics-operator
 - icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/nvidia-operator/plural/icons/nvidia.png?raw=true
   git_url: https://github.com/NVIDIA/gpu-operator
   release_url: https://github.com/NVIDIA/gpu-operator/releases/tag/{vsn}
@@ -28825,6 +28850,7 @@ addons:
     chart_version: 1.4.0
     images: ['nvcr.io/nvidia/gpu-operator:1.4.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
+  name: gpu-operator
 - icon: https://avatars.githubusercontent.com/u/14012520?v=4
   git_url: https://github.com/goharbor/harbor
   release_url: https://github.com/goharbor/harbor/releases/tag/v{vsn}
@@ -28898,6 +28924,7 @@ addons:
     summary: null
     chart_version: 1.16.0
     images: []
+  name: harbor
 - icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/elasticsearch/plural/icons/elastic.png?raw=true
   git_url: https://github.com/elastic/elasticsearch
   release_url: https://github.com/elastic/elasticsearch/releases/tag/{vsn}
@@ -29051,6 +29078,7 @@ addons:
     summary: null
     chart_version: 8.18.0
     images: ['docker.elastic.co/elastic-agent/elastic-agent:8.18.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  name: elastic-agent
 - icon: https://avatars.githubusercontent.com/u/96669?s=48&v=4
   git_url: https://github.com/rabbitmq/cluster-operator
   release_url: https://github.com/rabbitmq/cluster-operator/releases/tag/v{vsn}
@@ -29485,6 +29513,7 @@ addons:
     summary: null
     chart_version: 2.6.6
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.13.1-scratch-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.6.0-scratch-r0']
+  name: rabbitmq-cluster-operator
 - icon: https://kserve.github.io/website/img/kserve-logo-small.png
   git_url: https://github.com/kserve/kserve
   release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
@@ -29983,6 +30012,7 @@ addons:
     summary: null
     chart_version: v0.7.0
     images: []
+  name: kserve
 - icon: https://avatars.githubusercontent.com/u/100554170?v=4
   git_url: https://github.com/kubescape/helm-charts
   release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-operator-{vsn}
@@ -30641,6 +30671,7 @@ addons:
     summary: null
     chart_version: 0.29.6
     images: []
+  name: kubescape-operator
 - icon: https://assets.dynatrace.com/global/resources/Signet_Logo_RGB_CP_512x512px.png
   git_url: https://github.com/Dynatrace/dynatrace-operator
   release_url: https://github.com/Dynatrace/dynatrace-operator/releases/tag/v{vsn}
@@ -30702,6 +30733,7 @@ addons:
     summary: null
     chart_version: 0.6.0
     images: []
+  name: dynatrace-operator
 - icon: https://avatars.githubusercontent.com/u/54533161?s=200&v=4
   git_url: https://github.com/wiz-sec/charts
   release_url: https://github.com/wiz-sec/charts/releases/tag/wiz-sensor-{vsn}
@@ -30728,6 +30760,7 @@ addons:
     summary: null
     chart_version: 1.0.3999
     images: ['wizio.azurecr.io/sensor:v1']
+  name: wiz-sensor
 - icon: https://avatars.githubusercontent.com/u/54533161?s=200&v=4
   git_url: https://github.com/wiz-sec/charts
   release_url: https://github.com/wiz-sec/charts/releases/tag/wiz-admission-controller-{vsn}
@@ -30854,6 +30887,7 @@ addons:
     summary: null
     chart_version: 0.0.1
     images: []
+  name: wiz-admission-controller
 - icon: https://avatars.githubusercontent.com/u/54533161?s=200&v=4
   git_url: https://github.com/wiz-sec/charts
   release_url: https://github.com/wiz-sec/charts/releases/tag/wiz-network-analyzer-{vsn}
@@ -30875,6 +30909,7 @@ addons:
     summary: null
     chart_version: 0.1.1
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-network-analyzer:0.1']
+  name: wiz-network-analyzer
 - icon: https://helm.elastic.co/icons/eck.png
   git_url: https://github.com/elastic/cloud-on-k8s
   release_url: https://github.com/elastic/cloud-on-k8s/releases/tag/v{vsn}
