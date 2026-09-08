@@ -20,6 +20,8 @@ def parse_index(content, latest_kube):
     index = yaml.safe_load(content)
     entries = index.get("entries", {}).get(APP_NAME, [])
     latest = Version.coerce(latest_kube)
+    if latest.major != 1:
+        raise ValueError("Kubernetes major changed; update release history before scraping.")
     kube_releases = [
         Version(major=latest.major, minor=minor, patch=0)
         for minor in range(latest.minor + 1)

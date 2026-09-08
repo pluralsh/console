@@ -8,7 +8,6 @@ names:
 - amazon-vpc-cni-k8s
 - calico
 - cert-manager
-- trust-manager
 - cilium
 - contour
 - coredns
@@ -32,6 +31,7 @@ names:
 - rook
 - strimzi-kafka
 - traefik
+- trust-manager
 - velero
 - vitess
 - gatekeeper

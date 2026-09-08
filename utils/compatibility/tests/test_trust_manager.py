@@ -68,6 +68,14 @@ class TrustManagerTests(unittest.TestCase):
                 scraper.scrape()
                 update.assert_not_called()
 
+    def test_major_transition_preserves_existing_data(self):
+        with patch.object(scraper, "current_kube_version", return_value="2.0"), \
+             patch.object(scraper, "fetch_page", return_value=index(chart())), \
+             patch.object(scraper, "update_compatibility_info") as update:
+            with self.assertRaisesRegex(ValueError, "Kubernetes major changed"):
+                scraper.scrape()
+            update.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
