@@ -1,0 +1,35 @@
+icon: https://avatars.githubusercontent.com/u/10297834?v=4
+git_url: https://github.com/SeldonIO/seldon-core
+release_url: https://github.com/SeldonIO/seldon-core/releases/tag/v{vsn}
+helm_repository_url: https://seldonio.github.io/helm-charts
+chart_name: seldon-core-operator
+versions:
+- version: 1.19.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.19.0
+  images: ['docker.io/seldonio/seldon-core-operator:1.19.0']
+- version: 1.18.2
+  kube: ['1.27', '1.26', '1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.18.2
+  images: ['docker.io/seldonio/seldon-core-operator:1.18.2']
+- version: 1.17.1
+  kube: ['1.27', '1.26', '1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.17.1
+  images: ['docker.io/seldonio/seldon-core-operator:1.17.1']
+- version: 1.16.0
+  kube: ['1.27', '1.26', '1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.16.0
+  images: ['docker.io/seldonio/seldon-core-operator:1.16.0']
