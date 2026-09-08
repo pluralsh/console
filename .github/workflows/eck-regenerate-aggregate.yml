@@ -14,30 +14,43 @@ jobs:
   regenerate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
         with:
           ref: feat/eck-operator-compatibility
-      - uses: actions/setup-python@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - run: pip install pyyaml
-      - name: Regenerate aggregate
+
+      - name: Install compatibility utility dependencies
+        run: python -m pip install PyYAML==6.0.2 requests==2.33.0 semantic-version==2.10.0 colorama==0.4.6 packaging==24.1
+
+      - name: Regenerate aggregate with repository formatter
+        working-directory: utils/compatibility
         run: |
           python - <<'PY'
-          import yaml
-          from pathlib import Path
+          import utils
 
-          aggregate_path = Path('static/compatibilities.yaml')
-          addon_path = Path('static/compatibilities/eck-operator.yaml')
-          aggregate = yaml.safe_load(aggregate_path.read_text()) or {'addons': []}
-          addon = yaml.safe_load(addon_path.read_text())
-          addon['name'] = 'eck-operator'
-          aggregate['addons'] = [a for a in aggregate.get('addons', []) if a.get('name') != 'eck-operator']
-          aggregate['addons'].append(addon)
-          aggregate_path.write_text(yaml.dump(aggregate, default_flow_style=False, sort_keys=False))
+          manifest = utils.read_yaml('../../static/compatibilities/manifest.yaml')
+          if not manifest or not manifest.get('names'):
+              raise SystemExit('compatibility manifest is empty')
+
+          addons = []
+          for name in manifest['names']:
+              addon = utils.read_yaml(f'../../static/compatibilities/{name}.yaml')
+              if not addon:
+                  raise SystemExit(f'missing compatibility data for {name}')
+              addons.append(addon)
+
+          if not utils.write_yaml('../../static/compatibilities.yaml', {'addons': addons}):
+              raise SystemExit('failed to write aggregate compatibility matrix')
           PY
+
       - name: Commit aggregate
         run: |
+          git diff --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add static/compatibilities.yaml
