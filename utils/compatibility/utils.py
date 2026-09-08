@@ -225,7 +225,7 @@ def find_nested_images(objs: Any) -> List[str]:
 
     Important behavior:
     - Traverses dict VALUES only (not keys), to avoid collecting component names.
-    - Only returns strings that look like real image references (repo/name:tag or @sha256 digest).
+    - Only returns string values under image keys; structured values are traversed.
     """
     images: Set[str] = set()
 
@@ -235,7 +235,7 @@ def find_nested_images(objs: Any) -> List[str]:
 
         if isinstance(x, dict):
             for k, v in x.items():
-                if k == "image":
+                if k == "image" and isinstance(v, str):
                     images.add(v)
                     continue
                 walk(v)
