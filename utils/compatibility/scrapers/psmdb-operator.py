@@ -53,7 +53,19 @@ def _platform_section(markdown: str) -> list[str]:
     )
     if not match:
         raise ValueError("Percona Platforms compatibility section not found")
-    return [line for line in match.group(1).splitlines() if line.strip().startswith("|")]
+
+    table: list[str] = []
+    started = False
+    for line in match.group(1).splitlines():
+        stripped = line.strip()
+        if stripped.startswith("|"):
+            table.append(line)
+            started = True
+            continue
+        if started:
+            break
+
+    return table
 
 
 def parse_platform_matrix(
