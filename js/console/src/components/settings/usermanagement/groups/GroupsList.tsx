@@ -12,7 +12,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 import { mapExistingNodes } from 'utils/graphql'
 import { ListWrapperSC } from '../users/UsersList'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
-import { groupsCols } from './GroupsColumns'
+import { GroupMembersExpand, groupsCols } from './GroupsColumns'
 
 export type GroupsListMeta = {
   editable: boolean
@@ -53,7 +53,6 @@ export function GroupsList({
         flexShrink={0}
       />
       <Table
-        hideHeader
         fullHeightWrap
         virtualizeRows
         rowBg="base"
@@ -65,6 +64,16 @@ export function GroupsList({
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
+        getRowCanExpand={() => true}
+        renderExpanded={({ row }) => (
+          <GroupMembersExpand
+            row={row}
+            editable={meta.editable}
+            setGroupEdit={setGroupEdit}
+          />
+        )}
+        onRowClick={(_, row) => row.getToggleExpandedHandler()()}
+        expandedBgColor="fill-zero"
         emptyStateProps={{
           ...(!throttledQ
             ? {

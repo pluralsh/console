@@ -4,10 +4,9 @@ import {
   CopyIcon,
   Flex,
   Spinner,
-  useCopyText,
 } from '@pluralsh/design-system'
 import { CaptionP } from 'components/utils/typography/Text'
-import { Children, ReactNode } from 'react'
+import { Children, ReactNode, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 export const MEMBERSHIP_VISIBLE_ROWS = 5
@@ -18,28 +17,50 @@ export const MEMBERSHIP_LIST_MAX_HEIGHT =
 
 export function MembershipExpandPanel({
   copyText,
+  getCopyText,
   copyDisabled,
   loading,
   emptyMessage,
   viewAll,
   children,
 }: {
-  copyText: string
+  copyText?: string
+  getCopyText?: () => Promise<string>
   copyDisabled?: boolean
   loading?: boolean
   emptyMessage?: string
   viewAll?: { label: string; onClick: () => void }
   children?: ReactNode
 }) {
-  const { copied, handleCopy } = useCopyText(copyText)
+  const [copied, setCopied] = useState(false)
+  const [copying, setCopying] = useState(false)
   const showEmpty = !loading && Children.count(children) === 0
+
+  useEffect(() => {
+    if (!copied) return
+
+    const timeout = setTimeout(() => setCopied(false), 1000)
+
+    return () => clearTimeout(timeout)
+  }, [copied])
+
+  const handleCopy = useCallback(async () => {
+    setCopying(true)
+    try {
+      const text = getCopyText ? await getCopyText() : (copyText ?? '')
+      await window.navigator.clipboard.writeText(text)
+      setCopied(true)
+    } finally {
+      setCopying(false)
+    }
+  }, [copyText, getCopyText])
 
   return (
     <WrapperSC onClick={(e) => e.stopPropagation()}>
       <Button
         small
         tertiary
-        disabled={copyDisabled || !copyText}
+        disabled={copyDisabled || copying || (!getCopyText && !copyText)}
         startIcon={copied ? <CheckIcon /> : <CopyIcon />}
         onClick={handleCopy}
         width="fit-content"
