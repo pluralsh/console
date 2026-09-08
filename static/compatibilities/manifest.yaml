@@ -23,6 +23,7 @@ names:
 - karpenter
 - keda
 - kube-prometheus-stack
+- kueue
 - kyverno
 - linkerd
 - longhorn

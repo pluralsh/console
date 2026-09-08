@@ -1,0 +1,32 @@
+name: Test Compatibility Scrapers
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compatibility-scraper-tests.yaml'
+      - 'utils/compatibility/**'
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/compatibility-scraper-tests.yaml'
+      - 'utils/compatibility/**'
+
+permissions:
+  contents: read
+
+jobs:
+  test-compatibility-scrapers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: utils/compatibility/requirements.txt
+      - name: Install scraper dependencies
+        run: python -m pip install -r utils/compatibility/requirements.txt
+      - name: Run offline scraper tests
+        working-directory: utils/compatibility
+        run: python -m unittest discover -s tests -v
