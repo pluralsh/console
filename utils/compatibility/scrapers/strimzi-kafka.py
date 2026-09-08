@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import re
 from collections import OrderedDict
+from copy import deepcopy
 
 from bs4 import BeautifulSoup
 from utils import (
     current_kube_version,
+    ensure_keys,
     fetch_page,
     get_chart_versions,
     print_error,
     read_yaml,
+    reduce_versions,
     update_compatibility_info,
     validate_semver,
 )
@@ -19,6 +22,9 @@ downloads_url = "https://strimzi.io/downloads/"
 target_file = f"../../static/compatibilities/{app_name}.yaml"
 chart_name = "strimzi-kafka-operator"
 kube_headers = {"kubernetes versions", "tested kubernetes versions"}
+# Records through 0.50.0 predate the finite tested-version matrix migration.
+# Freeze that legacy history, but allow later missing releases and backports.
+legacy_version_cutoff = validate_semver("0.50.0")
 
 
 def _latest_minor() -> str | None:
@@ -151,10 +157,19 @@ def scrape() -> None:
     if not existing or not existing.get("versions"):
         print_error("Could not read existing Strimzi compatibility versions")
         return
-    latest_recorded = max(validate_semver(row["version"]) for row in existing["versions"])
-    # Historical rows were generated from older support policies. Keep them intact;
-    # this update adds released versions after the last recorded boundary only.
-    rows = [row for row in rows if validate_semver(row["version"]) > latest_recorded]
+    recorded_versions = {row["version"] for row in existing["versions"]}
+    rows = [
+        ensure_keys(row) for row in rows
+        if validate_semver(row["version"]) > legacy_version_cutoff
+        and row["version"] not in recorded_versions
+    ]
+    # Consider the complete version sequence, not just releases newer than its
+    # maximum. A delayed chart or changed-support backport can fill an older gap.
+    # Pre-reduction also avoids repeatedly reprocessing unchanged patch releases.
+    retained_versions = {
+        row["version"] for row in reduce_versions(deepcopy(existing["versions"]) + rows)
+    }
+    rows = [row for row in rows if row["version"] in retained_versions]
     if not rows:
         return
     charts = get_chart_versions(app_name, chart_name=chart_name)

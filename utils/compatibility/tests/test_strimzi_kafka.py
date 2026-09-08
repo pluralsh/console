@@ -93,8 +93,6 @@ class StrimziKafkaTests(unittest.TestCase):
         self.assertNotIn("0.50.0", [row["version"] for row in rows])
         self.assertNotIn("0.49.0", [row["version"] for row in rows])
         # Same-compatibility patches do not create extra boundary records.
-        for row in rows:
-            row["kube"].reverse()
         reduced = reduce_versions(sort_versions(rows + self.existing["versions"]))
         self.assertEqual([row["version"] for row in reduced], ["1.2.0", "1.1.0", "1.0.0", "0.51.0", "0.50.0"])
         self.assertEqual(self.existing, original)
@@ -118,8 +116,35 @@ class StrimziKafkaTests(unittest.TestCase):
         self.run_scrape().assert_not_called()
 
     def test_current_records_make_rerun_a_noop(self):
-        self.existing["versions"].append({"version": "1.2.0"})
+        first = self.run_scrape()
+        self.existing["versions"].extend(deepcopy(first.call_args.args[1]))
         self.run_scrape().assert_not_called()
+
+    def test_delayed_older_chart_is_backfilled_after_newer_version_was_saved(self):
+        del self.charts["1.1.0"]
+        first = self.run_scrape()
+        first_rows = first.call_args.args[1]
+        self.assertIn("1.2.0", [row["version"] for row in first_rows])
+        self.assertNotIn("1.1.0", [row["version"] for row in first_rows])
+        self.existing["versions"].extend(deepcopy(first_rows))
+        self.charts["1.1.0"] = "1.1.0"
+        second = self.run_scrape()
+        second.assert_called_once()
+        self.assertEqual([row["version"] for row in second.call_args.args[1]], ["1.1.0"])
+
+    def test_changed_support_backport_is_added_below_latest_saved_minor(self):
+        first = self.run_scrape()
+        self.existing["versions"].extend(deepcopy(first.call_args.args[1]))
+        original = deepcopy(self.existing)
+        # Synthetic future backport, with an explicit changed matrix window.
+        backport = b'<tr><td>1.1.1</td><td>1.0.0</td><td>0.17.1</td><td>4.3.0</td><td>1.30 - 1.37</td></tr>'
+        self.html = self.html.replace(b"</table>", backport + b"</table>")
+        self.charts["1.1.1"] = "1.1.1"
+        second = self.run_scrape()
+        second.assert_called_once()
+        self.assertEqual([row["version"] for row in second.call_args.args[1]], ["1.1.1"])
+        self.assertEqual(second.call_args.args[1][0]["kube"], [f"1.{v}" for v in range(37, 29, -1)])
+        self.assertEqual(self.existing, original)
 
 
 if __name__ == "__main__":
