@@ -8,6 +8,7 @@ names:
 - amazon-vpc-cni-k8s
 - calico
 - cert-manager
+- trust-manager
 - cilium
 - contour
 - coredns
