@@ -1,0 +1,141 @@
+icon: https://gitlab.com/uploads/-/system/project/avatar/12584701/logo-stackgres.png?width=64
+git_url: https://gitlab.com/ongresinc/stackgres
+release_url: https://gitlab.com/ongresinc/stackgres/-/releases/{vsn}
+helm_repository_url: https://stackgres.io/downloads/stackgres-k8s/stackgres/helm
+chart_name: stackgres-operator
+versions:
+- version: 1.19.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.19.0
+  images: ['quay.io/ongres/kubectl:v1.36.2-build-6.53', 'quay.io/stackgres/operator:1.19.0']
+- version: 1.18.3
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.18.3
+  images: []
+- version: 1.18.0
+  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.18.0
+  images: []
+- version: 1.17.4
+  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.17.4
+  images: []
+- version: 1.17.0
+  kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+    '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.17.0
+  images: []
+- version: 1.16.0
+  kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+    '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.16.0
+  images: []
+- version: 1.15.0
+  kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+    '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.15.0
+  images: []
+- version: 1.14.0
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+    '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.14.0
+  images: []
+- version: 1.13.0
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+    '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.13.0
+  images: []
+- version: 1.12.0
+  kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+    '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.12.0
+  images: []
+- version: 1.11.0
+  kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+    '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.11.0
+  images: []
+- version: 1.10.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+    '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.10.0
+  images: []
+- version: 1.9.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+    '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.9.0
+  images: []
+- version: 1.8.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+    '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.8.0
+  images: []
+- version: 1.7.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',
+    '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.7.0
+  images: []
+- version: 1.6.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19',
+    '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.6.0
+  images: []
+- version: 1.5.0
+  kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.5.0
+  images: []

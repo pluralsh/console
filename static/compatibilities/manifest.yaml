@@ -30,6 +30,7 @@ names:
 - opentelemetry-operator
 - rook
 - strimzi-kafka
+- stackgres
 - traefik
 - velero
 - vitess
