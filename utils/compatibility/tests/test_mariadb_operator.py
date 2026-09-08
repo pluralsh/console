@@ -42,6 +42,16 @@ class MariaDBOperatorScraperTest(unittest.TestCase):
             ["1.26", "1.27", "1.28"],
         )
 
+    def test_parse_kube_constraint_keeps_minors_with_valid_patch_overlap(self):
+        self.assertEqual(
+            mariadb_operator.parse_kube_constraint(">=1.26.0 <1.29.1", "1.36"),
+            ["1.26", "1.27", "1.28", "1.29"],
+        )
+        self.assertEqual(
+            mariadb_operator.parse_kube_constraint(">1.26.0 <=1.28.0", "1.36"),
+            ["1.26", "1.27", "1.28"],
+        )
+
     def test_extract_rows_uses_only_the_operator_chart_and_stable_app_versions(self):
         index_yaml = {
             "entries": {

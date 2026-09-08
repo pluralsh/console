@@ -7,7 +7,6 @@ import yaml
 
 from utils import (
     current_kube_version,
-    expand_kube_versions,
     fetch_page,
     print_error,
     read_yaml,
@@ -42,6 +41,48 @@ def _minor_bounds(version):
     return parsed.major, parsed.minor
 
 
+def _next_minor(major, minor):
+    return major, minor + 1
+
+
+def _version_tuple(major, minor, patch=0):
+    return int(major), int(minor), int(patch or 0)
+
+
+def _parse_constraints(spec):
+    normalized = spec.replace(",", " ")
+    constraints = []
+
+    for operator, major, minor, patch in re.findall(
+        r"(>=|<=|<|>|=)?\s*v?(\d+)\.(\d+)(?:\.(\d+))?",
+        normalized,
+    ):
+        constraints.append((operator or ">=", _version_tuple(major, minor, patch)))
+
+    return constraints
+
+
+def _minor_satisfies_constraints(major, minor, constraints):
+    start = (major, minor, 0)
+    end = (*_next_minor(major, minor), 0)
+
+    for operator, bound in constraints:
+        if operator in (">=", ">"):
+            if end <= bound:
+                return False
+        elif operator == "<":
+            if start >= bound:
+                return False
+        elif operator == "<=":
+            if start > bound:
+                return False
+        elif operator == "=":
+            if not (start <= bound < end):
+                return False
+
+    return True
+
+
 def parse_kube_constraint(spec, latest_kube):
     if not spec or not latest_kube:
         return []
@@ -50,30 +91,24 @@ def parse_kube_constraint(spec, latest_kube):
     if not latest:
         return []
 
-    lower = None
-    upper = latest
-    normalized = spec.replace(",", " ")
-
-    for operator, major, minor in re.findall(r"(>=|<=|<|>|=)?\s*v?(\d+)\.(\d+)", normalized):
-        bound = (int(major), int(minor))
-
-        if operator in ("", ">=", ">", "="):
-            if operator == ">":
-                bound = (bound[0], bound[1] + 1)
-            if lower is None or bound > lower:
-                lower = bound
-        elif operator in ("<", "<="):
-            if operator == "<":
-                bound = (bound[0], bound[1] - 1)
-            if upper is None or bound < upper:
-                upper = bound
-
-    if lower is None or upper is None or lower > upper:
+    constraints = _parse_constraints(spec)
+    lower_bounds = [
+        (bound[0], bound[1])
+        for operator, bound in constraints
+        if operator in (">=", ">", "=")
+    ]
+    if not constraints or not lower_bounds:
         return []
 
-    start = f"{lower[0]}.{lower[1]}"
-    end = f"{upper[0]}.{upper[1]}"
-    return expand_kube_versions(start, end)
+    major, minor = max(lower_bounds)
+    kube_versions = []
+
+    while (major, minor) <= latest:
+        if _minor_satisfies_constraints(major, minor, constraints):
+            kube_versions.append(f"{major}.{minor}")
+        major, minor = _next_minor(major, minor)
+
+    return kube_versions
 
 
 def load_index(content):
@@ -155,6 +190,8 @@ def prune_stale_representatives(filepath, rows):
         if version.get("version") in keep
     ]
     write_yaml(filepath, data)
+
+
 def scrape():
     latest_kube = current_kube_version()
     if not latest_kube:
