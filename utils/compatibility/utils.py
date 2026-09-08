@@ -235,7 +235,8 @@ def find_nested_images(objs: Any) -> List[str]:
 
         if isinstance(x, dict):
             for k, v in x.items():
-                if k == "image":
+                # CRD schemas also use "image" keys whose values are mappings.
+                if k == "image" and isinstance(v, str) and _looks_like_image(v):
                     images.add(v)
                     continue
                 walk(v)
@@ -461,6 +462,9 @@ def reduce_versions(versions):
 
     # Sort versions to ensure the latest version is last
     versions = sort_versions(versions)
+    # Chart consumers cannot use newer manifest-only releases. Keep their latest
+    # available chart as well as the latest application release.
+    latest_chart_index = next((i for i, data in enumerate(versions) if data.get("chart_version")), None)
 
     for i, data in reversed(list(enumerate(versions))):
         version = validate_semver(data["version"])
@@ -471,6 +475,7 @@ def reduce_versions(versions):
             or cur_minor != version.minor   # or if it's a new minor version
             or cur_kube != set(kube)        # or if kube list changed
             or i == 0                       # or if it's the latest version
+            or i == latest_chart_index      # or if it's the latest chart-backed version
         ):
             cur_major = version.major
             cur_minor = version.minor
@@ -489,6 +494,8 @@ def reduce_versions(versions):
             # Include chart_version if it exists in the original data
             if "chart_version" in data:
                 version_info["chart_version"] = data["chart_version"]
+            # Official release manifests can provide images without a Helm chart.
+            if "images" in data or "chart_version" in data:
                 version_info["images"] = data.get("images", [])
             if "eolAt" in data:
                 version_info["eolAt"] = data["eolAt"]

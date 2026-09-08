@@ -16400,6 +16400,24 @@ addons:
   release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/external-dns
   versions:
+  - version: 0.22.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: Application support is verified independently of Helm chart availability.
+      chart_updates: []
+      features: []
+      breaking_changes: [The default annotation prefix is now external-dns.kubernetes.io/
+          with no fallback. Migrate annotations or explicitly retain --annotation-prefix=external-dns.alpha.kubernetes.io/;
+          incorrect migration can delete DNS records., --policy is required and has
+          no default. Choose it explicitly before upgrading., 'In-tree Plural, Akamai
+          and Transip providers were removed. Use a supported webhook provider or retain
+          a compatible prior ExternalDNS version.', 'Upstream warns that --dry-run does
+          not prevent changes with ns1, hetzner and alibaba cloud providers; do not
+          rely on it as a universal safety guarantee.']
+    images: ['registry.k8s.io/external-dns/external-dns:v0.22.0@sha256:5fdcaf7deb5c158f93a1fc6fe169cdff4cfb9ae0172bee1a90ab0ef74fb9c9cf']
   - version: 0.21.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
