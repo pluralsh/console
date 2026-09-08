@@ -11,6 +11,23 @@ COMPATIBILITY_DIR = Path(__file__).resolve().parents[1]
 MODULE_PATH = COMPATIBILITY_DIR / "scrapers" / "scylladb-operator.py"
 sys.path.insert(0, str(COMPATIBILITY_DIR))
 
+utils_spec = importlib.util.spec_from_file_location("utils", COMPATIBILITY_DIR / "utils.py")
+compat_utils = importlib.util.module_from_spec(utils_spec)
+assert utils_spec.loader is not None
+utils_spec.loader.exec_module(compat_utils)
+
+utils_module = sys.modules.get("utils")
+if utils_module is None:
+    sys.modules["utils"] = compat_utils
+else:
+    for name in (
+        "expand_kube_versions",
+        "get_chart_versions",
+        "print_error",
+        "update_compatibility_info",
+    ):
+        setattr(utils_module, name, getattr(compat_utils, name))
+
 spec = importlib.util.spec_from_file_location("scylladb_operator", MODULE_PATH)
 scylladb_operator = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
