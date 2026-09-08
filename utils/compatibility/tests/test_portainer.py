@@ -77,6 +77,16 @@ class PortainerTests(unittest.TestCase):
         versions = build_versions(TABLE, {"entries": {"portainer": entries}}, lambda _: package("2.45.0"))
         self.assertEqual(versions[0]["chart_version"], "245.0.0")
 
+    def test_floating_missing_and_unrelated_metadata_do_not_hide_ce_tag(self):
+        for metadata in ["ce-latest", None, "ee-2.39.0"]:
+            with self.subTest(metadata=metadata):
+                entry = {"version": "245.0.0", "urls": ["chart.tgz"]}
+                if metadata is not None:
+                    entry["appVersion"] = metadata
+                versions = build_versions(TABLE, {"entries": {"portainer": [entry]}},
+                                          lambda _: package("2.45.0"))
+                self.assertEqual(versions[0]["chart_version"], "245.0.0")
+
 
 if __name__ == "__main__":
     unittest.main()

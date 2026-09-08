@@ -77,11 +77,10 @@ def build_versions(markdown, chart_index, fetch):
         if not version.is_prerelease:
             entries.append((version, entry))
     for _, entry in sorted(entries, key=lambda item: item[0], reverse=True):
-        # appVersion contains both editions and sometimes a floating CE tag.
-        # It is only a candidate filter; the packaged CE default is authoritative.
-        candidates = set(re.findall(r"\d+\.\d+\.\d+", str(entry.get("appVersion", ""))))
-        if not (candidates & (compatibility.keys() - charts.keys())):
-            continue
+        # appVersion may be floating, absent, or describe only Business Edition.
+        # Only the packaged CE default can establish the mapping.
+        if compatibility.keys() <= charts.keys():
+            break
         archive = fetch(urljoin(CHART_URL, entry["urls"][0]))
         if archive is None:
             raise ValueError("Could not fetch Portainer chart")
