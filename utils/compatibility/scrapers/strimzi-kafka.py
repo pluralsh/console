@@ -163,13 +163,6 @@ def scrape() -> None:
         if validate_semver(row["version"]) > legacy_version_cutoff
         and row["version"] not in recorded_versions
     ]
-    # Consider the complete version sequence, not just releases newer than its
-    # maximum. A delayed chart or changed-support backport can fill an older gap.
-    # Pre-reduction also avoids repeatedly reprocessing unchanged patch releases.
-    retained_versions = {
-        row["version"] for row in reduce_versions(deepcopy(existing["versions"]) + rows)
-    }
-    rows = [row for row in rows if row["version"] in retained_versions]
     if not rows:
         return
     charts = get_chart_versions(app_name, chart_name=chart_name)
@@ -182,5 +175,12 @@ def scrape() -> None:
         if chart and validate_semver(chart):
             row["chart_version"] = chart
             released_rows.append(row)
+    # Reduce only chart-backed candidates. An unavailable .0 chart must not
+    # hide a usable patch with the same compatibility window. Including existing
+    # rows preserves delayed/backport boundaries and makes unchanged patches no-ops.
+    retained_versions = {
+        row["version"] for row in reduce_versions(deepcopy(existing["versions"]) + released_rows)
+    }
+    released_rows = [row for row in released_rows if row["version"] in retained_versions]
     if released_rows:
         update_compatibility_info(target_file, released_rows)

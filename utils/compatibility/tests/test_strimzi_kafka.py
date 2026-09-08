@@ -132,6 +132,21 @@ class StrimziKafkaTests(unittest.TestCase):
         second.assert_called_once()
         self.assertEqual([row["version"] for row in second.call_args.args[1]], ["1.1.0"])
 
+    def test_missing_baseline_chart_does_not_hide_available_patch(self):
+        del self.charts["1.0.0"]
+        original = deepcopy(self.existing)
+        first = self.run_scrape()
+        first.assert_called_once()
+        rows = first.call_args.args[1]
+        self.assertEqual([row["version"] for row in rows], ["1.2.0", "1.1.0", "1.0.1", "0.51.0"])
+        patch_row = next(row for row in rows if row["version"] == "1.0.1")
+        self.assertEqual(patch_row["chart_version"], "1.0.1")
+        self.assertEqual(patch_row["kube"], [f"1.{v}" for v in range(36, 29, -1)])
+        self.assertEqual(self.existing, original)
+        self.existing["versions"].extend(deepcopy(rows))
+        # A complete chart-backed sequence must not repeatedly rewrite itself.
+        self.run_scrape().assert_not_called()
+
     def test_changed_support_backport_is_added_below_latest_saved_minor(self):
         first = self.run_scrape()
         self.existing["versions"].extend(deepcopy(first.call_args.args[1]))
