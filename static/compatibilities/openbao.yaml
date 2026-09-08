@@ -1,0 +1,62 @@
+icon: https://avatars.githubusercontent.com/u/152585220?v=4
+git_url: https://github.com/openbao/openbao
+release_url: https://github.com/openbao/openbao/releases/tag/v{vsn}
+helm_repository_url: https://openbao.github.io/openbao-helm
+chart_name: openbao
+versions:
+- version: 2.6.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.29.4
+  images: ['docker.io/hashicorp/vault-k8s:1.7.2', 'quay.io/openbao/openbao:2.6.2']
+- version: 2.5.5
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.28.4
+  images: ['docker.io/hashicorp/vault-k8s:1.7.2', 'quay.io/openbao/openbao:2.5.5']
+- version: 2.4.4
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.24.1
+  images: ['docker.io/hashicorp/vault-k8s:1.7.2', 'quay.io/openbao/openbao:2.4.4']
+- version: 2.3.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.16.4
+  images: ['docker.io/hashicorp/vault-k8s:1.4.2', 'quay.io/openbao/openbao:2.3.2']
+- version: 2.2.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.15.1
+  images: ['docker.io/hashicorp/vault-k8s:1.4.2', 'quay.io/openbao/openbao:2.2.2']
+- version: 2.1.1
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.8.1
+  images: ['docker.io/hashicorp/vault-k8s:1.4.2', 'quay.io/openbao/openbao:2.1.1']
+- version: 2.1.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.7.0
+  images: ['docker.io/hashicorp/vault-k8s:1.4.2', 'quay.io/openbao/openbao:2.1.0']
+- version: 2.0.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.6.0
+  images: ['docker.io/hashicorp/vault-k8s:1.4.2', 'quay.io/openbao/openbao:2.0.2']

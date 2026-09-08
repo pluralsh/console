@@ -179,8 +179,12 @@ def get_chart_images(url, chart, version, values=None):
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
     if (chart, url) not in IMPORTED_REPOS and not oci_repo:
-        subprocess.run(["helm", "repo", "add", chart, url, "--force-update"], check=True)
-        subprocess.run(["helm", "repo", "update"], check=True)
+        try:
+            subprocess.run(["helm", "repo", "add", chart, url, "--force-update"], check=True)
+            subprocess.run(["helm", "repo", "update"], check=True)
+        except FileNotFoundError:
+            print_warning("Helm is not installed; skipping chart image refresh.")
+            return None
         IMPORTED_REPOS.add((chart, url))
     cmd = ["helm", "template", f"{chart}/{chart}", "--version", version, "--kube-version", current_kube_version()]
     if oci_repo:
@@ -189,11 +193,15 @@ def get_chart_images(url, chart, version, values=None):
     if values:
         cmd.append("--set")
         cmd.append(values)
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True
-    )
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True
+        )
+    except FileNotFoundError:
+        print_warning("Helm is not installed; skipping chart image refresh.")
+        return None
     if result.returncode != 0:
         print_error(f"Failed to template helm chart: {result.stderr}")
         return None

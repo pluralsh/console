@@ -30,6 +30,7 @@ names:
 - longhorn
 - metrics-server
 - opentelemetry-operator
+- openbao
 - rook
 - strimzi-kafka
 - traefik
