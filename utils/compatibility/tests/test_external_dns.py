@@ -246,8 +246,9 @@ class ExternalDNSTests(unittest.TestCase):
         self.assertEqual(reduced[1]["eolAt"], "2027-01-01")
         self.assertEqual(max(Version(r["chart_version"]) for r in reduced if r.get("chart_version")), Version("1.21.1"))
 
-    def registry_artifacts(self, labels=None):
-        config = response({"config": {"Labels": labels or {"org.opencontainers.image.source": "https://github.com/kubernetes-sigs/external-dns"}}})
+    def registry_artifacts(self, labels=None, image_os="linux", architecture="amd64"):
+        config = response({"os": image_os, "architecture": architecture,
+                           "config": {"Labels": labels or {"org.opencontainers.image.source": "https://github.com/kubernetes-sigs/external-dns"}}})
         manifest = response({"schemaVersion": 2, "config": {"digest": config.headers["Docker-Content-Digest"]}})
         index = response({"schemaVersion": 2, "manifests": [{"platform": {"os": "linux", "architecture": "amd64"},
                                                           "digest": manifest.headers["Docker-Content-Digest"]}]})
@@ -261,6 +262,25 @@ class ExternalDNSTests(unittest.TestCase):
         self.assertEqual(get.call_count, 3)
         self.assertEqual(get.call_args_list[0].args[1], {"Accept": scraper.manifest_accept})
         self.assertIn("/blobs/sha256:", get.call_args_list[-1].args[0])
+
+    def test_direct_manifest_accepts_verified_linux_amd64_config(self):
+        _, manifest, config = self.registry_artifacts()
+        with patch.object(scraper, "_get", side_effect=[manifest, config]) as get:
+            image = scraper.verified_image("0.22.0")
+        self.assertEqual(image, scraper.image_name + ":v0.22.0@" + manifest.headers["Docker-Content-Digest"])
+        self.assertEqual(get.call_count, 2)
+        self.assertEqual(get.call_args_list[-1].args[0],
+                         scraper.registry_url + "/blobs/" + config.headers["Docker-Content-Digest"])
+
+    def test_direct_and_index_manifests_reject_non_linux_amd64_configuration(self):
+        for image_os, architecture in (("linux", "arm64"), ("windows", "amd64"),
+                                       (None, "amd64"), ("linux", None)):
+            artifacts = self.registry_artifacts(image_os=image_os, architecture=architecture)
+            for selected in (artifacts, artifacts[1:]):
+                with self.subTest(image_os=image_os, architecture=architecture, direct=len(selected) == 2), \
+                        patch.object(scraper, "_get", side_effect=selected), \
+                        self.assertRaisesRegex(ValueError, "configuration is not Linux amd64"):
+                    scraper.verified_image("0.22.0")
 
     def test_registry_rejects_wrong_digest_version_source_or_missing_platform(self):
         cases = [self.registry_artifacts({"org.opencontainers.image.version": "v0.21.0"}),

@@ -39,6 +39,11 @@ and [AWS tutorial](https://github.com/kubernetes-sigs/external-dns/blob/v0.22.0/
 still reference 0.21.0. They were excluded as evidence for the 0.22.0 image.
 If a future registry artifact cannot be verified, compatibility can be recorded
 with an explicitly empty images list; no image is inferred from a tag string.
+Direct OCI/Docker manifests and manifests selected through an image index must
+both have a digest-verified configuration declaring `os: linux` and
+`architecture: amd64`. An index descriptor alone is insufficient. Regression
+tests accept Linux/amd64 direct manifests and reject arm64, Windows, and missing
+platform configuration in both paths, including inconsistent index claims.
 
 The 0.22.0 generated summary records the required explicit policy, annotation
 prefix migration, removed Plural/Akamai/Transip providers, and upstream's warning

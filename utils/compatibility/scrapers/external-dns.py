@@ -172,6 +172,10 @@ def verified_image(version):
     if not isinstance(digest, str) or not re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
         raise ValueError("Missing image configuration digest")
     configuration, _ = _verified_json(_get(f"{registry_url}/blobs/{digest}"), digest)
+    # Direct manifests have no index descriptor to establish their platform.
+    # Check the actual configuration in both paths, including descriptor claims.
+    if configuration.get("os") != "linux" or configuration.get("architecture") != "amd64":
+        raise ValueError("Image configuration is not Linux amd64")
     config = configuration.get("config")
     labels = config.get("Labels", {}) if isinstance(config, dict) else {}
     labels = labels or {}
