@@ -13,6 +13,7 @@ spec = importlib.util.spec_from_file_location("contour_scraper", COMPATIBILITY /
 scraper = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(scraper)
 from utils import reduce_versions
+from packaging.version import Version
 
 FIXTURES = Path(__file__).parent / "fixtures/contour"
 
@@ -91,8 +92,29 @@ class ContourTests(unittest.TestCase):
         reduced = reduce_versions(deepcopy(self.existing["versions"]) + rows)
         self.assertEqual(reduced[0]["images"], rows[0]["images"])
         self.assertNotIn("chart_version", reduced[0])
-        self.assertEqual([row["version"] for row in reduced], ["1.33.7", "1.33.0", "1.32.0"])
+        self.assertEqual([row["version"] for row in reduced], ["1.33.7", "1.33.0", "1.32.1", "1.32.0"])
         self.assertEqual(reduced[-1]["images"], self.existing["versions"][-1]["images"])
+
+    def test_chart_update_consumer_retains_latest_chart_when_new_releases_lack_charts(self):
+        # observer/poller.ex filters by Kubernetes support and considers only
+        # chart_version for chart updates, so a newer manifest cannot replace it.
+        def latest_chart(rows, kube):
+            return max(Version(row["chart_version"]) for row in rows
+                       if kube in row["kube"] and row.get("chart_version"))
+
+        rows = self.run_scrape().call_args.args[1]
+        reduced = reduce_versions(deepcopy(self.existing["versions"]) + rows)
+        self.assertEqual(latest_chart(self.existing["versions"], "1.33"), Version("21.1.4"))
+        self.assertEqual(latest_chart(reduced, "1.33"), Version("21.1.4"))
+        self.assertIn("1.33.0", [row["version"] for row in reduced])
+        self.assertIn("1.33.7", [row["version"] for row in reduced])
+
+    def test_all_chart_reduction_still_drops_redundant_intermediate_patches(self):
+        rows = [
+            {"version": version, "kube": ["1.33"], "chart_version": chart}
+            for version, chart in (("1.32.0", "21.1.2"), ("1.32.1", "21.1.4"), ("1.32.2", "21.1.5"))
+        ]
+        self.assertEqual([row["version"] for row in reduce_versions(rows)], ["1.32.2", "1.32.0"])
 
     def test_reducer_keeps_chart_image_default_and_absent_metadata_behavior(self):
         with_chart = {"version": "1.0.0", "kube": ["1.30"], "chart_version": "2.0.0"}

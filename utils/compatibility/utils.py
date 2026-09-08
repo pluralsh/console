@@ -462,6 +462,9 @@ def reduce_versions(versions):
 
     # Sort versions to ensure the latest version is last
     versions = sort_versions(versions)
+    # Chart consumers cannot use newer manifest-only releases. Keep their latest
+    # available chart as well as the latest application release.
+    latest_chart_index = next((i for i, data in enumerate(versions) if data.get("chart_version")), None)
 
     for i, data in reversed(list(enumerate(versions))):
         version = validate_semver(data["version"])
@@ -472,6 +475,7 @@ def reduce_versions(versions):
             or cur_minor != version.minor   # or if it's a new minor version
             or cur_kube != set(kube)        # or if kube list changed
             or i == 0                       # or if it's the latest version
+            or i == latest_chart_index      # or if it's the latest chart-backed version
         ):
             cur_major = version.major
             cur_minor = version.minor
