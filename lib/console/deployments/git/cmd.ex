@@ -2,6 +2,7 @@ defmodule Console.Deployments.Git.Cmd do
   import Console.Deployments.Pr.Git, only: [request_options: 1]
   alias Console.Schema.{GitRepository, ScmConnection}
   alias Console.Jwt.Github
+  alias Console.Otel.Tracing
 
   def save_private_key(%GitRepository{private_key: pk} = git) when is_binary(pk) do
     with {:ok, path} <- private_key_file(git),
@@ -50,8 +51,10 @@ defmodule Console.Deployments.Git.Cmd do
   defp maybe_overwrite_key(git), do: {:ok, git}
 
   def fetch(%GitRepository{} = repo) do
-    with {:ok, _} <- git(repo, "fetch", maybe_recurse_submodules(repo, ["--all", "--tags", "--force", "--prune", "--prune-tags"])),
-      do: reset(repo)
+    Tracing.span("git.pull", %{"git.repository.url" => repo.url}, fn ->
+      with {:ok, _} <- git(repo, "fetch", maybe_recurse_submodules(repo, ["--all", "--tags", "--force", "--prune", "--prune-tags"])),
+        do: reset(repo)
+    end)
   end
 
   def reset(repo) do
@@ -137,10 +140,12 @@ defmodule Console.Deployments.Git.Cmd do
   end
 
   def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
-    with {:ok, _} = res <- git(git, "clone", maybe_recurse_submodules(git, ["--filter=blob:none", url(git), git.dir])),
-         :ok <- branches(git),
-         :ok <- unlock(git),
-      do: res
+    Tracing.span("git.clone", %{"git.repository.url" => git.url}, fn ->
+      with {:ok, _} = res <- git(git, "clone", maybe_recurse_submodules(git, ["--filter=blob:none", url(git), git.dir])),
+           :ok <- branches(git),
+           :ok <- unlock(git),
+        do: res
+    end)
   end
 
   def git(%GitRepository{} = git, cmd, args \\ []) do

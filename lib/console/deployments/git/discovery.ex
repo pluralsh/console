@@ -7,6 +7,7 @@ defmodule Console.Deployments.Git.Discovery do
   alias Console.Deployments.Git.{Agent, Supervisor}
   alias Console.Schema.{GitRepository, Service}
   alias Console.Deployments.Local.Server
+  alias Console.Otel.Tracing
   require Logger
 
   @type error :: Console.error
@@ -14,32 +15,52 @@ defmodule Console.Deployments.Git.Discovery do
   def start(%GitRepository{} = git), do: maybe_rpc(git, :identity)
 
   @spec fetch(Service.t) :: {:ok, SmartFile.t} | error
-  def fetch(%Service{git: %Service.Git{}} = svc) do
+  def fetch(%Service{git: %Service.Git{} = ref} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
-    with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, svc)),
-      do: Server.fetch(digest, opener)
+    Tracing.span("git.fetch", git_attrs(repo, ref, svc), fn ->
+      with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, svc)),
+        do: Server.fetch(digest, opener)
+    end)
   end
   def fetch(_), do: {:error, "no git spec provided for this service"}
 
   @spec fetch(GitRepository.t, Service.Git.t) :: {:ok, SmartFile.t} | error
   def fetch(%GitRepository{} = repo, %Service.Git{} = ref) do
-    with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, ref)),
-      do: Server.fetch(digest, opener)
+    Tracing.span("git.fetch", git_attrs(repo, ref), fn ->
+      with {:ok, opener, digest} <- maybe_rpc(repo, &Agent.fetch(&1, ref)),
+        do: Server.fetch(digest, opener)
+    end)
   end
   def fetch(_, _), do: {:error, "no git spec provided for this service"}
 
   @spec digest(GitRepository.t, Service.Git.t) :: {:ok, binary} | error
-  def digest(%GitRepository{} = repo, ref), do: maybe_rpc(repo, &Agent.digest(&1, ref))
+  def digest(%GitRepository{} = repo, ref) do
+    Tracing.span("git.digest", git_attrs(repo, ref), fn ->
+      maybe_rpc(repo, &Agent.digest(&1, ref))
+    end)
+  end
 
   @spec sha(GitRepository.t, Service.Git.t) :: {:ok, binary} | error
-  def sha(%GitRepository{} = repo, ref), do: maybe_rpc(repo, &Agent.sha(&1, ref))
+  def sha(%GitRepository{} = repo, ref) do
+    Tracing.span("git.sha", git_attrs(repo, ref), fn ->
+      maybe_rpc(repo, &Agent.sha(&1, ref))
+    end)
+  end
 
   @spec tags(GitRepository.t) :: {:ok, [binary]} | error
   def tags(%GitRepository{} = repo), do: maybe_rpc(repo, &Agent.tags/1)
 
   @spec changes(GitRepository.t, binary, binary, binary) :: {:ok, [binary] | :pass, binary, binary | nil} | error
-  def changes(%GitRepository{} = repo, sha1, sha2, folder),
-    do: maybe_rpc(repo, &Agent.changes(&1, sha1, sha2, folder))
+  def changes(%GitRepository{} = repo, sha1, sha2, folder) do
+    Tracing.span("git.changes", %{
+      "git.repository.url" => repo.url,
+      "git.from" => sha1,
+      "git.to" => sha2,
+      "git.folder" => folder
+    }, fn ->
+      maybe_rpc(repo, &Agent.changes(&1, sha1, sha2, folder))
+    end)
+  end
 
   @spec docs(Service.t) :: {:ok, File.t} | error
   def docs(%Service{} = svc) do
@@ -102,4 +123,22 @@ defmodule Console.Deployments.Git.Discovery do
 
   def agents(), do: Agent.local_agents()
   def agent_states(), do: Enum.map(agents(), &Agent.info/1)
+
+  defp git_attrs(repo, ref, svc \\ nil)
+  defp git_attrs(repo, %Service.Git{} = ref, svc) do
+    %{
+      "git.repository.id" => repo && repo.id,
+      "git.repository.url" => repo && repo.url,
+      "git.ref" => ref.ref,
+      "git.folder" => ref.folder,
+      "service.id" => svc && svc.id
+    }
+  end
+  defp git_attrs(repo, ref, _svc) do
+    %{
+      "git.repository.id" => repo && repo.id,
+      "git.repository.url" => repo && repo.url,
+      "git.ref" => ref
+    }
+  end
 end

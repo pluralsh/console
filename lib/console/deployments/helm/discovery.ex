@@ -2,18 +2,25 @@ defmodule Console.Deployments.Helm.Discovery do
   alias Console.SmartFile
   alias Console.Deployments.Helm.{Supervisor, Agent}
   alias Console.Deployments.Local.Server
+  alias Console.Otel.Tracing
 
   @type error :: Console.error
 
   @spec fetch(binary, binary, binary) :: {:ok, SmartFile.t, binary} | error
   def fetch(url, chart, vsn) do
-    with {:ok, opener, sha, digest} <- maybe_rpc(url, &Agent.fetch(&1, chart, vsn)),
-         {:ok, f} <- Server.fetch(digest, opener),
-      do: {:ok, f, sha}
+    Tracing.span("helm.fetch", helm_attrs(url, chart, vsn), fn ->
+      with {:ok, opener, sha, digest} <- maybe_rpc(url, &Agent.fetch(&1, chart, vsn)),
+           {:ok, f} <- Server.fetch(digest, opener),
+        do: {:ok, f, sha}
+    end)
   end
 
   @spec digest(binary, binary, binary) :: {:ok, binary} | error
-  def digest(url, chart, vsn), do: maybe_rpc(url, &Agent.digest(&1, chart, vsn))
+  def digest(url, chart, vsn) do
+    Tracing.span("helm.digest", helm_attrs(url, chart, vsn), fn ->
+      maybe_rpc(url, &Agent.digest(&1, chart, vsn))
+    end)
+  end
 
   defp maybe_rpc(url, fun) when is_function(fun, 1) do
     me = node()
@@ -41,4 +48,12 @@ defmodule Console.Deployments.Helm.Discovery do
 
   def worker_node(url), do: Console.ClusterRing.node(url)
   def local?(url), do: worker_node(url) == node()
+
+  defp helm_attrs(url, chart, vsn) do
+    %{
+      "helm.repository.url" => url,
+      "helm.chart" => chart,
+      "helm.version" => vsn
+    }
+  end
 end

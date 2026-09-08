@@ -126,6 +126,7 @@ defmodule Console.MixProject do
       {:opentelemetry_bandit, "~> 0.3"},
       {:opentelemetry_phoenix, "~> 2.0"},
       {:opentelemetry_ecto, "~> 1.2"},
+      {:opentelemetry_absinthe, "~> 2.4"},
       {:opentelemetry_process_propagator, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},

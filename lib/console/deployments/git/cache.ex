@@ -10,6 +10,7 @@ defmodule Console.Deployments.Git.Cache do
   import Console.Deployments.Git.Cmd
   require Logger
   alias Console.Schema.{GitRepository, Service.Git}
+  alias Console.Otel.Tracing
 
   defstruct [:git, :dir, :heads, :table]
 
@@ -209,10 +210,16 @@ defmodule Console.Deployments.Git.Cache do
   end
 
   defp new_line(cache, key, repo, sha, path, filter) do
-    with {:ok, _} <- git(repo, "checkout", ["-f", sha]),
-         {:ok, msg, email} <- msg(repo),
-         {:ok, f} <- tarball(cache, sha, path, filter),
-      do: {:ok, Line.new(key, f, sha, msg, email)}
+    Tracing.span("git.checkout", %{
+      "git.repository.url" => repo.url,
+      "git.sha" => sha,
+      "git.folder" => path
+    }, fn ->
+      with {:ok, _} <- git(repo, "checkout", ["-f", sha]),
+           {:ok, msg, email} <- msg(repo),
+           {:ok, f} <- tarball(cache, sha, path, filter),
+        do: {:ok, Line.new(key, f, sha, msg, email)}
+    end)
   end
 
   defp find_head(tid, ref) do
