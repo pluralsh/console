@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import importlib.util
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -24,10 +23,8 @@ else:
         "current_kube_version",
         "fetch_page",
         "print_error",
-        "read_yaml",
         "update_compatibility_info",
         "validate_semver",
-        "write_yaml",
     ):
         setattr(utils_module, name, getattr(compat_utils, name))
 
@@ -140,28 +137,6 @@ class SealedSecretsScraperTest(unittest.TestCase):
         selected = sealed_secrets._representative_rows(rows)
 
         self.assertEqual([row["version"] for row in selected], ["0.39.1", "0.39.0"])
-
-    def test_prune_stale_representatives_removes_old_patch_rows(self):
-        with tempfile.TemporaryDirectory() as temp:
-            path = Path(temp) / "sealed-secrets.yaml"
-            path.write_text(
-                """
-versions:
-- version: 0.39.0
-  summary: old
-- version: 0.39.1
-  summary: current
-""",
-                encoding="utf-8",
-            )
-
-            sealed_secrets.prune_stale_representatives(
-                path,
-                [{"version": "0.39.1"}],
-            )
-
-            self.assertNotIn("0.39.0", path.read_text(encoding="utf-8"))
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -9,10 +9,8 @@ from utils import (
     current_kube_version,
     fetch_page,
     print_error,
-    read_yaml,
     update_compatibility_info,
     validate_semver,
-    write_yaml,
 )
 
 
@@ -180,18 +178,6 @@ def _representative_rows(rows):
     return selected
 
 
-def prune_stale_representatives(filepath, rows):
-    data = read_yaml(filepath)
-    if not data or "versions" not in data:
-        return
-
-    keep = {row["version"] for row in rows}
-    data["versions"] = [
-        version for version in data.get("versions", []) if version.get("version") in keep
-    ]
-    write_yaml(filepath, data)
-
-
 def scrape():
     latest_kube = current_kube_version()
     if not latest_kube:
@@ -211,5 +197,4 @@ def scrape():
         print_error("No Sealed Secrets versions extracted from Helm index.")
         return
 
-    prune_stale_representatives(OUTPUT_PATH, rows)
     update_compatibility_info(OUTPUT_PATH, rows)
