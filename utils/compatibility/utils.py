@@ -235,7 +235,7 @@ def find_nested_images(objs: Any) -> List[str]:
 
         if isinstance(x, dict):
             for k, v in x.items():
-                if k == "image":
+                if k == "image" and isinstance(v, str):
                     images.add(v)
                     continue
                 walk(v)

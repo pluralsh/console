@@ -1,0 +1,56 @@
+icon: https://avatars.githubusercontent.com/u/49735278?v=4
+git_url: https://github.com/openkruise/kruise
+release_url: https://github.com/openkruise/kruise/releases/tag/v{vsn}
+readme_url: https://openkruise.io/docs/installation
+helm_repository_url: https://openkruise.github.io/charts
+chart_name: kruise
+versions:
+- version: 1.9.1
+  kube: ['1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.9.1
+  images: ['openkruise/kruise-helm-hook:v0.1.0', 'openkruise/kruise-manager:v1.9.1']
+- version: 1.9.0
+  kube: ['1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.9.0
+  images: ['openkruise/kruise-helm-hook:v0.1.0', 'openkruise/kruise-manager:v1.9.0']
+- version: 1.8.0
+  kube: ['1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.8.0
+  images: ['openkruise/kruise-helm-hook:v0.1.0', 'openkruise/kruise-manager:v1.8.0']
+- version: 1.7.0
+  kube: ['1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.7.0
+  images: ['openkruise/kruise-manager:v1.7.0']
+- version: 1.6.0
+  kube: ['1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.6.0
+  images: ['openkruise/kruise-manager:v1.6.0']
+- version: 1.5.0
+  kube: ['1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.5.0
+  images: ['openkruise/kruise-manager:v1.5.0']
+- version: 1.4.0
+  kube: ['1.22']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.4.0
+  images: ['openkruise/kruise-manager:v1.4.0']
