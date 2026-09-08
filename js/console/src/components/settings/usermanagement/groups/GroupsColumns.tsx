@@ -101,8 +101,7 @@ const ColActions = columnHelper.accessor((group) => group, {
           <MoreMenu
             onSelectionChange={(key) => {
               if (key === MenuItemKey.Edit) setGroupEdit(group)
-              else if (key === MenuItemKey.Delete)
-                setDialogKey('confirmDelete')
+              else if (key === MenuItemKey.Delete) setDialogKey('confirmDelete')
               else if (key === MenuItemKey.View) setDialogKey('viewGroup')
             }}
           >
