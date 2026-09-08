@@ -13,6 +13,14 @@ defmodule Console.Schema.GroupMember do
     from(m in query, where: m.group_id == ^group_id)
   end
 
+  def counts_by_group(query \\ __MODULE__, group_ids) do
+    from(m in query,
+      where: m.group_id in ^group_ids,
+      group_by: m.group_id,
+      select: {m.group_id, count(m.id)}
+    )
+  end
+
 
   def without_names(query \\ __MODULE__, names) do
     from(m in query,

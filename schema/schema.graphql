@@ -17063,6 +17063,9 @@ type Group {
   "automatically adds all users in the system to this group"
   global: Boolean
 
+  "number of users in this group"
+  memberCount: Int!
+
   insertedAt: DateTime
 
   updatedAt: DateTime

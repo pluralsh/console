@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.User do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.User
+  import Absinthe.Resolution.Helpers, only: [batch: 3]
   alias Console.Schema.{
     Group,
     GroupMember,
@@ -141,6 +142,18 @@ defmodule Console.GraphQl.Resolvers.User do
   def list_group_members(%{group_id: group_id} = args, _) do
     GroupMember.for_group(group_id)
     |> paginate(args)
+  end
+
+  def member_count(%{id: id}, _, _) do
+    batch({__MODULE__, :member_counts}, id, fn counts ->
+      {:ok, Map.get(counts, id, 0)}
+    end)
+  end
+
+  def member_counts(_, group_ids) do
+    GroupMember.counts_by_group(group_ids)
+    |> Console.Repo.all()
+    |> Map.new()
   end
 
   def read_notifications(_, %{context: %{current_user: user}}),
