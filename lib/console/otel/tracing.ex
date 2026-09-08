@@ -4,14 +4,17 @@ defmodule Console.Otel.Tracing do
 
   Tracing is opt-in: runtime configuration enables export only when an OTLP
   endpoint is present. `span/3` is always safe to call; with the exporter
-  disabled it records locally and is discarded. Repository `.url` attributes
-  are reduced to host/path so credentials and signed query parameters are
-  never exported.
+  disabled it records locally and is discarded.
+
+  Secrets are stripped before export: repository and database `.url`
+  attributes are reduced to host/path, HTTP query strings are dropped,
+  and GraphQL documents/variables/error payloads are not recorded.
   """
   require Logger
   require OpenTelemetry.Tracer
+  alias OpenTelemetry.SemConv.URLAttributes
 
-  @network_schemes ~w(http https ssh git oci)
+  @network_schemes ~w(http https ssh git oci postgres postgresql)
 
   @spec setup() :: :ok
   def setup do
@@ -64,18 +67,39 @@ defmodule Console.Otel.Tracing do
   @doc """
   Absinthe trace options shared by both GraphQL endpoints.
 
-  Documents are not exported: clients can embed tokens and passwords as
-  inline literals, and `trace_request_variables: false` does not redact
-  those. Operation name, type, and field selections still record.
+  Documents, variables, and response errors are not exported. Clients can
+  embed tokens and passwords as inline literals, and Absinthe validation
+  errors can echo those values. Operation name, type, and field selections
+  still record.
   """
   @spec absinthe_trace_options() :: keyword
   def absinthe_trace_options do
     [
       trace_request_query: false,
       trace_request_variables: false,
-      trace_response_errors: true
+      trace_response_result: false,
+      trace_response_errors: false
     ]
   end
+
+  @doc """
+  Overrides Ecto's `db.url` so `POSTGRES_URL` userinfo never leaves the process.
+  """
+  @spec ecto_span_attributes() :: map()
+  def ecto_span_attributes do
+    config = Application.get_env(:console, Console.Repo, [])
+    case Keyword.get(config, :url) do
+      url when is_binary(url) -> %{:"db.url" => sanitize_url(url) || "ecto://redacted"}
+      _ -> %{}
+    end
+  end
+
+  @doc false
+  def redact_http_query(_event, _measurements, %{conn: _}, _config) do
+    OpenTelemetry.Tracer.set_attribute(URLAttributes.url_query(), "")
+    :ok
+  end
+  def redact_http_query(_event, _measurements, _metadata, _config), do: :ok
 
   defp configured_endpoint do
     Application.get_env(:opentelemetry_exporter, :otlp_traces_endpoint) ||
@@ -84,17 +108,28 @@ defmodule Console.Otel.Tracing do
 
   defp setup_instrumentation do
     OpentelemetryBandit.setup()
+    attach_http_query_redaction()
     OpentelemetryPhoenix.setup(adapter: :bandit)
-    OpentelemetryEcto.setup([:console, :repo])
+    OpentelemetryEcto.setup([:console, :repo], additional_attributes: ecto_span_attributes())
     OpentelemetryAbsinthe.setup(absinthe_trace_options())
 
-    case ReqLLM.OpenTelemetry.attach() do
+    case ReqLLM.OpenTelemetry.attach("req-llm-open-telemetry", content: :none) do
       :ok -> :ok
+      {:error, :already_exists} -> :ok
       {:error, :opentelemetry_unavailable} -> :ok
       {:error, reason} ->
         Logger.warning("Unable to attach ReqLLM OpenTelemetry instrumentation: #{inspect(reason)}")
         :ok
     end
+  end
+
+  defp attach_http_query_redaction do
+    :telemetry.attach(
+      {__MODULE__, :http_query_redaction},
+      [:bandit, :request, :start],
+      &__MODULE__.redact_http_query/4,
+      %{}
+    )
   end
 
   defp compact_attrs(attrs) do

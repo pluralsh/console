@@ -1,5 +1,5 @@
 defmodule Console.Otel.TracingTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   alias Console.Otel.Tracing
 
   describe "span/3" do
@@ -46,12 +46,15 @@ defmodule Console.Otel.TracingTest do
                "https://github.com/org/repo.git"
     end
 
-    test "strips userinfo from oci and ssh URLs" do
+    test "strips userinfo from oci, ssh, and postgres URLs" do
       assert Tracing.sanitize_url("oci://user:token@ghcr.io/org/chart") ==
                "oci://ghcr.io/org/chart"
 
       assert Tracing.sanitize_url("ssh://git@github.com/org/repo.git") ==
                "ssh://github.com/org/repo.git"
+
+      assert Tracing.sanitize_url("postgres://console:s3cret@db.internal:5432/console") ==
+               "postgres://db.internal:5432/console"
     end
 
     test "redacts scp-style git remotes to host/path" do
@@ -76,11 +79,33 @@ defmodule Console.Otel.TracingTest do
   end
 
   describe "absinthe_trace_options/0" do
-    test "does not export graphql documents or variables" do
+    test "does not export graphql documents, variables, or error payloads" do
       opts = Tracing.absinthe_trace_options()
 
       assert Keyword.fetch!(opts, :trace_request_query) == false
       assert Keyword.fetch!(opts, :trace_request_variables) == false
+      assert Keyword.fetch!(opts, :trace_response_result) == false
+      assert Keyword.fetch!(opts, :trace_response_errors) == false
+    end
+  end
+
+  describe "ecto_span_attributes/0" do
+    test "overrides db.url when the repo is configured with a credential URL" do
+      original = Application.get_env(:console, Console.Repo)
+
+      Application.put_env(
+        :console,
+        Console.Repo,
+        url: "postgres://console:s3cret@db.internal:5432/console"
+      )
+
+      try do
+        assert Tracing.ecto_span_attributes() == %{
+          :"db.url" => "postgres://db.internal:5432/console"
+        }
+      after
+        Application.put_env(:console, Console.Repo, original)
+      end
     end
   end
 end
