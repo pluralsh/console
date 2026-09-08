@@ -15,7 +15,7 @@ from utils import (
 
 app_name = "opentelemetry-operator"
 markdown_url = (
-    "https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/docs/compatibility.md"
+    "https://raw.githubusercontent.com/open-telemetry/opentelemetry-operator/main/docs/getting-started/compatibility.md"
 )
 
 
