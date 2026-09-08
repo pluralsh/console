@@ -24,6 +24,15 @@ fragment UserTiny on User {
   profile
 }
 
+fragment UserWithGroups on User {
+  ...User
+  groups {
+    id
+    name
+    description
+  }
+}
+
 fragment Invite on Invite {
   secureId
 }
@@ -72,12 +81,7 @@ query Users($q: String, $after: String) {
     }
     edges {
       node {
-        ...User
-        groups {
-          id
-          name
-          description
-        }
+        ...UserWithGroups
       }
     }
   }

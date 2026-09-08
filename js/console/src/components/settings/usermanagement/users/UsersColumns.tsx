@@ -2,6 +2,7 @@ import { AppIcon } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
+import { UserWithGroupsFragment } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   ColMembershipExpander,
@@ -9,9 +10,9 @@ import {
   MembershipListRowSC,
 } from '../MembershipExpandPanel'
 import { formatUserGroupsCopy } from '../membershipCopy'
-import { UserAdminCell, UsersTableUser } from './User'
+import { UserAdminCell } from './User'
 
-const columnHelper = createColumnHelper<UsersTableUser>()
+const columnHelper = createColumnHelper<UserWithGroupsFragment>()
 
 const ColUser = columnHelper.accessor((user) => user, {
   id: 'user',
@@ -62,7 +63,11 @@ const ColAdmin = columnHelper.accessor((user) => user, {
   },
 })
 
-export function UserGroupsExpand({ row }: { row: Row<UsersTableUser> }) {
+export function UserGroupsExpand({
+  row,
+}: {
+  row: Row<UserWithGroupsFragment>
+}) {
   const user = row.original
   const groups = user.groups?.filter(isNonNullable) ?? []
 

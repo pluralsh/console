@@ -5,26 +5,12 @@ import { Chip, Switch } from '@pluralsh/design-system'
 import { Confirm } from 'components/utils/Confirm'
 
 import styled from 'styled-components'
-import { useUpdateUserMutation } from '../../../../generated/graphql.ts'
+import {
+  UserFragment,
+  useUpdateUserMutation,
+} from '../../../../generated/graphql.ts'
 
-export type UsersTableUser = {
-  id: string
-  name: string
-  email: string
-  profile?: string | null
-  roles?: { admin?: boolean | null } | null
-  groups?: Nullable<
-    Array<
-      Nullable<{
-        id: string
-        name: string
-        description?: string | null
-      }>
-    >
-  >
-}
-
-export function UserAdminCell({ user }: { user: UsersTableUser }) {
+export function UserAdminCell({ user }: { user: UserFragment }) {
   const { me } = useContext(LoginContext)
   const [mutation, { loading, error }] = useUpdateUserMutation({
     onCompleted: () => setConfirm(false),
