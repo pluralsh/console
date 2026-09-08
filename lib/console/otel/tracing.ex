@@ -61,6 +61,22 @@ defmodule Console.Otel.Tracing do
   end
   def sanitize_url(_), do: nil
 
+  @doc """
+  Absinthe trace options shared by both GraphQL endpoints.
+
+  Documents are not exported: clients can embed tokens and passwords as
+  inline literals, and `trace_request_variables: false` does not redact
+  those. Operation name, type, and field selections still record.
+  """
+  @spec absinthe_trace_options() :: keyword
+  def absinthe_trace_options do
+    [
+      trace_request_query: false,
+      trace_request_variables: false,
+      trace_response_errors: true
+    ]
+  end
+
   defp configured_endpoint do
     Application.get_env(:opentelemetry_exporter, :otlp_traces_endpoint) ||
       Application.get_env(:opentelemetry_exporter, :otlp_endpoint)
@@ -70,11 +86,7 @@ defmodule Console.Otel.Tracing do
     OpentelemetryBandit.setup()
     OpentelemetryPhoenix.setup(adapter: :bandit)
     OpentelemetryEcto.setup([:console, :repo])
-    OpentelemetryAbsinthe.setup(
-      trace_request_query: true,
-      trace_request_variables: false,
-      trace_response_errors: true
-    )
+    OpentelemetryAbsinthe.setup(absinthe_trace_options())
 
     case ReqLLM.OpenTelemetry.attach() do
       :ok -> :ok

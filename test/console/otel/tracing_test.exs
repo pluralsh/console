@@ -74,4 +74,13 @@ defmodule Console.Otel.TracingTest do
       assert Tracing.sanitize_url("") == nil
     end
   end
+
+  describe "absinthe_trace_options/0" do
+    test "does not export graphql documents or variables" do
+      opts = Tracing.absinthe_trace_options()
+
+      assert Keyword.fetch!(opts, :trace_request_query) == false
+      assert Keyword.fetch!(opts, :trace_request_variables) == false
+    end
+  end
 end
