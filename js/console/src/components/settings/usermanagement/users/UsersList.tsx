@@ -1,6 +1,6 @@
 import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
-import { ComponentProps, use, useMemo, useState } from 'react'
+import { use, useMemo, useState } from 'react'
 
 import { useUsersQuery } from 'generated/graphql'
 
@@ -14,7 +14,7 @@ import styled from 'styled-components'
 
 import { mapExistingNodes } from 'utils/graphql'
 import UserInvite from './UserInvite'
-import { usersCols } from './UsersColumns'
+import { UserGroupsExpand, usersCols } from './UsersColumns'
 
 export function UsersList() {
   const { configuration } = use(LoginContext)
@@ -30,10 +30,6 @@ export function UsersList() {
 
   if (error) return <GqlError error={error} />
 
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
-    meta: { q, gridTemplateColumns: '1fr auto' },
-  }
-
   return (
     <ListWrapperSC>
       <Input
@@ -45,7 +41,6 @@ export function UsersList() {
         flexShrink={0}
       />
       <Table
-        hideHeader
         fullHeightWrap
         virtualizeRows
         rowBg="base"
@@ -56,7 +51,10 @@ export function UsersList() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        reactTableOptions={reactTableOptions}
+        getRowCanExpand={() => true}
+        renderExpanded={UserGroupsExpand}
+        onRowClick={(_, row) => row.getToggleExpandedHandler()()}
+        expandedBgColor="fill-zero"
         emptyStateProps={{
           message: isEmpty(q)
             ? "Looks like you don't have any users yet."
