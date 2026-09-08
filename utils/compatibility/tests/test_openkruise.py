@@ -83,6 +83,8 @@ class OpenKruiseTests(unittest.TestCase):
     def test_chart_crd_image_schema_does_not_crash_image_extraction(self):
         self.assertEqual(find_nested_images([
             {"properties": {"image": {"type": "string"}}},
+            {"image": {"examples": [{"image": "schema-example"}]}},
+            {"image": [{"image": "list-example"}]},
             {"containers": [{"image": "openkruise/kruise-manager:v1.9.1"}]},
             {"image": None},
         ]), ["openkruise/kruise-manager:v1.9.1"])
