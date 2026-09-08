@@ -8,6 +8,7 @@ import yaml
 from utils import (
     current_kube_version,
     fetch_page,
+    get_chart_images,
     print_error,
     read_yaml,
     update_compatibility_info,
@@ -18,7 +19,8 @@ from utils import (
 
 APP_NAME = "spire"
 CHART_NAME = "spire"
-HELM_INDEX_URL = "https://spiffe.github.io/helm-charts-hardened/index.yaml"
+HELM_REPOSITORY_URL = "https://spiffe.github.io/helm-charts-hardened"
+HELM_INDEX_URL = f"{HELM_REPOSITORY_URL}/index.yaml"
 OUTPUT_PATH = f"../../static/compatibilities/{APP_NAME}.yaml"
 
 
@@ -119,6 +121,26 @@ def load_index(content):
         return None
 
 
+def _spire_workload_tags(images):
+    tags = set()
+
+    for image in images:
+        match = re.search(r"ghcr\.io/spiffe/spire-(?:server|agent):([^@]+)", image)
+        if match:
+            tags.add(match.group(1).lstrip("v"))
+
+    return tags
+
+
+def _chart_images_for_version(chart_version):
+    return get_chart_images(HELM_REPOSITORY_URL, CHART_NAME, chart_version) or []
+
+
+def _chart_matches_app_version(app_version, chart_version):
+    images = _chart_images_for_version(chart_version)
+    return _spire_workload_tags(images) == {app_version}, images
+
+
 def extract_rows(index_yaml, latest_kube):
     rows_by_version = {}
     entries = index_yaml.get("entries", {}).get(CHART_NAME, [])
@@ -133,10 +155,14 @@ def extract_rows(index_yaml, latest_kube):
         if not kube_versions:
             continue
 
-        current = rows_by_version.get(app_version)
-        if current and validate_semver(chart_version) <= validate_semver(
-            current["chart_version"]
-        ):
+        if app_version in rows_by_version:
+            continue
+
+        matches_app_version, images = _chart_matches_app_version(
+            app_version,
+            chart_version,
+        )
+        if not matches_app_version:
             continue
 
         rows_by_version[app_version] = OrderedDict(
@@ -144,7 +170,7 @@ def extract_rows(index_yaml, latest_kube):
                 ("version", app_version),
                 ("kube", kube_versions),
                 ("chart_version", chart_version),
-                ("images", []),
+                ("images", images),
                 ("requirements", []),
                 ("incompatibilities", []),
             ]
@@ -187,9 +213,19 @@ def prune_stale_representatives(filepath, rows):
 
     keep = {row["version"] for row in rows}
     data["versions"] = [
-        version for version in data.get("versions", []) if version.get("version") in keep
+        version
+        for version in data.get("versions", [])
+        if version.get("version") in keep or _has_curated_metadata(version)
     ]
     write_yaml(filepath, data)
+
+
+def _has_curated_metadata(version):
+    return bool(
+        version.get("requirements")
+        or version.get("incompatibilities")
+        or version.get("summary")
+    )
 
 
 def scrape():

@@ -24,13 +24,13 @@ versions:
   requirements: []
   incompatibilities: []
   summary: null
-  chart_version: 0.30.0
-  images: ['busybox:1.37.0-uclibc', 'cgr.dev/chainguard/bash:latest@sha256:90041f375e30f41aa7e0390075d8a69dc61900771d52fa98d63ee5d03d866a58',
-    'cgr.dev/chainguard/min-toolkit-debug:latest@sha256:9e45e6836c28489a6e57ca1210ec66927e88eca2409e403616a1278e210e86c9',
-    'docker.io/smallstep/step-cli:0.30.2', 'ghcr.io/spiffe/oidc-discovery-provider:1.15.2',
+  chart_version: 0.28.4
+  images: ['busybox:1.37.0-uclibc', 'cgr.dev/chainguard/bash:latest@sha256:ef209fd7d231ead12bf24287db24991bdd979669f4df2e037698f94545816d3e',
+    'cgr.dev/chainguard/min-toolkit-debug:latest@sha256:6ba4fb1b19bb35fa0b7e6bf08b308379a5b865727e50b7b3068efb824b39ebba',
+    'docker.io/smallstep/step-cli:0.30.2', 'ghcr.io/spiffe/oidc-discovery-provider:1.14.5',
     'ghcr.io/spiffe/spiffe-csi-driver:0.2.7', 'ghcr.io/spiffe/spiffe-helper:0.11.0',
-    'ghcr.io/spiffe/spire-agent:1.15.2', 'ghcr.io/spiffe/spire-controller-manager:0.7.0',
-    'ghcr.io/spiffe/spire-server:1.15.2', 'registry.k8s.io/kubectl:v1.36', 'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0']
+    'ghcr.io/spiffe/spire-agent:1.14.5', 'ghcr.io/spiffe/spire-controller-manager:0.6.4',
+    'ghcr.io/spiffe/spire-server:1.14.5', 'registry.k8s.io/kubectl:v1.36', 'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.9.4']
 - version: 1.13.2
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
@@ -134,13 +134,12 @@ versions:
     'docker.io/rancher/kubectl:v1.36', 'ghcr.io/spiffe/spiffe-csi-driver:0.2.3', 'ghcr.io/spiffe/spire-agent:1.6.4',
     'ghcr.io/spiffe/spire-controller-manager:0.2.2', 'ghcr.io/spiffe/spire-server:1.6.4',
     'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0']
-- version: 1.5.5
+- version: 1.5.4
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary: null
-  chart_version: 0.5.0
-  images: [busybox, 'cgr.dev/chainguard/wait-for-it:latest-20230113', 'ghcr.io/spiffe/spiffe-csi-driver:0.2.3',
-    'ghcr.io/spiffe/spire-agent:1.6.0', 'ghcr.io/spiffe/spire-controller-manager:0.2.2',
-    'ghcr.io/spiffe/spire-server:1.6.0', 'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.6.2']
+  chart_version: 0.1.0
+  images: [busybox, 'cgr.dev/chainguard/wait-for-it:latest-20230113', 'ghcr.io/spiffe/spiffe-csi-driver:0.2.1',
+    'ghcr.io/spiffe/spire-agent:1.5.4', 'ghcr.io/spiffe/spire-server:1.5.4', 'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.6.2']

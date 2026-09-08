@@ -23,6 +23,7 @@ else:
     for name in (
         "current_kube_version",
         "fetch_page",
+        "get_chart_images",
         "print_error",
         "read_yaml",
         "update_compatibility_info",
@@ -111,7 +112,30 @@ class SpireScraperTest(unittest.TestCase):
             }
         }
 
-        rows = spire.extract_rows(index_yaml, "1.36")
+        original = spire._chart_images_for_version
+        spire._chart_images_for_version = lambda version: {
+            "0.30.1": [
+                "ghcr.io/spiffe/spire-server:1.15.3",
+                "ghcr.io/spiffe/spire-agent:1.15.3",
+            ],
+            "0.30.0": [
+                "ghcr.io/spiffe/spire-server:1.15.2",
+                "ghcr.io/spiffe/spire-agent:1.15.2",
+            ],
+            "0.29.0": [
+                "ghcr.io/spiffe/spire-server:1.14.5",
+                "ghcr.io/spiffe/spire-agent:1.14.5",
+            ],
+            "0.28.0-rc.1": ["ghcr.io/spiffe/spire-server:1.14.1-rc.1"],
+            "0.20.0": [
+                "ghcr.io/spiffe/spire-server:1.8.7",
+                "ghcr.io/spiffe/spire-agent:1.8.7",
+            ],
+        }.get(version, [])
+        try:
+            rows = spire.extract_rows(index_yaml, "1.36")
+        finally:
+            spire._chart_images_for_version = original
 
         self.assertEqual(
             [row["version"] for row in rows],
@@ -119,7 +143,7 @@ class SpireScraperTest(unittest.TestCase):
         )
         self.assertEqual(
             [row["chart_version"] for row in rows],
-            ["0.30.1", "0.30.0", "0.20.0"],
+            ["0.30.1", "0.29.0", "0.20.0"],
         )
         self.assertEqual(rows[0]["kube"][0], "1.21")
         self.assertEqual(rows[0]["kube"][-1], "1.36")
@@ -143,7 +167,7 @@ class SpireScraperTest(unittest.TestCase):
                 """
 versions:
 - version: 1.15.2
-  summary: old
+  summary: null
 - version: 1.15.3
   summary: current
 """,
@@ -153,6 +177,24 @@ versions:
             spire.prune_stale_representatives(path, [{"version": "1.15.3"}])
 
             self.assertNotIn("1.15.2", path.read_text(encoding="utf-8"))
+
+    def test_prune_stale_representatives_preserves_curated_rows(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "spire.yaml"
+            path.write_text(
+                """
+versions:
+- version: 1.15.2
+  requirements: [manual note]
+- version: 1.15.3
+  summary: current
+""",
+                encoding="utf-8",
+            )
+
+            spire.prune_stale_representatives(path, [{"version": "1.15.3"}])
+
+            self.assertIn("1.15.2", path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
