@@ -10,6 +10,7 @@ names:
 - cert-manager
 - cilium
 - chaos-mesh
+- clickhouse-operator
 - contour
 - coredns
 - cloudnative-pg
