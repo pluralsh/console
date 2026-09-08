@@ -23160,7 +23160,37 @@ addons:
 - icon: https://avatars.githubusercontent.com/u/34767428?s=48&v=4
   git_url: https://github.com/strimzi/strimzi-kafka-operator
   release_url: https://github.com/strimzi/strimzi-kafka-operator/releases/tag/{vsn}
+  helm_repository_url: https://strimzi.io/charts
+  chart_name: strimzi-kafka-operator
   versions:
+  - version: 1.2.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.2.0
+    images: ['quay.io/strimzi/operator:1.2.0']
+  - version: 1.1.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.1.0
+    images: ['quay.io/strimzi/operator:1.1.0']
+  - version: 1.0.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.0.0
+    images: ['quay.io/strimzi/operator:1.0.0']
+  - version: 0.51.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.51.0
+    images: ['quay.io/strimzi/operator:0.51.0']
   - version: 0.50.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
     requirements: []

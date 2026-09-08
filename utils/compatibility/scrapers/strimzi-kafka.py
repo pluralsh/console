@@ -6,56 +6,78 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup
 from utils import (
     current_kube_version,
-    expand_kube_versions,
     fetch_page,
-    latest_kube_version,
+    get_chart_versions,
     print_error,
+    read_yaml,
     update_compatibility_info,
+    validate_semver,
 )
 
 app_name = "strimzi-kafka"
 downloads_url = "https://strimzi.io/downloads/"
+target_file = f"../../static/compatibilities/{app_name}.yaml"
+chart_name = "strimzi-kafka-operator"
+kube_headers = {"kubernetes versions", "tested kubernetes versions"}
 
 
 def _latest_minor() -> str | None:
     cur = current_kube_version()
-    if cur:
+    if cur and re.fullmatch(r"\d+\.\d+", cur):
         return cur
-    latest = latest_kube_version()
-    if not latest:
-        return None
-    return f"{latest.major}.{latest.minor}"
+    return None
+
+
+def _expand_range(start: str, end: str) -> list[str]:
+    start_major, start_minor = map(int, start.split("."))
+    end_major, end_minor = map(int, end.split("."))
+    if start_major != end_major or start_minor > end_minor:
+        return []
+    return [f"{start_major}.{minor}" for minor in range(start_minor, end_minor + 1)]
 
 
 def _parse_kube_cell(text: str) -> list[str]:
-    # Normalize whitespace and remove footnote numbers
+    # Only the compatibility matrix supplies these values, never a dependency floor.
     cleaned = re.sub(r"\s+", " ", text).strip()
-    cleaned = re.sub(r"\s*\[[^\]]*\]", "", cleaned)  # strip bracket notes if any
 
-    # Patterns: "1.27+", "v1.27+", "1.23+ 2", "1.21 - 1.25"
-    m_plus = re.search(r"v?(\d+\.\d+)\s*\+", cleaned)
+    # Patterns: "1.27+", "v1.27+", "1.21 - 1.25" (footnotes removed in _cell_text).
+    m_plus = re.fullmatch(r"v?(\d+\.\d+)\s*\+", cleaned)
     if m_plus:
         start = m_plus.group(1)
         latest_minor = _latest_minor()
         if not latest_minor:
             return []
-        return expand_kube_versions(start, latest_minor)
+        return _expand_range(start, latest_minor)
 
-    m_range = re.search(r"v?(\d+\.\d+)\s*-\s*v?(\d+\.\d+)", cleaned)
+    m_range = re.fullmatch(r"v?(\d+\.\d+)\s*[-–—]\s*v?(\d+\.\d+)", cleaned)
     if m_range:
         start, end = m_range.groups()
-        return expand_kube_versions(start, end)
+        return _expand_range(start, end)
 
     # Fallback: try comma separated explicit minors
     parts = [p.strip().lstrip("v") for p in cleaned.split(",")]
-    return [p for p in parts if re.match(r"^\d+\.\d+$", p)]
+    if not all(re.fullmatch(r"\d+\.\d+", p) for p in parts):
+        return []
+    return list(dict.fromkeys(parts))
+
+
+def _cell_text(cell) -> str:
+    # Footnote markers are presentation, not part of a version or header label.
+    return " ".join(
+        text.strip() for text in cell.find_all(string=True)
+        if text.strip() and text.find_parent("sup") is None
+    )
+
+
+def _headers(table) -> list[str]:
+    return [_cell_text(th).lower() for th in table.find_all("th")]
 
 
 def _find_supported_versions_table(soup: BeautifulSoup):
-    # Look for a table which has a header cell "Kubernetes versions"
+    # The current page labels its finite verified window "Tested Kubernetes versions".
     for table in soup.find_all("table"):
-        ths = [th.get_text(strip=True).lower() for th in table.find_all("th")]
-        if any("kubernetes versions" == th for th in ths):
+        ths = _headers(table)
+        if "operators" in ths and any(th in kube_headers for th in ths):
             return table
     return None
 
@@ -64,31 +86,31 @@ def _parse_rows(table) -> list[OrderedDict[str, object]]:
     rows: list[OrderedDict[str, object]] = []
     tbody = table.find("tbody") or table
     # Identify column indices based on header labels
-    header_cells = [th.get_text(strip=True).lower() for th in table.find_all("th")]
+    header_cells = _headers(table)
     try:
         op_idx = header_cells.index("operators")
-        k8s_idx = header_cells.index("kubernetes versions")
-    except ValueError:
-        # Fallback to assumed positions: operators at 0, k8s at last
-        op_idx = 0
-        k8s_idx = -1
+        k8s_idx = next(i for i, label in enumerate(header_cells) if label in kube_headers)
+    except (ValueError, StopIteration):
+        raise ValueError("Strimzi compatibility table is missing required headers")
 
     for tr in tbody.find_all("tr"):
         cells = tr.find_all("td")
-        if len(cells) < max(op_idx, k8s_idx if k8s_idx >= 0 else 0) + 1:
+        if not cells:
             continue
-        op_text = cells[op_idx].get_text(strip=True)
-        k8s_text = cells[k8s_idx].get_text(" ", strip=True) if k8s_idx >= 0 else ""
+        if len(cells) <= max(op_idx, k8s_idx):
+            raise ValueError("Incomplete Strimzi compatibility row")
+        op_text = _cell_text(cells[op_idx])
+        k8s_text = _cell_text(cells[k8s_idx])
 
         # Parse Strimzi operator version
-        m = re.search(r"(\d+\.\d+\.\d+)", op_text)
+        m = re.fullmatch(r"v?(\d+\.\d+\.\d+)", op_text)
         if not m:
             continue
         operator_version = m.group(1)
 
         kube_versions = _parse_kube_cell(k8s_text)
         if not kube_versions:
-            continue
+            raise ValueError(f"Invalid Strimzi Kubernetes compatibility for {operator_version}")
 
         rows.append(
             OrderedDict(
@@ -116,11 +138,34 @@ def scrape() -> None:
         print_error("Strimzi supported versions table not found")
         return
 
-    rows = _parse_rows(table)
+    try:
+        rows = _parse_rows(table)
+    except ValueError as error:
+        print_error(str(error))
+        return
     if not rows:
         print_error("No Strimzi compatibility rows parsed")
         return
 
-    update_compatibility_info(
-        f"../../static/compatibilities/{app_name}.yaml", rows
-    )
+    existing = read_yaml(target_file)
+    if not existing or not existing.get("versions"):
+        print_error("Could not read existing Strimzi compatibility versions")
+        return
+    latest_recorded = max(validate_semver(row["version"]) for row in existing["versions"])
+    # Historical rows were generated from older support policies. Keep them intact;
+    # this update adds released versions after the last recorded boundary only.
+    rows = [row for row in rows if validate_semver(row["version"]) > latest_recorded]
+    if not rows:
+        return
+    charts = get_chart_versions(app_name, chart_name=chart_name)
+    if not charts:
+        print_error("Could not read official Strimzi chart versions")
+        return
+    released_rows = []
+    for row in rows:
+        chart = charts.get(row["version"])
+        if chart and validate_semver(chart):
+            row["chart_version"] = chart
+            released_rows.append(row)
+    if released_rows:
+        update_compatibility_info(target_file, released_rows)
