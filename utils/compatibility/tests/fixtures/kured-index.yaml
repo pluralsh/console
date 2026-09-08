@@ -1,0 +1,104 @@
+# Projection of published entries from https://kubereboot.github.io/charts/index.yaml
+# Retrieved 2026-09-08; only the 20 selected app/chart pairs, with original digests and URLs.
+entries:
+  kured:
+  - appVersion: 1.23.0
+    version: 6.1.0
+    digest: 9451342cd13283a626fa63671eb593e88f734a848bdc02f49d42fd1b4ac224db
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-6.1.0/kured-6.1.0.tgz
+  - appVersion: 1.22.1
+    version: 6.0.0
+    digest: 8eac892fed1dbe2014f65bc1a29d2be93fd87cfc6a5b5aff8d3ff305ad6e33a0
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-6.0.0/kured-6.0.0.tgz
+  - appVersion: 1.22.0
+    version: 5.12.0
+    digest: 52805cbbe06d4da4cb360629f7df61a326ec37c8df6ebb38f72cd6ad2ba0a1db
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.12.0/kured-5.12.0.tgz
+  - appVersion: 1.21.0
+    version: 5.11.0
+    digest: 220e6469599308f852575b5358f222142b08b3936c59b6e6918919c84f8223ae
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.11.0/kured-5.11.0.tgz
+  - appVersion: 1.20.0
+    version: 5.10.0
+    digest: 63f35fb31551dd0e69558a9d10d93b78ab352e4f11cc0f1e92816104d9d63302
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.10.0/kured-5.10.0.tgz
+  - appVersion: 1.19.0
+    version: 5.8.0
+    digest: d6f0ef46caa95b6e164d3afa3272f6e09cffac907f5e4725e9665d55cf7e6171
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.8.0/kured-5.8.0.tgz
+  - appVersion: 1.17.1
+    version: 5.6.2
+    digest: ab81103dcd52d5d84ce9b959a0e9677d703a2d52edec838e529e2b65b41f9784
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.6.2/kured-5.6.2.tgz
+  - appVersion: 1.16.2
+    version: 5.5.2
+    digest: f8acdcf1f3b21dcd85bbe3d04f91f80e5e7d3207c0503e6b473830aa88c6d730
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.5.2/kured-5.5.2.tgz
+  - appVersion: 1.15.1
+    version: 5.4.5
+    digest: 58e3f838ec6c285fad3cbb97dc8470f37b24d6ad8d30bb8499cea531fd6e9439
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.4.5/kured-5.4.5.tgz
+  - appVersion: 1.14.2
+    version: 5.3.2
+    digest: c480cb381bf1b8eb64cda8e0c24a77ef697e24b438ec0e4944b0d6e3e2b7fa1a
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.3.2/kured-5.3.2.tgz
+  - appVersion: 1.13.2
+    version: 5.1.0
+    digest: 696b8230f95e5e087e93826c7475f438881d7c73376fe27d34193ecc6b16d0d2
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-5.1.0/kured-5.1.0.tgz
+  - appVersion: 1.12.2
+    version: 4.4.2
+    digest: 7162957d74693eb7d9325222b57a682daaa893ea7cfee73508309e20b1264d2f
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-4.4.2/kured-4.4.2.tgz
+  - appVersion: 1.11.0
+    version: 4.1.0
+    digest: f935c204fb285906eb92d11a3318a436cb958ad8ab5435555b633ac7d1b657fb
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-4.1.0/kured-4.1.0.tgz
+  - appVersion: 1.10.2
+    version: 4.0.4
+    digest: c9b2eee611800ee92b37b8973f328ef03211e9d2ed0124632e061cb8bed60e44
+    urls:
+    - https://github.com/kubereboot/charts/releases/download/kured-4.0.4/kured-4.0.4.tgz
+  - appVersion: 1.9.2
+    version: 2.14.2
+    digest: 48b267700a0d48ab73e4b6ace31c1c84c393959ed09c31a3ec03e170b6b4aacf
+    urls:
+    - https://kubereboot.github.io/charts/kured-2.14.2.tgz
+  - appVersion: 1.8.1
+    version: 2.10.1
+    digest: 905576b23f8263dcf26da50da6c004cb266a143cca0567f0e5d5586569b8e367
+    urls:
+    - https://kubereboot.github.io/charts/kured-2.10.1.tgz
+  - appVersion: 1.7.0
+    version: 2.9.1
+    digest: 02fd3ce98b427b411bf425cbdd60567072596f3c1ca44ff3ecb17f4852cd0099
+    urls:
+    - https://kubereboot.github.io/charts/kured-2.9.1.tgz
+  - appVersion: 1.6.1
+    version: 2.4.3
+    digest: 1961e0937676e0bcb8ceb7a4973c61450d059e2d4beea78481a9323cf0b964a6
+    urls:
+    - https://kubereboot.github.io/charts/kured-2.4.3.tgz
+  - appVersion: 1.5.1
+    version: 2.2.4
+    digest: b3a8b13a79efa56a0a94fa91976faa4916fbdab826d9f50ddf63f4d9179a36e4
+    urls:
+    - https://kubereboot.github.io/charts/kured-2.2.4.tgz
+  - appVersion: 1.4.4
+    version: 2.0.3
+    digest: 8ae0a2884d185ac6311d9333ba7b29c8815a2b433892bc073922c9ad5c0771bc
+    urls:
+    - https://kubereboot.github.io/charts/kured-2.0.3.tgz
