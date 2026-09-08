@@ -1,0 +1,94 @@
+# Exact selected entries from https://repos.emqx.io/charts/index.yaml
+# Fetched 2026-09-08; other apps/releases omitted to keep the fixture focused.
+apiVersion: v1
+entries:
+  emqx-operator:
+  - apiVersion: v2
+    appVersion: 2.3.3-rc.1
+    created: '2026-09-03T16:20:19.279343439Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: 46e4bc7ddcdb9ac6f361ab8ea2b68a23f30be1ab691e35537775da513021f21b
+    name: emqx-operator
+    sources:
+    - https://github.com/emqx/emqx-operator/tree/main-2.3/deploy/charts/emqx-operator
+    - https://github.com/emqx/emqx
+    type: application
+    urls:
+    - emqx-operator-2.3.3-rc.1.tgz
+    version: 2.3.3-rc.1
+  - apiVersion: v2
+    appVersion: 2.3.2
+    created: '2026-09-03T16:20:19.275113851Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: e2bb4e484a2d628306a714c3a2360d7f620f6c629bb435caf456805e432ee393
+    name: emqx-operator
+    sources:
+    - https://github.com/emqx/emqx-operator/tree/main-2.3/deploy/charts/emqx-operator
+    - https://github.com/emqx/emqx
+    type: application
+    urls:
+    - emqx-operator-2.3.2.tgz
+    version: 2.3.2
+  - apiVersion: v2
+    appVersion: 2.2.29
+    created: '2026-09-03T16:20:19.229408473Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: 8a89f97a72b5e8c4db61a47798749da075c02c1eb62352e419ceffc3eec75341
+    name: emqx-operator
+    sources:
+    - https://github.com/emqx/emqx-operator/tree/main/deploy/charts/emqx-operator
+    - https://github.com/emqx/emqx
+    type: application
+    urls:
+    - emqx-operator-2.2.29.tgz
+    version: 2.2.29
+  - apiVersion: v2
+    appVersion: 2.1.2
+    created: '2026-09-03T16:20:19.083147439Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: 685f930a96ac9e50f3de980c5bc747311620fd82a51ed8e550fda57c2e6d3ae7
+    name: emqx-operator
+    type: application
+    urls:
+    - emqx-operator-2.1.2.tgz
+    version: 2.1.2
+  - apiVersion: v2
+    appVersion: 2.1.1
+    created: '2026-09-03T16:20:19.079010586Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: 1d9e39a4fc875c87cae0c2493294c567265ce347930b5bc4585235f745200c9f
+    name: emqx-operator
+    type: application
+    urls:
+    - emqx-operator-2.1.1.tgz
+    version: 2.1.1
+  - apiVersion: v2
+    appVersion: 1.2.8
+    created: '2026-09-03T16:20:19.038432736Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: e809c84c18465076d448192f4c1dab10e83b5db8c3200d81217979d044acc27e
+    name: emqx-operator
+    type: application
+    urls:
+    - emqx-operator-1.0.12.tgz
+    version: 1.0.12
+  - apiVersion: v2
+    appVersion: 1.2.0
+    created: '2026-09-03T16:20:19.05300526Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: 748fba6e7733d815bd42310ad94ada28718ccea47ba000fbdb476fc56ae0fea7
+    name: emqx-operator
+    type: application
+    urls:
+    - emqx-operator-1.0.6.tgz
+    version: 1.0.6
+  - apiVersion: v2
+    appVersion: 1.2.0
+    created: '2026-09-03T16:20:19.049615137Z'
+    description: A Helm chart for EMQX Operator Controller
+    digest: 66bfd695db29e35fffd3da9420ead2be11f2e98bdda8ca14c2de20f432f9a7ed
+    name: emqx-operator
+    type: application
+    urls:
+    - emqx-operator-1.0.5.tgz
+    version: 1.0.5
