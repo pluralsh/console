@@ -4,6 +4,7 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 COMPATIBILITY_DIR = Path(__file__).resolve().parents[1]
@@ -53,6 +54,48 @@ Key:
                 },
             ],
         )
+
+    def test_parse_matrix_preserves_columns_when_metadata_columns_are_present(self):
+        readme = """
+## Kubernetes compatibility
+
+|               | Notes | Kubernetes 1.27 | Kubernetes 1.28 |
+|---------------|-------|-----------------|-----------------|
+| KubeEdge 1.21 | LTS   | ✓               | -               |
+"""
+
+        rows = kubeedge.parse_matrix(readme, {"1.21": "1.21.2"})
+
+        self.assertEqual(rows[0]["kube"], ["1.27"])
+
+    def test_latest_stable_release_by_minor_skips_draft_and_prerelease_entries(self):
+        class Response:
+            status_code = 200
+
+            def __init__(self, releases):
+                self._releases = releases
+
+            def json(self):
+                return self._releases
+
+        responses = [
+            Response(
+                [
+                    {"tag_name": "v1.22.3", "draft": False, "prerelease": True},
+                    {"tag_name": "v1.22.2", "draft": False, "prerelease": False},
+                    {"tag_name": "v1.21.9", "draft": True, "prerelease": False},
+                    {"tag_name": "v1.21.2", "draft": False, "prerelease": False},
+                ]
+            ),
+            Response([]),
+        ]
+
+        with patch.object(kubeedge.requests, "get", side_effect=responses) as get:
+            self.assertEqual(
+                kubeedge.latest_stable_release_by_minor(),
+                {"1.22": "1.22.2", "1.21": "1.21.2"},
+            )
+        self.assertEqual(get.call_args_list[0].kwargs["headers"], kubeedge.REQUEST_HEADERS)
 
     def test_parse_matrix_skips_missing_release_versions(self):
         readme = """
