@@ -11,6 +11,7 @@ import requests
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import utils as compatibility_utils
 from utils import reduce_versions
 
 scraper = importlib.import_module("scrapers.dynatrace-operator")
@@ -158,6 +159,92 @@ class ScrapeSafetyTests(unittest.TestCase):
             self.assertEqual(scraper._fetch(scraper.SUPPORT_URL), b"fixture")
             get.assert_called_once_with(scraper.SUPPORT_URL, timeout=30)
             get.return_value.raise_for_status.assert_called_once_with()
+
+
+class RecordedChartRefreshTests(unittest.TestCase):
+    def setUp(self):
+        self.saved = row("1.10.2")
+        self.saved.update(eolAt="2027-01-01", images=["registry.example.test/operator:old"],
+                          incompatibilities=[{"name": "other", "version": "<2.0.0"}])
+        # Historical charts may require credentials and intentionally have no images.
+        self.existing = {"helm_repository_url": "https://charts.example.test", "chart_name": "operator",
+                         "helm_values": "apiToken=fixture", "versions": [self.saved, row("0.6.0")]}
+        self.entries = [{"appVersion": "1.10.2", "version": "1.10.3"}]
+
+    def run_scrape(self, images=("registry.example.test/operator:new",), error=None):
+        with patch.object(scraper, "read_yaml", return_value=self.existing), \
+                patch.object(scraper, "_fetch", side_effect=[table([["1.36", "v1.10.2"]]), index(self.entries)]), \
+                patch.object(scraper, "get_chart_images", return_value=list(images) if images else images,
+                             side_effect=error) as render, \
+                patch.object(scraper, "print_error"), \
+                patch.object(scraper, "update_compatibility_info") as write:
+            scraper.scrape()
+        return write, render
+
+    def test_newer_exact_chart_preserves_metadata_and_only_renders_changed_chart_then_noop(self):
+        before = deepcopy(self.existing)
+        write, render = self.run_scrape()
+        refreshed, = write.call_args.args[1]
+        self.assertEqual(refreshed, dict(self.saved, chart_version="1.10.3",
+                                         images=["registry.example.test/operator:new"]))
+        self.assertEqual(self.existing, before)
+        render.assert_called_once_with("https://charts.example.test", "operator", "1.10.3", "apiToken=fixture")
+        self.saved.update(refreshed)
+        write, render = self.run_scrape()
+        write.assert_not_called()
+        render.assert_not_called()
+
+    def test_missing_chart_backfill_preserves_record_without_duplicate_sorting(self):
+        self.saved.pop("chart_version")
+        write, _ = self.run_scrape()
+        refreshed, = write.call_args.args[1]
+        self.assertEqual(refreshed, dict(self.saved, chart_version="1.10.3",
+                                         images=["registry.example.test/operator:new"]))
+
+    def test_older_equal_prerelease_and_mismatched_chart_cannot_refresh(self):
+        for chart in ("1.10.1", "1.10.2", "1.10.3-rc.1", "1.10.3+build", "1.11"):
+            with self.subTest(chart=chart):
+                self.entries = [{"appVersion": "1.10.2", "version": chart},
+                                {"appVersion": "1.10.3", "version": "1.11.0"}]
+                write, render = self.run_scrape()
+                write.assert_not_called()
+                render.assert_not_called()
+        self.entries = [{"appVersion": "1.10.3", "version": "1.11.0"}]
+        write, render = self.run_scrape()
+        write.assert_not_called()
+        render.assert_not_called()
+
+    def test_failed_new_chart_render_keeps_entire_saved_record(self):
+        before = deepcopy(self.existing)
+        for images, error in ((None, None), ([], None), (None, OSError("helm unavailable"))):
+            with self.subTest(images=images, error=error):
+                write, _ = self.run_scrape(images=images, error=error)
+                write.assert_not_called()
+                self.assertEqual(self.existing, before)
+
+    def test_failed_refresh_does_not_block_another_successful_chart(self):
+        other = row("1.9.0")
+        self.existing["versions"].append(other)
+        self.entries.append({"appVersion": "1.9.0", "version": "1.9.1"})
+        before = deepcopy(self.existing)
+        write, _ = self.run_scrape(error=[None, ["registry.example.test/operator:other"]])
+        refreshed, = write.call_args.args[1]
+        self.assertEqual(refreshed, dict(other, chart_version="1.9.1",
+                                         images=["registry.example.test/operator:other"]))
+        self.assertEqual(self.existing, before)
+
+    def test_normal_writer_keeps_verified_new_images_if_its_second_render_fails(self):
+        write, _ = self.run_scrape()
+        rows = write.call_args.args[1]
+        with patch.object(compatibility_utils, "read_yaml", return_value=deepcopy(self.existing)), \
+                patch.object(compatibility_utils, "get_chart_images", return_value=None), \
+                patch.object(compatibility_utils, "summarization_enabled", return_value=False), \
+                patch.object(compatibility_utils, "write_yaml", return_value=True) as persist:
+            compatibility_utils.update_compatibility_info(scraper.TARGET_FILE, rows)
+        persisted = {row["version"]: row for row in persist.call_args.args[1]["versions"]}
+        self.assertEqual(persisted["1.10.2"], dict(self.saved, chart_version="1.10.3",
+                                                 images=["registry.example.test/operator:new"]))
+        self.assertEqual(persisted["0.6.0"], self.existing["versions"][1])
 
 
 class GeneratedDataTests(unittest.TestCase):

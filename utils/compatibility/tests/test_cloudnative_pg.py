@@ -1,5 +1,6 @@
 """Offline regressions: python -m unittest discover -s tests -p 'test_cloudnative_pg.py'."""
 
+from copy import deepcopy
 import importlib.util
 from pathlib import Path
 import sys
@@ -30,13 +31,17 @@ class CloudNativePGTests(unittest.TestCase):
                 for version in ("1.29.0", "1.30.0")
             },
         }
-        self.existing = {"versions": [{"version": "1.28.0", "kube": ["1.34", "1.33", "1.32"]}]}
+        self.existing = {"helm_repository_url": "https://charts.example.test", "chart_name": "cloudnative-pg",
+                         "helm_values": "monitoring.enabled=true", "versions": [
+                             {"version": "1.28.0", "kube": ["1.34", "1.33", "1.32"], "chart_version": "0.27.0"}]}
         self.charts = {"1.30.0": "0.29.0", "1.29.0": "0.28.0", "1.28.0": "0.27.0"}
 
-    def run_scrape(self):
+    def run_scrape(self, images=("registry.example.test/operator:new",), error=None):
         with patch.object(scraper, "fetch_page", side_effect=self.sources.get) as fetch, \
                 patch.object(scraper, "read_yaml", return_value=self.existing), \
                 patch.object(scraper, "get_chart_versions", return_value=self.charts), \
+                patch.object(scraper, "get_chart_images", return_value=list(images) if images else images,
+                             side_effect=error), \
                 patch.object(scraper, "print_error"), \
                 patch.object(scraper, "update_compatibility_info") as update:
             scraper.scrape()
@@ -130,9 +135,75 @@ class CloudNativePGTests(unittest.TestCase):
                 update.assert_not_called()
 
     def test_existing_versions_make_rerun_a_noop(self):
-        self.existing["versions"].extend([{"version": "1.29.0"}, {"version": "1.30.0"}])
+        update, _ = self.run_scrape()
+        self.existing["versions"].extend(update.call_args.args[1])
         update, _ = self.run_scrape()
         update.assert_not_called()
+
+    def recorded_release(self):
+        update, _ = self.run_scrape()
+        self.existing["versions"].extend(update.call_args.args[1])
+        saved = next(row for row in self.existing["versions"] if row["version"] == "1.30.0")
+        saved.update(summary={"updates": "Keep custom notes"}, eolAt="2027-01-01",
+                     requirements=[{"name": "existing", "version": ">=1.0.0"}],
+                     incompatibilities=[{"name": "other", "version": "<2.0.0"}],
+                     images=["registry.example.test/operator:old"])
+        return saved
+
+    def test_newer_exact_chart_preserves_full_metadata_then_becomes_noop(self):
+        saved = self.recorded_release()
+        before = deepcopy(self.existing)
+        self.charts["1.30.0"] = "0.29.1"
+        update, fetch = self.run_scrape()
+        refreshed, = update.call_args.args[1]
+        self.assertEqual(refreshed, dict(saved, chart_version="0.29.1",
+                                         images=["registry.example.test/operator:new"]))
+        self.assertEqual(self.existing, before)
+        self.assertFalse(any("raw.githubusercontent.com" in call.args[0] for call in fetch.call_args_list))
+        saved.update(refreshed)
+        update, _ = self.run_scrape()
+        update.assert_not_called()
+
+    def test_missing_chart_is_backfilled_without_duplicate_version(self):
+        saved = self.recorded_release()
+        saved.pop("chart_version")
+        update, _ = self.run_scrape()
+        refreshed, = update.call_args.args[1]
+        self.assertEqual(refreshed["chart_version"], "0.29.0")
+        self.assertEqual(refreshed["kube"], saved["kube"])
+        self.assertEqual(refreshed["summary"], saved["summary"])
+
+    def test_recorded_chart_cannot_downgrade_or_use_prerelease_or_other_app(self):
+        self.recorded_release()
+        for chart in ("0.28.9", "0.29.0", "0.29.1-rc.1", "0.29.1+build", "0.30"):
+            with self.subTest(chart=chart):
+                self.charts = {"1.30.0": chart, "1.30.1": "0.29.2"}
+                update, _ = self.run_scrape()
+                update.assert_not_called()
+        self.charts = {"1.30.1": "0.29.2"}
+        update, _ = self.run_scrape()
+        update.assert_not_called()
+
+    def test_failed_new_chart_render_keeps_entire_saved_record(self):
+        self.recorded_release()
+        before = deepcopy(self.existing)
+        self.charts["1.30.0"] = "0.29.1"
+        for images, error in ((None, None), ([], None), (None, OSError("helm unavailable"))):
+            with self.subTest(images=images, error=error):
+                update, _ = self.run_scrape(images=images, error=error)
+                update.assert_not_called()
+                self.assertEqual(self.existing, before)
+
+    def test_failed_refresh_does_not_block_another_successful_chart(self):
+        self.recorded_release()
+        self.charts.update({"1.30.0": "0.29.1", "1.29.0": "0.28.1"})
+        before = deepcopy(self.existing)
+        update, _ = self.run_scrape(error=[None, ["registry.example.test/operator:other"]])
+        refreshed, = update.call_args.args[1]
+        original = next(row for row in self.existing["versions"] if row["version"] == "1.29.0")
+        self.assertEqual(refreshed, dict(original, chart_version="0.28.1",
+                                         images=["registry.example.test/operator:other"]))
+        self.assertEqual(self.existing, before)
 
     def test_unreadable_existing_file_never_writes(self):
         self.existing = None

@@ -6,13 +6,14 @@ still apply. Keep recorded releases when the moving recommendation changes.
 """
 
 from collections import OrderedDict
+from copy import deepcopy
 import re
 
 from bs4 import BeautifulSoup
 import requests
 import yaml
 
-from utils import print_error, read_yaml, reduce_versions, update_compatibility_info
+from utils import get_chart_images, print_error, read_yaml, reduce_versions, update_compatibility_info
 
 
 APP_NAME = "dynatrace-operator"
@@ -105,11 +106,16 @@ def parse_helm_versions(content):
 
 
 def build_rows(recommendations, charts, existing):
-    recorded = {row["version"] for row in existing}
+    recorded = {row["version"]: row for row in existing}
     rows = []
     for app, chart in charts.items():
         version = ".".join(map(str, app))
         if version in recorded:
+            original = recorded[version]
+            saved_chart = original.get("chart_version")
+            current = _stable_version(saved_chart)
+            if not saved_chart or (current and chart > current):
+                rows.append(dict(deepcopy(original), chart_version=".".join(map(str, chart))))
             continue
         kube = sorted(
             (kube for kube, rule in recommendations.items() if _matches(app, rule)),
@@ -122,7 +128,9 @@ def build_rows(recommendations, charts, existing):
             ]))
     # Resolve real charts first, then apply the repository's boundary/latest rule.
     # Including history here avoids rewriting on every run for redundant patches.
-    retained = {row["version"] for row in reduce_versions(existing + rows)}
+    combined = deepcopy(recorded)
+    combined.update({row["version"]: row for row in rows})
+    retained = {row["version"] for row in reduce_versions(list(combined.values()))}
     return [row for row in rows if row["version"] in retained]
 
 
@@ -144,5 +152,20 @@ def scrape():
     except (requests.RequestException, ValueError, yaml.YAMLError) as exc:
         print_error(f"Cannot update Dynatrace compatibility: {exc}")
         return
-    if rows:
-        update_compatibility_info(TARGET_FILE, rows)
+    recorded = {row["version"] for row in existing["versions"]}
+    verified = []
+    for row in rows:
+        if row["version"] in recorded:
+            try:
+                images = get_chart_images(existing["helm_repository_url"],
+                                          existing.get("chart_name", APP_NAME), row["chart_version"],
+                                          existing.get("helm_values"))
+            except Exception as error:
+                print_error(f"Could not render Dynatrace chart {row['chart_version']}: {error}")
+                continue
+            if not images:
+                continue
+            row["images"] = images
+        verified.append(row)
+    if verified:
+        update_compatibility_info(TARGET_FILE, verified)

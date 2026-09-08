@@ -1,10 +1,12 @@
 import re
 from collections import OrderedDict
+from copy import deepcopy
 
 from bs4 import BeautifulSoup
 
 from utils import (
     fetch_page,
+    get_chart_images,
     get_chart_versions,
     print_error,
     read_yaml,
@@ -157,7 +159,7 @@ def scrape():
     if not existing or not isinstance(existing.get("versions"), list):
         print_error("Could not read existing CloudNativePG compatibility versions.")
         return
-    existing_versions = {entry["version"] for entry in existing["versions"]}
+    existing_versions = {entry["version"]: entry for entry in existing["versions"]}
 
     parsed_versions: OrderedDict[str, OrderedDict] = OrderedDict()
     try:
@@ -186,17 +188,35 @@ def scrape():
     # Preserve recorded concrete releases: the moving .x table can gain support
     # in a later patch (for example 1.28.4), which must not be assigned to .0.
     versions = [entry for version, entry in parsed_versions.items() if version not in existing_versions]
-    if not versions:
-        return
-    chart_versions = get_chart_versions(APP_NAME, chart_name="cloudnative-pg")
+    chart_versions = {
+        version: validate_semver(chart)
+        for version, chart in get_chart_versions(APP_NAME, chart_name="cloudnative-pg").items()
+        if isinstance(chart, str) and re.fullmatch(r"\d+\.\d+\.\d+", chart)
+    }
     if not chart_versions:
         print_error("No CloudNativePG chart versions found.")
         return
     released_versions = []
+    # Exact chart packaging can advance without a new application release.
+    # Keep saved support and metadata rather than re-reading the moving matrix.
+    for version, original in existing_versions.items():
+        chart = chart_versions.get(version)
+        saved_chart = original.get("chart_version")
+        current = validate_semver(saved_chart) if isinstance(saved_chart, str) else None
+        if chart and (not saved_chart or (current and chart > current)):
+            try:
+                images = get_chart_images(existing["helm_repository_url"],
+                                          existing.get("chart_name", APP_NAME), str(chart),
+                                          existing.get("helm_values"))
+            except Exception as error:
+                print_error(f"Could not render CloudNativePG chart {chart}: {error}")
+                continue
+            if images:
+                released_versions.append(dict(deepcopy(original), chart_version=str(chart), images=images))
     try:
         for entry in versions:
             chart_version = chart_versions.get(entry["version"])
-            if not chart_version or not validate_semver(chart_version):
+            if not chart_version:
                 continue
             version = entry["version"]
             url = f"{RELEASE_DOCS}/v{version}/docs/src/supported_releases.md"
@@ -204,7 +224,7 @@ def scrape():
             if not content:
                 raise ValueError(f"Could not fetch the release-tag matrix: {url}")
             entry["kube"] = release_kube_versions(content, version)
-            entry["chart_version"] = chart_version
+            entry["chart_version"] = str(chart_version)
             released_versions.append(entry)
     except ValueError as error:
         print_error(str(error))
