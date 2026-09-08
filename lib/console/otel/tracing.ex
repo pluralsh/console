@@ -1,6 +1,6 @@
 defmodule Console.Otel.Tracing do
   @moduledoc """
-  Boots the OpenTelemetry SDK and Console's request/LLM instrumentation.
+  Boots the OpenTelemetry SDK and Console's request/LLM/Ecto instrumentation.
 
   Tracing is opt-in: runtime configuration enables it only when an OTLP
   endpoint is present. This keeps normal local and test runs unchanged while
@@ -27,6 +27,7 @@ defmodule Console.Otel.Tracing do
   defp setup_instrumentation do
     OpentelemetryBandit.setup()
     OpentelemetryPhoenix.setup(adapter: :bandit)
+    OpentelemetryEcto.setup([:console, :repo])
 
     case ReqLLM.OpenTelemetry.attach() do
       :ok -> :ok
