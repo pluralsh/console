@@ -1,0 +1,41 @@
+icon: https://avatars.githubusercontent.com/u/33164907?s=48&v=4
+git_url: https://github.com/kubeflow/spark-operator
+release_url: https://github.com/kubeflow/spark-operator/releases/tag/v{vsn}
+helm_repository_url: https://kubeflow.github.io/spark-operator
+versions:
+- version: 2.3.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+    '1.16']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.3.0
+  images: ['ghcr.io/kubeflow/spark-operator/controller:2.3.0']
+- version: 2.2.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+    '1.16']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.2.0
+  images: ['ghcr.io/kubeflow/spark-operator/controller:2.2.0']
+- version: 2.1.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+    '1.16']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.1.0
+  images: ['docker.io/kubeflow/spark-operator:2.1.0']
+- version: 2.0.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+    '1.16']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.0.0
+  images: ['docker.io/kubeflow/spark-operator:2.0.0']
