@@ -1,0 +1,22 @@
+icon: https://avatars.githubusercontent.com/u/47602533?s=48&v=4
+git_url: https://github.com/tektoncd/operator
+release_url: https://github.com/tektoncd/operator/releases/tag/v{vsn}
+helm_repository_url: oci://ghcr.io/tektoncd/operator/charts/tekton-operator
+readme_url: https://github.com/tektoncd/operator#releases
+versions:
+- version: 0.81.1
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.81.1
+  images: ['ghcr.io/tektoncd/operator/operator-303303c315a48490ba6517859ef65b77:v0.81.1',
+    'ghcr.io/tektoncd/operator/webhook-f2bb711aa8f0c0892856a4cbf6d9ddd8:v0.81.1']
+- version: 0.80.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.80.0
+  images: ['ghcr.io/tektoncd/operator/operator-303303c315a48490ba6517859ef65b77:v0.80.0',
+    'ghcr.io/tektoncd/operator/webhook-f2bb711aa8f0c0892856a4cbf6d9ddd8:v0.80.0']

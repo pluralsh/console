@@ -53,3 +53,4 @@ names:
 - wiz-network-analyzer
 - kuberay-operator
 - mongodb-kubernetes
+- tekton-operator
