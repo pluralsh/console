@@ -121,4 +121,22 @@ defmodule Console.Otel.TracingTest do
       end
     end
   end
+
+  describe "strip_http_query_metadata/1" do
+    test "clears the query string on a copied conn without changing the original" do
+      conn = %Plug.Conn{query_string: "token=secret&query=mutation{login}"}
+      metadata = %{conn: conn, extra: :kept}
+
+      stripped = Tracing.strip_http_query_metadata(metadata)
+
+      assert stripped.conn.query_string == ""
+      assert stripped.extra == :kept
+      assert conn.query_string == "token=secret&query=mutation{login}"
+    end
+
+    test "leaves metadata without a conn unchanged" do
+      metadata = %{error: "boom"}
+      assert Tracing.strip_http_query_metadata(metadata) == metadata
+    end
+  end
 end

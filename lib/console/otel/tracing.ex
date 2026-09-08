@@ -7,14 +7,20 @@ defmodule Console.Otel.Tracing do
   disabled it records locally and is discarded.
 
   Secrets are stripped before export: repository and database `.url`
-  attributes are reduced to host/path, HTTP query strings are dropped,
-  and GraphQL documents/variables/error payloads are not recorded.
+  attributes are reduced to host/path, HTTP query strings are removed from
+  the Bandit telemetry conn before the request span is created, and GraphQL
+  documents/variables/error payloads are not recorded.
   """
   require Logger
   require OpenTelemetry.Tracer
-  alias OpenTelemetry.SemConv.URLAttributes
 
   @network_schemes ~w(http https ssh git oci postgres postgresql)
+  @bandit_handler_id {OpentelemetryBandit, :otel_bandit}
+  @bandit_events [
+    [:bandit, :request, :start],
+    [:bandit, :request, :stop],
+    [:bandit, :request, :exception]
+  ]
 
   @spec setup() :: :ok
   def setup do
@@ -87,11 +93,20 @@ defmodule Console.Otel.Tracing do
   end
 
   @doc false
-  def redact_http_query(_event, _measurements, %{conn: _}, _config) do
-    OpenTelemetry.Tracer.set_attribute(URLAttributes.url_query(), "")
-    :ok
+  def handle_bandit_request(event, measurements, metadata, config) do
+    OpentelemetryBandit.handle_request(
+      event,
+      measurements,
+      strip_http_query_metadata(metadata),
+      config
+    )
   end
-  def redact_http_query(_event, _measurements, _metadata, _config), do: :ok
+
+  @doc false
+  def strip_http_query_metadata(%{conn: %Plug.Conn{} = conn} = metadata) do
+    %{metadata | conn: %{conn | query_string: ""}}
+  end
+  def strip_http_query_metadata(metadata), do: metadata
 
   defp configured_endpoint do
     Application.get_env(:opentelemetry_exporter, :otlp_traces_endpoint) ||
@@ -100,7 +115,7 @@ defmodule Console.Otel.Tracing do
 
   defp setup_instrumentation do
     OpentelemetryBandit.setup()
-    attach_http_query_redaction()
+    wrap_bandit_query_redaction()
     OpentelemetryPhoenix.setup(adapter: :bandit)
     OpentelemetryEcto.setup([:console, :repo], additional_attributes: ecto_span_attributes())
     OpentelemetryAbsinthe.setup(absinthe_trace_options())
@@ -115,13 +130,29 @@ defmodule Console.Otel.Tracing do
     end
   end
 
-  defp attach_http_query_redaction do
-    :telemetry.attach(
-      {__MODULE__, :http_query_redaction},
-      [:bandit, :request, :start],
-      &__MODULE__.redact_http_query/4,
-      %{}
-    )
+  defp wrap_bandit_query_redaction do
+    case bandit_handler_config() do
+      {:ok, config} ->
+        :telemetry.detach(@bandit_handler_id)
+
+        :telemetry.attach_many(
+          @bandit_handler_id,
+          @bandit_events,
+          &__MODULE__.handle_bandit_request/4,
+          config
+        )
+
+      :error ->
+        Logger.warning("Unable to wrap Bandit OpenTelemetry handler to drop HTTP query strings")
+        :ok
+    end
+  end
+
+  defp bandit_handler_config do
+    Enum.find_value(:telemetry.list_handlers(hd(@bandit_events)), :error, fn
+      %{id: @bandit_handler_id, config: config} -> {:ok, config}
+      _ -> nil
+    end)
   end
 
   defp compact_attrs(attrs) do
