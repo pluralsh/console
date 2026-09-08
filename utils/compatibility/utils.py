@@ -490,6 +490,8 @@ def reduce_versions(versions):
             if "chart_version" in data:
                 version_info["chart_version"] = data["chart_version"]
                 version_info["images"] = data.get("images", [])
+            if "eolAt" in data:
+                version_info["eolAt"] = data["eolAt"]
 
             reduced_versions.append(version_info)
 
