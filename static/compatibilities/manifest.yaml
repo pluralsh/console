@@ -17,6 +17,7 @@ names:
 - external-dns
 - external-secrets
 - flux
+- ibm-powervs-block-csi-driver
 - ingress-nginx
 - istio
 - jaeger
