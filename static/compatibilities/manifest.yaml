@@ -1,4 +1,5 @@
 names:
+- postgres-operator
 - kubevirt
 - argo-rollouts
 - aws-ebs-csi-driver
