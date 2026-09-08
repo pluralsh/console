@@ -56,7 +56,7 @@ export function GroupsList({
         fullHeightWrap
         virtualizeRows
         loose
-        rowBg="base"
+        rowBg="stripes"
         expandedRowType="custom"
         data={groups}
         loading={!data && loading}

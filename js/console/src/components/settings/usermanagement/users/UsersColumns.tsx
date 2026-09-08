@@ -1,6 +1,7 @@
+import { AppIcon } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
+import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
-import UserInfo from 'components/utils/UserInfo'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   ColMembershipExpander,
@@ -15,17 +16,26 @@ const columnHelper = createColumnHelper<UsersTableUser>()
 const ColUser = columnHelper.accessor((user) => user, {
   id: 'user',
   header: 'Users',
-  meta: { gridTemplate: '1fr' },
+  meta: { gridTemplate: 'minmax(0, 1fr)' },
   cell: function Cell({ getValue }) {
     const user = getValue()
 
     return (
-      <UserInfo
-        user={{
-          name: user.name,
-          email: user.email,
-          avatar: user.profile ?? undefined,
-        }}
+      <StackedText
+        icon={
+          <AppIcon
+            css={{ flexShrink: 0 }}
+            url={user.profile ?? undefined}
+            name={user.name}
+            spacing={user.profile ? 'none' : undefined}
+            size="xxsmall"
+          />
+        }
+        first={user.name}
+        second={user.email}
+        firstColor="text"
+        gap="xxxsmall"
+        truncate
       />
     )
   },

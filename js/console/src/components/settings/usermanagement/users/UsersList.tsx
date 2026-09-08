@@ -44,7 +44,7 @@ export function UsersList() {
         fullHeightWrap
         virtualizeRows
         loose
-        rowBg="base"
+        rowBg="stripes"
         expandedRowType="custom"
         data={users}
         columns={usersCols}

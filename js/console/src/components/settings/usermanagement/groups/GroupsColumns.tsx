@@ -1,9 +1,14 @@
-import { EyeIcon, IconFrame, Modal, PencilIcon } from '@pluralsh/design-system'
+import {
+  EyeIcon,
+  IconFrame,
+  Modal,
+  PencilIcon,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
-import { Info } from 'components/utils/Info'
-import { DeleteIconButton } from 'components/utils/IconButtons'
+import { StackedText } from 'components/utils/table/StackedText'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import {
   GroupFragment,
@@ -13,6 +18,7 @@ import {
   useGroupMembersQuery,
 } from 'generated/graphql'
 import { useState } from 'react'
+import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { mapExistingNodes } from 'utils/graphql'
 import {
@@ -34,14 +40,17 @@ const columnHelper = createColumnHelper<GroupFragment>()
 const ColGroupInfo = columnHelper.accessor((group) => group, {
   id: 'info',
   header: 'Groups',
-  meta: { gridTemplate: '1fr' },
+  meta: { gridTemplate: 'minmax(0, 1fr)', truncate: true },
   cell: function Cell({ getValue }) {
     const group = getValue()
 
     return (
-      <Info
-        text={group?.name}
-        description={group?.description || 'no description'}
+      <StackedText
+        first={group?.name}
+        second={group?.description || 'no description'}
+        firstColor="text"
+        gap="xxxsmall"
+        truncate
       />
     )
   },
@@ -59,8 +68,9 @@ const ColMembers = columnHelper.accessor((group) => group.memberCount ?? 0, {
 const ColActions = columnHelper.accessor((group) => group, {
   id: 'actions',
   header: '',
-  meta: { gridTemplate: 'max-content' },
+  meta: { gridTemplate: 'fit-content(72px)' },
   cell: function Cell({ getValue, table: { options } }) {
+    const theme = useTheme()
     const group = getValue()
     const { editable, setGroupEdit } = options.meta as GroupsListMeta
     const { popToast } = useSimpleToast()
@@ -85,18 +95,23 @@ const ColActions = columnHelper.accessor((group) => group, {
             <>
               <IconFrame
                 clickable
+                size="small"
                 tooltip="Edit group"
                 icon={<PencilIcon />}
                 onClick={() => setGroupEdit(group)}
               />
-              <DeleteIconButton
-                tooltip
+              <IconFrame
+                clickable
+                size="small"
+                tooltip="Delete group"
+                icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
                 onClick={() => setDialogKey('confirmDelete')}
               />
             </>
           ) : (
             <IconFrame
               clickable
+              size="small"
               tooltip="View group"
               icon={<EyeIcon />}
               onClick={() => setDialogKey('viewGroup')}

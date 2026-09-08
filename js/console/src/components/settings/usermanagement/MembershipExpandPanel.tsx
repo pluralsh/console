@@ -3,6 +3,7 @@ import {
   Button,
   CaretRightIcon,
   Flex,
+  IconFrame,
   Spinner,
 } from '@pluralsh/design-system'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
@@ -21,15 +22,20 @@ export const ColMembershipExpander = {
   meta: { gridTemplate: '48px' },
   cell: ({ row }) =>
     row.getCanExpand() && (
-      <CaretRightIcon
-        size={12}
-        color="icon-light"
-        cursor="pointer"
-        style={{
-          alignSelf: 'center',
-          transform: `rotate(${row.getIsExpanded() ? 90 : 0}deg)`,
-          transition: 'transform .2s',
-        }}
+      <IconFrame
+        clickable
+        size="medium"
+        type="tertiary"
+        tooltip={row.getIsExpanded() ? 'Collapse' : 'Expand'}
+        icon={
+          <CaretRightIcon
+            color="icon-light"
+            style={{
+              transform: `rotate(${row.getIsExpanded() ? 90 : 0}deg)`,
+              transition: 'transform .2s',
+            }}
+          />
+        }
         onClick={(e) => {
           e.stopPropagation()
           row.getToggleExpandedHandler()()
@@ -231,8 +237,10 @@ const HoverActionsSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.xsmall,
   opacity: 0,
+  pointerEvents: 'none',
   transition: 'opacity 0.12s ease',
-  'tr:hover &, tr:focus-within &, &:focus-within': {
+  'tr:hover &, tr:has(:hover) &, tr:focus-within &, &:focus-within': {
     opacity: 1,
+    pointerEvents: 'auto',
   },
 }))
