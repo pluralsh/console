@@ -44,8 +44,9 @@ defmodule Console.Otel.Tracing do
   Drops credentials, signed query parameters, and fragments from a repository URL.
 
   Returns host/path (with scheme when it is a real URL). SCP-style Git remotes
-  become `host/path`. Unsupported schemes and values that still contain
-  userinfo after fallback are dropped.
+  become `host/path`. Unsupported schemes, URLs with userinfo and no host,
+  `://` values that cannot be redacted, and fallback paths that still look
+  like `user:secret` are dropped.
   """
   @spec sanitize_url(term) :: String.t() | nil
   def sanitize_url(url) when is_binary(url) and byte_size(url) > 0 do
@@ -148,14 +149,19 @@ defmodule Console.Otel.Tracing do
     redact_uri(uri)
   end
   defp sanitize_parsed(%URI{scheme: "file"} = uri, _original), do: redact_uri(uri)
+  defp sanitize_parsed(%URI{userinfo: userinfo}, _original) when is_binary(userinfo), do: nil
   defp sanitize_parsed(%URI{scheme: scheme, host: host}, _original)
        when is_binary(scheme) and is_binary(host) and byte_size(host) > 0 do
     nil
   end
   defp sanitize_parsed(_uri, original) do
-    original
-    |> strip_query_fragment()
-    |> sanitize_scp()
+    case String.contains?(original, "://") do
+      true -> nil
+      false ->
+        original
+        |> strip_query_fragment()
+        |> sanitize_scp()
+    end
   end
 
   defp redact_uri(%URI{} = uri) do
@@ -174,7 +180,11 @@ defmodule Console.Otel.Tracing do
   defp sanitize_scp(url) do
     case Regex.run(~r/^(?:[^@]+@)?([^:]+):(.+)$/, url) do
       [_, host, path] ->
-        drop_if_userinfo("#{host}/#{String.trim_leading(path, "/")}")
+        path = String.trim_leading(path, "/")
+        case String.contains?(path, [":", "@"]) do
+          true -> nil
+          false -> "#{host}/#{path}"
+        end
       _ ->
         drop_if_userinfo(url)
     end

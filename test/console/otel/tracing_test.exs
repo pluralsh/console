@@ -75,6 +75,14 @@ defmodule Console.Otel.TracingTest do
     test "rejects unsupported schemes instead of leaking scp fallback userinfo" do
       assert Tracing.sanitize_url("foo://user:secret@repo.example/charts") == nil
       assert Tracing.sanitize_url("foo://repo.example/charts") == nil
+      assert Tracing.sanitize_url("foo://user:secret@") == nil
+      assert Tracing.sanitize_url("https://user:secret@") == nil
+      assert Tracing.sanitize_url("//user:secret@repo.example/charts") == nil
+    end
+
+    test "drops scheme-less fallbacks whose path still looks like userinfo" do
+      assert Tracing.sanitize_url("foo:user:secret") == nil
+      assert Tracing.sanitize_url("myscheme:admin:s3cret") == nil
     end
 
     test "returns nil for blank values" do
