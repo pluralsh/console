@@ -63,7 +63,7 @@ const ColGroupInfo = columnHelper.accessor((group) => group, {
   },
 })
 
-const ColMembers = columnHelper.accessor((group) => group.memberCount, {
+const ColMembers = columnHelper.accessor((group) => group.memberCount ?? 0, {
   id: 'members',
   header: 'Members',
   meta: { gridTemplate: '90px' },
@@ -227,7 +227,7 @@ export function GroupMembersExpand({
         emptyMessage="This group has no members."
         getCopyText={() => getGroupMembersCopyText(fetchMembers, group)}
         viewAll={
-          group.memberCount > MEMBERSHIP_VIEW_ALL_AFTER
+          (group.memberCount ?? 0) > MEMBERSHIP_VIEW_ALL_AFTER
             ? {
                 label: `View all ${group.memberCount} members`,
                 onClick: () =>

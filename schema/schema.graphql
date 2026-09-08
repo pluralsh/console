@@ -17064,7 +17064,7 @@ type Group {
   global: Boolean
 
   "number of users in this group"
-  memberCount: Int!
+  memberCount: Int
 
   insertedAt: DateTime
 

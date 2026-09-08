@@ -213,7 +213,7 @@ defmodule Console.GraphQl.Users do
     field :name,        non_null(:string)
     field :description, :string
     field :global,      :boolean, description: "automatically adds all users in the system to this group"
-    field :member_count, non_null(:integer), resolve: &User.member_count/3, description: "number of users in this group"
+    field :member_count, :integer, resolve: &User.member_count/3, description: "number of users in this group"
 
     timestamps()
   end
