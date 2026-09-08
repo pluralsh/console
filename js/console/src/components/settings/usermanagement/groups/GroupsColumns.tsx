@@ -1,22 +1,10 @@
-import {
-  CheckIcon,
-  CopyIcon,
-  EyeIcon,
-  IconFrame,
-  ListBoxItem,
-  Modal,
-  PencilIcon,
-  Tooltip,
-  TrashCanIcon,
-} from '@pluralsh/design-system'
+import { EyeIcon, IconFrame, Modal, PencilIcon } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
-import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { Info } from 'components/utils/Info'
-import { MoreMenu } from 'components/utils/MoreMenu'
+import { DeleteIconButton } from 'components/utils/IconButtons'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
-import UserInfo from 'components/utils/UserInfo'
 import {
   GroupFragment,
   GroupMembersQuery,
@@ -24,26 +12,22 @@ import {
   useGroupMembersLazyQuery,
   useGroupMembersQuery,
 } from 'generated/graphql'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 import { mapExistingNodes } from 'utils/graphql'
 import {
+  ColMembershipExpander,
   HoverActions,
   MembershipExpandPanel,
-  MEMBERSHIP_VIEW_ALL_AFTER,
-  MembershipListRowSC,
+  MembershipUserRow,
+  MEMBERSHIP_FETCH_LIMIT,
+  MEMBERSHIP_VISIBLE_ROWS,
 } from '../MembershipExpandPanel'
 import { formatGroupMembersCopy } from '../membershipCopy'
 import { GroupMembers } from './GroupMembers'
 import type { GroupsListMeta } from './GroupsList'
 
 const COPY_MEMBERS_PAGE_SIZE = 1000
-
-enum MenuItemKey {
-  Edit = 'edit',
-  Delete = 'delete',
-  View = 'view',
-}
 
 const columnHelper = createColumnHelper<GroupFragment>()
 
@@ -97,38 +81,27 @@ const ColActions = columnHelper.accessor((group) => group, {
     return (
       <>
         <HoverActions>
-          <CopyGroupListButton group={group} />
-          <MoreMenu
-            onSelectionChange={(key) => {
-              if (key === MenuItemKey.Edit) setGroupEdit(group)
-              else if (key === MenuItemKey.Delete) setDialogKey('confirmDelete')
-              else if (key === MenuItemKey.View) setDialogKey('viewGroup')
-            }}
-          >
-            {editable ? (
-              <>
-                <ListBoxItem
-                  key={MenuItemKey.Edit}
-                  leftContent={<PencilIcon />}
-                  label="Edit group"
-                  textValue="Edit group"
-                />
-                <ListBoxItem
-                  key={MenuItemKey.Delete}
-                  leftContent={<TrashCanIcon color="icon-danger" />}
-                  label="Delete group"
-                  textValue="Delete group"
-                />
-              </>
-            ) : (
-              <ListBoxItem
-                key={MenuItemKey.View}
-                leftContent={<EyeIcon />}
-                label="View group"
-                textValue="View group"
+          {editable ? (
+            <>
+              <IconFrame
+                clickable
+                tooltip="Edit group"
+                icon={<PencilIcon />}
+                onClick={() => setGroupEdit(group)}
               />
-            )}
-          </MoreMenu>
+              <DeleteIconButton
+                tooltip
+                onClick={() => setDialogKey('confirmDelete')}
+              />
+            </>
+          ) : (
+            <IconFrame
+              clickable
+              tooltip="View group"
+              icon={<EyeIcon />}
+              onClick={() => setDialogKey('viewGroup')}
+            />
+          )}
         </HoverActions>
         <Modal
           header={group.name}
@@ -161,44 +134,6 @@ const ColActions = columnHelper.accessor((group) => group, {
   },
 })
 
-function CopyGroupListButton({ group }: { group: GroupFragment }) {
-  const [copied, setCopied] = useState(false)
-  const [fetchMembers] = useGroupMembersLazyQuery()
-
-  useEffect(() => {
-    if (!copied) return
-
-    const timeout = setTimeout(() => setCopied(false), 1000)
-
-    return () => clearTimeout(timeout)
-  }, [copied])
-
-  const handleCopy = useCallback(
-    async (e: { stopPropagation: () => void }) => {
-      e.stopPropagation()
-      const text = await getGroupMembersCopyText(fetchMembers, group)
-      await window.navigator.clipboard.writeText(text)
-      setCopied(true)
-    },
-    [fetchMembers, group]
-  )
-
-  return (
-    <Tooltip
-      label={copied ? 'Copied!' : 'Copy list'}
-      placement="top"
-    >
-      <IconFrame
-        clickable
-        type="tertiary"
-        icon={copied ? <CheckIcon /> : <CopyIcon />}
-        onClick={handleCopy}
-        textValue="Copy list"
-      />
-    </Tooltip>
-  )
-}
-
 export function GroupMembersExpand({
   row,
   editable,
@@ -212,7 +147,7 @@ export function GroupMembersExpand({
   const [viewOpen, setViewOpen] = useState(false)
   const [fetchMembers] = useGroupMembersLazyQuery()
   const { data, loading, error } = useGroupMembersQuery({
-    variables: { id: group.id, first: MEMBERSHIP_VIEW_ALL_AFTER },
+    variables: { id: group.id, first: MEMBERSHIP_FETCH_LIMIT },
   })
   const users = mapExistingNodes(data?.groupMembers)
     .map((member) => member.user)
@@ -226,9 +161,8 @@ export function GroupMembersExpand({
         emptyMessage="This group has no members."
         getCopyText={() => getGroupMembersCopyText(fetchMembers, group)}
         viewAll={
-          (group.memberCount ?? 0) > MEMBERSHIP_VIEW_ALL_AFTER
+          (group.memberCount ?? 0) > MEMBERSHIP_VISIBLE_ROWS
             ? {
-                label: `View all ${group.memberCount} members`,
                 onClick: () =>
                   editable ? setGroupEdit(group) : setViewOpen(true),
               }
@@ -236,15 +170,12 @@ export function GroupMembersExpand({
         }
       >
         {users.map((user) => (
-          <MembershipListRowSC key={user.id}>
-            <UserInfo
-              user={{
-                name: user.name,
-                email: user.email,
-                avatar: user.profile ?? undefined,
-              }}
-            />
-          </MembershipListRowSC>
+          <MembershipUserRow
+            key={user.id}
+            name={user.name}
+            email={user.email}
+            avatar={user.profile}
+          />
         ))}
       </MembershipExpandPanel>
       {!editable && (
@@ -280,4 +211,9 @@ function membersFromQuery(data: Nullable<GroupMembersQuery>) {
     .filter(isNonNullable)
 }
 
-export const groupsCols = [ColExpander, ColGroupInfo, ColMembers, ColActions]
+export const groupsCols = [
+  ColMembershipExpander,
+  ColGroupInfo,
+  ColMembers,
+  ColActions,
+]

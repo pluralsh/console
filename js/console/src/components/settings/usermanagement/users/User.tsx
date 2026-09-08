@@ -4,6 +4,7 @@ import { Chip, Switch } from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 
+import styled from 'styled-components'
 import { useUpdateUserMutation } from '../../../../generated/graphql.ts'
 
 export type UsersTableUser = {
@@ -61,7 +62,8 @@ export function UserAdminCell({ user }: { user: UsersTableUser }) {
       )}
       {!editable && isAdmin && <Chip>Admin</Chip>}
       {editable && (
-        <Switch
+        <AdminSwitchSC
+          aria-label="Admin"
           checked={isAdmin}
           disabled={loading}
           onChange={() => {
@@ -71,10 +73,13 @@ export function UserAdminCell({ user }: { user: UsersTableUser }) {
               setAdmin()
             }
           }}
-        >
-          Admin
-        </Switch>
+        />
       )}
     </div>
   )
 }
+
+const AdminSwitchSC = styled(Switch)({
+  columnGap: 0,
+  '.label': { display: 'none' },
+})

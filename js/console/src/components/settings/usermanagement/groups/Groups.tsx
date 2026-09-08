@@ -38,7 +38,7 @@ export function Groups() {
     <WrapperSC>
       <StretchedFlex>
         <Body1P $color="text-light">
-          Create and manage permission groups.
+          Create and manage groups for services.
         </Body1P>
         <Button
           floating

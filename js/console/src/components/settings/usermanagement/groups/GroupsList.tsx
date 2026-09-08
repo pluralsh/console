@@ -55,7 +55,9 @@ export function GroupsList({
       <Table
         fullHeightWrap
         virtualizeRows
+        loose
         rowBg="base"
+        expandedRowType="custom"
         data={groups}
         loading={!data && loading}
         columns={groupsCols}

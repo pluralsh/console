@@ -34,7 +34,7 @@ export function UsersList() {
     <ListWrapperSC>
       <Input
         value={q}
-        placeholder="Search a user"
+        placeholder="Search users"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
         backgroundColor="fill-zero"
@@ -43,7 +43,9 @@ export function UsersList() {
       <Table
         fullHeightWrap
         virtualizeRows
+        loose
         rowBg="base"
+        expandedRowType="custom"
         data={users}
         columns={usersCols}
         loading={!data && loading}

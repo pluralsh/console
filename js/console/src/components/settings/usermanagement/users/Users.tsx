@@ -2,10 +2,11 @@ import { useLogin } from 'components/contexts'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { SettingsPageHeader } from 'components/settings/Settings'
-
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { Body1P } from 'components/utils/typography/Text'
+import styled from 'styled-components'
 import UserInvite from './UserInvite'
 import { UsersList } from './UsersList'
 
@@ -17,13 +18,24 @@ export default function Users() {
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <>
-      <SettingsPageHeader heading="Users">
+    <WrapperSC>
+      <StretchedFlex>
+        <Body1P $color="text-light">
+          See users in your org. Change them to admin here.
+        </Body1P>
         {!configuration?.pluralLogin && !configuration?.externalOidc && (
           <UserInvite />
         )}
-      </SettingsPageHeader>
+      </StretchedFlex>
       <UsersList />
-    </>
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  minHeight: 0,
+  height: '100%',
+}))

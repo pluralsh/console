@@ -1,9 +1,9 @@
 import { createColumnHelper, Row } from '@tanstack/react-table'
-import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
-import { Info } from 'components/utils/Info'
+import { Body2P } from 'components/utils/typography/Text'
 import UserInfo from 'components/utils/UserInfo'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
+  ColMembershipExpander,
   MembershipExpandPanel,
   MembershipListRowSC,
 } from '../MembershipExpandPanel'
@@ -46,6 +46,7 @@ const ColGroups = columnHelper.accessor(
 const ColAdmin = columnHelper.accessor((user) => user, {
   id: 'admin',
   header: 'Admin',
+  meta: { gridTemplate: '130px' },
   cell: function Cell({ getValue }) {
     return <UserAdminCell user={getValue()} />
   },
@@ -62,14 +63,11 @@ export function UserGroupsExpand({ row }: { row: Row<UsersTableUser> }) {
     >
       {groups.map((group) => (
         <MembershipListRowSC key={group.id}>
-          <Info
-            text={group.name}
-            description={group.description || 'no description'}
-          />
+          <Body2P $color="text-light">{group.name}</Body2P>
         </MembershipListRowSC>
       ))}
     </MembershipExpandPanel>
   )
 }
 
-export const usersCols = [ColExpander, ColUser, ColGroups, ColAdmin]
+export const usersCols = [ColMembershipExpander, ColUser, ColGroups, ColAdmin]
