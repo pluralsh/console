@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <body>
+    <main>
+      <h1>Install Aerospike Kubernetes Operator using Helm</h1>
+      <h2>Install AKO</h2>
+      <pre><code>helm install aerospike-kubernetes-operator aerospike/aerospike-kubernetes-operator \
+--namespace NAMESPACE_NAME --version=4.5.0 --set watchNamespaces="aerospike"</code></pre>
+      <p>Default operatorImage.tag: 4.5.0</p>
+    </main>
+  </body>
+</html>
