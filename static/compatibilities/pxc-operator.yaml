@@ -1,0 +1,84 @@
+icon: https://avatars.githubusercontent.com/u/1683025?s=48&v=4
+git_url: https://github.com/percona/percona-xtradb-cluster-operator
+release_url: https://github.com/percona/percona-xtradb-cluster-operator/releases/tag/v{vsn}
+helm_repository_url: https://percona.github.io/percona-helm-charts
+versions:
+- version: 1.20.0
+  kube: ['1.35', '1.34', '1.33']
+  chart_version: 1.20.1
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.19.1
+  kube: ['1.34', '1.33']
+  chart_version: 1.19.1
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.19.0
+  kube: ['1.33', '1.32']
+  chart_version: 1.19.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.18.0
+  kube: ['1.33', '1.32', '1.31', '1.30']
+  chart_version: 1.18.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.17.0
+  kube: ['1.32', '1.31', '1.30']
+  chart_version: 1.17.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.16.1
+  kube: ['1.30', '1.29', '1.28']
+  chart_version: 1.16.1
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.16.0
+  kube: ['1.30', '1.29', '1.28']
+  chart_version: 1.16.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.15.1
+  kube: ['1.30', '1.29', '1.28']
+  chart_version: 1.15.1
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.15.0
+  kube: ['1.30', '1.29', '1.28']
+  chart_version: 1.15.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.14.1
+  kube: ['1.28', '1.27', '1.26']
+  chart_version: 1.14.1
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.14.0
+  kube: ['1.28', '1.27', '1.26']
+  chart_version: 1.14.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.13.0
+  kube: ['1.26', '1.25', '1.24']
+  chart_version: 1.13.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.12.0
+  kube: ['1.24', '1.23', '1.22']
+  chart_version: 1.12.0
+  requirements: []
+  incompatibilities: []
+  summary: null
+name: pxc-operator
