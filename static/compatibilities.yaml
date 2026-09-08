@@ -30910,3 +30910,43 @@ addons:
     chart_version: 0.1.1
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-network-analyzer:0.1']
   name: wiz-network-analyzer
+- icon: https://karmada.io/img/logo.svg
+  git_url: https://github.com/karmada-io/karmada
+  release_url: https://github.com/karmada-io/karmada/releases/tag/v{vsn}
+  helm_repository_url: https://raw.githubusercontent.com/karmada-io/karmada/master/charts
+  chart_name: karmada
+  versions:
+  - version: 1.19.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.19.0
+    images: ['docker.io/bitnamisecure/kubectl:latest', 'docker.io/cfssl/cfssl:latest',
+      'docker.io/karmada/karmada-aggregated-apiserver:v1.19.0', 'docker.io/karmada/karmada-controller-manager:v1.19.0',
+      'docker.io/karmada/karmada-scheduler:v1.19.0', 'docker.io/karmada/karmada-webhook:v1.19.0',
+      'registry.k8s.io/etcd:3.6.8-0', 'registry.k8s.io/kube-apiserver:v1.36.2', 'registry.k8s.io/kube-controller-manager:v1.36.2']
+  - version: 1.18.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.18.0
+    images: ['docker.io/bitnamisecure/kubectl:latest', 'docker.io/cfssl/cfssl:latest',
+      'docker.io/karmada/karmada-aggregated-apiserver:v1.18.0', 'docker.io/karmada/karmada-controller-manager:v1.18.0',
+      'docker.io/karmada/karmada-scheduler:v1.18.0', 'docker.io/karmada/karmada-webhook:v1.18.0',
+      'registry.k8s.io/etcd:3.6.6-0', 'registry.k8s.io/kube-apiserver:v1.35.2', 'registry.k8s.io/kube-controller-manager:v1.35.2']
+  - version: 1.17.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.17.0
+    images: ['docker.io/bitnamisecure/kubectl:latest', 'docker.io/cfssl/cfssl:latest',
+      'docker.io/karmada/karmada-aggregated-apiserver:v1.17.0', 'docker.io/karmada/karmada-controller-manager:v1.17.0',
+      'docker.io/karmada/karmada-scheduler:v1.17.0', 'docker.io/karmada/karmada-webhook:v1.17.0',
+      'registry.k8s.io/etcd:3.6.6-0', 'registry.k8s.io/kube-apiserver:v1.35.2', 'registry.k8s.io/kube-controller-manager:v1.35.2']
+  name: karmada
