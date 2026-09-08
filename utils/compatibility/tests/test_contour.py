@@ -12,7 +12,7 @@ sys.path.insert(0, str(COMPATIBILITY))
 spec = importlib.util.spec_from_file_location("contour_scraper", COMPATIBILITY / "scrapers/contour.py")
 scraper = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(scraper)
-from utils import reduce_versions
+from utils import reduce_versions, update_versions_data
 from packaging.version import Version
 
 FIXTURES = Path(__file__).parent / "fixtures/contour"
@@ -165,6 +165,65 @@ class ContourTests(unittest.TestCase):
         self.existing["versions"].append(deepcopy(first[0]))
         rows = self.run_scrape().call_args.args[1]
         self.assertEqual([row["version"] for row in rows], ["1.33.0"])
+
+    def test_later_chart_backfills_saved_release_and_then_noops(self):
+        first = self.run_scrape().call_args.args[1]
+        self.existing["versions"] = reduce_versions(self.existing["versions"] + deepcopy(first))
+        saved = next(row for row in self.existing["versions"] if row["version"] == "1.33.7")
+        saved.update(requirements=["keep requirement"], incompatibilities=["keep restriction"],
+                     summary={"features": ["keep summary"]}, eolAt="2027-01-01")
+        original = deepcopy(self.existing)
+        self.charts["1.33.7"] = "22.1.0"
+        # Previously verified records must not depend on re-fetching manifests.
+        self.sources = {scraper.compatibility_url: self.html}
+        update = self.run_scrape()
+        update.assert_called_once()
+        backfills = update.call_args.args[1]
+        self.assertEqual(backfills, [dict(saved, chart_version="22.1.0")])
+        self.assertEqual(self.existing, original)
+        update_versions_data(self.existing, deepcopy(backfills))
+        self.existing["versions"] = reduce_versions(self.existing["versions"])
+        compatible_charts = [Version(row["chart_version"]) for row in self.existing["versions"]
+                             if "1.33" in row["kube"] and row.get("chart_version")]
+        self.assertEqual(max(compatible_charts), Version("22.1.0"))
+        self.run_scrape().assert_not_called()
+
+    def test_legacy_chart_backfill_uses_stored_data_outside_current_matrix(self):
+        first = self.run_scrape().call_args.args[1]
+        self.existing["versions"] = reduce_versions(self.existing["versions"] + deepcopy(first))
+        legacy = {"version": "1.24.0", "kube": ["1.25"], "images": ["example.org/contour:v1.24.0"],
+                  "summary": {"features": ["original"]}, "eolAt": "2025-01-01",
+                  "requirements": ["original requirement"], "incompatibilities": []}
+        self.existing["versions"].append(legacy)
+        self.charts["1.24.0"] = "11.0.0"
+        self.sources = {scraper.compatibility_url: self.html}
+        for empty_chart in (None, ""):
+            with self.subTest(chart_version=empty_chart):
+                legacy["chart_version"] = empty_chart
+                original = deepcopy(self.existing)
+                rows = self.run_scrape().call_args.args[1]
+                self.assertEqual(rows, [dict(legacy, chart_version="11.0.0")])
+                self.assertEqual(self.existing, original)
+
+    def test_backfill_ignores_prerelease_and_existing_chart_mappings(self):
+        first = self.run_scrape().call_args.args[1]
+        self.existing["versions"] = reduce_versions(self.existing["versions"] + deepcopy(first))
+        self.charts.update({"1.33.7": "22.1.0-rc1", "1.32.1": "99.0.0"})
+        original = deepcopy(self.existing)
+        self.run_scrape().assert_not_called()
+        self.assertEqual(self.existing, original)
+
+    def test_charted_intermediate_patch_survives_before_manifest_fetch(self):
+        self.charts["1.33.6"] = "22.0.0"
+        self.sources[scraper.release_manifest_url.format(version="1.33.6")] = (
+            self.sources[scraper.release_manifest_url.format(version="1.33.7")]
+            .replace(b"v1.33.7", b"v1.33.6")
+        )
+        rows = self.run_scrape().call_args.args[1]
+        self.assertEqual([row["version"] for row in rows], ["1.33.7", "1.33.6", "1.33.0"])
+        charted = next(row for row in rows if row["version"] == "1.33.6")
+        self.assertEqual(charted["chart_version"], "22.0.0")
+        self.assertIn("ghcr.io/projectcontour/contour:v1.33.6", charted["images"])
 
 
 if __name__ == "__main__":

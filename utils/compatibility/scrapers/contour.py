@@ -104,25 +104,43 @@ def scrape():
         existing = read_yaml(target_file)
         if not existing or not existing.get("versions"):
             raise ValueError("Could not read existing Contour compatibility versions")
-        recorded = {row["version"] for row in existing["versions"]}
+        recorded = {row["version"]: row for row in existing["versions"]}
         rows = [row for row in rows if validate_semver(row["version"]) > legacy_version_cutoff and row["version"] not in recorded]
-        retained = {row["version"] for row in reduce_versions(deepcopy(existing["versions"]) + rows)}
-        rows = [row for row in rows if row["version"] in retained]
-        if not rows:
+        chartless = [row for row in existing["versions"] if not row.get("chart_version")]
+        if not rows and not chartless:
             return
         # Chart packaging is optional: the upstream support matrix remains valid
         # when a third-party chart catalog has no matching application release.
         charts = get_chart_versions(app_name)
+        backfills = []
+        for row in chartless:
+            chart = charts.get(row["version"])
+            if chart and validate_semver(chart):
+                # Keep stored compatibility even after the vendor's matrix moves
+                # on. Only fill missing chart metadata, including legacy rows.
+                updated = deepcopy(row)
+                updated["chart_version"] = chart
+                backfills.append(updated)
+        for row in rows:
+            chart = charts.get(row["version"])
+            if chart and validate_semver(chart):
+                row["chart_version"] = chart
+        # Resolve charts before reduction so a chart-backed intermediate patch is
+        # retained. Merge by version first: duplicate chartless/chart-backed rows
+        # for one version cannot safely be sorted by the shared reducer.
+        combined = deepcopy(recorded)
+        combined.update({row["version"]: row for row in backfills + rows})
+        retained = {row["version"] for row in reduce_versions(list(combined.values()))}
+        rows = [row for row in rows if row["version"] in retained]
+        backfills = [row for row in backfills if row["version"] in retained]
         for row in rows:
             version = row["version"]
             content = fetch_page(release_manifest_url.format(version=version))
             if not content:
                 raise ValueError(f"Could not fetch the Contour v{version} release manifest")
             row["images"] = release_images(content, version)
-            chart = charts.get(version)
-            if chart and validate_semver(chart):
-                row["chart_version"] = chart
     except (ValueError, yaml.YAMLError) as error:
         print_error(str(error))
         return
-    update_compatibility_info(target_file, rows)
+    if backfills or rows:
+        update_compatibility_info(target_file, backfills + rows)
