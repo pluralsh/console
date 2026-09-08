@@ -1,0 +1,26 @@
+# Reduced from https://charts.kubewarden.io/index.yaml on 2026-09-08.
+# Retains the version, application, and Kubernetes fields of the five published
+# admission-controller entries; unrelated chart metadata is omitted.
+apiVersion: v1
+entries:
+  admission-controller:
+    - name: admission-controller
+      version: 6.0.2
+      appVersion: v1.37.2
+      kubeVersion: '>= 1.19.0-0'
+    - name: admission-controller
+      version: 6.0.1
+      appVersion: v1.37.1
+      kubeVersion: '>= 1.19.0-0'
+    - name: admission-controller
+      version: 6.0.0
+      appVersion: v1.37.0
+      kubeVersion: '>= 1.19.0-0'
+    - name: admission-controller
+      version: 6.0.0-rc.2
+      appVersion: v1.37.0-rc.2
+      kubeVersion: '>= 1.19.0-0'
+    - name: admission-controller
+      version: 6.0.0-alpha
+      appVersion: v1.37.0-alpha
+      kubeVersion: '>= 1.19.0-0'

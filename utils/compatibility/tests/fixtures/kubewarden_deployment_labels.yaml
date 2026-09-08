@@ -1,0 +1,35 @@
+# Reduced Deployment metadata from Helm-rendered admission-controller charts,
+# checked 2026-09-08 in venv/helm-state/rendered-{chart_version}.yaml.
+# These are controller Deployments; the audit scanner is a CronJob.
+# Sources:
+# https://github.com/kubewarden/helm-charts/releases/download/admission-controller-6.0.0/admission-controller-6.0.0.tgz
+# https://github.com/kubewarden/helm-charts/releases/download/admission-controller-6.0.2/admission-controller-6.0.2.tgz
+charts:
+  - chart_version: 6.0.0
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: release-name-admission-controller
+      namespace: default
+      labels:
+        helm.sh/chart: admission-controller-6.0.0
+        app.kubernetes.io/name: admission-controller
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/version: v1.37.0
+        app.kubernetes.io/part-of: kubewarden
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/managed-by: Helm
+  - chart_version: 6.0.2
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: release-name-admission-controller
+      namespace: default
+      labels:
+        helm.sh/chart: admission-controller-6.0.2
+        app.kubernetes.io/name: admission-controller
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/version: v1.37.2
+        app.kubernetes.io/part-of: kubewarden
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/managed-by: Helm

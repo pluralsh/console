@@ -47,6 +47,7 @@ names:
 - rabbitmq-cluster-operator
 - kserve
 - kubescape-operator
+- kubewarden
 - dynatrace-operator
 - wiz-sensor
 - wiz-admission-controller

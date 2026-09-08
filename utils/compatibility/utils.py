@@ -226,6 +226,7 @@ def find_nested_images(objs: Any) -> List[str]:
     Important behavior:
     - Traverses dict VALUES only (not keys), to avoid collecting component names.
     - Only returns strings that look like real image references (repo/name:tag or @sha256 digest).
+    - Reads Kubernetes manifests embedded in ConfigMap .yaml/.yml data entries.
     """
     images: Set[str] = set()
 
@@ -234,6 +235,21 @@ def find_nested_images(objs: Any) -> List[str]:
             return
 
         if isinstance(x, dict):
+            if x.get("kind") == "ConfigMap" and isinstance(x.get("data"), dict):
+                for filename, content in x["data"].items():
+                    if not isinstance(filename, str) or not filename.endswith((".yaml", ".yml")) or not isinstance(content, str):
+                        continue
+                    try:
+                        manifests = list(yaml.safe_load_all(content))
+                    except yaml.YAMLError:
+                        continue
+                    for manifest in manifests:
+                        if (
+                            isinstance(manifest, dict)
+                            and isinstance(manifest.get("apiVersion"), str)
+                            and isinstance(manifest.get("kind"), str)
+                        ):
+                            walk(manifest)
             for k, v in x.items():
                 # CRD schemas also use "image" keys whose values are mappings.
                 if k == "image" and isinstance(v, str) and _looks_like_image(v):
