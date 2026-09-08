@@ -1,0 +1,29 @@
+name: Test Antrea compatibility scraper
+on:
+  pull_request:
+    paths:
+      - 'utils/compatibility/scrapers/antrea.py'
+      - 'utils/compatibility/tests/test_antrea.py'
+      - 'utils/compatibility/utils.py'
+      - 'static/compatibilities/antrea.yaml'
+      - '.github/workflows/test-antrea-compatibility.yaml'
+  push:
+    branches: [master]
+    paths:
+      - 'utils/compatibility/scrapers/antrea.py'
+      - 'utils/compatibility/tests/test_antrea.py'
+      - 'utils/compatibility/utils.py'
+      - 'static/compatibilities/antrea.yaml'
+      - '.github/workflows/test-antrea-compatibility.yaml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install packaging==24.1
+      - run: python -m unittest discover -s utils/compatibility/tests -p test_antrea.py -v
