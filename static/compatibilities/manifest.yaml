@@ -16,6 +16,7 @@ names:
 - descheduler
 - external-dns
 - external-secrets
+- falco-operator
 - flux
 - ingress-nginx
 - istio
