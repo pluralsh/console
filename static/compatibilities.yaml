@@ -31215,3 +31215,154 @@ addons:
     chart_version: 1.0.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.0.0']
   name: mongodb-kubernetes
+- icon: https://metallb.io/images/logo/metallb-white.png
+  git_url: https://github.com/metallb/metallb
+  release_url: https://github.com/metallb/metallb/releases/tag/v{vsn}
+  readme_url: https://metallb.io
+  helm_repository_url: https://metallb.github.io/metallb
+  compatibility_source: https://metallb.github.io/metallb/index.yaml
+  compatibility_notes: Kubernetes versions satisfy the version-specific Helm kubeVersion installation constraint, bounded by this repository's KUBE_VERSION. They are not a tested Kubernetes matrix or a guarantee of runtime support. Charts without an explicit constraint are omitted. See upstream network and cloud requirements before use.
+  helm_values: frr-k8s.prometheus.serviceMonitor.enabled=false
+  versions:
+  - version: 0.16.1
+    kube:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
+    - '1.22'
+    - '1.21'
+    - '1.20'
+    - '1.19'
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.16.1
+    images:
+    - quay.io/frrouting/frr:10.4.3
+    - quay.io/metallb/controller:v0.16.1
+    - quay.io/metallb/frr-k8s:v0.0.25
+    - quay.io/metallb/speaker:v0.16.1
+  - version: 0.16.0
+    kube:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
+    - '1.22'
+    - '1.21'
+    - '1.20'
+    - '1.19'
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.16.0
+    images:
+    - quay.io/frrouting/frr:10.4.3
+    - quay.io/metallb/controller:v0.16.0
+    - quay.io/metallb/frr-k8s:v0.0.25
+    - quay.io/metallb/speaker:v0.16.0
+  - version: 0.15.0
+    kube:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
+    - '1.22'
+    - '1.21'
+    - '1.20'
+    - '1.19'
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.15.0
+    images:
+    - quay.io/frrouting/frr:9.1.0
+    - quay.io/metallb/controller:v0.15.0
+    - quay.io/metallb/speaker:v0.15.0
+  - version: 0.14.2
+    kube:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
+    - '1.22'
+    - '1.21'
+    - '1.20'
+    - '1.19'
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.14.2
+    images:
+    - quay.io/frrouting/frr:8.5.2
+    - quay.io/metallb/controller:v0.14.2
+    - quay.io/metallb/speaker:v0.14.2
+  - version: 0.13.9
+    kube:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+    - '1.26'
+    - '1.25'
+    - '1.24'
+    - '1.23'
+    - '1.22'
+    - '1.21'
+    - '1.20'
+    - '1.19'
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.13.9
+    images:
+    - quay.io/metallb/controller:v0.13.9
+    - quay.io/metallb/speaker:v0.13.9
+  name: metallb
