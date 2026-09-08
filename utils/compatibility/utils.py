@@ -12,7 +12,7 @@ from colorama import Fore, Style
 from packaging.version import Version
 from datetime import datetime
 from summarizer import helm_summary, summarization_enabled
-from typing import Any, List, Set
+from typing import Any, Dict, List, Set
 
 KUBE_VERSION_FILE = "../../KUBE_VERSION"
 
@@ -229,10 +229,18 @@ def find_nested_images(objs: Any) -> List[str]:
     - Reads Kubernetes manifests embedded in ConfigMap .yaml/.yml data entries.
     """
     images: Set[str] = set()
+    # Retain each object so separately parsed YAML cannot reuse a visited id.
+    visited: Dict[int, Any] = {}
 
     def walk(x: Any) -> None:
         if x is None:
             return
+
+        if isinstance(x, (dict, list, tuple, set)):
+            identity = id(x)
+            if identity in visited:
+                return
+            visited[identity] = x
 
         if isinstance(x, dict):
             if x.get("kind") == "ConfigMap" and isinstance(x.get("data"), dict):
