@@ -711,7 +711,7 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
   minHeight: 50,
   position: 'sticky',
   top: 0,
-  zIndex: 1,
+  zIndex: 2,
   '> :first-child': {
     alignItems: 'center',
     display: 'flex',
@@ -767,6 +767,7 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     padding: 0,
     textAlign: 'left',
     width: '100%',
+    zIndex: 0,
     '&:hover': { background: theme.colors['fill-one'] },
     '&:focus-visible': {
       outline: `1px solid ${theme.colors['border-outline-focused']}`,
@@ -906,7 +907,6 @@ const TraceBarSC = styled.span<{
   position: 'absolute',
   minWidth: 3,
   width: `${$width}%`,
-  zIndex: 1,
 }))
 
 const TraceBarTextSC = styled.span<{ $color: string }>(({ $color }) => ({
