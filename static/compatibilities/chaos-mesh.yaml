@@ -1,0 +1,106 @@
+icon: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/static/logo.svg
+git_url: https://github.com/chaos-mesh/chaos-mesh
+release_url: https://github.com/chaos-mesh/chaos-mesh/releases/tag/v{vsn}
+helm_repository_url: https://charts.chaos-mesh.org
+chart_name: chaos-mesh
+versions:
+- version: 2.8.4
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.8.4
+  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.4',
+    'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.4', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.4']
+- version: 2.8.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.8.0
+  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.0',
+    'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.0']
+- version: 2.7.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.7.0
+  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.7.0',
+    'ghcr.io/chaos-mesh/chaos-dashboard:v2.7.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.7.0']
+- version: 2.6.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.6.0
+  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.6.0',
+    'ghcr.io/chaos-mesh/chaos-dashboard:v2.6.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.6.0']
+- version: 2.5.0
+  kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.5.0
+  images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.5.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.5.0',
+    'ghcr.io/chaos-mesh/chaos-mesh:v2.5.0']
+- version: 2.4.0
+  kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.4.0
+  images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.4.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.4.0',
+    'ghcr.io/chaos-mesh/chaos-mesh:v2.4.0']
+- version: 2.3.0
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.3.0
+  images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.3.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.3.0',
+    'ghcr.io/chaos-mesh/chaos-mesh:v2.3.0']
+- version: 2.2.0
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.2.0
+  images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.2.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.2.0',
+    'ghcr.io/chaos-mesh/chaos-mesh:v2.2.0']
+- version: 2.1.0
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.1.0
+  images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.1.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.1.0',
+    'ghcr.io/chaos-mesh/chaos-mesh:v2.1.0']
+- version: 2.0.0
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.0.0
+  images: ['pingcap/chaos-daemon:v2.0.0', 'pingcap/chaos-dashboard:v2.0.0', 'pingcap/chaos-mesh:v2.0.0']
+- version: 1.2.0
+  kube: ['1.15', '1.14', '1.13', '1.12']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.5.0
+  images: ['pingcap/chaos-daemon:v1.2.0', 'pingcap/chaos-dashboard:v1.2.0', 'pingcap/chaos-mesh:v1.2.0']
+- version: 1.1.0
+  kube: ['1.15', '1.14', '1.13', '1.12']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.4.0
+  images: ['pingcap/chaos-daemon:v1.1.0', 'pingcap/chaos-mesh:v1.1.0']
+- version: 1.0.0
+  kube: ['1.15', '1.14', '1.13', '1.12']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.3.0
+  images: ['pingcap/chaos-daemon:v1.0.0', 'pingcap/chaos-mesh:v1.0.0']

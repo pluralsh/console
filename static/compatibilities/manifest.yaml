@@ -9,6 +9,7 @@ names:
 - calico
 - cert-manager
 - cilium
+- chaos-mesh
 - contour
 - coredns
 - cloudnative-pg
