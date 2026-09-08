@@ -1,0 +1,42 @@
+name: Verify ECK compatibility fix
+
+on:
+  push:
+    branches:
+      - feat/eck-operator-compatibility
+    paths:
+      - '.github/workflows/eck-verify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feat/eck-operator-compatibility
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python -m pip install packaging==24.1 PyYAML==6.0.2
+      - name: Run focused tests
+        run: python -m unittest discover -s utils/compatibility/tests -p 'test_eck_operator.py' -v
+      - name: Compile scraper and tests
+        run: python -m py_compile utils/compatibility/scrapers/eck-operator.py utils/compatibility/tests/test_eck_operator.py
+      - name: Validate YAML and aggregate registration
+        run: |
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          addon = yaml.safe_load(Path('static/compatibilities/eck-operator.yaml').read_text())
+          aggregate = yaml.safe_load(Path('static/compatibilities.yaml').read_text())
+          manifest = yaml.safe_load(Path('static/compatibilities/manifest.yaml').read_text())
+          assert addon and addon.get('versions')
+          assert 'eck-operator' in manifest['names']
+          matches = [a for a in aggregate['addons'] if a.get('name') == 'eck-operator']
+          assert len(matches) == 1
+          assert matches[0]['versions'] == addon['versions']
+          print('ECK YAML, manifest and aggregate are consistent')
+          PY
