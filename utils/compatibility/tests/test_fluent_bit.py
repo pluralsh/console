@@ -132,7 +132,7 @@ class FluentBitScraperTests(unittest.TestCase):
                 len(v["images"]), 0, f"Version {v['version']} has empty images list"
             )
             # Verify Fluent Bit container images are present
-            has_fluent_bit_img = any("fluent-bit" in img or "fluentbit" in img or "busybox" in img for img in v["images"])
+            has_fluent_bit_img = any("fluent-bit" in img or "fluentbit" in img for img in v["images"])
             self.assertTrue(
                 has_fluent_bit_img,
                 f"Version {v['version']} images do not contain expected components: {v['images']}"
