@@ -1,0 +1,188 @@
+# Exact e2e job from https://raw.githubusercontent.com/dapr/dapr/v1.18.3/.github/workflows/kind-e2e.yaml; retrieved 2026-09-08.
+name: E2E tests on KinD
+jobs:
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      REGISTRY_PORT: 5000
+      REGISTRY_NAME: kind-registry
+      DAPR_REGISTRY: localhost:5000/dapr
+      DAPR_TAG: dev
+      DAPR_NAMESPACE: dapr-tests
+      DAPR_TEST_N_MINUS_1_IMAGE: ghcr.io/dapr/daprd:1.16.8
+      DAPR_TEST_N_MINUS_2_IMAGE: ghcr.io/dapr/daprd:1.15.13
+      DAPR_CACHE_REGISTRY: dapre2eacr.azurecr.io
+      PULL_POLICY: IfNotPresent
+    strategy:
+      fail-fast: false
+      matrix:
+        k8s-version:
+        - v1.34.0
+        - v1.33.4
+        - v1.32.8
+        mode:
+        - ha
+        - non-ha
+        include:
+        - k8s-version: v1.34.0
+          kind-version: v0.30.0
+          kind-image-sha: sha256:7416a61b42b1662ca6ca89f02028ac133a309a2a30ba309614e8ec94d976dc5a
+          dapr-test-config-store: postgres
+        - k8s-version: v1.33.4
+          kind-version: v0.30.0
+          kind-image-sha: sha256:25a6018e48dfcaee478f4a59af81157a437f15e6e140bf103f85a2e7cd0cbbf2
+          dapr-test-config-store: redis
+        - k8s-version: v1.32.8
+          kind-version: v0.30.0
+          kind-image-sha: sha256:abd489f042d2b644e2d033f5c2d900bc707798d075e8186cb65e3f1367a9d5a1
+          dapr-test-config-store: redis
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v6
+    - name: Set up Go
+      id: setup-go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+    - name: Configure KinD
+      run: "cat > kind.yaml <<EOF\napiVersion: kind.x-k8s.io/v1alpha4\nkind: Cluster\n\
+        nodes:\n- role: control-plane\n  image: kindest/node:${{ matrix.k8s-version\
+        \ }}@${{ matrix.kind-image-sha }}\n- role: worker\n  image: kindest/node:${{\
+        \ matrix.k8s-version }}@${{ matrix.kind-image-sha }}\n- role: worker\n  image:\
+        \ kindest/node:${{ matrix.k8s-version }}@${{ matrix.kind-image-sha }}\n- role:\
+        \ worker\n  image: kindest/node:${{ matrix.k8s-version }}@${{ matrix.kind-image-sha\
+        \ }}\ncontainerdConfigPatches:\n- |-\n  [plugins.\"io.containerd.grpc.v1.cri\"\
+        .registry.mirrors.\"localhost:$REGISTRY_PORT\"]\n    endpoint = [\"http://$REGISTRY_NAME:$REGISTRY_PORT\"\
+        ]\nEOF\n\n# Log the generated kind.yaml for easy reference.\ncat kind.yaml\n\
+        \n# Set log target directories\necho \"DAPR_CONTAINER_LOG_PATH=$GITHUB_WORKSPACE/container_logs/${{\
+        \ matrix.k8s-version }}_${{ matrix.mode }}\" >> $GITHUB_ENV\necho \"DAPR_TEST_LOG_PATH=$GITHUB_WORKSPACE/test_logs/${{\
+        \ matrix.k8s-version }}_${{ matrix.mode }}\" >> $GITHUB_ENV\n"
+    - name: Create KinD Cluster
+      uses: helm/kind-action@v1.13.0
+      with:
+        config: kind.yaml
+        cluster_name: kind
+        version: ${{ matrix.kind-version }}
+    - name: Get KinD info
+      run: "kubectl cluster-info --context kind-kind\nNODE_IP=$(kubectl get nodes\
+        \ \\\n          -lkubernetes.io/hostname!=kind-control-plane \\\n        \
+        \  -ojsonpath='{.items[0].status.addresses[?(@.type==\"InternalIP\")].address}')\n\
+        echo \"MINIKUBE_NODE_IP=$NODE_IP\" >> $GITHUB_ENV\n"
+    - name: Setup test output
+      shell: bash
+      run: 'export TEST_OUTPUT_FILE_PREFIX=$GITHUB_WORKSPACE/test_report
+
+        echo "TEST_OUTPUT_FILE_PREFIX=$TEST_OUTPUT_FILE_PREFIX" >> $GITHUB_ENV
+
+        '
+    - name: Setup local registry
+      run: "# Run a registry.\ndocker run -d --restart=always \\\n  -p $REGISTRY_PORT:$REGISTRY_PORT\
+        \ --name $REGISTRY_NAME registry:2\n# Connect the registry to the KinD network.\n\
+        docker network connect \"kind\" $REGISTRY_NAME\n"
+    - name: Setup Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.3.4
+    - name: Free disk space
+      run: 'df -h
+
+        docker system prune -af || true
+
+        docker volume prune -f || true
+
+        sudo rm -rf /usr/local/lib/android || true
+
+        sudo rm -rf /opt/ghc || true
+
+        sudo rm -rf /usr/share/dotnet || true
+
+        sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+
+        sudo apt-get clean
+
+        sudo rm -rf /var/lib/apt/lists/* || true
+
+        df -h
+
+        '
+    - name: Build and push Dapr
+      run: 'make build-linux
+
+        make docker-build
+
+        make docker-push-retry
+
+        '
+    - name: Build and push test apps
+      run: 'make build-push-e2e-app-all
+
+        '
+    - name: Setup Dapr
+      run: "make setup-helm-init\nmake create-test-namespace\nexport ADDITIONAL_HELM_SET=\"\
+        dapr_operator.logLevel=debug,dapr_operator.watchInterval=20s\"\nif [[ \"${{\
+        \ matrix.mode }}\" == \"ha\" ]]; then\n  export HA_MODE=true\nelse\n  export\
+        \ HA_MODE=false\nfi\nmake docker-deploy-k8s\n"
+    - name: Setup Redis
+      run: 'make setup-test-env-redis
+
+        '
+    - name: Setup Kafka
+      run: 'make setup-test-env-kafka
+
+        '
+    - name: Setup Zipkin
+      run: 'make setup-test-env-zipkin
+
+        '
+    - name: Setup postgres
+      run: 'make setup-test-env-postgres
+
+        '
+    - name: Setup test components
+      run: 'make setup-test-components
+
+        '
+      env:
+        DAPR_TEST_CONFIG_STORE: ${{ matrix.dapr-test-config-store }}
+    - name: Run tests
+      run: 'make test-e2e-all
+
+        '
+      env:
+        DAPR_TEST_CONFIG_STORE: ${{ matrix.dapr-test-config-store }}
+    - name: Save control plane logs
+      if: always()
+      run: 'make save-dapr-control-plane-k8s-logs
+
+        '
+    - name: Compress logs
+      if: always()
+      run: 'gzip --fast -r ${{ env.DAPR_CONTAINER_LOG_PATH }}
+
+        gzip --fast -r ${{ env.DAPR_TEST_LOG_PATH }}
+
+        '
+      shell: bash
+    - name: Upload container logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.k8s-version }}_${{ matrix.mode}}_container_logs
+        path: ${{ env.DAPR_CONTAINER_LOG_PATH }}
+        compression-level: 0
+    - name: Upload test logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.k8s-version }}_${{ matrix.mode}}_test_logs
+        path: ${{ env.DAPR_TEST_LOG_PATH }}
+        compression-level: 0
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.k8s-version }}_${{ matrix.mode }}_test_e2e.json
+        path: ${{ env.TEST_OUTPUT_FILE_PREFIX }}_e2e.*

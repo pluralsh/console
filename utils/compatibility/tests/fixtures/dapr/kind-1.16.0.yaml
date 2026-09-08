@@ -1,0 +1,184 @@
+# Exact e2e job from https://raw.githubusercontent.com/dapr/dapr/v1.16.0/.github/workflows/kind-e2e.yaml; retrieved 2026-09-08.
+name: E2E tests on KinD
+jobs:
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      REGISTRY_PORT: 5000
+      REGISTRY_NAME: kind-registry
+      DAPR_REGISTRY: localhost:5000/dapr
+      DAPR_TAG: dev
+      DAPR_NAMESPACE: dapr-tests
+      DAPR_TEST_N_MINUS_1_IMAGE: ghcr.io/dapr/daprd:1.14.5
+      DAPR_TEST_N_MINUS_2_IMAGE: ghcr.io/dapr/daprd:1.13.6
+      DAPR_CACHE_REGISTRY: dapre2eacr.azurecr.io
+      PULL_POLICY: IfNotPresent
+    strategy:
+      fail-fast: false
+      matrix:
+        k8s-version:
+        - v1.31.0
+        - v1.30.4
+        - v1.29.8
+        mode:
+        - ha
+        - non-ha
+        include:
+        - k8s-version: v1.31.0
+          kind-version: v0.24.0
+          kind-image-sha: sha256:53df588e04085fd41ae12de0c3fe4c72f7013bba32a20e7325357a1ac94ba865
+          dapr-test-config-store: postgres
+        - k8s-version: v1.30.4
+          kind-version: v0.24.0
+          kind-image-sha: sha256:976ea815844d5fa93be213437e3ff5754cd599b040946b5cca43ca45c2047114
+          dapr-test-config-store: redis
+        - k8s-version: v1.29.8
+          kind-version: v0.24.0
+          kind-image-sha: sha256:d46b7aa29567e93b27f7531d258c372e829d7224b25e3fc6ffdefed12476d3aa
+          dapr-test-config-store: redis
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+    - name: Set up Go
+      id: setup-go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+    - name: Configure KinD
+      run: "cat > kind.yaml <<EOF\napiVersion: kind.x-k8s.io/v1alpha4\nkind: Cluster\n\
+        nodes:\n- role: control-plane\n  image: kindest/node:${{ matrix.k8s-version\
+        \ }}@${{ matrix.kind-image-sha }}\n- role: worker\n  image: kindest/node:${{\
+        \ matrix.k8s-version }}@${{ matrix.kind-image-sha }}\n- role: worker\n  image:\
+        \ kindest/node:${{ matrix.k8s-version }}@${{ matrix.kind-image-sha }}\n- role:\
+        \ worker\n  image: kindest/node:${{ matrix.k8s-version }}@${{ matrix.kind-image-sha\
+        \ }}\ncontainerdConfigPatches:\n- |-\n  [plugins.\"io.containerd.grpc.v1.cri\"\
+        .registry.mirrors.\"localhost:$REGISTRY_PORT\"]\n    endpoint = [\"http://$REGISTRY_NAME:$REGISTRY_PORT\"\
+        ]\nEOF\n\n# Log the generated kind.yaml for easy reference.\ncat kind.yaml\n\
+        \n# Set log target directories\necho \"DAPR_CONTAINER_LOG_PATH=$GITHUB_WORKSPACE/container_logs/${{\
+        \ matrix.k8s-version }}_${{ matrix.mode }}\" >> $GITHUB_ENV\necho \"DAPR_TEST_LOG_PATH=$GITHUB_WORKSPACE/test_logs/${{\
+        \ matrix.k8s-version }}_${{ matrix.mode }}\" >> $GITHUB_ENV\n"
+    - name: Create KinD Cluster
+      uses: helm/kind-action@v1.10.0
+      with:
+        config: kind.yaml
+        cluster_name: kind
+        version: ${{ matrix.kind-version }}
+    - name: Get KinD info
+      run: "kubectl cluster-info --context kind-kind\nNODE_IP=$(kubectl get nodes\
+        \ \\\n          -lkubernetes.io/hostname!=kind-control-plane \\\n        \
+        \  -ojsonpath='{.items[0].status.addresses[?(@.type==\"InternalIP\")].address}')\n\
+        echo \"MINIKUBE_NODE_IP=$NODE_IP\" >> $GITHUB_ENV\n"
+    - name: Setup test output
+      shell: bash
+      run: 'export TEST_OUTPUT_FILE_PREFIX=$GITHUB_WORKSPACE/test_report
+
+        echo "TEST_OUTPUT_FILE_PREFIX=$TEST_OUTPUT_FILE_PREFIX" >> $GITHUB_ENV
+
+        '
+    - name: Setup local registry
+      run: "# Run a registry.\ndocker run -d --restart=always \\\n  -p $REGISTRY_PORT:$REGISTRY_PORT\
+        \ --name $REGISTRY_NAME registry:2\n# Connect the registry to the KinD network.\n\
+        docker network connect \"kind\" $REGISTRY_NAME\n"
+    - name: Setup Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.3.4
+    - name: Build and push Dapr
+      run: 'make build-linux
+
+        make docker-build
+
+        make docker-push
+
+        '
+    - name: Build and push test apps
+      run: 'make build-push-e2e-app-all
+
+        '
+    - name: Setup Dapr
+      run: "make setup-helm-init\nmake create-test-namespace\nexport ADDITIONAL_HELM_SET=\"\
+        dapr_operator.logLevel=debug,dapr_operator.watchInterval=20s\"\nif [[ \"${{\
+        \ matrix.mode }}\" == \"ha\" ]]; then\n  export HA_MODE=true\nelse\n  export\
+        \ HA_MODE=false\nfi\nmake docker-deploy-k8s\n"
+    - name: Setup Redis
+      run: 'make setup-test-env-redis
+
+        '
+    - name: Setup Kafka
+      run: 'make setup-test-env-kafka
+
+        '
+    - name: Setup Zipkin
+      run: 'make setup-test-env-zipkin
+
+        '
+    - name: Setup postgres
+      run: 'make setup-test-env-postgres
+
+        '
+    - name: Setup test components
+      run: 'make setup-test-components
+
+        '
+      env:
+        DAPR_TEST_CONFIG_STORE: ${{ matrix.dapr-test-config-store }}
+    - name: Free up some diskspace
+      run: "docker image prune -a -f\n# Clean up some more\necho \"Listing 100 largest\
+        \ packages\"\ndpkg-query -Wf '${Installed-Size}\\t${Package}\\n' | sort -n\
+        \ | tail -n 100\ndf -h\necho \"Removing large packages\"\nsudo apt-get update\n\
+        \n# check if pkgs exist before removing them\nif dpkg -l | grep -q '^dotnet-.*';\
+        \ then\n  sudo apt-get remove -y '^dotnet-.*'\nfi\n\nif dpkg -l | grep -q\
+        \ '^llvm-.*'; then\n  sudo apt-get remove -y '^llvm-.*'\nfi\n\nif dpkg -l\
+        \ | grep -q 'php.*'; then\n  sudo apt-get remove -y 'php.*'\nfi\n\nif dpkg\
+        \ -l | grep -q 'temurin-*'; then\n  sudo apt-get remove -y 'temurin-*'\nfi\n\
+        \nif dpkg -l | grep -q 'microsoft-edge-stable'; then\n  sudo apt-get remove\
+        \ -y microsoft-edge-stable\nfi\n\nif dpkg -l | grep -q 'azure-cli'; then\n\
+        \  sudo apt-get remove -y azure-cli\nfi\n\nif dpkg -l | grep -q 'google-chrome-stable';\
+        \ then\n  sudo apt-get remove -y google-chrome-stable\nfi\n\nif dpkg -l |\
+        \ grep -q 'firefox'; then\n  sudo apt-get remove -y firefox\nfi\n\nif dpkg\
+        \ -l | grep -q '^powershell'; then\n  sudo apt-get remove -y powershell\n\
+        fi\n\nif dpkg -l | grep -q 'mono-devel'; then\n  sudo apt-get remove -y mono-devel\n\
+        fi\n\nsudo apt-get autoremove -y\nsudo apt-get clean\ndf -h\n\necho \"Removing\
+        \ large directories\"\n# deleting 15GB\nrm -rf /usr/share/dotnet/\ndf -h\n"
+    - name: Run tests
+      run: 'make test-e2e-all
+
+        '
+      env:
+        DAPR_TEST_CONFIG_STORE: ${{ matrix.dapr-test-config-store }}
+    - name: Save control plane logs
+      if: always()
+      run: 'make save-dapr-control-plane-k8s-logs
+
+        '
+    - name: Compress logs
+      if: always()
+      run: 'gzip --fast -r ${{ env.DAPR_CONTAINER_LOG_PATH }}
+
+        gzip --fast -r ${{ env.DAPR_TEST_LOG_PATH }}
+
+        '
+      shell: bash
+    - name: Upload container logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.k8s-version }}_${{ matrix.mode}}_container_logs
+        path: ${{ env.DAPR_CONTAINER_LOG_PATH }}
+        compression-level: 0
+    - name: Upload test logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.k8s-version }}_${{ matrix.mode}}_test_logs
+        path: ${{ env.DAPR_TEST_LOG_PATH }}
+        compression-level: 0
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.k8s-version }}_${{ matrix.mode }}_test_e2e.json
+        path: ${{ env.TEST_OUTPUT_FILE_PREFIX }}_e2e.*
