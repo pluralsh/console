@@ -211,7 +211,7 @@ export function toolCallDisplayTitle(
     case 'grep':
       return 'Grep'
     case 'subagent':
-      return 'Subagent'
+      return formatSubagentTitle(args)
     case 'subagent_result':
       return 'Result'
     case 'enable_tools':
@@ -292,10 +292,13 @@ export function getSubagentPrompt(args?: ToolArguments): string {
   return typeof args.prompt === 'string' ? args.prompt : ''
 }
 
-function formatSubagentSubtitle(args?: ToolArguments): string {
+export function formatSubagentTitle(args?: ToolArguments): string {
   const role = startCase(getSubagentRole(args).replace(/[_-]+/g, ' '))
-  const prompt = getSubagentPrompt(args)
-  return [role, prompt].filter(Boolean).join(' · ')
+  return role ? `${role} subagent` : 'Subagent'
+}
+
+function formatSubagentSubtitle(args?: ToolArguments): string {
+  return getSubagentPrompt(args)
 }
 
 export function getCommand(toolName: string, args?: ToolArguments): string {

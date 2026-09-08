@@ -34,6 +34,11 @@ describe('toolCallDisplayTitle', () => {
     expect(toolCallDisplayTitle('subagent', 'workbench_subagent')).toBe(
       'Subagent'
     )
+    expect(
+      toolCallDisplayTitle('subagent', 'workbench_subagent', {
+        subagent: 'coding',
+      })
+    ).toBe('Coding subagent')
     expect(toolCallDisplayTitle('read', 'Read')).toBe('Read')
     expect(toolCallDisplayTitle('python_sandbox', 'python_sandbox')).toBe(
       'Python sandbox'
@@ -55,7 +60,7 @@ describe('toolCallDisplaySubtitle', () => {
         subagent: 'infrastructure',
         prompt: 'Find CrashLoopBackOff pods in production',
       })
-    ).toBe('Infrastructure · Find CrashLoopBackOff pods in production')
+    ).toBe('Find CrashLoopBackOff pods in production')
   })
 
   it('prefers path and query over the raw tool name', () => {

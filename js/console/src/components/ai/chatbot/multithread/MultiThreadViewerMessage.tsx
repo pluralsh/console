@@ -94,10 +94,7 @@ export function SimpleToolCall({
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
   const title =
-    customTitle ??
-    (isPending && kind === 'subagent'
-      ? 'Waiting for subagent'
-      : toolCallDisplayTitle(kind, toolName, args))
+    customTitle ?? toolCallDisplayTitle(kind, toolName, args)
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
   const label = customLabel ?? (
     <ToolCallLineLabel
