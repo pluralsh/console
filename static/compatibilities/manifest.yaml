@@ -27,6 +27,7 @@ names:
 - linkerd
 - longhorn
 - metrics-server
+- node-feature-discovery
 - opentelemetry-operator
 - rook
 - strimzi-kafka

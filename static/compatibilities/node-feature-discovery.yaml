@@ -1,0 +1,61 @@
+icon: https://kubernetes-sigs.github.io/node-feature-discovery/v0.19/assets/images/nfd/favicon.svg
+git_url: https://github.com/kubernetes-sigs/node-feature-discovery
+release_url: https://github.com/kubernetes-sigs/node-feature-discovery/releases/tag/v{vsn}
+helm_repository_url: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+versions:
+- version: 0.19.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.19.0
+  images: ['registry.k8s.io/nfd/node-feature-discovery:v0.19.0']
+- version: 0.18.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.18.0
+  images: ['registry.k8s.io/nfd/node-feature-discovery:v0.18.0']
+- version: 0.17.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.17.0
+  images: ['registry.k8s.io/nfd/node-feature-discovery:v0.17.0']
+- version: 0.16.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.16.2
+  images: ['registry.k8s.io/nfd/node-feature-discovery:v0.16.2']
+- version: 0.16.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.16.0
+  images: ['registry.k8s.io/nfd/node-feature-discovery:v0.16.0']
+- version: 0.15.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.15.0
+  images: ['registry.k8s.io/nfd/node-feature-discovery:v0.15.0']
+- version: 0.14.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.14.0
+  images: ['registry.k8s.io/nfd/node-feature-discovery:v0.14.0']
