@@ -44,6 +44,13 @@ def stable_version(value):
     return tuple(map(int, value.split(".")))
 
 
+def recorded_ceiling(row):
+    kube = row.get("kube", [])
+    if not isinstance(kube, list) or any(not isinstance(value, str) or not re.fullmatch(r"1\.\d+", value) for value in kube):
+        raise ValueError("Invalid recorded Kubernetes versions")
+    return max(kube, key=lambda value: int(value.split(".")[1]), default=None)
+
+
 def _get(url, headers=None):
     response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
@@ -188,19 +195,37 @@ def scrape():
         recorded = {row["version"]: row for row in existing["versions"]}
         if len(recorded) != len(existing["versions"]):
             raise ValueError("Duplicate existing ExternalDNS versions")
-        versions = released_versions(_get(releases_url).content)
+        versions = set(released_versions(_get(releases_url).content))
+        # Stored nonlegacy releases may have fallen off the bounded release list.
+        # Their immutable matrices still determine whether a new ceiling extends
+        # an explicitly open-ended range. Legacy history remains untouched.
+        versions.update(version for version in recorded
+                        if stable_version(version) and stable_version(version)[:2] >= (0, 22))
+        ceiling = current_kube_version()
         charts = get_chart_versions(app_name)
         backfills = []
         for version, original in recorded.items():
             chart = charts.get(version)
             if not original.get("chart_version") and stable_version(chart):
                 backfills.append(dict(deepcopy(original), chart_version=chart))
-        rows = []
-        for version in versions:
-            if version in recorded:
+        rows, refreshed = [], []
+        for version in sorted(versions, key=stable_version, reverse=True):
+            original = recorded.get(version)
+            if original and stable_version(version)[:2] < (0, 22):
+                continue
+            if original and recorded_ceiling(original) == ceiling:
                 continue
             kube = supported_kubernetes(_get(matrix_url.format(version=version)).content,
-                                        version, current_kube_version())
+                                        version, ceiling)
+            if original:
+                if kube != original["kube"]:
+                    # Retain a simultaneous exact chart backfill on this version
+                    # as well as all saved image, summary and EOL metadata.
+                    row = deepcopy(next((row for row in backfills if row["version"] == version), original))
+                    row["kube"] = kube
+                    refreshed.append(row)
+                    backfills = [row for row in backfills if row["version"] != version]
+                continue
             row = {"version": version, "kube": kube, "requirements": [], "incompatibilities": []}
             chart = charts.get(version)
             if stable_version(chart):
@@ -211,10 +236,11 @@ def scrape():
                     row["summary"]["helm_changes"] = "Official chart packaging is available; review the application migration constraints below."
             rows.append(row)
         combined = deepcopy(recorded)
-        combined.update({row["version"]: row for row in backfills + rows})
+        combined.update({row["version"]: row for row in backfills + refreshed + rows})
         retained = {row["version"] for row in reduce_versions(list(combined.values()))}
         rows = [row for row in rows if row["version"] in retained]
         backfills = [row for row in backfills if row["version"] in retained]
+        refreshed = [row for row in refreshed if row["version"] in retained]
         for row in rows:
             try:
                 row["images"] = [verified_image(row["version"])]
@@ -224,5 +250,5 @@ def scrape():
     except (requests.RequestException, ValueError, KeyError, TypeError, yaml.YAMLError) as error:
         print_error(f"Cannot update ExternalDNS compatibility: {error}")
         return
-    if backfills or rows:
-        update_compatibility_info(target_file, backfills + rows)
+    if backfills or refreshed or rows:
+        update_compatibility_info(target_file, backfills + refreshed + rows)

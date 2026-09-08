@@ -14,9 +14,13 @@ The scraper discovers stable application releases in the latest 100 GitHub
 release records, excluding draft/prerelease/chart-only tags. New releases read
 their own tagged README matrix. The explicitly compatible open Kubernetes range
 is capped at the repository's configured `KUBE_VERSION`, currently 1.36; this is
-not a claim that 1.36 is the newest upstream Kubernetes version. Recorded history
-is preserved. Missing exact charts can be filled later, even for legacy versions
-outside the current release list, without replacing stored compatibility.
+not a claim that 1.36 is the newest upstream Kubernetes version. Recorded legacy
+history is preserved. If the configured ceiling differs from the highest saved supported
+minor, recorded releases from 0.22 onward recheck their own immutable matrices.
+An explicit finite range is never extended beyond its source. Only changed
+Kubernetes lists are updated; summary/images/EOL and any simultaneous exact chart
+backfill are preserved. Unchanged ceilings produce no writes. Missing exact charts
+can be filled later, even for legacy versions outside the current release list, without replacing stored compatibility.
 
 Sources verified on 2026-09-08:
 

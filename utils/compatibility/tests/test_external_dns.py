@@ -32,11 +32,11 @@ class ExternalDNSTests(unittest.TestCase):
         self.sources = {scraper.releases_url: response([release("0.22.0"), release("0.21.0")]),
             scraper.matrix_url.format(version="0.22.0"): SimpleNamespace(content=MATRIX)}
 
-    def run_scrape(self, failure=None):
+    def run_scrape(self, failure=None, ceiling="1.36"):
         with patch.object(scraper, "read_yaml", return_value=self.existing), \
                 patch.object(scraper, "_get", side_effect=lambda url, *args: self.sources[url]), \
                 patch.object(scraper, "get_chart_versions", return_value=self.charts), \
-                patch.object(scraper, "current_kube_version", return_value="1.36"), \
+                patch.object(scraper, "current_kube_version", return_value=ceiling), \
                 patch.object(scraper, "verified_image", side_effect=failure,
                              return_value=scraper.image_name + ":v0.22.0@sha256:" + "a"*64) as image, \
                 patch.object(scraper, "print_warning"), patch.object(scraper, "print_error"), \
@@ -113,6 +113,38 @@ class ExternalDNSTests(unittest.TestCase):
         write, image = self.run_scrape()
         write.assert_not_called()
         image.assert_not_called()
+
+    def test_recorded_open_range_refreshes_new_ceiling_preserving_metadata_then_noops(self):
+        self.save(self.run_scrape()[0].call_args.args[1])
+        saved = self.existing["versions"][0]
+        saved.update(eolAt="2027-01-01", requirements=[{"name": "keep", "version": "1.0"}])
+        before = deepcopy(self.existing)
+        # The release may already have fallen off the latest 100 release records.
+        self.sources[scraper.releases_url] = response([])
+        write, image = self.run_scrape(ceiling="1.37")
+        rows = write.call_args.args[1]
+        self.assertEqual(rows, [dict(saved, kube=["1.37"] + saved["kube"])])
+        self.assertEqual(self.existing, before)
+        image.assert_not_called()
+        self.save(rows)
+        self.assertEqual(self.existing["versions"][1], before["versions"][1])
+        self.sources = {scraper.releases_url: response([])}
+        self.run_scrape(ceiling="1.37")[0].assert_not_called()
+
+    def test_ceiling_refresh_merges_a_simultaneous_exact_chart_backfill(self):
+        self.save(self.run_scrape()[0].call_args.args[1])
+        saved = deepcopy(self.existing["versions"][0])
+        self.charts["0.22.0"] = "1.22.2"
+        rows = self.run_scrape(ceiling="1.37")[0].call_args.args[1]
+        self.assertEqual(rows, [dict(saved, kube=["1.37"] + saved["kube"], chart_version="1.22.2")])
+        self.save(rows)
+        self.run_scrape(ceiling="1.37")[0].assert_not_called()
+
+    def test_finite_matrix_range_does_not_extend_with_a_new_ceiling(self):
+        self.save(self.run_scrape()[0].call_args.args[1])
+        self.sources[scraper.matrix_url.format(version="0.22.0")] = SimpleNamespace(
+            content=MATRIX.replace("≥ 1.33".encode(), "≥ 1.33 and ≤ 1.36".encode()))
+        self.run_scrape(ceiling="1.37")[0].assert_not_called()
 
     def test_delayed_exact_chart_backfill_preserves_metadata_and_noops_next_run(self):
         self.save(self.run_scrape()[0].call_args.args[1])
