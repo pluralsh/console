@@ -20,8 +20,8 @@ defmodule Console.Otel.Tracing do
   end
 
   defp configured_endpoint do
-    System.get_env("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") ||
-      System.get_env("OTEL_EXPORTER_OTLP_ENDPOINT")
+    Application.get_env(:opentelemetry_exporter, :otlp_traces_endpoint) ||
+      Application.get_env(:opentelemetry_exporter, :otlp_endpoint)
   end
 
   defp setup_instrumentation do
