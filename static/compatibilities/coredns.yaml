@@ -1,7 +1,15 @@
 icon: https://avatars.githubusercontent.com/u/21110084?s=200&v=4
+git_url: https://github.com/coredns/coredns
 release_url: https://github.com/coredns/coredns/releases/tag/{vsn}
 helm_repository_url: https://coredns.github.io/helm
 versions:
+- version: 1.13.1
+  kube: ['1.35']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.46.2
+  images: ['coredns/coredns:1.13.1']
 - version: 1.12.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
