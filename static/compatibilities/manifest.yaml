@@ -1,6 +1,7 @@
 names:
 - kubevirt
 - argo-rollouts
+- artifact-hub
 - aws-ebs-csi-driver
 - aws-efs-csi-driver
 - aws-load-balancer-controller
