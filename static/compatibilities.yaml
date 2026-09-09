@@ -44,21 +44,69 @@ addons:
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v1.9.1 is a minor security release addressing CVE-2026-35469 and
+          includes dependency updates (notably gRPC)., 'v1.10.0 is primarily a stability/bugfix
+          release for the controller, notifications, experiments, and dashboard, with
+          performance improvements (less pod listing) and safer handling to prevent
+          panics.']
+      breaking_changes: []
     chart_version: 2.43.0
     images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
   - version: 1.9.1
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Bumps Argo Rollouts controller image to v1.9.1 (minor security
+          release for CVE-2026-35469)., 'install.yaml change: readinessProbe removed
+          from the Rollouts controller manifest (affects how the controller pod reports
+          readiness).', 'Logging/redaction behavior updated: isolated logger for redactor;
+          controller now honors stderrthreshold when logtostderr is enabled.', 'Dashboard
+          UI fix: guard against null metric chart tooltip values.', 'Traffic routing
+          fix retained/backported: ensure early SetWeight runs after checkReplicasAvailable
+          (relevant to canary traffic routing flows).', 'Dependency/packaging updates:
+          grpc dependency updated; go toolchain restored to go 1.24.9 on release-1.9
+          after a bad cherry-pick (build/release pipeline).']
+      features: [Security patch release addressing CVE-2026-35469 (no new user-facing
+          features beyond security hardening).]
+      breaking_changes: ['Controller readinessProbe removed from the default install
+          manifest; if you relied on that probe for health gating, review/replace
+          with appropriate readiness/health checks (e.g., ServiceMonitor/metrics or
+          custom probes).']
     chart_version: 2.42.0
     images: ['quay.io/argoproj/argo-rollouts:v1.9.1']
   - version: 1.9.0
     kube: ['1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Traffic routing reliability improvements, especially for Istio:
+          better DestinationRule handling, ordering of updates vs SetWeight, and safer
+          rollback/early-weight behavior.', 'New rollout/analysis behaviors and tunables:
+          available replica pods threshold, ability to allow full promotion once a
+          replica progress threshold is met, and start/end time support for Kayenta
+          queries.', 'Dashboard UX improvements: surface API/action failure notifications,
+          fix blank step display when setWeight=0, respect --root-path for /api mux,
+          and avoid dialing 0.0.0.0.', 'Experiment and analysis enhancements: expose
+          scaleDownDelaySeconds on experiments created via rollouts, and make AnalysisRunMetadata
+          a pointer to avoid empty object churn; controller can skip analysis runs
+          when no templates are specified.', "Operational/security upkeep: base image\
+          \ moved Debian 11\u219212, security fixes (incl. CVE-2023-46402), and upgrades\
+          \ to Go/Kubernetes libraries and other deps."]
+      breaking_changes: ['`clusterScope` configuration/flag semantics changed to use
+          `*bool` (tri-state). Helm values or manifests that set this may need adjustment
+          (e.g., distinguish unset vs explicitly false).', 'Controller/CRD behavior
+          changes may affect GitOps diffs: removal of `preserveUnknownFields` in the
+          CRD to avoid Argo CD OutOfSync; expect CRD diffs on upgrade if you manage
+          CRDs separately.', "Potential image/runtime change: Debian 11\u219212 base\
+          \ image could impact environments relying on specific OS packages/certs\
+          \ or strict image scanning/allowlists."]
     chart_version: 2.41.0
     images: ['quay.io/argoproj/argo-rollouts:v1.9.0']
   - version: 1.8.0
@@ -11198,6 +11246,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+    chart_version: 1.23.0
   - version: 1.22.1
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -14719,6 +14768,405 @@ addons:
     chart_version: 1.9.0
     images: ['quay.io/cilium/cilium:v1.9.0', 'quay.io/cilium/operator-generic:v1.9.0']
   name: cilium
+- icon: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/static/logo.svg
+  git_url: https://github.com/chaos-mesh/chaos-mesh
+  release_url: https://github.com/chaos-mesh/chaos-mesh/releases/tag/v{vsn}
+  helm_repository_url: https://charts.chaos-mesh.org
+  chart_name: chaos-mesh
+  versions:
+  - version: 2.8.4
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- **New capability:** Helm chart can now deploy **extra Kubernetes\
+        \ objects** (see #4649). If you use this, ensure your values reference the\
+        \ chart\u2019s render helper correctly; **v2.8.4 fixes** an `include`/render-function\
+        \ issue for extra objects (#4780).\n- **Default change:** `enableCtrlServer`\
+        \ is now **`false` by default** in the Helm chart (#4702). If you relied on\
+        \ the controller server being enabled previously, you must explicitly set\
+        \ this value back to `true`.\n- **Template fix:** Prior helm values references\
+        \ in the Prometheus template were wrong and were fixed (#4543). If you had\
+        \ local chart patches/workarounds, re-check and drop them if no longer needed.\n"
+      chart_updates: ['Helm chart enhancement: support deploying extra Kubernetes
+          objects via chart templates (#4649).', 'Chart behavior change: `enableCtrlServer`
+          default set to `false` (#4702).', 'Chart fix in v2.8.4: extra objects template
+          `include` now uses the correct render function (#4780).', 'Prometheus template:
+          corrected wrong helm values references (#4543).']
+      features: ["Helm chart can deploy additional, user-supplied Kubernetes manifests\
+          \ (\u201Cextra objects\u201D), reducing the need for separate manifests/kustomize\
+          \ for companion resources.", 'Workflows: labels can now be added to `workflow.spec.templates.task`,
+          improving filtering/selection and metadata consistency.']
+      breaking_changes: [Helm chart default for `enableCtrlServer` changed to `false`;
+          installs/upgrades that previously depended on the controller server being
+          enabled must now set it explicitly to preserve behavior., "Operational/tooling\
+          \ change: `chaosctl` was removed; if your workflows/scripts used it, you\u2019\
+          ll need an alternative (e.g., kubectl + CRDs/API or documented CLI replacements)."]
+    chart_version: 2.8.4
+    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.4',
+      'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.4', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.4']
+  - version: 2.8.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- **New:** Helm chart can now deploy **extra Kubernetes objects**\
+        \ (e.g., additional ConfigMaps/Secrets/Policies) as part of the release. Review\
+        \ the new values for \u201Cextra objects\u201D support introduced in #4649\
+        \ and decide if you want to use it.\n- **Changed default:** `enableCtrlServer`\
+        \ is now **`false` by default** in the Helm chart (#4702). If you relied on\
+        \ the controller server being enabled (or any features that depend on it),\
+        \ you must explicitly set the value back to `true` during/after the upgrade.\n\
+        - **Template/values fixes:** Prometheus template had wrong helm-value references\
+        \ (#4543). If you have custom Prometheus/ServiceMonitor values, re-check that\
+        \ they still render as expected after upgrading.\n- **Dashboard service rendering:**\
+        \ Chart now supports **label templates** when rendering the `chaos-dashboard`\
+        \ Service (#4708). If you customized service labels, re-validate your values\
+        \ against the new behavior.\n- **Schema/docs:** Usage around `helm-values-schema-json`\
+        \ was updated (#4719). If you validate values via schema in CI, regenerate/refresh\
+        \ any pinned schema expectations."
+      chart_updates: ['Helm chart: support deploying extra Kubernetes objects (#4649).',
+        'Helm chart: `enableCtrlServer` default changed to `false` (#4702).', 'Helm
+          chart: fix wrong helm values references in Prometheus template (#4543).',
+        'Helm chart: use label templates for chaos-dashboard Service rendering (#4708).',
+        'Docs/tooling: update guidance around helm-values-schema-json (#4719).']
+      features: ['Helm chart can deploy extra Kubernetes objects as part of the release,
+          reducing the need for separate manifests.', 'Workflows add labels to `workflow.spec.templates.task`,
+          improving organization/selection in tooling and UIs.']
+      breaking_changes: ['`enableCtrlServer` now defaults to `false` in the Helm chart;
+          clusters depending on the controller server must explicitly enable it after
+          upgrading.', '`chaosctl` was removed; any operational scripts or runbooks
+          using chaosctl must be migrated to other supported interfaces (e.g., kubectl/apply
+          CRs, Dashboard/API).']
+    chart_version: 2.8.0
+    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.0',
+      'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.0']
+  - version: 2.7.0
+    kube: ['1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- **CRDs must be updated as part of the upgrade** (explicitly\
+        \ called out in the v2.7.0 notes).\n- **New/changed Helm values (potential\
+        \ action items):**\n  - `gcp.auth` **value structure changed** to an object\
+        \ that includes `existingSecret` (was a different/flat structure previously).\
+        \ Review any existing GCP auth configuration and update values accordingly.\
+        \ *(PR #4303)*\n  - **ServiceAccount creation can now be conditional** for\
+        \ `chaos-controller-manager` and you can add **annotations** on ServiceAccounts\
+        \ for both `chaos-controller-manager` and `chaos-daemon`. If you rely on custom\
+        \ SAs/IRSA/workload identity, review these toggles/annotations. *(PRs #4390,\
+        \ #4106)*\n  - **chaos-daemon `securityContext` is now configurable** via\
+        \ Helm values. If you previously patched manifests, move those settings into\
+        \ values. *(PR #4390)*\n  - **Dashboard can be deployed under a subpath**;\
+        \ Helm also allows **templating** `dashboard.rootUrl`. If you have ingress/path\
+        \ routing, set these to match. *(PRs #4093, #4370)*\n  - **Dashboard Service:**\
+        \ support `loadBalancerSourceRanges`. If using a `LoadBalancer` service, you\
+        \ can now restrict source CIDRs via values. *(PR #4172)*\n  - **Dashboard\
+        \ sidecars** supported via Helm values. *(PR #4164)*\n  - **Chaos DNS server:**\
+        \ configurable pod affinities via values. *(PR #4260)*\n  - **Chaos Daemon\
+        \ metrics scraping can be toggled** (useful if you don\u2019t run Prometheus\
+        \ or want to reduce noise). *(PR #4488)*\n  - `values.schema.json` added/generated\
+        \ for values validation; use `helm lint`/schema validation in CI to catch\
+        \ invalid values early. *(PRs #4205, #4435)*\n- **Behavioral default fix to\
+        \ be aware of:** when HA is not enabled, `replicas` is automatically set to\
+        \ `1` (could affect anyone who previously set a different replica count without\
+        \ HA). *(PR #4079)*"
+      chart_updates: ['Helm chart enhancements: conditional ServiceAccount creation,
+          SA annotations, chaos-daemon pod securityContext support. (#4390, #4106)',
+        'Helm chart: chaos-dashboard subpath support, templated `rootUrl`, sidecar
+          containers, and `loadBalancerSourceRanges` for the dashboard Service. (#4093,
+          #4370, #4164, #4172)', 'Helm chart: GCP auth values refactor to support
+          `existingSecret`. (#4303)', 'Helm chart: configurable chaos-dns-server pod
+          affinities. (#4260)', 'Helm chart: option to toggle Chaos Daemon metric
+          scraping. (#4488)', 'Chart now includes/generated `values.schema.json` for
+          values validation. (#4205, #4435)']
+      features: [Chaos Dashboard can now be hosted under a subpath (useful for ingress
+          path-based routing) and `rootUrl` can be templated via Helm., 'NetworkChaos
+          now supports additional rate units and netem/rate support, expanding traffic
+          shaping options.', Multi-cluster/remote status watching improvements allow
+          syncing remote chaos experiment status to a local cluster., 'You can read
+          the dashboard database connection string from a Kubernetes Secret, improving
+          credential management.', 'More Helm flexibility: dashboard sidecars, restricted
+          LB source ranges, configurable DNS server affinities, and optional Chaos
+          Daemon metrics scraping.']
+      breaking_changes: ['Helm values change: `gcp.auth` is now an object with an
+          `existingSecret` key; existing values files using the old structure will
+          need to be updated. (#4303)']
+    chart_version: 2.7.0
+    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.7.0',
+      'ghcr.io/chaos-mesh/chaos-dashboard:v2.7.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.7.0']
+  - version: 2.6.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- **New default component**: Chaos Mesh now deploys the **Chaos\
+        \ DNS Server by default**. If you don\u2019t need DNS fault injection, explicitly\
+        \ set:\n  ```yaml\n  dnsServer:\n    create: false\n  ```\n- **Webhook port\
+        \ default changed**: Helm chart defaults the webhook port to **10250**. Verify\
+        \ this doesn\u2019t conflict with cluster policies/firewalls and that any\
+        \ NetworkPolicies/allowlists/reference docs are updated accordingly.\n- **Chaos\
+        \ Daemon capabilities configurable via values**: Capabilities for `chaos-daemon`\
+        \ can now be set via Helm values (instead of being fixed). Review your current\
+        \ security posture (PodSecurity/PSA, OPA/Gatekeeper, SCC) and ensure required\
+        \ capabilities are granted/allowed.\n"
+      chart_updates: ['Chaos DNS Server is included and enabled by default (opt-out
+          via `dnsServer.create: false`).', Helm chart default webhook port changed
+          to 10250., Chart supports setting `chaos-daemon` Linux capabilities via
+          Helm values. (Review/align with your security policies.)]
+      features: [Offline Helm chart installation support for multi-cluster deployments.,
+        Chaos DNS Server now deploys by default to enable DNS-fault simulation out
+          of the box (can be disabled via values).]
+      breaking_changes: [CoreDNS listen port changed from 53 to 5353; any workloads/tests
+          assuming port 53 for the embedded DNS component must be updated., 'Helm
+          default webhook port changed to 10250; may require updating firewall rules,
+          NetworkPolicies, or documentation if you referenced the old port.', 'Removal
+          of the unused `inject-v1-pod` webhook and `crd-v1beta1.yaml`; if you had
+          automation referencing these artifacts, update it.']
+    chart_version: 2.6.0
+    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.6.0',
+      'ghcr.io/chaos-mesh/chaos-dashboard:v2.6.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.6.0']
+  - version: 2.5.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- **New values added:** `controller.securityContext` and `dashboard.securityContext`
+        (introduced in chart enhancement #3603). If your cluster enforces Pod Security
+        Standards / restricted policies, set these explicitly to match your requirements.
+
+        - No other Helm values changes were noted in the provided release notes.'
+      chart_updates: ['Helm chart enhancement: added `controller.securityContext`
+          and `dashboard.securityContext` values to configure pod/container security
+          context (#3603).']
+      features: ['Multi-Cluster Chaos Experiments support, enabling chaos experiments
+          targeting multiple Kubernetes clusters (#3342 #3384 #3414 #3453).', 'HTTPChaos
+          now supports TLS, allowing fault injection/testing for HTTPS endpoints (#3549).',
+        The refined "New Workflow" UI is enabled by default in the dashboard (#3718).]
+      breaking_changes: []
+    chart_version: 2.5.0
+    images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.5.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.5.0',
+      'ghcr.io/chaos-mesh/chaos-mesh:v2.5.0']
+  - version: 2.4.0
+    kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Release notes provided are for v2.3.0 only; no v2.4.0 app/helm
+          chart changelog included, so cannot accurately summarize changes for upgrade
+          2.3.0 -> 2.4.0 yet.']
+      features: [v2.3.0 adds BlockChaos implementation in chaos-daemon., v2.3.0 adds
+          AArch64 support for TimeChaos.]
+      breaking_changes: []
+    chart_version: 2.4.0
+    images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.4.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.4.0',
+      'ghcr.io/chaos-mesh/chaos-mesh:v2.4.0']
+  - version: 2.3.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- Helm charts: support latest API version of **dashboard ingress**
+        (verify `apiVersion`/schema for your Ingress objects and values) (#3066)
+
+        - Helm charts: add `chaosDaemon.updateStrategy` to configure the `DaemonSetUpdateStrategy`
+        for **chaos-daemon** (#3108)
+
+        - Helm charts: **relax** `allowedHostPaths` in the chaos-daemon **PodSecurityPolicy**
+        (if you still use PSPs) (#3350)
+
+        - Helm charts: rename `validate-auth` to `chaos-mesh-validation-auth` (#3193)
+
+        - Certificates: add `spec.privateKey.rotationPolicy` to comply with **cert-manager
+        1.8** requirements (#3325)
+
+        - Helm charts metadata/packaging changes: Artifact Hub annotations (#3355);
+        chart uses `0.0.0` as chart version and appVersion in some context (#3311)
+
+        - Installer/scripts: `install.sh` updated for Kubernetes >= 1.24 (#3177)'
+      chart_updates: ['Dashboard/Ingress templates updated to the latest Ingress API
+          version (expect template changes around `networking.k8s.io/v1`, `pathType`,
+          and backend service fields).', chaos-daemon DaemonSet template now supports
+          configurable update strategy via `chaosDaemon.updateStrategy`., PSP template
+          for chaos-daemon adjusted to permit more host paths (relevant only on clusters
+          where PSP is enabled)., 'Helm component/resource naming updated: validation
+          auth component renamed from `validate-auth` to `chaos-mesh-validation-auth`.',
+        Certificate manifests/CRs updated to include `spec.privateKey.rotationPolicy`
+          for cert-manager compatibility., Chart metadata updated with Artifact Hub
+          annotations; some version fields may appear as `0.0.0` depending on packaging
+          workflow.]
+      features: ['BlockChaos is now implemented in chaos-daemon, enabling block I/O
+          fault injection support end-to-end.', 'TimeChaos adds AArch64/arm64 support,
+          improving compatibility for ARM-based nodes.']
+      breaking_changes: ['If you have existing Helm values or external references
+          to the `validate-auth` component, they must be updated to the new name `chaos-mesh-validation-auth`
+          (otherwise upgrades may fail or leave orphaned resources).', Ingress manifests/values
+          may need adjustment due to the move to the latest Ingress API version (fields
+          like backend/service and `pathType` are stricter in `networking.k8s.io/v1`).,
+        'On clusters using cert-manager >= 1.8, certificate resources may require/expect
+          `spec.privateKey.rotationPolicy`; older custom manifests without it could
+          be rejected depending on policy/webhooks.']
+    chart_version: 2.3.0
+    images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.3.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.3.0',
+      'ghcr.io/chaos-mesh/chaos-mesh:v2.3.0']
+  - version: 2.2.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- **RBAC changes for chaos-dashboard**: the Helm chart now creates/uses\
+        \ additional/specific RBAC resources for `chaos-dashboard` ([#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)).\
+        \ Review any custom `rbac.*` values or existing ClusterRole/Role overrides\
+        \ to avoid conflicts.\n- **Admission webhook CA bundle**: the chart now specifies\
+        \ a CA bundle for admission webhooks ([#3190](https://github.com/chaos-mesh/chaos-mesh/pull/3190)).\
+        \ If you manage certificates/webhooks externally (cert-manager, custom CA\
+        \ injection), verify compatibility and whether you need to override/disable\
+        \ the chart\u2019s CA bundle behavior."
+      chart_updates: ['Helm chart updated to use certain RBAC resources for `chaos-dashboard`
+          ([#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)).', 'Helm chart
+          updated to specify a CA bundle for admission webhooks ([#3190](https://github.com/chaos-mesh/chaos-mesh/pull/3190)).']
+      features: ['AzureChaos added: can shutdown/restart Azure VMs and detach disks
+          for Azure-based fault injection.', 'StatusCheck introduced: can monitor
+          application health and abort workflows/experiments when the app becomes
+          unhealthy.', '`chaosctl` adds outbound force recovery to more easily clean
+          up experiments from outside the cluster.', "Chaos Dashboard preview adds\
+          \ a drag-and-drop \u201CNew Workflow\u201D page for easier workflow authoring."]
+      breaking_changes: []
+    chart_version: 2.2.0
+    images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.2.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.2.0',
+      'ghcr.io/chaos-mesh/chaos-mesh:v2.2.0']
+  - version: 2.1.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [PhysicalMachineChaos added to inject node-level chaos via chaosd;
+          dashboard can create it., JVMChaos refined with Byteman support; dashboard
+          creation supported., Leader election enabled for chaos-controller-manager
+          for HA deployments., NetworkChaos can select different network interfaces.,
+        'Chaos Dashboard workflow UX improvements: create HTTP requests via workflow;
+          view related events and YAML for workflows.', Chaos Dashboard integrates
+          GCP authentication., Container images migrated from Docker Hub to GitHub
+          Container Registry (GHCR).]
+      breaking_changes: ["Image registry change (Docker Hub \u2192 GHCR) may require\
+          \ updating image repository/credentials/network allowlists and mirroring\
+          \ policies.", 'Enabling leader election for controller manager may change
+          deployment expectations (e.g., multiple replicas, RBAC/leases); verify HA
+          settings during upgrade.']
+    chart_version: 2.1.0
+    images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.1.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.1.0',
+      'ghcr.io/chaos-mesh/chaos-mesh:v2.1.0']
+  - version: 2.0.0
+    kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- **chaos-daemon runs privileged by default (v1.2.0)**: confirm
+        your security policy/PSP/OPA allows privileged pods; if not, set the chart
+        value that disables privileged mode.
+
+        - **Registry configuration added (v1.2.0)**: if you use a private registry/mirror,
+        populate the new registry-related values.
+
+        - **Dashboard enabled by default (v1.2.0)**: decide whether you want the dashboard
+        exposed; if not, explicitly disable it in values.
+
+        - **Namespace naming constraint (v1.2.0)**: chart install was restricted to
+        namespaces with numbers only per notes; verify your target namespace meets
+        any chart validation.
+
+        - **Env var name fix (v2.0.0)**: if you previously set dashboard/controller
+        env vars via values, re-check names after upgrade because a rename/fix may
+        break overrides.
+
+        - **Helm upgrade behavior fix (v2.0.0)**: previous versions could recreate
+        the Chaos Dashboard on `helm upgrade`; after upgrading, confirm your dashboard
+        Service/Ingress/credentials remain as expected, but expect behavior to be
+        corrected going forward.'
+      chart_updates: ['v1.2.0 chart defaults changed: chaos-daemon privileged by default;
+          dashboard enabled by default; added registry config; additional install-time
+          validation around namespace naming.', 'v2.0.0 chart: fixed environment variable
+          naming; fixed `helm upgrade` behavior that could recreate the dashboard.']
+      features: [AWSChaos added (v1.2.0) to simulate failures on AWS nodes., TLS authentication
+          support for chaos-daemon added (v1.2.0)., Workflow introduced (v2.0.0) to
+          orchestrate multiple chaos experiments/schedules serially or in parallel.,
+        Schedule introduced (v2.0.0) to run chaos experiments via cron-like scheduling.,
+        HTTPChaos added (v2.0.0) for server-side HTTP request/response hijacking.,
+        Dashboard gains search across workflows/schedules/experiments/archives and
+          a workflow editor (v2.0.0).]
+      breaking_changes: [Major controller refactor in v2.0.0 implies CRDs/specs and
+          behavior may have changed; validate existing experiment manifests and automation
+          against the new API and controller semantics before upgrading in production.,
+        New concepts (Schedule/Workflow) may change how users model recurring or orchestrated
+          chaos; existing ad-hoc automation may need adjustment to use or avoid these
+          resources., Helm environment variable name fixes in v2.0.0 can break existing
+          values-based env overrides; review your `values.yaml` for any `env` settings
+          and reconcile names.]
+    chart_version: 2.0.0
+    images: ['pingcap/chaos-daemon:v2.0.0', 'pingcap/chaos-dashboard:v2.0.0', 'pingcap/chaos-mesh:v2.0.0']
+  - version: 1.2.0
+    kube: ['1.15', '1.14', '1.13', '1.12']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values/behavior changes to account for\n- **chaos-daemon\
+        \ runs privileged by default**. There is now a Helm value to disable privileged\
+        \ mode. Review your cluster\u2019s PSP/OPA/PodSecurity settings and decide\
+        \ whether to keep privileged or explicitly disable it.\n- **Registry configuration\
+        \ added**. If you use private registries/mirrors, configure the new registry\
+        \ settings in the chart.\n- **Namespace naming restriction**: installing Chaos\
+        \ Mesh into a namespace that contains numbers only is restricted/blocked;\
+        \ ensure your target namespace is valid (alphanumeric with letters).\n- **Chaos\
+        \ Dashboard enabled by default**. If you previously disabled it or don\u2019\
+        t want it exposed, explicitly set the dashboard to disabled and review Service/Ingress\
+        \ settings."
+      chart_updates: [Chaos-daemon deployment defaults changed to privileged (with
+          opt-out)., Added registry configuration support to chart templates/values.,
+        Added validation/restriction around namespace naming (numbers-only not allowed).,
+        Dashboard subchart/component now enabled by default.]
+      features: [Adds **AWSChaos** to simulate failures on AWS nodes., Adds **CRI-O**
+          container runtime support., Adds **TLS authentication** support for chaos-daemon
+          connections., 'Dashboard improvements: version display, token generator
+          for namespaces/roles, better search UX, batch delete for archives/experiments.']
+      breaking_changes: ['Helm default behavior changes: **dashboard now enabled by
+          default** and **chaos-daemon is privileged by default**, which may break
+          installs in restricted clusters unless values/policies are updated.', Install
+          may fail if targeting a **numbers-only namespace name** (namespace naming
+          rule enforcement).]
+    chart_version: 0.5.0
+    images: ['pingcap/chaos-daemon:v1.2.0', 'pingcap/chaos-dashboard:v1.2.0', 'pingcap/chaos-mesh:v1.2.0']
+  - version: 1.1.0
+    kube: ['1.15', '1.14', '1.13', '1.12']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Chaos Dashboard refactor with authentication/authorization, including
+          token-based login and optional token disabling; UI changes like YAML experiment
+          descriptions and global search.', New DNSChaos experiment type to simulate
+          DNS failures., New `chaosctl` CLI tool to print debug information for troubleshooting.,
+        'Improved network chaos capabilities: more tc filters, configurable network
+          devices, and protocol selection support for iptables/tc; plus support for
+          external networkchaos targets in the dashboard.', IoChaos enhancements including
+          specifying container name; `toda` updated to v0.1.11., Controller improvements
+          and reliability fixes (various controller/reconcile improvements).]
+      breaking_changes: [Dashboard now includes authentication/authorization; upgrade
+          may require configuring access tokens/login flow and may change how users
+          access/operate the dashboard.]
+    chart_version: 0.4.0
+    images: ['pingcap/chaos-daemon:v1.1.0', 'pingcap/chaos-mesh:v1.1.0']
+  - version: 1.0.0
+    kube: ['1.15', '1.14', '1.13', '1.12']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.3.0
+    images: ['pingcap/chaos-daemon:v1.0.0', 'pingcap/chaos-mesh:v1.0.0']
+  name: chaos-mesh
 - icon: https://avatars.githubusercontent.com/u/54918165?s=48&v=4
   git_url: https://github.com/projectcontour/contour
   release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
@@ -18378,6 +18826,7 @@ addons:
     summary: null
     chart_version: 1.31.0
     images: ['docker.io/istio/pilot:1.31.0']
+    eolAt: '2027-02-28'
   - version: 1.30.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -19277,21 +19726,39 @@ addons:
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No actionable release notes were provided beyond the existence of
+          v3.3.0 release assets; cannot determine new features for 3.4.0 from the
+          supplied text.]
+      breaking_changes: [No breaking changes can be identified from the provided excerpt;
+          need v3.4.0 release notes/changelog to assess upgrade impact.]
     chart_version: 0.20.0
     images: ['kong/kubernetes-ingress-controller:3.4', 'kong:3.9']
   - version: 3.3.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release note excerpt provided contains only metadata and download
+          links for v3.3.0; no feature details were included.]
+      breaking_changes: [No breaking changes were listed in the provided notes (only
+          release metadata/links).]
     chart_version: 0.16.0
     images: ['kong/kubernetes-ingress-controller:3.3', 'kong:3.8']
   - version: 3.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release v3.2.0 of Kong/kubernetes-ingress-controller published 2024-06-12
+          (see upstream changelog link for details).]
+      breaking_changes: []
     chart_version: 0.13.1
     images: ['kong/kubernetes-ingress-controller:3.2', 'kong:3.6']
   - version: 3.1.0
@@ -21839,47 +22306,193 @@ addons:
   release_url: https://github.com/longhorn/longhorn/releases/tag/v{vsn}
   helm_repository_url: https://charts.longhorn.io
   versions:
-  - version: 1.10.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+  - version: 1.12.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: '### Helm values / upgrade notes
-
-        - **Use the Longhorn Manager hotfix image when targeting v1.10.1:** set the
-        manager image tag to `v1.10.1-hotfix-2` (the plain `v1.10.1` manager image
-        has known crash/regression issues).
-
-        - **Temporarily disable the upgrade version check if needed:** set `upgradeVersionCheck:
-        false` (or `preUpgradeChecker.upgradeVersionCheck: false` depending on your
-        chart values) to allow applying the hotfix image and/or performing certain
-        recovery/downgrade scenarios.
-
-        - **If upgrading from any v1.9.x to v1.10.x and your cluster may contain `v1beta1`
-        stored CRs:** perform the **manual CRD storage version migration** to `v1beta2`
-        *before* the Helm upgrade.
-
-        '
-      chart_updates: ['Helm chart behavior improvement: `defaultSettings` handling
-          supports automatic quoting and multiple types (reduces YAML/JSON typing
-          pitfalls when setting Longhorn global settings via Helm).']
-      features: ['V2 Data Engine: interrupt mode now supports **NVMe disks** starting
-          in v1.10.1 (v1.10.0 supported AIO disks only).', 'Improved scheduling visibility:
-          `CSIStorageCapacity` objects show schedulable/allocatable capacity (helps
-          capacity-aware scheduling with `WaitForFirstConsumer`).', Adds/extends installation
-          variant usage metrics (observability/telemetry improvement).]
-      breaking_changes: ['Longhorn v1.10.0 removes the `longhorn.io/v1beta1` API and
-          removes the deprecated `replica.status.evictionRequested` field. If any
-          CRs are still stored as `v1beta1`, upgrades to v1.10.x can fail until you
-          migrate CRD storedVersions to `v1beta2`.', 'Kubernetes requirement: v1.10.x
-          requires **Kubernetes v1.25+**; upgrading on older clusters is unsupported.']
-    chart_version: 1.10.1
-    images: ['longhornio/longhorn-manager:v1.10.1', 'longhornio/longhorn-share-manager:v1.10.1',
-      'longhornio/longhorn-ui:v1.10.1']
+      helm_changes: "## Helm values / chart behavior to review\n\n- **NetworkPolicies\
+        \ enabled by default (security change):** v1.12.1 turns on ingress `NetworkPolicy`\
+        \ resources for internal Longhorn endpoints/RPCs by default (effective only\
+        \ if your cluster enforces NetworkPolicies). Verify your CNI supports NetworkPolicy\
+        \ and confirm any cross-namespace Prometheus scraping still works (may need\
+        \ an additional allow policy).\n- **Instance-manager gRPC mTLS expanded:**\
+        \ If you use the `longhorn-grpc-tls` secret, v1.12.1 now requires valid client\
+        \ certs for *all* instance-manager gRPC services (disk/SPDK services included).\
+        \ Validate any external tooling that talks to IM gRPC.\n- **New V2 CPU allocation\
+        \ setting:** `data-engine-number-of-cpu-cores` can request exclusive cores\
+        \ via Kubernetes CPU Manager (kubelet policy must be `static`). When set,\
+        \ it overrides `data-engine-cpu-mask`.\n- **New V2 SPDK iobuf tuning settings:**\
+        \ `data-engine-iobuf-large-pool-size` and `data-engine-iobuf-small-pool-size`\
+        \ available. Changing them may recreate V2 instance-manager pods with no running\
+        \ instances.\n- **CPU isolation behavior change:** `data-engine-cpu-isolation-enabled`\
+        \ now also adjusts host RPS steering (network RX softirq) away from SPDK reactor\
+        \ cores; verify this doesn\u2019t conflict with your node-level CPU/network\
+        \ tuning.\n- **Helm bugfix note:** `csi.*ReplicaCount` Helm values previously\
+        \ only applied on initial creation; v1.12.1 fixes this, so upgrades may now\
+        \ actually reconcile those counts.\n- **Chart/CNI edge cases fixed:** fixes\
+        \ for RKE2 `rke2-traefik` ingress controller NetworkPolicy matching and ArgoCD\
+        \ OutOfSync when using Gateway API."
+      chart_updates: ['V2 feature additions: fast cloning (new linked-clone architecture)
+          and experimental sharding (erasure coding).', 'Security hardening: internal
+          NetworkPolicies installed/enabled by default (when enforced).', mTLS coverage
+          expanded for instance-manager gRPC services when TLS secret is configured.,
+        'Operational knobs added for V2 SPDK: CPU allocation via CPU Manager and iobuf
+          pool sizing.', 'Multiple bugfixes around V2 encryption sizing, storage network
+          attach, expansion/resize, backup/restore edge cases, and upgrade resilience.']
+      features: [V2 fast volume cloning (linked-clone) with parallel replica creation
+          and support for most normal volume operations (snapshots/expansion/rebuild/nested
+          clones)., Experimental V2 storage sharding using erasure coding to distribute
+          data/parity chunks across nodes for better space efficiency and scaling
+          beyond a single disk/node., Optional exclusive CPU core allocation for SPDK
+          target daemon via Kubernetes CPU Manager (`data-engine-number-of-cpu-cores`).]
+      breaking_changes: [Legacy V2 linked-clone volumes created on v1.12.0 or earlier
+          become effectively read-only from an operations standpoint after upgrading
+          to v1.12.1 (only detachment and deletion allowed); you must recreate clones
+          using the new linked-clone mechanism., 'If `longhorn-grpc-tls` is configured,
+          instance-manager gRPC endpoints now enforce mTLS on additional services;
+          any clients relying on plaintext access will fail until updated.']
+    chart_version: 1.12.1
+    images: ['docker.io/longhornio/longhorn-manager:v1.12.1', 'docker.io/longhornio/longhorn-share-manager:v1.12.1',
+      'docker.io/longhornio/longhorn-ui:v1.12.1']
+  - version: 1.12.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / chart behavior changes to review\n\n- **Default\
+        \ StorageClass creation can now be disabled via Helm** (issue #12906). If\
+        \ you currently rely on the chart creating the default `longhorn` StorageClass,\
+        \ confirm the value remains enabled or set it explicitly.\n- **New StorageClass\
+        \ parameters supported in the chart** (issue #9324), including:\n  - `strictTopology`\
+        \ (StorageClass parameter) to pin PV `nodeAffinity` more strictly when using\
+        \ `WaitForFirstConsumer`.\n  - Settings related to **topology-aware PV nodeAffinity\
+        \ control**.\n- **New setting to control which topology keys are propagated**\
+        \ via `csi-allowed-topology-keys` (cluster setting) and related StorageClass\
+        \ behavior (issue #12684). Expect changes in PV `nodeAffinity` behavior if\
+        \ you start using these.\n- **StorageClass annotations configurable via Helm\
+        \ values** (issue #13137). If you previously patched annotations manually,\
+        \ consider moving them into Helm values.\n- **Configurable engine-image DaemonSet\
+        \ liveness probe parameters** (issue #12846). Values added for probe period/timeout/failureThreshold;\
+        \ tune if you see restarts during upgrade or on smaller nodes.\n- **Chart\
+        \ distro label/metadata update**: Longhorn chart `distro` is set to `longhorn`\
+        \ (issue #13160). Mostly informational, but can affect tooling that reads\
+        \ this field.\n\n> Note: The changelog provided is primarily application release\
+        \ notes; verify exact value keys/names in the Longhorn chart `values.yaml`\
+        \ for v1.12.0 before applying."
+      chart_updates: [V2 Data Engine is GA in 1.12.0; V2 networking/scheduling/observability
+          enhancements and multiple stability fixes land in this release., V2 Backing
+          Images are **removed** in 1.12.0; clusters using V2 volumes created from
+          backing images must migrate those volumes before upgrade., 'Default V2 data-engine
+          CPU allocation increases: default `data-engine-cpu-mask` changes from `0x1`
+          (1 core) to `0x3` (2 cores).', Longhorn now supports dual-stack clusters
+          (with consistent IP family ordering across all nodes) and adds IPv6 support
+          for V2 volumes in IPv6-only clusters., 'Operational tooling and observability
+          improvements: longhornctl on-demand snapshot checksums; metrics-server integration
+          can be disabled; longhorn-manager memory usage reduced; engine-image liveness
+          probe settings configurable.', 'Multiple critical stability/scheduling fixes:
+          instance-manager panic during rebuild storms; replica auto-balance loop;
+          CSIStorageCapacity reporting for compute-only nodes; replica CR leak in
+          failed local scheduling; encrypted volume size correction behavior.']
+      features: ['V2 Data Engine is now GA, making V2 volumes more suitable for production
+          (with known limitations still documented).', 'Topology-aware PV nodeAffinity
+          control via `csi-allowed-topology-keys` plus StorageClass `strictTopology`,
+          improving placement with `WaitForFirstConsumer`.', 'Improved networking
+          support: dual-stack cluster support (with constraints) and IPv6 support
+          for V2 volumes in IPv6-only clusters.', 'New ops tooling: `longhornctl`
+          can trigger on-demand snapshot checksum calculation across a volume/node/cluster.',
+        'Observability/operability knobs: ability to disable metrics-server-dependent
+          metrics and configure engine-image liveness probes.', 'Resource efficiency
+          improvements: reduced longhorn-manager memory usage through informer cache
+          optimization.']
+      breaking_changes: ['**V2 Backing Images removed** in v1.12.0. Any V2 volume
+          created from a backing image must be migrated (backup+restore or delete)
+          before upgrade or you risk attachment failures.', '**V2 live upgrade constraint**:
+          V2 volumes do **not** support live upgrades between v1.12 patch releases;
+          they must be detached before upgrading within the 1.12.x line.', Dual-stack
+          is supported only when all nodes use the same IP family ordering (all IPv4-first
+          or all IPv6-first); mixed ordering can cause replica/engine connectivity
+          failures., "Encrypted migratable volumes: live migration is not supported\
+          \ when using an engine image with CLI API version < 12\u2014upgrade engine\
+          \ image to v1.12.0+ first.", UBLK frontend remains experimental and does
+          not work on Linux kernel >= 6.17 due to upstream API changes.]
+    chart_version: 1.12.0
+    images: ['docker.io/longhornio/longhorn-manager:v1.12.0', 'docker.io/longhornio/longhorn-share-manager:v1.12.0',
+      'docker.io/longhornio/longhorn-ui:v1.12.0']
+  - version: 1.11.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / upgrade notes (1.10.0 \x7F\x7F\x7F\x7F 1.11.0)\n\
+        \n### Required / strongly recommended before you upgrade\n- **Kubernetes version:**\
+        \ Longhorn **v1.11.0 requires Kubernetes v1.25+** (same requirement as v1.10.0,\
+        \ but re-check before upgrading).\n\n### Hotfixes you should apply during\
+        \ the Helm upgrade\n- **Instance manager regression (memory leak):**\n  -\
+        \ Set **`longhorn-instance-manager` image** to `longhornio/longhorn-instance-manager:v1.11.0-hotfix-1`\
+        \ (instead of `v1.11.0`).\n  - Do this via `values.yaml` (chart values) before\
+        \ running `helm upgrade`.\n- **Manager regression (node/CNI label deadlock):**\n\
+        \  - Temporarily set **`upgradeVersionCheck: false`** in `values.yaml` to\
+        \ bypass the upgrade check.\n  - Set **`longhorn-manager` image** to `longhornio/longhorn-manager:v1.11.0-hotfix-1`\
+        \ (instead of `v1.11.0`).\n\n### New/changed Helm knobs surfaced in 1.11.0\
+        \ (review your values)\n- **`managerUrl` Helm chart setting** is now available\
+        \ (lets you define the Longhorn manager URL explicitly).\n- **UI Service custom\
+        \ labels/annotations** can be configured via values (if you previously used\
+        \ post-render/patches, move them into values).\n- **UI Service `loadBalancerClass`**\
+        \ is now configurable via values.\n- **TLS: multiple FQDNs** supported by\
+        \ the Helm chart (if you terminate TLS with multiple hostnames).\n- **Gateway\
+        \ API HTTPRoute support for Longhorn UI** is added (optional; relevant only\
+        \ if you use Gateway API).\n- **Resource limits configuration is now exposed**\
+        \ for:\n  - `longhorn-manager` / `instance-manager`\n  - CSI components\n\
+        \  Review defaults vs. your cluster capacity; set explicit limits/requests\
+        \ if you run in resource-constrained environments.\n- **RollingUpdate strategy\
+        \ configuration** is introduced for the `longhorn-manager` and CSI deployments\
+        \ (review if you need custom surge/unavailable behavior).\n- **defaultSettings\
+        \ handling improved** (automatic quoting & multi-type support): re-check any\
+        \ `defaultSettings.*` values that relied on implicit string conversion.\n\n\
+        ### Deprecation to plan for\n- **V2 Backing Image feature is deprecated in\
+        \ v1.11.0 and scheduled for removal in v1.12.0.**\n  - If you use **V2 volumes\
+        \ + backing images** (often for VM images), plan migration to **KubeVirt CDI**\
+        \ or another population mechanism before 1.12.\n"
+      chart_updates: [Adds Helm value/option to set `managerUrl`., Helm chart supports
+          multiple TLS FQDNs., 'Helm chart adds UI Service customization: annotations/labels
+          and `loadBalancerClass`.', Adds Gateway API `HTTPRoute` support for exposing
+          Longhorn UI., Exposes resource limits configuration for Longhorn manager/instance-manager
+          and CSI components., Introduces configurable RollingUpdate strategy for
+          longhorn-manager and CSI deployments., Improves `defaultSettings` rendering/quoting
+          to better support multiple value types.]
+      features: [V2 Data Engine is now **Technical Preview** with improved stability;
+          note that live engine upgrade is **not supported** yet (V2 volumes must
+          be detached for engine upgrade)., V2 Data Engine adds **`ublk` frontend**
+          support with tunable performance parameters globally/per-volume/StorageClass.,
+        V1 Data Engine supports **parallel replica rebuild** by streaming from multiple
+          healthy replicas to speed up redundancy restoration., New **balance-aware
+          replica scheduling** improves disk selection to avoid uneven storage usage.,
+        Adds **node disk health monitoring** using S.M.A.R.T. data (with a setting
+          to disable it if needed)., Share Manager can now use an **extra network
+          interface** for segmented networking setups., Adds full Kubernetes **ReadWriteOncePod
+          (RWOP)** support., StorageClasses now support **`allowedTopologies`** for
+          zone/region/node constrained provisioning., 'Observability improvements:
+          real-time volume performance monitoring and new metrics (e.g., last backup
+          time).']
+      breaking_changes: ['Hotfix required for v1.11.0 images: upgrading to plain `v1.11.0`
+          has known regressions in `longhorn-instance-manager` (proxy connection leak)
+          and `longhorn-manager` (node/CNI label deadlock); use `*-hotfix-1` images
+          during upgrade.', V2 Backing Image feature is **deprecated** in 1.11.0 and
+          will be **removed in 1.12.0** (treat this as an upcoming breaking change
+          if you depend on it)., 'V2 engine upgrade behavior: while V2 is in Technical
+          Preview, **live upgrade is not supported**; V2 volumes must be detached
+          before engine upgrades (operational constraint that can break upgrade runbooks
+          if not planned).']
+    chart_version: 1.11.0
+    images: ['docker.io/longhornio/longhorn-manager:v1.11.0', 'docker.io/longhornio/longhorn-share-manager:v1.11.0',
+      'docker.io/longhornio/longhorn-ui:v1.11.0']
   - version: 1.10.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -21931,8 +22544,8 @@ addons:
     images: ['longhornio/longhorn-manager:v1.10.0', 'longhornio/longhorn-share-manager:v1.10.0',
       'longhornio/longhorn-ui:v1.10.0']
   - version: 1.9.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -21973,8 +22586,8 @@ addons:
     images: ['longhornio/longhorn-manager:v1.9.0', 'longhornio/longhorn-share-manager:v1.9.0',
       'longhornio/longhorn-ui:v1.9.0']
   - version: 1.8.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -22031,8 +22644,8 @@ addons:
     images: ['longhornio/longhorn-manager:v1.8.0', 'longhornio/longhorn-share-manager:v1.8.0',
       'longhornio/longhorn-ui:v1.8.0']
   - version: 1.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     summary:
@@ -22065,8 +22678,8 @@ addons:
     images: ['longhornio/longhorn-manager:v1.7.0', 'longhornio/longhorn-share-manager:v1.7.0',
       'longhornio/longhorn-ui:v1.7.0']
   - version: 1.6.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     summary:
@@ -22116,8 +22729,8 @@ addons:
     chart_version: 1.6.0
     images: ['longhornio/longhorn-manager:v1.6.0', 'longhornio/longhorn-ui:v1.6.0']
   - version: 1.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     summary:
@@ -22164,8 +22777,8 @@ addons:
     chart_version: 1.5.0
     images: ['longhornio/longhorn-manager:v1.5.0', 'longhornio/longhorn-ui:v1.5.0']
   - version: 1.4.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     summary:
@@ -22236,8 +22849,8 @@ addons:
     chart_version: 1.3.2
     images: []
   - version: 1.3.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     summary:
@@ -22312,8 +22925,8 @@ addons:
     chart_version: 1.2.6
     images: []
   - version: 1.2.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     summary:
@@ -22370,9 +22983,9 @@ addons:
     chart_version: 1.1.3
     images: []
   - version: 1.1.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
-      '1.16']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17', '1.16']
     requirements: []
     incompatibilities: []
     summary:
@@ -22402,9 +23015,9 @@ addons:
     chart_version: 1.1.0
     images: ['longhornio/longhorn-manager:v1.1.0', 'longhornio/longhorn-ui:v1.1.0']
   - version: 1.0.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
-      '1.16', '1.15', '1.14']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17', '1.16', '1.15', '1.14']
     requirements: []
     incompatibilities: []
     summary: null
@@ -22532,6 +23145,30 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.158.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  - version: 0.157.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  - version: 0.156.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  - version: 0.155.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.154.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -23523,27 +24160,35 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.7.12
+  - version: 3.7.13
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['v3.7.0 introduced a large batch of new capabilities, mostly around
-          Kubernetes integrations (Ingress-NGINX provider annotation compatibility,
-          Gateway API enhancements, and CRD improvements), plus new middleware and
-          UI/observability options.', 'v3.7.12 is primarily a security and stability
-          patch release, fixing three published CVEs and a handful of correctness/robustness
-          issues (HTTP/3 timeouts, file provider error context, ingress-nginx edge
-          cases, and service weight validation).']
-      breaking_changes: ['Potential behavior changes within v3.7.x to watch for include
-          stricter handling/sanitization of headers and URLs (e.g., removal of untrusted
-          X- headers with underscores, encoded character handling becoming opt-in)
-          which could affect applications that relied on previously accepted requests.',
-        ForwardAuth.TrustForwardHeader was deprecated in v3.7.0; plan to adjust configurations
-          and validate forward-auth behavior if you were using that option.]
-    chart_version: 41.4.0
+      features: ['Kubernetes ingress-nginx provider gained broad NGINX annotation
+          compatibility (rate limiting, rewrites, auth, buffering, canary, redirects,
+          timeouts, headers, allow/whitelists) and now generates its dynamic config
+          via a metamodel.', Gateway API improvements include support for multiple
+          certificateRefs per listener and secret-based CA refs for BackendTLSPolicy.,
+        'New routing/traffic features: provider routing precedence configuration,
+          wildcard host support in Host/HostSNI matchers, and service-level middleware
+          plus response-status-based failover.', 'Observability and ops enhancements
+          include richer Kubernetes access log fields, OTLP + stdout access log support,
+          and a global option to disable X-Forwarded-For appending.', 'Security/TLS
+          and middleware enhancements include encodedCharacters middleware, retry
+          enhancements based on status codes/timeouts/non-idempotent methods, and
+          a new ACME CertificateTimeout option.']
+      breaking_changes: [ForwardAuth.TrustForwardHeader was deprecated; plan to migrate
+          away from it and validate forward-auth header trust behavior after the upgrade.,
+        Behavior around rejecting/sanitizing suspicious encoded characters was tightened
+          and made opt-in via new options; validate any apps relying on unusual URL
+          encoding or underscores in untrusted headers., Ingress-NGINX provider refactors
+          and behavior fixes (notably SSL redirect/rewrite-target handling) may change
+          request/redirect behavior compared to earlier 3.7.x expectations; validate
+          ingress annotations in staging.]
+    chart_version: 41.5.0
     images: []
   - version: 3.7.0
     kube: ['1.36', '1.35', '1.34', '1.33']
@@ -25548,7 +26193,7 @@ addons:
           appset page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug
           fixes from Dex).']
       breaking_changes: []
-    chart_version: 10.8.1
+    chart_version: 10.8.2
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.2']
   - version: 3.5.1
@@ -27131,8 +27776,318 @@ addons:
   readme_url: https://github.com/VictoriaMetrics/operator/blob/master/README.md
   icon: https://dashboard.snapcraft.io/site_media/appmedia/2020/11/output-onlinepngtools.png
   versions:
+  - version: 0.74.1
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [v0.74.1 adds a validation webhook for the new `VLDistributed`
+          custom resource (VictoriaLogs distributed) to prevent invalid specs from
+          being accepted.]
+      features: [VLDistributed now has a validation webhook to catch invalid resources
+          earlier (admission time) instead of failing later during reconciliation.]
+      breaking_changes: []
+    chart_version: 0.67.3
+    images: []
+  - version: 0.74.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator: validation webhook for Prometheus-operator CRDs is
+          now **disabled by default** (enable via `VM_PROMCR_VALIDATION_ENABLED`).',
+        'Operator: default component versions bumped (VM apps v1.148.0, VL apps v1.52.0,
+          VT apps v0.10.0, VMAnomaly v1.30.0).', 'Operator CRDs: new `networkPolicy`
+          field across all supported CRDs; operator creates/manages `NetworkPolicy`
+          objects when set.', 'RBAC: operator ClusterRole now includes permissions
+          for `networking.k8s.io/networkpolicies` (fix for the above).', 'VMAuth:
+          new opt-in `spec.waitForConfigReload` to ensure config reload propagation
+          before marking dependent VMUsers applied.', 'VLDistributed: new CRD for
+          multi-region distributed VictoriaLogs clusters.', 'VMCluster: support `extraStorageNodes`
+          for vmselect component.', 'VLAgent: `remoteWrite.basicAuth` support.', 'VMUser:
+          `spec.jwt.defaultVMAccessClaim` support (maps to vmauth `jwt.default_vm_access_claim`).',
+        'Helm-converter enhancements: can convert vmauth native `config` into VMAuth
+          + VMUser CRs and fixes multiple dropped fields (storageClassName, securityContext,
+          TLS fields, headers normalization, extra volumes/mounts).', 'Multiple bugfixes:
+          configmap diff logging size, digest pinning via `image.tag` with `@sha256`,
+          RBAC list verb for config-reloader secrets, improved error handling, vmalert
+          behavior with no notifiers, vmalertmanager fsGroup default on PVC, VPA targetRef
+          fixes, and child object selection robustness on CRD/operator version mismatch.']
+      features: ['NetworkPolicy management via new `networkPolicy` field on all operator
+          CRDs, enabling standardized ingress/egress restriction per component.',
+        VMAuth can optionally wait for config reload on all replicas before marking
+          VMUser objects applied (`spec.waitForConfigReload`)., VLDistributed CRD
+          introduced for managing region-distributed VictoriaLogs setups from a single
+          resource., VLAgent remoteWrite now supports basic auth credentials., VMUser
+          JWT handling enhanced via `defaultVMAccessClaim` to accept tokens without
+          `vm_access` claim., 'VMAnomaly upgraded to v1.30.0, adding Temporal Envelope
+          models and multiple new tuning/history/warmup controls.']
+      breaking_changes: ['Prometheus-operator CRD validation webhook is now disabled
+          by default; if you relied on it to block invalid resources, you must explicitly
+          enable it with `VM_PROMCR_VALIDATION_ENABLED`.']
+    chart_version: 0.67.2
+    images: []
+  - version: 0.73.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Security/RBAC hardening: operator-managed ClusterRole no longer
+          has cluster-wide secrets/configmaps permissions; config-reloader secret
+          access is now via namespace-scoped Role/RoleBinding limited to the operator-managed
+          config secret; in VMSingle ingest-only mode (default) no secret/configmap
+          permissions are granted.', 'Default component versions bumped (VM apps v1.147.0,
+          VictoriaLogs v1.51.0, VictoriaTraces v0.9.4).', Operator can create Role/RoleBinding
+          in each namespace listed in WATCH_NAMESPACES to allow vmagent/vmsingle service
+          discovery across watched namespaces.]
+      features: ['VMUser/VMAuth: new access_log support for VMAuth access logging
+          configuration.', "VMUser: new useExtraService flag in target references\
+          \ to route traffic via the CR\u2019s additional service (spec.serviceSpec)\
+          \ instead of the default service.", 'All operator CRs: new useLegacyNaming
+          option to name managed resources using legacy standalone Helm chart conventions
+          (helps migration from standalone charts).', 'VMDistributed: can use VMSingle
+          backends alongside VMCluster backends in separate zones.', 'Operator: OpenShift
+          compatibility mode (VM_OPENSHIFT_COMPATIBILITY / OpenshiftCompatibilityMode)
+          with auto-detection; currently auto-mounts OpenShift service CA into VMAgent/VMSingle
+          pods for TLS verification.']
+      breaking_changes: [RBAC change may break setups that relied on operator-managed
+          components reading arbitrary Secrets/ConfigMaps cluster-wide; ensure needed
+          secrets/configmaps are accessible in-namespace or via the new per-namespace
+          Roles (especially with WATCH_NAMESPACES)., Enabling useLegacyNaming changes
+          managed resource names; avoid toggling it on an existing installation unless
+          you intend a migration and understand the rollout/ownership implications.]
+    chart_version: 0.66.1
+    images: []
+  - version: 0.72.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['**VMAlert rule ConfigMaps format change**: rule files are now
+          stored gzip-compressed in ConfigMaps under `binaryData`, and an init container
+          decompresses them before VMAlert starts. This will trigger a one-time rollout
+          of existing VMAlert pods during the upgrade.', '**Optional validating webhooks
+          for Prometheus Operator CRDs**: when enabled, the operator will validate
+          `ServiceMonitor`, `PodMonitor`, `PrometheusRule`, `Probe`, `ScrapeConfig`,
+          and `AlertmanagerConfig` by converting them to VictoriaMetrics equivalents
+          and validating them. This may introduce new admission-time failures for
+          previously-accepted objects when webhooks are turned on.', '**VMScrapeConfig
+          service discovery parity**: adds new SD config types (Consul agent, Docker,
+          Docker Swarm, Marathon, Yandex Cloud), expanding what CRs can express without
+          custom config. ', '**Operator metrics labeling change**: operator now adds
+          `victoriametrics_app=true` label to all metrics it scrapes.', '**Controller
+          reconciliation behavior tweak**: resources previously skipped due to `ParsingSpecError`
+          caused only by unknown fields will now be reconciled (useful after downgrades,
+          but may re-apply/modify resources that were previously left untouched).',
+        '**Fixes for stability and reloader correctness**: addresses potential deadlocks
+          in `operator_object_status` metrics collector and fixes config-reloader
+          behavior for filenames containing `..` (only synthetic `..data`-style entries
+          are ignored now).']
+      features: [VMAlert can now handle larger rule sets by storing gzip-compressed
+          rule files in ConfigMaps `binaryData` and decompressing them via an init
+          container., Operator can (optionally) run validating webhooks for Prometheus
+          Operator CRDs by converting them to VM equivalents and validating on admission.,
+        'VMScrapeConfig gains additional service discovery types (Consul agent, Docker,
+          Docker Swarm, Marathon, Yandex Cloud) to match VictoriaMetrics `sd_configs`.',
+        Operator adds `victoriametrics_app=true` label to all metrics it scrapes.]
+      breaking_changes: ['VMAlert rule ConfigMap storage format changes (compressed
+          `binaryData` + init container), causing a one-time rollout of VMAlert pods
+          and potentially impacting any tooling that directly reads rule ConfigMaps
+          as plain text.', 'If validating webhooks are enabled, admission-time validation
+          may start rejecting previously-applied Prometheus Operator CRDs that don''t
+          translate/validate cleanly against VM equivalents.']
+    chart_version: 0.65.1
+    images: []
+  - version: 0.71.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator now adds a default `preStop` lifecycle hook (15s sleep)
+          to most managed pods on Kubernetes >= 1.29; this can trigger rolling updates
+          on operator upgrade. It is globally controllable via env `VM_ENABLE_DEFAULT_PRESTOP_HOOK`
+          and per-CR via `spec.preStopSleepSeconds` (0 disables)., Default bundled
+          VictoriaMetrics app versions were bumped (v1.143.0/v1.142.0 in 0.70.0 ->
+          v1.145.0 in 0.71.0)., 'Operator now enforces strict CR spec unmarshalling
+          on create, so unknown/typo fields in CR specs may start failing reconciliation.',
+        'Operator can apply common labels/annotations to all managed resources via
+          new env vars `VM_COMMON_LABELS` and `VM_COMMON_ANNOTATIONS` (non-overriding),
+          and ensures HTTPRoutes and PVCs include ManagedMetadata labels/annotations.',
+        All CRs gain `enableServiceLinks` support., New operator status metrics for
+          objects managed by each controller.]
+      features: [Default `preStop` hook (15s) to reduce traffic loss during pod termination
+          on Kubernetes >= 1.29; configurable/disableable per resource and globally.,
+        New env vars `VM_COMMON_LABELS` / `VM_COMMON_ANNOTATIONS` to add consistent
+          metadata across all operator-managed resources (without overriding existing
+          metadata)., '`enableServiceLinks` can now be set on all CRs to control injection
+          of service environment variables.', '`vmsingle` and `vmcluster` add structured
+          `downsampling` and (vmstorage) `retentionFilters` configuration (enterprise
+          license required).', '`vmcluster` adds `spec.discovery` for automatic vmstorage
+          node discovery for vmselect/vminsert (enterprise license required).', '`vmalertmanagerconfig`
+          IncidentioConfig supports `url_file` and `alert_source_token_file` for file-based
+          secrets.', Operator exposes new status metrics per controller for managed
+          objects., '`vmanomaly` config parity improvements: new offsets, retry settings,
+          connection settings reuse, logger levels, and backtesting scheduler parameters.']
+      breaking_changes: ['Operator upgrade may roll all applicable pods due to new
+          default `preStop` hook (Kubernetes >= 1.29). Mitigate by setting `VM_ENABLE_DEFAULT_PRESTOP_HOOK=false`
+          during upgrade or `spec.preStopSleepSeconds: 0` on specific CRs.', Strict
+          CR spec unmarshalling on create may break existing manifests that contain
+          unknown/typo fields; these will now be rejected or fail reconciliation.]
+    chart_version: 0.64.1
+    images: []
+  - version: 0.70.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Security: Go builder upgraded from Go 1.26.2 to 1.26.3.', 'Default
+          VictoriaMetrics app versions bumped (operator defaults): VM apps to v1.142.0
+          and then v1.143.0.', 'VMAuth: add support for arbitrary filesystem access
+          configuration (can reference files directly, fewer config workarounds).',
+        'VMUser: allow VMAnomaly CRD in targetRefs.', 'VMDistributed: add spec.zones[*].trafficMode
+          to disable read/write/all traffic per zone.', 'VMAgent: add per-remote-write
+          queues configuration.', 'Converter: if Prometheus CRD group is missing,
+          disable all Prometheus controllers automatically.', 'VMDistributed: change
+          default write load-balancing policy from first_available to least_loaded.',
+        'VMAlertmanagerConfig: negative values are now handled correctly (previously
+          ignored).', 'VMAlertmanager: templates now applied even if there are no
+          discovered VMAlertmanagerconfig CRs or tracing config.', 'VMCluster/VTCluster/VLCluster:
+          fix infinite recreation of non-default additional Service when requestsLoadBalancer.enabled=true.',
+        'VMAuth: fix target_path_suffix being appended multiple times.', 'Operator:
+          retry reconcile errors that could leave resources stuck in an expanding
+          state.', 'VMCluster/VLCluster/VTCluster: fix -storageNode flag generation
+          during HPA scaling by deriving node count from current StatefulSet.', 'VMDistributed:
+          expose VMClusterSpec parsing errors in status (previously swallowed causing
+          infinite reconciles).']
+      features: ['VMAuth can now read configuration from arbitrary filesystem paths,
+          enabling direct file references instead of only predefined locations.',
+        'VMDistributed adds spec.zones[*].trafficMode to selectively disable read/write/all
+          traffic to a given zone.', VMAgent supports per-remote-write queue configuration
+          for finer control of remote_write buffering and throughput., VMUser targetRefs
+          now supports VMAnomaly CRDs as targets.]
+      breaking_changes: ['Default VMDistributed write load-balancing policy changes
+          from first_available to least_loaded, which may change traffic patterns
+          and capacity distribution after upgrade.']
+    chart_version: 0.63.0
+    images: []
+  - version: 0.69.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Operator behavior changes around Prometheus CR conversion:
+          deprecated per-resource env vars for disabling conversion; use `-controller.disableReconcileFor`
+          with a comma-separated list of controller names.', Removed metric `operator_prometheus_converter_watch_events_total`;
+          dashboards/alerts using it must be updated or dropped., Flag `controller.prometheusCRD.resyncPeriod`
+          is now a no-op (legacy from Prometheus object watchers)., 'EULA handling
+          changed for VMBackup/VMRestore: `-eula` no longer set by default; may cause
+          VMCluster/VMSingle rollouts unless CRs are updated (see breaking changes).',
+        VMAnomaly will be recreated due to a new flag; VMAnomaly version must be >=
+          1.25., Port name collision fix for VMBackup in VMSingle/VMCluster changes
+          port names; can force legacy names with `VM_USE_OLD_BACKUP_RESTORE_PORT_NAMES=true`
+          to avoid pod recreation., VMDistributed default `unauthorizedUserAccessSpec`
+          removed; users must explicitly choose anonymous vs authorized access in
+          VMDistributed CRs., Defaults for bundled VM apps updated (VictoriaMetrics
+          to v1.139.0/v1.140.0; VictoriaLogs to v1.50.0).]
+      features: [Introduced `helm-converter` CLI to help migrate from Helm chart values
+          to equivalent Operator CRs., "VMSingle now reuses vmagent\u2019s scraping/relabeling\
+          \ implementation, improving feature parity and behavior consistency.", Operator
+          supports dry-run mode to preview changes without applying them., 'Added
+          `spec.componentVersion` as an alternative to `spec.clusterVersion` across
+          pod-deploying CRDs, improving version pinning flexibility.', 'VMUser enhancements:
+          multiple targetRefs of same kind and JWT-based auth support.', 'VMAgent
+          enhancements: HPA support and configurable rolling update strategies for
+          StatefulSet and DaemonSet modes.', Introduced `VMAnomalyConfig` CRD for
+          dynamic configuration and hot-reload (VMAnomaly >= 1.25.0) plus added retention
+          settings support., 'VMAlertmanager enhancements: arbitrary filesystem access
+          feature and Slack `update_message` support (requires Alertmanager v0.32.0+).']
+      breaking_changes: [Deprecated Prometheus CR conversion disable env vars; automation
+          relying on them must switch to `-controller.disableReconcileFor` or conversion
+          will run unexpectedly., Removal of `operator_prometheus_converter_watch_events_total`
+          metric can break existing alerts/dashboards., '`-eula` is no longer defaulted
+          for VMBackup/VMRestore; to avoid rollouts and ensure compliant behavior
+          you must set `acceptEula: true` in the appropriate CR fields (and plan migration
+          to `spec.license`).', VMAnomaly pods will be recreated due to new flag;
+          VMAnomaly must be upgraded to at least 1.25 before/with operator upgrade.,
+        'VMBackup/VMRestore port names changed to avoid collisions; if you depend
+          on old named ports or want to avoid rollout, set `VM_USE_OLD_BACKUP_RESTORE_PORT_NAMES=true`.',
+        VMDistributed no longer defaults `unauthorizedUserAccessSpec`; clusters may
+          become inaccessible or unintentionally open until CRs are updated to explicitly
+          configure access.]
+    chart_version: 0.62.1
+    images: []
+  - version: 0.68.0
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Introduces a new `VMDistributed` CR to support zone-by-zone rollouts
+          that preserve global availability, replacing a previously manual multi-step
+          distributed deployment process.', Adds new VMProbe target discovery model
+          via `spec.targets.kubernetes` (ingress/pod/service roles) and deprecates
+          older target fields; also adds `spec.targets.static` as the replacement
+          for `spec.targets.staticConfig`., Adds global env vars to set ephemeral
+          storage requests/limits (`VM_*_EPHEMERAL_STORAGE_REQUEST` / `VM_*_EPHEMERAL_STORAGE_LIMIT`)
+          for operator-managed workloads., Adds VPA support for vmcluster/vtcluster/vlcluster
+          and vmauth; earlier release also added HPA support for all cluster storage
+          CRs., 'Enhances logs collection with VLAgent: logs collection support, license
+          options, ability to override default stream fields, richer k8s collector
+          metadata filters, and defaulting to a single data volume for VLAgent.',
+        'Enhances scraping: vmagent supports `attach_metadata.namespace` and a per-target
+          `sampleLimit` in scrape configs; VMScrapeConfig gains `nomad_sd_config`
+          support.', 'Improves VMAlertmanager: explicit namespace handling in `--cluster.peer`
+          args, plus tracing support.', Operator observability improves with a new
+          `operator_bad_objects_total` metric labeled by `object_namespace` and `crd`
+          (replacing older per-component bad object metrics).]
+      breaking_changes: ["From 0.67.0: removal of 3rd-party config reloaders\u2014\
+          VMAlert, VMAgent, VMAuth, and VMAlertmanager now use only VM config reloader;\
+          \ invalid `spec.configReloaderExtraArgs` can break reload behavior after\
+          \ upgrade.", "From 0.67.0: removed deprecated fields: VMAgent `spec.aPIServerConfig`\
+          \ and VMCluster `spec.vmselect.persistentVolume`\u2014manifests using these\
+          \ will fail validation/creation.", 'From 0.68.0: VMProbe `spec.targets.ingress`
+          and `spec.targets.staticConfig` are deprecated (to be removed in v0.71.0);
+          you should migrate now to `spec.targets.kubernetes` and `spec.targets.static`
+          to avoid future breakage.']
+    chart_version: 0.59.0
+    images: []
+  - version: 0.67.0
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Removed 3rd\u2011party config reloaders; operator-managed components\
+          \ now use only VM config reloader.", 'CRD/API surface cleanup: removed deprecated
+          fields in VMAgent and VMCluster; multiple fields deprecated for future removal.',
+        'Default component versions bumped (VM apps v1.134.0, VL v1.43.1, VT v0.7.0,
+          VMAnomaly v1.28.5).', 'Operator metrics changed: new `operator_bad_objects_total`
+          (old per-component bad_objects metrics deprecated).', Added/expanded HPA
+          support for cluster storages; fixed prior HPA cleanup bug., Various reconcile/volume
+          mount/security mode and IPv6/localhost related bugfixes.]
+      features: ['VMAgent: supports `namespace` in `attach_metadata` for all scrape
+          configs; also supports per-target `sampleLimit` in scrape config.', 'VLAgent:
+          logs collection support plus richer metadata-based filtering (extraFilter,
+          include* labels/annotations) and single volume default for data.', 'Operator:
+          new `operator_bad_objects_total` metric with `object_namespace` and `crd`
+          labels; added HPA support for all cluster CR storage.', 'VLAgent/VLSingle/VLCluster:
+          license options support; VMAnomaly: supports `spec.server` configuration.']
+      breaking_changes: [Removed 3rd-party config reloaders; any `spec.configReloaderExtraArgs`
+          must now be valid for VM config reloader before upgrade., "Removed deprecated\
+          \ fields: VMAgent `spec.aPIServerConfig` and VMCluster `spec.vmselect.persistentVolume`\u2014\
+          manifests using them will fail validation/reconciliation."]
+    chart_version: 0.58.1
+    images: []
   - version: 0.66.1
-    kube: ['1.34', '1.33', '1.32']
+    kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
@@ -27150,7 +28105,7 @@ addons:
           removes deprecated status fields: `VMCluster.status.clusterStatus` and `VMSingle.status.singleStatus`
           (may break dashboards/scripts that read them).']
     chart_version: 0.57.1
-    images: ['victoriametrics/operator:config-reloader-v0.66.1', 'victoriametrics/operator:v0.66.1']
+    images: []
   - version: 0.66.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -27175,7 +28130,7 @@ addons:
           that reads these status fields must be updated to use the current status
           structure.]
     chart_version: 0.57.0
-    images: ['victoriametrics/operator:config-reloader-v0.66.0', 'victoriametrics/operator:v0.66.0']
+    images: []
   - version: 0.65.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -27191,7 +28146,7 @@ addons:
           VMProbe (and related). This is a schema/type change that may require updating
           manifests/clients or re-applying CRDs if validation fails.']
     chart_version: 0.56.4
-    images: ['victoriametrics/operator:config-reloader-v0.65.0', 'victoriametrics/operator:v0.65.0']
+    images: []
   - version: 0.64.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -27231,7 +28186,7 @@ addons:
           scanning), you must either accept the new image or set `VM_USECUSTOMCONFIGRELOADER=false`
           to keep prior behavior.']
     chart_version: 0.55.2
-    images: ['victoriametrics/operator:v0.64.0']
+    images: []
   - version: 0.63.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -27256,7 +28211,7 @@ addons:
           to customize the label key used in the top-route namespace matcher for VMAlertmanagerConfig.]
       breaking_changes: []
     chart_version: 0.54.1
-    images: ['victoriametrics/operator:v0.63.0']
+    images: []
   - version: 0.62.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -27273,7 +28228,7 @@ addons:
           with `name`, `is_set`, `value` labels).']
       breaking_changes: []
     chart_version: 0.52.1
-    images: ['victoriametrics/operator:v0.62.0']
+    images: []
   - version: 0.61.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -27316,7 +28271,7 @@ addons:
           without it, operator actions involving evictions/PDB-respecting StatefulSet
           updates may fail.']
     chart_version: 0.51.2
-    images: ['victoriametrics/operator:v0.61.0']
+    images: []
   - version: 0.60.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -27338,7 +28293,7 @@ addons:
           (and semantics broaden to all secret/configmap fetch failures), which can
           break dashboards/alerts.']
     chart_version: 0.52.0
-    images: ['victoriametrics/operator:v0.60.0']
+    images: []
   - version: 0.59.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -27374,7 +28329,7 @@ addons:
           (`app.kubernetes.io/name` and add `app.kubernetes.io/instance`); if you
           select resources by these labels in tooling/policies, update selectors accordingly.']
     chart_version: 0.49.0-rc1
-    images: ['victoriametrics/operator:v0.59.0']
+    images: []
   - version: 0.58.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -27391,7 +28346,7 @@ addons:
           version with a known bug (VictoriaMetrics#8941). Recommended to skip this
           release; if you must upgrade, override vmagent to `v1.117.1` via `VM_VMAGENTDEFAULT_VERSION=v1.117.1`.']
     chart_version: 0.47.0
-    images: ['victoriametrics/operator:v0.58.0']
+    images: []
   - version: 0.57.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -27414,7 +28369,7 @@ addons:
           and defaults to 1 month when omitted; previously accepted values may now
           be rejected by the webhook/CRD validation.]
     chart_version: 0.46.0
-    images: ['victoriametrics/operator:v0.57.0']
+    images: []
   - version: 0.56.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -27440,7 +28395,7 @@ addons:
           on proxy-protocol on that internal endpoint, adjust your setup or remove
           the expectation.']
     chart_version: 0.45.0
-    images: ['victoriametrics/operator:v0.56.0']
+    images: []
   - version: 0.55.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -27473,7 +28428,7 @@ addons:
           vars are now deprecated in favor of the new global `VM_CONFIG_RELOADER_REQUEST_CPU/MEMORY`
           controls (not an immediate break, but update values/automation accordingly).']
     chart_version: 0.44.0
-    images: ['victoriametrics/operator:v0.55.0']
+    images: []
   - version: 0.54.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -27486,7 +28441,7 @@ addons:
           VLogs resources (VLogs support in VMUser).]
       breaking_changes: []
     chart_version: 0.43.1
-    images: ['victoriametrics/operator:v0.54.1']
+    images: []
   - version: 0.53.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -27501,7 +28456,7 @@ addons:
           \ (from v1.109.1).", Rebuilds operator with Go 1.23.5 (security patch upgrade).]
       breaking_changes: []
     chart_version: 0.42.5
-    images: ['victoriametrics/operator:v0.53.0']
+    images: []
   - version: 0.52.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -27532,7 +28487,7 @@ addons:
           stale if `controller.statusLastUpdateTimeTTL` too low for your object count;
           tune accordingly.']
     chart_version: 0.41.2
-    images: ['victoriametrics/operator:v0.52.0']
+    images: []
   - version: 0.51.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -27584,7 +28539,7 @@ addons:
           and several inlined VMAuth.spec fields are deprecated in favor of unauthorizedUserAccessSpec
           (supported until v1.0).']
     chart_version: 0.40.1
-    images: ['victoriametrics/operator:v0.51.1']
+    images: []
   - version: 0.50.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -27612,7 +28567,7 @@ addons:
           \ was added. Existing manifests must be updated or they will fail validation/behavior\
           \ will change."]
     chart_version: 0.39.1
-    images: ['victoriametrics/operator:v0.50.0']
+    images: []
   - version: 0.49.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -27646,7 +28601,7 @@ addons:
           security settings may see pods fail to start until securityContext/permissions
           are adjusted.']
     chart_version: 0.37.0
-    images: ['victoriametrics/operator:v0.49.0']
+    images: []
   - version: 0.48.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -27684,7 +28639,7 @@ addons:
           can change deletion/GC semantics in GitOps setups (e.g., Argo CD pruning)
           if you previously managed PVCs separately.']
     chart_version: 0.35.0
-    images: ['victoriametrics/operator:v0.48.0']
+    images: []
   - version: 0.47.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -27738,7 +28693,7 @@ addons:
           it to `blackhole` (previously it picked the first VMAlertmanagerConfig receiver),
           which can change alert delivery until you set an explicit receiver.']
     chart_version: 0.34.0
-    images: ['victoriametrics/operator:v0.47.0']
+    images: []
   - version: 0.46.4
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -27941,7 +28896,35 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Improved operator log messages for better debugging and context.,
+        Updated bundled VictoriaMetrics image tags to v1.99.0., Added support for
+          comma-separated WATCH_NAMESPACE to watch multiple namespaces without cluster-wide
+          permissions (requires per-namespace RBAC)., Added status.updateStatus field
+          on pod-owning CRs to better track rollouts/updates., Added operator.victoriametrics/last-applied-spec
+          annotation on pod-owning CRs to track spec changes and enable future cleanup
+          logic., 'vmagent: added stream aggregation option flush_on_shutdown.', 'vmagent:
+          added experimental spec.ingestOnlyMode to run without scrape config/config-reloaders
+          (currently disables some TLS/auth for remoteWrite).', 'vmalertmanager: default
+          router now blackhole when no config is provided (instead of dummy webhook).',
+        'vmalertmanager: fixed template path handling when configured both in config
+          file and spec.templates.', 'vmauth: added spec.configSecret to load external
+          config from a Secret key config.yaml (can be watched via configCheckInterval
+          or reloader).', 'vmcluster/vmstorage: changed pvc resize-disable check to
+          be at StatefulSet storage spec level via operator.victoriametrics.com/pvc-allow-volume-expansion;
+          enables adding PVC autoscaler.', 'APIs: added missing static config relabeling
+          config + tests.']
+      breaking_changes: [WATCH_NAMESPACE behavior may change if you start using comma-separated
+          values; ensure RBAC is updated to include permissions in each watched namespace.,
+        vmstorage PVC resize disable logic changed from per-PVC to storage spec level;
+          existing annotations/expectations around resizing may need validation after
+          upgrade., vmalertmanager default routing behavior changed to blackhole when
+          no config is provided; alerts may be dropped if you relied on previous dummy
+          webhook behavior., "vmagent ingestOnlyMode is experimental and currently\
+          \ disables TLS/auth options for remoteWrites; don\u2019t enable it in production\
+          \ unless you accept these limitations."]
     chart_version: 0.29.6
     images: ['victoriametrics/operator:v0.42.4']
   - version: 0.42.0
@@ -28044,7 +29027,21 @@ addons:
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Bumps bundled VictoriaMetrics component image tags to **v1.96.0**.,
+        'Extends `VMAlertmanagerConfig` (OpsGenie) schema with new fields: `entity`,
+          `actions`, `update_alerts`.', "Removes vmoperator \u201Cvmalert notifier\
+          \ is null\u201D guard; `-notifier.url` is treated as optional and only required\
+          \ when alerting rules are present."]
+      features: [Operator-managed VictoriaMetrics images are updated to VictoriaMetrics
+          **v1.96.0**., 'OpsGenie integration in `VMAlertmanagerConfig` now supports
+          `entity`, `actions`, and `update_alerts` fields (aligning with Prometheus
+          `opsgenie_config`).']
+      breaking_changes: ['Potential behavior change in vmalert notifier handling:
+          vmoperator no longer performs a null check; ensure your vmalert deployments
+          either omit notifier settings when not using alerting rules, or set `-notifier.url`
+          when alerting rules are configured.']
     chart_version: 0.27.9
     images: ['victoriametrics/operator:v0.39.3']
   - version: 0.39.0
@@ -28123,7 +29120,7 @@ addons:
     chart_version: 0.25.0
     images: ['victoriametrics/operator:v0.36.0']
   - version: 0.35.0
-    kube: ['1.27', '1.26', '1.25']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28139,7 +29136,7 @@ addons:
     chart_version: 0.24.0
     images: ['victoriametrics/operator:v0.35.0']
   - version: 0.34.0
-    kube: ['1.27', '1.26', '1.25']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28158,7 +29155,7 @@ addons:
     chart_version: 0.23.0
     images: ['victoriametrics/operator:v0.34.0']
   - version: 0.33.0
-    kube: ['1.27', '1.26', '1.25']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28175,19 +29172,6 @@ addons:
       breaking_changes: []
     chart_version: 0.21.0
     images: ['victoriametrics/operator:v0.33.0']
-  - version: 0.32.1
-    kube: ['1.27', '1.26', '1.25']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [No new features in v0.32.1; it is a patch release focused on fixes.,
-        "v0.32.1 makes vmsingle\u2019s stream aggregation config conditional, preventing\
-          \ it from being injected when not configured/needed."]
-      breaking_changes: []
-    chart_version: 0.20.1
-    images: ['victoriametrics/operator:v0.32.1']
   - version: 0.32.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -28222,29 +29206,8 @@ addons:
           v2beta, they may need adjustment.']
     chart_version: 0.19.0
     images: ['victoriametrics/operator:v0.31.0']
-  - version: 0.30.3
-    kube: ['1.26', '1.25', '1.24']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ['v0.30.0 added the Scaling subresource for `VMAgent`, enabling use
-          of the Kubernetes scale API (e.g., `kubectl scale`) against the CRD.', 'v0.30.0
-          introduced optional namespace label matching for inhibit rules, improving
-          alert inhibition scoping.', 'v0.30.0 started publishing CRDs YAML as a release
-          asset, making CRD management outside Helm easier.', v0.30.0 added child
-          labels filtering to control which labels propagate to generated child resources.,
-        v0.30.0 added OAuth2 and bearer auth support for vmalert remote DB connections.]
-      breaking_changes: ['Kubernetes 1.26+ deprecates `autoscaling/v2beta2`; v0.30.3
-          adds an API-availability check, which may change HPA behavior if your cluster
-          only supports certain autoscaling API versions.', 'PVC resize logic in v0.30.3
-          now uses corrected selector labels; if you relied on the previous (incorrect)
-          labels for automation/monitoring, behavior/metrics selection may differ.']
-    chart_version: 0.17.2
-    images: ['victoriametrics/operator:v0.30.3']
   - version: 0.30.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28263,7 +29226,7 @@ addons:
     chart_version: 0.17.0
     images: ['victoriametrics/operator:v0.30.0']
   - version: 0.29.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28282,7 +29245,7 @@ addons:
     chart_version: 0.15.0
     images: ['victoriametrics/operator:v0.29.0']
   - version: 0.28.3
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28298,7 +29261,7 @@ addons:
     chart_version: 0.14.0
     images: ['victoriametrics/operator:v0.28.3']
   - version: 0.27.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28316,7 +29279,7 @@ addons:
     chart_version: 0.12.0
     images: ['victoriametrics/operator:v0.27.0']
   - version: 0.26.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28342,7 +29305,7 @@ addons:
     chart_version: 0.11.1
     images: ['victoriametrics/operator:v0.26.0']
   - version: 0.25.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28363,7 +29326,7 @@ addons:
     chart_version: 0.10.0
     images: ['victoriametrics/operator:v0.25.0']
   - version: 0.24.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28385,7 +29348,7 @@ addons:
     chart_version: 0.9.0
     images: ['victoriametrics/operator:v0.24.0']
   - version: 0.23.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28401,7 +29364,7 @@ addons:
     chart_version: 0.7.1
     images: ['victoriametrics/operator:v0.23.0']
   - version: 0.22.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28418,7 +29381,7 @@ addons:
     chart_version: 0.6.0
     images: ['victoriametrics/operator:v0.22.0']
   - version: 0.21.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28442,7 +29405,7 @@ addons:
     chart_version: 0.5.1
     images: ['victoriametrics/operator:v0.21.0']
   - version: 0.20.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28461,7 +29424,7 @@ addons:
     chart_version: 0.4.0
     images: ['victoriametrics/operator:v0.20.0']
   - version: 0.19.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28479,7 +29442,7 @@ addons:
     chart_version: 0.3.0
     images: ['victoriametrics/operator:v0.19.0']
   - version: 0.18.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28514,7 +29477,7 @@ addons:
     chart_version: 0.2.0
     images: ['victoriametrics/operator:v0.18.0']
   - version: 0.17.1
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28532,7 +29495,7 @@ addons:
     chart_version: 0.1.18
     images: ['victoriametrics/operator:v0.17.1']
   - version: 0.16.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28548,7 +29511,7 @@ addons:
     chart_version: 0.1.17
     images: ['victoriametrics/operator:v0.16.0']
   - version: 0.15.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28564,14 +29527,19 @@ addons:
     chart_version: 0.1.14
     images: ['victoriametrics/operator:v0.15.0']
   - version: 0.14.2
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Probe customization via CRD (adds ability to configure liveness/readiness
+          probes through custom resources).]
+      breaking_changes: []
     chart_version: 0.1.13
     images: ['victoriametrics/operator:v0.14.2']
   - version: 0.13.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28583,21 +29551,37 @@ addons:
     chart_version: 0.1.12
     images: ['victoriametrics/operator:v0.13.0']
   - version: 0.12.2
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Adds an additional Service resource for all components to make external
+          exposition easier.]
+      breaking_changes: [VMBackuper now requires an explicit acceptEULA setting; without
+          it the backuper will not run.]
     chart_version: 0.1.10
     images: ['victoriametrics/operator:v0.12.2']
   - version: 0.11.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator v0.11.0 adds an additional Kubernetes Service for all
+          components to simplify service exposure., 'Bugfix: fixes an issue with insert
+          ports.', Minor fixes/updates to examples., Operator v0.9.1 adds `externalLabels`
+          support for `vmalert`., 'Bugfix: RBAC role namespace fix.']
+      features: ['v0.9.1: `vmalert` now supports `externalLabels` configuration.',
+        'v0.11.0: Each component gets an additional Service resource to make exposing
+          services easier.']
+      breaking_changes: ['v0.11.0: `VMBackuper` now requires `acceptEULA` to be set;
+          without it the backuper will not run/be usable.']
     chart_version: 0.1.9
     images: ['victoriametrics/operator:v0.11.0']
   - version: 0.9.1
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28614,7 +29598,7 @@ addons:
     chart_version: 0.1.8
     images: ['victoriametrics/operator:v0.9.1']
   - version: 0.8.0
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28632,21 +29616,31 @@ addons:
     chart_version: 0.1.7
     images: ['victoriametrics/operator:v0.8.0']
   - version: 0.7.3
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['v0.7.3: Fix: prevent panic in VMCluster (issue #147).', 'v0.6.1:
+          Fix: VMAlert TLSConfig build; docs fixes for operator-hub.']
+      features: []
+      breaking_changes: []
     chart_version: 0.1.5
     images: ['victoriametrics/operator:v0.7.3']
   - version: 0.6.1
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Fixes VMAlert TLSConfig building, improving reliability when configuring
+          TLS for vmalert.', Documentation fixes for OperatorHub listing/install guidance.]
+      breaking_changes: []
     chart_version: 0.1.4
     images: ['victoriametrics/operator:v0.6.1']
   - version: 0.2.1
-    kube: ['1.25', '1.24', '1.23']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary: null
@@ -31037,88 +32031,329 @@ addons:
   helm_repository_url: https://ray-project.github.io/kuberay-helm
   versions:
   - version: 1.7.0
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- **Breaking:** In the `kuberay-operator` Helm chart, `metrics.serviceMonitor.selector`\
+        \ was **renamed** to `metrics.serviceMonitor.additionalLabels`, and the chart\
+        \ will **no longer emit empty labels**. If you set the old field in your values,\
+        \ update it before upgrading.\n- Several features are controlled via **operator\
+        \ feature gates** (CLI args), so ensure your Helm values/operator args reflect\
+        \ what you want enabled/disabled:\n  - `RayClusterHistoryServer` (alpha, default\
+        \ **off**)\n  - `RayClusterMTLS` (alpha, default **off**)\n  - `RayClusterNetworkPolicy`\
+        \ (alpha, default **off**)\n  - `GCSFaultToleranceEmbeddedStorage` (alpha,\
+        \ default **off**)\n  - `RayServiceIncrementalUpgrade` (now **beta and enabled\
+        \ by default**)\n"
+      chart_updates: ['History Server images are now published to `quay.io/kuberay`
+          (e.g., `historyserver:v1.7.0`, `collector:v1.7.0`).', 'Operator memory-usage
+          improvements (pod informer cache selectors, more efficient pod resource
+          calculation) may change runtime characteristics/footprint but should be
+          transparent to chart consumers.', 'Grafana dashboards updated for Ray 2.56
+          (if you deploy dashboards via chart/configmaps, expect updated content).']
+      features: ['Ray History Server graduates to **beta** with major performance/scalability
+          improvements, token auth support, and better UI/API coverage (cluster selection,
+          task logs, Serve/placement groups/Ray Data endpoints polled by default).',
+        Operator can **auto-inject** the History Server collector sidecar into RayCluster
+          pods when `RayClusterHistoryServer` feature gate is enabled and `spec.historyServerOptions`
+          is set., 'RayService **Incremental Upgrade** is now **beta and enabled by
+          default**, adding safer zero-downtime upgrades with rollback support and
+          improved reliability.', Alpha **mTLS via cert-manager** for pod-to-pod TLS
+          in RayCluster (feature-gated)., Alpha **NetworkPolicy** support for RayCluster
+          via new `spec.networkPolicy` (feature-gated)., Alpha **GCS fault tolerance
+          with embedded RocksDB storage** to avoid external Redis (feature-gated).,
+        'Other: built-in Ingress options on `headGroupSpec.ingressOptions`, RayCronJob
+          `spec.timeZone`, WorkerGroup `priority`, operator `defaultPodAnnotations/defaultPodLabels`,
+          and `kubectl ray logs --gke-link`.']
+      breaking_changes: ["Helm values breaking rename: `metrics.serviceMonitor.selector`\
+          \ \u2192 `metrics.serviceMonitor.additionalLabels`; empty labels no longer\
+          \ emitted.", "History Server config changes from v1.6 alpha to v1.7 beta:\
+          \ S3 credentials now use standard AWS env vars, a runtime-class flag replaced\
+          \ by `--storage-backend`, and the on-storage event layout changed\u2014\
+          redeploy collector and server together and follow updated setup guide."]
     chart_version: 1.7.0
     images: ['quay.io/kuberay/operator:v1.7.0']
   - version: 1.6.2
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: []
+      breaking_changes: []
     chart_version: 1.6.2
     images: ['quay.io/kuberay/operator:v1.6.2']
   - version: 1.5.2
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Bumps KubeRay (kuberay-operator) version references to **v1.5.2**
+          (chart/app version alignment).]
+      features: ['RayService suspend propagation bugfix: setting `spec.rayClusterSpec.suspend`
+          on a RayService now correctly suspends the underlying RayCluster (important
+          for Kueue queueing/preemption scenarios).']
+      breaking_changes: []
     chart_version: 1.5.2
     images: ['quay.io/kuberay/operator:v1.5.2']
   - version: 1.4.2
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Krew (kubectl plugin) release indentation fix; mostly packaging/release
+          metadata., 'RayCluster: head pod naming reverted to non-deterministic (behavioral
+          change in naming).', Version references updated for 1.4.2 release.]
+      features: ['kubectl-ray: add head/worker nodeSelector options; add nodeSelector
+          for creating worker groups (from v1.3.2 notes).']
+      breaking_changes: [RayCluster headPod name changed back to non-deterministic;
+          any automation that relies on a stable/deterministic head pod name may break
+          and should be updated to use labels/selectors instead.]
     chart_version: 1.4.2
     images: ['quay.io/kuberay/operator:v1.4.2']
   - version: 1.3.2
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Kubectl Ray plugin maturity improvements: added head/worker node
+          selector options and a node selector option when creating a worker group
+          (v1.3.2).', 'RayJob UX improvements: job submission now uses --no-wait to
+          avoid propagating submission errors into log tailing output (v1.3.2).',
+        'Kubectl Ray plugin (alpha in v1.2.2): introduced commands like get, session,
+          log, and job submit, plus shell completion improvements.', 'Kubernetes events
+          (alpha in v1.2.2): operator emits Kubernetes events for important interactions
+          and failures, improving observability.', 'Apache YuniKorn integration (alpha
+          in v1.2.2): supports gang scheduling via YuniKorn. ']
+      breaking_changes: ['Potential CLI behavior change: kubectl ray job submit now
+          requires/provides an explicit entrypoint to preserve compatibility with
+          v1.2.2; scripts relying on implicit defaults should be validated.', 'Operational
+          behavior change: RayJob submission uses --no-wait; workflows that assumed
+          synchronous submission completion/tailing semantics should be tested.']
     chart_version: 1.3.2
     images: ['quay.io/kuberay/operator:v1.3.2']
   - version: 1.2.2
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['KubeRay operator bugfixes in v1.1.1: fixes crash when RayCluster
+          sets `resources.limits` without `resources.requests`, and prevents unintended
+          worker Pod deletions when using an older v1.0.0 CRD with a v1.1.x operator
+          image.', v1.2.2 adds (alpha) kubectl plugin (`kubectl ray get/session/log/job
+          submit`) shipped as separate assets; not part of the operator chart unless
+          you choose to distribute it., 'v1.2.2 adds (alpha) Kubernetes Events emitted
+          by controllers to surface reconciliation failures and lifecycle milestones
+          (e.g., failed pod/serviceaccount creation, RayJob submitter/cluster creation/deletion,
+          GCS FT Redis cleanup job). Expect new Event objects in namespaces where
+          Ray resources run.', v1.2.2 adds (alpha) Apache YuniKorn gang scheduling
+          integration and scheduler-related behavior changes (batch scheduler option
+          and defaults)., 'Behavioral tweaks: RayCluster headless worker service publishes
+          not-ready addresses; exec probe timeouts for head pods are longer, which
+          can affect readiness/liveness timing expectations.', 'Deprecation: RayCluster
+          `.status.state` is deprecated in favor of other status signals/events.']
+      features: ['Alpha kubectl plugin for interacting with Ray resources (`kubectl
+          ray get`, `session`, `log`, `job submit`).', 'Alpha Kubernetes Events emission
+          for key operator actions and failures, improving observability during reconciles.',
+        Alpha Apache YuniKorn gang scheduling support for Ray workloads., RayJob enhancements
+          including UserMode SubmissionMode and better failure feedback via logs/events.]
+      breaking_changes: ['Scheduler configuration changes: introduction of `batch-scheduler`
+          option and removal of a default scheduler name; clusters relying on implicit/default
+          batch scheduler behavior may need explicit configuration.', RayCluster `.status.state`
+          is deprecated; any automation reading it should be updated to use newer
+          status fields/conditions or rely on Events/logs instead.]
     chart_version: 1.2.2
     images: ['quay.io/kuberay/operator:v1.2.2']
   - version: 1.1.1
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [CRD/API moved from v1alpha1 to v1 in v1.0.0 (GA). Ensure your
+          cluster has the v1 CRDs installed/updated before/with the operator upgrade.,
+        'Helm chart tweaks around RayCluster templates: removed `miniReplicas` from
+          raycluster-cluster.yaml; template reference fixes; custom labels propagation
+          fix; allow per-worker-group images; allow manually creating initContainers.']
+      features: ['GA release (v1.0.0) with CRD promotion from v1alpha1 to v1, plus
+          UX improvements for RayJob and GCS fault tolerance.', 'RayService: option
+          to make zero-downtime upgrades optional and added HA example; improved health/unhealthy
+          criteria and logging.', 'RayJob: improved status reconciliation, log streaming
+          via PYTHONUNBUFFERED, runtime env field, defaults for submitter resources,
+          and better dashboard readiness gating.', 'RayCluster: worker group replicas
+          optional; autoscaler defaults to head image; per-worker-group images in
+          Helm; better autoscaler-controlled pod deletion behavior; GPU/GKE Autopilot
+          related fix.', 'Observability: ability to scrape autoscaler and dashboard
+          metrics; operator supports custom labels/annotations.']
+      breaking_changes: [CRD version bump from v1alpha1 to v1 (v1.0.0). Existing manifests
+          or clients targeting v1alpha1 may need updates; CRDs must be upgraded carefully
+          to avoid compatibility issues., 'Autoscaler/operator behavior change: only
+          the autoscaler should make pod deletion decisions; upgrading operator without
+          aligning CRDs can lead to unexpected worker pod deletions (explicitly fixed
+          in v1.1.1 for v1.0.0 CRD + v1.1.0 operator combo).']
     chart_version: 1.1.1
     images: ['quay.io/kuberay/operator:v1.1.1']
   - version: 1.0.0
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "## Helm values / chart behavior changes to review\n\n- **`miniReplicas`\
+        \ removed from the RayCluster sample/template**: release notes mention removing\
+        \ `miniReplicas` in `raycluster-cluster.yaml`. If you previously set `miniReplicas`\
+        \ in values or relied on that sample, remove/replace it.\n- **Custom labels\
+        \ propagation fix**: if you had workarounds to get labels into rendered manifests,\
+        \ re-check and simplify values; behavior is fixed in v1.0.0.\n- **Worker-group-specific\
+        \ images**: chart now supports setting different container images per worker\
+        \ group; if you were using a single global image but need per-group overrides,\
+        \ adopt the new fields.\n- **Init containers support**: chart allows manually\
+        \ defining initContainers; if you previously patched manifests post-render,\
+        \ you can move that logic into values.\n- **Template reference fix**: chart\
+        \ rendering changed slightly (bugfix); validate with `helm template`/diff\
+        \ before applying.\n\n> Note: the provided notes don\u2019t include a full\
+        \ Helm `values.yaml` diff; treat the above as items to verify in your own\
+        \ values files during the upgrade."
+      chart_updates: ['KubeRay **CRDs promoted from `v1alpha1` to `v1`** (GA). This
+          is the main upgrade driver: CRDs and any custom resources must be compatible
+          with the new API version.', 'RayCluster: **replicas becomes optional** for
+          `WorkerGroupSpec` (may affect validation/defaulting expectations).', 'RayCluster:
+          **Ray container must be the first application container** (pod spec ordering
+          matters; sidecars still allowed).', 'Autoscaler behavior tightened: **only
+          the autoscaler is allowed to decide pod deletions**; operator stops certain
+          event-listening behavior and refines pod deletion logic.', 'GCS fault tolerance
+          improvements: better cleanup UX, sidecar handling, default probe values,
+          fixes for Redis address parsing and HA issues.', 'RayService: option to
+          make **zero-downtime upgrades optional**; bugfixes to avoid unnecessary
+          upgrades and improve recovery behavior.', 'RayJob UX/behavior improvements:
+          defaults for submitter resources, better status reconciliation, readiness
+          checks, log streaming enabled via `PYTHONUNBUFFERED`, runtime env field
+          and other API enhancements.', 'Observability: added scraping of autoscaler/dashboard
+          metrics; more logging for networking/troubleshooting.', 'Docs relocation:
+          most documentation moved to the Ray website; expect broken in-repo links
+          and update internal runbooks.', 'API server: expanded job APIs, Python client,
+          v1 URL updates, probes, OpenShift support, HA example.']
+      features: ['GA release: CRDs and APIs move to stable `v1` (from `v1alpha1`).',
+        'Improved GCS fault tolerance, including Redis cleanup on RayCluster deletion
+          and better default health probes.', 'RayService enhancements: optional zero-downtime
+          upgrades and improved HA examples/behavior.', 'RayJob improvements: better
+          status reconciliation, default submitter CPU/memory, log streaming, runtime
+          env support, and more robust job submission flow.', 'Helm improvements:
+          per-worker-group images and ability to define initContainers via values,
+          plus label/template fixes.', Added/expanded KubeRay API server capabilities
+          including Python client and extended job APIs.]
+      breaking_changes: ["**CRD API version bump `v1alpha1` \u2192 `v1`**: existing\
+          \ RayCluster/RayJob/RayService manifests and any automation referencing\
+          \ the old API version must be updated and resources may need migration/re-apply\
+          \ after CRD upgrade.", 'RayCluster pod spec constraint: **Ray container
+          must be the first application container**; clusters using a sidecar-first
+          ordering will fail validation or behave incorrectly until reordered.', 'Autoscaler/operator
+          semantics change around pod deletions: **only autoscaler can delete pods**;
+          any custom tooling or expectations around operator-driven deletions/scale-down
+          may change during upgrades.']
     chart_version: 1.0.0
     images: ['kuberay/operator:v1.0.0']
   - version: 0.6.0
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- **New Helm value:** `crNamespacedRbacEnable` (added in 0.6.0)
+        to enable/disable creation of `Role`/`RoleBinding` used for RayCluster preparation
+        (namespaced RBAC).
+
+        - **RBAC behavior fix:** when `singleNamespaceInstall=true` and `rbacEnable=true`,
+        0.6.0 fixes an issue where KubeRay attempted to create a `ClusterRoleBinding`.
+
+        - **Worker replica edge case:** Helm now supports **zero worker replicas**
+        (previously could fail).
+
+
+        **Action for upgrade:** review your `values.yaml` for RBAC-related settings
+        (`singleNamespaceInstall`, `rbacEnable`) and decide whether you want namespaced
+        RBAC for RayCluster prep via `crNamespacedRbacEnable`.'
+      chart_updates: [Introduced optional creation of namespaced RBAC resources (Role/RoleBinding)
+          for RayCluster preparation via `crNamespacedRbacEnable`., Fixed Helm/RBAC
+          logic to avoid creating ClusterRoleBinding in single-namespace installs.,
+        Fixed Helm templating/logic to allow worker groups with 0 replicas.]
+      features: ['RayService: added support for multi-app Serve config provided as
+          a YAML-string and status reporting for multi-app deployments.', 'RayJob:
+          refactored submission flow to use a Kubernetes Job as the submitter mechanism
+          instead of relying on dashboard status polling.', 'KubeRay API server: added
+          support for OpenShift Routes and service account integration.', 'Autoscaler:
+          improved safety/stability by ensuring only the autoscaler makes scale-down
+          pod deletion decisions.']
+      breaking_changes: ['RBAC/installation behavior may change for single-namespace
+          installs: 0.6.0 corrects ClusterRoleBinding creation; clusters that accidentally
+          relied on that cluster-scoped binding may need explicit RBAC adjustments.',
+        RayJob submission mechanism changed (now uses a K8s Job); any workflows that
+          depended on the previous dashboard-client based behavior/log locations may
+          need updates.]
     chart_version: 0.6.0
     images: ['kuberay/operator:v0.6.0']
   - version: 0.5.2
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- **Service spec customization expanded:** KubeRay now allows
+        specifying the *entire* `headService` and `serveService` YAML spec (not just
+        selected fields like `labels`/`annotations`). Review any existing values that
+        previously relied on the old limited knobs and migrate to the new full-service-spec
+        fields if needed. (PRs [#1040](https://github.com/ray-project/kuberay/pull/1040),
+        [#1117](https://github.com/ray-project/kuberay/pull/1117))
+
+        - **Worker init container injection is now configurable:** A new flag lets
+        you enable/disable worker init-container injection. If you were depending
+        on implicit behavior from older versions or have custom init containers, verify
+        the default and explicitly set the flag to match your expectations. (PR [#1069](https://github.com/ray-project/kuberay/pull/1069))
+
+        - **Helm ray-cluster bugfix:** Fix parsing `envFrom` in `additionalWorkerGroups`.
+        If your `values.yaml` uses `additionalWorkerGroups.*.envFrom`, re-test templating
+        and rendered manifests. (PR [#1039](https://github.com/ray-project/kuberay/pull/1039))
+
+        '
+      chart_updates: ['Operator can watch Custom Resources in multiple namespaces
+          using namespaced RBAC resources; this typically implies additional/changed
+          RBAC manifests and possibly new configuration for the watch scope. (PR [#1106](https://github.com/ray-project/kuberay/pull/1106))',
+        'RayService and autoscaler reconciliation logic received multiple stability
+          fixes that may change reconciliation frequency and service generation behavior
+          (less churn). (PRs [#1056](https://github.com/ray-project/kuberay/pull/1056),
+          [#1065](https://github.com/ray-project/kuberay/pull/1065), [#1074](https://github.com/ray-project/kuberay/pull/1074))',
+        'Autoscaler behavior fixes: worker removal and RayService/autoscaler interaction
+          improved; expect different scaling/downscale behavior compared to 0.4.x.
+          (PRs [#1037](https://github.com/ray-project/kuberay/pull/1037), [#1139](https://github.com/ray-project/kuberay/pull/1139))']
+      features: [Full customization of the Head and Serve Kubernetes Services (`headService`
+          and `serveService`) instead of only labels/annotations., Operator can watch
+          Ray CRs across multiple namespaces with namespaced RBAC resources., RayJob
+          gains a `suspend` capability (feature introduced in 0.5.x line)., Configurable
+          enable/disable for worker init-container injection., 'Improved RayService
+          stability: status updates and dashboard submission behavior are less noisy
+          and more reliable.']
+      breaking_changes: ['Potential RBAC/authorization change: a fix labeled **[breaking
+          change]** addresses `401 Unauthorized` when fetching Ray CRs; upgrades may
+          require updating RBAC/ServiceAccount permissions and re-applying manifests/CRDs
+          to match 0.5.x expectations. (PR [#1128](https://github.com/ray-project/kuberay/pull/1128))']
     chart_version: 0.5.2
     images: ['kuberay/operator:v0.5.2']
   - version: 0.4.0
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary: null
@@ -31134,77 +32369,323 @@ addons:
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['MongoDBUser can now set an optional `spec.connectionStringDatabase`
+          to control the database path segment in generated connection string secrets,
+          while `spec.db` continues to set `authSource`.', "kubectl-mongodb multicluster\
+          \ `setup` and `recover` add a repeatable `--member-cluster-ca <cluster>=<pemBundle>`\
+          \ flag to override the CA used in generated kubeconfigs for member clusters,\
+          \ useful when TLS is terminated differently on the operator\u2019s network\
+          \ path to the API server."]
+      breaking_changes: []
     chart_version: 1.11.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.11.0']
   - version: 1.10.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "## Helm / values changes to check\n\n- **Multi-cluster Search\
+        \ health check streak**: `multiCluster.memberClusterRequiredHealthyStreak`\
+        \ (default `5`) controls how many consecutive successful health checks are\
+        \ required before a previously-failed member cluster is marked healthy again.\n\
+        \n- **Search monitoring workaround (Ops Manager 8.0.24)**: If you have `MongoDBSearch`\
+        \ resources with metrics forwarding enabled, explicitly set `.spec.observability.metricsForwarder.mode:\
+        \ disabled` until Ops Manager >= **8.0.25** is in place.\n\n- **Ops Manager\
+        \ AppDB monitoring agent config moved** (1.10.0): `spec.appDB.monitoringAgent`\
+        \ is **deprecated** and has **no effect**. Use:\n  - `spec.applicationDatabase.agent`\n\
+        \  - `spec.applicationDatabase.agent.monitoringAgent`\n  for monitoring agent\
+        \ settings (log level/rotation, etc.).\n\n- **Pod securityContext became more\
+        \ restrictive** (1.9.0): If your cluster/policies require different settings,\
+        \ plan Helm `template` / `podTemplate` overrides for operator and workloads."
+      chart_updates: [MongoDB Search GA landed in 1.9.x with multiple `MongoDBSearch`
+          API additions and field moves (notably `.spec.prometheus` -> `.spec.observability.prometheus`).,
+        Multi-cluster Search support added in 1.10.0 for `spec.source.external` sources;
+          operator deploys per-cluster Envoy plus one `mongot` StatefulSet per shard
+          per member cluster., Added cluster-level status reporting for Search / LoadBalancer
+          / MetricsForwarder in `MongoDBSearch.status.clusters`., 'Added node affinity
+          configuration for `mongot` via `spec.clusters[].nodeAffinity` and per-shard
+          overrides.', 'Changed default `mongot` JVM heap sizing: half of memory request
+          but capped at 30GB unless user overrides via `jvmFlags`.', 'Ops Manager/AppDB:
+          merged `mongodb-agent-monitoring` sidecar into the main `mongodb-agent`
+          container; monitoring config fields updated/deprecated.']
+      features: ['MongoDB Search & Vector Search GA (1.9.x), plus Auto Embeddings
+          (public preview) and more TLS/key handling options for encrypted keys.',
+        Search metrics forwarding to Ops Manager via `spec.observability.metricsForwarder`
+          (with noted Ops Manager version caveat)., 'Multi-cluster MongoDB Search
+          (1.10.0) for external replica set/sharded sources using `spec.source.external`,
+          keeping search traffic local per cluster.', Cluster-level Search status
+          surfaced in `MongoDBSearch.status.clusters` plus `mongot` nodeAffinity controls.,
+        'Ops Manager/AppDB agent simplification: automation+monitoring now run in
+          a single `mongodb-agent` container; monitoring settings centralized under
+          `spec.applicationDatabase.agent.*`.']
+      breaking_changes: ['MongoDBSearch GA schema changes vs Search public preview:
+          new fields added, x509 key password handling moved to a dedicated Secret
+          ref, and `.spec.prometheus` moved to `.spec.observability.prometheus` (Prometheus
+          enabled by default; disable explicitly if needed).', Ops Manager 8.0.24
+          + Search metrics forwarding can cause startup preflight restart loops after
+          next restart; require Ops Manager >= 8.0.25 or disable metrics forwarding.,
+        AppDB monitoring agent field `spec.appDB.monitoringAgent` is deprecated and
+          ignored in 1.10.0; migrate configuration to `spec.applicationDatabase.agent`
+          / `spec.applicationDatabase.agent.monitoringAgent`.]
     chart_version: 1.10.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.10.0']
   - version: 1.9.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "## Helm values / chart values to review\n- **`operator.baseName`\
+        \ removed (already removed in 1.8.0):** ensure it is not present in your values;\
+        \ RBAC resource names are now fixed to `mongodb-kubernetes-*`.\n- **Init container\
+        \ image values removed (already removed in 1.8.0):** `initAppDb.name`, `initAppDb.version`,\
+        \ `registry.initAppDb` no longer exist. Use `initDatabase.name`, `initDatabase.version`,\
+        \ `registry.initDatabase`.\n- **New Helm value (1.9.0):** `multiCluster.memberClusterRequiredHealthyStreak`\
+        \ (default **5**) controls how many consecutive successful health checks are\
+        \ required before clearing the \u201Cfailed cluster\u201D annotation when\
+        \ automatic failover is disabled.\n- **Potential env var alternative:** `MDB_MEMBER_CLUSTER_REQUIRED_HEALTHY_STREAK`\
+        \ provides the same setting if you configure via env vars rather than Helm.\n\
+        \n## Resource (CR) spec changes you must apply (MongoDBSearch)\n- `.spec.prometheus`\
+        \ **moved** to `.spec.observability.prometheus` (Prometheus metrics now **enabled\
+        \ by default**; disable via `.spec.observability.prometheus.mode: disabled`).\n\
+        - New/changed GA fields:\n  - `.spec.observability.metricsForwarder` (+ `.opsManager`)\
+        \ to forward Search metrics to Ops Manager (default off).\n  - TLS/encrypted\
+        \ key password secrets:\n    - `.spec.security.tls.keyFilePasswordSecretRef`\n\
+        \    - `.spec.source.tls.clientCertificateSecretRef`\n    - `.spec.source.tls.keyFilePasswordSecretRef`\n\
+        \    - `.spec.source.x509.keyFilePasswordSecretRef` (**replaces** embedded\
+        \ `tls.keyFilePassword` in the x509 secret).\n  - `.spec.clusters[].advancedMongotConfigs`\n\
+        \  - `.spec.clusters[].syncSourceSelector.matchTagSets`\n  - `.spec.clusters[].loadBalancer.managed.retryPolicy`\n\
+        \  - `.spec.clusters[].loadBalancer.managed.minMongotReadyReplicas`\n  - `.spec.clusters[].loadBalancer.managed.replicas`\n\
+        \  - `.spec.featureFlags.enableOverloadRetrySignal` (default `true`)"
+      chart_updates: ['MongoDB Search & Vector Search graduated to **GA** (from Public
+          Preview) with corresponding `MongoDBSearch` CRD/schema updates and new capabilities
+          (auto embeddings preview, monitoring integrations, additional LB/tuning).',
+        Default pod `securityContext` hardened to align with Kubernetes Pod Security
+          Standards (operator and workloads); use `template`/`podTemplate` overrides
+          if your environment requires less restrictive settings., "Multi-cluster\
+          \ reconciliation improvements and new configurability for clearing \u201C\
+          failed cluster\u201D annotations when automatic failover is disabled.",
+        'Bug fixes across Ops Manager, MongoDB, multi-cluster ownership/GC issues,
+          reconciliation triggers, AppDB PVC status, and connection string password
+          encoding.']
+      features: [MongoDB Search & Vector Search is now **Generally Available** for
+          Enterprise Advanced; Auto Embeddings for Enterprise is added in **Public
+          Preview**., '`mongot` can use **password-encrypted private keys** for gRPC
+          and **client TLS** for SCRAM sync-source, with decryption passwords supplied
+          via dedicated Kubernetes Secrets.', Optional **Search metrics forwarding
+          into Ops Manager** via a new metrics forwarder (shows status in the CR).,
+        '`mongot` sync source selection can now be targeted using **replica set tag
+          sets** for data-locality aware syncing.', 'Managed Envoy load balancer gains
+          **retry policy**, configurable **Envoy replica count**, and a **minimum
+          ready mongot replicas** threshold before routing traffic.', '`MongoDB` and
+          `MongoDBUser` now expose Ops Manager **project ID** in `.status.projectId`.']
+      breaking_changes: ['**MongoDBSearch GA schema changes**: `.spec.prometheus`
+          moved to `.spec.observability.prometheus`; Prometheus metrics are enabled
+          by default unless explicitly disabled.', '**MongoDBSearch encrypted-key
+          handling change**: x509 password is no longer read from the embedded `tls.keyFilePassword`
+          entry inside the cert Secret; it must be provided via `.spec.source.x509.keyFilePasswordSecretRef`
+          when using encrypted keys.', "**Minimum supported Search stack versions\
+          \ for GA**: MongoDB Server **8.3.0+**, Ops Manager **8.0.25+**, and Search\
+          \ (`mongot`) **1.70.1+**. Default Search version becomes **1.70.1** (older\
+          \ versions won\u2019t be supported).", 'Operational risk note: Ops Manager
+          **8.0.24** has a critical issue when Search monitoring is enabled; until
+          Ops Manager is upgraded, explicitly set `.spec.observability.metricsForwarder.mode:
+          disabled` on each `MongoDBSearch`.']
     chart_version: 1.9.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.9.0']
   - version: 1.8.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "### Helm values / deployment config changes\n- **Removed values\
+        \ (must be deleted/updated in your `values.yaml`):**\n  - `initAppDb.name`,\
+        \ `initAppDb.version`, `registry.initAppDb`\n  - **Replace with:** `initDatabase.name`,\
+        \ `initDatabase.version`, `registry.initDatabase`\n- **Removed value:** `operator.baseName`\n\
+        \  - This can no longer be customized; RBAC and ServiceAccount names are now\
+        \ fixed to the chart defaults.\n- **Env vars removed (if you set extra env\
+        \ on the operator Deployment):**\n  - `INIT_APPDB_IMAGE_REPOSITORY`, `INIT_APPDB_VERSION`\n\
+        \  - **Replace with:** `INIT_DATABASE_IMAGE_REPOSITORY`, `INIT_DATABASE_VERSION`\n\
+        \n### Operational/behavioral changes relevant to Helm upgrades\n- `init-appdb`\
+        \ init container image is no longer published; ensure your image overrides\
+        \ (if any) point to `init-database` only.\n- RBAC/ServiceAccount naming is\
+        \ now predefined; any downstream manifests referencing old/custom names must\
+        \ be updated."
+      chart_updates: [Merged `init-database` and `init-appdb` init container images
+          into a single `init-database` image; `init-appdb` is no longer published.,
+        Removed the `operator.baseName` Helm value and standardized workload RBAC
+          resource names (specific ServiceAccounts/Role/RoleBinding names are now
+          fixed)., 'Ops Manager and BackupDaemon services no longer set `publishNotReadyAddresses:
+          true`, reducing the chance of proxies routing to NotReady pods during rollouts.']
+      features: ['MongoDBSearch (Public Preview) now supports sharded clusters as
+          a source, deploying and managing a mongot group per shard (operator-managed
+          or external sharded clusters).', MongoDBSearch now supports horizontal scaling
+          via `spec.replicas` and requires L7 load balancing for multi-mongot; the
+          operator can manage an Envoy proxy (`spec.loadBalancer.managed`) or you
+          can provide your own (`spec.loadBalancer.unmanaged`)., 'MongoDBSearch adds
+          x509 client cert auth for mongot-to-mongod (`spec.source.x509`), convention-based
+          TLS secret discovery via `spec.security.tls.certsSecretPrefix`, and custom
+          JVM flags via `spec.jvmFlags` (operator auto-sizes heap if not set).', Default
+          mongodb-search image updated to `0.64.0` and default search pod requests
+          increased to 2 CPU / 4Gi memory.]
+      breaking_changes: ['`initAppDb.*` Helm values and related env vars were removed
+          due to image merge; upgrades will fail or use wrong images if your values
+          still reference `initAppDb` overrides.', '`operator.baseName` Helm value
+          was removed; any installation depending on custom-prefixed RBAC/ServiceAccount
+          names must be refactored to the fixed names.', MongoDBSearch now requires
+          mongot image version >= 0.64.0 (minimum supported); older mongot versions
+          will report NotReady and will not work correctly.]
     chart_version: 1.8.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.8.0']
   - version: 1.7.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- **New Helm value:** `operator.webhook.name` to set a custom
+        `ValidatingWebhookConfiguration` name (useful when multiple installs or naming
+        constraints exist).
+
+        - **Existing Helm values from 1.6.0 (ensure carried forward):** `operator.podSecurityContext`
+        and `operator.securityContext`.
+
+        - **Behavioral fix affecting hardened settings:** If you set `operator.securityContext.readOnlyRootFilesystem=true`,
+        1.7.0 now auto-creates an `emptyDir` for webhook certs (previously could crash).'
+      chart_updates: [Support configuring the `ValidatingWebhookConfiguration` name
+          via Helm (`operator.webhook.name`)., Operator deployment becomes compatible
+          with `readOnlyRootFilesystem=true` by provisioning an `emptyDir` volume
+          for webhook certificates (fix).]
+      features: ['MongoDB Community: adds auto-embeddings support to automatically
+          generate vector embeddings for vector search workloads (see MongoDB docs
+          tutorial).', 'MongoDBSearch: default `mongodb/mongodb-search` image updated
+          to **0.60.1** when `.spec.version` is not set.', 'MongoDBOpsManager: new
+          field `spec.backup.s3Stores[].objectLockEnabled` to support immutable backups
+          (requires Ops Manager >= 8.0.19).', 'MongoDBOpsManager: allows overriding
+          Ops Manager `emptyDir` mounts with PVCs via `statefulSet.spec.volumeClaimTemplates`
+          overrides.']
+      breaking_changes: []
     chart_version: 1.7.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.7.0']
   - version: 1.6.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- **New Helm values**: `operator.podSecurityContext` and `operator.securityContext`\
+        \ were added to configure the Operator Deployment\u2019s `podSecurityContext`\
+        \ and container `securityContext`.\n- **Helm bugfix**: `customEnvVars` parsing\
+        \ was fixed to correctly handle values containing `=` characters (review your\
+        \ current `customEnvVars` strings; behavior may change if you relied on the\
+        \ old parsing)."
+      chart_updates: [Helm chart now supports setting the Operator Pod and container
+          security contexts via `operator.podSecurityContext` and `operator.securityContext`.,
+        Fixed Helm `customEnvVars` parsing when values include `=`.]
+      features: ["MongoDBCommunity now supports a custom Kubernetes cluster DNS domain\
+          \ via `spec.clusterDomain`, with fallback order: `spec.clusterDomain` \u2192\
+          \ `CLUSTER_DOMAIN` env var \u2192 `cluster.local`.", "MongoDB Search with\
+          \ Community is now Public Preview; Search now requires MongoDB Server **8.2.0+**\
+          \ and the default `mongodb/mongodb-search` image version is **0.55.0** if\
+          \ `.spec.version` isn\u2019t set.", 'MongoDB Search internal communication
+          switched from Wire Protocol + keyfile to **gRPC + mTLS** (mTLS enabled when
+          both MongoDB and MongoDBSearch are configured for TLS), enabling future
+          load balancing.', 'MongoDB Search Prometheus metrics endpoint is now configurable
+          and can be disabled by default; enable it by setting `spec.prometheus: {}`
+          and optionally set `spec.prometheus.port`.', MongoDB deployments using X509
+          internal cluster auth are now supported for MongoDB Search (SCRAM client
+          auth still required).]
+      breaking_changes: ['MongoDB Search: if `spec.prometheus` is not provided, the
+          mongot Prometheus metrics endpoint is **disabled by default**. Previously
+          it was always enabled on port 9946; update manifests if you scrape these
+          metrics.', 'MongoDB Search (Community): minimum MongoDB Server version is
+          now **8.2.0** to run Search; upgrading MCK may require upgrading MongoDB
+          if you use Search.']
     chart_version: 1.6.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.6.0']
   - version: 1.5.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Automation agent certificate rotation is improved: when the agent\u2019\
+          s certificate is renewed, the agent will restart automatically so you don\u2019\
+          t need to manually restart Pods for cert updates to take effect."]
+      breaking_changes: []
     chart_version: 1.5.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.5.0']
   - version: 1.4.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Public Preview of integrated Search and Vector Search for self-managed
+          MongoDB Enterprise Server deployments., Compatible with MongoDB Enterprise
+          Server 8.0.10+; intended for testing/evaluation/feedback (public preview).,
+        'Supports flexible topologies: `mongot` runs in Kubernetes while `mongod`
+          can be in-cluster or on external VMs/bare metal.', Initial support for replica
+          set deployments., TLS can be used to secure communication between `mongod`
+          and `mongot`.]
+      breaking_changes: []
     chart_version: 1.4.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.4.0']
   - version: 1.3.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [OpenID Connect (OIDC) user authentication support via `spec.security.authentication.modes=OIDC`
+          and `spec.security.authentication.oidcProviderConfigs` (MongoDB Enterprise
+          only; requires MongoDB 7.0.11+ or 8.0.0+)., New `ClusterMongoDBRole` CRD
+          to define reusable role templates and reference them from clusters via `.spec.security.roleRefs`
+          (mutually exclusive with `.spec.security.roles`).]
+      breaking_changes: ['Operator now watches `ClusterMongoDBRole` by default, requiring
+          additional RBAC (new ClusterRole/ClusterRoleBinding). Helm chart and kubectl
+          plugin create these by default; other install methods must add them manually.']
     chart_version: 1.3.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.3.0']
   - version: 1.2.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["MongoDBSearch (Community Private Preview): Operator can deploy MongoDB\
+          \ Search for MongoDBCommunity, including a new CRD watched by default. Requires\
+          \ MongoDB Community >= 8.0 and TLS disabled for mongot\u2194mongod communication\
+          \ (private preview limitation).", 'OpenID Connect (OIDC) authentication:
+          Configure via spec.security.authentication.modes=OIDC and spec.security.authentication.oidcProviderConfigs;
+          requires MongoDB Enterprise Server and MongoDB >= 7.0.11 or 8.0.0.', 'New
+          ClusterMongoDBRole CRD: Define reusable, cluster-scoped role templates and
+          reference them from MongoDB/MongoDBMultiCluster via spec.security.roleRefs
+          (mutually exclusive with spec.security.roles). Adds new watched resource
+          by default and requires additional RBAC (ClusterRole/ClusterRoleBinding).']
+      breaking_changes: ['RBAC requirements change when upgrading to 1.2.0: because
+          the operator now watches ClusterMongoDBRole by default, installations not
+          using the Helm chart or kubectl plugin must add a new ClusterRole and ClusterRoleBinding
+          or the operator may fail/lose permissions.']
     chart_version: 1.2.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.2.0']
   - version: 1.1.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Adds MongoDBSearch (Community Private Preview) support for MongoDBCommunity
+          deployments, enabling full-text and vector search.', Introduces a new MongoDB
+          Search-related CRD that the operator watches by default.]
+      breaking_changes: ["MongoDB Search private preview has constraints that may\
+          \ force config changes: requires MongoDB Community >= 8.0 and TLS must be\
+          \ disabled (mongot\u2194mongod traffic is plaintext)."]
     chart_version: 1.1.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.1.0']
   - version: 1.0.0
