@@ -198,6 +198,66 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
       assert monitor["threshold"]["aggregate"] == "MAX"
       assert monitor["threshold"]["value"] == 1.0
     end
+
+    test "it can create a typed metrics monitor using a named tool" do
+      service = insert(:service)
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createMonitor" => monitor}}} =
+        run_query(
+          """
+          mutation Create($attrs: MonitorAttributes!) {
+            createMonitor(attributes: $attrs) {
+              type
+              workbench { id }
+              query {
+                metrics {
+                  tool
+                  query
+                  step
+                  duration
+                  options {
+                    azure { resourceId aggregation }
+                  }
+                }
+              }
+            }
+          }
+          """,
+          %{
+            "attrs" => %{
+              "name" => "request-rate",
+              "serviceId" => service.id,
+              "workbenchId" => workbench.id,
+              "severity" => "HIGH",
+              "type" => "METRICS",
+              "evaluationCron" => "*/5 * * * *",
+              "query" => %{
+                "metrics" => %{
+                  "tool" => "workbench_observability_metrics_azure",
+                  "query" => "requests",
+                  "step" => "1m",
+                  "duration" => "1h",
+                  "options" => %{
+                    "azure" => %{"resourceId" => "resource", "aggregation" => "Average"}
+                  }
+                }
+              },
+              "threshold" => %{"aggregate" => "MAX", "value" => 10.0}
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert monitor["type"] == "METRICS"
+      assert monitor["workbench"]["id"] == workbench.id
+      assert monitor["query"]["metrics"]["tool"] ==
+               "workbench_observability_metrics_azure"
+      assert monitor["query"]["metrics"]["options"]["azure"] == %{
+               "resourceId" => "resource",
+               "aggregation" => "Average"
+             }
+    end
   end
 
   describe "updateMonitor" do
@@ -263,6 +323,110 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
 
       assert deleted["id"] == monitor.id
       refute refetch(monitor)
+    end
+  end
+
+  describe "dashboard mutations" do
+    test "it can create a dashboard with graph and input datasources" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createDashboard" => dashboard}}} =
+        run_query(
+          """
+          mutation Create($attrs: DashboardAttributes!) {
+            createDashboard(attributes: $attrs) {
+              id
+              name
+              graphs {
+                identifier
+                type
+                layout { x y w h }
+                datasource { type tool input }
+              }
+              inputs {
+                name
+                type
+                datasource { type tool input }
+              }
+            }
+          }
+          """,
+          %{
+            "attrs" => %{
+              "workbenchId" => workbench.id,
+              "name" => "Operations",
+              "graphs" => [
+                %{
+                  "identifier" => "requests",
+                  "type" => "TIMESERIES",
+                  "layout" => %{"x" => 0, "y" => 0, "w" => 2, "h" => 2},
+                  "datasource" => %{
+                    "type" => "METRICS",
+                    "tool" => "prometheus_query",
+                    "input" => Jason.encode!(%{"query" => "up"})
+                  }
+                }
+              ],
+              "inputs" => [
+                %{
+                  "name" => "namespace",
+                  "type" => "SELECT",
+                  "datasource" => %{
+                    "type" => "LABELS",
+                    "tool" => "workbench_observability_metric_label_search_prometheus",
+                    "input" => Jason.encode!(%{"metric" => "kube_pod_info", "label" => "namespace"})
+                  }
+                }
+              ]
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert dashboard["name"] == "Operations"
+      assert [graph] = dashboard["graphs"]
+      assert graph["datasource"]["type"] == "METRICS"
+      assert graph["datasource"]["input"] == %{"query" => "up"}
+      assert [input] = dashboard["inputs"]
+      assert input["datasource"]["type"] == "LABELS"
+    end
+
+    test "it can update a dashboard" do
+      dashboard = insert(:dashboard)
+
+      {:ok, %{data: %{"updateDashboard" => updated}}} =
+        run_query(
+          """
+          mutation Update($id: ID!, $attrs: DashboardAttributes!) {
+            updateDashboard(id: $id, attributes: $attrs) {
+              id
+              name
+            }
+          }
+          """,
+          %{"id" => dashboard.id, "attrs" => %{"name" => "Updated"}},
+          %{current_user: admin_user()}
+        )
+
+      assert updated == %{"id" => dashboard.id, "name" => "Updated"}
+    end
+
+    test "it can delete a dashboard" do
+      dashboard = insert(:dashboard)
+
+      {:ok, %{data: %{"deleteDashboard" => deleted}}} =
+        run_query(
+          """
+          mutation Delete($id: ID!) {
+            deleteDashboard(id: $id) { id }
+          }
+          """,
+          %{"id" => dashboard.id},
+          %{current_user: admin_user()}
+        )
+
+      assert deleted["id"] == dashboard.id
+      refute refetch(dashboard)
     end
   end
 end

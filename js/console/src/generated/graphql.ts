@@ -4108,12 +4108,113 @@ export type Dashboard = {
   spec: DashboardSpec;
 };
 
+/** Attributes used to create or update a dashboard */
+export type DashboardAttributes = {
+  /** Optional dashboard description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** Graphs arranged on the dashboard grid */
+  graphs?: InputMaybe<Array<InputMaybe<DashboardGraphAttributes>>>;
+  /** User-configurable dashboard variables */
+  inputs?: InputMaybe<Array<InputMaybe<DashboardInputAttributes>>>;
+  /** Dashboard name, unique within its workbench */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** ID of the workbench that owns this dashboard */
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type DashboardDatasourceAttributes = {
+  /** Input passed to the observability tool */
+  input: Scalars['Json']['input'];
+  /** Observability tool used to render the graph */
+  tool: Scalars['String']['input'];
+  /** Kind of data returned by the datasource */
+  type: DashboardDatasourceType;
+};
+
+export enum DashboardDatasourceType {
+  Labels = 'LABELS',
+  Logs = 'LOGS',
+  Metrics = 'METRICS',
+  Traces = 'TRACES'
+}
+
 export type DashboardGraph = {
   __typename?: 'DashboardGraph';
   format?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   queries?: Maybe<Array<Maybe<DashboardMetric>>>;
 };
+
+export type DashboardGraphAttributes = {
+  /** Tool call used to fetch external data */
+  datasource?: InputMaybe<DashboardDatasourceAttributes>;
+  /** Optional graph description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** Stable identifier unique within the dashboard */
+  identifier: Scalars['String']['input'];
+  /** Grid position and size */
+  layout: DashboardGraphLayoutAttributes;
+  /** Markdown content for markdown graphs */
+  markdown?: InputMaybe<Scalars['String']['input']>;
+  /** Visualization-specific display options */
+  options?: InputMaybe<Scalars['Json']['input']>;
+  /** Graph title */
+  title?: InputMaybe<Scalars['String']['input']>;
+  /** Graph visualization type */
+  type: DashboardGraphType;
+};
+
+export type DashboardGraphLayoutAttributes = {
+  /** Height in grid rows */
+  h: Scalars['Int']['input'];
+  /** Width in grid columns */
+  w: Scalars['Int']['input'];
+  /** Zero-based horizontal grid coordinate */
+  x: Scalars['Int']['input'];
+  /** Zero-based vertical grid coordinate */
+  y: Scalars['Int']['input'];
+};
+
+export enum DashboardGraphType {
+  Bar = 'BAR',
+  Gauge = 'GAUGE',
+  Heatmap = 'HEATMAP',
+  Logs = 'LOGS',
+  Markdown = 'MARKDOWN',
+  Pie = 'PIE',
+  Stat = 'STAT',
+  Table = 'TABLE',
+  Timeseries = 'TIMESERIES',
+  Traces = 'TRACES'
+}
+
+export type DashboardInputAttributes = {
+  /** Tool query used to populate input options, such as metric label search */
+  datasource?: InputMaybe<DashboardDatasourceAttributes>;
+  /** Default input value */
+  default?: InputMaybe<Scalars['String']['input']>;
+  /** Optional input description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** Human-readable input label */
+  label?: InputMaybe<Scalars['String']['input']>;
+  /** Variable name referenced by graph datasource inputs */
+  name: Scalars['String']['input'];
+  /** Allowed values for select inputs */
+  options?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** Whether a value is required when rendering */
+  required?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Input control type */
+  type: DashboardInputType;
+};
+
+export enum DashboardInputType {
+  Boolean = 'BOOLEAN',
+  MultiSelect = 'MULTI_SELECT',
+  Number = 'NUMBER',
+  Select = 'SELECT',
+  Text = 'TEXT',
+  TimeRange = 'TIME_RANGE'
+}
 
 export type DashboardLabel = {
   __typename?: 'DashboardLabel';
@@ -4135,6 +4236,13 @@ export type DashboardSpec = {
   labels?: Maybe<Array<Maybe<DashboardLabel>>>;
   name?: Maybe<Scalars['String']['output']>;
   timeslices?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+export type DashboardTimeRangeAttributes = {
+  /** Inclusive end of the query range */
+  end: Scalars['DateTime']['input'];
+  /** Inclusive start of the query range */
+  start: Scalars['DateTime']['input'];
 };
 
 /** Datadog API credentials */
@@ -6290,10 +6398,14 @@ export type Monitor = {
   /** Stable identifier for this monitor */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Mode-specific options for monitor-triggered workbench jobs */
+  modes?: Maybe<WorkbenchJobModes>;
   /** Short name used to identify this monitor */
   name: Scalars['String']['output'];
   /** Next scheduled time this monitor will be evaluated, if any */
   nextRunAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Prompt used when this monitor starts a workbench investigation */
+  prompt?: Maybe<Scalars['String']['output']>;
   /** Underlying query configuration used to fetch data for this monitor */
   query: MonitorQuery;
   /** The service deployment this monitor is attached to */
@@ -6304,9 +6416,11 @@ export type Monitor = {
   state?: Maybe<AlertState>;
   /** Threshold configuration that determines when the monitor should fire */
   threshold: MonitorThreshold;
-  /** Monitor type (currently log‑based only) */
+  /** Monitor data type */
   type: MonitorType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user whose identity is used for monitor-triggered workbench jobs */
+  user?: Maybe<User>;
   /** The workbench this monitor is attached to */
   workbench?: Maybe<Workbench>;
 };
@@ -6325,8 +6439,12 @@ export type MonitorAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
   /** Cron schedule defining when the monitor is evaluated (for example *\/5 * * * *) */
   evaluationCron: Scalars['String']['input'];
+  /** Mode-specific options for monitor-triggered workbench jobs */
+  modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** Short name used to identify this monitor */
   name: Scalars['String']['input'];
+  /** Prompt used when the monitor starts a workbench investigation */
+  prompt?: InputMaybe<Scalars['String']['input']>;
   /** Underlying query configuration used to fetch data for this monitor */
   query: MonitorQueryAttributes;
   /** ID of the service deployment this monitor should be attached to */
@@ -6335,7 +6453,7 @@ export type MonitorAttributes = {
   severity: AlertSeverity;
   /** Threshold configuration that determines when the monitor should fire */
   threshold: MonitorThresholdAttributes;
-  /** Monitor type (currently log‑based only) */
+  /** Monitor data type */
   type: MonitorType;
   /** ID of the workbench this monitor should be attached to */
   workbenchId?: InputMaybe<Scalars['ID']['input']>;
@@ -6370,6 +6488,24 @@ export type MonitorFacetAttributes = {
   value: Scalars['String']['input'];
 };
 
+export type MonitorLogAzureOptions = {
+  __typename?: 'MonitorLogAzureOptions';
+  resourceId?: Maybe<Scalars['String']['output']>;
+};
+
+export type MonitorLogAzureOptionsAttributes = {
+  resourceId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MonitorLogOptions = {
+  __typename?: 'MonitorLogOptions';
+  azure?: Maybe<MonitorLogAzureOptions>;
+};
+
+export type MonitorLogOptionsAttributes = {
+  azure?: InputMaybe<MonitorLogAzureOptionsAttributes>;
+};
+
 /** Log‑level query parameters for a monitor */
 export type MonitorLogQuery = {
   __typename?: 'MonitorLogQuery';
@@ -6381,8 +6517,11 @@ export type MonitorLogQuery = {
   facets?: Maybe<Array<Maybe<MonitorFacet>>>;
   /** Operator to use for evaluating multi word log queries */
   operator?: Maybe<MonitorOperator>;
+  options?: Maybe<MonitorLogOptions>;
   /** Log query string passed through to the underlying log provider */
   query: Scalars['String']['output'];
+  /** Named workbench logs tool, or null for the native Plural logs provider */
+  tool?: Maybe<Scalars['String']['output']>;
 };
 
 /** Log query configuration for a monitor */
@@ -6395,8 +6534,67 @@ export type MonitorLogQueryAttributes = {
   facets?: InputMaybe<Array<InputMaybe<MonitorFacetAttributes>>>;
   /** Operator to use when combining multiple log queries */
   operator?: InputMaybe<MonitorOperator>;
+  /** Provider-specific log query options */
+  options?: InputMaybe<MonitorLogOptionsAttributes>;
   /** Log query string passed through to the underlying log provider */
   query: Scalars['String']['input'];
+  /** Named workbench logs tool; when omitted, uses the native Plural logs provider */
+  tool?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MonitorMetricsAzureOptions = {
+  __typename?: 'MonitorMetricsAzureOptions';
+  aggregation?: Maybe<Scalars['String']['output']>;
+  filter?: Maybe<Scalars['String']['output']>;
+  metricsEndpoint?: Maybe<Scalars['String']['output']>;
+  metricsNamespace?: Maybe<Scalars['String']['output']>;
+  orderBy?: Maybe<Scalars['String']['output']>;
+  resourceId?: Maybe<Scalars['String']['output']>;
+  rollUpBy?: Maybe<Scalars['String']['output']>;
+};
+
+export type MonitorMetricsAzureOptionsAttributes = {
+  aggregation?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
+  metricsEndpoint?: InputMaybe<Scalars['String']['input']>;
+  metricsNamespace?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  resourceId?: InputMaybe<Scalars['String']['input']>;
+  rollUpBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MonitorMetricsOptions = {
+  __typename?: 'MonitorMetricsOptions';
+  azure?: Maybe<MonitorMetricsAzureOptions>;
+};
+
+export type MonitorMetricsOptionsAttributes = {
+  azure?: InputMaybe<MonitorMetricsAzureOptionsAttributes>;
+};
+
+/** Metrics-level query parameters for a monitor */
+export type MonitorMetricsQuery = {
+  __typename?: 'MonitorMetricsQuery';
+  duration?: Maybe<Scalars['String']['output']>;
+  options?: Maybe<MonitorMetricsOptions>;
+  query: Scalars['String']['output'];
+  step?: Maybe<Scalars['String']['output']>;
+  /** Named workbench metrics tool, or null for the native Plural metrics provider */
+  tool?: Maybe<Scalars['String']['output']>;
+};
+
+/** Metrics query configuration for a monitor */
+export type MonitorMetricsQueryAttributes = {
+  /** Lookback duration for the metrics query (for example 1h) */
+  duration?: InputMaybe<Scalars['String']['input']>;
+  /** Provider-specific metrics query options */
+  options?: InputMaybe<MonitorMetricsOptionsAttributes>;
+  /** Metrics query string passed through to the underlying metrics provider */
+  query: Scalars['String']['input'];
+  /** Metrics query step (for example 5m) */
+  step?: InputMaybe<Scalars['String']['input']>;
+  /** Named workbench metrics tool; when omitted, uses the native Plural metrics provider */
+  tool?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum MonitorOperator {
@@ -6408,13 +6606,17 @@ export enum MonitorOperator {
 export type MonitorQuery = {
   __typename?: 'MonitorQuery';
   /** Log query configuration used by this monitor */
-  log: MonitorLogQuery;
+  log?: Maybe<MonitorLogQuery>;
+  /** Metrics query configuration used by this monitor */
+  metrics?: Maybe<MonitorMetricsQuery>;
 };
 
 /** Wrapper for the underlying query definition for a monitor */
 export type MonitorQueryAttributes = {
   /** Log query used when the monitor type is log‑based */
-  log: MonitorLogQueryAttributes;
+  log?: InputMaybe<MonitorLogQueryAttributes>;
+  /** Metrics query used when the monitor type is metrics-based */
+  metrics?: InputMaybe<MonitorMetricsQueryAttributes>;
 };
 
 /** Threshold configuration defining when a monitor should fire alerts */
@@ -6435,7 +6637,8 @@ export type MonitorThresholdAttributes = {
 };
 
 export enum MonitorType {
-  Log = 'LOG'
+  Log = 'LOG',
+  Metrics = 'METRICS'
 }
 
 export type Namespace = {
@@ -9463,6 +9666,7 @@ export type RootMutationType = {
   createClusterRestore?: Maybe<ClusterRestore>;
   createClusterUpgrade?: Maybe<ClusterUpgrade>;
   createCustomStackRun?: Maybe<CustomStackRun>;
+  createDashboard?: Maybe<WorkbenchDashboard>;
   createFederatedCredential?: Maybe<FederatedCredential>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
@@ -9536,6 +9740,7 @@ export type RootMutationType = {
   deleteComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   deleteCustomCompatibilityMatrix?: Maybe<CustomCompatibilityMatrix>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
+  deleteDashboard?: Maybe<WorkbenchDashboard>;
   deleteFederatedCredential?: Maybe<FederatedCredential>;
   deleteFlow?: Maybe<Flow>;
   deleteGitRepository?: Maybe<GitRepository>;
@@ -9692,6 +9897,7 @@ export type RootMutationType = {
   updateClusterRegistration?: Maybe<ClusterRegistration>;
   updateClusterRestore?: Maybe<ClusterRestore>;
   updateCustomStackRun?: Maybe<CustomStackRun>;
+  updateDashboard?: Maybe<WorkbenchDashboard>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateFederatedCredential?: Maybe<FederatedCredential>;
   updateGate?: Maybe<PipelineGate>;
@@ -10008,6 +10214,11 @@ export type RootMutationTypeCreateClusterUpgradeArgs = {
 
 export type RootMutationTypeCreateCustomStackRunArgs = {
   attributes: CustomStackRunAttributes;
+};
+
+
+export type RootMutationTypeCreateDashboardArgs = {
+  attributes: DashboardAttributes;
 };
 
 
@@ -10349,6 +10560,11 @@ export type RootMutationTypeDeleteCustomCompatibilityMatrixArgs = {
 
 
 export type RootMutationTypeDeleteCustomStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteDashboardArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -11000,6 +11216,12 @@ export type RootMutationTypeUpdateCustomStackRunArgs = {
 };
 
 
+export type RootMutationTypeUpdateDashboardArgs = {
+  attributes: DashboardAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateDeploymentSettingsArgs = {
   attributes: DeploymentSettingsAttributes;
 };
@@ -11643,6 +11865,7 @@ export type RootQueryType = {
   workbenchAggregates: WorkbenchAggregates;
   workbenchAlerts?: Maybe<AlertConnection>;
   workbenchChatbot?: Maybe<WorkbenchChatbot>;
+  workbenchDashboard?: Maybe<WorkbenchDashboard>;
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchJobActivities?: Maybe<WorkbenchJobActivityConnection>;
@@ -13089,6 +13312,11 @@ export type RootQueryTypeWorkbenchAlertsArgs = {
 
 
 export type RootQueryTypeWorkbenchChatbotArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeWorkbenchDashboardArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -16198,6 +16426,7 @@ export type Workbench = {
   /** users that have read or write access to this workbench */
   users?: Maybe<Array<Maybe<User>>>;
   webhooks?: Maybe<WorkbenchWebhookConnection>;
+  workbenchDashboards?: Maybe<WorkbenchDashboardConnection>;
   workbenchKnowledge?: Maybe<WorkbenchKnowledgeConnection>;
   workbenchPolicies?: Maybe<WorkbenchPolicyConnection>;
   workbenchSkills?: Maybe<WorkbenchSkillConnection>;
@@ -16270,6 +16499,14 @@ export type WorkbenchRunsArgs = {
 
 
 export type WorkbenchWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchWorkbenchDashboardsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -16580,6 +16817,126 @@ export type WorkbenchCronEdge = {
   node?: Maybe<WorkbenchCron>;
 };
 
+/** A workbench-owned collection of observability graphs */
+export type WorkbenchDashboard = {
+  __typename?: 'WorkbenchDashboard';
+  /** Optional dashboard description */
+  description?: Maybe<Scalars['String']['output']>;
+  graph?: Maybe<WorkbenchDashboardGraphResult>;
+  /** Graphs arranged on the dashboard grid */
+  graphs?: Maybe<Array<Maybe<WorkbenchDashboardGraph>>>;
+  /** Stable identifier for this dashboard */
+  id: Scalars['ID']['output'];
+  input?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** User-configurable dashboard variables */
+  inputs?: Maybe<Array<Maybe<WorkbenchDashboardInput>>>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Dashboard name */
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  workbench?: Maybe<Workbench>;
+};
+
+
+/** A workbench-owned collection of observability graphs */
+export type WorkbenchDashboardGraphArgs = {
+  identifier: Scalars['String']['input'];
+  input: Scalars['Json']['input'];
+  timeRange: DashboardTimeRangeAttributes;
+};
+
+
+/** A workbench-owned collection of observability graphs */
+export type WorkbenchDashboardInputArgs = {
+  identifier: Scalars['String']['input'];
+  input: Scalars['Json']['input'];
+  timeRange: DashboardTimeRangeAttributes;
+};
+
+export type WorkbenchDashboardConnection = {
+  __typename?: 'WorkbenchDashboardConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchDashboardEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchDashboardDatasource = {
+  __typename?: 'WorkbenchDashboardDatasource';
+  /** Input passed to the observability tool */
+  input: Scalars['Json']['output'];
+  /** Observability tool used to render the graph */
+  tool: Scalars['String']['output'];
+  /** Kind of data returned by the datasource */
+  type: DashboardDatasourceType;
+};
+
+export type WorkbenchDashboardEdge = {
+  __typename?: 'WorkbenchDashboardEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchDashboard>;
+};
+
+export type WorkbenchDashboardGraph = {
+  __typename?: 'WorkbenchDashboardGraph';
+  /** Tool call used to fetch external data */
+  datasource?: Maybe<WorkbenchDashboardDatasource>;
+  /** Optional graph description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Stable identifier unique within the dashboard */
+  identifier: Scalars['String']['output'];
+  /** Grid position and size */
+  layout: WorkbenchDashboardGraphLayout;
+  /** Markdown content for markdown graphs */
+  markdown?: Maybe<Scalars['String']['output']>;
+  /** Visualization-specific display options */
+  options?: Maybe<Scalars['Json']['output']>;
+  /** Graph title */
+  title?: Maybe<Scalars['String']['output']>;
+  /** Graph visualization type */
+  type: DashboardGraphType;
+};
+
+export type WorkbenchDashboardGraphLayout = {
+  __typename?: 'WorkbenchDashboardGraphLayout';
+  /** Height in grid rows */
+  h: Scalars['Int']['output'];
+  /** Width in grid columns */
+  w: Scalars['Int']['output'];
+  /** Zero-based horizontal grid coordinate */
+  x: Scalars['Int']['output'];
+  /** Zero-based vertical grid coordinate */
+  y: Scalars['Int']['output'];
+};
+
+export type WorkbenchDashboardGraphResult = {
+  __typename?: 'WorkbenchDashboardGraphResult';
+  /** Log entries returned by a logs datasource */
+  logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
+  /** Metric points returned by a metrics datasource */
+  metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+  /** Trace spans returned by a traces datasource */
+  traces?: Maybe<Array<Maybe<WorkbenchJobActivityTrace>>>;
+};
+
+export type WorkbenchDashboardInput = {
+  __typename?: 'WorkbenchDashboardInput';
+  /** Tool query used to populate input options, such as metric label search */
+  datasource?: Maybe<WorkbenchDashboardDatasource>;
+  /** Default input value */
+  default?: Maybe<Scalars['String']['output']>;
+  /** Optional input description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Human-readable input label */
+  label?: Maybe<Scalars['String']['output']>;
+  /** Variable name referenced by graph datasource inputs */
+  name: Scalars['String']['output'];
+  /** Allowed values for select inputs */
+  options?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** Whether a value is required when rendering */
+  required?: Maybe<Scalars['Boolean']['output']>;
+  /** Input control type */
+  type: DashboardInputType;
+};
+
 export type WorkbenchEdge = {
   __typename?: 'WorkbenchEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -16706,6 +17063,8 @@ export type WorkbenchJob = {
   activities?: Maybe<WorkbenchJobActivityConnection>;
   /** the alert this run was spawned from */
   alert?: Maybe<Alert>;
+  /** dashboards and monitors associated with this workbench job */
+  associations?: Maybe<Array<Maybe<WorkbenchJobAssociation>>>;
   /** chatbot integration metadata for this job, when present */
   chatbotMessage?: Maybe<ChatbotMessage>;
   /** when the run completed */
@@ -16996,6 +17355,7 @@ export enum WorkbenchJobActivityType {
   Kubernetes = 'KUBERNETES',
   Memo = 'MEMO',
   Memory = 'MEMORY',
+  Monitoring = 'MONITORING',
   Observability = 'OBSERVABILITY',
   Plan = 'PLAN',
   Search = 'SEARCH',
@@ -17004,6 +17364,18 @@ export enum WorkbenchJobActivityType {
   User = 'USER',
   Verify = 'VERIFY'
 }
+
+export type WorkbenchJobAssociation = {
+  __typename?: 'WorkbenchJobAssociation';
+  /** the associated dashboard */
+  dashboard?: Maybe<WorkbenchDashboard>;
+  /** the id of the association */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the associated monitor */
+  monitor?: Maybe<Monitor>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
 
 export type WorkbenchJobAttributes = {
   /** the flow this job is associated with */
@@ -17497,6 +17869,7 @@ export enum WorkbenchSkillSubagent {
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
   Memory = 'MEMORY',
+  Monitoring = 'MONITORING',
   Observability = 'OBSERVABILITY',
   Orchestrator = 'ORCHESTRATOR',
   Search = 'SEARCH',
@@ -21255,18 +21628,18 @@ export type ServiceMetricsQuery = { __typename?: 'RootQueryType', serviceDeploym
 
 export type MonitorThresholdFragment = { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number };
 
-export type MonitorTinyFragment = { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } };
+export type MonitorTinyFragment = { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', query: string } | null } };
 
 export type MonitorLogQueryFragment = { __typename?: 'MonitorLogQuery', bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, query: string, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null };
 
-export type MonitorFragment = { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, state?: AlertState | null, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
+export type MonitorFragment = { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, state?: AlertState | null, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } | null }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
 
 export type MonitorDetailsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type MonitorDetailsQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, state?: AlertState | null, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
+export type MonitorDetailsQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, state?: AlertState | null, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } | null }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
 
 export type ServiceMonitorsQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -21276,14 +21649,14 @@ export type ServiceMonitorsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceMonitorsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, monitors?: { __typename?: 'MonitorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'MonitorEdge', node?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null } | null> | null } | null } | null };
+export type ServiceMonitorsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, monitors?: { __typename?: 'MonitorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'MonitorEdge', node?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', query: string } | null } } | null } | null> | null } | null } | null };
 
 export type CreateMonitorMutationVariables = Exact<{
   attributes: MonitorAttributes;
 }>;
 
 
-export type CreateMonitorMutation = { __typename?: 'RootMutationType', createMonitor?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
+export type CreateMonitorMutation = { __typename?: 'RootMutationType', createMonitor?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', query: string } | null } } | null };
 
 export type UpdateMonitorMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21291,7 +21664,7 @@ export type UpdateMonitorMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMonitorMutation = { __typename?: 'RootMutationType', updateMonitor?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
+export type UpdateMonitorMutation = { __typename?: 'RootMutationType', updateMonitor?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', query: string } | null } } | null };
 
 export type DeleteMonitorMutationVariables = Exact<{
   id: Scalars['ID']['input'];

@@ -22,6 +22,7 @@ import {
   MonitorAggregate,
   MonitorAttributes,
   MonitorFragment,
+  MonitorLogQueryAttributes,
   MonitorLogQueryFragment,
   MonitorOperator,
   MonitorType,
@@ -51,6 +52,14 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 export type ServiceMonitorStepKey =
   'description' | 'threshold-config' | 'log-query'
+
+export type ServiceMonitorAttributes = Omit<
+  MonitorAttributes,
+  'query' | 'type'
+> & {
+  query: { log: MonitorLogQueryAttributes }
+  type: MonitorType.Log
+}
 
 const STEPS: { key: ServiceMonitorStepKey; label: string }[] = [
   { key: 'log-query', label: 'Log query' },
@@ -114,7 +123,7 @@ function ServiceMonitorCreateOrEditInner({
     setCurStepState(newStep)
   }
   const { state, update, hasUpdates, reset } =
-    useUpdateState<MonitorAttributes>(
+    useUpdateState<ServiceMonitorAttributes>(
       sanitizeInitialFormState(monitor, serviceId)
     )
   const allowSubmit = hasUpdates && isFormValid(state)
@@ -256,12 +265,11 @@ const WrapperSC = styled.div(({ theme }) => ({
 const sanitizeInitialFormState = (
   monitor: Nullable<MonitorFragment>,
   serviceId: string
-): MonitorAttributes => {
+): ServiceMonitorAttributes => {
   const {
     name = '',
     evaluationCron = '',
     severity = AlertSeverity.Undefined,
-    type = MonitorType.Log,
     query: initialQuery,
     threshold: initialThreshold,
   } = monitor ?? {}
@@ -285,7 +293,7 @@ const sanitizeInitialFormState = (
     evaluationCron,
     query,
     severity,
-    type,
+    type: MonitorType.Log,
     threshold,
     serviceId: monitor?.service?.id ?? serviceId,
     ...(monitor?.workbench?.id && { workbenchId: monitor.workbench.id }),
@@ -297,7 +305,7 @@ const facetArrToAttributeArr = (arr: MonitorLogQueryFragment['facets']) =>
 
 const getStepIcon = (
   key: ServiceMonitorStepKey,
-  state: MonitorAttributes,
+  state: ServiceMonitorAttributes,
   onlyShowFailures: boolean = false
 ) => {
   const { name, evaluationCron, threshold, query } = state
@@ -327,7 +335,7 @@ const getStepIcon = (
   }
 }
 
-const isFormValid = (state: MonitorAttributes) => {
+const isFormValid = (state: ServiceMonitorAttributes) => {
   const { name, evaluationCron, threshold, query } = state
   const { value, aggregate } = threshold
   const { query: q, bucketSize, duration, operator } = query.log

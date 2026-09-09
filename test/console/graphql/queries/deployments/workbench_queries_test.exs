@@ -857,6 +857,45 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["status"] == to_string(job.status) |> String.upcase()
     end
 
+    test "it sideloads associated dashboards and monitors" do
+      job = insert(:workbench_job)
+      dashboard = insert(:dashboard, workbench: job.workbench)
+      monitor = insert(:monitor, workbench: job.workbench)
+
+      dashboard_association =
+        insert(:workbench_job_association, workbench_job: job, dashboard: dashboard)
+
+      monitor_association =
+        insert(:workbench_job_association,
+          workbench_job: job,
+          dashboard: nil,
+          monitor: monitor
+        )
+
+      {:ok, %{data: %{"workbenchJob" => found}}} =
+        run_query(
+          """
+          query WorkbenchJob($id: ID!) {
+            workbenchJob(id: $id) {
+              associations {
+                id
+                dashboard { id name }
+                monitor { id name }
+              }
+            }
+          }
+          """,
+          %{"id" => job.id},
+          %{current_user: admin_user()}
+        )
+
+      assert MapSet.new(Enum.map(found["associations"], & &1["id"])) ==
+               MapSet.new([dashboard_association.id, monitor_association.id])
+
+      assert Enum.any?(found["associations"], &(get_in(&1, ["dashboard", "id"]) == dashboard.id))
+      assert Enum.any?(found["associations"], &(get_in(&1, ["monitor", "id"]) == monitor.id))
+    end
+
     test "it returns queuedPromptCount for unconsumed prompts" do
       job = insert(:workbench_job)
       insert_list(2, :queued_prompt, workbench_job: job)

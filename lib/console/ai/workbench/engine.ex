@@ -208,7 +208,7 @@ defmodule Console.AI.Workbench.Engine do
     end)
   end
 
-  @supported_subagents ~w(infrastructure integration coding observability memory skill history search verify)a
+  @supported_subagents ~w(infrastructure integration coding observability monitoring memory skill history search verify)a
 
   defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
       when type in @supported_subagents do
@@ -356,6 +356,7 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:integration), do: SA.Integration
   defp subagent_module(:coding), do: SA.Coding
   defp subagent_module(:observability), do: SA.Observability
+  defp subagent_module(:monitoring), do: SA.Monitoring
   defp subagent_module(:memory), do: SA.Memory
   defp subagent_module(:history), do: SA.History
   defp subagent_module(:skill), do: SA.Skill

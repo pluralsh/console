@@ -1,0 +1,56 @@
+{
+    "type": "object",
+    "properties": {
+        "service_id": {
+            "type": "string",
+            "description": "Plural service ID used to authorize log access and scope results to that service. Provide this or cluster_id."
+        },
+        "cluster_id": {
+            "type": "string",
+            "description": "Plural cluster ID used to authorize log access and scope results to that cluster. Provide this or service_id."
+        },
+        "query": {
+            "type": "string",
+            "description": "Query string used to select logs to aggregate."
+        },
+        "bucket_size": {
+            "type": "string",
+            "description": "The duration of each aggregation bucket, for example 5m."
+        },
+        "facets": {
+            "type": "array",
+            "description": "Facet filters used to narrow the aggregated logs.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "value"]
+            }
+        },
+        "operator": {
+            "type": "string",
+            "enum": ["or", "and"],
+            "description": "How query tokens and facets are combined."
+        },
+        "time_range": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time in ISO8601 format."
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time in ISO8601 format."
+                }
+            }
+        }
+    },
+    "required": ["query", "bucket_size"]
+}

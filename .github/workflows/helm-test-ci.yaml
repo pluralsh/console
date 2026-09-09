@@ -17,7 +17,14 @@ env:
   GOPROXY: "https://proxy.golang.org"
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build:
+    needs: [vouch]
     name: Test
     runs-on: ubuntu-latest
     defaults:

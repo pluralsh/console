@@ -10,7 +10,14 @@ on:
   schedule:
     - cron: "0 0 * * *"
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   trivy-scan:
+    needs: [vouch]
     name: Trivy IaC scan
     runs-on: ubuntu-latest
     permissions:
