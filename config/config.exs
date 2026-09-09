@@ -1,5 +1,11 @@
 import Config
 
+# Trace exporting is enabled at runtime only when an OTLP endpoint is supplied.
+# Keeping the exporter disabled by default avoids adding export overhead to local
+# and test environments while still allowing the release to bootstrap handlers.
+config :opentelemetry,
+  traces_exporter: :none
+
 config :console,
   ecto_repos: [Console.Repo],
   socket: :forge_socket
