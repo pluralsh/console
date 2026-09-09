@@ -184,9 +184,6 @@ def get_chart_images(url, chart, version, values=None):
     Returns the Helm chart YAML or None if not found.
     This assumes the chart is available via a Helm repository.
     """
-    if not shutil.which("helm"):
-        return None
-
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
     if (chart, url) not in IMPORTED_REPOS and not oci_repo:
