@@ -6,7 +6,8 @@ defmodule Console.Schema.Flow do
     User,
     McpServerAssociation,
     AgentRuntime,
-    FlowWorkbench
+    FlowWorkbench,
+    Service
   }
   alias Console.Deployments.Policies.Rbac
 
@@ -68,6 +69,14 @@ defmodule Console.Schema.Flow do
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(f in query, order_by: ^order)
+  end
+
+  def with_service_statuses(query \\ __MODULE__, statuses)
+  def with_service_statuses(query, statuses) when statuses in [nil], do: query
+  def with_service_statuses(query, []), do: from(f in query, where: f.id in ^[])
+  def with_service_statuses(query, statuses) do
+    ids = Service.for_statuses(statuses) |> select([s], s.flow_id)
+    from(f in query, where: f.id in subquery(ids))
   end
 
   def changeset(model, attrs \\ %{}) do

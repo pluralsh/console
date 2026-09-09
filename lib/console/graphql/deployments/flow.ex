@@ -59,6 +59,11 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :preview_ttl,          :string, description: "how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)"
   end
 
+  object :component_status_count do
+    field :state, non_null(:component_state)
+    field :count, non_null(:integer)
+  end
+
   object :flow do
     field :id,           non_null(:id)
     field :name,         non_null(:string)
@@ -78,6 +83,28 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this flow"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this flow"
     field :project,        :project, resolve: dataloader(Deployments), description: "the project this flow belongs to"
+
+    field :service_count, :integer,
+      resolve: &Deployments.flow_service_count/3,
+      description: "the number of services in this flow"
+    field :component_count, :integer,
+      resolve: &Deployments.flow_component_count/3,
+      description: "the number of service components in this flow"
+    field :alert_count, :integer,
+      resolve: &Deployments.flow_alert_count/3,
+      description: "the number of alerts for services in this flow"
+    field :pipeline_count, :integer,
+      resolve: &Deployments.flow_pipeline_count/3,
+      description: "the number of pipelines in this flow"
+    field :pending_pipeline_count, :integer,
+      resolve: &Deployments.flow_pending_pipeline_count/3,
+      description: "the number of pending pipeline gates in this flow"
+    field :service_statuses, list_of(:service_status_count),
+      resolve: &Deployments.flow_service_statuses/3,
+      description: "a rollup of service statuses in this flow"
+    field :component_statuses, list_of(:component_status_count),
+      resolve: &Deployments.flow_component_statuses/3,
+      description: "a rollup of component states in this flow"
 
     connection field :services, node_type: :service_deployment do
       resolve &Deployments.services_for_flow/3
@@ -219,8 +246,20 @@ defmodule Console.GraphQl.Deployments.Flow do
         resource: :flow,
         action: :read
       arg :q, :string
+      arg :statuses, list_of(:service_deployment_status),
+        description: "return flows that have at least one service in one of these statuses"
 
       resolve &Deployments.list_flows/2
+    end
+
+    field :flow_service_counts, list_of(:service_status_count) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :read
+      arg :q, :string, description: "restrict counts to flows matching this search"
+
+      resolve &Deployments.flow_service_counts/2
     end
 
     field :flow, :flow do

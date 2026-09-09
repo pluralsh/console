@@ -1,9 +1,13 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   use Console.GraphQl.Resolvers.Deployments.Base
+  import Absinthe.Resolution.Helpers, only: [batch: 3]
+  import Ecto.Query
+  alias Console.Repo
   alias Console.Deployments.{Flows, Policies}
   alias Console.Schema.{
     Flow,
     Service,
+    ServiceComponent,
     Pipeline,
     McpServer,
     PullRequest,
@@ -19,8 +23,129 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     Flow.ordered()
     |> Flow.for_user(user)
     |> maybe_search(Flow, args)
+    |> flow_status_filter(args)
     |> paginate(args)
   end
+
+  defp flow_status_filter(query, %{statuses: statuses}) when is_list(statuses),
+    do: Flow.with_service_statuses(query, statuses)
+  defp flow_status_filter(query, _), do: query
+
+  def flow_service_counts(args, %{context: %{current_user: user}}) do
+    flow_ids =
+      Flow.for_user(user)
+      |> maybe_search(Flow, args)
+      |> select([f], f.id)
+
+    Service
+    |> where([s], s.flow_id in subquery(flow_ids))
+    |> Service.statuses()
+    |> Repo.all()
+    |> ok()
+  end
+
+  def flow_service_count(%Flow{id: id}, _, _), do: summary_field(id, :service_count)
+  def flow_component_count(%Flow{id: id}, _, _), do: summary_field(id, :component_count)
+  def flow_alert_count(%Flow{id: id}, _, _), do: summary_field(id, :alert_count)
+  def flow_pipeline_count(%Flow{id: id}, _, _), do: summary_field(id, :pipeline_count)
+  def flow_pending_pipeline_count(%Flow{id: id}, _, _), do: summary_field(id, :pending_pipeline_count)
+  def flow_service_statuses(%Flow{id: id}, _, _), do: summary_field(id, :service_statuses)
+  def flow_component_statuses(%Flow{id: id}, _, _), do: summary_field(id, :component_statuses)
+
+  defp summary_field(id, key) do
+    batch({__MODULE__, :flow_summaries}, id, fn summaries ->
+      {:ok, Map.get(summaries, id, empty_summary()) |> Map.get(key)}
+    end)
+  end
+
+  def flow_summaries(_, ids) do
+    ids = Enum.uniq(ids)
+    base = Map.new(ids, &{&1, empty_summary()})
+
+    base
+    |> put_status_groups(service_status_rows(ids), :service_statuses, :service_count)
+    |> put_status_groups(component_status_rows(ids), :component_statuses, :component_count)
+    |> put_counts(count_rows(alert_query(ids), :flow_id), :alert_count)
+    |> put_counts(count_rows(pipeline_query(ids), :flow_id), :pipeline_count)
+    |> put_counts(pending_pipeline_rows(ids), :pending_pipeline_count)
+  end
+
+  defp empty_summary do
+    %{
+      service_count: 0,
+      component_count: 0,
+      alert_count: 0,
+      pipeline_count: 0,
+      pending_pipeline_count: 0,
+      service_statuses: [],
+      component_statuses: []
+    }
+  end
+
+  defp put_status_groups(map, rows, list_key, count_key) do
+    Enum.reduce(rows, map, fn {id, entry}, acc ->
+      Map.update(acc, id, empty_summary(), fn summary ->
+        summary
+        |> Map.update!(list_key, &[entry | &1])
+        |> Map.update!(count_key, &(&1 + entry.count))
+      end)
+    end)
+  end
+
+  defp put_counts(map, rows, key) do
+    Enum.reduce(rows, map, fn {id, count}, acc ->
+      Map.update(acc, id, empty_summary(), &Map.put(&1, key, count))
+    end)
+  end
+
+  defp service_status_rows(ids) do
+    from(s in Service,
+      where: s.flow_id in ^ids,
+      group_by: [s.flow_id, s.status],
+      select: {s.flow_id, %{status: s.status, count: count(s.id)}}
+    )
+    |> Repo.all()
+  end
+
+  defp component_status_rows(ids) do
+    from(sc in ServiceComponent,
+      join: s in assoc(sc, :service),
+      where: s.flow_id in ^ids,
+      group_by: [s.flow_id, sc.state],
+      select: {s.flow_id, %{state: sc.state, count: count(sc.id)}}
+    )
+    |> Repo.all()
+  end
+
+  defp alert_query(ids) do
+    from(a in Alert,
+      join: s in assoc(a, :service),
+      where: s.flow_id in ^ids,
+      group_by: s.flow_id,
+      select: {s.flow_id, count(a.id)}
+    )
+  end
+
+  defp pipeline_query(ids) do
+    from(p in Pipeline,
+      where: p.flow_id in ^ids,
+      group_by: p.flow_id,
+      select: {p.flow_id, count(p.id)}
+    )
+  end
+
+  defp pending_pipeline_rows(ids) do
+    from(p in Pipeline,
+      join: e in assoc(p, :edges),
+      join: g in assoc(e, :gates),
+      where: p.flow_id in ^ids and g.state == :pending,
+      group_by: p.flow_id,
+      select: {p.flow_id, count(g.id)}
+    )
+    |> Repo.all()
+  end
+
+  defp count_rows(query, _key), do: Repo.all(query)
 
   def list_mcp_servers(args, %{context: %{current_user: user}}) do
     McpServer.ordered()

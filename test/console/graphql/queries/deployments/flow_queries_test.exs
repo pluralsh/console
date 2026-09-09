@@ -20,6 +20,67 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       assert from_connection(found)
              |> ids_equal([flow1, flow2])
     end
+
+    test "it can roll up flow summaries and filter by service status" do
+      user = insert(:user)
+      healthy_flow = insert(:flow, name: "healthy-flow", read_bindings: [%{user_id: user.id}])
+      failed_flow = insert(:flow, name: "failed-flow", read_bindings: [%{user_id: user.id}])
+      healthy_svc = insert(:service, flow: healthy_flow, status: :healthy)
+      failed_svc = insert(:service, flow: failed_flow, status: :failed)
+      insert(:service, flow: healthy_flow, status: :stale)
+      insert(:service_component, service: healthy_svc, state: :running)
+      insert(:service_component, service: failed_svc, state: :failed)
+      insert(:alert, service: failed_svc)
+      pipe = insert(:pipeline, flow: failed_flow)
+      edge = insert(:pipeline_edge, pipeline: pipe)
+      insert(:pipeline_gate, edge: edge, state: :pending)
+
+      {:ok, %{data: %{"flows" => found, "flowServiceCounts" => counts}}} = run_query("""
+        query {
+          flows(first: 5) {
+            edges {
+              node {
+                id
+                serviceCount
+                componentCount
+                alertCount
+                pipelineCount
+                pendingPipelineCount
+                serviceStatuses { status count }
+                componentStatuses { state count }
+              }
+            }
+          }
+          flowServiceCounts { status count }
+        }
+      """, %{}, %{current_user: user})
+
+      nodes = Map.new(from_connection(found), & {&1["id"], &1})
+      healthy = nodes[healthy_flow.id]
+      failed = nodes[failed_flow.id]
+
+      assert healthy["serviceCount"] == 2
+      assert healthy["componentCount"] == 1
+      assert healthy["alertCount"] == 0
+      assert failed["serviceCount"] == 1
+      assert failed["alertCount"] == 1
+      assert failed["pipelineCount"] == 1
+      assert failed["pendingPipelineCount"] == 1
+      assert Enum.any?(healthy["serviceStatuses"], & &1["status"] == "HEALTHY" && &1["count"] == 1)
+      assert Enum.any?(failed["componentStatuses"], & &1["state"] == "FAILED" && &1["count"] == 1)
+      assert Enum.any?(counts, & &1["status"] == "FAILED" && &1["count"] == 1)
+
+      {:ok, %{data: %{"flows" => filtered}}} = run_query("""
+        query {
+          flows(first: 5, statuses: [FAILED]) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(filtered)
+             |> ids_equal([failed_flow])
+    end
   end
 
   describe "flow" do
