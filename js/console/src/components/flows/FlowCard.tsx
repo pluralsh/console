@@ -5,15 +5,8 @@ import {
   Card,
   Flex,
   FlowIcon,
-  GitPullIcon,
-  ListBoxItem,
-  PeopleIcon,
 } from '@pluralsh/design-system'
-import {
-  PermissionsIdType,
-  PermissionsModal,
-} from 'components/cd/utils/PermissionsModal'
-import { useLogin } from 'components/contexts'
+import { FlowActionsMenu } from 'components/flows/FlowActionsMenu'
 import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
 import {
   FlowAlertChip,
@@ -21,12 +14,10 @@ import {
   FlowPipelineChip,
   componentHealthCounts,
 } from 'components/flows/flowHealth'
-import { MoreMenu } from 'components/utils/MoreMenu'
 import { Body1BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
-import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 
@@ -42,30 +33,21 @@ export function FlowCard({
   onToggleFavorite: () => void
 }) {
   const { search } = useLocation()
-  const navigate = useNavigate()
-  const { personaConfiguration } = useLogin()
-  const showPermissionsBtn = hasAccess(
-    personaConfiguration,
-    'flows.permissions'
-  )
-  const showPipelines = hasAccess(personaConfiguration, 'flows.pipelines')
   const [hovered, setHovered] = useState(false)
-  const [menuKey, setMenuKey] = useState('')
   const serviceCount = flow.serviceCount ?? 0
   const componentCount = flow.componentCount ?? 0
   const componentCounts = componentHealthCounts(flow.componentStatuses)
   const flowPath = getFlowDetailsPath({ flowIdOrName: flow.name })
 
   return (
-    <>
-      <CardSC
-        fillLevel={1}
-        forwardedAs={Link}
-        to={`${flowPath}/services${search}`}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        <ContentSC>
+    <CardSC
+      fillLevel={1}
+      forwardedAs={Link}
+      to={`${flowPath}/services${search}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <ContentSC>
           <HeaderSC>
             <AppIcon
               size="xsmall"
@@ -144,66 +126,27 @@ export function FlowCard({
               />
             </MetricGroupSC>
           </MetricsSC>
-        </ContentSC>
-        <FooterSC $parentHover={hovered}>
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            {(showPermissionsBtn || showPipelines) && (
-              <MoreMenu
-                onSelectionChange={(key: string) => {
-                  if (key === 'pipelines') {
-                    navigate(`${flowPath}/pipelines${search}`)
-                    return
-                  }
-                  setMenuKey(key)
-                }}
-                triggerProps={{
-                  onClick: (e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                  },
-                }}
-              >
-                {showPermissionsBtn && (
-                  <ListBoxItem
-                    key="permissions"
-                    label="Permissions"
-                    leftContent={<PeopleIcon />}
-                    textValue="Permissions"
-                  />
-                )}
-                {showPipelines && (
-                  <ListBoxItem
-                    key="pipelines"
-                    label="View pipelines"
-                    leftContent={<GitPullIcon />}
-                    textValue="View pipelines"
-                  />
-                )}
-              </MoreMenu>
-            )}
-            <FlowFavoriteButton
-              favorited={favorited}
-              onToggle={onToggleFavorite}
-            />
-          </Flex>
-          <ArrowRightIcon color="icon-light" />
-        </FooterSC>
-      </CardSC>
-      {showPermissionsBtn && (
-        <PermissionsModal
-          id={flow.id}
-          type={PermissionsIdType.Flow}
-          bindings={flow}
-          header="Flow permissions"
-          refetch={refetch}
-          open={menuKey === 'permissions'}
-          onClose={() => setMenuKey('')}
-        />
-      )}
-    </>
+      </ContentSC>
+      <FooterSC $parentHover={hovered}>
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          <FlowActionsMenu
+            flow={flow}
+            search={search}
+            refetch={refetch}
+            favorited={favorited}
+            onToggleFavorite={onToggleFavorite}
+          />
+          <FlowFavoriteButton
+            favorited={favorited}
+            onToggle={onToggleFavorite}
+          />
+        </Flex>
+        <ArrowRightIcon color="icon-light" />
+      </FooterSC>
+    </CardSC>
   )
 }
 

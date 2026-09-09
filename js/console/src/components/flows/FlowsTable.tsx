@@ -1,33 +1,20 @@
-import {
-  AppIcon,
-  FlowIcon,
-  GitPullIcon,
-  ListBoxItem,
-  PeopleIcon,
-  Table,
-} from '@pluralsh/design-system'
+import { AppIcon, FlowIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import {
-  PermissionsIdType,
-  PermissionsModal,
-} from 'components/cd/utils/PermissionsModal'
-import { useLogin } from 'components/contexts'
-import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
+import { FlowActionsMenu } from 'components/flows/FlowActionsMenu'
+import { FlowFavoriteStar } from 'components/flows/FlowFavoriteButton'
 import {
   FlowAlertChip,
   FlowHealthStacked,
   FlowPipelineChip,
   componentHealthCounts,
 } from 'components/flows/flowHealth'
-import { MoreMenu } from 'components/utils/MoreMenu'
-import { StackedText } from 'components/utils/table/StackedText'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
-import { hasAccess } from 'components/utils/persona'
+import { TRUNCATE } from 'components/utils/truncate'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 
@@ -46,11 +33,30 @@ function getColumns({
 }) {
   return [
     columnHelper.accessor((flow) => flow, {
+      id: 'actions',
+      header: '',
+      meta: { gridTemplate: 'min-content' },
+      cell: function Cell({ getValue }) {
+        const flow = getValue()
+
+        return (
+          <FlowActionsMenu
+            flow={flow}
+            search={search}
+            refetch={refetch}
+            favorited={favoriteIds.includes(flow.id)}
+            onToggleFavorite={() => onToggleFavorite(flow.id)}
+          />
+        )
+      },
+    }),
+    columnHelper.accessor((flow) => flow, {
       id: 'name',
       header: '',
       meta: { gridTemplate: 'minmax(240px, 2fr)' },
       cell: function Cell({ getValue }) {
         const flow = getValue()
+        const favorited = favoriteIds.includes(flow.id)
 
         return (
           <NameCellSC>
@@ -59,23 +65,20 @@ function getColumns({
               url={flow.icon || undefined}
               icon={<FlowIcon />}
             />
-            <NameTextSC>
-              <StackedText
-                first={flow.name}
-                second={flow.description || undefined}
-                firstPartialType="body2Bold"
-                firstColor="text"
-                secondPartialType="caption"
-                secondColor="text-xlight"
-                truncate
-              />
-              <FavoriteSlotSC $favorited={favoriteIds.includes(flow.id)}>
-                <FlowFavoriteButton
-                  favorited={favoriteIds.includes(flow.id)}
-                  onToggle={() => onToggleFavorite(flow.id)}
-                />
-              </FavoriteSlotSC>
-            </NameTextSC>
+            <NameBlockSC>
+              <NameRowSC>
+                <NameP>{flow.name}</NameP>
+                {favorited && <FlowFavoriteStar size={14} />}
+              </NameRowSC>
+              {flow.description && (
+                <CaptionP
+                  $color="text-xlight"
+                  css={{ ...TRUNCATE, margin: 0 }}
+                >
+                  {flow.description}
+                </CaptionP>
+              )}
+            </NameBlockSC>
           </NameCellSC>
         )
       },
@@ -130,91 +133,7 @@ function getColumns({
         return <FlowAlertChip count={getValue() ?? 0} />
       },
     }),
-    columnHelper.accessor((flow) => flow, {
-      id: 'actions',
-      header: '',
-      meta: { gridTemplate: 'min-content' },
-      cell: function Cell({ getValue }) {
-        return (
-          <FlowRowActions
-            flow={getValue()}
-            search={search}
-            refetch={refetch}
-          />
-        )
-      },
-    }),
   ]
-}
-
-function FlowRowActions({
-  flow,
-  search,
-  refetch,
-}: {
-  flow: FlowBasicWithBindingsFragment
-  search: string
-  refetch: () => void
-}) {
-  const { personaConfiguration } = useLogin()
-  const navigate = useNavigate()
-  const showPermissionsBtn = hasAccess(
-    personaConfiguration,
-    'flows.permissions'
-  )
-  const showPipelines = hasAccess(personaConfiguration, 'flows.pipelines')
-  const [menuKey, setMenuKey] = useState('')
-  const flowPath = getFlowDetailsPath({ flowIdOrName: flow.name })
-
-  return (
-    <ActionsSC>
-      {(showPermissionsBtn || showPipelines) && (
-        <MoreMenu
-          onSelectionChange={(key: string) => {
-            if (key === 'pipelines') {
-              navigate(`${flowPath}/pipelines${search}`)
-              return
-            }
-            setMenuKey(key)
-          }}
-          triggerProps={{
-            onClick: (e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            },
-          }}
-        >
-          {showPermissionsBtn && (
-            <ListBoxItem
-              key="permissions"
-              label="Permissions"
-              leftContent={<PeopleIcon />}
-              textValue="Permissions"
-            />
-          )}
-          {showPipelines && (
-            <ListBoxItem
-              key="pipelines"
-              label="View pipelines"
-              leftContent={<GitPullIcon />}
-              textValue="View pipelines"
-            />
-          )}
-        </MoreMenu>
-      )}
-      {showPermissionsBtn && (
-        <PermissionsModal
-          id={flow.id}
-          type={PermissionsIdType.Flow}
-          bindings={flow}
-          header="Flow permissions"
-          refetch={refetch}
-          open={menuKey === 'permissions'}
-          onClose={() => setMenuKey('')}
-        />
-      )}
-    </ActionsSC>
-  )
 }
 
 export function FlowsTable({
@@ -276,29 +195,26 @@ const NameCellSC = styled.div(({ theme }) => ({
   maxWidth: '100%',
 }))
 
-const NameTextSC = styled.div(({ theme }) => ({
+const NameBlockSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+  maxWidth: '100%',
+})
+
+const NameRowSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.xxsmall,
   minWidth: 0,
   maxWidth: '100%',
   width: 'max-content',
 }))
 
-const FavoriteSlotSC = styled.div<{ $favorited: boolean }>(
-  ({ $favorited }) => ({
-    flexShrink: 0,
-    ...(!$favorited && {
-      opacity: 0,
-      pointerEvents: 'none',
-      'tr:hover &, tr:focus-within &': {
-        opacity: 1,
-        pointerEvents: 'auto',
-      },
-    }),
-  })
-)
-
-const ActionsSC = styled.div({
-  'td &': { pointerEvents: 'auto' },
-})
+const NameP = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2LooseLineHeight,
+  ...TRUNCATE,
+  margin: 0,
+  minWidth: 0,
+  color: theme.colors['text-light'],
+}))
