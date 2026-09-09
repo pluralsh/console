@@ -1,4 +1,5 @@
 import {
+  Button,
   EyeIcon,
   Flex,
   IconFrame,
@@ -20,7 +21,7 @@ import {
   useGroupMembersLazyQuery,
   useGroupMembersQuery,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
@@ -30,6 +31,8 @@ import {
   MembershipListRowSC,
   MembershipListSC,
   MembershipUserRow,
+  MEMBERSHIP_FULL_LIST_LIMIT,
+  MEMBERSHIP_GROUP_PAGE_AFTER,
   MEMBERSHIP_VISIBLE_ROWS,
 } from '../MembershipExpandPanel'
 import { formatGroupMembersCopy } from '../membershipCopy'
@@ -118,6 +121,7 @@ const ColActions = columnHelper.accessor((group) => group, {
           group={group}
           open={dialogKey === 'viewGroup'}
           onClose={() => setDialogKey('')}
+          onOpenGroup={editable ? () => setGroupEdit(group) : undefined}
         />
         <Confirm
           open={dialogKey === 'confirmDelete'}
@@ -140,7 +144,15 @@ const ColActions = columnHelper.accessor((group) => group, {
   },
 })
 
-export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
+export function GroupMembersExpand({
+  row,
+  editable,
+  setGroupEdit,
+}: {
+  row: Row<GroupFragment>
+  editable: boolean
+  setGroupEdit: GroupsListMeta['setGroupEdit']
+}) {
   const group = row.original
   const [viewOpen, setViewOpen] = useState(false)
   const [fetchMembers] = useGroupMembersLazyQuery()
@@ -148,7 +160,8 @@ export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
     variables: { id: group.id, first: MEMBERSHIP_VISIBLE_ROWS },
   })
   const users = membersFromQuery(data)
-  const hasMore = (group.memberCount ?? users.length) > MEMBERSHIP_VISIBLE_ROWS
+  const memberCount = group.memberCount ?? users.length
+  const hasMore = memberCount > MEMBERSHIP_VISIBLE_ROWS
 
   return (
     <>
@@ -157,10 +170,7 @@ export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
         loading={!data && loading}
         emptyMessage="This group has no members."
         getCopyText={() => getGroupMembersCopyText(fetchMembers, group)}
-        previewRows={Math.min(
-          group.memberCount ?? MEMBERSHIP_VISIBLE_ROWS,
-          MEMBERSHIP_VISIBLE_ROWS
-        )}
+        previewRows={Math.min(memberCount, MEMBERSHIP_VISIBLE_ROWS)}
         viewAll={hasMore ? { onClick: () => setViewOpen(true) } : undefined}
       >
         {users.map((user) => (
@@ -176,6 +186,7 @@ export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
         group={group}
         open={viewOpen}
         onClose={() => setViewOpen(false)}
+        onOpenGroup={editable ? () => setGroupEdit(group) : undefined}
       />
     </>
   )
@@ -185,55 +196,103 @@ function ViewGroupMembersModal({
   group,
   open,
   onClose,
+  onOpenGroup,
 }: {
   group: GroupFragment
   open: boolean
   onClose: () => void
+  onOpenGroup?: () => void
 }) {
   const { data, loading, error } = useGroupMembersQuery({
-    variables: { id: group.id, first: COPY_MEMBERS_PAGE_SIZE },
+    variables: { id: group.id, first: MEMBERSHIP_FULL_LIST_LIMIT },
     skip: !open,
   })
   const users = membersFromQuery(data)
   const showEmpty = !!data && !loading && users.length === 0
+  const canOpenGroup =
+    !!onOpenGroup && (group.memberCount ?? 0) > MEMBERSHIP_FULL_LIST_LIMIT
+  const [showGroupPage, setShowGroupPage] = useState(false)
+  const [sentinel, setSentinel] = useState<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!sentinel || !canOpenGroup) return
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setShowGroupPage(true)
+    })
+
+    observer.observe(sentinel)
+
+    return () => observer.disconnect()
+  }, [canOpenGroup, sentinel])
+
+  const handleClose = () => {
+    setShowGroupPage(false)
+    onClose()
+  }
 
   return (
     <Modal
       header={group.name}
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       size="large"
       scrollable={false}
     >
       {error && <GqlError error={error} />}
-      <MembershipListSC
-        css={{
-          maxHeight: 480,
-          overflow: 'auto',
-        }}
+      <Flex
+        direction="column"
+        gap="small"
+        minHeight={0}
       >
-        {loading && !data && (
-          <Flex
-            justify="center"
-            padding="medium"
+        <MembershipListSC
+          css={{
+            maxHeight: 480,
+            overflow: 'auto',
+          }}
+        >
+          {loading && !data && (
+            <Flex
+              justify="center"
+              padding="medium"
+            >
+              <Spinner />
+            </Flex>
+          )}
+          {showEmpty && (
+            <MembershipListRowSC>
+              <CaptionP $color="text-xlight">
+                This group has no members.
+              </CaptionP>
+            </MembershipListRowSC>
+          )}
+          {users.map((user, i) => (
+            <MembershipUserRow
+              key={user.id}
+              ref={
+                canOpenGroup && i === MEMBERSHIP_GROUP_PAGE_AFTER - 1
+                  ? setSentinel
+                  : undefined
+              }
+              name={user.name}
+              email={user.email}
+              avatar={user.profile}
+            />
+          ))}
+        </MembershipListSC>
+        {showGroupPage && (
+          <Button
+            secondary
+            onClick={() => {
+              handleClose()
+              onOpenGroup?.()
+            }}
+            width="fit-content"
           >
-            <Spinner />
-          </Flex>
+            See all on group page
+          </Button>
         )}
-        {showEmpty && (
-          <MembershipListRowSC>
-            <CaptionP $color="text-xlight">This group has no members.</CaptionP>
-          </MembershipListRowSC>
-        )}
-        {users.map((user) => (
-          <MembershipUserRow
-            key={user.id}
-            name={user.name}
-            email={user.email}
-            avatar={user.profile}
-          />
-        ))}
-      </MembershipListSC>
+      </Flex>
     </Modal>
   )
 }

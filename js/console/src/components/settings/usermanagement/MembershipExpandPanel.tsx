@@ -13,6 +13,7 @@ import {
   Children,
   MouseEvent,
   ReactNode,
+  forwardRef,
   useCallback,
   useEffect,
   useRef,
@@ -21,6 +22,8 @@ import {
 import styled from 'styled-components'
 
 export const MEMBERSHIP_VISIBLE_ROWS = 5
+export const MEMBERSHIP_FULL_LIST_LIMIT = 100
+export const MEMBERSHIP_GROUP_PAGE_AFTER = 30
 
 const MEMBERSHIP_ROW_HEIGHT = 68
 
@@ -227,17 +230,16 @@ export function MembershipExpandPanel({
   )
 }
 
-export function MembershipUserRow({
-  name,
-  email,
-  avatar,
-}: {
-  name?: string | null
-  email?: string | null
-  avatar?: string | null
-}) {
+export const MembershipUserRow = forwardRef<
+  HTMLDivElement,
+  {
+    name?: string | null
+    email?: string | null
+    avatar?: string | null
+  }
+>(function MembershipUserRow({ name, email, avatar }, ref) {
   return (
-    <MembershipListRowSC>
+    <MembershipListRowSC ref={ref}>
       <Flex
         align="center"
         gap="small"
@@ -268,7 +270,7 @@ export function MembershipUserRow({
       )}
     </MembershipListRowSC>
   )
-}
+})
 
 export function HoverActions({ children }: { children: ReactNode }) {
   return (

@@ -70,7 +70,13 @@ export function GroupsList({
         columns={groupsCols}
         reactTableOptions={{ meta }}
         onVirtualSliceChange={onVirtualSliceChange}
-        renderExpanded={({ row }) => <GroupMembersExpand row={row} />}
+        renderExpanded={({ row }) => (
+          <GroupMembersExpand
+            row={row}
+            editable={meta.editable}
+            setGroupEdit={setGroupEdit}
+          />
+        )}
         emptyStateProps={{
           ...(!throttledQ
             ? {
