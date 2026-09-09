@@ -123,6 +123,10 @@ type ContainerLogsTableProps = ComponentProps<typeof ContainerLogs> & {
   refetch: () => void
   loading: boolean
   logs: string[]
+  hasNextPage?: boolean
+  fetchNextPage?: () => void
+  isFetchingNextPage?: boolean
+  isTerminallyTruncated?: boolean
 }
 
 const columns = [
@@ -142,6 +146,10 @@ export function ContainerLogsTable({
   refetch,
   loading,
   logs,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
+  isTerminallyTruncated,
 }: ContainerLogsTableProps) {
   return (
     <div
@@ -161,6 +169,17 @@ export function ContainerLogsTable({
         data={logs}
         loading={isEmpty(logs) && loading}
         emptyStateProps={{ message: 'No logs found to display' }}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        endRowContent={
+          isTerminallyTruncated ? (
+            <span role="status">
+              This view is limited to the most recent 16,000 lines. Earlier
+              lines may not be shown.
+            </span>
+          ) : undefined
+        }
       />
     </div>
   )

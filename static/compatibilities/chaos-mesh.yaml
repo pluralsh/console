@@ -8,7 +8,30 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **New capability:** Helm chart can now deploy **extra Kubernetes\
+      \ objects** (see #4649). If you use this, ensure your values reference the chart\u2019\
+      s render helper correctly; **v2.8.4 fixes** an `include`/render-function issue\
+      \ for extra objects (#4780).\n- **Default change:** `enableCtrlServer` is now\
+      \ **`false` by default** in the Helm chart (#4702). If you relied on the controller\
+      \ server being enabled previously, you must explicitly set this value back to\
+      \ `true`.\n- **Template fix:** Prior helm values references in the Prometheus\
+      \ template were wrong and were fixed (#4543). If you had local chart patches/workarounds,\
+      \ re-check and drop them if no longer needed.\n"
+    chart_updates: ['Helm chart enhancement: support deploying extra Kubernetes objects
+        via chart templates (#4649).', 'Chart behavior change: `enableCtrlServer`
+        default set to `false` (#4702).', 'Chart fix in v2.8.4: extra objects template
+        `include` now uses the correct render function (#4780).', 'Prometheus template:
+        corrected wrong helm values references (#4543).']
+    features: ["Helm chart can deploy additional, user-supplied Kubernetes manifests\
+        \ (\u201Cextra objects\u201D), reducing the need for separate manifests/kustomize\
+        \ for companion resources.", 'Workflows: labels can now be added to `workflow.spec.templates.task`,
+        improving filtering/selection and metadata consistency.']
+    breaking_changes: [Helm chart default for `enableCtrlServer` changed to `false`;
+        installs/upgrades that previously depended on the controller server being
+        enabled must now set it explicitly to preserve behavior., "Operational/tooling\
+        \ change: `chaosctl` was removed; if your workflows/scripts used it, you\u2019\
+        ll need an alternative (e.g., kubectl + CRDs/API or documented CLI replacements)."]
   chart_version: 2.8.4
   images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.4',
     'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.4', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.4']
@@ -16,7 +39,35 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **New:** Helm chart can now deploy **extra Kubernetes objects**\
+      \ (e.g., additional ConfigMaps/Secrets/Policies) as part of the release. Review\
+      \ the new values for \u201Cextra objects\u201D support introduced in #4649 and\
+      \ decide if you want to use it.\n- **Changed default:** `enableCtrlServer` is\
+      \ now **`false` by default** in the Helm chart (#4702). If you relied on the\
+      \ controller server being enabled (or any features that depend on it), you must\
+      \ explicitly set the value back to `true` during/after the upgrade.\n- **Template/values\
+      \ fixes:** Prometheus template had wrong helm-value references (#4543). If you\
+      \ have custom Prometheus/ServiceMonitor values, re-check that they still render\
+      \ as expected after upgrading.\n- **Dashboard service rendering:** Chart now\
+      \ supports **label templates** when rendering the `chaos-dashboard` Service\
+      \ (#4708). If you customized service labels, re-validate your values against\
+      \ the new behavior.\n- **Schema/docs:** Usage around `helm-values-schema-json`\
+      \ was updated (#4719). If you validate values via schema in CI, regenerate/refresh\
+      \ any pinned schema expectations."
+    chart_updates: ['Helm chart: support deploying extra Kubernetes objects (#4649).',
+      'Helm chart: `enableCtrlServer` default changed to `false` (#4702).', 'Helm
+        chart: fix wrong helm values references in Prometheus template (#4543).',
+      'Helm chart: use label templates for chaos-dashboard Service rendering (#4708).',
+      'Docs/tooling: update guidance around helm-values-schema-json (#4719).']
+    features: ['Helm chart can deploy extra Kubernetes objects as part of the release,
+        reducing the need for separate manifests.', 'Workflows add labels to `workflow.spec.templates.task`,
+        improving organization/selection in tooling and UIs.']
+    breaking_changes: ['`enableCtrlServer` now defaults to `false` in the Helm chart;
+        clusters depending on the controller server must explicitly enable it after
+        upgrading.', '`chaosctl` was removed; any operational scripts or runbooks
+        using chaosctl must be migrated to other supported interfaces (e.g., kubectl/apply
+        CRs, Dashboard/API).']
   chart_version: 2.8.0
   images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.0',
     'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.0']
@@ -24,7 +75,52 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **CRDs must be updated as part of the upgrade** (explicitly called\
+      \ out in the v2.7.0 notes).\n- **New/changed Helm values (potential action items):**\n\
+      \  - `gcp.auth` **value structure changed** to an object that includes `existingSecret`\
+      \ (was a different/flat structure previously). Review any existing GCP auth\
+      \ configuration and update values accordingly. *(PR #4303)*\n  - **ServiceAccount\
+      \ creation can now be conditional** for `chaos-controller-manager` and you can\
+      \ add **annotations** on ServiceAccounts for both `chaos-controller-manager`\
+      \ and `chaos-daemon`. If you rely on custom SAs/IRSA/workload identity, review\
+      \ these toggles/annotations. *(PRs #4390, #4106)*\n  - **chaos-daemon `securityContext`\
+      \ is now configurable** via Helm values. If you previously patched manifests,\
+      \ move those settings into values. *(PR #4390)*\n  - **Dashboard can be deployed\
+      \ under a subpath**; Helm also allows **templating** `dashboard.rootUrl`. If\
+      \ you have ingress/path routing, set these to match. *(PRs #4093, #4370)*\n\
+      \  - **Dashboard Service:** support `loadBalancerSourceRanges`. If using a `LoadBalancer`\
+      \ service, you can now restrict source CIDRs via values. *(PR #4172)*\n  - **Dashboard\
+      \ sidecars** supported via Helm values. *(PR #4164)*\n  - **Chaos DNS server:**\
+      \ configurable pod affinities via values. *(PR #4260)*\n  - **Chaos Daemon metrics\
+      \ scraping can be toggled** (useful if you don\u2019t run Prometheus or want\
+      \ to reduce noise). *(PR #4488)*\n  - `values.schema.json` added/generated for\
+      \ values validation; use `helm lint`/schema validation in CI to catch invalid\
+      \ values early. *(PRs #4205, #4435)*\n- **Behavioral default fix to be aware\
+      \ of:** when HA is not enabled, `replicas` is automatically set to `1` (could\
+      \ affect anyone who previously set a different replica count without HA). *(PR\
+      \ #4079)*"
+    chart_updates: ['Helm chart enhancements: conditional ServiceAccount creation,
+        SA annotations, chaos-daemon pod securityContext support. (#4390, #4106)',
+      'Helm chart: chaos-dashboard subpath support, templated `rootUrl`, sidecar containers,
+        and `loadBalancerSourceRanges` for the dashboard Service. (#4093, #4370, #4164,
+        #4172)', 'Helm chart: GCP auth values refactor to support `existingSecret`.
+        (#4303)', 'Helm chart: configurable chaos-dns-server pod affinities. (#4260)',
+      'Helm chart: option to toggle Chaos Daemon metric scraping. (#4488)', 'Chart
+        now includes/generated `values.schema.json` for values validation. (#4205,
+        #4435)']
+    features: [Chaos Dashboard can now be hosted under a subpath (useful for ingress
+        path-based routing) and `rootUrl` can be templated via Helm., 'NetworkChaos
+        now supports additional rate units and netem/rate support, expanding traffic
+        shaping options.', Multi-cluster/remote status watching improvements allow
+        syncing remote chaos experiment status to a local cluster., 'You can read
+        the dashboard database connection string from a Kubernetes Secret, improving
+        credential management.', 'More Helm flexibility: dashboard sidecars, restricted
+        LB source ranges, configurable DNS server affinities, and optional Chaos Daemon
+        metrics scraping.']
+    breaking_changes: ['Helm values change: `gcp.auth` is now an object with an `existingSecret`
+        key; existing values files using the old structure will need to be updated.
+        (#4303)']
   chart_version: 2.7.0
   images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.7.0',
     'ghcr.io/chaos-mesh/chaos-dashboard:v2.7.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.7.0']
@@ -32,7 +128,29 @@ versions:
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **New default component**: Chaos Mesh now deploys the **Chaos\
+      \ DNS Server by default**. If you don\u2019t need DNS fault injection, explicitly\
+      \ set:\n  ```yaml\n  dnsServer:\n    create: false\n  ```\n- **Webhook port\
+      \ default changed**: Helm chart defaults the webhook port to **10250**. Verify\
+      \ this doesn\u2019t conflict with cluster policies/firewalls and that any NetworkPolicies/allowlists/reference\
+      \ docs are updated accordingly.\n- **Chaos Daemon capabilities configurable\
+      \ via values**: Capabilities for `chaos-daemon` can now be set via Helm values\
+      \ (instead of being fixed). Review your current security posture (PodSecurity/PSA,\
+      \ OPA/Gatekeeper, SCC) and ensure required capabilities are granted/allowed.\n"
+    chart_updates: ['Chaos DNS Server is included and enabled by default (opt-out
+        via `dnsServer.create: false`).', Helm chart default webhook port changed
+        to 10250., Chart supports setting `chaos-daemon` Linux capabilities via Helm
+        values. (Review/align with your security policies.)]
+    features: [Offline Helm chart installation support for multi-cluster deployments.,
+      Chaos DNS Server now deploys by default to enable DNS-fault simulation out of
+        the box (can be disabled via values).]
+    breaking_changes: [CoreDNS listen port changed from 53 to 5353; any workloads/tests
+        assuming port 53 for the embedded DNS component must be updated., 'Helm default
+        webhook port changed to 10250; may require updating firewall rules, NetworkPolicies,
+        or documentation if you referenced the old port.', 'Removal of the unused
+        `inject-v1-pod` webhook and `crd-v1beta1.yaml`; if you had automation referencing
+        these artifacts, update it.']
   chart_version: 2.6.0
   images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.6', 'ghcr.io/chaos-mesh/chaos-daemon:v2.6.0',
     'ghcr.io/chaos-mesh/chaos-dashboard:v2.6.0', 'ghcr.io/chaos-mesh/chaos-mesh:v2.6.0']
@@ -40,7 +158,20 @@ versions:
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- **New values added:** `controller.securityContext` and `dashboard.securityContext`
+      (introduced in chart enhancement #3603). If your cluster enforces Pod Security
+      Standards / restricted policies, set these explicitly to match your requirements.
+
+      - No other Helm values changes were noted in the provided release notes.'
+    chart_updates: ['Helm chart enhancement: added `controller.securityContext` and
+        `dashboard.securityContext` values to configure pod/container security context
+        (#3603).']
+    features: ['Multi-Cluster Chaos Experiments support, enabling chaos experiments
+        targeting multiple Kubernetes clusters (#3342 #3384 #3414 #3453).', 'HTTPChaos
+        now supports TLS, allowing fault injection/testing for HTTPS endpoints (#3549).',
+      The refined "New Workflow" UI is enabled by default in the dashboard (#3718).]
+    breaking_changes: []
   chart_version: 2.5.0
   images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.5.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.5.0',
     'ghcr.io/chaos-mesh/chaos-mesh:v2.5.0']
@@ -48,7 +179,14 @@ versions:
   kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Release notes provided are for v2.3.0 only; no v2.4.0 app/helm
+        chart changelog included, so cannot accurately summarize changes for upgrade
+        2.3.0 -> 2.4.0 yet.']
+    features: [v2.3.0 adds BlockChaos implementation in chaos-daemon., v2.3.0 adds
+        AArch64 support for TimeChaos.]
+    breaking_changes: []
   chart_version: 2.4.0
   images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.4.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.4.0',
     'ghcr.io/chaos-mesh/chaos-mesh:v2.4.0']
@@ -56,7 +194,47 @@ versions:
   kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- Helm charts: support latest API version of **dashboard ingress**
+      (verify `apiVersion`/schema for your Ingress objects and values) (#3066)
+
+      - Helm charts: add `chaosDaemon.updateStrategy` to configure the `DaemonSetUpdateStrategy`
+      for **chaos-daemon** (#3108)
+
+      - Helm charts: **relax** `allowedHostPaths` in the chaos-daemon **PodSecurityPolicy**
+      (if you still use PSPs) (#3350)
+
+      - Helm charts: rename `validate-auth` to `chaos-mesh-validation-auth` (#3193)
+
+      - Certificates: add `spec.privateKey.rotationPolicy` to comply with **cert-manager
+      1.8** requirements (#3325)
+
+      - Helm charts metadata/packaging changes: Artifact Hub annotations (#3355);
+      chart uses `0.0.0` as chart version and appVersion in some context (#3311)
+
+      - Installer/scripts: `install.sh` updated for Kubernetes >= 1.24 (#3177)'
+    chart_updates: ['Dashboard/Ingress templates updated to the latest Ingress API
+        version (expect template changes around `networking.k8s.io/v1`, `pathType`,
+        and backend service fields).', chaos-daemon DaemonSet template now supports
+        configurable update strategy via `chaosDaemon.updateStrategy`., PSP template
+        for chaos-daemon adjusted to permit more host paths (relevant only on clusters
+        where PSP is enabled)., 'Helm component/resource naming updated: validation
+        auth component renamed from `validate-auth` to `chaos-mesh-validation-auth`.',
+      Certificate manifests/CRs updated to include `spec.privateKey.rotationPolicy`
+        for cert-manager compatibility., Chart metadata updated with Artifact Hub
+        annotations; some version fields may appear as `0.0.0` depending on packaging
+        workflow.]
+    features: ['BlockChaos is now implemented in chaos-daemon, enabling block I/O
+        fault injection support end-to-end.', 'TimeChaos adds AArch64/arm64 support,
+        improving compatibility for ARM-based nodes.']
+    breaking_changes: ['If you have existing Helm values or external references to
+        the `validate-auth` component, they must be updated to the new name `chaos-mesh-validation-auth`
+        (otherwise upgrades may fail or leave orphaned resources).', Ingress manifests/values
+        may need adjustment due to the move to the latest Ingress API version (fields
+        like backend/service and `pathType` are stricter in `networking.k8s.io/v1`).,
+      'On clusters using cert-manager >= 1.8, certificate resources may require/expect
+        `spec.privateKey.rotationPolicy`; older custom manifests without it could
+        be rejected depending on policy/webhooks.']
   chart_version: 2.3.0
   images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.3.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.3.0',
     'ghcr.io/chaos-mesh/chaos-mesh:v2.3.0']
@@ -64,7 +242,25 @@ versions:
   kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **RBAC changes for chaos-dashboard**: the Helm chart now creates/uses\
+      \ additional/specific RBAC resources for `chaos-dashboard` ([#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)).\
+      \ Review any custom `rbac.*` values or existing ClusterRole/Role overrides to\
+      \ avoid conflicts.\n- **Admission webhook CA bundle**: the chart now specifies\
+      \ a CA bundle for admission webhooks ([#3190](https://github.com/chaos-mesh/chaos-mesh/pull/3190)).\
+      \ If you manage certificates/webhooks externally (cert-manager, custom CA injection),\
+      \ verify compatibility and whether you need to override/disable the chart\u2019\
+      s CA bundle behavior."
+    chart_updates: ['Helm chart updated to use certain RBAC resources for `chaos-dashboard`
+        ([#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)).', 'Helm chart
+        updated to specify a CA bundle for admission webhooks ([#3190](https://github.com/chaos-mesh/chaos-mesh/pull/3190)).']
+    features: ['AzureChaos added: can shutdown/restart Azure VMs and detach disks
+        for Azure-based fault injection.', 'StatusCheck introduced: can monitor application
+        health and abort workflows/experiments when the app becomes unhealthy.', '`chaosctl`
+        adds outbound force recovery to more easily clean up experiments from outside
+        the cluster.', "Chaos Dashboard preview adds a drag-and-drop \u201CNew Workflow\u201D\
+        \ page for easier workflow authoring."]
+    breaking_changes: []
   chart_version: 2.2.0
   images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.2.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.2.0',
     'ghcr.io/chaos-mesh/chaos-mesh:v2.2.0']
@@ -72,7 +268,20 @@ versions:
   kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [PhysicalMachineChaos added to inject node-level chaos via chaosd; dashboard
+        can create it., JVMChaos refined with Byteman support; dashboard creation
+        supported., Leader election enabled for chaos-controller-manager for HA deployments.,
+      NetworkChaos can select different network interfaces., 'Chaos Dashboard workflow
+        UX improvements: create HTTP requests via workflow; view related events and
+        YAML for workflows.', Chaos Dashboard integrates GCP authentication., Container
+        images migrated from Docker Hub to GitHub Container Registry (GHCR).]
+    breaking_changes: ["Image registry change (Docker Hub \u2192 GHCR) may require\
+        \ updating image repository/credentials/network allowlists and mirroring policies.",
+      'Enabling leader election for controller manager may change deployment expectations
+        (e.g., multiple replicas, RBAC/leases); verify HA settings during upgrade.']
   chart_version: 2.1.0
   images: ['ghcr.io/chaos-mesh/chaos-daemon:v2.1.0', 'ghcr.io/chaos-mesh/chaos-dashboard:v2.1.0',
     'ghcr.io/chaos-mesh/chaos-mesh:v2.1.0']
@@ -80,21 +289,98 @@ versions:
   kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- **chaos-daemon runs privileged by default (v1.2.0)**: confirm
+      your security policy/PSP/OPA allows privileged pods; if not, set the chart value
+      that disables privileged mode.
+
+      - **Registry configuration added (v1.2.0)**: if you use a private registry/mirror,
+      populate the new registry-related values.
+
+      - **Dashboard enabled by default (v1.2.0)**: decide whether you want the dashboard
+      exposed; if not, explicitly disable it in values.
+
+      - **Namespace naming constraint (v1.2.0)**: chart install was restricted to
+      namespaces with numbers only per notes; verify your target namespace meets any
+      chart validation.
+
+      - **Env var name fix (v2.0.0)**: if you previously set dashboard/controller
+      env vars via values, re-check names after upgrade because a rename/fix may break
+      overrides.
+
+      - **Helm upgrade behavior fix (v2.0.0)**: previous versions could recreate the
+      Chaos Dashboard on `helm upgrade`; after upgrading, confirm your dashboard Service/Ingress/credentials
+      remain as expected, but expect behavior to be corrected going forward.'
+    chart_updates: ['v1.2.0 chart defaults changed: chaos-daemon privileged by default;
+        dashboard enabled by default; added registry config; additional install-time
+        validation around namespace naming.', 'v2.0.0 chart: fixed environment variable
+        naming; fixed `helm upgrade` behavior that could recreate the dashboard.']
+    features: [AWSChaos added (v1.2.0) to simulate failures on AWS nodes., TLS authentication
+        support for chaos-daemon added (v1.2.0)., Workflow introduced (v2.0.0) to
+        orchestrate multiple chaos experiments/schedules serially or in parallel.,
+      Schedule introduced (v2.0.0) to run chaos experiments via cron-like scheduling.,
+      HTTPChaos added (v2.0.0) for server-side HTTP request/response hijacking., Dashboard
+        gains search across workflows/schedules/experiments/archives and a workflow
+        editor (v2.0.0).]
+    breaking_changes: [Major controller refactor in v2.0.0 implies CRDs/specs and
+        behavior may have changed; validate existing experiment manifests and automation
+        against the new API and controller semantics before upgrading in production.,
+      New concepts (Schedule/Workflow) may change how users model recurring or orchestrated
+        chaos; existing ad-hoc automation may need adjustment to use or avoid these
+        resources., Helm environment variable name fixes in v2.0.0 can break existing
+        values-based env overrides; review your `values.yaml` for any `env` settings
+        and reconcile names.]
   chart_version: 2.0.0
   images: ['pingcap/chaos-daemon:v2.0.0', 'pingcap/chaos-dashboard:v2.0.0', 'pingcap/chaos-mesh:v2.0.0']
 - version: 1.2.0
   kube: ['1.15', '1.14', '1.13', '1.12']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "## Helm values/behavior changes to account for\n- **chaos-daemon\
+      \ runs privileged by default**. There is now a Helm value to disable privileged\
+      \ mode. Review your cluster\u2019s PSP/OPA/PodSecurity settings and decide whether\
+      \ to keep privileged or explicitly disable it.\n- **Registry configuration added**.\
+      \ If you use private registries/mirrors, configure the new registry settings\
+      \ in the chart.\n- **Namespace naming restriction**: installing Chaos Mesh into\
+      \ a namespace that contains numbers only is restricted/blocked; ensure your\
+      \ target namespace is valid (alphanumeric with letters).\n- **Chaos Dashboard\
+      \ enabled by default**. If you previously disabled it or don\u2019t want it\
+      \ exposed, explicitly set the dashboard to disabled and review Service/Ingress\
+      \ settings."
+    chart_updates: [Chaos-daemon deployment defaults changed to privileged (with opt-out).,
+      Added registry configuration support to chart templates/values., Added validation/restriction
+        around namespace naming (numbers-only not allowed)., Dashboard subchart/component
+        now enabled by default.]
+    features: [Adds **AWSChaos** to simulate failures on AWS nodes., Adds **CRI-O**
+        container runtime support., Adds **TLS authentication** support for chaos-daemon
+        connections., 'Dashboard improvements: version display, token generator for
+        namespaces/roles, better search UX, batch delete for archives/experiments.']
+    breaking_changes: ['Helm default behavior changes: **dashboard now enabled by
+        default** and **chaos-daemon is privileged by default**, which may break installs
+        in restricted clusters unless values/policies are updated.', Install may fail
+        if targeting a **numbers-only namespace name** (namespace naming rule enforcement).]
   chart_version: 0.5.0
   images: ['pingcap/chaos-daemon:v1.2.0', 'pingcap/chaos-dashboard:v1.2.0', 'pingcap/chaos-mesh:v1.2.0']
 - version: 1.1.0
   kube: ['1.15', '1.14', '1.13', '1.12']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Chaos Dashboard refactor with authentication/authorization, including
+        token-based login and optional token disabling; UI changes like YAML experiment
+        descriptions and global search.', New DNSChaos experiment type to simulate
+        DNS failures., New `chaosctl` CLI tool to print debug information for troubleshooting.,
+      'Improved network chaos capabilities: more tc filters, configurable network
+        devices, and protocol selection support for iptables/tc; plus support for
+        external networkchaos targets in the dashboard.', IoChaos enhancements including
+        specifying container name; `toda` updated to v0.1.11., Controller improvements
+        and reliability fixes (various controller/reconcile improvements).]
+    breaking_changes: [Dashboard now includes authentication/authorization; upgrade
+        may require configuring access tokens/login flow and may change how users
+        access/operate the dashboard.]
   chart_version: 0.4.0
   images: ['pingcap/chaos-daemon:v1.1.0', 'pingcap/chaos-mesh:v1.1.0']
 - version: 1.0.0
