@@ -4,7 +4,7 @@ import re
 from collections import OrderedDict
 from typing import Callable, Optional
 
-import requests
+import yaml
 
 from utils import (
     expand_kube_versions,
@@ -27,9 +27,11 @@ MAX_RELEASES = 15
 # The compatibility matrix tracks the three newest Kubernetes minors per row.
 LATEST_KUBE_MINORS = 3
 
-RELEASES_API_URL = "https://api.github.com/repos/{owner}/{name}/releases"
 README_URL = (
     "https://raw.githubusercontent.com/{owner}/{name}/{commitish}/README.md"
+)
+HELM_INDEX_URL = (
+    f"https://opensearch-project.github.io/helm-charts/index.yaml"
 )
 
 # The chart README documents its supported range, e.g.
@@ -39,9 +41,6 @@ _K8S_REQ_RE = re.compile(
 )
 # Fallback for a stricter "Kubernetes 1.19+" style statement
 _K8S_PLUS_RE = re.compile(r"(?i)kubernetes\s+v?(1\.\d+)\s*\+")
-
-# Only the OpenSearch server chart (never dashboards/data-prepper variants)
-_TAG_RE = re.compile(r"^opensearch-(\d+\.\d+\.\d+)(?:-\d+)?$")
 
 
 def parse_min_kubernetes(text: str) -> str:
@@ -78,32 +77,53 @@ def expand_minimum(floor: str, latest: str) -> list[str]:
         )
     expanded = expand_kube_versions(floor, latest)
     # expand_kube_versions can overshoot by one minor when floor == latest.
-    supported = [v for v in expanded if v <= latest]
+    # Compare as version tuples: string compare breaks across digit
+    # boundaries ("1.9" > "1.10" lexicographically).
+    supported = [
+        v for v in expanded
+        if validate_semver(v) and validate_semver(v) <= latest_v
+    ]
     return supported[-LATEST_KUBE_MINORS:][::-1]
 
 
-def server_releases(release_data: list[dict]) -> list[tuple[str, str]]:
-    """(app_version, commitish) pairs for the OpenSearch server chart.
+def server_releases(index_doc: dict) -> list[tuple[str, str]]:
+    """(server_version, tag) pairs for the OpenSearch server chart.
 
-    Newest first. Duplicate app versions (chart patch releases) keep only
-    the newest entry.
+    Driven by the official Helm index (newest first), not by the chart's
+    own tag names: the server chart's version number does not track the
+    OpenSearch server version it packages (chart 2.38.0 ships server
+    2.19.6), so rows are keyed by the server (app) version from the index.
+    The chart version maps to its immutable release tag, whose README
+    documents the Kubernetes floor shipped with that chart. Duplicate
+    server versions (several chart releases can package the same server)
+    keep the newest chart.
     """
+    entries = (index_doc or {}).get("entries", {}).get(CHART_NAME, [])
     seen = set()
     result: list[tuple[str, str]] = []
-    for release in release_data:
-        tag = release.get("tag_name") or ""
-        m = _TAG_RE.match(tag)
-        if not m:
+    for entry in entries:
+        chart_version = (entry.get("version") or "").lstrip("v")
+        server_version = (entry.get("appVersion") or "").lstrip("v")
+        if not chart_version or not server_version:
             continue
-        version = m.group(1)
-        if version in seen:
+        if server_version in seen:
             continue
-        seen.add(version)
-        commitish = release.get("target_commitish") or "main"
-        result.append((version, commitish))
+        seen.add(server_version)
+        result.append((server_version, f"{CHART_NAME}-{chart_version}"))
         if len(result) >= MAX_RELEASES:
             break
     return result
+
+
+def _ref_candidates(tag: str) -> list[str]:
+    """Immutable refs whose README documents a chart release.
+
+    Some chart releases only cut a pre-release tag (e.g. ``3.7.0-1``);
+    the plain stable tag may never be created. The pre-release tag is
+    still immutable, and its README is the documentation that shipped
+    with that chart line.
+    """
+    return [tag, f"{tag}-1"]
 
 
 def build_rows(
@@ -116,11 +136,15 @@ def build_rows(
     docs_get maps a release README URL to raw bytes (or None).
     """
     rows: list[OrderedDict[str, object]] = []
-    for version, commitish in releases:
-        url = README_URL.format(
-            owner=REPO_OWNER, name=REPO_NAME, commitish=commitish
-        )
-        content = docs_get(url)
+    for version, tag in releases:
+        content = None
+        for ref in _ref_candidates(tag):
+            url = README_URL.format(
+                owner=REPO_OWNER, name=REPO_NAME, commitish=ref
+            )
+            content = docs_get(url)
+            if content:
+                break
         if not content:
             print_warning(f"No README found for {version}")
             continue
@@ -152,19 +176,6 @@ def build_rows(
     return rows
 
 
-def _fetch_releases() -> list[dict]:
-    releases: list[dict] = []
-    for page in range(1, 3):
-        response = requests.get(
-            RELEASES_API_URL.format(owner=REPO_OWNER, name=REPO_NAME),
-            params={"page": page, "per_page": 100},
-        )
-        if response.status_code != 200:
-            break
-        releases.extend(response.json())
-    return releases
-
-
 def scrape() -> None:
     latest = latest_kube_version()
     latest_minor = f"{latest.major}.{latest.minor}" if latest else None
@@ -173,12 +184,13 @@ def scrape() -> None:
         return
 
     try:
-        releases = server_releases(_fetch_releases())
+        index_doc = yaml.safe_load(fetch_page(HELM_INDEX_URL) or b"")
     except Exception as e:
-        print_error(f"Failed to fetch releases: {e}")
+        print_error(f"Failed to fetch the Helm index: {e}")
         return
+    releases = server_releases(index_doc)
     if not releases:
-        print_error(f"No {CHART_NAME} chart releases found")
+        print_error(f"No {CHART_NAME} chart versions found in the Helm index")
         return
 
     rows = build_rows(releases, latest_minor, fetch_page)

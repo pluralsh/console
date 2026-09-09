@@ -33,6 +33,19 @@ DOC_NONE = """# OpenSearch Helm Chart
 helm repo add opensearch https://opensearch-project.github.io/helm-charts
 """
 
+INDEX_DOC = {
+    "entries": {
+        "opensearch": [
+            {"version": "3.8.0", "appVersion": "3.8.0"},
+            {"version": "3.7.0", "appVersion": "3.7.0"},
+            {"version": "2.38.0", "appVersion": "2.19.6"},
+            {"version": "2.37.0", "appVersion": "2.19.5"},
+            {"version": "2.36.0", "appVersion": "2.19.5"},
+            {"version": "3.6.0", "appVersion": "3.6.0"},
+        ]
+    }
+}
+
 
 class ParseMinKubernetesTests(unittest.TestCase):
     def test_parses_tested_with_statement(self):
@@ -65,6 +78,10 @@ class ExpandMinimumTests(unittest.TestCase):
     def test_narrow_window_returns_full_range(self):
         self.assertEqual(scraper.expand_minimum("1.19", "1.20"), ["1.20", "1.19"])
 
+    def test_two_digit_minor_boundary_compares_numerically(self):
+        # "1.9" > "1.10" lexicographically; version compare must keep 1.9.
+        self.assertEqual(scraper.expand_minimum("1.9", "1.10"), ["1.10", "1.9"])
+
     def test_future_minimum_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "newer than Plural"):
             scraper.expand_minimum("1.37", "1.36")
@@ -75,84 +92,141 @@ class ExpandMinimumTests(unittest.TestCase):
 
 
 class ServerReleasesTests(unittest.TestCase):
-    RELEASES = [
-        {"tag_name": "opensearch-3.8.0", "target_commitish": "main"},
-        {"tag_name": "opensearch-dashboards-3.8.0", "target_commitish": "main"},
-        {"tag_name": "data-prepper-0.3.1", "target_commitish": "main"},
-        {"tag_name": "opensearch-3.7.0-1", "target_commitish": "abc123"},
-        {"tag_name": "opensearch-3.7.0", "target_commitish": "def456"},
-        {"tag_name": "opensearch-3.6.0", "target_commitish": ""},
-    ]
-
-    def test_filters_to_server_chart_newest_first(self):
+    def test_driven_by_helm_index_newest_first(self):
         self.assertEqual(
-            scraper.server_releases(self.RELEASES),
+            scraper.server_releases(INDEX_DOC),
             [
-                ("3.8.0", "main"),
-                ("3.7.0", "abc123"),
-                ("3.6.0", "main"),
+                ("3.8.0", "opensearch-3.8.0"),
+                ("3.7.0", "opensearch-3.7.0"),
+                ("2.19.6", "opensearch-2.38.0"),
+                ("2.19.5", "opensearch-2.37.0"),
+                ("3.6.0", "opensearch-3.6.0"),
             ],
         )
 
+    def test_chart_version_numbers_are_not_server_versions(self):
+        # Chart 2.38.0 packages server 2.19.6, not "2.38.0".
+        rows = scraper.server_releases(INDEX_DOC)
+        self.assertIn(("2.19.6", "opensearch-2.38.0"), rows)
+        self.assertNotIn("2.38.0", [r[0] for r in rows])
+
+    def test_duplicate_server_versions_keep_newest_chart(self):
+        # 2.19.5 is packaged by 2.37.0 (newer) and 2.36.0.
+        rows = scraper.server_releases(INDEX_DOC)
+        self.assertEqual(
+            [r for r in rows if r[0] == "2.19.5"],
+            [("2.19.5", "opensearch-2.37.0")],
+        )
+
+    def test_max_releases_cap(self):
+        big = {
+            "entries": {
+                "opensearch": [
+                    {"version": f"9.{i}.0", "appVersion": f"9.{i}.0"}
+                    for i in range(scraper.MAX_RELEASES + 5)
+                ]
+            }
+        }
+        self.assertEqual(len(scraper.server_releases(big)), scraper.MAX_RELEASES)
+
+    def test_missing_chart_is_empty(self):
+        self.assertEqual(scraper.server_releases({}), [])
+
+    def test_none_document_is_empty(self):
+        self.assertEqual(scraper.server_releases(None), [])
+
 
 class BuildRowsTests(unittest.TestCase):
-    def docs(self, versions):
+    def docs(self, tags):
         return {
             scraper.README_URL.format(
-                owner="opensearch-project", name="helm-charts", commitish=c
+                owner="opensearch-project", name="helm-charts", commitish=t
             ): d.encode()
-            for (v, c), d in zip(versions, [DOC_119, DOC_PLUS, DOC_NONE])
+            for t, d in zip(tags, [DOC_119, DOC_PLUS, DOC_NONE])
         }
 
     def test_builds_rows_from_release_docs(self):
-        releases = [("3.8.0", "main"), ("3.7.0", "abc123")]
-        rows = scraper.build_rows(releases, "1.36", self.docs(releases).get)
+        releases = [("3.8.0", "opensearch-3.8.0"), ("3.7.0", "opensearch-3.7.0")]
+        rows = scraper.build_rows(releases, "1.36", self.docs([
+            "opensearch-3.8.0", "opensearch-3.7.0"
+        ]).get)
         self.assertEqual([r["version"] for r in rows], ["3.8.0", "3.7.0"])
         self.assertEqual(rows[0]["kube"], ["1.36", "1.35", "1.34"])
         self.assertEqual(rows[1]["kube"], ["1.36", "1.35", "1.34"])
 
     def test_readme_without_requirement_is_skipped(self):
-        releases = [("3.8.0", "main"), ("3.7.0", "abc123"), ("3.6.0", "old")]
-        rows = scraper.build_rows(releases, "1.36", self.docs(releases).get)
+        releases = [
+            ("3.8.0", "opensearch-3.8.0"),
+            ("3.7.0", "opensearch-3.7.0"),
+            ("3.6.0", "opensearch-3.6.0"),
+        ]
+        rows = scraper.build_rows(releases, "1.36", self.docs([
+            "opensearch-3.8.0", "opensearch-3.7.0", "opensearch-3.6.0"
+        ]).get)
         self.assertEqual([r["version"] for r in rows], ["3.8.0", "3.7.0"])
 
+    def test_prerelease_tag_fallback(self):
+        # opensearch-3.7.0 tag does not exist; the -1 tag does.
+        docs = {
+            scraper.README_URL.format(
+                owner="opensearch-project", name="helm-charts",
+                commitish="opensearch-3.7.0-1",
+            ): DOC_119.encode()
+        }
+        rows = scraper.build_rows(
+            [("3.7.0", "opensearch-3.7.0")], "1.36", docs.get
+        )
+        self.assertEqual([r["version"] for r in rows], ["3.7.0"])
+
     def test_missing_readme_is_skipped(self):
-        rows = scraper.build_rows([("3.8.0", "main")], "1.36", lambda url: None)
+        rows = scraper.build_rows(
+            [("3.8.0", "opensearch-3.8.0")], "1.36", lambda url: None
+        )
         self.assertEqual(rows, [])
 
     def test_invalid_utf8_readme_is_skipped(self):
         def fetcher(url):
-            if url.endswith("/main/README.md"):
+            if url.endswith("/opensearch-3.8.0/README.md"):
                 return b"\xff\xfe"
             return None
-        rows = scraper.build_rows([("3.8.0", "main")], "1.36", fetcher)
+        rows = scraper.build_rows(
+            [("3.8.0", "opensearch-3.8.0")], "1.36", fetcher
+        )
         self.assertEqual(rows, [])
 
     def test_future_floor_is_skipped_not_lowered(self):
         future = "Requirements:\n\n * Kubernetes 1.37+\n"
         rows = scraper.build_rows(
-            [("3.99.0", "future")], "1.36", lambda url: future.encode()
+            [("3.99.0", "opensearch-3.99.0")], "1.36", lambda url: future.encode()
         )
         self.assertEqual(rows, [])
 
 
 class ScrapeWiringTests(unittest.TestCase):
+    INDEX_BYTES = (
+        b"entries:\n"
+        b"  opensearch:\n"
+        b"    - version: 3.8.0\n"
+        b"      appVersion: 3.8.0\n"
+        b"    - version: 3.7.0\n"
+        b"      appVersion: 3.7.0\n"
+    )
+
     def test_scrape_wires_official_sources(self):
         mock_latest = Mock(return_value=Mock(major=1, minor=36))
-        mock_fetch = Mock(
-            side_effect=lambda url: DOC_119.encode()
-            if url.endswith("/README.md")
-            else None
-        )
+
+        def fake_fetch(url):
+            if url.endswith("/index.yaml"):
+                return self.INDEX_BYTES
+            if url.endswith("/README.md"):
+                return DOC_119.encode()
+            return None
+
         mock_update = Mock()
         mock_read_yaml = Mock(return_value={"helm_repository_url": "x"})
         mock_charts = Mock()
-        releases = [
-            {"tag_name": "opensearch-3.8.0", "target_commitish": "main"},
-            {"tag_name": "opensearch-3.7.0-1", "target_commitish": "abc"},
-        ]
         with patch.object(real_utils, "latest_kube_version", mock_latest), patch.object(
-            real_utils, "fetch_page", mock_fetch
+            real_utils, "fetch_page", side_effect=fake_fetch
         ), patch.object(real_utils, "update_compatibility_info", mock_update), patch.object(
             real_utils, "read_yaml", mock_read_yaml
         ), patch.object(real_utils, "update_chart_versions", mock_charts):
@@ -161,8 +235,7 @@ class ScrapeWiringTests(unittest.TestCase):
             )
             fresh = importlib.util.module_from_spec(fresh_spec)
             fresh_spec.loader.exec_module(fresh)
-            with patch.object(fresh, "_fetch_releases", Mock(return_value=releases)):
-                fresh.scrape()
+            fresh.scrape()
 
         mock_latest.assert_called_once_with()
         path, rows = mock_update.call_args.args
