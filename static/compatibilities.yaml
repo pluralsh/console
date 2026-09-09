@@ -31215,3 +31215,225 @@ addons:
     chart_version: 1.0.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.0.0']
   name: mongodb-kubernetes
+- icon: https://apache.org/logos/res/apisix/apisix.png
+  git_url: https://github.com/apache/apisix
+  release_url: https://github.com/apache/apisix/releases/tag/{vsn}
+  helm_repository_url: https://apache.github.io/apisix-helm-chart
+  versions:
+  - version: 3.18.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.17.0
+    images: ['apache/apisix:3.18.0-ubuntu', 'busybox:1.28', 'docker.io/bitnamilegacy/etcd:latest']
+  - version: 3.17.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.16.1
+    images: ['apache/apisix:3.17.0-ubuntu', 'busybox:1.28', 'docker.io/bitnamilegacy/etcd:latest']
+  - version: 3.16.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.14.1
+    images: ['apache/apisix:3.16.0-ubuntu', 'busybox:1.28', 'docker.io/bitnamilegacy/etcd:latest']
+  - version: 3.15.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.13.0
+    images: ['apache/apisix:3.15.0-ubuntu', 'busybox:1.28', 'docker.io/bitnamilegacy/etcd:latest']
+  - version: 3.14.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.12.6
+    images: ['apache/apisix:3.14.1-ubuntu', 'busybox:1.28', 'docker.io/bitnamilegacy/etcd:latest']
+  - version: 3.13.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.11.6
+    images: ['apache/apisix:3.13.0-ubuntu', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.10-debian-11-r2']
+  - version: 3.11.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.10.1
+    images: ['apache/apisix:3.11.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.10-debian-11-r2']
+  - version: 3.10.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.9.0
+    images: ['apache/apisix:3.10.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.10-debian-11-r2']
+  - version: 3.9.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.8.1
+    images: ['apache/apisix:3.9.1-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.10-debian-11-r2']
+  - version: 3.8.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.6.1
+    images: ['apache/apisix:3.8.1-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.7-debian-11-r14']
+  - version: 3.7.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.5.0
+    images: ['apache/apisix:3.7.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.7-debian-11-r14']
+  - version: 3.6.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.3.1
+    images: ['apache/apisix:3.6.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.7-debian-11-r14']
+  - version: 3.5.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.2.0
+    images: ['apache/apisix:3.5.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.7-debian-11-r14']
+  - version: 3.4.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.1.0
+    images: ['apache/apisix:3.4.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.7-debian-11-r14']
+  - version: 3.3.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.0.0
+    images: ['apache/apisix:3.3.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.7-debian-11-r14']
+  - version: 3.2.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.3.1
+    images: ['apache/apisix:3.2.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.7-debian-11-r14']
+  - version: 3.1.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.1.1
+    images: ['apache/apisix:3.1.0-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.4-debian-11-r14']
+  - version: 2.15.2
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.13.1
+    images: ['apache/apisix:2.15.2-debian', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.4-debian-11-r14']
+  - version: 2.14.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.10.2
+    images: ['apache/apisix:2.14.1-alpine', 'busybox:1.28', 'docker.io/bitnami/etcd:3.5.4-debian-11-r14']
+  - version: 2.13.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.9.4
+    images: ['apache/apisix:2.13.1-alpine', 'busybox:1.28', 'docker.io/bitnami/etcd:3.4.18-debian-10-r14']
+  - version: 2.12.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.8.4
+    images: ['apache/apisix:2.12.1-alpine', 'busybox:1.28', 'docker.io/bitnami/etcd:3.4.16-debian-10-r14']
+  - version: 2.10.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.7.3
+    images: ['apache/apisix:2.10.0-alpine', 'busybox:1.28', 'docker.io/bitnami/etcd:3.4.16-debian-10-r14']
+  - version: 2.9.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.5.0
+    images: ['apache/apisix:2.9-alpine', 'busybox:1.28', 'docker.io/bitnami/etcd:3.4.16-debian-10-r14']
+  - version: 2.7.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+      '1.16', '1.15', '1.14']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.4.0
+    images: ['apache/apisix:2.7-alpine', 'busybox:1.28', 'docker.io/bitnami/etcd:3.4.16-debian-10-r14']
+  name: apisix
