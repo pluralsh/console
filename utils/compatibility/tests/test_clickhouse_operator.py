@@ -117,24 +117,26 @@ class BuildRowsTests(unittest.TestCase):
 
 class ScrapeWiringTests(unittest.TestCase):
     def test_scrape_wires_official_sources(self):
-        with patch.object(
-            real_utils, "latest_kube_version", Mock(return_value=Mock(major=1, minor=36))
-        ), patch.object(
-            real_utils,
-            "get_github_releases",
-            Mock(return_value=["release-0.27.3", "release-0.27.2", "v9.9.9"]),
-        ), patch.object(
-            real_utils,
-            "fetch_page",
-            Mock(
-                side_effect=lambda url: DOC_125.encode()
-                if url.endswith("release-0.27.3/README.md")
-                or url.endswith("release-0.27.2/README.md")
-                else None
-            ),
-        ), patch.object(real_utils, "update_compatibility_info", Mock()), patch.object(
-            real_utils, "read_yaml", Mock(return_value={"helm_repository_url": "x"})
-        ), patch.object(real_utils, "update_chart_versions", Mock()):
+        mock_latest = Mock(return_value=Mock(major=1, minor=36))
+        mock_releases = Mock(
+            return_value=["release-0.27.3", "release-0.27.2", "v9.9.9"]
+        )
+        mock_fetch = Mock(
+            side_effect=lambda url: DOC_125.encode()
+            if url.endswith("release-0.27.3/README.md")
+            or url.endswith("release-0.27.2/README.md")
+            else None
+        )
+        mock_update = Mock()
+        mock_read_yaml = Mock(return_value={"helm_repository_url": "x"})
+        mock_charts = Mock()
+        with patch.object(real_utils, "latest_kube_version", mock_latest), patch.object(
+            real_utils, "get_github_releases", mock_releases
+        ), patch.object(real_utils, "fetch_page", mock_fetch), patch.object(
+            real_utils, "update_compatibility_info", mock_update
+        ), patch.object(real_utils, "read_yaml", mock_read_yaml), patch.object(
+            real_utils, "update_chart_versions", mock_charts
+        ):
             fresh_spec = importlib.util.spec_from_file_location(
                 "clickhouse_operator_wiring", SCRAPER_PATH
             )
@@ -142,16 +144,14 @@ class ScrapeWiringTests(unittest.TestCase):
             fresh_spec.loader.exec_module(fresh)
             fresh.scrape()
 
-        real_utils.latest_kube_version.assert_called_once_with()
-        real_utils.get_github_releases.assert_called_once_with(
-            "Altinity", "clickhouse-operator"
-        )
-        path, rows = real_utils.update_compatibility_info.call_args.args
+        mock_latest.assert_called_once_with()
+        mock_releases.assert_called_once_with("Altinity", "clickhouse-operator")
+        path, rows = mock_update.call_args.args
         self.assertEqual(
             path, "../../static/compatibilities/clickhouse-operator.yaml"
         )
         self.assertEqual([row["version"] for row in rows], ["0.27.3", "0.27.2"])
-        real_utils.update_chart_versions.assert_called_once_with(
+        mock_charts.assert_called_once_with(
             "clickhouse-operator", "altinity-clickhouse-operator"
         )
 
