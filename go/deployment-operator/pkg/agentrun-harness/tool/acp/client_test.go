@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -110,6 +111,80 @@ func TestClientRejectsWritesThroughSymlinkEscape(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(outside, "file.txt")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("symlink escape file error = %v, want not exist", err)
+	}
+}
+
+func TestClientRejectsReadsOutsideRoot(t *testing.T) {
+	acpClient, _ := newTestClient(t, true)
+	path := filepath.Join(t.TempDir(), "outside.txt")
+	if err := os.WriteFile(path, []byte("outside content"), 0o600); err != nil {
+		t.Fatalf("write outside file: %v", err)
+	}
+
+	response, err := acpClient.ReadTextFile(context.Background(), acpsdk.ReadTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+	})
+	if err == nil {
+		t.Fatal("outside-root read unexpectedly succeeded")
+	}
+	if response.Content == "outside content" {
+		t.Fatal("outside-root content was returned")
+	}
+	if !strings.Contains(err.Error(), path) {
+		t.Fatalf("outside-root read error = %v, want original path %q", err, path)
+	}
+}
+
+func TestClientRejectsReadsThroughSymlinkEscapes(t *testing.T) {
+	acpClient, directory := newTestClient(t, true)
+	outside := t.TempDir()
+	outsideFile := filepath.Join(outside, "outside.txt")
+	if err := os.WriteFile(outsideFile, []byte("outside content"), 0o600); err != nil {
+		t.Fatalf("write outside file: %v", err)
+	}
+	outsideTarget, err := filepath.Rel(directory, outside)
+	if err != nil {
+		t.Fatalf("resolve relative outside target: %v", err)
+	}
+	for _, test := range []struct {
+		name       string
+		linkTarget string
+		linkPath   string
+		path       string
+	}{
+		{
+			name:       "file",
+			linkTarget: filepath.Join(outsideTarget, "outside.txt"),
+			linkPath:   filepath.Join(directory, "outside-file"),
+			path:       filepath.Join(directory, "outside-file"),
+		},
+		{
+			name:       "directory",
+			linkTarget: outsideTarget,
+			linkPath:   filepath.Join(directory, "outside-directory"),
+			path:       filepath.Join(directory, "outside-directory", "outside.txt"),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if err := os.Symlink(test.linkTarget, test.linkPath); err != nil {
+				t.Fatalf("create symlink: %v", err)
+			}
+
+			response, err := acpClient.ReadTextFile(context.Background(), acpsdk.ReadTextFileRequest{
+				SessionId: "session-1",
+				Path:      test.path,
+			})
+			if err == nil {
+				t.Fatal("symlink escape read unexpectedly succeeded")
+			}
+			if response.Content == "outside content" {
+				t.Fatal("symlink escape content was returned")
+			}
+			if !strings.Contains(err.Error(), test.path) {
+				t.Fatalf("symlink escape read error = %v, want original path %q", err, test.path)
+			}
+		})
 	}
 }
 
