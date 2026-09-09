@@ -26,6 +26,8 @@ export const MEMBERSHIP_FULL_LIST_LIMIT = 100
 export const MEMBERSHIP_GROUP_PAGE_AFTER = 30
 
 const MEMBERSHIP_ROW_HEIGHT = 68
+// Table cells use a 52px minimum content height, 32px of loose padding, and a 1px border.
+const MEMBERSHIP_TABLE_ROW_HEIGHT = 85
 
 export const membershipExpandTableProps = {
   loose: true,
@@ -39,7 +41,7 @@ export const membershipExpandTableProps = {
     row.getToggleExpandedHandler()()
   },
   reactVirtualOptions: {
-    estimateSize: () => 80,
+    estimateSize: () => MEMBERSHIP_TABLE_ROW_HEIGHT,
   },
   lockColumnsOnScroll: false,
 }
@@ -58,6 +60,11 @@ export function useMembershipListPagination({
   setVirtualSlice: (slice: VirtualSlice) => void
 }) {
   const sliceRef = useRef<VirtualSlice | undefined>(undefined)
+  const isFetchingNextPageRef = useRef(false)
+
+  useEffect(() => {
+    if (!isFetching) isFetchingNextPageRef.current = false
+  }, [isFetching])
 
   const syncSlice = useCallback(
     (slice?: VirtualSlice) => {
@@ -76,8 +83,10 @@ export function useMembershipListPagination({
         endIndex != null &&
         endIndex >= itemCount - 1 &&
         hasNextPage &&
-        !isFetching
+        !isFetching &&
+        !isFetchingNextPageRef.current
       ) {
+        isFetchingNextPageRef.current = true
         fetchNextPage()
       }
     },
