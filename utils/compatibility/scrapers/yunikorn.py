@@ -17,6 +17,11 @@ SUPPORT_MATRIX_URL = (
 HELM_INDEX_URL = "https://apache.github.io/yunikorn-release/index.yaml"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
 
+SUPPORT_HEADING_VARIANTS = {
+    "kubernetes versions supported by yunikorn",
+    "supported k8s versions",
+}
+
 
 def _parse_version(value: str) -> Version | None:
     try:
@@ -26,6 +31,11 @@ def _parse_version(value: str) -> Version | None:
     if parsed.is_prerelease or parsed.is_devrelease:
         return None
     return parsed
+
+
+def _heading_text(line: str) -> str:
+    """Normalize a Markdown heading while preserving fail-closed matching."""
+    return line.lstrip("#").strip().lower()
 
 
 def parse_support_matrix(markdown: str) -> list[tuple[str, Version, Version | None]] | None:
@@ -42,7 +52,7 @@ def parse_support_matrix(markdown: str) -> list[tuple[str, Version, Version | No
 
     for line in lines:
         stripped = line.strip()
-        if stripped.startswith("# Kubernetes versions supported by YuniKorn"):
+        if stripped.startswith("#") and _heading_text(stripped) in SUPPORT_HEADING_VARIANTS:
             heading_seen = True
             continue
         if not heading_seen:
@@ -58,7 +68,11 @@ def parse_support_matrix(markdown: str) -> list[tuple[str, Version, Version | No
     headers = [cell.strip().lower() for cell in table_lines[0].strip("|").split("|")]
     if len(headers) != 3:
         return None
-    if "k8s version" not in headers[0] or "supported" not in headers[1] or "support ended" not in headers[2]:
+    if (
+        "k8s version" not in headers[0]
+        or "supported" not in headers[1]
+        or "support ended" not in headers[2]
+    ):
         return None
 
     rules: list[tuple[str, Version, Version | None]] = []
@@ -70,8 +84,8 @@ def parse_support_matrix(markdown: str) -> list[tuple[str, Version, Version | No
 
         kube_match = re.search(r"(\d+\.\d+)\.x", cells[0])
         if not kube_match:
-            # The only intentionally unsupported row today is "1.12.x (or earlier)".
-            # If a future row changes shape, fail closed instead of guessing.
+            # The intentionally unsupported floor row has no usable minor.
+            # If a future supported row changes shape, fail closed instead of guessing.
             if cells[1] == "-" and cells[2] == "-":
                 continue
             return None
@@ -107,7 +121,14 @@ def parse_helm_index(content: bytes) -> dict[str, str] | None:
     except yaml.YAMLError:
         return None
 
-    entries = (index or {}).get("entries", {}).get(APP_NAME)
+    if not isinstance(index, dict):
+        return None
+
+    all_entries = index.get("entries")
+    if not isinstance(all_entries, dict):
+        return None
+
+    entries = all_entries.get(APP_NAME)
     if not isinstance(entries, list) or not entries:
         return None
 
