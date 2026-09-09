@@ -17,25 +17,28 @@ import (
 )
 
 type testState struct {
-	mu                sync.Mutex
-	sessionID         string
-	newSessions       []acpsdk.NewSessionRequest
-	resumedSessions   []acpsdk.ResumeSessionRequest
-	prompts           []string
-	initializations   []acpsdk.InitializeRequest
-	setConfig         []acpsdk.SetSessionConfigOptionRequest
-	setModes          []acpsdk.SetSessionModeRequest
-	cancels           []acpsdk.CancelNotification
-	newSessionUpdates []acpsdk.SessionNotification
-	promptUpdates     []acpsdk.SessionUpdate
-	configOptions     []acpsdk.SessionConfigOption
-	modes             *acpsdk.SessionModeState
-	responseUsage     *acpsdk.Usage
-	stopReason        acpsdk.StopReason
-	promptStarted     chan struct{}
-	promptRelease     chan struct{}
-	promptOnce        sync.Once
-	protocolVersion   int
+	mu                 sync.Mutex
+	sessionID          string
+	newSessions        []acpsdk.NewSessionRequest
+	resumedSessions    []acpsdk.ResumeSessionRequest
+	loadedSessions     []acpsdk.LoadSessionRequest
+	loadSessionUpdates []acpsdk.SessionNotification
+	prompts            []string
+	initializations    []acpsdk.InitializeRequest
+	setConfig          []acpsdk.SetSessionConfigOptionRequest
+	setModes           []acpsdk.SetSessionModeRequest
+	cancels            []acpsdk.CancelNotification
+	newSessionUpdates  []acpsdk.SessionNotification
+	promptUpdates      []acpsdk.SessionUpdate
+	configOptions      []acpsdk.SessionConfigOption
+	modes              *acpsdk.SessionModeState
+	responseUsage      *acpsdk.Usage
+	responseMeta       map[string]any
+	stopReason         acpsdk.StopReason
+	promptStarted      chan struct{}
+	promptRelease      chan struct{}
+	promptOnce         sync.Once
+	protocolVersion    int
 }
 
 type testAgent struct {
@@ -124,7 +127,7 @@ func (agent *testAgent) Prompt(ctx context.Context, request acpsdk.PromptRequest
 	if stopReason == "" {
 		stopReason = acpsdk.StopReasonEndTurn
 	}
-	return acpsdk.PromptResponse{StopReason: stopReason, Usage: usageValue}, nil
+	return acpsdk.PromptResponse{StopReason: stopReason, Usage: usageValue, Meta: agent.state.responseMeta}, nil
 }
 
 func (agent *testAgent) ResumeSession(_ context.Context, request acpsdk.ResumeSessionRequest) (acpsdk.ResumeSessionResponse, error) {
@@ -134,6 +137,21 @@ func (agent *testAgent) ResumeSession(_ context.Context, request acpsdk.ResumeSe
 	modes := agent.state.modes
 	agent.state.mu.Unlock()
 	return acpsdk.ResumeSessionResponse{ConfigOptions: options, Modes: modes}, nil
+}
+
+func (agent *testAgent) LoadSession(ctx context.Context, request acpsdk.LoadSessionRequest) (acpsdk.LoadSessionResponse, error) {
+	agent.state.mu.Lock()
+	agent.state.loadedSessions = append(agent.state.loadedSessions, request)
+	updates := append([]acpsdk.SessionNotification(nil), agent.state.loadSessionUpdates...)
+	options := append([]acpsdk.SessionConfigOption(nil), agent.state.configOptions...)
+	modes := agent.state.modes
+	agent.state.mu.Unlock()
+	for _, update := range updates {
+		if err := agent.conn.SessionUpdate(ctx, update); err != nil {
+			return acpsdk.LoadSessionResponse{}, err
+		}
+	}
+	return acpsdk.LoadSessionResponse{ConfigOptions: options, Modes: modes}, nil
 }
 
 func (agent *testAgent) SetSessionConfigOption(_ context.Context, request acpsdk.SetSessionConfigOptionRequest) (acpsdk.SetSessionConfigOptionResponse, error) {
@@ -297,6 +315,20 @@ func newTestAgentProcess(state *testState, stdinCloseEnds bool) (*testState, *ex
 	return state, stdio, process
 }
 
+func TestNewEngineOptionsPreserveDefaultsAndApplyOverrides(t *testing.T) {
+	standard := &acpsdk.Usage{InputTokens: 3}
+	defaults := NewEngine(WithStopTimeout(0), WithSessionRestorer(nil), WithUsageResolver(nil))
+	if defaults.stopTimeout != defaultStopTimeout || defaults.restoreSession == nil || defaults.usageResolver(acpsdk.PromptResponse{Usage: standard}) != standard {
+		t.Fatalf("default engine = %#v", defaults)
+	}
+
+	resolver := func(acpsdk.PromptResponse) *acpsdk.Usage { return &acpsdk.Usage{InputTokens: 5} }
+	configured := NewEngine(WithStopTimeout(time.Second), WithSessionRestorer(LoadSession), WithUsageResolver(resolver))
+	if configured.stopTimeout != time.Second || configured.restoreSession == nil || configured.usageResolver(acpsdk.PromptResponse{}).InputTokens != 5 {
+		t.Fatalf("configured engine = %#v", configured)
+	}
+}
+
 func (state *testState) snapshot() (newCount, resumeCount, promptCount, configCount, modeCount, cancelCount int, prompts []string) {
 	state.mu.Lock()
 	defer state.mu.Unlock()
@@ -323,7 +355,7 @@ func (process *testProcess) killCount() int {
 
 func TestEngineTurnCreatesAndResumesSession(t *testing.T) {
 	state := newTestState()
-	engine := NewEngine(Config{StopTimeout: time.Second})
+	engine := NewEngine(WithStopTimeout(time.Second))
 	firstSink := &testSink{}
 	_, firstProcess, _ := newTestAgentProcess(state, true)
 	first, err := engine.Turn(context.Background(), firstProcess, Request{Cwd: t.TempDir(), Prompt: "first"}, firstSink)
@@ -345,13 +377,67 @@ func TestEngineTurnCreatesAndResumesSession(t *testing.T) {
 	}
 }
 
+func TestEngineTurnLoadsSessionWhenConfigured(t *testing.T) {
+	state := newTestState()
+	state.configOptions = []acpsdk.SessionConfigOption{{Select: &acpsdk.SessionConfigOptionSelect{
+		Id: "model", CurrentValue: "default", Options: acpsdk.SessionConfigSelectOptions{
+			Ungrouped: &acpsdk.SessionConfigSelectOptionsUngrouped{{Value: "default"}, {Value: "configured"}},
+		},
+	}}}
+	state.modes = &acpsdk.SessionModeState{AvailableModes: []acpsdk.SessionMode{{Id: "analysis"}}}
+	engine := NewEngine(WithSessionRestorer(LoadSession))
+	_, firstProcess, _ := newTestAgentProcess(state, true)
+	first, err := engine.Turn(context.Background(), firstProcess, Request{Cwd: t.TempDir(), Prompt: "first"}, &testSink{})
+	if err != nil {
+		t.Fatalf("create turn: %v", err)
+	}
+	_, secondProcess, _ := newTestAgentProcess(state, true)
+	second, err := engine.Turn(context.Background(), secondProcess, Request{
+		Cwd: t.TempDir(), Prompt: "second", SessionID: first.SessionID,
+		Settings: SessionSettings{ModelID: "configured", ModeID: "analysis"},
+	}, &testSink{})
+	if err != nil {
+		t.Fatalf("load turn: %v", err)
+	}
+	state.mu.Lock()
+	loads := append([]acpsdk.LoadSessionRequest(nil), state.loadedSessions...)
+	resumes := len(state.resumedSessions)
+	configures := append([]acpsdk.SetSessionConfigOptionRequest(nil), state.setConfig...)
+	modes := append([]acpsdk.SetSessionModeRequest(nil), state.setModes...)
+	state.mu.Unlock()
+	if len(loads) != 1 || string(loads[0].SessionId) != first.SessionID || second.SessionID != first.SessionID || resumes != 0 || len(configures) != 1 || len(modes) != 1 {
+		t.Fatalf("loads = %#v resumes = %d configures = %#v modes = %#v result = %q", loads, resumes, configures, modes, second.SessionID)
+	}
+}
+
+func TestEngineTurnSuppressesLoadSessionHistory(t *testing.T) {
+	state := newTestState()
+	state.loadSessionUpdates = []acpsdk.SessionNotification{
+		{SessionId: "session-1", Update: acpsdk.UpdateAgentMessageText("prior assistant")},
+		{SessionId: "session-1", Update: acpsdk.StartToolCall("prior-tool", "shell")},
+	}
+	state.promptUpdates = []acpsdk.SessionUpdate{acpsdk.UpdateAgentMessageText("current assistant")}
+	_, process, _ := newTestAgentProcess(state, true)
+	sink := &testSink{}
+	if _, err := NewEngine(WithSessionRestorer(LoadSession)).Turn(context.Background(), process, Request{
+		Cwd: t.TempDir(), Prompt: "current", SessionID: "session-1",
+	}, sink); err != nil {
+		t.Fatalf("load turn: %v", err)
+	}
+	sink.mu.Lock()
+	defer sink.mu.Unlock()
+	if len(sink.messages) != 1 || sink.messages[0].Message != "current assistant" {
+		t.Fatalf("messages = %#v", sink.messages)
+	}
+}
+
 func TestEngineTurnAppliesModelAndModeConfig(t *testing.T) {
 	state := newTestState()
 	state.configOptions = []acpsdk.SessionConfigOption{
 		{Select: &acpsdk.SessionConfigOptionSelect{Id: "model", CurrentValue: "default", Options: acpsdk.SessionConfigSelectOptions{Ungrouped: &acpsdk.SessionConfigSelectOptionsUngrouped{{Value: "default"}, {Value: "configured"}}}}},
 		{Select: &acpsdk.SessionConfigOptionSelect{Id: "mode", CurrentValue: "default", Options: acpsdk.SessionConfigSelectOptions{Ungrouped: &acpsdk.SessionConfigSelectOptionsUngrouped{{Value: "default"}, {Value: "analysis"}}}}},
 	}
-	engine := NewEngine(Config{})
+	engine := NewEngine()
 	_, process, _ := newTestAgentProcess(state, true)
 	_, err := engine.Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "configure", Settings: SessionSettings{ModelID: "configured", ModeID: "analysis"}}, &testSink{})
 	if err != nil {
@@ -370,7 +456,7 @@ func TestEngineTurnAppliesModelAndReasoningEffort(t *testing.T) {
 		{Select: &acpsdk.SessionConfigOptionSelect{Id: "reasoning_effort", CurrentValue: "low", Options: acpsdk.SessionConfigSelectOptions{Ungrouped: &acpsdk.SessionConfigSelectOptionsUngrouped{{Value: "low"}, {Value: "medium"}}}}},
 	}
 	_, process, _ := newTestAgentProcess(state, true)
-	_, err := NewEngine(Config{}).Turn(context.Background(), process, Request{
+	_, err := NewEngine().Turn(context.Background(), process, Request{
 		Cwd: t.TempDir(), Prompt: "configure", Settings: SessionSettings{ModelID: "openai/gpt-5.4", Reasoning: "medium"},
 	}, &testSink{})
 	if err != nil {
@@ -399,7 +485,7 @@ func TestEngineTurnStreamsMessagesToolsUsageAndOrdering(t *testing.T) {
 	state.promptUpdates = append(state.promptUpdates, acpsdk.SessionUpdate{UsageUpdate: &acpsdk.SessionUsageUpdate{Cost: &acpsdk.Cost{Amount: 7}}})
 	sink := &testSink{}
 	_, process, _ := newTestAgentProcess(state, true)
-	if _, err := NewEngine(Config{}).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "stream"}, sink); err != nil {
+	if _, err := NewEngine().Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "stream"}, sink); err != nil {
 		t.Fatalf("streaming turn: %v", err)
 	}
 	sink.mu.Lock()
@@ -449,11 +535,58 @@ func TestEngineTurnStreamsMessagesToolsUsageAndOrdering(t *testing.T) {
 	}
 }
 
+func TestEngineTurnAdaptsPromptMetadataUsage(t *testing.T) {
+	state := newTestState()
+	state.responseMeta = map[string]any{"tokens": float64(12)}
+	sink := &testSink{}
+	_, process, _ := newTestAgentProcess(state, true)
+	adapter := func(response acpsdk.PromptResponse) *acpsdk.Usage {
+		tokens, ok := response.Meta["tokens"].(float64)
+		if !ok {
+			return nil
+		}
+		return &acpsdk.Usage{InputTokens: int(tokens), TotalTokens: int(tokens)}
+	}
+	if _, err := NewEngine(WithUsageResolver(adapter)).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "metadata"}, sink); err != nil {
+		t.Fatalf("metadata usage turn: %v", err)
+	}
+	sink.mu.Lock()
+	defer sink.mu.Unlock()
+	if len(sink.usages) != 1 || sink.usages[0].InputTokens != 12 || sink.usages[0].TotalTokens != 12 {
+		t.Fatalf("usage = %#v", sink.usages)
+	}
+	if len(sink.messages) != 1 || sink.messages[0].Cost == nil || *sink.messages[0].Cost.Tokens.Input != 12 {
+		t.Fatalf("messages = %#v", sink.messages)
+	}
+}
+
+func TestEngineTurnPrefersStandardPromptUsage(t *testing.T) {
+	state := newTestState()
+	state.responseUsage = &acpsdk.Usage{InputTokens: 8, TotalTokens: 8}
+	state.responseMeta = map[string]any{"tokens": float64(12)}
+	sink := &testSink{}
+	_, process, _ := newTestAgentProcess(state, true)
+	resolver := func(response acpsdk.PromptResponse) *acpsdk.Usage {
+		if response.Usage != nil {
+			return response.Usage
+		}
+		return &acpsdk.Usage{InputTokens: 12, TotalTokens: 12}
+	}
+	if _, err := NewEngine(WithUsageResolver(resolver)).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "standard"}, sink); err != nil {
+		t.Fatalf("standard usage turn: %v", err)
+	}
+	sink.mu.Lock()
+	defer sink.mu.Unlock()
+	if len(sink.usages) != 1 || sink.usages[0].InputTokens != 8 || sink.usages[0].TotalTokens != 8 {
+		t.Fatalf("usage = %#v", sink.usages)
+	}
+}
+
 func TestEngineTurnRejectsMismatchedEarlyBinding(t *testing.T) {
 	state := newTestState()
 	state.newSessionUpdates = []acpsdk.SessionNotification{{SessionId: "other", Update: acpsdk.UpdateAgentMessageText("wrong")}}
 	_, process, _ := newTestAgentProcess(state, true)
-	_, err := NewEngine(Config{}).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "mismatch"}, &testSink{})
+	_, err := NewEngine().Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "mismatch"}, &testSink{})
 	if err == nil || !strings.Contains(err.Error(), `belongs to session "other"`) {
 		t.Fatalf("mismatch error = %v", err)
 	}
@@ -467,7 +600,7 @@ func TestEngineTurnCancellationKillsUncooperativeProcess(t *testing.T) {
 	startedAt := time.Now()
 	result := make(chan error, 1)
 	go func() {
-		_, err := NewEngine(Config{StopTimeout: 20 * time.Millisecond}).Turn(ctx, process, Request{Cwd: t.TempDir(), Prompt: "cancel"}, &testSink{})
+		_, err := NewEngine(WithStopTimeout(20*time.Millisecond)).Turn(ctx, process, Request{Cwd: t.TempDir(), Prompt: "cancel"}, &testSink{})
 		result <- err
 	}()
 	select {
@@ -500,7 +633,7 @@ func TestEngineTurnIgnoresCleanupKillAfterSuccessfulPrompt(t *testing.T) {
 	state := newTestState()
 	_, process, cleanup := newTestAgentProcess(state, false)
 	cleanup.stopReportsKill = true
-	_, err := NewEngine(Config{StopTimeout: 10 * time.Millisecond}).Turn(context.Background(), process, Request{
+	_, err := NewEngine(WithStopTimeout(10*time.Millisecond)).Turn(context.Background(), process, Request{
 		Cwd: t.TempDir(), Prompt: "complete",
 	}, &testSink{})
 	if err != nil {
@@ -512,7 +645,7 @@ func TestEngineTurnPreservesPromptStopReasonAfterCleanupKill(t *testing.T) {
 	state := newTestState()
 	state.stopReason = acpsdk.StopReasonMaxTokens
 	_, process, _ := newTestAgentProcess(state, false)
-	_, err := NewEngine(Config{StopTimeout: 10 * time.Millisecond}).Turn(context.Background(), process, Request{
+	_, err := NewEngine(WithStopTimeout(10*time.Millisecond)).Turn(context.Background(), process, Request{
 		Cwd: t.TempDir(), Prompt: "complete",
 	}, &testSink{})
 	if err == nil || !strings.Contains(err.Error(), string(acpsdk.StopReasonMaxTokens)) {
@@ -526,7 +659,7 @@ func TestEngineTurnPreservesPromptStopReasonAfterCleanupKill(t *testing.T) {
 func TestSessionAttemptPreservesSpontaneousExit(t *testing.T) {
 	naturalExit := errors.New("agent exited with status 17")
 	attempt := &sessionAttempt{
-		engine:  NewEngine(Config{StopTimeout: time.Second}),
+		engine:  NewEngine(WithStopTimeout(time.Second)),
 		process: exec.NewStdioProcess(nil, nil, nil, exec.StdioProcessHooks{Wait: func() error { return naturalExit }}),
 	}
 	if err := attempt.waitForExit(); !errors.Is(err, naturalExit) {

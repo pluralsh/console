@@ -24,6 +24,7 @@ type turnState struct {
 	reasoning      strings.Builder
 	tools          map[string]*toolCall
 	cost           float64
+	restoring      bool
 }
 
 func (turn *turnState) contentText(content acpsdk.ContentBlock) (string, error) {
@@ -64,6 +65,18 @@ func (turn *turnState) setSessionID(sessionID string) {
 	turn.mu.Unlock()
 }
 
+func (turn *turnState) setRestoring(restoring bool) {
+	turn.mu.Lock()
+	turn.restoring = restoring
+	turn.mu.Unlock()
+}
+
+func (turn *turnState) isRestoring() bool {
+	turn.mu.Lock()
+	defer turn.mu.Unlock()
+	return turn.restoring
+}
+
 func (turn *turnState) err() error {
 	turn.mu.Lock()
 	defer turn.mu.Unlock()
@@ -84,6 +97,9 @@ func (turn *turnState) setErr(err error) {
 func (turn *turnState) handle(notification acpsdk.SessionNotification) error {
 	if err := turn.bindNotification(notification.SessionId); err != nil {
 		return err
+	}
+	if turn.isRestoring() {
+		return nil
 	}
 	update := notification.Update
 	switch {

@@ -14,7 +14,7 @@ import acpsdk "github.com/coder/acp-go-sdk"
 
 func newTestClient(t *testing.T) (*client, string) {
 	t.Helper()
-	engine := NewEngine(Config{})
+	engine := NewEngine()
 	return &client{turn: newTurn(engine, &testSink{}, "session-1")}, t.TempDir()
 }
 

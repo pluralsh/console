@@ -33,14 +33,14 @@ func NewTransport(agent *Agent) (*Transport, error) {
 	if err != nil {
 		return nil, fmt.Errorf("resolve claude work directory: %w", err)
 	}
-	return &Transport{agent: agent, engine: acp.NewEngine(acp.Config{}), workDir: workDir}, nil
+	return &Transport{agent: agent, engine: acp.NewEngine(), workDir: workDir}, nil
 }
 
 func (*Transport) Kind() toolv1.TransportKind {
 	return toolv1.TransportKindACP
 }
 func (*Transport) Capabilities() toolv1.TransportCapabilities {
-	return toolv1.TransportCapabilities{SessionResume: true, ToolCallOutputStreaming: true, UsageReporting: true, FileSystemRead: true, FileSystemWrite: true}
+	return toolv1.TransportCapabilities{SessionResume: true, ToolCallOutputStreaming: false, UsageReporting: true, FileSystemRead: true, FileSystemWrite: true}
 }
 
 func (transport *Transport) Turn(ctx context.Context, request toolv1.TurnRequest, sink toolv1.TurnSink) (toolv1.TurnResult, error) {

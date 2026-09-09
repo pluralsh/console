@@ -2,9 +2,7 @@ package codex
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/samber/lo"
@@ -18,8 +16,9 @@ import (
 // These paths keep Codex's native state, prompt, and skills inside the
 // workspace owned by this Agent.
 const (
-	codexHomeDir   = ".codex"
-	codexSkillsDir = "skills"
+	codexHomeDir     = ".codex"
+	codexSessionsDir = "sessions"
+	codexSkillsDir   = "skills"
 )
 
 // Agent owns Codex settings, shared prompt and skills preparation, native
@@ -132,15 +131,12 @@ func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (t
 		return toolv1.ExportResult{}, err
 	}
 	source := filepath.Join(agent.codexHome(config), codexSessionsDir)
-	if _, err := os.Stat(source); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return toolv1.ExportResult{}, nil
-		}
-		return toolv1.ExportResult{}, fmt.Errorf("stat codex sessions: %w", err)
+	found, err := artifacts.StageSessionDirectory(ctx, source, request.OutputDir)
+	if err != nil {
+		return toolv1.ExportResult{}, fmt.Errorf("stage codex sessions: %w", err)
 	}
-
-	if err := agent.copySessionDirectory(ctx, source, request.OutputDir); err != nil {
-		return toolv1.ExportResult{}, err
+	if !found {
+		return toolv1.ExportResult{}, nil
 	}
 	return toolv1.ExportResult{SessionSource: artifacts.SessionSource{
 		Path:        request.OutputDir,

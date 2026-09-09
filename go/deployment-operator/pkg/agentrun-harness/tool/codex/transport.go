@@ -39,7 +39,7 @@ func NewTransport(agent *Agent) (*Transport, error) {
 	}
 	return &Transport{
 		agent:         agent,
-		engine:        acp.NewEngine(acp.Config{}),
+		engine:        acp.NewEngine(),
 		repositoryDir: repositoryDir,
 	}, nil
 }

@@ -41,7 +41,12 @@ func New(runtimeType console.AgentRuntimeType, config v1.Config) (v1.Tool, error
 		}
 		return v1.NewRuntime(config, agent, transport)
 	case console.AgentRuntimeTypeGemini:
-		return gemini.New(config), nil
+		agent := gemini.NewAgent(config)
+		transport, err := gemini.NewTransport(agent)
+		if err != nil {
+			return nil, err
+		}
+		return v1.NewRuntime(config, agent, transport)
 	case console.AgentRuntimeTypeCodex:
 		agent := codex.NewAgent(config)
 		transport, err := codex.NewTransport(agent)

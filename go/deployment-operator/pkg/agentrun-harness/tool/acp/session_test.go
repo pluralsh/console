@@ -22,7 +22,7 @@ func TestEngineTurnReportsInitializeProcessFailure(t *testing.T) {
 		t.Fatalf("start helper: %v", err)
 	}
 
-	_, err = NewEngine(Config{}).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "prompt"}, &testSink{})
+	_, err = NewEngine().Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "prompt"}, &testSink{})
 	if err == nil {
 		t.Fatal("initialize failure succeeded")
 	}
@@ -57,7 +57,7 @@ func TestEngineTurnDeliversUpdatesSentBeforeSessionResponse(t *testing.T) {
 	state.promptUpdates = []acpsdk.SessionUpdate{acpsdk.UpdateAgentMessageText("response")}
 	sink := &testSink{}
 	_, process, _ := newTestAgentProcess(state, true)
-	if _, err := NewEngine(Config{}).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "prompt"}, sink); err != nil {
+	if _, err := NewEngine().Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "prompt"}, sink); err != nil {
 		t.Fatalf("early update turn: %v", err)
 	}
 	sink.mu.Lock()
@@ -74,7 +74,7 @@ func TestEngineTurnUsesAdvertisedSessionMode(t *testing.T) {
 		CurrentModeId:  "default",
 	}
 	_, process, _ := newTestAgentProcess(state, true)
-	if _, err := NewEngine(Config{}).Turn(context.Background(), process, Request{
+	if _, err := NewEngine().Turn(context.Background(), process, Request{
 		Cwd: t.TempDir(), Prompt: "mode", Settings: SessionSettings{ModeID: "analysis"},
 	}, &testSink{}); err != nil {
 		t.Fatalf("mode turn: %v", err)
@@ -89,7 +89,7 @@ func TestEngineTurnRejectsUnsupportedProtocolVersion(t *testing.T) {
 	state := newTestState()
 	state.protocolVersion = acpsdk.ProtocolVersionNumber + 1
 	_, process, _ := newTestAgentProcess(state, true)
-	_, err := NewEngine(Config{}).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "version"}, &testSink{})
+	_, err := NewEngine().Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "version"}, &testSink{})
 	if err == nil || !strings.Contains(err.Error(), "protocol version") {
 		t.Fatalf("protocol version error = %v", err)
 	}

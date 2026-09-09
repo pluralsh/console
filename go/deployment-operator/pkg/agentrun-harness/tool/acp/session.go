@@ -59,7 +59,7 @@ func (attempt *sessionAttempt) run(prompt string) error {
 		return attempt.promptFailure(err)
 	}
 
-	attempt.finishTurn(response.Usage)
+	attempt.finishTurn(response)
 	if err = attempt.turn.err(); err != nil {
 		return attempt.fail(err, attempt.cancelled())
 	}
@@ -138,13 +138,11 @@ func (attempt *sessionAttempt) createSession(cwd string) (sessionDetails, error)
 }
 
 func (attempt *sessionAttempt) resumeSession(cwd, sessionID string) (sessionDetails, error) {
-	resumed, err := attempt.connection.ResumeSession(attempt.ctx, acpsdk.ResumeSessionRequest{
-		Cwd:        cwd,
-		McpServers: []acpsdk.McpServer{},
-		SessionId:  acpsdk.SessionId(sessionID),
-	})
+	attempt.turn.setRestoring(true)
+	defer attempt.turn.setRestoring(false)
+	resumed, err := attempt.engine.restoreSession(attempt.ctx, attempt.connection, SessionRestoreRequest{Cwd: cwd, SessionID: sessionID})
 	if err != nil {
-		return sessionDetails{}, fmt.Errorf("acp session/resume: %w", err)
+		return sessionDetails{}, fmt.Errorf("acp session restore: %w", err)
 	}
 	attempt.turn.setSessionID(sessionID)
 	attempt.sessionID = sessionID
@@ -163,8 +161,8 @@ func (attempt *sessionAttempt) prompt(prompt, sessionID string) (acpsdk.PromptRe
 	})
 }
 
-func (attempt *sessionAttempt) finishTurn(usage *acpsdk.Usage) {
-	attempt.turn.emitAssistant(usage)
+func (attempt *sessionAttempt) finishTurn(response acpsdk.PromptResponse) {
+	attempt.turn.emitAssistant(attempt.engine.usageResolver(response))
 }
 
 func (attempt *sessionAttempt) close() {

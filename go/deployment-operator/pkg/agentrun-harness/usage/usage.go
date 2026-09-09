@@ -38,6 +38,7 @@ func New(existing *console.AgentRunUsage) *Usage {
 	if existing == nil {
 		return u
 	}
+
 	if existing.InputTokens != nil {
 		u.inputTokens = *existing.InputTokens
 	}
