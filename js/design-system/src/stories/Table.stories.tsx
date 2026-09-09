@@ -458,6 +458,20 @@ export const PagedData: StoryObj<Parameters<typeof PagedTemplate>[0]> = {
   },
 }
 
+export const TerminalRow: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    virtualizeRows: true,
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns,
+    endRowContent: 'No additional results are available.',
+  },
+}
+
 export const Loose: StoryObj<Parameters<typeof Template>[0]> = {
   render: Template,
   args: {

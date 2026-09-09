@@ -21,17 +21,165 @@ import (
 	"strings"
 	"testing"
 
+	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/logs"
 )
 
 func TestCreateHTTPAPIHandler(t *testing.T) {
 	_, err := CreateHTTPAPIHandler(nil)
 	if err != nil {
 		t.Fatal("CreateHTTPAPIHandler() cannot create HTTP API handler")
+	}
+}
+
+func TestCreateHTTPAPIHandler_LogRouteParameters(t *testing.T) {
+	container, err := CreateHTTPAPIHandler(nil)
+	if err != nil {
+		t.Fatalf("CreateHTTPAPIHandler() error = %v", err)
+	}
+
+	swagger := restfulspec.BuildSwagger(restfulspec.Config{
+		WebServices: container.RegisteredWebServices(),
+	})
+
+	expected := map[string]struct {
+		dataType    string
+		description string
+	}{
+		"referenceTimestamp": {
+			dataType:    "string",
+			description: "timestamp of the reference log line",
+		},
+		"referenceLineNum": {
+			dataType:    "integer",
+			description: "line number of the reference log line",
+		},
+		"offsetFrom": {
+			dataType:    "integer",
+			description: "inclusive offset from the reference log line",
+		},
+		"offsetTo": {
+			dataType:    "integer",
+			description: "exclusive offset from the reference log line",
+		},
+		"logFilePosition": {
+			dataType:    "string",
+			description: "position to load logs from: beginning or end",
+		},
+		"tailLines": {
+			dataType:    "integer",
+			description: "maximum number of lines to load from the end of the log",
+		},
+		"previous": {
+			dataType:    "boolean",
+			description: "return logs from the previous container instance",
+		},
+	}
+
+	routes := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "pod",
+			path: "/api/v1/log/{namespace}/{pod}",
+		},
+		{
+			name: "container",
+			path: "/api/v1/log/{namespace}/{pod}/{container}",
+		},
+	}
+
+	for _, route := range routes {
+		t.Run(route.name, func(t *testing.T) {
+			path, ok := swagger.Paths.Paths[route.path]
+			if !ok || path.Get == nil {
+				t.Fatal("log route is not included in the OpenAPI specification")
+			}
+
+			missing := make(map[string]struct{}, len(expected))
+			for name := range expected {
+				missing[name] = struct{}{}
+			}
+
+			for _, parameter := range path.Get.Parameters {
+				want, ok := expected[parameter.Name]
+				if !ok {
+					continue
+				}
+
+				if parameter.In != "query" {
+					t.Errorf("parameter %q location = %q, want query", parameter.Name, parameter.In)
+				}
+				if parameter.Type != want.dataType {
+					t.Errorf("parameter %q type = %q, want %q", parameter.Name, parameter.Type, want.dataType)
+				}
+				if parameter.Description != want.description {
+					t.Errorf("parameter %q description = %q, want %q", parameter.Name, parameter.Description, want.description)
+				}
+				if parameter.Name == "tailLines" {
+					if parameter.Minimum == nil || *parameter.Minimum != 1 {
+						t.Errorf("tailLines minimum = %v, want 1", parameter.Minimum)
+					}
+					if parameter.Maximum == nil || *parameter.Maximum != float64(logs.MaxTailLines) {
+						t.Errorf("tailLines maximum = %v, want %d", parameter.Maximum, logs.MaxTailLines)
+					}
+					if parameter.Default != int64(logs.DefaultTailLines) {
+						t.Errorf("tailLines default = %#v, want %d", parameter.Default, logs.DefaultTailLines)
+					}
+				}
+				delete(missing, parameter.Name)
+			}
+
+			for name := range missing {
+				t.Errorf("OpenAPI specification is missing query parameter %q", name)
+			}
+		})
+	}
+}
+
+func TestCreateHTTPAPIHandler_ResourceUpdateBodySchema(t *testing.T) {
+	container, err := CreateHTTPAPIHandler(nil)
+	if err != nil {
+		t.Fatalf("CreateHTTPAPIHandler() error = %v", err)
+	}
+
+	swagger := restfulspec.BuildSwagger(restfulspec.Config{
+		WebServices: container.RegisteredWebServices(),
+	})
+
+	jsonDefinition, ok := swagger.Definitions["handler.JSON"]
+	if !ok {
+		t.Fatal("OpenAPI specification is missing the JSON request body definition")
+	}
+	if len(jsonDefinition.Type) != 1 || jsonDefinition.Type[0] != "object" {
+		t.Errorf("JSON definition type = %v, want [object]", jsonDefinition.Type)
+	}
+
+	for _, path := range []string{
+		"/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}",
+		"/api/v1/_raw/{kind}/name/{name}",
+	} {
+		pathItem, ok := swagger.Paths.Paths[path]
+		if !ok || pathItem.Put == nil {
+			t.Fatalf("resource update route %q is not included in the OpenAPI specification", path)
+		}
+
+		var bodySchemaRef string
+		for _, parameter := range pathItem.Put.Parameters {
+			if parameter.In == "body" {
+				bodySchemaRef = parameter.Schema.Ref.String()
+				break
+			}
+		}
+		if bodySchemaRef != "#/definitions/handler.JSON" {
+			t.Errorf("resource update body schema = %q, want %q", bodySchemaRef, "#/definitions/handler.JSON")
+		}
 	}
 }
 
