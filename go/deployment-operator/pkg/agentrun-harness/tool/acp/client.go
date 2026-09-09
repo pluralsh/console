@@ -19,7 +19,10 @@ const maxTextFileBytes = 16 << 20
 var _ acpsdk.Client = (*client)(nil)
 
 type client struct {
-	turn *turnState
+	turn            *turnState
+	cwd             string
+	root            *os.Root
+	fileSystemWrite bool
 }
 
 func (client *client) ReadTextFile(ctx context.Context, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
@@ -131,8 +134,12 @@ func (client *client) WriteTextFile(ctx context.Context, request acpsdk.WriteTex
 	if err := client.validateSession(request.SessionId); err != nil {
 		return acpsdk.WriteTextFileResponse{}, err
 	}
-	if !filepath.IsAbs(request.Path) {
-		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("acp filesystem path must be absolute: %q", request.Path)
+	if !client.fileSystemWrite {
+		return acpsdk.WriteTextFileResponse{}, errors.New("acp filesystem writes are disabled")
+	}
+	path, err := client.rootRelativePath(request.Path)
+	if err != nil {
+		return acpsdk.WriteTextFileResponse{}, err
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -140,16 +147,30 @@ func (client *client) WriteTextFile(ctx context.Context, request acpsdk.WriteTex
 	if err := ctx.Err(); err != nil {
 		return acpsdk.WriteTextFileResponse{}, err
 	}
-	if err := os.MkdirAll(filepath.Dir(request.Path), 0o755); err != nil {
-		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("mkdir %s: %w", filepath.Dir(request.Path), err)
+	if err := client.root.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("mkdir %s: %w", request.Path, err)
 	}
 	if err := ctx.Err(); err != nil {
 		return acpsdk.WriteTextFileResponse{}, err
 	}
-	if err := os.WriteFile(request.Path, []byte(request.Content), 0o644); err != nil {
+	if err := client.root.WriteFile(path, []byte(request.Content), 0o644); err != nil {
 		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("write %s: %w", request.Path, err)
 	}
 	return acpsdk.WriteTextFileResponse{}, nil
+}
+
+func (client *client) rootRelativePath(path string) (string, error) {
+	if client.root == nil {
+		return "", errors.New("acp client filesystem root is not set")
+	}
+	if !filepath.IsAbs(path) {
+		return "", fmt.Errorf("acp filesystem path must be absolute: %q", path)
+	}
+	relative, err := filepath.Rel(client.cwd, path)
+	if err != nil || relative == "." || !filepath.IsLocal(relative) {
+		return "", fmt.Errorf("acp filesystem path is outside the working directory: %q", path)
+	}
+	return relative, nil
 }
 
 func (client *client) RequestPermission(context.Context, acpsdk.RequestPermissionRequest) (acpsdk.RequestPermissionResponse, error) {

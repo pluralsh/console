@@ -20,10 +20,11 @@ type SessionSettings struct {
 
 // Request contains the provider-neutral inputs for one ACP turn.
 type Request struct {
-	Cwd       string
-	Prompt    string
-	SessionID string
-	Settings  SessionSettings
+	Cwd             string
+	Prompt          string
+	SessionID       string
+	Settings        SessionSettings
+	FileSystemWrite bool
 }
 
 // Result contains the latest session state observed by the ACP engine.

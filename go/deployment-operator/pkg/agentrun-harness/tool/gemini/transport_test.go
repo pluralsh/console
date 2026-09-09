@@ -70,7 +70,8 @@ func TestTransportCapabilitiesAndPreCancelledTurn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if transport.Kind() != toolv1.TransportKindACP || transport.Capabilities().ToolCallOutputStreaming {
+	if transport.Kind() != toolv1.TransportKindACP || transport.Capabilities().ToolCallOutputStreaming ||
+		!transport.Capabilities().FileSystemWrite {
 		t.Fatalf("transport = %#v", transport.Capabilities())
 	}
 	ctx, cancel := context.WithCancel(context.Background())

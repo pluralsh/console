@@ -17,15 +17,17 @@ import (
 )
 
 type sessionAttempt struct {
-	engine         *Engine
-	ctx            context.Context
-	process        *exec.StdioProcess
-	connection     *acpsdk.ClientSideConnection
-	turn           *turnState
-	settings       SessionSettings
-	cwd            string
-	priorSessionID string
-	sessionID      string
+	engine          *Engine
+	ctx             context.Context
+	process         *exec.StdioProcess
+	connection      *acpsdk.ClientSideConnection
+	turn            *turnState
+	settings        SessionSettings
+	cwd             string
+	root            *os.Root
+	fileSystemWrite bool
+	priorSessionID  string
+	sessionID       string
 }
 
 type sessionDetails struct {
@@ -97,7 +99,7 @@ func (attempt *sessionAttempt) initialize() (acpsdk.InitializeResponse, error) {
 		ClientCapabilities: acpsdk.ClientCapabilities{
 			Fs: acpsdk.FileSystemCapabilities{
 				ReadTextFile:  true,
-				WriteTextFile: true,
+				WriteTextFile: attempt.fileSystemWrite,
 			},
 			Auth: acpsdk.AuthCapabilities{},
 		},
@@ -166,6 +168,7 @@ func (attempt *sessionAttempt) finishTurn(response acpsdk.PromptResponse) {
 }
 
 func (attempt *sessionAttempt) close() {
+	_ = attempt.root.Close()
 	// The process is stopped explicitly during the run. This final guard
 	// handles setup failures and keeps test launchers from leaking children.
 	_ = attempt.process.Close()
@@ -275,19 +278,30 @@ func (attempt *sessionAttempt) promptResult(reason acpsdk.StopReason) error {
 	}
 }
 
-func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioProcess, request Request, sink Sink) *sessionAttempt {
+func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioProcess, request Request, sink Sink) (*sessionAttempt, error) {
+	root, err := os.OpenRoot(request.Cwd)
+	if err != nil {
+		return nil, fmt.Errorf("open acp working directory: %w", err)
+	}
 	turn := newTurn(engine, sink, request.SessionID)
 	attempt := &sessionAttempt{
-		engine:         engine,
-		ctx:            ctx,
-		process:        process,
-		connection:     acpsdk.NewClientSideConnection(&client{turn: turn}, process.Stdin, process.Stdout),
-		turn:           turn,
-		settings:       request.Settings,
-		cwd:            request.Cwd,
-		priorSessionID: request.SessionID,
-		sessionID:      request.SessionID,
+		engine:  engine,
+		ctx:     ctx,
+		process: process,
+		connection: acpsdk.NewClientSideConnection(&client{
+			turn:            turn,
+			cwd:             request.Cwd,
+			root:            root,
+			fileSystemWrite: request.FileSystemWrite,
+		}, process.Stdin, process.Stdout),
+		turn:            turn,
+		settings:        request.Settings,
+		cwd:             request.Cwd,
+		root:            root,
+		fileSystemWrite: request.FileSystemWrite,
+		priorSessionID:  request.SessionID,
+		sessionID:       request.SessionID,
 	}
 	attempt.connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
-	return attempt
+	return attempt, nil
 }

@@ -193,9 +193,14 @@ func (engine *Engine) Turn(ctx context.Context, process *exec.StdioProcess, requ
 		ctx = context.Background()
 	}
 
-	attempt := newSessionAttempt(engine, ctx, process, request, sink)
+	attempt, err := newSessionAttempt(engine, ctx, process, request, sink)
+	if err != nil {
+		_ = process.Stop()
+		_ = process.Wait()
+		return Result{SessionID: request.SessionID}, err
+	}
 	defer attempt.close()
-	err := attempt.run(request.Prompt)
+	err = attempt.run(request.Prompt)
 
 	return Result{SessionID: attempt.sessionID}, err
 }

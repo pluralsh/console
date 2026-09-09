@@ -88,6 +88,9 @@ func TestTransportProjectsCodexACP(t *testing.T) {
 	if transport.Kind() != toolv1.TransportKindACP {
 		t.Fatalf("transport kind = %q, want ACP", transport.Kind())
 	}
+	if transport.Capabilities().FileSystemWrite {
+		t.Fatal("analyze transport unexpectedly advertises filesystem writes")
+	}
 	model, reasoning, modeID, err := transport.agent.resolveACPSettings(toolv1.Settings{Mode: console.AgentRunModeAnalyze, Model: toolv1.ModelSelection{Name: "openai/gpt-5.4"}})
 	if err != nil {
 		t.Fatal(err)

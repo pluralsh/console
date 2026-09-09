@@ -18,6 +18,31 @@ import (
 	stackv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 )
 
+func TestTransportCapabilitiesReflectRunMode(t *testing.T) {
+	for _, mode := range []console.AgentRunMode{
+		console.AgentRunModeAnalyze,
+		console.AgentRunModeReview,
+		console.AgentRunModeWrite,
+	} {
+		t.Run(string(mode), func(t *testing.T) {
+			run := agentRun("openai", "gpt-5.4", false, false)
+			run.Mode = mode
+			transport, err := NewTransport(NewAgent(toolv1.Config{
+				WorkDir:       t.TempDir(),
+				RepositoryDir: t.TempDir(),
+				Run:           run,
+			}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantWrite := mode == console.AgentRunModeWrite
+			if got := transport.Capabilities().FileSystemWrite; got != wantWrite {
+				t.Fatalf("FileSystemWrite = %t, want %t", got, wantWrite)
+			}
+		})
+	}
+}
+
 func TestTransportLaunchPreservesLifecycleHooks(t *testing.T) {
 	binDir := t.TempDir()
 	opencodePath := filepath.Join(binDir, "opencode")

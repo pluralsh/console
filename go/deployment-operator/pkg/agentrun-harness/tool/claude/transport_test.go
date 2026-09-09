@@ -59,7 +59,8 @@ func TestTransportProjectsClaudeACP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if transport.Kind() != toolv1.TransportKindACP || !transport.Capabilities().SessionResume {
+	if capabilities := transport.Capabilities(); transport.Kind() != toolv1.TransportKindACP ||
+		!capabilities.SessionResume || capabilities.FileSystemWrite {
 		t.Fatal("transport does not advertise ACP session resume")
 	}
 	settings, err := transport.agent.ResolveSettings(config.Run)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/acp"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -39,8 +40,14 @@ func NewTransport(agent *Agent) (*Transport, error) {
 func (*Transport) Kind() toolv1.TransportKind {
 	return toolv1.TransportKindACP
 }
-func (*Transport) Capabilities() toolv1.TransportCapabilities {
-	return toolv1.TransportCapabilities{SessionResume: true, ToolCallOutputStreaming: false, UsageReporting: true, FileSystemRead: true, FileSystemWrite: true}
+func (transport *Transport) Capabilities() toolv1.TransportCapabilities {
+	return toolv1.TransportCapabilities{
+		SessionResume:           true,
+		ToolCallOutputStreaming: false,
+		UsageReporting:          true,
+		FileSystemRead:          true,
+		FileSystemWrite:         transport.agent.config.Run.Mode == console.AgentRunModeWrite,
+	}
 }
 
 func (transport *Transport) Turn(ctx context.Context, request toolv1.TurnRequest, sink toolv1.TurnSink) (toolv1.TurnResult, error) {
@@ -58,7 +65,13 @@ func (transport *Transport) Turn(ctx context.Context, request toolv1.TurnRequest
 	if err != nil {
 		return toolv1.TurnResult{SessionID: request.SessionID}, err
 	}
-	result, err := transport.engine.Turn(ctx, process, acp.Request{Cwd: transport.workDir, Prompt: request.Prompt, SessionID: request.SessionID, Settings: acp.SessionSettings{ModeID: modeID, ModelID: request.Settings.Model.Name}}, sink)
+	result, err := transport.engine.Turn(ctx, process, acp.Request{
+		Cwd:             transport.workDir,
+		Prompt:          request.Prompt,
+		SessionID:       request.SessionID,
+		Settings:        acp.SessionSettings{ModeID: modeID, ModelID: request.Settings.Model.Name},
+		FileSystemWrite: transport.Capabilities().FileSystemWrite,
+	}, sink)
 	return toolv1.TurnResult{SessionID: result.SessionID}, err
 }
 

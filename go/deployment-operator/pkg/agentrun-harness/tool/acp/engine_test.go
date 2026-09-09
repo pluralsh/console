@@ -377,6 +377,41 @@ func TestEngineTurnCreatesAndResumesSession(t *testing.T) {
 	}
 }
 
+func TestEngineTurnAdvertisesRequestedFilesystemWriteCapability(t *testing.T) {
+	for _, test := range []struct {
+		name            string
+		fileSystemWrite bool
+	}{
+		{name: "read only", fileSystemWrite: false},
+		{name: "write enabled", fileSystemWrite: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			state := newTestState()
+			_, process, _ := newTestAgentProcess(state, true)
+
+			_, err := NewEngine().Turn(context.Background(), process, Request{
+				Cwd:             t.TempDir(),
+				Prompt:          "capabilities",
+				FileSystemWrite: test.fileSystemWrite,
+			}, &testSink{})
+			if err != nil {
+				t.Fatalf("turn: %v", err)
+			}
+
+			state.mu.Lock()
+			initializations := append([]acpsdk.InitializeRequest(nil), state.initializations...)
+			state.mu.Unlock()
+			if len(initializations) != 1 {
+				t.Fatalf("initializations = %#v", initializations)
+			}
+			capabilities := initializations[0].ClientCapabilities.Fs
+			if !capabilities.ReadTextFile || capabilities.WriteTextFile != test.fileSystemWrite {
+				t.Fatalf("filesystem capabilities = %#v", capabilities)
+			}
+		})
+	}
+}
+
 func TestEngineTurnLoadsSessionWhenConfigured(t *testing.T) {
 	state := newTestState()
 	state.configOptions = []acpsdk.SessionConfigOption{{Select: &acpsdk.SessionConfigOptionSelect{

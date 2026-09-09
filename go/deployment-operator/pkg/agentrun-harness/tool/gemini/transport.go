@@ -69,13 +69,13 @@ func (*Transport) Kind() toolv1.TransportKind {
 	return toolv1.TransportKindACP
 }
 
-func (*Transport) Capabilities() toolv1.TransportCapabilities {
+func (transport *Transport) Capabilities() toolv1.TransportCapabilities {
 	return toolv1.TransportCapabilities{
 		SessionResume:           true,
 		ToolCallOutputStreaming: false,
 		UsageReporting:          true,
 		FileSystemRead:          true,
-		FileSystemWrite:         true,
+		FileSystemWrite:         transport.agent.config.Run.Mode == console.AgentRunModeWrite,
 	}
 }
 
@@ -135,8 +135,11 @@ func (transport *Transport) Turn(ctx context.Context, request toolv1.TurnRequest
 	}
 
 	result, err := transport.engine.Turn(ctx, process, acp.Request{
-		Cwd: transport.workDir, Prompt: request.Prompt, SessionID: request.SessionID,
-		Settings: acp.SessionSettings{ModelID: request.Settings.Model.Name},
+		Cwd:             transport.workDir,
+		Prompt:          request.Prompt,
+		SessionID:       request.SessionID,
+		Settings:        acp.SessionSettings{ModelID: request.Settings.Model.Name},
+		FileSystemWrite: transport.Capabilities().FileSystemWrite,
 	}, sink)
 	return toolv1.TurnResult{SessionID: result.SessionID}, err
 }

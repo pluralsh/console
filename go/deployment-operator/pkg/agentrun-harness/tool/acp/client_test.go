@@ -12,14 +12,20 @@ import (
 
 import acpsdk "github.com/coder/acp-go-sdk"
 
-func newTestClient(t *testing.T) (*client, string) {
+func newTestClient(t *testing.T, fileSystemWrite bool) (*client, string) {
 	t.Helper()
+	directory := t.TempDir()
+	root, err := os.OpenRoot(directory)
+	if err != nil {
+		t.Fatalf("open test root: %v", err)
+	}
+	t.Cleanup(func() { _ = root.Close() })
 	engine := NewEngine()
-	return &client{turn: newTurn(engine, &testSink{}, "session-1")}, t.TempDir()
+	return &client{turn: newTurn(engine, &testSink{}, "session-1"), cwd: directory, root: root, fileSystemWrite: fileSystemWrite}, directory
 }
 
 func TestClientReadsAndWritesTextFiles(t *testing.T) {
-	acpClient, directory := newTestClient(t)
+	acpClient, directory := newTestClient(t, true)
 	path := filepath.Join(directory, "nested", "file.txt")
 	if _, err := acpClient.WriteTextFile(context.Background(), acpsdk.WriteTextFileRequest{SessionId: "session-1", Path: path, Content: "one\ntwo\nthree\n"}); err != nil {
 		t.Fatalf("write text file: %v", err)
@@ -34,8 +40,81 @@ func TestClientReadsAndWritesTextFiles(t *testing.T) {
 	}
 }
 
+func TestClientRejectsWritesWithoutPermission(t *testing.T) {
+	acpClient, directory := newTestClient(t, false)
+	path := filepath.Join(directory, "nested", "file.txt")
+
+	_, err := acpClient.WriteTextFile(context.Background(), acpsdk.WriteTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+		Content:   "content",
+	})
+	if err == nil {
+		t.Fatal("write without permission unexpectedly succeeded")
+	}
+	if _, err := os.Stat(filepath.Dir(path)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("write parent directory error = %v, want not exist", err)
+	}
+}
+
+func TestClientRejectsWritesOutsideRoot(t *testing.T) {
+	acpClient, _ := newTestClient(t, true)
+	outside := t.TempDir()
+	path := filepath.Join(outside, "nested", "file.txt")
+
+	_, err := acpClient.WriteTextFile(context.Background(), acpsdk.WriteTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+		Content:   "content",
+	})
+	if err == nil {
+		t.Fatal("outside-root write unexpectedly succeeded")
+	}
+	if _, err := os.Stat(filepath.Dir(path)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("outside-root parent directory error = %v, want not exist", err)
+	}
+}
+
+func TestClientRejectsWritesToRootDirectory(t *testing.T) {
+	acpClient, directory := newTestClient(t, true)
+
+	_, err := acpClient.WriteTextFile(context.Background(), acpsdk.WriteTextFileRequest{
+		SessionId: "session-1",
+		Path:      directory,
+		Content:   "content",
+	})
+	if err == nil {
+		t.Fatal("root-directory write unexpectedly succeeded")
+	}
+}
+
+func TestClientRejectsWritesThroughSymlinkEscape(t *testing.T) {
+	acpClient, directory := newTestClient(t, true)
+	outside := t.TempDir()
+	target, err := filepath.Rel(directory, outside)
+	if err != nil {
+		t.Fatalf("relative symlink target: %v", err)
+	}
+	if err := os.Symlink(target, filepath.Join(directory, "escape")); err != nil {
+		t.Fatalf("create symlink: %v", err)
+	}
+	path := filepath.Join(directory, "escape", "file.txt")
+
+	_, err = acpClient.WriteTextFile(context.Background(), acpsdk.WriteTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+		Content:   "content",
+	})
+	if err == nil {
+		t.Fatal("symlink escape write unexpectedly succeeded")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "file.txt")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("symlink escape file error = %v, want not exist", err)
+	}
+}
+
 func TestClientRejectsRelativeAndForeignSessionPaths(t *testing.T) {
-	acpClient, directory := newTestClient(t)
+	acpClient, directory := newTestClient(t, true)
 	for _, request := range []acpsdk.ReadTextFileRequest{
 		{SessionId: "session-1", Path: "relative.txt"},
 		{SessionId: "other", Path: filepath.Join(directory, "file.txt")},
@@ -55,7 +134,7 @@ func TestClientRejectsRelativeAndForeignSessionPaths(t *testing.T) {
 }
 
 func TestClientRejectsOversizedAndCanceledReads(t *testing.T) {
-	acpClient, directory := newTestClient(t)
+	acpClient, directory := newTestClient(t, true)
 	path := filepath.Join(directory, "large.txt")
 	file, err := os.Create(path)
 	if err != nil {
@@ -79,7 +158,7 @@ func TestClientRejectsOversizedAndCanceledReads(t *testing.T) {
 }
 
 func TestClientRejectsFIFOWithoutBlocking(t *testing.T) {
-	acpClient, directory := newTestClient(t)
+	acpClient, directory := newTestClient(t, true)
 	path := filepath.Join(directory, "pipe")
 	if err := syscall.Mkfifo(path, 0o600); err != nil {
 		t.Fatalf("create FIFO: %v", err)
@@ -102,7 +181,7 @@ func TestClientRejectsFIFOWithoutBlocking(t *testing.T) {
 }
 
 func TestClientRejectsCanceledWritesBeforeFilesystemSideEffects(t *testing.T) {
-	acpClient, directory := newTestClient(t)
+	acpClient, directory := newTestClient(t, true)
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	path := filepath.Join(directory, "nested", "file.txt")
@@ -129,7 +208,7 @@ func (ctx *cancelAfterFirstCheckContext) Err() error {
 	return nil
 }
 func TestClientRejectsCanceledWritesBetweenFilesystemSideEffects(t *testing.T) {
-	acpClient, directory := newTestClient(t)
+	acpClient, directory := newTestClient(t, true)
 	path := filepath.Join(directory, "nested", "file.txt")
 
 	ctx := &cancelAfterFirstCheckContext{Context: context.Background()}

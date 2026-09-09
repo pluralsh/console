@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/acp"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -50,13 +51,13 @@ func (*Transport) Kind() toolv1.TransportKind {
 }
 
 // Capabilities reports the ACP features implemented by Codex.
-func (*Transport) Capabilities() toolv1.TransportCapabilities {
+func (transport *Transport) Capabilities() toolv1.TransportCapabilities {
 	return toolv1.TransportCapabilities{
 		SessionResume:           true,
 		ToolCallOutputStreaming: true,
 		UsageReporting:          true,
 		FileSystemRead:          true,
-		FileSystemWrite:         true,
+		FileSystemWrite:         transport.agent.config.Run.Mode == console.AgentRunModeWrite,
 	}
 }
 
@@ -79,10 +80,11 @@ func (transport *Transport) Turn(ctx context.Context, request toolv1.TurnRequest
 		return toolv1.TurnResult{SessionID: request.SessionID}, err
 	}
 	result, err := transport.engine.Turn(ctx, process, acp.Request{
-		Cwd:       transport.repositoryDir,
-		Prompt:    request.Prompt,
-		SessionID: request.SessionID,
-		Settings:  acp.SessionSettings{ModeID: modeID, ModelID: model, Reasoning: reasoning},
+		Cwd:             transport.repositoryDir,
+		Prompt:          request.Prompt,
+		SessionID:       request.SessionID,
+		Settings:        acp.SessionSettings{ModeID: modeID, ModelID: model, Reasoning: reasoning},
+		FileSystemWrite: transport.Capabilities().FileSystemWrite,
 	}, sink)
 	return toolv1.TurnResult{SessionID: result.SessionID}, err
 }
