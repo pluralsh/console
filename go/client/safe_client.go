@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 )
 
 const (
 	sanitizedResponseMessage            = "response body omitted"
 	gqlgencTopLevelDecodePrefix         = "failed to decode data "
 	gqlgencResponseDecodePrefix         = "failed to decode data into response "
-	gqlgencMalformedGraphQLErrorsPrefix = "faild to parse graphql errors. Response content " // "faild" is from gqlgenc v0.33.0.
+	gqlgencMalformedGraphQLErrorsPrefix = "faild to parse graphql errors. Response content " // "faild" is from gqlgenc.
 )
 
 // New creates a ConsoleClient that does not expose GraphQL response bodies in errors.

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	client "github.com/Yamashou/gqlgenc/clientv2"
+	client "github.com/gqlgo/gqlgenc/clientv2"
 	"github.com/samber/lo"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
