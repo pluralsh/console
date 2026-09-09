@@ -60,6 +60,8 @@ def _extract_requirement_changes(from_vsn, to_vsn):
     return changes
 
 def helm_summary(name, compatibility, from_vsn, to_vsn):
+  if compatibility.get('skip_release_summary') is True:
+      return None
   chart_url = compatibility.get('chart_changelog')
   release_url = compatibility.get('release_url')
   if not release_url and not chart_url:

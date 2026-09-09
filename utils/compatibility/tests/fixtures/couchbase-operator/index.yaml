@@ -1,0 +1,200 @@
+# Relevant upstream entries. Source: https://couchbase-partners.github.io/helm-charts/index.yaml
+# Retrieved 2026-09-09; only app/chart identity and artifact fields retained.
+entries:
+  couchbase-operator:
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.93.0
+    appVersion: 2.9.3
+    digest: 09527e27484f44110607d31b857e8feb7649c7aebcbc51637e3b255231754f22
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.93.0/couchbase-operator-2.93.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.92.0
+    appVersion: 2.9.2
+    digest: cbc74e2fbfcd6a08ecc963a420806aed79cb2dad33846444b91ac7e340ac6681
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.92.0/couchbase-operator-2.92.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.91.0
+    appVersion: 2.9.1
+    digest: dfb8e5335f8d82b997ccd01bb57ab75c0c45fa5775323a596efcac8d87c6ad34
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.91.0/couchbase-operator-2.91.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.90.0
+    appVersion: 2.9.0
+    digest: 4ebcbfa9e53f35c08820281940611b965fd8aceea0f6f3805e21a690d8764464
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.90.0/couchbase-operator-2.90.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.82.0
+    appVersion: 2.8.2
+    digest: bcd07ae511febe9f6a814579fa9d325d59f6c3f44ff75482671b3aa94f4d5fff
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.82.0/couchbase-operator-2.82.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.81.1
+    appVersion: 2.8.1
+    digest: efa7d20b3907e5eb99a614f71a41d7457599ec08e10ae2e06266af83fa0ee48a
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.81.1/couchbase-operator-2.81.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.81.0
+    appVersion: 2.8.1
+    digest: b9c233ae07ce864ae48f5f392c4aea8956a6d31de6bd0840fe8548d0a6dc141b
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.81.0/couchbase-operator-2.81.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.80.3
+    appVersion: 2.8.0
+    digest: f482c497754d1e5cedbe7061687b6652ae1dd6f667b2c35b880c5c06ccc21702
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.80.3/couchbase-operator-2.80.3.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.80.2
+    appVersion: 2.8.0
+    digest: 80c1590c22d66910683458ce2683b469bf06feb7877c6d2992ef99d66ed4ee87
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.80.2/couchbase-operator-2.80.2.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.80.1
+    appVersion: 2.8.0
+    digest: 69d5bcc86848f068f7b3ae18b70226d8f0255f2456c03fd7ed5f2d6bf66df955
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.80.1/couchbase-operator-2.80.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.80.0
+    appVersion: 2.8.0
+    digest: a357b737c732e5b04aad4abcb959f14b2c078d776be5b7274651c5490fcef48a
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.80.0/couchbase-operator-2.80.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.71.0
+    appVersion: 2.7.1
+    digest: 8f92ca67a891a200f04058a114a1ed08317cc28f6523541b28359935f3659f7d
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.71.0/couchbase-operator-2.71.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.70.1
+    appVersion: 2.7.0
+    digest: 427c2432e565582664a9bae6a5580741f2a29a425e5a20496843730fe215bd54
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.70.1/couchbase-operator-2.70.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.70.0
+    appVersion: 2.7.0
+    digest: fde4dfeb9b77916a3535e7695bdfdb68d9dc3529e162f5a250050df7e8ab686f
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.70.0/couchbase-operator-2.70.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.64.1
+    appVersion: 2.6.4
+    digest: 0f5305ee83719fd832f184eda34f1a5ae8acb7088c5d3e45dde9b8149fd98699
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.64.1/couchbase-operator-2.64.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.64.0
+    appVersion: 2.6.4
+    digest: 3e5072b789c058148684bb2b7e5ba0b391c7596582dfa8e2cdd914dd04825c35
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.64.0/couchbase-operator-2.64.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.62.0
+    appVersion: 2.6.2
+    digest: 587d18c46b61a3f8be16ec6d6e3a8a67b3d484ac9ff7879672c1e8fb45efafbd
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.62.0/couchbase-operator-2.62.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.61.0
+    appVersion: 2.6.1
+    digest: 330af6abc5316d0be4e88f19b332a2644e73cb481c58f7a6a5d337efb6ac23be
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.61.0/couchbase-operator-2.61.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.60.0
+    appVersion: 2.6.0
+    digest: b2e8b2d9546e6ff23fc63a2ae2e090b58dca17a1cad28c0f3c3302a2c54db5e2
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.60.0/couchbase-operator-2.60.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.50.4
+    appVersion: 2.5.0
+    digest: 3be4bd46414d7cae15a48940d620395b83a7cb232f19a999c5185623aa0c52c1
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.50.4/couchbase-operator-2.50.4.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.50.3
+    appVersion: 2.5.0
+    digest: e39d483f16c68c0b9f9c62f0c526c76a964cf9ec032ca6c8df90607267647eb6
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.50.3/couchbase-operator-2.50.3.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.50.2
+    appVersion: 2.5.0
+    digest: 3eaf14ea48553590640a8ef34b9a5bb2c940cf84efd42e41eddc0a8f79a4298d
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.50.2/couchbase-operator-2.50.2.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.50.1
+    appVersion: 2.5.0
+    digest: 5a4c17c2e90f7477b9f2f71a89520c823ef347754c2fe8d388536698bd8b862a
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.50.1/couchbase-operator-2.50.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.42.1
+    appVersion: 2.4.2
+    digest: ed4a5f2d2a91da3f4e41a80a6012fa41bb6516c9bce65b6bbc3145ca57ef2e36
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.42.1/couchbase-operator-2.42.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.42.0
+    appVersion: 2.4.2
+    digest: dd00ec5519a456a0d6554c8f7ee44345023c20293f2e5af1eab9f6897f83f755
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.42.0/couchbase-operator-2.42.0.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.41.1
+    appVersion: 2.4.1
+    digest: 87f033ee403ef0b7acb1d8b92376b343ff9bb4ea90790a8f88e9f708b7c18c89
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.41.1/couchbase-operator-2.41.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.40.1
+    appVersion: 2.4.0
+    digest: e91e596fdd79de645bbf2c6b095ce02342dc2458a45204bc2db8ef6f012050af
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.40.1/couchbase-operator-2.40.1.tgz
+  - apiVersion: v2
+    name: couchbase-operator
+    version: 2.40.0
+    appVersion: 2.4.0
+    digest: 18f64ac154f0de1b1ceb8df5a7153c8724364cc1d6f28f4dc6a721da46de26f7
+    urls:
+    - https://github.com/couchbase-partners/helm-charts/releases/download/couchbase-operator-2.40.0/couchbase-operator-2.40.0.tgz

@@ -31215,3 +31215,48 @@ addons:
     chart_version: 1.0.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.0.0']
   name: mongodb-kubernetes
+- icon: https://couchbase-partners.github.io/helm-charts/assets/img/CB_Logomark_220.png
+  git_url: https://github.com/couchbase-partners/helm-charts
+  release_url: https://docs.couchbase.com/operator/current/release-notes.html
+  skip_release_summary: true
+  readme_url: https://raw.githubusercontent.com/couchbase-partners/helm-charts/master/README.md
+  helm_repository_url: https://couchbase-partners.github.io/helm-charts
+  chart_name: couchbase-operator
+  helm_values: install.couchbaseCluster=false,install.syncGateway=false
+  versions:
+  - version: 2.9.3
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.93.0
+    images: ['couchbase/admission-controller:2.9.3', 'couchbase/operator:2.9.3']
+  - version: 2.8.2
+    kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.82.0
+    images: ['couchbase/admission-controller:2.8.2', 'couchbase/operator:2.8.2']
+  - version: 2.7.1
+    kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.71.0
+    images: ['couchbase/admission-controller:2.7.1', 'couchbase/operator:2.7.1']
+  - version: 2.6.4
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.64.1
+    images: ['couchbase/admission-controller:2.6.4', 'couchbase/operator:2.6.4']
+  - version: 2.5.0
+    kube: ['1.28', '1.27', '1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.50.4
+    images: ['couchbase/admission-controller:2.5.0', 'couchbase/operator:2.5.0']
+  name: couchbase-operator
