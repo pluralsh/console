@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import requests
+import yaml
 
 COMPATIBILITY = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(COMPATIBILITY))
@@ -69,6 +70,15 @@ class VSphereCPITests(unittest.TestCase):
         get.assert_called_once_with(scraper.HELM_INDEX_URL, timeout=30)
         self.assertEqual(update.call_args.args[0], scraper.TARGET_FILE)
         self.assertEqual(update.call_args.args[1][0]["kube"], ["1.35"])
+
+
+class GeneratedCatalogTests(unittest.TestCase):
+    def test_published_aggregate_matches_the_per_addon_catalog(self):
+        root = COMPATIBILITY.parents[1]
+        catalog = yaml.safe_load((root / "static/compatibilities/vsphere-cpi.yaml").read_text())
+        aggregate = yaml.safe_load((root / "static/compatibilities.yaml").read_text())
+        matches = [addon for addon in aggregate["addons"] if addon["name"] == scraper.APP_NAME]
+        self.assertEqual(matches, [dict(catalog, name=scraper.APP_NAME)])
 
 
 if __name__ == "__main__":
