@@ -78,6 +78,10 @@ defmodule Console.Schema.Monitor do
     from(m in query, where: m.service_id == ^id)
   end
 
+  def for_workbench(query \\ __MODULE__, id) do
+    from(m in query, where: m.workbench_id == ^id)
+  end
+
   def search(query \\ __MODULE__, search) do
     from(m in query, where: ilike(m.name, ^"%#{search}%"))
   end
@@ -121,7 +125,7 @@ defmodule Console.Schema.Monitor do
     |> validate_required(~w(name severity type query threshold evaluation_cron service_id)a)
   end
 
-  defp query_changeset(model, attrs, type) do
+  def query_changeset(model, attrs, type) do
     model
     |> cast(attrs, [])
     |> cast_embed(:log, with: &log_changeset/2)
@@ -196,7 +200,7 @@ defmodule Console.Schema.Monitor do
     |> validate_required(~w(key value)a)
   end
 
-  defp threshold_changeset(model, attrs) do
+  def threshold_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(aggregate value)a)
     |> validate_required(~w(aggregate value)a)

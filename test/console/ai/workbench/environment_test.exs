@@ -50,7 +50,15 @@ defmodule Console.AI.Workbench.EnvironmentTest do
 
       assert Environment.subagents(job)
              |> MapSet.new()
-             |> MapSet.equal?(MapSet.new([:observability, :integration, :coding, :infrastructure]))
+             |> MapSet.equal?(
+               MapSet.new([
+                 :observability,
+                 :monitoring,
+                 :integration,
+                 :coding,
+                 :infrastructure
+               ])
+             )
     end
   end
 

@@ -2996,6 +2996,7 @@ enum WorkbenchJobActivityType {
   KUBERNETES
   VERIFY
   EXEC
+  MONITORING
 }
 
 enum WorkbenchCanvasBlockType {
@@ -3017,6 +3018,7 @@ enum WorkbenchSkillSubagent {
   SKILL
   HISTORY
   SEARCH
+  MONITORING
 }
 
 enum WorkbenchChatbotMessageBehavior {

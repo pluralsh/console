@@ -7,6 +7,8 @@ defmodule Console.AI.Workbench.ToolsTest do
   alias Console.AI.Tools.Workbench.{Http, FunctionCall}
   alias Console.AI.Tools.Workbench.MCP, as: MCPTool
   alias Console.AI.Tools.Workbench.Observability.{
+    ExternalDashboard,
+    ExternalDashboards,
     LogAggregate,
     Logs,
     Metrics,
@@ -97,6 +99,9 @@ defmodule Console.AI.Workbench.ToolsTest do
       tempo = insert_associated_tool(workbench, :tempo, "tempo", [:traces], %{
         tempo: %{url: "https://tempo.example.com"}
       })
+      datadog = insert_associated_tool(workbench, :datadog, "datadog", [:metrics], %{
+        datadog: %{site: "datadoghq.com", api_key: "api", app_key: "app"}
+      })
 
       workbench = Repo.preload(workbench, :tools)
       index = Tools.index(workbench)
@@ -108,6 +113,18 @@ defmodule Console.AI.Workbench.ToolsTest do
       assert_indexed(index, "workbench_observability_logs_loki", Logs, loki)
       assert_indexed(index, "workbench_observability_log_aggregate_loki", LogAggregate, loki)
       assert_indexed(index, "workbench_observability_traces_tempo", Traces, tempo)
+      assert_indexed(
+        index,
+        "workbench_observability_dashboards_datadog",
+        ExternalDashboards,
+        datadog
+      )
+      assert_indexed(
+        index,
+        "workbench_observability_dashboard_datadog",
+        ExternalDashboard,
+        datadog
+      )
     end
 
     test "does not treat http function tools as integrations" do

@@ -82,6 +82,7 @@ defmodule Console.MixProject do
       {:ex_machina, "~> 2.8", only: :test},
       {:dns_cluster, "~> 0.2.0"},
       {:ex_aws, "~> 2.7"},
+      {:ex_aws_cloudwatch, "~> 2.0"},
       {:ex_aws_sts, "~> 2.3.0"},
       {:configparser_ex, "~> 5.0"},
       {:crontab, "~> 1.1"},

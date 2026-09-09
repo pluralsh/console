@@ -202,7 +202,7 @@ defmodule Console.AI.Workbench.Environment do
   defp infra_agents(_), do: []
 
   defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]
-  defp type_subagents(_), do: []
+  defp type_subagents(_), do: [:monitoring]
 
   defp tool_agents(tools) do
     Enum.flat_map(tools || [], fn

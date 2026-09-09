@@ -138,6 +138,10 @@ defmodule Console.Schema.Dashboard do
     from(d in query, order_by: ^order)
   end
 
+  def search(query \\ __MODULE__, search) do
+    from(d in query, where: ilike(d.name, ^"%#{search}%"))
+  end
+
   @valid ~w(name description workbench_id)a
 
   def changeset(model, attrs \\ %{}) do

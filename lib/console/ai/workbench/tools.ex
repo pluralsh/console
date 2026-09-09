@@ -14,6 +14,8 @@ defmodule Console.AI.Workbench.Tools do
     MetricsLabelSearch,
     Logs,
     LogAggregate,
+    ExternalDashboard,
+    ExternalDashboards,
     Traces
   }
   alias Console.AI.Tools.Workbench.Infrastructure.{CloudSchemas, RawCloudQuery, CloudTables}
@@ -118,9 +120,11 @@ defmodule Console.AI.Workbench.Tools do
       _ -> false
     end)
     |> Enum.flat_map(fn
-      %WorkbenchTool{tool: :sentry} = tool -> Sentry.Tools.expand(tool)
+      %WorkbenchTool{tool: :sentry} = tool ->
+        Sentry.Tools.expand(tool) ++ external_dashboard_tools(tool)
       %WorkbenchTool{categories: [_ | _] = categories} = tool ->
-        Enum.flat_map(categories, &obs_category_tools(tool, &1))
+        Enum.flat_map(categories, &obs_category_tools(tool, &1)) ++
+          external_dashboard_tools(tool)
       _ -> []
     end)
   end
@@ -170,6 +174,12 @@ defmodule Console.AI.Workbench.Tools do
     do: [%Logs{tool: tool}, %LogAggregate{tool: tool}]
   defp obs_category_tools(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
   defp obs_category_tools(_, _), do: []
+
+  defp external_dashboard_tools(%WorkbenchTool{tool: provider} = tool)
+       when provider in [:azure, :cloudwatch, :datadog, :dynatrace, :sentry, :splunk],
+    do: [%ExternalDashboards{tool: tool}, %ExternalDashboard{tool: tool}]
+
+  defp external_dashboard_tools(_), do: []
 
   defp expand_integration(%WorkbenchTool{tool: :http} = tool), do: [%Http{tool: tool}]
   defp expand_integration(%WorkbenchTool{tool: :slack} = tool), do: Slack.Tools.expand(tool)

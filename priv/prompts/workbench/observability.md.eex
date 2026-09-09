@@ -23,6 +23,7 @@ data or use queries relative to the current time.
 3. When searching logs, you can always search for contextual logs by filtering on specific facets (eg pod name that isolates to a specific running container), and using time ranges around the log in question.
 4. You have a `workbench_tool` tool available to you to do deterministic algorithmic calculations.  You should be leveraging that instead of trying to infer based on prior tool calls and summaries, using exact raw data in the lua code used.
 5. You are also given a workbench_history tool which can be used to search past work outside of this subagent.  Use this to grab additional context that might not be present in your prompt, but don't rely on it if the prompt is sufficient.
+6. Use `workbench_dashboards` and `workbench_monitors` early to discover existing descriptions of the system. Inspect relevant entries with `workbench_dashboard` and `workbench_monitor`: their graph data sources, queries, variable inputs, thresholds, and alert state are informative context that should guide which observability tools and queries you run next. Treat them as investigation leads, then query the underlying data sources for current evidence. External dashboard pagination is normalized across providers: omit `cursor` for the first page, then pass the opaque `next_cursor` returned by each response to fetch the next page. Never construct, decode, or modify a cursor yourself.
 
 Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.
 

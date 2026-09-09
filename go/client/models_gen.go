@@ -19272,6 +19272,7 @@ const (
 	WorkbenchJobActivityTypeKubernetes     WorkbenchJobActivityType = "KUBERNETES"
 	WorkbenchJobActivityTypeVerify         WorkbenchJobActivityType = "VERIFY"
 	WorkbenchJobActivityTypeExec           WorkbenchJobActivityType = "EXEC"
+	WorkbenchJobActivityTypeMonitoring     WorkbenchJobActivityType = "MONITORING"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -19293,11 +19294,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeKubernetes,
 	WorkbenchJobActivityTypeVerify,
 	WorkbenchJobActivityTypeExec,
+	WorkbenchJobActivityTypeMonitoring,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify, WorkbenchJobActivityTypeExec:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify, WorkbenchJobActivityTypeExec, WorkbenchJobActivityTypeMonitoring:
 		return true
 	}
 	return false
@@ -19413,6 +19415,7 @@ const (
 	WorkbenchSkillSubagentSkill          WorkbenchSkillSubagent = "SKILL"
 	WorkbenchSkillSubagentHistory        WorkbenchSkillSubagent = "HISTORY"
 	WorkbenchSkillSubagentSearch         WorkbenchSkillSubagent = "SEARCH"
+	WorkbenchSkillSubagentMonitoring     WorkbenchSkillSubagent = "MONITORING"
 )
 
 var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
@@ -19425,11 +19428,12 @@ var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
 	WorkbenchSkillSubagentSkill,
 	WorkbenchSkillSubagentHistory,
 	WorkbenchSkillSubagentSearch,
+	WorkbenchSkillSubagentMonitoring,
 }
 
 func (e WorkbenchSkillSubagent) IsValid() bool {
 	switch e {
-	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator, WorkbenchSkillSubagentMemory, WorkbenchSkillSubagentSkill, WorkbenchSkillSubagentHistory, WorkbenchSkillSubagentSearch:
+	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator, WorkbenchSkillSubagentMemory, WorkbenchSkillSubagentSkill, WorkbenchSkillSubagentHistory, WorkbenchSkillSubagentSearch, WorkbenchSkillSubagentMonitoring:
 		return true
 	}
 	return false

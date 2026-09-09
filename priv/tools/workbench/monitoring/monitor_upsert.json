@@ -1,0 +1,164 @@
+{
+  "type": "object",
+  "properties": {
+    "monitor_id": {
+      "type": "string",
+      "description": "Existing monitor ID to update; omit to create"
+    },
+    "attributes": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "alert_template": { "type": "string" },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical", "undefined"] },
+        "type": { "type": "string", "enum": ["log", "metrics"] },
+        "evaluation_cron": {
+          "type": "string",
+          "description": "Cron expression controlling monitor evaluation"
+        },
+        "service_id": { "type": "string" },
+        "prompt": { "type": "string", "maxLength": 2048 },
+        "modes": {
+          "type": "object",
+          "description": "Optional investigation behavior and model overrides used when this monitor fires",
+          "properties": {
+            "plan": { "type": "boolean" },
+            "verification": { "type": "boolean" },
+            "model": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "enum": ["openai", "anthropic", "ollama", "azure", "bedrock", "vertex", "openai_compatible", "xai"]
+                },
+                "model": { "type": "string" }
+              },
+              "required": ["provider", "model"]
+            },
+            "kubernetes": {
+              "type": "object",
+              "properties": {
+                "update": { "type": "boolean" },
+                "delete": { "type": "boolean" },
+                "exec": { "type": "boolean" },
+                "drain": { "type": "boolean" },
+                "exclude_namespaces": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "require_namespaces": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            },
+            "coding": {
+              "type": "object",
+              "properties": {
+                "babysit": { "type": "boolean" },
+                "approval": { "type": "boolean" },
+                "review": { "type": "boolean" }
+              }
+            },
+            "budget": {
+              "type": "object",
+              "properties": {
+                "cost": { "type": "number", "minimum": 0 },
+                "tokens": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        },
+        "threshold": {
+          "type": "object",
+          "properties": {
+            "aggregate": { "type": "string", "enum": ["max", "min", "avg"] },
+            "value": { "type": "number" }
+          },
+          "required": ["aggregate", "value"]
+        },
+        "query": {
+          "type": "object",
+          "description": "Exactly one query matching attributes.type",
+          "properties": {
+            "log": {
+              "type": "object",
+              "properties": {
+                "tool": { "type": "string" },
+                "query": { "type": "string" },
+                "bucket_size": {
+                  "type": "string",
+                  "pattern": "^[0-9]+[dmhs]$"
+                },
+                "duration": {
+                  "type": "string",
+                  "pattern": "^[0-9]+[dmhs]$"
+                },
+                "operator": { "type": "string", "enum": ["and", "or"] },
+                "facets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": { "type": "string" },
+                      "value": { "type": "string" }
+                    },
+                    "required": ["key", "value"]
+                  }
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "azure": {
+                      "type": "object",
+                      "properties": {
+                        "resource_id": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              },
+              "required": ["tool", "query", "bucket_size"]
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "tool": { "type": "string" },
+                "query": { "type": "string" },
+                "step": {
+                  "type": "string",
+                  "pattern": "^[0-9]+[dmhs]$"
+                },
+                "duration": {
+                  "type": "string",
+                  "pattern": "^[0-9]+[dmhs]$"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "azure": {
+                      "type": "object",
+                      "properties": {
+                        "resource_id": { "type": "string" },
+                        "metrics_namespace": { "type": "string" },
+                        "aggregation": { "type": "string" },
+                        "filter": { "type": "string" },
+                        "order_by": { "type": "string" },
+                        "roll_up_by": { "type": "string" },
+                        "metrics_endpoint": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              },
+              "required": ["tool", "query"]
+            }
+          }
+        }
+      },
+      "required": ["name", "severity", "type", "evaluation_cron", "service_id", "query", "threshold"]
+    }
+  },
+  "required": ["attributes"]
+}
