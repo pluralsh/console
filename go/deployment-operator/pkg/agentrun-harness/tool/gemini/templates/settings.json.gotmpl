@@ -37,10 +37,10 @@
   ],
   "includeDirectories": [
     "/plural/contexts",
-    "{{ .RepositoryDir }}"
+    {{ quote .RepositoryDir }}
   ],
   "model": {
-    "name": "{{ .Model }}"
+    "name": {{ quote .Model }}
   },
   "mcpServers": {
     "plural": {

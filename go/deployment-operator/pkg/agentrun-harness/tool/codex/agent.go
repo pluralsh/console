@@ -108,7 +108,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	}
 
 	model := agent.resolveModelForSettings(config, request.Settings)
-
 	return agent.writeNativeConfig(config, model)
 }
 

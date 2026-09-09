@@ -12,9 +12,8 @@ import (
 //nolint:gocyclo
 func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 	baseInput := &ConfigTemplateInput{
-		Model:         ModelGemini31FlashLite,
+		Model:         "gemini-3.1-flash-lite",
 		RepositoryDir: "/repo",
-		AgentRunID:    "run-123",
 	}
 
 	t.Run("plural MCP server uses in-pod remote URL", func(t *testing.T) {
@@ -138,15 +137,41 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("quotes model and repository directory", func(t *testing.T) {
+		input := *baseInput
+		input.Model = "gemini-3.1-\"flash\""
+		input.RepositoryDir = "/repo/with \"quotes\""
+
+		_, content, err := settings(&input)
+		if err != nil {
+			t.Fatalf("settings() failed: %v", err)
+		}
+
+		var out struct {
+			IncludeDirectories []string `json:"includeDirectories"`
+			Model              struct {
+				Name string `json:"name"`
+			} `json:"model"`
+		}
+		if err := json.Unmarshal([]byte(content), &out); err != nil {
+			t.Fatalf("generated content is not valid JSON: %v", err)
+		}
+		if out.Model.Name != input.Model {
+			t.Errorf("model = %q, want %q", out.Model.Name, input.Model)
+		}
+		if len(out.IncludeDirectories) != 2 || out.IncludeDirectories[1] != input.RepositoryDir {
+			t.Errorf("includeDirectories = %#v, want repository %q", out.IncludeDirectories, input.RepositoryDir)
+		}
+	})
 }
 
 func TestSettingsTemplate_ExternalMCPServer(t *testing.T) {
 	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp","allowedTools":["list_issues"],"headers":{"Authorization":"Bearer secret"}}]`)
 
 	input := &ConfigTemplateInput{
-		Model:         ModelGemini31FlashLite,
+		Model:         "gemini-3.1-flash-lite",
 		RepositoryDir: "/repo",
-		AgentRunID:    "run-123",
 		AgentRunMode:  console.AgentRunModeWrite,
 	}
 	_, content, err := settings(input)

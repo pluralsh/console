@@ -15,11 +15,31 @@ func TestResolveSettingsUsesDefaultModel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ResolveSettings() error = %v", err)
 	}
-	if settings.Model.Provider != nil {
-		t.Fatalf("provider = %v, want nil", settings.Model.Provider)
+	if settings.Model.Provider == nil || *settings.Model.Provider != console.AiProviderVertex {
+		t.Fatalf("provider = %v, want vertex", settings.Model.Provider)
 	}
 	if settings.Model.Name != defaultModel || settings.Timeout != 7*time.Minute || settings.Proxy {
 		t.Fatalf("settings = %#v", settings)
+	}
+}
+
+func TestResolveSettingsPreservesExplicitModelAndProxy(t *testing.T) {
+	const explicitModel = "gemini-custom"
+	run := geminiTestRun(console.AgentRunModeWrite, explicitModel, nil)
+	run.Runtime.AiProxy = true
+
+	settings, err := NewAgent(toolv1.Config{Run: run}).ResolveSettings(run)
+	if err != nil {
+		t.Fatalf("ResolveSettings() error = %v", err)
+	}
+	if settings.Model.Provider == nil || *settings.Model.Provider != console.AiProviderVertex {
+		t.Fatalf("provider = %v, want vertex", settings.Model.Provider)
+	}
+	if settings.Model.Name != explicitModel {
+		t.Fatalf("model = %q, want %q", settings.Model.Name, explicitModel)
+	}
+	if !settings.Proxy {
+		t.Fatalf("proxy = false, want true")
 	}
 }
 

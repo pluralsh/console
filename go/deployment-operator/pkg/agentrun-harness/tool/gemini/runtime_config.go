@@ -22,9 +22,10 @@ func (agent *Agent) ResolveSettings(run *agentrunv1.AgentRun) (toolv1.Settings, 
 	if err != nil {
 		return toolv1.Settings{}, err
 	}
+	provider := console.AiProviderVertex
 	return toolv1.Settings{
 		Mode:    run.Mode,
-		Model:   toolv1.ModelSelection{Name: agent.resolveModel(gemini.Model)},
+		Model:   toolv1.ModelSelection{Provider: &provider, Name: agent.resolveModel(gemini.Model)},
 		Timeout: gemini.Timeout,
 		Proxy:   run.IsProxyEnabled(),
 	}, nil

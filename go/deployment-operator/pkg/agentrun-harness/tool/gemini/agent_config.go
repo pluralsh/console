@@ -21,12 +21,10 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 	}
 
 	input := &ConfigTemplateInput{
-		Model:             Model(model),
+		Model:             model,
 		RepositoryDir:     config.RepositoryDir,
-		AgentRunID:        config.Run.ID,
 		AgentRunMode:      config.Run.Mode,
 		InactivityTimeout: int64(gemini.InactivityTimeout.Seconds()),
-		GitAccessToken:    os.Getenv("GIT_ACCESS_TOKEN"),
 	}
 	_, content, err := settings(input)
 	if err != nil {
