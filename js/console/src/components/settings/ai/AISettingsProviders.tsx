@@ -208,17 +208,9 @@ export function validateAttributes(
     case AiProvider.Bedrock:
       return !!settings.bedrock?.region
     case AiProvider.Ollama:
-      return !!(
-        settings.ollama?.model &&
-        settings.ollama?.url &&
-        settings.ollama?.authorization
-      )
+      return !!(settings.ollama?.model && settings.ollama?.url)
     case AiProvider.Azure:
-      return !!(
-        settings.azure?.apiVersion &&
-        settings.azure?.endpoint &&
-        settings.azure?.accessToken
-      )
+      return !!(settings.azure?.endpoint && settings.azure?.accessToken)
     case AiProvider.Vertex:
       return !!(settings.vertex?.project && settings.vertex?.location)
     default:
@@ -548,8 +540,7 @@ export function OllamaSettings({
       </FormField>
       <FormField
         label="Authorization"
-        infoTooltip="An HTTP Authorization header to use on calls to the Ollama API."
-        required={enabled}
+        infoTooltip="Optional HTTP Authorization header to use on calls to the Ollama API."
         flex={1}
       >
         <InputRevealer
@@ -592,7 +583,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="API version"
-        required={enabled}
+        infoTooltip="Optional Azure OpenAI API version. Leave blank to use the provider default."
         flex={1}
       >
         <Input
