@@ -20,6 +20,17 @@ import { GqlError, GqlErrorType } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { AxiosError } from 'axios'
 
+export function normalizeUpdateError(error: unknown): GqlErrorType {
+  const responseData =
+    error instanceof AxiosError ? error.response?.data : undefined
+
+  if (typeof responseData === 'string' && responseData.trim()) {
+    return responseData
+  }
+
+  return error instanceof Error ? error : String(error)
+}
+
 export default function Raw(): ReactElement<any> {
   const theme = useTheme()
   const { clusterId, name = '', namespace, crd } = useParams()
@@ -58,23 +69,21 @@ export default function Raw(): ReactElement<any> {
   const { data, refetch, isLoading, error } = namespace
     ? namespacedQuery
     : clusterQuery
+  const handleUpdateError = (error: unknown) => {
+    setUpdating(false)
+    setUpdateError(normalizeUpdateError(error))
+  }
 
   const namespacedMutation = useMutation({
     ...updateNamespacedResourceMutation(),
     onSuccess: () => refetch().finally(() => setUpdating(false)),
-    onError: (err) => {
-      setUpdating(false)
-      setUpdateError(err)
-    },
+    onError: handleUpdateError,
   })
 
   const clusterMutation = useMutation({
     ...updateResourceMutation(),
     onSuccess: () => refetch().finally(() => setUpdating(false)),
-    onError: (err) => {
-      setUpdating(false)
-      setUpdateError(err)
-    },
+    onError: handleUpdateError,
   })
 
   const mutation = namespace ? namespacedMutation : clusterMutation
@@ -82,7 +91,7 @@ export default function Raw(): ReactElement<any> {
   useEffect(() => {
     if (!updateError) return
 
-    setTimeout(() => setUpdateError(undefined), 6_000) // Dismiss error after 6s
+    setTimeout(() => setUpdateError(undefined), 10_000) // Dismiss error after 10s
   }, [updateError])
 
   useEffect(() => {
@@ -112,7 +121,7 @@ export default function Raw(): ReactElement<any> {
             position: 'absolute',
             top: theme.spacing.large,
             left: theme.spacing.large,
-            zIndex: 1,
+            zIndex: 100,
           }}
         >
           <GqlError
@@ -141,13 +150,7 @@ export default function Raw(): ReactElement<any> {
               body: input,
             })
           } catch (e) {
-            setUpdateError(
-              e instanceof Error
-                ? e.message
-                : e instanceof AxiosError
-                  ? e.message
-                  : String(e)
-            )
+            setUpdateError(normalizeUpdateError(e))
           }
         }}
       />
