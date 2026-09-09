@@ -17,6 +17,7 @@ package container
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	v1 "k8s.io/api/core/v1"
@@ -84,8 +85,6 @@ func BenchmarkGetLogDetails3(b *testing.B) { benchmarkGetLogDetails(2000, "99", 
 func BenchmarkGetLogDetails4(b *testing.B) { benchmarkGetLogDetails(2000, "9", b) }
 
 func TestGetLogs(t *testing.T) {
-	// for the test cases, the line read limit is reduced to 10
-	lineReadLimit = int64(10)
 	cases := []struct {
 		info        string
 		podId       string
@@ -127,8 +126,11 @@ func TestGetLogs(t *testing.T) {
 						LogTimestamp: "3",
 						LineNum:      -1,
 					},
-					OffsetFrom: -2,
-					OffsetTo:   3},
+					OffsetFrom:      -2,
+					OffsetTo:        3,
+					LogFilePosition: logs.End,
+					TailLines:       logs.MaxTailLines,
+				},
 			},
 		},
 		{
@@ -147,6 +149,7 @@ func TestGetLogs(t *testing.T) {
 					ContainerName: "test",
 					FromDate:      "2",
 					ToDate:        "3",
+					HasMore:       true,
 				},
 				LogLines: logs.LogLines{log2, log3},
 				Selection: logs.Selection{
@@ -154,8 +157,11 @@ func TestGetLogs(t *testing.T) {
 						LogTimestamp: "3",
 						LineNum:      -1,
 					},
-					OffsetFrom: -1,
-					OffsetTo:   1},
+					OffsetFrom:      -1,
+					OffsetTo:        1,
+					LogFilePosition: logs.End,
+					TailLines:       logs.DefaultTailLines,
+				},
 			},
 		},
 		{
@@ -174,6 +180,7 @@ func TestGetLogs(t *testing.T) {
 					ContainerName: "test",
 					FromDate:      "2",
 					ToDate:        "3",
+					HasMore:       true,
 				},
 				LogLines: logs.LogLines{log2, log3},
 				Selection: logs.Selection{
@@ -181,8 +188,11 @@ func TestGetLogs(t *testing.T) {
 						LogTimestamp: "3",
 						LineNum:      -1,
 					},
-					OffsetFrom: -1,
-					OffsetTo:   1},
+					OffsetFrom:      -1,
+					OffsetTo:        1,
+					LogFilePosition: logs.End,
+					TailLines:       logs.DefaultTailLines,
+				},
 			},
 		},
 		{
@@ -204,6 +214,7 @@ func TestGetLogs(t *testing.T) {
 					ContainerName: "test",
 					FromDate:      "2",
 					ToDate:        "3",
+					HasMore:       true,
 				},
 				LogLines: logs.LogLines{log2, log3},
 				Selection: logs.Selection{
@@ -211,12 +222,15 @@ func TestGetLogs(t *testing.T) {
 						LogTimestamp: "3",
 						LineNum:      -1,
 					},
-					OffsetFrom: -1,
-					OffsetTo:   1},
+					OffsetFrom:      -1,
+					OffsetTo:        1,
+					LogFilePosition: logs.End,
+					TailLines:       logs.DefaultTailLines,
+				},
 			},
 		},
 		{
-			"return a slice outside of log bounds - try to keep requested size",
+			"return a partial page at the newest boundary",
 			"pod-1",
 			"1 log1\n2 log2\n3 log3\n4 log4\n5 log5",
 			"test",
@@ -232,47 +246,54 @@ func TestGetLogs(t *testing.T) {
 				Info: logs.LogInfo{
 					PodName:       "pod-1",
 					ContainerName: "test",
-					FromDate:      "4",
+					FromDate:      "5",
 					ToDate:        "5",
+					HasMore:       true,
 				},
-				LogLines: logs.LogLines{log4, log5},
+				LogLines: logs.LogLines{log5},
 				Selection: logs.Selection{
 					ReferencePoint: logs.LogLineId{
 						LogTimestamp: "3",
 						LineNum:      -1,
 					},
-					OffsetFrom: 1,
-					OffsetTo:   3},
+					OffsetFrom:      2,
+					OffsetTo:        3,
+					LogFilePosition: logs.End,
+					TailLines:       logs.DefaultTailLines,
+				},
 			},
 		},
 		{
-			"return a slice outside of log bounds - try to keep requested size",
+			"report the oldest boundary as terminal by default",
 			"pod-1",
 			"1 log1\n2 log2\n3 log3\n4 log4\n5 log5",
 			"test",
 			&logs.Selection{
 				ReferencePoint: logs.LogLineId{
-					LogTimestamp: logs.LogTimestamp("4"),
+					LogTimestamp: logs.LogTimestamp("2"),
 					LineNum:      1,
 				},
-				OffsetFrom: -50,
-				OffsetTo:   -48,
+				OffsetFrom: -3,
+				OffsetTo:   0,
 			},
 			&logs.LogDetails{
 				Info: logs.LogInfo{
 					PodName:       "pod-1",
 					ContainerName: "test",
 					FromDate:      "1",
-					ToDate:        "2",
+					ToDate:        "1",
 				},
-				LogLines: logs.LogLines{log1, log2},
+				LogLines: logs.LogLines{log1},
 				Selection: logs.Selection{
 					ReferencePoint: logs.LogLineId{
 						LogTimestamp: "3",
 						LineNum:      -1,
 					},
-					OffsetFrom: -2,
-					OffsetTo:   0},
+					OffsetFrom:      -2,
+					OffsetTo:        -1,
+					LogFilePosition: logs.End,
+					TailLines:       logs.DefaultTailLines,
+				},
 			},
 		},
 		{
@@ -294,6 +315,7 @@ func TestGetLogs(t *testing.T) {
 					ContainerName: "test",
 					FromDate:      "1",
 					ToDate:        "1",
+					HasMore:       true,
 				},
 				LogLines: logs.LogLines{logs.LogLine{
 					Timestamp: "1",
@@ -307,8 +329,11 @@ func TestGetLogs(t *testing.T) {
 						LogTimestamp: "1",
 						LineNum:      3,
 					},
-					OffsetFrom: -1,
-					OffsetTo:   1},
+					OffsetFrom:      -1,
+					OffsetTo:        1,
+					LogFilePosition: logs.End,
+					TailLines:       logs.DefaultTailLines,
+				},
 			},
 		},
 		{
@@ -318,36 +343,33 @@ func TestGetLogs(t *testing.T) {
 			"test",
 			&logs.Selection{
 				ReferencePoint: logs.LogLineId{
-					LogTimestamp: logs.LogTimestamp("5"),
+					LogTimestamp: logs.LogTimestamp("2"),
 					LineNum:      1,
 				},
-				OffsetFrom:      -10,
-				OffsetTo:        -8, // request indices outside (beginning) of available log lines
+				OffsetFrom:      -3,
+				OffsetTo:        0,
 				LogFilePosition: "end",
+				TailLines:       10,
 			},
 			&logs.LogDetails{
 				Info: logs.LogInfo{
 					PodName:       "pod-1",
 					ContainerName: "test",
 					FromDate:      "1",
-					ToDate:        "2",
+					ToDate:        "1",
 					Truncated:     true, // Read limit is set to 10. Log lines could not be loaded
+					HasMore:       true,
 				},
-				LogLines: logs.LogLines{logs.LogLine{ // Last available page of logs is returned
-					Timestamp: "1",
-					Content:   "log1",
-				}, logs.LogLine{
-					Timestamp: "2",
-					Content:   "log2",
-				}},
+				LogLines: logs.LogLines{log1},
 				Selection: logs.Selection{
 					ReferencePoint: logs.LogLineId{
 						LogTimestamp: "6",
 						LineNum:      -1,
 					},
 					OffsetFrom:      -5,
-					OffsetTo:        -3,
-					LogFilePosition: "end",
+					OffsetTo:        -4,
+					LogFilePosition: logs.End,
+					TailLines:       10,
 				},
 			},
 		},
@@ -373,8 +395,11 @@ func TestGetLogs(t *testing.T) {
 						LogTimestamp: "0",
 						LineNum:      1,
 					},
-					OffsetFrom: 0,
-					OffsetTo:   1},
+					OffsetFrom:      0,
+					OffsetTo:        1,
+					LogFilePosition: logs.End,
+					TailLines:       logs.MaxTailLines,
+				},
 			},
 		},
 	}
@@ -384,6 +409,36 @@ func TestGetLogs(t *testing.T) {
 			t.Errorf("Test Case: %s.\nReceived: %#v \nExpected: %#v\n\n", c.info, actual, c.expected)
 		}
 
+	}
+}
+
+func TestConstructLogDetailsMaxTailWindowHasNoMorePages(t *testing.T) {
+	var rawLogs strings.Builder
+	for lineNum := 1; lineNum <= logs.MaxTailLines; lineNum++ {
+		fmt.Fprintf(&rawLogs, "%d log%d\n", lineNum, lineNum)
+	}
+
+	details := ConstructLogDetails(
+		"pod-1",
+		rawLogs.String(),
+		"test",
+		&logs.Selection{
+			ReferencePoint:  logs.NewestLogLineId,
+			OffsetFrom:      -logs.MaxLogLines,
+			OffsetTo:        1,
+			LogFilePosition: logs.End,
+			TailLines:       logs.MaxTailLines,
+		},
+	)
+
+	if details.Info.HasMore {
+		t.Error("ConstructLogDetails() HasMore = true, want false at the maximum tail window")
+	}
+	if !details.Info.Truncated {
+		t.Error("ConstructLogDetails() Truncated = false, want true when the maximum tail window is full")
+	}
+	if len(details.LogLines) == 0 {
+		t.Error("ConstructLogDetails() returned no log lines")
 	}
 }
 
@@ -413,7 +468,19 @@ func TestMapToLogOptions(t *testing.T) {
 			&v1.PodLogOptions{
 				Container:  "test",
 				Timestamps: true,
-				TailLines:  &lineReadLimit,
+				TailLines:  int64Pointer(logs.DefaultTailLines),
+			},
+		},
+		{"Requested line limit must be set, when reading the log file from the end",
+			"test",
+			&logs.Selection{
+				LogFilePosition: logs.End,
+				TailLines:       1000,
+			},
+			&v1.PodLogOptions{
+				Container:  "test",
+				Timestamps: true,
+				TailLines:  int64Pointer(1000),
 			},
 		},
 	}
@@ -424,4 +491,9 @@ func TestMapToLogOptions(t *testing.T) {
 		}
 
 	}
+}
+
+func int64Pointer(value int) *int64 {
+	result := int64(value)
+	return &result
 }
