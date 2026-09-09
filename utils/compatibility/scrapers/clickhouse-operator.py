@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from collections import OrderedDict
-from typing import Optional
+from typing import Callable, Optional
 
 from utils import (
     expand_kube_versions,
@@ -25,6 +25,9 @@ CHART_NAME = "altinity-clickhouse-operator"
 MAX_RELEASES = 20
 # The compatibility matrix tracks the three newest Kubernetes minors per row.
 LATEST_KUBE_MINORS = 3
+
+GIT_REPO_URL = "https://github.com/Altinity/clickhouse-operator"
+README_URL = "https://raw.githubusercontent.com/Altinity/clickhouse-operator/release-{version}/README.md"
 
 # Strict form: a line that states only the requirement, e.g.
 #   " * Kubernetes 1.25+"
@@ -54,33 +57,86 @@ def _release_versions() -> list[str]:
     return versions[:MAX_RELEASES]
 
 
-def _kube_floor(version: str) -> Optional[str]:
-    """Read the minimum supported Kubernetes version from the release-tag README."""
-    url = f"https://raw.githubusercontent.com/{REPO_OWNER}/{REPO_NAME}/release-{version}/README.md"
-    content = fetch_page(url)
-    if not content:
-        print_warning(f"No README found for release-{version}")
-        return None
-    text = content.decode("utf-8", errors="ignore")
+def parse_min_kubernetes(text: str) -> str:
+    """Extract the minimum supported Kubernetes minor from a release README.
+
+    Raises ValueError when no documented requirement is present (fail closed).
+    """
     m = _STRICT_REQ_RE.search(text) or _LOOSE_REQ_RE.search(text)
     if not m:
-        print_warning(f"No Kubernetes requirement found in release-{version} README")
-        return None
+        raise ValueError("Kubernetes requirement not found in README")
     v = validate_semver(m.group(1))
-    return f"{v.major}.{v.minor}" if v else None
+    if not v:
+        raise ValueError(f"Invalid Kubernetes version in README: {m.group(1)}")
+    return f"{v.major}.{v.minor}"
 
 
-def _kube_list(floor: str, latest_minor: str) -> list[str]:
-    """Newest supported Kubernetes minors for a release, descending.
+def expand_minimum(floor: str, latest: str) -> list[str]:
+    """Kubernetes minors tracked for a release, newest first.
 
-    The documented requirement is a floor ("Kubernetes 1.25+"); the matrix
-    tracks only the three newest stable minors, so intersect the expanded
-    range with that window. Entries newer than the latest stable release are
-    dropped (expand_kube_versions can overshoot when start == end).
+    The documented requirement is a floor ("Kubernetes 1.25+"). The matrix
+    tracks only the three newest stable minors, so the floor constrains a
+    fixed-size window rather than expanding the list. A floor newer than the
+    tracked latest stable release fails closed: no tracked Kubernetes version
+    satisfies it.
     """
-    expanded = expand_kube_versions(floor, latest_minor)
-    supported = [v for v in expanded if v <= latest_minor]
+    floor_v = validate_semver(floor)
+    latest_v = validate_semver(latest)
+    if not floor_v or not latest_v:
+        raise ValueError(f"Invalid version: floor={floor} latest={latest}")
+    if floor_v > latest_v:
+        raise ValueError(
+            f"Minimum Kubernetes {floor} is newer than Plural's tracked "
+            f"latest stable {latest}"
+        )
+    expanded = expand_kube_versions(floor, latest)
+    # expand_kube_versions can overshoot by one minor when floor == latest.
+    supported = [v for v in expanded if v <= latest]
     return supported[-LATEST_KUBE_MINORS:][::-1]
+
+
+def build_rows(
+    release_versions: list[str],
+    latest_minor: str,
+    docs_get: Callable[[str], Optional[bytes]],
+) -> list[OrderedDict[str, object]]:
+    """Compatibility rows from per-release README documentation.
+
+    docs_get maps a release-tag README URL to raw bytes (or None).
+    """
+    rows: list[OrderedDict[str, object]] = []
+    for version in release_versions:
+        url = README_URL.format(version=version)
+        content = docs_get(url)
+        if not content:
+            print_warning(f"No README found for {version}")
+            continue
+        try:
+            text = content.decode("utf-8", errors="strict")
+        except UnicodeDecodeError:
+            print_warning(f"Could not decode README for {version}")
+            continue
+        try:
+            floor = parse_min_kubernetes(text)
+        except ValueError as e:
+            print_warning(f"{version}: {e}")
+            continue
+        try:
+            kube = expand_minimum(floor, latest_minor)
+        except ValueError as e:
+            print_warning(f"{version}: {e}; skipped")
+            continue
+        rows.append(
+            OrderedDict(
+                [
+                    ("version", version),
+                    ("kube", kube),
+                    ("requirements", []),
+                    ("incompatibilities", []),
+                ]
+            )
+        )
+    return rows
 
 
 def scrape() -> None:
@@ -90,26 +146,7 @@ def scrape() -> None:
         print_error("Could not determine the latest Kubernetes version")
         return
 
-    rows: list[OrderedDict[str, object]] = []
-    for version in _release_versions():
-        floor = _kube_floor(version)
-        if not floor:
-            continue
-        floor_v = validate_semver(floor)
-        latest_v = validate_semver(latest_minor)
-        if floor_v and latest_v and floor_v > latest_v:
-            floor = latest_minor
-        rows.append(
-            OrderedDict(
-                [
-                    ("version", version),
-                    ("kube", _kube_list(floor, latest_minor)),
-                    ("requirements", []),
-                    ("incompatibilities", []),
-                ]
-            )
-        )
-
+    rows = build_rows(_release_versions(), latest_minor, fetch_page)
     if not rows:
         print_error("No compatibility information found for ClickHouse Operator")
         return
