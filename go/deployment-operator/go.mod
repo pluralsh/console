@@ -18,7 +18,6 @@ require (
 	github.com/DataDog/dd-trace-go/contrib/k8s.io/client-go/v2 v2.8.1
 	github.com/DataDog/dd-trace-go/v2 v2.8.1
 	github.com/Masterminds/semver/v3 v3.5.0
-	github.com/Yamashou/gqlgenc v0.33.0
 	github.com/aquasecurity/trivy v0.72.0
 	github.com/aquasecurity/trivy-db v0.0.0-20260629102122-a0049d7ad12f
 	github.com/aquasecurity/trivy-operator v0.28.0
@@ -40,6 +39,7 @@ require (
 	github.com/gobuffalo/flect v1.0.3
 	github.com/google/gnostic-models v0.7.0
 	github.com/google/go-github/v68 v68.0.0
+	github.com/gqlgo/gqlgenc v0.38.2
 	github.com/grafana/pyroscope-go v1.2.7
 	github.com/hashicorp/terraform-json v0.27.2
 	github.com/hasura/go-graphql-client v0.16.0
@@ -65,7 +65,7 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/terraform-docs/terraform-docs v0.20.0
-	github.com/vektah/gqlparser/v2 v2.5.33
+	github.com/vektah/gqlparser/v2 v2.5.34
 	github.com/vmware-tanzu/velero v1.18.1
 	github.com/yuin/gopher-lua v1.1.2
 	gitlab.com/gitlab-org/api/client-go v1.46.0
@@ -113,7 +113,7 @@ require (
 require (
 	cel.dev/expr v0.25.2 // indirect
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/99designs/gqlgen v0.17.78
+	github.com/99designs/gqlgen v0.17.91
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/DataDog/datadog-agent/comp/core/tagger/origindetection v0.77.0 // indirect
@@ -299,7 +299,7 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.11.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	github.com/sosodev/duration v1.3.1 // indirect
+	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect

@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	ddtrace "github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 )
 
 func HashQuery(query string) string {

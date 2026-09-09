@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
