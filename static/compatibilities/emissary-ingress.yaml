@@ -1,0 +1,134 @@
+icon: https://raw.githubusercontent.com/cncf/artwork/main/projects/emissary-ingress/icon/color/emissary-ingress-icon-color.svg
+git_url: https://github.com/emissary-ingress/emissary
+release_url: https://github.com/emissary-ingress/emissary/releases/tag/v{vsn}
+helm_repository_url: https://app.getambassador.io
+chart_name: emissary-ingress
+versions:
+- version: 3.9.1
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.9.1
+  images: ['docker.io/ambassador/ambassador-agent:1.0.14', 'docker.io/emissaryingress/emissary:3.9.1',
+    'istio/kubectl:1.5.10']
+- version: 3.9.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.9.0
+  images: ['docker.io/ambassador/ambassador-agent:1.0.14', 'docker.io/emissaryingress/emissary:3.9.0',
+    'istio/kubectl:1.5.10']
+- version: 3.8.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.8.0
+  images: ['docker.io/ambassador/ambassador-agent:1.0.14', 'docker.io/emissaryingress/emissary:3.8.0']
+- version: 3.7.2
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.7.2
+  images: ['docker.io/ambassador/ambassador-agent:1.0.3', 'docker.io/emissaryingress/emissary:3.7.2']
+- version: 3.7.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.7.0
+  images: ['docker.io/ambassador/ambassador-agent:1.0.3', 'docker.io/emissaryingress/emissary:3.7.0']
+- version: 3.6.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.6.0
+  images: ['docker.io/ambassador/ambassador-agent:1.0.3', 'docker.io/emissaryingress/emissary:3.6.0']
+- version: 3.5.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.5.0
+  images: ['docker.io/ambassador/ambassador-agent:1.0.3', 'docker.io/emissaryingress/emissary:3.5.0']
+- version: 3.4.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.4.0
+  images: ['docker.io/ambassador/ambassador-agent:1.0.3', 'docker.io/emissaryingress/emissary:3.4.0']
+- version: 3.3.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.3.0
+  images: ['docker.io/emissaryingress/emissary:3.1.0', 'docker.io/emissaryingress/emissary:3.3.0']
+- version: 3.2.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.2.0
+  images: ['docker.io/emissaryingress/emissary:3.1.0', 'docker.io/emissaryingress/emissary:3.2.0']
+- version: 3.1.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.1.0
+  images: ['docker.io/emissaryingress/emissary:3.1.0']
+- version: 3.0.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 8.0.0
+  images: ['docker.io/emissaryingress/emissary:3.0.0']
+- version: 2.5.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 7.6.0
+  images: [busybox, 'docker.io/emissaryingress/emissary:2.5.0']
+- version: 2.4.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 7.5.0
+  images: [busybox, 'docker.io/emissaryingress/emissary:2.4.0']
+- version: 2.3.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 7.4.0
+  images: [busybox, 'docker.io/emissaryingress/emissary:2.3.0']
+- version: 2.2.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 7.3.0
+  images: [busybox, 'docker.io/emissaryingress/emissary:2.2.0']
+- version: 2.1.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 7.2.0
+  images: [busybox, 'docker.io/emissaryingress/emissary:2.1.0']
+- version: 2.0.4
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 7.1.9
+  images: [busybox, 'docker.io/emissaryingress/emissary:2.0.4']
