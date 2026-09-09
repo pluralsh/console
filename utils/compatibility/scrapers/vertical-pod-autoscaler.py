@@ -22,7 +22,9 @@ def _decode(content: bytes | str) -> str:
     try:
         return content.decode("utf-8")
     except UnicodeDecodeError as exc:
-        raise ValueError("Could not decode the VPA installation documentation as UTF-8") from exc
+        raise ValueError(
+            "Could not decode the VPA installation documentation as UTF-8"
+        ) from exc
 
 
 def _expand_descending(start: str, end: str) -> list[str]:
@@ -31,12 +33,17 @@ def _expand_descending(start: str, end: str) -> list[str]:
     if start_major != end_major or start_minor > end_minor:
         raise ValueError(f"Unsupported VPA Kubernetes range: {start} - {end}")
     if end_minor - start_minor > 50:
-        raise ValueError(f"VPA Kubernetes range is unexpectedly large: {start} - {end}")
-    return [f"{start_major}.{minor}" for minor in range(end_minor, start_minor - 1, -1)]
+        raise ValueError(
+            f"VPA Kubernetes range is unexpectedly large: {start} - {end}"
+        )
+    return [
+        f"{start_major}.{minor}"
+        for minor in range(end_minor, start_minor - 1, -1)
+    ]
 
 
 def parse_compatibility_matrix(content: bytes | str) -> dict[str, list[str]]:
-    """Parse the bounded VPA/Kubernetes compatibility table from the official docs."""
+    """Parse the bounded compatibility table from the official VPA docs."""
     text = _decode(content)
     section_match = re.search(r"(?m)^## Compatibility\s*$", text)
     if not section_match:
@@ -52,7 +59,10 @@ def parse_compatibility_matrix(content: bytes | str) -> dict[str, list[str]]:
         stripped = line.strip()
         if not stripped.startswith("|"):
             continue
-        columns = [column.strip().strip("`") for column in stripped.strip("|").split("|")]
+        columns = [
+            column.strip().strip("`")
+            for column in stripped.strip("|").split("|")
+        ]
         if len(columns) < 2:
             continue
 
@@ -71,7 +81,8 @@ def parse_compatibility_matrix(content: bytes | str) -> dict[str, list[str]]:
         )
         if not range_match:
             raise ValueError(
-                f"Unrecognized Kubernetes compatibility range for VPA {vpa_cell}: {kube_cell!r}"
+                "Unrecognized Kubernetes compatibility range for VPA "
+                f"{vpa_cell}: {kube_cell!r}"
             )
 
         minor = version_match.group(1)
@@ -97,7 +108,7 @@ def _stable_version(value: str) -> Version | None:
 def build_rows(
     compatibility_matrix: dict[str, list[str]], chart_versions: dict[str, str]
 ) -> list[OrderedDict[str, object]]:
-    """Select the newest stable VPA patch represented by a chart for each documented minor."""
+    """Choose the newest stable VPA patch for each documented minor."""
     selected: dict[str, tuple[Version, str, str]] = {}
 
     for raw_app_version, raw_chart_version in chart_versions.items():
@@ -112,7 +123,11 @@ def build_rows(
 
         current = selected.get(minor)
         if current is None or app_version > current[0]:
-            selected[minor] = (app_version, str(raw_app_version).lstrip("v"), str(raw_chart_version).lstrip("v"))
+            selected[minor] = (
+                app_version,
+                str(raw_app_version).lstrip("v"),
+                str(raw_chart_version).lstrip("v"),
+            )
 
     missing = sorted(set(compatibility_matrix) - set(selected), key=Version)
     if missing:
