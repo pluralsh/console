@@ -107,10 +107,4 @@ versions:
   summary: null
   chart_version: 0.4.1
   images: ['nginx:1.17', 'quay.io/cortexproject/cortex:v1.7.0']
-- version: 1.6.0
-  kube: ['1.26', '1.25', '1.24']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 0.3.0
-  images: ['nginx:1.17', 'quay.io/cortexproject/cortex:v1.4.0']
+

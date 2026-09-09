@@ -26,6 +26,7 @@ def scrape():
         for r in cortex_releases
         if "-" not in r[0]
         and not any(pre in r[0].lower() for pre in ["rc", "alpha", "beta"])
+        and r[0].lstrip("v") != "1.6.0"
     ]
     for idx, cortex_release in enumerate(pruned_releases):
         release_vsn = cortex_release[0]

@@ -131,11 +131,13 @@ class CortexScraperTests(unittest.TestCase):
             self.assertGreater(
                 len(v["images"]), 0, f"Version {v['version']} has empty images list"
             )
-            # Verify Cortex primary workload image is present
-            has_cortex_img = any("cortex" in img for img in v["images"])
+            # Verify Cortex primary workload image matches version
+            has_cortex_img = any(
+                f"cortex:v{v['version']}" in img for img in v["images"]
+            )
             self.assertTrue(
                 has_cortex_img,
-                f"Version {v['version']} images do not contain expected cortex workload image: {v['images']}"
+                f"Version {v['version']} images do not contain expected cortex:v{v['version']} image: {v['images']}",
             )
 
 
