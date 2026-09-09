@@ -31215,3 +31215,39 @@ addons:
     chart_version: 1.0.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.0.0']
   name: mongodb-kubernetes
+- icon: https://raw.githubusercontent.com/cncf/artwork/main/projects/kube-ovn/icon/color/kube-ovn-icon-color.svg
+  git_url: https://github.com/kubeovn/kube-ovn
+  release_url: https://github.com/kubeovn/kube-ovn/releases/tag/v{vsn}
+  readme_url: https://github.com/kubeovn/kube-ovn/tree/master/charts/kube-ovn-v2
+  helm_repository_url: oci://ghcr.io/kubeovn/charts/kube-ovn-v2
+  chart_name: kube-ovn-v2
+  versions:
+  - version: 1.16.3
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v1.16.3
+    images: ['docker.io/kubeovn/kube-ovn:v1.16.3', 'docker.io/kubeovn/vpc-nat-gateway:v1.16.3']
+  - version: 1.16.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v1.16.0
+    images: ['docker.io/kubeovn/kube-ovn:v1.16.0', 'docker.io/kubeovn/vpc-nat-gateway:v1.16.0']
+  - version: 1.15.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v1.15.1
+    images: ['docker.io/kubeovn/kube-ovn:v1.15.1', 'docker.io/kubeovn/vpc-nat-gateway:v1.15.1']
+  - version: 1.14.14
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v1.14.14
+    images: ['docker.io/kubeovn/kube-ovn:v1.14.14', 'docker.io/kubeovn/vpc-nat-gateway:v1.14.14']
+  name: kube-ovn
