@@ -1,0 +1,97 @@
+icon: https://kuma.io/assets/images/brand/kuma-logo-new.svg
+git_url: https://github.com/kumahq/kuma
+release_url: https://github.com/kumahq/kuma/releases?q={vsn}
+readme_url: https://kuma.io/docs/latest/introduction/kuma-requirements/
+helm_repository_url: https://kumahq.github.io/charts
+versions:
+- version: 2.14.4
+  kube: ['1.35', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.14.4
+  images: []
+- version: 2.13.10
+  kube: ['1.34', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.13.10
+  images: []
+- version: 2.12.14
+  kube: ['1.32', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.12.14
+  images: []
+- version: 2.11.18
+  kube: ['1.32', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.11.18
+  images: []
+- version: 2.10.11
+  kube: ['1.31', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.10.11
+  images: []
+- version: 2.9.19
+  kube: ['1.31', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.9.19
+  images: []
+- version: 2.8.8
+  kube: ['1.30', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.8.8
+  images: []
+- version: 2.7.29
+  kube: ['1.31', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.7.29
+  images: []
+- version: 2.6.15
+  kube: ['1.28', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.6.15
+  images: []
+- version: 2.5.11
+  kube: ['1.28', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.5.11
+  images: []
+- version: 2.4.10
+  kube: ['1.27', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.4.10
+  images: []
+- version: 2.3.7
+  kube: ['1.27', '1.22']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.3.7
+  images: []
+- version: 2.2.9
+  kube: ['1.26', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.2.9
+  images: []
