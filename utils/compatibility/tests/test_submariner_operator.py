@@ -131,11 +131,9 @@ class SubmarinerOperatorScraperTests(unittest.TestCase):
             self.assertGreater(
                 len(v["images"]), 0, f"Version {v['version']} has empty images list"
             )
-            # Verify Submariner primary workload image is present
-            has_submariner_img = any("submariner" in img for img in v["images"])
-            self.assertTrue(
-                has_submariner_img,
-                f"Version {v['version']} images do not contain expected submariner workload image: {v['images']}"
+            self.assertEqual(
+                v["images"],
+                [f"quay.io/submariner/submariner-operator:{v['version']}"],
             )
 
 
