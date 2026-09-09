@@ -48,6 +48,11 @@ MATRIX = """
 | 1.35.x              |            1.9.0            |       -       |
 """
 
+ALT_HEADING_MATRIX = MATRIX.replace(
+    "# Kubernetes versions supported by YuniKorn",
+    "## Supported K8s versions",
+)
+
 
 def helm_index(*versions: str) -> bytes:
     rows = "\n".join(
@@ -64,6 +69,14 @@ class YuniKornScraperTest(unittest.TestCase):
         self.assertIn(("1.13", yunikorn.Version("0.8.0"), yunikorn.Version("0.10.0")), rules)
         self.assertIn(("1.35", yunikorn.Version("1.9.0"), None), rules)
         self.assertNotIn("1.12", [rule[0] for rule in rules])
+
+    def test_parse_support_matrix_accepts_known_heading_variants(self):
+        for content in (MATRIX, ALT_HEADING_MATRIX):
+            with self.subTest(heading=content.splitlines()[1:4]):
+                rules = yunikorn.parse_support_matrix(content)
+                self.assertIsNotNone(rules)
+                assert rules is not None
+                self.assertIn(("1.35", yunikorn.Version("1.9.0"), None), rules)
 
     def test_support_ended_is_exclusive(self):
         rules = yunikorn.parse_support_matrix(MATRIX)
@@ -85,10 +98,14 @@ class YuniKornScraperTest(unittest.TestCase):
         self.assertNotIn("1.36", rows[0]["kube"])
 
     def test_malformed_heading_or_row_fails_closed(self):
-        self.assertIsNone(yunikorn.parse_support_matrix(MATRIX.replace(
-            "# Kubernetes versions supported by YuniKorn",
-            "# Kubernetes test versions",
-        )))
+        self.assertIsNone(
+            yunikorn.parse_support_matrix(
+                MATRIX.replace(
+                    "# Kubernetes versions supported by YuniKorn",
+                    "# Kubernetes test versions",
+                )
+            )
+        )
         self.assertIsNone(yunikorn.parse_support_matrix(MATRIX + "| broken | row |\n"))
 
     def test_parse_helm_index_keeps_stable_exact_mappings(self):
@@ -101,6 +118,11 @@ entries:
       version: 1.10.0-rc.1
 """
         self.assertEqual(yunikorn.parse_helm_index(content), {"1.9.0": "1.9.0"})
+
+    def test_malformed_but_valid_helm_yaml_fails_closed(self):
+        for content in (b"[]\n", b"entries: []\n", b"entries:\n  yunikorn: {}\n"):
+            with self.subTest(content=content):
+                self.assertIsNone(yunikorn.parse_helm_index(content))
 
     def test_conflicting_helm_mapping_fails_closed(self):
         content = b"""apiVersion: v1
