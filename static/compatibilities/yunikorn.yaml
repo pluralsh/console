@@ -1,0 +1,122 @@
+icon: https://raw.githubusercontent.com/apache/yunikorn-site/master/static/img/logo/yunikorn_logo.svg
+git_url: https://github.com/apache/yunikorn-k8shim
+release_url: https://yunikorn.apache.org/release-announce/{vsn}/
+readme_url: https://yunikorn.apache.org/docs/get_started/version/
+helm_repository_url: https://apache.github.io/yunikorn-release
+chart_name: yunikorn
+versions:
+- version: 1.9.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.9.0
+  images: ['apache/yunikorn:admission-1.9.0', 'apache/yunikorn:scheduler-1.9.0', 'apache/yunikorn:web-1.9.0']
+- version: 1.8.0
+  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+    '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.8.0
+  images: ['apache/yunikorn:admission-1.8.0', 'apache/yunikorn:scheduler-1.8.0', 'apache/yunikorn:web-1.8.0']
+- version: 1.7.0
+  kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.7.0
+  images: ['apache/yunikorn:admission-1.7.0', 'apache/yunikorn:scheduler-1.7.0', 'apache/yunikorn:web-1.7.0']
+- version: 1.6.0
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.6.0
+  images: ['apache/yunikorn:admission-1.6.0', 'apache/yunikorn:scheduler-1.6.0', 'apache/yunikorn:web-1.6.0']
+- version: 1.5.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.5.0
+  images: ['apache/yunikorn:admission-1.5.0', 'apache/yunikorn:scheduler-1.5.0', 'apache/yunikorn:web-1.5.0']
+- version: 1.4.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.4.0
+  images: ['apache/yunikorn:admission-1.4.0', 'apache/yunikorn:scheduler-1.4.0', 'apache/yunikorn:web-1.4.0']
+- version: 1.3.0
+  kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.3.0
+  images: ['apache/yunikorn:admission-1.3.0', 'apache/yunikorn:scheduler-1.3.0', 'apache/yunikorn:web-1.3.0']
+- version: 1.2.0
+  kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.2.0
+  images: ['apache/yunikorn:admission-1.2.0', 'apache/yunikorn:scheduler-1.2.0', 'apache/yunikorn:web-1.2.0']
+- version: 1.1.0
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.1.0
+  images: ['apache/yunikorn:admission-1.1.0', 'apache/yunikorn:scheduler-1.1.0', 'apache/yunikorn:web-1.1.0']
+- version: 1.0.0
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.0
+  images: ['apache/yunikorn:admission-1.0.0', 'apache/yunikorn:scheduler-1.0.0', 'apache/yunikorn:web-1.0.0']
+- version: 0.12.2
+  kube: ['1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.12.2
+  images: ['apache/yunikorn:admission-0.12.2', 'apache/yunikorn:scheduler-0.12.2',
+    'apache/yunikorn:web-0.12.2']
+- version: 0.12.1
+  kube: ['1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.12.1
+  images: ['apache/yunikorn:scheduler-0.12.1', 'apache/yunikorn:web-0.12.1', 'curlimages/curl:latest']
+- version: 0.11.0
+  kube: ['1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.11.0
+  images: ['apache/yunikorn:scheduler-0.11.0', 'apache/yunikorn:web-0.11.0', 'curlimages/curl:latest']
+- version: 0.10.0
+  kube: ['1.18', '1.17', '1.16', '1.15', '1.14', '1.13']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.10.0
+  images: ['apache/yunikorn:scheduler-0.10.0', 'apache/yunikorn:web-0.10.0', 'curlimages/curl:latest']
+- version: 0.9.0
+  kube: ['1.15', '1.14', '1.13']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.9.0
+  images: ['apache/yunikorn:scheduler-0.9.0', 'apache/yunikorn:web-0.9.0', 'curlimages/curl:latest']
+- version: 0.8.0
+  kube: ['1.15', '1.14', '1.13']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.8.0
+  images: ['apache/yunikorn:scheduler-0.8.0', 'apache/yunikorn:web-0.8.0', 'curlimages/curl:latest']
