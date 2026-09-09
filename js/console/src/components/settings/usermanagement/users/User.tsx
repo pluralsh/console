@@ -1,22 +1,19 @@
-import { useCallback, useContext, useState } from 'react'
-import { LoginContext } from 'components/contexts'
 import { Chip, Switch } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-
+import { useLogin } from 'components/contexts'
 import { Confirm } from 'components/utils/Confirm'
+import { UserFragment, useUpdateUserMutation } from 'generated/graphql'
+import { useCallback, useState } from 'react'
+import styled from 'styled-components'
 
-import UserInfo from '../../../utils/UserInfo'
-
-import { useUpdateUserMutation } from '../../../../generated/graphql.ts'
-
-export function User({ user }: any) {
-  const theme = useTheme()
-  const { me } = useContext(LoginContext)
+export function UserAdminCell({ user }: { user: UserFragment }) {
+  const { me } = useLogin()
+  const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useUpdateUserMutation({
     onCompleted: () => setConfirm(false),
   })
   const editable = !!me?.roles?.admin
   const isAdmin = !!user.roles?.admin
+  const isSelf = user.id === me?.id
   const setAdmin = useCallback(
     () =>
       mutation({
@@ -24,44 +21,27 @@ export function User({ user }: any) {
       }),
     [mutation, user.id, isAdmin]
   )
-  const [confirm, setConfirm] = useState(false)
-
-  const isSelf = user.id === me?.id
-
-  const confirmModal = confirm && (
-    <Confirm
-      open={confirm}
-      title="Remove admin role"
-      text={`Are you sure you want to remove ${
-        isSelf ? 'yourself' : user.name
-      } as admin?${isSelf ? ' This cannot be undone.' : ''}`}
-      close={() => setConfirm(false)}
-      submit={() => {
-        setAdmin()
-      }}
-      loading={loading}
-      destructive
-      error={error}
-    />
-  )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        alignItems: 'center',
-        width: '100%',
-        gap: theme.spacing.small,
-      }}
-    >
-      <UserInfo
-        user={user}
-        css={{ width: '100%' }}
-      />
-      {confirmModal}
+    <div onClick={(e) => e.stopPropagation()}>
+      {confirm && (
+        <Confirm
+          open={confirm}
+          title="Remove admin role"
+          text={`Are you sure you want to remove ${
+            isSelf ? 'yourself' : user.name
+          } as admin?${isSelf ? ' This cannot be undone.' : ''}`}
+          close={() => setConfirm(false)}
+          submit={setAdmin}
+          loading={loading}
+          destructive
+          error={error}
+        />
+      )}
       {!editable && isAdmin && <Chip>Admin</Chip>}
       {editable && (
-        <Switch
+        <AdminSwitchSC
+          aria-label="Admin"
           checked={isAdmin}
           disabled={loading}
           onChange={() => {
@@ -71,10 +51,13 @@ export function User({ user }: any) {
               setAdmin()
             }
           }}
-        >
-          Admin
-        </Switch>
+        />
       )}
     </div>
   )
 }
+
+const AdminSwitchSC = styled(Switch)({
+  columnGap: 0,
+  '.label': { display: 'none' },
+})
