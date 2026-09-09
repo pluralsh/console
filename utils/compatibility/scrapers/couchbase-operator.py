@@ -102,7 +102,7 @@ def scrape():
                 previous = recorded[version]
                 previous_chart = stable_version(previous.get("chart_version", ""))
                 if previous_chart is None or stable_version(chart_version) > previous_chart:
-                    versions.append({**previous, "chart_version": chart_version})
+                    versions.append({**previous, "chart_version": chart_version, "images": []})
                 continue
             content = fetch_page(f"{docs_url}/{minor}/{page_name}")
             if not content:

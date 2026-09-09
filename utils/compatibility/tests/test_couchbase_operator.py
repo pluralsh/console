@@ -134,14 +134,28 @@ class CouchbaseOperatorTests(unittest.TestCase):
 
     def test_new_chart_for_recorded_operator_preserves_historical_range(self):
         old = {"version": "2.6.4", "chart_version": "2.64.0", "kube": ["1.25"],
-               "summary": {"features": ["Previously recorded"]}}
+               "summary": {"features": ["Previously recorded"]}, "images": ["previous-chart:old"]}
         self.existing["versions"].append(old)
         update, fetch = self.run_scrape()
         row = next(row for row in update.call_args.args[1] if row["version"] == "2.6.4")
-        self.assertEqual(row, {**old, "chart_version": "2.64.1"})
+        self.assertEqual(row, {**old, "chart_version": "2.64.1", "images": []})
         self.assertEqual(old["chart_version"], "2.64.0")
+        self.assertEqual(old["images"], ["previous-chart:old"])
         self.assertNotIn(f"{scraper.docs_url}/2.6/{scraper.page_name}",
                          [call.args[0] for call in fetch.call_args_list])
+
+        # The shared writer keeps a row when rendering yields no images. It must
+        # not publish the previous chart's images alongside the new chart version.
+        with patch.object(utils, "read_yaml", return_value={
+            "versions": [old], "helm_repository_url": scraper.helm_repository_url,
+        }), patch.object(utils, "get_chart_images", return_value=None), \
+                patch.object(utils, "summarization_enabled", return_value=False), \
+                patch.object(utils, "write_yaml", return_value=True) as write, \
+                patch.object(utils, "print_success"), patch.object(utils, "print_warning"):
+            utils.update_compatibility_info(scraper.filepath, [row])
+        written = write.call_args.args[1]["versions"][0]
+        self.assertEqual(written["chart_version"], "2.64.1")
+        self.assertEqual(written["images"], [])
 
     def test_catalog_writer_keeps_data_without_fetching_wrong_release_summaries(self):
         catalog_path = COMPATIBILITY.parents[1] / "static/compatibilities/couchbase-operator.yaml"
