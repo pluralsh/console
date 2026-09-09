@@ -1,0 +1,87 @@
+icon: https://kubeblocks.io/img/logo.png
+git_url: https://github.com/apecloud/kubeblocks
+release_url: https://github.com/apecloud/kubeblocks/releases/tag/v{vsn}
+helm_repository_url: https://apecloud.github.io/helm-charts
+versions:
+- version: 1.0.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.2
+  images: ['apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-dataprotection:1.0.2',
+    'apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-tools:1.0.2',
+    'apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks:1.0.2']
+- version: 1.0.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.0
+  images: ['apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-dataprotection:1.0.0',
+    'apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-tools:1.0.0',
+    'apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks:1.0.0']
+- version: 0.9.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.9.0
+  images: ['apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-dataprotection:0.9.0',
+    'apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-datascript:0.9.0',
+    'apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-tools:0.9.0',
+    'apecloud-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks:0.9.0']
+- version: 0.8.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.8.2
+  images: [busybox, 'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-dataprotection:0.8.2',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-datascript:0.8.2',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-tools:0.8.2',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks:0.8.2']
+- version: 0.8.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.8.0
+  images: [busybox, 'docker.io/apecloud/kubeblocks-tools:latest', 'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-dataprotection:0.8.0',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-datascript:0.8.0',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-tools:0.8.0',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks:0.8.0']
+- version: 0.7.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.7.0
+  images: [busybox, 'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-dataprotection:0.7.0',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-datascript:0.7.0',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks-tools:0.7.0',
+    'infracreate-registry.cn-zhangjiakou.cr.aliyuncs.com/apecloud/kubeblocks:0.7.0']
+- version: 0.6.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.6.0
+  images: [busybox, 'registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks-datascript:0.6.0',
+    'registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks-tools:0.6.0', 'registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks:0.6.0']
+- version: 0.5.1
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.5.1
+  images: [busybox, 'registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks-tools:0.5.1',
+    'registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks:0.5.1']
