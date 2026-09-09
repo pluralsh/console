@@ -16,8 +16,24 @@ CONFIG_URL = "https://raw.githubusercontent.com/NetApp/trident/v{version}/config
 
 def version_parts(value):
     # Trident uses zero-padded calendar versions, including historical chart versions.
-    match = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)", str(value))
-    return tuple(map(int, match.groups())) if match else None
+    if not isinstance(value, str):
+        raise ValueError(f"Expected a release version string, got {value!r}")
+    match = re.fullmatch(r"v?([0-9]+)\.([0-9]+)\.([0-9]+)([-+].*)?", value)
+    if not match:
+        raise ValueError(f"Invalid release version: {value!r}")
+    parts = tuple(map(int, match.group(1, 2, 3)))
+    suffix = match.group(4) or ""
+    # Validate suffixes after normalizing the calendar-version core. Only a
+    # well-formed prerelease may be skipped; malformed metadata must stop a refresh.
+    try:
+        parsed = semantic_version.Version(".".join(map(str, parts)) + suffix)
+    except ValueError as exc:
+        raise ValueError(f"Invalid release version: {value!r}") from exc
+    if parsed.prerelease:
+        return None
+    if parsed.build:
+        raise ValueError(f"Unsupported build metadata in release version: {value!r}")
+    return parts
 
 
 def parse_charts(content):

@@ -29,7 +29,10 @@ semantic versions (`26.06.1` → `26.6.1`). Original strings are retained for so
 tag lookups and chart versions. The release link points to the upstream release
 list because substituting normalized versions into its tag URLs would break them.
 
-Prereleases are excluded. Missing or malformed release evidence aborts before
+Only syntactically valid prereleases are excluded. Both application and chart
+versions are validated before an entry is skipped. Missing or malformed version
+metadata, and stable versions with unsupported build metadata, abort before the
+catalog writer runs. Missing or malformed release evidence also aborts before
 the catalog writer runs. Chart constraints involving patch-level bounds or
 unsupported syntax are rejected instead of guessed. A future upstream syntax
 change will need a parser update.

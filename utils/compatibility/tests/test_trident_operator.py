@@ -62,6 +62,39 @@ def test_chart_selection_skips_prereleases_and_chooses_newest_chart():
     assert [(x["appVersion"], x["version"]) for x in charts] == [("26.06.1", "100.2606.2"), ("25.10.0", "100.2510.0")]
 
 
+@pytest.mark.parametrize("field", ["appVersion", "version"])
+@pytest.mark.parametrize("value", [None, "", "garbage", "26.06", "26.06.1-", "26.06.1-rc..1", "26.06.1-01", "26.06.1+build.1", 26.06])
+def test_malformed_release_alongside_valid_release_aborts_before_writing(field, value):
+    invalid = chart()
+    invalid[field] = value
+    content = index(chart(), invalid)
+    with pytest.raises(ValueError, match="version"):
+        scraper.parse_charts(content)
+    with patch.object(scraper, "fetch_page", return_value=content), patch.object(scraper, "update_compatibility_info") as write:
+        scraper.scrape()
+        write.assert_not_called()
+
+
+@pytest.mark.parametrize("field", ["appVersion", "version"])
+def test_missing_release_version_is_rejected(field):
+    invalid = chart()
+    del invalid[field]
+    with pytest.raises(ValueError, match="version"):
+        scraper.parse_charts(index(chart(), invalid))
+
+
+@pytest.mark.parametrize("suffix", ["-rc.1", "-beta.2+build.7", "-0"])
+def test_recognized_prereleases_are_skipped(suffix):
+    result = scraper.parse_charts(index(chart(), chart(app="v26.06.2" + suffix), chart(version="100.2606.2" + suffix)))
+    assert result == [chart()]
+
+
+@pytest.mark.parametrize("invalid", [chart(app="26.06.1-rc.1", version="broken"), chart(app="broken", version="100.2606.1-rc.1")])
+def test_prerelease_does_not_hide_malformed_partner_version(invalid):
+    with pytest.raises(ValueError, match="version"):
+        scraper.parse_charts(index(chart(), invalid))
+
+
 def test_conflicting_duplicate_is_rejected():
     with pytest.raises(ValueError, match="Conflicting"):
         scraper.parse_charts(index(chart(), chart(constraint=">=1.28.0")))
