@@ -108,8 +108,9 @@ def kubernetes_versions(constraint, current):
 def build_rows(tags, current, chart_fetcher=None):
     if chart_fetcher is None:
         chart_fetcher = fetch_chart
-    rows = {}
-    for tag in tags:
+    rows = []
+    aliases = {}
+    for tag in dict.fromkeys(tags):
         chart_version = stable_version(tag)
         if chart_version is None:
             continue
@@ -129,17 +130,17 @@ def build_rows(tags, current, chart_fetcher=None):
             "requirements": [],
             "incompatibilities": [],
         }
-        existing = rows.get(app_version)
-        if existing and stable_version(existing["chart_version"]) == chart_version:
-            if existing["kube"] != row["kube"]:
-                raise ValueError(f"Conflicting chart aliases for Kube-OVN {app_version}")
-        if existing is None or (chart_version, tag) > (
-            stable_version(existing["chart_version"]), existing["chart_version"]
-        ):
-            rows[app_version] = row
+        existing = aliases.get(chart_version)
+        if existing and (existing["version"], existing["kube"]) != (row["version"], row["kube"]):
+            raise ValueError(f"Conflicting chart aliases for Kube-OVN {chart_version}")
+        aliases[chart_version] = row
+        # Keep every exact tag until its deployed application image is verified.
+        rows.append(row)
     if not rows:
         raise ValueError("No stable Kube-OVN v2 chart versions found")
-    return [rows[version] for version in sorted(rows, reverse=True)]
+    return sorted(rows, key=lambda row: (
+        stable_version(row["version"]), stable_version(row["chart_version"]), row["chart_version"]
+    ), reverse=True)
 
 
 def chart_images(tag, current):
@@ -159,7 +160,7 @@ def chart_images(tag, current):
 def verify_images(rows, current, image_fetcher=None):
     if image_fetcher is None:
         image_fetcher = chart_images
-    verified = []
+    verified = {}
     for row in rows:
         images = image_fetcher(row["chart_version"], current)
         versions = set()
@@ -178,10 +179,14 @@ def verify_images(rows, current, image_fetcher=None):
             print(f"Skipping chart {row['chart_version']}: appVersion {row['version']} "
                   f"does not match rendered Kube-OVN versions {sorted(versions)}")
             continue
-        verified.append({**row, "images": images})
+        existing = verified.get(row["version"])
+        if existing is None or (stable_version(row["chart_version"]), row["chart_version"]) > (
+            stable_version(existing["chart_version"]), existing["chart_version"]
+        ):
+            verified[row["version"]] = {**row, "images": images}
     if not verified:
         raise ValueError("No Kube-OVN charts match their declared application version")
-    return verified
+    return [verified[version] for version in sorted(verified, key=stable_version, reverse=True)]
 
 
 def scrape():

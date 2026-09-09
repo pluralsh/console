@@ -60,6 +60,10 @@ class KubeOvnTests(unittest.TestCase):
         }
         tags = ["latest", "v1.17.0-rc.1", *fixtures, "v1.16.0"]
         rows = scraper.build_rows(tags, "1.31", fixtures.__getitem__)
+        self.assertEqual([r["chart_version"] for r in rows], ["v1.16.0", "v1.15.2", "v1.15.1", "1.14.2"])
+        rows = scraper.verify_images(
+            rows, "1.31", lambda tag, _: [f"kubeovn/kube-ovn:v{fixtures[tag]['appVersion']}"]
+        )
         self.assertEqual([r["version"] for r in rows], ["1.16.0", "1.15.1", "1.14.2"])
         self.assertEqual([r["chart_version"] for r in rows], ["v1.16.0", "v1.15.2", "1.14.2"])
         self.assertEqual(rows[0]["kube"], ["1.31", "1.30"])
@@ -67,10 +71,45 @@ class KubeOvnTests(unittest.TestCase):
 
     def test_order_and_alias_selection_are_deterministic(self):
         tags = ["1.15.0", "v1.15.0", "v1.16.0"]
+        rows = scraper.build_rows(tags, "1.30", chart)
         self.assertEqual(
-            scraper.build_rows(tags, "1.30", chart),
+            rows,
             scraper.build_rows(list(reversed(tags)), "1.30", chart),
         )
+        images = lambda tag, _: [f"kubeovn/kube-ovn:v{tag.removeprefix('v')}"]
+        verified = scraper.verify_images(rows, "1.30", images)
+        self.assertEqual(verified, scraper.verify_images(list(reversed(rows)), "1.30", images))
+        self.assertEqual([row["chart_version"] for row in verified], ["v1.16.0", "v1.15.0"])
+
+    def test_valid_chart_survives_mismatched_newer_candidate(self):
+        fixtures = {
+            "v1.15.1": chart("v1.15.1", constraint=">=1.29.0"),
+            "v1.15.2": chart("v1.15.2", app="1.15.1", constraint=">=1.30.0"),
+        }
+        for tags in [list(fixtures), list(reversed(fixtures))]:
+            with self.subTest(tags=tags):
+                rows = scraper.build_rows(tags, "1.31", fixtures.__getitem__)
+                images = {
+                    "v1.15.1": ["docker.io/kubeovn/kube-ovn:v1.15.1"],
+                    "v1.15.2": ["docker.io/kubeovn/kube-ovn:v1.14.0"],
+                }
+                verified = scraper.verify_images(rows, "1.31", lambda tag, _: images[tag])
+                self.assertEqual(len(verified), 1)
+                self.assertEqual(verified[0]["chart_version"], "v1.15.1")
+                self.assertEqual(verified[0]["kube"], ["1.31", "1.30", "1.29"])
+                self.assertEqual(verified[0]["images"], images["v1.15.1"])
+
+    def test_valid_exact_tag_survives_mismatched_alias(self):
+        for tags in [["1.15.0", "v1.15.0"], ["v1.15.0", "1.15.0"]]:
+            with self.subTest(tags=tags):
+                rows = scraper.build_rows(tags, "1.30", chart)
+                images = {
+                    "1.15.0": ["docker.io/kubeovn/kube-ovn:v1.15.0"],
+                    "v1.15.0": ["docker.io/kubeovn/kube-ovn:v1.14.0"],
+                }
+                verified = scraper.verify_images(rows, "1.30", lambda tag, _: images[tag])
+                self.assertEqual(len(verified), 1)
+                self.assertEqual(verified[0]["chart_version"], "1.15.0")
 
     def test_conflicting_aliases_fail(self):
         with self.assertRaisesRegex(ValueError, "Conflicting"):
