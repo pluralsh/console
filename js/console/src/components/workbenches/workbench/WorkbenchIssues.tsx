@@ -1,14 +1,15 @@
-import {
-  Button,
-  FiltersIcon,
-  Flex,
-  Input2,
-  SearchIcon,
-} from '@pluralsh/design-system'
+import { Flex, Input2, SearchIcon } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
 import { GqlError } from 'components/utils/Alert'
+import {
+  DisplayButton,
+  DisplayContentSC,
+  DisplayFilterEmpty,
+  DisplayMainSC,
+  DisplayToolbarSC,
+} from 'components/utils/display/DisplayPanel'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
@@ -24,7 +25,6 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
 import { WorkbenchIssuesDisplayPanel } from './WorkbenchIssuesDisplayPanel'
-import { WorkbenchIssuesFilterEmpty } from './WorkbenchIssuesEmpty'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
   getIssueFilterEmptyKind,
@@ -105,7 +105,7 @@ export function WorkbenchIssues() {
         <GqlError error={error} />
       ) : (
         <WrapperSC>
-          <ToolbarSC>
+          <DisplayToolbarSC>
             <Input2
               showClearButton
               css={{ flex: 1 }}
@@ -114,22 +114,17 @@ export function WorkbenchIssues() {
               value={searchString}
               onChange={(e) => setSearchString(e.currentTarget.value)}
             />
-            <Button
-              secondary
-              startIcon={<FiltersIcon />}
+            <DisplayButton
+              showDot={hasUncheckedIssueFilters(display)}
               onClick={() => setDisplayOpen(!displayOpen)}
-            >
-              <DisplayLabelSC>
-                Display
-                {hasUncheckedIssueFilters(display) && <DisplayFilterDotSC />}
-              </DisplayLabelSC>
-            </Button>
-          </ToolbarSC>
-          <ContentSC>
-            <TableContainerSC>
+            />
+          </DisplayToolbarSC>
+          <DisplayContentSC>
+            <DisplayMainSC>
               {filterEmptyKind ? (
-                <WorkbenchIssuesFilterEmpty
-                  kind={filterEmptyKind}
+                <DisplayFilterEmpty
+                  title={`No ${filterEmptyKind} selected`}
+                  description={`It looks like there are no ${filterEmptyKind} selected.`}
                   onReset={() => updateDisplay(resetIssueFilters(display))}
                 />
               ) : display.view === 'board' ? (
@@ -151,7 +146,7 @@ export function WorkbenchIssues() {
                   fallbackWorkbenchId={workbenchId}
                 />
               )}
-            </TableContainerSC>
+            </DisplayMainSC>
             {displayOpen && (
               <WorkbenchIssuesDisplayPanel
                 state={display}
@@ -160,7 +155,7 @@ export function WorkbenchIssues() {
                 statusCounts={statusCounts}
               />
             )}
-          </ContentSC>
+          </DisplayContentSC>
         </WrapperSC>
       )}
     </WorkbenchPageLayout>
@@ -175,36 +170,3 @@ const WrapperSC = styled(Flex)(({ theme }) => ({
   overflow: 'hidden',
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
 }))
-
-const ToolbarSC = styled(Flex)(({ theme }) => ({
-  alignItems: 'center',
-  gap: theme.spacing.medium,
-}))
-
-const DisplayLabelSC = styled.span(({ theme }) => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-}))
-
-const DisplayFilterDotSC = styled.span(({ theme }) => ({
-  width: 8,
-  height: 8,
-  borderRadius: '50%',
-  backgroundColor: theme.colors['text-primary-accent'],
-  flexShrink: 0,
-}))
-
-const ContentSC = styled(Flex)(({ theme }) => ({
-  flex: 1,
-  gap: theme.spacing.medium,
-  minHeight: 0,
-}))
-
-const TableContainerSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  minHeight: 0,
-  minWidth: 0,
-})

@@ -1,4 +1,5 @@
 import {
+  AiSparkleOutlineIcon,
   AppIcon,
   ArrowRightIcon,
   Card,
@@ -6,7 +7,7 @@ import {
   Flex,
   FlowIcon,
   GitPullIcon,
-  IconFrame,
+  ListBoxItem,
   PeopleIcon,
 } from '@pluralsh/design-system'
 import {
@@ -14,7 +15,14 @@ import {
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
 import { useLogin } from 'components/contexts'
-import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
+import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
+import {
+  FlowHealthChips,
+  FlowPipelineChip,
+  componentHealthCounts,
+} from 'components/flows/flowHealth'
+import { MoreMenu } from 'components/utils/MoreMenu'
+import { Body1BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import pluralize from 'pluralize'
@@ -26,9 +34,13 @@ import styled from 'styled-components'
 export function FlowCard({
   flow,
   refetch,
+  favorited,
+  onToggleFavorite,
 }: {
   flow: FlowBasicWithBindingsFragment
   refetch: () => void
+  favorited: boolean
+  onToggleFavorite: () => void
 }) {
   const { search } = useLocation()
   const navigate = useNavigate()
@@ -39,9 +51,13 @@ export function FlowCard({
   )
   const showPipelines = hasAccess(personaConfiguration, 'flows.pipelines')
   const [hovered, setHovered] = useState(false)
-  const [showPermissions, setShowPermissions] = useState(false)
-  const numAlerts = flow.alerts?.edges?.length ?? 0
+  const [menuKey, setMenuKey] = useState('')
+  const numAlerts = flow.alertCount ?? 0
+  const serviceCount = flow.serviceCount ?? 0
+  const componentCount = flow.componentCount ?? 0
+  const componentCounts = componentHealthCounts(flow.componentStatuses)
   const flowPath = getFlowDetailsPath({ flowIdOrName: flow.name })
+
   return (
     <>
       <CardSC
@@ -52,56 +68,136 @@ export function FlowCard({
         onMouseLeave={() => setHovered(false)}
       >
         <ContentSC>
+          <HeaderSC>
+            <AppIcon
+              size="xsmall"
+              url={flow.icon ?? ''}
+              icon={<FlowIcon />}
+            />
+            <Body1BoldP
+              css={{
+                flex: 1,
+                minWidth: 0,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {flow.name}
+            </Body1BoldP>
+            {flow.agentRuntime?.id && (
+              <AiSparkleOutlineIcon
+                size={13}
+                color="icon-info"
+              />
+            )}
+          </HeaderSC>
+          <MetaSC>
+            <span>
+              <MetaLabelSC>Components</MetaLabelSC> {componentCount}
+            </span>
+            <span>
+              <MetaLabelSC>Services</MetaLabelSC> {serviceCount}
+            </span>
+          </MetaSC>
+          {flow.description && (
+            <Body2P
+              $color="text-light"
+              css={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {flow.description}
+            </Body2P>
+          )}
+          <MetricsSC>
+            <MetricGroupSC>
+              <CaptionP
+                $color="text-xlight"
+                css={{ margin: 0 }}
+              >
+                Components
+              </CaptionP>
+              <FlowHealthChips counts={componentCounts} />
+            </MetricGroupSC>
+            <MetricGroupSC>
+              <CaptionP
+                $color="text-xlight"
+                css={{ margin: 0 }}
+              >
+                Alerts
+              </CaptionP>
+              <Chip
+                inactive={numAlerts === 0}
+                severity="danger"
+                size="small"
+                css={{ width: 'fit-content' }}
+              >
+                {numAlerts} {pluralize('alert', numAlerts)}
+              </Chip>
+            </MetricGroupSC>
+            <MetricGroupSC>
+              <CaptionP
+                $color="text-xlight"
+                css={{ margin: 0 }}
+              >
+                Pipelines
+              </CaptionP>
+              <FlowPipelineChip
+                pipelineCount={flow.pipelineCount ?? 0}
+                pendingCount={flow.pendingPipelineCount ?? 0}
+              />
+            </MetricGroupSC>
+          </MetricsSC>
+        </ContentSC>
+        <FooterSC $parentHover={hovered}>
           <Flex
             gap="xsmall"
             align="center"
           >
-            <AppIcon
-              size="xxsmall"
-              url={flow.icon ?? ''}
-              icon={<FlowIcon />}
+            {(showPermissionsBtn || showPipelines) && (
+              <MoreMenu
+                onSelectionChange={(key: string) => {
+                  if (key === 'pipelines') {
+                    navigate(`${flowPath}/pipelines${search}`)
+                    return
+                  }
+                  setMenuKey(key)
+                }}
+                triggerProps={{
+                  onClick: (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  },
+                }}
+              >
+                {showPermissionsBtn && (
+                  <ListBoxItem
+                    key="permissions"
+                    label="Permissions"
+                    leftContent={<PeopleIcon />}
+                    textValue="Permissions"
+                  />
+                )}
+                {showPipelines && (
+                  <ListBoxItem
+                    key="pipelines"
+                    label="View pipelines"
+                    leftContent={<GitPullIcon />}
+                    textValue="View pipelines"
+                  />
+                )}
+              </MoreMenu>
+            )}
+            <FlowFavoriteButton
+              favorited={favorited}
+              onToggle={onToggleFavorite}
             />
-            <Body1BoldP>{flow.name}</Body1BoldP>
           </Flex>
-          <Body2P $color="text-light">{flow.description}</Body2P>
-          <Chip
-            inactive={numAlerts === 0}
-            severity="danger"
-            size="small"
-            css={{ width: 'fit-content' }}
-          >
-            {numAlerts}
-            {pluralize(' alert', numAlerts)}
-          </Chip>
-        </ContentSC>
-        <FooterSC $parentHover={hovered}>
-          <Flex gap="xsmall">
-            {showPermissionsBtn && (
-              <IconFrame
-                clickable
-                tooltip="Permissions"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setShowPermissions(!showPermissions)
-                }}
-                icon={<PeopleIcon color="icon-light" />}
-              />
-            )}
-            {showPipelines && (
-              <IconFrame
-                clickable
-                tooltip="View pipelines for this flow"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  navigate(`${flowPath}/pipelines${search}`)
-                }}
-                icon={<GitPullIcon color="icon-light" />}
-              />
-            )}
-          </Flex>
-
           <ArrowRightIcon color="icon-light" />
         </FooterSC>
       </CardSC>
@@ -112,13 +208,46 @@ export function FlowCard({
           bindings={flow}
           header="Flow permissions"
           refetch={refetch}
-          open={showPermissions}
-          onClose={() => setShowPermissions(false)}
+          open={menuKey === 'permissions'}
+          onClose={() => setMenuKey('')}
         />
       )}
     </>
   )
 }
+
+const HeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  width: '100%',
+}))
+
+const MetaSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+}))
+
+const MetaLabelSC = styled.span(({ theme }) => ({
+  color: theme.colors['text-input-disabled'],
+}))
+
+const MetricsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+  width: '100%',
+  flexWrap: 'wrap',
+}))
+
+const MetricGroupSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
+}))
+
 const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',

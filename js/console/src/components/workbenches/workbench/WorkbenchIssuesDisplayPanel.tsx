@@ -1,16 +1,18 @@
+import { Radio } from '@pluralsh/design-system'
 import {
-  Card,
-  Checkbox,
-  Chip,
-  DiffColumnIcon,
-  DiffUnifiedIcon,
-  Flex,
-  IconFrame,
-  Radio,
-  RadioGroup,
-  SortAscIcon,
-  SortDescIcon,
-} from '@pluralsh/design-system'
+  DisplayFilterRow,
+  DisplayFilterRows,
+  DisplayPanel,
+  DisplayRadioGroup,
+  DisplaySection,
+  DisplaySectionHeader,
+  DisplaySortHeader,
+  DisplayViewToggle,
+} from 'components/utils/display/DisplayPanel'
+import {
+  ISSUE_STATUS_LABELS,
+  ISSUE_STATUS_OPTIONS,
+} from 'components/workbenches/common/issueStatus'
 import {
   IssueSort,
   IssueSortDirection,
@@ -18,12 +20,6 @@ import {
   IssueWebhookProvider,
 } from 'generated/graphql'
 import { includes, startCase } from 'lodash'
-import { ReactElement } from 'react'
-import styled from 'styled-components'
-import {
-  ISSUE_STATUS_LABELS,
-  ISSUE_STATUS_OPTIONS,
-} from 'components/workbenches/common/issueStatus'
 import {
   toggleListValue,
   visibleIssueProviders,
@@ -44,28 +40,16 @@ export function WorkbenchIssuesDisplayPanel({
   const providers = visibleIssueProviders(providerCounts)
 
   return (
-    <PanelSC fillLevel={1}>
-      <ViewToggleSC>
-        <ViewChip
-          selected={state.view === 'list'}
-          icon={<DiffUnifiedIcon />}
-          onClick={() => onChange({ ...state, view: 'list' })}
-        >
-          List
-        </ViewChip>
-        <ViewChip
-          selected={state.view === 'board'}
-          icon={<DiffColumnIcon />}
-          onClick={() => onChange({ ...state, view: 'board' })}
-        >
-          Board
-        </ViewChip>
-      </ViewToggleSC>
-      <SectionSC>
-        <SectionHeaderSC>Source from</SectionHeaderSC>
-        <FilterRowsSC>
+    <DisplayPanel>
+      <DisplayViewToggle
+        view={state.view}
+        onChange={(view) => onChange({ ...state, view })}
+      />
+      <DisplaySection>
+        <DisplaySectionHeader>Source from</DisplaySectionHeader>
+        <DisplayFilterRows>
           {providers.map((provider) => (
-            <FilterRow
+            <DisplayFilterRow
               key={provider}
               label={startCase(provider.toLowerCase())}
               count={providerCounts[provider] ?? 0}
@@ -78,13 +62,13 @@ export function WorkbenchIssuesDisplayPanel({
               }
             />
           ))}
-        </FilterRowsSC>
-      </SectionSC>
-      <SectionSC>
-        <SectionHeaderSC>Ticket status</SectionHeaderSC>
-        <FilterRowsSC $compact>
+        </DisplayFilterRows>
+      </DisplaySection>
+      <DisplaySection>
+        <DisplaySectionHeader>Ticket status</DisplaySectionHeader>
+        <DisplayFilterRows compact>
           {ISSUE_STATUS_OPTIONS.map((status) => (
-            <FilterRow
+            <DisplayFilterRow
               key={status}
               label={ISSUE_STATUS_LABELS[status]}
               count={statusCounts[status] ?? 0}
@@ -97,46 +81,22 @@ export function WorkbenchIssuesDisplayPanel({
               }
             />
           ))}
-        </FilterRowsSC>
-      </SectionSC>
-      <SectionSC>
-        <SortHeaderSC>
-          <SectionTitleSC>Sort by</SectionTitleSC>
-          <IconFrame
-            clickable
-            textValue={`Sort ${state.direction === IssueSortDirection.Desc ? 'descending' : 'ascending'}`}
-            size="small"
-            type="tertiary"
-            tooltip={
-              state.direction === IssueSortDirection.Desc
-                ? 'Descending'
-                : 'Ascending'
-            }
-            icon={
-              state.direction === IssueSortDirection.Desc ? (
-                <SortDescIcon />
-              ) : (
-                <SortAscIcon />
-              )
-            }
-            onClick={() =>
-              onChange({
-                ...state,
-                direction:
-                  state.direction === IssueSortDirection.Desc
-                    ? IssueSortDirection.Asc
-                    : IssueSortDirection.Desc,
-              })
-            }
-            css={{
-              width: 28,
-              height: 20,
-              borderRadius: 6,
-              '& svg': { width: 12, height: 12 },
-            }}
-          />
-        </SortHeaderSC>
-        <RadioGroupSC
+        </DisplayFilterRows>
+      </DisplaySection>
+      <DisplaySection>
+        <DisplaySortHeader
+          descending={state.direction === IssueSortDirection.Desc}
+          onToggle={() =>
+            onChange({
+              ...state,
+              direction:
+                state.direction === IssueSortDirection.Desc
+                  ? IssueSortDirection.Asc
+                  : IssueSortDirection.Desc,
+            })
+          }
+        />
+        <DisplayRadioGroup
           value={state.sort}
           onChange={(value) => onChange({ ...state, sort: value as IssueSort })}
         >
@@ -152,145 +112,8 @@ export function WorkbenchIssuesDisplayPanel({
           >
             Issue name
           </Radio>
-        </RadioGroupSC>
-      </SectionSC>
-    </PanelSC>
+        </DisplayRadioGroup>
+      </DisplaySection>
+    </DisplayPanel>
   )
 }
-
-function ViewChip({
-  selected,
-  icon,
-  onClick,
-  children,
-}: {
-  selected: boolean
-  icon: ReactElement
-  onClick: () => void
-  children: string
-}) {
-  return (
-    <Chip
-      clickable
-      icon={icon}
-      fillLevel={selected ? 3 : 1}
-      aria-pressed={selected}
-      onClick={onClick}
-      css={{
-        width: '100%',
-        justifyContent: 'center',
-        '&&': {
-          minWidth: 80,
-          padding: '5px 12px',
-        },
-        '& .icon svg': { width: 12, height: 12 },
-      }}
-    >
-      {children}
-    </Chip>
-  )
-}
-
-function FilterRow({
-  label,
-  count,
-  checked,
-  onChange,
-}: {
-  label: string
-  count: number
-  checked: boolean
-  onChange: () => void
-}) {
-  return (
-    <FilterRowSC>
-      <Checkbox
-        small
-        checked={checked}
-        onChange={() => onChange()}
-      >
-        {label}
-      </Checkbox>
-      <CountSC>{count}</CountSC>
-    </FilterRowSC>
-  )
-}
-
-const PanelSC = styled(Card)(({ theme }) => ({
-  boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column',
-  flexShrink: 0,
-  alignSelf: 'stretch',
-  height: '100%',
-  maxHeight: '100%',
-  minHeight: 0,
-  overflowY: 'auto',
-  padding: `0 ${theme.spacing.medium}px`,
-  width: 230,
-}))
-
-const ViewToggleSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: theme.spacing.xxsmall,
-  padding: `${theme.spacing.medium}px 0`,
-}))
-
-const SectionSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  borderBottom: theme.borders.default,
-}))
-
-const SectionHeaderSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2Bold,
-  color: theme.colors.text,
-  paddingTop: theme.spacing.medium,
-  paddingBottom: theme.spacing.xxsmall,
-}))
-
-const SectionTitleSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.body2Bold,
-  color: theme.colors.text,
-}))
-
-const SortHeaderSC = styled(Flex)(({ theme }) => ({
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  paddingTop: theme.spacing.medium,
-  paddingBottom: theme.spacing.xxsmall,
-}))
-
-const FilterRowsSC = styled.div<{ $compact?: boolean }>(
-  ({ theme, $compact }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    paddingTop: theme.spacing.xxsmall,
-    paddingBottom: $compact ? theme.spacing.xxsmall : theme.spacing.medium,
-  })
-)
-
-const FilterRowSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: theme.spacing.xxsmall,
-  '& label': {
-    flex: 1,
-    minWidth: 0,
-  },
-}))
-
-const CountSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.body2,
-  color: theme.colors['text-input-disabled'],
-  flexShrink: 0,
-}))
-
-const RadioGroupSC = styled(RadioGroup)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  paddingTop: theme.spacing.xxsmall,
-  paddingBottom: theme.spacing.medium,
-}))

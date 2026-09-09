@@ -1,3 +1,4 @@
+import { DisplayView } from 'components/utils/display/DisplayPanel'
 import {
   IssueSort,
   IssueSortDirection,
@@ -7,7 +8,7 @@ import {
 import { intersection, isEmpty, xor } from 'lodash'
 import { ISSUE_STATUS_OPTIONS } from 'components/workbenches/common/issueStatus'
 
-export type WorkbenchIssuesView = 'list' | 'board'
+export type WorkbenchIssuesView = DisplayView
 
 export type WorkbenchIssuesDisplayState = {
   view: WorkbenchIssuesView
