@@ -6,7 +6,14 @@ defmodule Console.AI.Workbench.ToolsTest do
   alias Console.AI.MCP.Tool, as: MCPToolSpec
   alias Console.AI.Tools.Workbench.{Http, FunctionCall}
   alias Console.AI.Tools.Workbench.MCP, as: MCPTool
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, MetricsLabelSearch, Logs, Traces}
+  alias Console.AI.Tools.Workbench.Observability.{
+    LogAggregate,
+    Logs,
+    Metrics,
+    MetricsLabelSearch,
+    MetricsSearch,
+    Traces
+  }
   alias Console.AI.Tools.Workbench.Infrastructure.{CloudSchemas, RawCloudQuery, CloudTables}
   alias Console.AI.Tools.Workbench.Integration.Github.ListIssues
   alias Console.AI.Tools.Workbench.Integration.Sentry.ListIssues, as: SentryListIssues
@@ -99,6 +106,7 @@ defmodule Console.AI.Workbench.ToolsTest do
       assert_indexed(index, "sentry_list_issues_sentry", SentryListIssues, sentry)
       assert_indexed(index, "github_gh_list_issues", ListIssues, github)
       assert_indexed(index, "workbench_observability_logs_loki", Logs, loki)
+      assert_indexed(index, "workbench_observability_log_aggregate_loki", LogAggregate, loki)
       assert_indexed(index, "workbench_observability_traces_tempo", Traces, tempo)
     end
 

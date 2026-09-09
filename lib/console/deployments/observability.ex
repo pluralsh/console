@@ -141,7 +141,7 @@ defmodule Console.Deployments.Observability do
 
   @spec run_monitor(Monitor.t) :: alert_resp | :ignore
   def run_monitor(%Monitor{} = monitor) do
-    monitor = Repo.preload(monitor, [:alert, service: :cluster])
+    monitor = Repo.preload(monitor, [:alert, :workbench, :user, service: :cluster])
     with {:ok, result, results} <- MonitorImpl.query(monitor),
          {:ok, attrs} <- monitor_attrs(monitor, result, results) do
       start_transaction()

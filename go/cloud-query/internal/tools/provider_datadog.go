@@ -175,6 +175,83 @@ func (in *DatadogProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 	return in.toLogsQueryOutput(resp), nil
 }
 
+func (in *DatadogProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if in.conn == nil {
+		return nil, ErrInvalidArgument
+	}
+	if input == nil || input.Query == "" {
+		return nil, ErrInvalidArgument
+	}
+
+	ctx, client, err := in.newDatadogClient(ctx, in.conn)
+	if err != nil {
+		return nil, err
+	}
+
+	api := datadogV2.NewLogsApi(client)
+	resp, _, err := api.AggregateLogs(ctx, *datadogLogAggregateRequest(input))
+	if err != nil {
+		return nil, err
+	}
+
+	return in.toLogAggregateOutput(resp)
+}
+
+func datadogLogAggregateRequest(input *toolquery.LogAggregateInput) *datadogV2.LogsAggregateRequest {
+	filter := datadogV2.NewLogsQueryFilter()
+	filter.SetFrom(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano))
+	filter.SetTo(input.GetRange().GetEnd().AsTime().UTC().Format(time.RFC3339Nano))
+	filter.SetQuery(datadogLogsQueryWithFacets(datadogAggregateQuery(input.Query, input.GetOperator()), input.GetFacets()))
+
+	compute := datadogV2.NewLogsCompute(datadogV2.LOGSAGGREGATIONFUNCTION_COUNT)
+	compute.SetType(datadogV2.LOGSCOMPUTETYPE_TIMESERIES)
+	compute.SetInterval(input.GetBucketSize())
+
+	request := datadogV2.NewLogsAggregateRequest()
+	request.SetFilter(*filter)
+	request.SetCompute([]datadogV2.LogsCompute{*compute})
+	return request
+}
+
+func datadogAggregateQuery(query string, queryOperator toolquery.LogQueryOperator) string {
+	query = strings.TrimSpace(query)
+	if queryOperator != toolquery.LogQueryOperator_LOG_QUERY_OPERATOR_OR ||
+		strings.Contains(query, " AND ") ||
+		strings.Contains(query, " OR ") {
+		return query
+	}
+
+	terms := strings.Fields(query)
+	if len(terms) < 2 {
+		return query
+	}
+	return strings.Join(terms, " OR ")
+}
+
+func (in *DatadogProvider) toLogAggregateOutput(resp datadogV2.LogsAggregateResponse) (*toolquery.LogAggregateOutput, error) {
+	buckets := make([]*toolquery.LogAggregateBucket, 0)
+	data := resp.GetData()
+	for _, bucket := range data.GetBuckets() {
+		for _, compute := range bucket.GetComputes() {
+			if compute.LogsAggregateBucketValueTimeseries == nil {
+				continue
+			}
+			for _, point := range compute.LogsAggregateBucketValueTimeseries.Items {
+				timestamp, err := time.Parse(time.RFC3339Nano, point.GetTime())
+				if err != nil {
+					return nil, err
+				}
+				buckets = append(buckets, &toolquery.LogAggregateBucket{
+					Timestamp: timestamppb.New(timestamp),
+					Count:     int64(point.GetValue()),
+				})
+			}
+		}
+	}
+
+	return &toolquery.LogAggregateOutput{Buckets: buckets}, nil
+}
+
 func (in *DatadogProvider) toLogsQueryOutput(resp datadogV2.LogsListResponse) *toolquery.LogsQueryOutput {
 	logs := make([]*toolquery.LogEntry, 0, len(resp.GetData()))
 

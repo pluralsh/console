@@ -198,6 +198,66 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
       assert monitor["threshold"]["aggregate"] == "MAX"
       assert monitor["threshold"]["value"] == 1.0
     end
+
+    test "it can create a typed metrics monitor using a named tool" do
+      service = insert(:service)
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createMonitor" => monitor}}} =
+        run_query(
+          """
+          mutation Create($attrs: MonitorAttributes!) {
+            createMonitor(attributes: $attrs) {
+              type
+              workbench { id }
+              query {
+                metrics {
+                  tool
+                  query
+                  step
+                  duration
+                  options {
+                    azure { resourceId aggregation }
+                  }
+                }
+              }
+            }
+          }
+          """,
+          %{
+            "attrs" => %{
+              "name" => "request-rate",
+              "serviceId" => service.id,
+              "workbenchId" => workbench.id,
+              "severity" => "HIGH",
+              "type" => "METRICS",
+              "evaluationCron" => "*/5 * * * *",
+              "query" => %{
+                "metrics" => %{
+                  "tool" => "workbench_observability_metrics_azure",
+                  "query" => "requests",
+                  "step" => "1m",
+                  "duration" => "1h",
+                  "options" => %{
+                    "azure" => %{"resourceId" => "resource", "aggregation" => "Average"}
+                  }
+                }
+              },
+              "threshold" => %{"aggregate" => "MAX", "value" => 10.0}
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert monitor["type"] == "METRICS"
+      assert monitor["workbench"]["id"] == workbench.id
+      assert monitor["query"]["metrics"]["tool"] ==
+               "workbench_observability_metrics_azure"
+      assert monitor["query"]["metrics"]["options"]["azure"] == %{
+               "resourceId" => "resource",
+               "aggregation" => "Average"
+             }
+    end
   end
 
   describe "updateMonitor" do

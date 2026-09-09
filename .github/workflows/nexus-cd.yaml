@@ -23,7 +23,14 @@ env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   test:
+    needs: [vouch]
     name: Unit test
     runs-on: ubuntu-latest
     defaults:

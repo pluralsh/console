@@ -28,7 +28,14 @@ permissions:
   contents: read
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   lint:
+    needs: [vouch]
     name: Lint
     runs-on: ubuntu-latest
     defaults:
@@ -48,6 +55,7 @@ jobs:
       - run: yarn workspace console lint
 
   test:
+    needs: [vouch]
     name: Unit test
     runs-on: ubuntu-latest
     defaults:

@@ -2,8 +2,14 @@ package tools
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
+	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
@@ -81,6 +87,110 @@ func (in *DynatraceProvider) Logs(ctx context.Context, input *toolquery.LogsQuer
 	}
 
 	return resp.ToLogsQueryOutput(), nil
+}
+
+func (in *DynatraceProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if in.client == nil || input == nil {
+		return nil, ErrInvalidArgument
+	}
+	if !strings.HasPrefix(input.GetQuery(), "fetch logs") {
+		return nil, fmt.Errorf("invalid query: must start with 'fetch logs'")
+	}
+
+	query := dynatraceLogsQueryWithFacets(input.GetQuery(), input.GetFacets(), input.GetOperator())
+	query = fmt.Sprintf(
+		"%s | summarize count = count(), by:{timestamp = bin(timestamp, %s)}",
+		query,
+		input.GetBucketSize(),
+	)
+	resp, err := in.client.LogAggregate(
+		ctx,
+		query,
+		input.GetRange().GetStart().AsTime(),
+		input.GetRange().GetEnd().AsTime(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	buckets := make([]*toolquery.LogAggregateBucket, 0, len(resp.Result.Records))
+	for _, record := range resp.Result.Records {
+		timestamp, ok := timeFromDynatraceTimestamp(record.Timestamp)
+		if !ok {
+			continue
+		}
+		count, ok := dynatraceAggregateCount(record.Fields["count"])
+		if !ok {
+			continue
+		}
+		buckets = append(buckets, &toolquery.LogAggregateBucket{
+			Timestamp: timestamppb.New(timestamp),
+			Count:     count,
+		})
+	}
+	sort.Slice(buckets, func(i, j int) bool {
+		return buckets[i].GetTimestamp().AsTime().Before(buckets[j].GetTimestamp().AsTime())
+	})
+
+	return &toolquery.LogAggregateOutput{Buckets: buckets}, nil
+}
+
+func dynatraceLogsQueryWithFacets(
+	base string,
+	facets []*toolquery.LogsQueryFacet,
+	operator toolquery.LogQueryOperator,
+) string {
+	conditions := make([]string, 0, len(facets))
+	for _, facet := range facets {
+		if facet == nil {
+			continue
+		}
+		name := strings.TrimSpace(facet.GetName())
+		value := strings.TrimSpace(facet.GetValue())
+		if name == "" || value == "" {
+			continue
+		}
+		name = strings.NewReplacer(`\`, `\\`, "`", "\\`").Replace(name)
+		conditions = append(conditions, fmt.Sprintf(
+			"`%s` == \"%s\"",
+			name,
+			escapeDoubleQuoted(value),
+		))
+	}
+	if len(conditions) == 0 {
+		return base
+	}
+	return fmt.Sprintf("%s | filter %s", base, strings.Join(conditions, logFacetOperator(operator)))
+}
+
+func timeFromDynatraceTimestamp(value string) (time.Time, bool) {
+	for _, layout := range []string{time.RFC3339Nano, time.RFC3339} {
+		if timestamp, err := time.Parse(layout, value); err == nil {
+			return timestamp.UTC(), true
+		}
+	}
+	return time.Time{}, false
+}
+
+func dynatraceAggregateCount(value any) (int64, bool) {
+	switch count := value.(type) {
+	case float64:
+		return int64(count), true
+	case float32:
+		return int64(count), true
+	case int:
+		return int64(count), true
+	case int64:
+		return count, true
+	case json.Number:
+		parsed, err := strconv.ParseInt(string(count), 10, 64)
+		return parsed, err == nil
+	case string:
+		parsed, err := strconv.ParseInt(count, 10, 64)
+		return parsed, err == nil
+	default:
+		return 0, false
+	}
 }
 
 func (in *DynatraceProvider) validateLogsInput(input *toolquery.LogsQueryInput) error {

@@ -22,7 +22,14 @@ env:
   REGISTRY_IMAGE: ghcr.io/pluralsh/observability-proxy
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   test:
+    needs: [vouch]
     name: Unit test
     runs-on: ubuntu-latest
     defaults:

@@ -13,6 +13,7 @@ defmodule Console.AI.Workbench.Tools do
     MetricsSearch,
     MetricsLabelSearch,
     Logs,
+    LogAggregate,
     Traces
   }
   alias Console.AI.Tools.Workbench.Infrastructure.{CloudSchemas, RawCloudQuery, CloudTables}
@@ -165,7 +166,8 @@ defmodule Console.AI.Workbench.Tools do
 
   defp obs_category_tools(%WorkbenchTool{} = tool, :metrics),
     do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}, %MetricsLabelSearch{tool: tool}]
-  defp obs_category_tools(%WorkbenchTool{} = tool, :logs), do: [%Logs{tool: tool}]
+  defp obs_category_tools(%WorkbenchTool{} = tool, :logs),
+    do: [%Logs{tool: tool}, %LogAggregate{tool: tool}]
   defp obs_category_tools(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
   defp obs_category_tools(_, _), do: []
 

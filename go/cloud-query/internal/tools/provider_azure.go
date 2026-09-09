@@ -2,7 +2,10 @@ package tools
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -10,6 +13,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azmetrics"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/samber/lo"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
@@ -228,7 +232,7 @@ func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInp
 	if input == nil || strings.TrimSpace(input.GetQuery()) == "" {
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
-	resourceID := strings.TrimSpace(input.GetOptions().GetAzure().GetResourceId())
+	resourceID := azureLogsResourceID(input.GetOptions())
 	if resourceID == "" {
 		return nil, fmt.Errorf("%w: azure logs options require resource_id", ErrInvalidArgument)
 	}
@@ -243,6 +247,143 @@ func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInp
 	}
 
 	return datasource.AzureLogsQueryOutput{QueryResourceResponse: resp}.ToLogsQueryOutput(input.GetLimit()), nil
+}
+
+func (in *AzureProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if input == nil || strings.TrimSpace(input.GetQuery()) == "" {
+		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
+	}
+	resourceID := azureLogsResourceID(input.GetOptions())
+	if resourceID == "" {
+		return nil, fmt.Errorf("%w: azure logs options require resource_id", ErrInvalidArgument)
+	}
+
+	body := azureLogAggregateQueryBody(input)
+	resp, err := in.client.Logs(ctx, resourceID, body, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &toolquery.LogAggregateOutput{Buckets: azureAggregateBuckets(resp)}, nil
+}
+
+func azureLogAggregateQueryBody(input *toolquery.LogAggregateInput) azlogs.QueryBody {
+	query := azureLogsQueryWithFacets(input.GetQuery(), input.GetFacets(), input.GetOperator())
+	query = fmt.Sprintf(
+		"%s | summarize count = count() by timestamp = bin(TimeGenerated, %s) | order by timestamp asc",
+		query,
+		input.GetBucketSize(),
+	)
+	return azlogs.QueryBody{
+		Query:    new(query),
+		Timespan: logsTimeRange(input.GetRange()),
+	}
+}
+
+func azureLogsQueryWithFacets(
+	base string,
+	facets []*toolquery.LogsQueryFacet,
+	operator toolquery.LogQueryOperator,
+) string {
+	conditions := make([]string, 0, len(facets))
+	for _, facet := range facets {
+		if facet == nil {
+			continue
+		}
+		name := strings.TrimSpace(facet.GetName())
+		value := strings.TrimSpace(facet.GetValue())
+		if name == "" || value == "" {
+			continue
+		}
+		conditions = append(conditions, fmt.Sprintf(
+			`tostring(column_ifexists("%s", "")) == "%s"`,
+			escapeDoubleQuoted(name),
+			escapeDoubleQuoted(value),
+		))
+	}
+	if len(conditions) == 0 {
+		return base
+	}
+	return fmt.Sprintf("%s | where %s", base, strings.Join(conditions, logFacetOperator(operator)))
+}
+
+func azureLogsResourceID(options *toolquery.LogsOptions) string {
+	return strings.TrimSpace(options.GetAzure().GetResourceId())
+}
+
+func azureAggregateBuckets(resp azlogs.QueryResourceResponse) []*toolquery.LogAggregateBucket {
+	buckets := make([]*toolquery.LogAggregateBucket, 0)
+	for _, table := range resp.Tables {
+		timestampIndex, countIndex := -1, -1
+		for index, column := range table.Columns {
+			switch strings.ToLower(strings.TrimSpace(lo.FromPtr(column.Name))) {
+			case "timestamp", "timegenerated", "time":
+				timestampIndex = index
+			case "count", "count_":
+				countIndex = index
+			}
+		}
+		if timestampIndex < 0 || countIndex < 0 {
+			continue
+		}
+
+		for _, row := range table.Rows {
+			if timestampIndex >= len(row) || countIndex >= len(row) {
+				continue
+			}
+			timestamp, ok := azureAggregateTimestamp(row[timestampIndex])
+			if !ok {
+				continue
+			}
+			count, ok := azureAggregateCount(row[countIndex])
+			if !ok {
+				continue
+			}
+			buckets = append(buckets, &toolquery.LogAggregateBucket{
+				Timestamp: timestamppb.New(timestamp),
+				Count:     count,
+			})
+		}
+	}
+	sort.Slice(buckets, func(i, j int) bool {
+		return buckets[i].GetTimestamp().AsTime().Before(buckets[j].GetTimestamp().AsTime())
+	})
+	return buckets
+}
+
+func azureAggregateTimestamp(value any) (time.Time, bool) {
+	switch timestamp := value.(type) {
+	case time.Time:
+		return timestamp.UTC(), true
+	case string:
+		for _, layout := range []string{time.RFC3339Nano, time.RFC3339} {
+			if parsed, err := time.Parse(layout, timestamp); err == nil {
+				return parsed.UTC(), true
+			}
+		}
+	}
+	return time.Time{}, false
+}
+
+func azureAggregateCount(value any) (int64, bool) {
+	switch count := value.(type) {
+	case float64:
+		return int64(count), true
+	case float32:
+		return int64(count), true
+	case int:
+		return int64(count), true
+	case int64:
+		return count, true
+	case json.Number:
+		parsed, err := strconv.ParseInt(string(count), 10, 64)
+		return parsed, err == nil
+	case string:
+		parsed, err := strconv.ParseInt(count, 10, 64)
+		return parsed, err == nil
+	default:
+		return 0, false
+	}
 }
 
 func (in *AzureProvider) validate() (*AzureProvider, error) {

@@ -18,7 +18,14 @@ permissions:
   id-token: write
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   publish:
+    needs: [vouch]
     name: Publish npm package
     runs-on: ubuntu-latest
     steps:

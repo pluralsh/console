@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -43,6 +44,72 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 	}
 
 	return in.toLogsQueryOutput(resp)
+}
+
+func (in *LokiProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if in.conn == nil {
+		return nil, ErrInvalidArgument
+	}
+	if input == nil || input.Query == "" {
+		return nil, ErrInvalidArgument
+	}
+
+	lokiClient := client.NewLokiClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
+	defer lokiClient.Close()
+
+	query := mergeLokiQueryWithFacets(input.Query, input.GetFacets())
+	resp, err := lokiClient.LogAggregate(
+		ctx,
+		fmt.Sprintf("sum(count_over_time(%s[%s]))", query, input.GetBucketSize()),
+		strconv.FormatInt(input.GetRange().GetStart().AsTime().UnixNano(), 10),
+		strconv.FormatInt(input.GetRange().GetEnd().AsTime().UnixNano(), 10),
+		input.GetBucketSize())
+	if err != nil {
+		return nil, err
+	}
+
+	counts := map[int64]int64{}
+	for _, result := range resp.Data.Result {
+		for _, value := range result.Values {
+			if len(value) < 2 {
+				continue
+			}
+			timestamp, err := lokiAggregateTimestamp(value[0])
+			if err != nil {
+				return nil, err
+			}
+			count, err := strconv.ParseFloat(fmt.Sprint(value[1]), 64)
+			if err != nil {
+				return nil, err
+			}
+			counts[timestamp.UnixNano()] += int64(count)
+		}
+	}
+
+	timestamps := make([]int64, 0, len(counts))
+	for timestamp := range counts {
+		timestamps = append(timestamps, timestamp)
+	}
+	sort.Slice(timestamps, func(i, j int) bool { return timestamps[i] < timestamps[j] })
+
+	buckets := make([]*toolquery.LogAggregateBucket, 0, len(timestamps))
+	for _, timestamp := range timestamps {
+		buckets = append(buckets, &toolquery.LogAggregateBucket{
+			Timestamp: timestamppb.New(time.Unix(0, timestamp)),
+			Count:     counts[timestamp],
+		})
+	}
+
+	return &toolquery.LogAggregateOutput{Buckets: buckets}, nil
+}
+
+func lokiAggregateTimestamp(value any) (time.Time, error) {
+	seconds, err := strconv.ParseFloat(fmt.Sprint(value), 64)
+	if err != nil {
+		return time.Time{}, err
+	}
+	whole := int64(seconds)
+	return time.Unix(whole, int64((seconds-float64(whole))*float64(time.Second))), nil
 }
 
 func (in *LokiProvider) toLogsQueryOutput(resp *client.LokiLogsResponse) (*toolquery.LogsQueryOutput, error) {

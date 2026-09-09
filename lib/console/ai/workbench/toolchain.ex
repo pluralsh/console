@@ -11,6 +11,7 @@ defmodule Console.AI.Workbench.Toolchain do
 
   @metrics_tools [Observability.Metrics, Observability.Plrl.Metrics]
   @logs_tools [Observability.Logs, Observability.Plrl.Logs]
+  @log_aggregate_tools [Observability.LogAggregate, Observability.Plrl.LogsAggregate]
   @traces_tools [Observability.Traces]
   @label_tools [
     Observability.MetricsLabelSearch,
@@ -23,6 +24,10 @@ defmodule Console.AI.Workbench.Toolchain do
 
   def logs(resource, name, args, %User{} = user) when is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench),
     do: execute(resource, name, args, user, @logs_tools)
+
+  def log_aggregate(resource, name, args, %User{} = user)
+      when is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench),
+      do: execute(resource, name, args, user, @log_aggregate_tools)
 
   def traces(resource, name, args, %User{} = user) when is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench),
     do: execute(resource, name, args, user, @traces_tools)

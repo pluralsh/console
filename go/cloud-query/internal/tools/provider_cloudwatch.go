@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -258,6 +259,75 @@ func (in *CloudwatchProvider) Logs(ctx context.Context, input *toolquery.LogsQue
 	}
 
 	return &toolquery.LogsQueryOutput{Logs: in.toLogs(results)}, nil
+}
+
+func (in *CloudwatchProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if in.conn == nil {
+		return nil, fmt.Errorf("%w: cloudwatch connection is required", ErrInvalidArgument)
+	}
+	if input == nil || input.GetQuery() == "" {
+		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
+	}
+
+	cfg, err := in.newAWSConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	startQueryInput := cloudwatchLogAggregateStartQueryInput(input)
+	query := aws.ToString(startQueryInput.QueryString)
+
+	logGroupNames := in.logGroupNames()
+	if len(logGroupNames) > 0 {
+		startQueryInput.LogGroupNames = logGroupNames
+	} else if !containsCloudwatchSource(query) {
+		return nil, fmt.Errorf("%w: either cloudwatch.log_group_names must be set or query must include SOURCE", ErrInvalidArgument)
+	}
+
+	client := cloudwatchlogs.NewFromConfig(cfg)
+	startOutput, err := client.StartQuery(ctx, startQueryInput)
+	if err != nil {
+		return nil, err
+	}
+	if startOutput.QueryId == nil || *startOutput.QueryId == "" {
+		return nil, fmt.Errorf("cloudwatch logs query did not return query id")
+	}
+
+	results, err := in.waitForQueryResults(ctx, client, *startOutput.QueryId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &toolquery.LogAggregateOutput{Buckets: cloudwatchAggregateBuckets(results)}, nil
+}
+
+func cloudwatchLogAggregateStartQueryInput(input *toolquery.LogAggregateInput) *cloudwatchlogs.StartQueryInput {
+	query := cloudwatchLogsQueryWithFacets(input.GetQuery(), input.GetFacets())
+	query = fmt.Sprintf("%s | stats count(*) as count by bin(%s) as timestamp", query, input.GetBucketSize())
+	return &cloudwatchlogs.StartQueryInput{
+		StartTime:   aws.Int64(input.GetRange().GetStart().AsTime().Unix()),
+		EndTime:     aws.Int64(input.GetRange().GetEnd().AsTime().Unix()),
+		QueryString: aws.String(query),
+	}
+}
+
+func cloudwatchAggregateBuckets(rows []map[string]string) []*toolquery.LogAggregateBucket {
+	buckets := make([]*toolquery.LogAggregateBucket, 0, len(rows))
+	for _, row := range rows {
+		timestamp := parseCloudwatchTimestamp(row)
+		count, err := strconv.ParseInt(strings.TrimSpace(row["count"]), 10, 64)
+		if err != nil {
+			continue
+		}
+		buckets = append(buckets, &toolquery.LogAggregateBucket{
+			Timestamp: timestamppb.New(timestamp),
+			Count:     count,
+		})
+	}
+	sort.Slice(buckets, func(i, j int) bool {
+		return buckets[i].GetTimestamp().AsTime().Before(buckets[j].GetTimestamp().AsTime())
+	})
+	return buckets
 }
 
 func (in *CloudwatchProvider) newAWSConfig(ctx context.Context) (aws.Config, error) {
