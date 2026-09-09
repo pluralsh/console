@@ -3,7 +3,6 @@ import {
   AppIcon,
   ArrowRightIcon,
   Card,
-  Chip,
   Flex,
   FlowIcon,
   GitPullIcon,
@@ -17,6 +16,7 @@ import {
 import { useLogin } from 'components/contexts'
 import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
 import {
+  FlowAlertChip,
   FlowHealthChips,
   FlowPipelineChip,
   componentHealthCounts,
@@ -25,7 +25,6 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 import { Body1BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
-import pluralize from 'pluralize'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
@@ -52,7 +51,6 @@ export function FlowCard({
   const showPipelines = hasAccess(personaConfiguration, 'flows.pipelines')
   const [hovered, setHovered] = useState(false)
   const [menuKey, setMenuKey] = useState('')
-  const numAlerts = flow.alertCount ?? 0
   const serviceCount = flow.serviceCount ?? 0
   const componentCount = flow.componentCount ?? 0
   const componentCounts = componentHealthCounts(flow.componentStatuses)
@@ -131,14 +129,7 @@ export function FlowCard({
               >
                 Alerts
               </CaptionP>
-              <Chip
-                inactive={numAlerts === 0}
-                severity="danger"
-                size="small"
-                css={{ width: 'fit-content' }}
-              >
-                {numAlerts} {pluralize('alert', numAlerts)}
-              </Chip>
+              <FlowAlertChip count={flow.alertCount ?? 0} />
             </MetricGroupSC>
             <MetricGroupSC>
               <CaptionP

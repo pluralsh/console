@@ -69,12 +69,30 @@ export function FlowHealthChips({
         <Chip
           key={bucket}
           size="small"
+          rounded
+          fillLevel={1}
           severity={BUCKET_SEVERITY[bucket]}
+          css={{ width: 'max-content', flexShrink: 0 }}
         >
           {counts[bucket]} {bucketLabel(bucket, counts[bucket])}
         </Chip>
       ))}
     </ChipsSC>
+  )
+}
+
+export function FlowAlertChip({ count }: { count: number }) {
+  return (
+    <Chip
+      size="small"
+      rounded
+      fillLevel={1}
+      severity="danger"
+      inactive={count === 0 ? 'keep-fill' : false}
+      css={{ width: 'max-content', flexShrink: 0 }}
+    >
+      {count} {pluralize('alert', count)}
+    </Chip>
   )
 }
 
@@ -86,7 +104,16 @@ export function FlowHealthStacked({
   const worst = worstHealth(counts)
   const caption = healthCaption(counts)
 
-  if (!worst || !caption) return null
+  if (!worst || !caption) {
+    return (
+      <CaptionP
+        $color="text-xlight"
+        css={{ margin: 0 }}
+      >
+        —
+      </CaptionP>
+    )
+  }
 
   return (
     <StackedSC>
@@ -119,18 +146,16 @@ export function FlowPipelineChip({
   pipelineCount: number
   pendingCount: number
 }) {
-  if (pipelineCount <= 0 && pendingCount <= 0) return null
-
   return (
     <Chip
       size="small"
+      rounded
+      fillLevel={1}
       severity={pendingCount > 0 ? 'warning' : 'neutral'}
+      inactive={pipelineCount === 0 && pendingCount === 0 ? 'keep-fill' : false}
+      css={{ width: 'max-content', flexShrink: 0 }}
     >
-      {pipelineCount > 0 && (
-        <span>
-          {pipelineCount} {pluralize('pipeline', pipelineCount)}
-        </span>
-      )}
+      {pipelineCount} {pluralize('pipeline', pipelineCount)}
       {pendingCount > 0 && <PendingSC>{pendingCount} pending</PendingSC>}
     </Chip>
   )

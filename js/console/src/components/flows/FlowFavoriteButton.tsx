@@ -28,9 +28,12 @@ export function FlowFavoriteButton({
 }
 
 const StarFrameSC = styled(IconFrame)<{ $favorited: boolean }>(
-  ({ $favorited }) => ({
+  ({ $favorited, theme }) => ({
     ...($favorited && {
-      '& svg path': { fill: 'currentColor' },
+      '& svg path': {
+        fill: theme.colors['icon-warning'],
+        stroke: 'none',
+      },
     }),
   })
 )

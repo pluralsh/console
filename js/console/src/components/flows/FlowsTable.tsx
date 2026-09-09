@@ -1,7 +1,5 @@
 import {
   AppIcon,
-  Chip,
-  Flex,
   FlowIcon,
   GitPullIcon,
   ListBoxItem,
@@ -16,6 +14,7 @@ import {
 import { useLogin } from 'components/contexts'
 import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
 import {
+  FlowAlertChip,
   FlowHealthStacked,
   FlowPipelineChip,
   componentHealthCounts,
@@ -27,7 +26,6 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import pluralize from 'pluralize'
 import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
@@ -50,35 +48,35 @@ function getColumns({
     columnHelper.accessor((flow) => flow, {
       id: 'name',
       header: '',
-      meta: { gridTemplate: 'minmax(220px, 2fr)', truncate: true },
+      meta: { gridTemplate: 'minmax(240px, 2fr)' },
       cell: function Cell({ getValue }) {
         const flow = getValue()
 
         return (
-          <Flex
-            gap="small"
-            align="center"
-            minWidth={0}
-          >
+          <NameCellSC>
             <AppIcon
               size="xxxsmall"
-              url={flow.icon ?? ''}
+              url={flow.icon || undefined}
               icon={<FlowIcon />}
             />
-            <StackedText
-              first={flow.name}
-              second={flow.description ?? ''}
-              firstPartialType="body2Bold"
-              firstColor="text"
-              secondPartialType="caption"
-              secondColor="text-xlight"
-              truncate
-            />
-            <FlowFavoriteButton
-              favorited={favoriteIds.includes(flow.id)}
-              onToggle={() => onToggleFavorite(flow.id)}
-            />
-          </Flex>
+            <NameTextSC>
+              <StackedText
+                first={flow.name}
+                second={flow.description || undefined}
+                firstPartialType="body2Bold"
+                firstColor="text"
+                secondPartialType="caption"
+                secondColor="text-xlight"
+                truncate
+              />
+              <FavoriteSlotSC $favorited={favoriteIds.includes(flow.id)}>
+                <FlowFavoriteButton
+                  favorited={favoriteIds.includes(flow.id)}
+                  onToggle={() => onToggleFavorite(flow.id)}
+                />
+              </FavoriteSlotSC>
+            </NameTextSC>
+          </NameCellSC>
         )
       },
     }),
@@ -127,25 +125,15 @@ function getColumns({
     columnHelper.accessor((flow) => flow.alertCount, {
       id: 'alerts',
       header: '',
-      meta: { gridTemplate: 'auto' },
+      meta: { gridTemplate: 'min-content' },
       cell: function Cell({ getValue }) {
-        const numAlerts = getValue() ?? 0
-
-        return (
-          <Chip
-            inactive={numAlerts === 0}
-            severity="danger"
-            size="small"
-          >
-            {numAlerts} {pluralize('alert', numAlerts)}
-          </Chip>
-        )
+        return <FlowAlertChip count={getValue() ?? 0} />
       },
     }),
     columnHelper.accessor((flow) => flow, {
       id: 'actions',
       header: '',
-      meta: { gridTemplate: 'auto' },
+      meta: { gridTemplate: 'min-content' },
       cell: function Cell({ getValue }) {
         return (
           <FlowRowActions
@@ -178,42 +166,42 @@ function FlowRowActions({
   const [menuKey, setMenuKey] = useState('')
   const flowPath = getFlowDetailsPath({ flowIdOrName: flow.name })
 
-  if (!showPermissionsBtn && !showPipelines) return null
-
   return (
     <ActionsSC>
-      <MoreMenu
-        onSelectionChange={(key: string) => {
-          if (key === 'pipelines') {
-            navigate(`${flowPath}/pipelines${search}`)
-            return
-          }
-          setMenuKey(key)
-        }}
-        triggerProps={{
-          onClick: (e) => {
-            e.preventDefault()
-            e.stopPropagation()
-          },
-        }}
-      >
-        {showPermissionsBtn && (
-          <ListBoxItem
-            key="permissions"
-            label="Permissions"
-            leftContent={<PeopleIcon />}
-            textValue="Permissions"
-          />
-        )}
-        {showPipelines && (
-          <ListBoxItem
-            key="pipelines"
-            label="View pipelines"
-            leftContent={<GitPullIcon />}
-            textValue="View pipelines"
-          />
-        )}
-      </MoreMenu>
+      {(showPermissionsBtn || showPipelines) && (
+        <MoreMenu
+          onSelectionChange={(key: string) => {
+            if (key === 'pipelines') {
+              navigate(`${flowPath}/pipelines${search}`)
+              return
+            }
+            setMenuKey(key)
+          }}
+          triggerProps={{
+            onClick: (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            },
+          }}
+        >
+          {showPermissionsBtn && (
+            <ListBoxItem
+              key="permissions"
+              label="Permissions"
+              leftContent={<PeopleIcon />}
+              textValue="Permissions"
+            />
+          )}
+          {showPipelines && (
+            <ListBoxItem
+              key="pipelines"
+              label="View pipelines"
+              leftContent={<GitPullIcon />}
+              textValue="View pipelines"
+            />
+          )}
+        </MoreMenu>
+      )}
       {showPermissionsBtn && (
         <PermissionsModal
           id={flow.id}
@@ -256,7 +244,6 @@ export function FlowsTable({
 
   return (
     <Table
-      loose
       fullHeightWrap
       virtualizeRows
       fillLevel={1}
@@ -280,6 +267,37 @@ export function FlowsTable({
     />
   )
 }
+
+const NameCellSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  minWidth: 0,
+  maxWidth: '100%',
+}))
+
+const NameTextSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  maxWidth: '100%',
+  width: 'max-content',
+}))
+
+const FavoriteSlotSC = styled.div<{ $favorited: boolean }>(
+  ({ $favorited }) => ({
+    flexShrink: 0,
+    ...(!$favorited && {
+      opacity: 0,
+      pointerEvents: 'none',
+      'tr:hover &, tr:focus-within &': {
+        opacity: 1,
+        pointerEvents: 'auto',
+      },
+    }),
+  })
+)
 
 const ActionsSC = styled.div({
   'td &': { pointerEvents: 'auto' },

@@ -190,6 +190,7 @@ function ViewChip({
   return (
     <Chip
       clickable
+      rounded
       icon={icon}
       fillLevel={selected ? 3 : 1}
       aria-pressed={selected}
@@ -198,8 +199,14 @@ function ViewChip({
         width: '100%',
         justifyContent: 'center',
         '&&': {
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 32,
           minWidth: 80,
           padding: '5px 12px',
+          borderRadius: 999,
+          boxShadow: 'none',
         },
         '& .icon svg': { width: 12, height: 12 },
       }}
