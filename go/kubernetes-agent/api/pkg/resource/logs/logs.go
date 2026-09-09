@@ -191,7 +191,7 @@ func (in LogLines) SelectLogs(logSelection *Selection) (LogLines, LogTimestamp, 
 
 	// set the middle of log array as a reference point, this part of array should not be affected by log deletion/addition.
 	newSelection := Selection{
-		ReferencePoint:  *in.createLogLineId(len(in) / 2),
+		ReferencePoint:  *in.createLogLineId(len(in)/2, logFilePosition),
 		OffsetFrom:      fromIndex - len(in)/2,
 		OffsetTo:        toIndex - len(in)/2,
 		LogFilePosition: logFilePosition,
@@ -250,16 +250,14 @@ func (in LogLines) getLineIndex(logLineId *LogLineId) int {
 	return LineIndexNotFound
 }
 
-// createLogLineId returns ID of the line with provided lineIndex.
-func (in LogLines) createLogLineId(lineIndex int) *LogLineId {
+// createLogLineId returns an ID for the line at lineIndex.
+func (in LogLines) createLogLineId(lineIndex int, logFilePosition string) *LogLineId {
 	logTimestamp := in[lineIndex].Timestamp
 	// determine whether to use negative or positive indexing
-	// check whether last line has the same index as requested line. If so, we can only use positive referencing
-	// as more lines may appear at the end.
-	// negative referencing is preferred as higher indices disappear later.
+	// End cursors use negative indexing so older tail lines can be prepended.
+	// Other cursors use positive indexing for the newest timestamp group as logs append.
 	var step int
-	if in[len(in)-1].Timestamp == logTimestamp {
-		// use positive referencing
+	if logFilePosition != End && in[len(in)-1].Timestamp == logTimestamp {
 		step = 1
 	} else {
 		step = -1

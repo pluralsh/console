@@ -327,7 +327,7 @@ func TestGetLogs(t *testing.T) {
 				Selection: logs.Selection{
 					ReferencePoint: logs.LogLineId{
 						LogTimestamp: "1",
-						LineNum:      3,
+						LineNum:      -3,
 					},
 					OffsetFrom:      -1,
 					OffsetTo:        1,
@@ -337,7 +337,7 @@ func TestGetLogs(t *testing.T) {
 			},
 		},
 		{
-			"set truncated flag if read limit is reached",
+			"do not truncate an exact tail window",
 			"pod-1",
 			"1 log1\n2 log2\n3 log3\n4 log4\n5 log5\n6 log6\n7 log7\n8 log8\n9 log9\n10 log10",
 			"test",
@@ -357,8 +357,6 @@ func TestGetLogs(t *testing.T) {
 					ContainerName: "test",
 					FromDate:      "1",
 					ToDate:        "1",
-					Truncated:     true, // Read limit is set to 10. Log lines could not be loaded
-					HasMore:       true,
 				},
 				LogLines: logs.LogLines{log1},
 				Selection: logs.Selection{
@@ -393,7 +391,7 @@ func TestGetLogs(t *testing.T) {
 				Selection: logs.Selection{
 					ReferencePoint: logs.LogLineId{
 						LogTimestamp: "0",
-						LineNum:      1,
+						LineNum:      -1,
 					},
 					OffsetFrom:      0,
 					OffsetTo:        1,
@@ -412,24 +410,62 @@ func TestGetLogs(t *testing.T) {
 	}
 }
 
+func TestConstructLogDetailsExactTailWindowIsNotTruncated(t *testing.T) {
+	selection := &logs.Selection{
+		ReferencePoint:  logs.NewestLogLineId,
+		OffsetFrom:      -logs.MaxLogLines,
+		OffsetTo:        1,
+		LogFilePosition: logs.End,
+		TailLines:       3,
+	}
+	details := ConstructLogDetails("pod-1", "1 log1\n2 log2\n3 log3", "test", selection)
+
+	if details.Info.Truncated {
+		t.Error("ConstructLogDetails() Truncated = true, want false for an exact tail window")
+	}
+	if details.Info.HasMore {
+		t.Error("ConstructLogDetails() HasMore = true, want false at the actual log beginning")
+	}
+}
+
+func TestConstructLogDetailsTailSentinelSignalsExpansion(t *testing.T) {
+	selection := &logs.Selection{
+		ReferencePoint:  logs.NewestLogLineId,
+		OffsetFrom:      -logs.MaxLogLines,
+		OffsetTo:        1,
+		LogFilePosition: logs.End,
+		TailLines:       3,
+	}
+	details := ConstructLogDetails("pod-1", "1 sentinel\n2 log2\n3 log3\n4 log4", "test", selection)
+
+	if !details.Info.Truncated {
+		t.Error("ConstructLogDetails() Truncated = false, want true when a tail sentinel is present")
+	}
+	if !details.Info.HasMore {
+		t.Error("ConstructLogDetails() HasMore = false, want true when the tail window can expand")
+	}
+	if len(details.LogLines) != 3 {
+		t.Errorf("ConstructLogDetails() returned %d lines, want 3", len(details.LogLines))
+	}
+	if details.LogLines[0].Content == "sentinel" {
+		t.Error("ConstructLogDetails() returned the older tail sentinel")
+	}
+}
+
 func TestConstructLogDetailsMaxTailWindowHasNoMorePages(t *testing.T) {
 	var rawLogs strings.Builder
-	for lineNum := 1; lineNum <= logs.MaxTailLines; lineNum++ {
+	for lineNum := 1; lineNum <= logs.MaxTailLines+1; lineNum++ {
 		fmt.Fprintf(&rawLogs, "%d log%d\n", lineNum, lineNum)
 	}
 
-	details := ConstructLogDetails(
-		"pod-1",
-		rawLogs.String(),
-		"test",
-		&logs.Selection{
-			ReferencePoint:  logs.NewestLogLineId,
-			OffsetFrom:      -logs.MaxLogLines,
-			OffsetTo:        1,
-			LogFilePosition: logs.End,
-			TailLines:       logs.MaxTailLines,
-		},
-	)
+	selection := &logs.Selection{
+		ReferencePoint:  logs.NewestLogLineId,
+		OffsetFrom:      -logs.MaxLogLines,
+		OffsetTo:        1,
+		LogFilePosition: logs.End,
+		TailLines:       logs.MaxTailLines,
+	}
+	details := ConstructLogDetails("pod-1", rawLogs.String(), "test", selection)
 
 	if details.Info.HasMore {
 		t.Error("ConstructLogDetails() HasMore = true, want false at the maximum tail window")
@@ -437,8 +473,11 @@ func TestConstructLogDetailsMaxTailWindowHasNoMorePages(t *testing.T) {
 	if !details.Info.Truncated {
 		t.Error("ConstructLogDetails() Truncated = false, want true when the maximum tail window is full")
 	}
-	if len(details.LogLines) == 0 {
-		t.Error("ConstructLogDetails() returned no log lines")
+	if len(details.LogLines) != logs.MaxTailLines {
+		t.Errorf("ConstructLogDetails() returned %d lines, want %d", len(details.LogLines), logs.MaxTailLines)
+	}
+	if details.LogLines[0].Content == "log1" {
+		t.Error("ConstructLogDetails() returned the older tail sentinel")
 	}
 }
 
@@ -460,7 +499,7 @@ func TestMapToLogOptions(t *testing.T) {
 				LimitBytes: &byteReadLimit,
 			},
 		},
-		{"Line limit must be set, when reading the log file from the end",
+		{"One extra line must be read from the end to detect truncation",
 			"test",
 			&logs.Selection{
 				LogFilePosition: "end",
@@ -468,10 +507,10 @@ func TestMapToLogOptions(t *testing.T) {
 			&v1.PodLogOptions{
 				Container:  "test",
 				Timestamps: true,
-				TailLines:  int64Pointer(logs.DefaultTailLines),
+				TailLines:  int64Pointer(logs.DefaultTailLines + 1),
 			},
 		},
-		{"Requested line limit must be set, when reading the log file from the end",
+		{"One extra requested line must be read from the end to detect truncation",
 			"test",
 			&logs.Selection{
 				LogFilePosition: logs.End,
@@ -480,7 +519,7 @@ func TestMapToLogOptions(t *testing.T) {
 			&v1.PodLogOptions{
 				Container:  "test",
 				Timestamps: true,
-				TailLines:  int64Pointer(1000),
+				TailLines:  int64Pointer(1001),
 			},
 		},
 	}

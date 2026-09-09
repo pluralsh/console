@@ -142,3 +142,44 @@ func TestNormalizeTailLines(t *testing.T) {
 		})
 	}
 }
+
+func TestLogLinesSelectLogsExpandsEndWindowWithDuplicateTimestamps(t *testing.T) {
+	firstWindow := LogLines{
+		{Timestamp: "1", Content: "log5"},
+		{Timestamp: "1", Content: "log6"},
+		{Timestamp: "1", Content: "log7"},
+	}
+	_, _, _, firstSelection, _ := firstWindow.SelectLogs(&Selection{
+		ReferencePoint:  NewestLogLineId,
+		OffsetFrom:      -3,
+		OffsetTo:        1,
+		LogFilePosition: End,
+		TailLines:       3,
+	})
+
+	pageSize := firstSelection.OffsetTo - firstSelection.OffsetFrom
+	nextWindow := LogLines{
+		{Timestamp: "1", Content: "log2"},
+		{Timestamp: "1", Content: "log3"},
+		{Timestamp: "1", Content: "log4"},
+		{Timestamp: "1", Content: "log5"},
+		{Timestamp: "1", Content: "log6"},
+		{Timestamp: "1", Content: "log7"},
+	}
+	nextPage, _, _, _, _ := nextWindow.SelectLogs(&Selection{
+		ReferencePoint:  firstSelection.ReferencePoint,
+		OffsetFrom:      firstSelection.OffsetFrom - pageSize,
+		OffsetTo:        firstSelection.OffsetFrom,
+		LogFilePosition: End,
+		TailLines:       6,
+	})
+
+	expected := LogLines{
+		{Timestamp: "1", Content: "log2"},
+		{Timestamp: "1", Content: "log3"},
+		{Timestamp: "1", Content: "log4"},
+	}
+	if !reflect.DeepEqual(nextPage, expected) {
+		t.Errorf("expanded tail page = %#v, want %#v", nextPage, expected)
+	}
+}

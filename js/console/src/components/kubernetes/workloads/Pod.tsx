@@ -286,7 +286,8 @@ export function PodLogs(): ReactElement<any> {
 
       return { path, query }
     },
-    refetchInterval: 30_000,
+    refetchInterval: (query) =>
+      (query.state.data?.pages?.length ?? 0 > 1) ? false : 30_000,
   })
 
   const logs = useMemo(
