@@ -1,0 +1,258 @@
+icon: https://raw.githubusercontent.com/cncf/artwork/main/projects/submariner/icon/color/submariner-icon-color.svg
+git_url: https://github.com/submariner-io/submariner-operator
+release_url: https://github.com/submariner-io/submariner-operator/releases/tag/v{vsn}
+helm_repository_url: https://submariner-io.github.io/submariner-charts/charts
+chart_name: submariner-operator
+versions:
+- version: 0.24.1
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.24.1
+  images: ['quay.io/submariner/submariner-operator:0.24.1']
+- version: 0.24.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.24.0
+  images: ['quay.io/submariner/submariner-operator:0.24.0']
+- version: 0.23.1
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.23.1
+  images: ['quay.io/submariner/submariner-operator:0.23.1']
+- version: 0.22.0
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.22.0
+  images: ['quay.io/submariner/submariner-operator:0.22.0']
+- version: 0.21.3
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.21.3
+  images: ['quay.io/submariner/submariner-operator:0.21.3']
+- version: 0.21.1
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.21.1
+  images: ['quay.io/submariner/submariner-operator:0.21.1']
+- version: 0.20.3
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.20.3
+  images: ['quay.io/submariner/submariner-operator:0.20.3']
+- version: 0.20.2
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.20.2
+  images: ['quay.io/submariner/submariner-operator:0.20.2']
+- version: 0.20.1
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.20.1
+  images: ['quay.io/submariner/submariner-operator:0.20.1']
+- version: 0.20.0
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.20.0
+  images: ['quay.io/submariner/submariner-operator:0.20.0']
+- version: 0.19.4
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.19.4
+  images: ['quay.io/submariner/submariner-operator:0.19.4']
+- version: 0.19.2
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.19.2
+  images: ['quay.io/submariner/submariner-operator:0.19.2']
+- version: 0.19.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.19.0
+  images: ['quay.io/submariner/submariner-operator:0.19.0']
+- version: 0.18.5
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.18.5
+  images: ['quay.io/submariner/submariner-operator:0.18.5']
+- version: 0.18.3
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.18.3
+  images: ['quay.io/submariner/submariner-operator:0.18.3']
+- version: 0.18.1
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.18.1
+  images: ['quay.io/submariner/submariner-operator:0.18.1']
+- version: 0.18.0
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.18.0
+  images: ['quay.io/submariner/submariner-operator:0.18.0']
+- version: 0.17.6
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.17.6
+  images: ['quay.io/submariner/submariner-operator:0.17.6']
+- version: 0.17.5
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.17.5
+  images: ['quay.io/submariner/submariner-operator:0.17.5']
+- version: 0.17.3
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.17.3
+  images: ['quay.io/submariner/submariner-operator:0.17.3']
+- version: 0.17.1
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.17.1
+  images: ['quay.io/submariner/submariner-operator:0.17.1']
+- version: 0.17.0
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.17.0
+  images: ['quay.io/submariner/submariner-operator:0.17.0']
+- version: 0.16.8
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.16.8
+  images: ['quay.io/submariner/submariner-operator:0.16.8']
+- version: 0.16.4
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.16.4
+  images: ['quay.io/submariner/submariner-operator:0.16.4']
+- version: 0.16.2
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.16.2
+  images: ['quay.io/submariner/submariner-operator:0.16.2']
+- version: 0.16.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.16.0
+  images: ['quay.io/submariner/submariner-operator:0.16.0']
+- version: 0.15.4
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.15.4
+  images: ['quay.io/submariner/submariner-operator:0.15.4']
+- version: 0.15.3
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.15.3
+  images: ['quay.io/submariner/submariner-operator:0.15.3']
+- version: 0.15.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.15.0
+  images: ['quay.io/submariner/submariner-operator:0.15.0']
+- version: 0.14.9
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.14.9
+  images: ['quay.io/submariner/submariner-operator:0.14.9']
+- version: 0.14.8
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.14.8
+  images: ['quay.io/submariner/submariner-operator:0.14.8']
+- version: 0.14.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.14.0
+  images: ['quay.io/submariner/submariner-operator:0.14.0']
+- version: 0.12.2
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.12.2
+  images: ['quay.io/submariner/submariner-operator:0.12.2']
+- version: 0.11.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.11.0
+  images: ['quay.io/submariner/submariner-operator:0.11.0']
+- version: 0.10.1
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.10.1
+  images: ['quay.io/submariner/submariner-operator:0.10.1']
+- version: 0.7.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.7.0
+  images: ['quay.io/submariner/submariner-operator:0.7.0']
