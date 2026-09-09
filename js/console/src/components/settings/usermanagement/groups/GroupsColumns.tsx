@@ -1,10 +1,18 @@
-import { EyeIcon, IconFrame, Modal, PencilIcon } from '@pluralsh/design-system'
+import {
+  EyeIcon,
+  Flex,
+  IconFrame,
+  Modal,
+  PencilIcon,
+  Spinner,
+} from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { CaptionP } from 'components/utils/typography/Text'
 import {
   GroupFragment,
   GroupMembersQuery,
@@ -19,11 +27,12 @@ import {
   ColMembershipExpander,
   HoverActions,
   MembershipExpandPanel,
+  MembershipListRowSC,
+  MembershipListSC,
   MembershipUserRow,
   MEMBERSHIP_VISIBLE_ROWS,
 } from '../MembershipExpandPanel'
 import { formatGroupMembersCopy } from '../membershipCopy'
-import { GroupMembers } from './GroupMembers'
 import type { GroupsListMeta } from './GroupsList'
 
 const COPY_MEMBERS_PAGE_SIZE = 1000
@@ -181,6 +190,13 @@ function ViewGroupMembersModal({
   open: boolean
   onClose: () => void
 }) {
+  const { data, loading, error } = useGroupMembersQuery({
+    variables: { id: group.id, first: COPY_MEMBERS_PAGE_SIZE },
+    skip: !open,
+  })
+  const users = membersFromQuery(data)
+  const showEmpty = !!data && !loading && users.length === 0
+
   return (
     <Modal
       header={group.name}
@@ -189,20 +205,35 @@ function ViewGroupMembersModal({
       size="large"
       scrollable={false}
     >
-      <div
+      {error && <GqlError error={error} />}
+      <MembershipListSC
         css={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: 480,
-          minHeight: 0,
+          maxHeight: 480,
+          overflow: 'auto',
         }}
       >
-        <GroupMembers
-          viewOnly
-          groupId={group.id}
-          pageSize={1000}
-        />
-      </div>
+        {loading && !data && (
+          <Flex
+            justify="center"
+            padding="medium"
+          >
+            <Spinner />
+          </Flex>
+        )}
+        {showEmpty && (
+          <MembershipListRowSC>
+            <CaptionP $color="text-xlight">This group has no members.</CaptionP>
+          </MembershipListRowSC>
+        )}
+        {users.map((user) => (
+          <MembershipUserRow
+            key={user.id}
+            name={user.name}
+            email={user.email}
+            avatar={user.profile}
+          />
+        ))}
+      </MembershipListSC>
     </Modal>
   )
 }

@@ -30,7 +30,7 @@ export function GroupsList({
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useGroupsQuery, keyPath: ['groups'] },
+      { queryHook: useGroupsQuery, keyPath: ['groups'], pageSize: 20 },
       { q: throttledQ }
     )
   const groups = useMemo(() => mapExistingNodes(data?.groups), [data?.groups])
@@ -42,10 +42,13 @@ export function GroupsList({
     setVirtualSlice,
   })
 
-  const meta: GroupsListMeta = {
-    editable: !!me?.roles?.admin,
-    setGroupEdit,
-  }
+  const meta: GroupsListMeta = useMemo(
+    () => ({
+      editable: !!me?.roles?.admin,
+      setGroupEdit,
+    }),
+    [me?.roles?.admin, setGroupEdit]
+  )
 
   if (error) return <GqlError error={error} />
 
