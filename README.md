@@ -18,11 +18,9 @@ It provides a low-maintenance, all-in-one solution for virtually any devops task
 
 ## Contributor Program
 
-We are currently trying to aggregate compatibility and dependency information for many CNCF add-ons within the kubernetes ecosystem.  You can see some early examples in `static/compatibilities` and are hoping to get community support getting these built out and keeping them up-to-date.  We are focused on properly compensating any contributions to the Plural platform, which includes a bounty for either adding the compatibility info for a net-new application, or updating the information alongside a new version that has been released.  Currently the rewards are:
+We are currently trying to aggregate compatibility and dependency information for many CNCF add-ons within the kubernetes ecosystem.  You can see some early examples in `static/compatibilities` and are hoping to get community support getting keeping them up-to-date.  We are focused on properly compensating any contributions to the Plural platform, which includes a bounty for updating the information alongside a new version that has been released.  Currently the rewards are:
 
 * $50 for adding compatibilities for a specific version of an application
-* $150 for adding a new application and all to-date compatibility information
-* $300 for a new compatibility scraper (these are all defined in `utils/compatibility/scrapers`)
 
 Awards are limited to one award per contributor per calendar month. This helps keep the program sustainable and ensures reviewers can give submissions appropriate attention.
 
