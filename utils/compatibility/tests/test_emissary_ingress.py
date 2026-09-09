@@ -36,6 +36,7 @@ class EmissaryIngressScraperTests(unittest.TestCase):
         ]
         self.mock_chart_versions = {
             "3.9.1": "8.9.1",
+            "3.9.1-rc.1": "8.9.1-rc.1",
             "3.9.0": "8.9.0",
             "3.8.0": "8.8.0",
         }
@@ -43,15 +44,6 @@ class EmissaryIngressScraperTests(unittest.TestCase):
     def test_scraper_app_name_and_chart_name(self):
         self.assertEqual(scraper.app_name, "emissary-ingress")
         self.assertEqual(scraper.chart_name, "emissary-ingress")
-
-    def test_prerelease_filtering(self):
-        releases = [("v3.9.1-rc.1", "2026-08-10T00:00:00Z"), ("v3.9.1", "2026-08-20T00:00:00Z")]
-        filtered = [
-            r for r in releases
-            if "-" not in r[0] and not any(pre in r[0].lower() for pre in ["rc", "alpha", "beta"])
-        ]
-        self.assertEqual(len(filtered), 1)
-        self.assertEqual(filtered[0][0], "v3.9.1")
 
     @patch.object(scraper, "update_compatibility_info")
     @patch.object(scraper, "get_chart_versions")
@@ -71,16 +63,21 @@ class EmissaryIngressScraperTests(unittest.TestCase):
         filepath, versions = args[0], args[1]
 
         self.assertEqual(filepath, "../../static/compatibilities/emissary-ingress.yaml")
-        # Should filter out v3.9.1-rc.1 and v3.9.0-alpha.1
+        # Should filter out v3.9.1-rc.1 (even with chart) and v3.9.0-alpha.1
+        self.assertFalse(any("rc" in v["version"] or "alpha" in v["version"] for v in versions))
         self.assertEqual(len(versions), 3)
 
+        # Verify newest release using future_release fallback
         v3_9_1 = next(v for v in versions if v["version"] == "3.9.1")
         self.assertEqual(v3_9_1["chart_version"], "8.9.1")
-        self.assertIn("1.36", v3_9_1["kube"])
-        self.assertIn("1.35", v3_9_1["kube"])
-        self.assertIn("1.34", v3_9_1["kube"])
+        self.assertEqual(v3_9_1["kube"], ["1.34", "1.35", "1.36"])
         self.assertEqual(v3_9_1["requirements"], [])
         self.assertEqual(v3_9_1["incompatibilities"], [])
+
+        # Verify historical release using future_release boundary
+        v3_8_0 = next(v for v in versions if v["version"] == "3.8.0")
+        self.assertEqual(v3_8_0["chart_version"], "8.8.0")
+        self.assertEqual(v3_8_0["kube"], ["1.33", "1.34", "1.35"])
 
     @patch.object(scraper, "update_compatibility_info")
     @patch.object(scraper, "get_chart_versions")
