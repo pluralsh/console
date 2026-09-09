@@ -11564,6 +11564,40 @@ addons:
     chart_version: 3.20.6
     images: ['quay.io/tigera/operator:v1.20.9']
   name: calico
+- icon: https://raw.githubusercontent.com/ceph/ceph-csi/devel/assets/ceph-logo.png
+  git_url: https://github.com/ceph/ceph-csi
+  release_url: https://github.com/ceph/ceph-csi/releases/tag/v{vsn}
+  helm_repository_url: https://ceph.github.io/csi-charts
+  chart_name: ceph-csi-rbd
+  versions:
+  - version: 3.17.1
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.17.1
+    images: ['quay.io/cephcsi/cephcsi:v3.17.1', 'registry.k8s.io/sig-storage/csi-attacher:v4.11.0',
+      'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.16.0', 'registry.k8s.io/sig-storage/csi-provisioner:v6.2.0',
+      'registry.k8s.io/sig-storage/csi-resizer:v2.1.0', 'registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0']
+  - version: 3.17.0
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.17.0
+    images: ['quay.io/cephcsi/cephcsi:v3.17.0', 'registry.k8s.io/sig-storage/csi-attacher:v4.11.0',
+      'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.16.0', 'registry.k8s.io/sig-storage/csi-provisioner:v6.2.0',
+      'registry.k8s.io/sig-storage/csi-resizer:v2.1.0', 'registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0']
+  - version: 3.16.0
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.16.0
+    images: ['quay.io/cephcsi/cephcsi:v3.16.0', 'registry.k8s.io/sig-storage/csi-attacher:v4.10.0',
+      'registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0', 'registry.k8s.io/sig-storage/csi-provisioner:v6.0.0',
+      'registry.k8s.io/sig-storage/csi-resizer:v2.0.0', 'registry.k8s.io/sig-storage/csi-snapshotter:v8.4.0']
+  name: ceph-csi-rbd
 - icon: https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png
   git_url: https://github.com/cert-manager/cert-manager
   release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
