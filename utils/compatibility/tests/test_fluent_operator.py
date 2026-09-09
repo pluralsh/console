@@ -30,15 +30,23 @@ class FluentOperatorScraperTests(unittest.TestCase):
         self.mock_github_releases = [
             ("v3.10.0", "2026-08-17T13:10:13Z"),
             ("v3.10.0-rc.1", "2026-08-10T00:00:00Z"),
+            ("v3.10.0-beta.1", "2026-07-20T00:00:00Z"),
             ("v3.9.0", "2026-06-09T14:24:18Z"),
             ("v3.9.0-alpha.1", "2026-05-15T00:00:00Z"),
             ("v3.8.0", "2026-05-21T16:39:08Z"),
+            ("v3.3.0", "2025-08-01T00:00:00Z"),
+            ("v2.5.0", "2024-08-01T00:00:00Z"),
+            ("v1.7.0", "2023-08-01T00:00:00Z"),
         ]
         self.mock_chart_versions = {
             "3.10.0": "4.3.0",
             "3.10.0-rc.1": "4.3.0-rc.1",
+            "3.10.0-beta.1": "4.3.0-beta.1",
             "3.9.0": "4.2.0",
             "3.8.0": "4.1.0",
+            "3.3.0": "3.3.0",
+            "2.5.0": "2.5.0",
+            "1.7.0": "1.7.2",
         }
 
     def test_scraper_app_name_and_chart_name(self):
@@ -63,8 +71,14 @@ class FluentOperatorScraperTests(unittest.TestCase):
         filepath, versions = args[0], args[1]
 
         self.assertEqual(filepath, "../../static/compatibilities/fluent-operator.yaml")
-        # Should filter out v3.10.0-rc.1 (even with chart) and v3.9.0-alpha.1
-        self.assertFalse(any("rc" in v["version"] or "alpha" in v["version"] for v in versions))
+        # Assert exclusions: rc, beta, alpha, and explicitly excluded 1.7.0, 2.5.0, 3.3.0
+        output_versions = [v["version"] for v in versions]
+        self.assertNotIn("3.10.0-rc.1", output_versions)
+        self.assertNotIn("3.10.0-beta.1", output_versions)
+        self.assertNotIn("3.9.0-alpha.1", output_versions)
+        self.assertNotIn("3.3.0", output_versions)
+        self.assertNotIn("2.5.0", output_versions)
+        self.assertNotIn("1.7.0", output_versions)
         self.assertEqual(len(versions), 3)
 
         # Verify newest release using future_release fallback
