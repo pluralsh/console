@@ -148,6 +148,10 @@ export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
         loading={!data && loading}
         emptyMessage="This group has no members."
         getCopyText={() => getGroupMembersCopyText(fetchMembers, group)}
+        previewRows={Math.min(
+          group.memberCount ?? MEMBERSHIP_VISIBLE_ROWS,
+          MEMBERSHIP_VISIBLE_ROWS
+        )}
         viewAll={hasMore ? { onClick: () => setViewOpen(true) } : undefined}
       >
         {users.map((user) => (
@@ -183,11 +187,20 @@ function ViewGroupMembersModal({
       open={open}
       onClose={onClose}
       size="large"
+      scrollable={false}
     >
-      <div css={{ height: 480, minHeight: 0 }}>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 480,
+          minHeight: 0,
+        }}
+      >
         <GroupMembers
           viewOnly
           groupId={group.id}
+          pageSize={1000}
         />
       </div>
     </Modal>

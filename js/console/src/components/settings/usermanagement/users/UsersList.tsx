@@ -7,7 +7,10 @@ import { useUsersQuery } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { membershipExpandTableProps } from '../MembershipExpandPanel'
+import {
+  membershipExpandTableProps,
+  useMembershipListPagination,
+} from '../MembershipExpandPanel'
 import UserInvite from './UserInvite'
 import { UserGroupsExpand, usersCols } from './UsersColumns'
 
@@ -23,6 +26,13 @@ export function UsersList() {
     )
 
   const users = useMemo(() => mapExistingNodes(data?.users), [data?.users])
+  const onVirtualSliceChange = useMembershipListPagination({
+    itemCount: users.length,
+    hasNextPage: pageInfo?.hasNextPage,
+    isFetching: loading,
+    fetchNextPage,
+    setVirtualSlice,
+  })
 
   if (error) return <GqlError error={error} />
 
@@ -42,10 +52,7 @@ export function UsersList() {
         data={users}
         columns={usersCols}
         loading={!data && loading}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
+        onVirtualSliceChange={onVirtualSliceChange}
         renderExpanded={({ row }) => <UserGroupsExpand row={row} />}
         emptyStateProps={{
           message: !throttledQ

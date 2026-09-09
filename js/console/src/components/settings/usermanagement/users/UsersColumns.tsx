@@ -10,6 +10,7 @@ import {
   ColMembershipExpander,
   MembershipExpandPanel,
   MembershipListRowSC,
+  MembershipListSC,
   MEMBERSHIP_VISIBLE_ROWS,
 } from '../MembershipExpandPanel'
 import { formatUserGroupsCopy } from '../membershipCopy'
@@ -78,6 +79,7 @@ export function UserGroupsExpand({
       <MembershipExpandPanel
         copyText={formatUserGroupsCopy(user, groups)}
         emptyMessage="This user is not in any groups."
+        previewRows={Math.min(groups.length, MEMBERSHIP_VISIBLE_ROWS)}
         viewAll={hasMore ? { onClick: () => setViewOpen(true) } : undefined}
       >
         {groups.map((group) => (
@@ -95,17 +97,25 @@ export function UserGroupsExpand({
         header={`${user.name} groups`}
         open={viewOpen}
         onClose={() => setViewOpen(false)}
+        scrollable={false}
       >
-        {groups.map((group) => (
-          <MembershipListRowSC key={group.id}>
-            <Body2P
-              $color="text-light"
-              css={TRUNCATE}
-            >
-              {group.name}
-            </Body2P>
-          </MembershipListRowSC>
-        ))}
+        <MembershipListSC
+          css={{
+            maxHeight: 480,
+            overflow: 'auto',
+          }}
+        >
+          {groups.map((group) => (
+            <MembershipListRowSC key={group.id}>
+              <Body2P
+                $color="text-light"
+                css={TRUNCATE}
+              >
+                {group.name}
+              </Body2P>
+            </MembershipListRowSC>
+          ))}
+        </MembershipListSC>
       </Modal>
     </>
   )

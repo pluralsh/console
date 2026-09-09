@@ -7,6 +7,7 @@ import {
   Spinner,
 } from '@pluralsh/design-system'
 import { TRUNCATE } from 'components/utils/truncate'
+import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   Children,
@@ -14,6 +15,7 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import styled from 'styled-components'
@@ -33,6 +35,57 @@ export const membershipExpandTableProps = {
   ) => {
     row.getToggleExpandedHandler()()
   },
+  reactVirtualOptions: {
+    estimateSize: () => 80,
+  },
+  lockColumnsOnScroll: false,
+}
+
+export function useMembershipListPagination({
+  itemCount,
+  hasNextPage,
+  isFetching,
+  fetchNextPage,
+  setVirtualSlice,
+}: {
+  itemCount: number
+  hasNextPage?: boolean
+  isFetching: boolean
+  fetchNextPage: () => void
+  setVirtualSlice: (slice: VirtualSlice) => void
+}) {
+  const sliceRef = useRef<VirtualSlice | undefined>(undefined)
+
+  const syncSlice = useCallback(
+    (slice?: VirtualSlice) => {
+      if (slice) sliceRef.current = slice
+
+      const current = sliceRef.current
+
+      if (!current) return
+
+      setVirtualSlice(current)
+
+      const endIndex = current.end?.index
+
+      if (
+        itemCount > 0 &&
+        endIndex != null &&
+        endIndex >= itemCount - 1 &&
+        hasNextPage &&
+        !isFetching
+      ) {
+        fetchNextPage()
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetching, itemCount, setVirtualSlice]
+  )
+
+  useEffect(() => {
+    syncSlice()
+  }, [syncSlice])
+
+  return syncSlice
 }
 
 export const ColMembershipExpander = {
@@ -94,6 +147,7 @@ export function MembershipExpandPanel({
   loading,
   emptyMessage,
   viewAll,
+  previewRows,
   children,
 }: {
   copyText?: string
@@ -101,6 +155,7 @@ export function MembershipExpandPanel({
   loading?: boolean
   emptyMessage?: string
   viewAll?: { onClick: () => void }
+  previewRows?: number
   children?: ReactNode
 }) {
   const { copied, copying, handleCopy } = useCopyList(
@@ -111,11 +166,20 @@ export function MembershipExpandPanel({
   )
   const items = Children.toArray(children).slice(0, MEMBERSHIP_VISIBLE_ROWS)
   const showEmpty = !loading && items.length === 0
+  const listRows = loading
+    ? Math.min(previewRows ?? MEMBERSHIP_VISIBLE_ROWS, MEMBERSHIP_VISIBLE_ROWS)
+    : items.length
 
   return (
     <WrapperSC onClick={(e) => e.stopPropagation()}>
       <BodySC>
-        <ListSC>
+        <MembershipListSC
+          style={
+            listRows > 0
+              ? { minHeight: listRows * MEMBERSHIP_ROW_HEIGHT }
+              : undefined
+          }
+        >
           {loading && (
             <Flex
               justify="center"
@@ -130,7 +194,7 @@ export function MembershipExpandPanel({
             </MembershipListRowSC>
           )}
           {items}
-        </ListSC>
+        </MembershipListSC>
         {viewAll && (
           <SeeFullListSC
             type="button"
@@ -238,7 +302,7 @@ const BodySC = styled.div(({ theme }) => ({
   minWidth: 0,
 }))
 
-const ListSC = styled.div(({ theme }) => ({
+export const MembershipListSC = styled.div(({ theme }) => ({
   overflow: 'hidden',
   border: theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,

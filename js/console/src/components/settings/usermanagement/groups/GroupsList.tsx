@@ -6,7 +6,10 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { useGroupsQuery } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
-import { membershipExpandTableProps } from '../MembershipExpandPanel'
+import {
+  membershipExpandTableProps,
+  useMembershipListPagination,
+} from '../MembershipExpandPanel'
 import { ListWrapperSC } from '../users/UsersList'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
 import { GroupMembersExpand, groupsCols } from './GroupsColumns'
@@ -31,6 +34,13 @@ export function GroupsList({
       { q: throttledQ }
     )
   const groups = useMemo(() => mapExistingNodes(data?.groups), [data?.groups])
+  const onVirtualSliceChange = useMembershipListPagination({
+    itemCount: groups.length,
+    hasNextPage: pageInfo?.hasNextPage,
+    isFetching: loading,
+    fetchNextPage,
+    setVirtualSlice,
+  })
 
   const meta: GroupsListMeta = {
     editable: !!me?.roles?.admin,
@@ -56,10 +66,7 @@ export function GroupsList({
         loading={!data && loading}
         columns={groupsCols}
         reactTableOptions={{ meta }}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
+        onVirtualSliceChange={onVirtualSliceChange}
         renderExpanded={({ row }) => <GroupMembersExpand row={row} />}
         emptyStateProps={{
           ...(!throttledQ
