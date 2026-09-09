@@ -50,8 +50,9 @@ export function FlowCard({
       <ContentSC>
           <HeaderSC>
             <AppIcon
+              rounded
               size="xsmall"
-              url={flow.icon ?? ''}
+              url={flow.icon || undefined}
               icon={<FlowIcon />}
             />
             <Body1BoldP

@@ -60,7 +60,9 @@ function getColumns({
 
         return (
           <NameCellSC>
-            <AppIcon
+            <NameAppIconSC
+              rounded
+              hue="default"
               size="xxxsmall"
               url={flow.icon || undefined}
               icon={<FlowIcon />}
@@ -68,7 +70,11 @@ function getColumns({
             <NameBlockSC>
               <NameRowSC>
                 <NameP>{flow.name}</NameP>
-                {favorited && <FlowFavoriteStar size={14} />}
+                {favorited && (
+                  <FavoriteMarkSC>
+                    <FlowFavoriteStar size={14} />
+                  </FavoriteMarkSC>
+                )}
               </NameRowSC>
               {flow.description && (
                 <CaptionP
@@ -187,6 +193,17 @@ export function FlowsTable({
   )
 }
 
+const NameAppIconSC = styled(AppIcon)({
+  width: 32,
+  height: 32,
+  minWidth: 32,
+  minHeight: 32,
+  '& img, & svg': {
+    width: 16,
+    height: 16,
+  },
+})
+
 const NameCellSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -210,6 +227,12 @@ const NameRowSC = styled.div(({ theme }) => ({
   maxWidth: '100%',
   width: 'max-content',
 }))
+
+const FavoriteMarkSC = styled.span({
+  display: 'inline-flex',
+  flexShrink: 0,
+  lineHeight: 0,
+})
 
 const NameP = styled.p(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
