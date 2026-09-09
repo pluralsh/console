@@ -1,0 +1,76 @@
+icon: https://nats.io/img/nats-icon-color.png
+git_url: https://github.com/nats-io/nats-server
+release_url: https://github.com/nats-io/nats-server/releases/tag/v{vsn}
+helm_repository_url: https://nats-io.github.io/k8s/helm/charts
+chart_name: nats
+versions:
+- version: 2.14.6
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.14.6
+  images: ['nats:2.14.6-alpine', 'natsio/nats-box:0.19.7', 'natsio/nats-server-config-reloader:0.23.0']
+- version: 2.14.0
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.14.0
+  images: ['nats:2.14.0-alpine', 'natsio/nats-box:0.19.5', 'natsio/nats-server-config-reloader:0.23.0']
+- version: 2.12.1
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.12.1
+  images: ['nats:2.12.1-alpine', 'natsio/nats-box:0.19.2', 'natsio/nats-server-config-reloader:0.20.1']
+- version: 2.11.6
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.3.9
+  images: ['nats:2.11.6-alpine', 'natsio/nats-box:0.18.0', 'natsio/nats-server-config-reloader:0.18.2']
+- version: 2.11.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.3.1
+  images: ['nats:2.11.0-alpine', 'natsio/nats-box:0.17.0', 'natsio/nats-server-config-reloader:0.17.1']
+- version: 2.10.1
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.1.0
+  images: ['nats:2.10.1-alpine', 'natsio/nats-box:0.14.0', 'natsio/nats-server-config-reloader:0.11.0']
+- version: 2.9.20
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.0
+  images: ['nats:2.9.20-alpine', 'natsio/nats-box:0.13.5', 'natsio/nats-server-config-reloader:0.11.0']
+- version: 2.9.0
+  kube: ['1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.18.0
+  images: ['nats:2.9.0-alpine', 'natsio/nats-box:0.11.0', 'natsio/nats-server-config-reloader:0.7.0', 'natsio/prometheus-nats-exporter:0.9.1']
+- version: 2.8.0
+  kube: ['1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.17.0
+  images: ['nats:2.8.2-alpine', 'natsio/nats-box:0.11.0', 'natsio/nats-server-config-reloader:0.7.0', 'natsio/prometheus-nats-exporter:0.9.1']
+- version: 2.7.3
+  kube: ['1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.14.1
+  images: ['nats:2.7.3-alpine', 'natsio/nats-box:0.8.1', 'natsio/nats-server-config-reloader:0.6.3', 'natsio/prometheus-nats-exporter:0.9.1']
