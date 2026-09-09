@@ -16,7 +16,45 @@ from utils import (
 )
 
 app_name = "kyverno"
-compatibility_url = "https://kyverno.io/docs/installation/"
+compatibility_url = "https://kyverno.io/docs/installation/releases/"
+
+
+def _parse_patch_support(soup: BeautifulSoup) -> list[OrderedDict[str, object]]:
+    """Read the release page's labelled support schedule, not Helm constraints."""
+    for table in soup.find_all("table"):
+        fields = {}
+        for tr in table.find_all("tr"):
+            cells = tr.find_all(["td", "th"])
+            if len(cells) == 2:
+                label = cells[0].get_text(" ", strip=True).rstrip(":").lower()
+                fields[label] = cells[1].get_text(" ", strip=True)
+
+        release = re.fullmatch(
+            r"v?(\d+)\.(\d+)(?:\s+\(released:\s*[^)]+\))?",
+            fields.get("supported release", ""),
+        )
+        bounds = re.fullmatch(
+            r"v?(\d+)\.(\d+)\s*[-–—]\s*v?(\d+)\.(\d+)",
+            fields.get("kubernetes versions supported", ""),
+        )
+        if not release or not bounds:
+            continue
+        start_major, start_minor, end_major, end_minor = map(int, bounds.groups())
+        if start_major != end_major or start_minor > end_minor:
+            continue
+
+        version = f"{release[1]}.{release[2]}.0"
+        chart_version = get_chart_versions(app_name).get(version)
+        if not chart_version:
+            continue
+        return [OrderedDict([
+            ("version", version),
+            ("kube", [f"{start_major}.{minor}" for minor in range(start_minor, end_minor + 1)]),
+            ("requirements", []),
+            ("incompatibilities", []),
+            ("chart_version", chart_version),
+        ])]
+    return []
 
 
 def _find_compat_table(soup: BeautifulSoup):
@@ -85,12 +123,10 @@ def scrape() -> None:
         return
 
     soup = BeautifulSoup(page_content, "html.parser")
-    table = _find_compat_table(soup)
-    if not table:
-        print_error("Kyverno compatibility matrix table not found")
-        return
-
-    rows = _parse_rows(table)
+    rows = _parse_patch_support(soup)
+    if not rows:
+        table = _find_compat_table(soup)
+        rows = _parse_rows(table) if table else []
     if not rows:
         print_error("No compatibility rows parsed for Kyverno")
         return
