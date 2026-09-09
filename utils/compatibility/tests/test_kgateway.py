@@ -38,6 +38,20 @@ class ParseVersionsTableTests(unittest.TestCase):
             "2.1": ["1.31"],
         })
 
+    def test_only_the_release_table_is_parsed(self):
+        trailing = (
+            "\n## Image variants\n\n"
+            "| Component | Variant | Tag |\n|---|---|---|\n"
+            "| kgateway | distroless | v2.4.x-distroless |\n"
+        )
+        markdown = table(("2.4.x", "1.32 - 1.36")) + trailing
+        self.assertEqual(scraper.parse_versions_table(markdown), {"2.4": ["1.36", "1.35", "1.34", "1.33", "1.32"]})
+
+    def test_second_release_table_fails_closed(self):
+        markdown = table(("2.4.x", "1.32 - 1.36")) + "\nArchived:\n\n" + table(("2.0.x", "1.30 - 1.33"))
+        with self.assertRaisesRegex(ValueError, "more than one"):
+            scraper.parse_versions_table(markdown)
+
     def test_rejects_missing_open_ended_duplicate_or_malformed_rows(self):
         invalid = [
             "",

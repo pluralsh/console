@@ -61,31 +61,46 @@ def _kube_versions(cell):
     return [f"{low[0]}.{minor}" for minor in range(high[1], low[1] - 1, -1)]
 
 
+def _tables(markdown):
+    tables, current = [], []
+    for line in markdown.splitlines():
+        if line.strip().startswith("|"):
+            current.append(_cells(line))
+        elif current:
+            tables.append(current)
+            current = []
+    if current:
+        tables.append(current)
+    return tables
+
+
 def parse_versions_table(markdown):
-    lines = [line for line in markdown.splitlines() if line.strip().startswith("|")]
-    header = None
+    tables = [
+        table for table in _tables(markdown)
+        if any(cell.lower().startswith("kgateway") for cell in table[0])
+    ]
+    if not tables:
+        raise ValueError("kgateway version table not found")
+    if len(tables) > 1:
+        raise ValueError("Found more than one kgateway version table")
+    header, *rows = tables[0]
+    columns = (_column(header, "kgateway"), _column(header, "kubernetes"))
     families = {}
-    for line in lines:
-        cells = _cells(line)
-        if header is None:
-            if any(cell.lower().startswith("kgateway") for cell in cells):
-                header = (_column(cells, "kgateway"), _column(cells, "kubernetes"))
-            continue
+    for cells in rows:
         if all(set(cell) <= set("-: ") for cell in cells):
             continue
-        if len(cells) <= max(header):
-            raise ValueError(f"Malformed kgateway version table row: {line!r}")
-        match = FAMILY_RE.fullmatch(cells[header[0]])
+        if len(cells) <= max(columns):
+            raise ValueError(f"Malformed kgateway version table row: {cells!r}")
+        match = FAMILY_RE.fullmatch(cells[columns[0]])
         if not match:
-            raise ValueError(f"Unexpected kgateway release family: {cells[header[0]]!r}")
+            raise ValueError(f"Unexpected kgateway release family: {cells[columns[0]]!r}")
         family = f"{int(match[1])}.{int(match[2])}"
         if family in families:
             raise ValueError(f"Duplicate kgateway release family: {family}")
-        families[family] = _kube_versions(cells[header[1]])
-    if header is None or not families:
-        raise ValueError("kgateway version table not found")
+        families[family] = _kube_versions(cells[columns[1]])
+    if not families:
+        raise ValueError("kgateway version table has no release rows")
     return families
-
 
 def chart_tags():
     token = get(TOKEN_URL).json()["token"]
