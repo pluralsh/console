@@ -346,4 +346,6 @@ message ConfigurationFile {
   PrivateApiCF private_api = 5 [json_name = "private_api", (validate.rules).message.required = true];
   // Plural URL address
   string plural_url = 6 [json_name = "plural_url"];
+  // Skip TLS certificate verification when connecting to Plural Console.
+  bool plural_insecure_skip_tls_verify = 7 [json_name = "plural_insecure_skip_tls_verify"];
 }

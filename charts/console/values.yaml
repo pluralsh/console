@@ -580,6 +580,9 @@ provider: custom
 # controller is used in Chart.yaml to determine if controller dependency should be installed
 controller:
   enabled: true
+  console:
+    tls:
+      enabled: false
 
 # flux2 is used to override some values in flux2 default chart (packaged in charts/flux2-2.14.0.tgz). See https://github.com/fluxcd-community/helm-charts/blob/main/charts/flux2/values.yaml
 flux2:

@@ -35,4 +35,9 @@ data:
       listen:
         address: ":{{ .Values.kas.service.privateApiPort }}"
         authentication_secret_file: "/etc/kas/.privateapi_secret"
+    {{- if .Values.console.tls.enabled }}
+    plural_url: "https://console.{{ .Release.Namespace }}:{{ .Values.service.port }}/gql"
+    plural_insecure_skip_tls_verify: true
+    {{- else }}
     plural_url: "https://{{ .Values.kas.consoleUrl }}/gql"
+    {{- end }}

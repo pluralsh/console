@@ -10,6 +10,9 @@ securityContext:
     type: RuntimeDefault
 
 consoleUrl: ~
+console:
+  tls:
+    enabled: false
 fullnameOverride: console-operator
 
 tokenSecretRef:
