@@ -211,7 +211,17 @@ export function MembershipExpandPanel({
         onClick={handleCopy}
         width="fit-content"
       >
-        {copied ? 'Copied' : 'Copy list'}
+        <CopyLabelSC>
+          <span style={{ visibility: copied ? 'hidden' : 'visible' }}>
+            Copy list
+          </span>
+          <span
+            aria-live="polite"
+            style={{ visibility: copied ? 'visible' : 'hidden' }}
+          >
+            Copied
+          </span>
+        </CopyLabelSC>
       </Button>
     </WrapperSC>
   )
@@ -307,6 +317,12 @@ export const MembershipListSC = styled.div(({ theme }) => ({
   border: theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
+
+const CopyLabelSC = styled.span({
+  display: 'grid',
+  justifyItems: 'center',
+  '& > *': { gridArea: '1 / 1' },
+})
 
 const SeeFullListSC = styled.button(({ theme }) => ({
   ...theme.partials.text.caption,
