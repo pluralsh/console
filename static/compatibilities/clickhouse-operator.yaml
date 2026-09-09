@@ -1,47 +1,35 @@
-icon: https://avatars.githubusercontent.com/u/28471076?s=48&v=4
+icon: https://avatars.githubusercontent.com/u/54801242?s=48&v=4
 git_url: https://github.com/Altinity/clickhouse-operator
 release_url: https://github.com/Altinity/clickhouse-operator/releases/tag/release-{vsn}
 helm_repository_url: https://altinity.github.io/helm-charts
 chart_name: altinity-clickhouse-operator
 versions:
 - version: 0.27.3
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.27.3
 - version: 0.27.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.27.0
-- version: 0.26.2
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 0.26.2
 - version: 0.26.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.26.0
 - version: 0.25.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.25.0
 - version: 0.24.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary: null

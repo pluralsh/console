@@ -23,6 +23,8 @@ REPO_OWNER = "Altinity"
 REPO_NAME = "clickhouse-operator"
 CHART_NAME = "altinity-clickhouse-operator"
 MAX_RELEASES = 20
+# The compatibility matrix tracks the three newest Kubernetes minors per row.
+LATEST_KUBE_MINORS = 3
 
 # Strict form: a line that states only the requirement, e.g.
 #   " * Kubernetes 1.25+"
@@ -68,6 +70,19 @@ def _kube_floor(version: str) -> Optional[str]:
     return f"{v.major}.{v.minor}" if v else None
 
 
+def _kube_list(floor: str, latest_minor: str) -> list[str]:
+    """Newest supported Kubernetes minors for a release, descending.
+
+    The documented requirement is a floor ("Kubernetes 1.25+"); the matrix
+    tracks only the three newest stable minors, so intersect the expanded
+    range with that window. Entries newer than the latest stable release are
+    dropped (expand_kube_versions can overshoot when start == end).
+    """
+    expanded = expand_kube_versions(floor, latest_minor)
+    supported = [v for v in expanded if v <= latest_minor]
+    return supported[-LATEST_KUBE_MINORS:][::-1]
+
+
 def scrape() -> None:
     latest = latest_kube_version()
     latest_minor = f"{latest.major}.{latest.minor}" if latest else None
@@ -88,7 +103,7 @@ def scrape() -> None:
             OrderedDict(
                 [
                     ("version", version),
-                    ("kube", expand_kube_versions(floor, latest_minor)),
+                    ("kube", _kube_list(floor, latest_minor)),
                     ("requirements", []),
                     ("incompatibilities", []),
                 ]
