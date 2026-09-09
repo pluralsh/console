@@ -267,11 +267,15 @@ export function FlowsTable({
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       loading={loading && isEmpty(flows)}
-      getRowLink={({ original }) => (
-        <Link
-          to={`${getFlowDetailsPath({ flowIdOrName: original.name })}/services${search}`}
-        />
-      )}
+      getRowLink={({ original }) => {
+        const flow = original as FlowBasicWithBindingsFragment
+
+        return (
+          <Link
+            to={`${getFlowDetailsPath({ flowIdOrName: flow.name })}/services${search}`}
+          />
+        )
+      }}
       emptyStateProps={{ message: 'No flows found' }}
     />
   )
