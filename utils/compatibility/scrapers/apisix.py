@@ -13,6 +13,7 @@ chart_readme_url = (
 
 
 _MIN_KUBE_RE = re.compile(r"Kubernetes\s+v?(1\.\d+)\+", re.IGNORECASE)
+_RELEASE_VERSION_RE = re.compile(r"\d+\.\d+\.\d+")
 
 
 def _decode_text(payload: bytes | str, source: str) -> str:
@@ -66,6 +67,10 @@ def stable_charts_by_app_minor(index_payload: bytes | str):
         app_raw = str(entry.get("appVersion", "")).strip().lstrip("v")
         if not chart_raw or not app_raw or chart_raw in seen:
             continue
+        if not _RELEASE_VERSION_RE.fullmatch(chart_raw) or not _RELEASE_VERSION_RE.fullmatch(
+            app_raw
+        ):
+            continue
         try:
             chart = Version(chart_raw)
             app = Version(app_raw)
@@ -87,7 +92,7 @@ def stable_charts_by_app_minor(index_payload: bytes | str):
 
         seen.add(chart_raw)
         grouped.setdefault((app.major, app.minor), []).append(
-            (chart, str(app), chart_raw)
+            (app, chart, app_raw, chart_raw)
         )
 
     if not grouped:
@@ -95,8 +100,12 @@ def stable_charts_by_app_minor(index_payload: bytes | str):
 
     result = []
     for key in sorted(grouped, reverse=True):
-        candidates = sorted(grouped[key], key=lambda item: item[0], reverse=True)
-        result.append([(app, chart_raw) for _, app, chart_raw in candidates])
+        candidates = sorted(
+            grouped[key], key=lambda item: (item[0], item[1]), reverse=True
+        )
+        result.append(
+            [(app_raw, chart_raw) for _, _, app_raw, chart_raw in candidates]
+        )
     return result
 
 
@@ -108,7 +117,10 @@ def build_rows(index_payload: bytes | str, current_kube: str, fetcher):
             if not page:
                 continue
             markdown = _decode_text(page, f"APISIX chart {chart_version} README")
-            minimum = parse_min_kubernetes(markdown)
+            try:
+                minimum = parse_min_kubernetes(markdown)
+            except ValueError:
+                continue
             rows.append(
                 OrderedDict(
                     [

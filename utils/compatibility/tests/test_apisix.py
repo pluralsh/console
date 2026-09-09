@@ -73,6 +73,19 @@ entries:
             ],
         )
 
+    def test_prefers_newest_application_patch_over_newer_chart_version(self):
+        index = """entries:
+  apisix:
+  - version: 2.1.0
+    appVersion: 3.4.0
+  - version: 1.5.1
+    appVersion: 3.4.1
+"""
+        self.assertEqual(
+            scraper.stable_charts_by_app_minor(index),
+            [[("3.4.1", "1.5.1"), ("3.4.0", "2.1.0")]],
+        )
+
     def test_malformed_chart_metadata_is_ignored(self):
         index = """entries:
   apisix:
@@ -82,6 +95,25 @@ entries:
   - version: 2.17.0
     appVersion: 3.18.0
     annotations: {artifacthub.io/prerelease: "false"}
+"""
+        self.assertEqual(
+            scraper.stable_charts_by_app_minor(index),
+            [[("3.18.0", "2.17.0")]],
+        )
+
+    def test_rejects_non_release_version_forms(self):
+        index = """entries:
+  apisix:
+  - version: 2.17.0.post1
+    appVersion: 3.18.0
+  - version: 2.16.1
+    appVersion: 3.18
+  - version: 1!2.15.0
+    appVersion: 1!3.18.0
+  - version: 2.14.1+local
+    appVersion: 3.18.0+local
+  - version: 2.17.0
+    appVersion: 3.18.0
 """
         self.assertEqual(
             scraper.stable_charts_by_app_minor(index),
@@ -163,6 +195,36 @@ entries:
             "1.15",
             lambda url: b"* Kubernetes v1.14+" if url == older_url else None,
         )
+
+        self.assertEqual(
+            rows,
+            [
+                {
+                    "version": "3.17.0",
+                    "kube": ["1.15", "1.14"],
+                    "chart_version": "2.16.0",
+                    "requirements": [],
+                    "incompatibilities": [],
+                }
+            ],
+        )
+
+    def test_unparseable_latest_document_falls_back_within_application_minor(self):
+        index = """entries:
+  apisix:
+  - version: 2.16.1
+    appVersion: 3.17.1
+  - version: 2.16.0
+    appVersion: 3.17.0
+"""
+        newest_url = scraper.chart_readme_url.format(chart_version="2.16.1")
+        older_url = scraper.chart_readme_url.format(chart_version="2.16.0")
+        documentation = {
+            newest_url: b"## Prerequisites\nUse Kubernetes.\n",
+            older_url: b"## Prerequisites\n* Kubernetes v1.14+\n",
+        }
+
+        rows = scraper.build_rows(index, "1.15", documentation.get)
 
         self.assertEqual(
             rows,
