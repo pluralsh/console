@@ -23,6 +23,7 @@ names:
 - jaeger
 - karpenter
 - keda
+- kgateway
 - kong-ingress-controller
 - kube-prometheus-stack
 - kyverno

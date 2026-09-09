@@ -19259,6 +19259,48 @@ addons:
     chart_version: 2.7.0
     eolAt: '2022-12-09'
   name: keda
+- icon: https://raw.githubusercontent.com/kgateway-dev/kgateway.dev/main/static/favicon.svg
+  git_url: https://github.com/kgateway-dev/kgateway
+  release_url: https://github.com/kgateway-dev/kgateway/releases/tag/v{vsn}
+  readme_url: https://kgateway.dev/docs/envoy/latest/reference/versions/
+  helm_repository_url: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
+  versions:
+  - version: 2.4.4
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v2.4.4
+    images: ['cr.kgateway.dev/kgateway-dev/kgateway:v2.4.4']
+  - version: 2.4.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v2.4.0
+    images: ['cr.kgateway.dev/kgateway-dev/kgateway:v2.4.0']
+  - version: 2.3.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v2.3.0
+    images: ['cr.kgateway.dev/kgateway-dev/kgateway:v2.3.0']
+  - version: 2.2.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v2.2.0
+    images: ['cr.kgateway.dev/kgateway-dev/kgateway:v2.2.0']
+  - version: 2.1.0
+    kube: ['1.34', '1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v2.1.0
+    images: ['cr.kgateway.dev/kgateway-dev/kgateway:v2.1.0']
+  name: kgateway
 - icon: https://s3.amazonaws.com/downloads.kong/universe/assets/icon-kong-inc-large.png
   git_url: https://github.com/Kong/kubernetes-ingress-controller
   release_url: https://github.com/Kong/kubernetes-ingress-controller/releases/tag/v{vsn}
