@@ -1,0 +1,112 @@
+entries:
+  kuadrant-operator:
+  - name: kuadrant-operator
+    version: 1.5.3
+    appVersion: 1.5.3
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.5.2
+    appVersion: 1.5.2
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.5.2-rc1
+    appVersion: 1.5.2-rc1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.5.1
+    appVersion: 1.5.1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.5.0
+    appVersion: 1.5.0
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.5.0-rc3
+    appVersion: 1.5.0-rc3
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.4.7
+    appVersion: 1.4.7
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.4.7-rc1
+    appVersion: 1.4.7-rc1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.4.3
+    appVersion: 1.4.3
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.4.2
+    appVersion: 1.4.2
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.4.1
+    appVersion: 1.4.1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.4.0
+    appVersion: 1.4.0
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.3.1
+    appVersion: 1.3.1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.3.0
+    appVersion: 1.3.0
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.3.0-rc2
+    appVersion: 1.3.0-rc2
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.3.0-alpha2
+    appVersion: 1.3.0-alpha2
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.3.0-alpha1
+    appVersion: 1.3.0-alpha1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.2.0
+    appVersion: 1.2.0
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.1.0
+    appVersion: 1.1.0
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.2
+    appVersion: 1.0.2
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.1
+    appVersion: 1.0.1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.0
+    appVersion: 1.0.0
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.0-rc8
+    appVersion: 1.0.0-rc8
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.0-rc4
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.0-rc3
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.0-rc2
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 1.0.0-rc1
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 0.11.0
+    kubeVersion: '>=1.19.0-0'
+  - name: kuadrant-operator
+    version: 0.9.0-alpha1
+    kubeVersion: '>=1.19.0-0'
