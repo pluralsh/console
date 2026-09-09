@@ -301,9 +301,11 @@ async function getGroupMembersCopyText(
   fetchMembers: ReturnType<typeof useGroupMembersLazyQuery>[0],
   group: GroupFragment
 ) {
-  const { data } = await fetchMembers({
+  const { data, error } = await fetchMembers({
     variables: { id: group.id, first: COPY_MEMBERS_PAGE_SIZE },
   })
+
+  if (error) throw error
 
   return formatGroupMembersCopy(group, membersFromQuery(data))
 }

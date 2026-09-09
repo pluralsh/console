@@ -6,6 +6,7 @@ import {
   IconFrame,
   Spinner,
 } from '@pluralsh/design-system'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { TRUNCATE } from 'components/utils/truncate'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
@@ -129,6 +130,7 @@ export const ColMembershipExpander = {
 }
 
 function useCopyList(getText: () => Promise<string>) {
+  const { popToast } = useSimpleToast()
   const [copied, setCopied] = useState(false)
   const [copying, setCopying] = useState(false)
 
@@ -145,10 +147,18 @@ function useCopyList(getText: () => Promise<string>) {
     try {
       await window.navigator.clipboard.writeText(await getText())
       setCopied(true)
+    } catch (error) {
+      popToast({
+        content:
+          error instanceof Error && error.message
+            ? error.message
+            : 'Could not copy list',
+        severity: 'danger',
+      })
     } finally {
       setCopying(false)
     }
-  }, [getText])
+  }, [getText, popToast])
 
   return { copied, copying, handleCopy }
 }
