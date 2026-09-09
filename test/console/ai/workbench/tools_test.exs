@@ -9,6 +9,8 @@ defmodule Console.AI.Workbench.ToolsTest do
   alias Console.AI.Tools.Workbench.Observability.{
     ExternalDashboard,
     ExternalDashboards,
+    ExternalMonitor,
+    ExternalMonitors,
     LogAggregate,
     Logs,
     Metrics,
@@ -123,6 +125,18 @@ defmodule Console.AI.Workbench.ToolsTest do
         index,
         "workbench_observability_dashboard_datadog",
         ExternalDashboard,
+        datadog
+      )
+      assert_indexed(
+        index,
+        "workbench_observability_monitors_datadog",
+        ExternalMonitors,
+        datadog
+      )
+      assert_indexed(
+        index,
+        "workbench_observability_monitor_datadog",
+        ExternalMonitor,
         datadog
       )
     end

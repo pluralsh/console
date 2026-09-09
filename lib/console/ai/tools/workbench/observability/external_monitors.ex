@@ -1,4 +1,4 @@
-defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards do
+defmodule Console.AI.Tools.Workbench.Observability.ExternalMonitors do
   use Console.AI.Tools.Workbench.Base
   alias Console.AI.Tools.Workbench.Observability.External.Client
 
@@ -13,16 +13,16 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards do
     field :cursor, :string
   end
 
-  @json_schema Console.priv_file!("tools/workbench/observability/external_dashboards.json")
+  @json_schema Console.priv_file!("tools/workbench/observability/external_monitors.json")
                |> Jason.decode!()
 
   def name(%__MODULE__{tool: %{name: name}}),
-    do: "workbench_observability_dashboards_#{name}"
+    do: "workbench_observability_monitors_#{name}"
 
   def json_schema(_), do: @json_schema
 
   def description(%__MODULE__{tool: %{name: name}}),
-    do: "Search external dashboards from the #{name} observability connection in pages of up to #{@max_limit} for inspection or reinterpretation as Plural dashboards."
+    do: "Search external monitors and alert rules from the #{name} observability connection in pages of up to #{@max_limit} for inspection or reinterpretation as Plural monitors."
 
   def changeset(model, attrs) do
     model
@@ -37,8 +37,8 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards do
         scope: scope,
         cursor: cursor
       }) do
-    with {:ok, dashboards} <- Client.list_dashboards(tool, q, limit, scope, cursor) do
-      Jason.encode(dashboards)
+    with {:ok, monitors} <- Client.list_monitors(tool, q, limit, scope, cursor) do
+      Jason.encode(monitors)
     end
   end
 end

@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "q": {
+      "type": "string",
+      "description": "Optional provider-native monitor or alert name search when supported"
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 25,
+      "description": "Requested API page size; providers with a fixed page size may return more"
+    },
+    "scope": {
+      "type": "string",
+      "description": "Provider scope when required, such as a Sentry organization slug"
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque provider pagination cursor returned by the previous page"
+    }
+  }
+}

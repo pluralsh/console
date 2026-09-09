@@ -1,10 +1,10 @@
-defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards.Sentry do
+defmodule Console.AI.Tools.Workbench.Observability.External.Sentry do
   @moduledoc false
 
-  alias Console.AI.Tools.Workbench.Observability.ExternalDashboards.Support
+  alias Console.AI.Tools.Workbench.Observability.External.Support
   alias Console.Schema.WorkbenchTool
 
-  def list(
+  def list_dashboards(
         %WorkbenchTool{configuration: %{sentry: %{} = config}},
         opts
       ) do
@@ -14,20 +14,18 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards.Sentry do
              config,
              "/organizations/#{Support.encode_path(organization)}/dashboards/",
              params:
-               %{
+               Support.params(%{
                  "per_page" => opts[:limit],
                  "cursor" => opts[:cursor],
                  "query" => opts[:q]
-               }
-               |> Enum.reject(fn {_, value} -> is_nil(value) end)
-               |> Map.new()
+               })
            ) do
-      dashboards = Enum.map(response.body, &normalize/1)
-      {:ok, Support.page(dashboards, opts, next_cursor: next_cursor(response))}
+      dashboards = Enum.map(response.body, &normalize_dashboard/1)
+      {:ok, Support.page(:dashboards, dashboards, opts, next_cursor: Support.link_next_cursor(response))}
     end
   end
 
-  def get(
+  def get_dashboard(
         %WorkbenchTool{configuration: %{sentry: %{} = config}},
         dashboard_id,
         opts
@@ -38,13 +36,49 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards.Sentry do
              config,
              "/organizations/#{Support.encode_path(organization)}/dashboards/#{Support.encode_path(dashboard_id)}/"
            ) do
-      {:ok, normalize(dashboard)}
+      {:ok, normalize_dashboard(dashboard)}
+    end
+  end
+
+  def list_monitors(
+        %WorkbenchTool{configuration: %{sentry: %{} = config}},
+        opts
+      ) do
+    with {:ok, organization} <- scope(opts),
+         {:ok, response} <-
+           request_page(
+             config,
+             "/organizations/#{Support.encode_path(organization)}/alert-rules/",
+             params:
+               Support.params(%{
+                 "per_page" => opts[:limit],
+                 "cursor" => opts[:cursor],
+                 "query" => opts[:q]
+               })
+           ) do
+      monitors = Enum.map(response.body, &normalize_monitor/1)
+      {:ok, Support.page(:monitors, monitors, opts, next_cursor: Support.link_next_cursor(response))}
+    end
+  end
+
+  def get_monitor(
+        %WorkbenchTool{configuration: %{sentry: %{} = config}},
+        monitor_id,
+        opts
+      ) do
+    with {:ok, organization} <- scope(opts),
+         {:ok, monitor} <-
+           request(
+             config,
+             "/organizations/#{Support.encode_path(organization)}/alert-rules/#{Support.encode_path(monitor_id)}/"
+           ) do
+      {:ok, normalize_monitor(monitor)}
     end
   end
 
   defp scope(opts) do
     case String.trim(to_string(opts[:scope] || "")) do
-      "" -> {:error, "sentry dashboard access requires an organization slug in scope"}
+      "" -> {:error, "sentry access requires an organization slug in scope"}
       scope -> {:ok, scope}
     end
   end
@@ -59,7 +93,7 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards.Sentry do
     |> then(&Support.request(__MODULE__, &1, :get, path))
   end
 
-  defp request(_, _), do: {:error, "sentry dashboard access requires an access token"}
+  defp request(_, _), do: {:error, "sentry access requires an access token"}
 
   defp request_page(%{access_token: token} = config, path, opts)
        when is_binary(token) and byte_size(token) > 0 do
@@ -72,19 +106,7 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards.Sentry do
   end
 
   defp request_page(_, _, _),
-    do: {:error, "sentry dashboard access requires an access token"}
-
-  defp next_cursor(response) do
-    with [link | _] <- Req.Response.get_header(response, "link"),
-         [_, url] <- Regex.run(~r/<([^>]+)>;\s*rel="next"/, link),
-         %URI{query: query} when is_binary(query) <- URI.parse(url) do
-      query
-      |> URI.decode_query()
-      |> Map.get("cursor")
-    else
-      _ -> nil
-    end
-  end
+    do: {:error, "sentry access requires an access token"}
 
   defp api_base(url) do
     url
@@ -104,13 +126,23 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards.Sentry do
     |> Kernel.<>("/api/0")
   end
 
-  defp normalize(dashboard) do
-    Support.dashboard(
+  defp normalize_dashboard(dashboard) do
+    Support.item(
       to_string(dashboard["id"]),
       dashboard["title"],
       dashboard["description"],
       nil,
       dashboard
+    )
+  end
+
+  defp normalize_monitor(monitor) do
+    Support.item(
+      to_string(monitor["id"]),
+      monitor["name"],
+      monitor["query"],
+      nil,
+      monitor
     )
   end
 end

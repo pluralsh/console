@@ -23,6 +23,49 @@ const bedrockEmbeddingModelTooltip =
   'Bedrock model used for embeddings and vector search.'
 const bedrockToolModelTooltip =
   'Bedrock model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
+const bedrockRegionTooltip = 'AWS region where your Bedrock models are hosted.'
+
+const DEFAULT_BEDROCK_REGION = 'us-east-1'
+
+// Usable Amazon Bedrock commercial and GovCloud regions.
+// https://docs.aws.amazon.com/general/latest/gr/bedrock.html
+const BEDROCK_REGIONS = [
+  { value: 'us-east-1', label: 'US East (N. Virginia)' },
+  { value: 'us-east-2', label: 'US East (Ohio)' },
+  { value: 'us-west-1', label: 'US West (N. California)' },
+  { value: 'us-west-2', label: 'US West (Oregon)' },
+  { value: 'ca-central-1', label: 'Canada (Central)' },
+  { value: 'ca-west-1', label: 'Canada West (Calgary)' },
+  { value: 'mx-central-1', label: 'Mexico (Central)' },
+  { value: 'sa-east-1', label: 'South America (São Paulo)' },
+  { value: 'eu-central-1', label: 'Europe (Frankfurt)' },
+  { value: 'eu-central-2', label: 'Europe (Zurich)' },
+  { value: 'eu-north-1', label: 'Europe (Stockholm)' },
+  { value: 'eu-south-1', label: 'Europe (Milan)' },
+  { value: 'eu-south-2', label: 'Europe (Spain)' },
+  { value: 'eu-west-1', label: 'Europe (Ireland)' },
+  { value: 'eu-west-2', label: 'Europe (London)' },
+  { value: 'eu-west-3', label: 'Europe (Paris)' },
+  { value: 'af-south-1', label: 'Africa (Cape Town)' },
+  { value: 'il-central-1', label: 'Israel (Tel Aviv)' },
+  { value: 'me-central-1', label: 'Middle East (UAE)' },
+  { value: 'me-south-1', label: 'Middle East (Bahrain)' },
+  { value: 'ap-east-2', label: 'Asia Pacific (Taipei)' },
+  { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' },
+  { value: 'ap-northeast-2', label: 'Asia Pacific (Seoul)' },
+  { value: 'ap-northeast-3', label: 'Asia Pacific (Osaka)' },
+  { value: 'ap-south-1', label: 'Asia Pacific (Mumbai)' },
+  { value: 'ap-south-2', label: 'Asia Pacific (Hyderabad)' },
+  { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
+  { value: 'ap-southeast-2', label: 'Asia Pacific (Sydney)' },
+  { value: 'ap-southeast-3', label: 'Asia Pacific (Jakarta)' },
+  { value: 'ap-southeast-4', label: 'Asia Pacific (Melbourne)' },
+  { value: 'ap-southeast-5', label: 'Asia Pacific (Malaysia)' },
+  { value: 'ap-southeast-6', label: 'Asia Pacific (New Zealand)' },
+  { value: 'ap-southeast-7', label: 'Asia Pacific (Thailand)' },
+  { value: 'us-gov-east-1', label: 'AWS GovCloud (US-East)' },
+  { value: 'us-gov-west-1', label: 'AWS GovCloud (US-West)' },
+] as const
 
 export const aiProviderToLabel = {
   [AiProvider.Openai]: 'OpenAI',
@@ -66,17 +109,18 @@ export function initialSettingsAttributes(
               },
             }
           : {}),
-        ...(ai.bedrock
-          ? {
-              bedrock: {
+        bedrock: {
+          ...(ai.bedrock
+            ? {
                 modelId: ai.bedrock.modelId,
                 toolModelId: ai.bedrock.toolModelId,
                 embeddingModel: ai.bedrock.embeddingModel,
                 awsAccessKeyId: ai.bedrock.accessKeyId,
-                awsSecretAccessKey: '',
-              },
-            }
-          : {}),
+              }
+            : {}),
+          awsSecretAccessKey: '',
+          region: ai.bedrock?.region ?? DEFAULT_BEDROCK_REGION,
+        },
         ...(ai.ollama
           ? {
               ollama: {
@@ -137,7 +181,12 @@ export function initialSettingsAttributes(
             }
           : {}),
       }
-    : {}
+    : {
+        bedrock: {
+          awsSecretAccessKey: '',
+          region: DEFAULT_BEDROCK_REGION,
+        },
+      }
 }
 
 export function validateAttributes(
@@ -157,7 +206,7 @@ export function validateAttributes(
     case AiProvider.Anthropic:
       return !!settings.anthropic?.accessToken
     case AiProvider.Bedrock:
-      return true
+      return !!settings.bedrock?.region
     case AiProvider.Ollama:
       return !!(
         settings.ollama?.model &&
@@ -350,8 +399,34 @@ export function BedrockSettings({
     update: NonNullable<Partial<AiSettingsAttributes['bedrock']>>
   ) => void
 }) {
+  const region = settings?.region ?? DEFAULT_BEDROCK_REGION
+  const regionOptions =
+    region && !BEDROCK_REGIONS.some(({ value }) => value === region)
+      ? [...BEDROCK_REGIONS, { value: region, label: region }]
+      : BEDROCK_REGIONS
+
   return (
     <>
+      <FormField
+        label="Region"
+        infoTooltip={bedrockRegionTooltip}
+        required={enabled}
+        flex={1}
+      >
+        <Select
+          isDisabled={!enabled}
+          selectedKey={region}
+          onSelectionChange={(key) => updateSettings({ region: String(key) })}
+        >
+          {regionOptions.map(({ value, label }) => (
+            <ListBoxItem
+              key={value}
+              label={value}
+              description={label}
+            />
+          ))}
+        </Select>
+      </FormField>
       <FormField
         label="Model ID"
         infoTooltip={bedrockModelIdTooltip}
