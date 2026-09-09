@@ -57,15 +57,15 @@ def stable_charts_by_app_minor(index_payload: bytes | str):
     entries = entry_groups.get("apisix")
     if not isinstance(entries, list) or not entries:
         raise ValueError("APISIX chart entries not found")
-    grouped = {}
-    seen = set()
+    candidates_by_chart = {}
+    conflicting_charts = set()
 
     for entry in entries:
         if not isinstance(entry, dict):
             continue
         chart_raw = str(entry.get("version", "")).strip().lstrip("v")
         app_raw = str(entry.get("appVersion", "")).strip().lstrip("v")
-        if not chart_raw or not app_raw or chart_raw in seen:
+        if not chart_raw or not app_raw or chart_raw in conflicting_charts:
             continue
         if not _RELEASE_VERSION_RE.fullmatch(chart_raw) or not _RELEASE_VERSION_RE.fullmatch(
             app_raw
@@ -90,10 +90,18 @@ def stable_charts_by_app_minor(index_payload: bytes | str):
         ):
             continue
 
-        seen.add(chart_raw)
-        grouped.setdefault((app.major, app.minor), []).append(
-            (app, chart, app_raw, chart_raw)
-        )
+        previous = candidates_by_chart.get(chart_raw)
+        if previous:
+            if previous[2] != app_raw:
+                del candidates_by_chart[chart_raw]
+                conflicting_charts.add(chart_raw)
+            continue
+        candidates_by_chart[chart_raw] = (app, chart, app_raw, chart_raw)
+
+    grouped = {}
+    for candidate in candidates_by_chart.values():
+        app = candidate[0]
+        grouped.setdefault((app.major, app.minor), []).append(candidate)
 
     if not grouped:
         raise ValueError("No stable APISIX charts found")

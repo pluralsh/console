@@ -86,6 +86,20 @@ entries:
             [[("3.4.1", "1.5.1"), ("3.4.0", "2.1.0")]],
         )
 
+    def test_conflicting_duplicate_chart_metadata_is_ignored_deterministically(self):
+        entries = [
+            "  - version: 2.17.0\n    appVersion: 3.18.0",
+            "  - version: 2.17.0\n    appVersion: 3.17.0",
+            "  - version: 2.16.0\n    appVersion: 3.17.1",
+        ]
+
+        forward = "entries:\n  apisix:\n" + "\n".join(entries) + "\n"
+        reverse = "entries:\n  apisix:\n" + "\n".join(reversed(entries)) + "\n"
+
+        expected = [[("3.17.1", "2.16.0")]]
+        self.assertEqual(scraper.stable_charts_by_app_minor(forward), expected)
+        self.assertEqual(scraper.stable_charts_by_app_minor(reverse), expected)
+
     def test_malformed_chart_metadata_is_ignored(self):
         index = """entries:
   apisix:
