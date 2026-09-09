@@ -1,0 +1,28 @@
+icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
+git_url: https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler
+release_url: https://github.com/kubernetes/autoscaler/releases/tag/vertical-pod-autoscaler-{vsn}
+readme_url: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/docs/installation.md
+helm_repository_url: https://kubernetes.github.io/autoscaler
+chart_name: vertical-pod-autoscaler
+versions:
+- version: 1.7.1
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.12.0
+  images: ['registry.k8s.io/autoscaling/vpa-admission-controller:1.7.1', 'registry.k8s.io/autoscaling/vpa-recommender:1.7.1', 'registry.k8s.io/autoscaling/vpa-updater:1.7.1', 'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0']
+- version: 1.6.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.9.0
+  images: ['registry.k8s.io/autoscaling/vpa-admission-controller:1.6.0', 'registry.k8s.io/autoscaling/vpa-recommender:1.6.0', 'registry.k8s.io/autoscaling/vpa-updater:1.6.0', 'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0']
+- version: 1.5.1
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.8.0
+  images: ['registry.k8s.io/autoscaling/vpa-admission-controller:1.5.1', 'registry.k8s.io/autoscaling/vpa-recommender:1.5.1', 'registry.k8s.io/autoscaling/vpa-updater:1.5.1']
