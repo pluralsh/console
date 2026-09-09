@@ -53,3 +53,5 @@ names:
 - wiz-network-analyzer
 - kuberay-operator
 - mongodb-kubernetes
+- fluent-operator
+
