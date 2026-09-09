@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
@@ -11,6 +12,17 @@ var (
 	ErrUnsupportedOperation = errors.New("unsupported operation for provider")
 	ErrInvalidArgument      = errors.New("invalid argument")
 )
+
+func logFacetOperator(operator toolquery.LogQueryOperator) string {
+	if operator == toolquery.LogQueryOperator_LOG_QUERY_OPERATOR_OR {
+		return " or "
+	}
+	return " and "
+}
+
+func escapeDoubleQuoted(value string) string {
+	return strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(value)
+}
 
 type MetricsProvider interface {
 	Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error)
@@ -37,6 +49,7 @@ func newMetricsProvider(conn *toolquery.ToolConnection) (MetricsProvider, error)
 
 type LogsProvider interface {
 	Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error)
+	LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error)
 }
 
 func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
@@ -123,6 +136,14 @@ func (p *toolProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput
 	}
 
 	return p.logs.Logs(ctx, input)
+}
+
+func (p *toolProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if p.logs == nil {
+		return nil, ErrUnsupportedOperation
+	}
+
+	return p.logs.LogAggregate(ctx, input)
 }
 
 func (p *toolProvider) Traces(ctx context.Context, input *toolquery.TracesQueryInput) (*toolquery.TracesQueryOutput, error) {

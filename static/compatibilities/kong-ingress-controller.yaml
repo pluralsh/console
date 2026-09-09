@@ -16,21 +16,39 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No actionable release notes were provided beyond the existence of v3.3.0
+        release assets; cannot determine new features for 3.4.0 from the supplied
+        text.]
+    breaking_changes: [No breaking changes can be identified from the provided excerpt;
+        need v3.4.0 release notes/changelog to assess upgrade impact.]
   chart_version: 0.20.0
   images: ['kong/kubernetes-ingress-controller:3.4', 'kong:3.9']
 - version: 3.3.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release note excerpt provided contains only metadata and download links
+        for v3.3.0; no feature details were included.]
+    breaking_changes: [No breaking changes were listed in the provided notes (only
+        release metadata/links).]
   chart_version: 0.16.0
   images: ['kong/kubernetes-ingress-controller:3.3', 'kong:3.8']
 - version: 3.2.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release v3.2.0 of Kong/kubernetes-ingress-controller published 2024-06-12
+        (see upstream changelog link for details).]
+    breaking_changes: []
   chart_version: 0.13.1
   images: ['kong/kubernetes-ingress-controller:3.2', 'kong:3.6']
 - version: 3.1.0

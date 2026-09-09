@@ -11,7 +11,14 @@ on:
   schedule:
     - cron: '0 0 * * 1'
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   codeql:
+    needs: [vouch]
     permissions:
       actions: read
       contents: read

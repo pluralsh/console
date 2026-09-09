@@ -101,3 +101,21 @@ defmodule Console.GraphQl.Resolvers.PolicyCountLoader do
     Map.new(ids, & {&1, Map.get(counts, &1, 0)})
   end
 end
+
+defmodule Console.GraphQl.Resolvers.GroupMemberCountLoader do
+  alias Console.Schema.GroupMember
+
+  def data(_) do
+    Dataloader.KV.new(&query/2, max_concurrency: 1)
+  end
+
+  def query(:group, ids) do
+    counts =
+      MapSet.to_list(ids)
+      |> GroupMember.counts_by_group()
+      |> Console.Repo.all()
+      |> Map.new()
+
+    Map.new(ids, & {&1, Map.get(counts, &1, 0)})
+  end
+end

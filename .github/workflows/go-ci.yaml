@@ -20,7 +20,14 @@ env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   lint:
+    needs: [vouch]
     name: Lint
     runs-on: ubuntu-latest
     defaults:
@@ -44,6 +51,7 @@ jobs:
           args: -c .golangci.yml ${{ steps.lint-packages.outputs.packages }}
 
   tools:
+    needs: [vouch]
     name: Verify tools
     runs-on: ubuntu-latest
     defaults:

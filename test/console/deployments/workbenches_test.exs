@@ -547,6 +547,28 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "create_workbench_bot_job/3" do
+    test "creates a job with a monitor's actor and modes" do
+      actor = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: nil)
+
+      monitor =
+        insert(:monitor,
+          workbench: workbench,
+          user: actor,
+          modes: %{plan: true, coding: %{review: true}}
+        )
+
+      {:ok, job} =
+        Workbenches.create_workbench_bot_job(%{prompt: "monitor prompt"}, workbench.id, monitor)
+
+      assert job.workbench_id == workbench.id
+      assert job.user_id == actor.id
+      assert job.prompt == "monitor prompt"
+      assert job.modes.plan
+      assert job.modes.coding.review
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
     test "creates a job as the workbench bot user when set" do
       bot = insert(:user, roles: %{admin: true})
       workbench = insert(:workbench, bot_user: bot)

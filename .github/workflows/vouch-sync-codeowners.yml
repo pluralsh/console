@@ -1,0 +1,29 @@
+# Expand CODEOWNERS (including @pluralsh/server and @pluralsh/frontend) into VOUCHED.td.
+name: Vouch - Sync CODEOWNERS
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # Every Monday at midnight UTC
+  workflow_dispatch:
+
+concurrency:
+  group: vouch-manage
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Sync CODEOWNERS into VOUCHED.td
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: mitchellh/vouch/action/sync-codeowners@d66fa29a64600490892131ad87597c30c91fcac4 # v1.5.0
+        with:
+          repo: ${{ github.repository }}
+          pull-request: "true"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

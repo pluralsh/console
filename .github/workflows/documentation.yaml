@@ -32,7 +32,14 @@ permissions:
   contents: read
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   lint:
+    needs: [vouch]
     name: Lint
     runs-on: ubuntu-latest
     defaults:
@@ -51,6 +58,7 @@ jobs:
       - run: yarn workspace @pluralsh/documentation lint
 
   sync-docs:
+    needs: [vouch]
     name: Check docs sync
     runs-on: ubuntu-latest
     defaults:
@@ -69,6 +77,7 @@ jobs:
           }
 
   validate-routes:
+    needs: [vouch]
     name: Validate generated routes
     runs-on: ubuntu-latest
     defaults:

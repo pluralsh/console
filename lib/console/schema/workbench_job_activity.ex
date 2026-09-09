@@ -21,9 +21,10 @@ defmodule Console.Schema.WorkbenchJobActivity do
     function: 14,
     kubernetes: 15,
     verify: 16,
-    exec: 17
+    exec: 17,
+    monitoring: 18
 
-  defguard is_action(type) when type in [:function, :kubernetes, :exec]
+  defguard is_action(type) when type in [:function, :kubernetes, :exec, :monitoring]
 
   schema "workbench_job_activities" do
     field :status, Status, default: :pending

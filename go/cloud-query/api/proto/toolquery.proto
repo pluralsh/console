@@ -152,6 +152,21 @@ message LogsQueryInput {
   optional LogsOptions options = 6;
 }
 
+enum LogQueryOperator {
+  LOG_QUERY_OPERATOR_AND = 0;
+  LOG_QUERY_OPERATOR_OR = 1;
+}
+
+message LogAggregateInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  TimeRange range = 3;
+  string bucket_size = 4;
+  repeated LogsQueryFacet facets = 5;
+  optional LogsOptions options = 6;
+  LogQueryOperator operator = 7;
+}
+
 message LogsOptions {
   optional AzureLogsOptions azure = 1;
 }
@@ -264,6 +279,15 @@ message LogsQueryOutput {
   repeated LogEntry logs = 1;
 }
 
+message LogAggregateBucket {
+  google.protobuf.Timestamp timestamp = 1;
+  int64 count = 2;
+}
+
+message LogAggregateOutput {
+  repeated LogAggregateBucket buckets = 1;
+}
+
 message TraceSpan {
   string trace_id = 1;
   string span_id = 2;
@@ -305,6 +329,7 @@ service ToolQuery {
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
   rpc MetricsLabelSearch(MetricsLabelSearchInput) returns (MetricsLabelSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
+  rpc LogAggregate(LogAggregateInput) returns (LogAggregateOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
   rpc RunLua(RunLuaInput) returns (RunLuaOutput) {}

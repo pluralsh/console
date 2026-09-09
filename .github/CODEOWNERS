@@ -1,2 +1,10 @@
+# Members of these teams are vouched via mitchellh/vouch sync-codeowners.
+.github/VOUCHED.td @pluralsh/server @pluralsh/frontend
+.github/vouch/pr-unvouched @pluralsh/server @pluralsh/frontend
+.github/workflows/vouch-gate.yml @pluralsh/server @pluralsh/frontend
+.github/workflows/vouch-check-pr.yml @pluralsh/server @pluralsh/frontend
+.github/workflows/vouch-sync-codeowners.yml @pluralsh/server @pluralsh/frontend
+.github/workflows/vouch-manage-by-issue.yml @pluralsh/server @pluralsh/frontend
+
 js/ @pluralsh/frontend
 go/ @pluralsh/server

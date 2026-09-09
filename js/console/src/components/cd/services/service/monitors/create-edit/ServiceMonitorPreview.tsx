@@ -7,7 +7,6 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   InputMaybe,
   LogQueryOperator,
-  MonitorAttributes,
   useLogAggregationBucketsQuery,
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
@@ -17,8 +16,13 @@ import { useDebounce } from '@react-hooks-library/core'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
+import type { ServiceMonitorAttributes } from './ServiceMonitorCreateOrEdit'
 
-export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
+export function ServiceMonitorPreview({
+  state,
+}: {
+  state: ServiceMonitorAttributes
+}) {
   const { serviceId, query: q, threshold } = state
   const debouncedQ = useDebounce(q, 250)
   const {

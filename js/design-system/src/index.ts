@@ -112,6 +112,7 @@ export { default as PropsContainer } from './components/PropsContainer'
 export { default as PropWide } from './components/PropWide'
 export { default as Radio } from './components/Radio'
 export { default as RadioGroup } from './components/RadioGroup'
+export { default as SelectItem } from './components/SelectItem'
 export { default as RepositoryCard } from './components/RepositoryCard'
 export { default as RepositoryChip } from './components/RepositoryChip'
 export {

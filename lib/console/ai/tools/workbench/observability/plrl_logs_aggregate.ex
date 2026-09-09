@@ -12,6 +12,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
     field :cluster_id, :string
     field :query,      :string
     field :limit,      :integer
+    field :bucket_size, :string
     field :operator,   Console.Schema.Monitor.Operator, default: :or
 
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
@@ -22,9 +23,12 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
     embeds_one :time_range, TimeRange, on_replace: :update
   end
 
-  @valid ~w(service_id cluster_id query limit operator)a
+  @valid ~w(service_id cluster_id query limit bucket_size operator)a
 
-  def json_schema(_), do: Console.priv_file!("tools/workbench/observability/plrl_logs.json") |> Jason.decode!()
+  def json_schema(_),
+    do:
+      Console.priv_file!("tools/workbench/observability/plrl_logs_aggregate.json")
+      |> Jason.decode!()
   def name(_), do: "plrl_logs_aggregate"
   def description(_), do: "Gather log count metrics from Plural's built-in log aggregation integration, especially useful for detecting spikes in logs during certain time periods.  This requires either a Plural service_id or Plural cluster_id to be provided to authorize log extraction"
 
@@ -34,6 +38,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
     |> cast_embed(:time_range)
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_one_present([:service_id, :cluster_id])
+    |> validate_required([:query, :bucket_size])
   end
 
   defp facet_changeset(model, attrs) do
@@ -48,6 +53,15 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
          {:ok, logs} <- Provider.aggregate(query),
          {:ok, content} <- Jason.encode(logs) do
       {:ok, Output.truncate(content)}
+    end
+  end
+
+  def structured(%__MODULE__{user: user} = logs) do
+    query = Logs.logs_query(logs)
+
+    with {:ok, query} <- Query.accessible(query, user),
+         {:ok, buckets} <- Provider.aggregate(query) do
+      {:ok, buckets}
     end
   end
 end

@@ -53,4 +53,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
       {:ok, Output.truncate(content)}
     end
   end
+
+  def structured(%__MODULE__{user: user, field: field} = logs) do
+    query = Logs.logs_query(logs) |> Map.put(:field, field)
+
+    with {:ok, query} <- Query.accessible(query, user),
+         {:ok, labels} <- Provider.labels(query) do
+      {:ok, Enum.map(labels, & &1.label)}
+    end
+  end
 end

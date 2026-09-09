@@ -57,6 +57,8 @@ defmodule Console.MixProject do
           runtime_config_path: "rel/runtime.exs",
           applications: [
             runtime_tools: :permanent,
+            opentelemetry_exporter: :permanent,
+            opentelemetry: :permanent,
             console: :permanent
           ]
         ]
@@ -82,6 +84,7 @@ defmodule Console.MixProject do
       {:ex_machina, "~> 2.8", only: :test},
       {:dns_cluster, "~> 0.2.0"},
       {:ex_aws, "~> 2.7"},
+      {:ex_aws_cloudwatch, "~> 2.0"},
       {:ex_aws_sts, "~> 2.3.0"},
       {:configparser_ex, "~> 5.0"},
       {:crontab, "~> 1.1"},
@@ -118,6 +121,14 @@ defmodule Console.MixProject do
       {:telemetry_poller, "~> 1.1"},
       {:cowboy_telemetry, "~> 0.4"},
       {:telemetry_registry, "~> 0.3"},
+      {:opentelemetry_api, "~> 1.5"},
+      {:opentelemetry, "~> 1.7"},
+      {:opentelemetry_exporter, "~> 1.10"},
+      {:opentelemetry_bandit, "~> 0.3"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      {:opentelemetry_ecto, "~> 1.2"},
+      {:opentelemetry_absinthe, "~> 2.4"},
+      {:opentelemetry_process_propagator, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
       {:anubis_mcp, "~> 1.14"},
@@ -194,7 +205,7 @@ defmodule Console.MixProject do
       {:scribe, "~> 0.11"},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.20"},
+      {:req_llm, "~> 1.22"},
       {:sweet_xml, ">= 0.0.0"},
       {:jaqex, "~> 0.1.3"},
       {:waffle, "~> 1.1", git: "https://github.com/jopedroliveira/waffle.git", tag: "v1.1.9-azure.3", override: true},

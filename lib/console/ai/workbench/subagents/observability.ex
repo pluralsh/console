@@ -2,6 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, User}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Codemode, History, Infrastructure.PodLogs, Scratchpad}
+  alias Console.AI.Tools.Workbench.Monitoring
   alias Console.AI.Tools.Workbench.Observability.Plrl
   alias Console.AI.Workbench.{Environment, MCP, Tools}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
@@ -45,6 +46,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     core_tools(job, environment, user)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(pod_logs_tools(job, user))
+    |> Enum.concat(Monitoring.read_tools(job))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       ObservabilityResult,

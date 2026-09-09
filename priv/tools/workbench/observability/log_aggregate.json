@@ -1,0 +1,48 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "The query used to select logs to aggregate"
+        },
+        "bucket_size": {
+            "type": "string",
+            "description": "The duration of each aggregation bucket, for example 5m"
+        },
+        "operator": {
+            "type": "string",
+            "enum": ["and", "or"],
+            "description": "How facets are combined"
+        },
+        "facets": {
+            "type": "array",
+            "description": "The facets used to filter logs",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "value"]
+            }
+        },
+        "time_range": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time in ISO8601 format"
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time in ISO8601 format"
+                }
+            }
+        }
+    },
+    "required": ["query", "bucket_size"]
+}

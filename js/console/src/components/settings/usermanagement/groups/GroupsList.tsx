@@ -1,18 +1,18 @@
 import { Button, Input, SearchIcon, Table } from '@pluralsh/design-system'
-import { useGroupsQuery } from 'generated/graphql'
-import { useContext, useMemo, useState } from 'react'
-
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-
-import { GqlError } from 'components/utils/Alert'
-
-import { LoginContext } from 'components/contexts'
-
+import { useLogin } from 'components/contexts'
 import { useThrottle } from 'components/hooks/useThrottle'
+import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { useGroupsQuery } from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
+import {
+  membershipExpandTableProps,
+  useMembershipListPagination,
+} from '../MembershipExpandPanel'
 import { ListWrapperSC } from '../users/UsersList'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
-import { groupsCols } from './GroupsColumns'
+import { GroupMembersExpand, groupsCols } from './GroupsColumns'
 
 export type GroupsListMeta = {
   editable: boolean
@@ -24,24 +24,34 @@ export function GroupsList({
 }: {
   setGroupEdit: (group: Nullable<GroupEditT>) => void
 }) {
-  const { me } = useContext(LoginContext)
-
+  const { me } = useLogin()
   const [q, setQ] = useState('')
   const throttledQ = useThrottle(q, 300)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useGroupsQuery, keyPath: ['groups'] },
+      { queryHook: useGroupsQuery, keyPath: ['groups'], pageSize: 20 },
       { q: throttledQ }
     )
   const groups = useMemo(() => mapExistingNodes(data?.groups), [data?.groups])
+  const onVirtualSliceChange = useMembershipListPagination({
+    itemCount: groups.length,
+    hasNextPage: pageInfo?.hasNextPage,
+    isFetching: loading,
+    fetchNextPage,
+    setVirtualSlice,
+  })
 
-  const meta: GroupsListMeta = {
-    editable: !!me?.roles?.admin,
-    setGroupEdit,
-  }
+  const meta: GroupsListMeta = useMemo(
+    () => ({
+      editable: !!me?.roles?.admin,
+      setGroupEdit,
+    }),
+    [me?.roles?.admin, setGroupEdit]
+  )
 
   if (error) return <GqlError error={error} />
+
   return (
     <ListWrapperSC>
       <Input
@@ -49,22 +59,24 @@ export function GroupsList({
         placeholder="Search groups"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        background="fill-zero"
         flexShrink={0}
       />
       <Table
-        hideHeader
         fullHeightWrap
         virtualizeRows
-        rowBg="base"
+        {...membershipExpandTableProps}
         data={groups}
         loading={!data && loading}
         columns={groupsCols}
         reactTableOptions={{ meta }}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
+        onVirtualSliceChange={onVirtualSliceChange}
+        renderExpanded={({ row }) => (
+          <GroupMembersExpand
+            row={row}
+            editable={meta.editable}
+            setGroupEdit={setGroupEdit}
+          />
+        )}
         emptyStateProps={{
           ...(!throttledQ
             ? {

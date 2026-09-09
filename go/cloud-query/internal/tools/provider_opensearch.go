@@ -16,6 +16,7 @@ import (
 	signer "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/datasource"
@@ -81,6 +82,53 @@ func (in *OpensearchProvider) Logs(ctx context.Context, input *toolquery.LogsQue
 	return result.toLogsQueryOutput()
 }
 
+func (in *OpensearchProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if in.conn == nil {
+		return nil, ErrInvalidArgument
+	}
+	if input == nil || input.Query == "" {
+		return nil, ErrInvalidArgument
+	}
+
+	body, err := json.Marshal((&ElasticProvider{}).toAggregateRequest(input))
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, in.searchURL(), bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := in.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("opensearch aggregation failed with status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
+	}
+
+	var result opensearchAggregateResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	buckets := make([]*toolquery.LogAggregateBucket, 0, len(result.Aggregations.LogsOverTime.Buckets))
+	for _, bucket := range result.Aggregations.LogsOverTime.Buckets {
+		buckets = append(buckets, &toolquery.LogAggregateBucket{
+			Timestamp: timestamppb.New(time.UnixMilli(bucket.Key)),
+			Count:     bucket.DocCount,
+		})
+	}
+
+	return &toolquery.LogAggregateOutput{Buckets: buckets}, nil
+}
+
 func (in *OpensearchProvider) searchURL() string {
 	return fmt.Sprintf("%s/%s/_search", strings.TrimRight(in.conn.GetHost(), "/"), strings.TrimLeft(in.conn.GetIndex(), "/"))
 }
@@ -108,6 +156,17 @@ type opensearchSearchResponse struct {
 			Source json.RawMessage `json:"_source"`
 		} `json:"hits"`
 	} `json:"hits"`
+}
+
+type opensearchAggregateResponse struct {
+	Aggregations struct {
+		LogsOverTime struct {
+			Buckets []struct {
+				Key      int64 `json:"key"`
+				DocCount int64 `json:"doc_count"`
+			} `json:"buckets"`
+		} `json:"logs_over_time"`
+	} `json:"aggregations"`
 }
 
 func (in *opensearchSearchResponse) toLogsQueryOutput() (*toolquery.LogsQueryOutput, error) {

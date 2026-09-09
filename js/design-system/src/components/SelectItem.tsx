@@ -14,13 +14,18 @@ import { type RadioGroupState } from 'react-stately'
 import { RadioContext } from './RadioGroup'
 
 type SelectItemWrapProps = {
-  selected?: boolean
-  focused?: boolean
+  $selected?: boolean
+  $focused?: boolean
   width?: number | string
 }
 
 const SelectItemWrap = styled.label<SelectItemWrapProps>(
-  ({ theme, selected = false, focused = false, width }) => ({
+  ({
+    theme,
+    $selected: selected = false,
+    $focused: focused = false,
+    width,
+  }) => ({
     ...theme.partials.text.buttonSmall,
     display: 'flex',
     height: 32,
@@ -50,6 +55,7 @@ type SelectItemProps = AriaRadioProps & {
   label?: string
   name?: string
   className?: string
+  title?: string
 }
 
 function SelectItem({
@@ -59,6 +65,7 @@ function SelectItem({
   value,
   name,
   className,
+  title,
   ...props
 }: SelectItemProps) {
   const state = useContext(RadioContext) as RadioGroupState
@@ -77,8 +84,9 @@ function SelectItem({
 
   return (
     <SelectItemWrap
-      selected={isSelected}
-      focused={isFocusVisible}
+      $selected={isSelected}
+      $focused={isFocusVisible}
+      title={title}
       className={className}
       ref={ref}
     >

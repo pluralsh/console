@@ -17,6 +17,12 @@ permissions:
   contents: 'read'
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   # title:
   #   name: Title check
   #   runs-on: ubuntu-latest
@@ -26,6 +32,7 @@ jobs:
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   body:
+    needs: [vouch]
     name: Body check
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.*.labels.*.name, 'dependencies') && !contains(github.event.*.labels.*.name, 'release')}}

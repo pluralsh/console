@@ -20,6 +20,16 @@ type LokiLogsResponse struct {
 	} `json:"data"`
 }
 
+type LokiAggregateResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ResultType string `json:"resultType"`
+		Result     []struct {
+			Values [][]any `json:"values"`
+		} `json:"result"`
+	} `json:"data"`
+}
+
 type LokiClient struct {
 	*resty.Client
 
@@ -43,6 +53,23 @@ func (in *LokiClient) Logs(ctx context.Context, query, start, end, limit string)
 	return &resp, nil
 }
 
+func (in *LokiClient) LogAggregate(ctx context.Context, query, start, end, step string) (*LokiAggregateResponse, error) {
+	var resp LokiAggregateResponse
+	response, err := in.R().
+		SetContext(ctx).
+		SetQueryString(in.aggregateParams(query, start, end, step).Encode()).
+		SetResult(&resp).
+		Get(in.logsEndpoint())
+	if err != nil {
+		return nil, err
+	}
+	if response.IsError() {
+		return nil, fmt.Errorf("loki aggregation failed: status=%d body=%s", response.StatusCode(), response.String())
+	}
+
+	return &resp, nil
+}
+
 func (in *LokiClient) logsEndpoint() string {
 	return strings.TrimSuffix(in.baseUrl, "/") + "/loki/api/v1/query_range"
 }
@@ -59,6 +86,15 @@ func (in *LokiClient) logsParams(query, start, end, limit string) url.Values {
 	}
 
 	return params
+}
+
+func (in *LokiClient) aggregateParams(query, start, end, step string) url.Values {
+	return url.Values{
+		"query": {query},
+		"start": {start},
+		"end":   {end},
+		"step":  {step},
+	}
 }
 
 func NewLokiClient(baseUrl, token, username, password, tenantID string) *LokiClient {
