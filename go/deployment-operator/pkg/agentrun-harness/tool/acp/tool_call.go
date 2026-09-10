@@ -13,13 +13,14 @@ import (
 const runningToolOutput = "running..."
 
 type toolCall struct {
-	id     string
-	name   string
-	title  string
-	kind   acpsdk.ToolKind
-	input  string
-	output string
-	state  console.AgentMessageToolState
+	id        string
+	name      string
+	title     string
+	kind      acpsdk.ToolKind
+	input     string
+	output    string
+	state     console.AgentMessageToolState
+	recovered bool
 }
 
 type toolOutputValue struct {
@@ -115,6 +116,7 @@ func formattedRawOutput(rawOutput any) (string, bool) {
 }
 
 type toolUpdateEvents struct {
+	startMessage *console.AgentMessageAttributes
 	message      *console.AgentMessageAttributes
 	output       string
 	streamOutput bool
@@ -184,8 +186,25 @@ func (call *toolCall) updateMetadata(update *acpsdk.SessionToolCallUpdate) bool 
 }
 
 func (call *toolCall) updateStatus(status *acpsdk.ToolCallStatus) (bool, bool, error) {
+	state, terminal, err := call.status(status)
+	if err != nil || status == nil {
+		return terminal, false, err
+	}
+	changed := call.state != state
+	if changed {
+		call.state = state
+	}
+	return terminal, changed, nil
+}
+
+func (call *toolCall) validateStatus(status *acpsdk.ToolCallStatus) error {
+	_, _, err := call.status(status)
+	return err
+}
+
+func (*toolCall) status(status *acpsdk.ToolCallStatus) (console.AgentMessageToolState, bool, error) {
 	if status == nil {
-		return false, false, nil
+		return "", false, nil
 	}
 	var state console.AgentMessageToolState
 	switch *status {
@@ -198,12 +217,38 @@ func (call *toolCall) updateStatus(status *acpsdk.ToolCallStatus) (bool, bool, e
 	case acpsdk.ToolCallStatusFailed:
 		state = console.AgentMessageToolStateError
 	default:
-		return false, false, fmt.Errorf("acp tool call has unknown status %q", *status)
+		return "", false, fmt.Errorf("acp tool call has unknown status %q", *status)
 	}
 	terminal := state == console.AgentMessageToolStateCompleted || state == console.AgentMessageToolStateError
-	changed := call.state != state
-	if changed {
-		call.state = state
+	return state, terminal, nil
+}
+
+func (call *toolCall) reconcileStart(update *acpsdk.SessionUpdateToolCall) error {
+	if err := call.validateStatus(&update.Status); err != nil {
+		return err
 	}
-	return terminal, changed, nil
+	if call.title == "" {
+		call.title = update.Title
+	}
+	if call.kind == "" {
+		call.kind = update.Kind
+	}
+	call.name = call.displayName()
+	if call.input == "" && update.RawInput != nil {
+		call.input = call.formatValue(update.RawInput)
+	}
+	if call.output == "" {
+		call.applyOutput(call.toolOutput(update.Content, update.Meta, update.RawOutput))
+	}
+	if !call.isTerminal() && update.Status != acpsdk.ToolCallStatusPending {
+		if _, _, err := call.updateStatus(&update.Status); err != nil {
+			return err
+		}
+	}
+	call.recovered = false
+	return nil
+}
+
+func (call *toolCall) isTerminal() bool {
+	return call.state == console.AgentMessageToolStateCompleted || call.state == console.AgentMessageToolStateError
 }

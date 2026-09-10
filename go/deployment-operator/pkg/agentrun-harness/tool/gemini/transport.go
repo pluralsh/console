@@ -60,6 +60,9 @@ func NewTransport(agent *Agent) (*Transport, error) {
 	engine := acp.NewEngine(
 		acp.WithAuthenticationMethod(geminiAPIKeyAuthMethod),
 		acp.WithUsageResolver(result.toUsage),
+		// Gemini CLI v0.59.0 can emit a tool_call_update before its
+		// corresponding start event. Revisit on future upgrades.
+		acp.WithToolCallUpdateRecovery(),
 	)
 
 	result.engine = engine

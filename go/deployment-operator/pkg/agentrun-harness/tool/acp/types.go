@@ -127,3 +127,11 @@ func WithUsageResolver(resolver UsageResolver) Option {
 		}
 	}
 }
+
+// WithToolCallUpdateRecovery accepts tool call updates that arrive before
+// their corresponding tool call. Providers with ordered updates do not need it.
+func WithToolCallUpdateRecovery() Option {
+	return func(engine *Engine) {
+		engine.recoverToolUpdates = true
+	}
+}

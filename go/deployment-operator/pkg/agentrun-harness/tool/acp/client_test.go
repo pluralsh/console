@@ -100,6 +100,245 @@ func TestClientRequestPermissionStartsToolCallBeforeDenying(t *testing.T) {
 	}
 }
 
+func TestClientRejectsToolCallUpdateBeforeToolCallByDefault(t *testing.T) {
+	acpClient := &client{turn: newTurn(NewEngine(), &testSink{}, "session-1")}
+	completed := acpsdk.ToolCallStatusCompleted
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1",
+			Status:     &completed,
+		}},
+	})
+	if err == nil || err.Error() != `acp tool call update "call-1" arrived before tool_call` {
+		t.Fatalf("tool call update error = %v", err)
+	}
+}
+
+func TestClientRejectsDuplicateToolCallStarts(t *testing.T) {
+	acpClient := &client{turn: newTurn(NewEngine(), &testSink{}, "session-1")}
+	update := acpsdk.SessionUpdateToolCall{ToolCallId: "call-1", Status: acpsdk.ToolCallStatusInProgress}
+	request := acpsdk.SessionNotification{SessionId: "session-1", Update: acpsdk.SessionUpdate{ToolCall: &update}}
+	if err := acpClient.SessionUpdate(context.Background(), request); err != nil {
+		t.Fatalf("start tool call: %v", err)
+	}
+	err := acpClient.SessionUpdate(context.Background(), request)
+	if err == nil || err.Error() != `acp tool call "call-1" was started twice` {
+		t.Fatalf("duplicate tool call error = %v", err)
+	}
+}
+
+func TestClientRecoversToolCallUpdateBeforeToolCall(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), sink, "session-1")}
+	title := "Create pull request"
+	kind := acpsdk.ToolKindOther
+	completed := acpsdk.ToolCallStatusCompleted
+
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "mcp_plural_agentPullRequest__call_1028406",
+			Title:      &title,
+			Kind:       &kind,
+			RawInput:   map[string]any{"title": "docs: update README"},
+			RawOutput:  map[string]any{"formatted_output": "https://github.com/pluralsh/console/pull/1"},
+			Status:     &completed,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("tool call update before tool call: %v", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
+	}
+	start := sink.messages[0].Metadata.Tool
+	if start.Name == nil || *start.Name != title || start.State == nil || *start.State != console.AgentMessageToolStateRunning || start.Output == nil || *start.Output != runningToolOutput {
+		t.Fatalf("recovered tool start = %#v", start)
+	}
+	terminal := sink.messages[1].Metadata.Tool
+	if terminal.Input == nil || *terminal.Input != `{"title":"docs: update README"}` || terminal.Output == nil || *terminal.Output != "https://github.com/pluralsh/console/pull/1" || terminal.State == nil || *terminal.State != console.AgentMessageToolStateCompleted {
+		t.Fatalf("recovered terminal tool = %#v", terminal)
+	}
+	if len(sink.events) != 3 || sink.events[0] != "message:mcp_plural_agentPullRequest__call_1028406:Called tool" || sink.events[1] != "output:mcp_plural_agentPullRequest__call_1028406:https://github.com/pluralsh/console/pull/1" || sink.events[2] != "message:mcp_plural_agentPullRequest__call_1028406:Called tool" {
+		t.Fatalf("recovered tool event order = %v", sink.events)
+	}
+
+	pending := acpsdk.ToolCallStatusPending
+	err = acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "mcp_plural_agentPullRequest__call_1028406",
+			Title:      "Create pull request",
+			Kind:       kind,
+			Status:     pending,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("late tool call: %v", err)
+	}
+	if len(sink.messages) != 2 || len(sink.outputs) != 1 {
+		t.Fatalf("tool call events after reconciliation = %v / %v", sink.messages, sink.outputs)
+	}
+}
+
+func TestClientRejectsEmptyToolCallUpdateIDWithRecovery(t *testing.T) {
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), &testSink{}, "session-1")}
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update:    acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{}},
+	})
+	if err == nil || err.Error() != "acp tool call update has an empty id" {
+		t.Fatalf("empty tool call update error = %v", err)
+	}
+}
+
+func TestClientRecoversUnspecifiedToolCallStatusAsRunning(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), sink, "session-1")}
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1",
+		}},
+	}); err != nil {
+		t.Fatalf("recover tool call update: %v", err)
+	}
+	pending := acpsdk.ToolCallStatusPending
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1",
+			Status:     pending,
+		}},
+	}); err != nil {
+		t.Fatalf("reconcile tool call: %v", err)
+	}
+	if len(sink.messages) != 1 {
+		t.Fatalf("tool call messages = %d, want 1", len(sink.messages))
+	}
+	if state := sink.messages[0].Metadata.Tool.State; state == nil || *state != console.AgentMessageToolStateRunning {
+		t.Fatalf("reconciled tool state = %v, want running", state)
+	}
+}
+
+func TestClientPreservesRecoveredTerminalStatusAcrossLaterToolCallUpdates(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), sink, "session-1")}
+	completed := acpsdk.ToolCallStatusCompleted
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1",
+			Status:     &completed,
+		}},
+	}); err != nil {
+		t.Fatalf("recover completed tool call update: %v", err)
+	}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1",
+			Status:     &inProgress,
+		}},
+	}); err != nil {
+		t.Fatalf("late in-progress tool call update: %v", err)
+	}
+	pending := acpsdk.ToolCallStatusPending
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1",
+			Status:     pending,
+		}},
+	}); err != nil {
+		t.Fatalf("late tool call: %v", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
+	}
+	if state := sink.messages[1].Metadata.Tool.State; state == nil || *state != console.AgentMessageToolStateCompleted {
+		t.Fatalf("reconciled tool state = %v, want completed", state)
+	}
+}
+
+func TestClientValidatesStatusesAfterRecoveredTerminalToolCall(t *testing.T) {
+	unknown := acpsdk.ToolCallStatus("unknown")
+	for _, test := range []struct {
+		name   string
+		update acpsdk.SessionUpdate
+	}{
+		{
+			name: "late update",
+			update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+				ToolCallId: "call-1",
+				Status:     &unknown,
+			}},
+		},
+		{
+			name: "late start",
+			update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+				ToolCallId: "call-1",
+				Status:     unknown,
+			}},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), &testSink{}, "session-1")}
+			completed := acpsdk.ToolCallStatusCompleted
+			if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+				SessionId: "session-1",
+				Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+					ToolCallId: "call-1",
+					Status:     &completed,
+				}},
+			}); err != nil {
+				t.Fatalf("recover completed tool call update: %v", err)
+			}
+			err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{SessionId: "session-1", Update: test.update})
+			if err == nil || err.Error() != `acp tool call has unknown status "unknown"` {
+				t.Fatalf("late status error = %v", err)
+			}
+		})
+	}
+}
+
+func TestClientReconcilesPermissionToolCallAfterRecovery(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), sink, "session-1")}
+	completed := acpsdk.ToolCallStatusCompleted
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1",
+			Status:     &completed,
+		}},
+	}); err != nil {
+		t.Fatalf("recover tool call update: %v", err)
+	}
+	title := "Create pull request"
+	kind := acpsdk.ToolKindOther
+	_, err := acpClient.RequestPermission(context.Background(), acpsdk.RequestPermissionRequest{
+		SessionId: "session-1",
+		ToolCall: acpsdk.ToolCallUpdate{
+			ToolCallId: "call-1",
+			Title:      &title,
+			Kind:       &kind,
+			RawInput:   map[string]any{"title": "docs: update README"},
+		},
+	})
+	if err == nil || err.Error() != "acp permission requests are unavailable in unattended runs" {
+		t.Fatalf("permission error = %v, want unattended permission denial", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
+	}
+	if state := sink.messages[1].Metadata.Tool.State; state == nil || *state != console.AgentMessageToolStateCompleted {
+		t.Fatalf("recovered terminal state = %v, want completed", state)
+	}
+}
+
 func TestClientRequestPermissionUpdatesExistingToolCallBeforeDenying(t *testing.T) {
 	sink := &testSink{}
 	acpClient := &client{turn: newTurn(NewEngine(), sink, "session-1")}

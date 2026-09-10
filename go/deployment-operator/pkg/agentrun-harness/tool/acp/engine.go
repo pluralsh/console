@@ -28,6 +28,7 @@ type Engine struct {
 	restoreSession       SessionRestorer
 	authenticationMethod string
 	usageResolver        UsageResolver
+	recoverToolUpdates   bool
 }
 
 func (engine *Engine) setSessionConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, modes *acpsdk.SessionModeState, options []acpsdk.SessionConfigOption, settings SessionSettings) error {
