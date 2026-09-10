@@ -1,6 +1,6 @@
 import { Div } from 'honorable'
 import type { Meta, StoryObj } from '@storybook/react'
-import { type ReactNode } from 'react'
+import { type ComponentProps, type ReactNode } from 'react'
 import styled, { css, keyframes, useTheme } from 'styled-components'
 
 import {
@@ -11,6 +11,8 @@ import {
 
 const VARIANTS: AgentLoadingVariant[] = [
   'cursor',
+  'cursorWave',
+  'cursorEq',
   'slide',
   'wave',
   'pulse',
@@ -81,6 +83,7 @@ const WORKBENCH_SUBAGENTS: Array<{
   id: SubagentId
   name: string
   lines: string[]
+  error?: string
 }> = [
   {
     id: 'coding',
@@ -104,6 +107,7 @@ const WORKBENCH_SUBAGENTS: Array<{
     lines: [
       'Created a minimal, status-focused demo deployment handoff canvas…',
     ],
+    error: 'Failed to publish the canvas. Retry the subagent to continue.',
   },
 ]
 
@@ -143,20 +147,22 @@ const TitleSC = styled.span<{ $pending?: boolean }>(
       color: ${theme.colors['text-xlight']};
     }
 
-    ${$pending &&
-    css`
-      background: linear-gradient(
-        90deg,
-        ${theme.colors['text-xlight']} 40%,
-        ${theme.colors.text} 50%,
-        ${theme.colors['text-xlight']} 60%
-      );
-      background-size: 200% 100%;
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      animation: ${shimmer} 2.4s linear infinite;
-    `}
+    ${
+      $pending &&
+      css`
+        background: linear-gradient(
+          90deg,
+          ${theme.colors['text-xlight']} 40%,
+          ${theme.colors.text} 50%,
+          ${theme.colors['text-xlight']} 60%
+        );
+        background-size: 200% 100%;
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        animation: ${shimmer} 2.4s linear infinite;
+      `
+    }
   `
 )
 
@@ -165,45 +171,81 @@ const LineSC = styled.span<{ $pending?: boolean }>(
     ${theme.partials.text.body2}
     color: ${theme.colors['text-xlight']};
 
-    ${$pending &&
-    css`
-      color: ${theme.colors['text-disabled']};
-    `}
+    ${
+      $pending &&
+      css`
+        color: ${theme.colors['text-disabled']};
+      `
+    }
   `
 )
+
+const ErrorSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-danger'],
+}))
+
+function isLiveState(state?: AgentLoadingState) {
+  return state === 'working' || state === 'waiting'
+}
 
 function WorkbenchChatMock({
   renderIcon,
   pending,
+  states,
 }: {
   renderIcon: (agent: SubagentId) => ReactNode
-  pending: SubagentId[]
+  pending?: SubagentId[]
+  states?: Partial<Record<SubagentId, AgentLoadingState>>
 }) {
   return (
     <ChatSC>
       {WORKBENCH_SUBAGENTS.map((agent) => {
-        const isPending = pending.includes(agent.id)
+        const state = states?.[agent.id]
+        const showIcon = state != null || pending?.includes(agent.id)
+        const live = state ? isLiveState(state) : pending?.includes(agent.id)
 
         return (
           <SubagentBlockSC key={agent.id}>
             <TitleRowSC>
-              {isPending && renderIcon(agent.id)}
-              <TitleSC $pending={isPending}>
+              {showIcon && renderIcon(agent.id)}
+              <TitleSC $pending={!!live}>
                 {agent.name} <span className="kind">subagent</span>
               </TitleSC>
             </TitleRowSC>
             {agent.lines.map((line) => (
               <LineSC
                 key={line}
-                $pending={isPending}
+                $pending={!!live}
               >
                 {line}
               </LineSC>
             ))}
+            {state === 'error' && agent.error && (
+              <ErrorSC>{agent.error}</ErrorSC>
+            )}
           </SubagentBlockSC>
         )
       })}
     </ChatSC>
+  )
+}
+
+const PREVIEW_STATES: Record<SubagentId, AgentLoadingState> = {
+  coding: 'working',
+  integration: 'success',
+  canvas: 'error',
+}
+
+function previewIcon(
+  args: ComponentProps<typeof AgentLoadingIcon>,
+  states: Record<SubagentId, AgentLoadingState> = PREVIEW_STATES
+) {
+  return (agent: SubagentId) => (
+    <AgentLoadingIcon
+      {...args}
+      state={states[agent]}
+    />
   )
 }
 
@@ -215,8 +257,39 @@ export const Default: Story = {
   },
   render: (args) => (
     <WorkbenchChatMock
-      renderIcon={() => <AgentLoadingIcon {...args} />}
-      pending={['coding', 'integration', 'canvas']}
+      renderIcon={previewIcon(args)}
+      states={PREVIEW_STATES}
+    />
+  ),
+}
+
+export const CursorWave: Story = {
+  args: {
+    size: 12,
+    variant: 'cursorWave',
+    state: 'waiting',
+  },
+  render: (args) => (
+    <WorkbenchChatMock
+      renderIcon={previewIcon(args, {
+        ...PREVIEW_STATES,
+        coding: 'waiting',
+      })}
+      states={{ ...PREVIEW_STATES, coding: 'waiting' }}
+    />
+  ),
+}
+
+export const CursorEq: Story = {
+  args: {
+    size: 12,
+    variant: 'cursorEq',
+    state: 'working',
+  },
+  render: (args) => (
+    <WorkbenchChatMock
+      renderIcon={previewIcon(args)}
+      states={PREVIEW_STATES}
     />
   ),
 }
@@ -229,27 +302,22 @@ export const Whimsy: Story = {
   },
   render: (args) => (
     <WorkbenchChatMock
-      renderIcon={() => <AgentLoadingIcon {...args} />}
-      pending={['coding']}
+      renderIcon={previewIcon(args)}
+      states={PREVIEW_STATES}
     />
   ),
 }
 
 export const Paper: Story = {
   args: {
-    size: 12,
+    size: 8,
     variant: 'paper',
     state: 'working',
   },
   render: (args) => (
     <WorkbenchChatMock
-      renderIcon={() => (
-        <AgentLoadingIcon
-          {...args}
-          variant="paper"
-        />
-      )}
-      pending={['coding', 'integration', 'canvas']}
+      renderIcon={previewIcon({ ...args, variant: 'paper' })}
+      states={PREVIEW_STATES}
     />
   ),
 }
@@ -262,13 +330,8 @@ export const PaperLong: Story = {
   },
   render: (args) => (
     <WorkbenchChatMock
-      renderIcon={() => (
-        <AgentLoadingIcon
-          {...args}
-          variant="paperLong"
-        />
-      )}
-      pending={['coding', 'integration', 'canvas']}
+      renderIcon={previewIcon({ ...args, variant: 'paperLong' })}
+      states={PREVIEW_STATES}
     />
   ),
 }
@@ -281,8 +344,8 @@ export const Aaron: Story = {
   },
   render: (args) => (
     <WorkbenchChatMock
-      renderIcon={() => <AgentLoadingIcon {...args} />}
-      pending={['coding']}
+      renderIcon={previewIcon(args)}
+      states={PREVIEW_STATES}
     />
   ),
 }

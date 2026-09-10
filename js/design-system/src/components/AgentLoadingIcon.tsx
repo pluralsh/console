@@ -10,6 +10,8 @@ import { SemanticColorKey } from '../theme/colors'
 
 export type AgentLoadingVariant =
   | 'cursor'
+  | 'cursorWave'
+  | 'cursorEq'
   | 'slide'
   | 'wave'
   | 'pulse'
@@ -74,10 +76,37 @@ const wave = keyframes`
   18% { opacity: var(--on); transform: scale(1); }
 `
 
+const cursorWave = keyframes`
+  0%, 100% { opacity: var(--off); transform: scale(0.42); }
+  28% { opacity: var(--on); transform: scale(1); }
+  48% { opacity: 0.42; transform: scale(0.7); }
+`
+
 const pulse = keyframes`
   0%, 100% { opacity: 0.28; transform: scale(0.78); }
   50% { opacity: var(--on); transform: scale(1); }
 `
+
+const eqLow = keyframes`
+  0%, 100% { opacity: var(--on); transform: scale(1); }
+  52% { opacity: 0.55; transform: scale(0.82); }
+`
+
+const eqMid = keyframes`
+  0%, 14% { opacity: var(--off); transform: scale(0.42); }
+  24%, 62% { opacity: var(--on); transform: scale(1); }
+  76%, 100% { opacity: var(--off); transform: scale(0.42); }
+`
+
+const eqHigh = keyframes`
+  0%, 32% { opacity: var(--off); transform: scale(0.42); }
+  38%, 48% { opacity: var(--on); transform: scale(1); }
+  58%, 100% { opacity: var(--off); transform: scale(0.42); }
+`
+
+const EQ_COL_SPEED = [0.82, 1.18, 0.64]
+const EQ_COL_DELAY = [0, 0.1, 0.22]
+const EQ_ROW_FRAME = [eqHigh, eqMid, eqLow]
 
 const AgentLoadingIconSC = styled.span<{
   $size: number
@@ -126,6 +155,43 @@ const AgentLoadingIconSC = styled.span<{
         }
       `
     )}
+
+    ${$variant === 'cursorWave' &&
+    css`
+      i {
+        animation-name: ${allOn ? 'none' : cursorWave};
+        animation-timing-function: cubic-bezier(0.45, 0.05, 0.2, 1);
+      }
+      ${Array.from({ length: DOTS }, (_, i) => {
+        const col = i % 3
+        const row = Math.floor(i / 3)
+
+        return css`
+          i:nth-child(${i + 1}) {
+            animation-delay: ${col * 0.14 + row * 0.06}s;
+          }
+        `
+      })}
+    `}
+
+    ${$variant === 'cursorEq' &&
+    css`
+      i {
+        animation-timing-function: cubic-bezier(0.22, 0.7, 0.28, 1);
+      }
+      ${Array.from({ length: DOTS }, (_, i) => {
+        const col = i % 3
+        const row = Math.floor(i / 3)
+
+        return css`
+          i:nth-child(${i + 1}) {
+            animation-name: ${allOn ? 'none' : EQ_ROW_FRAME[row]};
+            animation-duration: calc(${$duration} * ${EQ_COL_SPEED[col]});
+            animation-delay: ${EQ_COL_DELAY[col]}s;
+          }
+        `
+      })}
+    `}
 
     ${$variant === 'slide' &&
     css`
@@ -176,28 +242,53 @@ const AgentLoadingIconSC = styled.span<{
       }
     `}
 
-    ${$state === 'success' &&
-    css`
-      i {
-        opacity: 1;
-      }
-    `}
-
-    ${$state === 'error' &&
-    css`
-      i {
-        opacity: 0.14;
-      }
-      i:nth-child(1),
-      i:nth-child(3),
-      i:nth-child(5),
-      i:nth-child(7),
-      i:nth-child(9) {
-        opacity: 1;
-      }
-    `}
   `
 })
+
+const StatusBulletSC = styled.span<{
+  $size: number
+  $dot: number
+  $color: string
+}>(({ $size, $dot, $color }) => css`
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: ${$size}px;
+  height: ${$size}px;
+  color: ${$color};
+
+  i {
+    display: block;
+    width: ${$dot}px;
+    height: ${$dot}px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+`)
+
+function StatusBullet({
+  size,
+  color,
+  ...props
+}: {
+  size: number
+  color: string
+} & ComponentPropsWithRef<'span'>) {
+  const dot = Math.max(3, Math.round(size * 0.32))
+
+  return (
+    <StatusBulletSC
+      $size={size}
+      $dot={dot}
+      $color={color}
+      aria-hidden
+      {...props}
+    >
+      <i />
+    </StatusBulletSC>
+  )
+}
 
 function stateColor(
   state: AgentLoadingState,
@@ -205,7 +296,6 @@ function stateColor(
   color?: SemanticColorKey,
   variant?: AgentLoadingVariant
 ): string {
-  if (state === 'success') return colors['icon-success']
   if (state === 'error') return colors['icon-danger']
   if (color) return colors[color]
   if (variant === 'paper' || variant === 'paperLong') return colors['icon-primary']
@@ -215,12 +305,16 @@ function stateColor(
 function stateDuration(state: AgentLoadingState, variant: AgentLoadingVariant) {
   if (state === 'waiting') {
     if (variant === 'cursor') return '8s'
+    if (variant === 'cursorWave') return '2.4s'
+    if (variant === 'cursorEq') return '2.6s'
     if (variant === 'whimsy') return '1.8s'
     if (variant === 'aaron') return '1.5s'
     if (variant === 'paper' || variant === 'paperLong') return '1.6s'
     return '2s'
   }
   if (variant === 'cursor') return '5.8s'
+  if (variant === 'cursorWave') return '1.5s'
+  if (variant === 'cursorEq') return '1.55s'
   if (variant === 'whimsy') return '1.05s'
   if (variant === 'aaron') return '0.9s'
   if (variant === 'paper' || variant === 'paperLong') return '1s'
@@ -251,6 +345,22 @@ export function AgentLoadingIcon({
   const duration = stateDuration(state, variant)
   const dot = Math.max(2, Math.round(size * 0.22))
   const span = (size - dot) / 2
+
+  if (state === 'success' || state === 'error') {
+    return (
+      <StatusBullet
+        size={size}
+        color={
+          state === 'error'
+            ? colors['icon-danger']
+            : color
+              ? colors[color]
+              : colors['icon-xlight']
+        }
+        {...props}
+      />
+    )
+  }
 
   if (variant === 'paper' || variant === 'paperLong') {
     return (
