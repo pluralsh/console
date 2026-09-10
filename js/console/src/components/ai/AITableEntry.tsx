@@ -14,10 +14,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 
 import { CaptionP } from 'components/utils/typography/Text'
 
-import {
-  AiInsightSummaryFragment,
-  ChatThreadTinyFragment,
-} from 'generated/graphql'
+import { ChatThreadTinyFragment, FlowInsightFragment } from 'generated/graphql'
 import { ComponentProps, ComponentPropsWithRef, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts.tsx'
@@ -238,8 +235,9 @@ function TableEntryIcon({
     />
   )
 }
+
 export function getInsightPathInfo(
-  insight: Nullable<AiInsightSummaryFragment>
+  insight: Nullable<FlowInsightFragment>
 ): { path?: string[]; url?: string } | null {
   if (!!insight?.cluster) {
     return {

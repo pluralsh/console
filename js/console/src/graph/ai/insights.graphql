@@ -22,10 +22,7 @@ fragment AiInsightSummary on AiInsight {
   ...AiInsightContext
 }
 
-fragment AiInsightContext on AiInsight {
-  evidence {
-    ...AiInsightEvidence
-  }
+fragment AiInsightAssociations on AiInsight {
   cluster {
     id
     name
@@ -86,6 +83,13 @@ fragment AiInsightContext on AiInsight {
     title
     message
   }
+}
+
+fragment AiInsightContext on AiInsight {
+  evidence {
+    ...AiInsightEvidence
+  }
+  ...AiInsightAssociations
 }
 
 fragment AiInsightEvidence on AiInsightEvidence {

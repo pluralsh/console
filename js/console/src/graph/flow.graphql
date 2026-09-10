@@ -25,8 +25,17 @@ fragment FlowBasic on Flow {
     count
   }
   insight {
-    ...AiInsightSummary
+    ...FlowInsight
   }
+}
+
+fragment FlowInsight on AiInsight {
+  id
+  summary
+  freshness
+  insertedAt
+  updatedAt
+  ...AiInsightAssociations
 }
 
 fragment FlowBasicWithBindings on Flow {
