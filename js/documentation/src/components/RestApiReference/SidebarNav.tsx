@@ -24,7 +24,6 @@ const Sidebar = styled.aside<{ $overlay?: boolean }>(({ $overlay }) => ({
     ? {
         flex: 1,
         minHeight: 0,
-        height: '100%',
         position: 'relative',
       }
     : {
@@ -35,18 +34,26 @@ const Sidebar = styled.aside<{ $overlay?: boolean }>(({ $overlay }) => ({
       }),
 }))
 
-const SidebarInner = styled.div(({ theme }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+const SidebarInner = styled.div<{ $overlay?: boolean }>(({ theme, $overlay }) => ({
   overflowY: 'auto',
   backgroundColor: theme.colors['fill-one'],
-  borderRight: theme.borders['fill-one'],
+  borderRight: $overlay ? 'none' : theme.borders['fill-one'],
   paddingBottom: theme.spacing.xlarge,
   paddingLeft: theme.spacing.medium,
   paddingRight: theme.spacing.medium,
+  ...($overlay
+    ? {
+        flex: 1,
+        minHeight: 0,
+        position: 'relative',
+      }
+    : {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }),
 }))
 
 const SearchWrapper = styled.div(({ theme }) => ({
@@ -181,7 +188,7 @@ export function SidebarNav({
 
   return (
     <Sidebar $overlay={overlay}>
-      <SidebarInner>
+      <SidebarInner $overlay={overlay}>
         <SearchWrapper>
           <FilterInput
             showClearButton

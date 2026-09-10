@@ -95,6 +95,11 @@ const Content = styled.div(({ theme }) => ({
   flexDirection: 'column',
   minHeight: 0,
   overflow: 'hidden',
+  [`${NavButtons}`]: {
+    position: 'relative',
+    zIndex: 1,
+    flexShrink: 0,
+  },
 }))
 
 function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
@@ -121,6 +126,7 @@ function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
           <>
             <NavButtons desktop={false}>
               <Button
+                type="button"
                 tertiary
                 startIcon={<ArrowLeftIcon />}
                 onClick={() => setShowDocsMenu(true)}
