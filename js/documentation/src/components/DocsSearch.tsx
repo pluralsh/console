@@ -4,6 +4,7 @@ import {
   IconFrame,
   SearchIcon,
 } from '@pluralsh/design-system'
+
 import styled from 'styled-components'
 
 import { mqs } from './Breakpoints'
