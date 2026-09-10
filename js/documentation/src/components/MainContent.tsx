@@ -15,12 +15,15 @@ import Breadcrumbs from './Breadcrumbs'
 import { FooterLink } from './PageFooter'
 import { PagePropsContext } from './PagePropsContext'
 
-const ContentWrapper = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.xlarge,
+const ContentWrapper = styled.div((_) => ({
+  minWidth: 0,
 }))
 
 const BreadcrumbsWrapper = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.xlarge,
+  display: 'flex',
+  alignItems: 'center',
+  minHeight: 40,
+  marginBottom: theme.spacing.large,
 }))
 
 const Title = styled.h1(({ theme }) => ({

@@ -2,13 +2,14 @@ import styled from 'styled-components'
 
 // ─── Content layout (uses shared PageGrid from PageGrid.tsx) ───────────────────
 
-export const RestContentWrapper = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.xlarge,
-  padding: `0 ${theme.spacing.xlarge}px`,
+export const RestContentWrapper = styled.div((_) => ({
+  minWidth: 0,
 }))
 
 export const BreadcrumbsWrapper = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.xlarge,
+  display: 'flex',
+  alignItems: 'center',
+  minHeight: 40,
   marginBottom: theme.spacing.large,
 }))
 

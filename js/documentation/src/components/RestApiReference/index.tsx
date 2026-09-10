@@ -6,15 +6,14 @@
 
 import { useMemo, useState } from 'react'
 
-import { Breadcrumbs, CheckIcon, CopyIcon, Tab } from '@pluralsh/design-system'
+import { CheckIcon, CopyIcon, Tab } from '@pluralsh/design-system'
 import { useRouter } from 'next/router'
 
-import styled from 'styled-components'
-
-import { mqs } from '@src/components/Breakpoints'
+import Breadcrumbs from '@src/components/Breadcrumbs'
 import { PageDivider } from '@src/components/MainContent'
 import {
   ContentContainer,
+  MainColumn,
   PageGrid,
   SideNavContainer,
 } from '@src/components/PageGrid'
@@ -45,13 +44,6 @@ import type {
   EndpointDetail,
   Parameter,
 } from '@src/lib/openapi-rest'
-
-// REST API has no right TOC column; SideNavContainer's auto margin is for centering regular docs.
-const RestSideNavContainer = styled(SideNavContainer)({
-  [mqs.twoColumn]: {
-    marginRight: 0,
-  },
-})
 
 type TabId = 'query' | 'responses'
 
@@ -104,82 +96,84 @@ export function RestApiReference({
 
   return (
     <PageGrid>
-      <RestSideNavContainer>
+      <SideNavContainer>
         <SidebarNav
           sections={apiSections}
           selectedId={selectedId}
         />
-      </RestSideNavContainer>
-      <ContentContainer>
-        <RestContentWrapper>
-          <BreadcrumbsWrapper>
-            <Breadcrumbs breadcrumbs={breadcrumbs} />
-          </BreadcrumbsWrapper>
+      </SideNavContainer>
+      <MainColumn>
+        <ContentContainer $wide>
+          <RestContentWrapper>
+            <BreadcrumbsWrapper>
+              <Breadcrumbs breadcrumbs={breadcrumbs} />
+            </BreadcrumbsWrapper>
 
-          {isAuthPage && <AuthPageContent />}
+            {isAuthPage && <AuthPageContent />}
 
-          {!isAuthPage && detail && (
-            <ContentGrid>
-              <div>
-                <EndpointTitleRow>
-                  <EndpointName>{detail.operationName}</EndpointName>
-                  <PathGroup>
-                    <MethodBadge method={detail.method} />
-                    <EndpointPath>{detail.path}</EndpointPath>
-                    <CopyIconButton
-                      onClick={() => handleCopyPath()}
-                      type="button"
-                      title={pathCopied ? 'Copied' : 'Copy path'}
+            {!isAuthPage && detail && (
+              <ContentGrid>
+                <div>
+                  <EndpointTitleRow>
+                    <EndpointName>{detail.operationName}</EndpointName>
+                    <PathGroup>
+                      <MethodBadge method={detail.method} />
+                      <EndpointPath>{detail.path}</EndpointPath>
+                      <CopyIconButton
+                        onClick={() => handleCopyPath()}
+                        type="button"
+                        title={pathCopied ? 'Copied' : 'Copy path'}
+                      >
+                        <CopyIconWrapper $visible={!pathCopied}>
+                          <CopyIcon size={16} />
+                        </CopyIconWrapper>
+                        <CopyIconWrapper $visible={pathCopied}>
+                          <CheckIcon size={16} />
+                        </CopyIconWrapper>
+                      </CopyIconButton>
+                    </PathGroup>
+                  </EndpointTitleRow>
+
+                  {detail.description && (
+                    <PageDescription>{detail.description}</PageDescription>
+                  )}
+
+                  <TabBar>
+                    <Tab
+                      active={activeTab === 'query'}
+                      onClick={() => setActiveTab('query')}
                     >
-                      <CopyIconWrapper $visible={!pathCopied}>
-                        <CopyIcon size={16} />
-                      </CopyIconWrapper>
-                      <CopyIconWrapper $visible={pathCopied}>
-                        <CheckIcon size={16} />
-                      </CopyIconWrapper>
-                    </CopyIconButton>
-                  </PathGroup>
-                </EndpointTitleRow>
+                      {getParameterTabLabel(detail.parameters ?? [])}
+                    </Tab>
+                    <Tab
+                      active={activeTab === 'responses'}
+                      onClick={() => setActiveTab('responses')}
+                    >
+                      Responses
+                    </Tab>
+                  </TabBar>
 
-                {detail.description && (
-                  <PageDescription>{detail.description}</PageDescription>
-                )}
+                  {activeTab === 'query' && (
+                    <ParameterTable parameters={detail.parameters} />
+                  )}
 
-                <TabBar>
-                  <Tab
-                    active={activeTab === 'query'}
-                    onClick={() => setActiveTab('query')}
-                  >
-                    {getParameterTabLabel(detail.parameters ?? [])}
-                  </Tab>
-                  <Tab
-                    active={activeTab === 'responses'}
-                    onClick={() => setActiveTab('responses')}
-                  >
-                    Responses
-                  </Tab>
-                </TabBar>
-
-                {activeTab === 'query' && (
-                  <ParameterTable parameters={detail.parameters} />
-                )}
-
-                {activeTab === 'responses' && (
-                  <ResponseSchemaView
-                    key={detail.id}
-                    schemas={detail.responseSchemas ?? []}
-                  />
-                )}
-              </div>
-              <ResponsePanel
-                key={detail.id}
-                detail={detail}
-              />
-            </ContentGrid>
-          )}
-        </RestContentWrapper>
-        <PageDivider />
-      </ContentContainer>
+                  {activeTab === 'responses' && (
+                    <ResponseSchemaView
+                      key={detail.id}
+                      schemas={detail.responseSchemas ?? []}
+                    />
+                  )}
+                </div>
+                <ResponsePanel
+                  key={detail.id}
+                  detail={detail}
+                />
+              </ContentGrid>
+            )}
+          </RestContentWrapper>
+          <PageDivider />
+        </ContentContainer>
+      </MainColumn>
     </PageGrid>
   )
 }

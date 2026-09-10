@@ -10,6 +10,7 @@ import styled from 'styled-components'
 import { DISCORD_LINK } from '@src/consts'
 
 import { BreakpointIsGreaterOrEqual, mqs, useBreakpoint } from './Breakpoints'
+import { DocsSearch } from './DocsSearch'
 import GithubStars from './GithubStars'
 import MobileMenu from './MobileMenu'
 import { HamburgerButton, SocialLink } from './PageHeaderButtons'
@@ -59,6 +60,7 @@ function PageHeaderUnstyled({ ...props }) {
       </nav>
       <Filler />
       <section className="rightSection">
+        <DocsSearch />
         <div className="socialIcons">
           <SocialLink
             className="discordIcon"
@@ -112,15 +114,16 @@ const PageHeader = styled(PageHeaderUnstyled)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'left',
-  paddingLeft: theme.spacing.large,
+  paddingLeft: 40,
   paddingRight: theme.spacing.large,
+  borderBottom: theme.borders['fill-one'],
   [mqs.fullHeader]: {
-    paddingLeft: 40,
+    paddingLeft: 0,
     paddingRight: 40,
   },
   '.socialIcons': {
     display: 'none',
-    [mqs.fullHeader]: {
+    [mqs.maxWidth]: {
       display: 'flex',
       flexDirection: 'row',
       gap: theme.spacing.medium,
@@ -136,11 +139,18 @@ const PageHeader = styled(PageHeaderUnstyled)(({ theme }) => ({
   },
   '.logo': {
     width: 162,
+    display: 'block',
+  },
+  '.leftSection': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.medium,
     [mqs.fullHeader]: {
-      // width: 216,
+      paddingLeft: 40,
+      paddingRight: theme.spacing.large,
     },
   },
-  '.rightSection, .leftSection': {
+  '.rightSection': {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.medium,
@@ -171,7 +181,7 @@ const PageHeaderLinks = styled(({ ...props }) => (
   </div>
 ))(({ theme }) => ({
   display: 'none',
-  [mqs.fullHeader]: {
+  [mqs.threeColumn]: {
     display: 'flex',
     gap: theme.spacing.xsmall,
   },

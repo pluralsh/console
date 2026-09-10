@@ -42,6 +42,7 @@ import MainContent from '@src/components/MainContent'
 import PageFooter from '@src/components/PageFooter'
 import {
   ContentContainer,
+  MainColumn,
   PageGrid,
   SideCarContainer,
   SideNavContainer,
@@ -169,29 +170,33 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
                   <FullNav desktop />
                 )}
               </SideNavContainer>
-              <ContentContainer>
-                <MainContent
-                  Component={Component}
-                  title={displayTitle}
-                  description={displayDescription}
-                />
-                <PageFooter />
-              </ContentContainer>
-              <SideCarContainer>
-                {isClient ? (
-                  <Suspense fallback={<div>Loading table of contents...</div>}>
-                    <TableOfContents
-                      key={router.asPath}
-                      toc={toc}
-                    />
-                  </Suspense>
-                ) : (
-                  <TableOfContents
-                    key={router.asPath}
-                    toc={toc}
+              <MainColumn>
+                <ContentContainer>
+                  <MainContent
+                    Component={Component}
+                    title={displayTitle}
+                    description={displayDescription}
                   />
+                  <PageFooter />
+                </ContentContainer>
+                {toc?.length > 0 && (
+                  <SideCarContainer>
+                    {isClient ? (
+                      <Suspense fallback={<div>Loading table of contents...</div>}>
+                        <TableOfContents
+                          key={router.asPath}
+                          toc={toc}
+                        />
+                      </Suspense>
+                    ) : (
+                      <TableOfContents
+                        key={router.asPath}
+                        toc={toc}
+                      />
+                    )}
+                  </SideCarContainer>
                 )}
-              </SideCarContainer>
+              </MainColumn>
             </PageGrid>
           )}
         </Page>

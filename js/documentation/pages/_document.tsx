@@ -44,6 +44,11 @@ class MyDocument extends Document {
             data-widget-position="bottom-right"
           />
           <script
+            dangerouslySetInnerHTML={{
+              __html: `window.Kapa=window.Kapa||function(){(window.Kapa.q=window.Kapa.q||[]).push(arguments)};`,
+            }}
+          />
+          <script
             async
             src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
           />

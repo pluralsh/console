@@ -5,6 +5,7 @@
 
 import { useMemo, useState } from 'react'
 
+import { CloseIcon } from '@pluralsh/design-system'
 import NextLink from 'next/link'
 
 import isEmpty from 'lodash/isEmpty'
@@ -18,7 +19,7 @@ const Sidebar = styled.aside(({ theme: _theme }) => ({
   position: 'sticky',
   top: 'var(--top-nav-height)',
   height: 'calc(100vh - var(--top-nav-height))',
-  width: 300,
+  width: '100%',
   flexShrink: 0,
   display: 'flex',
   flexDirection: 'column',
@@ -33,12 +34,14 @@ const SidebarInner = styled.div(({ theme }) => ({
   bottom: 0,
   overflowY: 'auto',
   backgroundColor: theme.colors['fill-one'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders['fill-one'],
   paddingBottom: theme.spacing.xlarge,
+  paddingLeft: theme.spacing.medium,
+  paddingRight: theme.spacing.medium,
 }))
 
 const SearchWrapper = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.medium}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium}px 0`,
   position: 'sticky',
   top: 0,
   backgroundColor: theme.colors['fill-one'],
@@ -62,12 +65,42 @@ const SearchInput = styled.div(({ theme }) => ({
   },
   input: {
     flex: 1,
+    minWidth: 0,
     background: 'transparent',
     border: 'none',
     outline: 'none',
     color: theme.colors.text,
     ...theme.partials.text.body2,
     '::placeholder': { color: theme.colors['text-xlight'] },
+    '&::-webkit-search-decoration, &::-webkit-search-cancel-button': {
+      WebkitAppearance: 'none',
+      appearance: 'none',
+      display: 'none',
+    },
+    '&::-ms-clear': {
+      display: 'none',
+      width: 0,
+      height: 0,
+    },
+  },
+}))
+
+const ClearButton = styled.button(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: 20,
+  height: 20,
+  padding: 0,
+  border: 'none',
+  borderRadius: '50%',
+  background: theme.colors['fill-three'] ?? theme.colors['fill-two'],
+  color: theme.colors['text-xlight'],
+  cursor: 'pointer',
+  '&:hover': {
+    color: theme.colors.text,
+    background: theme.colors['fill-two-hover'] ?? theme.colors['fill-one-hover'],
   },
 }))
 
@@ -94,7 +127,7 @@ const EndpointLabel = styled.span(({ theme }) => ({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   ...theme.partials.text.body2,
-  color: theme.colors['text-light'],
+  color: theme.colors['text-xlight'],
 }))
 
 const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
@@ -110,10 +143,7 @@ const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
     textAlign: 'left',
     textDecoration: 'none',
     color: 'inherit',
-    borderStartStartRadius: theme.borderRadiuses.medium,
-    borderEndStartRadius: theme.borderRadiuses.medium,
-    borderStartEndRadius: 0,
-    borderEndEndRadius: 0,
+    borderRadius: theme.borderRadiuses.medium,
     backgroundColor: $active ? theme.colors['action-primary'] : 'transparent',
     '&:hover': {
       backgroundColor: $active
@@ -167,12 +197,9 @@ const TopNavItemLink = styled(NextLink)<{ $active: boolean }>(
     cursor: 'pointer',
     textAlign: 'left',
     textDecoration: 'none',
-    borderStartStartRadius: theme.borderRadiuses.medium,
-    borderEndStartRadius: theme.borderRadiuses.medium,
-    borderStartEndRadius: 0,
-    borderEndEndRadius: 0,
+    borderRadius: theme.borderRadiuses.medium,
     backgroundColor: $active ? theme.colors['action-primary'] : 'transparent',
-    color: $active ? theme.colors.text : theme.colors['text-light'],
+    color: $active ? theme.colors.text : theme.colors['text-xlight'],
     '&:hover': {
       backgroundColor: $active
         ? theme.colors['action-primary-hover']
@@ -231,12 +258,21 @@ export function SidebarNav({
               <SearchIcon />
             </span>
             <input
-              type="search"
+              type="text"
               placeholder="Filter API"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               aria-label="Filter API endpoints"
             />
+            {filter && (
+              <ClearButton
+                type="button"
+                aria-label="Clear filter"
+                onClick={() => setFilter('')}
+              >
+                <CloseIcon size={10} />
+              </ClearButton>
+            )}
           </SearchInput>
         </SearchWrapper>
         <nav aria-label="REST API endpoints">
