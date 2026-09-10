@@ -5,7 +5,7 @@
 
 import { useMemo, useState } from 'react'
 
-import { CloseIcon } from '@pluralsh/design-system'
+import { Input2, SearchIcon } from '@pluralsh/design-system'
 import NextLink from 'next/link'
 
 import isEmpty from 'lodash/isEmpty'
@@ -48,61 +48,9 @@ const SearchWrapper = styled.div(({ theme }) => ({
   zIndex: 1,
 }))
 
-const SearchInput = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  background: theme.colors['fill-two'] ?? theme.colors['fill-zero'],
-  border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.medium,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  '&:focus-within': {
-    borderColor: theme.colors['border-primary'],
-  },
-  '.icon': {
-    color: theme.colors['text-xlight'],
-    flexShrink: 0,
-  },
-  input: {
-    flex: 1,
-    minWidth: 0,
-    background: 'transparent',
-    border: 'none',
-    outline: 'none',
-    color: theme.colors.text,
-    ...theme.partials.text.body2,
-    '::placeholder': { color: theme.colors['text-xlight'] },
-    '&::-webkit-search-decoration, &::-webkit-search-cancel-button': {
-      WebkitAppearance: 'none',
-      appearance: 'none',
-      display: 'none',
-    },
-    '&::-ms-clear': {
-      display: 'none',
-      width: 0,
-      height: 0,
-    },
-  },
-}))
-
-const ClearButton = styled.button(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  width: 20,
-  height: 20,
-  padding: 0,
-  border: 'none',
-  borderRadius: '50%',
-  background: theme.colors['fill-three'] ?? theme.colors['fill-two'],
-  color: theme.colors['text-xlight'],
-  cursor: 'pointer',
-  '&:hover': {
-    color: theme.colors.text,
-    background: theme.colors['fill-two-hover'] ?? theme.colors['fill-one-hover'],
-  },
-}))
+const FilterInput = styled(Input2)({
+  width: '100%',
+})
 
 const SectionGroup = styled.div(({ theme }) => ({
   display: 'block',
@@ -155,32 +103,6 @@ const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
     },
   })
 )
-
-function SearchIcon() {
-  return (
-    <svg
-      width={14}
-      height={14}
-      viewBox="0 0 16 16"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        cx="7"
-        cy="7"
-        r="5"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
-      <path
-        d="M10.5 10.5 14 14"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
 
 export const AUTH_PAGE_ID = '__authentication__'
 
@@ -250,30 +172,14 @@ export function SidebarNav({
     <Sidebar>
       <SidebarInner>
         <SearchWrapper>
-          <SearchInput>
-            <span
-              className="icon"
-              aria-hidden
-            >
-              <SearchIcon />
-            </span>
-            <input
-              type="text"
-              placeholder="Filter API"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              aria-label="Filter API endpoints"
-            />
-            {filter && (
-              <ClearButton
-                type="button"
-                aria-label="Clear filter"
-                onClick={() => setFilter('')}
-              >
-                <CloseIcon size={10} />
-              </ClearButton>
-            )}
-          </SearchInput>
+          <FilterInput
+            showClearButton
+            placeholder="Filter API"
+            startIcon={<SearchIcon />}
+            value={filter}
+            onChange={(e) => setFilter(e.currentTarget.value)}
+            inputProps={{ 'aria-label': 'Filter API endpoints' }}
+          />
         </SearchWrapper>
         <nav aria-label="REST API endpoints">
           {showAuthItem && (
