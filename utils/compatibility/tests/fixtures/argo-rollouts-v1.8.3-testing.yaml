@@ -1,0 +1,16 @@
+# Matrix excerpt from the official release-tag workflow:
+# https://raw.githubusercontent.com/argoproj/argo-rollouts/v1.8.3/.github/workflows/testing.yaml
+jobs:
+  test-e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes:
+          - version: "1.28"
+            latest: false
+          - version: "1.29"
+            latest: false
+          - version: "1.30"
+            latest: false
+          - version: "1.31"
+            latest: true

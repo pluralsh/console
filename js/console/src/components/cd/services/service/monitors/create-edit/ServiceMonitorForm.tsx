@@ -14,14 +14,16 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { EditableDivWrapperSC } from 'components/workbenches/tools/WorkbenchToolFormFields'
 import {
   MonitorAggregate,
-  MonitorAttributes,
   MonitorOperator,
   useLogAggregationQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { ServiceMonitorStepKey } from './ServiceMonitorCreateOrEdit'
+import type {
+  ServiceMonitorAttributes,
+  ServiceMonitorStepKey,
+} from './ServiceMonitorCreateOrEdit'
 
 export const DURATION_OPTIONS = [
   '5m',
@@ -41,8 +43,8 @@ export function ServiceMonitorForm({
   curStep,
   isLoading,
 }: {
-  state: MonitorAttributes
-  update: (update: Partial<MonitorAttributes>) => void
+  state: ServiceMonitorAttributes
+  update: (update: Partial<ServiceMonitorAttributes>) => void
   curStep: ServiceMonitorStepKey
   isLoading: boolean
 }) {

@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "properties": {
+    "dashboard_id": {
+      "type": "string",
+      "description": "Existing dashboard ID to update; omit to create"
+    },
+    "attributes": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "graphs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "identifier": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["timeseries", "gauge", "logs", "markdown", "table", "stat", "bar", "pie", "heatmap", "traces"]
+              },
+              "markdown": { "type": "string" },
+              "options": { "type": "object" },
+              "layout": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "integer", "minimum": 0 },
+                  "y": { "type": "integer", "minimum": 0 },
+                  "w": { "type": "integer", "minimum": 1 },
+                  "h": { "type": "integer", "minimum": 1 }
+                },
+                "required": ["x", "y", "w", "h"]
+              },
+              "datasource": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["logs", "metrics", "traces", "labels"] },
+                  "tool": { "type": "string" },
+                  "input": { "type": "object" }
+                },
+                "required": ["type", "tool", "input"]
+              }
+            },
+            "required": ["identifier", "type", "layout"]
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "label": { "type": "string" },
+              "description": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["text", "number", "boolean", "select", "multi_select", "time_range"]
+              },
+              "default": { "type": "string" },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "required": { "type": "boolean", "default": false },
+              "datasource": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["logs", "metrics", "traces", "labels"] },
+                  "tool": { "type": "string" },
+                  "input": { "type": "object" }
+                },
+                "required": ["type", "tool", "input"]
+              }
+            },
+            "required": ["name", "type"]
+          }
+        }
+      },
+      "required": ["name"]
+    }
+  },
+  "required": ["attributes"]
+}

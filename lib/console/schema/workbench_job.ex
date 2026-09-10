@@ -7,6 +7,7 @@ defmodule Console.Schema.WorkbenchJob do
     WorkbenchEvalResult,
     WorkbenchJobResult,
     WorkbenchJobActivity,
+    WorkbenchJobAssociation,
     AIUsage,
     User,
     Alert,
@@ -35,6 +36,7 @@ defmodule Console.Schema.WorkbenchJob do
         field :update, :boolean, default: false
         field :delete, :boolean, default: false
         field :exec,   :boolean, default: false
+        field :drain,  :boolean, default: false
 
         field :exclude_namespaces, {:array, :string}
         field :require_namespaces, {:array, :string}
@@ -79,7 +81,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     defp kubernetes_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(update delete exec exclude_namespaces require_namespaces)a)
+      |> cast(attrs, ~w(update delete exec drain exclude_namespaces require_namespaces)a)
     end
   end
 
@@ -112,6 +114,9 @@ defmodule Console.Schema.WorkbenchJob do
     has_one  :eval_result,     WorkbenchEvalResult, on_replace: :update
     has_one  :chatbot_message, ChatbotMessage, on_replace: :update
     has_many :activities,      WorkbenchJobActivity, on_replace: :delete
+    has_many :associations,    WorkbenchJobAssociation, on_replace: :delete
+    has_many :dashboards,      through: [:associations, :dashboard]
+    has_many :monitors,        through: [:associations, :monitor]
     has_many :pull_requests,   PullRequest, on_replace: :delete
     has_many :queued_prompts,  QueuedPrompt, on_replace: :delete
 

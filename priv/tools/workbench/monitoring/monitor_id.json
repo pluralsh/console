@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "monitor_id": {
+      "type": "string",
+      "description": "ID of a monitor belonging to this workbench"
+    }
+  },
+  "required": ["monitor_id"]
+}

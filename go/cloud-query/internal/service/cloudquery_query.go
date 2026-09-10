@@ -15,11 +15,11 @@ import (
 )
 
 // Query implements the cloudquery.CloudQueryServer interface
-func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryResult, error) {
+func (in *CloudQueryService) Query(ctx context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryResult, error) {
 	query := input.GetQuery()
 	var out *cloudquery.QueryResult
 	err := in.withProviderConnection(input.GetConnection(), func(c connection.Connection) error {
-		result, err := in.handleQuery(c, query)
+		result, err := in.handleQuery(ctx, c, query)
 		if err != nil {
 			return err
 		}
@@ -29,8 +29,12 @@ func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInp
 	return out, wrapInternal(err, "failed to execute query '%s': %v", query, err)
 }
 
-func (in *CloudQueryService) handleQuery(c connection.Connection, query string) (*cloudquery.QueryResult, error) {
-	columns, rows, err := c.Query(query)
+type queryConnection interface {
+	QueryWithContext(context.Context, string, ...any) ([]string, [][]any, error)
+}
+
+func (in *CloudQueryService) handleQuery(ctx context.Context, c queryConnection, query string) (*cloudquery.QueryResult, error) {
+	columns, rows, err := c.QueryWithContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}

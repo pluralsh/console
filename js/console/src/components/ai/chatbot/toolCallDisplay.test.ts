@@ -39,17 +39,17 @@ describe('toolCallDisplayTitle', () => {
         subagent: 'coding',
       })
     ).toBe('Coding subagent')
-    expect(toolCallDisplayTitle('read', 'Read')).toBe('Read')
+    expect(toolCallDisplayTitle('read', 'Read')).toBe('read')
     expect(toolCallDisplayTitle('python_sandbox', 'python_sandbox')).toBe(
-      'Python sandbox'
+      'python sandbox'
     )
   })
 
   it('humanizes workbench snake_case tools', () => {
-    expect(toolCallDisplayTitle('generic', 'plrl_logs')).toBe('Logs')
+    expect(toolCallDisplayTitle('generic', 'plrl_logs')).toBe('logs')
     expect(
       toolCallDisplayTitle('generic', 'workbench_observability_metrics_datadog')
-    ).toBe('Metrics Datadog')
+    ).toBe('metrics datadog')
   })
 })
 
@@ -77,9 +77,9 @@ describe('toolCallDisplaySubtitle', () => {
 
 describe('humanizeToolName', () => {
   it('strips workbench prefixes', () => {
-    expect(humanizeToolName('workbench_subagent')).toBe('Subagent')
+    expect(humanizeToolName('workbench_subagent')).toBe('subagent')
     expect(humanizeToolName('workbench_activity_search')).toBe(
-      'Activity Search'
+      'activity search'
     )
   })
 })

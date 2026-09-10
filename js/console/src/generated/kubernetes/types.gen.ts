@@ -340,6 +340,10 @@ export type EndpointEndpointList = {
 
 export type Error = unknown;
 
+export type HandlerHealthResponse = {
+    status: string;
+};
+
 export type HandlerJson = {
     [key: string]: unknown;
 };
@@ -483,6 +487,7 @@ export type LogsLogDetails = {
 export type LogsLogInfo = {
     containerName: string;
     fromDate: string;
+    hasMore: boolean;
     initContainerName: string;
     podName: string;
     toDate: string;
@@ -504,6 +509,7 @@ export type LogsSelection = {
     offsetFrom: number;
     offsetTo: number;
     referencePoint: LogsLogLineId;
+    tailLines: number;
 };
 
 export type NamespaceNamespace = {
@@ -2190,6 +2196,16 @@ export type V1ImageVolumeSource = {
 };
 
 /**
+ * ImageVolumeStatus represents the image-based volume status.
+ */
+export type V1ImageVolumeStatus = {
+    /**
+     * ImageRef is the digest of the image used for this volume. It should have a value that's similar to the pod's status.containerStatuses[i].imageID. The ImageRef length should not exceed 256 characters.
+     */
+    imageRef?: string;
+};
+
+/**
  * IngressBackend describes all endpoints for a given service and port.
  */
 export type V1IngressBackend = {
@@ -2870,6 +2886,18 @@ export type V1PodCertificateProjection = {
      * Kubelet's generated CSRs will be addressed to this signer.
      */
     signerName?: string;
+    /**
+     * userAnnotations allow pod authors to pass additional information to the signer implementation.  Kubernetes does not restrict or validate this metadata in any way.
+     *
+     * These values are copied verbatim into the `spec.unverifiedUserAnnotations` field of the PodCertificateRequest objects that Kubelet creates.
+     *
+     * Entries are subject to the same validation as object metadata annotations, with the addition that all keys must be domain-prefixed. No restrictions are placed on values, except an overall size limitation on the entire field.
+     *
+     * Signers should document the keys and values they support. Signers should deny requests that contain keys they do not recognize.
+     */
+    userAnnotations?: {
+        [key: string]: string;
+    };
 };
 
 /**
@@ -3168,6 +3196,10 @@ export type V1ResourceHealth = {
      */
     health?: string;
     /**
+     * Message provides human-readable context for Health (e.g. "ECC error count exceeded threshold"). This field is populated by the kubelet when ResourceHealthStatusMessage is enabled if the DRA plugin returns a message, and is null otherwise.
+     */
+    message?: string;
+    /**
      * ResourceID is the unique identifier of the resource. See the ResourceID type for more information.
      */
     resourceID: string;
@@ -3446,7 +3478,7 @@ export type V1SecurityContext = {
      */
     privileged?: boolean;
     /**
-     * procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.
+     * procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. Note that this field cannot be set when spec.os.name is windows.
      */
     procMount?: string;
     /**
@@ -3730,6 +3762,7 @@ export type V1VolumeMountStatus = {
      * RecursiveReadOnly must be set to Disabled, Enabled, or unspecified (for non-readonly mounts). An IfPossible value in the original VolumeMount must be translated to Disabled or Enabled, depending on the mount result.
      */
     recursiveReadOnly?: string;
+    volumeStatus?: V1VolumeStatus;
 };
 
 /**
@@ -3760,6 +3793,13 @@ export type V1VolumeResourceRequirements = {
     requests?: {
         [key: string]: ResourceQuantity;
     };
+};
+
+/**
+ * VolumeStatus represents the status of a mounted volume. At most one of its members must be specified.
+ */
+export type V1VolumeStatus = {
+    image?: V1ImageVolumeStatus;
 };
 
 /**
@@ -6189,6 +6229,47 @@ export type GetEventsResponses = {
 
 export type GetEventsResponse = GetEventsResponses[keyof GetEventsResponses];
 
+export type GetHealthData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Comma delimited string used to apply filtering: 'propertyName,filterValue'
+         */
+        filterBy?: string;
+        /**
+         * Name of the column to sort by
+         */
+        sortBy?: string;
+        /**
+         * Number of items to return when pagination is applied
+         */
+        itemsPerPage?: string;
+        /**
+         * Page number to return items from
+         */
+        page?: string;
+        /**
+         * Metric names to download
+         */
+        metricNames?: string;
+        /**
+         * Aggregations to be performed for each metric (default: sum)
+         */
+        aggregations?: string;
+    };
+    url: '/api/v1/health';
+};
+
+export type GetHealthResponses = {
+    /**
+     * OK
+     */
+    200: HandlerHealthResponse;
+};
+
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
+
 export type GetAllHorizontalPodAutoscalersData = {
     body?: never;
     path?: never;
@@ -7021,6 +7102,34 @@ export type GetPodLogsData = {
          * Aggregations to be performed for each metric (default: sum)
          */
         aggregations?: string;
+        /**
+         * timestamp of the reference log line
+         */
+        referenceTimestamp?: string;
+        /**
+         * line number of the reference log line
+         */
+        referenceLineNum?: number;
+        /**
+         * inclusive offset from the reference log line
+         */
+        offsetFrom?: number;
+        /**
+         * exclusive offset from the reference log line
+         */
+        offsetTo?: number;
+        /**
+         * position to load logs from: beginning or end
+         */
+        logFilePosition?: string;
+        /**
+         * maximum number of lines to load from the end of the log
+         */
+        tailLines?: number;
+        /**
+         * return logs from the previous container instance
+         */
+        previous?: boolean;
     };
     url: '/api/v1/log/{namespace}/{pod}';
 };
@@ -7075,6 +7184,34 @@ export type GetContainerLogsData = {
          * Aggregations to be performed for each metric (default: sum)
          */
         aggregations?: string;
+        /**
+         * timestamp of the reference log line
+         */
+        referenceTimestamp?: string;
+        /**
+         * line number of the reference log line
+         */
+        referenceLineNum?: number;
+        /**
+         * inclusive offset from the reference log line
+         */
+        offsetFrom?: number;
+        /**
+         * exclusive offset from the reference log line
+         */
+        offsetTo?: number;
+        /**
+         * position to load logs from: beginning or end
+         */
+        logFilePosition?: string;
+        /**
+         * maximum number of lines to load from the end of the log
+         */
+        tailLines?: number;
+        /**
+         * return logs from the previous container instance
+         */
+        previous?: boolean;
     };
     url: '/api/v1/log/{namespace}/{pod}/{container}';
 };

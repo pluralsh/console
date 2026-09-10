@@ -27,6 +27,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchPolicy,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
+    Monitor,
     PullRequest,
     FlowWorkbench,
     StackRun,
@@ -34,7 +35,7 @@ defmodule Console.Deployments.Workbenches do
     QueuedPrompt
   }
   alias Console.AI.{Provider, VectorStore}
-  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt, KubeShell}
+  alias Console.AI.Tools.Workbench.{FunctionCall, KubeDrain, KubeRequest, SavedPrompt, KubeShell}
   alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -869,6 +870,7 @@ defmodule Console.Deployments.Workbenches do
       job_modes
       |> Map.put(:update, job_modes[:update] && wb_kubernetes[:update])
       |> Map.put(:delete, job_modes[:delete] && wb_kubernetes[:delete])
+      |> Map.put(:drain, job_modes[:drain] && wb_kubernetes[:drain])
 
     %{modes | kubernetes: kubernetes}
   end
@@ -877,15 +879,21 @@ defmodule Console.Deployments.Workbenches do
   defp budget_available?(%Workbench{budget: %Budget{} = budget}), do: Budget.available?(budget)
   defp budget_available?(%Workbench{}), do: true
 
-  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
-    hook = Repo.preload(hook, [:user])
+  @spec create_workbench_bot_job(map, binary, WorkbenchWebhook.t() | Monitor.t()) :: job_resp
+  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{} = hook),
+    do: create_workbench_bot_job(attrs, workbench_id, hook, "workbench webhook")
+  def create_workbench_bot_job(attrs, workbench_id, %Monitor{} = monitor),
+    do: create_workbench_bot_job(attrs, workbench_id, monitor, "monitor")
+
+  defp create_workbench_bot_job(attrs, workbench_id, %{modes: modes} = source, source_name) do
+    source = Repo.preload(source, [:user])
     bench = get_workbench!(workbench_id) |> Repo.preload([:bot_user])
     start_transaction()
     |> add_operation(:actor, fn _ ->
-      case {hook, bench} do
-        {%WorkbenchWebhook{user: %User{} = user}, _} -> {:ok, Console.Services.Rbac.preload(user)}
+      case {source, bench} do
+        {%{user: %User{} = user}, _} -> {:ok, Console.Services.Rbac.preload(user)}
         {_, %Workbench{bot_user: %User{} = bot_user}} -> {:ok, Console.Services.Rbac.preload(bot_user)}
-        _ -> {:error, "workbench webhook does not have a bot user"}
+        _ -> {:error, "#{source_name} does not have a bot user"}
       end
     end)
     |> add_operation(:job, fn %{actor: user} ->
@@ -1276,6 +1284,30 @@ defmodule Console.Deployments.Workbenches do
     end)
 
     {:ok, activity}
+  end
+
+  defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :kubernetes, result: %{kube_drain: %KubeDrain{} = drain}} = activity,
+    user
+  ) do
+    case KubeDrain.invoke(drain, user) do
+      {:ok, _} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :successful,
+          result: %{output: "Node #{drain.node} drained successfully"}
+        })
+      {:error, {:http_error, _, %{"message" => msg}}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Kubernetes node drain failed: #{msg}"}
+        })
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Kubernetes node drain failed: #{inspect(err)}"}
+        })
+    end
+    |> Repo.update()
   end
 
   defp execute_approved_activity(

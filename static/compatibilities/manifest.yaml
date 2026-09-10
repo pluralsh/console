@@ -9,6 +9,7 @@ names:
 - calico
 - cert-manager
 - cilium
+- chaos-mesh
 - contour
 - coredns
 - cloudnative-pg
@@ -22,6 +23,7 @@ names:
 - jaeger
 - karpenter
 - keda
+- kong-ingress-controller
 - kube-prometheus-stack
 - kyverno
 - linkerd
@@ -49,3 +51,5 @@ names:
 - wiz-sensor
 - wiz-admission-controller
 - wiz-network-analyzer
+- kuberay-operator
+- mongodb-kubernetes

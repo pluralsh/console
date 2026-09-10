@@ -5,6 +5,15 @@ defmodule Console.Deployments.ObservabilityTest do
   alias Console.PubSub
   alias Console.Schema.{WorkbenchWebhook, Monitor}
   alias Console.Logs.AggregationBucket
+  alias Console.Deployments.Observability.Monitor, as: MonitorImpl
+  alias CloudQuery.Client
+  alias Toolquery.ToolQuery.Stub
+  alias Toolquery.{
+    LogAggregateBucket,
+    LogAggregateOutput,
+    MetricPoint,
+    MetricsQueryOutput
+  }
 
   describe "#upsert_provider/2" do
     test "it can create a new obs provider" do
@@ -359,6 +368,215 @@ defmodule Console.Deployments.ObservabilityTest do
   end
 
   describe "#run_monitor/1" do
+    test "evaluates a native metrics query" do
+      deployment_settings(
+        prometheus_connection: %{
+          host: "https://prom.example.com",
+          user: "user",
+          password: "password"
+        }
+      )
+
+      monitor =
+        insert(:monitor,
+          type: :metrics,
+          threshold: %{aggregate: :max, value: 1.0},
+          query: %{metrics: %{query: "up", step: "1m", duration: "10m"}}
+        )
+
+      timestamp = DateTime.utc_now()
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :metrics, fn :mock_conn, input, _opts ->
+        assert input.query == "up"
+        assert input.step == "1m"
+
+        {:ok,
+         %MetricsQueryOutput{
+           metrics: [
+             %MetricPoint{
+               timestamp: Google.Protobuf.from_datetime(timestamp),
+               name: "up",
+               value: 2.0
+             }
+           ]
+         }}
+      end)
+
+      assert {:ok, :firing, [%{count: 2.0, timestamp: result_timestamp}]} =
+               MonitorImpl.query(monitor)
+
+      assert DateTime.compare(result_timestamp, timestamp) == :eq
+    end
+
+    test "evaluates a named metrics tool query" do
+      user = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "prom",
+          tool: :prometheus,
+          categories: [:metrics],
+          configuration: %{
+            prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      monitor =
+        insert(:monitor,
+          type: :metrics,
+          workbench: workbench,
+          user: user,
+          threshold: %{aggregate: :avg, value: 2.0},
+          query: %{
+            metrics: %{
+              tool: "workbench_observability_metrics_prom",
+              query: "rate(requests[5m])",
+              step: "30s",
+              duration: "10m"
+            }
+          }
+        )
+        |> Console.Repo.preload([:workbench, :user])
+
+      timestamp = DateTime.utc_now()
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :metrics, fn :mock_conn, input, _opts ->
+        assert input.query == "rate(requests[5m])"
+        assert input.step == "30s"
+
+        {:ok,
+         %MetricsQueryOutput{
+           metrics: [
+             %MetricPoint{
+               timestamp: Google.Protobuf.from_datetime(timestamp),
+               name: "requests",
+               value: 3.0
+             }
+           ]
+         }}
+      end)
+
+      assert {:ok, :firing, [%{count: 3.0}]} = MonitorImpl.query(monitor)
+    end
+
+    test "rejects a named monitor query denied by workbench policy" do
+      user = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "prom",
+          tool: :prometheus,
+          categories: [:metrics],
+          configuration: %{
+            prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      policy =
+        insert(:policy,
+          project: workbench.project,
+          policy: """
+          package plrl.wb.admission
+          sample := 0
+          deny[{"message": "monitor query blocked"}] if {
+            input.tool_name == "workbench_observability_metrics_prom"
+          }
+          """
+        )
+
+      insert(:workbench_policy,
+        workbench: workbench,
+        policy: policy,
+        matches: %{regexes: ["^workbench_observability_metrics_prom$"]}
+      )
+
+      monitor =
+        insert(:monitor,
+          type: :metrics,
+          workbench: workbench,
+          user: user,
+          query: %{
+            metrics: %{
+              tool: "workbench_observability_metrics_prom",
+              query: "up",
+              duration: "10m"
+            }
+          }
+        )
+        |> Console.Repo.preload([:workbench, :user])
+
+      reject(&Client.connect/0)
+
+      assert {:error, message} = MonitorImpl.query(monitor)
+      assert message =~ "Policy denied"
+    end
+
+    test "evaluates a named logs tool with server-side aggregation" do
+      user = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "loki",
+          tool: :loki,
+          categories: [:logs],
+          configuration: %{loki: %{url: "https://loki.example.com"}}
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      monitor =
+        insert(:monitor,
+          workbench: workbench,
+          user: user,
+          threshold: %{aggregate: :max, value: 4.0},
+          query: %{
+            log: %{
+              tool: "workbench_observability_log_aggregate_loki",
+              query: "{namespace=\"prod\"}",
+              bucket_size: "5m",
+              duration: "10m",
+              operator: :and,
+              facets: [%{key: "pod", value: "api"}]
+            }
+          }
+        )
+        |> Console.Repo.preload([:workbench, :user])
+
+      timestamp = DateTime.utc_now()
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :log_aggregate, fn :mock_conn, input, _opts ->
+        assert input.query == "{namespace=\"prod\"}"
+        assert input.bucket_size == "5m"
+        assert input.operator == :LOG_QUERY_OPERATOR_AND
+        assert [%{name: "pod", value: "api"}] = input.facets
+
+        {:ok,
+         %LogAggregateOutput{
+           buckets: [
+             %LogAggregateBucket{
+               timestamp: Google.Protobuf.from_datetime(timestamp),
+               count: 5
+             }
+           ]
+         }}
+      end)
+
+      assert {:ok, :firing, [%{count: 5}]} = MonitorImpl.query(monitor)
+    end
+
     test "creates a firing alert when monitor is firing and no existing alert" do
       service = insert(:service)
 

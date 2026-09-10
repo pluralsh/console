@@ -1,17 +1,13 @@
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
-import { use, useState } from 'react'
-
-import { Button, useSetBreadcrumbs } from '@pluralsh/design-system'
-
-import { getUserManagementBreadcrumbs } from '../UserManagement'
-
+import { Button, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body1P } from 'components/utils/typography/Text'
-import styled from 'styled-components'
-import { GroupsList } from './GroupsList'
 import { GroupFragment } from 'generated/graphql'
+import { use, useState } from 'react'
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 import { GroupEditOrCreate } from './GroupEditOrCreate'
+import { GroupsList } from './GroupsList'
 
 export const GROUP_CREATE_ID_KEY = 'create-group' as const
 export type GroupEditT = GroupFragment | typeof GROUP_CREATE_ID_KEY
@@ -20,9 +16,7 @@ const breadcrumbs = getUserManagementBreadcrumbs('groups')
 
 export function Groups() {
   const { availableFeatures } = use(SubscriptionContext)
-
   const [groupEdit, setGroupEdit] = useState<Nullable<GroupEditT>>(null)
-
   const isAvailable = !!availableFeatures?.userManagement
 
   useSetBreadcrumbs(breadcrumbs)
@@ -34,11 +28,17 @@ export function Groups() {
         setGroupEdit={setGroupEdit}
       />
     )
+
   return (
-    <WrapperSC>
+    <Flex
+      direction="column"
+      gap="medium"
+      height="100%"
+      minHeight={0}
+    >
       <StretchedFlex>
         <Body1P $color="text-light">
-          Create and manage permission groups.
+          Create and manage groups for services.
         </Body1P>
         <Button
           floating
@@ -56,14 +56,6 @@ export function Groups() {
           placeholderImageURL="/placeholder-groups.png"
         />
       )}
-    </WrapperSC>
+    </Flex>
   )
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  minHeight: 0,
-  height: '100%',
-}))

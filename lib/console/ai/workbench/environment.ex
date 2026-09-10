@@ -104,7 +104,9 @@ defmodule Console.AI.Workbench.Environment do
     }
   end
 
-  defp has_k8s?(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}}), do: (u || d)
+  defp has_k8s?(
+    %WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e, drain: drain}}}
+  ), do: u || d || e || drain
   defp has_k8s?(_), do: false
 
   def with_builtins(skills) when is_map(skills) do
@@ -200,7 +202,7 @@ defmodule Console.AI.Workbench.Environment do
   defp infra_agents(_), do: []
 
   defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]
-  defp type_subagents(_), do: []
+  defp type_subagents(_), do: [:monitoring]
 
   defp tool_agents(tools) do
     Enum.flat_map(tools || [], fn

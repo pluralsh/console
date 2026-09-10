@@ -2,7 +2,7 @@ defmodule Console.Deployments.WorkbenchesTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
-  alias Console.AI.Tools.Workbench.{KubeRequest, KubeShell}
+  alias Console.AI.Tools.Workbench.{KubeDrain, KubeShell}
   alias Console.Kubernetes.PodExec
   alias Console.PubSub
   alias Console.Deployments.Workbenches
@@ -547,6 +547,28 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "create_workbench_bot_job/3" do
+    test "creates a job with a monitor's actor and modes" do
+      actor = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: nil)
+
+      monitor =
+        insert(:monitor,
+          workbench: workbench,
+          user: actor,
+          modes: %{plan: true, coding: %{review: true}}
+        )
+
+      {:ok, job} =
+        Workbenches.create_workbench_bot_job(%{prompt: "monitor prompt"}, workbench.id, monitor)
+
+      assert job.workbench_id == workbench.id
+      assert job.user_id == actor.id
+      assert job.prompt == "monitor prompt"
+      assert job.modes.plan
+      assert job.modes.coding.review
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
     test "creates a job as the workbench bot user when set" do
       bot = insert(:user, roles: %{admin: true})
       workbench = insert(:workbench, bot_user: bot)
@@ -677,19 +699,27 @@ defmodule Console.Deployments.WorkbenchesTest do
         insert(:workbench,
           read_bindings: [%{user_id: user.id}],
           modes: %WorkbenchJob.Modes{
-            kubernetes: %WorkbenchJob.Modes.Kubernetes{update: false, delete: true}
+            kubernetes: %WorkbenchJob.Modes.Kubernetes{
+              update: false,
+              delete: true,
+              drain: false
+            }
           }
         )
 
       {:ok, job} =
         Workbenches.create_workbench_job(
-          %{prompt: "test prompt", modes: %{kubernetes: %{update: true, delete: true}}},
+          %{
+            prompt: "test prompt",
+            modes: %{kubernetes: %{update: true, delete: true, drain: true}}
+          },
           workbench,
           user
         )
 
       assert job.modes.kubernetes.update == false
       assert job.modes.kubernetes.delete == true
+      assert job.modes.kubernetes.drain == false
     end
 
     test "users without read access cannot create a job" do
@@ -1519,18 +1549,17 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "approve_job_activity/2" do
-    test "users with read access approve a kubernetes activity and invoke the kube request" do
+    test "users with read access approve a node drain activity and invoke the kube request" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
       job = insert(:workbench_job, workbench: workbench, status: :running)
       cluster = insert(:cluster, handle: "approval-cluster")
 
-      request = %{
+      drain = %{
         handle: cluster.handle,
-        method: "delete",
-        path: "/apis/apps/v1/namespaces/default/deployments/api",
-        content_type: "application/json"
+        node: "worker-0",
+        explanation: "Drain the node before maintenance."
       }
 
       activity =
@@ -1541,30 +1570,32 @@ defmodule Console.Deployments.WorkbenchesTest do
           prompt: "approve the kubernetes request",
           result: %{
             output: "request pending user approval",
-            kube_request: request
+            explanation: drain.explanation,
+            kube_drain: drain
           }
         )
 
       expect(Kazan, :run, fn %Kazan.Request{} = request, opts ->
-        assert request.method == "delete"
-        assert request.path == "/apis/apps/v1/namespaces/default/deployments/api"
-        assert request.body == nil
+        assert request.method == "put"
+        assert request.path == "/api/v1/node/worker-0/drain"
+        assert request.body == "{}"
         assert request.content_type == "application/json"
         assert request.query_params == %{}
         assert request.response_model == Kube.Client.EchoModel
         assert %Kazan.Server{} = opts[:server]
 
-        {:ok, %{"kind" => "Status", "status" => "Success"}}
+        {:ok, nil}
       end)
 
       assert activity.status == :needs_approval
-      assert %KubeRequest{handle: "approval-cluster"} = activity.result.kube_request
+      assert %KubeDrain{handle: "approval-cluster", node: "worker-0"} =
+               activity.result.kube_drain
 
       {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
 
       assert updated.id == activity.id
       assert updated.status == :successful
-      assert Jason.decode!(updated.result.output) == %{"kind" => "Status", "status" => "Success"}
+      assert updated.result.output == "Node worker-0 drained successfully"
 
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 

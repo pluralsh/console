@@ -11,8 +11,8 @@ require (
 	github.com/DataDog/dd-trace-go/contrib/k8s.io/client-go/v2 v2.8.1
 	github.com/DataDog/dd-trace-go/v2 v2.8.1
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/Yamashou/gqlgenc v0.33.0
 	github.com/go-logr/logr v1.4.3
+	github.com/gqlgo/gqlgenc v0.38.2
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	github.com/orcaman/concurrent-map/v2 v2.0.1
@@ -20,7 +20,7 @@ require (
 	github.com/pluralsh/console/go/polly v0.0.0-00010101000000-000000000000
 	github.com/samber/lo v1.53.0
 	github.com/stretchr/testify v1.11.1
-	github.com/vektah/gqlparser/v2 v2.5.32
+	github.com/vektah/gqlparser/v2 v2.5.34
 	golang.org/x/time v0.15.0
 	k8s.io/api v0.36.2
 	k8s.io/apimachinery v0.36.2
@@ -33,7 +33,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/99designs/gqlgen v0.17.78 // indirect
+	github.com/99designs/gqlgen v0.17.91 // indirect
 	github.com/DataDog/datadog-agent/comp/core/tagger/origindetection v0.77.0 // indirect
 	github.com/DataDog/datadog-agent/pkg/obfuscate v0.77.0 // indirect
 	github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes v0.77.0 // indirect
@@ -90,7 +90,6 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.26.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/gobuffalo/flect v1.0.3 // indirect
-	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/google/cel-go v0.29.0 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -129,7 +128,7 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.11.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	github.com/sosodev/duration v1.3.1 // indirect
+	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect

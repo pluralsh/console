@@ -2,6 +2,7 @@ defmodule Console.Deployments.Integrations do
   use Console.Services.Base
   use Nebulex.Caching
   import Console.Deployments.Policies
+  alias Console.Deployments.Issues.Scm
   alias Console.Schema.{ChatConnection, IssueWebhook, User, Issue}
   alias Console.PubSub
 
@@ -127,7 +128,7 @@ defmodule Console.Deployments.Integrations do
   Upserts an issue keyed by external id.
   """
   @spec upsert_issue(%{external_id: binary}) :: issue_resp
-  def upsert_issue(%{external_id: external_id} = attrs) do
+  def upsert_issue(%{external_id: external_id} = attrs) when is_binary(external_id) do
     extant = get_issue_by_ext_id(external_id)
     related = related_issue(attrs)
     attrs = inherit_issue_scope(attrs, extant || related)
@@ -140,6 +141,7 @@ defmodule Console.Deployments.Integrations do
     |> execute()
     |> notify_issue_sync(extant)
   end
+  def upsert_issue(_), do: {:error, "issue external id is required"}
 
   defp persist_issue(%Issue{} = issue, attrs) do
     Issue.changeset(issue, attrs)
@@ -197,14 +199,12 @@ defmodule Console.Deployments.Integrations do
   defp issue_delta(%Issue{}), do: :update
   defp issue_delta(_), do: :create
 
-  defp related_issue(
-    %{provider: :github, status: status, url: url, payload: %{"pull_request" => _} = payload}
-  ) when status in [:open, :completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
-    github_issues_for_reference(url)
-    |> Repo.all()
-    |> sole_owner()
+  defp related_issue(attrs) do
+    case related_issues_query(attrs) do
+      nil -> nil
+      query -> query |> Repo.all() |> sole_owner()
+    end
   end
-  defp related_issue(_), do: nil
 
   defp sole_owner(issues) do
     Enum.uniq_by(issues, & {&1.workbench_id, &1.flow_id})
@@ -224,50 +224,29 @@ defmodule Console.Deployments.Integrations do
   end
   defp inherit_issue_scope(attrs, _), do: attrs
 
-  defp sync_related_issue_statuses(%{provider: :github, status: status, url: url, payload: payload}, except_id)
-    when status in [:open, :completed, :cancelled] and is_binary(url) and is_map(payload),
-    do: sync_github_pr_statuses(payload, url, status, except_id)
+  defp sync_related_issue_statuses(%{status: status} = attrs, except_id)
+       when status in [:open, :completed, :cancelled] do
+    case related_issues_query(attrs) do
+      nil ->
+        {:ok, []}
+
+      query ->
+        query
+        |> Issue.ignore_ids(List.wrap(except_id))
+        |> Issue.for_statuses([:open, :in_progress, :cancelled, :completed] -- [status])
+        |> Issue.selected()
+        |> Repo.update_all(set: [status: status, updated_at: DateTime.utc_now()])
+        |> then(fn {_, issues} -> {:ok, Enum.map(issues, &%{&1 | status_changed: true})} end)
+    end
+  end
   defp sync_related_issue_statuses(_, _), do: {:ok, []}
 
-  defp sync_github_pr_statuses(%{"comment" => comment}, _, _, _) when is_map(comment), do: {:ok, []}
-  defp sync_github_pr_statuses(%{"pull_request" => _}, url, status, except_id) do
-    github_issues_for_reference(url)
-    |> Repo.all()
-    |> Enum.reject(& &1.id == except_id)
-    |> Enum.reduce_while({:ok, []}, &sync_issue_status(&1, &2, status))
-  end
-  defp sync_github_pr_statuses(_, _, _, _), do: {:ok, []}
-
-  defp sync_issue_status(%Issue{} = issue, {:ok, synced}, status) do
-    Issue.changeset(issue, %{status: status})
-    |> Repo.update()
-    |> case do
-      {:ok, issue} -> {:cont, {:ok, [issue | synced]}}
-      {:error, error} -> {:halt, {:error, error}}
+  defp related_issues_query(%{provider: provider, url: url, payload: payload})
+       when is_atom(provider) and is_binary(url) and is_map(payload) do
+    case Scm.reference_urls(provider, payload, url) do
+      [] -> nil
+      urls -> Issue.for_related_references(provider, urls)
     end
   end
-
-  defp github_issues_for_reference(url) do
-    Issue.for_references(:github, github_reference_urls(url))
-  end
-
-  defp github_reference_urls(url) do
-    case github_reference_identity(url) do
-      {repository_url, number} ->
-        [url, "#{repository_url}/issues/#{number}", "#{repository_url}/pull/#{number}"]
-        |> Enum.uniq()
-      _ -> [url]
-    end
-  end
-
-  defp github_reference_identity(url) do
-    uri = URI.parse(url)
-
-    case Regex.run(~r{^(.+)/(?:issues|pull)/(\d+)/?$}, uri.path || "") do
-      [_, repository_path, number] ->
-        repository_url = URI.to_string(%{uri | path: repository_path, query: nil, fragment: nil})
-        {repository_url, number}
-      _ -> nil
-    end
-  end
+  defp related_issues_query(_), do: nil
 end

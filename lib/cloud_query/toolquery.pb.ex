@@ -1,3 +1,16 @@
+defmodule Toolquery.LogQueryOperator do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "toolquery.LogQueryOperator",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :LOG_QUERY_OPERATOR_AND, 0
+  field :LOG_QUERY_OPERATOR_OR, 1
+end
+
 defmodule Toolquery.ElasticConnection do
   @moduledoc false
 
@@ -279,6 +292,23 @@ defmodule Toolquery.LogsQueryInput do
   field :options, 6, proto3_optional: true, type: Toolquery.LogsOptions
 end
 
+defmodule Toolquery.LogAggregateInput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.LogAggregateInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :connection, 1, type: Toolquery.ToolConnection
+  field :query, 2, type: :string
+  field :range, 3, type: Toolquery.TimeRange
+  field :bucket_size, 4, type: :string, json_name: "bucketSize"
+  field :facets, 5, repeated: true, type: Toolquery.LogsQueryFacet
+  field :options, 6, proto3_optional: true, type: Toolquery.LogsOptions
+  field :operator, 7, type: Toolquery.LogQueryOperator, enum: true
+end
+
 defmodule Toolquery.LogsOptions do
   @moduledoc false
 
@@ -550,6 +580,29 @@ defmodule Toolquery.LogsQueryOutput do
   field :logs, 1, repeated: true, type: Toolquery.LogEntry
 end
 
+defmodule Toolquery.LogAggregateBucket do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.LogAggregateBucket",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :timestamp, 1, type: Google.Protobuf.Timestamp
+  field :count, 2, type: :int64
+end
+
+defmodule Toolquery.LogAggregateOutput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.LogAggregateOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :buckets, 1, repeated: true, type: Toolquery.LogAggregateBucket
+end
+
 defmodule Toolquery.TraceSpan.TagsEntry do
   @moduledoc false
 
@@ -651,6 +704,8 @@ defmodule Toolquery.ToolQuery.Service do
   rpc :MetricsLabelSearch, Toolquery.MetricsLabelSearchInput, Toolquery.MetricsLabelSearchOutput
 
   rpc :Logs, Toolquery.LogsQueryInput, Toolquery.LogsQueryOutput
+
+  rpc :LogAggregate, Toolquery.LogAggregateInput, Toolquery.LogAggregateOutput
 
   rpc :Traces, Toolquery.TracesQueryInput, Toolquery.TracesQueryOutput
 

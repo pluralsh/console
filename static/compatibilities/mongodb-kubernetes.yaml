@@ -1,0 +1,336 @@
+icon: https://mongodb-images-new.s3.eu-west-1.amazonaws.com/leaf-green-dark.png
+git_url: https://github.com/mongodb/mongodb-kubernetes
+release_url: https://github.com/mongodb/mongodb-kubernetes/releases/tag/{vsn}
+helm_repository_url: https://mongodb.github.io/helm-charts
+versions:
+- version: 1.12.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.12.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.12.0']
+- version: 1.11.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['MongoDBUser can now set an optional `spec.connectionStringDatabase`
+        to control the database path segment in generated connection string secrets,
+        while `spec.db` continues to set `authSource`.', "kubectl-mongodb multicluster\
+        \ `setup` and `recover` add a repeatable `--member-cluster-ca <cluster>=<pemBundle>`\
+        \ flag to override the CA used in generated kubeconfigs for member clusters,\
+        \ useful when TLS is terminated differently on the operator\u2019s network\
+        \ path to the API server."]
+    breaking_changes: []
+  chart_version: 1.11.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.11.0']
+- version: 1.10.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm / values changes to check\n\n- **Multi-cluster Search health\
+      \ check streak**: `multiCluster.memberClusterRequiredHealthyStreak` (default\
+      \ `5`) controls how many consecutive successful health checks are required before\
+      \ a previously-failed member cluster is marked healthy again.\n\n- **Search\
+      \ monitoring workaround (Ops Manager 8.0.24)**: If you have `MongoDBSearch`\
+      \ resources with metrics forwarding enabled, explicitly set `.spec.observability.metricsForwarder.mode:\
+      \ disabled` until Ops Manager >= **8.0.25** is in place.\n\n- **Ops Manager\
+      \ AppDB monitoring agent config moved** (1.10.0): `spec.appDB.monitoringAgent`\
+      \ is **deprecated** and has **no effect**. Use:\n  - `spec.applicationDatabase.agent`\n\
+      \  - `spec.applicationDatabase.agent.monitoringAgent`\n  for monitoring agent\
+      \ settings (log level/rotation, etc.).\n\n- **Pod securityContext became more\
+      \ restrictive** (1.9.0): If your cluster/policies require different settings,\
+      \ plan Helm `template` / `podTemplate` overrides for operator and workloads."
+    chart_updates: [MongoDB Search GA landed in 1.9.x with multiple `MongoDBSearch`
+        API additions and field moves (notably `.spec.prometheus` -> `.spec.observability.prometheus`).,
+      Multi-cluster Search support added in 1.10.0 for `spec.source.external` sources;
+        operator deploys per-cluster Envoy plus one `mongot` StatefulSet per shard
+        per member cluster., Added cluster-level status reporting for Search / LoadBalancer
+        / MetricsForwarder in `MongoDBSearch.status.clusters`., 'Added node affinity
+        configuration for `mongot` via `spec.clusters[].nodeAffinity` and per-shard
+        overrides.', 'Changed default `mongot` JVM heap sizing: half of memory request
+        but capped at 30GB unless user overrides via `jvmFlags`.', 'Ops Manager/AppDB:
+        merged `mongodb-agent-monitoring` sidecar into the main `mongodb-agent` container;
+        monitoring config fields updated/deprecated.']
+    features: ['MongoDB Search & Vector Search GA (1.9.x), plus Auto Embeddings (public
+        preview) and more TLS/key handling options for encrypted keys.', Search metrics
+        forwarding to Ops Manager via `spec.observability.metricsForwarder` (with
+        noted Ops Manager version caveat)., 'Multi-cluster MongoDB Search (1.10.0)
+        for external replica set/sharded sources using `spec.source.external`, keeping
+        search traffic local per cluster.', Cluster-level Search status surfaced in
+        `MongoDBSearch.status.clusters` plus `mongot` nodeAffinity controls., 'Ops
+        Manager/AppDB agent simplification: automation+monitoring now run in a single
+        `mongodb-agent` container; monitoring settings centralized under `spec.applicationDatabase.agent.*`.']
+    breaking_changes: ['MongoDBSearch GA schema changes vs Search public preview:
+        new fields added, x509 key password handling moved to a dedicated Secret ref,
+        and `.spec.prometheus` moved to `.spec.observability.prometheus` (Prometheus
+        enabled by default; disable explicitly if needed).', Ops Manager 8.0.24 +
+        Search metrics forwarding can cause startup preflight restart loops after
+        next restart; require Ops Manager >= 8.0.25 or disable metrics forwarding.,
+      AppDB monitoring agent field `spec.appDB.monitoringAgent` is deprecated and
+        ignored in 1.10.0; migrate configuration to `spec.applicationDatabase.agent`
+        / `spec.applicationDatabase.agent.monitoringAgent`.]
+  chart_version: 1.10.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.10.0']
+- version: 1.9.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart values to review\n- **`operator.baseName`\
+      \ removed (already removed in 1.8.0):** ensure it is not present in your values;\
+      \ RBAC resource names are now fixed to `mongodb-kubernetes-*`.\n- **Init container\
+      \ image values removed (already removed in 1.8.0):** `initAppDb.name`, `initAppDb.version`,\
+      \ `registry.initAppDb` no longer exist. Use `initDatabase.name`, `initDatabase.version`,\
+      \ `registry.initDatabase`.\n- **New Helm value (1.9.0):** `multiCluster.memberClusterRequiredHealthyStreak`\
+      \ (default **5**) controls how many consecutive successful health checks are\
+      \ required before clearing the \u201Cfailed cluster\u201D annotation when automatic\
+      \ failover is disabled.\n- **Potential env var alternative:** `MDB_MEMBER_CLUSTER_REQUIRED_HEALTHY_STREAK`\
+      \ provides the same setting if you configure via env vars rather than Helm.\n\
+      \n## Resource (CR) spec changes you must apply (MongoDBSearch)\n- `.spec.prometheus`\
+      \ **moved** to `.spec.observability.prometheus` (Prometheus metrics now **enabled\
+      \ by default**; disable via `.spec.observability.prometheus.mode: disabled`).\n\
+      - New/changed GA fields:\n  - `.spec.observability.metricsForwarder` (+ `.opsManager`)\
+      \ to forward Search metrics to Ops Manager (default off).\n  - TLS/encrypted\
+      \ key password secrets:\n    - `.spec.security.tls.keyFilePasswordSecretRef`\n\
+      \    - `.spec.source.tls.clientCertificateSecretRef`\n    - `.spec.source.tls.keyFilePasswordSecretRef`\n\
+      \    - `.spec.source.x509.keyFilePasswordSecretRef` (**replaces** embedded `tls.keyFilePassword`\
+      \ in the x509 secret).\n  - `.spec.clusters[].advancedMongotConfigs`\n  - `.spec.clusters[].syncSourceSelector.matchTagSets`\n\
+      \  - `.spec.clusters[].loadBalancer.managed.retryPolicy`\n  - `.spec.clusters[].loadBalancer.managed.minMongotReadyReplicas`\n\
+      \  - `.spec.clusters[].loadBalancer.managed.replicas`\n  - `.spec.featureFlags.enableOverloadRetrySignal`\
+      \ (default `true`)"
+    chart_updates: ['MongoDB Search & Vector Search graduated to **GA** (from Public
+        Preview) with corresponding `MongoDBSearch` CRD/schema updates and new capabilities
+        (auto embeddings preview, monitoring integrations, additional LB/tuning).',
+      Default pod `securityContext` hardened to align with Kubernetes Pod Security
+        Standards (operator and workloads); use `template`/`podTemplate` overrides
+        if your environment requires less restrictive settings., "Multi-cluster reconciliation\
+        \ improvements and new configurability for clearing \u201Cfailed cluster\u201D\
+        \ annotations when automatic failover is disabled.", 'Bug fixes across Ops
+        Manager, MongoDB, multi-cluster ownership/GC issues, reconciliation triggers,
+        AppDB PVC status, and connection string password encoding.']
+    features: [MongoDB Search & Vector Search is now **Generally Available** for Enterprise
+        Advanced; Auto Embeddings for Enterprise is added in **Public Preview**.,
+      '`mongot` can use **password-encrypted private keys** for gRPC and **client
+        TLS** for SCRAM sync-source, with decryption passwords supplied via dedicated
+        Kubernetes Secrets.', Optional **Search metrics forwarding into Ops Manager**
+        via a new metrics forwarder (shows status in the CR)., '`mongot` sync source
+        selection can now be targeted using **replica set tag sets** for data-locality
+        aware syncing.', 'Managed Envoy load balancer gains **retry policy**, configurable
+        **Envoy replica count**, and a **minimum ready mongot replicas** threshold
+        before routing traffic.', '`MongoDB` and `MongoDBUser` now expose Ops Manager
+        **project ID** in `.status.projectId`.']
+    breaking_changes: ['**MongoDBSearch GA schema changes**: `.spec.prometheus` moved
+        to `.spec.observability.prometheus`; Prometheus metrics are enabled by default
+        unless explicitly disabled.', '**MongoDBSearch encrypted-key handling change**:
+        x509 password is no longer read from the embedded `tls.keyFilePassword` entry
+        inside the cert Secret; it must be provided via `.spec.source.x509.keyFilePasswordSecretRef`
+        when using encrypted keys.', "**Minimum supported Search stack versions for\
+        \ GA**: MongoDB Server **8.3.0+**, Ops Manager **8.0.25+**, and Search (`mongot`)\
+        \ **1.70.1+**. Default Search version becomes **1.70.1** (older versions won\u2019\
+        t be supported).", 'Operational risk note: Ops Manager **8.0.24** has a critical
+        issue when Search monitoring is enabled; until Ops Manager is upgraded, explicitly
+        set `.spec.observability.metricsForwarder.mode: disabled` on each `MongoDBSearch`.']
+  chart_version: 1.9.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.9.0']
+- version: 1.8.0
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / deployment config changes\n- **Removed values\
+      \ (must be deleted/updated in your `values.yaml`):**\n  - `initAppDb.name`,\
+      \ `initAppDb.version`, `registry.initAppDb`\n  - **Replace with:** `initDatabase.name`,\
+      \ `initDatabase.version`, `registry.initDatabase`\n- **Removed value:** `operator.baseName`\n\
+      \  - This can no longer be customized; RBAC and ServiceAccount names are now\
+      \ fixed to the chart defaults.\n- **Env vars removed (if you set extra env on\
+      \ the operator Deployment):**\n  - `INIT_APPDB_IMAGE_REPOSITORY`, `INIT_APPDB_VERSION`\n\
+      \  - **Replace with:** `INIT_DATABASE_IMAGE_REPOSITORY`, `INIT_DATABASE_VERSION`\n\
+      \n### Operational/behavioral changes relevant to Helm upgrades\n- `init-appdb`\
+      \ init container image is no longer published; ensure your image overrides (if\
+      \ any) point to `init-database` only.\n- RBAC/ServiceAccount naming is now predefined;\
+      \ any downstream manifests referencing old/custom names must be updated."
+    chart_updates: [Merged `init-database` and `init-appdb` init container images
+        into a single `init-database` image; `init-appdb` is no longer published.,
+      Removed the `operator.baseName` Helm value and standardized workload RBAC resource
+        names (specific ServiceAccounts/Role/RoleBinding names are now fixed)., 'Ops
+        Manager and BackupDaemon services no longer set `publishNotReadyAddresses:
+        true`, reducing the chance of proxies routing to NotReady pods during rollouts.']
+    features: ['MongoDBSearch (Public Preview) now supports sharded clusters as a
+        source, deploying and managing a mongot group per shard (operator-managed
+        or external sharded clusters).', MongoDBSearch now supports horizontal scaling
+        via `spec.replicas` and requires L7 load balancing for multi-mongot; the operator
+        can manage an Envoy proxy (`spec.loadBalancer.managed`) or you can provide
+        your own (`spec.loadBalancer.unmanaged`)., 'MongoDBSearch adds x509 client
+        cert auth for mongot-to-mongod (`spec.source.x509`), convention-based TLS
+        secret discovery via `spec.security.tls.certsSecretPrefix`, and custom JVM
+        flags via `spec.jvmFlags` (operator auto-sizes heap if not set).', Default
+        mongodb-search image updated to `0.64.0` and default search pod requests increased
+        to 2 CPU / 4Gi memory.]
+    breaking_changes: ['`initAppDb.*` Helm values and related env vars were removed
+        due to image merge; upgrades will fail or use wrong images if your values
+        still reference `initAppDb` overrides.', '`operator.baseName` Helm value was
+        removed; any installation depending on custom-prefixed RBAC/ServiceAccount
+        names must be refactored to the fixed names.', MongoDBSearch now requires
+        mongot image version >= 0.64.0 (minimum supported); older mongot versions
+        will report NotReady and will not work correctly.]
+  chart_version: 1.8.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.8.0']
+- version: 1.7.0
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **New Helm value:** `operator.webhook.name` to set a custom `ValidatingWebhookConfiguration`
+      name (useful when multiple installs or naming constraints exist).
+
+      - **Existing Helm values from 1.6.0 (ensure carried forward):** `operator.podSecurityContext`
+      and `operator.securityContext`.
+
+      - **Behavioral fix affecting hardened settings:** If you set `operator.securityContext.readOnlyRootFilesystem=true`,
+      1.7.0 now auto-creates an `emptyDir` for webhook certs (previously could crash).'
+    chart_updates: [Support configuring the `ValidatingWebhookConfiguration` name
+        via Helm (`operator.webhook.name`)., Operator deployment becomes compatible
+        with `readOnlyRootFilesystem=true` by provisioning an `emptyDir` volume for
+        webhook certificates (fix).]
+    features: ['MongoDB Community: adds auto-embeddings support to automatically generate
+        vector embeddings for vector search workloads (see MongoDB docs tutorial).',
+      'MongoDBSearch: default `mongodb/mongodb-search` image updated to **0.60.1**
+        when `.spec.version` is not set.', 'MongoDBOpsManager: new field `spec.backup.s3Stores[].objectLockEnabled`
+        to support immutable backups (requires Ops Manager >= 8.0.19).', 'MongoDBOpsManager:
+        allows overriding Ops Manager `emptyDir` mounts with PVCs via `statefulSet.spec.volumeClaimTemplates`
+        overrides.']
+    breaking_changes: []
+  chart_version: 1.7.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.7.0']
+- version: 1.6.0
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **New Helm values**: `operator.podSecurityContext` and `operator.securityContext`\
+      \ were added to configure the Operator Deployment\u2019s `podSecurityContext`\
+      \ and container `securityContext`.\n- **Helm bugfix**: `customEnvVars` parsing\
+      \ was fixed to correctly handle values containing `=` characters (review your\
+      \ current `customEnvVars` strings; behavior may change if you relied on the\
+      \ old parsing)."
+    chart_updates: [Helm chart now supports setting the Operator Pod and container
+        security contexts via `operator.podSecurityContext` and `operator.securityContext`.,
+      Fixed Helm `customEnvVars` parsing when values include `=`.]
+    features: ["MongoDBCommunity now supports a custom Kubernetes cluster DNS domain\
+        \ via `spec.clusterDomain`, with fallback order: `spec.clusterDomain` \u2192\
+        \ `CLUSTER_DOMAIN` env var \u2192 `cluster.local`.", "MongoDB Search with\
+        \ Community is now Public Preview; Search now requires MongoDB Server **8.2.0+**\
+        \ and the default `mongodb/mongodb-search` image version is **0.55.0** if\
+        \ `.spec.version` isn\u2019t set.", 'MongoDB Search internal communication
+        switched from Wire Protocol + keyfile to **gRPC + mTLS** (mTLS enabled when
+        both MongoDB and MongoDBSearch are configured for TLS), enabling future load
+        balancing.', 'MongoDB Search Prometheus metrics endpoint is now configurable
+        and can be disabled by default; enable it by setting `spec.prometheus: {}`
+        and optionally set `spec.prometheus.port`.', MongoDB deployments using X509
+        internal cluster auth are now supported for MongoDB Search (SCRAM client auth
+        still required).]
+    breaking_changes: ['MongoDB Search: if `spec.prometheus` is not provided, the
+        mongot Prometheus metrics endpoint is **disabled by default**. Previously
+        it was always enabled on port 9946; update manifests if you scrape these metrics.',
+      'MongoDB Search (Community): minimum MongoDB Server version is now **8.2.0**
+        to run Search; upgrading MCK may require upgrading MongoDB if you use Search.']
+  chart_version: 1.6.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.6.0']
+- version: 1.5.0
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Automation agent certificate rotation is improved: when the agent\u2019\
+        s certificate is renewed, the agent will restart automatically so you don\u2019\
+        t need to manually restart Pods for cert updates to take effect."]
+    breaking_changes: []
+  chart_version: 1.5.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.5.0']
+- version: 1.4.0
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Public Preview of integrated Search and Vector Search for self-managed
+        MongoDB Enterprise Server deployments., Compatible with MongoDB Enterprise
+        Server 8.0.10+; intended for testing/evaluation/feedback (public preview).,
+      'Supports flexible topologies: `mongot` runs in Kubernetes while `mongod` can
+        be in-cluster or on external VMs/bare metal.', Initial support for replica
+        set deployments., TLS can be used to secure communication between `mongod`
+        and `mongot`.]
+    breaking_changes: []
+  chart_version: 1.4.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.4.0']
+- version: 1.3.0
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [OpenID Connect (OIDC) user authentication support via `spec.security.authentication.modes=OIDC`
+        and `spec.security.authentication.oidcProviderConfigs` (MongoDB Enterprise
+        only; requires MongoDB 7.0.11+ or 8.0.0+)., New `ClusterMongoDBRole` CRD to
+        define reusable role templates and reference them from clusters via `.spec.security.roleRefs`
+        (mutually exclusive with `.spec.security.roles`).]
+    breaking_changes: ['Operator now watches `ClusterMongoDBRole` by default, requiring
+        additional RBAC (new ClusterRole/ClusterRoleBinding). Helm chart and kubectl
+        plugin create these by default; other install methods must add them manually.']
+  chart_version: 1.3.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.3.0']
+- version: 1.2.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["MongoDBSearch (Community Private Preview): Operator can deploy MongoDB\
+        \ Search for MongoDBCommunity, including a new CRD watched by default. Requires\
+        \ MongoDB Community >= 8.0 and TLS disabled for mongot\u2194mongod communication\
+        \ (private preview limitation).", 'OpenID Connect (OIDC) authentication: Configure
+        via spec.security.authentication.modes=OIDC and spec.security.authentication.oidcProviderConfigs;
+        requires MongoDB Enterprise Server and MongoDB >= 7.0.11 or 8.0.0.', 'New
+        ClusterMongoDBRole CRD: Define reusable, cluster-scoped role templates and
+        reference them from MongoDB/MongoDBMultiCluster via spec.security.roleRefs
+        (mutually exclusive with spec.security.roles). Adds new watched resource by
+        default and requires additional RBAC (ClusterRole/ClusterRoleBinding).']
+    breaking_changes: ['RBAC requirements change when upgrading to 1.2.0: because
+        the operator now watches ClusterMongoDBRole by default, installations not
+        using the Helm chart or kubectl plugin must add a new ClusterRole and ClusterRoleBinding
+        or the operator may fail/lose permissions.']
+  chart_version: 1.2.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.2.0']
+- version: 1.1.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Adds MongoDBSearch (Community Private Preview) support for MongoDBCommunity
+        deployments, enabling full-text and vector search.', Introduces a new MongoDB
+        Search-related CRD that the operator watches by default.]
+    breaking_changes: ["MongoDB Search private preview has constraints that may force\
+        \ config changes: requires MongoDB Community >= 8.0 and TLS must be disabled\
+        \ (mongot\u2194mongod traffic is plaintext)."]
+  chart_version: 1.1.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.1.0']
+- version: 1.0.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.0.0']
+name: mongodb-kubernetes

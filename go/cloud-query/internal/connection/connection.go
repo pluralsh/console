@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -27,6 +28,7 @@ type Connection interface {
 	Schemas(tables []string) ([]cloudquery.SchemaResult, error)
 	Tables(table string) ([]string, error)
 	Query(q string, args ...any) (columns []string, rows [][]any, err error)
+	QueryWithContext(ctx context.Context, q string, args ...any) (columns []string, rows [][]any, err error)
 	Exec(q string, args ...any) (sql.Result, error)
 	Ping() error
 	LoadedModules() ([][]any, error)

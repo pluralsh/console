@@ -3,7 +3,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   alias Console.AI.Tools.Workbench.Observability.{TimeRange, Metrics}
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{LogsQueryInput, LogsQueryOutput, LogsQueryFacet, LogsOptions, AzureLogsOptions, LogEntry}
+  alias Toolquery.{
+    LogsQueryInput,
+    LogsQueryOutput,
+    LogsQueryFacet,
+    LogsOptions,
+    AzureLogsOptions,
+    LogEntry
+  }
   alias Console.AI.Workbench.Conversion
   alias Console.AI.Tools.Workbench.Output
 

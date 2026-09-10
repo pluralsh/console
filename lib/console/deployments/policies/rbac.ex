@@ -66,6 +66,7 @@ defmodule Console.Deployments.Policies.Rbac do
     IssueWebhook,
     ObservabilityWebhook,
     Monitor,
+    Dashboard,
     ChatConnection,
     Policy,
     ChatbotMessage
@@ -190,6 +191,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(chatbot, user, action, & &1.workbench)
   def evaluate(%Monitor{} = monitor, %User{} = user, action),
     do: recurse(monitor, user, action, & &1.service)
+  def evaluate(%Dashboard{} = dashboard, %User{} = user, action),
+    do: recurse(dashboard, user, action, & &1.workbench)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -367,6 +370,8 @@ defmodule Console.Deployments.Policies.Rbac do
       ])
   def preload(%Monitor{} = monitor),
     do: Repo.preload(monitor, [service: [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads]])
+  def preload(%Dashboard{} = dashboard),
+    do: Repo.preload(dashboard, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

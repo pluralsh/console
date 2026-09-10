@@ -4,6 +4,7 @@ import {
   DiffViewer,
   Flex,
   TrashCanIcon,
+  WarningIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -148,17 +149,19 @@ function DeleteWarningBanner({
 export function WorkbenchJobKubeActionChips({
   type,
   method,
+  drain,
   statusChip,
 }: {
   type: Nullable<WorkbenchJobActivityType>
   method: string | null | undefined
+  drain?: boolean
   statusChip?: ReactNode
 }) {
   if (type !== WorkbenchJobActivityType.Kubernetes) {
     return <>{statusChip}</>
   }
 
-  const chip = KUBE_VARIANT_CHIPS[getKubeActionVariant(method)]
+  const chip = KUBE_VARIANT_CHIPS[getKubeActionVariant(method, drain)]
 
   return (
     <Flex
@@ -184,8 +187,41 @@ const KUBE_VARIANT_CHIPS = {
   create: { severity: 'success', label: 'Create' },
   update: { severity: 'info', label: 'Update' },
   delete: { severity: 'danger', label: 'Delete' },
+  drain: { severity: 'warning', label: 'Drain' },
   other: null,
 } as const
+
+export function WorkbenchJobKubeDrainDetails({
+  node,
+  explanation,
+}: {
+  node?: string | null
+  explanation?: string | null
+}) {
+  const nodeName = node?.trim() || 'this node'
+
+  return (
+    <DrainDetailsSC>
+      {!!explanation?.trim() && (
+        <div>
+          <CaptionP $color="text-xlight">EXPLANATION</CaptionP>
+          <CaptionP $color="text-light">{explanation}</CaptionP>
+        </div>
+      )}
+      <DrainWarningSC role="alert">
+        <WarningIcon
+          size={16}
+          color="icon-warning"
+        />
+        <span>
+          Draining <strong>{nodeName}</strong> will cordon the node and evict
+          its workloads. Pod disruption budgets and Kubernetes RBAC remain
+          enforced.
+        </span>
+      </DrainWarningSC>
+    </DrainDetailsSC>
+  )
+}
 
 const DiffSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -207,4 +243,26 @@ const DeleteWarningSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors.red[900],
   border: `1px solid ${theme.colors.red[850]}`,
   color: theme.colors['text-danger-light'],
+}))
+
+const DrainWarningSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  width: '100%',
+  padding: theme.spacing.small,
+  borderRadius: 12,
+  backgroundColor: theme.colors['fill-two'],
+  border: `1px solid ${theme.colors['border-warning']}`,
+  color: theme.colors['text-light'],
+  strong: {
+    color: theme.colors.text,
+  },
+}))
+
+const DrainDetailsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
 }))

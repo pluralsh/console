@@ -69,12 +69,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
     }
   end
 
-  def logs_query(%{query: q, limit: l, facets: f, time_range: tr, operator: op}) do
+  def logs_query(%{query: q, limit: l, facets: f, time_range: tr, operator: op} = logs) do
     Query.new(
       query: q,
       limit: l,
       operator: op,
       facets: Enum.map(f || [], & %{key: &1.name, value: &1.value}),
+      bucket_size: Map.get(logs, :bucket_size),
       time: to_time(tr)
     )
   end

@@ -53,7 +53,7 @@ spec:
         {{- toYaml .Values.gitServer.containerSecurityContext | nindent 10 }}
         {{ end }}
         image: "{{ .Values.gitServer.image.registry | default .Values.global.registry }}/{{ .Values.gitServer.image.repository }}:{{ .Values.gitServer.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.gitServer.image.pullPolicy }}
         ports:
           - containerPort: {{ .Values.gitServer.sshPort }}
           - containerPort: {{ .Values.gitServer.httpPort }}

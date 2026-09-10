@@ -2,18 +2,14 @@ import { ApolloError } from '@apollo/client'
 import {
   ArrowTopRightIcon,
   Button,
-  CheckOutlineIcon,
   Chip,
   ChipSeverity,
   EyeIcon,
-  FailedFilledIcon,
   Flex,
   IconFrame,
-  SpinnerAlt,
   Table,
   TableProps,
   Tooltip,
-  UnknownIcon,
 } from '@pluralsh/design-system'
 import { CellContext, createColumnHelper } from '@tanstack/react-table'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
@@ -23,11 +19,10 @@ import {
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { isEmpty, upperFirst } from 'lodash'
-import { ReactNode, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
+import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
+import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { AiInsightSummaryIcon } from '../AiInsights'
 import { GqlError } from '../Alert'
 import { StackedText } from '../table/StackedText'
@@ -106,35 +101,6 @@ export function AlertsTable({
       }}
     />
   )
-}
-
-function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
-  switch (status) {
-    case WorkbenchJobStatus.Pending:
-    case WorkbenchJobStatus.Running:
-      return <SpinnerAlt size={12} />
-    case WorkbenchJobStatus.Successful:
-      return (
-        <CheckOutlineIcon
-          size={12}
-          color="icon-success"
-        />
-      )
-    case WorkbenchJobStatus.Failed:
-      return (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )
-    default:
-      return (
-        <UnknownIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-  }
 }
 
 function UrlCell({ getValue }: CellContext<AlertFragment, unknown>) {
@@ -236,32 +202,17 @@ function ViewJobCell({
   getValue: () => AlertFragment
   getViewJobData: (alert: AlertFragment) => ViewJobData | null
 }) {
-  const navigate = useNavigate()
   const alert = getValue()
   const jobData = getViewJobData(alert)
 
   if (!jobData) return null
 
   return (
-    <Chip
-      clickable
-      onClick={() =>
-        navigate(
-          getWorkbenchJobAbsPath({
-            workbenchId: jobData.workbenchId,
-            jobId: jobData.jobId,
-          })
-        )
-      }
-    >
-      <Flex
-        gap="xsmall"
-        align="center"
-      >
-        {jobStatusIcon(jobData.status)}
-        <span>View job</span>
-      </Flex>
-    </Chip>
+    <WorkbenchViewJobChip
+      workbenchId={jobData.workbenchId}
+      jobId={jobData.jobId}
+      status={jobData.status}
+    />
   )
 }
 

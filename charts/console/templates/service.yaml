@@ -13,10 +13,12 @@ spec:
     protocol: TCP
     name: epmd
   - port: {{ .Values.service.port }}
-    targetPort: http
+    targetPort: {{ ternary "https" "http" .Values.console.tls.enabled }}
     protocol: TCP
-    name: http
-    {{- if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
+    name: {{ ternary "https" "http" .Values.console.tls.enabled }}
+    {{- if .Values.console.tls.enabled }}
+    appProtocol: https
+    {{- else if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
     appProtocol: {{ .Values.gatewayApi.appProtocol | quote }}
     {{- end }}
   - port: 50051
@@ -43,9 +45,9 @@ spec:
     protocol: TCP
     name: epmd
   - port: {{ .Values.service.port }}
-    targetPort: http
+    targetPort: {{ ternary "https" "http" .Values.console.tls.enabled }}
     protocol: TCP
-    name: http
+    name: {{ ternary "https" "http" .Values.console.tls.enabled }}
   selector:
     app.kubernetes.io/name: console
     app.kubernetes.io/instance: {{ .Release.Name }}

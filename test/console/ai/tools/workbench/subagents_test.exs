@@ -1,10 +1,70 @@
 defmodule Console.AI.Tools.Workbench.SubagentsTest do
   use Console.DataCase, async: true
 
-  alias Console.AI.Tools.Workbench.Subagents
+  alias Console.AI.Tool
+  alias Console.AI.Tools.Workbench.{
+    ObservabilityResult,
+    Result,
+    Subagent,
+    Subagents
+  }
   alias Console.Schema.{Workbench, WorkbenchJob}
 
+  describe "subagent prompt guidance" do
+    test "accepts the monitoring subagent" do
+      assert {:ok, %Subagent{subagent: :monitoring}} =
+               Tool.validate(
+                 %Subagent{subagents: [:monitoring]},
+                 %{
+                   "subagent" => "monitoring",
+                   "prompt" => "Create persistent API monitoring"
+                 }
+               )
+    end
+
+    test "requires a descriptive first line without generic labels" do
+      tool = %Subagent{subagents: [:coding]}
+      prompt_description =
+        get_in(Subagent.json_schema(tool), ["properties", "prompt", "description"])
+
+      assert Subagent.description(tool) =~ "first line"
+      assert prompt_description =~ "first line"
+      assert prompt_description =~ ~s("Task")
+      assert prompt_description =~ ~s("Job")
+    end
+  end
+
+  describe "subagent result guidance" do
+    test "requires conclusions to describe the completed work on the first line" do
+      for tool <- [Result, ObservabilityResult] do
+        output_description =
+          get_in(tool.json_schema(), ["properties", "output", "description"])
+
+        assert tool.description() =~ "first line"
+        assert output_description =~ "first line"
+        assert output_description =~ "work completed"
+      end
+    end
+  end
+
   describe "implement/1" do
+    test "describes monitoring as persistent dashboard and monitor management" do
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:monitoring],
+          categories: [:metrics, :logs]
+        })
+
+      assert [%{"name" => "monitoring", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "create"
+      assert description =~ "dashboards and monitors"
+      assert description =~ "metrics, logs"
+    end
+
     test "mentions review mode on the coding subagent only when enabled" do
       {:ok, encoded} =
         Subagents.implement(%Subagents{

@@ -19,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
 
   def description(_),
     do:
-      "Add or replace a traces panel wired to a workbench traces tool: set `props.query.tool_name` and `props.query.tool_args` per that tool's schema. `layout` (x, y, w, h) is required; reuse `identifier` to refresh in place."
+      "Add or replace a full-width traces panel wired to a workbench traces tool: set `props.query.tool_name` and `props.query.tool_args` per that tool's schema. Use `layout.x: 0` and `layout.w: 3` so the trace timeline has the full dashboard row; `layout` (x, y, w, h) is required. Reuse `identifier` to refresh in place."
 
   def changeset(model, attrs) do
     model

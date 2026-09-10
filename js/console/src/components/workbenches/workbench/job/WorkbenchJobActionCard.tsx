@@ -59,6 +59,7 @@ export function WorkbenchJobActionCard({
         <WorkbenchJobKubeActionChips
           type={activity.type}
           method={activity.result?.kubeRequest?.method}
+          drain={!!activity.result?.kubeDrain}
         />
         <Button
           small

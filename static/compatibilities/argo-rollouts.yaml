@@ -3,31 +3,75 @@ git_url: https://github.com/argoproj/argo-rollouts
 release_url: https://github.com/argoproj/argo-rollouts/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 versions:
-- version: 1.8.3
+- version: 1.10.0
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [v1.9.1 is a minor security release addressing CVE-2026-35469 and includes
+        dependency updates (notably gRPC)., 'v1.10.0 is primarily a stability/bugfix
+        release for the controller, notifications, experiments, and dashboard, with
+        performance improvements (less pod listing) and safer handling to prevent
+        panics.']
+    breaking_changes: []
+  chart_version: 2.43.1
+  images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
+- version: 1.9.1
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumps Argo Rollouts controller image to v1.9.1 (minor security
+        release for CVE-2026-35469)., 'install.yaml change: readinessProbe removed
+        from the Rollouts controller manifest (affects how the controller pod reports
+        readiness).', 'Logging/redaction behavior updated: isolated logger for redactor;
+        controller now honors stderrthreshold when logtostderr is enabled.', 'Dashboard
+        UI fix: guard against null metric chart tooltip values.', 'Traffic routing
+        fix retained/backported: ensure early SetWeight runs after checkReplicasAvailable
+        (relevant to canary traffic routing flows).', 'Dependency/packaging updates:
+        grpc dependency updated; go toolchain restored to go 1.24.9 on release-1.9
+        after a bad cherry-pick (build/release pipeline).']
+    features: [Security patch release addressing CVE-2026-35469 (no new user-facing
+        features beyond security hardening).]
+    breaking_changes: ['Controller readinessProbe removed from the default install
+        manifest; if you relied on that probe for health gating, review/replace with
+        appropriate readiness/health checks (e.g., ServiceMonitor/metrics or custom
+        probes).']
+  chart_version: 2.42.0
+  images: ['quay.io/argoproj/argo-rollouts:v1.9.1']
+- version: 1.9.0
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ["No Helm chart changelog was provided in the notes you pasted\
-        \ (only application GitHub release notes). Treat this as an application-only\
-        \ summary; verify the Helm chart version you\u2019ll deploy and diff `values.yaml`\
-        \ separately."]
-    features: ['Prometheus metric provider: adds range query support, enabling analyses
-        over a time range instead of single-point queries.', 'Analysis/New Relic:
-        can now set a timeout and the provider returns the resolved query as metadata
-        (useful for debugging/traceability).', 'Datadog metric provider: supports
-        multi-account configurations and adds support for providing credentials to
-        download plugins.', 'Controller: adds an (alpha) canary steps plugin mechanism
-        for extending canary step behavior.', 'Controller: canary ingress support
-        allows specifying full annotations for nginx canary ingresses (more flexibility
-        for NGINX users).', 'Controller: enables pprof profiling support for debugging
-        performance issues.', 'Analysis: adds ConsecutiveSuccessLimit to Analysis
-        (lets you require N consecutive successful measurements).', 'Metrics/observability:
-        new Prometheus `build_info` metric is emitted.']
-    breaking_changes: []
-  chart_version: 2.40.5
-  images: ['quay.io/argoproj/argo-rollouts:v1.8.3']
+    chart_updates: []
+    features: ['Traffic routing reliability improvements, especially for Istio: better
+        DestinationRule handling, ordering of updates vs SetWeight, and safer rollback/early-weight
+        behavior.', 'New rollout/analysis behaviors and tunables: available replica
+        pods threshold, ability to allow full promotion once a replica progress threshold
+        is met, and start/end time support for Kayenta queries.', 'Dashboard UX improvements:
+        surface API/action failure notifications, fix blank step display when setWeight=0,
+        respect --root-path for /api mux, and avoid dialing 0.0.0.0.', 'Experiment
+        and analysis enhancements: expose scaleDownDelaySeconds on experiments created
+        via rollouts, and make AnalysisRunMetadata a pointer to avoid empty object
+        churn; controller can skip analysis runs when no templates are specified.',
+      "Operational/security upkeep: base image moved Debian 11\u219212, security fixes\
+        \ (incl. CVE-2023-46402), and upgrades to Go/Kubernetes libraries and other\
+        \ deps."]
+    breaking_changes: ['`clusterScope` configuration/flag semantics changed to use
+        `*bool` (tri-state). Helm values or manifests that set this may need adjustment
+        (e.g., distinguish unset vs explicitly false).', 'Controller/CRD behavior
+        changes may affect GitOps diffs: removal of `preserveUnknownFields` in the
+        CRD to avoid Argo CD OutOfSync; expect CRD diffs on upgrade if you manage
+        CRDs separately.', "Potential image/runtime change: Debian 11\u219212 base\
+        \ image could impact environments relying on specific OS packages/certs or\
+        \ strict image scanning/allowlists."]
+  chart_version: 2.41.0
+  images: ['quay.io/argoproj/argo-rollouts:v1.9.0']
 - version: 1.8.0
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []

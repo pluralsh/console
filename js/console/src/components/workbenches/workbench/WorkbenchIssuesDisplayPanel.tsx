@@ -180,7 +180,6 @@ function ViewChip({
         width: '100%',
         justifyContent: 'center',
         '&&': {
-          borderRadius: 100,
           minWidth: 80,
           padding: '5px 12px',
         },
@@ -267,7 +266,6 @@ const FilterRowsSC = styled.div<{ $compact?: boolean }>(
   ({ theme, $compact }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.xxsmall,
     paddingTop: theme.spacing.xxsmall,
     paddingBottom: $compact ? theme.spacing.xxsmall : theme.spacing.medium,
   })
@@ -278,11 +276,9 @@ const FilterRowSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing.xxsmall,
-  minHeight: 36,
   '& label': {
     flex: 1,
     minWidth: 0,
-    padding: theme.spacing.xsmall,
   },
 }))
 
@@ -295,10 +291,6 @@ const CountSC = styled.span(({ theme }) => ({
 const RadioGroupSC = styled(RadioGroup)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
   paddingTop: theme.spacing.xxsmall,
   paddingBottom: theme.spacing.medium,
-  '& label': {
-    padding: theme.spacing.xsmall,
-  },
 }))

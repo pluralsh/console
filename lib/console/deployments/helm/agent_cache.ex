@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Helm.AgentCache do
   alias Console.Helm.Client
   alias Console.Deployments.Helm.Utils
+  alias Console.Otel.Tracing
   require Logger
 
   @type t :: %__MODULE__{
@@ -49,11 +50,13 @@ defmodule Console.Deployments.Helm.AgentCache do
     %{cache | client: Client.client(repo)}
   end
 
-  def refresh(%__MODULE__{client: client} = cache) do
-    case Client.index(client) do
-      {:ok, idx} -> {:ok, sweep(%{cache | index: idx})}
-      _ -> {:error, "could not fetch index"}
-    end
+  def refresh(%__MODULE__{client: client, repo: repo} = cache) do
+    Tracing.span("helm.index", %{"helm.repository.url" => Tracing.sanitize_url(repo.url)}, fn ->
+      case Client.index(client) do
+        {:ok, idx} -> {:ok, sweep(%{cache | index: idx})}
+        _ -> {:error, "could not fetch index"}
+      end
+    end)
   end
 
   def get(%__MODULE__{table: t}, chart, vsn),  do: get(t, chart, vsn)
@@ -87,30 +90,36 @@ defmodule Console.Deployments.Helm.AgentCache do
   def touch(%__MODULE__{} = cache, %Line{} = line),
     do: put(cache, Line.touch(line))
 
-  def write(%__MODULE__{client: client} = cache, chart, vsn) do
-    path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")
-    tmp = Briefly.create!()
-    cleaned = Briefly.create!()
-    try do
-      with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
-          {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
-          {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
-          :ok <- validate_download(tmp),
-          :ok <- Utils.clean_chart(tmp, cleaned, chart),
-          :ok <- File.rename(cleaned, path),
-          line <- Line.new(path, chart, vsn, digest) do
-        cache = %{cache | client: client}
-        {:ok, line, put(cache, line)}
-      else
-        {:cache, {line, true}} ->
-          {:ok, line, cache}
-        err ->
-          Logger.warning "failed to write helm chart to cache: #{inspect(err)}"
-          err
+  def write(%__MODULE__{client: client, repo: repo} = cache, chart, vsn) do
+    Tracing.span("helm.chart.download", %{
+      "helm.repository.url" => Tracing.sanitize_url(repo.url),
+      "helm.chart" => chart,
+      "helm.version" => vsn
+    }, fn ->
+      path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")
+      tmp = Briefly.create!()
+      cleaned = Briefly.create!()
+      try do
+        with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
+            {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
+            {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
+            :ok <- validate_download(tmp),
+            :ok <- Utils.clean_chart(tmp, cleaned, chart),
+            :ok <- File.rename(cleaned, path),
+            line <- Line.new(path, chart, vsn, digest) do
+          cache = %{cache | client: client}
+          {:ok, line, put(cache, line)}
+        else
+          {:cache, {line, true}} ->
+            {:ok, line, cache}
+          err ->
+            Logger.warning "failed to write helm chart to cache: #{inspect(err)}"
+            err
+        end
+      after
+        File.rm(tmp)
       end
-    after
-      File.rm(tmp)
-    end
+    end)
   end
 
   def put(%__MODULE__{table: t} = cache,  %Line{chart: c, vsn: vsn} = line) do

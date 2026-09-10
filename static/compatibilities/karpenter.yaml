@@ -144,7 +144,7 @@ versions:
         can fail if `settings.clusterName` is not set; this is an intentional enforcement
         change.]
   chart_version: 1.5.0
-  images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
+  images: []
 - version: 1.2.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []

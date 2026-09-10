@@ -37,6 +37,8 @@ func TestLoadFromFile(t *testing.T) {
 	configContent := `
 server:
   address: ":9090"
+  certificateFile: "/tls/tls.crt"
+  keyFile: "/tls/tls.key"
   readTimeout: "45s"
   idleTimeout: "150s"
 
@@ -62,6 +64,9 @@ console:
 	// Verify loaded values
 	if cfg.Server.Address != ":9090" {
 		t.Errorf("expected address :9090, got %s", cfg.Server.Address)
+	}
+	if cfg.Server.CertificateFile != "/tls/tls.crt" || cfg.Server.KeyFile != "/tls/tls.key" {
+		t.Errorf("expected TLS file paths to be loaded, got cert=%q key=%q", cfg.Server.CertificateFile, cfg.Server.KeyFile)
 	}
 	if cfg.Server.ReadTimeout != 45*time.Second {
 		t.Errorf("expected read timeout 45s, got %v", cfg.Server.ReadTimeout)

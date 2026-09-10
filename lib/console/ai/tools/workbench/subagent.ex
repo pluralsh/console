@@ -2,7 +2,16 @@ defmodule Console.AI.Tools.Workbench.Subagent do
   use Console.AI.Tools.Workbench.Base
   import EctoEnum
 
-  defenum Subagent, coding: 0, infrastructure: 1, observability: 2, integration: 3, skill: 4, history: 5, search: 6, verify: 7
+  defenum Subagent,
+    coding: 0,
+    infrastructure: 1,
+    observability: 2,
+    integration: 3,
+    skill: 4,
+    history: 5,
+    search: 6,
+    verify: 7,
+    monitoring: 8
 
   embedded_schema do
     field :subagents, {:array, Subagent}, virtual: true
@@ -16,7 +25,9 @@ defmodule Console.AI.Tools.Workbench.Subagent do
   def json_schema(%__MODULE__{subagents: subagents}) do
     put_in(@json_schema, ["properties", "subagent"], %{"type" => "string", "enum" => subagents})
   end
-  def description(%__MODULE__{}), do: "Invoke a subagent to accomplish the task."
+  def description(%__MODULE__{}) do
+    "Invoke a subagent to accomplish the task. The prompt's first line must clearly describe the specific work to be done without a generic prefix such as \"Task\" or \"Job\"."
+  end
 
   def changeset(model, attrs) do
     model
