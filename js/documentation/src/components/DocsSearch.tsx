@@ -6,8 +6,6 @@ import {
 } from '@pluralsh/design-system'
 import styled from 'styled-components'
 
-import { openKapa } from '@src/lib/kapa'
-
 import { mqs } from './Breakpoints'
 
 function SearchTrigger({ compact = false }: { compact?: boolean }) {
@@ -19,7 +17,6 @@ function SearchTrigger({ compact = false }: { compact?: boolean }) {
         type="floating"
         tooltip="Search docs"
         icon={<SearchIcon size={16} />}
-        onClick={() => openKapa('search')}
         className="docs-search-trigger"
       />
     )
@@ -29,7 +26,6 @@ function SearchTrigger({ compact = false }: { compact?: boolean }) {
     <SearchBar
       type="button"
       className="docs-search-trigger"
-      onClick={() => openKapa('search')}
       aria-label="Search docs"
     >
       <SearchIcon
@@ -51,7 +47,6 @@ function AskAiTrigger({ compact = false }: { compact?: boolean }) {
         type="secondary"
         tooltip="Ask AI"
         icon={<AiSparkleFilledIcon size={16} />}
-        onClick={() => openKapa('ai')}
         className="docs-ai-trigger"
       />
     )
@@ -62,7 +57,6 @@ function AskAiTrigger({ compact = false }: { compact?: boolean }) {
       className="docs-ai-trigger"
       secondary
       startIcon={<AiSparkleFilledIcon size={16} />}
-      onClick={() => openKapa('ai')}
     >
       Ask AI
     </AskAiButton>

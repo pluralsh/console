@@ -29,14 +29,7 @@ interface Window {
     ): void
   }
   // Kapa docs widget (stub queue or loaded API)
-  Kapa?: ((command: string, ...args: unknown[]) => void) & {
-    open?: (options?: {
-      mode?: 'search' | 'ai'
-      query?: string
-      submit?: boolean
-    }) => void
-    q?: unknown[]
-  }
+  Kapa?: (command: string, ...args: unknown[]) => void
   // Hubspot
   _hsq?: any[]
   // Gtag
