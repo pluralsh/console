@@ -81,6 +81,35 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       assert from_connection(filtered)
              |> ids_equal([failed_flow])
     end
+
+    test "it can fetch the latest service or component insight for a flow" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      other = insert(:flow, read_bindings: [%{user_id: user.id}])
+      older = insert(:ai_insight, summary: "older insight", updated_at: Timex.now() |> Timex.shift(minutes: -10))
+      newer = insert(:ai_insight, summary: "newer insight")
+      svc = insert(:service, flow: flow, insight: older)
+      insert(:service_component, service: svc, insight: newer)
+      insert(:service, flow: other)
+
+      {:ok, %{data: %{"flows" => found}}} = run_query("""
+        query {
+          flows(first: 5) {
+            edges {
+              node {
+                id
+                insight { id summary }
+              }
+            }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      nodes = Map.new(from_connection(found), & {&1["id"], &1})
+      assert nodes[flow.id]["insight"]["id"] == newer.id
+      assert nodes[flow.id]["insight"]["summary"] == "newer insight"
+      refute nodes[other.id]["insight"]
+    end
   end
 
   describe "flow" do

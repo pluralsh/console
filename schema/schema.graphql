@@ -6396,6 +6396,9 @@ type Flow {
   "a rollup of component states in this flow"
   componentStatuses: [ComponentStatusCount]
 
+  "the most recent insight from a service or component in this flow"
+  insight: AiInsight
+
   services(after: String, first: Int, before: String, last: Int): ServiceDeploymentConnection
 
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection

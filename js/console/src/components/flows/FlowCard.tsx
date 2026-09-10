@@ -1,5 +1,4 @@
 import {
-  AiSparkleOutlineIcon,
   AppIcon,
   ArrowRightIcon,
   Card,
@@ -8,6 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import { FlowActionsMenu } from 'components/flows/FlowActionsMenu'
 import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
+import { FlowInsightIcon } from 'components/flows/FlowInsightIcon'
 import {
   FlowAlertChip,
   FlowHealthChips,
@@ -48,85 +48,80 @@ export function FlowCard({
       onMouseLeave={() => setHovered(false)}
     >
       <ContentSC>
-          <HeaderSC>
-            <AppIcon
-              rounded
-              size="xsmall"
-              url={flow.icon || undefined}
-              icon={<FlowIcon />}
+        <HeaderSC>
+          <AppIcon
+            rounded
+            size="xsmall"
+            url={flow.icon || undefined}
+            icon={<FlowIcon />}
+          />
+          <Body1BoldP
+            css={{
+              flex: 1,
+              minWidth: 0,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {flow.name}
+          </Body1BoldP>
+          <FlowInsightIcon insight={flow.insight} />
+        </HeaderSC>
+        <MetaSC>
+          <span>
+            <MetaLabelSC>Components</MetaLabelSC> {componentCount}
+          </span>
+          <span>
+            <MetaLabelSC>Services</MetaLabelSC> {serviceCount}
+          </span>
+        </MetaSC>
+        {flow.description && (
+          <Body2P
+            $color="text-light"
+            css={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {flow.description}
+          </Body2P>
+        )}
+        <MetricsSC>
+          <MetricGroupSC>
+            <CaptionP
+              $color="text-xlight"
+              css={{ margin: 0 }}
+            >
+              Components
+            </CaptionP>
+            <FlowHealthChips counts={componentCounts} />
+          </MetricGroupSC>
+          <MetricGroupSC>
+            <CaptionP
+              $color="text-xlight"
+              css={{ margin: 0 }}
+            >
+              Alerts
+            </CaptionP>
+            <FlowAlertChip count={flow.alertCount ?? 0} />
+          </MetricGroupSC>
+          <MetricGroupSC>
+            <CaptionP
+              $color="text-xlight"
+              css={{ margin: 0 }}
+            >
+              Pipelines
+            </CaptionP>
+            <FlowPipelineChip
+              pipelineCount={flow.pipelineCount ?? 0}
+              pendingCount={flow.pendingPipelineCount ?? 0}
             />
-            <Body1BoldP
-              css={{
-                flex: 1,
-                minWidth: 0,
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {flow.name}
-            </Body1BoldP>
-            {flow.agentRuntime?.id && (
-              <AiSparkleOutlineIcon
-                size={13}
-                color="icon-info"
-              />
-            )}
-          </HeaderSC>
-          <MetaSC>
-            <span>
-              <MetaLabelSC>Components</MetaLabelSC> {componentCount}
-            </span>
-            <span>
-              <MetaLabelSC>Services</MetaLabelSC> {serviceCount}
-            </span>
-          </MetaSC>
-          {flow.description && (
-            <Body2P
-              $color="text-light"
-              css={{
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {flow.description}
-            </Body2P>
-          )}
-          <MetricsSC>
-            <MetricGroupSC>
-              <CaptionP
-                $color="text-xlight"
-                css={{ margin: 0 }}
-              >
-                Components
-              </CaptionP>
-              <FlowHealthChips counts={componentCounts} />
-            </MetricGroupSC>
-            <MetricGroupSC>
-              <CaptionP
-                $color="text-xlight"
-                css={{ margin: 0 }}
-              >
-                Alerts
-              </CaptionP>
-              <FlowAlertChip count={flow.alertCount ?? 0} />
-            </MetricGroupSC>
-            <MetricGroupSC>
-              <CaptionP
-                $color="text-xlight"
-                css={{ margin: 0 }}
-              >
-                Pipelines
-              </CaptionP>
-              <FlowPipelineChip
-                pipelineCount={flow.pipelineCount ?? 0}
-                pendingCount={flow.pendingPipelineCount ?? 0}
-              />
-            </MetricGroupSC>
-          </MetricsSC>
+          </MetricGroupSC>
+        </MetricsSC>
       </ContentSC>
       <FooterSC $parentHover={hovered}>
         <Flex

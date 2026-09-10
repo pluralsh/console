@@ -2,6 +2,7 @@ import { AppIcon, FlowIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { FlowActionsMenu } from 'components/flows/FlowActionsMenu'
 import { FlowFavoriteStar } from 'components/flows/FlowFavoriteButton'
+import { FlowInsightIcon } from 'components/flows/FlowInsightIcon'
 import {
   FlowAlertChip,
   FlowHealthStacked,
@@ -137,6 +138,14 @@ function getColumns({
       meta: { gridTemplate: 'min-content' },
       cell: function Cell({ getValue }) {
         return <FlowAlertChip count={getValue() ?? 0} />
+      },
+    }),
+    columnHelper.accessor((flow) => flow.insight, {
+      id: 'insight',
+      header: '',
+      meta: { gridTemplate: 'min-content' },
+      cell: function Cell({ getValue }) {
+        return <FlowInsightIcon insight={getValue()} />
       },
     }),
   ]

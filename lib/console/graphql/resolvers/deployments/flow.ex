@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     Flow,
     Service,
     ServiceComponent,
+    AiInsight,
     Pipeline,
     McpServer,
     PullRequest,
@@ -51,6 +52,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   def flow_pending_pipeline_count(%Flow{id: id}, _, _), do: summary_field(id, :pending_pipeline_count)
   def flow_service_statuses(%Flow{id: id}, _, _), do: summary_field(id, :service_statuses)
   def flow_component_statuses(%Flow{id: id}, _, _), do: summary_field(id, :component_statuses)
+  def flow_insight(%Flow{id: id}, _, _), do: summary_field(id, :insight)
 
   defp summary_field(id, key) do
     batch({__MODULE__, :flow_summaries}, id, fn summaries ->
@@ -68,6 +70,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     |> put_counts(count_rows(alert_query(ids), :flow_id), :alert_count)
     |> put_counts(count_rows(pipeline_query(ids), :flow_id), :pipeline_count)
     |> put_counts(pending_pipeline_rows(ids), :pending_pipeline_count)
+    |> put_insights(ids)
   end
 
   defp empty_summary do
@@ -78,7 +81,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
       pipeline_count: 0,
       pending_pipeline_count: 0,
       service_statuses: [],
-      component_statuses: []
+      component_statuses: [],
+      insight: nil
     }
   end
 
@@ -132,6 +136,50 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
       group_by: p.flow_id,
       select: {p.flow_id, count(p.id)}
     )
+  end
+
+  defp put_insights(map, ids) do
+    latest = latest_insight_ids(ids)
+    insights = insights_by_id(Enum.map(latest, &elem(&1, 1)))
+
+    Enum.reduce(latest, map, fn {flow_id, insight_id}, acc ->
+      Map.update(acc, flow_id, empty_summary(), &Map.put(&1, :insight, Map.get(insights, insight_id)))
+    end)
+  end
+
+  defp latest_insight_ids(ids) do
+    (service_insight_rows(ids) ++ component_insight_rows(ids))
+    |> Enum.group_by(&elem(&1, 0))
+    |> Enum.map(fn {flow_id, rows} ->
+      {_, insight_id, _} = Enum.max_by(rows, fn {_, _, ts} -> ts end)
+      {flow_id, insight_id}
+    end)
+  end
+
+  defp insights_by_id([]), do: %{}
+  defp insights_by_id(ids) do
+    from(i in AiInsight, where: i.id in ^ids)
+    |> Repo.all()
+    |> Map.new(& {&1.id, &1})
+  end
+
+  defp service_insight_rows(ids) do
+    from(s in Service,
+      join: i in AiInsight, on: i.id == s.insight_id,
+      where: s.flow_id in ^ids and not is_nil(i.summary),
+      select: {s.flow_id, i.id, coalesce(i.updated_at, i.inserted_at)}
+    )
+    |> Repo.all()
+  end
+
+  defp component_insight_rows(ids) do
+    from(sc in ServiceComponent,
+      join: s in assoc(sc, :service),
+      join: i in AiInsight, on: i.id == sc.insight_id,
+      where: s.flow_id in ^ids and not is_nil(i.summary),
+      select: {s.flow_id, i.id, coalesce(i.updated_at, i.inserted_at)}
+    )
+    |> Repo.all()
   end
 
   defp pending_pipeline_rows(ids) do

@@ -2973,6 +2973,11 @@ type ComponentContentAttributes struct {
 	Live    *string `json:"live,omitempty"`
 }
 
+type ComponentStatusCount struct {
+	State ComponentState `json:"state"`
+	Count int64          `json:"count"`
+}
+
 // A tree view of the kubernetes object hierarchy beneath a component
 type ComponentTree struct {
 	Root         *KubernetesUnstructured `json:"root,omitempty"`
@@ -3769,7 +3774,23 @@ type Flow struct {
 	// write policy for this flow
 	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// the project this flow belongs to
-	Project                     *Project                              `json:"project,omitempty"`
+	Project *Project `json:"project,omitempty"`
+	// the number of services in this flow
+	ServiceCount *int64 `json:"serviceCount,omitempty"`
+	// the number of service components in this flow
+	ComponentCount *int64 `json:"componentCount,omitempty"`
+	// the number of alerts for services in this flow
+	AlertCount *int64 `json:"alertCount,omitempty"`
+	// the number of pipelines in this flow
+	PipelineCount *int64 `json:"pipelineCount,omitempty"`
+	// the number of pending pipeline gates in this flow
+	PendingPipelineCount *int64 `json:"pendingPipelineCount,omitempty"`
+	// a rollup of service statuses in this flow
+	ServiceStatuses []*ServiceStatusCount `json:"serviceStatuses,omitempty"`
+	// a rollup of component states in this flow
+	ComponentStatuses []*ComponentStatusCount `json:"componentStatuses,omitempty"`
+	// the most recent insight from a service or component in this flow
+	Insight                     *AiInsight                            `json:"insight,omitempty"`
 	Services                    *ServiceDeploymentConnection          `json:"services,omitempty"`
 	Pipelines                   *PipelineConnection                   `json:"pipelines,omitempty"`
 	PullRequests                *PullRequestConnection                `json:"pullRequests,omitempty"`
@@ -4130,9 +4151,11 @@ type Group struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	// automatically adds all users in the system to this group
-	Global     *bool   `json:"global,omitempty"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
+	Global *bool `json:"global,omitempty"`
+	// number of users in this group
+	MemberCount *int64  `json:"memberCount,omitempty"`
+	InsertedAt  *string `json:"insertedAt,omitempty"`
+	UpdatedAt   *string `json:"updatedAt,omitempty"`
 }
 
 type GroupAttributes struct {

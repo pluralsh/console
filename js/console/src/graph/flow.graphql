@@ -24,6 +24,9 @@ fragment FlowBasic on Flow {
     state
     count
   }
+  insight {
+    ...AiInsightSummary
+  }
 }
 
 fragment FlowBasicWithBindings on Flow {
