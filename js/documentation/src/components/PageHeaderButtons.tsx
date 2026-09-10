@@ -51,7 +51,10 @@ export function HamburgerButton({
   ...props
 }: { isOpen: boolean } & ComponentPropsWithoutRef<'a'>) {
   return (
-    <HamburgerButtonWrap {...props}>
+    <HamburgerButtonWrap
+      aria-label={isOpen ? 'Close menu' : 'Open menu'}
+      {...props}
+    >
       {!isOpen && <MenuOpenIcon size={22} />}
       {isOpen && <MenuCloseIcon size={22} />}
     </HamburgerButtonWrap>

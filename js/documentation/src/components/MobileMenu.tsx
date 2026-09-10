@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import {
   ArrowLeftIcon,
@@ -82,6 +82,20 @@ export const PluralMenu = styled(PluralMenuContent)(
   })
 )
 
+const Panel = styled.div<{ $hidden: boolean }>(({ $hidden }) => ({
+  display: $hidden ? 'none' : 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+}))
+
+const DocsNavWrap = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+})
+
 const Content = styled.div(({ theme }) => ({
   pointerEvents: 'all',
   position: 'absolute',
@@ -111,10 +125,13 @@ function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
     setScrollLock(isOpen)
   }, [isOpen, setScrollLock])
 
+  const wasOpen = useRef(isOpen)
+
   useIsomorphicLayoutEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpen.current) {
       setShowDocsMenu(false)
     }
+    wasOpen.current = isOpen
   }, [isOpen])
 
   const showRestNav = !!restNav && !showDocsMenu
@@ -122,8 +139,8 @@ function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
   return (
     <div className={className}>
       <Content>
-        {showRestNav ? (
-          <>
+        {restNav && (
+          <Panel $hidden={!showRestNav}>
             <NavButtons desktop={false}>
               <Button
                 type="button"
@@ -139,28 +156,30 @@ function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
               sections={restNav.sections}
               selectedId={restNav.selectedId}
             />
-          </>
-        ) : (
-          <>
-            {restNav && (
-              <NavButtons desktop={false}>
-                <div />
-                <Button
-                  tertiary
-                  endIcon={<ArrowRightIcon />}
-                  onClick={() => setShowDocsMenu(false)}
-                >
-                  API menu
-                </Button>
-              </NavButtons>
-            )}
+          </Panel>
+        )}
+        <Panel $hidden={showRestNav}>
+          {restNav && (
+            <NavButtons desktop={false}>
+              <div />
+              <Button
+                type="button"
+                tertiary
+                endIcon={<ArrowRightIcon />}
+                onClick={() => setShowDocsMenu(false)}
+              >
+                API menu
+              </Button>
+            </NavButtons>
+          )}
+          <DocsNavWrap>
             <FullNav
               desktop={false}
               isOpen={isOpen}
               setIsOpen={setIsOpen}
             />
-          </>
-        )}
+          </DocsNavWrap>
+        </Panel>
       </Content>
     </div>
   )
