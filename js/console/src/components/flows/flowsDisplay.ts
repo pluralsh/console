@@ -15,11 +15,7 @@ export type FlowsDisplayState = {
   direction: FlowSortDirection
 }
 
-export const FLOW_HEALTH_OPTIONS = [
-  ServiceDeploymentStatus.Healthy,
-  ServiceDeploymentStatus.Failed,
-  ServiceDeploymentStatus.Stale,
-] as const
+export const FLOW_HEALTH_OPTIONS = Object.values(ServiceDeploymentStatus)
 
 export const DEFAULT_FLOWS_DISPLAY: FlowsDisplayState = {
   view: 'board',
@@ -31,7 +27,7 @@ export const DEFAULT_FLOWS_DISPLAY: FlowsDisplayState = {
 export function allFlowHealthSelected(
   statuses: ServiceDeploymentStatus[]
 ): boolean {
-  return isEmpty(xor(statuses, [...FLOW_HEALTH_OPTIONS]))
+  return isEmpty(xor(statuses, FLOW_HEALTH_OPTIONS))
 }
 
 export function hasUncheckedFlowFilters({

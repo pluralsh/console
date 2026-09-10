@@ -1888,17 +1888,6 @@ enum IssueSortDirection {
   DESC
 }
 
-enum FlowSort {
-  NAME
-  SERVICE_COUNT
-  FAVORITED
-}
-
-enum FlowSortDirection {
-  ASC
-  DESC
-}
-
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
 input ChatProviderConnectionAttributes {
   "the name of this chat connection"
@@ -6261,6 +6250,17 @@ type SentinelRunJobConnection {
 enum McpServerProtocol {
   SSE
   STREAMABLE_HTTP
+}
+
+enum FlowSort {
+  NAME
+  SERVICE_COUNT
+  FAVORITED
+}
+
+enum FlowSortDirection {
+  ASC
+  DESC
 }
 
 input FlowAttributes {
