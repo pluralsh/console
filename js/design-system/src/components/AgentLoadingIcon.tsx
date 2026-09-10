@@ -21,11 +21,7 @@ export type AgentLoadingVariant =
   | 'paperLong'
   | 'aaron'
 export type AgentLoadingState =
-  | 'working'
-  | 'waiting'
-  | 'idle'
-  | 'success'
-  | 'error'
+  'working' | 'waiting' | 'idle' | 'success' | 'error'
 
 const DOTS = 9
 
@@ -58,7 +54,9 @@ function cursorDotFrames(cell: number) {
   `
 }
 
-const cursorCell = Array.from({ length: DOTS }, (_, i) => cursorDotFrames(i + 1))
+const cursorCell = Array.from({ length: DOTS }, (_, i) =>
+  cursorDotFrames(i + 1)
+)
 
 const slideRow = keyframes`
   0%, 12% { transform: translate(0, 0); }
@@ -170,102 +168,115 @@ const AgentLoadingIconSC = styled.span<{
       ${easeMotion}
     }
 
-    ${$variant === 'cursor' &&
-    cursorCell.map(
-      (frame, i) => css`
-        i:nth-child(${i + 1}) {
-          animation-name: ${allOn ? 'none' : frame};
+    ${
+      $variant === 'cursor' &&
+      cursorCell.map(
+        (frame, i) => css`
+          i:nth-child(${i + 1}) {
+            animation-name: ${allOn ? 'none' : frame};
+            animation-timing-function: cubic-bezier(0.45, 0.05, 0.2, 1);
+          }
+        `
+      )
+    }
+
+    ${
+      $variant === 'cursorWave' &&
+      css`
+        i {
+          animation-name: ${allOn ? 'none' : cursorWave};
           animation-timing-function: cubic-bezier(0.45, 0.05, 0.2, 1);
         }
+        ${Array.from({ length: DOTS }, (_, i) => {
+          const col = i % 3
+          const row = Math.floor(i / 3)
+
+          return css`
+            i:nth-child(${i + 1}) {
+              animation-delay: ${col * 0.14 + row * 0.06}s;
+            }
+          `
+        })}
       `
-    )}
+    }
 
-    ${$variant === 'cursorWave' &&
-    css`
-      i {
-        animation-name: ${allOn ? 'none' : cursorWave};
-        animation-timing-function: cubic-bezier(0.45, 0.05, 0.2, 1);
-      }
-      ${Array.from({ length: DOTS }, (_, i) => {
-        const col = i % 3
-        const row = Math.floor(i / 3)
+    ${
+      $variant === 'cursorEq' &&
+      css`
+        i {
+          animation-timing-function: cubic-bezier(0.22, 0.7, 0.28, 1);
+        }
+        ${Array.from({ length: DOTS }, (_, i) => {
+          const col = i % 3
+          const row = Math.floor(i / 3)
 
-        return css`
-          i:nth-child(${i + 1}) {
-            animation-delay: ${col * 0.14 + row * 0.06}s;
-          }
-        `
-      })}
-    `}
+          return css`
+            i:nth-child(${i + 1}) {
+              animation-name: ${allOn ? 'none' : EQ_ROW_FRAME[row]};
+              animation-duration: calc(${$duration} * ${EQ_COL_SPEED[col]});
+              animation-delay: ${EQ_COL_DELAY[col]}s;
+            }
+          `
+        })}
+      `
+    }
 
-    ${$variant === 'cursorEq' &&
-    css`
-      i {
-        animation-timing-function: cubic-bezier(0.22, 0.7, 0.28, 1);
-      }
-      ${Array.from({ length: DOTS }, (_, i) => {
-        const col = i % 3
-        const row = Math.floor(i / 3)
+    ${
+      $variant === 'slide' &&
+      css`
+        i {
+          animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+          opacity: var(--on);
+        }
+        i:nth-child(-n + 3) {
+          animation-name: ${allOn ? 'none' : slideRow};
+        }
+        i:nth-child(n + 4):nth-child(-n + 6) {
+          animation-name: ${allOn ? 'none' : slideRowReverse};
+        }
+        i:nth-child(n + 7) {
+          animation-name: ${allOn ? 'none' : slideRow};
+        }
+      `
+    }
 
-        return css`
-          i:nth-child(${i + 1}) {
-            animation-name: ${allOn ? 'none' : EQ_ROW_FRAME[row]};
-            animation-duration: calc(${$duration} * ${EQ_COL_SPEED[col]});
-            animation-delay: ${EQ_COL_DELAY[col]}s;
-          }
-        `
-      })}
-    `}
+    ${
+      $variant === 'wave' &&
+      css`
+        i {
+          animation-name: ${allOn ? 'none' : wave};
+        }
+        ${Array.from(
+          { length: DOTS },
+          (_, i) => css`
+            i:nth-child(${i + 1}) {
+              animation-delay: ${i * 0.07}s;
+            }
+          `
+        )}
+      `
+    }
 
-    ${$variant === 'slide' &&
-    css`
-      i {
-        animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
-        opacity: var(--on);
-      }
-      i:nth-child(-n + 3) {
-        animation-name: ${allOn ? 'none' : slideRow};
-      }
-      i:nth-child(n + 4):nth-child(-n + 6) {
-        animation-name: ${allOn ? 'none' : slideRowReverse};
-      }
-      i:nth-child(n + 7) {
-        animation-name: ${allOn ? 'none' : slideRow};
-      }
-    `}
+    ${
+      $variant === 'pulse' &&
+      css`
+        i {
+          animation-name: ${allOn ? 'none' : pulse};
+        }
+        i:nth-child(5) {
+          animation-delay: 0.18s;
+        }
+      `
+    }
 
-    ${$variant === 'wave' &&
-    css`
-      i {
-        animation-name: ${allOn ? 'none' : wave};
-      }
-      ${Array.from(
-        { length: DOTS },
-        (_, i) => css`
-          i:nth-child(${i + 1}) {
-            animation-delay: ${i * 0.07}s;
-          }
-        `
-      )}
-    `}
-
-    ${$variant === 'pulse' &&
-    css`
-      i {
-        animation-name: ${allOn ? 'none' : pulse};
-      }
-      i:nth-child(5) {
-        animation-delay: 0.18s;
-      }
-    `}
-
-    ${$state === 'idle' &&
-    css`
-      i {
-        opacity: 0.38;
-      }
-    `}
-
+    ${
+      $state === 'idle' &&
+      css`
+        i {
+          opacity: 0.38;
+        }
+      `
+    }
   `
 })
 
@@ -273,23 +284,25 @@ const StatusBulletSC = styled.span<{
   $size: number
   $dot: number
   $color: string
-}>(({ $size, $dot, $color }) => css`
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: ${$size}px;
-  height: ${$size}px;
-  color: ${$color};
+}>(
+  ({ $size, $dot, $color }) => css`
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: ${$size}px;
+    height: ${$size}px;
+    color: ${$color};
 
-  i {
-    display: block;
-    width: ${$dot}px;
-    height: ${$dot}px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-`)
+    i {
+      display: block;
+      width: ${$dot}px;
+      height: ${$dot}px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+  `
+)
 
 function StatusBullet({
   size,
@@ -322,7 +335,8 @@ function stateColor(
 ): string {
   if (state === 'error') return colors['icon-danger']
   if (color) return colors[color]
-  if (variant === 'paper' || variant === 'paperLong') return colors['icon-primary']
+  if (variant === 'paper' || variant === 'paperLong')
+    return colors['icon-primary']
   return colors['icon-xlight']
 }
 
@@ -450,9 +464,7 @@ function cssColorToRgb(color: string): string {
     const n = parseInt(h, 16)
     return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`
   }
-  const rgb = color.match(
-    /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i
-  )
+  const rgb = color.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i)
   if (rgb) return `${rgb[1]}, ${rgb[2]}, ${rgb[3]}`
   return '52, 133, 249'
 }
@@ -774,32 +786,38 @@ const WhimsyBirdSC = styled.span<{
       ${easeMotion}
     }
 
-    ${$state === 'idle' &&
-    css`
-      .pose-b {
-        opacity: 0;
-      }
-    `}
+    ${
+      $state === 'idle' &&
+      css`
+        .pose-b {
+          opacity: 0;
+        }
+      `
+    }
 
-    ${$state === 'success' &&
-    css`
-      .pose-a {
-        opacity: 0;
-      }
-      .pose-b {
-        opacity: 1;
-      }
-    `}
+    ${
+      $state === 'success' &&
+      css`
+        .pose-a {
+          opacity: 0;
+        }
+        .pose-b {
+          opacity: 1;
+        }
+      `
+    }
 
-    ${$state === 'error' &&
-    css`
-      svg {
-        transform: rotate(90deg) translateY(8%);
-      }
-      .pose-b {
-        opacity: 0;
-      }
-    `}
+    ${
+      $state === 'error' &&
+      css`
+        svg {
+          transform: rotate(90deg) translateY(8%);
+        }
+        .pose-b {
+          opacity: 0;
+        }
+      `
+    }
   `
 })
 
@@ -960,32 +978,38 @@ const AaronManSC = styled.span<{
       opacity: 0;
     }
 
-    ${$state === 'idle' &&
-    css`
-      .pose-seven {
-        opacity: 0;
-      }
-    `}
+    ${
+      $state === 'idle' &&
+      css`
+        .pose-seven {
+          opacity: 0;
+        }
+      `
+    }
 
-    ${$state === 'success' &&
-    css`
-      .pose-six {
-        opacity: 0;
-      }
-      .pose-seven {
-        opacity: 1;
-      }
-    `}
+    ${
+      $state === 'success' &&
+      css`
+        .pose-six {
+          opacity: 0;
+        }
+        .pose-seven {
+          opacity: 1;
+        }
+      `
+    }
 
-    ${$state === 'error' &&
-    css`
-      svg {
-        transform: rotate(90deg) translateY(12%);
-      }
-      .pose-seven {
-        opacity: 0;
-      }
-    `}
+    ${
+      $state === 'error' &&
+      css`
+        svg {
+          transform: rotate(90deg) translateY(12%);
+        }
+        .pose-seven {
+          opacity: 0;
+        }
+      `
+    }
   `
 })
 
@@ -1025,6 +1049,3 @@ function AaronMan({
     </AaronManSC>
   )
 }
-
-
-
