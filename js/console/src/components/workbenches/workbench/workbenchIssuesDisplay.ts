@@ -28,10 +28,6 @@ export const DEFAULT_WORKBENCH_ISSUES_DISPLAY: WorkbenchIssuesDisplayState = {
   direction: IssueSortDirection.Desc,
 }
 
-export function toggleListValue<T>(list: T[], value: T): T[] {
-  return xor(list, [value])
-}
-
 export function visibleIssueProviders(
   counts: Partial<Record<IssueWebhookProvider, number>>
 ): IssueWebhookProvider[] {

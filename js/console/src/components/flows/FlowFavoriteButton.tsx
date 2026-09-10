@@ -45,7 +45,6 @@ export function FlowFavoriteButton({
   favorited: boolean
   onToggle: () => void
 }) {
-  const theme = useTheme()
   const label = favorited ? 'Unfavorite' : 'Favorite'
 
   return (
@@ -63,7 +62,7 @@ export function FlowFavoriteButton({
         }}
       >
         {favorited ? (
-          <FavoriteStarGlyph color={theme.colors['icon-warning']} />
+          <FlowFavoriteStar size={STAR_SIZE} />
         ) : (
           <StarIcon
             size={STAR_SIZE}
@@ -75,13 +74,11 @@ export function FlowFavoriteButton({
   )
 }
 
-const StarButtonSC = styled.button({
+const StarButtonSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: 0,
-  border: 'none',
-  background: 'none',
   cursor: 'pointer',
   lineHeight: 0,
-})
+}))

@@ -1,6 +1,6 @@
 import { DisplayView } from 'components/utils/display/DisplayPanel'
 import { ServiceDeploymentStatus } from 'generated/graphql'
-import { isEmpty, xor } from 'lodash'
+import { isEmpty, orderBy, xor } from 'lodash'
 
 export type FlowsView = DisplayView
 
@@ -26,10 +26,6 @@ export const DEFAULT_FLOWS_DISPLAY: FlowsDisplayState = {
   statuses: [...FLOW_HEALTH_OPTIONS],
   sort: 'name',
   direction: 'asc',
-}
-
-export function toggleListValue<T>(list: T[], value: T): T[] {
-  return xor(list, [value])
 }
 
 export function allFlowHealthSelected(
@@ -85,20 +81,22 @@ export function sortFlows<
   favoriteIds: string[]
 ): T[] {
   const favoriteSet = new Set(favoriteIds)
-  const dir = direction === 'desc' ? -1 : 1
 
-  return [...flows].sort((a, b) => {
-    if (sort === 'favorited') {
-      const fav = Number(favoriteSet.has(b.id)) - Number(favoriteSet.has(a.id))
-      if (fav !== 0) return fav
-      return a.name.localeCompare(b.name) * dir
-    }
+  if (sort === 'favorited') {
+    return orderBy(
+      flows,
+      [(flow) => (favoriteSet.has(flow.id) ? 0 : 1), 'name'],
+      ['asc', direction]
+    )
+  }
 
-    const result =
-      sort === 'serviceCount'
-        ? (a.serviceCount ?? 0) - (b.serviceCount ?? 0)
-        : a.name.localeCompare(b.name)
+  if (sort === 'serviceCount') {
+    return orderBy(
+      flows,
+      [(flow) => flow.serviceCount ?? 0, 'name'],
+      [direction, direction]
+    )
+  }
 
-    return (result === 0 ? a.name.localeCompare(b.name) : result) * dir
-  })
+  return orderBy(flows, ['name'], [direction])
 }

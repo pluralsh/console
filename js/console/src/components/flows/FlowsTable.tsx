@@ -8,7 +8,7 @@ import {
   FlowHealthStacked,
   FlowPipelineChip,
   componentHealthCounts,
-  getFlowTabPath,
+  flowTabPath,
   worstHealth,
 } from 'components/flows/flowHealth'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
@@ -18,7 +18,6 @@ import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 
 const columnHelper = createColumnHelper<FlowBasicWithBindingsFragment>()
@@ -103,11 +102,7 @@ function getColumns({
           <FlowPipelineChip
             pipelineCount={flow.pipelineCount ?? 0}
             pendingCount={flow.pendingPipelineCount ?? 0}
-            to={getFlowTabPath({
-              flowName: flow.name,
-              tab: 'pipelines',
-              search,
-            })}
+            to={flowTabPath(flow.name, 'pipelines', search)}
           />
         )
       },
@@ -126,12 +121,7 @@ function getColumns({
             counts={counts}
             to={
               bucket
-                ? getFlowTabPath({
-                    flowName: flow.name,
-                    tab: 'services',
-                    search,
-                    component: bucket,
-                  })
+                ? flowTabPath(flow.name, 'services', search, bucket)
                 : undefined
             }
           />
@@ -163,11 +153,7 @@ function getColumns({
         return (
           <FlowAlertChip
             count={flow.alertCount ?? 0}
-            to={getFlowTabPath({
-              flowName: flow.name,
-              tab: 'alerts',
-              search,
-            })}
+            to={flowTabPath(flow.name, 'alerts', search)}
           />
         )
       },
@@ -223,11 +209,7 @@ export function FlowsTable({
       getRowLink={({ original }) => {
         const flow = original as FlowBasicWithBindingsFragment
 
-        return (
-          <Link
-            to={`${getFlowDetailsPath({ flowIdOrName: flow.name })}/services${search}`}
-          />
-        )
+        return <Link to={flowTabPath(flow.name, 'services', search)} />
       }}
       emptyStateProps={{ message: 'No flows found' }}
     />

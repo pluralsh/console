@@ -8,6 +8,7 @@ import {
   DisplaySectionHeader,
   DisplaySortHeader,
   DisplayViewToggle,
+  toggleListValue,
 } from 'components/utils/display/DisplayPanel'
 import {
   ISSUE_STATUS_LABELS,
@@ -19,9 +20,8 @@ import {
   IssueStatus,
   IssueWebhookProvider,
 } from 'generated/graphql'
-import { includes, startCase } from 'lodash'
+import { startCase } from 'lodash'
 import {
-  toggleListValue,
   visibleIssueProviders,
   WorkbenchIssuesDisplayState,
 } from './workbenchIssuesDisplay'
@@ -53,7 +53,7 @@ export function WorkbenchIssuesDisplayPanel({
               key={provider}
               label={startCase(provider.toLowerCase())}
               count={providerCounts[provider] ?? 0}
-              checked={includes(state.providers, provider)}
+              checked={state.providers.includes(provider)}
               onChange={() =>
                 onChange({
                   ...state,
@@ -72,7 +72,7 @@ export function WorkbenchIssuesDisplayPanel({
               key={status}
               label={ISSUE_STATUS_LABELS[status]}
               count={statusCounts[status] ?? 0}
-              checked={includes(state.statuses, status)}
+              checked={state.statuses.includes(status)}
               onChange={() =>
                 onChange({
                   ...state,

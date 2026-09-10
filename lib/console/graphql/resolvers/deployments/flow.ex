@@ -67,8 +67,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     base
     |> put_status_groups(service_status_rows(ids), :service_statuses, :service_count)
     |> put_status_groups(component_status_rows(ids), :component_statuses, :component_count)
-    |> put_counts(count_rows(alert_query(ids), :flow_id), :alert_count)
-    |> put_counts(count_rows(pipeline_query(ids), :flow_id), :pipeline_count)
+    |> put_counts(alert_rows(ids), :alert_count)
+    |> put_counts(pipeline_rows(ids), :pipeline_count)
     |> put_counts(pending_pipeline_rows(ids), :pending_pipeline_count)
     |> put_insights(ids)
   end
@@ -121,21 +121,23 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     |> Repo.all()
   end
 
-  defp alert_query(ids) do
+  defp alert_rows(ids) do
     from(a in Alert,
       join: s in assoc(a, :service),
       where: s.flow_id in ^ids,
       group_by: s.flow_id,
       select: {s.flow_id, count(a.id)}
     )
+    |> Repo.all()
   end
 
-  defp pipeline_query(ids) do
+  defp pipeline_rows(ids) do
     from(p in Pipeline,
       where: p.flow_id in ^ids,
       group_by: p.flow_id,
       select: {p.flow_id, count(p.id)}
     )
+    |> Repo.all()
   end
 
   defp put_insights(map, ids) do
@@ -192,8 +194,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     )
     |> Repo.all()
   end
-
-  defp count_rows(query, _key), do: Repo.all(query)
 
   def list_mcp_servers(args, %{context: %{current_user: user}}) do
     McpServer.ordered()

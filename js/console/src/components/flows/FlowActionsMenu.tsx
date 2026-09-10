@@ -5,12 +5,12 @@ import {
 } from 'components/cd/utils/PermissionsModal'
 import { useLogin } from 'components/contexts'
 import { FlowFavoriteStar } from 'components/flows/FlowFavoriteButton'
+import { flowTabPath } from 'components/flows/flowHealth'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 
 export function FlowActionsMenu({
@@ -34,24 +34,22 @@ export function FlowActionsMenu({
   )
   const showPipelines = hasAccess(personaConfiguration, 'flows.pipelines')
   const [menuKey, setMenuKey] = useState('')
-  const flowPath = getFlowDetailsPath({ flowIdOrName: flow.name })
   const favoriteLabel = favorited
     ? 'Unfavorite this flow'
     : 'Favorite this flow'
+  const onSelect = {
+    pipelines: () => navigate(flowTabPath(flow.name, 'pipelines', search)),
+    favorite: onToggleFavorite,
+  }
 
   return (
     <ActionsSC>
       <MoreMenu
         onSelectionChange={(key: string) => {
-          if (key === 'pipelines') {
-            navigate(`${flowPath}/pipelines${search}`)
-            return
-          }
-          if (key === 'favorite') {
-            onToggleFavorite()
-            return
-          }
-          setMenuKey(key)
+          const action = onSelect[key as keyof typeof onSelect]
+
+          if (action) action()
+          else setMenuKey(key)
         }}
         triggerProps={{
           onClick: (e) => {

@@ -45,10 +45,10 @@ export function FlowServices() {
 
     if (!bucket) return edges
 
-    const statuses = new Set(BUCKET_SERVICE_STATUSES[bucket])
-
     return edges.filter(
-      (edge) => edge?.node?.status && statuses.has(edge.node.status)
+      (edge) =>
+        !!edge?.node?.status &&
+        BUCKET_SERVICE_STATUSES[bucket].includes(edge.node.status)
     )
   }, [bucket, data?.flow?.services?.edges])
 
@@ -69,12 +69,11 @@ export function FlowServices() {
           severity={BUCKET_SEVERITY[bucket]}
           css={{ width: 'max-content' }}
           closeButtonProps={{
-            onClick: () => {
-              const next = new URLSearchParams(searchParams)
-
-              next.delete(FLOW_COMPONENT_PARAM)
-              setSearchParams(next)
-            },
+            onClick: () =>
+              setSearchParams((params) => {
+                params.delete(FLOW_COMPONENT_PARAM)
+                return params
+              }),
           }}
         >
           {bucket} services

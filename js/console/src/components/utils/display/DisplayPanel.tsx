@@ -13,10 +13,15 @@ import {
   SortDescIcon,
 } from '@pluralsh/design-system'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
+import { xor } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode } from 'react'
 import styled from 'styled-components'
 
 export type DisplayView = 'list' | 'board'
+
+export function toggleListValue<T>(list: T[], value: T): T[] {
+  return xor(list, [value])
+}
 
 export function DisplayButton({
   showDot,
@@ -104,7 +109,7 @@ export function DisplayFilterRow({
       <Checkbox
         small
         checked={checked}
-        onChange={() => onChange()}
+        onChange={onChange}
       >
         {label}
       </Checkbox>

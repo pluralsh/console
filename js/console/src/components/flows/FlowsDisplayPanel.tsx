@@ -1,4 +1,5 @@
 import { Radio } from '@pluralsh/design-system'
+import { serviceStatusToLabel } from 'components/cd/services/ServiceStatusChip'
 import {
   DisplayFilterRow,
   DisplayFilterRows,
@@ -8,21 +9,14 @@ import {
   DisplaySectionHeader,
   DisplaySortHeader,
   DisplayViewToggle,
+  toggleListValue,
 } from 'components/utils/display/DisplayPanel'
 import { ServiceDeploymentStatus } from 'generated/graphql'
-import { includes } from 'lodash'
 import {
   FLOW_HEALTH_OPTIONS,
   FlowsDisplayState,
   FlowsSort,
-  toggleListValue,
 } from './flowsDisplay'
-
-const HEALTH_LABELS: Record<(typeof FLOW_HEALTH_OPTIONS)[number], string> = {
-  [ServiceDeploymentStatus.Healthy]: 'Healthy',
-  [ServiceDeploymentStatus.Failed]: 'Failed',
-  [ServiceDeploymentStatus.Stale]: 'Stale',
-}
 
 export function FlowsDisplayPanel({
   state,
@@ -45,9 +39,9 @@ export function FlowsDisplayPanel({
           {FLOW_HEALTH_OPTIONS.map((status) => (
             <DisplayFilterRow
               key={status}
-              label={HEALTH_LABELS[status]}
+              label={serviceStatusToLabel(status)}
               count={statusCounts[status] ?? 0}
-              checked={includes(state.statuses, status)}
+              checked={state.statuses.includes(status)}
               onChange={() =>
                 onChange({
                   ...state,

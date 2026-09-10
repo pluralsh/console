@@ -35,12 +35,13 @@ import {
   DisplayFilterEmpty,
   DisplayMainSC,
   DisplayToolbarSC,
+  toggleListValue,
 } from 'components/utils/display/DisplayPanel'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
 import { ServiceDeploymentStatus, useFlowsQuery } from 'generated/graphql'
-import { compact, fromPairs, isEmpty, xor } from 'lodash'
+import { compact, isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
@@ -82,7 +83,7 @@ export function Flows() {
     setPersistedView(next.view)
   }
   const toggleFavorite = (id: string) => {
-    setFavoriteIds((ids) => xor(ids, [id]))
+    setFavoriteIds((ids) => toggleListValue(ids, id))
   }
 
   const {
@@ -104,7 +105,7 @@ export function Flows() {
   }, [data, display, favoriteIds])
   const statusCounts = useMemo(
     () =>
-      fromPairs(
+      Object.fromEntries(
         compact(data?.flowServiceCounts).map((entry) => [
           entry.status,
           entry.count,
@@ -128,8 +129,7 @@ export function Flows() {
         />
       )
     }
-    if (!data && loading) return <LoadingIndicator />
-    if (isSearchPending) return <LoadingIndicator />
+    if ((!data && loading) || isSearchPending) return <LoadingIndicator />
     if (isEmpty(flows)) {
       return hasActiveSearch ? (
         <Card css={{ padding: theme.spacing.large }}>

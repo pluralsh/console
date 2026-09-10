@@ -12,15 +12,22 @@ import {
   FlowAlertChip,
   FlowHealthChips,
   FlowPipelineChip,
+  FlowTab,
+  HealthBucket,
   componentHealthCounts,
-  getFlowTabPath,
+  flowTabPath,
 } from 'components/flows/flowHealth'
 import { Body1BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
-import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
+
+const LINE_CLAMP = {
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+} as const
 
 export function FlowCard({
   flow,
@@ -34,19 +41,14 @@ export function FlowCard({
   onToggleFavorite: () => void
 }) {
   const { search } = useLocation()
-  const [hovered, setHovered] = useState(false)
-  const serviceCount = flow.serviceCount ?? 0
-  const componentCount = flow.componentCount ?? 0
-  const componentCounts = componentHealthCounts(flow.componentStatuses)
-  const flowPath = getFlowDetailsPath({ flowIdOrName: flow.name })
+  const tab = (name: FlowTab, component?: HealthBucket) =>
+    flowTabPath(flow.name, name, search, component)
 
   return (
     <CardSC
       fillLevel={1}
       forwardedAs={Link}
-      to={`${flowPath}/services${search}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      to={tab('services')}
     >
       <ContentSC>
         <HeaderSC>
@@ -56,37 +58,23 @@ export function FlowCard({
             url={flow.icon || undefined}
             icon={<FlowIcon />}
           />
-          <Body1BoldP
-            css={{
-              flex: 1,
-              minWidth: 0,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
+          <Body1BoldP css={{ flex: 1, minWidth: 0, ...LINE_CLAMP }}>
             {flow.name}
           </Body1BoldP>
           <FlowInsightIcon insight={flow.insight} />
         </HeaderSC>
         <MetaSC>
           <span>
-            <MetaLabelSC>Components</MetaLabelSC> {componentCount}
+            <MetaLabelSC>Components</MetaLabelSC> {flow.componentCount ?? 0}
           </span>
           <span>
-            <MetaLabelSC>Services</MetaLabelSC> {serviceCount}
+            <MetaLabelSC>Services</MetaLabelSC> {flow.serviceCount ?? 0}
           </span>
         </MetaSC>
         {flow.description && (
           <Body2P
             $color="text-light"
-            css={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
+            css={LINE_CLAMP}
           >
             {flow.description}
           </Body2P>
@@ -100,15 +88,8 @@ export function FlowCard({
               Components
             </CaptionP>
             <FlowHealthChips
-              counts={componentCounts}
-              getTo={(bucket) =>
-                getFlowTabPath({
-                  flowName: flow.name,
-                  tab: 'services',
-                  search,
-                  component: bucket,
-                })
-              }
+              counts={componentHealthCounts(flow.componentStatuses)}
+              getTo={(bucket) => tab('services', bucket)}
             />
           </MetricGroupSC>
           <MetricGroupSC>
@@ -120,11 +101,7 @@ export function FlowCard({
             </CaptionP>
             <FlowAlertChip
               count={flow.alertCount ?? 0}
-              to={getFlowTabPath({
-                flowName: flow.name,
-                tab: 'alerts',
-                search,
-              })}
+              to={tab('alerts')}
             />
           </MetricGroupSC>
           <MetricGroupSC>
@@ -137,16 +114,12 @@ export function FlowCard({
             <FlowPipelineChip
               pipelineCount={flow.pipelineCount ?? 0}
               pendingCount={flow.pendingPipelineCount ?? 0}
-              to={getFlowTabPath({
-                flowName: flow.name,
-                tab: 'pipelines',
-                search,
-              })}
+              to={tab('pipelines')}
             />
           </MetricGroupSC>
         </MetricsSC>
       </ContentSC>
-      <FooterSC $parentHover={hovered}>
+      <FooterSC>
         <Flex
           gap="xsmall"
           align="center"
@@ -209,21 +182,13 @@ const ContentSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
 }))
 
-const FooterSC = styled.div<{ $parentHover: boolean }>(
-  ({ $parentHover, theme }) => ({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-    borderTop: theme.borders.default,
-    ...($parentHover && {
-      '&:not(:has(button:hover))': {
-        backgroundColor: theme.colors['fill-one-hover'],
-        borderTopColor: theme.colors['border-fill-one'],
-      },
-    }),
-  })
-)
+const FooterSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  borderTop: theme.borders.default,
+}))
 
 const CardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -235,5 +200,9 @@ const CardSC = styled(Card)(({ theme }) => ({
   '&:hover:not(:has(button:hover))': {
     backgroundColor: theme.colors['fill-one-hover'],
     borderColor: theme.colors['border-fill-one'],
+    [`${FooterSC}`]: {
+      backgroundColor: theme.colors['fill-one-hover'],
+      borderTopColor: theme.colors['border-fill-one'],
+    },
   },
 }))
