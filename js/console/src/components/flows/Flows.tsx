@@ -22,7 +22,6 @@ import {
   parseFavoriteIds,
   parseFlowsView,
   resetFlowFilters,
-  sortFlows,
   toFlowFilterVariables,
 } from 'components/flows/flowsDisplay'
 import usePersistedState from 'components/hooks/usePersistedState'
@@ -77,7 +76,10 @@ export function Flows() {
     ...DEFAULT_FLOWS_DISPLAY,
     view: persistedView,
   }))
-  const filterVars = useMemo(() => toFlowFilterVariables(display), [display])
+  const filterVars = useMemo(
+    () => toFlowFilterVariables(display, favoriteIds),
+    [display, favoriteIds]
+  )
   const updateDisplay = (next: FlowsDisplayState) => {
     setDisplay(next)
     setPersistedView(next.view)
@@ -99,10 +101,7 @@ export function Flows() {
     { q: debouncedSearchString, ...filterVars }
   )
 
-  const flows = useMemo(() => {
-    const nodes = mapExistingNodes(data?.flows)
-    return sortFlows(nodes, display, favoriteIds)
-  }, [data, display, favoriteIds])
+  const flows = useMemo(() => mapExistingNodes(data?.flows), [data])
   const statusCounts = useMemo(
     () =>
       Object.fromEntries(

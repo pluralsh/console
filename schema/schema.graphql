@@ -546,6 +546,15 @@ type RootQueryType {
 
     "return flows that have at least one service in one of these statuses"
     statuses: [ServiceDeploymentStatus]
+
+    "field to sort flows by"
+    sort: FlowSort
+
+    "sort direction"
+    direction: FlowSortDirection
+
+    "flow ids to rank first when sorting by favorited"
+    favoriteIds: [ID]
   ): FlowConnection
 
   flowServiceCounts(
@@ -1875,6 +1884,17 @@ enum IssueSort {
 }
 
 enum IssueSortDirection {
+  ASC
+  DESC
+}
+
+enum FlowSort {
+  NAME
+  SERVICE_COUNT
+  FAVORITED
+}
+
+enum FlowSortDirection {
   ASC
   DESC
 }

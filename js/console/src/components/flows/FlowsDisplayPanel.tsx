@@ -11,12 +11,12 @@ import {
   DisplayViewToggle,
   toggleListValue,
 } from 'components/utils/display/DisplayPanel'
-import { ServiceDeploymentStatus } from 'generated/graphql'
 import {
-  FLOW_HEALTH_OPTIONS,
-  FlowsDisplayState,
-  FlowsSort,
-} from './flowsDisplay'
+  FlowSort,
+  FlowSortDirection,
+  ServiceDeploymentStatus,
+} from 'generated/graphql'
+import { FLOW_HEALTH_OPTIONS, FlowsDisplayState } from './flowsDisplay'
 
 export function FlowsDisplayPanel({
   state,
@@ -54,33 +54,36 @@ export function FlowsDisplayPanel({
       </DisplaySection>
       <DisplaySection>
         <DisplaySortHeader
-          descending={state.direction === 'desc'}
+          descending={state.direction === FlowSortDirection.Desc}
           onToggle={() =>
             onChange({
               ...state,
-              direction: state.direction === 'desc' ? 'asc' : 'desc',
+              direction:
+                state.direction === FlowSortDirection.Desc
+                  ? FlowSortDirection.Asc
+                  : FlowSortDirection.Desc,
             })
           }
         />
         <DisplayRadioGroup
           value={state.sort}
-          onChange={(value) => onChange({ ...state, sort: value as FlowsSort })}
+          onChange={(value) => onChange({ ...state, sort: value as FlowSort })}
         >
           <Radio
             small
-            value="name"
+            value={FlowSort.Name}
           >
             Flow name
           </Radio>
           <Radio
             small
-            value="serviceCount"
+            value={FlowSort.ServiceCount}
           >
             Number of services
           </Radio>
           <Radio
             small
-            value="favorited"
+            value={FlowSort.Favorited}
           >
             Favorited flows
           </Radio>

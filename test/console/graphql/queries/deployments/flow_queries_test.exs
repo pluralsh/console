@@ -82,6 +82,47 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
              |> ids_equal([failed_flow])
     end
 
+    test "it can sort flows by name, service count, and favorites" do
+      user = insert(:user)
+      alpha = insert(:flow, name: "alpha-flow", read_bindings: [%{user_id: user.id}])
+      zeta = insert(:flow, name: "zeta-flow", read_bindings: [%{user_id: user.id}])
+      insert(:service, flow: alpha)
+      insert_list(3, :service, flow: zeta)
+
+      {:ok, %{data: %{"flows" => by_name}}} = run_query("""
+        query {
+          flows(first: 5, sort: NAME, direction: DESC) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(by_name)
+             |> Enum.map(& &1["id"]) == [zeta.id, alpha.id]
+
+      {:ok, %{data: %{"flows" => by_count}}} = run_query("""
+        query {
+          flows(first: 5, sort: SERVICE_COUNT, direction: DESC) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(by_count)
+             |> Enum.map(& &1["id"]) == [zeta.id, alpha.id]
+
+      {:ok, %{data: %{"flows" => by_favorite}}} = run_query("""
+        query Flows($favoriteIds: [ID]) {
+          flows(first: 5, sort: FAVORITED, direction: ASC, favoriteIds: $favoriteIds) {
+            edges { node { id } }
+          }
+        }
+      """, %{"favoriteIds" => [alpha.id]}, %{current_user: user})
+
+      assert from_connection(by_favorite)
+             |> Enum.map(& &1["id"]) == [alpha.id, zeta.id]
+    end
+
     test "it can fetch the latest service or component insight for a flow" do
       user = insert(:user)
       flow = insert(:flow, read_bindings: [%{user_id: user.id}])

@@ -71,6 +71,30 @@ defmodule Console.Schema.Flow do
     from(f in query, order_by: ^order)
   end
 
+  def ordered_by_service_count(query \\ __MODULE__, dir \\ :desc) do
+    counts =
+      from(s in Service,
+        group_by: s.flow_id,
+        select: %{flow_id: s.flow_id, n: count(s.id)}
+      )
+
+    from(f in query,
+      left_join: c in subquery(counts),
+      on: c.flow_id == f.id,
+      order_by: [{^dir, coalesce(c.n, 0)}, {^dir, f.name}]
+    )
+  end
+
+  def ordered_by_favorites(query, [], dir), do: ordered(query, [{dir, :name}])
+  def ordered_by_favorites(query, ids, dir) do
+    from(f in query,
+      order_by: [
+        {:asc, fragment("CASE WHEN ? THEN 0 ELSE 1 END", f.id in ^ids)},
+        {^dir, f.name}
+      ]
+    )
+  end
+
   def with_service_statuses(query \\ __MODULE__, statuses)
   def with_service_statuses(query, statuses) when statuses in [nil], do: query
   def with_service_statuses(query, []), do: from(f in query, where: f.id in ^[])

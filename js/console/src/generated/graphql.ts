@@ -4712,6 +4712,17 @@ export type FlowEdge = {
   node?: Maybe<Flow>;
 };
 
+export enum FlowSort {
+  Favorited = 'FAVORITED',
+  Name = 'NAME',
+  ServiceCount = 'SERVICE_COUNT'
+}
+
+export enum FlowSortDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 export type FlowWorkbenchAttributes = {
   /** the workbench to associate with this flow */
   workbenchId?: InputMaybe<Scalars['ID']['input']>;
@@ -12419,9 +12430,12 @@ export type RootQueryTypeFlowServiceCountsArgs = {
 export type RootQueryTypeFlowsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  direction?: InputMaybe<FlowSortDirection>;
+  favoriteIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  sort?: InputMaybe<FlowSort>;
   statuses?: InputMaybe<Array<InputMaybe<ServiceDeploymentStatus>>>;
 };
 
@@ -21009,6 +21023,9 @@ export type FlowsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   statuses?: InputMaybe<Array<InputMaybe<ServiceDeploymentStatus>> | InputMaybe<ServiceDeploymentStatus>>;
+  sort?: InputMaybe<FlowSort>;
+  direction?: InputMaybe<FlowSortDirection>;
+  favoriteIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
 }>;
 
 
@@ -38971,8 +38988,16 @@ export type ClusterIsoImagesLazyQueryHookResult = ReturnType<typeof useClusterIs
 export type ClusterIsoImagesSuspenseQueryHookResult = ReturnType<typeof useClusterIsoImagesSuspenseQuery>;
 export type ClusterIsoImagesQueryResult = Apollo.QueryResult<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>;
 export const FlowsDocument = gql`
-    query Flows($first: Int = 100, $after: String, $q: String, $statuses: [ServiceDeploymentStatus]) {
-  flows(first: $first, after: $after, q: $q, statuses: $statuses) {
+    query Flows($first: Int = 100, $after: String, $q: String, $statuses: [ServiceDeploymentStatus], $sort: FlowSort, $direction: FlowSortDirection, $favoriteIds: [ID]) {
+  flows(
+    first: $first
+    after: $after
+    q: $q
+    statuses: $statuses
+    sort: $sort
+    direction: $direction
+    favoriteIds: $favoriteIds
+  ) {
     edges {
       node {
         ...FlowBasicWithBindings
@@ -39006,6 +39031,9 @@ ${ServiceStatusCountFragmentDoc}`;
  *      after: // value for 'after'
  *      q: // value for 'q'
  *      statuses: // value for 'statuses'
+ *      sort: // value for 'sort'
+ *      direction: // value for 'direction'
+ *      favoriteIds: // value for 'favoriteIds'
  *   },
  * });
  */

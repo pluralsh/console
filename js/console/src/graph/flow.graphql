@@ -109,8 +109,19 @@ query Flows(
   $after: String
   $q: String
   $statuses: [ServiceDeploymentStatus]
+  $sort: FlowSort
+  $direction: FlowSortDirection
+  $favoriteIds: [ID]
 ) {
-  flows(first: $first, after: $after, q: $q, statuses: $statuses) {
+  flows(
+    first: $first
+    after: $after
+    q: $q
+    statuses: $statuses
+    sort: $sort
+    direction: $direction
+    favoriteIds: $favoriteIds
+  ) {
     edges {
       node {
         ...FlowBasicWithBindings

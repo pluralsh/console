@@ -1,18 +1,18 @@
 import { DisplayView } from 'components/utils/display/DisplayPanel'
-import { ServiceDeploymentStatus } from 'generated/graphql'
-import { isEmpty, orderBy, xor } from 'lodash'
+import {
+  FlowSort,
+  FlowSortDirection,
+  ServiceDeploymentStatus,
+} from 'generated/graphql'
+import { isEmpty, xor } from 'lodash'
 
 export type FlowsView = DisplayView
-
-export type FlowsSort = 'name' | 'serviceCount' | 'favorited'
-
-export type FlowsSortDirection = 'asc' | 'desc'
 
 export type FlowsDisplayState = {
   view: FlowsView
   statuses: ServiceDeploymentStatus[]
-  sort: FlowsSort
-  direction: FlowsSortDirection
+  sort: FlowSort
+  direction: FlowSortDirection
 }
 
 export const FLOW_HEALTH_OPTIONS = [
@@ -24,8 +24,8 @@ export const FLOW_HEALTH_OPTIONS = [
 export const DEFAULT_FLOWS_DISPLAY: FlowsDisplayState = {
   view: 'board',
   statuses: [...FLOW_HEALTH_OPTIONS],
-  sort: 'name',
-  direction: 'asc',
+  sort: FlowSort.Name,
+  direction: FlowSortDirection.Asc,
 }
 
 export function allFlowHealthSelected(
@@ -54,13 +54,23 @@ export function resetFlowFilters(state: FlowsDisplayState): FlowsDisplayState {
   }
 }
 
-export function toFlowFilterVariables({
-  statuses,
-}: Pick<FlowsDisplayState, 'statuses'>): {
+export function toFlowFilterVariables(
+  { statuses, sort, direction }: FlowsDisplayState,
+  favoriteIds: string[]
+): {
   statuses?: ServiceDeploymentStatus[]
+  sort?: FlowSort
+  direction?: FlowSortDirection
+  favoriteIds?: string[]
 } {
+  const defaultSort =
+    sort === FlowSort.Name && direction === FlowSortDirection.Asc
+
   return {
     statuses: allFlowHealthSelected(statuses) ? undefined : statuses,
+    sort: defaultSort ? undefined : sort,
+    direction: defaultSort ? undefined : direction,
+    favoriteIds: sort === FlowSort.Favorited ? favoriteIds : undefined,
   }
 }
 
@@ -71,32 +81,4 @@ export function parseFlowsView(value: unknown): FlowsView {
 export function parseFavoriteIds(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.filter((id): id is string => typeof id === 'string')
-}
-
-export function sortFlows<
-  T extends { id: string; name: string; serviceCount?: number | null },
->(
-  flows: T[],
-  { sort, direction }: Pick<FlowsDisplayState, 'sort' | 'direction'>,
-  favoriteIds: string[]
-): T[] {
-  const favoriteSet = new Set(favoriteIds)
-
-  if (sort === 'favorited') {
-    return orderBy(
-      flows,
-      [(flow) => (favoriteSet.has(flow.id) ? 0 : 1), 'name'],
-      ['asc', direction]
-    )
-  }
-
-  if (sort === 'serviceCount') {
-    return orderBy(
-      flows,
-      [(flow) => flow.serviceCount ?? 0, 'name'],
-      [direction, direction]
-    )
-  }
-
-  return orderBy(flows, ['name'], [direction])
 }
