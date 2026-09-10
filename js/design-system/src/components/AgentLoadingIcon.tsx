@@ -109,10 +109,9 @@ const EQ_COL_SPEED = [0.82, 1.18, 0.64]
 const EQ_COL_DELAY = [0, 0.1, 0.22]
 const EQ_ROW_FRAME = [eqHigh, eqMid, eqLow]
 
-const stopMotion = css`
+const easeMotion = css`
   @media (prefers-reduced-motion: reduce) {
-    animation-name: none !important;
-    animation-play-state: paused !important;
+    animation-duration: calc(var(--motion, 1s) * 3) !important;
   }
 `
 
@@ -147,6 +146,7 @@ const AgentLoadingIconSC = styled.span<{
     --on: 1;
     --off: 0.16;
     --span: ${$span}px;
+    --motion: ${$duration};
     display: inline-grid;
     flex-shrink: 0;
     width: ${$size}px;
@@ -167,20 +167,7 @@ const AgentLoadingIconSC = styled.span<{
       animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
       animation-iteration-count: infinite;
       animation-play-state: ${paused ? 'paused' : 'running'};
-      ${stopMotion}
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      i {
-        opacity: var(--off);
-        transform: scale(0.42);
-      }
-      i:nth-child(1),
-      i:nth-child(2),
-      i:nth-child(4) {
-        opacity: var(--on);
-        transform: scale(1);
-      }
+      ${easeMotion}
     }
 
     ${$variant === 'cursor' &&
@@ -522,16 +509,12 @@ function PaperRain({
   const timeRef = useRef(0)
   const lastRef = useRef(-1)
   const reduceMotion = usePrefersReducedMotion()
-  const paused =
-    reduceMotion ||
-    state === 'idle' ||
-    state === 'success' ||
-    state === 'error'
+  const paused = state === 'idle' || state === 'success' || state === 'error'
   const cellSize = Math.max(2, size / rows)
   const wrap = rows + 4
   const width = columns * cellSize
   const height = rows * cellSize
-  const speed = state === 'waiting' ? 0.75 : 1.2
+  const speed = (state === 'waiting' ? 0.75 : 1.2) * (reduceMotion ? 0.3 : 1)
   const rgb = cssColorToRgb(color)
 
   const draw = useCallback(
@@ -759,6 +742,7 @@ const WhimsyBirdSC = styled.span<{
     flex-shrink: 0;
     width: ${$size}px;
     height: ${$size}px;
+    --motion: ${$duration};
     color: ${$color};
     overflow: visible;
 
@@ -771,7 +755,7 @@ const WhimsyBirdSC = styled.span<{
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
       transform-origin: center;
-      ${stopMotion}
+      ${easeMotion}
     }
 
     .pose-a {
@@ -779,7 +763,7 @@ const WhimsyBirdSC = styled.span<{
       animation-duration: ${$duration};
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
-      ${stopMotion}
+      ${easeMotion}
     }
 
     .pose-b {
@@ -787,13 +771,7 @@ const WhimsyBirdSC = styled.span<{
       animation-duration: ${$duration};
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
-      ${stopMotion}
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .pose-b {
-        opacity: 0;
-      }
+      ${easeMotion}
     }
 
     ${$state === 'idle' &&
@@ -950,6 +928,7 @@ const AaronManSC = styled.span<{
     flex-shrink: 0;
     width: ${$size}px;
     height: ${$size}px;
+    --motion: ${$duration};
     color: ${$color};
     overflow: visible;
 
@@ -962,7 +941,7 @@ const AaronManSC = styled.span<{
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
       transform-origin: center bottom;
-      ${stopMotion}
+      ${easeMotion}
     }
 
     .pose-six,
@@ -970,13 +949,7 @@ const AaronManSC = styled.span<{
       animation-duration: ${$duration};
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
-      ${stopMotion}
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .pose-seven {
-        opacity: 0;
-      }
+      ${easeMotion}
     }
 
     .pose-six {

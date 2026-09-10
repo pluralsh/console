@@ -161,6 +161,10 @@ const TitleSC = styled.span<{ $pending?: boolean }>(
         -webkit-background-clip: text;
         color: transparent;
         animation: ${shimmer} 2.4s linear infinite;
+
+        @media (prefers-reduced-motion: reduce) {
+          animation-duration: 7s;
+        }
       `
     }
   `
