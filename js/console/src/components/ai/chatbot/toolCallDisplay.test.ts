@@ -32,12 +32,20 @@ describe('resolveToolCallKind', () => {
 describe('toolCallDisplayTitle', () => {
   it('uses Cursor-style verbs for common tools', () => {
     expect(toolCallDisplayTitle('subagent', 'workbench_subagent')).toBe(
-      'Subagent'
+      'subagent'
     )
     expect(
       toolCallDisplayTitle('subagent', 'workbench_subagent', {
         subagent: 'coding',
       })
+    ).toBe('subagent')
+    expect(
+      toolCallDisplayTitle(
+        'subagent',
+        'workbench_subagent',
+        { subagent: 'coding' },
+        true
+      )
     ).toBe('Coding subagent')
     expect(toolCallDisplayTitle('read', 'Read')).toBe('read')
     expect(toolCallDisplayTitle('python_sandbox', 'python_sandbox')).toBe(

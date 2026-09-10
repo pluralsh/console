@@ -191,7 +191,8 @@ export function toolCallGroupHeader(
 export function toolCallDisplayTitle(
   kind: ToolCallKind,
   toolName: string,
-  args?: ToolArguments
+  args?: ToolArguments,
+  isPending?: boolean
 ): string {
   switch (kind) {
     case 'command_execution':
@@ -211,7 +212,7 @@ export function toolCallDisplayTitle(
     case 'grep':
       return 'grep'
     case 'subagent':
-      return formatSubagentTitle(args)
+      return isPending ? formatSubagentTitle(args) : 'subagent'
     case 'subagent_result':
       return 'result'
     case 'enable_tools':

@@ -94,7 +94,7 @@ export function SimpleToolCall({
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
   const title =
-    customTitle ?? toolCallDisplayTitle(kind, toolName, args)
+    customTitle ?? toolCallDisplayTitle(kind, toolName, args, isPending)
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
   const label = customLabel ?? (
     <ToolCallLineLabel
