@@ -191,7 +191,6 @@ export function SidebarNav({
       <SidebarInner $overlay={overlay}>
         <SearchWrapper>
           <FilterInput
-            showClearButton
             placeholder="Filter API"
             startIcon={<SearchIcon />}
             value={filter}

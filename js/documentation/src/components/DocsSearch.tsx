@@ -15,6 +15,7 @@ function SearchTrigger({ compact = false }: { compact?: boolean }) {
         clickable
         size="large"
         type="floating"
+        textValue="Search docs"
         tooltip="Search docs"
         icon={<SearchIcon size={16} />}
         className="docs-search-trigger"
@@ -45,6 +46,7 @@ function AskAiTrigger({ compact = false }: { compact?: boolean }) {
         clickable
         size="large"
         type="secondary"
+        textValue="Ask AI"
         tooltip="Ask AI"
         icon={<AiSparkleFilledIcon size={16} />}
         className="docs-ai-trigger"
