@@ -1,11 +1,6 @@
 import { useRef, useState } from 'react'
 
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  Button,
-  DiscordIcon,
-} from '@pluralsh/design-system'
+import { ArrowLeftIcon, Button, DiscordIcon } from '@pluralsh/design-system'
 
 import styled from 'styled-components'
 import { useIsomorphicLayoutEffect } from 'usehooks-ts'
@@ -159,19 +154,6 @@ function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
           </Panel>
         )}
         <Panel $hidden={showRestNav}>
-          {restNav && (
-            <NavButtons desktop={false}>
-              <div />
-              <Button
-                type="button"
-                tertiary
-                endIcon={<ArrowRightIcon />}
-                onClick={() => setShowDocsMenu(false)}
-              >
-                API menu
-              </Button>
-            </NavButtons>
-          )}
           <DocsNavWrap>
             <FullNav
               desktop={false}
