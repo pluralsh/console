@@ -93,11 +93,11 @@ func (client *client) skipTextFileLines(reader *bufio.Reader, line *int, path st
 	}
 
 	for current := 1; current < max(*line, 1); current++ {
-
 		if _, err := reader.ReadString('\n'); err != nil {
 			if errors.Is(err, io.EOF) {
 				return true, nil
 			}
+
 			return false, fmt.Errorf("read %s: %w", path, err)
 		}
 	}
