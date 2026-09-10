@@ -61,7 +61,7 @@ func TestToolCallMapsAdapterTerminalOutput(t *testing.T) {
 	for _, update := range updates {
 		events, err := turn.applyToolUpdate(&acpsdk.SessionToolCallUpdate{
 			ToolCallId: "call-1", Meta: update.meta, RawOutput: update.rawOutput, Status: update.status,
-		}, false)
+		})
 		if err != nil {
 			t.Fatalf("applyToolUpdate() error = %v", err)
 		}

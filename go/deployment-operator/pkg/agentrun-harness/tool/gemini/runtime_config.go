@@ -36,6 +36,6 @@ func (*Agent) validateMode(mode console.AgentRunMode) error {
 	case console.AgentRunModeAnalyze, console.AgentRunModeWrite, console.AgentRunModeReview:
 		return nil
 	default:
-		return fmt.Errorf("unsupported gemini ACP mode %q", mode)
+		return fmt.Errorf("unsupported gemini run mode %q", mode)
 	}
 }

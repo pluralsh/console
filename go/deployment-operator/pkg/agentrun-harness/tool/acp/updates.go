@@ -204,33 +204,18 @@ func (turn *turnState) startTool(update *acpsdk.SessionUpdateToolCall) error {
 
 func (turn *turnState) startToolLocked(update *acpsdk.SessionUpdateToolCall) (*console.AgentMessageAttributes, string, error) {
 	id := string(update.ToolCallId)
-	if call, exists := turn.tools[id]; exists {
-		if call.recovered {
-			wasTerminal := call.isTerminal()
-			message, err := call.reconcileStart(update, turn.usesStartContentAsInput())
-			if err != nil {
-				return nil, "", err
-			}
-			if call.isTerminal() {
-				delete(turn.tools, id)
-			}
-			if !wasTerminal {
-				return message, "", nil
-			}
-			return nil, "", nil
-		}
+	if _, exists := turn.tools[id]; exists {
 		return nil, "", fmt.Errorf("acp tool call %q was started twice", id)
 	}
 
 	call := &toolCall{id: id}
+	call.input = call.formatValue(update.RawInput)
 	call.setName(update.Title, update.Kind)
 	if _, _, err := call.updateStatus(&update.Status); err != nil {
 		return nil, "", err
 	}
-	contentIsInput := turn.usesStartContentAsInput() && !call.isTerminal()
-	call.setStartInput(update.Content, update.RawInput, contentIsInput)
 
-	toolOutputValue := call.startOutput(update.Content, update.Meta, update.RawInput, update.RawOutput, contentIsInput)
+	toolOutputValue := call.toolOutput(update.Content, update.Meta, update.RawOutput)
 	call.applyOutput(toolOutputValue)
 	if call.isTerminal() {
 		return call.message(), "", nil
@@ -248,25 +233,8 @@ func (turn *turnState) upsertPermissionTool(update *acpsdk.ToolCallUpdate) error
 	defer turn.toolMu.Unlock()
 	turn.mu.Lock()
 
-	if call, exists := turn.tools[string(update.ToolCallId)]; exists {
-		if call.recovered {
-			message, output, err := turn.startToolLocked(turn.permissionToolCallStart(update))
-			turn.mu.Unlock()
-
-			if err != nil {
-				turn.setErr(err)
-				return err
-			}
-
-			if message != nil {
-				turn.sink.Message(message, string(update.ToolCallId))
-			}
-			if output != "" {
-				turn.sink.ToolCallOutput(string(update.ToolCallId), output)
-			}
-			return nil
-		}
-		events, err := turn.applyToolUpdate(turn.permissionToolCallUpdate(update), turn.usesStartContentAsInput())
+	if _, exists := turn.tools[string(update.ToolCallId)]; exists {
+		events, err := turn.applyToolUpdate(turn.permissionToolCallUpdate(update))
 		turn.mu.Unlock()
 
 		if err != nil {
@@ -341,7 +309,7 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 	turn.toolMu.Lock()
 	defer turn.toolMu.Unlock()
 	turn.mu.Lock()
-	events, err := turn.applyToolUpdate(update, false)
+	events, err := turn.applyToolUpdate(update)
 	turn.mu.Unlock()
 
 	if err != nil {
@@ -353,58 +321,31 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 	return nil
 }
 
-func (turn *turnState) applyToolUpdate(update *acpsdk.SessionToolCallUpdate, contentIsInput bool) (toolUpdateEvents, error) {
+func (turn *turnState) applyToolUpdate(update *acpsdk.SessionToolCallUpdate) (toolUpdateEvents, error) {
 	id := string(update.ToolCallId)
 	call, exists := turn.tools[id]
 
 	if !exists {
-		if turn.engine != nil && turn.engine.recoverToolUpdates {
-			return turn.recoverToolUpdate(update)
-		}
 		return toolUpdateEvents{}, fmt.Errorf("acp tool call update %q arrived before tool_call", id)
 	}
 	metadataChanged := call.updateMetadata(update)
-	_, terminal, err := call.status(update.Status)
-	if err != nil {
-		return toolUpdateEvents{}, err
-	}
 	previousOutput := call.output
 	output := call.toolOutput(update.Content, update.Meta, update.RawOutput)
-	if contentIsInput && !terminal && update.RawInput == nil {
-		metadataChanged = call.setContentInput(update.Content) || metadataChanged
-		output = call.toolOutput(nil, update.Meta, update.RawOutput)
-	}
 
 	if output.text != "" {
 		call.applyOutput(output)
 	}
 	streamOutput := call.output != previousOutput && (previousOutput == "" || strings.HasPrefix(call.output, previousOutput))
-	wasTerminal := call.isTerminal()
-	terminal = wasTerminal
-	statusChanged := false
-	if wasTerminal {
-		if err := call.validateStatus(update.Status); err != nil {
-			return toolUpdateEvents{}, err
-		}
-	} else {
-		terminal, statusChanged, err = call.updateStatus(update.Status)
-		if err != nil {
-			return toolUpdateEvents{}, err
-		}
-	}
-	if wasTerminal && call.recovered {
-		return toolUpdateEvents{}, nil
+	terminal, statusChanged, err := call.updateStatus(update.Status)
+	if err != nil {
+		return toolUpdateEvents{}, err
 	}
 	metadataChanged = metadataChanged || statusChanged
 	message := (*console.AgentMessageAttributes)(nil)
 
 	if terminal {
-		if !wasTerminal || metadataChanged {
-			message = call.message()
-		}
-		if !call.recovered {
-			delete(turn.tools, id)
-		}
+		message = call.message()
+		delete(turn.tools, id)
 	} else if metadataChanged {
 		message = call.message()
 	}
@@ -413,39 +354,6 @@ func (turn *turnState) applyToolUpdate(update *acpsdk.SessionToolCallUpdate, con
 		message:      message,
 		output:       call.output,
 		streamOutput: streamOutput,
-		terminal:     terminal,
-	}, nil
-}
-
-func (turn *turnState) recoverToolUpdate(update *acpsdk.SessionToolCallUpdate) (toolUpdateEvents, error) {
-	call := &toolCall{id: string(update.ToolCallId), state: console.AgentMessageToolStateRunning, recovered: true}
-	call.updateMetadata(update)
-	_, terminal, err := call.status(update.Status)
-	if err != nil {
-		return toolUpdateEvents{}, err
-	}
-	output := call.toolOutput(update.Content, update.Meta, update.RawOutput)
-	if !terminal && turn.usesStartContentAsInput() && update.RawInput == nil {
-		call.setContentInput(update.Content)
-		output = call.toolOutput(nil, update.Meta, update.RawOutput)
-	}
-	startMessage := call.message()
-	call.applyOutput(output)
-	terminal, _, err = call.updateStatus(update.Status)
-	if err != nil {
-		return toolUpdateEvents{}, err
-	}
-	turn.tools[call.id] = call
-	message := (*console.AgentMessageAttributes)(nil)
-	if terminal {
-		message = call.message()
-	}
-
-	return toolUpdateEvents{
-		startMessage: startMessage,
-		message:      message,
-		output:       call.output,
-		streamOutput: call.output != "",
 		terminal:     terminal,
 	}, nil
 }
@@ -460,10 +368,6 @@ func (call *toolCall) applyOutput(output toolOutputValue) {
 }
 
 func (turn *turnState) emitToolUpdate(id acpsdk.ToolCallId, events toolUpdateEvents) {
-	if events.startMessage != nil {
-		turn.sink.Message(events.startMessage, string(id))
-	}
-
 	if events.streamOutput {
 		turn.sink.ToolCallOutput(string(id), events.output)
 	}
@@ -471,10 +375,6 @@ func (turn *turnState) emitToolUpdate(id acpsdk.ToolCallId, events toolUpdateEve
 	if events.message != nil {
 		turn.sink.Message(events.message, string(id))
 	}
-}
-
-func (turn *turnState) usesStartContentAsInput() bool {
-	return turn.engine != nil && turn.engine.startContentIsInputWithoutRawInput
 }
 
 func (turn *turnState) emitAssistant(responseUsage *acpsdk.Usage) {

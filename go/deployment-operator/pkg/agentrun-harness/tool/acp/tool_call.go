@@ -13,14 +13,13 @@ import (
 const runningToolOutput = "running..."
 
 type toolCall struct {
-	id        string
-	name      string
-	title     string
-	kind      acpsdk.ToolKind
-	input     string
-	output    string
-	state     console.AgentMessageToolState
-	recovered bool
+	id     string
+	name   string
+	title  string
+	kind   acpsdk.ToolKind
+	input  string
+	output string
+	state  console.AgentMessageToolState
 }
 
 type toolOutputValue struct {
@@ -86,31 +85,6 @@ func (call *toolCall) toolOutput(content []acpsdk.ToolCallContent, meta map[stri
 	return toolOutputValue{text: output}
 }
 
-func (call *toolCall) setStartInput(content []acpsdk.ToolCallContent, rawInput any, startContentIsInputWithoutRawInput bool) {
-	call.input = call.formatValue(rawInput)
-	if rawInput == nil && startContentIsInputWithoutRawInput {
-		call.setContentInput(content)
-	}
-}
-
-func (call *toolCall) setContentInput(content []acpsdk.ToolCallContent) bool {
-	if input := call.contentOutput(content); input != "" {
-		if call.input == input {
-			return false
-		}
-		call.input = input
-		return true
-	}
-	return false
-}
-
-func (call *toolCall) startOutput(content []acpsdk.ToolCallContent, meta map[string]any, rawInput, rawOutput any, startContentIsInputWithoutRawInput bool) toolOutputValue {
-	if rawInput == nil && startContentIsInputWithoutRawInput {
-		return call.toolOutput(nil, meta, rawOutput)
-	}
-	return call.toolOutput(content, meta, rawOutput)
-}
-
 func terminalOutput(meta map[string]any) (string, bool, bool) {
 	for _, candidate := range []struct {
 		name  string
@@ -141,7 +115,6 @@ func formattedRawOutput(rawOutput any) (string, bool) {
 }
 
 type toolUpdateEvents struct {
-	startMessage *console.AgentMessageAttributes
 	message      *console.AgentMessageAttributes
 	output       string
 	streamOutput bool
@@ -222,11 +195,6 @@ func (call *toolCall) updateStatus(status *acpsdk.ToolCallStatus) (bool, bool, e
 	return terminal, changed, nil
 }
 
-func (call *toolCall) validateStatus(status *acpsdk.ToolCallStatus) error {
-	_, _, err := call.status(status)
-	return err
-}
-
 func (*toolCall) status(status *acpsdk.ToolCallStatus) (console.AgentMessageToolState, bool, error) {
 	if status == nil {
 		return "", false, nil
@@ -246,42 +214,6 @@ func (*toolCall) status(status *acpsdk.ToolCallStatus) (console.AgentMessageTool
 	}
 	terminal := state == console.AgentMessageToolStateCompleted || state == console.AgentMessageToolStateError
 	return state, terminal, nil
-}
-
-func (call *toolCall) reconcileStart(update *acpsdk.SessionUpdateToolCall, startContentIsInputWithoutRawInput bool) (*console.AgentMessageAttributes, error) {
-	if err := call.validateStatus(&update.Status); err != nil {
-		return nil, err
-	}
-	if call.title == "" {
-		call.title = update.Title
-	}
-	if call.kind == "" {
-		call.kind = update.Kind
-	}
-	call.name = call.displayName()
-	_, terminal, err := call.status(&update.Status)
-	if err != nil {
-		return nil, err
-	}
-	if update.RawInput != nil {
-		call.input = call.formatValue(update.RawInput)
-	} else if call.input == "" {
-		call.setStartInput(update.Content, nil, startContentIsInputWithoutRawInput && !terminal)
-	}
-	if call.output == "" {
-		if startContentIsInputWithoutRawInput && !terminal {
-			call.applyOutput(call.toolOutput(nil, update.Meta, update.RawOutput))
-		} else {
-			call.applyOutput(call.startOutput(update.Content, update.Meta, update.RawInput, update.RawOutput, false))
-		}
-	}
-	if !call.isTerminal() && update.Status != acpsdk.ToolCallStatusPending {
-		if _, _, err := call.updateStatus(&update.Status); err != nil {
-			return nil, err
-		}
-	}
-	call.recovered = false
-	return call.message(), nil
 }
 
 func (call *toolCall) isTerminal() bool {

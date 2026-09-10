@@ -1,0 +1,4 @@
+{not valid json
+{"type":"init","session_id":"session-after-malformed","model":"gemini-custom"}
+{"type":"message","role":"assistant","content":"processed after malformed event","delta":true}
+{"type":"result","status":"success","stats":{"total_tokens":3,"input_tokens":2,"output_tokens":1}}

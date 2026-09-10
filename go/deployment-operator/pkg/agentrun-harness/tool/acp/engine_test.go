@@ -335,7 +335,7 @@ func TestNewEngineOptionsPreserveDefaultsAndApplyOverrides(t *testing.T) {
 	standard := &acpsdk.Usage{InputTokens: 3}
 	defaults := NewEngine(WithStopTimeout(0), WithSessionRestorer(nil), WithUsageResolver(nil))
 	if defaults.stopTimeout != defaultStopTimeout || defaults.restoreSession == nil ||
-		defaults.authenticationMethod != "" || defaults.usageResolver(acpsdk.PromptResponse{Usage: standard}) != standard || defaults.recoverToolUpdates || defaults.startContentIsInputWithoutRawInput {
+		defaults.authenticationMethod != "" || defaults.usageResolver(acpsdk.PromptResponse{Usage: standard}) != standard {
 		t.Fatalf("default engine = %#v", defaults)
 	}
 
@@ -345,11 +345,9 @@ func TestNewEngineOptionsPreserveDefaultsAndApplyOverrides(t *testing.T) {
 		WithSessionRestorer(LoadSession),
 		WithAuthenticationMethod("api-key"),
 		WithUsageResolver(resolver),
-		WithToolCallUpdateRecovery(),
-		WithToolCallStartContentAsInputWithoutRawInput(),
 	)
 	if configured.stopTimeout != time.Second || configured.restoreSession == nil ||
-		configured.authenticationMethod != "api-key" || configured.usageResolver(acpsdk.PromptResponse{}).InputTokens != 5 || !configured.recoverToolUpdates || !configured.startContentIsInputWithoutRawInput {
+		configured.authenticationMethod != "api-key" || configured.usageResolver(acpsdk.PromptResponse{}).InputTokens != 5 {
 		t.Fatalf("configured engine = %#v", configured)
 	}
 }

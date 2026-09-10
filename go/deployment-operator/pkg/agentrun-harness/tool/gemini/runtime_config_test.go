@@ -50,7 +50,7 @@ func TestValidateMode(t *testing.T) {
 			t.Fatalf("validateMode(%q) error = %v", mode, err)
 		}
 	}
-	if err := agent.validateMode("unsupported"); err == nil {
-		t.Fatal("validateMode() error = nil")
+	if err := agent.validateMode("unsupported"); err == nil || err.Error() != `unsupported gemini run mode "unsupported"` {
+		t.Fatalf("validateMode() error = %v", err)
 	}
 }
