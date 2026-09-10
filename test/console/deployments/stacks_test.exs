@@ -794,6 +794,24 @@ defmodule Console.Deployments.StacksTest do
       assert updated.scm_state.comment_id == "id"
     end
 
+    test "it can post an ai plan summary to a pr" do
+      run = insert(:stack_run,
+        status: :pending_approval,
+        pull_request: build(:pull_request, url: "https://github.com/pluralsh/console/pull/10"),
+        stack: build(:stack, connection: build(:scm_connection))
+      )
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, %{"body" => body} ->
+        assert String.contains?(body, "Plan Summary")
+        assert String.contains?(body, "safe to apply")
+        {:ok, %{"id" => "id"}, :ok}
+      end)
+
+      {:ok, updated} = Stacks.post_plan_comment(run, "## Safety Assessment\n\nsafe to apply")
+
+      assert updated.scm_state.ai_comment_id == "id"
+    end
+
     test "it includes failed step logs in the github pr comment body" do
       run = insert(:stack_run,
         status: :failed,

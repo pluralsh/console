@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "dashboard_name": {
+      "type": "string",
+      "description": "Unique name of a dashboard belonging to this workbench"
+    },
+    "graph_identifier": {
+      "type": "string",
+      "description": "Unique identifier of the graph to delete"
+    }
+  },
+  "required": ["dashboard_name", "graph_identifier"]
+}

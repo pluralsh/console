@@ -6678,6 +6678,11 @@ enum OpenAiMethod {
   AUTO
 }
 
+enum BedrockEndpoint {
+  RUNTIME
+  MANTLE
+}
+
 enum Provider {
   AWS
   GCP
@@ -6997,6 +7002,9 @@ input BedrockAiAttributes {
 
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
+
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
 
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
@@ -7434,6 +7442,9 @@ type BedrockAiSettings {
 
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
+
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
 
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]

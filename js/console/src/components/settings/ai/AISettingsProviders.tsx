@@ -7,6 +7,7 @@ import {
   AiProvider,
   AiSettings,
   AiSettingsAttributes,
+  BedrockEndpoint,
   ModelDefault,
   OpenAiMethod,
 } from '../../../generated/graphql.ts'
@@ -24,6 +25,8 @@ const bedrockEmbeddingModelTooltip =
 const bedrockToolModelTooltip =
   'Bedrock model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
 const bedrockRegionTooltip = 'AWS region where your Bedrock models are hosted.'
+const bedrockEndpointTooltip =
+  'Bedrock API surface. Runtime uses InvokeModel or Converse; Mantle uses the Anthropic/OpenAI-compatible APIs.'
 
 const DEFAULT_BEDROCK_REGION = 'us-east-1'
 
@@ -119,6 +122,7 @@ export function initialSettingsAttributes(
               }
             : {}),
           awsSecretAccessKey: '',
+          endpoint: ai.bedrock?.endpoint ?? BedrockEndpoint.Runtime,
           region: ai.bedrock?.region ?? DEFAULT_BEDROCK_REGION,
         },
         ...(ai.ollama
@@ -184,6 +188,7 @@ export function initialSettingsAttributes(
     : {
         bedrock: {
           awsSecretAccessKey: '',
+          endpoint: BedrockEndpoint.Runtime,
           region: DEFAULT_BEDROCK_REGION,
         },
       }
@@ -483,6 +488,30 @@ export function BedrockSettings({
             updateSettings({ awsSecretAccessKey: e.currentTarget.value })
           }
         />
+      </FormField>
+      <FormField
+        label="Endpoint"
+        infoTooltip={bedrockEndpointTooltip}
+        flex={1}
+      >
+        <Select
+          isDisabled={!enabled}
+          selectedKey={settings?.endpoint ?? BedrockEndpoint.Runtime}
+          onSelectionChange={(key) =>
+            updateSettings({ endpoint: key as BedrockEndpoint })
+          }
+        >
+          <ListBoxItem
+            key={BedrockEndpoint.Runtime}
+            label="Runtime"
+            description="InvokeModel or Converse"
+          />
+          <ListBoxItem
+            key={BedrockEndpoint.Mantle}
+            label="Mantle"
+            description="Anthropic and OpenAI-compatible APIs"
+          />
+        </Select>
       </FormField>
     </>
   )

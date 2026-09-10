@@ -1458,6 +1458,8 @@ type BedrockAiAttributes struct {
 	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
+	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
@@ -1476,6 +1478,8 @@ type BedrockAiSettings struct {
 	Region *string `json:"region,omitempty"`
 	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
+	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
@@ -13600,6 +13604,61 @@ func (e *AutoscalingTarget) UnmarshalJSON(b []byte) error {
 }
 
 func (e AutoscalingTarget) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type BedrockEndpoint string
+
+const (
+	BedrockEndpointRuntime BedrockEndpoint = "RUNTIME"
+	BedrockEndpointMantle  BedrockEndpoint = "MANTLE"
+)
+
+var AllBedrockEndpoint = []BedrockEndpoint{
+	BedrockEndpointRuntime,
+	BedrockEndpointMantle,
+}
+
+func (e BedrockEndpoint) IsValid() bool {
+	switch e {
+	case BedrockEndpointRuntime, BedrockEndpointMantle:
+		return true
+	}
+	return false
+}
+
+func (e BedrockEndpoint) String() string {
+	return string(e)
+}
+
+func (e *BedrockEndpoint) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BedrockEndpoint(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BedrockEndpoint", str)
+	}
+	return nil
+}
+
+func (e BedrockEndpoint) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *BedrockEndpoint) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e BedrockEndpoint) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

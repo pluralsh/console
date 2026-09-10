@@ -12,6 +12,44 @@ defmodule Console.AI.Provider.BedrockTest do
 
   setup :set_mimic_global
 
+  describe "provider_options/1" do
+    test "uses the runtime endpoint by default" do
+      bedrock =
+        Bedrock.new(%BedrockSettings{
+          region: @region,
+          aws_access_key_id: "test-access-key",
+          aws_secret_access_key: "test-secret-key"
+        })
+
+      assert Bedrock.provider_options(bedrock)[:endpoint] == :runtime
+    end
+
+    test "passes the configured Mantle endpoint to ReqLLM" do
+      bedrock =
+        Bedrock.new(%BedrockSettings{
+          region: @region,
+          endpoint: :mantle,
+          aws_access_key_id: "test-access-key",
+          aws_secret_access_key: "test-secret-key"
+        })
+
+      assert Bedrock.provider_options(bedrock)[:endpoint] == :mantle
+    end
+
+    test "maps the configured Bedrock bearer token to ReqLLM's API key option" do
+      bedrock =
+        Bedrock.new(%BedrockSettings{
+          region: @region,
+          access_token: "bedrock-token"
+        })
+
+      options = Bedrock.provider_options(bedrock)
+
+      assert options[:api_key] == "bedrock-token"
+      refute Keyword.has_key?(options, :access_token)
+    end
+  end
+
   describe "tool_call/4" do
     test "calls the configured inference profile id in the Bedrock runtime REST URL" do
       bedrock =
@@ -61,6 +99,47 @@ defmodule Console.AI.Provider.BedrockTest do
   end
 
   describe "completion/3" do
+    test "calls and SigV4-signs the configured Bedrock Mantle endpoint" do
+      model_id = "anthropic.claude-sonnet-4-6"
+
+      bedrock =
+        Bedrock.new(%BedrockSettings{
+          model_id: model_id,
+          region: @region,
+          endpoint: :mantle,
+          aws_access_key_id: "test-access-key",
+          aws_secret_access_key: "test-secret-key"
+        })
+
+      expected_url = "https://bedrock-mantle.#{@region}.api.aws/anthropic/v1/messages"
+
+      expect(Req, :request, fn %Req.Request{} = request ->
+        assert request.method == :post
+        assert URI.to_string(request.url) == expected_url
+        assert Keyword.has_key?(request.request_steps, :aws_sigv4)
+
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body: %Response{
+             id: "test-response",
+             model: model_id,
+             context: %ReqLLM.Context{messages: []},
+             message: %Message{
+               role: :assistant,
+               content: [%ContentPart{type: :text, text: "hello from mantle"}]
+             },
+             finish_reason: :stop,
+             usage: @usage,
+             stream?: false
+           }
+         }}
+      end)
+
+      assert {:ok, "hello from mantle"} =
+               Bedrock.completion(bedrock, [{:user, "hi"}], [])
+    end
+
     test "calls the configured inference profile id in the Bedrock runtime REST URL" do
       bedrock =
         Bedrock.new(%BedrockSettings{

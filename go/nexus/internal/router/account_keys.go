@@ -34,7 +34,9 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 	case schemas.Vertex:
 		return in.handleVertexKeys(aiConfig.GetVertexAi())
 	case schemas.Bedrock:
-		return in.handleBedrockKeys(aiConfig.GetBedrock())
+		return in.handleBedrockKeys(aiConfig.GetBedrock(), schemas.Bedrock)
+	case schemas.BedrockMantle:
+		return in.handleBedrockKeys(aiConfig.GetBedrock(), schemas.BedrockMantle)
 	case schemas.Azure:
 		return in.handleAzureKeys(aiConfig.GetAzure())
 	default:
@@ -60,7 +62,7 @@ func (in *Account) handleOpenAIKeys(ctx context.Context, config *pb.OpenAiConfig
 
 	return []schemas.Key{
 		{
-			Value: schemas.EnvVar{
+			Value: schemas.SecretVar{
 				Val: apiKey,
 			},
 			Models: in.filterModels(append(
@@ -102,7 +104,7 @@ func (in *Account) handleAnthropicKeys(config *pb.AnthropicConfig) ([]schemas.Ke
 
 	return []schemas.Key{
 		{
-			Value: schemas.EnvVar{
+			Value: schemas.SecretVar{
 				Val: config.GetApiKey(),
 			},
 			Models: in.filterModels(append(
@@ -134,13 +136,13 @@ func (in *Account) handleVertexKeys(config *pb.VertexAiConfig) ([]schemas.Key, e
 				config.GetEmbeddingModel(),
 			}, config.GetProxyModels()...)),
 			VertexKeyConfig: &schemas.VertexKeyConfig{
-				ProjectID: schemas.EnvVar{
+				ProjectID: schemas.SecretVar{
 					Val: config.GetProject(),
 				},
-				Region: schemas.EnvVar{
+				Region: schemas.SecretVar{
 					Val: config.GetLocation(),
 				},
-				AuthCredentials: schemas.EnvVar{
+				AuthCredentials: schemas.SecretVar{
 					Val: config.GetServiceAccountJson(),
 				},
 			},
@@ -150,36 +152,75 @@ func (in *Account) handleVertexKeys(config *pb.VertexAiConfig) ([]schemas.Key, e
 	}, nil
 }
 
-func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, error) {
+func (in *Account) handleBedrockKeys(config *pb.BedrockConfig, provider schemas.ModelProvider) ([]schemas.Key, error) {
 	if config == nil {
 		return nil, fmt.Errorf("bedrock not configured")
 	}
+	if provider == schemas.BedrockMantle && bedrockProvider(config) != schemas.BedrockMantle {
+		return nil, fmt.Errorf("bedrock mantle not configured")
+	}
 
 	in.logger.Debug("Bedrock configuration",
+		zap.String("endpoint", string(provider)),
 		zap.String("model", config.GetModelId()),
 		zap.String("tool_model", config.GetToolModelId()),
 		zap.String("embedding_model", config.GetEmbeddingModelId()),
 	)
 
+	key := schemas.Key{
+		Value:          schemas.SecretVar{Val: config.GetAccessToken()},
+		Models:         in.bedrockModels(config, provider),
+		UseForBatchAPI: lo.ToPtr(provider == schemas.Bedrock),
+		Weight:         1.0,
+	}
+
+	accessKey := schemas.SecretVar{Val: config.GetAwsAccessKeyId()}
+	secretKey := schemas.SecretVar{Val: config.GetAwsSecretAccessKey()}
+	region := &schemas.SecretVar{Val: config.GetRegion()}
+
+	if provider == schemas.BedrockMantle {
+		key.BedrockMantleKeyConfig = &schemas.BedrockMantleKeyConfig{
+			AccessKey: accessKey,
+			SecretKey: secretKey,
+			Region:    region,
+		}
+	} else {
+		if bedrockProvider(config) == schemas.BedrockMantle {
+			key.Aliases = in.bedrockEmbeddingDeployments(config)
+		} else {
+			key.Aliases = in.bedrockDeployments(config)
+		}
+		key.BedrockKeyConfig = &schemas.BedrockKeyConfig{
+			AccessKey: accessKey,
+			SecretKey: secretKey,
+			Region:    region,
+		}
+	}
+
 	return []schemas.Key{
-		{
-			Models:  in.toBedrockModels(config),
-			Aliases: schemas.KeyAliases(in.toBedrockDeployments(config)),
-			BedrockKeyConfig: &schemas.BedrockKeyConfig{
-				AccessKey: schemas.EnvVar{
-					Val: config.GetAwsAccessKeyId(),
-				},
-				SecretKey: schemas.EnvVar{
-					Val: config.GetAwsSecretAccessKey(),
-				},
-				Region: &schemas.EnvVar{
-					Val: config.GetRegion(),
-				},
-			},
-			UseForBatchAPI: lo.ToPtr(true),
-			Weight:         1.0,
-		},
+		key,
 	}, nil
+}
+
+func (in *Account) bedrockModels(config *pb.BedrockConfig, provider schemas.ModelProvider) []string {
+	if provider == schemas.BedrockMantle {
+		return in.filterModels(append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId()))
+	}
+
+	if bedrockProvider(config) == schemas.BedrockMantle {
+		return in.filterModels([]string{config.GetEmbeddingModelId()})
+	}
+
+	return in.toBedrockModels(config)
+}
+
+func (in *Account) bedrockEmbeddingDeployments(config *pb.BedrockConfig) schemas.KeyAliases {
+	aliases := make(schemas.KeyAliases)
+	if modelID := config.GetEmbeddingModelId(); modelID != "" {
+		inferenceProfileID, model := in.parseModelID(modelID)
+		aliases[model] = schemas.AliasConfig{ModelID: inferenceProfileID}
+	}
+	return aliases
 }
 
 // toBedrockModels returns client-facing model IDs registered on the Bifrost key.
@@ -212,8 +253,8 @@ func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 //
 // Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
-func (in *Account) toBedrockDeployments(config *pb.BedrockConfig) map[string]string {
-	deployments := in.filterDeployments(config.GetDeployments())
+func (in *Account) bedrockDeployments(config *pb.BedrockConfig) schemas.KeyAliases {
+	deployments := in.toKeyAliases(config.GetDeployments())
 	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
 
 	// Augment configured deployments with provided profiles ids.
@@ -223,7 +264,7 @@ func (in *Account) toBedrockDeployments(config *pb.BedrockConfig) map[string]str
 		}
 
 		inferenceProfileID, model := in.parseModelID(modelID)
-		deployments[model] = inferenceProfileID
+		deployments[model] = schemas.AliasConfig{ModelID: inferenceProfileID}
 	}
 
 	return deployments
@@ -263,12 +304,12 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 				config.GetToolModel(),
 				config.GetEmbeddingModel(),
 			}, config.GetProxyModels()...)),
-			Aliases: schemas.KeyAliases(in.filterDeployments(config.GetDeployments())),
-			Value: schemas.EnvVar{
+			Aliases: in.toKeyAliases(config.GetDeployments()),
+			Value: schemas.SecretVar{
 				Val: config.GetAccessToken(),
 			},
 			AzureKeyConfig: &schemas.AzureKeyConfig{
-				Endpoint: schemas.EnvVar{
+				Endpoint: schemas.SecretVar{
 					// We need to remove the suffix since console deployment settings enforce it currently.
 					Val: strings.TrimSuffix(config.GetEndpoint(), "/openai/deployments"),
 				},
@@ -285,12 +326,12 @@ func (in *Account) filterModels(models []string) []string {
 	})
 }
 
-func (in *Account) filterDeployments(deployments map[string]string) map[string]string {
-	result := make(map[string]string)
+func (in *Account) toKeyAliases(deployments map[string]string) schemas.KeyAliases {
+	result := make(schemas.KeyAliases)
 
 	for model, deployment := range deployments {
 		if len(model) > 0 && len(deployment) > 0 {
-			result[model] = deployment
+			result[model] = schemas.AliasConfig{ModelID: deployment}
 		}
 	}
 

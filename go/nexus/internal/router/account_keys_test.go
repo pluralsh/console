@@ -118,6 +118,92 @@ func TestHandleOpenAIKeys_tokenExchangeEnabledIncomplete(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestAccountBedrockRuntimeEndpointIsDefault(t *testing.T) {
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId: lo.ToPtr("anthropic.claude-sonnet-4-6"),
+			Region:  lo.ToPtr("us-east-1"),
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providers, err := acct.GetConfiguredProviders()
+	require.NoError(t, err)
+	require.Contains(t, providers, schemas.Bedrock)
+	require.NotContains(t, providers, schemas.BedrockMantle)
+
+	provider, model, _, err := (&OpenAIRouter{consoleClient: acct.consoleClient}).resolveModel(
+		context.Background(),
+		"bedrock/anthropic.claude-sonnet-4-6",
+	)
+	require.NoError(t, err)
+	require.Equal(t, schemas.Bedrock, provider)
+	require.Equal(t, "anthropic.claude-sonnet-4-6", model)
+
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.NotNil(t, keys[0].BedrockKeyConfig)
+	require.Nil(t, keys[0].BedrockMantleKeyConfig)
+	require.Empty(t, keys[0].BedrockKeyConfig.AccessKey.GetValue())
+	require.Empty(t, keys[0].BedrockKeyConfig.SecretKey.GetValue())
+}
+
+func TestAccountBedrockMantleEndpointUsesMantleAndRuntimeEmbeddings(t *testing.T) {
+	endpoint := pb.BedrockEndpoint_MANTLE
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId:          lo.ToPtr("anthropic.claude-sonnet-4-6"),
+			ToolModelId:      lo.ToPtr("openai.gpt-5.4"),
+			EmbeddingModelId: lo.ToPtr("cohere.embed-english-v3"),
+			ProxyModels:      []string{"google.gemma-4-27b"},
+			AccessToken:      lo.ToPtr("bedrock-token"),
+			Region:           lo.ToPtr("us-west-2"),
+			Endpoint:         &endpoint,
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providers, err := acct.GetConfiguredProviders()
+	require.NoError(t, err)
+	require.ElementsMatch(t, []schemas.ModelProvider{schemas.BedrockMantle, schemas.Bedrock}, providers)
+
+	provider, model, _, err := (&OpenAIRouter{consoleClient: acct.consoleClient}).resolveModel(
+		context.Background(),
+		"bedrock/anthropic.claude-sonnet-4-6",
+	)
+	require.NoError(t, err)
+	require.Equal(t, schemas.BedrockMantle, provider)
+	require.Equal(t, "anthropic.claude-sonnet-4-6", model)
+
+	mantleKeys, err := acct.GetKeysForProvider(context.Background(), schemas.BedrockMantle)
+	require.NoError(t, err)
+	require.Len(t, mantleKeys, 1)
+	require.Nil(t, mantleKeys[0].BedrockKeyConfig)
+	require.NotNil(t, mantleKeys[0].BedrockMantleKeyConfig)
+	require.Equal(t, "bedrock-token", mantleKeys[0].Value.GetValue())
+	require.ElementsMatch(t,
+		[]string{"anthropic.claude-sonnet-4-6", "openai.gpt-5.4", "google.gemma-4-27b"},
+		mantleKeys[0].Models,
+	)
+
+	runtimeKeys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, runtimeKeys, 1)
+	require.NotNil(t, runtimeKeys[0].BedrockKeyConfig)
+	require.Equal(t, []string{"cohere.embed-english-v3"}, []string(runtimeKeys[0].Models))
+}
+
 func TestAccountOpenAICompatibleProvider(t *testing.T) {
 	chat := pb.OpenAiMethod_CHAT
 	cfg := &pb.AiConfig{

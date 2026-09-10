@@ -581,6 +581,11 @@ func (in *BedrockSettings) DeepCopyInto(out *BedrockSettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Endpoint != nil {
+		in, out := &in.Endpoint, &out.Endpoint
+		*out = new(client.BedrockEndpoint)
+		**out = **in
+	}
 	if in.ProxyModels != nil {
 		in, out := &in.ProxyModels, &out.ProxyModels
 		*out = make([]string, len(*in))

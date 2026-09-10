@@ -779,6 +779,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken:        secret,
 			Region:             lo.ToPtr(in.Bedrock.Region),
 			EmbeddingModel:     in.Bedrock.EmbeddingModel,
+			Endpoint:           in.Bedrock.Endpoint,
 			ProxyModels:        lo.ToSlicePtr(in.Bedrock.ProxyModels),
 			AWSSecretAccessKey: secretKey,
 			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
@@ -1109,6 +1110,14 @@ type BedrockSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// Endpoint selects the AWS Bedrock API surface. RUNTIME (the default) uses InvokeModel or
+	// Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
+	//
+	// +kubebuilder:default=RUNTIME
+	// +kubebuilder:validation:Enum=RUNTIME;MANTLE
+	// +kubebuilder:validation:Optional
+	Endpoint *console.BedrockEndpoint `json:"endpoint,omitempty"`
 
 	// ProxyModels lists additional Bedrock model or inference profile IDs exposed through the Nexus
 	// OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.

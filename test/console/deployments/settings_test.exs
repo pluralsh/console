@@ -33,10 +33,13 @@ defmodule Console.Deployments.SettingsTest do
           bedrock: %{
             region: "us-east-1",
             model_id: "anthropic.custom",
+            endpoint: :mantle,
             proxy_models: ["anthropic.proxy"]
           }
         }
       )
+
+      assert Settings.fetch_consistent().ai.bedrock.endpoint == :mantle
 
       assert Enum.map(Settings.available_models(), &Map.take(&1, [:provider, :model])) == [
                %{provider: :openai, model: "gpt-custom"},

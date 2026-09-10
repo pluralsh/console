@@ -8,7 +8,7 @@ defmodule Console.AI.Bedrock do
 
   require Logger
 
-  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :stream]
+  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :endpoint, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -24,6 +24,7 @@ defmodule Console.AI.Bedrock do
       aws_secret_access_key: opts.aws_secret_access_key,
       access_token: opts.access_token,
       region: opts.region,
+      endpoint: opts.endpoint || :runtime,
       stream: Stream.stream(),
     }
   end
@@ -79,8 +80,8 @@ defmodule Console.AI.Bedrock do
 
   def tools?(), do: true
 
-  def provider_options(%__MODULE__{region: region, access_token: token} = bedrock) do
-    [region: region, access_token: token]
+  def provider_options(%__MODULE__{region: region, access_token: token, endpoint: endpoint} = bedrock) do
+    [region: region, api_key: token, endpoint: endpoint || :runtime]
     |> Enum.concat(if is_nil(token), do: aws_auth(bedrock), else: [])
     |> Enum.filter(fn {_, v} -> not is_nil(v) end)
   end

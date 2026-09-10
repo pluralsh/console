@@ -5,7 +5,7 @@ defmodule Console.AI.PubSub.Consumer do
     protocol: Console.AI.PubSub.Insightful
   import Console.Services.Base, only: [handle_notify: 2]
   alias Console.PubSub
-  alias Console.Schema.{AiInsight, Service, Stack, StackState, Alert}
+  alias Console.Schema.{AiInsight, Service, Stack, Alert}
   alias Console.AI.{PubSub.Insightful, Cron}
   require Logger
 
@@ -25,8 +25,6 @@ defmodule Console.AI.PubSub.Consumer do
         handle_notify(PubSub.ServiceInsight, {svc, insight})
       %AiInsight{stack: %Stack{} = stack} ->
         handle_notify(PubSub.StackInsight, {stack, insight})
-      %AiInsight{stack_state: %StackState{} = state} ->
-        handle_notify(PubSub.StackStateInsight, {state, insight})
       %AiInsight{alert: %Alert{} = alert} ->
         handle_notify(PubSub.AlertInsight, {alert, insight})
       _ -> :ok

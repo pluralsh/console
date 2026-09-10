@@ -155,11 +155,13 @@ defmodule Console.GRPC.Server do
       modelId: Map.get(bedrock, :model_id) || defaults[:model],
       toolModelId: Map.get(bedrock, :tool_model_id) || defaults[:tool_model],
       embeddingModelId: Map.get(bedrock, :embedding_model) || defaults[:embedding_model],
+      accessToken: Map.get(bedrock, :access_token),
       region: Map.get(bedrock, :region),
       awsAccessKeyId: Map.get(bedrock, :aws_access_key_id),
       awsSecretAccessKey: Map.get(bedrock, :aws_secret_access_key),
       proxyModels: proxy_models(bedrock, defaults),
-      deployments: to_string_map(Map.get(bedrock, :deployments))
+      deployments: to_string_map(Map.get(bedrock, :deployments)),
+      endpoint: bedrock_endpoint_to_pb(Map.get(bedrock, :endpoint))
     }
   end
   defp to_bedrock_pb(_), do: nil
@@ -184,6 +186,9 @@ defmodule Console.GRPC.Server do
   defp openai_method_to_pb(:auto), do: :AUTO
   defp openai_method_to_pb(nil), do: :AUTO
   defp openai_method_to_pb(_), do: :AUTO
+
+  defp bedrock_endpoint_to_pb(:mantle), do: :MANTLE
+  defp bedrock_endpoint_to_pb(_), do: :RUNTIME
 
   defp proxy_models(config, defaults)
   defp proxy_models(%{proxy_models: [_ | _] = models}, _), do: models

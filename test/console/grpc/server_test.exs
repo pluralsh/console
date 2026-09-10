@@ -53,6 +53,23 @@ defmodule Console.GRPC.ServerTest do
       assert config.openaiCompatible.apiKey == "configured-token"
     end
 
+    test "forwards configured Bedrock bearer tokens" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          bedrock: %{
+            access_token: "bedrock-token",
+            endpoint: :mantle
+          }
+        }
+      )
+
+      config = Server.get_ai_config(%Plrl.AiConfigRequest{}, nil)
+
+      assert config.bedrock.accessToken == "bedrock-token"
+      assert config.bedrock.endpoint == :MANTLE
+    end
+
     test "returns xAI configuration" do
       deployment_settings(
         ai: %{

@@ -190,17 +190,21 @@ end
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
   alias Console.Schema.{StackRun, PullRequest, StackState}
   alias Console.Deployments.Stacks
+  alias Console.AI.Plan
 
   def process(%{item: %{dry_run: true, status: :pending_approval} = run}) do
     case Console.Repo.preload(run, [:pull_request, :state]) do
       %StackRun{pull_request: %PullRequest{}, state: %StackState{plan: p}} = run when is_binary(p) ->
         Stacks.post_comment(run)
+        Plan.enqueue(run)
       _ -> :ok
     end
   end
 
-  def process(%@for{item: %StackRun{status: :pending_approval} = run}),
-    do: Stacks.stack_run_approval(run)
+  def process(%@for{item: %StackRun{status: :pending_approval} = run}) do
+    Plan.enqueue(run)
+    Stacks.stack_run_approval(run)
+  end
 
   def process(%@for{item: %StackRun{pull_request_id: id, status: status} = run})
     when is_binary(id) and status != :queued do
@@ -212,19 +216,6 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
   #   do: Console.Deployments.Stacks.Discovery.runner(run)
 
   def process(_), do: :ok
-end
-
-defimpl Console.PubSub.Recurse, for: Console.PubSub.StackStateInsight do
-  alias Console.Schema.{StackRun, PullRequest, StackState, AiInsight}
-  alias Console.Deployments.Stacks
-
-  def process(%@for{item: {%StackState{} = state, _}}) do
-    case Console.Repo.preload(state, [run: [:pull_request, state: :insight]]) do
-      %StackState{run: %StackRun{pull_request: %PullRequest{}, state: %StackState{insight: %AiInsight{}}} = run} ->
-        Stacks.post_comment(run)
-      _ -> :ok
-    end
-  end
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
@@ -265,6 +256,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
         Console.Repo.delete(stack)
       %StackRun{pull_request: %PullRequest{} = pr} = run ->
         Stacks.post_comment(run)
+        Console.AI.Plan.enqueue(run)
         Stacks.dequeue(pr)
       %StackRun{stack: %Stack{} = stack} ->
         Workbenches.kick_workbench(run)

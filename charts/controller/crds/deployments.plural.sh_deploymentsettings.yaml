@@ -255,6 +255,15 @@ spec:
                         description: EmbeddingModel is the Bedrock model or inference
                           profile for embeddings. Same ID formats as modelId.
                         type: string
+                      endpoint:
+                        default: RUNTIME
+                        description: |-
+                          Endpoint selects the AWS Bedrock API surface. RUNTIME (the default) uses InvokeModel or
+                          Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
+                        enum:
+                        - RUNTIME
+                        - MANTLE
+                        type: string
                       modelId:
                         description: |-
                           ModelID is the primary AWS Bedrock model or inference profile identifier.

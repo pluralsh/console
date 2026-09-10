@@ -29,7 +29,6 @@ defmodule Console.Deployments.Stacks do
     CustomStackRun,
     StackDefinition,
     StackCron,
-    AiInsight,
     StackPolicy
   }
 
@@ -404,18 +403,8 @@ defmodule Console.Deployments.Stacks do
   Posts a review comment for a completed pr stack run if possible
   """
   def post_comment(%StackRun{} = run) do
-    run = Repo.preload(run, [:pull_request, stack: :connection, state: :insight])
+    run = Repo.preload(run, [:pull_request, :state, stack: :connection])
     case {run, scm_connection(run)}  do
-      {%StackRun{
-        id: id,
-        stack_id: stack_id,
-        status: :successful,
-        state: %StackState{insight: %AiInsight{} = insight},
-        pull_request: %PullRequest{} = pr
-      }, %ScmConnection{} = conn} ->
-        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state ai_comment_id)a)}, pr_blob("insight", insight: insight, link: url))
-        |> save_comment(run, :ai_comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
@@ -450,6 +439,28 @@ defmodule Console.Deployments.Stacks do
         Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("succeeded", link: url))
         |> save_comment(run, :comment_id)
       _ -> {:error, "cannot post review for this stack run"}
+    end
+  end
+
+  @doc """
+  Posts an AI-generated plan summary as a separate PR review comment.
+  """
+  def post_plan_comment(%StackRun{} = run, text) when is_binary(text) do
+    run = Repo.preload(run, [:pull_request, stack: :connection])
+    case {run, scm_connection(run)} do
+      {%StackRun{
+        id: id,
+        stack_id: stack_id,
+        pull_request: %PullRequest{} = pr
+      }, %ScmConnection{} = conn} ->
+        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
+        Dispatcher.review(
+          conn,
+          %{pr | comment_id: Console.deep_get(run, ~w(scm_state ai_comment_id)a)},
+          pr_blob("insight", text: text, link: url)
+        )
+        |> save_comment(run, :ai_comment_id)
+      _ -> {:error, "cannot post plan summary for this stack run"}
     end
   end
 
