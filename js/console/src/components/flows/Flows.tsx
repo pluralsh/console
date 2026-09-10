@@ -130,6 +130,15 @@ export function Flows() {
     }
     if ((!data && loading) || isSearchPending) return <LoadingIndicator />
     if (isEmpty(flows)) {
+      if (hasUncheckedFlowFilters(display)) {
+        return (
+          <DisplayFilterEmpty
+            title="No flows found"
+            description="It looks like there are no flows matching the selected filters."
+            onReset={() => updateDisplay(resetFlowFilters(display))}
+          />
+        )
+      }
       return hasActiveSearch ? (
         <Card css={{ padding: theme.spacing.large }}>
           <EmptyState message="No flows found" />
