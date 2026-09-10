@@ -63,6 +63,9 @@ func NewTransport(agent *Agent) (*Transport, error) {
 		// Gemini CLI v0.59.0 can emit a tool_call_update before its
 		// corresponding start event. Revisit on future upgrades.
 		acp.WithToolCallUpdateRecovery(),
+		// Gemini CLI v0.59.0 puts tool input in start content and omits
+		// rawInput. Revisit on future upgrades.
+		acp.WithToolCallStartContentAsInputWithoutRawInput(),
 	)
 
 	result.engine = engine

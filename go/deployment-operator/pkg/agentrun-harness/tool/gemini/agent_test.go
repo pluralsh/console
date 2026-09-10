@@ -30,6 +30,9 @@ func TestAgentPrepareWritesPromptAndSkills(t *testing.T) {
 	if !strings.HasPrefix(string(prompt), "analyze") {
 		t.Fatalf("prompt = %q", prompt)
 	}
+	if !strings.Contains(string(prompt), "command substitution") || !strings.Contains(string(prompt), "temporary files") {
+		t.Fatalf("Gemini compatibility instructions missing: %q", prompt)
+	}
 	if _, err := os.Stat(filepath.Join(workDir, geminiHomeDir, geminiSkillsDir, "repository", "SKILL.md")); err != nil {
 		t.Fatalf("skill: %v", err)
 	}
@@ -43,6 +46,9 @@ func TestAgentPrepareWritesPromptAndSkills(t *testing.T) {
 	}
 	if !strings.HasPrefix(string(prompt), "babysit") {
 		t.Fatalf("babysit prompt = %q", prompt)
+	}
+	if !strings.Contains(string(prompt), "command substitution") || !strings.Contains(string(prompt), "temporary files") {
+		t.Fatalf("Gemini babysit compatibility instructions missing: %q", prompt)
 	}
 }
 

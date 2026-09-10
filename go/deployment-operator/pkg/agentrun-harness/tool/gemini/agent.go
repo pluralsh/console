@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 
 	console "github.com/pluralsh/console/go/client"
@@ -13,9 +15,13 @@ import (
 )
 
 const (
-	geminiHomeDir   = ".gemini"
-	geminiSkillsDir = "skills"
-	geminiChatsDir  = "chats"
+	geminiHomeDir                   = ".gemini"
+	geminiSkillsDir                 = "skills"
+	geminiChatsDir                  = "chats"
+	geminiCompatibilityInstructions = `
+
+Gemini CLI compatibility: do not use command substitution forms such as $(), backticks, <(), or >(), because the CLI blocks them even in yolo mode. Use arithmetic loops, shell builtins, temporary files, or separate commands instead.
+`
 )
 
 type Agent struct {
@@ -62,6 +68,9 @@ func (agent *Agent) Prepare(ctx context.Context, request toolv1.FileSystemReques
 		return err
 	}
 	if err := agent.contextError(ctx); err != nil {
+		return err
+	}
+	if err := agent.appendCompatibilityInstructions(config); err != nil {
 		return err
 	}
 	return defaultTool.ConfigureSkills(agent.skillsPath(config))
@@ -161,6 +170,28 @@ func (agent *Agent) skillsPath(config toolv1.Config) string {
 
 func (agent *Agent) chatsPath(config toolv1.Config) string {
 	return filepath.Join(agent.geminiHome(config), "tmp", "plural", geminiChatsDir)
+}
+
+func (agent *Agent) appendCompatibilityInstructions(config toolv1.Config) error {
+	promptPath := filepath.Join(agent.geminiHome(config), toolv1.SystemPromptFile)
+	prompt, err := os.OpenFile(promptPath, os.O_WRONLY|os.O_APPEND, 0)
+	if err != nil {
+		return fmt.Errorf("open Gemini system prompt for compatibility instructions: %w", err)
+	}
+
+	written, err := io.WriteString(prompt, geminiCompatibilityInstructions)
+	if err != nil {
+		_ = prompt.Close()
+		return fmt.Errorf("append Gemini compatibility instructions: %w", err)
+	}
+	if written != len(geminiCompatibilityInstructions) {
+		_ = prompt.Close()
+		return fmt.Errorf("append Gemini compatibility instructions: %w", io.ErrShortWrite)
+	}
+	if err := prompt.Close(); err != nil {
+		return fmt.Errorf("close Gemini system prompt: %w", err)
+	}
+	return nil
 }
 
 func (*Agent) contextError(ctx context.Context) error {

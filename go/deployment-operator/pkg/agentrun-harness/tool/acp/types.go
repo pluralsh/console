@@ -135,3 +135,11 @@ func WithToolCallUpdateRecovery() Option {
 		engine.recoverToolUpdates = true
 	}
 }
+
+// WithToolCallStartContentAsInputWithoutRawInput treats textual start content
+// as tool input when a provider omits RawInput.
+func WithToolCallStartContentAsInputWithoutRawInput() Option {
+	return func(engine *Engine) {
+		engine.startContentIsInputWithoutRawInput = true
+	}
+}

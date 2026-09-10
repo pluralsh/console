@@ -128,6 +128,107 @@ func TestClientRejectsDuplicateToolCallStarts(t *testing.T) {
 	}
 }
 
+func TestClientMapsStartContentToOutputByDefault(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1", Status: inProgress,
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock(`{"command":"git status"}`))},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("start tool call: %v", err)
+	}
+	if len(sink.messages) != 1 || sink.messages[0].Metadata.Tool.Input != nil || *sink.messages[0].Metadata.Tool.Output != `{"command":"git status"}` {
+		t.Fatalf("default tool mapping = %#v", sink.messages)
+	}
+	if len(sink.outputs) != 1 || sink.outputs[0] != `call-1:{"command":"git status"}` {
+		t.Fatalf("default output events = %v", sink.outputs)
+	}
+}
+
+func TestClientMapsGeminiStartContentToInput(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	completed := acpsdk.ToolCallStatusCompleted
+	start := acpsdk.SessionNotification{SessionId: "session-1", Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+		ToolCallId: "call-1", Status: inProgress,
+		Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock(`{"command":"git status"}`))},
+	}}}
+	if err := acpClient.SessionUpdate(context.Background(), start); err != nil {
+		t.Fatalf("start tool call: %v", err)
+	}
+	if len(sink.messages) != 1 || sink.messages[0].Metadata.Tool.Input == nil || *sink.messages[0].Metadata.Tool.Input != `{"command":"git status"}` || *sink.messages[0].Metadata.Tool.Output != runningToolOutput {
+		t.Fatalf("Gemini start mapping = %#v", sink.messages)
+	}
+	if len(sink.outputs) != 0 {
+		t.Fatalf("Gemini start output events = %v", sink.outputs)
+	}
+	completion := acpsdk.SessionNotification{SessionId: "session-1", Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+		ToolCallId: "call-1", Status: &completed,
+		Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("clean"))},
+	}}}
+	if err := acpClient.SessionUpdate(context.Background(), completion); err != nil {
+		t.Fatalf("complete tool call: %v", err)
+	}
+	if len(sink.outputs) != 1 || sink.outputs[0] != "call-1:clean" {
+		t.Fatalf("Gemini completion output events = %v", sink.outputs)
+	}
+}
+
+func TestClientKeepsStartContentAsOutputWhenRawInputExists(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1", Status: inProgress, RawInput: map[string]any{"command": "git status"},
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("displayed output"))},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("start tool call: %v", err)
+	}
+	tool := sink.messages[0].Metadata.Tool
+	if tool.Input == nil || *tool.Input != `{"command":"git status"}` || tool.Output == nil || *tool.Output != "displayed output" {
+		t.Fatalf("raw input tool mapping = %#v", tool)
+	}
+	if len(sink.outputs) != 1 || sink.outputs[0] != "call-1:displayed output" {
+		t.Fatalf("raw input output events = %v", sink.outputs)
+	}
+}
+
+func TestClientKeepsTerminalGeminiStartContentAsOutput(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	completed := acpsdk.ToolCallStatusCompleted
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1", Status: completed,
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("actual output"))},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("start terminal tool call: %v", err)
+	}
+	tool := sink.messages[0].Metadata.Tool
+	if tool.Input != nil || tool.Output == nil || *tool.Output != "actual output" {
+		t.Fatalf("terminal Gemini start mapping = %#v", tool)
+	}
+	if len(sink.outputs) != 0 {
+		t.Fatalf("terminal Gemini start output events = %v", sink.outputs)
+	}
+	if _, exists := acpClient.turn.tools["call-1"]; exists {
+		t.Fatal("terminal Gemini start remained active")
+	}
+}
+
 func TestClientRecoversToolCallUpdateBeforeToolCall(t *testing.T) {
 	sink := &testSink{}
 	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), sink, "session-1")}
@@ -182,6 +283,119 @@ func TestClientRecoversToolCallUpdateBeforeToolCall(t *testing.T) {
 	}
 }
 
+func TestClientMapsRecoveredGeminiNonterminalContentToInput(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery(), WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1", Status: &inProgress,
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("Run shell command."))},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("recover tool call update: %v", err)
+	}
+	if len(sink.messages) != 1 || sink.messages[0].Metadata.Tool.Input == nil || *sink.messages[0].Metadata.Tool.Input != "Run shell command." || *sink.messages[0].Metadata.Tool.Output != runningToolOutput {
+		t.Fatalf("recovered Gemini start mapping = %#v", sink.messages)
+	}
+	if len(sink.outputs) != 0 {
+		t.Fatalf("recovered Gemini output events = %v", sink.outputs)
+	}
+}
+
+func TestClientReconcilesGeminiRawInputWithoutEmittingDelayedStartContent(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery(), WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1", Status: &inProgress,
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("inferred input"))},
+		}},
+	}); err != nil {
+		t.Fatalf("recover tool call update: %v", err)
+	}
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1", Status: inProgress, RawInput: map[string]any{"command": "git status"},
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("delayed explanation"))},
+		}},
+	}); err != nil {
+		t.Fatalf("reconcile tool call: %v", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("reconciled Gemini messages = %d, want 2", len(sink.messages))
+	}
+	tool := sink.messages[1].Metadata.Tool
+	if tool.Input == nil || *tool.Input != `{"command":"git status"}` || tool.Output == nil || *tool.Output != runningToolOutput || tool.State == nil || *tool.State != console.AgentMessageToolStateRunning {
+		t.Fatalf("reconciled Gemini message = %#v", tool)
+	}
+	if len(sink.outputs) != 0 {
+		t.Fatalf("reconciled Gemini output events = %v", sink.outputs)
+	}
+}
+
+func TestClientReconcilesTerminalGeminiStartAsMetadataOutput(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery(), WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1", Status: &inProgress,
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("inferred input"))},
+		}},
+	}); err != nil {
+		t.Fatalf("recover tool call update: %v", err)
+	}
+	completed := acpsdk.ToolCallStatusCompleted
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1", Status: completed,
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("actual output"))},
+		}},
+	}); err != nil {
+		t.Fatalf("reconcile terminal tool call: %v", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("reconciled terminal Gemini messages = %d, want 2", len(sink.messages))
+	}
+	tool := sink.messages[1].Metadata.Tool
+	if tool.Output == nil || *tool.Output != "actual output" || tool.State == nil || *tool.State != console.AgentMessageToolStateCompleted {
+		t.Fatalf("reconciled terminal Gemini message = %#v", tool)
+	}
+	if len(sink.outputs) != 0 {
+		t.Fatalf("reconciled terminal Gemini output events = %v", sink.outputs)
+	}
+}
+
+func TestClientKeepsRecoveredGeminiTerminalContentAsOutput(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery(), WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	completed := acpsdk.ToolCallStatusCompleted
+	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1", Status: &completed,
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("actual output"))},
+		}},
+	})
+	if err != nil {
+		t.Fatalf("recover terminal tool call update: %v", err)
+	}
+	if len(sink.messages) != 2 || sink.messages[0].Metadata.Tool.Input != nil || *sink.messages[1].Metadata.Tool.Output != "actual output" {
+		t.Fatalf("recovered terminal Gemini mapping = %#v", sink.messages)
+	}
+	if len(sink.outputs) != 1 || sink.outputs[0] != "call-1:actual output" {
+		t.Fatalf("recovered terminal output events = %v", sink.outputs)
+	}
+}
+
 func TestClientRejectsEmptyToolCallUpdateIDWithRecovery(t *testing.T) {
 	acpClient := &client{turn: newTurn(NewEngine(WithToolCallUpdateRecovery()), &testSink{}, "session-1")}
 	err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
@@ -214,10 +428,10 @@ func TestClientRecoversUnspecifiedToolCallStatusAsRunning(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("reconcile tool call: %v", err)
 	}
-	if len(sink.messages) != 1 {
-		t.Fatalf("tool call messages = %d, want 1", len(sink.messages))
+	if len(sink.messages) != 2 {
+		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
 	}
-	if state := sink.messages[0].Metadata.Tool.State; state == nil || *state != console.AgentMessageToolStateRunning {
+	if state := sink.messages[1].Metadata.Tool.State; state == nil || *state != console.AgentMessageToolStateRunning {
 		t.Fatalf("reconciled tool state = %v, want running", state)
 	}
 }
@@ -376,6 +590,60 @@ func TestClientRequestPermissionUpdatesExistingToolCallBeforeDenying(t *testing.
 	}
 	if tool.Input == nil || *tool.Input != `{"command":"rm -rf build"}` {
 		t.Fatalf("updated tool input = %v", tool.Input)
+	}
+}
+
+func TestClientMapsGeminiPermissionContentToInputForExistingToolCall(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(WithToolCallStartContentAsInputWithoutRawInput()), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update:    acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{ToolCallId: "call-1", Status: inProgress}},
+	}); err != nil {
+		t.Fatalf("start tool call: %v", err)
+	}
+
+	_, err := acpClient.RequestPermission(context.Background(), acpsdk.RequestPermissionRequest{
+		SessionId: "session-1",
+		ToolCall: acpsdk.ToolCallUpdate{
+			ToolCallId: "call-1",
+			Content:    []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("Run shell command."))},
+		},
+	})
+	if err == nil || err.Error() != "acp permission requests are unavailable in unattended runs" {
+		t.Fatalf("permission error = %v, want unattended permission denial", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
+	}
+	tool := sink.messages[1].Metadata.Tool
+	if tool.Input == nil || *tool.Input != "Run shell command." || tool.Output == nil || *tool.Output != runningToolOutput {
+		t.Fatalf("Gemini permission mapping = %#v", tool)
+	}
+	if len(sink.outputs) != 0 {
+		t.Fatalf("Gemini permission output events = %v", sink.outputs)
+	}
+
+	_, err = acpClient.RequestPermission(context.Background(), acpsdk.RequestPermissionRequest{
+		SessionId: "session-1",
+		ToolCall: acpsdk.ToolCallUpdate{
+			ToolCallId: "call-1", RawInput: map[string]any{"command": "git status"},
+			Content: []acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("displayed output"))},
+		},
+	})
+	if err == nil || err.Error() != "acp permission requests are unavailable in unattended runs" {
+		t.Fatalf("permission error with raw input = %v, want unattended permission denial", err)
+	}
+	if len(sink.messages) != 3 {
+		t.Fatalf("tool call messages with raw input = %d, want 3", len(sink.messages))
+	}
+	tool = sink.messages[2].Metadata.Tool
+	if tool.Input == nil || *tool.Input != `{"command":"git status"}` || tool.Output == nil || *tool.Output != "displayed output" {
+		t.Fatalf("Gemini permission raw input mapping = %#v", tool)
+	}
+	if len(sink.outputs) != 1 || sink.outputs[0] != "call-1:displayed output" {
+		t.Fatalf("Gemini permission raw input output events = %v", sink.outputs)
 	}
 }
 
