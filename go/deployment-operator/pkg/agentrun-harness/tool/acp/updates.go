@@ -18,6 +18,7 @@ type turnState struct {
 	engine         *Engine
 	sink           Sink
 	mu             sync.Mutex
+	toolMu         sync.Mutex
 	sessionIDValue string
 	errValue       error
 	assistant      strings.Builder
@@ -31,6 +32,7 @@ func (turn *turnState) contentText(content acpsdk.ContentBlock) (string, error) 
 	if content.Text != nil {
 		return content.Text.Text, nil
 	}
+
 	return "", errors.New("expected text content")
 }
 
@@ -38,6 +40,7 @@ func (turn *turnState) normalizeUsage(providerUsage *acpsdk.Usage) (input, outpu
 	input = int64(max(providerUsage.InputTokens, 0))
 	output = int64(max(providerUsage.OutputTokens, 0))
 	total = max(int64(max(providerUsage.TotalTokens, 0)), input+output)
+
 	if providerUsage.CachedReadTokens != nil {
 		cached += int64(max(*providerUsage.CachedReadTokens, 0))
 	}
@@ -50,6 +53,7 @@ func (turn *turnState) normalizeUsage(providerUsage *acpsdk.Usage) (input, outpu
 			total = input + output + thought
 		}
 	}
+
 	return
 }
 
@@ -87,10 +91,12 @@ func (turn *turnState) setErr(err error) {
 	if err == nil {
 		return
 	}
+
 	turn.mu.Lock()
 	if turn.errValue == nil {
 		turn.errValue = err
 	}
+
 	turn.mu.Unlock()
 }
 
@@ -101,6 +107,7 @@ func (turn *turnState) handle(notification acpsdk.SessionNotification) error {
 	if turn.isRestoring() {
 		return nil
 	}
+
 	update := notification.Update
 	switch {
 	case update.AgentMessageChunk != nil:
@@ -123,6 +130,7 @@ func (turn *turnState) handle(notification acpsdk.SessionNotification) error {
 		// not affect the Console message contract.
 		klog.V(log.LogLevelDebug).InfoS("ignoring optional ACP session update")
 	}
+
 	return nil
 }
 
@@ -142,9 +150,11 @@ func (turn *turnState) bindNotification(sessionID acpsdk.SessionId) error {
 		turn.sessionIDValue = expected
 	}
 	turn.mu.Unlock()
+
 	if sessionID == acpsdk.SessionId(expected) {
 		return nil
 	}
+
 	return turn.sessionUpdateMismatch(sessionID, expected)
 }
 
@@ -154,6 +164,7 @@ func (turn *turnState) appendTextChunk(content acpsdk.ContentBlock, target *stri
 		turn.setErr(fmt.Errorf("acp %s content: %w", kind, err))
 		return err
 	}
+
 	turn.mu.Lock()
 	target.WriteString(text)
 	turn.mu.Unlock()
@@ -170,40 +181,131 @@ func (turn *turnState) startTool(update *acpsdk.SessionUpdateToolCall) error {
 	if update.ToolCallId == "" {
 		return turn.fail("acp tool call has an empty id")
 	}
-	id := string(update.ToolCallId)
+
+	turn.toolMu.Lock()
+	defer turn.toolMu.Unlock()
 	turn.mu.Lock()
-	if _, exists := turn.tools[id]; exists {
-		turn.mu.Unlock()
-		return turn.fail(fmt.Sprintf("acp tool call %q was started twice", id))
+	message, output, err := turn.startToolLocked(update)
+	turn.mu.Unlock()
+
+	if err != nil {
+		return turn.fail(err.Error())
 	}
+
+	turn.sink.Message(message, string(update.ToolCallId))
+	if output != "" {
+		turn.sink.ToolCallOutput(string(update.ToolCallId), output)
+	}
+
+	return nil
+}
+
+func (turn *turnState) startToolLocked(update *acpsdk.SessionUpdateToolCall) (*console.AgentMessageAttributes, string, error) {
+	id := string(update.ToolCallId)
+	if _, exists := turn.tools[id]; exists {
+		return nil, "", fmt.Errorf("acp tool call %q was started twice", id)
+	}
+
 	call := &toolCall{id: id}
 	call.input = call.formatValue(update.RawInput)
 	call.setName(update.Title, update.Kind)
 	if _, _, err := call.updateStatus(&update.Status); err != nil {
-		turn.mu.Unlock()
-		return turn.fail(err.Error())
+		return nil, "", err
 	}
+
 	toolOutputValue := call.toolOutput(update.Content, update.Meta, update.RawOutput)
 	call.applyOutput(toolOutputValue)
 	turn.tools[id] = call
-	message := call.message()
-	output := call.output
-	turn.mu.Unlock()
-	turn.sink.Message(message, id)
-	if output != "" {
-		turn.sink.ToolCallOutput(id, output)
+	return call.message(), call.output, nil
+}
+
+func (turn *turnState) upsertPermissionTool(update *acpsdk.ToolCallUpdate) error {
+	if update.ToolCallId == "" {
+		return turn.fail("acp tool call has an empty id")
 	}
+
+	turn.toolMu.Lock()
+	defer turn.toolMu.Unlock()
+	turn.mu.Lock()
+
+	if _, exists := turn.tools[string(update.ToolCallId)]; exists {
+		events, err := turn.applyToolUpdate(turn.permissionToolCallUpdate(update))
+		turn.mu.Unlock()
+
+		if err != nil {
+			turn.setErr(err)
+			return err
+		}
+
+		turn.emitToolUpdate(update.ToolCallId, events)
+		return nil
+	}
+
+	message, output, err := turn.startToolLocked(turn.permissionToolCallStart(update))
+	turn.mu.Unlock()
+	if err != nil {
+		return turn.fail(err.Error())
+	}
+
+	turn.sink.Message(message, string(update.ToolCallId))
+	if output != "" {
+		turn.sink.ToolCallOutput(string(update.ToolCallId), output)
+	}
+
 	return nil
 }
 
+func (*turnState) permissionToolCallStart(update *acpsdk.ToolCallUpdate) *acpsdk.SessionUpdateToolCall {
+	toolCall := &acpsdk.SessionUpdateToolCall{
+		Meta:       update.Meta,
+		Content:    update.Content,
+		Kind:       acpsdk.ToolKindOther,
+		Locations:  update.Locations,
+		RawInput:   update.RawInput,
+		RawOutput:  update.RawOutput,
+		Status:     acpsdk.ToolCallStatusPending,
+		ToolCallId: update.ToolCallId,
+	}
+
+	if update.Kind != nil {
+		toolCall.Kind = *update.Kind
+	}
+	if update.Status != nil {
+		toolCall.Status = *update.Status
+	}
+	if update.Title != nil {
+		toolCall.Title = *update.Title
+	}
+
+	return toolCall
+}
+
+func (*turnState) permissionToolCallUpdate(update *acpsdk.ToolCallUpdate) *acpsdk.SessionToolCallUpdate {
+	return &acpsdk.SessionToolCallUpdate{
+		Meta:       update.Meta,
+		Content:    update.Content,
+		Kind:       update.Kind,
+		Locations:  update.Locations,
+		RawInput:   update.RawInput,
+		RawOutput:  update.RawOutput,
+		Status:     update.Status,
+		Title:      update.Title,
+		ToolCallId: update.ToolCallId,
+	}
+}
+
 func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
+	turn.toolMu.Lock()
+	defer turn.toolMu.Unlock()
 	turn.mu.Lock()
 	events, err := turn.applyToolUpdate(update)
 	turn.mu.Unlock()
+
 	if err != nil {
 		turn.setErr(err)
 		return err
 	}
+
 	turn.emitToolUpdate(update.ToolCallId, events)
 	return nil
 }
@@ -211,28 +313,33 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 func (turn *turnState) applyToolUpdate(update *acpsdk.SessionToolCallUpdate) (toolUpdateEvents, error) {
 	id := string(update.ToolCallId)
 	call, exists := turn.tools[id]
+
 	if !exists {
 		return toolUpdateEvents{}, fmt.Errorf("acp tool call update %q arrived before tool_call", id)
 	}
 	metadataChanged := call.updateMetadata(update)
 	previousOutput := call.output
 	output := call.toolOutput(update.Content, update.Meta, update.RawOutput)
+
 	if output.text != "" {
 		call.applyOutput(output)
 	}
 	streamOutput := call.output != previousOutput && (previousOutput == "" || strings.HasPrefix(call.output, previousOutput))
 	terminal, statusChanged, err := call.updateStatus(update.Status)
+
 	if err != nil {
 		return toolUpdateEvents{}, err
 	}
 	metadataChanged = metadataChanged || statusChanged
 	message := (*console.AgentMessageAttributes)(nil)
+
 	if terminal {
 		message = call.message()
 		delete(turn.tools, id)
 	} else if metadataChanged {
 		message = call.message()
 	}
+
 	return toolUpdateEvents{
 		message:      message,
 		output:       call.output,
@@ -246,6 +353,7 @@ func (call *toolCall) applyOutput(output toolOutputValue) {
 		call.appendOutput(output.text)
 		return
 	}
+
 	call.addOutput(output.text)
 }
 
@@ -272,6 +380,7 @@ func (turn *turnState) emitAssistant(responseUsage *acpsdk.Usage) {
 			Reasoning: &console.AgentMessageReasoningAttributes{Text: &reasoning},
 		}
 	}
+
 	if responseUsage != nil {
 		input, output, total, cached, thought := turn.normalizeUsage(responseUsage)
 		turn.sink.Usage(usage.Record{
@@ -290,6 +399,7 @@ func (turn *turnState) emitAssistant(responseUsage *acpsdk.Usage) {
 	} else {
 		klog.V(log.LogLevelDebug).InfoS("ACP prompt response omitted optional usage")
 	}
+
 	if message.Cost == nil && cost > 0 {
 		message.Cost = &console.AgentMessageCostAttributes{Total: cost}
 	}
@@ -299,6 +409,7 @@ func (turn *turnState) emitAssistant(responseUsage *acpsdk.Usage) {
 		}
 		message.Message = "__plrl_ignore__"
 	}
+
 	turn.sink.Message(message, "")
 }
 
@@ -307,10 +418,12 @@ func (turn *turnState) usageUpdate(update *acpsdk.SessionUsageUpdate) {
 		klog.V(log.LogLevelDebug).InfoS("ACP usage update omitted optional cost")
 		return
 	}
+
 	delta := turn.engine.costs.RecordCumulativeCost(turn.sessionID(), update.Cost.Amount)
 	if delta <= 0 {
 		return
 	}
+
 	turn.sink.Usage(usage.Record{TotalCost: delta})
 	turn.mu.Lock()
 	turn.cost += delta

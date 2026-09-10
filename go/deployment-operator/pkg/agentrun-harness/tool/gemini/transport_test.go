@@ -82,8 +82,9 @@ func TestTransportCapabilitiesAndPreCancelledTurn(t *testing.T) {
 	}
 }
 
-func TestGeminiPromptUsageReadsQuotaTokenCount(t *testing.T) {
-	usage := geminiPromptUsage(acpsdk.PromptResponse{Meta: map[string]any{
+func TestTransportToUsageReadsQuotaTokenCount(t *testing.T) {
+	transport := &Transport{}
+	usage := transport.toUsage(acpsdk.PromptResponse{Meta: map[string]any{
 		"quota": map[string]any{"token_count": map[string]any{
 			"input_tokens": float64(17), "output_tokens": float64(9),
 		}},
@@ -91,19 +92,20 @@ func TestGeminiPromptUsageReadsQuotaTokenCount(t *testing.T) {
 	if usage == nil || usage.InputTokens != 17 || usage.OutputTokens != 9 || usage.TotalTokens != 26 {
 		t.Fatalf("usage = %#v", usage)
 	}
-	if usage := geminiPromptUsage(acpsdk.PromptResponse{Meta: map[string]any{"quota": map[string]any{"token_count": map[string]any{
+	if usage := transport.toUsage(acpsdk.PromptResponse{Meta: map[string]any{"quota": map[string]any{"token_count": map[string]any{
 		"input_tokens": float64(17.5), "output_tokens": float64(9),
 	}}}}); usage != nil {
 		t.Fatalf("usage = %#v, want nil", usage)
 	}
-	if _, ok := geminiTokenCount(math.Ldexp(1, strconv.IntSize-1)); ok {
-		t.Fatal("geminiTokenCount() overflow was accepted")
+	if _, ok := transport.toTokenCount(math.Ldexp(1, strconv.IntSize-1)); ok {
+		t.Fatal("toTokenCount() overflow was accepted")
 	}
 }
 
-func TestGeminiPromptUsagePrefersStandardUsage(t *testing.T) {
+func TestTransportToUsagePrefersStandardUsage(t *testing.T) {
+	transport := &Transport{}
 	standard := &acpsdk.Usage{InputTokens: 8, OutputTokens: 3, TotalTokens: 11}
-	usage := geminiPromptUsage(acpsdk.PromptResponse{
+	usage := transport.toUsage(acpsdk.PromptResponse{
 		Usage: standard,
 		Meta: map[string]any{"quota": map[string]any{"token_count": map[string]any{
 			"input_tokens": float64(17), "output_tokens": float64(9),

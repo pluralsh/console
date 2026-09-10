@@ -22,6 +22,26 @@ func TestToolCallPrefersContentAndFormatsRawOutput(t *testing.T) {
 	}
 }
 
+func TestToolCallUpdatesFallbackNameFromKind(t *testing.T) {
+	call := &toolCall{}
+	call.setName("", acpsdk.ToolKindExecute)
+	read := acpsdk.ToolKindRead
+	if !call.updateMetadata(&acpsdk.SessionToolCallUpdate{Kind: &read}) {
+		t.Fatal("kind-only update did not change fallback name")
+	}
+	if call.name != string(read) {
+		t.Fatalf("fallback tool name = %q, want %q", call.name, read)
+	}
+
+	call.setName("Explicit title", acpsdk.ToolKindExecute)
+	if call.updateMetadata(&acpsdk.SessionToolCallUpdate{Kind: &read}) {
+		t.Fatal("kind-only update changed explicit title")
+	}
+	if call.name != "Explicit title" {
+		t.Fatalf("explicit tool name = %q", call.name)
+	}
+}
+
 func TestToolCallMapsAdapterTerminalOutput(t *testing.T) {
 	sink := &testSink{}
 	turn := &turnState{sink: sink, tools: map[string]*toolCall{"call-1": {id: "call-1"}}}
@@ -73,6 +93,10 @@ func TestToolCallMessageUsesRunningOutputAndInput(t *testing.T) {
 	}
 	if *message.Metadata.Tool.Input != `{"command":"ls"}` {
 		t.Fatalf("tool input = %q", *message.Metadata.Tool.Input)
+	}
+	call.state = console.AgentMessageToolStateCompleted
+	if *message.Metadata.Tool.State != console.AgentMessageToolStateRunning {
+		t.Fatalf("message state = %q, want running snapshot", *message.Metadata.Tool.State)
 	}
 }
 

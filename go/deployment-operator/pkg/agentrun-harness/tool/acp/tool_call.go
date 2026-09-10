@@ -15,6 +15,8 @@ const runningToolOutput = "running..."
 type toolCall struct {
 	id     string
 	name   string
+	title  string
+	kind   acpsdk.ToolKind
 	input  string
 	output string
 	state  console.AgentMessageToolState
@@ -122,6 +124,7 @@ type toolUpdateEvents struct {
 func (call *toolCall) message() *console.AgentMessageAttributes {
 	name := call.name
 	output := call.output
+	state := call.state
 	if output == "" && (call.state == console.AgentMessageToolStateRunning || call.state == console.AgentMessageToolStatePending) {
 		output = runningToolOutput
 	}
@@ -130,7 +133,7 @@ func (call *toolCall) message() *console.AgentMessageAttributes {
 		Message: "Called tool",
 		Metadata: &console.AgentMessageMetadataAttributes{
 			Tool: &console.AgentMessageToolAttributes{
-				Name: new(name), State: &call.state, Output: new(output),
+				Name: new(name), State: &state, Output: new(output),
 			},
 		},
 	}
@@ -141,20 +144,33 @@ func (call *toolCall) message() *console.AgentMessageAttributes {
 }
 
 func (call *toolCall) setName(title string, kind acpsdk.ToolKind) {
+	call.title = title
+	call.kind = kind
+	call.name = call.displayName()
+}
+
+func (call *toolCall) displayName() string {
 	switch {
-	case title != "":
-		call.name = title
-	case kind != "":
-		call.name = string(kind)
+	case call.title != "":
+		return call.title
+	case call.kind != "":
+		return string(call.kind)
 	default:
-		call.name = "tool"
+		return "tool"
 	}
 }
 
 func (call *toolCall) updateMetadata(update *acpsdk.SessionToolCallUpdate) bool {
 	changed := false
-	if update.Title != nil && call.name != *update.Title {
-		call.name = *update.Title
+	if update.Title != nil {
+		call.title = *update.Title
+	}
+	if update.Kind != nil {
+		call.kind = *update.Kind
+	}
+	name := call.displayName()
+	if call.name != name {
+		call.name = name
 		changed = true
 	}
 	if update.RawInput != nil {

@@ -13,6 +13,8 @@ import (
 
 import acpsdk "github.com/coder/acp-go-sdk"
 
+import console "github.com/pluralsh/console/go/client"
+
 func newTestClient(t *testing.T, fileSystemWrite bool) (*client, string) {
 	t.Helper()
 	directory := t.TempDir()
@@ -55,6 +57,113 @@ func TestClientRejectsWritesWithoutPermission(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Dir(path)); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("write parent directory error = %v, want not exist", err)
+	}
+}
+
+func TestClientRequestPermissionStartsToolCallBeforeDenying(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(), sink, "session-1")}
+	title := "Run command"
+	kind := acpsdk.ToolKindExecute
+
+	_, err := acpClient.RequestPermission(context.Background(), acpsdk.RequestPermissionRequest{
+		SessionId: "session-1",
+		ToolCall: acpsdk.ToolCallUpdate{
+			ToolCallId: "call-1",
+			Title:      &title,
+			Kind:       &kind,
+		},
+	})
+	if err == nil || err.Error() != "acp permission requests are unavailable in unattended runs" {
+		t.Fatalf("permission error = %v, want unattended permission denial", err)
+	}
+	if len(sink.messages) != 1 {
+		t.Fatalf("permission-start tool messages = %d, want 1", len(sink.messages))
+	}
+	if state := sink.messages[0].Metadata.Tool.State; state == nil || *state != console.AgentMessageToolStatePending {
+		t.Fatalf("permission-start tool state = %v, want pending", state)
+	}
+
+	completed := acpsdk.ToolCallStatusCompleted
+	err = acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCallUpdate: &acpsdk.SessionToolCallUpdate{
+			ToolCallId: "call-1",
+			Status:     &completed,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("tool call update after permission denial: %v", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
+	}
+}
+
+func TestClientRequestPermissionUpdatesExistingToolCallBeforeDenying(t *testing.T) {
+	sink := &testSink{}
+	acpClient := &client{turn: newTurn(NewEngine(), sink, "session-1")}
+	inProgress := acpsdk.ToolCallStatusInProgress
+	execute := acpsdk.ToolKindExecute
+	if err := acpClient.SessionUpdate(context.Background(), acpsdk.SessionNotification{
+		SessionId: "session-1",
+		Update: acpsdk.SessionUpdate{ToolCall: &acpsdk.SessionUpdateToolCall{
+			ToolCallId: "call-1",
+			Kind:       execute,
+			Status:     inProgress,
+		}},
+	}); err != nil {
+		t.Fatalf("start tool call: %v", err)
+	}
+
+	read := acpsdk.ToolKindRead
+	_, err := acpClient.RequestPermission(context.Background(), acpsdk.RequestPermissionRequest{
+		SessionId: "session-1",
+		ToolCall: acpsdk.ToolCallUpdate{
+			ToolCallId: "call-1",
+			Kind:       &read,
+			RawInput:   map[string]any{"command": "rm -rf build"},
+		},
+	})
+	if err == nil || err.Error() != "acp permission requests are unavailable in unattended runs" {
+		t.Fatalf("permission error = %v, want unattended permission denial", err)
+	}
+	if len(sink.messages) != 2 {
+		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
+	}
+	tool := sink.messages[1].Metadata.Tool
+	if tool.Name == nil || *tool.Name != string(read) {
+		t.Fatalf("updated tool name = %v, want %q", tool.Name, read)
+	}
+	if tool.Input == nil || *tool.Input != `{"command":"rm -rf build"}` {
+		t.Fatalf("updated tool input = %v", tool.Input)
+	}
+}
+
+func TestClientRequestPermissionReturnsSessionAndToolCallErrors(t *testing.T) {
+	acpClient := &client{turn: newTurn(NewEngine(), &testSink{}, "session-1")}
+	for _, test := range []struct {
+		name    string
+		request acpsdk.RequestPermissionRequest
+		want    string
+	}{
+		{
+			name:    "foreign session",
+			request: acpsdk.RequestPermissionRequest{SessionId: "session-2", ToolCall: acpsdk.ToolCallUpdate{ToolCallId: "call-1"}},
+			want:    `acp request belongs to session "session-2", expected "session-1"`,
+		},
+		{
+			name:    "missing tool call id",
+			request: acpsdk.RequestPermissionRequest{SessionId: "session-1"},
+			want:    "acp tool call has an empty id",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			_, err := acpClient.RequestPermission(context.Background(), test.request)
+			if err == nil || err.Error() != test.want {
+				t.Fatalf("permission error = %v, want %q", err, test.want)
+			}
+		})
 	}
 }
 
