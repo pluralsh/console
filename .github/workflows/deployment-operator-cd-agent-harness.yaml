@@ -32,7 +32,7 @@ jobs:
     env:
       NODE_VERSION: 24.11.1
       CLAUDE_VERSION: 2.1.236
-      GEMINI_VERSION: 0.58.0
+      GEMINI_VERSION: 0.59.0
       OPENCODE_VERSION: 1.18.23
       CODEX_VERSION: 0.153.4
       PI_VERSION: 0.84.1
@@ -181,7 +181,7 @@ jobs:
           - name: claude
             version: 2.1.236
           - name: gemini
-            version: 0.58.0
+            version: 0.59.0
           - name: opencode
             version: 1.18.23
           - name: codex

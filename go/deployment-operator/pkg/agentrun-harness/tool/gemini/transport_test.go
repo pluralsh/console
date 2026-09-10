@@ -70,7 +70,7 @@ func TestTransportCapabilitiesAndPreCancelledTurn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if transport.Kind() != toolv1.TransportKindACP || transport.Capabilities().ToolCallOutputStreaming ||
+	if transport.Kind() != toolv1.TransportKindACP || transport.Capabilities().SessionResume || transport.Capabilities().ToolCallOutputStreaming ||
 		!transport.Capabilities().FileSystemWrite {
 		t.Fatalf("transport = %#v", transport.Capabilities())
 	}
@@ -79,6 +79,28 @@ func TestTransportCapabilitiesAndPreCancelledTurn(t *testing.T) {
 	_, err = transport.Turn(ctx, toolv1.TurnRequest{}, nil)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("Turn() error = %v", err)
+	}
+}
+
+func TestTransportACPRequestStartsFreshSession(t *testing.T) {
+	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: geminiTestRun(console.AgentRunModeWrite, "gemini-custom", nil)}
+	transport, err := NewTransport(NewAgent(config))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := transport.acpRequest(toolv1.TurnRequest{
+		Prompt:    "follow up",
+		SessionID: "prior-session",
+		Settings: toolv1.Settings{
+			Model: toolv1.ModelSelection{Name: "gemini-custom"},
+		},
+	})
+	if request.SessionID != "" {
+		t.Fatalf("ACP session ID = %q, want empty", request.SessionID)
+	}
+	if request.Cwd != transport.workDir || request.Prompt != "follow up" || request.Settings.ModelID != "gemini-custom" || !request.FileSystemWrite {
+		t.Fatalf("ACP request = %#v", request)
 	}
 }
 

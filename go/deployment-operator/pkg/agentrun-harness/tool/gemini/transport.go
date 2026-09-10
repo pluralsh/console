@@ -59,7 +59,6 @@ func NewTransport(agent *Agent) (*Transport, error) {
 
 	engine := acp.NewEngine(
 		acp.WithAuthenticationMethod(geminiAPIKeyAuthMethod),
-		acp.WithSessionRestorer(acp.LoadSession),
 		acp.WithUsageResolver(result.toUsage),
 	)
 
@@ -73,7 +72,10 @@ func (*Transport) Kind() toolv1.TransportKind {
 
 func (transport *Transport) Capabilities() toolv1.TransportCapabilities {
 	return toolv1.TransportCapabilities{
-		SessionResume:           true,
+		// Gemini CLI v0.59.0 session/load can corrupt same-minute saved sessions
+		// and fail with "No previous sessions found". Revisit on future upgrades.
+		// Ref: https://github.com/google-gemini/gemini-cli/issues/28693
+		SessionResume:           false,
 		ToolCallOutputStreaming: false,
 		UsageReporting:          true,
 		FileSystemRead:          true,
@@ -136,14 +138,17 @@ func (transport *Transport) Turn(ctx context.Context, request toolv1.TurnRequest
 		return toolv1.TurnResult{SessionID: request.SessionID}, err
 	}
 
-	result, err := transport.engine.Turn(ctx, process, acp.Request{
+	result, err := transport.engine.Turn(ctx, process, transport.acpRequest(request), sink)
+	return toolv1.TurnResult{SessionID: result.SessionID}, err
+}
+
+func (transport *Transport) acpRequest(request toolv1.TurnRequest) acp.Request {
+	return acp.Request{
 		Cwd:             transport.workDir,
 		Prompt:          request.Prompt,
-		SessionID:       request.SessionID,
 		Settings:        acp.SessionSettings{ModelID: request.Settings.Model.Name},
 		FileSystemWrite: transport.Capabilities().FileSystemWrite,
-	}, sink)
-	return toolv1.TurnResult{SessionID: result.SessionID}, err
+	}
 }
 
 func (transport *Transport) launch(options []exec.Option, mode console.AgentRunMode, model string) (*exec.StdioProcess, error) {

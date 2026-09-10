@@ -1,6 +1,6 @@
 ARG NODE_IMAGE_TAG=24
 ARG NODE_IMAGE=node:${NODE_IMAGE_TAG}-slim
-ARG AGENT_VERSION=0.58.0
+ARG AGENT_VERSION=0.59.0
 
 ARG AGENT_HARNESS_BASE_IMAGE_TAG=latest
 ARG AGENT_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/agent-harness-base
@@ -19,36 +19,6 @@ RUN npm install -g @google/gemini-cli@$AGENT_VERSION
 
 # Copy to a fixed, predictable path
 RUN cp -r $(npm root -g)/@google/gemini-cli /opt/gemini-cli
-
-# Gemini ACP replays loaded-session history asynchronously. Make the session
-# load response wait for that replay, so clients can safely begin a new turn.
-# Fail the image build if the pinned upstream artifact changes this call site.
-RUN node -e "\
-  const fs = require('fs'); \
-  const path = require('path'); \
-  const root = '/opt/gemini-cli/bundle'; \
-  const needle = 'session.streamHistory(sessionData.messages);'; \
-  const replacement = 'await session.streamHistory(sessionData.messages);'; \
-  const files = []; \
-  const visit = directory => { \
-    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) { \
-      const file = path.join(directory, entry.name); \
-      if (entry.isDirectory()) visit(file); \
-      else if (entry.isFile() && file.endsWith('.js')) files.push(file); \
-    } \
-  }; \
-  visit(root); \
-  const matches = files.filter(file => fs.readFileSync(file, 'utf8').includes(needle)); \
-  if (matches.length !== 3) throw new Error('expected three Gemini history calls, found ' + matches.length); \
-  for (const file of matches) { \
-    const source = fs.readFileSync(file, 'utf8'); \
-    if (source.split(needle).length - 1 !== 1) throw new Error('unexpected Gemini history call count in ' + file); \
-    fs.writeFileSync(file, source.replace(needle, replacement)); \
-    const patched = fs.readFileSync(file, 'utf8'); \
-    if (patched.split(replacement).length - 1 !== 1 || patched.replace(replacement, '').includes(needle)) { \
-      throw new Error('Gemini history patch verification failed in ' + file); \
-    } \
-  }"
 
 # Resolve the actual bin entry point from package.json and save it
 RUN node -e "\
