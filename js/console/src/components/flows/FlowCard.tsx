@@ -52,11 +52,11 @@ export function FlowCard({
     >
       <ContentSC>
         <HeaderSC>
-          <AppIcon
+          <CardAppIconSC
             rounded
             size="xsmall"
             url={flow.icon || undefined}
-            icon={<FlowIcon />}
+            icon={<FlowIcon size={20} />}
           />
           <Body1BoldP css={{ flex: 1, minWidth: 0, ...LINE_CLAMP }}>
             {flow.name}
@@ -136,11 +136,21 @@ export function FlowCard({
             onToggle={onToggleFavorite}
           />
         </Flex>
-        <ArrowRightIcon color="icon-light" />
+        <ArrowRightIcon
+          color="icon-light"
+          size={16}
+        />
       </FooterSC>
     </CardSC>
   )
 }
+
+const CardAppIconSC = styled(AppIcon)({
+  '& img, & svg': {
+    width: 20,
+    height: 20,
+  },
+})
 
 const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
