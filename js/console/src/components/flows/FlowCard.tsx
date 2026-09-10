@@ -13,6 +13,7 @@ import {
   FlowHealthChips,
   FlowPipelineChip,
   componentHealthCounts,
+  getFlowTabPath,
 } from 'components/flows/flowHealth'
 import { Body1BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
@@ -98,7 +99,17 @@ export function FlowCard({
             >
               Components
             </CaptionP>
-            <FlowHealthChips counts={componentCounts} />
+            <FlowHealthChips
+              counts={componentCounts}
+              getTo={(bucket) =>
+                getFlowTabPath({
+                  flowName: flow.name,
+                  tab: 'services',
+                  search,
+                  component: bucket,
+                })
+              }
+            />
           </MetricGroupSC>
           <MetricGroupSC>
             <CaptionP
@@ -107,7 +118,14 @@ export function FlowCard({
             >
               Alerts
             </CaptionP>
-            <FlowAlertChip count={flow.alertCount ?? 0} />
+            <FlowAlertChip
+              count={flow.alertCount ?? 0}
+              to={getFlowTabPath({
+                flowName: flow.name,
+                tab: 'alerts',
+                search,
+              })}
+            />
           </MetricGroupSC>
           <MetricGroupSC>
             <CaptionP
@@ -119,6 +137,11 @@ export function FlowCard({
             <FlowPipelineChip
               pipelineCount={flow.pipelineCount ?? 0}
               pendingCount={flow.pendingPipelineCount ?? 0}
+              to={getFlowTabPath({
+                flowName: flow.name,
+                tab: 'pipelines',
+                search,
+              })}
             />
           </MetricGroupSC>
         </MetricsSC>

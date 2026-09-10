@@ -1,19 +1,43 @@
 import { Chip, ChipSeverity } from '@pluralsh/design-system'
-import { ComponentState, ComponentStatusCount } from 'generated/graphql'
+import { CaptionP } from 'components/utils/typography/Text'
+import {
+  ComponentState,
+  ComponentStatusCount,
+  ServiceDeploymentStatus,
+} from 'generated/graphql'
 import { compact, sumBy } from 'lodash'
 import pluralize from 'pluralize'
-import { CaptionP } from 'components/utils/typography/Text'
+import { MouseEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 
 export type HealthBucket = 'failed' | 'stale' | 'healthy'
 
-const BUCKET_SEVERITY: Record<HealthBucket, ChipSeverity> = {
+export const FLOW_COMPONENT_PARAM = 'component'
+
+export const BUCKET_SEVERITY: Record<HealthBucket, ChipSeverity> = {
   failed: 'danger',
   stale: 'warning',
   healthy: 'success',
 }
 
 const BUCKET_PRIORITY: HealthBucket[] = ['failed', 'stale', 'healthy']
+
+export const BUCKET_SERVICE_STATUSES: Record<
+  HealthBucket,
+  ServiceDeploymentStatus[]
+> = {
+  failed: [ServiceDeploymentStatus.Failed],
+  stale: [ServiceDeploymentStatus.Stale, ServiceDeploymentStatus.Paused],
+  healthy: [ServiceDeploymentStatus.Healthy, ServiceDeploymentStatus.Synced],
+}
+
+const chipCss = {
+  width: 'max-content',
+  flexShrink: 0,
+  pointerEvents: 'auto',
+} as const
 
 export function componentHealthCounts(
   statuses: Nullable<Nullable<ComponentStatusCount>[]> | undefined
@@ -52,36 +76,97 @@ export function healthCaption(counts: Record<HealthBucket, number>) {
     .join(' · ')
 }
 
+export function parseComponentBucket(
+  value: string | null | undefined
+): HealthBucket | null {
+  if (value === 'failed' || value === 'stale' || value === 'healthy') {
+    return value
+  }
+
+  return null
+}
+
+export function getFlowTabPath({
+  flowName,
+  tab,
+  search,
+  component,
+}: {
+  flowName: string
+  tab: 'services' | 'alerts' | 'pipelines'
+  search?: string
+  component?: HealthBucket
+}) {
+  const params = new URLSearchParams(search)
+
+  if (component) params.set(FLOW_COMPONENT_PARAM, component)
+  else params.delete(FLOW_COMPONENT_PARAM)
+
+  const qs = params.toString()
+
+  return `${getFlowDetailsPath({ flowIdOrName: flowName })}/${tab}${qs ? `?${qs}` : ''}`
+}
+
 function bucketLabel(bucket: HealthBucket, count: number) {
   if (bucket === 'stale') return pluralize('stale', count)
   if (bucket === 'failed') return pluralize('failed', count)
   return pluralize('healthy', count)
 }
 
+function onChipClick(
+  event: MouseEvent,
+  navigate: (to: string) => void,
+  to: string
+) {
+  event.preventDefault()
+  event.stopPropagation()
+  navigate(to)
+}
+
 export function FlowHealthChips({
   counts,
+  getTo,
 }: {
   counts: Record<HealthBucket, number>
+  getTo?: (bucket: HealthBucket) => string
 }) {
+  const navigate = useNavigate()
+
   return (
     <ChipsSC>
-      {BUCKET_PRIORITY.filter((bucket) => counts[bucket] > 0).map((bucket) => (
-        <Chip
-          key={bucket}
-          size="small"
-          rounded
-          fillLevel={1}
-          severity={BUCKET_SEVERITY[bucket]}
-          css={{ width: 'max-content', flexShrink: 0 }}
-        >
-          {counts[bucket]} {bucketLabel(bucket, counts[bucket])}
-        </Chip>
-      ))}
+      {BUCKET_PRIORITY.filter((bucket) => counts[bucket] > 0).map((bucket) => {
+        const to = getTo?.(bucket)
+
+        return (
+          <Chip
+            key={bucket}
+            size="small"
+            rounded
+            fillLevel={1}
+            severity={BUCKET_SEVERITY[bucket]}
+            clickable={!!to}
+            css={chipCss}
+            onClick={
+              to ? (event) => onChipClick(event, navigate, to) : undefined
+            }
+          >
+            {counts[bucket]} {bucketLabel(bucket, counts[bucket])}
+          </Chip>
+        )
+      })}
     </ChipsSC>
   )
 }
 
-export function FlowAlertChip({ count }: { count: number }) {
+export function FlowAlertChip({
+  count,
+  to,
+}: {
+  count: number
+  to?: string
+}) {
+  const navigate = useNavigate()
+
   return (
     <Chip
       size="small"
@@ -89,7 +174,11 @@ export function FlowAlertChip({ count }: { count: number }) {
       fillLevel={1}
       severity="danger"
       inactive={count === 0 ? 'keep-fill' : false}
-      css={{ width: 'max-content', flexShrink: 0 }}
+      clickable={!!to}
+      css={chipCss}
+      onClick={
+        to ? (event) => onChipClick(event, navigate, to) : undefined
+      }
     >
       {count} {pluralize('alert', count)}
     </Chip>
@@ -98,9 +187,12 @@ export function FlowAlertChip({ count }: { count: number }) {
 
 export function FlowHealthStacked({
   counts,
+  to,
 }: {
   counts: Record<HealthBucket, number>
+  to?: string
 }) {
+  const navigate = useNavigate()
   const worst = worstHealth(counts)
   const caption = healthCaption(counts)
 
@@ -115,7 +207,7 @@ export function FlowHealthStacked({
     )
   }
 
-  return (
+  const stacked = (
     <StackedSC>
       <CaptionP
         $color={
@@ -137,15 +229,30 @@ export function FlowHealthStacked({
       </CaptionP>
     </StackedSC>
   )
+
+  if (!to) return stacked
+
+  return (
+    <StackedButtonSC
+      type="button"
+      onClick={(event) => onChipClick(event, navigate, to)}
+    >
+      {stacked}
+    </StackedButtonSC>
+  )
 }
 
 export function FlowPipelineChip({
   pipelineCount,
   pendingCount,
+  to,
 }: {
   pipelineCount: number
   pendingCount: number
+  to?: string
 }) {
+  const navigate = useNavigate()
+
   return (
     <Chip
       size="small"
@@ -153,7 +260,11 @@ export function FlowPipelineChip({
       fillLevel={1}
       severity={pendingCount > 0 ? 'warning' : 'neutral'}
       inactive={pipelineCount === 0 && pendingCount === 0 ? 'keep-fill' : false}
-      css={{ width: 'max-content', flexShrink: 0 }}
+      clickable={!!to}
+      css={chipCss}
+      onClick={
+        to ? (event) => onChipClick(event, navigate, to) : undefined
+      }
     >
       {pipelineCount} {pluralize('pipeline', pipelineCount)}
       {pendingCount > 0 && <PendingSC>{pendingCount} pending</PendingSC>}
@@ -171,6 +282,16 @@ const StackedSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
 })
+
+const StackedButtonSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  pointerEvents: 'auto',
+  textAlign: 'left',
+  cursor: 'pointer',
+  '&:hover p': {
+    textDecoration: 'underline',
+  },
+}))
 
 const PendingSC = styled.span(({ theme }) => ({
   marginLeft: theme.spacing.xsmall,

@@ -8,6 +8,8 @@ import {
   FlowHealthStacked,
   FlowPipelineChip,
   componentHealthCounts,
+  getFlowTabPath,
+  worstHealth,
 } from 'components/flows/flowHealth'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -101,6 +103,11 @@ function getColumns({
           <FlowPipelineChip
             pipelineCount={flow.pipelineCount ?? 0}
             pendingCount={flow.pendingPipelineCount ?? 0}
+            to={getFlowTabPath({
+              flowName: flow.name,
+              tab: 'pipelines',
+              search,
+            })}
           />
         )
       },
@@ -110,9 +117,23 @@ function getColumns({
       header: 'Components',
       meta: { gridTemplate: 'minmax(160px, 1fr)' },
       cell: function Cell({ getValue }) {
+        const flow = getValue()
+        const counts = componentHealthCounts(flow.componentStatuses)
+        const bucket = worstHealth(counts)
+
         return (
           <FlowHealthStacked
-            counts={componentHealthCounts(getValue().componentStatuses)}
+            counts={counts}
+            to={
+              bucket
+                ? getFlowTabPath({
+                    flowName: flow.name,
+                    tab: 'services',
+                    search,
+                    component: bucket,
+                  })
+                : undefined
+            }
           />
         )
       },
@@ -132,12 +153,23 @@ function getColumns({
         )
       },
     }),
-    columnHelper.accessor((flow) => flow.alertCount, {
+    columnHelper.accessor((flow) => flow, {
       id: 'alerts',
       header: '',
       meta: { gridTemplate: 'min-content' },
       cell: function Cell({ getValue }) {
-        return <FlowAlertChip count={getValue() ?? 0} />
+        const flow = getValue()
+
+        return (
+          <FlowAlertChip
+            count={flow.alertCount ?? 0}
+            to={getFlowTabPath({
+              flowName: flow.name,
+              tab: 'alerts',
+              search,
+            })}
+          />
+        )
       },
     }),
     columnHelper.accessor((flow) => flow.insight, {
