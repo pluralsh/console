@@ -121,11 +121,13 @@ function FlowNavChip({
   inactive,
   severity,
   children,
+  css: extraCss,
 }: {
   to?: string
   inactive?: ChipProps['inactive']
   severity: ChipProps['severity']
   children: ReactNode
+  css?: ChipProps['css']
 }) {
   const onClick = useStopNav(to)
 
@@ -136,7 +138,7 @@ function FlowNavChip({
       severity={severity}
       inactive={inactive}
       clickable={!!to}
-      css={chipCss}
+      css={{ ...chipCss, ...extraCss }}
       onClick={to ? onClick : undefined}
     >
       {children}
@@ -181,20 +183,39 @@ export function FlowAlertChip({ count, to }: { count: number; to?: string }) {
 export function FlowPipelineChip({
   pipelineCount,
   pendingCount,
+  stoppedCount = 0,
   to,
 }: {
   pipelineCount: number
   pendingCount: number
+  stoppedCount?: number
   to?: string
 }) {
+  const pending = pendingCount > 0
+  const stopped = stoppedCount > 0
+
   return (
     <FlowNavChip
       to={to}
-      severity={pendingCount > 0 ? 'warning' : 'neutral'}
-      inactive={pipelineCount === 0 && pendingCount === 0 ? 'keep-fill' : false}
+      severity="neutral"
+      inactive={
+        !pending && !stopped && pipelineCount === 0 ? 'keep-fill' : false
+      }
+      css={{ '& .children': { gap: 4 } }}
     >
-      {pipelineCount} {pluralize('pipeline', pipelineCount)}
-      {pendingCount > 0 && <PendingSC>{pendingCount} pending</PendingSC>}
+      {pending && (
+        <PipelineStatusSC $tone="pending">
+          {pendingCount} pending
+        </PipelineStatusSC>
+      )}
+      {stopped && (
+        <PipelineStatusSC $tone="stopped">
+          {stoppedCount} stopped
+        </PipelineStatusSC>
+      )}
+      {!pending &&
+        !stopped &&
+        `${pipelineCount} ${pluralize('pipeline', pipelineCount)}`}
     </FlowNavChip>
   )
 }
@@ -245,6 +266,15 @@ export function FlowHealthStacked({
   )
 }
 
+const PipelineStatusSC = styled.span<{ $tone: 'pending' | 'stopped' }>(
+  ({ theme, $tone }) => ({
+    color:
+      $tone === 'pending'
+        ? theme.colors['text-warning-light']
+        : theme.colors['text-danger-light'],
+  })
+)
+
 const ChipsSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
@@ -259,9 +289,4 @@ const StackedButtonSC = styled.button(({ theme }) => ({
   '&:hover': {
     textDecoration: 'underline',
   },
-}))
-
-const PendingSC = styled.span(({ theme }) => ({
-  marginLeft: theme.spacing.xsmall,
-  color: theme.colors['text-warning-light'],
 }))

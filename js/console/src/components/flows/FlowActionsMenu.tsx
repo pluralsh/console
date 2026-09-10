@@ -9,9 +9,18 @@ import { flowTabPath } from 'components/flows/flowHealth'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
-import { useState } from 'react'
+import { MouseEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+
+function stopBubble(event: { stopPropagation: () => void }) {
+  event.stopPropagation()
+}
+
+function stopLink(event: MouseEvent) {
+  event.preventDefault()
+  event.stopPropagation()
+}
 
 export function FlowActionsMenu({
   flow,
@@ -43,19 +52,17 @@ export function FlowActionsMenu({
   }
 
   return (
-    <ActionsSC>
+    <ActionsSC
+      onClick={stopLink}
+      onPointerDown={stopBubble}
+      onMouseDown={stopBubble}
+    >
       <MoreMenu
         onSelectionChange={(key: string) => {
           const action = onSelect[key as keyof typeof onSelect]
 
           if (action) action()
           else setMenuKey(key)
-        }}
-        triggerProps={{
-          onClick: (e) => {
-            e.preventDefault()
-            e.stopPropagation()
-          },
         }}
       >
         {showPermissionsBtn && (
@@ -97,5 +104,7 @@ export function FlowActionsMenu({
 }
 
 const ActionsSC = styled.div({
-  'td &': { pointerEvents: 'auto' },
+  position: 'relative',
+  zIndex: 1,
+  pointerEvents: 'auto',
 })

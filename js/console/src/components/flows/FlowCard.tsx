@@ -45,11 +45,11 @@ export function FlowCard({
     flowTabPath(flow.name, name, search, component)
 
   return (
-    <CardSC
-      fillLevel={1}
-      forwardedAs={Link}
-      to={tab('services')}
-    >
+    <CardSC fillLevel={1}>
+      <CardLinkSC
+        to={tab('services')}
+        aria-label={flow.name}
+      />
       <ContentSC>
         <HeaderSC>
           <CardAppIconSC
@@ -200,13 +200,24 @@ const FooterSC = styled.div(({ theme }) => ({
   borderTop: theme.borders.default,
 }))
 
+const CardLinkSC = styled(Link)({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+})
+
 const CardSC = styled(Card)(({ theme }) => ({
+  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
   overflow: 'hidden',
   cursor: 'pointer',
   textDecoration: 'none',
+  '& button': {
+    position: 'relative',
+    zIndex: 1,
+  },
   '&:hover:not(:has(button:hover))': {
     backgroundColor: theme.colors['fill-one-hover'],
     borderColor: theme.colors['border-fill-one'],
