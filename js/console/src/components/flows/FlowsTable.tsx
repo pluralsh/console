@@ -1,4 +1,10 @@
-import { AppIcon, FlowIcon, Table } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  CaretRightIcon,
+  FlowIcon,
+  IconFrame,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { FlowActionsMenu } from 'components/flows/FlowActionsMenu'
 import { FlowFavoriteStar } from 'components/flows/FlowFavoriteButton'
@@ -166,6 +172,18 @@ function getColumns({
         return <FlowInsightIcon insight={getValue()} />
       },
     }),
+    columnHelper.display({
+      id: 'arrow',
+      header: '',
+      meta: { gridTemplate: 'min-content' },
+      cell: () => (
+        <IconFrame
+          icon={<CaretRightIcon color="icon-xlight" />}
+          size="medium"
+          type="tertiary"
+        />
+      ),
+    }),
   ]
 }
 
@@ -198,7 +216,7 @@ export function FlowsTable({
     <Table
       fullHeightWrap
       virtualizeRows
-      fillLevel={1}
+      fillLevel={0}
       data={flows}
       columns={columns}
       hasNextPage={hasNextPage}

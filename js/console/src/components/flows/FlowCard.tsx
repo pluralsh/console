@@ -1,7 +1,7 @@
 import {
   AppIcon,
-  ArrowRightIcon,
   Card,
+  CaretRightIcon,
   Flex,
   FlowIcon,
 } from '@pluralsh/design-system'
@@ -136,8 +136,8 @@ export function FlowCard({
             onToggle={onToggleFavorite}
           />
         </Flex>
-        <ArrowRightIcon
-          color="icon-light"
+        <CaretRightIcon
+          color="icon-xlight"
           size={16}
         />
       </FooterSC>

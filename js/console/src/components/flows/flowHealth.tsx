@@ -134,7 +134,7 @@ function FlowNavChip({
   return (
     <Chip
       size="small"
-      fillLevel={1}
+      fillLevel={2}
       severity={severity}
       inactive={inactive}
       clickable={!!to}
