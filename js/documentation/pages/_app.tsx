@@ -183,7 +183,9 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
                 {toc?.length > 0 && (
                   <SideCarContainer>
                     {isClient ? (
-                      <Suspense fallback={<div>Loading table of contents...</div>}>
+                      <Suspense
+                        fallback={<div>Loading table of contents...</div>}
+                      >
                         <TableOfContents
                           key={router.asPath}
                           toc={toc}
