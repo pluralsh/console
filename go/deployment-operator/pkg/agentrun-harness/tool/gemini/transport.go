@@ -60,7 +60,7 @@ func NewTransport(agent *Agent) (*Transport, error) {
 	engine := acp.NewEngine(
 		acp.WithAuthenticationMethod(geminiAPIKeyAuthMethod),
 		acp.WithSessionRestorer(acp.LoadSession),
-		acp.WithUsageResolver(geminiPromptUsage),
+		acp.WithUsageResolver(result.toUsage),
 	)
 
 	result.engine = engine
@@ -81,7 +81,7 @@ func (transport *Transport) Capabilities() toolv1.TransportCapabilities {
 	}
 }
 
-func geminiPromptUsage(response acpsdk.PromptResponse) *acpsdk.Usage {
+func (transport *Transport) toUsage(response acpsdk.PromptResponse) *acpsdk.Usage {
 	if response.Usage != nil {
 		return response.Usage
 	}
@@ -95,12 +95,12 @@ func geminiPromptUsage(response acpsdk.PromptResponse) *acpsdk.Usage {
 		return nil
 	}
 
-	input, ok := geminiTokenCount(tokenCount["input_tokens"])
+	input, ok := transport.toTokenCount(tokenCount["input_tokens"])
 	if !ok {
 		return nil
 	}
 
-	output, ok := geminiTokenCount(tokenCount["output_tokens"])
+	output, ok := transport.toTokenCount(tokenCount["output_tokens"])
 	if !ok || input > int(^uint(0)>>1)-output {
 		return nil
 	}
@@ -108,7 +108,7 @@ func geminiPromptUsage(response acpsdk.PromptResponse) *acpsdk.Usage {
 	return &acpsdk.Usage{InputTokens: input, OutputTokens: output, TotalTokens: input + output}
 }
 
-func geminiTokenCount(value any) (int, bool) {
+func (transport *Transport) toTokenCount(value any) (int, bool) {
 	tokens, ok := value.(float64)
 	limit := math.Ldexp(1, strconv.IntSize-1)
 
