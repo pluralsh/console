@@ -133,6 +133,23 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       assert del["id"] == runtime.id
       refute refetch(runtime)
     end
+
+    test "cannot delete an agent runtime still referenced by a workbench" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      insert(:workbench, agent_runtime: runtime)
+
+      {:ok, %{errors: [error | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteAgentRuntime(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => runtime.id}, %{cluster: cluster})
+
+      assert error.message =~ "workbenches"
+      assert refetch(runtime)
+    end
   end
 
   describe "createAgentRun" do

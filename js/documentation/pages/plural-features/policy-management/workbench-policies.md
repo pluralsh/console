@@ -17,7 +17,18 @@ A policy cannot make an unavailable tool accessible or grant permissions the act
 |---|---|
 | `input.tool_name` | Name of the tool being called |
 | `input.tool` | Arguments supplied to the tool, represented as an object |
-| `input.actor` | Current user, including `id`, `name`, `email`, and a `groups` array when available |
+| `input.actor` | Current user, including identity, service-account status, roles, and groups |
+
+The `input.actor` object contains:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | User ID |
+| `name` | string | User display name |
+| `email` | string | User email address |
+| `service_account` | boolean | Whether the actor is a service account |
+| `roles.admin` | boolean | Whether the actor is a Plural administrator |
+| `groups` | string array | Names of the groups the actor belongs to |
 
 The shape of `input.tool` depends on the tool. For example, a Kubernetes operation can include a `namespace`, while a logging tool can include an index and query. Select a past evaluation in the [policy simulator](/plural-features/policy-management/simulating-policies) to inspect the real input for a tool before writing rules against it.
 

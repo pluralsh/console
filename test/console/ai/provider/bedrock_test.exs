@@ -140,6 +140,49 @@ defmodule Console.AI.Provider.BedrockTest do
                Bedrock.completion(bedrock, [{:user, "hi"}], [])
     end
 
+    test "sets GPT-5.6 reasoning to low without lowering its output token limit" do
+      model_id = "openai.gpt-5.6-terra"
+
+      bedrock =
+        Bedrock.new(%BedrockSettings{
+          model_id: model_id,
+          region: @region,
+          endpoint: :mantle,
+          aws_access_key_id: "test-access-key",
+          aws_secret_access_key: "test-secret-key"
+        })
+
+      expect(Req, :request, fn %Req.Request{} = request ->
+        body = Jason.decode!(request.body)
+
+        assert URI.to_string(request.url) ==
+                 "https://bedrock-mantle.#{@region}.api.aws/openai/v1/responses"
+
+        assert body["reasoning"] == %{"effort" => "low"}
+        assert body["max_output_tokens"] == 128_000
+
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body: %Response{
+             id: "test-response",
+             model: model_id,
+             context: %ReqLLM.Context{messages: []},
+             message: %Message{
+               role: :assistant,
+               content: [%ContentPart{type: :text, text: "hello with low reasoning"}]
+             },
+             finish_reason: :stop,
+             usage: @usage,
+             stream?: false
+           }
+         }}
+      end)
+
+      assert {:ok, "hello with low reasoning"} =
+               Bedrock.completion(bedrock, [{:user, "hi"}], [])
+    end
+
     test "calls the configured inference profile id in the Bedrock runtime REST URL" do
       bedrock =
         Bedrock.new(%BedrockSettings{

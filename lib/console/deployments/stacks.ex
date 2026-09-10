@@ -12,6 +12,7 @@ defmodule Console.Deployments.Stacks do
   alias Console.Services.Users
   alias Console.AI.{Provider, Tools.ApproveStack}
   alias Console.Deployments.Policy, as: PolicyEngine
+  alias Console.Deployments.Policy.Input, as: PolicyInput
   alias Console.Deployments.Stacks.Plan
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
@@ -592,7 +593,14 @@ defmodule Console.Deployments.Stacks do
   """
   @spec stack_run_approval(StackRun.t) :: run_resp | :ok
   def stack_run_approval(%StackRun{status: :pending_approval, approver_id: nil} = run) do
-    run = Repo.preload(run, [:state, :repository, actor: :groups, stack: [:project, :repository, stack_policies: :policy]])
+    run = Repo.preload(run, [
+      :state,
+      :repository,
+      :infracost_resources,
+      actor: :groups,
+      violations: :causes,
+      stack: [:project, :repository, stack_policies: :policy]
+    ])
 
     case maybe_policy_approval(run) do
       {:decide, approval} -> handle_approval(run, approval, :policy)
@@ -628,10 +636,12 @@ defmodule Console.Deployments.Stacks do
   defp stack_policy_input(%StackRun{} = run) do
     %{
       "plan" => stack_plan(run),
-      "actor" => PolicyEngine.actor(run.actor),
+      "actor" => PolicyInput.actor(run.actor),
       "run_type" => Plan.run_type(run),
-      "stack" => PolicyEngine.stack(run.stack),
-      "commit" => PolicyEngine.commit(run)
+      "stack" => PolicyInput.stack(run.stack),
+      "commit" => PolicyInput.commit(run),
+      "costs" => PolicyInput.costs(run.infracost_resources),
+      "violations" => PolicyInput.violations(run.violations)
     }
   end
 

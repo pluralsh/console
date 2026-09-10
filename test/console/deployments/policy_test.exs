@@ -1,6 +1,7 @@
 defmodule Console.Deployments.PolicyTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Policy
+  alias Console.Deployments.Policy.Input
   alias Console.Schema.{BindingPolicy, PolicyConstraint, VulnerabilityReport}
 
   describe "create_policy/2" do
@@ -399,20 +400,22 @@ defmodule Console.Deployments.PolicyTest do
   describe "actor/1" do
     test "builds a cleaned actor payload from a user" do
       group = insert(:group, name: "admins")
-      user = insert(:user, name: "Pat", email: "pat@example.com")
+      user = insert(:user, name: "Pat", email: "pat@example.com", roles: %{admin: true})
       insert(:group_member, group: group, user: user)
       user = Repo.preload(user, :groups)
 
-      assert Policy.actor(user) == %{
+      assert Input.actor(user) == %{
         "id" => user.id,
         "name" => "Pat",
         "email" => "pat@example.com",
+        "service_account" => false,
+        "roles" => %{"admin" => true},
         "groups" => ["admins"]
       }
     end
 
     test "returns an empty map when no user is present" do
-      assert Policy.actor(nil) == %{}
+      assert Input.actor(nil) == %{}
     end
   end
 
@@ -428,7 +431,7 @@ defmodule Console.Deployments.PolicyTest do
         sha: "abc123"
       )
 
-      assert Policy.stack(stack) == %{
+      assert Input.stack(stack) == %{
         "name" => "prod-network",
         "project" => %{"id" => project.id, "name" => "infra"},
         "git" => %{
@@ -441,7 +444,7 @@ defmodule Console.Deployments.PolicyTest do
     end
 
     test "returns an empty map when no stack is present" do
-      assert Policy.stack(nil) == %{}
+      assert Input.stack(nil) == %{}
     end
   end
 
@@ -453,7 +456,7 @@ defmodule Console.Deployments.PolicyTest do
         committer: "alice@example.com"
       )
 
-      assert Policy.commit(run) == %{
+      assert Input.commit(run) == %{
         "sha" => "abc123",
         "message" => "add web instance",
         "committer" => "alice@example.com"
@@ -461,7 +464,7 @@ defmodule Console.Deployments.PolicyTest do
     end
 
     test "returns an empty map when no run is present" do
-      assert Policy.commit(nil) == %{}
+      assert Input.commit(nil) == %{}
     end
   end
 
