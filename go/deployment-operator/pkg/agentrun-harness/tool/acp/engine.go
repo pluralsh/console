@@ -23,10 +23,11 @@ const defaultStopTimeout = 15 * time.Second
 // Engine owns one provider-neutral ACP protocol implementation. It does not
 // launch processes or retain provider configuration.
 type Engine struct {
-	stopTimeout    time.Duration
-	costs          *usage.Usage
-	restoreSession SessionRestorer
-	usageResolver  UsageResolver
+	stopTimeout          time.Duration
+	costs                *usage.Usage
+	restoreSession       SessionRestorer
+	authenticationMethod string
+	usageResolver        UsageResolver
 }
 
 func (engine *Engine) setSessionConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, modes *acpsdk.SessionModeState, options []acpsdk.SessionConfigOption, settings SessionSettings) error {

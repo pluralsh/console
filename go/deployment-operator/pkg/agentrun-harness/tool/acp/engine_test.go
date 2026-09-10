@@ -22,6 +22,8 @@ type testState struct {
 	newSessions        []acpsdk.NewSessionRequest
 	resumedSessions    []acpsdk.ResumeSessionRequest
 	loadedSessions     []acpsdk.LoadSessionRequest
+	authentications    []acpsdk.AuthenticateRequest
+	callOrder          []string
 	loadSessionUpdates []acpsdk.SessionNotification
 	prompts            []string
 	initializations    []acpsdk.InitializeRequest
@@ -39,6 +41,8 @@ type testState struct {
 	promptRelease      chan struct{}
 	promptOnce         sync.Once
 	protocolVersion    int
+	authMethods        []acpsdk.AuthMethod
+	authenticateErr    error
 }
 
 type testAgent struct {
@@ -46,19 +50,29 @@ type testAgent struct {
 	conn  *acpsdk.AgentSideConnection
 }
 
-func (agent *testAgent) Authenticate(context.Context, acpsdk.AuthenticateRequest) (acpsdk.AuthenticateResponse, error) {
+func (agent *testAgent) Authenticate(_ context.Context, request acpsdk.AuthenticateRequest) (acpsdk.AuthenticateResponse, error) {
+	agent.state.mu.Lock()
+	agent.state.authentications = append(agent.state.authentications, request)
+	agent.state.callOrder = append(agent.state.callOrder, "authenticate")
+	err := agent.state.authenticateErr
+	agent.state.mu.Unlock()
+	if err != nil {
+		return acpsdk.AuthenticateResponse{}, err
+	}
 	return acpsdk.AuthenticateResponse{}, nil
 }
 
 func (agent *testAgent) Initialize(_ context.Context, request acpsdk.InitializeRequest) (acpsdk.InitializeResponse, error) {
 	agent.state.mu.Lock()
 	agent.state.initializations = append(agent.state.initializations, request)
+	agent.state.callOrder = append(agent.state.callOrder, "initialize")
 	version := agent.state.protocolVersion
+	authMethods := append([]acpsdk.AuthMethod(nil), agent.state.authMethods...)
 	agent.state.mu.Unlock()
 	if version == 0 {
 		version = acpsdk.ProtocolVersionNumber
 	}
-	return acpsdk.InitializeResponse{ProtocolVersion: acpsdk.ProtocolVersion(version)}, nil
+	return acpsdk.InitializeResponse{ProtocolVersion: acpsdk.ProtocolVersion(version), AuthMethods: authMethods}, nil
 }
 
 func (agent *testAgent) Logout(context.Context, acpsdk.LogoutRequest) (acpsdk.LogoutResponse, error) {
@@ -83,6 +97,7 @@ func (agent *testAgent) ListSessions(context.Context, acpsdk.ListSessionsRequest
 func (agent *testAgent) NewSession(ctx context.Context, request acpsdk.NewSessionRequest) (acpsdk.NewSessionResponse, error) {
 	agent.state.mu.Lock()
 	agent.state.newSessions = append(agent.state.newSessions, request)
+	agent.state.callOrder = append(agent.state.callOrder, "new")
 	updates := append([]acpsdk.SessionNotification(nil), agent.state.newSessionUpdates...)
 	sessionID := agent.state.sessionID
 	options := append([]acpsdk.SessionConfigOption(nil), agent.state.configOptions...)
@@ -142,6 +157,7 @@ func (agent *testAgent) ResumeSession(_ context.Context, request acpsdk.ResumeSe
 func (agent *testAgent) LoadSession(ctx context.Context, request acpsdk.LoadSessionRequest) (acpsdk.LoadSessionResponse, error) {
 	agent.state.mu.Lock()
 	agent.state.loadedSessions = append(agent.state.loadedSessions, request)
+	agent.state.callOrder = append(agent.state.callOrder, "load")
 	updates := append([]acpsdk.SessionNotification(nil), agent.state.loadSessionUpdates...)
 	options := append([]acpsdk.SessionConfigOption(nil), agent.state.configOptions...)
 	modes := agent.state.modes
@@ -318,13 +334,20 @@ func newTestAgentProcess(state *testState, stdinCloseEnds bool) (*testState, *ex
 func TestNewEngineOptionsPreserveDefaultsAndApplyOverrides(t *testing.T) {
 	standard := &acpsdk.Usage{InputTokens: 3}
 	defaults := NewEngine(WithStopTimeout(0), WithSessionRestorer(nil), WithUsageResolver(nil))
-	if defaults.stopTimeout != defaultStopTimeout || defaults.restoreSession == nil || defaults.usageResolver(acpsdk.PromptResponse{Usage: standard}) != standard {
+	if defaults.stopTimeout != defaultStopTimeout || defaults.restoreSession == nil ||
+		defaults.authenticationMethod != "" || defaults.usageResolver(acpsdk.PromptResponse{Usage: standard}) != standard {
 		t.Fatalf("default engine = %#v", defaults)
 	}
 
 	resolver := func(acpsdk.PromptResponse) *acpsdk.Usage { return &acpsdk.Usage{InputTokens: 5} }
-	configured := NewEngine(WithStopTimeout(time.Second), WithSessionRestorer(LoadSession), WithUsageResolver(resolver))
-	if configured.stopTimeout != time.Second || configured.restoreSession == nil || configured.usageResolver(acpsdk.PromptResponse{}).InputTokens != 5 {
+	configured := NewEngine(
+		WithStopTimeout(time.Second),
+		WithSessionRestorer(LoadSession),
+		WithAuthenticationMethod("api-key"),
+		WithUsageResolver(resolver),
+	)
+	if configured.stopTimeout != time.Second || configured.restoreSession == nil ||
+		configured.authenticationMethod != "api-key" || configured.usageResolver(acpsdk.PromptResponse{}).InputTokens != 5 {
 		t.Fatalf("configured engine = %#v", configured)
 	}
 }
@@ -369,8 +392,19 @@ func TestEngineTurnCreatesAndResumesSession(t *testing.T) {
 		t.Fatalf("resume turn: %v", err)
 	}
 	newCount, resumeCount, promptCount, _, _, _, prompts := state.snapshot()
-	if newCount != 1 || resumeCount != 1 || promptCount != 2 || second.SessionID != first.SessionID {
-		t.Fatalf("sessions = new %d resume %d prompts %d result %q", newCount, resumeCount, promptCount, second.SessionID)
+	state.mu.Lock()
+	authentications := len(state.authentications)
+	state.mu.Unlock()
+	if newCount != 1 || resumeCount != 1 || promptCount != 2 ||
+		authentications != 0 || second.SessionID != first.SessionID {
+		t.Fatalf(
+			"sessions = new %d resume %d prompts %d authentications %d result %q",
+			newCount,
+			resumeCount,
+			promptCount,
+			authentications,
+			second.SessionID,
+		)
 	}
 	if strings.Join(prompts, ",") != "first,second" {
 		t.Fatalf("prompts = %v", prompts)
@@ -442,6 +476,127 @@ func TestEngineTurnLoadsSessionWhenConfigured(t *testing.T) {
 	state.mu.Unlock()
 	if len(loads) != 1 || string(loads[0].SessionId) != first.SessionID || second.SessionID != first.SessionID || resumes != 0 || len(configures) != 1 || len(modes) != 1 {
 		t.Fatalf("loads = %#v resumes = %d configures = %#v modes = %#v result = %q", loads, resumes, configures, modes, second.SessionID)
+	}
+}
+
+func TestEngineTurnAuthenticatesBeforeLoadingConfiguredSession(t *testing.T) {
+	state := newTestState()
+	state.authMethods = []acpsdk.AuthMethod{{
+		Agent: &acpsdk.AuthMethodAgent{Id: "gemini-api-key", Name: "Gemini API key"},
+	}}
+	_, process, _ := newTestAgentProcess(state, true)
+
+	result, err := NewEngine(
+		WithAuthenticationMethod("gemini-api-key"),
+		WithSessionRestorer(LoadSession),
+	).Turn(context.Background(), process, Request{
+		Cwd:       t.TempDir(),
+		Prompt:    "load",
+		SessionID: "session-1",
+	}, &testSink{})
+	if err != nil {
+		t.Fatalf("load turn: %v", err)
+	}
+
+	state.mu.Lock()
+	authentications := append([]acpsdk.AuthenticateRequest(nil), state.authentications...)
+	callOrder := append([]string(nil), state.callOrder...)
+	loads := append([]acpsdk.LoadSessionRequest(nil), state.loadedSessions...)
+	state.mu.Unlock()
+	if result.SessionID != "session-1" || len(loads) != 1 ||
+		len(authentications) != 1 || authentications[0].MethodId != "gemini-api-key" {
+		t.Fatalf("result = %#v loads = %#v authentications = %#v", result, loads, authentications)
+	}
+	if strings.Join(callOrder, ",") != "initialize,authenticate,load" {
+		t.Fatalf("call order = %v", callOrder)
+	}
+}
+
+func TestEngineTurnAuthenticatesBeforeCreatingConfiguredSession(t *testing.T) {
+	state := newTestState()
+	state.authMethods = []acpsdk.AuthMethod{{
+		Agent: &acpsdk.AuthMethodAgent{Id: "gemini-api-key", Name: "Gemini API key"},
+	}}
+	_, process, _ := newTestAgentProcess(state, true)
+
+	result, err := NewEngine(WithAuthenticationMethod("gemini-api-key")).Turn(
+		context.Background(),
+		process,
+		Request{Cwd: t.TempDir(), Prompt: "new"},
+		&testSink{},
+	)
+	if err != nil {
+		t.Fatalf("new turn: %v", err)
+	}
+
+	state.mu.Lock()
+	callOrder := append([]string(nil), state.callOrder...)
+	newSessions := len(state.newSessions)
+	state.mu.Unlock()
+	if result.SessionID != "session-1" || newSessions != 1 {
+		t.Fatalf("result = %#v new sessions = %d", result, newSessions)
+	}
+	if strings.Join(callOrder, ",") != "initialize,authenticate,new" {
+		t.Fatalf("call order = %v", callOrder)
+	}
+}
+
+func TestEngineTurnStopsProcessWhenAuthenticationFails(t *testing.T) {
+	state := newTestState()
+	state.authMethods = []acpsdk.AuthMethod{{
+		Agent: &acpsdk.AuthMethodAgent{Id: "gemini-api-key", Name: "Gemini API key"},
+	}}
+	state.authenticateErr = errors.New("authentication failed")
+	_, process, processFixture := newTestAgentProcess(state, false)
+
+	_, err := NewEngine(
+		WithAuthenticationMethod("gemini-api-key"),
+		WithStopTimeout(10*time.Millisecond),
+	).Turn(
+		context.Background(),
+		process,
+		Request{Cwd: t.TempDir(), Prompt: "new"},
+		&testSink{},
+	)
+	if err == nil || !strings.Contains(err.Error(), "acp authenticate:") ||
+		!strings.Contains(err.Error(), "authentication failed") {
+		t.Fatalf("authentication error = %v", err)
+	}
+
+	if processFixture.killCount() == 0 {
+		t.Fatal("authentication failure did not stop the process")
+	}
+
+	state.mu.Lock()
+	newSessions := len(state.newSessions)
+	state.mu.Unlock()
+	if newSessions != 0 {
+		t.Fatalf("new sessions = %d", newSessions)
+	}
+}
+
+func TestEngineTurnRejectsUnadvertisedAuthenticationMethod(t *testing.T) {
+	state := newTestState()
+	_, process, _ := newTestAgentProcess(state, true)
+
+	_, err := NewEngine(
+		WithAuthenticationMethod("gemini-api-key"),
+		WithSessionRestorer(LoadSession),
+	).Turn(context.Background(), process, Request{
+		Cwd:       t.TempDir(),
+		Prompt:    "load",
+		SessionID: "session-1",
+	}, &testSink{})
+	if err == nil || !strings.Contains(err.Error(), `acp authentication method "gemini-api-key" is not advertised`) {
+		t.Fatalf("load error = %v", err)
+	}
+
+	state.mu.Lock()
+	authentications := len(state.authentications)
+	loads := len(state.loadedSessions)
+	state.mu.Unlock()
+	if authentications != 0 || loads != 0 {
+		t.Fatalf("authentications = %d loads = %d", authentications, loads)
 	}
 }
 

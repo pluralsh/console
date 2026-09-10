@@ -26,6 +26,7 @@ const (
 	geminiTrustWorkspaceEnv = "GEMINI_CLI_TRUST_WORKSPACE"
 	geminiHomeEnv           = "GEMINI_CLI_HOME"
 	geminiTrustWorkspace    = "true"
+	geminiAPIKeyAuthMethod  = "gemini-api-key"
 )
 
 type Transport struct {
@@ -57,6 +58,7 @@ func NewTransport(agent *Agent) (*Transport, error) {
 	}
 
 	engine := acp.NewEngine(
+		acp.WithAuthenticationMethod(geminiAPIKeyAuthMethod),
 		acp.WithSessionRestorer(acp.LoadSession),
 		acp.WithUsageResolver(geminiPromptUsage),
 	)

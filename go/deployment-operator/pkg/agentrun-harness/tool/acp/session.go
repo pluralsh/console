@@ -44,6 +44,9 @@ func (attempt *sessionAttempt) run(prompt string) error {
 	if initialize.ProtocolVersion != acpsdk.ProtocolVersionNumber {
 		return attempt.fail(fmt.Errorf("acp protocol version %d is unsupported", initialize.ProtocolVersion), false)
 	}
+	if err = attempt.authenticate(initialize.AuthMethods); err != nil {
+		return attempt.fail(err, attempt.cancelled())
+	}
 
 	details, err := attempt.openSession(attempt.cwd)
 	if err != nil {
@@ -79,6 +82,41 @@ func (attempt *sessionAttempt) run(prompt string) error {
 	}
 
 	return nil
+}
+
+func (attempt *sessionAttempt) authenticate(methods []acpsdk.AuthMethod) error {
+	methodID := attempt.engine.authenticationMethod
+	if methodID == "" {
+		return nil
+	}
+
+	if !attempt.authenticationMethodAvailable(methods, methodID) {
+		return fmt.Errorf("acp authentication method %q is not advertised", methodID)
+	}
+
+	if _, err := attempt.connection.Authenticate(
+		attempt.ctx,
+		acpsdk.AuthenticateRequest{MethodId: methodID},
+	); err != nil {
+		return fmt.Errorf("acp authenticate: %w", err)
+	}
+
+	return nil
+}
+
+func (attempt *sessionAttempt) authenticationMethodAvailable(methods []acpsdk.AuthMethod, methodID string) bool {
+	for _, method := range methods {
+		switch {
+		case method.Agent != nil && method.Agent.Id == methodID:
+			return true
+		case method.EnvVar != nil && method.EnvVar.Id == methodID:
+			return true
+		case method.Terminal != nil && method.Terminal.Id == methodID:
+			return true
+		}
+	}
+
+	return false
 }
 
 func (attempt *sessionAttempt) configureSession(details sessionDetails) error {

@@ -109,6 +109,16 @@ func WithSessionRestorer(restorer SessionRestorer) Option {
 	}
 }
 
+// WithAuthenticationMethod sets the provider-selected ACP authentication
+// method. The engine authenticates with this method before opening a session.
+func WithAuthenticationMethod(methodID string) Option {
+	return func(engine *Engine) {
+		if methodID != "" {
+			engine.authenticationMethod = methodID
+		}
+	}
+}
+
 // WithUsageResolver sets a non-nil provider prompt usage resolver.
 func WithUsageResolver(resolver UsageResolver) Option {
 	return func(engine *Engine) {
