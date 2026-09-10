@@ -1,0 +1,110 @@
+icon: https://www.k8gb.io/images/k8gb-icon-color.svg
+git_url: https://github.com/k8gb-io/k8gb
+release_url: https://github.com/k8gb-io/k8gb/releases/tag/v{vsn}
+helm_repository_url: https://www.k8gb.io
+chart_name: k8gb
+versions:
+- version: 1.0.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v1.0.0
+  images: ['registry.k8gb.io/k8gb-io/k8gb:v1.0.0', 'registry.k8gb.io/k8gb-io/k8s_crd:v0.6.0']
+- version: 0.20.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.20.0
+  images: ['registry.k8gb.io/k8gb-io/k8gb:v0.20.0', 'registry.k8gb.io/k8gb-io/k8s_crd:v0.5.0']
+- version: 0.19.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.19.0
+  images: ['registry.k8gb.io/k8gb-io/k8gb:v0.19.0', 'registry.k8gb.io/k8gb-io/k8s_crd:v0.4.0']
+- version: 0.18.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.18.0
+  images: ['k8gb-io.gateway.scarf.sh/absaoss/k8gb:v0.18.0', 'k8gb-io.gateway.scarf.sh/absaoss/k8s_crd:v0.2.0']
+- version: 0.17.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.17.0
+  images: ['absaoss/k8s_crd:v0.1.2', 'docker.io/absaoss/k8gb:v0.17.0']
+- version: 0.16.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.16.0
+  images: ['absaoss/k8s_crd:v0.1.2', 'docker.io/absaoss/k8gb:v0.16.0']
+- version: 0.15.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.15.0
+  images: ['absaoss/k8s_crd:v0.1.2', 'docker.io/absaoss/k8gb:v0.15.0']
+- version: 0.14.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.14.0
+  images: ['absaoss/k8s_crd:v0.1.0', 'docker.io/absaoss/k8gb:v0.14.0']
+- version: 0.13.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.13.0
+  images: ['absaoss/k8s_crd:v0.0.11', 'docker.io/absaoss/k8gb:v0.13.0']
+- version: 0.12.2
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.12.2
+  images: ['absaoss/k8s_crd:v0.0.11', 'docker.io/absaoss/k8gb:v0.12.2']
+- version: 0.11.1
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.11.1
+  images: ['absaoss/k8s_crd:v0.0.10', 'docker.io/absaoss/k8gb:v0.11.1']
+- version: 0.10.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.10.0
+  images: ['absaoss/k8gb:v0.10.0', 'absaoss/k8s_crd:v0.0.8']
+- version: 0.9.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: v0.9.0
+  images: ['absaoss/k8gb:v0.9.0', 'absaoss/k8s_crd:v0.0.8']

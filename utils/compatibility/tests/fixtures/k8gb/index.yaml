@@ -1,0 +1,29 @@
+entries:
+  k8gb:
+  - name: k8gb
+    version: v1.0.0
+    appVersion: v1.0.0
+    kubeVersion: '>= 1.21.0-0'
+    digest: 2e545146de6daf7c7e4e925385ba287301888e73a82864229dfa92dd69a2bd49
+    urls:
+    - charts/k8gb-v1.0.0.tgz
+  - name: k8gb
+    version: v0.21.0-rc4
+    appVersion: v0.21.0-rc4
+    kubeVersion: '>= 1.21.0-0'
+    digest: 4691f63869aa56a341bf3c2837bcec63a19d07d2ab25249ba861df661de91021
+    urls:
+    - charts/k8gb-v0.21.0-rc4.tgz
+  - name: k8gb
+    version: v0.14.0
+    appVersion: v0.14.0
+    kubeVersion: '>= 1.19.0-0'
+    digest: 607083337cc06976e6bf1202ff6ffc877718faff3d5478571ce1b43703c38af5
+    urls:
+    - charts/k8gb-v0.14.0.tgz
+  - name: k8gb
+    version: v0.8.8
+    appVersion: v0.8.8
+    digest: 4ce691e607688ca1454611ebdf84ffe601f56206534beb31586d1a70b423a27c
+    urls:
+    - charts/k8gb-v0.8.8.tgz
