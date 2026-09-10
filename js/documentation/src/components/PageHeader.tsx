@@ -8,6 +8,7 @@ import { useKey } from 'rooks'
 import styled from 'styled-components'
 
 import { DISCORD_LINK } from '@src/consts'
+import { getBarePathFromPath } from '@src/utils/text'
 
 import { BreakpointIsGreaterOrEqual, mqs, useBreakpoint } from './Breakpoints'
 import { DocsSearch } from './DocsSearch'
@@ -21,8 +22,9 @@ const Filler = styled.div((_) => ({
 
 function PageHeaderUnstyled({ ...props }) {
   const [menuIsOpen, setMenuIsOpen] = useState(false)
-  const { pathname } = useRouter()
-  const prevPathname = usePrevious(pathname)
+  const { asPath } = useRouter()
+  const thisPath = getBarePathFromPath(asPath)
+  const prevPath = usePrevious(thisPath)
 
   const breakpoint = useBreakpoint()
 
@@ -33,10 +35,10 @@ function PageHeaderUnstyled({ ...props }) {
   }, [breakpoint])
 
   useEffect(() => {
-    if (pathname !== prevPathname) {
+    if (prevPath && thisPath !== prevPath) {
       setMenuIsOpen(false)
     }
-  }, [pathname, prevPathname])
+  }, [thisPath, prevPath])
 
   useKey(['Escape'], () => {
     setMenuIsOpen(false)
