@@ -6,10 +6,8 @@
 
 import { useMemo, useState } from 'react'
 
-import { CheckIcon, CopyIcon, Tab } from '@pluralsh/design-system'
+import { Breadcrumbs, CheckIcon, CopyIcon, Tab } from '@pluralsh/design-system'
 import { useRouter } from 'next/router'
-
-import Breadcrumbs from '@src/components/Breadcrumbs'
 import { PageDivider } from '@src/components/MainContent'
 import {
   ContentContainer,
