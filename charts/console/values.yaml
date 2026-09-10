@@ -127,6 +127,10 @@ console:
     # tarballQps configures the global QPS limit for digest and git tarball endpoints.
     tarballQps: 100
 
+    # maxRequestBodyLength configures the maximum HTTP request body size in bytes.
+    # Leave unset to use the application default (100000000). Raise this if stack state uploads return 413.
+    maxRequestBodyLength: ~
+
     # cacheAgentQps configures the global QPS limit for pod-local cache agents.
     cacheAgentQps: ~
 
@@ -141,6 +145,12 @@ console:
 
     # healthmapClusterCount configures the number of clusters to show in the healthmap.
     healthmapClusterCount: ~
+
+    # tracing configures OpenTelemetry trace export from the Console.
+    tracing:
+      # endpoint is the full OTLP/HTTP traces endpoint. Leave unset to disable tracing.
+      # Example: http://otel-collector.observability:4318/v1/traces
+      endpoint: ~
 
     # rdsIamAuthentication is used to configure whether rds iam authentication should be enabled for all db connections.  Ensure your database is prepared to handle IAM authentication before enabling here.
     rdsIamAuthentication: false

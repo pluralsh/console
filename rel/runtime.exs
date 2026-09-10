@@ -97,6 +97,10 @@ if get_env("CONSOLE_TARBALL_QPS") do
   config :console, :tarball_qps, String.to_integer(get_env("CONSOLE_TARBALL_QPS"))
 end
 
+if get_env("CONSOLE_MAX_REQUEST_BODY_LENGTH") do
+  config :console, :max_request_body_length, String.to_integer(get_env("CONSOLE_MAX_REQUEST_BODY_LENGTH"))
+end
+
 if get_env("CONSOLE_CACHE_AGENT_QPS") do
   config :console, :cache_agent_qps, String.to_integer(get_env("CONSOLE_CACHE_AGENT_QPS"))
 end
