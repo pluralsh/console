@@ -22,8 +22,14 @@ const ContentWrapper = styled.div((_) => ({
 const BreadcrumbsWrapper = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  width: '100%',
+  minWidth: 0,
   minHeight: 40,
   marginBottom: theme.spacing.large,
+  '& > *': {
+    minWidth: 0,
+    width: '100%',
+  },
 }))
 
 const Title = styled.h1(({ theme }) => ({

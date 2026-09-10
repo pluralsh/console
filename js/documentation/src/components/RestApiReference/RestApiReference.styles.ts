@@ -9,8 +9,14 @@ export const RestContentWrapper = styled.div((_) => ({
 export const BreadcrumbsWrapper = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  width: '100%',
+  minWidth: 0,
   minHeight: 40,
   marginBottom: theme.spacing.large,
+  '& > *': {
+    minWidth: 0,
+    width: '100%',
+  },
 }))
 
 export const ContentGrid = styled.div(({ theme }) => ({
