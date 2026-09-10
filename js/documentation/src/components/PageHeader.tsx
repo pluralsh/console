@@ -139,6 +139,8 @@ const PageHeader = styled(PageHeaderUnstyled)(({ theme }) => ({
   },
   '.logo': {
     width: 162,
+    maxWidth: '100%',
+    minWidth: 0,
     display: 'block',
   },
   '.leftSection': {

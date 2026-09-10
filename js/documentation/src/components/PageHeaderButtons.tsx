@@ -38,6 +38,7 @@ export const SocialLink = styled(ButtonFillTwo)(({ theme }) => ({
 export const HamburgerButtonWrap = styled(ButtonFillTwo)((_) => ({
   width: 40,
   height: 40,
+  flexShrink: 0,
   alignItems: 'center',
   justifyContent: 'center',
   [mqs.fullHeader]: {

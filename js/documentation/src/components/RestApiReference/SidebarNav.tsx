@@ -15,15 +15,24 @@ import { MethodBadge } from './MethodBadge'
 
 import type { ApiSection, Endpoint } from '@src/lib/openapi-rest'
 
-const Sidebar = styled.aside(({ theme: _theme }) => ({
-  position: 'sticky',
-  top: 'var(--top-nav-height)',
-  height: 'calc(100vh - var(--top-nav-height))',
-  width: '100%',
-  flexShrink: 0,
+const Sidebar = styled.aside<{ $overlay?: boolean }>(({ $overlay }) => ({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
+  width: '100%',
+  ...($overlay
+    ? {
+        flex: 1,
+        minHeight: 0,
+        height: '100%',
+        position: 'relative',
+      }
+    : {
+        position: 'sticky',
+        top: 'var(--top-nav-height)',
+        height: 'calc(100vh - var(--top-nav-height))',
+        flexShrink: 0,
+      }),
 }))
 
 const SidebarInner = styled.div(({ theme }) => ({
@@ -140,9 +149,11 @@ const TopNavDivider = styled.hr(({ theme }) => ({
 export function SidebarNav({
   sections,
   selectedId,
+  overlay = false,
 }: {
   sections: ApiSection[]
   selectedId: string
+  overlay?: boolean
 }) {
   const [filter, setFilter] = useState('')
 
@@ -169,7 +180,7 @@ export function SidebarNav({
   const showAuthItem = !filter
 
   return (
-    <Sidebar>
+    <Sidebar $overlay={overlay}>
       <SidebarInner>
         <SearchWrapper>
           <FilterInput

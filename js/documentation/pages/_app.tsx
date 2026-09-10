@@ -57,6 +57,7 @@ import {
   ROOT_TITLE,
 } from '@src/consts'
 import { NavDataProvider } from '@src/contexts/NavDataContext'
+import { RestNavProvider } from '@src/contexts/RestNavContext'
 import { collectHeadings } from '@src/markdoc/utils/parseHeadings'
 import { getNavData } from '@src/NavData'
 
@@ -216,13 +217,15 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
         <NavigationContextProvider value={navContextVal}>
           <SWRConfig value={swrConfig}>
             <NavDataProvider value={navData}>
-              <BreakpointProvider>
-                <StyledThemeProvider theme={docsStyledTheme}>
-                  <HonorableThemeProvider>
-                    <FillLevelProvider value={0}>{app}</FillLevelProvider>
-                  </HonorableThemeProvider>
-                </StyledThemeProvider>
-              </BreakpointProvider>
+              <RestNavProvider>
+                <BreakpointProvider>
+                  <StyledThemeProvider theme={docsStyledTheme}>
+                    <HonorableThemeProvider>
+                      <FillLevelProvider value={0}>{app}</FillLevelProvider>
+                    </HonorableThemeProvider>
+                  </StyledThemeProvider>
+                </BreakpointProvider>
+              </RestNavProvider>
             </NavDataProvider>
           </SWRConfig>
         </NavigationContextProvider>

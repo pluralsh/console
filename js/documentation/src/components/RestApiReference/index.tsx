@@ -15,6 +15,7 @@ import {
   PageGrid,
   SideNavContainer,
 } from '@src/components/PageGrid'
+import { useSetRestNav } from '@src/contexts/RestNavContext'
 import { useCopyText } from '@src/hooks/useCopyText'
 
 import { AuthPageContent } from './AuthPageContent'
@@ -81,6 +82,8 @@ export function RestApiReference({
   const currentLabel = isAuthPage
     ? 'Authentication'
     : (detail?.operationName ?? selectedId)
+
+  useSetRestNav(apiSections, selectedId)
 
   const breadcrumbs = useMemo(
     () => [

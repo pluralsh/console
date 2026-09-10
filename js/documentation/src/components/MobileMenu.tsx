@@ -1,15 +1,24 @@
-import { DiscordIcon } from '@pluralsh/design-system'
+import { useState } from 'react'
+
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  Button,
+  DiscordIcon,
+} from '@pluralsh/design-system'
 
 import styled from 'styled-components'
 import { useIsomorphicLayoutEffect } from 'usehooks-ts'
 
 import { DISCORD_LINK } from '@src/consts'
+import { useRestNav } from '@src/contexts/RestNavContext'
 
-import { FullNav, type NavContextValue } from './FullNav'
+import { FullNav, NavButtons, type NavContextValue } from './FullNav'
 import GithubStars from './GithubStars'
 import useScrollLock from './hooks/useScrollLock'
 import { MainLink } from './PageHeader'
 import { SocialLink } from './PageHeaderButtons'
+import { SidebarNav } from './RestApiReference/SidebarNav'
 import { TopHeading } from './SideNav'
 
 type MobileMenuProps = NavContextValue & {
@@ -84,23 +93,68 @@ const Content = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],
   display: 'flex',
   flexDirection: 'column',
+  minHeight: 0,
+  overflow: 'hidden',
 }))
 
 function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
   const [, setScrollLock] = useScrollLock(false)
+  const restNav = useRestNav()
+  const [showDocsMenu, setShowDocsMenu] = useState(false)
 
   useIsomorphicLayoutEffect(() => {
     setScrollLock(isOpen)
   }, [isOpen, setScrollLock])
 
+  useIsomorphicLayoutEffect(() => {
+    if (isOpen) {
+      setShowDocsMenu(false)
+    }
+  }, [isOpen])
+
+  const showRestNav = !!restNav && !showDocsMenu
+
   return (
     <div className={className}>
       <Content>
-        <FullNav
-          desktop={false}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-        />
+        {showRestNav ? (
+          <>
+            <NavButtons desktop={false}>
+              <Button
+                tertiary
+                startIcon={<ArrowLeftIcon />}
+                onClick={() => setShowDocsMenu(true)}
+              >
+                Docs menu
+              </Button>
+            </NavButtons>
+            <SidebarNav
+              overlay
+              sections={restNav.sections}
+              selectedId={restNav.selectedId}
+            />
+          </>
+        ) : (
+          <>
+            {restNav && (
+              <NavButtons desktop={false}>
+                <div />
+                <Button
+                  tertiary
+                  endIcon={<ArrowRightIcon />}
+                  onClick={() => setShowDocsMenu(false)}
+                >
+                  API menu
+                </Button>
+              </NavButtons>
+            )}
+            <FullNav
+              desktop={false}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+            />
+          </>
+        )}
       </Content>
     </div>
   )
