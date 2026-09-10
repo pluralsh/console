@@ -151,19 +151,31 @@ export function FlowHealthChips({
   getTo,
 }: {
   counts: Record<HealthBucket, number>
-  getTo?: (bucket: HealthBucket) => string
+  getTo?: (bucket?: HealthBucket) => string
 }) {
+  const chips = BUCKETS.filter((bucket) => counts[bucket] > 0)
+
   return (
     <ChipsSC>
-      {BUCKETS.filter((bucket) => counts[bucket] > 0).map((bucket) => (
+      {chips.length === 0 ? (
         <FlowNavChip
-          key={bucket}
-          severity={BUCKET_SEVERITY[bucket]}
-          to={getTo?.(bucket)}
+          severity="success"
+          inactive="keep-fill"
+          to={getTo?.()}
         >
-          {bucketPhrase(bucket, counts[bucket])}
+          0 healthy
         </FlowNavChip>
-      ))}
+      ) : (
+        chips.map((bucket) => (
+          <FlowNavChip
+            key={bucket}
+            severity={BUCKET_SEVERITY[bucket]}
+            to={getTo?.(bucket)}
+          >
+            {bucketPhrase(bucket, counts[bucket])}
+          </FlowNavChip>
+        ))
+      )}
     </ChipsSC>
   )
 }
