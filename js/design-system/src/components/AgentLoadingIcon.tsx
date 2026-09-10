@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from 'react'
 import styled, { css, keyframes, useTheme } from 'styled-components'
 
@@ -108,6 +109,28 @@ const EQ_COL_SPEED = [0.82, 1.18, 0.64]
 const EQ_COL_DELAY = [0, 0.1, 0.22]
 const EQ_ROW_FRAME = [eqHigh, eqMid, eqLow]
 
+const stopMotion = css`
+  @media (prefers-reduced-motion: reduce) {
+    animation-name: none !important;
+    animation-play-state: paused !important;
+  }
+`
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReduced(media.matches)
+
+    onChange()
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
+
+  return reduced
+}
+
 const AgentLoadingIconSC = styled.span<{
   $size: number
   $dot: number
@@ -144,6 +167,20 @@ const AgentLoadingIconSC = styled.span<{
       animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
       animation-iteration-count: infinite;
       animation-play-state: ${paused ? 'paused' : 'running'};
+      ${stopMotion}
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      i {
+        opacity: var(--off);
+        transform: scale(0.42);
+      }
+      i:nth-child(1),
+      i:nth-child(2),
+      i:nth-child(4) {
+        opacity: var(--on);
+        transform: scale(1);
+      }
     }
 
     ${$variant === 'cursor' &&
@@ -484,7 +521,12 @@ function PaperRain({
   const colsRef = useRef<ColumnState | null>(null)
   const timeRef = useRef(0)
   const lastRef = useRef(-1)
-  const paused = state === 'idle' || state === 'success' || state === 'error'
+  const reduceMotion = usePrefersReducedMotion()
+  const paused =
+    reduceMotion ||
+    state === 'idle' ||
+    state === 'success' ||
+    state === 'error'
   const cellSize = Math.max(2, size / rows)
   const wrap = rows + 4
   const width = columns * cellSize
@@ -729,6 +771,7 @@ const WhimsyBirdSC = styled.span<{
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
       transform-origin: center;
+      ${stopMotion}
     }
 
     .pose-a {
@@ -736,6 +779,7 @@ const WhimsyBirdSC = styled.span<{
       animation-duration: ${$duration};
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
+      ${stopMotion}
     }
 
     .pose-b {
@@ -743,6 +787,13 @@ const WhimsyBirdSC = styled.span<{
       animation-duration: ${$duration};
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
+      ${stopMotion}
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pose-b {
+        opacity: 0;
+      }
     }
 
     ${$state === 'idle' &&
@@ -911,6 +962,7 @@ const AaronManSC = styled.span<{
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
       transform-origin: center bottom;
+      ${stopMotion}
     }
 
     .pose-six,
@@ -918,6 +970,13 @@ const AaronManSC = styled.span<{
       animation-duration: ${$duration};
       animation-timing-function: steps(1, end);
       animation-iteration-count: infinite;
+      ${stopMotion}
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pose-seven {
+        opacity: 0;
+      }
     }
 
     .pose-six {
