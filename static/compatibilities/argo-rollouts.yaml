@@ -16,7 +16,7 @@ versions:
         performance improvements (less pod listing) and safer handling to prevent
         panics.']
     breaking_changes: []
-  chart_version: 2.43.0
+  chart_version: 2.43.1
   images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
 - version: 1.9.1
   kube: ['1.35', '1.34', '1.33', '1.32']
