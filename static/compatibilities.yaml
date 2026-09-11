@@ -227,6 +227,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.66.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.66.0
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.8', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.7',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.6',
+      'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.66.0',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260817-81577dc432-master']
   - version: 1.65.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -19485,7 +19496,7 @@ addons:
           can fail if `settings.clusterName` is not set; this is an intentional enforcement
           change.]
     chart_version: 1.5.0
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
   - version: 1.2.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -19771,14 +19782,28 @@ addons:
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release note stub only: v3.1.0 provides updated container image/tag
+          and points to the main CHANGELOG for details.']
+      breaking_changes: ['Not specified in the provided notes; you must review the
+          linked CHANGELOG sections (#310 and #300) to confirm any breaking changes
+          between 3.0.0 and 3.1.0.']
     chart_version: 0.12.0
     images: ['kong/kubernetes-ingress-controller:3.1', 'kong:3.6']
   - version: 3.0.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided only include metadata and links for v3.0.0
+          and v2.12.0; no feature details included in the supplied text.]
+      breaking_changes: ['Release notes provided do not list changes; breaking changes
+          cannot be determined from the supplied text alone. Review the linked CHANGELOG
+          sections (#300 and #2120) for upgrade-impacting items.']
     chart_version: 0.10.2
     images: ['kong/kubernetes-ingress-controller:3.0', 'kong:3.5']
   - version: 2.12.0
@@ -32375,7 +32400,32 @@ addons:
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Ops Manager can now use an externally managed AppDB via `MongoDBOpsManager.spec.externalApplicationDatabaseRef`
+          pointing to a `MongoDB` resource with `spec.role: AppDB`, enabling backup/DR
+          workflows without recreating/copying AppDB data.', 'Introduces a migration-to-Kubernetes
+          workflow that lets a MongoDB deployment temporarily span VM and Kubernetes
+          members using `spec.externalMembers` and new per-component external access
+          fields, plus a dry-run connectivity validation job and a `kubectl mongodb
+          migrate-to-mck` helper.', 'Adds an always-updated, credential-less cluster
+          connection string Secret named `<mongodb-name>-cluster-connection-string`
+          to help apps connect during migrations and topology changes.', '`kubectl
+          mongodb multicluster setup/recover` gains `--member-cluster-ca` to supply
+          custom API server CA bundles when the operator reaches member clusters through
+          nonstandard TLS termination.', '`MongoDBUser` can now set `spec.connectionStringDatabase`
+          to control the URI path database separately from `spec.db` (authSource).']
+      breaking_changes: [Validating webhook now forbids adding/changing/removing any
+          `externalDomain` on an already deployed `MongoDB`/sharded resource (including
+          per-tier/per-cluster variants); attempting this will be rejected and previously
+          would lead to `Failed`. Plan external domain up front before first deploy.,
+        '`MongoDBOpsManager` reconciliation now fails if the secret referenced by
+          `spec.applicationDatabase.passwordSecretKeyRef` is missing (it no longer
+          silently generates a random password); ensure the secret exists before upgrading/applying
+          manifests.', MongoDB resources with `spec.externalAccess.externalDomain`
+          are now rejected as a MongoDB Search source; existing Search configs must
+          be adjusted or will fail.]
     chart_version: 1.12.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.12.0']
   - version: 1.11.0
