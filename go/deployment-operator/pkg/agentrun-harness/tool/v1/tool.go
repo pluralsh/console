@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
@@ -11,6 +12,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
@@ -110,18 +112,47 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 	}
 
 	return &SystemPromptTemplateInput{
-		Mode:           in.Config.Run.Mode,
-		ReviewDepth:    in.Config.Run.ReviewDepth,
-		BrowserEnabled: in.Config.Run.BrowserEnabled,
-		DindEnabled:    in.Config.Run.DindEnabled,
-		MemoryEnabled:  in.Config.Run.MemoryEnabled,
-		WorkDir:        in.Config.WorkDir,
-		RepositoryDir:  in.Config.RepositoryDir,
-		Prompt:         in.Config.Run.Prompt,
-		Branch:         branch,
-		PRURL:          in.Config.Run.PRURL,
-		Followup:       in.Config.Run.Followup,
+		Mode:                 in.Config.Run.Mode,
+		ReviewDepth:          in.Config.Run.ReviewDepth,
+		BrowserEnabled:       in.Config.Run.BrowserEnabled,
+		DindEnabled:          in.Config.Run.DindEnabled,
+		MemoryEnabled:        in.Config.Run.MemoryEnabled,
+		WorkDir:              in.Config.WorkDir,
+		RepositoryDir:        in.Config.RepositoryDir,
+		Prompt:               in.Config.Run.Prompt,
+		Branch:               branch,
+		PRURL:                in.Config.Run.PRURL,
+		Followup:             in.Config.Run.Followup,
+		PrebakedRepositories: prebakedRepositories(in.Config.Run.Repository),
 	}
+}
+
+func prebakedRepositories(assignedURL string) []PrebakedRepository {
+	repos, err := prebake.List()
+	if err != nil {
+		klog.ErrorS(err, "failed to load repository prebake manifest")
+		return nil
+	}
+	return extraPrebakedRepositories(repos, assignedURL)
+}
+
+func extraPrebakedRepositories(repos []prebake.Repository, assignedURL string) []PrebakedRepository {
+	if len(repos) == 0 {
+		return nil
+	}
+
+	assigned := prebake.NormalizeGitURL(assignedURL)
+	out := make([]PrebakedRepository, 0, len(repos))
+	for _, repo := range repos {
+		if assigned != "" && strings.EqualFold(prebake.NormalizeGitURL(repo.URL), assigned) {
+			continue
+		}
+		out = append(out, PrebakedRepository{URL: repo.URL, Dir: repo.Dir})
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 func (in DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {

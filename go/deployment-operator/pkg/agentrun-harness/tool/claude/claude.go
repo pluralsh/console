@@ -14,6 +14,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
@@ -62,7 +63,7 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := in.agentJSON(babysitAgent)
 
-	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, bCtx.Prompt, in.sessionID)
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, bCtx.Prompt, in.sessionID, prebake.ExtraReadDirs()...)
 
 	var envOpt exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -126,7 +127,7 @@ func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 	case console.AgentRunModeReview:
 		agent = in.agentJSON(reviewAgent)
 	}
-	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, followUpPrompt, in.sessionID)
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, followUpPrompt, in.sessionID, prebake.ExtraReadDirs()...)
 
 	var opts []exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -179,7 +180,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 	case console.AgentRunModeReview:
 		agent = in.agentJSON(reviewAgent)
 	}
-	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, in.Config.Run.Prompt, "")
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, in.Config.Run.Prompt, "", prebake.ExtraReadDirs()...)
 
 	if in.Config.Run.IsProxyEnabled() {
 		options = append(options,
@@ -523,13 +524,19 @@ func mapRole(role string) console.AiRole {
 	}
 }
 
-func claudeRunArgs(repositoryDir, promptFile, agent string, model Model, prompt, resumeSessionID string) []string {
-	args := []string{
-		"--add-dir", repositoryDir,
+func claudeRunArgs(repositoryDir, promptFile, agent string, model Model, prompt, resumeSessionID string, extraDirs ...string) []string {
+	args := []string{"--add-dir", repositoryDir}
+	for _, dir := range extraDirs {
+		if dir == "" || dir == repositoryDir {
+			continue
+		}
+		args = append(args, "--add-dir", dir)
+	}
+	args = append(args,
 		"--agents", agent,
 		"--system-prompt-file", promptFile,
 		"--model", string(model),
-	}
+	)
 	if resumeSessionID != "" {
 		args = append(args, "--resume", resumeSessionID, "-p", prompt)
 	} else {

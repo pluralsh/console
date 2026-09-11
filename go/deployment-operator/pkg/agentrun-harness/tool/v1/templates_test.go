@@ -8,6 +8,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 )
 
 func TestSystemPromptTemplate_EmbedsOriginalPrompt(t *testing.T) {
@@ -253,5 +254,104 @@ func TestSystemPromptTemplate_TemplateFilesExist(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(templateDir, name)); err != nil {
 			t.Fatalf("expected template file %q: %v", name, err)
 		}
+	}
+}
+
+func TestSystemPromptTemplate_PrebakedRepositories(t *testing.T) {
+	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+	input := &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/shared/repository",
+		PrebakedRepositories: []PrebakedRepository{
+			{URL: "https://github.com/pluralsh/console.git", Dir: "/plural/shared/repos/console"},
+			{URL: "https://github.com/pluralsh/plural.git", Dir: "/plural/shared/repos/plural"},
+		},
+	}
+
+	for _, name := range []string{"analyze.md.tmpl", "write.md.tmpl", "review.md.tmpl", "babysit.md.tmpl"} {
+		t.Run(name, func(t *testing.T) {
+			content, err := systemPromptTemplate(filepath.Join(templateDir, name), input)
+			if err != nil {
+				t.Fatalf("systemPromptTemplate() failed: %v", err)
+			}
+			for _, expected := range []string{
+				"## Additional local repositories",
+				"You SHOULD inspect them",
+				"https://github.com/pluralsh/console.git",
+				"/plural/shared/repos/console",
+				"https://github.com/pluralsh/plural.git",
+				"/plural/shared/repos/plural",
+				"Do not clone it again",
+			} {
+				if !strings.Contains(content, expected) {
+					t.Fatalf("expected prebake instructions to contain %q", expected)
+				}
+			}
+			switch name {
+			case "analyze.md.tmpl":
+				if !strings.Contains(content, "You MAY also read (not modify) the additional local repositories listed above.") {
+					t.Fatal("expected analyze scope to allow reading additional local repositories")
+				}
+				if strings.Contains(content, "Never access files outside this directory.") {
+					t.Fatal("analyze scope must not forbid additional local repositories")
+				}
+			case "review.md.tmpl":
+				if !strings.Contains(content, "You MAY also read (not modify) the additional local repositories listed above.") {
+					t.Fatal("expected review prompt to allow reading additional local repositories")
+				}
+			default:
+				if !strings.Contains(content, "You MAY read the additional local repositories listed above.") {
+					t.Fatal("expected write/babysit prompt to allow reading additional local repositories")
+				}
+			}
+		})
+	}
+
+	omitted, err := systemPromptTemplate(filepath.Join(templateDir, "write.md.tmpl"), &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/shared/repository",
+	})
+	if err != nil {
+		t.Fatalf("systemPromptTemplate() failed: %v", err)
+	}
+	if strings.Contains(omitted, "## Additional local repositories") {
+		t.Fatal("did not expect prebake section when PrebakedRepositories is empty")
+	}
+
+	strict, err := systemPromptTemplate(filepath.Join(templateDir, "analyze.md.tmpl"), &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeAnalyze,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/shared/repository",
+	})
+	if err != nil {
+		t.Fatalf("systemPromptTemplate() failed: %v", err)
+	}
+	if !strings.Contains(strict, "Never access files outside this directory.") {
+		t.Fatal("expected analyze scope to stay restricted when there are no additional local repositories")
+	}
+}
+
+func TestExtraPrebakedRepositories_OmitsAssignedRepo(t *testing.T) {
+	repos := []prebake.Repository{
+		{URL: "https://github.com/octocat/Hello-World.git", Dir: "/plural/shared/repos/hello-world"},
+		{URL: "git@" + "github.com" + ":pluralsh/console.git", Dir: "/plural/shared/repos/console"},
+	}
+
+	got := extraPrebakedRepositories(repos, "https://github.com/octocat/hello-world")
+	if len(got) != 1 {
+		t.Fatalf("got %d extra repos, want 1", len(got))
+	}
+	if got[0].Dir != "/plural/shared/repos/console" {
+		t.Fatalf("got extra repo dir %q, want console", got[0].Dir)
+	}
+
+	if extra := extraPrebakedRepositories(repos[:1], "https://github.com/octocat/Hello-World.git"); extra != nil {
+		t.Fatalf("expected nil when the only prebaked repo is the assigned run, got %#v", extra)
+	}
+
+	if extra := extraPrebakedRepositories(nil, "https://github.com/octocat/Hello-World.git"); extra != nil {
+		t.Fatalf("expected nil for empty input, got %#v", extra)
 	}
 }
