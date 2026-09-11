@@ -23,6 +23,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Elastic]: extractElasticMetadata,
   [WorkbenchToolType.Opensearch]: extractOpensearchMetadata,
   [WorkbenchToolType.Loki]: extractLokiMetadata,
+  [WorkbenchToolType.VictoriaLogs]: extractVictoriaLogsMetadata,
   [WorkbenchToolType.Prometheus]: extractPrometheusMetadata,
   [WorkbenchToolType.Tempo]: extractTempoMetadata,
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
@@ -155,6 +156,17 @@ function extractLokiMetadata(
     { label: 'URL', value: configuration?.loki?.url },
     { label: 'User', value: configuration?.loki?.username },
     { label: 'Tenant', value: configuration?.loki?.tenantId },
+  ]
+}
+
+function extractVictoriaLogsMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'URL', value: configuration?.victoriaLogs?.url },
+    { label: 'User', value: configuration?.victoriaLogs?.username },
+    { label: 'Account ID', value: configuration?.victoriaLogs?.accountId },
+    { label: 'Project ID', value: configuration?.victoriaLogs?.projectId },
   ]
 }
 

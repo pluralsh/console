@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_tool_type, Console.Schema.WorkbenchTool.Tool
   ecto_enum :workbench_tool_category, Console.Schema.WorkbenchTool.Category
   ecto_enum :workbench_tool_http_method, Console.Schema.WorkbenchTool.HttpMethod
+  ecto_enum :splunk_token_type, Console.Schema.WorkbenchTool.SplunkTokenType
   ecto_enum :workbench_job_status, Console.Schema.WorkbenchJob.Status
   ecto_enum :workbench_job_activity_status, Console.Schema.WorkbenchJobActivity.Status
   ecto_enum :workbench_job_activity_type, Console.Schema.WorkbenchJobActivity.Type
@@ -226,6 +227,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :opensearch,           :workbench_tool_opensearch_connection_attributes, description: "aws opensearch connection (logs)"
     field :prometheus,           :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
     field :loki,                 :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
+    field :victoria_logs,        :workbench_tool_victoria_logs_connection_attributes, description: "victoria logs connection (logs)"
     field :splunk,               :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
     field :tempo,                :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
     field :jaeger,               :workbench_tool_jaeger_connection_attributes, description: "jaeger connection (traces)"
@@ -288,6 +290,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id, :string, description: "optional tenant id"
   end
 
+  input_object :workbench_tool_victoria_logs_connection_attributes do
+    field :url,        non_null(:string), description: "victoria logs base url"
+    field :token,      :string, description: "bearer token or api key"
+    field :username,   :string, description: "basic auth username"
+    field :password,   :string, description: "basic auth password"
+    field :account_id, :string, description: "optional AccountID tenant header"
+    field :project_id, :string, description: "optional ProjectID tenant header"
+  end
+
   input_object :workbench_tool_tempo_connection_attributes do
     field :url,       non_null(:string), description: "tempo base url"
     field :token,     :string, description: "bearer token or api key"
@@ -304,10 +315,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_splunk_connection_attributes do
-    field :url,       non_null(:string), description: "splunk base url"
-    field :token,     :string, description: "bearer token"
-    field :username,  :string, description: "basic auth username"
-    field :password,  :string, description: "basic auth password"
+    field :url,        non_null(:string), description: "splunk base url"
+    field :token,      :string, description: "splunk authentication token"
+    field :token_type, :splunk_token_type, default_value: :bearer, description: "authorization realm for token authentication"
+    field :username,   :string, description: "basic auth username"
+    field :password,   :string, description: "basic auth password"
   end
 
   input_object :workbench_tool_datadog_connection_attributes do
@@ -659,6 +671,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the metrics tool"
 
       resolve &Deployments.metrics_tool/3
+      middleware ErrorHandler
     end
 
     field :logs_tool, list_of(:workbench_job_activity_log) do
@@ -666,6 +679,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the logs tool"
 
       resolve &Deployments.logs_tool/3
+      middleware ErrorHandler
     end
 
     field :traces_tool, list_of(:workbench_job_activity_trace) do
@@ -673,6 +687,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the traces tool"
 
       resolve &Deployments.traces_tool/3
+      middleware ErrorHandler
     end
 
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
@@ -1208,6 +1223,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :opensearch, :workbench_tool_opensearch_connection, description: "aws opensearch connection (no secrets)"
     field :prometheus, :workbench_tool_prometheus_connection, description: "prometheus connection (no secrets)"
     field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
+    field :victoria_logs, :workbench_tool_victoria_logs_connection, description: "victoria logs connection (no secrets)"
     field :splunk,    :workbench_tool_splunk_connection, description: "splunk connection (no secrets)"
     field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
     field :jaeger,    :workbench_tool_jaeger_connection, description: "jaeger connection (no secrets)"
@@ -1265,6 +1281,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id, :string, description: "optional tenant id"
   end
 
+  object :workbench_tool_victoria_logs_connection do
+    field :url,        :string, description: "victoria logs base url"
+    field :username,   :string, description: "basic auth username"
+    field :account_id, :string, description: "optional AccountID tenant header"
+    field :project_id, :string, description: "optional ProjectID tenant header"
+  end
+
   object :workbench_tool_tempo_connection do
     field :url,       :string, description: "tempo base url"
     field :username,  :string, description: "basic auth username"
@@ -1277,8 +1300,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_splunk_connection do
-    field :url,       :string, description: "splunk base url"
-    field :username,  :string, description: "basic auth username"
+    field :url,        :string, description: "splunk base url"
+    field :token_type, :splunk_token_type, description: "authorization realm for token authentication"
+    field :username,   :string, description: "basic auth username"
   end
 
   object :workbench_tool_datadog_connection do

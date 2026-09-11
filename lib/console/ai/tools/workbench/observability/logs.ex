@@ -40,15 +40,16 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   def json_schema(%{tool: %{tool: :azure}}), do: @azure_schema
   def json_schema(_), do: @default_schema
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_logs_#{n}"
-  def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather logs from the #{n} observability connection. #{Metrics.provider_hint(t)}#{facet_hint(t)}")
+  def description(%__MODULE__{tool: %{name: n} = t}),
+    do: String.trim("Gather logs from the #{n} observability connection. Leave the query empty to page logs without a text filter. #{Metrics.provider_hint(t)}#{query_hint(t)}#{facet_hint(t)}")
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:facets, with: &facet_changeset/2)
-    |> validate_required([:query])
   end
 
   defp options_changeset(model, attrs) do
@@ -71,7 +72,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
 
   def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input, Client.logs_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{content: Output.truncate(content), logs: Enum.map(Enum.take(output.logs, @log_limit), &to_log/1)}}
@@ -80,7 +81,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
 
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input, Client.logs_rpc_opts()) do
       {:ok, Enum.map(output.logs, &to_log/1)}
     end
@@ -98,7 +99,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     with {:ok, connection} <- Conversion.to_proto(tool) do
       {:ok, %LogsQueryInput{
         connection: connection,
-        query: q,
+        query: q || "",
         limit: l,
         facets: to_facets(fs),
         range: TimeRange.to_proto(tr),
@@ -121,8 +122,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   defp facet_hint(%{tool: :datadog}), do: " This tool supports facets for filtering logs, which will be appended to the query as \"{facet-name}:{facet-value}\" (space-separated AND conditions)."
   defp facet_hint(%{tool: :splunk}), do: " This tool supports facets for filtering logs, which will be appended to the first search stage as \"{facet-name}=\"{facet-value}\"\"."
   defp facet_hint(%{tool: :loki}), do: " This tool supports facets for filtering logs, which will be merged into the LogQL label selector as \"{facet-name}=\"{facet-value}\"\"."
-  defp facet_hint(%{tool: :elastic}), do: " This tool supports facets for filtering logs, which will be applied as exact-match term filters on the \"{facet-name}\" field."
+  defp facet_hint(%{tool: :victoria_logs}), do: " This tool supports facets for filtering logs, which will be appended to the LogsQL query as \"{facet-name}:=\"{facet-value}\"\"."
+  defp facet_hint(%{tool: :elastic}), do: " Facets are exact-match term filters and are combined with AND. Use the mapped field name, typically a keyword field such as \"cluster.name.keyword\" or \"kubernetes.namespace.keyword\"."
   defp facet_hint(_), do: " Facets are not supported for this tool."
+
+  defp query_hint(%{tool: :elastic}), do: " Elasticsearch analyzes the query against the \"message\" field only and combines its terms with OR. Use an empty query or \"*\" to match all log messages."
+  defp query_hint(%{tool: :loki}), do: " An empty query uses the supplied facets as the LogQL stream selector. Without facets, it defaults to `{job=~\".+\"}`, so only streams with a nonempty `job` label are returned."
+  defp query_hint(_), do: ""
 
   defp blank_to_nil(v) do
     case String.trim(to_string(v || "")) do

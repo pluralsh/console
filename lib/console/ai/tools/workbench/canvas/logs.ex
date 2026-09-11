@@ -2,7 +2,6 @@ defmodule Console.AI.Tools.Workbench.Canvas.LogsBlock do
   use Console.AI.Tools.Workbench.Base
   import Console.AI.Tools.Workbench.Canvas.MetricsBlock, only: [validate_tool: 3]
   alias Console.AI.Workbench.Canvas
-  alias Console.AI.Tools.Workbench.Observability
   alias Console.Schema.WorkbenchJobResult.{CanvasBlock, ToolGraph}
 
   embedded_schema do
@@ -28,8 +27,6 @@ defmodule Console.AI.Tools.Workbench.Canvas.LogsBlock do
     |> validate_required([:identifier])
   end
 
-  @logs_tools [Observability.Logs, Observability.Plrl.Logs]
-
   def implement(%__MODULE__{env: env, layout: layout, props: props} = model) do
     block = %CanvasBlock{
       identifier: model.identifier,
@@ -38,7 +35,7 @@ defmodule Console.AI.Tools.Workbench.Canvas.LogsBlock do
       content: %CanvasBlock.Content{logs: props}
     }
 
-    with {:ok, _} <- validate_tool(env, props.query, @logs_tools),
+    with {:ok, _} <- validate_tool(env, props.query, :logs),
          {:ok, canvas} <- Canvas.insert(Canvas.canvas(), block) do
       Canvas.save(canvas)
       {:ok, "added logs block #{model.identifier} to canvas"}

@@ -1,0 +1,34 @@
+{
+    "type": "object",
+    "properties": {
+        "summary": {
+            "type": "string",
+            "description": "A short summary of what this infrastructure plan will change. Markdown format is preferred."
+        },
+        "blast_radius": {
+            "type": "string",
+            "description": "The expected blast radius of applying this plan: what is in scope, how broad the impact is, and which environments or workloads are touched. Markdown format is preferred."
+        },
+        "critical_systems": {
+            "type": "array",
+            "description": "Critical systems, services, or resources that could be affected by applying this plan. Empty if none. Markdown format is preferred.",
+            "items": {
+                "type": "string",
+                "description": "A critical system that could be affected. Markdown format is preferred."
+            }
+        },
+        "notable_changes": {
+            "type": "array",
+            "description": "The most important resource creates, updates, or destroys in this plan. Markdown format is preferred.",
+            "items": {
+                "type": "string",
+                "description": "A notable resource change. Markdown format is preferred."
+            }
+        },
+        "safety": {
+            "type": "string",
+            "description": "Whether it is safe to apply this plan, including any caveats, sequencing requirements, or reasons to wait. Markdown format is preferred."
+        }
+    },
+    "required": ["summary", "blast_radius", "critical_systems", "notable_changes", "safety"]
+}

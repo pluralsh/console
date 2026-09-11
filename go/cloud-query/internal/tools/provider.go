@@ -24,6 +24,13 @@ func escapeDoubleQuoted(value string) string {
 	return strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(value)
 }
 
+func defaultLogQuery(query, fallback string) string {
+	if strings.TrimSpace(query) == "" {
+		return fallback
+	}
+	return query
+}
+
 type MetricsProvider interface {
 	Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error)
 	MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error)
@@ -70,6 +77,8 @@ func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
 		return NewCloudwatchProvider(provider.Cloudwatch), nil
 	case *toolquery.ToolConnection_Azure:
 		return NewAzureProvider(provider.Azure)
+	case *toolquery.ToolConnection_VictoriaLogs:
+		return NewVictoriaLogsProvider(provider.VictoriaLogs), nil
 	default:
 		return nil, nil
 	}

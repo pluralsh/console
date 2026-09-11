@@ -15,10 +15,9 @@ defmodule Console.Deployments.Policy do
     Service,
     ComplianceReportGenerator,
     User,
-    Project,
-    GitRepository,
-    StackRun
+    Project
   }
+  alias Console.Deployments.Policy.Input
   alias Console.Deployments.Settings
   alias Console.Deployments.{Stacks, Workbenches}
   alias Console.Services.Users
@@ -111,56 +110,6 @@ defmodule Console.Deployments.Policy do
       |> maybe_sample(input, ids)
     end
   end
-
-  @doc "Builds the actor payload used as policy input."
-  def actor(%User{id: id, name: name, email: email, groups: groups}) do
-    %{
-      "id" => id,
-      "name" => name,
-      "email" => email,
-      "groups" => if(is_list(groups), do: Enum.map(groups, & &1.name), else: [])
-    }
-  end
-  def actor(_), do: %{}
-
-  @doc "Builds the stack payload used as policy input."
-  def stack(%Stack{name: name} = stack) do
-    %{
-      "name" => name,
-      "project" => stack_project(stack.project),
-      "git" => stack_git(stack)
-    }
-  end
-  def stack(_), do: %{}
-
-  @doc "Builds the commit payload used as policy input."
-  def commit(%StackRun{} = run) do
-    %{
-      "sha" => git_field(run.git, :ref),
-      "message" => run.message,
-      "committer" => run.committer
-    }
-  end
-  def commit(_), do: %{}
-
-  defp stack_project(%Project{id: id, name: name}), do: %{"id" => id, "name" => name}
-  defp stack_project(_), do: %{}
-
-  defp stack_git(%Stack{git: git, repository: repo, sha: sha}) do
-    %{
-      "ref" => git_field(git, :ref),
-      "folder" => git_field(git, :folder),
-      "sha" => sha,
-      "url" => repo_url(repo)
-    }
-  end
-
-  defp git_field(%{ref: ref}, :ref), do: ref
-  defp git_field(%{folder: folder}, :folder), do: folder
-  defp git_field(_, _), do: nil
-
-  defp repo_url(%GitRepository{url: url}), do: url
-  defp repo_url(_), do: nil
 
   @doc "Joins deny/approve reason objects into a single persisted string."
   def policy_reason(items, fallback \\ "")
@@ -279,20 +228,11 @@ defmodule Console.Deployments.Policy do
 
   defp reconcile_binding(%BindingPolicy{} = binding, target) do
     user = bot()
-    case evaluate_policy(binding.bind_policy, binding_input(target), [binding.bind_policy_id]) do
+    case evaluate_policy(binding.bind_policy, Input.binding(target), [binding.bind_policy_id]) do
       {:ok, %{"bind" => true}} -> attach_binding(binding, target, user)
       {:ok, %{"bind" => false}} -> detach_binding(binding, target, user)
       error -> Logger.error("Failed to evaluate binding policy #{binding.id}: #{inspect(error)}")
     end
-  end
-
-  defp binding_input(%Workbench{} = target), do: %{workbench: clean_binding_input(target)}
-  defp binding_input(%Stack{} = target), do: %{stack: clean_binding_input(target)}
-
-  defp clean_binding_input(target) do
-    target
-    |> Map.from_struct()
-    |> Console.clean()
   end
 
   defp attach_binding(%BindingPolicy{} = binding, target, user) do

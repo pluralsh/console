@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -26,7 +27,7 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 
@@ -35,7 +36,7 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 
 	resp, err := client.Logs(
 		ctx,
-		mergeLokiQueryWithFacets(input.Query, input.GetFacets()),
+		lokiQueryWithFacets(input.Query, input.GetFacets()),
 		strconv.FormatInt(input.GetRange().GetStart().AsTime().UnixNano(), 10),
 		strconv.FormatInt(input.GetRange().GetEnd().AsTime().UnixNano(), 10),
 		strconv.Itoa(int(input.GetLimit())))
@@ -50,14 +51,14 @@ func (in *LokiProvider) LogAggregate(ctx context.Context, input *toolquery.LogAg
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 
 	lokiClient := client.NewLokiClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
 	defer lokiClient.Close()
 
-	query := mergeLokiQueryWithFacets(input.Query, input.GetFacets())
+	query := lokiQueryWithFacets(input.Query, input.GetFacets())
 	resp, err := lokiClient.LogAggregate(
 		ctx,
 		fmt.Sprintf("sum(count_over_time(%s[%s]))", query, input.GetBucketSize()),
@@ -101,6 +102,16 @@ func (in *LokiProvider) LogAggregate(ctx context.Context, input *toolquery.LogAg
 	}
 
 	return &toolquery.LogAggregateOutput{Buckets: buckets}, nil
+}
+
+func lokiQueryWithFacets(query string, facets []*toolquery.LogsQueryFacet) string {
+	if strings.TrimSpace(query) == "" {
+		if facetQuery := mergeLokiQueryWithFacets("", facets); strings.TrimSpace(facetQuery) != "" {
+			return facetQuery
+		}
+		query = `{job=~".+"}`
+	}
+	return mergeLokiQueryWithFacets(query, facets)
 }
 
 func lokiAggregateTimestamp(value any) (time.Time, error) {

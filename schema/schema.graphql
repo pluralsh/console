@@ -2953,6 +2953,7 @@ enum WorkbenchToolType {
   CLOUD_RUN
   AZURE_FUNCTION
   DOCKER
+  VICTORIA_LOGS
 }
 
 enum WorkbenchToolCategory {
@@ -2978,6 +2979,11 @@ enum WorkbenchToolHttpMethod {
   PUT
   DELETE
   PATCH
+}
+
+enum SplunkTokenType {
+  BEARER
+  SPLUNK
 }
 
 enum WorkbenchJobStatus {
@@ -3476,6 +3482,9 @@ input WorkbenchToolConfigurationAttributes {
   "loki connection (logs)"
   loki: WorkbenchToolLokiConnectionAttributes
 
+  "victoria logs connection (logs)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnectionAttributes
+
   "splunk connection (logs)"
   splunk: WorkbenchToolSplunkConnectionAttributes
 
@@ -3629,6 +3638,26 @@ input WorkbenchToolLokiConnectionAttributes {
   tenantId: String
 }
 
+input WorkbenchToolVictoriaLogsConnectionAttributes {
+  "victoria logs base url"
+  url: String!
+
+  "bearer token or api key"
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
+}
+
 input WorkbenchToolTempoConnectionAttributes {
   "tempo base url"
   url: String!
@@ -3664,8 +3693,11 @@ input WorkbenchToolSplunkConnectionAttributes {
   "splunk base url"
   url: String!
 
-  "bearer token"
+  "splunk authentication token"
   token: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String
@@ -5151,6 +5183,9 @@ type WorkbenchToolConfiguration {
   "loki connection (no secrets)"
   loki: WorkbenchToolLokiConnection
 
+  "victoria logs connection (no secrets)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnection
+
   "splunk connection (no secrets)"
   splunk: WorkbenchToolSplunkConnection
 
@@ -5283,6 +5318,20 @@ type WorkbenchToolLokiConnection {
   tenantId: String
 }
 
+type WorkbenchToolVictoriaLogsConnection {
+  "victoria logs base url"
+  url: String
+
+  "basic auth username"
+  username: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
+}
+
 type WorkbenchToolTempoConnection {
   "tempo base url"
   url: String
@@ -5305,6 +5354,9 @@ type WorkbenchToolJaegerConnection {
 type WorkbenchToolSplunkConnection {
   "splunk base url"
   url: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String
@@ -6678,6 +6730,11 @@ enum OpenAiMethod {
   AUTO
 }
 
+enum BedrockEndpoint {
+  RUNTIME
+  MANTLE
+}
+
 enum Provider {
   AWS
   GCP
@@ -6997,6 +7054,9 @@ input BedrockAiAttributes {
 
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
+
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
 
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
@@ -7434,6 +7494,9 @@ type BedrockAiSettings {
 
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
+
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
 
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]

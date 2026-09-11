@@ -68,6 +68,15 @@ func (in *OpenAIRouter) resolveModel(ctx context.Context, model string) (schemas
 			return "", "", nil, fmt.Errorf("provider not configured: %s", provider)
 		}
 		return provider, parts[1], aiConfig.GetXai(), nil
+	case schemas.Bedrock:
+		aiConfig, err := in.consoleClient.GetAiConfig(ctx)
+		if err != nil {
+			return "", "", nil, fmt.Errorf("failed to load AI config: %w", err)
+		}
+		if aiConfig.GetBedrock() == nil {
+			return "", "", nil, fmt.Errorf("provider not configured: %s", provider)
+		}
+		return bedrockProvider(aiConfig.GetBedrock()), parts[1], nil, nil
 	}
 
 	if !schemas.IsKnownProvider(parts[0]) {

@@ -126,7 +126,7 @@ type WorkbenchToolSpec struct {
 
 	// The type of tool.
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum:=HTTP;ELASTIC;DATADOG;PROMETHEUS;LOKI;TEMPO;SENTRY;MCP;LINEAR;ATLASSIAN;SPLUNK;DYNATRACE;CLOUDWATCH;AZURE;CLOUD;JAEGER;EXA;GITHUB;SLACK;TEAMS;GITLAB;BITBUCKET;BITBUCKET_DATACENTER;AZURE_DEVOPS;PAGERDUTY;OPENSEARCH;LAMBDA;CLOUD_RUN;AZURE_FUNCTION;DOCKER
+	// +kubebuilder:validation:Enum:=HTTP;ELASTIC;DATADOG;PROMETHEUS;LOKI;TEMPO;SENTRY;MCP;LINEAR;ATLASSIAN;SPLUNK;DYNATRACE;CLOUDWATCH;AZURE;CLOUD;JAEGER;EXA;GITHUB;SLACK;TEAMS;GITLAB;BITBUCKET;BITBUCKET_DATACENTER;AZURE_DEVOPS;PAGERDUTY;OPENSEARCH;LAMBDA;CLOUD_RUN;AZURE_FUNCTION;DOCKER;VICTORIA_LOGS
 	Tool console.WorkbenchToolType `json:"tool"`
 
 	// Categories for the tool.
@@ -186,6 +186,10 @@ type WorkbenchToolConfiguration struct {
 	// Loki connection (logs).
 	// +kubebuilder:validation:Optional
 	Loki *WorkbenchToolLokiConfig `json:"loki,omitempty"`
+
+	// VictoriaLogs connection (logs).
+	// +kubebuilder:validation:Optional
+	VictoriaLogs *WorkbenchToolVictoriaLogsConfig `json:"victoriaLogs,omitempty"`
 
 	// Tempo connection (traces).
 	// +kubebuilder:validation:Optional
@@ -305,6 +309,11 @@ func (c *WorkbenchToolConfiguration) Attributes(ctx context.Context, cl client.C
 		return nil, err
 	}
 
+	victoriaLogs, err := c.VictoriaLogs.Attributes(ctx, cl, namespace)
+	if err != nil {
+		return nil, err
+	}
+
 	tempo, err := c.Tempo.Attributes(ctx, cl, namespace)
 	if err != nil {
 		return nil, err
@@ -406,6 +415,7 @@ func (c *WorkbenchToolConfiguration) Attributes(ctx context.Context, cl client.C
 		Opensearch:          opensearch,
 		Prometheus:          prometheus,
 		Loki:                loki,
+		VictoriaLogs:        victoriaLogs,
 		Tempo:               tempo,
 		Jaeger:              jaeger,
 		Splunk:              splunk,
@@ -738,6 +748,64 @@ func (c *WorkbenchToolLokiConfig) Attributes(ctx context.Context, cl client.Clie
 	return attr, nil
 }
 
+// WorkbenchToolVictoriaLogsConfig defines a VictoriaLogs connection.
+type WorkbenchToolVictoriaLogsConfig struct {
+	// VictoriaLogs base URL.
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
+	// Reference to a secret key containing the bearer token or api key.
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+
+	// Basic auth username.
+	// +kubebuilder:validation:Optional
+	Username *string `json:"username,omitempty"`
+
+	// Reference to a secret key containing the basic auth password.
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
+
+	// Optional AccountID tenant header.
+	// +kubebuilder:validation:Optional
+	AccountID *string `json:"accountId,omitempty"`
+
+	// Optional ProjectID tenant header.
+	// +kubebuilder:validation:Optional
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
+func (c *WorkbenchToolVictoriaLogsConfig) Attributes(ctx context.Context, cl client.Client, namespace string) (*console.WorkbenchToolVictoriaLogsConnectionAttributes, error) {
+	if c == nil {
+		return nil, nil
+	}
+
+	attr := &console.WorkbenchToolVictoriaLogsConnectionAttributes{
+		URL:       c.URL,
+		Username:  c.Username,
+		AccountID: c.AccountID,
+		ProjectID: c.ProjectID,
+	}
+
+	if c.TokenSecretRef != nil {
+		token, err := utils.GetSecretKey(ctx, cl, c.TokenSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Token = lo.ToPtr(token)
+	}
+
+	if c.PasswordSecretRef != nil {
+		password, err := utils.GetSecretKey(ctx, cl, c.PasswordSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Password = lo.ToPtr(password)
+	}
+
+	return attr, nil
+}
+
 // WorkbenchToolTempoConfig defines a tempo connection.
 type WorkbenchToolTempoConfig struct {
 	// Tempo base URL.
@@ -845,9 +913,15 @@ type WorkbenchToolSplunkConfig struct {
 	// +kubebuilder:validation:Required
 	URL string `json:"url"`
 
-	// Reference to a secret key containing the bearer token.
+	// Reference to a secret key containing the authentication token.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+
+	// Authorization realm used for token authentication.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum:=BEARER;SPLUNK
+	// +kubebuilder:default:=BEARER
+	TokenType *console.SplunkTokenType `json:"tokenType,omitempty"`
 
 	// Basic auth username.
 	// +kubebuilder:validation:Optional
@@ -864,8 +938,9 @@ func (c *WorkbenchToolSplunkConfig) Attributes(ctx context.Context, cl client.Cl
 	}
 
 	attr := &console.WorkbenchToolSplunkConnectionAttributes{
-		URL:      c.URL,
-		Username: c.Username,
+		URL:       c.URL,
+		TokenType: lo.CoalesceOrEmpty(c.TokenType, lo.ToPtr(console.SplunkTokenTypeBearer)),
+		Username:  c.Username,
 	}
 
 	if c.TokenSecretRef != nil {

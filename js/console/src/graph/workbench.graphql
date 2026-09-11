@@ -228,6 +228,12 @@ fragment WorkbenchTool on WorkbenchTool {
       username
       tenantId
     }
+    victoriaLogs {
+      url
+      username
+      accountId
+      projectId
+    }
     prometheus {
       url
       username
@@ -264,6 +270,7 @@ fragment WorkbenchTool on WorkbenchTool {
     }
     splunk {
       url
+      tokenType
       username
     }
     cloudwatch {
@@ -1311,7 +1318,7 @@ query WorkbenchJobActivities($id: ID!) {
         grade
       }
     }
-    activities(first: 100) {
+    activities(first: 1000) {
       edges {
         node {
           ...WorkbenchJobActivity

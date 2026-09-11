@@ -3,6 +3,6 @@ Plural AI has generated a summary of what this plan entails [here](<%= @link %>)
 <details>
 <summary>Plan Summary</summary>
 
-<%= @insight.text %>
+<%= @text %>
 
 </details>

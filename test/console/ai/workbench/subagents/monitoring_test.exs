@@ -27,6 +27,7 @@ defmodule Console.AI.Workbench.Subagents.MonitoringTest do
     assert "workbench_dashboards" in names
     assert "workbench_dashboard" in names
     assert "workbench_dashboard_upsert" in names
+    assert "workbench_dashboard_graph_delete" in names
     assert "workbench_dashboard_delete" in names
     assert "workbench_monitors" in names
     assert "workbench_monitor" in names

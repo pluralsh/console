@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/helm-test-ci.yaml"
       - "go/helm-test/**"
+      - "charts/controller/**"
       - "charts/console/**"
       - "charts/console-rapid/**"
 permissions:

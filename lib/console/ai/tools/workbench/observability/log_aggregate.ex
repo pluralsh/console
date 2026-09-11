@@ -18,7 +18,7 @@ defmodule Console.AI.Tools.Workbench.Observability.LogAggregate do
     field :tool, :map, virtual: true
     field :query, :string
     field :bucket_size, :string
-    field :operator, Console.Schema.Monitor.Operator, default: :and
+    field :operator, Console.Schema.Monitor.Operator, default: :or
 
     embeds_one :options, Options, on_replace: :update, primary_key: false do
       embeds_one :azure, Azure, on_replace: :update, primary_key: false do
@@ -43,15 +43,16 @@ defmodule Console.AI.Tools.Workbench.Observability.LogAggregate do
   def name(%__MODULE__{tool: %{name: name}}), do: "workbench_observability_log_aggregate_#{name}"
 
   def description(%__MODULE__{tool: %{name: name} = tool}),
-    do: String.trim("Aggregate log counts from the #{name} observability connection. #{Metrics.provider_hint(tool)}")
+    do: String.trim("Aggregate log counts from the #{name} observability connection. Leave the query empty to aggregate logs without a text filter. #{Metrics.provider_hint(tool)}#{query_hint(tool)}#{facet_hint(tool)}")
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:facets, with: &facet_changeset/2)
-    |> validate_required([:query, :bucket_size])
+    |> validate_required([:bucket_size])
   end
 
   def implement(%__MODULE__{} = tool) do
@@ -63,7 +64,7 @@ defmodule Console.AI.Tools.Workbench.Observability.LogAggregate do
 
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %LogAggregateOutput{} = output} <-
            Stub.log_aggregate(conn, input, Client.logs_rpc_opts()) do
       {:ok, Enum.map(output.buckets, &to_bucket/1)}
@@ -85,7 +86,7 @@ defmodule Console.AI.Tools.Workbench.Observability.LogAggregate do
       {:ok,
        %LogAggregateInput{
          connection: connection,
-         query: query,
+         query: query || "",
          range: TimeRange.to_proto(time_range),
          bucket_size: bucket_size,
          facets: to_facets(facets),
@@ -127,6 +128,13 @@ defmodule Console.AI.Tools.Workbench.Observability.LogAggregate do
   end
 
   defp logs_options(_, _), do: nil
+
+  defp query_hint(%{tool: :elastic}), do: " Elasticsearch analyzes the query against the \"message\" field only. Terms use the selected operator, which defaults to OR. Use an empty query or \"*\" to match all log messages."
+  defp query_hint(%{tool: :loki}), do: " An empty query uses the supplied facets as the LogQL stream selector. Without facets, it defaults to `{job=~\".+\"}`, so only streams with a nonempty `job` label are returned."
+  defp query_hint(_), do: ""
+
+  defp facet_hint(%{tool: :elastic}), do: " Facets are exact-match term filters and are combined with AND. Use the mapped field name, typically a keyword field such as \"cluster.name.keyword\" or \"kubernetes.namespace.keyword\"."
+  defp facet_hint(_), do: ""
 
   defp blank_to_nil(value) do
     case String.trim(to_string(value || "")) do

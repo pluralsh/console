@@ -109,6 +109,7 @@ ConfigurationFile represents kas configuration file.
 | api | [ApiCF](#plural-agent-kascfg-ApiCF) |  | Public API. |
 | private_api | [PrivateApiCF](#plural-agent-kascfg-PrivateApiCF) |  | Private API for kas-&gt;kas communication. |
 | plural_url | [string](#string) |  | Plural URL address |
+| plural_insecure_skip_tls_verify | [bool](#bool) |  | Skip TLS certificate verification when connecting to Plural Console. |
 
 
 

@@ -71,6 +71,7 @@ defmodule Console.Schema.AgentRuntime do
     |> cast_embed(:model, with: &Modes.model_changeset/2)
     |> unique_constraint(:default, message: "only one default runtime can be set at once")
     |> unique_constraint(:name, name: :agent_runtimes_cluster_id_name_uniq_index, message: "a runtime with this name already exists for this cluster")
+    |> foreign_key_constraint(:id, name: :workbenches, match: :prefix, message: "cannot delete due to workbenches referencing this agent runtime")
     |> validate_length(:name, max: 255)
     |> validate_required([:name, :type])
     |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)

@@ -148,6 +148,28 @@ export function appendConnectionToEnd(prev, next, key) {
   }
 }
 
+export function mergeConnectionsByNodeId(existing, incoming, { readField }) {
+  if (!existing) return incoming
+  if (!incoming) return existing
+
+  const incomingEdges = incoming.edges ?? []
+  const incomingIds = new Set(
+    incomingEdges
+      .map((edge) => readField('id', edge?.node))
+      .filter(isNonNullable)
+  )
+  const existingOnlyEdges = (existing.edges ?? []).filter((edge) => {
+    const id = readField('id', edge?.node)
+
+    return !id || !incomingIds.has(id)
+  })
+
+  return {
+    ...incoming,
+    edges: [...incomingEdges, ...existingOnlyEdges],
+  }
+}
+
 export function removeConnection(prev, val, key) {
   return {
     ...prev,

@@ -40,7 +40,7 @@ func datadogEscapeLogQueryValue(v string) string {
 // splunkSearchWithFacets appends field predicates to the first search stage of an SPL pipeline.
 func splunkSearchWithFacets(query string, limit int32, facets []*toolquery.LogsQueryFacet) string {
 	clause := splunkFacetClause(facets)
-	trimmed := strings.TrimSpace(query)
+	trimmed := strings.TrimSpace(defaultLogQuery(query, "*"))
 
 	var pipeline string
 	if strings.HasPrefix(trimmed, "search ") {

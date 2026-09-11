@@ -1458,6 +1458,8 @@ type BedrockAiAttributes struct {
 	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
+	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
@@ -1476,6 +1478,8 @@ type BedrockAiSettings struct {
 	Region *string `json:"region,omitempty"`
 	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
+	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
@@ -11875,6 +11879,8 @@ type WorkbenchToolConfiguration struct {
 	Prometheus *WorkbenchToolPrometheusConnection `json:"prometheus,omitempty"`
 	// loki connection (no secrets)
 	Loki *WorkbenchToolLokiConnection `json:"loki,omitempty"`
+	// victoria logs connection (no secrets)
+	VictoriaLogs *WorkbenchToolVictoriaLogsConnection `json:"victoriaLogs,omitempty"`
 	// splunk connection (no secrets)
 	Splunk *WorkbenchToolSplunkConnection `json:"splunk,omitempty"`
 	// tempo connection (no secrets)
@@ -11934,6 +11940,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Prometheus *WorkbenchToolPrometheusConnectionAttributes `json:"prometheus,omitempty"`
 	// loki connection (logs)
 	Loki *WorkbenchToolLokiConnectionAttributes `json:"loki,omitempty"`
+	// victoria logs connection (logs)
+	VictoriaLogs *WorkbenchToolVictoriaLogsConnectionAttributes `json:"victoriaLogs,omitempty"`
 	// splunk connection (logs)
 	Splunk *WorkbenchToolSplunkConnectionAttributes `json:"splunk,omitempty"`
 	// tempo connection (traces)
@@ -12324,6 +12332,8 @@ type WorkbenchToolSlackConnectionAttributes struct {
 type WorkbenchToolSplunkConnection struct {
 	// splunk base url
 	URL *string `json:"url,omitempty"`
+	// authorization realm for token authentication
+	TokenType *SplunkTokenType `json:"tokenType,omitempty"`
 	// basic auth username
 	Username *string `json:"username,omitempty"`
 }
@@ -12331,8 +12341,10 @@ type WorkbenchToolSplunkConnection struct {
 type WorkbenchToolSplunkConnectionAttributes struct {
 	// splunk base url
 	URL string `json:"url"`
-	// bearer token
+	// splunk authentication token
 	Token *string `json:"token,omitempty"`
+	// authorization realm for token authentication
+	TokenType *SplunkTokenType `json:"tokenType,omitempty"`
 	// basic auth username
 	Username *string `json:"username,omitempty"`
 	// basic auth password
@@ -12375,6 +12387,32 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolVictoriaLogsConnection struct {
+	// victoria logs base url
+	URL *string `json:"url,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// optional AccountID tenant header
+	AccountID *string `json:"accountId,omitempty"`
+	// optional ProjectID tenant header
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
+type WorkbenchToolVictoriaLogsConnectionAttributes struct {
+	// victoria logs base url
+	URL string `json:"url"`
+	// bearer token or api key
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
+	// optional AccountID tenant header
+	AccountID *string `json:"accountId,omitempty"`
+	// optional ProjectID tenant header
+	ProjectID *string `json:"projectId,omitempty"`
 }
 
 type WorkbenchUsageTimeseries struct {
@@ -13600,6 +13638,61 @@ func (e *AutoscalingTarget) UnmarshalJSON(b []byte) error {
 }
 
 func (e AutoscalingTarget) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type BedrockEndpoint string
+
+const (
+	BedrockEndpointRuntime BedrockEndpoint = "RUNTIME"
+	BedrockEndpointMantle  BedrockEndpoint = "MANTLE"
+)
+
+var AllBedrockEndpoint = []BedrockEndpoint{
+	BedrockEndpointRuntime,
+	BedrockEndpointMantle,
+}
+
+func (e BedrockEndpoint) IsValid() bool {
+	switch e {
+	case BedrockEndpointRuntime, BedrockEndpointMantle:
+		return true
+	}
+	return false
+}
+
+func (e BedrockEndpoint) String() string {
+	return string(e)
+}
+
+func (e *BedrockEndpoint) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BedrockEndpoint(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BedrockEndpoint", str)
+	}
+	return nil
+}
+
+func (e BedrockEndpoint) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *BedrockEndpoint) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e BedrockEndpoint) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -18324,6 +18417,61 @@ func (e SortDirection) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type SplunkTokenType string
+
+const (
+	SplunkTokenTypeBearer SplunkTokenType = "BEARER"
+	SplunkTokenTypeSplunk SplunkTokenType = "SPLUNK"
+)
+
+var AllSplunkTokenType = []SplunkTokenType{
+	SplunkTokenTypeBearer,
+	SplunkTokenTypeSplunk,
+}
+
+func (e SplunkTokenType) IsValid() bool {
+	switch e {
+	case SplunkTokenTypeBearer, SplunkTokenTypeSplunk:
+		return true
+	}
+	return false
+}
+
+func (e SplunkTokenType) String() string {
+	return string(e)
+}
+
+func (e *SplunkTokenType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SplunkTokenType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SplunkTokenType", str)
+	}
+	return nil
+}
+
+func (e SplunkTokenType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SplunkTokenType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SplunkTokenType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type StackStatus string
 
 const (
@@ -19725,6 +19873,7 @@ const (
 	WorkbenchToolTypeCloudRun            WorkbenchToolType = "CLOUD_RUN"
 	WorkbenchToolTypeAzureFunction       WorkbenchToolType = "AZURE_FUNCTION"
 	WorkbenchToolTypeDocker              WorkbenchToolType = "DOCKER"
+	WorkbenchToolTypeVictoriaLogs        WorkbenchToolType = "VICTORIA_LOGS"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -19758,11 +19907,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeCloudRun,
 	WorkbenchToolTypeAzureFunction,
 	WorkbenchToolTypeDocker,
+	WorkbenchToolTypeVictoriaLogs,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs:
 		return true
 	}
 	return false

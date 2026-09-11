@@ -35,7 +35,10 @@ export type WorkbenchJobLevelThinkingItem = WorkbenchJobProgressFragment & {
 }
 
 // only returns a map of the ephemeral text streams, others subs are added to Apollo cache
-export function useWorkbenchJobStreams(jobId: Nullable<string>) {
+export function useWorkbenchJobStreams(
+  jobId: Nullable<string>,
+  activityQueryLoaded: boolean
+) {
   const client = useApolloClient()
   const [textStreamMap, setTextStreamMap] = useState<WorkbenchJobTextStreamMap>(
     {}
@@ -94,7 +97,7 @@ export function useWorkbenchJobStreams(jobId: Nullable<string>) {
   })
   useWorkbenchJobActivityDeltaSubscription({
     variables: { jobId: jobId ?? '' },
-    skip: !jobId,
+    skip: !jobId || !activityQueryLoaded,
     ignoreResults: true,
     onData: ({ data: { data } }) => {
       const activityDelta = data?.workbenchJobActivityDelta

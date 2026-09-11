@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   ecto_enum :log_driver, DeploymentSettings.LogDriver
   ecto_enum :vector_store, DeploymentSettings.VectorStore
   ecto_enum :open_ai_method, DeploymentSettings.OpenAIMethod
+  ecto_enum :bedrock_endpoint, DeploymentSettings.BedrockEndpoint
   ecto_enum :provider, CloudConnection.Provider
 
   @bedrock_model_id_doc "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases."
@@ -15,6 +16,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   @bedrock_proxy_models_doc "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
 
   @bedrock_deployments_doc "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+
+  @bedrock_endpoint_doc "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs."
 
   input_object :project_attributes do
     field :name, non_null(:string)
@@ -286,6 +289,7 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
 
+    field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :json, description: @bedrock_deployments_doc
   end
@@ -684,6 +688,7 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
 
+    field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :map, description: @bedrock_deployments_doc
   end

@@ -14882,6 +14882,38 @@ func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUs
 	return t.Username
 }
 
+type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.Username
+}
+
 type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
 	URL      *string "json:\"url,omitempty\" graphql:\"url\""
 	Username *string "json:\"username,omitempty\" graphql:\"username\""
@@ -15343,6 +15375,7 @@ type WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration struct {
 	Splunk              *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
@@ -15512,6 +15545,12 @@ func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetTempo()
 		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
@@ -15777,6 +15816,38 @@ func (t *WorkbenchToolFragment_Configuration_Loki) GetURL() *string {
 func (t *WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -16242,6 +16313,7 @@ type WorkbenchToolFragment_Configuration struct {
 	Splunk              *WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *WorkbenchToolFragment_Configuration) GetAtlassian() *WorkbenchToolFragment_Configuration_Atlassian {
@@ -16411,6 +16483,12 @@ func (t *WorkbenchToolFragment_Configuration) GetTempo() *WorkbenchToolFragment_
 		t = &WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *WorkbenchToolFragment_Configuration) GetVictoriaLogs() *WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type WorkbenchCronFragment_Workbench struct {
@@ -34122,6 +34200,38 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.Username
 }
 
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.Username
+}
+
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk struct {
 	URL      *string "json:\"url,omitempty\" graphql:\"url\""
 	Username *string "json:\"username,omitempty\" graphql:\"username\""
@@ -34583,6 +34693,7 @@ type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragme
 	Splunk              *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
@@ -34752,6 +34863,12 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
@@ -35171,6 +35288,38 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -35636,6 +35785,7 @@ type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragme
 	Splunk              *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
@@ -35805,6 +35955,12 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
@@ -36224,6 +36380,38 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -36689,6 +36877,7 @@ type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragme
 	Splunk              *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
@@ -36858,6 +37047,12 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type WorkbenchPrFollowup_WorkbenchPrFollowup struct {
@@ -37155,6 +37350,38 @@ func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configura
 func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -37620,6 +37847,7 @@ type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration
 	Splunk              *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
@@ -37789,6 +38017,12 @@ func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configura
 		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
@@ -38054,6 +38288,38 @@ func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configura
 func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -38519,6 +38785,7 @@ type UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration
 	Splunk              *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
@@ -38688,6 +38955,12 @@ func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configura
 		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &UpdateWorkbenchTool_UpdateWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
@@ -38953,6 +39226,38 @@ func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configura
 func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -39418,6 +39723,7 @@ type DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration
 	Splunk              *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
@@ -39587,6 +39893,12 @@ func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configura
 		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
@@ -40006,6 +40318,38 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_Workbenc
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -40471,6 +40815,7 @@ type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToo
 	Splunk              *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
@@ -40640,6 +40985,12 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_Workbenc
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type ListWorkbenches_Workbenches_Edges struct {
@@ -41088,6 +41439,38 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Co
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -41553,6 +41936,7 @@ type GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Config
 	Splunk              *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetAtlassian() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_Atlassian {
@@ -41722,6 +42106,12 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Co
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type GetWorkbenchTiny_Workbench struct {
@@ -42005,6 +42395,38 @@ func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Conf
 func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -42470,6 +42892,7 @@ type ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configur
 	Splunk              *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetAtlassian() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_Atlassian {
@@ -42639,6 +43062,12 @@ func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Conf
 		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &ListWorkbenchTools_WorkbenchTools_Edges_Node_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type ListWorkbenchTools_WorkbenchTools_Edges struct {
@@ -42933,6 +43362,38 @@ func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki
 func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki) GetUsername() *string {
 	if t == nil {
 		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Loki{}
+	}
+	return t.Username
+}
+
+type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs struct {
+	AccountID *string "json:\"accountId,omitempty\" graphql:\"accountId\""
+	ProjectID *string "json:\"projectId,omitempty\" graphql:\"projectId\""
+	URL       *string "json:\"url,omitempty\" graphql:\"url\""
+	Username  *string "json:\"username,omitempty\" graphql:\"username\""
+}
+
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetAccountID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.AccountID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetProjectID() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.ProjectID
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetURL() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
+	}
+	return t.URL
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs) GetUsername() *string {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs{}
 	}
 	return t.Username
 }
@@ -43398,6 +43859,7 @@ type GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration struct {
 	Splunk              *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Splunk              "json:\"splunk,omitempty\" graphql:\"splunk\""
 	Teams               *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Teams               "json:\"teams,omitempty\" graphql:\"teams\""
 	Tempo               *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Tempo               "json:\"tempo,omitempty\" graphql:\"tempo\""
+	VictoriaLogs        *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs        "json:\"victoriaLogs,omitempty\" graphql:\"victoriaLogs\""
 }
 
 func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetAtlassian() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_Atlassian {
@@ -43567,6 +44029,12 @@ func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) Get
 		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
 	}
 	return t.Tempo
+}
+func (t *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration) GetVictoriaLogs() *GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration_VictoriaLogs {
+	if t == nil {
+		t = &GetWorkbenchTool_WorkbenchTool_WorkbenchToolFragment_Configuration{}
+	}
+	return t.VictoriaLogs
 }
 
 type GetWorkbenchToolTiny_WorkbenchTool struct {
@@ -70531,6 +70999,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			username
 			tenantId
 		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
+		}
 		splunk {
 			url
 			username
@@ -70824,6 +71298,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			username
 			tenantId
+		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
 		}
 		splunk {
 			url
@@ -71120,6 +71600,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			username
 			tenantId
 		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
+		}
 		splunk {
 			url
 			username
@@ -71369,6 +71855,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			username
 			tenantId
 		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
+		}
 		splunk {
 			url
 			username
@@ -71594,6 +72086,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			username
 			tenantId
+		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
 		}
 		splunk {
 			url
@@ -71821,6 +72319,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			username
 			tenantId
+		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
 		}
 		splunk {
 			url
@@ -72128,6 +72632,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			username
 			tenantId
 		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
+		}
 		splunk {
 			url
 			username
@@ -72430,6 +72940,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			username
 			tenantId
 		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
+		}
 		splunk {
 			url
 			username
@@ -72685,6 +73201,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			username
 			tenantId
 		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
+		}
 		splunk {
 			url
 			username
@@ -72918,6 +73440,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 			url
 			username
 			tenantId
+		}
+		victoriaLogs {
+			url
+			username
+			accountId
+			projectId
 		}
 		splunk {
 			url

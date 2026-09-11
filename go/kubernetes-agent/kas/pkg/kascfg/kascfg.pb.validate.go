@@ -4184,6 +4184,8 @@ func (m *ConfigurationFile) validate(all bool) error {
 
 	// no validation rules for PluralUrl
 
+	// no validation rules for PluralInsecureSkipTlsVerify
+
 	if len(errors) > 0 {
 		return ConfigurationFileMultiError(errors)
 	}

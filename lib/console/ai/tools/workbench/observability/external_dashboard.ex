@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboard do
   use Console.AI.Tools.Workbench.Base
-  alias Console.AI.Tools.Workbench.Observability.ExternalDashboards.Client
+  alias Console.AI.Tools.Workbench.Observability.External.Client
 
   embedded_schema do
     field :tool, :map, virtual: true
@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboard do
         dashboard_id: dashboard_id,
         scope: scope
       }) do
-    with {:ok, dashboard} <- Client.get(tool, dashboard_id, scope) do
+    with {:ok, dashboard} <- Client.get_dashboard(tool, dashboard_id, scope) do
       Jason.encode(dashboard)
     end
   end

@@ -12,6 +12,7 @@ defmodule Console.Deployments.Stacks do
   alias Console.Services.Users
   alias Console.AI.{Provider, Tools.ApproveStack}
   alias Console.Deployments.Policy, as: PolicyEngine
+  alias Console.Deployments.Policy.Input, as: PolicyInput
   alias Console.Deployments.Stacks.Plan
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
@@ -29,7 +30,6 @@ defmodule Console.Deployments.Stacks do
     CustomStackRun,
     StackDefinition,
     StackCron,
-    AiInsight,
     StackPolicy
   }
 
@@ -404,18 +404,8 @@ defmodule Console.Deployments.Stacks do
   Posts a review comment for a completed pr stack run if possible
   """
   def post_comment(%StackRun{} = run) do
-    run = Repo.preload(run, [:pull_request, stack: :connection, state: :insight])
+    run = Repo.preload(run, [:pull_request, :state, stack: :connection])
     case {run, scm_connection(run)}  do
-      {%StackRun{
-        id: id,
-        stack_id: stack_id,
-        status: :successful,
-        state: %StackState{insight: %AiInsight{} = insight},
-        pull_request: %PullRequest{} = pr
-      }, %ScmConnection{} = conn} ->
-        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state ai_comment_id)a)}, pr_blob("insight", insight: insight, link: url))
-        |> save_comment(run, :ai_comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
@@ -450,6 +440,28 @@ defmodule Console.Deployments.Stacks do
         Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("succeeded", link: url))
         |> save_comment(run, :comment_id)
       _ -> {:error, "cannot post review for this stack run"}
+    end
+  end
+
+  @doc """
+  Posts an AI-generated plan summary as a separate PR review comment.
+  """
+  def post_plan_comment(%StackRun{} = run, text) when is_binary(text) do
+    run = Repo.preload(run, [:pull_request, stack: :connection])
+    case {run, scm_connection(run)} do
+      {%StackRun{
+        id: id,
+        stack_id: stack_id,
+        pull_request: %PullRequest{} = pr
+      }, %ScmConnection{} = conn} ->
+        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
+        Dispatcher.review(
+          conn,
+          %{pr | comment_id: Console.deep_get(run, ~w(scm_state ai_comment_id)a)},
+          pr_blob("insight", text: text, link: url)
+        )
+        |> save_comment(run, :ai_comment_id)
+      _ -> {:error, "cannot post plan summary for this stack run"}
     end
   end
 
@@ -581,7 +593,14 @@ defmodule Console.Deployments.Stacks do
   """
   @spec stack_run_approval(StackRun.t) :: run_resp | :ok
   def stack_run_approval(%StackRun{status: :pending_approval, approver_id: nil} = run) do
-    run = Repo.preload(run, [:state, :repository, actor: :groups, stack: [:project, :repository, stack_policies: :policy]])
+    run = Repo.preload(run, [
+      :state,
+      :repository,
+      :infracost_resources,
+      actor: :groups,
+      violations: :causes,
+      stack: [:project, :repository, stack_policies: :policy]
+    ])
 
     case maybe_policy_approval(run) do
       {:decide, approval} -> handle_approval(run, approval, :policy)
@@ -617,10 +636,12 @@ defmodule Console.Deployments.Stacks do
   defp stack_policy_input(%StackRun{} = run) do
     %{
       "plan" => stack_plan(run),
-      "actor" => PolicyEngine.actor(run.actor),
+      "actor" => PolicyInput.actor(run.actor),
       "run_type" => Plan.run_type(run),
-      "stack" => PolicyEngine.stack(run.stack),
-      "commit" => PolicyEngine.commit(run)
+      "stack" => PolicyInput.stack(run.stack),
+      "commit" => PolicyInput.commit(run),
+      "costs" => PolicyInput.costs(run.infracost_resources),
+      "violations" => PolicyInput.violations(run.violations)
     }
   end
 

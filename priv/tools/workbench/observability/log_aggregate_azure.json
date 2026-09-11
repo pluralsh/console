@@ -3,7 +3,7 @@
     "properties": {
         "query": {
             "type": "string",
-            "description": "The query used to select logs to aggregate"
+            "description": "Optional provider-specific query used to select logs. Leave empty to aggregate logs without a text filter."
         },
         "bucket_size": {
             "type": "string",
@@ -12,7 +12,8 @@
         "operator": {
             "type": "string",
             "enum": ["and", "or"],
-            "description": "How facets are combined"
+            "default": "or",
+            "description": "How terms in the log query are combined. Facet filters are always combined with AND."
         },
         "facets": {
             "type": "array",
@@ -59,5 +60,5 @@
             }
         }
     },
-    "required": ["query", "bucket_size"]
+    "required": ["bucket_size"]
 }

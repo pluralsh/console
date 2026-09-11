@@ -7,6 +7,7 @@ import (
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/console"
 	"github.com/pluralsh/console/go/nexus/internal/log"
+	pb "github.com/pluralsh/console/go/nexus/internal/proto"
 	"github.com/pluralsh/console/go/nexus/internal/tokenexchange"
 	"go.uber.org/zap"
 )
@@ -114,7 +115,14 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 	}
 
 	if cfg := aiConfig.GetBedrock(); cfg != nil {
-		providers = append(providers, schemas.Bedrock)
+		provider := bedrockProvider(cfg)
+		providers = append(providers, provider)
+
+		// Bedrock Mantle does not expose embeddings. Keep the runtime provider configured
+		// for the embedding model, matching ReqLLM's runtime-only embedding behavior.
+		if provider == schemas.BedrockMantle && cfg.GetEmbeddingModelId() != "" {
+			providers = append(providers, schemas.Bedrock)
+		}
 	}
 
 	if cfg := aiConfig.GetAzure(); cfg != nil {
@@ -180,7 +188,7 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 	case schemas.Vertex:
 		// Vertex uses project/location + auth in keys; no base URL override required.
 
-	case schemas.Bedrock:
+	case schemas.Bedrock, schemas.BedrockMantle:
 		// Bedrock uses AWS region + credentials in keys; no base URL override required.
 
 	case schemas.Azure:
@@ -188,4 +196,12 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 	}
 
 	return config, nil
+}
+
+func bedrockProvider(config *pb.BedrockConfig) schemas.ModelProvider {
+	if config != nil && config.GetEndpoint() == pb.BedrockEndpoint_MANTLE {
+		return schemas.BedrockMantle
+	}
+
+	return schemas.Bedrock
 }

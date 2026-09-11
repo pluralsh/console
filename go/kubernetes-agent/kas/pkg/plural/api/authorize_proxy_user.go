@@ -9,8 +9,8 @@ import (
 	"github.com/pluralsh/console/go/polly/algorithms"
 )
 
-func AuthorizeProxyUser(ctx context.Context, token, clusterId, pluralURL string) (*AuthorizeProxyUserResponse, error) {
-	client := plural.NewUnauthorized(pluralURL)
+func AuthorizeProxyUser(ctx context.Context, token, clusterId, pluralURL string, insecureSkipTLSVerify bool) (*AuthorizeProxyUserResponse, error) {
+	client := plural.NewUnauthorized(pluralURL, insecureSkipTLSVerify)
 	resp, err := client.Console.TokenExchange(ctx, fmt.Sprintf("plrl:%s:%s", clusterId, token))
 	if err != nil {
 		return nil, err

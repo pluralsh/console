@@ -45,7 +45,7 @@ export function WorkbenchJobActivities({
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 30_000,
+    pollInterval: 15_000,
   })
 
   const job = data?.workbenchJob
@@ -60,7 +60,10 @@ export function WorkbenchJobActivities({
 
   const [openIds, setOpenIds] = useState<string[]>([])
 
-  const { textStreamMap, jobLevelThinking } = useWorkbenchJobStreams(jobId)
+  const { textStreamMap, jobLevelThinking } = useWorkbenchJobStreams(
+    jobId,
+    !!data
+  )
 
   const userPromptIndices = useMemo(() => {
     const indices = [0] // 0 is initial user prompt in topContent

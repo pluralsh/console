@@ -7,8 +7,8 @@ import (
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/uuid"
 )
 
-func GetAgentInfo(ctx context.Context, agentToken api.AgentToken, pluralURL string) (*api.AgentInfo, error) {
-	client := New(pluralURL, string(agentToken))
+func GetAgentInfo(ctx context.Context, agentToken api.AgentToken, pluralURL string, insecureSkipTLSVerify bool) (*api.AgentInfo, error) {
+	client := New(pluralURL, string(agentToken), insecureSkipTLSVerify)
 	cluster, err := client.Console.MyCluster(ctx)
 	if err != nil {
 		return nil, err

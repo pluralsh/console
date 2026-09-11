@@ -13,6 +13,19 @@ defmodule Plrl.OpenAiMethod do
   field :AUTO, 3
 end
 
+defmodule Plrl.BedrockEndpoint do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "plrl.BedrockEndpoint",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :RUNTIME, 0
+  field :MANTLE, 1
+end
+
 defmodule Plrl.AiConfigRequest do
   @moduledoc false
 
@@ -134,6 +147,7 @@ defmodule Plrl.BedrockConfig do
   field :awsSecretAccessKey, 7, proto3_optional: true, type: :string
   field :proxyModels, 8, repeated: true, type: :string
   field :deployments, 9, repeated: true, type: Plrl.BedrockConfig.DeploymentsEntry, map: true
+  field :endpoint, 10, proto3_optional: true, type: Plrl.BedrockEndpoint, enum: true
 end
 
 defmodule Plrl.AzureOpenAiConfig.DeploymentsEntry do

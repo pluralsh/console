@@ -14,7 +14,7 @@ var cache *identityCache
 func Cache() IdentityCache {
 	if cache == nil {
 		klog.V(log.LogLevelDefault).InfoS("initializing user group cache")
-		consoleClient := client.New(args.ConsoleUrl(), args.ConsoleToken(), args.DatadogEnabled())
+		consoleClient := client.New(args.ConsoleUrl(), args.ConsoleToken(), args.DatadogEnabled(), args.ConsoleInsecureSkipTLSVerify())
 		cache = &identityCache{
 			consoleClient: consoleClient,
 			userCache: pollycache.NewCache[string](args.WipeCacheInterval(), func(email string) (*string, error) {

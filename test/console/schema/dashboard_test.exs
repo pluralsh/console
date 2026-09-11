@@ -74,6 +74,29 @@ defmodule Console.Schema.DashboardTest do
       assert changeset.valid?
       assert [%{datasource: %{type: :labels}}] = Ecto.Changeset.apply_changes(changeset).inputs
     end
+
+    test "accepts traces graphs" do
+      changeset =
+        Dashboard.changeset(
+          %Dashboard{},
+          attrs([
+            %{
+              identifier: "checkout",
+              type: :traces,
+              layout: %{x: 0, y: 0, w: 3, h: 4},
+              datasource: %{
+                type: :traces,
+                tool: "workbench_observability_traces_tempo",
+                input: %{query: "{ service.name = \"checkout\" }"}
+              }
+            }
+          ])
+        )
+
+      assert changeset.valid?
+      assert [%{type: :traces, datasource: %{type: :traces}}] =
+               Ecto.Changeset.apply_changes(changeset).graphs
+    end
   end
 
   defp attrs(graphs) do

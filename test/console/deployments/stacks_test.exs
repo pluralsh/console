@@ -794,6 +794,24 @@ defmodule Console.Deployments.StacksTest do
       assert updated.scm_state.comment_id == "id"
     end
 
+    test "it can post an ai plan summary to a pr" do
+      run = insert(:stack_run,
+        status: :pending_approval,
+        pull_request: build(:pull_request, url: "https://github.com/pluralsh/console/pull/10"),
+        stack: build(:stack, connection: build(:scm_connection))
+      )
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, %{"body" => body} ->
+        assert String.contains?(body, "Plan Summary")
+        assert String.contains?(body, "safe to apply")
+        {:ok, %{"id" => "id"}, :ok}
+      end)
+
+      {:ok, updated} = Stacks.post_plan_comment(run, "## Safety Assessment\n\nsafe to apply")
+
+      assert updated.scm_state.ai_comment_id == "id"
+    end
+
     test "it includes failed step logs in the github pr comment body" do
       run = insert(:stack_run,
         status: :failed,
@@ -1614,6 +1632,74 @@ defmodule Console.Deployments.StacksSyncTest do
   end
 
   describe "#stack_run_approval/1" do
+    test "supplies cost and vulnerability information to stack policies" do
+      user = insert(:user)
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"message": "expensive vulnerable resource"}] if {
+          some cost in input.costs
+          cost.name == "aws_instance.web"
+          cost.monthly_cost > 100
+          cost.raw_resource.tags.environment == "production"
+
+          some violation in input.violations
+          violation.severity == "high"
+          violation.policy_id == "AVD-AWS-0001"
+          some cause in violation.causes
+          cause.filename == "main.tf"
+          cause.lines[0].content == "resource \\"aws_instance\\" \\"web\\" {"
+        }
+        """)
+      )
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      insert(:stack_policy, stack: stack, policy: policy)
+      run = insert(:stack_run, stack: stack, status: :pending)
+
+      {:ok, run} = Stacks.update_stack_run(%{
+        status: :pending_approval,
+        infracost_resources: [
+          %{
+            resource_scope: "diff",
+            project_name: "production",
+            name: "aws_instance.web",
+            resource_type: "aws_instance",
+            monthly_cost: "125.50",
+            hourly_cost: "0.17",
+            raw_resource: %{"tags" => %{"environment" => "production"}}
+          }
+        ],
+        violations: [
+          %{
+            severity: :high,
+            policy_id: "AVD-AWS-0001",
+            policy_url: "https://example.com/AVD-AWS-0001",
+            policy_module: "aws",
+            title: "Public instance",
+            description: "The instance is publicly accessible.",
+            resolution: "Restrict public access.",
+            causes: [
+              %{
+                resource: "aws_instance.web",
+                filename: "main.tf",
+                start: 1,
+                end: 3,
+                lines: [
+                  %{line: 1, content: "resource \"aws_instance\" \"web\" {", first: true, last: false}
+                ]
+              }
+            ]
+          }
+        ]
+      }, run.id, user)
+
+      {:ok, cancelled} = Stacks.stack_run_approval(run)
+
+      assert cancelled.status == :cancelled
+      assert cancelled.approval_result.result == :rejected
+      assert cancelled.approval_result.reason == "expensive vulnerable resource"
+    end
+
     test "approves a pending run when stack policy approves" do
       bot = insert(:user, bot_name: "console", roles: %{admin: true})
       group = insert(:group, name: "admins")

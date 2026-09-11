@@ -43,13 +43,7 @@ defmodule ConsoleWeb.Endpoint do
 
   plug ConsoleWeb.ProxyRouter
 
-  plug Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
-    pass: ["*/*"],
-    json_decoder: Phoenix.json_library(),
-    length: 20_000_000,
-    ready_length: 20_000_000,
-    body_reader: {ConsoleWeb.CacheBodyReader, :read_body, []}
+  plug ConsoleWeb.Plugs.Parsers
 
   plug Sentry.PlugContext, body_scrubber: {ConsoleWeb.Sentry, :scrub_params}
 

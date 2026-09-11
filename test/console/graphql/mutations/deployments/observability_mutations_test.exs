@@ -330,6 +330,18 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
     test "it can create a dashboard with graph and input datasources" do
       workbench = insert(:workbench)
 
+      tool =
+        insert(:workbench_tool,
+          name: "prom",
+          tool: :prometheus,
+          categories: [:metrics],
+          configuration: %{
+            prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
       {:ok, %{data: %{"createDashboard" => dashboard}}} =
         run_query(
           """
@@ -362,7 +374,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
                   "layout" => %{"x" => 0, "y" => 0, "w" => 2, "h" => 2},
                   "datasource" => %{
                     "type" => "METRICS",
-                    "tool" => "prometheus_query",
+                    "tool" => "workbench_observability_metrics_prom",
                     "input" => Jason.encode!(%{"query" => "up"})
                   }
                 }
@@ -373,7 +385,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
                   "type" => "SELECT",
                   "datasource" => %{
                     "type" => "LABELS",
-                    "tool" => "workbench_observability_metric_label_search_prometheus",
+                    "tool" => "workbench_observability_metric_label_search_prom",
                     "input" => Jason.encode!(%{"metric" => "kube_pod_info", "label" => "namespace"})
                   }
                 }
@@ -391,10 +403,70 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
       assert input["datasource"]["type"] == "LABELS"
     end
 
-    test "it can update a dashboard" do
-      dashboard = insert(:dashboard)
+    test "it can create a dashboard with a traces graph" do
+      workbench = insert(:workbench)
 
-      {:ok, %{data: %{"updateDashboard" => updated}}} =
+      tool =
+        insert(:workbench_tool,
+          name: "tempo",
+          tool: :tempo,
+          categories: [:traces],
+          configuration: %{
+            tempo: %{url: "https://tempo.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      {:ok, %{data: %{"createDashboard" => dashboard}}} =
+        run_query(
+          """
+          mutation Create($attrs: DashboardAttributes!) {
+            createDashboard(attributes: $attrs) {
+              id
+              name
+              graphs {
+                identifier
+                type
+                datasource { type tool input }
+              }
+            }
+          }
+          """,
+          %{
+            "attrs" => %{
+              "workbenchId" => workbench.id,
+              "name" => "Checkout traces",
+              "graphs" => [
+                %{
+                  "identifier" => "checkout",
+                  "type" => "TRACES",
+                  "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 4},
+                  "datasource" => %{
+                    "type" => "TRACES",
+                    "tool" => "workbench_observability_traces_tempo",
+                    "input" => Jason.encode!(%{"query" => "{ service.name = \"checkout\" }"})
+                  }
+                }
+              ]
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert dashboard["name"] == "Checkout traces"
+      assert [graph] = dashboard["graphs"]
+      assert graph["identifier"] == "checkout"
+      assert graph["type"] == "TRACES"
+      assert graph["datasource"]["type"] == "TRACES"
+      assert graph["datasource"]["tool"] == "workbench_observability_traces_tempo"
+      assert graph["datasource"]["input"] == %{"query" => "{ service.name = \"checkout\" }"}
+    end
+
+    test "it can update a dashboard" do
+      dashboard = insert(:dashboard, graphs: [])
+
+      {:ok, result} =
         run_query(
           """
           mutation Update($id: ID!, $attrs: DashboardAttributes!) {
@@ -408,6 +480,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
           %{current_user: admin_user()}
         )
 
+      assert result[:errors] == nil
+      updated = result.data["updateDashboard"]
       assert updated == %{"id" => dashboard.id, "name" => "Updated"}
     end
 

@@ -17,6 +17,7 @@ import { FormBindings } from 'components/utils/bindings'
 import {
   PolicyBindingFragment,
   Provider,
+  SplunkTokenType,
   WorkbenchToolCategory,
   WorkbenchToolAttributes,
   WorkbenchToolConfigurationAttributes,
@@ -230,6 +231,8 @@ export function WorkbenchToolForm({
       })) &&
     (type !== WorkbenchToolType.Opensearch ||
       opensearchConfigurationIsComplete(state.configuration?.opensearch)) &&
+    (type !== WorkbenchToolType.VictoriaLogs ||
+      !!(state.configuration?.victoriaLogs?.url ?? '').trim()) &&
     (type !== WorkbenchToolType.Gitlab ||
       hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.gitlab?.token)) &&
@@ -652,6 +655,12 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     const { url, username, tenantId } = config?.loki ?? {}
     return { loki: { url: url ?? '', username, tenantId } }
   },
+  [WorkbenchToolType.VictoriaLogs]: (config) => {
+    const { url, username, accountId, projectId } = config?.victoriaLogs ?? {}
+    return {
+      victoriaLogs: { url: url ?? '', username, accountId, projectId },
+    }
+  },
   [WorkbenchToolType.Prometheus]: (config) => {
     const { url, username, tenantId, awsSigv4, awsAccessKeyId, awsRegion } =
       config?.prometheus ?? {}
@@ -707,8 +716,14 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   },
   [WorkbenchToolType.AzureDevops]: () => ({ azureDevops: { token: '' } }),
   [WorkbenchToolType.Splunk]: (config) => {
-    const { url, username } = config?.splunk ?? {}
-    return { splunk: { url: url ?? '', username } }
+    const { url, tokenType, username } = config?.splunk ?? {}
+    return {
+      splunk: {
+        url: url ?? '',
+        tokenType: tokenType ?? SplunkTokenType.Bearer,
+        username,
+      },
+    }
   },
   [WorkbenchToolType.Cloudwatch]: (config) => {
     const { region, logGroupNames, roleArn, roleSessionName } =

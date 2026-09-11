@@ -318,6 +318,12 @@ defmodule Console.Deployments.WorkbenchesTest do
           url: "https://loki.example.com",
           token: "loki-bearer-token"
         }}], [:logs]},
+        {:victoria_logs, [configuration: %{victoria_logs: %{
+          url: "https://victorialogs.example.com",
+          token: "victoria-logs-token",
+          account_id: "12",
+          project_id: "34"
+        }}], [:logs]},
         {:tempo, [configuration: %{tempo: %{
           url: "https://tempo.example.com",
           token: "tempo-bearer-token"
@@ -2190,6 +2196,43 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: job_id}}}
       assert job_id == updated_job.id
+    end
+
+    test "rejects canvas blocks with invalid tool calls" do
+      job =
+        insert(:workbench_job,
+          user: admin_user(),
+          result: build(:workbench_job_result)
+        )
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :canvas,
+          status: :running
+        )
+
+      blocks = [
+        %{
+          identifier: "metrics",
+          type: :metrics,
+          layout: %{x: 0, y: 0, w: 6, h: 4},
+          content: %{
+            metrics: %{
+              title: "Requests",
+              query: %{tool_name: "not_a_real_tool", tool_args: %{query: "up"}}
+            }
+          }
+        }
+      ]
+
+      assert {:error, "tool not_a_real_tool not found"} =
+               Workbenches.save_canvas(blocks, "invalid canvas", activity)
+
+      assert Repo.get(WorkbenchJobActivity, activity.id).result == nil
+
+      persisted_job = Repo.get(WorkbenchJob, job.id) |> Repo.preload(:result)
+      assert persisted_job.result.canvas == []
     end
   end
 

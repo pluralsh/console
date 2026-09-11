@@ -147,7 +147,10 @@ defmodule Console.Deployments.Agents do
   @spec delete_agent_runtime(binary, Cluster.t) :: agent_runtime_resp
   def delete_agent_runtime(id, %Cluster{id: cluster_id}) do
     case get_agent_runtime!(id) do
-      %AgentRuntime{cluster_id: ^cluster_id} = runtime -> Repo.delete(runtime)
+      %AgentRuntime{cluster_id: ^cluster_id} = runtime ->
+        runtime
+        |> AgentRuntime.changeset()
+        |> Repo.delete()
       _ -> {:error, "clusters can only delete their own agent runtimes"}
     end
   end

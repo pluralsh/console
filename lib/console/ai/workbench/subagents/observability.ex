@@ -18,23 +18,26 @@ defmodule Console.AI.Workbench.Subagents.Observability do
         acc: %{},
         callback: &callback(activity, environment, &1),
         tool_search: length(tools) > 10,
-        pre_enable: [ObservabilityResult | skill_knowledge_pre_enable()],
+        pre_enable: [%ObservabilityResult{} | skill_knowledge_pre_enable()],
         continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
       ]
     )
-    |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
+    |> MemoryEngine.reduce([{:user, prompt}], &reducer(&1, &2, environment))
     |> case do
       {:ok, attrs} -> attrs
       {:error, error} -> %{status: :failed, result: %{error: "error running observability subagent: #{inspect(error)}"}}
     end
   end
 
-  defp reducer(messages, _) do
+  defp reducer(messages, _, %Environment{}) do
     case Enum.find(messages, &match?(%ObservabilityResult{}, &1)) do
-      %ObservabilityResult{} = result -> {:halt, %{
-        status: :successful,
-        result: Console.mapify(result) |> Map.drop([:id])
-      }}
+      %ObservabilityResult{} = result ->
+        {:halt,
+         %{
+           status: :successful,
+           result: Console.mapify(result) |> Map.drop([:id, :job, :user])
+         }}
+
       _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
@@ -49,7 +52,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     |> Enum.concat(Monitoring.read_tools(job))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
-      ObservabilityResult,
+      %ObservabilityResult{job: job, user: user},
       %Codemode{tools: []},
       %History{job: job, activities: activities}
     ])

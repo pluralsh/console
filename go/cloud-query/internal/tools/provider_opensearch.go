@@ -47,7 +47,7 @@ func (in *OpensearchProvider) Logs(ctx context.Context, input *toolquery.LogsQue
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 
@@ -86,7 +86,7 @@ func (in *OpensearchProvider) LogAggregate(ctx context.Context, input *toolquery
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 

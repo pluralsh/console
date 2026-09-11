@@ -57,7 +57,7 @@ import (
 	metricsdk "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.41.0"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -336,7 +336,8 @@ func (a *ConfiguredApp) constructPluralRpcApiFactory(errRep errz.ErrReporter, se
 			dt,
 			gapi.IsCacheableError,
 		),
-		PluralURL: a.Configuration.PluralUrl,
+		PluralURL:             a.Configuration.PluralUrl,
+		InsecureSkipTLSVerify: a.Configuration.PluralInsecureSkipTlsVerify,
 	}
 	return f.New, fAgent.New
 }
