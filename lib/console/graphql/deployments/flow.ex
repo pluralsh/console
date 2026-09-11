@@ -111,10 +111,6 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :component_statuses, list_of(:component_status_count),
       resolve: FlowSummaryLoader.resolve(:component_statuses),
       description: "a rollup of component states in this flow"
-    field :insight, :ai_insight,
-      resolve: FlowSummaryLoader.resolve(:insight),
-      description: "the most recent insight from a service or component in this flow"
-
     connection field :services, node_type: :service_deployment do
       resolve &Deployments.services_for_flow/3
     end

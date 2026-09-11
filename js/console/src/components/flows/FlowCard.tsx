@@ -7,7 +7,6 @@ import {
 } from '@pluralsh/design-system'
 import { FlowActionsMenu } from 'components/flows/FlowActionsMenu'
 import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
-import { FlowInsightIcon } from 'components/flows/FlowInsightIcon'
 import {
   FlowAlertChip,
   FlowHealthChips,
@@ -61,7 +60,6 @@ export function FlowCard({
           <Body1BoldP css={{ flex: 1, minWidth: 0, ...LINE_CLAMP }}>
             {flow.name}
           </Body1BoldP>
-          <FlowInsightIcon insight={flow.insight} />
         </HeaderSC>
         <MetaSC>
           <span>

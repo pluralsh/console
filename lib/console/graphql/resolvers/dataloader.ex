@@ -123,7 +123,7 @@ end
 defmodule Console.GraphQl.Resolvers.FlowSummaryLoader do
   import Absinthe.Resolution.Helpers, only: [on_load: 2]
   alias Console.Repo
-  alias Console.Schema.{Service, ServiceComponent, Alert, Pipeline, AiInsight}
+  alias Console.Schema.{Service, ServiceComponent, Alert, Pipeline}
 
   def data(_) do
     Dataloader.KV.new(&query/2, max_concurrency: 1)
@@ -154,7 +154,6 @@ defmodule Console.GraphQl.Resolvers.FlowSummaryLoader do
     |> put_counts(Repo.all(Alert.count_by_flow(ids)), :alert_count)
     |> put_counts(Repo.all(Pipeline.for_flow_ids(ids) |> Pipeline.count_by_flow()), :pipeline_count)
     |> put_counts(Repo.all(Pipeline.for_flow_ids(ids) |> Pipeline.pending_gate_count_by_flow()), :pending_pipeline_count)
-    |> put_insights(ids)
   end
 
   defp empty_summary do
@@ -165,8 +164,7 @@ defmodule Console.GraphQl.Resolvers.FlowSummaryLoader do
       pipeline_count: 0,
       pending_pipeline_count: 0,
       service_statuses: [],
-      component_statuses: [],
-      insight: nil
+      component_statuses: []
     }
   end
 
@@ -184,30 +182,5 @@ defmodule Console.GraphQl.Resolvers.FlowSummaryLoader do
     Enum.reduce(rows, map, fn {id, count}, acc ->
       Map.update!(acc, id, &Map.put(&1, key, count))
     end)
-  end
-
-  defp put_insights(map, ids) do
-    latest = latest_insight_ids(ids)
-    insights = insights_by_id(Enum.map(latest, &elem(&1, 1)))
-
-    Enum.reduce(latest, map, fn {flow_id, insight_id}, acc ->
-      Map.update!(acc, flow_id, &Map.put(&1, :insight, Map.get(insights, insight_id)))
-    end)
-  end
-
-  defp latest_insight_ids(ids) do
-    (Repo.all(Service.flow_insight_rows(ids)) ++ Repo.all(ServiceComponent.flow_insight_rows(ids)))
-    |> Enum.group_by(&elem(&1, 0))
-    |> Enum.map(fn {flow_id, rows} ->
-      {_, insight_id, _} = Enum.max_by(rows, fn {_, _, ts} -> ts end)
-      {flow_id, insight_id}
-    end)
-  end
-
-  defp insights_by_id([]), do: %{}
-  defp insights_by_id(ids) do
-    AiInsight.for_ids(ids)
-    |> Repo.all()
-    |> Map.new(& {&1.id, &1})
   end
 end

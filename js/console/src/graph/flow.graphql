@@ -24,18 +24,6 @@ fragment FlowBasic on Flow {
     state
     count
   }
-  insight {
-    ...FlowInsight
-  }
-}
-
-fragment FlowInsight on AiInsight {
-  id
-  summary
-  freshness
-  insertedAt
-  updatedAt
-  ...AiInsightAssociations
 }
 
 fragment FlowBasicWithBindings on Flow {

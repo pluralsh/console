@@ -8,7 +8,6 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { FlowActionsMenu } from 'components/flows/FlowActionsMenu'
 import { FlowFavoriteStar } from 'components/flows/FlowFavoriteButton'
-import { FlowInsightIcon } from 'components/flows/FlowInsightIcon'
 import {
   FlowAlertChip,
   FlowHealthStacked,
@@ -162,14 +161,6 @@ function getColumns({
             to={flowTabPath(flow.name, 'alerts', search)}
           />
         )
-      },
-    }),
-    columnHelper.accessor((flow) => flow.insight, {
-      id: 'insight',
-      header: '',
-      meta: { gridTemplate: 'min-content' },
-      cell: function Cell({ getValue }) {
-        return <FlowInsightIcon insight={getValue()} />
       },
     }),
     columnHelper.display({

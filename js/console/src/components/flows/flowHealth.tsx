@@ -215,19 +215,23 @@ export function FlowPipelineChip({
       }
       css={{ '& .children': { gap: 4 } }}
     >
+      {`${pipelineCount} ${pluralize('pipeline', pipelineCount)}`}
       {pending && (
-        <PipelineStatusSC $tone="pending">
-          {pendingCount} pending
-        </PipelineStatusSC>
+        <>
+          <span>·</span>
+          <PipelineStatusSC $tone="pending">
+            {pendingCount} pending
+          </PipelineStatusSC>
+        </>
       )}
       {stopped && (
-        <PipelineStatusSC $tone="stopped">
-          {stoppedCount} stopped
-        </PipelineStatusSC>
+        <>
+          <span>·</span>
+          <PipelineStatusSC $tone="stopped">
+            {stoppedCount} stopped
+          </PipelineStatusSC>
+        </>
       )}
-      {!pending &&
-        !stopped &&
-        `${pipelineCount} ${pluralize('pipeline', pipelineCount)}`}
     </FlowNavChip>
   )
 }

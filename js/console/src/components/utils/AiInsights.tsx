@@ -8,7 +8,7 @@ import {
   Markdown,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { InsightFreshness } from 'generated/graphql'
+import { AiInsightSummaryFragment, InsightFreshness } from 'generated/graphql'
 import { MouseEventHandler } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -24,11 +24,7 @@ export function AiInsightSummaryIcon({
   size = 'medium',
   ...props
 }: {
-  insight: Nullable<{
-    summary?: string | null
-    freshness?: InsightFreshness | null
-    updatedAt?: string | null
-  }>
+  insight: Nullable<AiInsightSummaryFragment>
   navPath?: string
   preserveSpace?: boolean
   iconFrameType?: IconFrameProps['type']
@@ -108,11 +104,7 @@ export function AiInsightSummaryIcon({
 export function InsightsTabLabel({
   insight,
 }: {
-  insight: Nullable<{
-    summary?: string | null
-    freshness?: InsightFreshness | null
-    updatedAt?: string | null
-  }>
+  insight: Nullable<AiInsightSummaryFragment>
 }) {
   return (
     <Flex

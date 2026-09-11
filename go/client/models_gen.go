@@ -3788,9 +3788,7 @@ type Flow struct {
 	// a rollup of service statuses in this flow
 	ServiceStatuses []*ServiceStatusCount `json:"serviceStatuses,omitempty"`
 	// a rollup of component states in this flow
-	ComponentStatuses []*ComponentStatusCount `json:"componentStatuses,omitempty"`
-	// the most recent insight from a service or component in this flow
-	Insight                     *AiInsight                            `json:"insight,omitempty"`
+	ComponentStatuses           []*ComponentStatusCount               `json:"componentStatuses,omitempty"`
 	Services                    *ServiceDeploymentConnection          `json:"services,omitempty"`
 	Pipelines                   *PipelineConnection                   `json:"pipelines,omitempty"`
 	PullRequests                *PullRequestConnection                `json:"pullRequests,omitempty"`
