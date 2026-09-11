@@ -2226,7 +2226,7 @@ defmodule Console.Deployments.WorkbenchesTest do
         }
       ]
 
-      assert {:error, "tool not found"} =
+      assert {:error, "tool not_a_real_tool not found"} =
                Workbenches.save_canvas(blocks, "invalid canvas", activity)
 
       assert Repo.get(WorkbenchJobActivity, activity.id).result == nil

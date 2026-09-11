@@ -198,7 +198,7 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
                }
              )
 
-    assert {:error, "tool not found"} = DashboardUpsert.implement(upsert)
+    assert {:error, "tool not_a_real_tool not found"} = DashboardUpsert.implement(upsert)
     refute Repo.get_by(Console.Schema.Dashboard, workbench_id: workbench.id, name: "API health")
   end
 
