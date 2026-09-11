@@ -2,23 +2,37 @@ import styled from 'styled-components'
 
 import { mqs } from './Breakpoints'
 
-export const PageGrid = styled.div((_p) => ({
-  display: 'flex',
-  flexDirection: 'row',
+export const PageGrid = styled.div({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
   width: '100%',
-  maxWidth: 1588,
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  position: 'relative',
-}))
+  minHeight: 'calc(100vh - var(--top-nav-height))',
+  [mqs.twoColumn]: {
+    gridTemplateColumns: 'var(--docs-sidenav-width) minmax(0, 1fr)',
+  },
+})
 
 export const SideNavContainer = styled.div(({ theme }) => ({
   display: 'none',
   [mqs.twoColumn]: {
     display: 'block',
-    flex: '0 0 300px',
-    marginRight: 'auto',
-    marginLeft: theme.spacing.large,
+    minWidth: 0,
+    backgroundColor: theme.colors['fill-one'],
+  },
+}))
+
+export const MainColumn = styled.div(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'flex-start',
+  minWidth: 0,
+  width: '100%',
+  padding: `0 ${theme.spacing.large}px`,
+  [mqs.twoColumn]: {
+    padding: `0 ${theme.spacing.xlarge}px`,
+  },
+  [mqs.maxWidth]: {
+    padding: '0 64px',
   },
 }))
 
@@ -27,25 +41,38 @@ export const SideCarContainer = styled.div(({ theme }) => ({
 
   [mqs.threeColumn]: {
     position: 'sticky',
-    marginRight: theme.spacing.large,
     top: 'var(--top-nav-height)',
-    bottom: 0,
+    alignSelf: 'flex-start',
+    flex: '0 0 var(--docs-sidecar-width)',
+    width: 'var(--docs-sidecar-width)',
     maxHeight: 'calc(100vh - var(--top-nav-height))',
-    flex: '0 0 200px',
+    overflow: 'auto',
     display: 'block',
-  },
-}))
-
-export const ContentContainer = styled.main(({ theme }) => ({
-  flex: '1 1',
-  marginRight: theme.spacing.large,
-  marginLeft: theme.spacing.large,
-  // Don't remove this min width, or it will paradoxically allow
-  // the content to stretch wider than the flex container
-  minWidth: '100px',
-  [mqs.threeColumn]: {
-    maxWidth: 896,
-    marginRight: theme.spacing.xlarge,
     marginLeft: theme.spacing.xlarge,
   },
 }))
+
+export const ContentContainer = styled.main<{ $wide?: boolean }>(
+  ({ theme, $wide }) => ({
+    flex: '1 1 auto',
+    minWidth: 0,
+    width: '100%',
+    padding: `${theme.spacing.medium}px 0 ${theme.spacing.xxxlarge}px`,
+    ...(!$wide
+      ? {
+          maxWidth: 896,
+          [mqs.threeColumn]: {
+            maxWidth: 960,
+          },
+          [mqs.maxWidth]: {
+            maxWidth: 1120,
+          },
+        }
+      : {
+          maxWidth: 1120,
+          [mqs.maxWidth]: {
+            maxWidth: 1280,
+          },
+        }),
+  })
+)
