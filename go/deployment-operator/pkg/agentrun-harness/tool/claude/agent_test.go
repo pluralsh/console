@@ -50,12 +50,12 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	native, err := os.ReadFile(filepath.Join(workDir, claudeConfigDir, "settings.local.json"))
+	native, err := os.ReadFile(filepath.Join(workDir, claudeConfigDir, "settings.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, want := range []string{`"model": "claude-sonnet-4-6"`, `"availableModels": [`, `"Write"`, `"BASH_DEFAULT_TIMEOUT_MS"`} {
+	for _, want := range []string{`"model": "claude-sonnet-5"`, `"availableModels": [`, `"Write"`, `"BASH_DEFAULT_TIMEOUT_MS"`} {
 		if !strings.Contains(string(native), want) {
 			t.Fatalf("native settings missing %q: %s", want, native)
 		}
@@ -72,7 +72,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	afterBabysit, err := os.ReadFile(filepath.Join(workDir, claudeConfigDir, "settings.local.json"))
+	afterBabysit, err := os.ReadFile(filepath.Join(workDir, claudeConfigDir, "settings.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,16 +104,16 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 
 func TestAgentConfigureReadOnlyPermissions(t *testing.T) {
 	useClaudeSystemTemplates(t)
-	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: claudeTestRun(console.AgentRunModeReview, "claude-opus", false)}
+	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: claudeTestRun(console.AgentRunModeReview, "claude-sonnet-4-6", false)}
 	agent := NewAgent(config)
 	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{Phase: toolv1.ConfigurePhaseInitial}); err != nil {
 		t.Fatal(err)
 	}
-	settings, err := os.ReadFile(filepath.Join(config.WorkDir, claudeConfigDir, "settings.local.json"))
+	settings, err := os.ReadFile(filepath.Join(config.WorkDir, claudeConfigDir, "settings.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{`"Edit"`, `"Write"`, `"Bash(rm:*)"`} {
+	for _, want := range []string{`"model": "claude-sonnet-4-6"`, `"availableModels": ["claude-sonnet-4-6"]`, `"Edit"`, `"Write"`, `"Bash(rm:*)"`} {
 		if !strings.Contains(string(settings), want) {
 			t.Fatalf("settings missing deny %q", want)
 		}

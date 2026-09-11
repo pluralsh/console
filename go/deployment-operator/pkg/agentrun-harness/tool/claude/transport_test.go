@@ -113,7 +113,7 @@ func TestTransportProjectsClaudeACP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Model.Name != "claude-sonnet-4-6" {
+	if settings.Model.Name != "claude-sonnet-5" {
 		t.Fatalf("model = %q", settings.Model.Name)
 	}
 	mode, err := transport.agent.modeID(settings.Mode)

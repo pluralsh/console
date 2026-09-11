@@ -12,10 +12,12 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 )
 
-//go:embed templates/settings.local.json.gotmpl
+//go:embed templates/settings.json.gotmpl
 var settingsTemplateText string
 
-const settingsTemplateFileName = "settings.local.json"
+// The ACP adapter loads user settings from CLAUDE_CONFIG_DIR/settings.json.
+// Its settings.local.json path is rooted under the ACP session working directory.
+const settingsTemplateFileName = "settings.json"
 
 type settingsTemplateInput struct {
 	Model                string
