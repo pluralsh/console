@@ -67,6 +67,14 @@ defmodule Console.Schema.Flow do
     from(f in query, order_by: [asc: :id])
   end
 
+  def ids(query \\ __MODULE__) do
+    from(f in query, select: f.id)
+  end
+
+  def by_ids(query) do
+    from(f in __MODULE__, where: f.id in subquery(ids(query)))
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(f in query, order_by: ^order)
   end
@@ -99,7 +107,7 @@ defmodule Console.Schema.Flow do
   def with_service_statuses(query, statuses) when statuses in [nil], do: query
   def with_service_statuses(query, []), do: from(f in query, where: f.id in ^[])
   def with_service_statuses(query, statuses) do
-    ids = Service.for_statuses(statuses) |> select([s], s.flow_id)
+    ids = Service.for_statuses(statuses) |> Service.flow_ids()
     from(f in query, where: f.id in subquery(ids))
   end
 

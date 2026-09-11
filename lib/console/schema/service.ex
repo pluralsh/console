@@ -268,6 +268,33 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.flow_id == ^flow_id)
   end
 
+  def for_flow_ids(query \\ __MODULE__, ids) do
+    from(s in query, where: s.flow_id in ^ids)
+  end
+
+  def for_flows(flow_ids) do
+    from(s in __MODULE__, where: s.flow_id in subquery(flow_ids))
+  end
+
+  def flow_ids(query \\ __MODULE__) do
+    from(s in query, select: s.flow_id)
+  end
+
+  def count_by_flow_status(query \\ __MODULE__) do
+    from(s in query,
+      group_by: [s.flow_id, s.status],
+      select: {s.flow_id, %{status: s.status, count: count(s.id)}}
+    )
+  end
+
+  def flow_insight_rows(ids) do
+    from(s in __MODULE__,
+      join: i in AiInsight, on: i.id == s.insight_id,
+      where: s.flow_id in ^ids and not is_nil(i.summary),
+      select: {s.flow_id, i.id, coalesce(i.updated_at, i.inserted_at)}
+    )
+  end
+
   def search(query \\ __MODULE__, sq) do
     from(s in query, where: ilike(s.name, ^"%#{sq}%"))
   end

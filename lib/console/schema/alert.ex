@@ -120,6 +120,15 @@ defmodule Console.Schema.Alert do
     )
   end
 
+  def count_by_flow(ids) do
+    from(a in __MODULE__,
+      join: s in assoc(a, :service),
+      where: s.flow_id in ^ids,
+      group_by: s.flow_id,
+      select: {s.flow_id, count(a.id)}
+    )
+  end
+
   def distinct(query \\ __MODULE__) do
     from(a in query, distinct: true)
   end

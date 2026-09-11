@@ -1,7 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   use Console.GraphQl.Resolvers.Deployments.Base
   import Absinthe.Resolution.Helpers, only: [batch: 3]
-  import Ecto.Query
   alias Console.Repo
   alias Console.Deployments.{Flows, Policies}
   alias Console.Schema.{
@@ -24,7 +23,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     Flow.for_user(user)
     |> maybe_search(Flow, args)
     |> flow_status_filter(args)
-    |> visible_flow_query()
+    |> Flow.by_ids()
     |> flow_order(args)
     |> paginate(args)
   end
@@ -32,10 +31,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   defp flow_status_filter(query, %{statuses: statuses}) when is_list(statuses),
     do: Flow.with_service_statuses(query, statuses)
   defp flow_status_filter(query, _), do: query
-
-  defp visible_flow_query(query) do
-    from(f in Flow, where: f.id in subquery(from(v in query, select: v.id)))
-  end
 
   defp flow_order(query, args) do
     dir = Map.get(args, :direction) || :asc
@@ -50,13 +45,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     do: Flow.ordered(query, [{dir, :name}])
 
   def flow_service_counts(args, %{context: %{current_user: user}}) do
-    flow_ids =
-      Flow.for_user(user)
-      |> maybe_search(Flow, args)
-      |> select([f], f.id)
-
-    Service
-    |> where([s], s.flow_id in subquery(flow_ids))
+    Flow.for_user(user)
+    |> maybe_search(Flow, args)
+    |> Flow.ids()
+    |> Service.for_flows()
     |> Service.statuses()
     |> Repo.all()
     |> ok()
@@ -82,11 +74,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     base = Map.new(ids, &{&1, empty_summary()})
 
     base
-    |> put_status_groups(service_status_rows(ids), :service_statuses, :service_count)
-    |> put_status_groups(component_status_rows(ids), :component_statuses, :component_count)
-    |> put_counts(alert_rows(ids), :alert_count)
-    |> put_counts(pipeline_rows(ids), :pipeline_count)
-    |> put_counts(pending_pipeline_rows(ids), :pending_pipeline_count)
+    |> put_status_groups(Repo.all(Service.for_flow_ids(ids) |> Service.count_by_flow_status()), :service_statuses, :service_count)
+    |> put_status_groups(Repo.all(ServiceComponent.count_by_flow_state(ids)), :component_statuses, :component_count)
+    |> put_counts(Repo.all(Alert.count_by_flow(ids)), :alert_count)
+    |> put_counts(Repo.all(Pipeline.for_flow_ids(ids) |> Pipeline.count_by_flow()), :pipeline_count)
+    |> put_counts(Repo.all(Pipeline.for_flow_ids(ids) |> Pipeline.pending_gate_count_by_flow()), :pending_pipeline_count)
     |> put_insights(ids)
   end
 
@@ -119,44 +111,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     end)
   end
 
-  defp service_status_rows(ids) do
-    from(s in Service,
-      where: s.flow_id in ^ids,
-      group_by: [s.flow_id, s.status],
-      select: {s.flow_id, %{status: s.status, count: count(s.id)}}
-    )
-    |> Repo.all()
-  end
-
-  defp component_status_rows(ids) do
-    from(sc in ServiceComponent,
-      join: s in assoc(sc, :service),
-      where: s.flow_id in ^ids,
-      group_by: [s.flow_id, sc.state],
-      select: {s.flow_id, %{state: sc.state, count: count(sc.id)}}
-    )
-    |> Repo.all()
-  end
-
-  defp alert_rows(ids) do
-    from(a in Alert,
-      join: s in assoc(a, :service),
-      where: s.flow_id in ^ids,
-      group_by: s.flow_id,
-      select: {s.flow_id, count(a.id)}
-    )
-    |> Repo.all()
-  end
-
-  defp pipeline_rows(ids) do
-    from(p in Pipeline,
-      where: p.flow_id in ^ids,
-      group_by: p.flow_id,
-      select: {p.flow_id, count(p.id)}
-    )
-    |> Repo.all()
-  end
-
   defp put_insights(map, ids) do
     latest = latest_insight_ids(ids)
     insights = insights_by_id(Enum.map(latest, &elem(&1, 1)))
@@ -167,7 +121,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   end
 
   defp latest_insight_ids(ids) do
-    (service_insight_rows(ids) ++ component_insight_rows(ids))
+    (Repo.all(Service.flow_insight_rows(ids)) ++ Repo.all(ServiceComponent.flow_insight_rows(ids)))
     |> Enum.group_by(&elem(&1, 0))
     |> Enum.map(fn {flow_id, rows} ->
       {_, insight_id, _} = Enum.max_by(rows, fn {_, _, ts} -> ts end)
@@ -177,39 +131,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
 
   defp insights_by_id([]), do: %{}
   defp insights_by_id(ids) do
-    from(i in AiInsight, where: i.id in ^ids)
+    AiInsight.for_ids(ids)
     |> Repo.all()
     |> Map.new(& {&1.id, &1})
-  end
-
-  defp service_insight_rows(ids) do
-    from(s in Service,
-      join: i in AiInsight, on: i.id == s.insight_id,
-      where: s.flow_id in ^ids and not is_nil(i.summary),
-      select: {s.flow_id, i.id, coalesce(i.updated_at, i.inserted_at)}
-    )
-    |> Repo.all()
-  end
-
-  defp component_insight_rows(ids) do
-    from(sc in ServiceComponent,
-      join: s in assoc(sc, :service),
-      join: i in AiInsight, on: i.id == sc.insight_id,
-      where: s.flow_id in ^ids and not is_nil(i.summary),
-      select: {s.flow_id, i.id, coalesce(i.updated_at, i.inserted_at)}
-    )
-    |> Repo.all()
-  end
-
-  defp pending_pipeline_rows(ids) do
-    from(p in Pipeline,
-      join: e in assoc(p, :edges),
-      join: g in assoc(e, :gates),
-      where: p.flow_id in ^ids and g.state == :pending,
-      group_by: p.flow_id,
-      select: {p.flow_id, count(g.id)}
-    )
-    |> Repo.all()
   end
 
   def list_mcp_servers(args, %{context: %{current_user: user}}) do
