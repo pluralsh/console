@@ -270,6 +270,7 @@ fragment WorkbenchTool on WorkbenchTool {
     }
     splunk {
       url
+      tokenType
       username
     }
     cloudwatch {

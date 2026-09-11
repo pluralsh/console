@@ -125,5 +125,29 @@ defmodule Console.AI.Workbench.ConversionTest do
       {:ok, _} = Protobuf.JSON.encode(res)
       assert is_binary(Protobuf.encode(res))
     end
+
+    test "converts splunk token types to proto and defaults to bearer" do
+      for {token_type, expected} <- [
+            {nil, :BEARER},
+            {:bearer, :BEARER},
+            {:splunk, :SPLUNK}
+          ] do
+        tool = %WorkbenchTool{
+          tool: :splunk,
+          configuration: %{
+            splunk: %{
+              url: "https://splunk.example.com",
+              token: "token",
+              token_type: token_type,
+              username: nil,
+              password: nil
+            }
+          }
+        }
+
+        assert {:ok, %ToolConnection{connection: {:splunk, splunk}}} = Conversion.to_proto(tool)
+        assert splunk.token_type == expected
+      end
+    end
   end
 end

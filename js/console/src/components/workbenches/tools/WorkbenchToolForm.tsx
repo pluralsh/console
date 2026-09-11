@@ -17,6 +17,7 @@ import { FormBindings } from 'components/utils/bindings'
 import {
   PolicyBindingFragment,
   Provider,
+  SplunkTokenType,
   WorkbenchToolCategory,
   WorkbenchToolAttributes,
   WorkbenchToolConfigurationAttributes,
@@ -715,8 +716,14 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   },
   [WorkbenchToolType.AzureDevops]: () => ({ azureDevops: { token: '' } }),
   [WorkbenchToolType.Splunk]: (config) => {
-    const { url, username } = config?.splunk ?? {}
-    return { splunk: { url: url ?? '', username } }
+    const { url, tokenType, username } = config?.splunk ?? {}
+    return {
+      splunk: {
+        url: url ?? '',
+        tokenType: tokenType ?? SplunkTokenType.Bearer,
+        username,
+      },
+    }
   },
   [WorkbenchToolType.Cloudwatch]: (config) => {
     const { region, logGroupNames, roleArn, roleSessionName } =

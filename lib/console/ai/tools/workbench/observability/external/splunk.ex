@@ -98,8 +98,8 @@ defmodule Console.AI.Tools.Workbench.Observability.External.Splunk do
   defp request(_, _, _),
     do: {:error, "splunk access requires a URL and credentials"}
 
-  defp auth(%{token: token}) when is_binary(token) and byte_size(token) > 0,
-    do: {:ok, %{"authorization" => "Bearer #{token}"}, []}
+  defp auth(%{token: token} = config) when is_binary(token) and byte_size(token) > 0,
+    do: {:ok, %{"authorization" => "#{token_realm(config.token_type)} #{token}"}, []}
 
   defp auth(%{username: username, password: password})
        when is_binary(username) and byte_size(username) > 0 and is_binary(password) and
@@ -107,6 +107,9 @@ defmodule Console.AI.Tools.Workbench.Observability.External.Splunk do
        do: {:ok, %{}, [auth: {:basic, "#{username}:#{password}"}]}
 
   defp auth(_), do: {:error, "splunk access requires a token or username and password"}
+
+  defp token_realm(:splunk), do: "Splunk"
+  defp token_realm(_), do: "Bearer"
 
   defp dashboard_search(q) when is_binary(q) and byte_size(q) > 0,
     do: ~s(name="*#{escape_search(q)}*" OR label="*#{escape_search(q)}*")

@@ -55,6 +55,7 @@ defmodule Console.Schema.WorkbenchTool do
     observability: 13
 
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
+  defenum SplunkTokenType, bearer: 0, splunk: 1
 
   schema "workbench_tools" do
     field :tool,            Tool
@@ -158,10 +159,11 @@ defmodule Console.Schema.WorkbenchTool do
       end
 
       embeds_one :splunk, SplunkConnection, on_replace: :update do
-        field :url,      :string
-        field :token,    EncryptedString
-        field :username, :string
-        field :password, EncryptedString
+        field :url,        :string
+        field :token,      EncryptedString
+        field :token_type, SplunkTokenType, default: :bearer
+        field :username,   :string
+        field :password,   EncryptedString
       end
 
       embeds_one :tempo, TempoConnection, on_replace: :update do
@@ -545,7 +547,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp splunk_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url token username password)a)
+    |> cast(attrs, ~w(url token token_type username password)a)
     |> then(fn cs ->
       case {get_field(cs, :token), get_field(cs, :username), get_field(cs, :password)} do
         {token, _, _} when is_binary(token) and token != "" -> cs

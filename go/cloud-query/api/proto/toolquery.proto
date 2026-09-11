@@ -74,11 +74,17 @@ message JaegerConnection {
   optional string password = 4;
 }
 
+enum SplunkTokenType {
+  BEARER = 0;
+  SPLUNK = 1;
+}
+
 message SplunkConnection {
   string url = 1;
   optional string token = 2;
   optional string username = 3;
   optional string password = 4;
+  SplunkTokenType token_type = 5;
 }
 
 message DynatraceConnection {

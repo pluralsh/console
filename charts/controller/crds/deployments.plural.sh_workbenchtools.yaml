@@ -1590,7 +1590,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       tokenSecretRef:
-                        description: Reference to a secret key containing the bearer
+                        description: Reference to a secret key containing the authentication
                           token.
                         properties:
                           key:
@@ -1614,6 +1614,13 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      tokenType:
+                        default: BEARER
+                        description: Authorization realm used for token authentication.
+                        enum:
+                        - BEARER
+                        - SPLUNK
+                        type: string
                       url:
                         description: Splunk base URL.
                         type: string

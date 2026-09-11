@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"resty.dev/v3"
 )
 
@@ -16,7 +17,7 @@ type SplunkClient struct {
 	baseURL string
 }
 
-func NewSplunkClient(baseURL, token, username, password string) *SplunkClient {
+func NewSplunkClient(baseURL, token string, tokenType toolquery.SplunkTokenType, username, password string) *SplunkClient {
 	client := resty.New()
 	normalizedBaseURL, insecureSkipVerify := normalizeSplunkURL(baseURL)
 
@@ -26,7 +27,11 @@ func NewSplunkClient(baseURL, token, username, password string) *SplunkClient {
 	}
 
 	if len(token) > 0 {
-		client.SetHeader("Authorization", "Splunk "+token)
+		realm := "Bearer"
+		if tokenType == toolquery.SplunkTokenType_SPLUNK {
+			realm = "Splunk"
+		}
+		client.SetHeader("Authorization", realm+" "+token)
 	} else if len(username) > 0 && len(password) > 0 {
 		client.SetBasicAuth(username, password)
 	}

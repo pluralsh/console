@@ -2981,6 +2981,11 @@ enum WorkbenchToolHttpMethod {
   PATCH
 }
 
+enum SplunkTokenType {
+  BEARER
+  SPLUNK
+}
+
 enum WorkbenchJobStatus {
   PENDING
   RUNNING
@@ -3688,8 +3693,11 @@ input WorkbenchToolSplunkConnectionAttributes {
   "splunk base url"
   url: String!
 
-  "bearer token"
+  "splunk authentication token"
   token: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String
@@ -5346,6 +5354,9 @@ type WorkbenchToolJaegerConnection {
 type WorkbenchToolSplunkConnection {
   "splunk base url"
   url: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String

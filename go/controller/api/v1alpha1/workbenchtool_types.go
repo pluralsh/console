@@ -913,9 +913,15 @@ type WorkbenchToolSplunkConfig struct {
 	// +kubebuilder:validation:Required
 	URL string `json:"url"`
 
-	// Reference to a secret key containing the bearer token.
+	// Reference to a secret key containing the authentication token.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+
+	// Authorization realm used for token authentication.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum:=BEARER;SPLUNK
+	// +kubebuilder:default:=BEARER
+	TokenType *console.SplunkTokenType `json:"tokenType,omitempty"`
 
 	// Basic auth username.
 	// +kubebuilder:validation:Optional
@@ -932,8 +938,9 @@ func (c *WorkbenchToolSplunkConfig) Attributes(ctx context.Context, cl client.Cl
 	}
 
 	attr := &console.WorkbenchToolSplunkConnectionAttributes{
-		URL:      c.URL,
-		Username: c.Username,
+		URL:       c.URL,
+		TokenType: lo.CoalesceOrEmpty(c.TokenType, lo.ToPtr(console.SplunkTokenTypeBearer)),
+		Username:  c.Username,
 	}
 
 	if c.TokenSecretRef != nil {

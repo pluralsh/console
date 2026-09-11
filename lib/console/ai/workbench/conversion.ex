@@ -75,6 +75,7 @@ defmodule Console.AI.Workbench.Conversion do
       connection: {:splunk, %SplunkConnection{
         url: splunk.url,
         token: splunk.token,
+        token_type: splunk_token_type(splunk.token_type),
         username: splunk.username,
         password: splunk.password,
       }}
@@ -164,4 +165,7 @@ defmodule Console.AI.Workbench.Conversion do
   end
 
   def to_proto(_), do: {:error, "No tool connection found"}
+
+  defp splunk_token_type(:splunk), do: :SPLUNK
+  defp splunk_token_type(_), do: :BEARER
 end

@@ -1,3 +1,16 @@
+defmodule Toolquery.SplunkTokenType do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "toolquery.SplunkTokenType",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :BEARER, 0
+  field :SPLUNK, 1
+end
+
 defmodule Toolquery.LogQueryOperator do
   @moduledoc false
 
@@ -156,6 +169,7 @@ defmodule Toolquery.SplunkConnection do
   field :token, 2, proto3_optional: true, type: :string
   field :username, 3, proto3_optional: true, type: :string
   field :password, 4, proto3_optional: true, type: :string
+  field :token_type, 5, type: Toolquery.SplunkTokenType, json_name: "tokenType", enum: true
 end
 
 defmodule Toolquery.DynatraceConnection do

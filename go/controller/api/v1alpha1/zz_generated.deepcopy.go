@@ -12014,6 +12014,11 @@ func (in *WorkbenchToolSplunkConfig) DeepCopyInto(out *WorkbenchToolSplunkConfig
 		*out = new(v1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.TokenType != nil {
+		in, out := &in.TokenType, &out.TokenType
+		*out = new(client.SplunkTokenType)
+		**out = **in
+	}
 	if in.Username != nil {
 		in, out := &in.Username, &out.Username
 		*out = new(string)

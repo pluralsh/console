@@ -115,11 +115,12 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalProvidersTest do
         tool: :splunk,
         name: "splunk",
         categories: [:logs],
-        configuration: %{splunk: %{url: "https://splunk.example.com", token: "token"}}
+        configuration: %{splunk: %{url: "https://splunk.example.com", token: "token", token_type: :splunk}}
       )
 
     Req.Test.stub(Splunk, fn conn ->
       assert conn.request_path == "/servicesNS/-/-/saved/searches"
+      assert ["Splunk token"] = Plug.Conn.get_req_header(conn, "authorization")
       assert %{
                "count" => "25",
                "offset" => "0",

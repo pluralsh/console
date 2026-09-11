@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_tool_type, Console.Schema.WorkbenchTool.Tool
   ecto_enum :workbench_tool_category, Console.Schema.WorkbenchTool.Category
   ecto_enum :workbench_tool_http_method, Console.Schema.WorkbenchTool.HttpMethod
+  ecto_enum :splunk_token_type, Console.Schema.WorkbenchTool.SplunkTokenType
   ecto_enum :workbench_job_status, Console.Schema.WorkbenchJob.Status
   ecto_enum :workbench_job_activity_status, Console.Schema.WorkbenchJobActivity.Status
   ecto_enum :workbench_job_activity_type, Console.Schema.WorkbenchJobActivity.Type
@@ -314,10 +315,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_splunk_connection_attributes do
-    field :url,       non_null(:string), description: "splunk base url"
-    field :token,     :string, description: "bearer token"
-    field :username,  :string, description: "basic auth username"
-    field :password,  :string, description: "basic auth password"
+    field :url,        non_null(:string), description: "splunk base url"
+    field :token,      :string, description: "splunk authentication token"
+    field :token_type, :splunk_token_type, default_value: :bearer, description: "authorization realm for token authentication"
+    field :username,   :string, description: "basic auth username"
+    field :password,   :string, description: "basic auth password"
   end
 
   input_object :workbench_tool_datadog_connection_attributes do
@@ -1298,8 +1300,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_splunk_connection do
-    field :url,       :string, description: "splunk base url"
-    field :username,  :string, description: "basic auth username"
+    field :url,        :string, description: "splunk base url"
+    field :token_type, :splunk_token_type, description: "authorization realm for token authentication"
+    field :username,   :string, description: "basic auth username"
   end
 
   object :workbench_tool_datadog_connection do

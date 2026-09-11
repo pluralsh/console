@@ -6503,7 +6503,8 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ | Splunk base URL. |  | Required: \{\} <br /> |
-| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the bearer token. |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the authentication token. |  | Optional: \{\} <br /> |
+| `tokenType` _[SplunkTokenType](#splunktokentype)_ | Authorization realm used for token authentication. | BEARER | Enum: [BEARER SPLUNK] <br />Optional: \{\} <br /> |
 | `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
 

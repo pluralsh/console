@@ -12332,6 +12332,8 @@ type WorkbenchToolSlackConnectionAttributes struct {
 type WorkbenchToolSplunkConnection struct {
 	// splunk base url
 	URL *string `json:"url,omitempty"`
+	// authorization realm for token authentication
+	TokenType *SplunkTokenType `json:"tokenType,omitempty"`
 	// basic auth username
 	Username *string `json:"username,omitempty"`
 }
@@ -12339,8 +12341,10 @@ type WorkbenchToolSplunkConnection struct {
 type WorkbenchToolSplunkConnectionAttributes struct {
 	// splunk base url
 	URL string `json:"url"`
-	// bearer token
+	// splunk authentication token
 	Token *string `json:"token,omitempty"`
+	// authorization realm for token authentication
+	TokenType *SplunkTokenType `json:"tokenType,omitempty"`
 	// basic auth username
 	Username *string `json:"username,omitempty"`
 	// basic auth password
@@ -18408,6 +18412,61 @@ func (e *SortDirection) UnmarshalJSON(b []byte) error {
 }
 
 func (e SortDirection) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SplunkTokenType string
+
+const (
+	SplunkTokenTypeBearer SplunkTokenType = "BEARER"
+	SplunkTokenTypeSplunk SplunkTokenType = "SPLUNK"
+)
+
+var AllSplunkTokenType = []SplunkTokenType{
+	SplunkTokenTypeBearer,
+	SplunkTokenTypeSplunk,
+}
+
+func (e SplunkTokenType) IsValid() bool {
+	switch e {
+	case SplunkTokenTypeBearer, SplunkTokenTypeSplunk:
+		return true
+	}
+	return false
+}
+
+func (e SplunkTokenType) String() string {
+	return string(e)
+}
+
+func (e *SplunkTokenType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SplunkTokenType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SplunkTokenType", str)
+	}
+	return nil
+}
+
+func (e SplunkTokenType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SplunkTokenType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SplunkTokenType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

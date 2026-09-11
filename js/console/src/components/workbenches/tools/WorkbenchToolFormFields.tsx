@@ -19,6 +19,7 @@ import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   HelmAuthProvider,
+  SplunkTokenType,
   WorkbenchToolHttpMethod,
   WorkbenchToolType,
 } from 'generated/graphql'
@@ -1048,11 +1049,36 @@ function SplunkFormFields({
         onChange={(e) => set({ ...c, password: e.target.value || undefined })}
       />
       <InputField
-        label="Bearer token"
+        label="Authentication token"
         revealer
         value={c.token ?? ''}
         onChange={(e) => set({ ...c, token: e.target.value || undefined })}
       />
+      <FormField
+        label="Token type"
+        hint="Bearer is used for Splunk authentication tokens; Splunk is used for session keys."
+      >
+        <Select
+          selectedKey={c.tokenType ?? SplunkTokenType.Bearer}
+          onSelectionChange={(key) =>
+            set({
+              ...c,
+              tokenType: (key as SplunkTokenType) ?? SplunkTokenType.Bearer,
+            })
+          }
+          selectionMode="single"
+          label="Token type"
+        >
+          <ListBoxItem
+            key={SplunkTokenType.Bearer}
+            label="Bearer"
+          />
+          <ListBoxItem
+            key={SplunkTokenType.Splunk}
+            label="Splunk"
+          />
+        </Select>
+      </FormField>
     </>
   )
 }

@@ -23,6 +23,52 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type SplunkTokenType int32
+
+const (
+	SplunkTokenType_BEARER SplunkTokenType = 0
+	SplunkTokenType_SPLUNK SplunkTokenType = 1
+)
+
+// Enum value maps for SplunkTokenType.
+var (
+	SplunkTokenType_name = map[int32]string{
+		0: "BEARER",
+		1: "SPLUNK",
+	}
+	SplunkTokenType_value = map[string]int32{
+		"BEARER": 0,
+		"SPLUNK": 1,
+	}
+)
+
+func (x SplunkTokenType) Enum() *SplunkTokenType {
+	p := new(SplunkTokenType)
+	*p = x
+	return p
+}
+
+func (x SplunkTokenType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SplunkTokenType) Descriptor() protoreflect.EnumDescriptor {
+	return file_toolquery_proto_enumTypes[0].Descriptor()
+}
+
+func (SplunkTokenType) Type() protoreflect.EnumType {
+	return &file_toolquery_proto_enumTypes[0]
+}
+
+func (x SplunkTokenType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SplunkTokenType.Descriptor instead.
+func (SplunkTokenType) EnumDescriptor() ([]byte, []int) {
+	return file_toolquery_proto_rawDescGZIP(), []int{0}
+}
+
 type LogQueryOperator int32
 
 const (
@@ -53,11 +99,11 @@ func (x LogQueryOperator) String() string {
 }
 
 func (LogQueryOperator) Descriptor() protoreflect.EnumDescriptor {
-	return file_toolquery_proto_enumTypes[0].Descriptor()
+	return file_toolquery_proto_enumTypes[1].Descriptor()
 }
 
 func (LogQueryOperator) Type() protoreflect.EnumType {
-	return &file_toolquery_proto_enumTypes[0]
+	return &file_toolquery_proto_enumTypes[1]
 }
 
 func (x LogQueryOperator) Number() protoreflect.EnumNumber {
@@ -66,7 +112,7 @@ func (x LogQueryOperator) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use LogQueryOperator.Descriptor instead.
 func (LogQueryOperator) EnumDescriptor() ([]byte, []int) {
-	return file_toolquery_proto_rawDescGZIP(), []int{0}
+	return file_toolquery_proto_rawDescGZIP(), []int{1}
 }
 
 type ElasticConnection struct {
@@ -707,6 +753,7 @@ type SplunkConnection struct {
 	Token         *string                `protobuf:"bytes,2,opt,name=token,proto3,oneof" json:"token,omitempty"`
 	Username      *string                `protobuf:"bytes,3,opt,name=username,proto3,oneof" json:"username,omitempty"`
 	Password      *string                `protobuf:"bytes,4,opt,name=password,proto3,oneof" json:"password,omitempty"`
+	TokenType     SplunkTokenType        `protobuf:"varint,5,opt,name=token_type,json=tokenType,proto3,enum=toolquery.SplunkTokenType" json:"token_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -767,6 +814,13 @@ func (x *SplunkConnection) GetPassword() string {
 		return *x.Password
 	}
 	return ""
+}
+
+func (x *SplunkConnection) GetTokenType() SplunkTokenType {
+	if x != nil {
+		return x.TokenType
+	}
+	return SplunkTokenType_BEARER
 }
 
 type DynatraceConnection struct {
@@ -3346,12 +3400,14 @@ const file_toolquery_proto_rawDesc = "" +
 	"\bpassword\x18\x04 \x01(\tH\x02R\bpassword\x88\x01\x01B\b\n" +
 	"\x06_tokenB\v\n" +
 	"\t_usernameB\v\n" +
-	"\t_password\"\xa5\x01\n" +
+	"\t_password\"\xe0\x01\n" +
 	"\x10SplunkConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x19\n" +
 	"\x05token\x18\x02 \x01(\tH\x00R\x05token\x88\x01\x01\x12\x1f\n" +
 	"\busername\x18\x03 \x01(\tH\x01R\busername\x88\x01\x01\x12\x1f\n" +
-	"\bpassword\x18\x04 \x01(\tH\x02R\bpassword\x88\x01\x01B\b\n" +
+	"\bpassword\x18\x04 \x01(\tH\x02R\bpassword\x88\x01\x01\x129\n" +
+	"\n" +
+	"token_type\x18\x05 \x01(\x0e2\x1a.toolquery.SplunkTokenTypeR\ttokenTypeB\b\n" +
 	"\x06_tokenB\v\n" +
 	"\t_usernameB\v\n" +
 	"\t_password\"M\n" +
@@ -3599,7 +3655,12 @@ const file_toolquery_proto_rawDesc = "" +
 	"\x06script\x18\x01 \x01(\tR\x06script\"/\n" +
 	"\fRunLuaOutput\x12\x1f\n" +
 	"\vresult_json\x18\x01 \x01(\tR\n" +
-	"resultJson*I\n" +
+	"resultJson*)\n" +
+	"\x0fSplunkTokenType\x12\n" +
+	"\n" +
+	"\x06BEARER\x10\x00\x12\n" +
+	"\n" +
+	"\x06SPLUNK\x10\x01*I\n" +
 	"\x10LogQueryOperator\x12\x1a\n" +
 	"\x16LOG_QUERY_OPERATOR_AND\x10\x00\x12\x19\n" +
 	"\x15LOG_QUERY_OPERATOR_OR\x10\x012\xeb\x04\n" +
@@ -3625,140 +3686,142 @@ func file_toolquery_proto_rawDescGZIP() []byte {
 	return file_toolquery_proto_rawDescData
 }
 
-var file_toolquery_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_toolquery_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_toolquery_proto_msgTypes = make([]protoimpl.MessageInfo, 51)
 var file_toolquery_proto_goTypes = []any{
-	(LogQueryOperator)(0),                  // 0: toolquery.LogQueryOperator
-	(*ElasticConnection)(nil),              // 1: toolquery.ElasticConnection
-	(*OpensearchConnection)(nil),           // 2: toolquery.OpensearchConnection
-	(*DatadogConnection)(nil),              // 3: toolquery.DatadogConnection
-	(*PrometheusConnection)(nil),           // 4: toolquery.PrometheusConnection
-	(*LokiConnection)(nil),                 // 5: toolquery.LokiConnection
-	(*VictoriaLogsConnection)(nil),         // 6: toolquery.VictoriaLogsConnection
-	(*TempoConnection)(nil),                // 7: toolquery.TempoConnection
-	(*JaegerConnection)(nil),               // 8: toolquery.JaegerConnection
-	(*SplunkConnection)(nil),               // 9: toolquery.SplunkConnection
-	(*DynatraceConnection)(nil),            // 10: toolquery.DynatraceConnection
-	(*CloudwatchConnection)(nil),           // 11: toolquery.CloudwatchConnection
-	(*AzureConnection)(nil),                // 12: toolquery.AzureConnection
-	(*ToolConnection)(nil),                 // 13: toolquery.ToolConnection
-	(*TimeRange)(nil),                      // 14: toolquery.TimeRange
-	(*MetricsQueryInput)(nil),              // 15: toolquery.MetricsQueryInput
-	(*MetricsOptions)(nil),                 // 16: toolquery.MetricsOptions
-	(*AzureMetricsOptions)(nil),            // 17: toolquery.AzureMetricsOptions
-	(*LogsQueryFacet)(nil),                 // 18: toolquery.LogsQueryFacet
-	(*LogsQueryInput)(nil),                 // 19: toolquery.LogsQueryInput
-	(*LogAggregateInput)(nil),              // 20: toolquery.LogAggregateInput
-	(*LogsOptions)(nil),                    // 21: toolquery.LogsOptions
-	(*AzureLogsOptions)(nil),               // 22: toolquery.AzureLogsOptions
-	(*TracesQueryInput)(nil),               // 23: toolquery.TracesQueryInput
-	(*TracesOptions)(nil),                  // 24: toolquery.TracesOptions
-	(*JaegerTraceQueryAttribute)(nil),      // 25: toolquery.JaegerTraceQueryAttribute
-	(*JaegerTracesOptions)(nil),            // 26: toolquery.JaegerTracesOptions
-	(*MetricPoint)(nil),                    // 27: toolquery.MetricPoint
-	(*MetricsQueryOutput)(nil),             // 28: toolquery.MetricsQueryOutput
-	(*MetricsSearchInput)(nil),             // 29: toolquery.MetricsSearchInput
-	(*MetricsSearchOptions)(nil),           // 30: toolquery.MetricsSearchOptions
-	(*AzureMetricsSearchOptions)(nil),      // 31: toolquery.AzureMetricsSearchOptions
-	(*MetricsSearchResult)(nil),            // 32: toolquery.MetricsSearchResult
-	(*MetricsSearchOutput)(nil),            // 33: toolquery.MetricsSearchOutput
-	(*MetricsLabelSearchInput)(nil),        // 34: toolquery.MetricsLabelSearchInput
-	(*MetricsLabelSearchOptions)(nil),      // 35: toolquery.MetricsLabelSearchOptions
-	(*AzureMetricsLabelSearchOptions)(nil), // 36: toolquery.AzureMetricsLabelSearchOptions
-	(*MetricsLabelSearchResult)(nil),       // 37: toolquery.MetricsLabelSearchResult
-	(*MetricsLabelSearchOutput)(nil),       // 38: toolquery.MetricsLabelSearchOutput
-	(*LogEntry)(nil),                       // 39: toolquery.LogEntry
-	(*LogsQueryOutput)(nil),                // 40: toolquery.LogsQueryOutput
-	(*LogAggregateBucket)(nil),             // 41: toolquery.LogAggregateBucket
-	(*LogAggregateOutput)(nil),             // 42: toolquery.LogAggregateOutput
-	(*TraceSpan)(nil),                      // 43: toolquery.TraceSpan
-	(*TracesQueryOutput)(nil),              // 44: toolquery.TracesQueryOutput
-	(*InvokeLambdaInput)(nil),              // 45: toolquery.InvokeLambdaInput
-	(*InvokeLambdaOutput)(nil),             // 46: toolquery.InvokeLambdaOutput
-	(*RunLuaInput)(nil),                    // 47: toolquery.RunLuaInput
-	(*RunLuaOutput)(nil),                   // 48: toolquery.RunLuaOutput
-	nil,                                    // 49: toolquery.MetricPoint.LabelsEntry
-	nil,                                    // 50: toolquery.LogEntry.LabelsEntry
-	nil,                                    // 51: toolquery.TraceSpan.TagsEntry
-	(*timestamppb.Timestamp)(nil),          // 52: google.protobuf.Timestamp
-	(*cloudquery.Connection)(nil),          // 53: cloudquery.Connection
+	(SplunkTokenType)(0),                   // 0: toolquery.SplunkTokenType
+	(LogQueryOperator)(0),                  // 1: toolquery.LogQueryOperator
+	(*ElasticConnection)(nil),              // 2: toolquery.ElasticConnection
+	(*OpensearchConnection)(nil),           // 3: toolquery.OpensearchConnection
+	(*DatadogConnection)(nil),              // 4: toolquery.DatadogConnection
+	(*PrometheusConnection)(nil),           // 5: toolquery.PrometheusConnection
+	(*LokiConnection)(nil),                 // 6: toolquery.LokiConnection
+	(*VictoriaLogsConnection)(nil),         // 7: toolquery.VictoriaLogsConnection
+	(*TempoConnection)(nil),                // 8: toolquery.TempoConnection
+	(*JaegerConnection)(nil),               // 9: toolquery.JaegerConnection
+	(*SplunkConnection)(nil),               // 10: toolquery.SplunkConnection
+	(*DynatraceConnection)(nil),            // 11: toolquery.DynatraceConnection
+	(*CloudwatchConnection)(nil),           // 12: toolquery.CloudwatchConnection
+	(*AzureConnection)(nil),                // 13: toolquery.AzureConnection
+	(*ToolConnection)(nil),                 // 14: toolquery.ToolConnection
+	(*TimeRange)(nil),                      // 15: toolquery.TimeRange
+	(*MetricsQueryInput)(nil),              // 16: toolquery.MetricsQueryInput
+	(*MetricsOptions)(nil),                 // 17: toolquery.MetricsOptions
+	(*AzureMetricsOptions)(nil),            // 18: toolquery.AzureMetricsOptions
+	(*LogsQueryFacet)(nil),                 // 19: toolquery.LogsQueryFacet
+	(*LogsQueryInput)(nil),                 // 20: toolquery.LogsQueryInput
+	(*LogAggregateInput)(nil),              // 21: toolquery.LogAggregateInput
+	(*LogsOptions)(nil),                    // 22: toolquery.LogsOptions
+	(*AzureLogsOptions)(nil),               // 23: toolquery.AzureLogsOptions
+	(*TracesQueryInput)(nil),               // 24: toolquery.TracesQueryInput
+	(*TracesOptions)(nil),                  // 25: toolquery.TracesOptions
+	(*JaegerTraceQueryAttribute)(nil),      // 26: toolquery.JaegerTraceQueryAttribute
+	(*JaegerTracesOptions)(nil),            // 27: toolquery.JaegerTracesOptions
+	(*MetricPoint)(nil),                    // 28: toolquery.MetricPoint
+	(*MetricsQueryOutput)(nil),             // 29: toolquery.MetricsQueryOutput
+	(*MetricsSearchInput)(nil),             // 30: toolquery.MetricsSearchInput
+	(*MetricsSearchOptions)(nil),           // 31: toolquery.MetricsSearchOptions
+	(*AzureMetricsSearchOptions)(nil),      // 32: toolquery.AzureMetricsSearchOptions
+	(*MetricsSearchResult)(nil),            // 33: toolquery.MetricsSearchResult
+	(*MetricsSearchOutput)(nil),            // 34: toolquery.MetricsSearchOutput
+	(*MetricsLabelSearchInput)(nil),        // 35: toolquery.MetricsLabelSearchInput
+	(*MetricsLabelSearchOptions)(nil),      // 36: toolquery.MetricsLabelSearchOptions
+	(*AzureMetricsLabelSearchOptions)(nil), // 37: toolquery.AzureMetricsLabelSearchOptions
+	(*MetricsLabelSearchResult)(nil),       // 38: toolquery.MetricsLabelSearchResult
+	(*MetricsLabelSearchOutput)(nil),       // 39: toolquery.MetricsLabelSearchOutput
+	(*LogEntry)(nil),                       // 40: toolquery.LogEntry
+	(*LogsQueryOutput)(nil),                // 41: toolquery.LogsQueryOutput
+	(*LogAggregateBucket)(nil),             // 42: toolquery.LogAggregateBucket
+	(*LogAggregateOutput)(nil),             // 43: toolquery.LogAggregateOutput
+	(*TraceSpan)(nil),                      // 44: toolquery.TraceSpan
+	(*TracesQueryOutput)(nil),              // 45: toolquery.TracesQueryOutput
+	(*InvokeLambdaInput)(nil),              // 46: toolquery.InvokeLambdaInput
+	(*InvokeLambdaOutput)(nil),             // 47: toolquery.InvokeLambdaOutput
+	(*RunLuaInput)(nil),                    // 48: toolquery.RunLuaInput
+	(*RunLuaOutput)(nil),                   // 49: toolquery.RunLuaOutput
+	nil,                                    // 50: toolquery.MetricPoint.LabelsEntry
+	nil,                                    // 51: toolquery.LogEntry.LabelsEntry
+	nil,                                    // 52: toolquery.TraceSpan.TagsEntry
+	(*timestamppb.Timestamp)(nil),          // 53: google.protobuf.Timestamp
+	(*cloudquery.Connection)(nil),          // 54: cloudquery.Connection
 }
 var file_toolquery_proto_depIdxs = []int32{
-	1,  // 0: toolquery.ToolConnection.elastic:type_name -> toolquery.ElasticConnection
-	3,  // 1: toolquery.ToolConnection.datadog:type_name -> toolquery.DatadogConnection
-	4,  // 2: toolquery.ToolConnection.prometheus:type_name -> toolquery.PrometheusConnection
-	5,  // 3: toolquery.ToolConnection.loki:type_name -> toolquery.LokiConnection
-	7,  // 4: toolquery.ToolConnection.tempo:type_name -> toolquery.TempoConnection
-	9,  // 5: toolquery.ToolConnection.splunk:type_name -> toolquery.SplunkConnection
-	10, // 6: toolquery.ToolConnection.dynatrace:type_name -> toolquery.DynatraceConnection
-	11, // 7: toolquery.ToolConnection.cloudwatch:type_name -> toolquery.CloudwatchConnection
-	12, // 8: toolquery.ToolConnection.azure:type_name -> toolquery.AzureConnection
-	8,  // 9: toolquery.ToolConnection.jaeger:type_name -> toolquery.JaegerConnection
-	2,  // 10: toolquery.ToolConnection.opensearch:type_name -> toolquery.OpensearchConnection
-	6,  // 11: toolquery.ToolConnection.victoria_logs:type_name -> toolquery.VictoriaLogsConnection
-	52, // 12: toolquery.TimeRange.start:type_name -> google.protobuf.Timestamp
-	52, // 13: toolquery.TimeRange.end:type_name -> google.protobuf.Timestamp
-	13, // 14: toolquery.MetricsQueryInput.connection:type_name -> toolquery.ToolConnection
-	14, // 15: toolquery.MetricsQueryInput.range:type_name -> toolquery.TimeRange
-	16, // 16: toolquery.MetricsQueryInput.options:type_name -> toolquery.MetricsOptions
-	17, // 17: toolquery.MetricsOptions.azure:type_name -> toolquery.AzureMetricsOptions
-	13, // 18: toolquery.LogsQueryInput.connection:type_name -> toolquery.ToolConnection
-	14, // 19: toolquery.LogsQueryInput.range:type_name -> toolquery.TimeRange
-	18, // 20: toolquery.LogsQueryInput.facets:type_name -> toolquery.LogsQueryFacet
-	21, // 21: toolquery.LogsQueryInput.options:type_name -> toolquery.LogsOptions
-	13, // 22: toolquery.LogAggregateInput.connection:type_name -> toolquery.ToolConnection
-	14, // 23: toolquery.LogAggregateInput.range:type_name -> toolquery.TimeRange
-	18, // 24: toolquery.LogAggregateInput.facets:type_name -> toolquery.LogsQueryFacet
-	21, // 25: toolquery.LogAggregateInput.options:type_name -> toolquery.LogsOptions
-	0,  // 26: toolquery.LogAggregateInput.operator:type_name -> toolquery.LogQueryOperator
-	22, // 27: toolquery.LogsOptions.azure:type_name -> toolquery.AzureLogsOptions
-	13, // 28: toolquery.TracesQueryInput.connection:type_name -> toolquery.ToolConnection
-	14, // 29: toolquery.TracesQueryInput.range:type_name -> toolquery.TimeRange
-	24, // 30: toolquery.TracesQueryInput.options:type_name -> toolquery.TracesOptions
-	26, // 31: toolquery.TracesOptions.jaeger:type_name -> toolquery.JaegerTracesOptions
-	25, // 32: toolquery.JaegerTracesOptions.attributes:type_name -> toolquery.JaegerTraceQueryAttribute
-	52, // 33: toolquery.MetricPoint.timestamp:type_name -> google.protobuf.Timestamp
-	49, // 34: toolquery.MetricPoint.labels:type_name -> toolquery.MetricPoint.LabelsEntry
-	27, // 35: toolquery.MetricsQueryOutput.metrics:type_name -> toolquery.MetricPoint
-	13, // 36: toolquery.MetricsSearchInput.connection:type_name -> toolquery.ToolConnection
-	30, // 37: toolquery.MetricsSearchInput.options:type_name -> toolquery.MetricsSearchOptions
-	31, // 38: toolquery.MetricsSearchOptions.azure:type_name -> toolquery.AzureMetricsSearchOptions
-	32, // 39: toolquery.MetricsSearchOutput.metrics:type_name -> toolquery.MetricsSearchResult
-	13, // 40: toolquery.MetricsLabelSearchInput.connection:type_name -> toolquery.ToolConnection
-	35, // 41: toolquery.MetricsLabelSearchInput.options:type_name -> toolquery.MetricsLabelSearchOptions
-	36, // 42: toolquery.MetricsLabelSearchOptions.azure:type_name -> toolquery.AzureMetricsLabelSearchOptions
-	37, // 43: toolquery.MetricsLabelSearchOutput.results:type_name -> toolquery.MetricsLabelSearchResult
-	52, // 44: toolquery.LogEntry.timestamp:type_name -> google.protobuf.Timestamp
-	50, // 45: toolquery.LogEntry.labels:type_name -> toolquery.LogEntry.LabelsEntry
-	39, // 46: toolquery.LogsQueryOutput.logs:type_name -> toolquery.LogEntry
-	52, // 47: toolquery.LogAggregateBucket.timestamp:type_name -> google.protobuf.Timestamp
-	41, // 48: toolquery.LogAggregateOutput.buckets:type_name -> toolquery.LogAggregateBucket
-	52, // 49: toolquery.TraceSpan.start:type_name -> google.protobuf.Timestamp
-	52, // 50: toolquery.TraceSpan.end:type_name -> google.protobuf.Timestamp
-	51, // 51: toolquery.TraceSpan.tags:type_name -> toolquery.TraceSpan.TagsEntry
-	43, // 52: toolquery.TracesQueryOutput.spans:type_name -> toolquery.TraceSpan
-	53, // 53: toolquery.InvokeLambdaInput.connection:type_name -> cloudquery.Connection
-	15, // 54: toolquery.ToolQuery.Metrics:input_type -> toolquery.MetricsQueryInput
-	29, // 55: toolquery.ToolQuery.MetricsSearch:input_type -> toolquery.MetricsSearchInput
-	34, // 56: toolquery.ToolQuery.MetricsLabelSearch:input_type -> toolquery.MetricsLabelSearchInput
-	19, // 57: toolquery.ToolQuery.Logs:input_type -> toolquery.LogsQueryInput
-	20, // 58: toolquery.ToolQuery.LogAggregate:input_type -> toolquery.LogAggregateInput
-	23, // 59: toolquery.ToolQuery.Traces:input_type -> toolquery.TracesQueryInput
-	45, // 60: toolquery.ToolQuery.InvokeLambda:input_type -> toolquery.InvokeLambdaInput
-	47, // 61: toolquery.ToolQuery.RunLua:input_type -> toolquery.RunLuaInput
-	28, // 62: toolquery.ToolQuery.Metrics:output_type -> toolquery.MetricsQueryOutput
-	33, // 63: toolquery.ToolQuery.MetricsSearch:output_type -> toolquery.MetricsSearchOutput
-	38, // 64: toolquery.ToolQuery.MetricsLabelSearch:output_type -> toolquery.MetricsLabelSearchOutput
-	40, // 65: toolquery.ToolQuery.Logs:output_type -> toolquery.LogsQueryOutput
-	42, // 66: toolquery.ToolQuery.LogAggregate:output_type -> toolquery.LogAggregateOutput
-	44, // 67: toolquery.ToolQuery.Traces:output_type -> toolquery.TracesQueryOutput
-	46, // 68: toolquery.ToolQuery.InvokeLambda:output_type -> toolquery.InvokeLambdaOutput
-	48, // 69: toolquery.ToolQuery.RunLua:output_type -> toolquery.RunLuaOutput
-	62, // [62:70] is the sub-list for method output_type
-	54, // [54:62] is the sub-list for method input_type
-	54, // [54:54] is the sub-list for extension type_name
-	54, // [54:54] is the sub-list for extension extendee
-	0,  // [0:54] is the sub-list for field type_name
+	0,  // 0: toolquery.SplunkConnection.token_type:type_name -> toolquery.SplunkTokenType
+	2,  // 1: toolquery.ToolConnection.elastic:type_name -> toolquery.ElasticConnection
+	4,  // 2: toolquery.ToolConnection.datadog:type_name -> toolquery.DatadogConnection
+	5,  // 3: toolquery.ToolConnection.prometheus:type_name -> toolquery.PrometheusConnection
+	6,  // 4: toolquery.ToolConnection.loki:type_name -> toolquery.LokiConnection
+	8,  // 5: toolquery.ToolConnection.tempo:type_name -> toolquery.TempoConnection
+	10, // 6: toolquery.ToolConnection.splunk:type_name -> toolquery.SplunkConnection
+	11, // 7: toolquery.ToolConnection.dynatrace:type_name -> toolquery.DynatraceConnection
+	12, // 8: toolquery.ToolConnection.cloudwatch:type_name -> toolquery.CloudwatchConnection
+	13, // 9: toolquery.ToolConnection.azure:type_name -> toolquery.AzureConnection
+	9,  // 10: toolquery.ToolConnection.jaeger:type_name -> toolquery.JaegerConnection
+	3,  // 11: toolquery.ToolConnection.opensearch:type_name -> toolquery.OpensearchConnection
+	7,  // 12: toolquery.ToolConnection.victoria_logs:type_name -> toolquery.VictoriaLogsConnection
+	53, // 13: toolquery.TimeRange.start:type_name -> google.protobuf.Timestamp
+	53, // 14: toolquery.TimeRange.end:type_name -> google.protobuf.Timestamp
+	14, // 15: toolquery.MetricsQueryInput.connection:type_name -> toolquery.ToolConnection
+	15, // 16: toolquery.MetricsQueryInput.range:type_name -> toolquery.TimeRange
+	17, // 17: toolquery.MetricsQueryInput.options:type_name -> toolquery.MetricsOptions
+	18, // 18: toolquery.MetricsOptions.azure:type_name -> toolquery.AzureMetricsOptions
+	14, // 19: toolquery.LogsQueryInput.connection:type_name -> toolquery.ToolConnection
+	15, // 20: toolquery.LogsQueryInput.range:type_name -> toolquery.TimeRange
+	19, // 21: toolquery.LogsQueryInput.facets:type_name -> toolquery.LogsQueryFacet
+	22, // 22: toolquery.LogsQueryInput.options:type_name -> toolquery.LogsOptions
+	14, // 23: toolquery.LogAggregateInput.connection:type_name -> toolquery.ToolConnection
+	15, // 24: toolquery.LogAggregateInput.range:type_name -> toolquery.TimeRange
+	19, // 25: toolquery.LogAggregateInput.facets:type_name -> toolquery.LogsQueryFacet
+	22, // 26: toolquery.LogAggregateInput.options:type_name -> toolquery.LogsOptions
+	1,  // 27: toolquery.LogAggregateInput.operator:type_name -> toolquery.LogQueryOperator
+	23, // 28: toolquery.LogsOptions.azure:type_name -> toolquery.AzureLogsOptions
+	14, // 29: toolquery.TracesQueryInput.connection:type_name -> toolquery.ToolConnection
+	15, // 30: toolquery.TracesQueryInput.range:type_name -> toolquery.TimeRange
+	25, // 31: toolquery.TracesQueryInput.options:type_name -> toolquery.TracesOptions
+	27, // 32: toolquery.TracesOptions.jaeger:type_name -> toolquery.JaegerTracesOptions
+	26, // 33: toolquery.JaegerTracesOptions.attributes:type_name -> toolquery.JaegerTraceQueryAttribute
+	53, // 34: toolquery.MetricPoint.timestamp:type_name -> google.protobuf.Timestamp
+	50, // 35: toolquery.MetricPoint.labels:type_name -> toolquery.MetricPoint.LabelsEntry
+	28, // 36: toolquery.MetricsQueryOutput.metrics:type_name -> toolquery.MetricPoint
+	14, // 37: toolquery.MetricsSearchInput.connection:type_name -> toolquery.ToolConnection
+	31, // 38: toolquery.MetricsSearchInput.options:type_name -> toolquery.MetricsSearchOptions
+	32, // 39: toolquery.MetricsSearchOptions.azure:type_name -> toolquery.AzureMetricsSearchOptions
+	33, // 40: toolquery.MetricsSearchOutput.metrics:type_name -> toolquery.MetricsSearchResult
+	14, // 41: toolquery.MetricsLabelSearchInput.connection:type_name -> toolquery.ToolConnection
+	36, // 42: toolquery.MetricsLabelSearchInput.options:type_name -> toolquery.MetricsLabelSearchOptions
+	37, // 43: toolquery.MetricsLabelSearchOptions.azure:type_name -> toolquery.AzureMetricsLabelSearchOptions
+	38, // 44: toolquery.MetricsLabelSearchOutput.results:type_name -> toolquery.MetricsLabelSearchResult
+	53, // 45: toolquery.LogEntry.timestamp:type_name -> google.protobuf.Timestamp
+	51, // 46: toolquery.LogEntry.labels:type_name -> toolquery.LogEntry.LabelsEntry
+	40, // 47: toolquery.LogsQueryOutput.logs:type_name -> toolquery.LogEntry
+	53, // 48: toolquery.LogAggregateBucket.timestamp:type_name -> google.protobuf.Timestamp
+	42, // 49: toolquery.LogAggregateOutput.buckets:type_name -> toolquery.LogAggregateBucket
+	53, // 50: toolquery.TraceSpan.start:type_name -> google.protobuf.Timestamp
+	53, // 51: toolquery.TraceSpan.end:type_name -> google.protobuf.Timestamp
+	52, // 52: toolquery.TraceSpan.tags:type_name -> toolquery.TraceSpan.TagsEntry
+	44, // 53: toolquery.TracesQueryOutput.spans:type_name -> toolquery.TraceSpan
+	54, // 54: toolquery.InvokeLambdaInput.connection:type_name -> cloudquery.Connection
+	16, // 55: toolquery.ToolQuery.Metrics:input_type -> toolquery.MetricsQueryInput
+	30, // 56: toolquery.ToolQuery.MetricsSearch:input_type -> toolquery.MetricsSearchInput
+	35, // 57: toolquery.ToolQuery.MetricsLabelSearch:input_type -> toolquery.MetricsLabelSearchInput
+	20, // 58: toolquery.ToolQuery.Logs:input_type -> toolquery.LogsQueryInput
+	21, // 59: toolquery.ToolQuery.LogAggregate:input_type -> toolquery.LogAggregateInput
+	24, // 60: toolquery.ToolQuery.Traces:input_type -> toolquery.TracesQueryInput
+	46, // 61: toolquery.ToolQuery.InvokeLambda:input_type -> toolquery.InvokeLambdaInput
+	48, // 62: toolquery.ToolQuery.RunLua:input_type -> toolquery.RunLuaInput
+	29, // 63: toolquery.ToolQuery.Metrics:output_type -> toolquery.MetricsQueryOutput
+	34, // 64: toolquery.ToolQuery.MetricsSearch:output_type -> toolquery.MetricsSearchOutput
+	39, // 65: toolquery.ToolQuery.MetricsLabelSearch:output_type -> toolquery.MetricsLabelSearchOutput
+	41, // 66: toolquery.ToolQuery.Logs:output_type -> toolquery.LogsQueryOutput
+	43, // 67: toolquery.ToolQuery.LogAggregate:output_type -> toolquery.LogAggregateOutput
+	45, // 68: toolquery.ToolQuery.Traces:output_type -> toolquery.TracesQueryOutput
+	47, // 69: toolquery.ToolQuery.InvokeLambda:output_type -> toolquery.InvokeLambdaOutput
+	49, // 70: toolquery.ToolQuery.RunLua:output_type -> toolquery.RunLuaOutput
+	63, // [63:71] is the sub-list for method output_type
+	55, // [55:63] is the sub-list for method input_type
+	55, // [55:55] is the sub-list for extension type_name
+	55, // [55:55] is the sub-list for extension extendee
+	0,  // [0:55] is the sub-list for field type_name
 }
 
 func init() { file_toolquery_proto_init() }
@@ -3809,7 +3872,7 @@ func file_toolquery_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_toolquery_proto_rawDesc), len(file_toolquery_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      2,
 			NumMessages:   51,
 			NumExtensions: 0,
 			NumServices:   1,
