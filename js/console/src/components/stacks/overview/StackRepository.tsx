@@ -2,7 +2,7 @@ import {
   Button,
   Card,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
@@ -119,7 +119,7 @@ export default function StackRepository() {
             </Select>
           )}
           {!repoData?.gitRepository?.refs && (
-            <Input2
+            <Input
               value={ref}
               onChange={(e) => setRef(e.currentTarget.value)}
             />
@@ -129,7 +129,7 @@ export default function StackRepository() {
           label="Folder"
           required
         >
-          <Input2
+          <Input
             value={folder}
             onChange={(e) => setFolder(e.currentTarget.value)}
           />

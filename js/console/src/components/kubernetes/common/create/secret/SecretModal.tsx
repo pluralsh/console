@@ -1,7 +1,7 @@
 import {
   Button,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Modal,
   Select,
@@ -157,7 +157,7 @@ export function CreateSecretModal({
           label="Name"
           required
         >
-          <Input2
+          <Input
             placeholder="my-secret"
             value={name}
             onChange={(e) => {
@@ -187,7 +187,7 @@ export function CreateSecretModal({
               ))}
             </Select>
           ) : (
-            <Input2
+            <Input
               placeholder="Enter namespace"
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}

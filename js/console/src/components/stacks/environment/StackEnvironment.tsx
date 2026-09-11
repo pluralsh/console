@@ -3,7 +3,7 @@ import {
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
-  Input2,
+  Input,
   SearchIcon,
   Table,
   useSetBreadcrumbs,
@@ -155,7 +155,7 @@ export default function StackEnvironment() {
             flexShrink: 0,
           }}
         >
-          <Input2
+          <Input
             placeholder="Search"
             startIcon={<SearchIcon />}
             value={filterString}

@@ -1,11 +1,15 @@
-export function simulateInputChange(input: HTMLInputElement, value: string) {
+export function simulateInputChange(
+  input: HTMLInputElement | HTMLTextAreaElement,
+  value: string
+) {
   if (!input) {
     return
   }
-  const setter = Object.getOwnPropertyDescriptor(
-    window?.HTMLInputElement?.prototype,
-    'value'
-  )?.set
+  const proto =
+    input instanceof HTMLTextAreaElement
+      ? window?.HTMLTextAreaElement?.prototype
+      : window?.HTMLInputElement?.prototype
+  const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set
 
   if (typeof setter?.call === 'function') {
     setter.call(input, value)

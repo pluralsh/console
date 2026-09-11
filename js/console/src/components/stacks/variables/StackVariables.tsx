@@ -1,5 +1,5 @@
 import {
-  Input2,
+  Input,
   SearchIcon,
   Table,
   useSetBreadcrumbs,
@@ -82,7 +82,7 @@ export default function StackVariables() {
         }}
       >
         <div>
-          <Input2
+          <Input
             placeholder="Search"
             startIcon={<SearchIcon />}
             value={filterString}

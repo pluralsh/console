@@ -1,6 +1,6 @@
 import {
   Flex,
-  Input2,
+  Input,
   SearchIcon,
   Table,
   useSetBreadcrumbs,
@@ -50,7 +50,7 @@ export function Pipelines() {
       gap="small"
       height="100%"
     >
-      <Input2
+      <Input
         placeholder="Search pipelines"
         startIcon={<SearchIcon />}
         showClearButton

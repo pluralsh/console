@@ -7,7 +7,7 @@ import {
   FiltersIcon,
   Flex,
   IconFrame,
-  Input2,
+  Input,
   ListBoxItem,
   MoreIcon,
   PeopleIcon,
@@ -270,7 +270,7 @@ export function Stacks() {
         width={340}
       >
         <Flex gap="small">
-          <Input2
+          <Input
             placeholder="Search stacks"
             startIcon={<SearchIcon />}
             value={searchString}

@@ -1,6 +1,6 @@
 import {
   Flex,
-  Input2,
+  Input,
   ListBoxFooterPlus,
   ListBoxItem,
   SearchIcon,
@@ -80,7 +80,7 @@ export function CostManagementDetailsRecommendations() {
       overflow="hidden"
     >
       <Flex gap="medium">
-        <Input2
+        <Input
           startIcon={<SearchIcon />}
           placeholder="Search by resource name"
           value={recommendationsQ}

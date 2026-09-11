@@ -18,7 +18,7 @@ type Story = StoryObj<any>
 function Template(args: any) {
   const [value, setValue] = useState('')
   const {
-    valid,
+    valid: _valid,
     disabled,
     error,
     large,
@@ -52,7 +52,6 @@ function Template(args: any) {
         onChange={(event) =>
           setValue(event.target.value.substring(0, maxLength))
         }
-        valid={valid}
         error={error}
         large={large}
         small={small}

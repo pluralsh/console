@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   Modal,
   Switch,
 } from '@pluralsh/design-system'
@@ -115,7 +115,7 @@ function ClusterSettingsModalInner({
         gap="large"
       >
         <FormField label="Name">
-          <Input2
+          <Input
             value={name}
             onChange={(e) => updateState({ name: e.target.value })}
           />

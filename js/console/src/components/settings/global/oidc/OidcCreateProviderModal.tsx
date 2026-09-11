@@ -5,7 +5,7 @@ import {
   FillLevelContext,
   Flex,
   FormField,
-  Input2,
+  Input,
   Modal,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -87,7 +87,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
         overflow="auto"
       >
         <FormField label="Client ID">
-          <Input2
+          <Input
             disabled
             endIcon={
               clientId && (
@@ -107,7 +107,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
           />
         </FormField>
         <FormField label="Client Secret">
-          <Input2
+          <Input
             disabled
             endIcon={
               clientSecret && (
@@ -133,7 +133,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
             gap="medium"
           >
             <FormField label="Name">
-              <Input2
+              <Input
                 value={form.name}
                 placeholder="Enter OIDC provider name"
                 onChange={(e) =>
@@ -144,7 +144,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
               />
             </FormField>
             <FormField label="Description">
-              <Input2
+              <Input
                 value={form.description ?? ''}
                 placeholder="Enter description"
                 onChange={(e) =>
@@ -247,7 +247,7 @@ export function UrlsInput({
         align="center"
         gap="small"
       >
-        <Input2
+        <Input
           value={value}
           placeholder="Enter a redirect URL"
           onChange={({ target: { value } }) => setValue(value)}

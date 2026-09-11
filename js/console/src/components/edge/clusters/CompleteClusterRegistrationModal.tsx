@@ -1,4 +1,4 @@
-import { Button, FormField, Modal, Input2 } from '@pluralsh/design-system'
+import { Button, FormField, Modal, Input } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { useUpdateClusterRegistrationMutation } from 'generated/graphql.ts'
@@ -94,13 +94,13 @@ function CompleteClusterRegistrationModal({
           label="Name"
           required
         >
-          <Input2
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </FormField>
         <FormField label="Handle">
-          <Input2
+          <Input
             value={handle}
             onChange={(e) => setHandle(e.target.value)}
           />

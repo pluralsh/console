@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import { FormField, Input2, ListBoxItem, Select } from '@pluralsh/design-system'
+import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { CloudSettingsAttributes } from 'generated/graphql'
 
@@ -47,7 +47,7 @@ export function GCP() {
           gap: theme.spacing.medium,
         }}
       >
-        <Input2
+        <Input
           placeholder="project-512333"
           value={settings?.project || ''}
           onChange={({ target: { value } }) =>
@@ -55,7 +55,7 @@ export function GCP() {
           }
           prefix={<div>Project ID{isRequired('project') && '*'}</div>}
         />
-        <Input2
+        <Input
           placeholder="vpc-network"
           value={settings?.network || ''}
           onChange={({ target: { value } }) =>

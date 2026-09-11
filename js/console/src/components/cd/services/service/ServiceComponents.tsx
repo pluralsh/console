@@ -4,7 +4,7 @@ import {
   Callout,
   FillLevelProvider,
   Flex,
-  Input2,
+  Input,
   ListIcon,
   NetworkInterfaceIcon,
   SearchIcon,
@@ -138,7 +138,7 @@ export function ServiceComponents() {
                   overflow: theme.mode === 'light' ? 'visible' : 'hidden',
                 }}
               >
-                <Input2
+                <Input
                   raised
                   placeholder="Search components"
                   startIcon={<SearchIcon />}

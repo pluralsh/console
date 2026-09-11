@@ -1,4 +1,4 @@
-import { Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -72,7 +72,7 @@ export function ClusterPRs() {
           <div
             css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}
           >
-            <Input2
+            <Input
               placeholder="Search"
               startIcon={<SearchIcon />}
               showClearButton

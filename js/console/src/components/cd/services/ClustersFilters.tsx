@@ -1,7 +1,7 @@
 import {
   Chip,
   ChipSeverity,
-  Input2,
+  Input,
   ListBoxItem,
   SearchIcon,
   Select,
@@ -93,7 +93,7 @@ export function ClustersFilters({
         />
       </div>
       <div css={{ flex: '1 1 25%', minWidth: 120 }}>
-        <Input2
+        <Input
           placeholder="Search"
           startIcon={<SearchIcon />}
           value={searchString}

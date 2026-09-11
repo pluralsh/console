@@ -2,7 +2,7 @@ import {
   CaretDownIcon,
   Chip,
   Divider,
-  Input2,
+  Input,
   ListBoxItem,
   LogsIcon,
   Select,
@@ -155,7 +155,7 @@ function AgentRunRepoSelectorInner({
         }
         dropdownHeaderFixed={
           <div css={{ padding: spacing.xsmall }}>
-            <Input2
+            <Input
               raised
               inputProps={{ ref: (node) => node?.focus() }}
               value={query}

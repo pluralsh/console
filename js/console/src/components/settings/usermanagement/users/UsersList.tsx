@@ -1,4 +1,4 @@
-import { Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
@@ -38,7 +38,7 @@ export function UsersList() {
 
   return (
     <ListWrapperSC>
-      <Input2
+      <Input
         value={q}
         placeholder="Search users"
         startIcon={<SearchIcon color="text-light" />}

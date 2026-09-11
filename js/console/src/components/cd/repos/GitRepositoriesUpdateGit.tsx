@@ -2,7 +2,7 @@ import {
   Button,
   FormField,
   GitHubLogoIcon,
-  Input2,
+  Input,
   Switch,
 } from '@pluralsh/design-system'
 import {
@@ -159,7 +159,7 @@ export function ModalForm({
         }}
       >
         <FormField label="Git repository URL">
-          <Input2
+          <Input
             inputProps={{ ref: inputRef }}
             value={gitUrl}
             onChange={(e) => {

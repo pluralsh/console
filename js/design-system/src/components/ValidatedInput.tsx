@@ -8,12 +8,15 @@ import {
 } from 'react'
 
 import FormField from './FormField'
-import Input2, { type InputPropsFull } from './Input2'
+import Input, { type InputPropsFull } from './Input'
 
 export type ValidationResponse = { error: boolean; message: string } | null
 export type CaptionProps = { caption: string; color: string }
 
-export type ValidatedInputProps = Omit<InputPropsFull, 'error' | 'ref'> &
+export type ValidatedInputProps = Omit<
+  InputPropsFull,
+  'error' | 'ref' | 'value'
+> &
   PropsWithChildren<{
     label?: ReactNode
     hint?: ReactNode
@@ -21,6 +24,7 @@ export type ValidatedInputProps = Omit<InputPropsFull, 'error' | 'ref'> &
     width?: string | number
     type?: ComponentPropsWithoutRef<'input'>['type']
     ref?: ComponentPropsWithoutRef<typeof FormField>['ref']
+    value?: InputPropsFull['value'] | null
   }>
 
 function ValidatedInput({
@@ -32,6 +36,7 @@ function ValidatedInput({
   width,
   type,
   inputProps,
+  value,
   ...input
 }: ValidatedInputProps) {
   const [error, setError] = useState<ValidationResponse>(null)
@@ -53,10 +58,11 @@ function ValidatedInput({
       error={!!error?.error}
       width={width}
     >
-      <Input2
+      <Input
         onChange={wrappedOnChange}
         css={{ width: '100%' }}
         inputProps={{ type, ...inputProps }}
+        value={value ?? ''}
         {...input}
         error={!!error?.error}
       />

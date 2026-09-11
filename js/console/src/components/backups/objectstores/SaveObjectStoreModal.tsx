@@ -9,7 +9,7 @@ import {
 import {
   Button,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
@@ -245,7 +245,7 @@ export default function SaveObjectStoreModal({
         }}
       >
         <FormField label="Name">
-          <Input2
+          <Input
             value={name}
             onChange={(e) => setName(e.currentTarget.value)}
           />

@@ -2,7 +2,7 @@ import {
   CatalogIcon,
   Chip,
   Flex,
-  Input2,
+  Input,
   MagnifyingGlassIcon,
   PrQueueIcon,
 } from '@pluralsh/design-system'
@@ -65,7 +65,7 @@ export function SelfServiceSearchBar({
             position: 'relative',
           }}
         >
-          <Input2
+          <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.currentTarget.value)}
             onFocus={() => setSearchFocused(true)}

@@ -1,4 +1,4 @@
-import { Input2, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -81,7 +81,7 @@ export function Gatekeeper() {
 
   const header = useMemo(
     () => (
-      <Input2
+      <Input
         startIcon={<SearchIcon />}
         placeholder="Search policies"
         value={searchString}

@@ -70,7 +70,6 @@ export type { IconFrameProps } from './components/IconFrame'
 export { default as AWSIcon, AWSIconName } from './components/icons/AWSIcon'
 export { default as InlineCode } from './components/InlineCode'
 export { default as Input } from './components/Input'
-export { default as Input2 } from './components/Input2'
 export { LightDarkSwitch } from './components/LightDarkSwitch'
 export { ListBox } from './components/ListBox'
 export {

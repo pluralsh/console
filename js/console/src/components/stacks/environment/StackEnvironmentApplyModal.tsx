@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Button, FormField, Input2, Switch } from '@pluralsh/design-system'
+import { Button, FormField, Input, Switch } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
 
 import { useUpdateState } from '../../hooks/useUpdateState'
@@ -112,7 +112,7 @@ export default function StackEnvironmentApplyModal({
       }
     >
       <FormField label="Name">
-        <Input2
+        <Input
           value={name}
           disabled={mode === 'edit'}
           onChange={(e) => {
@@ -122,7 +122,7 @@ export default function StackEnvironmentApplyModal({
         />
       </FormField>
       <FormField label="Value">
-        <Input2
+        <Input
           value={value}
           onChange={(e) => update({ value: e.target.value })}
           inputProps={{

@@ -4,7 +4,7 @@ import {
   Code,
   Flex,
   FormField,
-  Input2,
+  Input,
   Markdown,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -77,7 +77,7 @@ export function ReviewPrStep({
         name="repository"
         hint={'Repository slug, i.e. username/infra-repo.'}
       >
-        <Input2
+        <Input
           value={formState.identifier}
           onChange={(e) =>
             setFormState({ ...formState, identifier: e.target.value })
@@ -90,7 +90,7 @@ export function ReviewPrStep({
         name="branch"
         hint="Pull request source branch name. Avoid using existing branches."
       >
-        <Input2
+        <Input
           value={formState.branch}
           onChange={(e) =>
             setFormState({ ...formState, branch: e.target.value })

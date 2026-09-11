@@ -1,4 +1,4 @@
-import { Button, CodeEditor, FormField, Input2 } from '@pluralsh/design-system'
+import { Button, CodeEditor, FormField, Input } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 import {
   Dispatch,
@@ -253,7 +253,7 @@ const HelmValuesFilesInput = memo(
                         errors.duplicate ? 'Duplicate file path' : undefined
                       }
                     >
-                      <Input2
+                      <Input
                         error={errors.duplicate}
                         value={valuesFile ?? ''}
                         inputProps={{ 'aria-label': 'Name' }}

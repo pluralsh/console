@@ -2,7 +2,7 @@ import {
   ArrowTopRightIcon,
   Button,
   Flex,
-  Input2,
+  Input,
   SearchIcon,
   Table,
 } from '@pluralsh/design-system'
@@ -76,7 +76,7 @@ export function PrAutomations() {
       height="100%"
       overflow="hidden"
     >
-      <Input2
+      <Input
         placeholder="Search PR automations"
         startIcon={<SearchIcon />}
         showClearButton

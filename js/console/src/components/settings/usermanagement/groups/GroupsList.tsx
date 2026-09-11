@@ -1,4 +1,4 @@
-import { Button, Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import { Button, Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
@@ -54,7 +54,7 @@ export function GroupsList({
 
   return (
     <ListWrapperSC>
-      <Input2
+      <Input
         value={q}
         placeholder="Search groups"
         startIcon={<SearchIcon color="text-light" />}

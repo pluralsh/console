@@ -7,7 +7,6 @@ import BrowseAppsIcon from '../components/icons/BrowseAppsIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
 import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
-import Input2 from '../components/Input2'
 import { Card } from '../index'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -146,21 +145,21 @@ function CustomInputV2Template(args: any) {
       maxWidth="500px"
     >
       <Div marginTop="medium">
-        <Input2
+        <Input
           size="large"
           width="100%"
           {...props}
         />
       </Div>
       <Div marginTop="medium">
-        <Input2
+        <Input
           width="100%"
           value={inputVal}
           {...props}
         />
       </Div>
       <Div marginTop="medium">
-        <Input2
+        <Input
           size="small"
           width="100%"
           value={inputVal}

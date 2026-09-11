@@ -1,4 +1,4 @@
-import { FormField, Input2, ListBoxItem, Select } from '@pluralsh/design-system'
+import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { FileDrop, FileDropFile } from 'components/utils/FileDrop.tsx'
 import { isEmpty } from 'lodash'
 import { useCallback, useState } from 'react'
@@ -197,7 +197,7 @@ export function OpenAISettings({
         infoTooltip={modelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
@@ -208,7 +208,7 @@ export function OpenAISettings({
         infoTooltip={embeddingModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={
             settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
@@ -223,7 +223,7 @@ export function OpenAISettings({
         infoTooltip={toolModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
@@ -234,7 +234,7 @@ export function OpenAISettings({
         infoTooltip="Optional custom API base URL for OpenAI-compatible providers. Leave blank to use OpenAI."
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.baseUrl ?? ''}
           onChange={(e) => updateSettings({ baseUrl: e.currentTarget.value })}
@@ -303,7 +303,7 @@ export function AnthropicSettings({
         infoTooltip={modelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
@@ -314,7 +314,7 @@ export function AnthropicSettings({
         infoTooltip={toolModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
@@ -357,7 +357,7 @@ export function BedrockSettings({
         infoTooltip={bedrockModelIdTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.modelId ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ modelId: e.currentTarget.value })}
@@ -368,7 +368,7 @@ export function BedrockSettings({
         infoTooltip={bedrockEmbeddingModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={
             settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
@@ -383,7 +383,7 @@ export function BedrockSettings({
         infoTooltip={bedrockToolModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.toolModelId ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) =>
@@ -396,7 +396,7 @@ export function BedrockSettings({
         infoTooltip="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.awsAccessKeyId ?? ''}
           onChange={(e) =>
@@ -442,7 +442,7 @@ export function OllamaSettings({
         required={enabled}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
@@ -453,7 +453,7 @@ export function OllamaSettings({
         infoTooltip={toolModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
@@ -465,7 +465,7 @@ export function OllamaSettings({
         required={enabled}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.url}
           onChange={(e) => updateSettings({ url: e.currentTarget.value })}
@@ -509,7 +509,7 @@ export function AzureSettings({
         infoTooltip={modelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
@@ -520,7 +520,7 @@ export function AzureSettings({
         required={enabled}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.apiVersion ?? ''}
           onChange={(e) =>
@@ -533,7 +533,7 @@ export function AzureSettings({
         infoTooltip={embeddingModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={
             settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
@@ -548,7 +548,7 @@ export function AzureSettings({
         infoTooltip={toolModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
@@ -560,7 +560,7 @@ export function AzureSettings({
         required={enabled}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
@@ -644,7 +644,7 @@ export function VertexSettings({
         infoTooltip={modelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
@@ -655,7 +655,7 @@ export function VertexSettings({
         infoTooltip={embeddingModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={
             settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
@@ -671,7 +671,7 @@ export function VertexSettings({
         flex={1}
         required={enabled}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.project}
           onChange={(e) => updateSettings({ project: e.currentTarget.value })}
@@ -682,7 +682,7 @@ export function VertexSettings({
         infoTooltip={toolModelTooltip}
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
@@ -694,7 +694,7 @@ export function VertexSettings({
         flex={1}
         required={enabled}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.location}
           onChange={(e) => updateSettings({ location: e.currentTarget.value })}
@@ -705,7 +705,7 @@ export function VertexSettings({
         infoTooltip="Custom Vertex AI endpoint for dedicated deployments. Leave blank to use the default endpoint."
         flex={1}
       >
-        <Input2
+        <Input
           disabled={!enabled}
           value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}

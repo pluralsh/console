@@ -7,7 +7,7 @@ import {
   FormField,
   GearTrainIcon,
   IconFrame,
-  Input2,
+  Input,
   SearchIcon,
   Table,
 } from '@pluralsh/design-system'
@@ -185,7 +185,7 @@ function SecretEditModal({
       }
     >
       <FormField label="Name">
-        <Input2
+        <Input
           value={name}
           disabled={mode === 'edit'}
           onChange={(e) => {
@@ -386,7 +386,7 @@ export function ServiceSecrets() {
           flexShrink: 0,
         }}
       >
-        <Input2
+        <Input
           placeholder="Search"
           startIcon={<SearchIcon />}
           value={filterString}

@@ -1,4 +1,4 @@
-import { Input2, ListBoxItem, Select } from '@pluralsh/design-system'
+import { Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -51,7 +51,7 @@ export function NameVersionHandle({
           gap: theme.spacing.medium,
         }}
       >
-        <Input2
+        <Input
           css={{ width: 'fit-content', flexGrow: 1 }}
           placeholder="your-cluster-name"
           value={name}
@@ -84,7 +84,7 @@ export function NameVersionHandle({
         )}
       </div>
       {setHandle && (
-        <Input2
+        <Input
           placeholder="custom-handle"
           value={handle}
           onChange={({ target: { value } }) => setHandle(value)}

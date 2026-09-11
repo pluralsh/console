@@ -1,4 +1,4 @@
-import { Flex, Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import { Flex, Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { usePullRequestsQuery } from 'generated/graphql'
 import { ComponentProps, useState } from 'react'
@@ -60,7 +60,7 @@ export function ServicePRs() {
         gap="medium"
         height="100%"
       >
-        <Input2
+        <Input
           placeholder="Search"
           startIcon={<SearchIcon />}
           showClearButton

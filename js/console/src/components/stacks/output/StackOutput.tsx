@@ -5,7 +5,7 @@ import {
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
-  Input2,
+  Input,
   SearchIcon,
   Table,
   useCopyText,
@@ -175,7 +175,7 @@ export default function StackOutput() {
             flexShrink: 0,
           }}
         >
-          <Input2
+          <Input
             placeholder="Search"
             startIcon={<SearchIcon />}
             value={filterString}

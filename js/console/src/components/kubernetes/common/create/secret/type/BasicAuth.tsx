@@ -1,5 +1,5 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Input2 } from '@pluralsh/design-system'
+import { Input } from '@pluralsh/design-system'
 
 interface SecretBasicAuthFormProps {
   data: { key: string; value: string }[]
@@ -25,14 +25,14 @@ function SecretBasicAuthForm({
 
   return (
     <>
-      <Input2
+      <Input
         placeholder="username"
         value={username}
         onChange={(e) => {
           setUsername(e.target.value)
         }}
       />
-      <Input2
+      <Input
         placeholder="password"
         value={password}
         onChange={(e) => {

@@ -1,4 +1,4 @@
-import { Button, Card, FormField, Input2 } from '@pluralsh/design-system'
+import { Button, Card, FormField, Input } from '@pluralsh/design-system'
 
 import { FormEventHandler, useCallback } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -119,7 +119,7 @@ function HttpForm({ name, connection, setConnection }) {
       <StepHeaderSC>{name}</StepHeaderSC>
       <FormRowSC>
         <FormField label="Host">
-          <Input2
+          <Input
             value={connection?.host || ''}
             placeholder="https://some.domain"
             onChange={(e) =>
@@ -128,7 +128,7 @@ function HttpForm({ name, connection, setConnection }) {
           />
         </FormField>
         <FormField label="User">
-          <Input2
+          <Input
             value={connection?.user || ''}
             placeholder="plural-user"
             onChange={(e) =>
@@ -138,7 +138,7 @@ function HttpForm({ name, connection, setConnection }) {
         </FormField>
       </FormRowSC>
       <FormField label="Password">
-        <Input2
+        <Input
           inputProps={{ type: 'password' }}
           value={connection?.password || ''}
           placeholder="super secret password"

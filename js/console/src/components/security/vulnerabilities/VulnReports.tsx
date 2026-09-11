@@ -2,7 +2,7 @@ import {
   Chip,
   FillLevelProvider,
   Flex,
-  Input2,
+  Input,
   SearchIcon,
   SubTab,
   useSetBreadcrumbs,
@@ -97,7 +97,7 @@ export function VulnerabilityReports() {
   return (
     <ContentWrapperSC>
       <FiltersWrapperSC>
-        <Input2
+        <Input
           startIcon={<SearchIcon color="icon-light" />}
           placeholder="Search vulnerability reports"
           value={reportsQ}

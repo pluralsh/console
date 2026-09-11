@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   Tab,
   TabList,
   TabPanel,
@@ -106,7 +106,7 @@ export function GitHubSetupStep() {
             label="Owner"
             hint="should be a GitHub organization or repo slug"
           >
-            <Input2
+            <Input
               placeholder="Enter webhook owner"
               value={owner}
               onChange={(e) => setOwner(e.target.value)}

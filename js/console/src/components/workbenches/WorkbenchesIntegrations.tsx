@@ -10,7 +10,7 @@ import {
   EmptyState,
   FiltersIcon,
   Flex,
-  Input2,
+  Input,
   MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
 import { animated, useTransition } from '@react-spring/web'
@@ -152,7 +152,7 @@ export function WorkbenchesIntegrations() {
           minWidth={0}
         >
           <Flex gap="medium">
-            <Input2
+            <Input
               value={query}
               onChange={(e) => setQuery(e.currentTarget.value)}
               showClearButton

@@ -1,5 +1,5 @@
 import { ApolloError } from '@apollo/client'
-import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 import { ReactNode, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -100,7 +100,7 @@ export function Confirm({
               },
             }}
           >
-            <Input2
+            <Input
               value={confirmationInput}
               onChange={(e) => setConfirmationInput(e.target.value)}
               onKeyDown={(e) => {

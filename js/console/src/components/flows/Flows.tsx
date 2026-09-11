@@ -4,7 +4,7 @@ import {
   Button,
   Flex,
   FlowIcon,
-  Input2,
+  Input,
   SearchIcon,
   useSetBreadcrumbs,
   Card,
@@ -58,7 +58,7 @@ export function Flows() {
           </Body2P>
         </Flex>
       </HeaderSC>
-      <Input2
+      <Input
         showClearButton
         placeholder="Search flows"
         startIcon={<SearchIcon />}

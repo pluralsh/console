@@ -3,7 +3,7 @@ import {
   AccordionItem,
   Checkbox,
   Flex,
-  Input2,
+  Input,
   Radio,
   RadioGroup,
 } from '@pluralsh/design-system'
@@ -158,7 +158,7 @@ function GatekeeperFilter({
           height="100%"
           gap="small"
         >
-          <Input2
+          <Input
             placeholder="Filter clusters"
             value={searchString}
             onChange={(e) => setSearchString?.(e.currentTarget.value)}

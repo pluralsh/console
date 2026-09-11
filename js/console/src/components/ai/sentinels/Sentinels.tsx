@@ -1,7 +1,7 @@
 import {
   Chip,
   Flex,
-  Input2,
+  Input,
   SearchIcon,
   SubTab,
   Table,
@@ -75,7 +75,7 @@ export function Sentinels() {
         secondColor="text-light"
       />
       <StretchedFlex gap="medium">
-        <Input2
+        <Input
           css={{ width: '40%' }}
           startIcon={<SearchIcon />}
           placeholder="Search by sentinel name"

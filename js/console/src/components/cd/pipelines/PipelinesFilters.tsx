@@ -1,4 +1,4 @@
-import { Input2, SearchIcon } from '@pluralsh/design-system'
+import { Input, SearchIcon } from '@pluralsh/design-system'
 import styled from 'styled-components'
 import { useEffect, useState } from 'react'
 import { useDebounce } from '@react-hooks-library/core'
@@ -27,7 +27,7 @@ export function PipelinesFilters({
 
   return (
     <PipelinesFiltersSC>
-      <Input2
+      <Input
         placeholder="Search"
         startIcon={
           <SearchIcon

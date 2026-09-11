@@ -9,7 +9,7 @@ import {
   CodeEditor,
   FormField,
   IconFrame,
-  Input2,
+  Input,
   ListBoxItem,
   PencilIcon,
   TrashCanIcon,
@@ -396,7 +396,7 @@ function PluralSkillForm({
             label="Skill name"
             hint={validationError}
           >
-            <Input2
+            <Input
               placeholder="Skill name"
               value={draft.name}
               error={!!validationError}
@@ -404,7 +404,7 @@ function PluralSkillForm({
             />
           </FormField>
           <FormField label="Skill description">
-            <Input2
+            <Input
               placeholder="Short summary of what this skill does"
               value={draft.description ?? ''}
               onChange={(e) =>

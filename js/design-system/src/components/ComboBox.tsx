@@ -2,6 +2,7 @@ import { omitBy } from 'lodash'
 import { isEmpty, isUndefined, omit, pick } from 'lodash-es'
 import {
   type ComponentProps,
+  type ComponentPropsWithoutRef,
   type HTMLAttributes,
   type KeyboardEvent,
   type KeyboardEventHandler,
@@ -29,7 +30,7 @@ import { type Key } from '@react-types/shared'
 import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
 
 import SearchIcon from './icons/SearchIcon'
-import { type InputProps } from './Input'
+import Input, { type InputProps, type InputPropsFull } from './Input'
 import { Spinner } from './Spinner'
 
 import { type ListBoxItemBaseProps } from './ListBoxItem'
@@ -39,7 +40,6 @@ import {
   setNextFocusedKey,
   useSelectComboStateProps,
 } from './SelectComboShared'
-import Input2 from './Input2'
 import Chip, { CHIP_CLOSE_ATTR_KEY } from './Chip'
 import CaretDownIcon from './icons/CaretDownIcon'
 
@@ -60,13 +60,13 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   placement?: Placement
   width?: string | number
   maxHeight?: string | number
-  inputProps?: InputProps
+  inputProps?: InputPropsFull
   loading?: boolean
   titleContent?: ReactNode
   chips?: ComponentProps<typeof Chip>[]
   onDeleteChip?: (key: string) => void
-  inputContent?: ComponentProps<typeof Input2>['inputContent']
-  onDeleteInputContent?: ComponentProps<typeof Input2>['onDeleteInputContent']
+  inputContent?: ComponentProps<typeof Input>['inputContent']
+  onDeleteInputContent?: ComponentProps<typeof Input>['onDeleteInputContent']
   containerProps?: HTMLAttributes<HTMLDivElement>
 } & Pick<InputProps, 'suffix' | 'prefix' | 'titleContent' | 'showClearButton'> &
   Omit<
@@ -77,13 +77,15 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
 type ComboBoxInputProps = {
   showArrow?: boolean
   isOpen?: boolean
-  outerInputProps?: InputProps
+  outerInputProps?: InputPropsFull
   onInputClick?: MouseEventHandler
   inputRef?: RefObject<HTMLInputElement | null>
   buttonRef?: RefObject<HTMLDivElement | null>
   buttonProps?: AriaButtonProps
   loading?: boolean
   hasChips?: boolean
+  children?: ReactNode
+  inputProps?: ComponentPropsWithoutRef<'input'>
 }
 
 const OpenButtonSC = styled.div(({ theme }) => ({
@@ -138,7 +140,7 @@ const onChipClick = (e: Event) => {
   e.stopPropagation()
 }
 
-const honorableInputPropNames = [
+const inputEventPropNames = [
   'onChange',
   'onFocus',
   'onBlur',
@@ -159,25 +161,25 @@ function ComboBoxInput({
   onInputClick,
   loading,
   ...props
-}: ComboBoxInputProps & InputProps) {
+}: ComboBoxInputProps & InputPropsFull) {
   outerInputProps = {
     ...outerInputProps,
-    ...(pick(inputProps, honorableInputPropNames) as Pick<
-      typeof inputProps,
+    ...(pick(inputProps ?? {}, inputEventPropNames) as Pick<
+      ComponentPropsWithoutRef<'input'>,
       'onChange' | 'onFocus' | 'onBlur' | 'onKeyDown' | 'onKeyUp'
     >),
   }
 
   const theme = useTheme()
   // Need to filter out undefined properties so they won't override
-  // outerInputProps for honorable <Input> component
+  // outerInputProps for <Input>
   const innerInputProps = useMemo(
-    () => omitBy(omit(inputProps, honorableInputPropNames), isUndefined),
+    () => omitBy(omit(inputProps, inputEventPropNames), isUndefined),
     [inputProps]
   )
 
   return (
-    <Input2
+    <Input
       startIcon={
         loading ? <Spinner color={theme.colors['icon-xlight']} /> : startIcon
       }

@@ -2,7 +2,7 @@ import {
   Card,
   CpuIcon,
   Flex,
-  Input2,
+  Input,
   NamespaceIcon,
   RamIcon,
   SearchIcon,
@@ -123,7 +123,7 @@ export function CostManagementDetailsNamespaces() {
         gap="small"
         overflow="hidden"
       >
-        <Input2
+        <Input
           startIcon={<SearchIcon />}
           placeholder="Search by namespace"
           value={namespaceQ}

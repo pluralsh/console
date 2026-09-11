@@ -1,7 +1,7 @@
 import {
   ComboBox,
   Flex,
-  Input2,
+  Input,
   ListBoxItem,
   SearchIcon,
 } from '@pluralsh/design-system'
@@ -181,7 +181,7 @@ export function ClusterPods() {
       width="100%"
     >
       <Flex gap="large">
-        <Input2
+        <Input
           startIcon={<SearchIcon />}
           placeholder="Filter pods"
           value={filterString}

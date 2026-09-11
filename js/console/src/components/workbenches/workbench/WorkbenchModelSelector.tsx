@@ -1,4 +1,4 @@
-import { Input2, ListBoxItem, Select } from '@pluralsh/design-system'
+import { Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import {
   useDeploymentSettings,
@@ -217,7 +217,7 @@ export function WorkbenchModelSelector({
       dropdownHeaderFixed={
         shouldShowSearch ? (
           <DropdownSearchHeaderSC>
-            <Input2
+            <Input
               small
               showClearButton
               placeholder="Search for model"

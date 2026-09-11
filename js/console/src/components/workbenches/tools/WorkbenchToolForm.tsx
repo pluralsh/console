@@ -5,7 +5,7 @@ import {
   Divider,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Select,
   SelectButton,
@@ -316,7 +316,7 @@ export function WorkbenchToolForm({
               value={state.name}
               onChange={(e) => update({ name: e.target.value })}
             >
-              <Input2
+              <Input
                 placeholder="Enter a name for the tool"
                 value={state.name}
                 onChange={(e) => update({ name: e.target.value })}

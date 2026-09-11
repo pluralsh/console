@@ -6,7 +6,7 @@ import {
   ComponentsIcon,
   Flex,
   IconFrame,
-  Input2,
+  Input,
   ListBoxFooterPlus,
   ListBoxItem,
   NetworkInterfaceIcon,
@@ -102,7 +102,7 @@ export function ClusterUpgradePlanCRAccordion({
         padding="medium"
         paddingTop={0}
       >
-        <Input2
+        <Input
           css={{ background: 'transparent', flex: 1 }}
           placeholder="Search custom resources"
           startIcon={<SearchIcon />}

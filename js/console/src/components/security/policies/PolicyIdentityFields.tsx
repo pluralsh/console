@@ -1,4 +1,4 @@
-import { FormField, Input, Input2 } from '@pluralsh/design-system'
+import { FormField, Input } from '@pluralsh/design-system'
 
 export function PolicyNameField({
   value,
@@ -14,7 +14,7 @@ export function PolicyNameField({
       label="Name"
       required={required}
     >
-      <Input2
+      <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />

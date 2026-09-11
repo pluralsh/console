@@ -1,6 +1,6 @@
 import { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
-import { FormField, Input2 } from '@pluralsh/design-system'
+import { FormField, Input } from '@pluralsh/design-system'
 
 import { ClusterProviderSelect } from '../utils/ProviderSelect'
 
@@ -33,7 +33,7 @@ export function GlobalServiceFields({
         required
         label="Global service name"
       >
-        <Input2
+        <Input
           value={name}
           placeholder="Name"
           onChange={(e) => {

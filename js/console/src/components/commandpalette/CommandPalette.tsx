@@ -3,7 +3,7 @@ import {
   Chip,
   CommandIcon,
   Flex,
-  Input2,
+  Input,
   ReturnIcon,
 } from '@pluralsh/design-system'
 import {
@@ -325,7 +325,7 @@ function CommandAdvancedInput({
       onValueChange={onHistoryValueChange}
     />
   ) : (
-    <Input2
+    <Input
       placeholder="Search commands..."
       value={cmdValue}
       onChange={(e) => onCmdValueChange(e.target.value)}

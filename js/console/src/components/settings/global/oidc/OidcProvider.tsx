@@ -6,7 +6,7 @@ import {
   Flex,
   FormField,
   IconFrame,
-  Input2,
+  Input,
   ReturnIcon,
 } from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
@@ -123,14 +123,14 @@ export function OidcProvider({
               gap="medium"
             >
               <FormField label="Name">
-                <Input2
+                <Input
                   value={state.name}
                   placeholder="Enter OIDC provider name"
                   onChange={(e) => update({ ...state, name: e.target.value })}
                 />
               </FormField>
               <FormField label="Description">
-                <Input2
+                <Input
                   value={state.description ?? ''}
                   placeholder="Enter description"
                   onChange={(e) =>

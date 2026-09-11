@@ -2,7 +2,7 @@ import {
   Card,
   EmptyState,
   Flex,
-  Input2,
+  Input,
   ListBoxItem,
   NamespaceIcon,
   SearchIcon,
@@ -121,7 +121,7 @@ function NetworkGraphInternal({
         gap="medium"
         width="100%"
       >
-        <Input2
+        <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search service names"

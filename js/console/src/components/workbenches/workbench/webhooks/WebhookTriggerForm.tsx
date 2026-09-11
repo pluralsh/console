@@ -6,7 +6,7 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxFooter,
   ListBoxItem,
   ReturnIcon,
@@ -417,7 +417,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                       required
                       label="Webhook label"
                     >
-                      <Input2
+                      <Input
                         value={formState.name}
                         onChange={(e) =>
                           setFormState((prev) => ({
@@ -560,7 +560,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                         infoTooltip="Higher priority webhooks take precedence when more than one trigger matches the same incoming event (larger numbers win)."
                         css={{ flex: '3 1 0%', minWidth: 0 }}
                       >
-                        <Input2
+                        <Input
                           value={String(formState.priority)}
                           inputProps={{
                             type: 'number',
@@ -607,7 +607,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                     </TabList>
                     {formState.matchType === 'regex' ? (
                       <FormField hint="Use a regex pattern to match against incoming event payloads. Supports syntax like ^alert\\.triggered$.">
-                        <Input2
+                        <Input
                           value={formState.regex}
                           onChange={(e) =>
                             setFormState((prev) => ({
@@ -627,7 +627,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                           hint="Create a filter rule. Match events containing this exact string. Case insensitive option available."
                           css={{ flex: 1, minWidth: 0 }}
                         >
-                          <Input2
+                          <Input
                             value={formState.substring}
                             onChange={(e) =>
                               setFormState((prev) => ({

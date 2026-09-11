@@ -1,4 +1,4 @@
-import { Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { ComponentProps, useMemo } from 'react'
 
@@ -54,7 +54,7 @@ export function ServiceAccountsList({
 
   return (
     <ListWrapperSC>
-      <Input2
+      <Input
         value={q}
         placeholder="Search an account"
         startIcon={<SearchIcon color="text-light" />}

@@ -1,4 +1,4 @@
-import { Button, FormField, Input2 } from '@pluralsh/design-system'
+import { Button, FormField, Input } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { produce } from 'immer'
@@ -105,7 +105,7 @@ export function DeployServiceSettingsSecrets({
                         : undefined
                   }
                 >
-                  <Input2
+                  <Input
                     error={errors.duplicate || errors.noName}
                     value={secret.name}
                     inputProps={{ 'aria-label': 'Name' }}

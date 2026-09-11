@@ -2,7 +2,7 @@ import {
   Button,
   Code,
   FormField,
-  Input2,
+  Input,
   Modal,
   ReturnIcon,
   Toast,
@@ -152,14 +152,14 @@ export default function ShareSecretModal({
           }}
         >
           <FormField label="Secret name">
-            <Input2
+            <Input
               disabled={completed}
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
             />
           </FormField>
           <FormField label="Secret string">
-            <Input2
+            <Input
               disabled={completed}
               value={secret}
               onChange={(e) => setSecret(e.currentTarget.value)}

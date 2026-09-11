@@ -4,7 +4,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   Modal,
 } from '@pluralsh/design-system'
 import { type ComponentProps, ReactNode, useCallback } from 'react'
@@ -175,7 +175,7 @@ export function ScmConnectionForm({
           label="Name"
           required
         >
-          <Input2
+          <Input
             disabled={readOnlyName}
             css={{ background: colors['fill-two'] }}
             placeholder="Enter name"
@@ -205,7 +205,7 @@ export function ScmConnectionForm({
               required
               label="Username"
             >
-              <Input2
+              <Input
                 css={{ background: colors['fill-two'] }}
                 placeholder="Enter username"
                 value={formState.azure?.username ?? ''}
@@ -218,7 +218,7 @@ export function ScmConnectionForm({
               required
               label="Organization"
             >
-              <Input2
+              <Input
                 css={{ background: colors['fill-two'] }}
                 placeholder="Enter organization"
                 value={formState.azure?.organization ?? ''}
@@ -231,7 +231,7 @@ export function ScmConnectionForm({
               required
               label="Project"
             >
-              <Input2
+              <Input
                 css={{ background: colors['fill-two'] }}
                 placeholder="Enter project"
                 value={formState.azure?.project ?? ''}
@@ -250,7 +250,7 @@ export function ScmConnectionForm({
               label="App ID"
               required
             >
-              <Input2
+              <Input
                 css={{ background: colors['fill-two'] }}
                 placeholder="Enter app ID"
                 value={formState.github?.appId}
@@ -261,7 +261,7 @@ export function ScmConnectionForm({
               label="Installation ID"
               required
             >
-              <Input2
+              <Input
                 css={{ background: colors['fill-two'] }}
                 placeholder="Enter installation ID"
                 value={formState.github?.installationId}
@@ -286,7 +286,7 @@ export function ScmConnectionForm({
           >
             <StretchedInputRow>
               <FormField label="Base URL">
-                <Input2
+                <Input
                   css={{ background: colors['fill-three'] }}
                   placeholder="Enter base URL"
                   value={formState.baseUrl ?? ''}
@@ -294,7 +294,7 @@ export function ScmConnectionForm({
                 />
               </FormField>
               <FormField label="API URL">
-                <Input2
+                <Input
                   css={{ background: colors['fill-three'] }}
                   placeholder="Enter API URL"
                   value={formState.apiUrl ?? ''}
@@ -303,7 +303,7 @@ export function ScmConnectionForm({
               </FormField>
             </StretchedInputRow>
             <FormField label="Username">
-              <Input2
+              <Input
                 css={{ background: colors['fill-three'] }}
                 placeholder="Enter username"
                 value={formState.username ?? ''}

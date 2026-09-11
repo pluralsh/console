@@ -5,7 +5,7 @@ import {
   Flex,
   FormField,
   IconFrame,
-  Input2,
+  Input,
   ListIcon,
   Modal,
   Switch,
@@ -117,14 +117,14 @@ function McpServerDetailsForm({ server }: { server: McpServerFragment }) {
       gap="medium"
     >
       <FormField label="MCP server name">
-        <Input2
+        <Input
           disabled
           inputProps={{ css: { color: colors['text-input-disabled'] } }}
           value={server.name}
         />
       </FormField>
       <FormField label="MCP server url">
-        <Input2
+        <Input
           disabled
           inputProps={{ css: { color: colors['text-input-disabled'] } }}
           value={server.url}
