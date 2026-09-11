@@ -55,7 +55,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, want := range []string{`"model": "claude-sonnet-5"`, `"availableModels": [`, `"Write"`, `"BASH_DEFAULT_TIMEOUT_MS"`} {
+	for _, want := range []string{`"model": "claude-sonnet-4-6"`, `"availableModels": [`, `"Write"`, `"BASH_DEFAULT_TIMEOUT_MS"`} {
 		if !strings.Contains(string(native), want) {
 			t.Fatalf("native settings missing %q: %s", want, native)
 		}
