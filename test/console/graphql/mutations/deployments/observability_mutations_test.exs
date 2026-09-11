@@ -330,6 +330,18 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
     test "it can create a dashboard with graph and input datasources" do
       workbench = insert(:workbench)
 
+      tool =
+        insert(:workbench_tool,
+          name: "prom",
+          tool: :prometheus,
+          categories: [:metrics],
+          configuration: %{
+            prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
       {:ok, %{data: %{"createDashboard" => dashboard}}} =
         run_query(
           """
@@ -362,7 +374,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
                   "layout" => %{"x" => 0, "y" => 0, "w" => 2, "h" => 2},
                   "datasource" => %{
                     "type" => "METRICS",
-                    "tool" => "prometheus_query",
+                    "tool" => "workbench_observability_metrics_prom",
                     "input" => Jason.encode!(%{"query" => "up"})
                   }
                 }
@@ -373,7 +385,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
                   "type" => "SELECT",
                   "datasource" => %{
                     "type" => "LABELS",
-                    "tool" => "workbench_observability_metric_label_search_prometheus",
+                    "tool" => "workbench_observability_metric_label_search_prom",
                     "input" => Jason.encode!(%{"metric" => "kube_pod_info", "label" => "namespace"})
                   }
                 }
@@ -392,9 +404,9 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
     end
 
     test "it can update a dashboard" do
-      dashboard = insert(:dashboard)
+      dashboard = insert(:dashboard, graphs: [])
 
-      {:ok, %{data: %{"updateDashboard" => updated}}} =
+      {:ok, result} =
         run_query(
           """
           mutation Update($id: ID!, $attrs: DashboardAttributes!) {
@@ -408,6 +420,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
           %{current_user: admin_user()}
         )
 
+      assert result[:errors] == nil
+      updated = result.data["updateDashboard"]
       assert updated == %{"id" => dashboard.id, "name" => "Updated"}
     end
 

@@ -35,7 +35,32 @@ defmodule Console.AI.Workbench.Toolchain do
   def labels(%Workbench{} = workbench, name, args, %User{} = user),
     do: execute(workbench, name, args, user, @label_tools)
 
+  @doc "Validates that a named tool exists, accepts the arguments, and supports the requested query type."
+  def validate(resource, type, name, args, %User{} = user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and
+             type in [:metrics, :logs, :log_aggregate, :traces, :labels] do
+    validate_call(resource, name, args, user, allowed_tools(type))
+  end
+
+  def validate_all(resource, queries, %User{} = user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and is_list(queries) do
+    Enum.reduce_while(queries, :ok, fn {type, name, args}, :ok ->
+      case validate(resource, type, name, args, user) do
+        {:ok, _} -> {:cont, :ok}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
+  end
+
   defp execute(resource, name, args, user, allowed) do
+    with {:ok, %mod{} = tool} <- validate_call(resource, name, args, user, allowed) do
+      tool
+      |> mod.structured()
+      |> normalize_error()
+    end
+  end
+
+  defp validate_call(resource, name, args, user, allowed) do
     {tools, environment} = execution(resource, user)
     Tool.context(user: Rbac.preload(user), job: environment.job)
 
@@ -43,13 +68,19 @@ defmodule Console.AI.Workbench.Toolchain do
          {:ok, tool} <- Tool.policy(tool, args, environment.policies),
          {:ok, %mod{} = t} <- Tool.validate(tool, args),
          true <- mod in allowed do
-      mod.structured(t)
+      {:ok, t}
     else
       {:error, err} -> {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}
       nil -> {:error, "tool not found"}
       _ -> {:error, "tool not valid for querying on the fly"}
     end
   end
+
+  defp allowed_tools(:metrics), do: @metrics_tools
+  defp allowed_tools(:logs), do: @logs_tools
+  defp allowed_tools(:log_aggregate), do: @log_aggregate_tools
+  defp allowed_tools(:traces), do: @traces_tools
+  defp allowed_tools(:labels), do: @label_tools
 
   defp execution(%WorkbenchJob{} = job, user) do
     environment = env(job)
@@ -67,4 +98,9 @@ defmodule Console.AI.Workbench.Toolchain do
     job = Repo.preload(job, [workbench: [tools: :mcp_server]])
     Environment.new(job, job.workbench.tools, [])
   end
+
+  defp normalize_error({:error, %GRPC.RPCError{message: message}}) when is_binary(message),
+    do: {:error, message}
+
+  defp normalize_error(result), do: result
 end

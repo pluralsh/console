@@ -1272,6 +1272,56 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       }, %{current_user: admin_user()})
     end
 
+    test "it returns gRPC metrics errors as GraphQL errors" do
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "prom",
+          tool: :prometheus,
+          categories: [:metrics],
+          configuration: %{
+            prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :metrics, fn :mock_conn, input, _opts ->
+        assert %Toolquery.TimeRange{start: start_ts, end: end_ts} = input.range
+
+        assert DateTime.diff(
+                 Google.Protobuf.to_datetime(end_ts),
+                 Google.Protobuf.to_datetime(start_ts),
+                 :second
+               ) == 3600
+
+        {:error, %GRPC.RPCError{status: 3, message: "time range is required"}}
+      end)
+
+      assert {:ok, %{errors: [%{message: "time range is required"}]}} =
+               run_query(
+                 """
+                 query WorkbenchJob($id: ID!, $arguments: Json) {
+                   workbenchJob(id: $id) {
+                     metricsTool(
+                       name: "workbench_observability_metrics_prom",
+                       arguments: $arguments
+                     ) {
+                       name
+                     }
+                   }
+                 }
+                 """,
+                 %{"id" => job.id, "arguments" => Jason.encode!(%{"query" => "up"})},
+                 %{current_user: admin_user()}
+               )
+    end
+
     test "it resolves tracesTool using the generated observability traces tool name and parses GraphQL output" do
       workbench = insert(:workbench)
       tool = insert(:workbench_tool,

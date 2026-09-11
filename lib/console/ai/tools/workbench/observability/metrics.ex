@@ -45,6 +45,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     |> cast(attrs, @valid)
     |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> validate_required([:query])
   end
 
@@ -61,7 +62,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   @metric_limit 500
 
   def implement(%__MODULE__{} = tool) do
-    tool = Map.put_new(tool, :time_range, TimeRange.default())
+    tool = TimeRange.ensure(tool)
     with :ok <- TimeRange.safe(tool.time_range),
          {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
@@ -73,7 +74,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
 
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()) do
       {:ok, Enum.map(output.metrics, &mapify/1)}
     end

@@ -50,6 +50,7 @@ defmodule Console.AI.Tools.Workbench.Observability.LogAggregate do
     |> cast(attrs, @valid)
     |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_required([:bucket_size])
   end
@@ -63,7 +64,7 @@ defmodule Console.AI.Tools.Workbench.Observability.LogAggregate do
 
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %LogAggregateOutput{} = output} <-
            Stub.log_aggregate(conn, input, Client.logs_rpc_opts()) do
       {:ok, Enum.map(output.buckets, &to_bucket/1)}

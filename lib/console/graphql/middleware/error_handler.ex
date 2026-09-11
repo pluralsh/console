@@ -11,6 +11,7 @@ defmodule Console.Middleware.ErrorHandler do
   def call(res, _), do: res
 
   defp format(%Ecto.Changeset{} = cs), do: resolve_changeset(cs)
+  defp format(%GRPC.RPCError{message: message}) when is_binary(message), do: message
   defp format(%Tee{} = tee), do: Tee.output(tee)
   defp format(%{"message" => msg}), do: msg
   defp format({:http_error, _, %{"message" => msg}}), do: msg

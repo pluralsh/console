@@ -48,6 +48,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     |> cast(attrs, @valid)
     |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:facets, with: &facet_changeset/2)
   end
 
@@ -71,7 +72,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
 
   def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input, Client.logs_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{content: Output.truncate(content), logs: Enum.map(Enum.take(output.logs, @log_limit), &to_log/1)}}
@@ -80,7 +81,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
 
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input, Client.logs_rpc_opts()) do
       {:ok, Enum.map(output.logs, &to_log/1)}
     end

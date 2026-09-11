@@ -4,7 +4,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Codemode, History, Infrastructure.PodLogs, Scratchpad}
   alias Console.AI.Tools.Workbench.Monitoring
   alias Console.AI.Tools.Workbench.Observability.Plrl
-  alias Console.AI.Workbench.{Environment, MCP, Tools}
+  alias Console.AI.Workbench.{Environment, MCP, Toolchain, Tools}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
@@ -22,21 +22,52 @@ defmodule Console.AI.Workbench.Subagents.Observability do
         continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
       ]
     )
-    |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
+    |> MemoryEngine.reduce([{:user, prompt}], &reducer(&1, &2, environment))
     |> case do
       {:ok, attrs} -> attrs
       {:error, error} -> %{status: :failed, result: %{error: "error running observability subagent: #{inspect(error)}"}}
     end
   end
 
-  defp reducer(messages, _) do
+  defp reducer(messages, _, %Environment{} = environment) do
     case Enum.find(messages, &match?(%ObservabilityResult{}, &1)) do
-      %ObservabilityResult{} = result -> {:halt, %{
-        status: :successful,
-        result: Console.mapify(result) |> Map.drop([:id])
-      }}
+      %ObservabilityResult{} = result ->
+        case Toolchain.validate_all(
+               environment.job,
+               result_tool_queries(result),
+               environment.user
+             ) do
+          :ok ->
+            {:halt,
+             %{
+               status: :successful,
+               result: Console.mapify(result) |> Map.drop([:id])
+             }}
+
+          {:error, error} ->
+            {:halt,
+             %{
+               status: :failed,
+               result: %{error: "invalid observability result: #{error}"}
+             }}
+        end
+
       _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
+  end
+
+  defp result_tool_queries(%ObservabilityResult{} = result) do
+    [
+      {:metrics, [result.metrics_query | result.metrics_queries]},
+      {:logs, result.logs_queries},
+      {:traces, [result.traces_query | result.traces_queries]}
+    ]
+    |> Enum.flat_map(fn {type, queries} ->
+      Enum.flat_map(queries, fn
+        nil -> []
+        query -> [{type, query.tool_name, query.tool_args || %{}}]
+      end)
+    end)
   end
 
   def tools(%Environment{job: %WorkbenchJob{user: user}} = environment), do: tools(environment, user)

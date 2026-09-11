@@ -123,6 +123,36 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       enable_thought = Enum.find(thoughts, & &1.tool_name == "enable_tools")
       assert enable_thought
       refute enable_thought.tool_id
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "summarizing", [
+          %Tool{
+            name: "observability_result",
+            arguments: %{
+              "output" => "Invalid result",
+              "metrics_query" => %{
+                "tool_name" => "not_a_real_tool",
+                "tool_args" => %{"query" => "up"}
+              }
+            },
+            id: "3"
+          }
+        ]}
+      end)
+
+      invalid_activity =
+        insert(:workbench_job_activity, workbench_job: job, type: :observability)
+
+      invalid =
+        Subagents.Observability.run(
+          invalid_activity,
+          job,
+          Environment.new(job, [tool], [])
+        )
+
+      assert invalid.status == :failed
+      assert invalid.result.error == "invalid observability result: tool not found"
+      refute Map.has_key?(invalid.result, :metrics_query)
     end
   end
 end

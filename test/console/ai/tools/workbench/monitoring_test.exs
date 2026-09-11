@@ -76,7 +76,20 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
 
   test "creates a dashboard in the current workbench and associates it to the job" do
     user = insert(:user, roles: %{admin: true})
-    job = insert(:workbench_job, user: user)
+    workbench = insert(:workbench)
+    job = insert(:workbench_job, workbench: workbench, user: user)
+
+    tool =
+      insert(:workbench_tool,
+        name: "prom",
+        tool: :prometheus,
+        categories: [:metrics],
+        configuration: %{
+          prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+    insert(:workbench_tool_association, workbench: workbench, tool: tool)
 
     assert {:ok, tool} =
              Tool.validate(
@@ -109,6 +122,33 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
              workbench_job_id: job.id,
              dashboard_id: dashboard_id
            )
+  end
+
+  test "rejects dashboard graphs whose tool call is invalid" do
+    user = insert(:user, roles: %{admin: true})
+    workbench = insert(:workbench)
+    job = insert(:workbench_job, workbench: workbench, user: user)
+
+    assert {:ok, upsert} =
+             Tool.validate(
+               %DashboardUpsert{job: job, user: user},
+               %{
+                 "dashboard_name" => "API health",
+                 "graph" => %{
+                   "identifier" => "requests",
+                   "type" => "timeseries",
+                   "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4},
+                   "datasource" => %{
+                     "type" => "metrics",
+                     "tool" => "not_a_real_tool",
+                     "input" => %{"query" => "up"}
+                   }
+                 }
+               }
+             )
+
+    assert {:error, "tool not found"} = DashboardUpsert.implement(upsert)
+    refute Repo.get_by(Console.Schema.Dashboard, workbench_id: workbench.id, name: "API health")
   end
 
   test "upserts dashboard graphs and deletes them by dashboard name" do

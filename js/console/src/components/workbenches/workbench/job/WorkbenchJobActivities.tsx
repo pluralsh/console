@@ -45,7 +45,7 @@ export function WorkbenchJobActivities({
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 30_000,
+    pollInterval: 15_000,
   })
 
   const job = data?.workbenchJob

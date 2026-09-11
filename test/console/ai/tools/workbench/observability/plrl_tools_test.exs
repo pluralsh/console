@@ -10,6 +10,21 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
     MetricsSearch
   }
 
+  test "query tools default to a one-hour lookback" do
+    for {tool, attrs} <- [
+          {%Logs{}, %{"service_id" => "svc-1"}},
+          {%LogsAggregate{},
+           %{"service_id" => "svc-1", "query" => "error", "bucket_size" => "5m"}},
+          {%LogLabels{}, %{"service_id" => "svc-1"}},
+          {Metrics, %{"query" => "up"}}
+        ] do
+      assert {:ok, %{time_range: %{start: start_ts, end: end_ts}}} =
+               Tool.validate(tool, attrs)
+
+      assert DateTime.diff(end_ts, start_ts, :second) == 3600
+    end
+  end
+
   describe "Logs (plrl_logs)" do
     test "changeset accepts service_id" do
       assert {:ok, %Logs{service_id: "svc-1"}} =

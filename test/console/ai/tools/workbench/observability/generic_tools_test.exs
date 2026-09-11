@@ -2,8 +2,22 @@ defmodule Console.AI.Tools.Workbench.Observability.GenericToolsTest do
   use ExUnit.Case, async: true
 
   alias Console.AI.Tool
-  alias Console.AI.Tools.Workbench.Observability.{LogAggregate, Logs, Metrics, MetricsSearch}
+  alias Console.AI.Tools.Workbench.Observability.{LogAggregate, Logs, Metrics, MetricsSearch, Traces}
   alias Console.Schema.WorkbenchTool
+
+  test "query tools default to a one-hour lookback" do
+    for {tool, attrs} <- [
+          {%Metrics{}, %{"query" => "up"}},
+          {%Logs{}, %{}},
+          {%LogAggregate{}, %{"bucket_size" => "5m"}},
+          {%Traces{}, %{"query" => "{}"}}
+        ] do
+      assert {:ok, %{time_range: %{start: start_ts, end: end_ts}}} =
+               Tool.validate(tool, attrs)
+
+      assert DateTime.diff(end_ts, start_ts, :second) == 3600
+    end
+  end
 
   describe "MetricsSearch" do
     test "changeset accepts azure options" do
