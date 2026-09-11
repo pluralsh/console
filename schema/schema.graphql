@@ -551,7 +551,7 @@ type RootQueryType {
     sort: FlowSort
 
     "sort direction"
-    direction: FlowSortDirection
+    direction: SortDirection
 
     "flow ids to rank first when sorting by favorited"
     favoriteIds: [ID]
@@ -1881,11 +1881,6 @@ enum IssueStatus {
 enum IssueSort {
   INSERTED_AT
   TITLE
-}
-
-enum IssueSortDirection {
-  ASC
-  DESC
 }
 
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
@@ -4043,7 +4038,7 @@ type Workbench {
     sort: IssueSort
 
     "sort direction"
-    direction: IssueSortDirection
+    direction: SortDirection
   ): IssueConnection
 
   issueCounts: WorkbenchIssueCounts
@@ -6256,11 +6251,6 @@ enum FlowSort {
   NAME
   SERVICE_COUNT
   FAVORITED
-}
-
-enum FlowSortDirection {
-  ASC
-  DESC
 }
 
 input FlowAttributes {
@@ -17873,6 +17863,11 @@ enum Delta {
   CREATE
   UPDATE
   DELETE
+}
+
+enum SortDirection {
+  ASC
+  DESC
 }
 
 type MetricResult {

@@ -1016,7 +1016,7 @@ query WorkbenchIssues(
   $providers: [IssueWebhookProvider]
   $statuses: [IssueStatus]
   $sort: IssueSort
-  $direction: IssueSortDirection
+  $direction: SortDirection
   $first: Int = 100
   $after: String
 ) {

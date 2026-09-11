@@ -4718,11 +4718,6 @@ export enum FlowSort {
   ServiceCount = 'SERVICE_COUNT'
 }
 
-export enum FlowSortDirection {
-  Asc = 'ASC',
-  Desc = 'DESC'
-}
-
 export type FlowWorkbenchAttributes = {
   /** the workbench to associate with this flow */
   workbenchId?: InputMaybe<Scalars['ID']['input']>;
@@ -5758,11 +5753,6 @@ export type IssueEdge = {
 export enum IssueSort {
   InsertedAt = 'INSERTED_AT',
   Title = 'TITLE'
-}
-
-export enum IssueSortDirection {
-  Asc = 'ASC',
-  Desc = 'DESC'
 }
 
 export enum IssueStatus {
@@ -12430,7 +12420,7 @@ export type RootQueryTypeFlowServiceCountsArgs = {
 export type RootQueryTypeFlowsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  direction?: InputMaybe<FlowSortDirection>;
+  direction?: InputMaybe<SortDirection>;
   favoriteIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
@@ -15010,6 +15000,11 @@ export type SmtpSettingsAttributes = {
   user: Scalars['String']['input'];
 };
 
+export enum SortDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 export type StackAttributes = {
   /** user id to use for default Plural authentication in this stack */
   actorId?: InputMaybe<Scalars['ID']['input']>;
@@ -16515,7 +16510,7 @@ export type WorkbenchEvalResultsArgs = {
 export type WorkbenchIssuesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  direction?: InputMaybe<IssueSortDirection>;
+  direction?: InputMaybe<SortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>>>;
@@ -21024,7 +21019,7 @@ export type FlowsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   statuses?: InputMaybe<Array<InputMaybe<ServiceDeploymentStatus>> | InputMaybe<ServiceDeploymentStatus>>;
   sort?: InputMaybe<FlowSort>;
-  direction?: InputMaybe<FlowSortDirection>;
+  direction?: InputMaybe<SortDirection>;
   favoriteIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
 }>;
 
@@ -22842,7 +22837,7 @@ export type WorkbenchIssuesQueryVariables = Exact<{
   providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>> | InputMaybe<IssueWebhookProvider>>;
   statuses?: InputMaybe<Array<InputMaybe<IssueStatus>> | InputMaybe<IssueStatus>>;
   sort?: InputMaybe<IssueSort>;
-  direction?: InputMaybe<IssueSortDirection>;
+  direction?: InputMaybe<SortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -38988,7 +38983,7 @@ export type ClusterIsoImagesLazyQueryHookResult = ReturnType<typeof useClusterIs
 export type ClusterIsoImagesSuspenseQueryHookResult = ReturnType<typeof useClusterIsoImagesSuspenseQuery>;
 export type ClusterIsoImagesQueryResult = Apollo.QueryResult<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>;
 export const FlowsDocument = gql`
-    query Flows($first: Int = 100, $after: String, $q: String, $statuses: [ServiceDeploymentStatus], $sort: FlowSort, $direction: FlowSortDirection, $favoriteIds: [ID]) {
+    query Flows($first: Int = 100, $after: String, $q: String, $statuses: [ServiceDeploymentStatus], $sort: FlowSort, $direction: SortDirection, $favoriteIds: [ID]) {
   flows(
     first: $first
     after: $after
@@ -47055,7 +47050,7 @@ export type WorkbenchesIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenc
 export type WorkbenchesIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesIssuesSuspenseQuery>;
 export type WorkbenchesIssuesQueryResult = Apollo.QueryResult<WorkbenchesIssuesQuery, WorkbenchesIssuesQueryVariables>;
 export const WorkbenchIssuesDocument = gql`
-    query WorkbenchIssues($id: ID!, $q: String, $providers: [IssueWebhookProvider], $statuses: [IssueStatus], $sort: IssueSort, $direction: IssueSortDirection, $first: Int = 100, $after: String) {
+    query WorkbenchIssues($id: ID!, $q: String, $providers: [IssueWebhookProvider], $statuses: [IssueStatus], $sort: IssueSort, $direction: SortDirection, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
     issueCounts {

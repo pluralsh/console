@@ -1,7 +1,7 @@
 import { DisplayView } from 'components/utils/display/DisplayPanel'
 import {
   IssueSort,
-  IssueSortDirection,
+  SortDirection,
   IssueStatus,
   IssueWebhookProvider,
 } from 'generated/graphql'
@@ -15,7 +15,7 @@ export type WorkbenchIssuesDisplayState = {
   providers: IssueWebhookProvider[]
   statuses: IssueStatus[]
   sort: IssueSort
-  direction: IssueSortDirection
+  direction: SortDirection
 }
 
 export const ALL_ISSUE_PROVIDERS = Object.values(IssueWebhookProvider)
@@ -25,7 +25,7 @@ export const DEFAULT_WORKBENCH_ISSUES_DISPLAY: WorkbenchIssuesDisplayState = {
   providers: ALL_ISSUE_PROVIDERS,
   statuses: [...ISSUE_STATUS_OPTIONS],
   sort: IssueSort.InsertedAt,
-  direction: IssueSortDirection.Desc,
+  direction: SortDirection.Desc,
 }
 
 export function visibleIssueProviders(
@@ -91,10 +91,10 @@ export function toIssueFilterVariables({
   providers?: IssueWebhookProvider[]
   statuses?: IssueStatus[]
   sort?: IssueSort
-  direction?: IssueSortDirection
+  direction?: SortDirection
 } {
   const defaultSort =
-    sort === IssueSort.InsertedAt && direction === IssueSortDirection.Desc
+    sort === IssueSort.InsertedAt && direction === SortDirection.Desc
 
   return {
     providers: allIssueProvidersSelected(providers) ? undefined : providers,

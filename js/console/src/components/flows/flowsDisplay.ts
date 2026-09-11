@@ -1,7 +1,7 @@
 import { DisplayView } from 'components/utils/display/DisplayPanel'
 import {
   FlowSort,
-  FlowSortDirection,
+  SortDirection,
   ServiceDeploymentStatus,
 } from 'generated/graphql'
 import { isEmpty, xor } from 'lodash'
@@ -12,7 +12,7 @@ export type FlowsDisplayState = {
   view: FlowsView
   statuses: ServiceDeploymentStatus[]
   sort: FlowSort
-  direction: FlowSortDirection
+  direction: SortDirection
 }
 
 export const FLOW_HEALTH_OPTIONS = Object.values(ServiceDeploymentStatus)
@@ -21,7 +21,7 @@ export const DEFAULT_FLOWS_DISPLAY: FlowsDisplayState = {
   view: 'board',
   statuses: [...FLOW_HEALTH_OPTIONS],
   sort: FlowSort.Name,
-  direction: FlowSortDirection.Asc,
+  direction: SortDirection.Asc,
 }
 
 export function allFlowHealthSelected(
@@ -56,11 +56,11 @@ export function toFlowFilterVariables(
 ): {
   statuses?: ServiceDeploymentStatus[]
   sort?: FlowSort
-  direction?: FlowSortDirection
+  direction?: SortDirection
   favoriteIds?: string[]
 } {
   const defaultSort =
-    sort === FlowSort.Name && direction === FlowSortDirection.Asc
+    sort === FlowSort.Name && direction === SortDirection.Asc
 
   return {
     statuses: allFlowHealthSelected(statuses) ? undefined : statuses,

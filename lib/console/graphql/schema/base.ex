@@ -14,6 +14,11 @@ defmodule Console.GraphQl.Schema.Base do
     value :after
   end
 
+  enum :sort_direction do
+    value :asc
+    value :desc
+  end
+
   object :metric_result do
     field :timestamp, :long, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
     field :value,     :string

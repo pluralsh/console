@@ -16,7 +16,7 @@ import {
 } from 'components/workbenches/common/issueStatus'
 import {
   IssueSort,
-  IssueSortDirection,
+  SortDirection,
   IssueStatus,
   IssueWebhookProvider,
 } from 'generated/graphql'
@@ -85,14 +85,14 @@ export function WorkbenchIssuesDisplayPanel({
       </DisplaySection>
       <DisplaySection>
         <DisplaySortHeader
-          descending={state.direction === IssueSortDirection.Desc}
+          descending={state.direction === SortDirection.Desc}
           onToggle={() =>
             onChange({
               ...state,
               direction:
-                state.direction === IssueSortDirection.Desc
-                  ? IssueSortDirection.Asc
-                  : IssueSortDirection.Desc,
+                state.direction === SortDirection.Desc
+                  ? SortDirection.Asc
+                  : SortDirection.Desc,
             })
           }
         />

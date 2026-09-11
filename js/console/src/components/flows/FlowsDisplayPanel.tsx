@@ -13,7 +13,7 @@ import {
 } from 'components/utils/display/DisplayPanel'
 import {
   FlowSort,
-  FlowSortDirection,
+  SortDirection,
   ServiceDeploymentStatus,
 } from 'generated/graphql'
 import { FLOW_HEALTH_OPTIONS, FlowsDisplayState } from './flowsDisplay'
@@ -54,14 +54,14 @@ export function FlowsDisplayPanel({
       </DisplaySection>
       <DisplaySection>
         <DisplaySortHeader
-          descending={state.direction === FlowSortDirection.Desc}
+          descending={state.direction === SortDirection.Desc}
           onToggle={() =>
             onChange({
               ...state,
               direction:
-                state.direction === FlowSortDirection.Desc
-                  ? FlowSortDirection.Asc
-                  : FlowSortDirection.Desc,
+                state.direction === SortDirection.Desc
+                  ? SortDirection.Asc
+                  : SortDirection.Desc,
             })
           }
         />

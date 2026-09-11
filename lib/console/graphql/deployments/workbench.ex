@@ -564,7 +564,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :providers, list_of(:issue_webhook_provider), description: "filter issues by provider"
       arg :statuses, list_of(:issue_status), description: "filter issues by status"
       arg :sort, :issue_sort, description: "field to sort issues by"
-      arg :direction, :issue_sort_direction, description: "sort direction"
+      arg :direction, :sort_direction, description: "sort direction"
 
       resolve &Deployments.list_issues/3
     end

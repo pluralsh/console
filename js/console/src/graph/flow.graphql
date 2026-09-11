@@ -110,7 +110,7 @@ query Flows(
   $q: String
   $statuses: [ServiceDeploymentStatus]
   $sort: FlowSort
-  $direction: FlowSortDirection
+  $direction: SortDirection
   $favoriteIds: [ID]
 ) {
   flows(

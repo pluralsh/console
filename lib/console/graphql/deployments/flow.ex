@@ -11,11 +11,6 @@ defmodule Console.GraphQl.Deployments.Flow do
     value :favorited
   end
 
-  enum :flow_sort_direction do
-    value :asc
-    value :desc
-  end
-
   input_object :flow_attributes do
     field :name,                non_null(:string)
     field :description,         :string
@@ -263,7 +258,7 @@ defmodule Console.GraphQl.Deployments.Flow do
       arg :statuses, list_of(:service_deployment_status),
         description: "return flows that have at least one service in one of these statuses"
       arg :sort, :flow_sort, description: "field to sort flows by"
-      arg :direction, :flow_sort_direction, description: "sort direction"
+      arg :direction, :sort_direction, description: "sort direction"
       arg :favorite_ids, list_of(:id),
         description: "flow ids to rank first when sorting by favorited"
 

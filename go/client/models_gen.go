@@ -14747,6 +14747,63 @@ func (e EvidenceType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type FlowSort string
+
+const (
+	FlowSortName         FlowSort = "NAME"
+	FlowSortServiceCount FlowSort = "SERVICE_COUNT"
+	FlowSortFavorited    FlowSort = "FAVORITED"
+)
+
+var AllFlowSort = []FlowSort{
+	FlowSortName,
+	FlowSortServiceCount,
+	FlowSortFavorited,
+}
+
+func (e FlowSort) IsValid() bool {
+	switch e {
+	case FlowSortName, FlowSortServiceCount, FlowSortFavorited:
+		return true
+	}
+	return false
+}
+
+func (e FlowSort) String() string {
+	return string(e)
+}
+
+func (e *FlowSort) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FlowSort(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FlowSort", str)
+	}
+	return nil
+}
+
+func (e FlowSort) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *FlowSort) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e FlowSort) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type GateState string
 
 const (
@@ -15321,61 +15378,6 @@ func (e *IssueSort) UnmarshalJSON(b []byte) error {
 }
 
 func (e IssueSort) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
-type IssueSortDirection string
-
-const (
-	IssueSortDirectionAsc  IssueSortDirection = "ASC"
-	IssueSortDirectionDesc IssueSortDirection = "DESC"
-)
-
-var AllIssueSortDirection = []IssueSortDirection{
-	IssueSortDirectionAsc,
-	IssueSortDirectionDesc,
-}
-
-func (e IssueSortDirection) IsValid() bool {
-	switch e {
-	case IssueSortDirectionAsc, IssueSortDirectionDesc:
-		return true
-	}
-	return false
-}
-
-func (e IssueSortDirection) String() string {
-	return string(e)
-}
-
-func (e *IssueSortDirection) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = IssueSortDirection(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid IssueSortDirection", str)
-	}
-	return nil
-}
-
-func (e IssueSortDirection) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *IssueSortDirection) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e IssueSortDirection) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -18264,6 +18266,61 @@ func (e *SinkType) UnmarshalJSON(b []byte) error {
 }
 
 func (e SinkType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SortDirection string
+
+const (
+	SortDirectionAsc  SortDirection = "ASC"
+	SortDirectionDesc SortDirection = "DESC"
+)
+
+var AllSortDirection = []SortDirection{
+	SortDirectionAsc,
+	SortDirectionDesc,
+}
+
+func (e SortDirection) IsValid() bool {
+	switch e {
+	case SortDirectionAsc, SortDirectionDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortDirection) String() string {
+	return string(e)
+}
+
+func (e *SortDirection) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortDirection(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortDirection", str)
+	}
+	return nil
+}
+
+func (e SortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SortDirection) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SortDirection) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
