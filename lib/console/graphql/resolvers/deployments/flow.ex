@@ -1,13 +1,10 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   use Console.GraphQl.Resolvers.Deployments.Base
-  import Absinthe.Resolution.Helpers, only: [batch: 3]
   alias Console.Repo
   alias Console.Deployments.{Flows, Policies}
   alias Console.Schema.{
     Flow,
     Service,
-    ServiceComponent,
-    AiInsight,
     Pipeline,
     McpServer,
     PullRequest,
@@ -52,88 +49,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     |> Service.statuses()
     |> Repo.all()
     |> ok()
-  end
-
-  def flow_service_count(%Flow{id: id}, _, _), do: summary_field(id, :service_count)
-  def flow_component_count(%Flow{id: id}, _, _), do: summary_field(id, :component_count)
-  def flow_alert_count(%Flow{id: id}, _, _), do: summary_field(id, :alert_count)
-  def flow_pipeline_count(%Flow{id: id}, _, _), do: summary_field(id, :pipeline_count)
-  def flow_pending_pipeline_count(%Flow{id: id}, _, _), do: summary_field(id, :pending_pipeline_count)
-  def flow_service_statuses(%Flow{id: id}, _, _), do: summary_field(id, :service_statuses)
-  def flow_component_statuses(%Flow{id: id}, _, _), do: summary_field(id, :component_statuses)
-  def flow_insight(%Flow{id: id}, _, _), do: summary_field(id, :insight)
-
-  defp summary_field(id, key) do
-    batch({__MODULE__, :flow_summaries}, id, fn summaries ->
-      {:ok, Map.get(summaries, id, empty_summary()) |> Map.get(key)}
-    end)
-  end
-
-  def flow_summaries(_, ids) do
-    ids = Enum.uniq(ids)
-    base = Map.new(ids, &{&1, empty_summary()})
-
-    base
-    |> put_status_groups(Repo.all(Service.for_flow_ids(ids) |> Service.count_by_flow_status()), :service_statuses, :service_count)
-    |> put_status_groups(Repo.all(ServiceComponent.count_by_flow_state(ids)), :component_statuses, :component_count)
-    |> put_counts(Repo.all(Alert.count_by_flow(ids)), :alert_count)
-    |> put_counts(Repo.all(Pipeline.for_flow_ids(ids) |> Pipeline.count_by_flow()), :pipeline_count)
-    |> put_counts(Repo.all(Pipeline.for_flow_ids(ids) |> Pipeline.pending_gate_count_by_flow()), :pending_pipeline_count)
-    |> put_insights(ids)
-  end
-
-  defp empty_summary do
-    %{
-      service_count: 0,
-      component_count: 0,
-      alert_count: 0,
-      pipeline_count: 0,
-      pending_pipeline_count: 0,
-      service_statuses: [],
-      component_statuses: [],
-      insight: nil
-    }
-  end
-
-  defp put_status_groups(map, rows, list_key, count_key) do
-    Enum.reduce(rows, map, fn {id, entry}, acc ->
-      Map.update(acc, id, empty_summary(), fn summary ->
-        summary
-        |> Map.update!(list_key, &[entry | &1])
-        |> Map.update!(count_key, &(&1 + entry.count))
-      end)
-    end)
-  end
-
-  defp put_counts(map, rows, key) do
-    Enum.reduce(rows, map, fn {id, count}, acc ->
-      Map.update(acc, id, empty_summary(), &Map.put(&1, key, count))
-    end)
-  end
-
-  defp put_insights(map, ids) do
-    latest = latest_insight_ids(ids)
-    insights = insights_by_id(Enum.map(latest, &elem(&1, 1)))
-
-    Enum.reduce(latest, map, fn {flow_id, insight_id}, acc ->
-      Map.update(acc, flow_id, empty_summary(), &Map.put(&1, :insight, Map.get(insights, insight_id)))
-    end)
-  end
-
-  defp latest_insight_ids(ids) do
-    (Repo.all(Service.flow_insight_rows(ids)) ++ Repo.all(ServiceComponent.flow_insight_rows(ids)))
-    |> Enum.group_by(&elem(&1, 0))
-    |> Enum.map(fn {flow_id, rows} ->
-      {_, insight_id, _} = Enum.max_by(rows, fn {_, _, ts} -> ts end)
-      {flow_id, insight_id}
-    end)
-  end
-
-  defp insights_by_id([]), do: %{}
-  defp insights_by_id(ids) do
-    AiInsight.for_ids(ids)
-    |> Repo.all()
-    |> Map.new(& {&1.id, &1})
   end
 
   def list_mcp_servers(args, %{context: %{current_user: user}}) do

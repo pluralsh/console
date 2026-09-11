@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Deployments.Flow do
   use Console.GraphQl.Schema.Base
   alias Console.Middleware.AdminRequired
-  alias Console.GraphQl.Resolvers.{Deployments, User}
+  alias Console.GraphQl.Resolvers.{Deployments, User, FlowSummaryLoader}
 
   ecto_enum :mcp_server_protocol, Console.Schema.McpServer.Protocol
 
@@ -96,28 +96,28 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :project,        :project, resolve: dataloader(Deployments), description: "the project this flow belongs to"
 
     field :service_count, :integer,
-      resolve: &Deployments.flow_service_count/3,
+      resolve: FlowSummaryLoader.resolve(:service_count),
       description: "the number of services in this flow"
     field :component_count, :integer,
-      resolve: &Deployments.flow_component_count/3,
+      resolve: FlowSummaryLoader.resolve(:component_count),
       description: "the number of service components in this flow"
     field :alert_count, :integer,
-      resolve: &Deployments.flow_alert_count/3,
+      resolve: FlowSummaryLoader.resolve(:alert_count),
       description: "the number of alerts for services in this flow"
     field :pipeline_count, :integer,
-      resolve: &Deployments.flow_pipeline_count/3,
+      resolve: FlowSummaryLoader.resolve(:pipeline_count),
       description: "the number of pipelines in this flow"
     field :pending_pipeline_count, :integer,
-      resolve: &Deployments.flow_pending_pipeline_count/3,
+      resolve: FlowSummaryLoader.resolve(:pending_pipeline_count),
       description: "the number of pending pipeline gates in this flow"
     field :service_statuses, list_of(:service_status_count),
-      resolve: &Deployments.flow_service_statuses/3,
+      resolve: FlowSummaryLoader.resolve(:service_statuses),
       description: "a rollup of service statuses in this flow"
     field :component_statuses, list_of(:component_status_count),
-      resolve: &Deployments.flow_component_statuses/3,
+      resolve: FlowSummaryLoader.resolve(:component_statuses),
       description: "a rollup of component states in this flow"
     field :insight, :ai_insight,
-      resolve: &Deployments.flow_insight/3,
+      resolve: FlowSummaryLoader.resolve(:insight),
       description: "the most recent insight from a service or component in this flow"
 
     connection field :services, node_type: :service_deployment do
