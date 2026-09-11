@@ -10,39 +10,41 @@
   "context": {
     "fileName": "AGENTS.md"
   },
-  "tools": {
-    "core": {{ if eq .AgentRunMode "WRITE" }}[
-    "read_file",
-    "read_many_files",
-    "write_file",
-    "replace",
-    "glob",
-    "list_directory",
-    "grep_search",
-    "run_shell_command",
-    "google_web_search",
-    "web_fetch",
-    "save_memory"
+  "coreTools": {{ if eq .AgentRunMode "WRITE" }}[
+    "ReadFileTool",
+    "ReadManyFilesTool",
+    "WriteFileTool",
+    "EditTool",
+    "GlobTool",
+    "LSTool",
+    "GrepTool",
+    "ShellTool",
+    "WebSearchTool",
+    "WebFetchTool",
+    "MemoryTool"
   ]{{ else }}[
-    "read_file",
-    "read_many_files",
-    "glob",
-    "list_directory",
-    "grep_search",
-    "run_shell_command(ls, cd, pwd, git status, git diff, git branch, git log, git show, git merge-base, git rev-parse, head, tail, cat, grep, rg, find)",
-    "google_web_search",
-    "save_memory"
+    "ReadFileTool",
+    "ReadManyFilesTool",
+    "GlobTool",
+    "LSTool",
+    "GrepTool",
+    "ShellTool(ls, cd, pwd, git status, git diff, git branch, git log, git show, git merge-base, git rev-parse, head, tail, cat, grep, rg, find)",
+    "WebSearchTool",
+    "MemoryTool"
   ]{{ end }},
-    "shell": {
-      "inactivityTimeout": {{ .InactivityTimeout }}
-    }
-  },
+  "excludeTools": [
+    "ShellTool(rm -rf)"
+  ],
+  "includeDirectories": [
+    "/plural/contexts",
+    "{{ .RepositoryDir }}"
+  ],
   "model": {
-    "name": {{ quote .Model }}
+    "name": "{{ .Model }}"
   },
   "mcpServers": {
     "plural": {
-      "httpUrl": "http://127.0.0.1:8080/mcp",
+      "url": "http://127.0.0.1:8080/mcp",
       "description": "Plural MCP Server",
       "trust": true
     },
@@ -56,15 +58,15 @@
       "trust": true
     }
   },
-  "security": {
-    "environmentVariableRedaction": {
-      "enabled": true
-    }
-  },
   "privacy": {
     "usageStatisticsEnabled": false
   },
   "telemetry": {
     "enabled": false
+  },
+  "tools": {
+    "shell": {
+      "inactivityTimeout": {{ .InactivityTimeout }}
+    }
   }
 }

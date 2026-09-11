@@ -16,20 +16,16 @@ var settingsTemplate string
 const SettingsFileName = "settings.json"
 
 type ConfigTemplateInput struct {
-	Model             string
+	Model             Model
+	RepositoryDir     string
+	AgentRunID        string
 	AgentRunMode      console.AgentRunMode
 	InactivityTimeout int64
+	GitAccessToken    string
 }
 
 func settings(input *ConfigTemplateInput) (fileName, content string, err error) {
-	quote := func(value string) (string, error) {
-		quoted, err := json.Marshal(value)
-		return string(quoted), err
-	}
-
-	tmpl, err := template.New(SettingsFileName).Funcs(template.FuncMap{
-		"quote": quote,
-	}).Parse(settingsTemplate)
+	tmpl, err := template.New(SettingsFileName).Parse(settingsTemplate)
 	if err != nil {
 		return "", "", err
 	}

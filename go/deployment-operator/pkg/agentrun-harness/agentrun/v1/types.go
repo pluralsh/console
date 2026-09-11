@@ -21,9 +21,9 @@ const (
 	// for a command before it is terminated.
 	defaultBashMaxTimeout = defaultTimeout
 
-	// defaultGeminiInactivityTimeout is the default Gemini CLI timeout for the process,
+	// defaultInactivityTimeout is the default Gemini CLI timeout for the process,
 	// tool call, or session if there is no output or input detected.
-	defaultGeminiInactivityTimeout = 5 * time.Minute
+	defaultInactivityTimeout = defaultBashTimeout
 
 	defaultBabysitInterval = int64(60) // seconds between PR/SCM babysit checks
 )
@@ -273,7 +273,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 			APIKey:            helpers.GetPluralEnv(controller.EnvGeminiAPIKey, ""),
 			Model:             helpers.GetPluralEnv(controller.EnvGeminiModel, ""),
 			Timeout:           helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
-			InactivityTimeout: helpers.GetPluralEnvDuration(controller.EnvGeminiInactivityTimeout, defaultGeminiInactivityTimeout),
+			InactivityTimeout: helpers.GetPluralEnvDuration(controller.EnvGeminiInactivityTimeout, defaultInactivityTimeout),
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvGeminiEndpoint, ""); endpoint != "" {
 			config.Gemini.Endpoint = &endpoint

@@ -1,3 +1,0 @@
-{"type":"init","session_id":"session-error","model":"gemini-custom"}
-{"type":"message","role":"assistant","content":"partial response","delta":true}
-{"type":"result","status":"error","error":{"type":"FatalToolExecutionError","message":"permission denied"},"stats":{"total_tokens":5,"input_tokens":4,"output_tokens":1}}

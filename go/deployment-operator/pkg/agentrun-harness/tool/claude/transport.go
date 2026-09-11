@@ -15,9 +15,9 @@ import (
 const claudeACPBinary = "claude-agent-acp"
 
 type Transport struct {
-	agent   *Agent
-	engine  *acp.Engine
-	workDir string
+	agent         *Agent
+	engine        *acp.Engine
+	repositoryDir string
 }
 
 var _ toolv1.Transport = (*Transport)(nil)
@@ -30,11 +30,11 @@ func NewTransport(agent *Agent) (*Transport, error) {
 	if err != nil {
 		return nil, err
 	}
-	workDir, err := filepath.Abs(config.WorkDir)
+	repositoryDir, err := filepath.Abs(config.RepositoryDir)
 	if err != nil {
-		return nil, fmt.Errorf("resolve claude work directory: %w", err)
+		return nil, fmt.Errorf("resolve claude repository directory: %w", err)
 	}
-	return &Transport{agent: agent, engine: acp.NewEngine(), workDir: workDir}, nil
+	return &Transport{agent: agent, engine: acp.NewEngine(), repositoryDir: repositoryDir}, nil
 }
 
 func (*Transport) Kind() toolv1.TransportKind {
@@ -66,7 +66,7 @@ func (transport *Transport) Turn(ctx context.Context, request toolv1.TurnRequest
 		return toolv1.TurnResult{SessionID: request.SessionID}, err
 	}
 	result, err := transport.engine.Turn(ctx, process, acp.Request{
-		Cwd:             transport.workDir,
+		Cwd:             transport.repositoryDir,
 		Prompt:          request.Prompt,
 		SessionID:       request.SessionID,
 		Settings:        acp.SessionSettings{ModeID: modeID, ModelID: request.Settings.Model.Name},
@@ -82,6 +82,6 @@ func (transport *Transport) launch(options []exec.Option) (*exec.StdioProcess, e
 		return nil, err
 	}
 	launchOptions := append([]exec.Option(nil), options...)
-	launchOptions = append(launchOptions, exec.WithEnv(transport.agent.env(config)), exec.WithDir(transport.workDir), exec.WithTimeout(claude.Timeout))
+	launchOptions = append(launchOptions, exec.WithEnv(transport.agent.env(config)), exec.WithDir(transport.repositoryDir), exec.WithTimeout(claude.Timeout))
 	return exec.StartWithStdio(context.Background(), claudeACPBinary, launchOptions...)
 }

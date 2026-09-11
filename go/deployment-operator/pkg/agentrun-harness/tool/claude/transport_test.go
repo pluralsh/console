@@ -10,8 +10,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	acpsdk "github.com/coder/acp-go-sdk"
 	console "github.com/pluralsh/console/go/client"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	stackv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 )
@@ -50,6 +52,50 @@ func TestTransportLaunchUsesACPAdapterAndClaudeEnvironment(t *testing.T) {
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("environment missing %q: %s", want, content)
 		}
+	}
+}
+
+func TestTransportTurnUsesRepositoryRootForACPAndProcess(t *testing.T) {
+	binDir := t.TempDir()
+	rootsPath := filepath.Join(t.TempDir(), "roots")
+	writeClaudeACPHelperBinary(t, binDir)
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("CLAUDE_ACP_HELPER", "1")
+	t.Setenv("CLAUDE_ACP_HELPER_BINARY", os.Args[0])
+	t.Setenv("CLAUDE_ACP_ROOTS_FILE", rootsPath)
+
+	config := toolv1.Config{
+		WorkDir:       t.TempDir(),
+		RepositoryDir: t.TempDir(),
+		Run:           claudeTestRun(console.AgentRunModeAnalyze, "", false),
+	}
+	transport, err := NewTransport(NewAgent(config))
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := transport.Turn(context.Background(), toolv1.TurnRequest{
+		Prompt:   "inspect repository",
+		Settings: toolv1.Settings{Mode: console.AgentRunModeAnalyze},
+	}, &claudeTransportTestSink{})
+	if err != nil {
+		t.Fatalf("Turn() error = %v", err)
+	}
+	if result.SessionID != "claude-test-session" {
+		t.Fatalf("session ID = %q", result.SessionID)
+	}
+
+	content, err := os.ReadFile(rootsPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roots := testEnvValues(strings.Split(string(content), "\n"))
+	for _, key := range []string{"cwd", "pwd"} {
+		if roots[key] != transport.repositoryDir {
+			t.Fatalf("%s = %q, want repository directory %q", key, roots[key], transport.repositoryDir)
+		}
+	}
+	if transport.repositoryDir == config.WorkDir {
+		t.Fatalf("repository directory unexpectedly uses work directory %q", config.WorkDir)
 	}
 }
 
@@ -116,6 +162,91 @@ func writeClaudeACPBinary(t *testing.T, binDir string) {
 		t.Fatal(err)
 	}
 }
+
+func writeClaudeACPHelperBinary(t *testing.T, binDir string) {
+	t.Helper()
+	path := filepath.Join(binDir, claudeACPBinary)
+	script := "#!/bin/sh\nexec \"$CLAUDE_ACP_HELPER_BINARY\" -test.run=TestClaudeACPHelperProcess --\n"
+	if err := os.WriteFile(path, []byte(script), 0755); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestClaudeACPHelperProcess(t *testing.T) {
+	if os.Getenv("CLAUDE_ACP_HELPER") != "1" {
+		return
+	}
+
+	agent := &claudeACPTestAgent{}
+	connection := acpsdk.NewAgentSideConnection(agent, os.Stdout, os.Stdin)
+	<-connection.Done()
+}
+
+type claudeACPTestAgent struct{}
+
+var _ acpsdk.Agent = (*claudeACPTestAgent)(nil)
+
+func (*claudeACPTestAgent) Authenticate(context.Context, acpsdk.AuthenticateRequest) (acpsdk.AuthenticateResponse, error) {
+	return acpsdk.AuthenticateResponse{}, nil
+}
+
+func (*claudeACPTestAgent) Initialize(context.Context, acpsdk.InitializeRequest) (acpsdk.InitializeResponse, error) {
+	return acpsdk.InitializeResponse{ProtocolVersion: acpsdk.ProtocolVersionNumber}, nil
+}
+
+func (*claudeACPTestAgent) Logout(context.Context, acpsdk.LogoutRequest) (acpsdk.LogoutResponse, error) {
+	return acpsdk.LogoutResponse{}, nil
+}
+
+func (*claudeACPTestAgent) Cancel(context.Context, acpsdk.CancelNotification) error {
+	return nil
+}
+
+func (*claudeACPTestAgent) CloseSession(context.Context, acpsdk.CloseSessionRequest) (acpsdk.CloseSessionResponse, error) {
+	return acpsdk.CloseSessionResponse{}, nil
+}
+
+func (*claudeACPTestAgent) ListSessions(context.Context, acpsdk.ListSessionsRequest) (acpsdk.ListSessionsResponse, error) {
+	return acpsdk.ListSessionsResponse{}, nil
+}
+
+func (*claudeACPTestAgent) NewSession(_ context.Context, params acpsdk.NewSessionRequest) (acpsdk.NewSessionResponse, error) {
+	workingDirectory, err := os.Getwd()
+	if err != nil {
+		return acpsdk.NewSessionResponse{}, err
+	}
+	content := []byte("cwd=" + params.Cwd + "\npwd=" + workingDirectory + "\n")
+	if err := os.WriteFile(os.Getenv("CLAUDE_ACP_ROOTS_FILE"), content, 0644); err != nil {
+		return acpsdk.NewSessionResponse{}, err
+	}
+	return acpsdk.NewSessionResponse{SessionId: "claude-test-session"}, nil
+}
+
+func (*claudeACPTestAgent) Prompt(context.Context, acpsdk.PromptRequest) (acpsdk.PromptResponse, error) {
+	return acpsdk.PromptResponse{StopReason: acpsdk.StopReasonEndTurn}, nil
+}
+
+func (*claudeACPTestAgent) ResumeSession(context.Context, acpsdk.ResumeSessionRequest) (acpsdk.ResumeSessionResponse, error) {
+	return acpsdk.ResumeSessionResponse{}, nil
+}
+
+func (*claudeACPTestAgent) SetSessionConfigOption(context.Context, acpsdk.SetSessionConfigOptionRequest) (acpsdk.SetSessionConfigOptionResponse, error) {
+	return acpsdk.SetSessionConfigOptionResponse{}, nil
+}
+
+func (*claudeACPTestAgent) SetSessionMode(context.Context, acpsdk.SetSessionModeRequest) (acpsdk.SetSessionModeResponse, error) {
+	return acpsdk.SetSessionModeResponse{}, nil
+}
+
+type claudeTransportTestSink struct{}
+
+func (*claudeTransportTestSink) Session(string) {}
+
+func (*claudeTransportTestSink) Message(*console.AgentMessageAttributes, string) {}
+
+func (*claudeTransportTestSink) ToolCallOutput(string, string) {}
+
+func (*claudeTransportTestSink) Usage(usage.Record) {}
 
 func testEnvValues(env []string) map[string]string {
 	values := make(map[string]string, len(env))

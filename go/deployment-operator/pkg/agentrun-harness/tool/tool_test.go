@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
 
@@ -67,7 +68,7 @@ func TestNewComposesClaudeRuntime(t *testing.T) {
 	}
 }
 
-func TestNewComposesGeminiRuntime(t *testing.T) {
+func TestNewUsesLegacyGeminiTool(t *testing.T) {
 	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: &agentrunv1.AgentRun{
 		Mode: console.AgentRunModeWrite,
 		Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{
@@ -78,8 +79,8 @@ func TestNewComposesGeminiRuntime(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New() error = %v", err)
 	}
-	if _, ok := created.(*toolv1.Runtime); !ok {
-		t.Fatalf("Gemini factory returned %T, want *v1.Runtime", created)
+	if _, ok := created.(*gemini.Gemini); !ok {
+		t.Fatalf("Gemini factory returned %T, want *gemini.Gemini", created)
 	}
 }
 
