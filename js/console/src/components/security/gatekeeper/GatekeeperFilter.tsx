@@ -3,7 +3,7 @@ import {
   AccordionItem,
   Checkbox,
   Flex,
-  Input,
+  Input2,
   Radio,
   RadioGroup,
 } from '@pluralsh/design-system'
@@ -158,11 +158,11 @@ function GatekeeperFilter({
           height="100%"
           gap="small"
         >
-          <Input
-            minHeight="fit-content"
+          <Input2
             placeholder="Filter clusters"
             value={searchString}
             onChange={(e) => setSearchString?.(e.currentTarget.value)}
+            css={{ minHeight: 'fit-content' }}
           />
           <div
             css={{ overflowY: 'auto' }}

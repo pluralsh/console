@@ -1,6 +1,6 @@
 import {
   Flex,
-  Input,
+  Input2,
   ListBoxFooterPlus,
   ListBoxItem,
   SearchIcon,
@@ -80,12 +80,12 @@ export function CostManagementDetailsRecommendations() {
       overflow="hidden"
     >
       <Flex gap="medium">
-        <Input
-          flex={1}
+        <Input2
           startIcon={<SearchIcon />}
           placeholder="Search by resource name"
           value={recommendationsQ}
           onChange={(e) => setRecommendationsQ(e.target.value)}
+          css={{ flex: 1 }}
         />
         <Select
           triggerButton={

@@ -5,7 +5,7 @@ import {
   FillLevelContext,
   Flex,
   FormField,
-  Input,
+  Input2,
   Modal,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -87,7 +87,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
         overflow="auto"
       >
         <FormField label="Client ID">
-          <Input
+          <Input2
             disabled
             endIcon={
               clientId && (
@@ -102,12 +102,12 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
             inputProps={{
               css: { '&, &::placeholder': { color: colors[READONLY_COLOR] } },
             }}
-            value={clientId}
+            value={clientId ?? ''}
             placeholder="A client ID will be generated upon creation"
           />
         </FormField>
         <FormField label="Client Secret">
-          <Input
+          <Input2
             disabled
             endIcon={
               clientSecret && (
@@ -122,7 +122,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
             inputProps={{
               css: { '&, &::placeholder': { color: colors[READONLY_COLOR] } },
             }}
-            value={clientSecret}
+            value={clientSecret ?? ''}
             placeholder="A client secret will be generated upon creation"
           />
         </FormField>
@@ -133,7 +133,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
             gap="medium"
           >
             <FormField label="Name">
-              <Input
+              <Input2
                 value={form.name}
                 placeholder="Enter OIDC provider name"
                 onChange={(e) =>
@@ -144,8 +144,8 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
               />
             </FormField>
             <FormField label="Description">
-              <Input
-                value={form.description}
+              <Input2
+                value={form.description ?? ''}
                 placeholder="Enter description"
                 onChange={(e) =>
                   updateForm(setForm, (d) => {
@@ -247,11 +247,11 @@ export function UrlsInput({
         align="center"
         gap="small"
       >
-        <Input
+        <Input2
           value={value}
-          width="100%"
           placeholder="Enter a redirect URL"
           onChange={({ target: { value } }) => setValue(value)}
+          css={{ flexGrow: 1 }}
         />
         <Button
           secondary

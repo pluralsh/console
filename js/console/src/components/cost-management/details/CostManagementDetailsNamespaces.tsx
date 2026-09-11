@@ -2,7 +2,7 @@ import {
   Card,
   CpuIcon,
   Flex,
-  Input,
+  Input2,
   NamespaceIcon,
   RamIcon,
   SearchIcon,
@@ -123,12 +123,12 @@ export function CostManagementDetailsNamespaces() {
         gap="small"
         overflow="hidden"
       >
-        <Input
-          flexShrink={0}
+        <Input2
           startIcon={<SearchIcon />}
           placeholder="Search by namespace"
           value={namespaceQ}
           onChange={(e) => setNamespaceQ(e.target.value)}
+          css={{ flexShrink: 0 }}
         />
         <Card
           css={{ overflow: 'hidden', maxHeight: 500 }}

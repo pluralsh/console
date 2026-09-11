@@ -2,7 +2,7 @@ import {
   Chip,
   FillLevelProvider,
   Flex,
-  Input,
+  Input2,
   SearchIcon,
   SubTab,
   useSetBreadcrumbs,
@@ -97,12 +97,12 @@ export function VulnerabilityReports() {
   return (
     <ContentWrapperSC>
       <FiltersWrapperSC>
-        <Input
-          flex={1}
+        <Input2
           startIcon={<SearchIcon color="icon-light" />}
           placeholder="Search vulnerability reports"
           value={reportsQ}
           onChange={(e) => setReportsQ(e.target.value)}
+          css={{ flex: 1 }}
         />
         <Flex>
           <FillLevelProvider value={1}>

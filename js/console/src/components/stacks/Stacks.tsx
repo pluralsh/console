@@ -7,7 +7,7 @@ import {
   FiltersIcon,
   Flex,
   IconFrame,
-  Input,
+  Input2,
   ListBoxItem,
   MoreIcon,
   PeopleIcon,
@@ -270,14 +270,14 @@ export function Stacks() {
         width={340}
       >
         <Flex gap="small">
-          <Input
-            flexGrow={1}
+          <Input2
             placeholder="Search stacks"
             startIcon={<SearchIcon />}
             value={searchString}
             onChange={(e) => {
               setSearchString?.(e.currentTarget.value)
             }}
+            css={{ flexGrow: 1 }}
           />
           {!filterExpanded && (
             <Button

@@ -10,7 +10,7 @@ import {
   EmptyState,
   FiltersIcon,
   Flex,
-  Input,
+  Input2,
   MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
 import { animated, useTransition } from '@react-spring/web'
@@ -152,13 +152,13 @@ export function WorkbenchesIntegrations() {
           minWidth={0}
         >
           <Flex gap="medium">
-            <Input
+            <Input2
               value={query}
               onChange={(e) => setQuery(e.currentTarget.value)}
               showClearButton
               placeholder="Search workbench connectors"
               startIcon={<MagnifyingGlassIcon color="icon-light" />}
-              width="100%"
+              css={{ flexGrow: 1 }}
             />
             <Button
               secondary

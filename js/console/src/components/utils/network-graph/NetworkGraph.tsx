@@ -2,7 +2,7 @@ import {
   Card,
   EmptyState,
   Flex,
-  Input,
+  Input2,
   ListBoxItem,
   NamespaceIcon,
   SearchIcon,
@@ -121,12 +121,12 @@ function NetworkGraphInternal({
         gap="medium"
         width="100%"
       >
-        <Input
+        <Input2
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search service names"
           startIcon={<SearchIcon color="icon-light" />}
-          flex={1}
+          css={{ flex: 1 }}
         />
         {enableNamespaceFilter && (
           <NamespaceFilter

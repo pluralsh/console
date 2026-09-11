@@ -11,7 +11,7 @@ import {
   Card,
   EmptyState,
   Flex,
-  Input,
+  Input2,
   SearchIcon,
 } from '@pluralsh/design-system'
 import { LayoutOptions } from 'elkjs'
@@ -97,7 +97,7 @@ export function StackStateGraph({ state }: { state: StackState }) {
       height="100%"
       gap="medium"
     >
-      <Input
+      <Input2
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search resources"

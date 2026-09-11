@@ -1,4 +1,4 @@
-import { Flex, Input, Button, ArrowTopRightIcon } from '@pluralsh/design-system'
+import { Flex, Input2, Button, ArrowTopRightIcon } from '@pluralsh/design-system'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body1P } from 'components/utils/typography/Text'
 import { useState } from 'react'
@@ -34,12 +34,11 @@ export function GitHubAppSetup({
       </Body1P>
       {showIdInput ? (
         <Flex gap="small">
-          <Input
-            background="transparent"
-            flex={1}
+          <Input2
             placeholder="Installation ID"
             value={installationId}
             onChange={(e) => setInstallationId(e.target.value)}
+            css={{ flex: 1, background: 'transparent' }}
           />
           <Button
             secondary

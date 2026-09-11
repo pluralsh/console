@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Button, FormField, Input, Switch } from '@pluralsh/design-system'
+import { Button, FormField, Input2, Switch } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
 
 import { useUpdateState } from '../../hooks/useUpdateState'
@@ -29,8 +29,8 @@ export default function StackEnvironmentApplyModal({
     hasUpdates,
     update,
   } = useUpdateState(initialValue)
-  const nameRef = useRef<HTMLInputElement>(undefined)
-  const valueRef = useRef<HTMLInputElement>(undefined)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const valueRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (mode === 'edit') {
@@ -112,7 +112,7 @@ export default function StackEnvironmentApplyModal({
       }
     >
       <FormField label="Name">
-        <Input
+        <Input2
           value={name}
           disabled={mode === 'edit'}
           onChange={(e) => {
@@ -122,11 +122,13 @@ export default function StackEnvironmentApplyModal({
         />
       </FormField>
       <FormField label="Value">
-        <Input
+        <Input2
           value={value}
-          type={secret ? 'password' : 'text'}
           onChange={(e) => update({ value: e.target.value })}
-          inputProps={{ ref: valueRef }}
+          inputProps={{
+            ref: valueRef,
+            type: secret ? 'password' : 'text',
+          }}
         />
       </FormField>
       <Switch

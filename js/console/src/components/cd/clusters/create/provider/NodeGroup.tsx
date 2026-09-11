@@ -3,7 +3,7 @@ import {
   AccordionItem,
   FormField,
   IconFrame,
-  Input,
+  Input2,
   ListBoxItem,
   Select,
   TrashCanIcon,
@@ -78,7 +78,7 @@ function NodeGroup({
           width="fit-content"
           required
         >
-          <Input
+          <Input2
             placeholder="small-burst-on-demand"
             value={nodeGroup.name}
             onChange={({ target: { value } }) =>
@@ -106,7 +106,7 @@ function NodeGroup({
           hint="Production clusters should have a minimum of 3 nodes."
           width="100%"
         >
-          <Input
+          <Input2
             placeholder="3"
             value={nodeGroup.minNodes}
             onChange={({ target: { value } }) =>
@@ -115,7 +115,7 @@ function NodeGroup({
                 minNodes: Number.parseInt(value),
               }))
             }
-            type="number"
+            inputProps={{ type: 'number' }}
             css={disabledNumberInputArrows}
           />
         </FormField>
@@ -126,7 +126,7 @@ function NodeGroup({
           hint="No more than 5,000 nodes."
           width="100%"
         >
-          <Input
+          <Input2
             placeholder="2500"
             value={nodeGroup.maxNodes}
             onChange={({ target: { value } }) =>
@@ -135,7 +135,7 @@ function NodeGroup({
                 maxNodes: Number.parseInt(value),
               }))
             }
-            type="number"
+            inputProps={{ type: 'number' }}
             css={disabledNumberInputArrows}
           />
         </FormField>
