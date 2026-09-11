@@ -261,7 +261,7 @@ func (turn *streamTurn) handleError(line []byte) error {
 		return errors.New("invalid gemini error event: message is required")
 	}
 
-	prefix := ""
+	var prefix string
 	switch event.Severity {
 	case streamSeverityWarning:
 		prefix = "Warning"
@@ -271,6 +271,7 @@ func (turn *streamTurn) handleError(line []byte) error {
 	default:
 		return fmt.Errorf("invalid gemini error event: unsupported severity %q", event.Severity)
 	}
+
 	turn.sink.Message(&console.AgentMessageAttributes{
 		Role: console.AiRoleSystem, Message: fmt.Sprintf("%s: %s", prefix, event.Message),
 	}, "")
