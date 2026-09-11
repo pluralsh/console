@@ -8,7 +8,7 @@ import (
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
 
-const defaultModel = "claude-sonnet-5"
+const defaultModel = "claude-sonnet-4-6"
 
 const (
 	defaultModeID = "default"
