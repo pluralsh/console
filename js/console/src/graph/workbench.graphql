@@ -1317,7 +1317,7 @@ query WorkbenchJobActivities($id: ID!) {
         grade
       }
     }
-    activities(first: 100) {
+    activities(first: 1000) {
       edges {
         node {
           ...WorkbenchJobActivity

@@ -13,6 +13,7 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
+import { mergeConnectionsByNodeId } from 'utils/graphql'
 
 import fragments from '../generated/fragments.json'
 import { fetchToken } from './auth'
@@ -160,6 +161,20 @@ export function buildClient(
                   ...incoming,
                   edges: [...(existing.edges || []), ...(incoming.edges || [])],
                 }
+              },
+            },
+          },
+        },
+        WorkbenchJob: {
+          fields: {
+            // Poll responses can have been resolved before a subscription event
+            // arrives. Preserve activity edges added by the subscription when
+            // that older response is written to the cache.
+            activities: {
+              merge(existing, incoming, options) {
+                if (options.args?.status || options.args?.type) return incoming
+
+                return mergeConnectionsByNodeId(existing, incoming, options)
               },
             },
           },

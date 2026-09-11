@@ -48076,7 +48076,7 @@ export const WorkbenchJobActivitiesDocument = gql`
         grade
       }
     }
-    activities(first: 100) {
+    activities(first: 1000) {
       edges {
         node {
           ...WorkbenchJobActivity
