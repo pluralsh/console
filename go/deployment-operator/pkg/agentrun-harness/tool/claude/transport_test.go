@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	acpsdk "github.com/coder/acp-go-sdk"
+
 	console "github.com/pluralsh/console/go/client"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
@@ -113,7 +114,7 @@ func TestTransportProjectsClaudeACP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Model.Name != "claude-sonnet-5" {
+	if settings.Model.Name != "claude-sonnet-4-6" {
 		t.Fatalf("model = %q", settings.Model.Name)
 	}
 	mode, err := transport.agent.modeID(settings.Mode)
