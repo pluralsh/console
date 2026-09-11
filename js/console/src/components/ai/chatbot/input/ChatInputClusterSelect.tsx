@@ -5,7 +5,7 @@ import {
 } from '../../../../generated/graphql.ts'
 import {
   ClusterIcon,
-  Input,
+  Input2,
   ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -114,10 +114,9 @@ export function ChatInputClusterSelect({
             }}
           >
             Cluster
-            <Input
+            <Input2
               small
-              inputProps={{ lineHeight: '12px' }}
-              type="text"
+              inputProps={{ css: { lineHeight: '12px' } }}
               showClearButton
               placeholder="Search..."
               value={inputValue}

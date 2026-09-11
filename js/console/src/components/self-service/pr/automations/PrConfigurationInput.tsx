@@ -1,4 +1,4 @@
-import { Input, ListBoxItem, Select, Switch } from '@pluralsh/design-system'
+import { Input2, ListBoxItem, Select, Switch } from '@pluralsh/design-system'
 import {
   ClusterHandleSelector,
   GroupSelector,
@@ -91,9 +91,9 @@ export function PrConfigurationInput({
       )
     default:
       return (
-        <Input
+        <Input2
           value={value}
-          placeContent={config.placeholder}
+          placeholder={config.placeholder ?? undefined}
           onChange={(e) => {
             setValue(e.currentTarget.value)
           }}
