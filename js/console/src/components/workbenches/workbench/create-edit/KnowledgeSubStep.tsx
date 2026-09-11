@@ -7,7 +7,7 @@ import {
   Flex,
   FormField,
   IconFrame,
-  Input2,
+  Input,
   PencilIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
@@ -360,7 +360,7 @@ function KnowledgeForm({
             label="Knowledge name"
             hint={validationError}
           >
-            <Input2
+            <Input
               placeholder="Knowledge name"
               value={draft.name}
               error={!!validationError}
@@ -368,7 +368,7 @@ function KnowledgeForm({
             />
           </FormField>
           <FormField label="Knowledge description">
-            <Input2
+            <Input
               placeholder="Short summary of this fact"
               value={draft.description ?? ''}
               onChange={(e) =>
@@ -384,7 +384,7 @@ function KnowledgeForm({
               direction="column"
               gap="xsmall"
             >
-              <Input2
+              <Input
                 placeholder="Add a label"
                 value={labelDraft}
                 onChange={(e) => setLabelDraft(e.target.value)}

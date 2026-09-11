@@ -2,7 +2,7 @@ import {
   Button,
   FiltersIcon,
   Flex,
-  Input2,
+  Input,
   SearchIcon,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
@@ -106,7 +106,7 @@ export function WorkbenchIssues() {
       ) : (
         <WrapperSC>
           <ToolbarSC>
-            <Input2
+            <Input
               showClearButton
               css={{ flex: 1 }}
               placeholder="Search issues"

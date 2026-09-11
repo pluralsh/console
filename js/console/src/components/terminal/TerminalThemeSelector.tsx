@@ -43,15 +43,17 @@ function TerminalThemeSelector() {
         >
           <Input
             small
-            position="absolute"
-            width="460px"
-            margin="-1px"
-            borderTopLeftRadius={0}
-            borderTopRightRadius={0}
             startIcon={<MagnifyingGlassIcon />}
             placeholder="Filter themes"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            css={{
+              position: 'absolute',
+              width: 460,
+              margin: -1,
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+            }}
           />
         </Flex>
       }

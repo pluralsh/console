@@ -17,7 +17,7 @@ export function LabelledInput({
   inputProps,
   ...props
 }: {
-  ref?: RefObject<HTMLInputElement>
+  ref?: RefObject<HTMLInputElement | null>
   label?: string
   value?: string
   onChange?: (value: string) => void
@@ -41,16 +41,19 @@ export function LabelledInput({
       {...props}
     >
       <Input
-        ref={ref}
         width="100%"
-        name={label}
-        type={type}
         value={value || ''}
         onChange={onChange && (({ target: { value } }) => onChange(value))}
         placeholder={placeholder}
         error={error}
         disabled={disabled}
         {...inputProps}
+        inputProps={{
+          name: label,
+          type,
+          ref,
+          ...inputProps?.inputProps,
+        }}
       />
     </FormField>
   )

@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { Div, Flex, Input, type InputProps, P } from 'honorable'
+import { Div, Flex, P } from 'honorable'
 import React, {
   type ComponentProps,
   type ReactElement,
@@ -17,6 +17,7 @@ import {
   AppIcon,
   ArrowRightLeftIcon,
   CollapseIcon,
+  Input,
   LogsIcon,
   Table,
   Tooltip,
@@ -311,7 +312,7 @@ function DebouncedInput({
   initialValue: string | number
   onChange: (value: string | number) => void
   debounce?: number
-} & Omit<InputProps, 'onChange' | 'value'>) {
+} & Omit<ComponentProps<typeof Input>, 'onChange' | 'value'>) {
   const [value, setValue] = React.useState(initialValue)
 
   useEffect(() => {

@@ -37,7 +37,7 @@ export function AwsSettings({
           multiline
           minRows={3}
           maxRows={6}
-          value={settings?.secretAccessKey}
+          value={settings?.secretAccessKey ?? ''}
           onChange={(e) => {
             updateSettings({ secretAccessKey: e.currentTarget.value })
           }}
@@ -103,8 +103,7 @@ export function AzureSettings({
       </FormField>
       <FormField label="Subscription ID">
         <Input
-          type="text"
-          value={settings?.subscriptionId}
+          value={settings?.subscriptionId ?? ''}
           onChange={(e) => {
             updateSettings({ subscriptionId: e.currentTarget.value })
           }}

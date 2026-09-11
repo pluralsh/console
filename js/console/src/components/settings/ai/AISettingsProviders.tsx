@@ -236,7 +236,7 @@ export function OpenAISettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.baseUrl}
+          value={settings?.baseUrl ?? ''}
           onChange={(e) => updateSettings({ baseUrl: e.currentTarget.value })}
         />
       </FormField>
@@ -398,7 +398,7 @@ export function BedrockSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.awsAccessKeyId}
+          value={settings?.awsAccessKeyId ?? ''}
           onChange={(e) =>
             updateSettings({ awsAccessKeyId: e.currentTarget.value })
           }
@@ -522,7 +522,7 @@ export function AzureSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.apiVersion}
+          value={settings?.apiVersion ?? ''}
           onChange={(e) =>
             updateSettings({ apiVersion: e.currentTarget.value })
           }
@@ -562,7 +562,7 @@ export function AzureSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.endpoint}
+          value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>
@@ -707,7 +707,7 @@ export function VertexSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.endpoint}
+          value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>

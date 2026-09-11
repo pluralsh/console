@@ -3,7 +3,7 @@ import {
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
-  Input2,
+  Input,
 } from '@pluralsh/design-system'
 
 import { ComponentProps, useState } from 'react'
@@ -18,11 +18,11 @@ export function InputRevealer({
   inputProps,
   defaultRevealed = false,
   ...props
-}: { defaultRevealed?: boolean } & ComponentProps<typeof Input2>) {
+}: { defaultRevealed?: boolean } & ComponentProps<typeof Input>) {
   const [showInput, setShowInput] = useState(defaultRevealed)
 
   return (
-    <Input2
+    <Input
       inputProps={{
         ...inputProps,
         type: showInput ? 'text' : 'password',

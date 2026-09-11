@@ -3,7 +3,7 @@ import { type FormEvent, useState } from 'react'
 
 import styled from 'styled-components'
 
-import { Button, Card, Code, Flyover, FormField, Input2, SearchIcon } from '..'
+import { Button, Card, Code, Flyover, FormField, Input, SearchIcon } from '..'
 import { jsCode } from '../constants'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -79,13 +79,13 @@ function Template(args: any) {
             direction="column"
           >
             <FormField label="Name">
-              <Input2 value="Admin" />
+              <Input value="Admin" />
             </FormField>
             <FormField label="Description">
-              <Input2 value="Full account access" />
+              <Input value="Full account access" />
             </FormField>
             <FormField label="Repository bindings">
-              <Input2 value="*" />
+              <Input value="*" />
             </FormField>
             <P>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
@@ -101,7 +101,7 @@ function Template(args: any) {
               nec nisl eu nibh fringilla vehicula. Suspendisse a purus quam.
             </P>
             <FormField label="Repository bindings">
-              <Input2 startIcon={<SearchIcon />} />
+              <Input startIcon={<SearchIcon />} />
             </FormField>
           </Flex>
         )}

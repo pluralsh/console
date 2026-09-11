@@ -1,5 +1,5 @@
 import { ComponentProps, FormEvent, useCallback, useMemo } from 'react'
-import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { Body2P } from 'components/utils/typography/Text'
@@ -169,14 +169,14 @@ function UpsertNotificationSinkModal({
         <FormField label={mode === 'edit' ? `Webhook url` : 'Add sink'}>
           <div css={{ display: 'flex', gap: theme.spacing.xxsmall }}>
             {mode !== 'edit' && (
-              <Input2
+              <Input
                 value={state.name}
                 onChange={(e) => update({ name: e.target.value })}
                 placeholder="Name"
                 css={{ flex: '0 0 130px' }}
               />
             )}
-            <Input2
+            <Input
               value={state.hookUrl}
               endIcon={sinkTypeToIcon[hookType || '']}
               onChange={(e) => update({ hookUrl: e.target.value })}

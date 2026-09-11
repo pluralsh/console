@@ -28,7 +28,7 @@ export function S3Settings({
           multiline
           minRows={3}
           maxRows={6}
-          value={settings?.secretAccessKey}
+          value={settings?.secretAccessKey ?? ''}
           onChange={(e) => {
             updateSettings({ secretAccessKey: e.currentTarget.value })
           }}
@@ -36,8 +36,7 @@ export function S3Settings({
       </FormField>
       <FormField label="Region">
         <Input
-          type="text"
-          value={settings?.region}
+          value={settings?.region ?? ''}
           onChange={(e) => {
             updateSettings({ region: e.currentTarget.value })
           }}
@@ -45,8 +44,7 @@ export function S3Settings({
       </FormField>
       <FormField label="Endpoint">
         <Input
-          type="text"
-          value={settings?.endpoint}
+          value={settings?.endpoint ?? ''}
           onChange={(e) => {
             updateSettings({ endpoint: e.currentTarget.value })
           }}
@@ -54,8 +52,7 @@ export function S3Settings({
       </FormField>
       <FormField label="Bucket">
         <Input
-          type="text"
-          value={settings?.bucket}
+          value={settings?.bucket ?? ''}
           onChange={(e) => {
             updateSettings({ bucket: e.currentTarget.value })
           }}
@@ -78,8 +75,7 @@ export function AzureSettings({
     <>
       <FormField label="Client ID">
         <Input
-          type="text"
-          value={settings?.clientId}
+          value={settings?.clientId ?? ''}
           onChange={(e) => {
             updateSettings({ clientId: e.currentTarget.value })
           }}
@@ -95,8 +91,7 @@ export function AzureSettings({
       </FormField>
       <FormField label="Tenant ID">
         <Input
-          type="text"
-          value={settings?.tenantId}
+          value={settings?.tenantId ?? ''}
           onChange={(e) => {
             updateSettings({ tenantId: e.currentTarget.value })
           }}
@@ -104,8 +99,7 @@ export function AzureSettings({
       </FormField>
       <FormField label="Subscription ID">
         <Input
-          type="text"
-          value={settings?.subscriptionId}
+          value={settings?.subscriptionId ?? ''}
           onChange={(e) => {
             updateSettings({ subscriptionId: e.currentTarget.value })
           }}
@@ -113,8 +107,7 @@ export function AzureSettings({
       </FormField>
       <FormField label="Resource group">
         <Input
-          type="text"
-          value={settings?.resourceGroup}
+          value={settings?.resourceGroup ?? ''}
           onChange={(e) => {
             updateSettings({ resourceGroup: e.currentTarget.value })
           }}
@@ -122,8 +115,7 @@ export function AzureSettings({
       </FormField>
       <FormField label="Storage account">
         <Input
-          type="text"
-          value={settings?.storageAccount}
+          value={settings?.storageAccount ?? ''}
           onChange={(e) => {
             updateSettings({ storageAccount: e.currentTarget.value })
           }}
@@ -131,8 +123,7 @@ export function AzureSettings({
       </FormField>
       <FormField label="Container">
         <Input
-          type="text"
-          value={settings?.container}
+          value={settings?.container ?? ''}
           onChange={(e) => {
             updateSettings({ container: e.currentTarget.value })
           }}
@@ -161,8 +152,7 @@ export function GcsSettings({
       />
       <FormField label="Bucket">
         <Input
-          type="text"
-          value={settings?.bucket}
+          value={settings?.bucket ?? ''}
           onChange={(e) => {
             updateSettings({ bucket: e.currentTarget.value })
           }}

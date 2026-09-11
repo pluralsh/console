@@ -126,7 +126,7 @@ function NetworkGraphInternal({
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search service names"
           startIcon={<SearchIcon color="icon-light" />}
-          flex={1}
+          css={{ flex: 1 }}
         />
         {enableNamespaceFilter && (
           <NamespaceFilter

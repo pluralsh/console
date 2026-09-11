@@ -115,7 +115,7 @@ function NodeGroup({
                 minNodes: Number.parseInt(value),
               }))
             }
-            type="number"
+            inputProps={{ type: 'number' }}
             css={disabledNumberInputArrows}
           />
         </FormField>
@@ -135,7 +135,7 @@ function NodeGroup({
                 maxNodes: Number.parseInt(value),
               }))
             }
-            type="number"
+            inputProps={{ type: 'number' }}
             css={disabledNumberInputArrows}
           />
         </FormField>

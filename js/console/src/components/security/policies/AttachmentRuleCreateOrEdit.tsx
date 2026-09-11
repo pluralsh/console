@@ -5,7 +5,7 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -315,7 +315,7 @@ function AttachmentRuleForm({
               direction="column"
               gap="xsmall"
             >
-              <Input2
+              <Input
                 value={regexDraft}
                 placeholder="Add regex and press enter"
                 onChange={(e) => setRegexDraft(e.target.value)}

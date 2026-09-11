@@ -34,7 +34,7 @@ export type SegmentedInputProps = {
   separator: string
   segments: Segment[]
   ref?: Ref<SegmentedInputHandle>
-} & ComponentPropsWithoutRef<typeof Input>
+} & Omit<ComponentPropsWithoutRef<typeof Input>, 'onChange'>
 
 export default function SegmentedInput({
   onChange,

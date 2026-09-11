@@ -140,15 +140,17 @@ export function ExpandedInput({
 }: {
   inputValue: string
   onChange: (value: string) => void
-} & ComponentProps<typeof Input>) {
-  const inputRef = useRef<HTMLElement>(undefined)
+} & Omit<ComponentProps<typeof Input>, 'onChange' | 'value'>) {
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => inputRef.current?.focus(), [])
 
   return (
     <Input
-      border="none"
-      borderRadius={0}
+      css={{
+        border: 'none',
+        borderRadius: 0,
+      }}
       inputProps={{ ref: inputRef }}
       placeholder="Filter by name"
       value={inputValue}

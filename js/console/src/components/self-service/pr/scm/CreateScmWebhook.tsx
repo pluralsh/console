@@ -3,7 +3,7 @@ import {
   Codeline,
   Flex,
   FormField,
-  Input2,
+  Input,
   Modal,
   PlusIcon,
 } from '@pluralsh/design-system'
@@ -145,7 +145,7 @@ export function CreateScmWebhookModal({
               }
               required
             >
-              <Input2
+              <Input
                 value={formState.owner}
                 onChange={(e) => updateFormState({ owner: e.target.value })}
               />
@@ -159,7 +159,7 @@ export function CreateScmWebhookModal({
               }
               required
             >
-              <Input2
+              <Input
                 value={formState.hmac}
                 onChange={(e) => updateFormState({ hmac: e.target.value })}
               />

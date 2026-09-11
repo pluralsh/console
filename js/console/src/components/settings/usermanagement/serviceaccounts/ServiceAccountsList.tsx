@@ -59,7 +59,6 @@ export function ServiceAccountsList({
         placeholder="Search an account"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        backgroundColor="fill-zero"
       />
       <GridTableWrapper>
         <Table
