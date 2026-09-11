@@ -10,7 +10,9 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
     MetricPoint,
     MetricsLabelSearchOutput,
     MetricsLabelSearchResult,
-    MetricsQueryOutput
+    MetricsQueryOutput,
+    TraceSpan,
+    TracesQueryOutput
   }
   alias Console.Schema.Dashboard
 
@@ -262,6 +264,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
               graphData: graph(identifier: "requests", input: $input, timeRange: $timeRange) {
                 metrics { timestamp name value labels }
                 logs { timestamp message labels }
+                traces { traceId spanId name }
               }
               inputValues: input(identifier: "namespace", input: $input, timeRange: $timeRange)
             }
@@ -283,6 +286,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert metric["value"] == 42.0
       assert metric["labels"] == %{"namespace" => "production"}
       assert found["graphData"]["logs"] == nil
+      assert found["graphData"]["traces"] == nil
       assert found["inputValues"] == ["production", "staging"]
     end
 
@@ -345,6 +349,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
               graph(identifier: "errors", input: $input, timeRange: $timeRange) {
                 metrics { name value }
                 logs { timestamp message labels }
+                traces { traceId }
               }
             }
           }
@@ -361,9 +366,109 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         )
 
       assert found["graph"]["metrics"] == nil
+      assert found["graph"]["traces"] == nil
       assert [log] = found["graph"]["logs"]
       assert log["message"] == "request failed"
       assert log["labels"] == %{"namespace" => "production", "pod" => "api-0"}
+    end
+
+    test "fetches typed trace results for trace graphs" do
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "tempo",
+          tool: :tempo,
+          categories: [:traces],
+          configuration: %{
+            tempo: %{url: "https://tempo.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      dashboard =
+        insert(:dashboard,
+          workbench: workbench,
+          graphs: [
+            %Dashboard.Graph{
+              identifier: "checkout",
+              type: :traces,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 3, h: 4},
+              datasource: %Dashboard.Datasource{
+                type: :traces,
+                tool: "workbench_observability_traces_tempo",
+                input: %{"query" => "{ service.name = \"${service}\" }", "limit" => 50}
+              }
+            }
+          ]
+        )
+
+      start_at = ~U[2026-09-07 21:00:00Z]
+      end_at = ~U[2026-09-07 22:00:00Z]
+      span_end = DateTime.add(start_at, 10, :second)
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :traces, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.minutes(5)
+        assert input.query == "{ service.name = \"checkout\" }"
+        assert input.limit == 50
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
+
+        {:ok,
+         %TracesQueryOutput{
+           spans: [
+             %TraceSpan{
+               trace_id: "trace-1",
+               span_id: "span-1",
+               parent_id: "parent-1",
+               name: "GET /checkout",
+               service: "checkout",
+               start: Google.Protobuf.from_datetime(start_at),
+               end: Google.Protobuf.from_datetime(span_end),
+               tags: %{"http.method" => "GET"}
+             }
+           ]
+         }}
+      end)
+
+      {:ok, %{data: %{"workbenchDashboard" => found}}} =
+        run_query(
+          """
+          query Dashboard($id: ID!, $input: Json!, $timeRange: DashboardTimeRangeAttributes!) {
+            workbenchDashboard(id: $id) {
+              graph(identifier: "checkout", input: $input, timeRange: $timeRange) {
+                metrics { name value }
+                logs { message }
+                traces { traceId spanId parentId name service start end tags }
+              }
+            }
+          }
+          """,
+          %{
+            "id" => dashboard.id,
+            "input" => Jason.encode!(%{"service" => "checkout"}),
+            "timeRange" => %{
+              "start" => DateTime.to_iso8601(start_at),
+              "end" => DateTime.to_iso8601(end_at)
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert found["graph"]["metrics"] == nil
+      assert found["graph"]["logs"] == nil
+      assert [trace] = found["graph"]["traces"]
+      assert trace["traceId"] == "trace-1"
+      assert trace["spanId"] == "span-1"
+      assert trace["parentId"] == "parent-1"
+      assert trace["name"] == "GET /checkout"
+      assert trace["service"] == "checkout"
+      assert trace["start"]
+      assert trace["end"]
+      assert trace["tags"] == %{"http.method" => "GET"}
     end
 
     test "rejects dashboard queries denied by a workbench policy" do

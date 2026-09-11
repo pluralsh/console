@@ -403,6 +403,66 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
       assert input["datasource"]["type"] == "LABELS"
     end
 
+    test "it can create a dashboard with a traces graph" do
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          name: "tempo",
+          tool: :tempo,
+          categories: [:traces],
+          configuration: %{
+            tempo: %{url: "https://tempo.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      {:ok, %{data: %{"createDashboard" => dashboard}}} =
+        run_query(
+          """
+          mutation Create($attrs: DashboardAttributes!) {
+            createDashboard(attributes: $attrs) {
+              id
+              name
+              graphs {
+                identifier
+                type
+                datasource { type tool input }
+              }
+            }
+          }
+          """,
+          %{
+            "attrs" => %{
+              "workbenchId" => workbench.id,
+              "name" => "Checkout traces",
+              "graphs" => [
+                %{
+                  "identifier" => "checkout",
+                  "type" => "TRACES",
+                  "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 4},
+                  "datasource" => %{
+                    "type" => "TRACES",
+                    "tool" => "workbench_observability_traces_tempo",
+                    "input" => Jason.encode!(%{"query" => "{ service.name = \"checkout\" }"})
+                  }
+                }
+              ]
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert dashboard["name"] == "Checkout traces"
+      assert [graph] = dashboard["graphs"]
+      assert graph["identifier"] == "checkout"
+      assert graph["type"] == "TRACES"
+      assert graph["datasource"]["type"] == "TRACES"
+      assert graph["datasource"]["tool"] == "workbench_observability_traces_tempo"
+      assert graph["datasource"]["input"] == %{"query" => "{ service.name = \"checkout\" }"}
+    end
+
     test "it can update a dashboard" do
       dashboard = insert(:dashboard, graphs: [])
 

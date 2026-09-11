@@ -52,6 +52,26 @@ defmodule Console.AI.Workbench.Toolchain do
     end)
   end
 
+  @doc "Validates the persisted observability queries attached to a subagent or workbench result."
+  def validate_result(resource, result, %User{} = user)
+      when is_map(result) do
+    validate_all(resource, result_queries(result), user)
+  end
+
+  defp result_queries(result) do
+    [
+      {:metrics, [Map.get(result, :metrics_query) | Map.get(result, :metrics_queries, [])]},
+      {:logs, Map.get(result, :logs_queries, [])},
+      {:traces, [Map.get(result, :traces_query) | Map.get(result, :traces_queries, [])]}
+    ]
+    |> Enum.flat_map(fn {type, queries} ->
+      Enum.flat_map(queries, fn
+        nil -> []
+        query -> [{type, query.tool_name, query.tool_args || %{}}]
+      end)
+    end)
+  end
+
   defp execute(resource, name, args, user, allowed) do
     with {:ok, %mod{} = tool} <- validate_call(resource, name, args, user, allowed) do
       tool
@@ -71,8 +91,8 @@ defmodule Console.AI.Workbench.Toolchain do
       {:ok, t}
     else
       {:error, err} -> {:error, "failed to call tool: #{name}, result: #{inspect(err)}"}
-      nil -> {:error, "tool not found"}
-      _ -> {:error, "tool not valid for querying on the fly"}
+      nil -> {:error, "tool #{name} not found"}
+      _ -> {:error, "tool #{name} not valid for querying on the fly"}
     end
   end
 

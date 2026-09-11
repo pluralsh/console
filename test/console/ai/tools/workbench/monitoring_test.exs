@@ -124,6 +124,57 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
            )
   end
 
+  test "creates a traces dashboard graph wired to a workbench traces tool" do
+    user = insert(:user, roles: %{admin: true})
+    workbench = insert(:workbench)
+    job = insert(:workbench_job, workbench: workbench, user: user)
+
+    tool =
+      insert(:workbench_tool,
+        name: "tempo",
+        tool: :tempo,
+        categories: [:traces],
+        configuration: %{
+          tempo: %{url: "https://tempo.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+    insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+    assert {:ok, upsert} =
+             Tool.validate(
+               %DashboardUpsert{job: job, user: user},
+               %{
+                 "dashboard_name" => "Checkout traces",
+                 "graph" => %{
+                   "identifier" => "checkout",
+                   "type" => "traces",
+                   "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 4},
+                   "datasource" => %{
+                     "type" => "traces",
+                     "tool" => "workbench_observability_traces_tempo",
+                     "input" => %{"query" => "{ service.name = \"checkout\" }", "limit" => 50}
+                   }
+                 }
+               }
+             )
+
+    assert upsert.graph.type == :traces
+    assert upsert.graph.datasource.type == :traces
+    assert {:ok, json} = DashboardUpsert.implement(upsert)
+
+    assert %{
+             "name" => "Checkout traces",
+             "graphs" => [
+               %{
+                 "identifier" => "checkout",
+                 "type" => "traces",
+                 "datasource" => %{"type" => "traces"}
+               }
+             ]
+           } = Jason.decode!(json)
+  end
+
   test "rejects dashboard graphs whose tool call is invalid" do
     user = insert(:user, roles: %{admin: true})
     workbench = insert(:workbench)

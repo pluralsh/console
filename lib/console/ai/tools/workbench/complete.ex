@@ -1,10 +1,13 @@
 defmodule Console.AI.Tools.Workbench.Complete do
   use Console.AI.Tools.Workbench.Base
-  alias Console.Schema.WorkbenchJobActivity
+  alias Console.Schema.{User, WorkbenchJob, WorkbenchJobActivity}
   alias Console.Schema.WorkbenchJobResult
   alias Console.Schema.WorkbenchJobResult.ToolQuery
+  alias Console.AI.Workbench.Toolchain
 
   embedded_schema do
+    field :job, :map, virtual: true
+    field :user, :map, virtual: true
     field :conclusion, :string
     field :topology, :string
     field :criticism, :string
@@ -19,8 +22,11 @@ defmodule Console.AI.Tools.Workbench.Complete do
   @json_schema Console.priv_file!("tools/workbench/complete.json") |> Jason.decode!()
 
   def name(), do: "workbench_complete"
+  def name(_), do: name()
   def json_schema(), do: @json_schema
+  def json_schema(_), do: json_schema()
   def description(), do: "Complete the workbench job, with the final conclusion given and any relevant metrics or logs to include in the result metadata.  Be sure to always mark the final status of all todos as well."
+  def description(_), do: description()
 
   def changeset(model, attrs) do
     model
@@ -39,5 +45,7 @@ defmodule Console.AI.Tools.Workbench.Complete do
     |> validate_required([:conclusion])
   end
 
-  def implement(result), do: {:ok, result}
+  def implement(%__MODULE__{job: %WorkbenchJob{} = job, user: %User{} = user} = result) do
+    with :ok <- Toolchain.validate_result(job, result, user), do: {:ok, result}
+  end
 end

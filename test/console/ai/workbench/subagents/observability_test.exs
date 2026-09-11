@@ -139,20 +139,41 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
           }
         ]}
       end)
+      expect(Provider, :completion, fn messages, _ ->
+        assert Enum.any?(messages, fn
+                 {:tool, content, _} ->
+                   content =~
+                     "failed to call tool: observability_result, result: {:error, \"tool not_a_real_tool not found\"}"
+
+                 _ ->
+                   false
+               end)
+
+        {:ok, "correcting the result", [
+          %Tool{
+            name: "observability_result",
+            arguments: %{
+              "output" => "Corrected result",
+              "metrics_query" => metrics_query
+            },
+            id: "4"
+          }
+        ]}
+      end)
 
       invalid_activity =
         insert(:workbench_job_activity, workbench_job: job, type: :observability)
 
-      invalid =
+      corrected =
         Subagents.Observability.run(
           invalid_activity,
           job,
           Environment.new(job, [tool], [])
         )
 
-      assert invalid.status == :failed
-      assert invalid.result.error == "invalid observability result: tool not found"
-      refute Map.has_key?(invalid.result, :metrics_query)
+      assert corrected.status == :successful
+      assert corrected.result.output == "Corrected result"
+      assert corrected.result.metrics_query.tool_name == metrics_tool_name
     end
   end
 end
