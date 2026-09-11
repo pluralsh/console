@@ -59,8 +59,7 @@ export function toFlowFilterVariables(
   direction?: SortDirection
   favoriteIds?: string[]
 } {
-  const defaultSort =
-    sort === FlowSort.Name && direction === SortDirection.Asc
+  const defaultSort = sort === FlowSort.Name && direction === SortDirection.Asc
 
   return {
     statuses: allFlowHealthSelected(statuses) ? undefined : statuses,
