@@ -40,6 +40,11 @@ export function WorkbenchIssuesBoard({
     if (!loading) fetchingRef.current = false
   }, [loading])
 
+  const visibleStatuses = useMemo(
+    () => ISSUE_STATUS_OPTIONS.filter((status) => includes(statuses, status)),
+    [statuses]
+  )
+
   if (loading && isEmpty(issues)) {
     return (
       <LoadingSC>
@@ -49,11 +54,17 @@ export function WorkbenchIssuesBoard({
   }
 
   return (
-    <BoardSC $columnCount={statuses.length}>
-      {ISSUE_STATUS_OPTIONS.filter((status) => includes(statuses, status)).map(
-        (status) => (
+    <BoardSC>
+      <HeaderBandSC $columnCount={visibleStatuses.length}>
+        {visibleStatuses.map((status) => (
+          <ColumnTitleSC key={status}>
+            {ISSUE_STATUS_LABELS[status]}
+          </ColumnTitleSC>
+        ))}
+      </HeaderBandSC>
+      <ColumnsRowSC $columnCount={visibleStatuses.length}>
+        {visibleStatuses.map((status) => (
           <ColumnSC key={status}>
-            <ColumnTitleSC>{ISSUE_STATUS_LABELS[status]}</ColumnTitleSC>
             <CardsSC>
               {!isEmpty(grouped[status]) ? (
                 grouped[status].map((issue) => (
@@ -68,8 +79,8 @@ export function WorkbenchIssuesBoard({
               )}
             </CardsSC>
           </ColumnSC>
-        )
-      )}
+        ))}
+      </ColumnsRowSC>
       {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
     </BoardSC>
   )
@@ -143,18 +154,45 @@ function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
   return <LoadMoreSentinelSC ref={ref} />
 }
 
-const BoardSC = styled.div<{ $columnCount: number }>(
-  ({ theme, $columnCount }) => ({
+function boardGrid(columnCount: number) {
+  return {
     display: 'grid',
-    gridTemplateColumns: `repeat(${Math.max($columnCount, 1)}, minmax(0, 1fr))`,
+    gridTemplateColumns: `repeat(${Math.max(columnCount, 1)}, minmax(0, 1fr))`,
+  } as const
+}
+
+const BoardSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  width: '100%',
+  minWidth: 0,
+  minHeight: 0,
+  overflowX: 'hidden',
+  overflowY: 'auto',
+})
+
+const HeaderBandSC = styled.div<{ $columnCount: number }>(
+  ({ theme, $columnCount }) => ({
+    ...boardGrid($columnCount),
     columnGap: theme.spacing.medium,
-    rowGap: 0,
-    flex: 1,
-    width: '100%',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
+    flexShrink: 0,
+    paddingBottom: theme.spacing.xsmall,
+    backgroundColor:
+      theme.mode === 'light'
+        ? theme.colors['page-background']
+        : theme.colors['fill-zero'],
+  })
+)
+
+const ColumnsRowSC = styled.div<{ $columnCount: number }>(
+  ({ theme, $columnCount }) => ({
+    ...boardGrid($columnCount),
+    columnGap: theme.spacing.medium,
     minWidth: 0,
-    minHeight: 0,
-    overflowX: 'hidden',
-    overflowY: 'auto',
   })
 )
 
@@ -166,18 +204,13 @@ const ColumnSC = styled.div({
 })
 
 const ColumnTitleSC = styled.h2(({ theme }) => ({
-  position: 'sticky',
-  top: 0,
-  zIndex: 1,
   fontFamily: theme.fontFamilies.mono,
   fontSize: 18,
   fontWeight: 400,
   lineHeight: '24px',
   letterSpacing: 0,
   margin: 0,
-  paddingBottom: theme.spacing.xsmall,
   color: theme.colors.text,
-  flexShrink: 0,
 }))
 
 const CardsSC = styled.div(({ theme }) => ({
@@ -235,7 +268,6 @@ const EmptyCardTextSC = styled.p(({ theme }) => ({
 }))
 
 const LoadMoreSentinelSC = styled.div({
-  gridColumn: '1 / -1',
   height: 1,
 })
 
