@@ -103,7 +103,7 @@ func TestSystemPromptTemplate_ReviewDepth(t *testing.T) {
 }
 
 func TestSystemPromptInputIncludesPRURL(t *testing.T) {
-	input := (DefaultTool{Config: Config{
+	input := (&DefaultTool{Config: Config{
 		Run: &agentrunv1.AgentRun{
 			Mode:  console.AgentRunModeReview,
 			PRURL: "https://github.com/pluralsh/console/pull/1",

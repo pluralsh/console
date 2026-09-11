@@ -123,6 +123,51 @@ func TestHandleToolOutputStreamsStdout(t *testing.T) {
 	}, "call-1")
 }
 
+func TestHandleAgentMessageCorrelatesRecoveredTerminalToolCall(t *testing.T) {
+	t.Parallel()
+
+	m := mocks.NewClientMock(t)
+	m.On("CreateAgentMessage", mock.Anything, "run-1", mock.MatchedBy(func(attrs gqlclient.AgentMessageAttributes) bool {
+		return attrs.Metadata != nil && attrs.Metadata.Tool != nil && attrs.Metadata.Tool.State != nil &&
+			*attrs.Metadata.Tool.State == gqlclient.AgentMessageToolStateRunning
+	})).Return(&gqlclient.CreateAgentMessage_CreateAgentMessage{ID: "msg-1", Message: "Called tool"}, nil).Once()
+	m.On("AgentMessageOutput", mock.Anything, mock.MatchedBy(func(attrs gqlclient.AgentMessageOutputAttributes) bool {
+		return attrs.MessageID == "msg-1" && attrs.Stdout != nil && *attrs.Stdout == "done"
+	})).Return(nil).Once()
+	m.On("UpdateAgentMessage", mock.Anything, "msg-1", mock.MatchedBy(func(attrs gqlclient.AgentMessageAttributes) bool {
+		return attrs.Metadata != nil && attrs.Metadata.Tool != nil && attrs.Metadata.Tool.State != nil &&
+			*attrs.Metadata.Tool.State == gqlclient.AgentMessageToolStateCompleted
+	})).Return(&gqlclient.UpdateAgentMessage_UpdateAgentMessage{ID: "msg-1", Message: "Called tool"}, nil).Once()
+
+	in := &agentRunController{
+		agentRunID:         "run-1",
+		consoleClient:      m,
+		toolCallMessageIDs: map[string]string{},
+		output:             output.New(t.Context(), m).WithSizeLimit(1024).WithFlushInterval(time.Hour),
+	}
+	callID := "call-1"
+	in.handleAgentMessage(t.Context(), &gqlclient.AgentMessageAttributes{
+		Role:    gqlclient.AiRoleAssistant,
+		Message: "Called tool",
+		Metadata: &gqlclient.AgentMessageMetadataAttributes{Tool: &gqlclient.AgentMessageToolAttributes{
+			State:  lo.ToPtr(gqlclient.AgentMessageToolStateRunning),
+			Output: lo.ToPtr(v1.RunningToolOutput),
+		}},
+	}, callID)
+	in.handleToolOutput(callID, "done")
+	in.handleAgentMessage(t.Context(), &gqlclient.AgentMessageAttributes{
+		Role:    gqlclient.AiRoleAssistant,
+		Message: "Called tool",
+		Metadata: &gqlclient.AgentMessageMetadataAttributes{Tool: &gqlclient.AgentMessageToolAttributes{
+			State:  lo.ToPtr(gqlclient.AgentMessageToolStateCompleted),
+			Output: lo.ToPtr("done"),
+		}},
+	}, callID)
+
+	_, tracked := in.toolCallMessageID(callID)
+	require.False(t, tracked)
+}
+
 func TestHandleAgentMessageKeepsOutputOpenWhenTerminalUpdateFails(t *testing.T) {
 	t.Parallel()
 

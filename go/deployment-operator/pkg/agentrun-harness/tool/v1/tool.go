@@ -33,7 +33,26 @@ const (
 
 // ConfigureSystemPrompt prepares system prompt/context files for the provider and puts them in the required directory
 // for the agent CLI to read during the run.
-func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) error {
+func (in *DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) error {
+	templateFile := systemPromptTemplateDir
+
+	switch in.Config.Run.Mode {
+	case console.AgentRunModeAnalyze:
+		templateFile = path.Join(templateFile, systemPromptAnalyzeTemplateFile)
+	case console.AgentRunModeWrite:
+		templateFile = path.Join(templateFile, systemPromptWriteTemplateFile)
+	case console.AgentRunModeReview:
+		templateFile = path.Join(templateFile, systemPromptReviewTemplateFile)
+	}
+
+	return in.configureSystemPrompt(runtime, templateFile)
+}
+
+func (in *DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRuntimeType) error {
+	return in.configureSystemPrompt(runtime, path.Join(systemPromptTemplateDir, systemPromptBabysitTemplateFile))
+}
+
+func (in *DefaultTool) configureSystemPrompt(runtime console.AgentRuntimeType, templateFile string) error {
 	providerDir := ""
 	switch runtime {
 	case console.AgentRuntimeTypeClaude:
@@ -49,17 +68,6 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 	}
 
 	outputFile := path.Join(in.Config.WorkDir, providerDir, SystemPromptFile)
-	templateFile := systemPromptTemplateDir
-
-	switch in.Config.Run.Mode {
-	case console.AgentRunModeAnalyze:
-		templateFile = path.Join(templateFile, systemPromptAnalyzeTemplateFile)
-	case console.AgentRunModeWrite:
-		templateFile = path.Join(templateFile, systemPromptWriteTemplateFile)
-	case console.AgentRunModeReview:
-		templateFile = path.Join(templateFile, systemPromptReviewTemplateFile)
-	}
-
 	content, err := systemPromptTemplate(templateFile, in.systemPromptInput())
 	if err != nil {
 		return err
@@ -73,37 +81,7 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 	return nil
 }
 
-func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRuntimeType) error {
-	providerDir := ""
-	switch runtime {
-	case console.AgentRuntimeTypeClaude:
-		providerDir = ".claude/prompts"
-	case console.AgentRuntimeTypeGemini:
-		providerDir = ".gemini"
-	case console.AgentRuntimeTypeOpencode:
-		providerDir = ".opencode/prompts"
-	case console.AgentRuntimeTypeCodex:
-		providerDir = ".codex"
-	case console.AgentRuntimeTypePi:
-		providerDir = ".pi/agent"
-	}
-
-	outputFile := path.Join(in.Config.WorkDir, providerDir, SystemPromptFile)
-	templateFile := path.Join(systemPromptTemplateDir, systemPromptBabysitTemplateFile)
-
-	content, err := systemPromptTemplate(templateFile, in.systemPromptInput())
-	if err != nil {
-		return fmt.Errorf("failed to render babysit system prompt template %q: %w", templateFile, err)
-	}
-
-	if err = helpers.File().Create(outputFile, content, 0644); err != nil {
-		return fmt.Errorf("failed to write babysit system prompt %q: %w", outputFile, err)
-	}
-
-	return nil
-}
-
-func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
+func (in *DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 	branch := ""
 	if in.Config.Run.Branch != nil {
 		branch = *in.Config.Run.Branch
@@ -124,7 +102,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 	}
 }
 
-func (in DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {
+func (in *DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {
 	return artifacts.NewUploadArtifactBuilder(artifacts.Config{
 		WorkDir:       in.Config.WorkDir,
 		RepositoryDir: in.Config.RepositoryDir,

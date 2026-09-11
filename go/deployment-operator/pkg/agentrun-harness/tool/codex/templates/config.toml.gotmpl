@@ -1,0 +1,97 @@
+model = {{ quote .Settings.Model }}
+{{ if .Settings.ModelProvider }}
+model_provider = {{ quote .Settings.ModelProvider }}
+{{ end }}
+sandbox_mode = {{ quote .Settings.SandboxMode }}
+approval_policy = {{ quote .Settings.ApprovalPolicy }}
+model_reasoning_effort = {{ quote .Settings.ModelReasoningEffort }}
+{{ if .Settings.ModelInstructionsFile }}
+model_instructions_file = {{ quote .Settings.ModelInstructionsFile }}
+{{ end }}
+
+{{ if .Settings.ShellEnvironmentPolicy }}
+[shell_environment_policy]
+{{ if .Settings.ShellEnvironmentPolicy.IncludeOnly }}
+include_only = [{{ range $index, $value := .Settings.ShellEnvironmentPolicy.IncludeOnly }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+
+{{ if .Settings.ShellEnvironmentPolicy.Set }}
+[shell_environment_policy.set]
+{{ range .Settings.ShellEnvironmentPolicy.Set }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+{{ end }}
+
+[features]
+{{ if .Settings.EnableWebSearch }}
+web_search_request = true
+{{ end }}
+{{ if .Settings.EnableShellCache }}
+shell_snapshot = true
+{{ end }}
+
+[projects.{{ quote .RepositoryDir }}]
+trust_level = "trusted"
+
+{{ range .Providers }}
+[model_providers.{{ quote .Name }}]
+{{ if .Name }}
+name = {{ quote .Name }}
+{{ end }}
+{{ if .BaseURL }}
+base_url = {{ quote .BaseURL }}
+{{ end }}
+{{ if .EnvKey }}
+env_key = {{ quote .EnvKey }}
+{{ end }}
+{{ if .WireAPI }}
+wire_api = {{ quote .WireAPI }}
+{{ end }}
+{{ end }}
+
+{{ range .MCPServers }}
+[mcp_servers.{{ quote .Name }}]
+{{ if .URL }}
+url = {{ quote .URL }}
+{{ end }}
+{{ if .Command }}
+command = {{ quote .Command }}
+{{ end }}
+{{ if .Args }}
+args = [{{ range $index, $value := .Args }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+{{ if .EnabledTools }}
+enabled_tools = [{{ range $index, $value := .EnabledTools }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+{{ if .DisabledTools }}
+disabled_tools = [{{ range $index, $value := .DisabledTools }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+{{ if .Env }}
+[mcp_servers.{{ quote .Name }}.env]
+{{ range .Env }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+
+{{ if .Headers }}
+[mcp_servers.{{ quote .Name }}.headers]
+{{ range .Headers }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+
+{{ if .HTTPHeaders }}
+[mcp_servers.{{ quote .Name }}.http_headers]
+{{ range .HTTPHeaders }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+
+{{ if .EnvHTTPHeaders }}
+[mcp_servers.{{ quote .Name }}.env_http_headers]
+{{ range .EnvHTTPHeaders }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+{{ end }}

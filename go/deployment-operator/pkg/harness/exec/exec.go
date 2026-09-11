@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pluralsh/console/go/polly/algorithms"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/signals"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/polly/algorithms"
 )
 
 func (in *executable) Run(ctx context.Context) error {
@@ -80,6 +80,9 @@ func (in *executable) RunWithOutput(ctx context.Context) ([]byte, error) {
 }
 
 func (in *executable) Command() string {
+	if len(in.args) == 0 {
+		return in.command
+	}
 	return fmt.Sprintf("%s %s", in.command, strings.Join(in.args, " "))
 }
 
