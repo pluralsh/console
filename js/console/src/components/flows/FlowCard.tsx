@@ -52,23 +52,24 @@ export function FlowCard({
       <ContentSC>
         <HeaderSC>
           <CardAppIconSC
-            rounded
             size="xsmall"
             url={flow.icon || undefined}
             icon={<FlowIcon size={20} />}
           />
-          <Body1BoldP css={{ flex: 1, minWidth: 0, ...LINE_CLAMP }}>
-            {flow.name}
-          </Body1BoldP>
+          <HeaderTextSC>
+            <Body1BoldP css={{ minWidth: 0, ...LINE_CLAMP }}>
+              {flow.name}
+            </Body1BoldP>
+            <MetaSC>
+              <span>
+                <MetaLabelSC>Components</MetaLabelSC> {flow.componentCount ?? 0}
+              </span>
+              <span>
+                <MetaLabelSC>Services</MetaLabelSC> {flow.serviceCount ?? 0}
+              </span>
+            </MetaSC>
+          </HeaderTextSC>
         </HeaderSC>
-        <MetaSC>
-          <span>
-            <MetaLabelSC>Components</MetaLabelSC> {flow.componentCount ?? 0}
-          </span>
-          <span>
-            <MetaLabelSC>Services</MetaLabelSC> {flow.serviceCount ?? 0}
-          </span>
-        </MetaSC>
         {flow.description && (
           <Body2P
             $color="text-light"
@@ -155,6 +156,14 @@ const HeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.small,
   width: '100%',
+}))
+
+const HeaderTextSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minWidth: 0,
+  gap: theme.spacing.xxsmall,
 }))
 
 const MetaSC = styled.div(({ theme }) => ({
