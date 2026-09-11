@@ -43,6 +43,66 @@ func TestClientReadsAndWritesTextFiles(t *testing.T) {
 	}
 }
 
+func TestClientReadTextFileCancellationInterruptsBlockedRead(t *testing.T) {
+	underlying := &stalledReadCloser{
+		readStarted:  make(chan struct{}),
+		closeStarted: make(chan struct{}),
+		releaseRead:  make(chan struct{}),
+		releaseClose: make(chan struct{}),
+	}
+	t.Cleanup(func() {
+		close(underlying.releaseRead)
+		close(underlying.releaseClose)
+	})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	readDone := make(chan error, 1)
+	go func() {
+		_, err := (&client{}).readTextFile(ctx, underlying, acpsdk.ReadTextFileRequest{Path: "/file.txt"})
+		readDone <- err
+	}()
+
+	select {
+	case <-underlying.readStarted:
+	case <-time.After(time.Second):
+		t.Fatal("underlying read did not start")
+	}
+	cancel()
+
+	select {
+	case err := <-readDone:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("canceled read error = %v, want context canceled", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("canceled read remained blocked")
+	}
+	select {
+	case <-underlying.closeStarted:
+	case <-time.After(time.Second):
+		t.Fatal("cancellation did not attempt to close the underlying reader")
+	}
+}
+
+type stalledReadCloser struct {
+	readStarted  chan struct{}
+	closeStarted chan struct{}
+	releaseRead  chan struct{}
+	releaseClose chan struct{}
+}
+
+func (reader *stalledReadCloser) Read([]byte) (int, error) {
+	close(reader.readStarted)
+	<-reader.releaseRead
+	return 0, errors.New("read released")
+}
+
+func (reader *stalledReadCloser) Close() error {
+	close(reader.closeStarted)
+	<-reader.releaseClose
+	return nil
+}
+
 func TestClientRejectsWritesWithoutPermission(t *testing.T) {
 	acpClient, directory := newTestClient(t, false)
 	path := filepath.Join(directory, "nested", "file.txt")

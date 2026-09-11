@@ -15,7 +15,7 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		Model: "gemini-3.1-flash-lite",
 	}
 
-	t.Run("plural MCP server uses in-pod remote URL", func(t *testing.T) {
+	t.Run("plural MCP server uses in-pod streamable HTTP URL", func(t *testing.T) {
 		input := *baseInput
 		input.AgentRunMode = console.AgentRunModeWrite
 
@@ -38,12 +38,15 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Fatal("mcpServers.plural missing or not an object")
 		}
 
-		url, ok := plural["url"].(string)
+		url, ok := plural["httpUrl"].(string)
 		if !ok {
-			t.Fatal("mcpServers.plural.url missing or not a string")
+			t.Fatal("mcpServers.plural.httpUrl missing or not a string")
 		}
 		if url != "http://127.0.0.1:8080/mcp" {
-			t.Errorf("expected mcpServers.plural.url=http://127.0.0.1:8080/mcp, got %q", url)
+			t.Errorf("expected mcpServers.plural.httpUrl=http://127.0.0.1:8080/mcp, got %q", url)
+		}
+		if _, ok := plural["url"]; ok {
+			t.Fatal("mcpServers.plural unexpectedly configured with SSE url")
 		}
 	})
 

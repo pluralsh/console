@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 
 	acpsdk "github.com/coder/acp-go-sdk"
@@ -37,10 +38,41 @@ func (client *client) ReadTextFile(ctx context.Context, request acpsdk.ReadTextF
 	if err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
-	defer file.Close()
 
-	reader := bufio.NewReader(io.LimitReader(&contextReader{ctx: ctx, reader: file}, maxTextFileBytes+1))
-	exhausted, err := client.skipTextFileLines(reader, request.Line, request.Path)
+	return client.readTextFile(ctx, file, request)
+}
+
+func (client *client) readTextFile(ctx context.Context, reader io.ReadCloser, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
+	file := newCancelableTextFile(reader)
+	if err := ctx.Err(); err != nil {
+		file.closeAsync()
+		return acpsdk.ReadTextFileResponse{}, err
+	}
+
+	type result struct {
+		response acpsdk.ReadTextFileResponse
+		err      error
+	}
+	resultCh := make(chan result, 1)
+	go func() {
+		response, err := client.readTextFileResponse(file, request)
+		file.closeAsync()
+		<-file.closed
+		resultCh <- result{response: response, err: err}
+	}()
+
+	select {
+	case <-ctx.Done():
+		file.closeAsync()
+		return acpsdk.ReadTextFileResponse{}, ctx.Err()
+	case result := <-resultCh:
+		return result.response, result.err
+	}
+}
+
+func (client *client) readTextFileResponse(reader io.Reader, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
+	buffered := bufio.NewReader(io.LimitReader(reader, maxTextFileBytes+1))
+	exhausted, err := client.skipTextFileLines(buffered, request.Line, request.Path)
 	if err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
@@ -48,7 +80,7 @@ func (client *client) ReadTextFile(ctx context.Context, request acpsdk.ReadTextF
 		return acpsdk.ReadTextFileResponse{}, nil
 	}
 
-	content, err := client.readTextFileContent(reader, request.Path, request.Limit)
+	content, err := client.readTextFileContent(buffered, request.Path, request.Limit)
 	if err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
@@ -135,16 +167,29 @@ func (client *client) readTextFileContent(reader *bufio.Reader, path string, lim
 	return strings.Join(lines, "\n"), nil
 }
 
-type contextReader struct {
-	ctx    context.Context
-	reader io.Reader
+type cancelableTextFile struct {
+	reader    io.ReadCloser
+	closeOnce sync.Once
+	closed    chan struct{}
 }
 
-func (reader *contextReader) Read(buffer []byte) (int, error) {
-	if err := reader.ctx.Err(); err != nil {
-		return 0, err
-	}
-	return reader.reader.Read(buffer)
+func newCancelableTextFile(reader io.ReadCloser) *cancelableTextFile {
+	return &cancelableTextFile{reader: reader, closed: make(chan struct{})}
+}
+
+func (file *cancelableTextFile) Read(buffer []byte) (int, error) {
+	return file.reader.Read(buffer)
+}
+
+func (file *cancelableTextFile) closeAsync() {
+	file.closeOnce.Do(func() {
+		// Closing an owned os.File usually interrupts its Read. Some filesystems
+		// leave the syscall uninterruptible, so Close must not block this caller.
+		go func() {
+			_ = file.reader.Close()
+			close(file.closed)
+		}()
+	})
 }
 
 func (client *client) WriteTextFile(ctx context.Context, request acpsdk.WriteTextFileRequest) (acpsdk.WriteTextFileResponse, error) {
