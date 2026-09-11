@@ -12,8 +12,7 @@ import (
 //nolint:gocyclo
 func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 	baseInput := &ConfigTemplateInput{
-		Model:         "gemini-3.1-flash-lite",
-		RepositoryDir: "/repo",
+		Model: "gemini-3.1-flash-lite",
 	}
 
 	t.Run("plural MCP server uses in-pod remote URL", func(t *testing.T) {
@@ -73,7 +72,7 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 	})
 
-	t.Run("coreTools differ by mode", func(t *testing.T) {
+	t.Run("tools.core differs by mode", func(t *testing.T) {
 		writeInput := *baseInput
 		writeInput.AgentRunMode = console.AgentRunModeWrite
 		_, writeContent, err := settings(&writeInput)
@@ -106,35 +105,47 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Fatalf("REVIEW content not valid JSON: %v", err)
 		}
 
-		writeCoreTools, _ := writeOut["coreTools"].([]any)
-		analyzeCoreTools, _ := analyzeOut["coreTools"].([]any)
-		reviewCoreTools, _ := reviewOut["coreTools"].([]any)
+		writeTools := writeOut["tools"].(map[string]any)
+		analyzeTools := analyzeOut["tools"].(map[string]any)
+		reviewTools := reviewOut["tools"].(map[string]any)
+		writeCoreTools, _ := writeTools["core"].([]any)
+		analyzeCoreTools, _ := analyzeTools["core"].([]any)
+		reviewCoreTools, _ := reviewTools["core"].([]any)
 
 		hasWriteFile := false
 		for _, t := range writeCoreTools {
-			if s, ok := t.(string); ok && s == "WriteFileTool" {
+			if s, ok := t.(string); ok && s == "write_file" {
 				hasWriteFile = true
 				break
 			}
 		}
 		if !hasWriteFile {
-			t.Error("WRITE mode coreTools should include WriteFileTool")
+			t.Error("WRITE mode tools.core should include write_file")
 		}
 
 		hasWriteInAnalyze := false
 		for _, t := range analyzeCoreTools {
-			if s, ok := t.(string); ok && (s == "WriteFileTool" || s == "EditTool") {
+			if s, ok := t.(string); ok && (s == "write_file" || s == "replace") {
 				hasWriteInAnalyze = true
 				break
 			}
 		}
 		if hasWriteInAnalyze {
-			t.Error("ANALYZE mode coreTools should not include WriteFileTool or EditTool")
+			t.Error("ANALYZE mode tools.core should not include write_file or replace")
 		}
 		for _, tool := range reviewCoreTools {
-			if tool == "WriteFileTool" || tool == "EditTool" {
-				t.Error("REVIEW mode coreTools should not include WriteFileTool or EditTool")
+			if tool == "write_file" || tool == "replace" {
+				t.Error("REVIEW mode tools.core should not include write_file or replace")
 			}
+		}
+		if _, ok := writeOut["coreTools"]; ok {
+			t.Error("settings unexpectedly contains deprecated top-level coreTools")
+		}
+		if _, ok := writeOut["excludeTools"]; ok {
+			t.Error("settings unexpectedly contains deprecated top-level excludeTools")
+		}
+		if writeTools["shell"].(map[string]any)["inactivityTimeout"] != float64(baseInput.InactivityTimeout) {
+			t.Errorf("tools.shell.inactivityTimeout = %v, want %d", writeTools["shell"].(map[string]any)["inactivityTimeout"], baseInput.InactivityTimeout)
 		}
 	})
 
@@ -148,24 +159,25 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 
 		var out struct {
-			ExcludeTools []string `json:"excludeTools"`
+			Tools struct {
+				ExcludeTools []string `json:"exclude"`
+			} `json:"tools"`
 		}
 		if err := json.Unmarshal([]byte(content), &out); err != nil {
 			t.Fatalf("generated content is not valid JSON: %v", err)
 		}
 
-		for _, tool := range out.ExcludeTools {
-			if tool == "UpdateTopicTool" {
+		for _, tool := range out.Tools.ExcludeTools {
+			if tool == "update_topic" {
 				return
 			}
 		}
-		t.Errorf("excludeTools = %q, want UpdateTopicTool", out.ExcludeTools)
+		t.Errorf("tools.exclude = %q, want update_topic", out.Tools.ExcludeTools)
 	})
 
-	t.Run("quotes model and repository directory", func(t *testing.T) {
+	t.Run("quotes model", func(t *testing.T) {
 		input := *baseInput
 		input.Model = "gemini-3.1-\"flash\""
-		input.RepositoryDir = "/repo/with \"quotes\""
 
 		_, content, err := settings(&input)
 		if err != nil {
@@ -173,8 +185,10 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 
 		var out struct {
-			IncludeDirectories []string `json:"includeDirectories"`
-			Model              struct {
+			Context struct {
+				IncludeDirectories []string `json:"includeDirectories"`
+			} `json:"context"`
+			Model struct {
 				Name string `json:"name"`
 			} `json:"model"`
 		}
@@ -184,8 +198,8 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		if out.Model.Name != input.Model {
 			t.Errorf("model = %q, want %q", out.Model.Name, input.Model)
 		}
-		if len(out.IncludeDirectories) != 2 || out.IncludeDirectories[1] != input.RepositoryDir {
-			t.Errorf("includeDirectories = %#v, want repository %q", out.IncludeDirectories, input.RepositoryDir)
+		if len(out.Context.IncludeDirectories) != 0 {
+			t.Errorf("context.includeDirectories = %#v, want no auxiliary directories", out.Context.IncludeDirectories)
 		}
 	})
 }
@@ -194,9 +208,8 @@ func TestSettingsTemplate_ExternalMCPServer(t *testing.T) {
 	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp","allowedTools":["list_issues"],"headers":{"Authorization":"Bearer secret"}}]`)
 
 	input := &ConfigTemplateInput{
-		Model:         "gemini-3.1-flash-lite",
-		RepositoryDir: "/repo",
-		AgentRunMode:  console.AgentRunModeWrite,
+		Model:        "gemini-3.1-flash-lite",
+		AgentRunMode: console.AgentRunModeWrite,
 	}
 	_, content, err := settings(input)
 	if err != nil {

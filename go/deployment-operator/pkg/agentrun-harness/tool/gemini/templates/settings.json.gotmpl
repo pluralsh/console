@@ -10,36 +10,37 @@
   "context": {
     "fileName": "AGENTS.md"
   },
-  "coreTools": {{ if eq .AgentRunMode "WRITE" }}[
-    "ReadFileTool",
-    "ReadManyFilesTool",
-    "WriteFileTool",
-    "EditTool",
-    "GlobTool",
-    "LSTool",
-    "GrepTool",
-    "ShellTool",
-    "WebSearchTool",
-    "WebFetchTool",
-    "MemoryTool"
+  "tools": {
+    "core": {{ if eq .AgentRunMode "WRITE" }}[
+    "read_file",
+    "read_many_files",
+    "write_file",
+    "replace",
+    "glob",
+    "list_directory",
+    "grep_search",
+    "run_shell_command",
+    "google_web_search",
+    "web_fetch",
+    "save_memory"
   ]{{ else }}[
-    "ReadFileTool",
-    "ReadManyFilesTool",
-    "GlobTool",
-    "LSTool",
-    "GrepTool",
-    "ShellTool(ls, cd, pwd, git status, git diff, git branch, git log, git show, git merge-base, git rev-parse, head, tail, cat, grep, rg, find)",
-    "WebSearchTool",
-    "MemoryTool"
+    "read_file",
+    "read_many_files",
+    "glob",
+    "list_directory",
+    "grep_search",
+    "run_shell_command(ls, cd, pwd, git status, git diff, git branch, git log, git show, git merge-base, git rev-parse, head, tail, cat, grep, rg, find)",
+    "google_web_search",
+    "save_memory"
   ]{{ end }},
-  "excludeTools": [
-    "UpdateTopicTool",
-    "ShellTool(rm -rf)"
-  ],
-  "includeDirectories": [
-    "/plural/contexts",
-    {{ quote .RepositoryDir }}
-  ],
+    "exclude": [
+      "update_topic",
+      "run_shell_command(rm -rf)"
+    ],
+    "shell": {
+      "inactivityTimeout": {{ .InactivityTimeout }}
+    }
+  },
   "model": {
     "name": {{ quote .Model }}
   },
@@ -64,10 +65,5 @@
   },
   "telemetry": {
     "enabled": false
-  },
-  "tools": {
-    "shell": {
-      "inactivityTimeout": {{ .InactivityTimeout }}
-    }
   }
 }

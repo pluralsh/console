@@ -22,7 +22,6 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 
 	input := &ConfigTemplateInput{
 		Model:             model,
-		RepositoryDir:     config.RepositoryDir,
 		AgentRunMode:      config.Run.Mode,
 		InactivityTimeout: int64(gemini.InactivityTimeout.Seconds()),
 	}

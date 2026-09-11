@@ -30,8 +30,8 @@ const (
 )
 
 type Transport struct {
-	agent   *Agent
-	workDir string
+	agent         *Agent
+	repositoryDir string
 }
 
 var _ toolv1.Transport = (*Transport)(nil)
@@ -44,12 +44,12 @@ func NewTransport(agent *Agent) (*Transport, error) {
 	if err != nil {
 		return nil, err
 	}
-	workDir, err := filepath.Abs(config.WorkDir)
+	repositoryDir, err := filepath.Abs(config.RepositoryDir)
 	if err != nil {
-		return nil, fmt.Errorf("resolve gemini work directory: %w", err)
+		return nil, fmt.Errorf("resolve gemini repository directory: %w", err)
 	}
 
-	return &Transport{agent: agent, workDir: workDir}, nil
+	return &Transport{agent: agent, repositoryDir: repositoryDir}, nil
 }
 
 func (*Transport) Kind() toolv1.TransportKind {
@@ -99,7 +99,7 @@ func (transport *Transport) executable(request toolv1.TurnRequest) (exec.Executa
 		launchOptions,
 		exec.WithArgs(transport.args(request)),
 		exec.WithEnv(transport.agent.env(config)),
-		exec.WithDir(transport.workDir),
+		exec.WithDir(transport.repositoryDir),
 		exec.WithTimeout(gemini.Timeout),
 	)
 

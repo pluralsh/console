@@ -17,7 +17,6 @@ const SettingsFileName = "settings.json"
 
 type ConfigTemplateInput struct {
 	Model             string
-	RepositoryDir     string
 	AgentRunMode      console.AgentRunMode
 	InactivityTimeout int64
 }

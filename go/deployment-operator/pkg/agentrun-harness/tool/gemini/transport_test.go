@@ -98,7 +98,7 @@ func TestTransportArgs(t *testing.T) {
 	}
 }
 
-func TestTransportTurnParsesStreamAndPreservesExecutionOptions(t *testing.T) {
+func TestTransportTurnUsesRepositoryCWDAndPreservesExecutionOptions(t *testing.T) {
 	binDir := t.TempDir()
 	writeGeminiBinary(t, binDir)
 	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
@@ -146,7 +146,7 @@ func TestTransportTurnParsesStreamAndPreservesExecutionOptions(t *testing.T) {
 		"arg=--output-format", "arg=stream-json", "arg=--model", "arg=gemini-custom",
 		"arg=--approval-mode", "arg=yolo", "arg=--prompt", "arg=implement feature with spaces",
 		"key=api-key", "endpoint=https://api.example", "trust=true",
-		"home=" + transport.agent.config.WorkDir, "cwd=" + transport.workDir,
+		"home=" + transport.agent.config.WorkDir, "cwd=" + transport.repositoryDir,
 	}
 	for _, want := range wantLaunchLines {
 		if !strings.Contains(string(launch), want+"\n") {

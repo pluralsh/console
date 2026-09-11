@@ -21,6 +21,8 @@ const (
 	geminiCompatibilityInstructions = `
 
 Gemini CLI compatibility: do not use command substitution forms such as $(), backticks, <(), or >(), because the CLI blocks them even in yolo mode. Use arithmetic loops, shell builtins, temporary files, or separate commands instead.
+
+Git metadata: inspect repository history and state with git commands. Do not use file tools to read .git internals such as .git/HEAD, because Gemini CLI restricts direct access to those paths.
 `
 )
 
