@@ -62,7 +62,6 @@ export { default as Flex } from './components/Flex'
 export type { FlexProps } from './components/Flex'
 export { default as Flyover } from './components/Flyover'
 export { default as FormField } from './components/FormField'
-export { default as FormTitle } from './components/FormTitle'
 export { default as Highlight } from './components/Highlight'
 export { default as hljs } from './hljs'
 export { default as IconFrame } from './components/IconFrame'
@@ -84,8 +83,6 @@ export {
 export { default as ListBoxItemChipList } from './components/ListBoxItemChipList'
 export { default as LoadingSpinner } from './components/LoadingSpinner'
 export { default as LoopingLogo } from './components/LoopingLogo'
-export { default as LoopingLogoAlternative } from './components/LoopingLogoAlternative'
-export { default as LoopingLogoOutlineAlternative } from './components/LoopingLogoOutlineAlternative'
 export {
   default as Markdown,
   getLastStringChild,
@@ -107,7 +104,6 @@ export { PopoverWrapper } from './components/PopoverListBox'
 export { Popover, type PopoverProps } from './components/ReactAriaPopover'
 export { default as ProgressBar } from './components/ProgressBar'
 export { default as Prop } from './components/Prop'
-export { default as PropsContainer } from './components/PropsContainer'
 export { default as PropWide } from './components/PropWide'
 export { default as Radio } from './components/Radio'
 export { default as RadioGroup } from './components/RadioGroup'
@@ -142,13 +138,11 @@ export type { TabBaseProps, TabListStateProps } from './components/TabList'
 export { default as TabPanel } from './components/TabPanel'
 export { TagMultiSelect } from './components/TagMultiSelect'
 export type { TagMultiSelectProps } from './components/TagMultiSelect'
-export { default as TextSwitch } from './components/TextSwitch'
 export { default as TipCarousel } from './components/TipCarousel'
 export { GraphQLToast, Toast } from './components/Toast'
 export { default as Tooltip } from './components/Tooltip'
 export type { TooltipProps } from './components/Tooltip'
 export * from './components/TreeNavigation'
-export { default as UserDetails } from './components/UserDetails'
 export {
   default as ValidatedInput,
   type ValidationResponse,
