@@ -135,6 +135,7 @@ func (attempt *sessionAttempt) initialize() (acpsdk.InitializeResponse, error) {
 			Version: "1",
 		},
 		ClientCapabilities: acpsdk.ClientCapabilities{
+			Meta: map[string]any{"terminal_output": true},
 			Fs: acpsdk.FileSystemCapabilities{
 				ReadTextFile:  true,
 				WriteTextFile: attempt.fileSystemWrite,

@@ -35,8 +35,8 @@ func TestResolveSettingsPreservesExplicitModelAndProxy(t *testing.T) {
 	if settings.Model.Provider == nil || *settings.Model.Provider != console.AiProviderVertex {
 		t.Fatalf("provider = %v, want vertex", settings.Model.Provider)
 	}
-	if settings.Model.Name != explicitModel {
-		t.Fatalf("model = %q, want %q", settings.Model.Name, explicitModel)
+	if settings.Model.Name != "vertex/"+explicitModel {
+		t.Fatalf("model = %q, want %q", settings.Model.Name, "vertex/"+explicitModel)
 	}
 	if !settings.Proxy {
 		t.Fatalf("proxy = false, want true")

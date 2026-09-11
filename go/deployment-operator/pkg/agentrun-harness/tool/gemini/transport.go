@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -22,6 +23,7 @@ const (
 	geminiPromptFlag        = "--prompt"
 	geminiAPIKeyEnv         = "GEMINI_API_KEY"
 	geminiAPIBaseURLEnv     = "GEMINI_API_BASE_URL"
+	geminiGoogleBaseURLEnv  = "GOOGLE_GEMINI_BASE_URL"
 	geminiTrustWorkspaceEnv = "GEMINI_CLI_TRUST_WORKSPACE"
 	geminiHomeEnv           = "GEMINI_CLI_HOME"
 	geminiTrustWorkspace    = "true"
@@ -123,10 +125,20 @@ func (transport *Transport) args(request toolv1.TurnRequest) []string {
 
 func (agent *Agent) env(config toolv1.Config) []string {
 	gemini := config.Run.Runtime.Config.Gemini
+	apiKey := gemini.APIKey
 	env := []string{
-		fmt.Sprintf("%s=%s", geminiAPIKeyEnv, gemini.APIKey),
+		fmt.Sprintf("%s=%s", geminiAPIKeyEnv, apiKey),
 		fmt.Sprintf("%s=%s", geminiTrustWorkspaceEnv, geminiTrustWorkspace),
 		fmt.Sprintf("%s=%s", geminiHomeEnv, config.WorkDir),
+	}
+
+	if config.Run.IsProxyEnabled() {
+		apiKey = agent.consoleToken
+		env[0] = fmt.Sprintf("%s=%s", geminiAPIKeyEnv, apiKey)
+		if baseURL := agent.proxyBaseURL(); baseURL != "" {
+			env = append(env, fmt.Sprintf("%s=%s", geminiGoogleBaseURLEnv, baseURL))
+		}
+		return env
 	}
 
 	if gemini.Endpoint != nil {
@@ -134,4 +146,15 @@ func (agent *Agent) env(config toolv1.Config) []string {
 	}
 
 	return env
+}
+
+func (agent *Agent) proxyBaseURL() string {
+	consoleURL := strings.TrimSuffix(agent.consoleURL, "/")
+	consoleURL = strings.TrimSuffix(consoleURL, "/ext/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/")
+	if consoleURL == "" {
+		return ""
+	}
+	return consoleURL + "/ext/ai/gemini"
 }

@@ -17,7 +17,7 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 		return err
 	}
 	if model == "" {
-		model = agent.resolveModel(gemini.Model)
+		model = agent.resolveModelForSettings(config, toolv1.Settings{Model: toolv1.ModelSelection{Name: gemini.Model}})
 	}
 
 	input := &ConfigTemplateInput{

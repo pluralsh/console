@@ -55,7 +55,12 @@ func New(runtimeType console.AgentRuntimeType, config v1.Config) (v1.Tool, error
 		}
 		return v1.NewRuntime(config, agent, transport)
 	case console.AgentRuntimeTypePi:
-		return pi.New(config), nil
+		agent := pi.NewAgent(config)
+		transport, err := pi.NewTransport(agent)
+		if err != nil {
+			return nil, err
+		}
+		return v1.NewRuntime(config, agent, transport)
 
 	default:
 		return nil, fmt.Errorf("unsupported agent run type: %s", runtimeType)

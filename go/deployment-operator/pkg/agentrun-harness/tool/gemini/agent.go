@@ -25,7 +25,9 @@ Gemini CLI compatibility: do not use command substitution forms such as $(), bac
 )
 
 type Agent struct {
-	config toolv1.Config
+	config       toolv1.Config
+	consoleURL   string
+	consoleToken string
 }
 
 var _ toolv1.Agent = (*Agent)(nil)
@@ -91,6 +93,12 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	if err != nil {
 		return err
 	}
+
+	agent.consoleURL = request.ConsoleURL
+	if request.ConsoleToken != "" {
+		agent.consoleToken = request.ConsoleToken
+	}
+
 	return agent.writeNativeConfig(config, request.Settings.Model.Name)
 }
 

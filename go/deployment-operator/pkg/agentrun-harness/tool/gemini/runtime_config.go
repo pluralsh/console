@@ -5,6 +5,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
 
@@ -22,13 +23,29 @@ func (agent *Agent) ResolveSettings(run *agentrunv1.AgentRun) (toolv1.Settings, 
 	if err != nil {
 		return toolv1.Settings{}, err
 	}
+	model := agent.resolveModel(gemini.Model)
+	if run.IsProxyEnabled() {
+		model = proxymodel.ProxyModel(console.AgentRuntimeTypeGemini, model)
+	}
 	provider := console.AiProviderVertex
 	return toolv1.Settings{
 		Mode:    run.Mode,
-		Model:   toolv1.ModelSelection{Provider: &provider, Name: agent.resolveModel(gemini.Model)},
+		Model:   toolv1.ModelSelection{Provider: &provider, Name: model},
 		Timeout: gemini.Timeout,
 		Proxy:   run.IsProxyEnabled(),
 	}, nil
+}
+
+func (agent *Agent) resolveModelForSettings(config toolv1.Config, settings toolv1.Settings) string {
+	model := settings.Model.Name
+	if model == "" {
+		model = config.Run.Runtime.Config.Gemini.Model
+	}
+	model = agent.resolveModel(model)
+	if config.Run.IsProxyEnabled() {
+		model = proxymodel.ProxyModel(console.AgentRuntimeTypeGemini, model)
+	}
+	return model
 }
 
 func (*Agent) validateMode(mode console.AgentRunMode) error {

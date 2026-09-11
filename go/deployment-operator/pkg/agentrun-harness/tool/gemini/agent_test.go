@@ -68,6 +68,31 @@ func TestAgentConfigureWritesSettings(t *testing.T) {
 	}
 }
 
+func TestAgentConfigureCapturesProxyCredentialsWithoutSettingsLeak(t *testing.T) {
+	workDir := t.TempDir()
+	run := geminiTestRun(console.AgentRunModeReview, "gemini-custom", nil)
+	run.Runtime.AiProxy = true
+	agent := NewAgent(toolv1.Config{WorkDir: workDir, RepositoryDir: "/repo", Run: run})
+	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
+		Phase:        toolv1.ConfigurePhaseInitial,
+		ConsoleURL:   "https://console.example",
+		ConsoleToken: "console-token",
+		Settings:     toolv1.Settings{Model: toolv1.ModelSelection{Name: "vertex/gemini-custom"}},
+	}); err != nil {
+		t.Fatalf("Configure() error = %v", err)
+	}
+	if agent.consoleURL != "https://console.example" || agent.consoleToken != "console-token" {
+		t.Fatalf("proxy credentials were not captured: url=%q token=%q", agent.consoleURL, agent.consoleToken)
+	}
+	settings, err := os.ReadFile(filepath.Join(workDir, geminiHomeDir, SettingsFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(settings), "console-token") {
+		t.Fatalf("native settings exposed Console token: %s", settings)
+	}
+}
+
 func TestAgentExportStagesChats(t *testing.T) {
 	workDir := t.TempDir()
 	chatDir := filepath.Join(workDir, geminiHomeDir, "tmp", "plural", geminiChatsDir)

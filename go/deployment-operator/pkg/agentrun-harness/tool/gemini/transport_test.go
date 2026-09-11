@@ -157,6 +157,57 @@ func TestTransportTurnParsesStreamAndPreservesExecutionOptions(t *testing.T) {
 	assertSuccessfulStream(t, sink)
 }
 
+func TestTransportEnvUsesConsoleCredentialsForProxy(t *testing.T) {
+	run := geminiTestRun(console.AgentRunModeWrite, "gemini-custom", nil)
+	run.Runtime.AiProxy = true
+	config := toolv1.Config{
+		WorkDir:       t.TempDir(),
+		RepositoryDir: t.TempDir(),
+		Run:           run,
+	}
+	agent := NewAgent(config)
+	agent.consoleURL = "https://console.example/gql"
+	agent.consoleToken = "console-token"
+	values := make(map[string]string)
+	for _, item := range agent.env(config) {
+		key, value, ok := strings.Cut(item, "=")
+		if ok {
+			values[key] = value
+		}
+	}
+
+	if values[geminiAPIKeyEnv] != "console-token" {
+		t.Fatalf("proxy API key = %q, want Console token", values[geminiAPIKeyEnv])
+	}
+	if values[geminiGoogleBaseURLEnv] != "https://console.example/ext/ai/gemini" {
+		t.Fatalf("proxy base URL = %q", values[geminiGoogleBaseURLEnv])
+	}
+	if _, ok := values[geminiAPIBaseURLEnv]; ok {
+		t.Fatal("proxy environment unexpectedly set legacy direct endpoint")
+	}
+	if values[geminiAPIKeyEnv] == run.Runtime.Config.Gemini.APIKey {
+		t.Fatal("proxy environment used provider API key")
+	}
+}
+
+func TestTransportEnvDoesNotSubstituteProxyCredential(t *testing.T) {
+	run := geminiTestRun(console.AgentRunModeWrite, "gemini-custom", nil)
+	run.Runtime.AiProxy = true
+	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: run}
+
+	values := make(map[string]string)
+	for _, item := range NewAgent(config).env(config) {
+		key, value, ok := strings.Cut(item, "=")
+		if ok {
+			values[key] = value
+		}
+	}
+
+	if values[geminiAPIKeyEnv] != "" {
+		t.Fatalf("proxy API key = %q, want empty when Console token is missing", values[geminiAPIKeyEnv])
+	}
+}
+
 func TestTransportTurnReportsStreamErrorsAfterDrain(t *testing.T) {
 	binDir := t.TempDir()
 	writeGeminiBinary(t, binDir)
@@ -317,7 +368,7 @@ if [ -n "$GEMINI_TEST_OUTPUT" ]; then
   for arg in "$@"; do
     printf 'arg=%s\n' "$arg" >> "$GEMINI_TEST_OUTPUT"
   done
-  printf 'key=%s\nendpoint=%s\ntrust=%s\nhome=%s\ncwd=%s\n' "$GEMINI_API_KEY" "$GEMINI_API_BASE_URL" "$GEMINI_CLI_TRUST_WORKSPACE" "$GEMINI_CLI_HOME" "$PWD" >> "$GEMINI_TEST_OUTPUT"
+  printf 'key=%s\nendpoint=%s\ngoogle_endpoint=%s\ntrust=%s\nhome=%s\ncwd=%s\n' "$GEMINI_API_KEY" "$GEMINI_API_BASE_URL" "$GOOGLE_GEMINI_BASE_URL" "$GEMINI_CLI_TRUST_WORKSPACE" "$GEMINI_CLI_HOME" "$PWD" >> "$GEMINI_TEST_OUTPUT"
 fi
 printf '[DEBUG] ignored Gemini CLI stderr noise\n' >&2
 if [ -n "$GEMINI_TEST_FIXTURE" ]; then

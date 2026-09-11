@@ -83,6 +83,22 @@ func TestNewComposesGeminiRuntime(t *testing.T) {
 	}
 }
 
+func TestNewComposesPiRuntime(t *testing.T) {
+	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: &agentrunv1.AgentRun{
+		Mode: console.AgentRunModeWrite,
+		Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{
+			Pi: &agentrunv1.PiConfig{Model: "gpt-5.4", Timeout: time.Minute},
+		}},
+	}}
+	created, err := New(console.AgentRuntimeTypePi, config)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	if _, ok := created.(*toolv1.Runtime); !ok {
+		t.Fatalf("Pi factory returned %T, want *v1.Runtime", created)
+	}
+}
+
 func TestNewRejectsMissingAgentRun(t *testing.T) {
 	if _, err := New(console.AgentRuntimeTypeClaude, toolv1.Config{}); err == nil {
 		t.Fatal("New() error = nil, want missing agent run error")

@@ -442,6 +442,9 @@ func TestEngineTurnAdvertisesRequestedFilesystemWriteCapability(t *testing.T) {
 			if !capabilities.ReadTextFile || capabilities.WriteTextFile != test.fileSystemWrite {
 				t.Fatalf("filesystem capabilities = %#v", capabilities)
 			}
+			if terminalOutput, ok := initializations[0].ClientCapabilities.Meta["terminal_output"].(bool); !ok || !terminalOutput {
+				t.Fatalf("terminal output capability = %#v", initializations[0].ClientCapabilities.Meta)
+			}
 		})
 	}
 }
