@@ -81,6 +81,8 @@ export function WorkbenchToolFormFields({
       return render(type, HttpFormFields)
     case WorkbenchToolType.Loki:
       return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.VictoriaLogs:
+      return render(type, VictoriaLogsFormFields)
     case WorkbenchToolType.Prometheus:
       return render(type, PrometheusFormFields)
     case WorkbenchToolType.Tempo:
@@ -530,6 +532,53 @@ function UrlUsernamePasswordTokenTenantFormFields<
         placeholder="Optional tenant id (e.g. for Mimir)"
         value={c.tenantId ?? ''}
         onChange={(e) => set({ ...c, tenantId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token / API key"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
+function VictoriaLogsFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.VictoriaLogs>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="VictoriaLogs base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Account ID"
+        placeholder="Optional AccountID tenant header"
+        value={c.accountId ?? ''}
+        onChange={(e) => set({ ...c, accountId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Project ID"
+        placeholder="Optional ProjectID tenant header"
+        value={c.projectId ?? ''}
+        onChange={(e) => set({ ...c, projectId: e.target.value || undefined })}
       />
       <InputField
         label="Bearer token / API key"

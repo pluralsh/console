@@ -11879,6 +11879,8 @@ type WorkbenchToolConfiguration struct {
 	Prometheus *WorkbenchToolPrometheusConnection `json:"prometheus,omitempty"`
 	// loki connection (no secrets)
 	Loki *WorkbenchToolLokiConnection `json:"loki,omitempty"`
+	// victoria logs connection (no secrets)
+	VictoriaLogs *WorkbenchToolVictoriaLogsConnection `json:"victoriaLogs,omitempty"`
 	// splunk connection (no secrets)
 	Splunk *WorkbenchToolSplunkConnection `json:"splunk,omitempty"`
 	// tempo connection (no secrets)
@@ -11938,6 +11940,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Prometheus *WorkbenchToolPrometheusConnectionAttributes `json:"prometheus,omitempty"`
 	// loki connection (logs)
 	Loki *WorkbenchToolLokiConnectionAttributes `json:"loki,omitempty"`
+	// victoria logs connection (logs)
+	VictoriaLogs *WorkbenchToolVictoriaLogsConnectionAttributes `json:"victoriaLogs,omitempty"`
 	// splunk connection (logs)
 	Splunk *WorkbenchToolSplunkConnectionAttributes `json:"splunk,omitempty"`
 	// tempo connection (traces)
@@ -12379,6 +12383,32 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolVictoriaLogsConnection struct {
+	// victoria logs base url
+	URL *string `json:"url,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// optional AccountID tenant header
+	AccountID *string `json:"accountId,omitempty"`
+	// optional ProjectID tenant header
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
+type WorkbenchToolVictoriaLogsConnectionAttributes struct {
+	// victoria logs base url
+	URL string `json:"url"`
+	// bearer token or api key
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
+	// optional AccountID tenant header
+	AccountID *string `json:"accountId,omitempty"`
+	// optional ProjectID tenant header
+	ProjectID *string `json:"projectId,omitempty"`
 }
 
 type WorkbenchUsageTimeseries struct {
@@ -19784,6 +19814,7 @@ const (
 	WorkbenchToolTypeCloudRun            WorkbenchToolType = "CLOUD_RUN"
 	WorkbenchToolTypeAzureFunction       WorkbenchToolType = "AZURE_FUNCTION"
 	WorkbenchToolTypeDocker              WorkbenchToolType = "DOCKER"
+	WorkbenchToolTypeVictoriaLogs        WorkbenchToolType = "VICTORIA_LOGS"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -19817,11 +19848,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeCloudRun,
 	WorkbenchToolTypeAzureFunction,
 	WorkbenchToolTypeDocker,
+	WorkbenchToolTypeVictoriaLogs,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs:
 		return true
 	}
 	return false

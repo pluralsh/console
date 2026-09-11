@@ -29,6 +29,7 @@ import {
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
+  VictoriaLogsLogoIcon,
   VSphereLogoIcon,
 } from '@pluralsh/design-system'
 import {
@@ -48,6 +49,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Opensearch,
   WorkbenchToolType.Http,
   WorkbenchToolType.Loki,
+  WorkbenchToolType.VictoriaLogs,
   WorkbenchToolType.Prometheus,
   WorkbenchToolType.Tempo,
   WorkbenchToolType.Jaeger,
@@ -86,6 +88,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Opensearch]: 'opensearch',
   [WorkbenchToolType.Prometheus]: 'prometheus',
   [WorkbenchToolType.Loki]: 'loki',
+  [WorkbenchToolType.VictoriaLogs]: 'victoriaLogs',
   [WorkbenchToolType.Tempo]: 'tempo',
   [WorkbenchToolType.Jaeger]: 'jaeger',
   [WorkbenchToolType.Datadog]: 'datadog',
@@ -167,6 +170,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Opensearch]: 'OpenSearch',
   [WorkbenchToolType.Prometheus]: 'Prometheus',
   [WorkbenchToolType.Loki]: 'Loki',
+  [WorkbenchToolType.VictoriaLogs]: 'VictoriaLogs',
   [WorkbenchToolType.Tempo]: 'Tempo',
   [WorkbenchToolType.Datadog]: 'Datadog',
   [WorkbenchToolType.Atlassian]: 'Atlassian',
@@ -239,6 +243,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Opensearch]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Prometheus]: [WorkbenchToolCategory.Metrics],
   [WorkbenchToolType.Loki]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.VictoriaLogs]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
@@ -294,6 +299,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Prometheus]:
     'Query metrics from Prometheus or Prometheus-compatible stores.',
   [WorkbenchToolType.Loki]: 'Query log data from Grafana Loki.',
+  [WorkbenchToolType.VictoriaLogs]:
+    'Query logs from VictoriaLogs using LogsQL.',
   [WorkbenchToolType.Tempo]:
     'Query trace data from Grafana Tempo for distributed tracing.',
   [WorkbenchToolType.Atlassian]:
@@ -510,6 +517,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Elastic]: ElasticsearchLogoIcon,
   [WorkbenchToolType.Opensearch]: OpenSearchLogoIcon,
   [WorkbenchToolType.Loki]: LokiLogoIcon,
+  [WorkbenchToolType.VictoriaLogs]: VictoriaLogsLogoIcon,
   [WorkbenchToolType.Prometheus]: PrometheusLogoIcon,
   [WorkbenchToolType.Tempo]: TempoLogoIcon,
   [WorkbenchToolType.Http]: ToolsIcon,

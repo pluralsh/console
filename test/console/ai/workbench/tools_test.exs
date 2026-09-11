@@ -98,6 +98,9 @@ defmodule Console.AI.Workbench.ToolsTest do
       loki = insert_associated_tool(workbench, :loki, "loki", [:logs], %{
         loki: %{url: "https://loki.example.com"}
       })
+      victoria_logs = insert_associated_tool(workbench, :victoria_logs, "vlogs", [:logs], %{
+        victoria_logs: %{url: "https://victorialogs.example.com"}
+      })
       tempo = insert_associated_tool(workbench, :tempo, "tempo", [:traces], %{
         tempo: %{url: "https://tempo.example.com"}
       })
@@ -114,6 +117,8 @@ defmodule Console.AI.Workbench.ToolsTest do
       assert_indexed(index, "github_gh_list_issues", ListIssues, github)
       assert_indexed(index, "workbench_observability_logs_loki", Logs, loki)
       assert_indexed(index, "workbench_observability_log_aggregate_loki", LogAggregate, loki)
+      assert_indexed(index, "workbench_observability_logs_vlogs", Logs, victoria_logs)
+      assert_indexed(index, "workbench_observability_log_aggregate_vlogs", LogAggregate, victoria_logs)
       assert_indexed(index, "workbench_observability_traces_tempo", Traces, tempo)
       assert_indexed(
         index,

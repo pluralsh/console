@@ -226,6 +226,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :opensearch,           :workbench_tool_opensearch_connection_attributes, description: "aws opensearch connection (logs)"
     field :prometheus,           :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
     field :loki,                 :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
+    field :victoria_logs,        :workbench_tool_victoria_logs_connection_attributes, description: "victoria logs connection (logs)"
     field :splunk,               :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
     field :tempo,                :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
     field :jaeger,               :workbench_tool_jaeger_connection_attributes, description: "jaeger connection (traces)"
@@ -286,6 +287,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :username,  :string, description: "basic auth username"
     field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  input_object :workbench_tool_victoria_logs_connection_attributes do
+    field :url,        non_null(:string), description: "victoria logs base url"
+    field :token,      :string, description: "bearer token or api key"
+    field :username,   :string, description: "basic auth username"
+    field :password,   :string, description: "basic auth password"
+    field :account_id, :string, description: "optional AccountID tenant header"
+    field :project_id, :string, description: "optional ProjectID tenant header"
   end
 
   input_object :workbench_tool_tempo_connection_attributes do
@@ -1208,6 +1218,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :opensearch, :workbench_tool_opensearch_connection, description: "aws opensearch connection (no secrets)"
     field :prometheus, :workbench_tool_prometheus_connection, description: "prometheus connection (no secrets)"
     field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
+    field :victoria_logs, :workbench_tool_victoria_logs_connection, description: "victoria logs connection (no secrets)"
     field :splunk,    :workbench_tool_splunk_connection, description: "splunk connection (no secrets)"
     field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
     field :jaeger,    :workbench_tool_jaeger_connection, description: "jaeger connection (no secrets)"
@@ -1263,6 +1274,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url,       :string, description: "loki base url"
     field :username,  :string, description: "basic auth username"
     field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  object :workbench_tool_victoria_logs_connection do
+    field :url,        :string, description: "victoria logs base url"
+    field :username,   :string, description: "basic auth username"
+    field :account_id, :string, description: "optional AccountID tenant header"
+    field :project_id, :string, description: "optional ProjectID tenant header"
   end
 
   object :workbench_tool_tempo_connection do

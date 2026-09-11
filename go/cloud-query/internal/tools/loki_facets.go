@@ -24,6 +24,9 @@ func mergeLokiQueryWithFacets(query string, facets []*toolquery.LogsQueryFacet) 
 	extra := strings.Join(additions, ",")
 
 	q := strings.TrimSpace(query)
+	if q == "" {
+		return "{" + extra + "}"
+	}
 	start := strings.Index(q, "{")
 	if start >= 0 {
 		depth := 0

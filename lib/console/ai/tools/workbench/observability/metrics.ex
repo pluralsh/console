@@ -120,7 +120,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   def azure_opts(%{azure: %{} = az}), do: az
   def azure_opts(_), do: %{}
 
-  @known_providers ~w(prometheus cloudwatch datadog elastic loki splunk tempo dynatrace newrelic)a
+  @known_providers ~w(prometheus cloudwatch datadog elastic loki victoria_logs splunk tempo dynatrace newrelic)a
 
   def provider_hint(%Console.Schema.WorkbenchTool{tool: type}) when type in @known_providers,
     do: "This tool is configured against #{type}, and so you should be able to use its documented query format as needed."

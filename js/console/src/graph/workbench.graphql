@@ -228,6 +228,12 @@ fragment WorkbenchTool on WorkbenchTool {
       username
       tenantId
     }
+    victoriaLogs {
+      url
+      username
+      accountId
+      projectId
+    }
     prometheus {
       url
       username

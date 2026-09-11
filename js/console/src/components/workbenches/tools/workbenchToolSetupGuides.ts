@@ -8,6 +8,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Opensearch]: '/setup-guides/tools/opensearch.md',
   [WorkbenchToolType.Prometheus]: '/setup-guides/tools/prometheus.md',
   [WorkbenchToolType.Loki]: '/setup-guides/tools/loki.md',
+  [WorkbenchToolType.VictoriaLogs]: '/setup-guides/tools/victoria_logs.md',
   [WorkbenchToolType.Tempo]: '/setup-guides/tools/tempo.md',
   [WorkbenchToolType.Jaeger]: '/setup-guides/tools/jaeger.md',
   [WorkbenchToolType.Datadog]: '/setup-guides/tools/datadog.md',
@@ -42,6 +43,8 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://prometheus.io/docs/guides/basic-auth/',
   [WorkbenchToolType.Loki]:
     'https://grafana.com/docs/loki/latest/operations/authentication/',
+  [WorkbenchToolType.VictoriaLogs]:
+    'https://docs.victoriametrics.com/victorialogs/querying/',
   [WorkbenchToolType.Tempo]:
     'https://grafana.com/docs/tempo/latest/setup/operator/grafana_datasource/',
   [WorkbenchToolType.Jaeger]: 'https://www.jaegertracing.io/docs/latest/apis/',

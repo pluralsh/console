@@ -229,8 +229,8 @@ func (in *AzureProvider) metricsLabelSearchValues(ctx context.Context, input *to
 }
 
 func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {
-	if input == nil || strings.TrimSpace(input.GetQuery()) == "" {
-		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
+	if input == nil {
+		return nil, ErrInvalidArgument
 	}
 	resourceID := azureLogsResourceID(input.GetOptions())
 	if resourceID == "" {
@@ -238,7 +238,7 @@ func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInp
 	}
 
 	body := azlogs.QueryBody{
-		Query:    new(input.GetQuery()),
+		Query:    new(defaultLogQuery(input.GetQuery(), "search *")),
 		Timespan: logsTimeRange(input.GetRange()),
 	}
 	resp, err := in.client.Logs(ctx, resourceID, body, nil)
@@ -250,8 +250,8 @@ func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInp
 }
 
 func (in *AzureProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
-	if input == nil || strings.TrimSpace(input.GetQuery()) == "" {
-		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
+	if input == nil {
+		return nil, ErrInvalidArgument
 	}
 	resourceID := azureLogsResourceID(input.GetOptions())
 	if resourceID == "" {
@@ -268,7 +268,7 @@ func (in *AzureProvider) LogAggregate(ctx context.Context, input *toolquery.LogA
 }
 
 func azureLogAggregateQueryBody(input *toolquery.LogAggregateInput) azlogs.QueryBody {
-	query := azureLogsQueryWithFacets(input.GetQuery(), input.GetFacets(), input.GetOperator())
+	query := azureLogsQueryWithFacets(defaultLogQuery(input.GetQuery(), "search *"), input.GetFacets(), input.GetOperator())
 	query = fmt.Sprintf(
 		"%s | summarize count = count() by timestamp = bin(TimeGenerated, %s) | order by timestamp asc",
 		query,

@@ -143,7 +143,7 @@ func (in *DatadogProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 
@@ -155,7 +155,7 @@ func (in *DatadogProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 	filter := datadogV2.NewLogsQueryFilter()
 	filter.SetFrom(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano))
 	filter.SetTo(input.GetRange().GetEnd().AsTime().UTC().Format(time.RFC3339Nano))
-	filter.SetQuery(datadogLogsQueryWithFacets(input.Query, input.GetFacets()))
+	filter.SetQuery(datadogLogsQueryWithFacets(defaultLogQuery(input.Query, "*"), input.GetFacets()))
 
 	request := datadogV2.NewLogsListRequest()
 	request.SetFilter(*filter)
@@ -179,7 +179,7 @@ func (in *DatadogProvider) LogAggregate(ctx context.Context, input *toolquery.Lo
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 
@@ -201,7 +201,7 @@ func datadogLogAggregateRequest(input *toolquery.LogAggregateInput) *datadogV2.L
 	filter := datadogV2.NewLogsQueryFilter()
 	filter.SetFrom(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano))
 	filter.SetTo(input.GetRange().GetEnd().AsTime().UTC().Format(time.RFC3339Nano))
-	filter.SetQuery(datadogLogsQueryWithFacets(datadogAggregateQuery(input.Query, input.GetOperator()), input.GetFacets()))
+	filter.SetQuery(datadogLogsQueryWithFacets(datadogAggregateQuery(defaultLogQuery(input.Query, "*"), input.GetOperator()), input.GetFacets()))
 
 	compute := datadogV2.NewLogsCompute(datadogV2.LOGSAGGREGATIONFUNCTION_COUNT)
 	compute.SetType(datadogV2.LOGSCOMPUTETYPE_TIMESERIES)

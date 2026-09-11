@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Conversion do
     DatadogConnection,
     PrometheusConnection,
     LokiConnection,
+    VictoriaLogsConnection,
     SplunkConnection,
     TempoConnection,
     JaegerConnection,
@@ -52,6 +53,19 @@ defmodule Console.AI.Workbench.Conversion do
         username: loki.username,
         password: loki.password,
         tenant_id: loki.tenant_id,
+      }}
+    }}
+  end
+
+  def to_proto(%WorkbenchTool{tool: :victoria_logs, configuration: %{victoria_logs: %{} = victoria_logs}}) do
+    {:ok, %ToolConnection{
+      connection: {:victoria_logs, %VictoriaLogsConnection{
+        url: victoria_logs.url,
+        token: victoria_logs.token,
+        username: victoria_logs.username,
+        password: victoria_logs.password,
+        account_id: victoria_logs.account_id,
+        project_id: victoria_logs.project_id,
       }}
     }}
   end

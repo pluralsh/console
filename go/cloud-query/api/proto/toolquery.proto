@@ -50,6 +50,15 @@ message LokiConnection {
   optional string password = 5;
 }
 
+message VictoriaLogsConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+  optional string account_id = 5;
+  optional string project_id = 6;
+}
+
 message TempoConnection {
   string url = 1;
   optional string token = 2;
@@ -107,6 +116,7 @@ message ToolConnection {
     AzureConnection azure = 9;
     JaegerConnection jaeger = 10;
     OpensearchConnection opensearch = 11;
+    VictoriaLogsConnection victoria_logs = 12;
   }
 }
 

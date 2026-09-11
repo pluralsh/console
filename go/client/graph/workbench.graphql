@@ -105,6 +105,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
             username
             tenantId
         }
+        victoriaLogs {
+            url
+            username
+            accountId
+            projectId
+        }
         splunk {
             url
             username

@@ -35,7 +35,8 @@ defmodule Console.Schema.WorkbenchTool do
     lambda: 26,
     cloud_run: 27,
     azure_function: 28,
-    docker: 29
+    docker: 29,
+    victoria_logs: 30
 
   defenum Category,
     metrics: 0,
@@ -145,6 +146,15 @@ defmodule Console.Schema.WorkbenchTool do
         field :tenant_id, :string
         field :username,  :string
         field :password,  EncryptedString
+      end
+
+      embeds_one :victoria_logs, VictoriaLogsConnection, on_replace: :update do
+        field :url,        :string
+        field :token,      EncryptedString
+        field :username,   :string
+        field :password,   EncryptedString
+        field :account_id, :string
+        field :project_id, :string
       end
 
       embeds_one :splunk, SplunkConnection, on_replace: :update do
@@ -375,6 +385,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:splunk), do: [:logs]
   defp categories(:prometheus), do: [:metrics]
   defp categories(:loki), do: [:logs]
+  defp categories(:victoria_logs), do: [:logs]
   defp categories(:elastic), do: [:logs]
   defp categories(:opensearch), do: [:logs]
   defp categories(:tempo), do: [:traces]
@@ -403,6 +414,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:opensearch, with: &opensearch_configuration_changeset/2)
     |> cast_embed(:prometheus, with: &prom_configuration_changeset/2)
     |> cast_embed(:loki, with: &loki_configuration_changeset/2)
+    |> cast_embed(:victoria_logs, with: &victoria_logs_configuration_changeset/2)
     |> cast_embed(:splunk, with: &splunk_configuration_changeset/2)
     |> cast_embed(:tempo, with: &tempo_configuration_changeset/2)
     |> cast_embed(:jaeger, with: &jaeger_configuration_changeset/2)
@@ -475,6 +487,12 @@ defmodule Console.Schema.WorkbenchTool do
   defp loki_configuration_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url token tenant_id username password)a)
+    |> validate_required([:url])
+  end
+
+  defp victoria_logs_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token username password account_id project_id)a)
     |> validate_required([:url])
   end
 

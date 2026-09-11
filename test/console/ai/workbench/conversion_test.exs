@@ -97,5 +97,33 @@ defmodule Console.AI.Workbench.ConversionTest do
       {:ok, _} = Protobuf.JSON.encode(res)
       assert is_binary(Protobuf.encode(res))
     end
+
+    test "converts victoria_logs tool to proto" do
+      tool = %WorkbenchTool{
+        tool: :victoria_logs,
+        configuration: %{
+          victoria_logs: %{
+            url: "https://victorialogs.example.com",
+            token: "vl-token",
+            username: "user",
+            password: "pass",
+            account_id: "12",
+            project_id: "34"
+          }
+        }
+      }
+
+      {:ok, res} = Conversion.to_proto(tool)
+      {:victoria_logs, victoria_logs} = res.connection
+
+      assert victoria_logs.url == "https://victorialogs.example.com"
+      assert victoria_logs.token == "vl-token"
+      assert victoria_logs.username == "user"
+      assert victoria_logs.password == "pass"
+      assert victoria_logs.account_id == "12"
+      assert victoria_logs.project_id == "34"
+      {:ok, _} = Protobuf.JSON.encode(res)
+      assert is_binary(Protobuf.encode(res))
+    end
   end
 end

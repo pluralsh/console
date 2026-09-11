@@ -2953,6 +2953,7 @@ enum WorkbenchToolType {
   CLOUD_RUN
   AZURE_FUNCTION
   DOCKER
+  VICTORIA_LOGS
 }
 
 enum WorkbenchToolCategory {
@@ -3476,6 +3477,9 @@ input WorkbenchToolConfigurationAttributes {
   "loki connection (logs)"
   loki: WorkbenchToolLokiConnectionAttributes
 
+  "victoria logs connection (logs)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnectionAttributes
+
   "splunk connection (logs)"
   splunk: WorkbenchToolSplunkConnectionAttributes
 
@@ -3627,6 +3631,26 @@ input WorkbenchToolLokiConnectionAttributes {
 
   "optional tenant id"
   tenantId: String
+}
+
+input WorkbenchToolVictoriaLogsConnectionAttributes {
+  "victoria logs base url"
+  url: String!
+
+  "bearer token or api key"
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
 }
 
 input WorkbenchToolTempoConnectionAttributes {
@@ -5151,6 +5175,9 @@ type WorkbenchToolConfiguration {
   "loki connection (no secrets)"
   loki: WorkbenchToolLokiConnection
 
+  "victoria logs connection (no secrets)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnection
+
   "splunk connection (no secrets)"
   splunk: WorkbenchToolSplunkConnection
 
@@ -5281,6 +5308,20 @@ type WorkbenchToolLokiConnection {
 
   "optional tenant id"
   tenantId: String
+}
+
+type WorkbenchToolVictoriaLogsConnection {
+  "victoria logs base url"
+  url: String
+
+  "basic auth username"
+  username: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
 }
 
 type WorkbenchToolTempoConnection {

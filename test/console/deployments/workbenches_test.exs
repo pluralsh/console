@@ -318,6 +318,12 @@ defmodule Console.Deployments.WorkbenchesTest do
           url: "https://loki.example.com",
           token: "loki-bearer-token"
         }}], [:logs]},
+        {:victoria_logs, [configuration: %{victoria_logs: %{
+          url: "https://victorialogs.example.com",
+          token: "victoria-logs-token",
+          account_id: "12",
+          project_id: "34"
+        }}], [:logs]},
         {:tempo, [configuration: %{tempo: %{
           url: "https://tempo.example.com",
           token: "tempo-bearer-token"
