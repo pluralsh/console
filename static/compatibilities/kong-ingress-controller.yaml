@@ -60,14 +60,28 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release note stub only: v3.1.0 provides updated container image/tag
+        and points to the main CHANGELOG for details.']
+    breaking_changes: ['Not specified in the provided notes; you must review the linked
+        CHANGELOG sections (#310 and #300) to confirm any breaking changes between
+        3.0.0 and 3.1.0.']
   chart_version: 0.12.0
   images: ['kong/kubernetes-ingress-controller:3.1', 'kong:3.6']
 - version: 3.0.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release notes provided only include metadata and links for v3.0.0 and
+        v2.12.0; no feature details included in the supplied text.]
+    breaking_changes: ['Release notes provided do not list changes; breaking changes
+        cannot be determined from the supplied text alone. Review the linked CHANGELOG
+        sections (#300 and #2120) for upgrade-impacting items.']
   chart_version: 0.10.2
   images: ['kong/kubernetes-ingress-controller:3.0', 'kong:3.5']
 - version: 2.12.0
