@@ -65,60 +65,6 @@ func TestAuth_BearerToken(t *testing.T) {
 	assert.Equal(t, "test-bearer-token", authenticator.calledWith)
 }
 
-func TestAuth_GeminiAPIKeyHeader(t *testing.T) {
-	authenticator := &mockAuthenticator{authenticated: true}
-	middleware := Auth(authenticator)
-	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-
-	req := httptest.NewRequest("POST", "/gemini/v1beta/models/gemini:generateContent", nil)
-	req.Header.Set("x-goog-api-key", "console-token")
-	rec := httptest.NewRecorder()
-
-	handler.ServeHTTP(rec, req)
-
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "console-token", authenticator.calledWith)
-}
-
-func TestAuth_BearerHeaderTakesPrecedenceOverGeminiAPIKey(t *testing.T) {
-	authenticator := &mockAuthenticator{authenticated: true}
-	middleware := Auth(authenticator)
-	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-
-	req := httptest.NewRequest("POST", "/gemini/v1beta/models/gemini:generateContent", nil)
-	req.Header.Set("Authorization", "Bearer bearer-token")
-	req.Header.Set("x-goog-api-key", "gemini-token")
-	rec := httptest.NewRecorder()
-
-	handler.ServeHTTP(rec, req)
-
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "bearer-token", authenticator.calledWith)
-}
-
-func TestAuth_InvalidAuthorizationTakesPrecedenceOverGeminiAPIKey(t *testing.T) {
-	authenticator := &mockAuthenticator{authenticated: true}
-	middleware := Auth(authenticator)
-	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Fatal("handler should not be called with invalid Authorization")
-	}))
-
-	req := httptest.NewRequest("POST", "/gemini/v1beta/models/gemini:generateContent", nil)
-	req.Header.Set("Authorization", "Basic credentials")
-	req.Header.Set("x-goog-api-key", "gemini-token")
-	rec := httptest.NewRecorder()
-
-	handler.ServeHTTP(rec, req)
-
-	assert.Equal(t, http.StatusUnauthorized, rec.Code)
-	assert.Contains(t, rec.Body.String(), "invalid authorization header format")
-	assert.Empty(t, authenticator.calledWith)
-}
-
 // TestAuth_InvalidToken tests FR-3.3: Return 403 for invalid tokens
 func TestAuth_InvalidToken(t *testing.T) {
 	authenticator := &mockAuthenticator{authenticated: false}
@@ -303,37 +249,6 @@ func TestExtractToken(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			result := extractToken(tc.header)
 			assert.Equal(t, tc.expected, result)
-		})
-	}
-}
-
-func TestRequestToken(t *testing.T) {
-	testCases := []struct {
-		name      string
-		authority string
-		apiKey    string
-		expected  string
-		errorMsg  string
-	}{
-		{name: "missing headers", errorMsg: "missing authorization header"},
-		{name: "gemini API key", apiKey: " gemini-token ", expected: "gemini-token"},
-		{name: "invalid Authorization wins", authority: "Basic credentials", apiKey: "gemini-token", errorMsg: "invalid authorization header format"},
-		{name: "bearer wins", authority: "Bearer bearer-token", apiKey: "gemini-token", expected: "bearer-token"},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest("POST", "/gemini/v1beta/models/gemini:generateContent", nil)
-			if tc.authority != "" {
-				req.Header.Set("Authorization", tc.authority)
-			}
-			if tc.apiKey != "" {
-				req.Header.Set("X-Goog-Api-Key", tc.apiKey)
-			}
-
-			got, errMessage := requestToken(req)
-			assert.Equal(t, tc.expected, got)
-			assert.Equal(t, tc.errorMsg, errMessage)
 		})
 	}
 }

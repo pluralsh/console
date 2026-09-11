@@ -13,13 +13,13 @@ import (
 )
 
 const (
-	routeGeminiV1GenerateContent       = "/gemini/v1/models/{model:.*}:generateContent"
-	routeGeminiV1StreamGenerateContent = "/gemini/v1/models/{model:.*}:streamGenerateContent"
-	routeGeminiV1CountTokens           = "/gemini/v1/models/{model:.*}:countTokens"
+	routeGeminiV1GenerateContent       = "/gemini/v1/models/{model}:generateContent"
+	routeGeminiV1StreamGenerateContent = "/gemini/v1/models/{model}:streamGenerateContent"
+	routeGeminiV1CountTokens           = "/gemini/v1/models/{model}:countTokens"
 
-	routeGeminiV1BetaGenerateContent       = "/gemini/v1beta/models/{model:.*}:generateContent"
-	routeGeminiV1BetaStreamGenerateContent = "/gemini/v1beta/models/{model:.*}:streamGenerateContent"
-	routeGeminiV1BetaCountTokens           = "/gemini/v1beta/models/{model:.*}:countTokens"
+	routeGeminiV1BetaGenerateContent       = "/gemini/v1beta/models/{model}:generateContent"
+	routeGeminiV1BetaStreamGenerateContent = "/gemini/v1beta/models/{model}:streamGenerateContent"
+	routeGeminiV1BetaCountTokens           = "/gemini/v1beta/models/{model}:countTokens"
 )
 
 type geminiContextKey string
