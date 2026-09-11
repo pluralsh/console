@@ -1,4 +1,4 @@
-import { Button, Card, FormField, Input, Switch } from '@pluralsh/design-system'
+import { Button, Card, FormField, Input2, Switch } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
@@ -115,8 +115,8 @@ export default function StackConfiguration() {
         }}
       >
         <FormField label="Image">
-          <Input
-            value={image}
+          <Input2
+            value={image ?? ''}
             placeholder="Enter image"
             onChange={(e) => setImage(e.currentTarget.value)}
           />
@@ -125,8 +125,8 @@ export default function StackConfiguration() {
           label="Version"
           required
         >
-          <Input
-            value={version}
+          <Input2
+            value={version ?? ''}
             placeholder="Enter image version"
             onChange={(e) => setVersion(e.currentTarget.value)}
           />
@@ -153,7 +153,7 @@ export default function StackConfiguration() {
         )}
         {isTerraformFamilyStackType(stack.type) && (
           <FormField label="Parallelism">
-            <Input
+            <Input2
               value={parallelism?.toString() ?? ''}
               placeholder="Enter integer"
               onChange={(e) => {
@@ -165,7 +165,7 @@ export default function StackConfiguration() {
         )}
         {isPulumi && (
           <FormField label="Parallel">
-            <Input
+            <Input2
               value={parallel?.toString() ?? ''}
               placeholder="Enter integer"
               onChange={(e) => {
@@ -177,7 +177,7 @@ export default function StackConfiguration() {
         )}
         {isPulumi && (
           <FormField label="Stack">
-            <Input
+            <Input2
               value={pulumiStack}
               placeholder="dev"
               onChange={(e) => setPulumiStack(e.currentTarget.value)}
@@ -186,7 +186,7 @@ export default function StackConfiguration() {
         )}
         {isPulumi && (
           <FormField label="Backend URL">
-            <Input
+            <Input2
               value={backendUrl}
               placeholder="Pulumi Cloud (default), s3://bucket, or https://..."
               onChange={(e) => setBackendUrl(e.currentTarget.value)}

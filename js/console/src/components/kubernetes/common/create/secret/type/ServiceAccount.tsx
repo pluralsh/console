@@ -1,5 +1,5 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
-import { Input } from '@pluralsh/design-system'
+import { Input2 } from '@pluralsh/design-system'
 
 interface SecretServiceAccountFormProps {
   serviceAccount: string
@@ -17,7 +17,7 @@ function SecretServiceAccountForm({
   }, [serviceAccount, setValid])
 
   return (
-    <Input
+    <Input2
       placeholder="my-service-account"
       value={serviceAccount}
       onChange={(e) => {

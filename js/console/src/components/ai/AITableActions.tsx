@@ -5,7 +5,7 @@ import {
   Flex,
   FormField,
   GitForkIcon,
-  Input,
+  Input2,
   ListBoxItem,
   Modal,
   PencilIcon,
@@ -131,7 +131,7 @@ export function RenameAiThread({
       >
         {error && <GqlError error={error} />}
         <FormField label="Thread name">
-          <Input
+          <Input2
             value={name}
             onChange={(e) => setName(e.target.value)}
           />

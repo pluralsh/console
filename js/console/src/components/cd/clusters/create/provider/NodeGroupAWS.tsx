@@ -1,5 +1,5 @@
 import { ReactElement } from 'react'
-import { Input, Switch } from '@pluralsh/design-system'
+import { Input2, Switch } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 function NodeGroupAWS(): ReactElement<any> {
@@ -21,9 +21,9 @@ function NodeGroupAWS(): ReactElement<any> {
       >
         Spot Instance
       </Switch>
-      <Input placeholder="Test" />
-      <Input placeholder="Test" />
-      <Input placeholder="Test" />
+      <Input2 placeholder="Test" />
+      <Input2 placeholder="Test" />
+      <Input2 placeholder="Test" />
     </div>
   )
 }

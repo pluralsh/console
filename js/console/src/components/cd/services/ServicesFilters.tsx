@@ -1,6 +1,6 @@
 import {
   Chip,
-  Input,
+  Input2,
   SearchIcon,
   SubTab,
   TabList,
@@ -110,7 +110,7 @@ export function ServicesFilters({
       )}
       <div css={{ minWidth: 120, flex: 1 }}>
         {!hideSearch && (
-          <Input
+          <Input2
             placeholder="Search"
             startIcon={<SearchIcon />}
             value={searchString}

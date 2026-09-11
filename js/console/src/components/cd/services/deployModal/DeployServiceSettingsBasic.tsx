@@ -1,4 +1,4 @@
-import { FormField, Input } from '@pluralsh/design-system'
+import { FormField, Input2 } from '@pluralsh/design-system'
 import { useEffect, useRef } from 'react'
 import ClusterSelector from 'components/cd/utils/ClusterSelector'
 
@@ -19,7 +19,7 @@ export function DeployServiceSettingsBasic({
   setClusterId: (clusterId: string) => void
   showClusterSelector: boolean
 }): any {
-  const inputRef = useRef<HTMLInputElement>(undefined)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     inputRef.current?.focus?.()
@@ -31,7 +31,7 @@ export function DeployServiceSettingsBasic({
         required
         label="Service name"
       >
-        <Input
+        <Input2
           inputProps={{ ref: inputRef }}
           value={name}
           onChange={(e) => setName(e.currentTarget.value)}
@@ -41,7 +41,7 @@ export function DeployServiceSettingsBasic({
         required
         label="Service namespace"
       >
-        <Input
+        <Input2
           value={namespace}
           onChange={(e) => setNamespace(e.currentTarget.value)}
         />

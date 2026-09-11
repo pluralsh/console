@@ -2,7 +2,7 @@ import {
   ComboBox,
   FormField,
   GitHubLogoIcon,
-  Input,
+  Input2,
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
@@ -146,7 +146,7 @@ export function ServiceGitRefField({
             </Select>
           )}
           {!refs && (
-            <Input
+            <Input2
               disabled={disabled}
               value={value}
               onChange={(e) => setValue(e.currentTarget.value)}
@@ -179,7 +179,7 @@ export function ServiceGitFolderField({
       hint="Folder within the source tree where manifests are located"
       {...props}
     >
-      <Input
+      <Input2
         value={value}
         onChange={onChange}
         placeholder={placeholder}

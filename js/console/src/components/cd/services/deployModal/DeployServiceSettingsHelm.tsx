@@ -1,4 +1,4 @@
-import { FormField, Input } from '@pluralsh/design-system'
+import { FormField, Input2 } from '@pluralsh/design-system'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export function ChartForm({
@@ -20,7 +20,7 @@ export function ChartForm({
     <>
       {isNonNullable(url) && (
         <FormField label="URL">
-          <Input
+          <Input2
             placeholder="Optionally specify a Helm chart repository URL"
             value={url}
             onChange={(e) => setUrl(e.target?.value)}
@@ -31,7 +31,7 @@ export function ChartForm({
         required
         label="Chart Name"
       >
-        <Input
+        <Input2
           placeholder="Enter chart name"
           value={chart}
           onChange={(e) => setChart(e.target?.value)}
@@ -41,7 +41,7 @@ export function ChartForm({
         required
         label="Chart Version"
       >
-        <Input
+        <Input2
           placeholder="Enter chart version"
           value={version}
           onChange={(e) => setVersion(e.target?.value)}

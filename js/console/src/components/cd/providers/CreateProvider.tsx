@@ -1,4 +1,4 @@
-import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
+import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import isEmpty from 'lodash/isEmpty'
@@ -234,7 +234,7 @@ export function CreateProviderModal({
           }}
         >
           <FormField label="Name">
-            <Input
+            <Input2
               value={name}
               onChange={(e) => {
                 setName(e.currentTarget.value)

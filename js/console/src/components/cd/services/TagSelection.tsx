@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import sortBy from 'lodash/sortBy'
 import { useTheme } from 'styled-components'
-import { Chip, IconFrame, Input, PlusIcon } from '@pluralsh/design-system'
+import { Chip, IconFrame, Input2, PlusIcon } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 
 import {
@@ -21,8 +21,8 @@ export function TagSelection({
   const theme = useTheme()
   const [tagName, setTagName] = useState('')
   const [tagValue, setTagValue] = useState('')
-  const tagNameRef = useRef<HTMLInputElement>(undefined)
-  const tagValueRef = useRef<HTMLInputElement>(undefined)
+  const tagNameRef = useRef<HTMLInputElement>(null)
+  const tagValueRef = useRef<HTMLInputElement>(null)
   const sortedTags = useMemo(
     () => sortBy(tagsToNameValue(tags), ['name']),
     [tags]
@@ -48,7 +48,7 @@ export function TagSelection({
           '&& > *': { flexShrink: 0, flexGrow: 1 },
         }}
       >
-        <Input
+        <Input2
           placeholder="Tag name"
           inputProps={{ ref: tagNameRef, maxLength: 63 }}
           value={tagName}
@@ -63,7 +63,7 @@ export function TagSelection({
             }
           }}
         />
-        <Input
+        <Input2
           placeholder="Tag value"
           inputProps={{ ref: tagValueRef, maxLength: 63 }}
           value={tagValue}

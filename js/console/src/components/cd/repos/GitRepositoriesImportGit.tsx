@@ -2,7 +2,7 @@ import {
   Button,
   FormField,
   GitHubLogoIcon,
-  Input,
+  Input2,
   Switch,
 } from '@pluralsh/design-system'
 import {
@@ -226,7 +226,7 @@ export function GitRepositoryImportFields({
         }}
       >
         <StepH>Step 2. Connect your repository</StepH>
-        <Input
+        <Input2
           inputProps={{ ref: inputRef }}
           value={formState.gitUrl}
           onChange={(e) => {
@@ -306,9 +306,9 @@ export function GitAuthFields({
         setPrivateKey={setPrivateKey}
       />
       <FormField label="Passphrase">
-        <Input
+        <Input2
           inputProps={{ type: 'password' }}
-          value={passphrase}
+          value={passphrase ?? ''}
           onChange={(e) => {
             setPassphrase(e.currentTarget.value)
           }}
@@ -327,8 +327,8 @@ export function GitAuthFields({
       }}
     >
       <FormField label="User name">
-        <Input
-          value={username}
+        <Input2
+          value={username ?? ''}
           onChange={(e) => {
             setUsername(e.currentTarget.value)
           }}
@@ -336,9 +336,9 @@ export function GitAuthFields({
         />
       </FormField>
       <FormField label="Password">
-        <Input
+        <Input2
           inputProps={{ type: 'password' }}
-          value={password}
+          value={password ?? ''}
           onChange={(e) => {
             setPassword(e.currentTarget.value)
           }}

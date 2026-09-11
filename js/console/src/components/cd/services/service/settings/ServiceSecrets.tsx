@@ -7,7 +7,7 @@ import {
   FormField,
   GearTrainIcon,
   IconFrame,
-  Input,
+  Input2,
   SearchIcon,
   Table,
 } from '@pluralsh/design-system'
@@ -115,7 +115,7 @@ function SecretEditModal({
     hasUpdates,
     update,
   } = useUpdateState(initialValue || { name: '', value: '' })
-  const nameRef = useRef<HTMLInputElement>(undefined)
+  const nameRef = useRef<HTMLInputElement>(null)
   const valueRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -185,7 +185,7 @@ function SecretEditModal({
       }
     >
       <FormField label="Name">
-        <Input
+        <Input2
           value={name}
           disabled={mode === 'edit'}
           onChange={(e) => {
@@ -386,7 +386,7 @@ export function ServiceSecrets() {
           flexShrink: 0,
         }}
       >
-        <Input
+        <Input2
           placeholder="Search"
           startIcon={<SearchIcon />}
           value={filterString}

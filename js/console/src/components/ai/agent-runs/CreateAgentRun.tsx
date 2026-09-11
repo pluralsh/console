@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input,
+  Input2,
   ListBoxItem,
   Modal,
   Select,
@@ -97,7 +97,7 @@ export function CreateAgentRunModal({
           />
         </FormField>
         <FormField label="Repository URL">
-          <Input
+          <Input2
             value={form.repository}
             onChange={(e) => setForm({ ...form, repository: e.target.value })}
           />

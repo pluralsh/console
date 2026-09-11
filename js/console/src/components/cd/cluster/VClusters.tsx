@@ -1,6 +1,6 @@
 import {
   Flex,
-  Input,
+  Input2,
   SearchIcon,
   SubTab,
   TabList,
@@ -132,7 +132,7 @@ function UnstyledVirtualClustersFilters({
   return (
     <div {...props}>
       <div css={{ flex: '1' }}>
-        <Input
+        <Input2
           placeholder="Search"
           startIcon={<SearchIcon />}
           value={searchString}

@@ -1,6 +1,6 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import styled from 'styled-components'
-import { Input } from '@pluralsh/design-system'
+import { Input2 } from '@pluralsh/design-system'
 import { DeleteIconButton } from '../../../../../utils/IconButtons.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
 
@@ -69,7 +69,7 @@ function DataEntryUnstyled({
       {...props}
     >
       <div className="inputContainer">
-        <Input
+        <Input2
           placeholder="Key"
           value={entry.key}
           onChange={(e) => {

@@ -1,6 +1,6 @@
 import {
   Chip,
-  Input,
+  Input2,
   SearchIcon,
   SubTab,
   TabList,
@@ -101,7 +101,7 @@ export function RepositoriesFilters({
 
   return (
     <GitRepositoryFiltersSC>
-      <Input
+      <Input2
         placeholder="Search"
         startIcon={
           <SearchIcon

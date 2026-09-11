@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
+import { FormField, Input2, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { CloudSettingsAttributes } from 'generated/graphql'
 
@@ -47,7 +47,7 @@ export function Azure() {
           gap: theme.spacing.medium,
         }}
       >
-        <Input
+        <Input2
           css={{ flexBasis: '50%', flexShrink: 1 }}
           placeholder=""
           value={settings?.resourceGroup || ''}
@@ -56,7 +56,7 @@ export function Azure() {
           }
           prefix={<div>Resource group{isRequired('resourceGroup') && '*'}</div>}
         />
-        <Input
+        <Input2
           css={{ flexBasis: '50%', flexShrink: 1 }}
           placeholder="vpc-network"
           value={settings?.network || ''}
@@ -66,7 +66,7 @@ export function Azure() {
           prefix={<div>VPC Name{isRequired('network') && '*'}</div>}
         />
       </div>
-      <Input
+      <Input2
         css={{ flexGrow: 1, width: '100%' }}
         placeholder=""
         value={settings?.subscriptionId || ''}

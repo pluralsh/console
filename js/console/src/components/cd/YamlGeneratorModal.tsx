@@ -7,7 +7,7 @@ import {
   FormField,
   GearTrainIcon,
   GlobeIcon,
-  Input,
+  Input2,
   ListBoxItem,
   ListBoxItemChipList,
   Select,
@@ -137,7 +137,7 @@ export function YamlGeneratorModal({
               required
               label="Service name"
             >
-              <Input
+              <Input2
                 value={name}
                 placeholder="Name"
                 onChange={(e) => {

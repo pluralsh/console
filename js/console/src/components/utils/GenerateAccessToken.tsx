@@ -3,7 +3,7 @@ import {
   CheckIcon,
   CopyIcon,
   Flex,
-  Input,
+  Input2,
   useCopyText,
 } from '@pluralsh/design-system'
 
@@ -32,7 +32,7 @@ export function GenerateAccessToken({
 
   return (
     <Flex gap="medium">
-      <Input
+      <Input2
         css={{ flex: 1, caretColor: 'transparent' }}
         placeholder="Access token"
         value={token}
