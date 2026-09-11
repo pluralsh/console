@@ -1,5 +1,6 @@
-import Input, { type InputProps } from './Input'
 import {
+  type ChangeEvent,
+  type ComponentPropsWithoutRef,
   type PropsWithChildren,
   type ReactNode,
   useCallback,
@@ -7,15 +8,19 @@ import {
 } from 'react'
 
 import FormField from './FormField'
+import Input2, { type InputPropsFull } from './Input2'
 
 export type ValidationResponse = { error: boolean; message: string } | null
 export type CaptionProps = { caption: string; color: string }
 
-export type ValidatedInputProps = InputProps &
+export type ValidatedInputProps = Omit<InputPropsFull, 'error' | 'ref'> &
   PropsWithChildren<{
     label?: ReactNode
     hint?: ReactNode
     validation?: (val: string) => ValidationResponse
+    width?: string | number
+    type?: ComponentPropsWithoutRef<'input'>['type']
+    ref?: ComponentPropsWithoutRef<typeof FormField>['ref']
   }>
 
 function ValidatedInput({
@@ -25,12 +30,14 @@ function ValidatedInput({
   validation,
   onChange,
   width,
+  type,
+  inputProps,
   ...input
 }: ValidatedInputProps) {
   const [error, setError] = useState<ValidationResponse>(null)
   const wrappedOnChange = useCallback(
-    (e: any) => {
-      if (onChange) onChange(e)
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onChange?.(e)
       setError(
         validation && e.target?.value ? validation(e.target.value) : null
       )
@@ -46,12 +53,12 @@ function ValidatedInput({
       error={!!error?.error}
       width={width}
     >
-      <Input
+      <Input2
         onChange={wrappedOnChange}
-        width="100%"
+        css={{ width: '100%' }}
+        inputProps={{ type, ...inputProps }}
         {...input}
-        error={error?.error}
-        valid={error ? !error.error : null}
+        error={!!error?.error}
       />
     </FormField>
   )
