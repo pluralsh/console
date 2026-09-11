@@ -37,7 +37,8 @@ code {
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/*  Undo mysterious global :focus-visible styles set by (probably) honorable */
+/*  Undo mysterious global :focus / :focus-visible styles set by (probably) honorable */
+html :focus,
 html :focus-visible {
   background-color: unset;
   color: unset;

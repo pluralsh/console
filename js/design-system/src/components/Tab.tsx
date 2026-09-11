@@ -38,6 +38,7 @@ function Tab({
       body2
       display="block"
       textDecoration="none"
+      color="inherit"
       tabIndex={0}
       userSelect="none"
       cursor="pointer"
@@ -58,9 +59,14 @@ function Tab({
           : undefined
       }
       {...borderRadiuses}
+      _focus={{
+        outline: 'none',
+        color: 'inherit',
+      }}
       _focusVisible={{
         zIndex: theme.zIndexes.base + 1,
         ...theme.partials.focus.default,
+        color: 'inherit',
       }}
       {...props}
     >
