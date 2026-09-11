@@ -33,10 +33,6 @@
     "google_web_search",
     "save_memory"
   ]{{ end }},
-    "exclude": [
-      "update_topic",
-      "run_shell_command(rm -rf)"
-    ],
     "shell": {
       "inactivityTimeout": {{ .InactivityTimeout }}
     }
@@ -58,6 +54,11 @@
       },
       "description": "Codebase Memory MCP Server for graph-backed code search",
       "trust": true
+    }
+  },
+  "security": {
+    "environmentVariableRedaction": {
+      "enabled": true
     }
   },
   "privacy": {

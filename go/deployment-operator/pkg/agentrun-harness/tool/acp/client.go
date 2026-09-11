@@ -9,30 +9,49 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"syscall"
 
 	acpsdk "github.com/coder/acp-go-sdk"
 )
 
-const maxTextFileBytes = 16 << 20
+const (
+	maxTextFileBytes           = 16 << 20
+	maxConcurrentTextFileReads = 1
+)
 
 var _ acpsdk.Client = (*client)(nil)
 
+var (
+	errTerminalUnavailable   = errors.New("acp terminal requests are unavailable in unattended runs")
+	errReadGateUninitialized = errors.New("acp client text file read gate is not initialized")
+)
+
 type client struct {
-	turn            *turnState
-	cwd             string
-	root            *os.Root
-	fileSystemWrite bool
+	turn              *turnState
+	cwd               string
+	root              *os.Root
+	textFileReadSlots chan struct{}
+	fileSystemWrite   bool
+}
+
+func newClient(turn *turnState, cwd string, root *os.Root, fileSystemWrite bool) *client {
+	return &client{
+		turn:              turn,
+		cwd:               cwd,
+		root:              root,
+		textFileReadSlots: make(chan struct{}, maxConcurrentTextFileReads),
+		fileSystemWrite:   fileSystemWrite,
+	}
 }
 
 func (client *client) ReadTextFile(ctx context.Context, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
 	if err := client.validateSession(request.SessionId); err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
-	if err := ctx.Err(); err != nil {
+	if err := client.acquireTextFileRead(ctx); err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
+	defer client.releaseTextFileRead()
 
 	file, err := client.openTextFile(request.Path)
 	if err != nil {
@@ -42,32 +61,41 @@ func (client *client) ReadTextFile(ctx context.Context, request acpsdk.ReadTextF
 	return client.readTextFile(ctx, file, request)
 }
 
-func (client *client) readTextFile(ctx context.Context, reader io.ReadCloser, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
-	file := newCancelableTextFile(reader)
+func (client *client) acquireTextFileRead(ctx context.Context) error {
+	if client.textFileReadSlots == nil {
+		return errReadGateUninitialized
+	}
 	if err := ctx.Err(); err != nil {
-		file.closeAsync()
+		return err
+	}
+
+	select {
+	case client.textFileReadSlots <- struct{}{}:
+		if err := ctx.Err(); err != nil {
+			client.releaseTextFileRead()
+			return err
+		}
+
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (client *client) releaseTextFileRead() {
+	<-client.textFileReadSlots
+}
+
+func (client *client) readTextFile(ctx context.Context, reader io.ReadCloser, request acpsdk.ReadTextFileRequest) (response acpsdk.ReadTextFileResponse, err error) {
+	defer func() {
+		err = errors.Join(err, reader.Close())
+	}()
+
+	if err := ctx.Err(); err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
 
-	type result struct {
-		response acpsdk.ReadTextFileResponse
-		err      error
-	}
-	resultCh := make(chan result, 1)
-	go func() {
-		response, err := client.readTextFileResponse(file, request)
-		file.closeAsync()
-		<-file.closed
-		resultCh <- result{response: response, err: err}
-	}()
-
-	select {
-	case <-ctx.Done():
-		file.closeAsync()
-		return acpsdk.ReadTextFileResponse{}, ctx.Err()
-	case result := <-resultCh:
-		return result.response, result.err
-	}
+	return client.readTextFileResponse(&contextReader{ctx: ctx, reader: reader}, request)
 }
 
 func (client *client) readTextFileResponse(reader io.Reader, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
@@ -167,29 +195,22 @@ func (client *client) readTextFileContent(reader *bufio.Reader, path string, lim
 	return strings.Join(lines, "\n"), nil
 }
 
-type cancelableTextFile struct {
-	reader    io.ReadCloser
-	closeOnce sync.Once
-	closed    chan struct{}
+type contextReader struct {
+	ctx    context.Context
+	reader io.Reader
 }
 
-func newCancelableTextFile(reader io.ReadCloser) *cancelableTextFile {
-	return &cancelableTextFile{reader: reader, closed: make(chan struct{})}
-}
+func (reader *contextReader) Read(buffer []byte) (int, error) {
+	if err := reader.ctx.Err(); err != nil {
+		return 0, err
+	}
 
-func (file *cancelableTextFile) Read(buffer []byte) (int, error) {
-	return file.reader.Read(buffer)
-}
+	read, err := reader.reader.Read(buffer)
+	if contextErr := reader.ctx.Err(); contextErr != nil {
+		return 0, contextErr
+	}
 
-func (file *cancelableTextFile) closeAsync() {
-	file.closeOnce.Do(func() {
-		// Closing an owned os.File usually interrupts its Read. Some filesystems
-		// leave the syscall uninterruptible, so Close must not block this caller.
-		go func() {
-			_ = file.reader.Close()
-			close(file.closed)
-		}()
-	})
+	return read, err
 }
 
 func (client *client) WriteTextFile(ctx context.Context, request acpsdk.WriteTextFileRequest) (acpsdk.WriteTextFileResponse, error) {
@@ -253,23 +274,23 @@ func (client *client) RequestPermission(_ context.Context, request acpsdk.Reques
 }
 
 func (*client) CreateTerminal(context.Context, acpsdk.CreateTerminalRequest) (acpsdk.CreateTerminalResponse, error) {
-	return acpsdk.CreateTerminalResponse{TerminalId: "terminal-1"}, nil
+	return acpsdk.CreateTerminalResponse{}, errTerminalUnavailable
 }
 
 func (*client) KillTerminal(context.Context, acpsdk.KillTerminalRequest) (acpsdk.KillTerminalResponse, error) {
-	return acpsdk.KillTerminalResponse{}, nil
+	return acpsdk.KillTerminalResponse{}, errTerminalUnavailable
 }
 
 func (*client) TerminalOutput(context.Context, acpsdk.TerminalOutputRequest) (acpsdk.TerminalOutputResponse, error) {
-	return acpsdk.TerminalOutputResponse{Output: "", Truncated: false}, nil
+	return acpsdk.TerminalOutputResponse{}, errTerminalUnavailable
 }
 
 func (*client) ReleaseTerminal(context.Context, acpsdk.ReleaseTerminalRequest) (acpsdk.ReleaseTerminalResponse, error) {
-	return acpsdk.ReleaseTerminalResponse{}, nil
+	return acpsdk.ReleaseTerminalResponse{}, errTerminalUnavailable
 }
 
 func (*client) WaitForTerminalExit(context.Context, acpsdk.WaitForTerminalExitRequest) (acpsdk.WaitForTerminalExitResponse, error) {
-	return acpsdk.WaitForTerminalExitResponse{}, nil
+	return acpsdk.WaitForTerminalExitResponse{}, errTerminalUnavailable
 }
 
 func (client *client) SessionUpdate(_ context.Context, notification acpsdk.SessionNotification) error {

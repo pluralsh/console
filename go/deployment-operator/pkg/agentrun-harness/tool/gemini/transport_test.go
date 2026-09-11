@@ -105,6 +105,9 @@ func TestTransportTurnUsesRepositoryCWDAndPreservesExecutionOptions(t *testing.T
 	t.Setenv("GEMINI_TEST_FIXTURE", fixturePath(t, "success.jsonl"))
 	launchOutput := filepath.Join(t.TempDir(), "launch")
 	t.Setenv("GEMINI_TEST_OUTPUT", launchOutput)
+	t.Setenv("GIT_CONFIG_COUNT", "8")
+	t.Setenv("GIT_CONFIG_KEY_0", "unsafe.key")
+	t.Setenv("GIT_CONFIG_VALUE_0", "unsafe-value")
 
 	endpoint := "https://api.example"
 	transport := newTestTransport(t, console.AgentRunModeWrite, "gemini-custom", &endpoint)
@@ -118,6 +121,11 @@ func TestTransportTurnUsesRepositoryCWDAndPreservesExecutionOptions(t *testing.T
 			Model: toolv1.ModelSelection{Name: "gemini-custom"},
 		},
 		Options: []exec.Option{
+			exec.WithEnv([]string{
+				"GIT_CONFIG_COUNT=9",
+				"GIT_CONFIG_KEY_0=another.unsafe.key",
+				"GIT_CONFIG_VALUE_0=another-unsafe-value",
+			}),
 			exec.WithHook(stackv1.LifecyclePreStart, func() error {
 				preStarts.Add(1)
 				return nil
@@ -147,6 +155,8 @@ func TestTransportTurnUsesRepositoryCWDAndPreservesExecutionOptions(t *testing.T
 		"arg=--approval-mode", "arg=yolo", "arg=--prompt", "arg=implement feature with spaces",
 		"key=api-key", "endpoint=https://api.example", "trust=true",
 		"home=" + transport.agent.config.WorkDir, "cwd=" + transport.repositoryDir,
+		"git_config_count=1", "git_config_key_0=safe.directory", "git_config_value_0=" + transport.repositoryDir,
+		"git_safe_directory=" + transport.repositoryDir,
 	}
 	for _, want := range wantLaunchLines {
 		if !strings.Contains(string(launch), want+"\n") {
@@ -303,7 +313,7 @@ func assertSuccessfulStream(t *testing.T, sink *testSink) {
 		t.Fatalf("first assistant message = %#v", sink.messages[0])
 	}
 	assertToolMessage(t, sink.messages[1], "call-1", "read_file", `{"path":"README.md"}`, toolv1.RunningToolOutput, console.AgentMessageToolStateRunning)
-	assertToolMessage(t, sink.messages[2], "call-1", "read_file", `{"path":"README.md"}`, "line one\nline two  ", console.AgentMessageToolStateCompleted)
+	assertToolMessage(t, sink.messages[2], "call-1", "read_file", `{"path":"README.md"}`, "Tool completed successfully; Gemini CLI did not expose display output.", console.AgentMessageToolStateCompleted)
 	assertToolMessage(t, sink.messages[3], "call-2", "run_shell", `{"command":"false"}`, toolv1.RunningToolOutput, console.AgentMessageToolStateRunning)
 	assertToolMessage(t, sink.messages[4], "call-2", "run_shell", `{"command":"false"}`, "command failed", console.AgentMessageToolStateError)
 	if sink.messages[5].attributes.Role != console.AiRoleSystem || sink.messages[5].attributes.Message != "Warning: approaching turn limit" {
@@ -368,7 +378,10 @@ if [ -n "$GEMINI_TEST_OUTPUT" ]; then
   for arg in "$@"; do
     printf 'arg=%s\n' "$arg" >> "$GEMINI_TEST_OUTPUT"
   done
-  printf 'key=%s\nendpoint=%s\ngoogle_endpoint=%s\ntrust=%s\nhome=%s\ncwd=%s\n' "$GEMINI_API_KEY" "$GEMINI_API_BASE_URL" "$GOOGLE_GEMINI_BASE_URL" "$GEMINI_CLI_TRUST_WORKSPACE" "$GEMINI_CLI_HOME" "$PWD" >> "$GEMINI_TEST_OUTPUT"
+  printf 'key=%s\nendpoint=%s\ngoogle_endpoint=%s\ntrust=%s\nhome=%s\ncwd=%s\ngit_config_count=%s\ngit_config_key_0=%s\ngit_config_value_0=%s\n' "$GEMINI_API_KEY" "$GEMINI_API_BASE_URL" "$GOOGLE_GEMINI_BASE_URL" "$GEMINI_CLI_TRUST_WORKSPACE" "$GEMINI_CLI_HOME" "$PWD" "$GIT_CONFIG_COUNT" "$GIT_CONFIG_KEY_0" "$GIT_CONFIG_VALUE_0" >> "$GEMINI_TEST_OUTPUT"
+  git config --get-all safe.directory | while IFS= read -r directory; do
+    printf 'git_safe_directory=%s\n' "$directory" >> "$GEMINI_TEST_OUTPUT"
+  done
 fi
 printf '[DEBUG] ignored Gemini CLI stderr noise\n' >&2
 if [ -n "$GEMINI_TEST_FIXTURE" ]; then

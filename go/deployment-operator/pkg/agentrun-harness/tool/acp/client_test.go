@@ -3,9 +3,11 @@ package acp
 import (
 	"context"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
@@ -24,7 +26,12 @@ func newTestClient(t *testing.T, fileSystemWrite bool) (*client, string) {
 	}
 	t.Cleanup(func() { _ = root.Close() })
 	engine := NewEngine()
-	return &client{turn: newTurn(engine, &testSink{}, "session-1"), cwd: directory, root: root, fileSystemWrite: fileSystemWrite}, directory
+	return newClient(
+		newTurn(engine, &testSink{}, "session-1"),
+		directory,
+		root,
+		fileSystemWrite,
+	), directory
 }
 
 func TestClientReadsAndWritesTextFiles(t *testing.T) {
@@ -43,17 +50,101 @@ func TestClientReadsAndWritesTextFiles(t *testing.T) {
 	}
 }
 
-func TestClientReadTextFileCancellationInterruptsBlockedRead(t *testing.T) {
-	underlying := &stalledReadCloser{
+func TestClientReadTextFileCancellationWhileWaitingForAdmission(t *testing.T) {
+	acpClient, directory := newTestClient(t, true)
+	path := filepath.Join(directory, "file.txt")
+	if err := os.WriteFile(path, []byte("content"), 0o600); err != nil {
+		t.Fatalf("write text file: %v", err)
+	}
+	if err := acpClient.acquireTextFileRead(context.Background()); err != nil {
+		t.Fatalf("hold text file read slot: %v", err)
+	}
+	if slots := cap(acpClient.textFileReadSlots); slots != 1 {
+		t.Fatalf("text file read slot capacity = %d, want 1", slots)
+	}
+
+	var releaseOnce sync.Once
+	release := func() {
+		releaseOnce.Do(acpClient.releaseTextFileRead)
+	}
+	t.Cleanup(release)
+
+	baseCtx, cancel := context.WithCancel(context.Background())
+	ctx := &observedDoneContext{
+		Context:  baseCtx,
+		observed: make(chan struct{}),
+	}
+	readDone := make(chan error, 1)
+	go func() {
+		_, err := acpClient.ReadTextFile(ctx, acpsdk.ReadTextFileRequest{
+			SessionId: "session-1",
+			Path:      path,
+		})
+		readDone <- err
+	}()
+
+	select {
+	case <-ctx.observed:
+	case <-time.After(time.Second):
+		t.Fatal("read did not wait for admission")
+	}
+	cancel()
+
+	select {
+	case err := <-readDone:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("queued read error = %v, want context canceled", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("queued read did not return after cancellation")
+	}
+
+	if slots := len(acpClient.textFileReadSlots); slots != maxConcurrentTextFileReads {
+		t.Fatalf("occupied text file read slots = %d, want %d", slots, maxConcurrentTextFileReads)
+	}
+	release()
+	if slots := len(acpClient.textFileReadSlots); slots != 0 {
+		t.Fatalf("occupied text file read slots after release = %d, want 0", slots)
+	}
+}
+
+func TestClientReadTextFileRejectsMissingAdmissionGate(t *testing.T) {
+	acpClient, directory := newTestClient(t, true)
+	acpClient.textFileReadSlots = nil
+	path := filepath.Join(directory, "file.txt")
+	if err := os.WriteFile(path, []byte("content"), 0o600); err != nil {
+		t.Fatalf("write text file: %v", err)
+	}
+
+	_, err := acpClient.ReadTextFile(context.Background(), acpsdk.ReadTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+	})
+	if !errors.Is(err, errReadGateUninitialized) {
+		t.Fatalf("missing text file read gate error = %v, want %v", err, errReadGateUninitialized)
+	}
+}
+
+type observedDoneContext struct {
+	context.Context
+	observed     chan struct{}
+	observedOnce sync.Once
+}
+
+func (ctx *observedDoneContext) Done() <-chan struct{} {
+	ctx.observedOnce.Do(func() { close(ctx.observed) })
+	return ctx.Context.Done()
+}
+
+func TestClientReadTextFileCancellationRetainsResourceOwnership(t *testing.T) {
+	underlying := &blockingReadCloser{
 		readStarted:  make(chan struct{}),
 		closeStarted: make(chan struct{}),
 		releaseRead:  make(chan struct{}),
 		releaseClose: make(chan struct{}),
+		read:         1,
 	}
-	t.Cleanup(func() {
-		close(underlying.releaseRead)
-		close(underlying.releaseClose)
-	})
+	t.Cleanup(underlying.release)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	readDone := make(chan error, 1)
@@ -70,37 +161,125 @@ func TestClientReadTextFileCancellationInterruptsBlockedRead(t *testing.T) {
 	cancel()
 
 	select {
+	case <-underlying.closeStarted:
+		t.Fatal("cancellation started close concurrently with the blocked read")
+	case err := <-readDone:
+		t.Fatalf("canceled read returned before the owned read stopped: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+
+	underlying.unblockRead()
+	select {
+	case <-underlying.closeStarted:
+	case <-time.After(time.Second):
+		t.Fatal("underlying close did not start after the read stopped")
+	}
+
+	select {
+	case err := <-readDone:
+		t.Fatalf("canceled read returned before the owned close stopped: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+
+	underlying.unblockClose()
+	select {
 	case err := <-readDone:
 		if !errors.Is(err, context.Canceled) {
 			t.Fatalf("canceled read error = %v, want context canceled", err)
 		}
 	case <-time.After(time.Second):
-		t.Fatal("canceled read remained blocked")
+		t.Fatal("canceled read did not return after cleanup completed")
 	}
+}
+
+func TestClientReadTextFileCancellationTakesPrecedenceOverEOF(t *testing.T) {
+	underlying := &blockingReadCloser{
+		readStarted:  make(chan struct{}),
+		closeStarted: make(chan struct{}),
+		releaseRead:  make(chan struct{}),
+		releaseClose: make(chan struct{}),
+		readErr:      io.EOF,
+	}
+	t.Cleanup(underlying.release)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	readDone := make(chan error, 1)
+	go func() {
+		_, err := (&client{}).readTextFile(ctx, underlying, acpsdk.ReadTextFileRequest{Path: "/file.txt"})
+		readDone <- err
+	}()
+
+	select {
+	case <-underlying.readStarted:
+	case <-time.After(time.Second):
+		t.Fatal("underlying read did not start")
+	}
+	cancel()
+	underlying.unblockRead()
+
 	select {
 	case <-underlying.closeStarted:
 	case <-time.After(time.Second):
-		t.Fatal("cancellation did not attempt to close the underlying reader")
+		t.Fatal("underlying close did not start after EOF")
+	}
+
+	select {
+	case err := <-readDone:
+		t.Fatalf("canceled read returned before the owned close stopped: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+
+	underlying.unblockClose()
+	select {
+	case err := <-readDone:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("canceled EOF read error = %v, want context canceled", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("canceled EOF read did not return after cleanup completed")
 	}
 }
 
-type stalledReadCloser struct {
-	readStarted  chan struct{}
-	closeStarted chan struct{}
-	releaseRead  chan struct{}
-	releaseClose chan struct{}
+type blockingReadCloser struct {
+	readStarted      chan struct{}
+	closeStarted     chan struct{}
+	releaseRead      chan struct{}
+	releaseClose     chan struct{}
+	readStartedOnce  sync.Once
+	releaseReadOnce  sync.Once
+	releaseCloseOnce sync.Once
+	readCount        int
+	read             int
+	readErr          error
 }
 
-func (reader *stalledReadCloser) Read([]byte) (int, error) {
-	close(reader.readStarted)
+func (reader *blockingReadCloser) Read([]byte) (int, error) {
+	reader.readStartedOnce.Do(func() { close(reader.readStarted) })
 	<-reader.releaseRead
-	return 0, errors.New("read released")
+	reader.readCount++
+	if reader.readCount > 1 {
+		return 0, io.EOF
+	}
+	return reader.read, reader.readErr
 }
 
-func (reader *stalledReadCloser) Close() error {
+func (reader *blockingReadCloser) Close() error {
 	close(reader.closeStarted)
 	<-reader.releaseClose
 	return nil
+}
+
+func (reader *blockingReadCloser) release() {
+	reader.unblockRead()
+	reader.unblockClose()
+}
+
+func (reader *blockingReadCloser) unblockRead() {
+	reader.releaseReadOnce.Do(func() { close(reader.releaseRead) })
+}
+
+func (reader *blockingReadCloser) unblockClose() {
+	reader.releaseCloseOnce.Do(func() { close(reader.releaseClose) })
 }
 
 func TestClientRejectsWritesWithoutPermission(t *testing.T) {
@@ -157,6 +336,59 @@ func TestClientRequestPermissionStartsToolCallBeforeDenying(t *testing.T) {
 	}
 	if len(sink.messages) != 2 {
 		t.Fatalf("tool call messages = %d, want 2", len(sink.messages))
+	}
+}
+
+func TestClientTerminalRequestsAreUnavailable(t *testing.T) {
+	const expected = "acp terminal requests are unavailable in unattended runs"
+
+	tests := []struct {
+		name string
+		call func() error
+	}{
+		{
+			name: "create",
+			call: func() error {
+				_, err := (&client{}).CreateTerminal(context.Background(), acpsdk.CreateTerminalRequest{})
+				return err
+			},
+		},
+		{
+			name: "kill",
+			call: func() error {
+				_, err := (&client{}).KillTerminal(context.Background(), acpsdk.KillTerminalRequest{})
+				return err
+			},
+		},
+		{
+			name: "output",
+			call: func() error {
+				_, err := (&client{}).TerminalOutput(context.Background(), acpsdk.TerminalOutputRequest{})
+				return err
+			},
+		},
+		{
+			name: "release",
+			call: func() error {
+				_, err := (&client{}).ReleaseTerminal(context.Background(), acpsdk.ReleaseTerminalRequest{})
+				return err
+			},
+		},
+		{
+			name: "wait for exit",
+			call: func() error {
+				_, err := (&client{}).WaitForTerminalExit(context.Background(), acpsdk.WaitForTerminalExitRequest{})
+				return err
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if err := test.call(); err == nil || err.Error() != expected {
+				t.Fatalf("terminal request error = %v, want %q", err, expected)
+			}
+		})
 	}
 }
 

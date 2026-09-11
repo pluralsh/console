@@ -27,6 +27,11 @@ const (
 	geminiTrustWorkspaceEnv = "GEMINI_CLI_TRUST_WORKSPACE"
 	geminiHomeEnv           = "GEMINI_CLI_HOME"
 	geminiTrustWorkspace    = "true"
+	gitConfigCountEnv       = "GIT_CONFIG_COUNT"
+	gitConfigKeyEnv         = "GIT_CONFIG_KEY_0"
+	gitConfigValueEnv       = "GIT_CONFIG_VALUE_0"
+	gitConfigCount          = "1"
+	gitSafeDirectoryKey     = "safe.directory"
 )
 
 type Transport struct {
@@ -98,12 +103,20 @@ func (transport *Transport) executable(request toolv1.TurnRequest) (exec.Executa
 	launchOptions = append(
 		launchOptions,
 		exec.WithArgs(transport.args(request)),
-		exec.WithEnv(transport.agent.env(config)),
+		exec.WithEnv(transport.env(config)),
 		exec.WithDir(transport.repositoryDir),
 		exec.WithTimeout(gemini.Timeout),
 	)
 
 	return exec.NewExecutable(geminiBinary, launchOptions...), nil
+}
+
+func (transport *Transport) env(config toolv1.Config) []string {
+	return append(transport.agent.env(config),
+		fmt.Sprintf("%s=%s", gitConfigCountEnv, gitConfigCount),
+		fmt.Sprintf("%s=%s", gitConfigKeyEnv, gitSafeDirectoryKey),
+		fmt.Sprintf("%s=%s", gitConfigValueEnv, transport.repositoryDir),
+	)
 }
 
 func (transport *Transport) args(request toolv1.TurnRequest) []string {

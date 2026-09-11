@@ -12,6 +12,8 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 )
 
+const successfulToolResultWithoutDisplay = "Tool completed successfully; Gemini CLI did not expose display output."
+
 type streamEventType string
 
 const (
@@ -233,8 +235,8 @@ func (turn *streamTurn) handleToolResult(line []byte) error {
 		return fmt.Errorf("invalid gemini tool result event: unsupported status %q", event.Status)
 	}
 
-	output := ""
-	if event.Output != nil {
+	output := successfulToolResultWithoutDisplay
+	if event.Output != nil && *event.Output != "" {
 		output = *event.Output
 	} else if event.Error != nil {
 		output = event.Error.Message

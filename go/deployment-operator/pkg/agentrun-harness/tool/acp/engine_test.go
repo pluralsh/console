@@ -411,7 +411,7 @@ func TestEngineTurnCreatesAndResumesSession(t *testing.T) {
 	}
 }
 
-func TestEngineTurnAdvertisesRequestedFilesystemWriteCapability(t *testing.T) {
+func TestEngineTurnAdvertisesClientCapabilities(t *testing.T) {
 	for _, test := range []struct {
 		name            string
 		fileSystemWrite bool
@@ -438,12 +438,15 @@ func TestEngineTurnAdvertisesRequestedFilesystemWriteCapability(t *testing.T) {
 			if len(initializations) != 1 {
 				t.Fatalf("initializations = %#v", initializations)
 			}
-			capabilities := initializations[0].ClientCapabilities.Fs
-			if !capabilities.ReadTextFile || capabilities.WriteTextFile != test.fileSystemWrite {
-				t.Fatalf("filesystem capabilities = %#v", capabilities)
+			capabilities := initializations[0].ClientCapabilities
+			if !capabilities.Fs.ReadTextFile || capabilities.Fs.WriteTextFile != test.fileSystemWrite {
+				t.Fatalf("filesystem capabilities = %#v", capabilities.Fs)
 			}
-			if terminalOutput, ok := initializations[0].ClientCapabilities.Meta["terminal_output"].(bool); !ok || !terminalOutput {
-				t.Fatalf("terminal output capability = %#v", initializations[0].ClientCapabilities.Meta)
+			if capabilities.Terminal {
+				t.Fatal("terminal capability unexpectedly advertised")
+			}
+			if _, exists := capabilities.Meta["terminal_output"]; exists {
+				t.Fatalf("legacy terminal output capability = %#v, want absent", capabilities.Meta)
 			}
 		})
 	}

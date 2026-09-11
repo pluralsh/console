@@ -2,9 +2,31 @@ package v1
 
 import (
 	"testing"
+	"time"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 )
+
+func TestAgentRunFromEnvGeminiInactivityTimeout(t *testing.T) {
+	runtime := &console.AgentRuntimeFragment{Type: console.AgentRuntimeTypeGemini}
+
+	t.Run("defaults to Gemini CLI timeout", func(t *testing.T) {
+		t.Setenv(controller.EnvGeminiInactivityTimeout, "")
+		config := new(AgentRun).fromEnv(runtime).Config.Gemini
+		if config.InactivityTimeout != 5*time.Minute {
+			t.Fatalf("Gemini inactivity timeout = %s, want 5m", config.InactivityTimeout)
+		}
+	})
+
+	t.Run("explicit environment value overrides default", func(t *testing.T) {
+		t.Setenv(controller.EnvGeminiInactivityTimeout, "47s")
+		config := new(AgentRun).fromEnv(runtime).Config.Gemini
+		if config.InactivityTimeout != 47*time.Second {
+			t.Fatalf("Gemini inactivity timeout = %s, want 47s", config.InactivityTimeout)
+		}
+	})
+}
 
 func TestExaConnectionEnabled(t *testing.T) {
 	run := &AgentRun{Runtime: &AgentRuntime{ExaConnection: true}}

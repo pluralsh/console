@@ -18,11 +18,17 @@ const (
 	geminiHomeDir                   = ".gemini"
 	geminiSkillsDir                 = "skills"
 	geminiChatsDir                  = "chats"
+	geminiPoliciesDir               = "policies"
+	geminiPolicyFileName            = "plural-harness.toml"
 	geminiCompatibilityInstructions = `
 
 Gemini CLI compatibility: do not use command substitution forms such as $(), backticks, <(), or >(), because the CLI blocks them even in yolo mode. Use arithmetic loops, shell builtins, temporary files, or separate commands instead.
 
 Git metadata: inspect repository history and state with git commands. Do not use file tools to read .git internals such as .git/HEAD, because Gemini CLI restricts direct access to those paths.
+
+MCP endpoint safety: never probe http://127.0.0.1:8080/mcp with an unbounded curl. A bare GET is a long-lived streamable-HTTP notification connection, not a health probe. Use Gemini MCP tools for MCP work. If a connectivity diagnostic is necessary, use an explicit short deadline such as curl --max-time 5.
+
+Environment safety: do not run broad environment dumps or inspect secret values directly. Check only a named non-secret variable when necessary.
 `
 )
 
@@ -176,6 +182,10 @@ func (agent *Agent) geminiHome(config toolv1.Config) string {
 
 func (agent *Agent) skillsPath(config toolv1.Config) string {
 	return filepath.Join(agent.geminiHome(config), geminiSkillsDir)
+}
+
+func (agent *Agent) policiesPath(config toolv1.Config) string {
+	return filepath.Join(agent.geminiHome(config), geminiPoliciesDir)
 }
 
 func (agent *Agent) chatsPath(config toolv1.Config) string {

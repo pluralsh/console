@@ -135,7 +135,6 @@ func (attempt *sessionAttempt) initialize() (acpsdk.InitializeResponse, error) {
 			Version: "1",
 		},
 		ClientCapabilities: acpsdk.ClientCapabilities{
-			Meta: map[string]any{"terminal_output": true},
 			Fs: acpsdk.FileSystemCapabilities{
 				ReadTextFile:  true,
 				WriteTextFile: attempt.fileSystemWrite,
@@ -323,16 +322,17 @@ func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioP
 		return nil, fmt.Errorf("open acp working directory: %w", err)
 	}
 	turn := newTurn(engine, sink, request.SessionID)
+	protocolClient := newClient(
+		turn,
+		request.Cwd,
+		root,
+		request.FileSystemWrite,
+	)
 	attempt := &sessionAttempt{
-		engine:  engine,
-		ctx:     ctx,
-		process: process,
-		connection: acpsdk.NewClientSideConnection(&client{
-			turn:            turn,
-			cwd:             request.Cwd,
-			root:            root,
-			fileSystemWrite: request.FileSystemWrite,
-		}, process.Stdin, process.Stdout),
+		engine:          engine,
+		ctx:             ctx,
+		process:         process,
+		connection:      acpsdk.NewClientSideConnection(protocolClient, process.Stdin, process.Stdout),
 		turn:            turn,
 		settings:        request.Settings,
 		cwd:             request.Cwd,

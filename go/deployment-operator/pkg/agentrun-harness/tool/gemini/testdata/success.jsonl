@@ -3,7 +3,7 @@
 {"type":"message","timestamp":"2026-09-10T12:00:02Z","role":"assistant","content":"I will ","delta":true}
 {"type":"message","timestamp":"2026-09-10T12:00:03Z","role":"assistant","content":"inspect.","delta":true}
 {"type":"tool_use","timestamp":"2026-09-10T12:00:04Z","tool_name":"read_file","tool_id":"call-1","parameters":{"path":"README.md"}}
-{"type":"tool_result","timestamp":"2026-09-10T12:00:05Z","tool_id":"call-1","status":"success","output":"line one\nline two  "}
+{"type":"tool_result","timestamp":"2026-09-10T12:00:05Z","tool_id":"call-1","status":"success","output":""}
 {"type":"tool_use","timestamp":"2026-09-10T12:00:06Z","tool_name":"run_shell","tool_id":"call-2","parameters":{"command":"false"}}
 {"type":"tool_result","timestamp":"2026-09-10T12:00:07Z","tool_id":"call-2","status":"error","error":{"type":"TOOL_EXECUTION_ERROR","message":"command failed"}}
 {"type":"error","timestamp":"2026-09-10T12:00:08Z","severity":"warning","message":"approaching turn limit"}

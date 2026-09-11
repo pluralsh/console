@@ -12,7 +12,8 @@ import (
 //nolint:gocyclo
 func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 	baseInput := &ConfigTemplateInput{
-		Model: "gemini-3.1-flash-lite",
+		Model:             "gemini-3.1-flash-lite",
+		InactivityTimeout: 300,
 	}
 
 	t.Run("plural MCP server uses in-pod streamable HTTP URL", func(t *testing.T) {
@@ -72,6 +73,30 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		env := codebaseMemory["env"].(map[string]any)
 		if env[common.CodebaseMemoryCacheEnv] != common.CodebaseMemoryCacheDir {
 			t.Fatalf("expected %s=%s, got %v", common.CodebaseMemoryCacheEnv, common.CodebaseMemoryCacheDir, env[common.CodebaseMemoryCacheEnv])
+		}
+	})
+
+	t.Run("redacts inherited environment variables from shell tools", func(t *testing.T) {
+		input := *baseInput
+		input.AgentRunMode = console.AgentRunModeWrite
+
+		_, content, err := settings(&input)
+		if err != nil {
+			t.Fatalf("settings() failed: %v", err)
+		}
+
+		var out struct {
+			Security struct {
+				EnvironmentVariableRedaction struct {
+					Enabled bool `json:"enabled"`
+				} `json:"environmentVariableRedaction"`
+			} `json:"security"`
+		}
+		if err := json.Unmarshal([]byte(content), &out); err != nil {
+			t.Fatalf("generated content is not valid JSON: %v", err)
+		}
+		if !out.Security.EnvironmentVariableRedaction.Enabled {
+			t.Fatal("security.environmentVariableRedaction.enabled = false, want true")
 		}
 	})
 
@@ -147,35 +172,12 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		if _, ok := writeOut["excludeTools"]; ok {
 			t.Error("settings unexpectedly contains deprecated top-level excludeTools")
 		}
+		if _, ok := writeTools["exclude"]; ok {
+			t.Error("settings unexpectedly contains deprecated tools.exclude")
+		}
 		if writeTools["shell"].(map[string]any)["inactivityTimeout"] != float64(baseInput.InactivityTimeout) {
 			t.Errorf("tools.shell.inactivityTimeout = %v, want %d", writeTools["shell"].(map[string]any)["inactivityTimeout"], baseInput.InactivityTimeout)
 		}
-	})
-
-	t.Run("progress-only topic tool is excluded", func(t *testing.T) {
-		input := *baseInput
-		input.AgentRunMode = console.AgentRunModeWrite
-
-		_, content, err := settings(&input)
-		if err != nil {
-			t.Fatalf("settings() failed: %v", err)
-		}
-
-		var out struct {
-			Tools struct {
-				ExcludeTools []string `json:"exclude"`
-			} `json:"tools"`
-		}
-		if err := json.Unmarshal([]byte(content), &out); err != nil {
-			t.Fatalf("generated content is not valid JSON: %v", err)
-		}
-
-		for _, tool := range out.Tools.ExcludeTools {
-			if tool == "update_topic" {
-				return
-			}
-		}
-		t.Errorf("tools.exclude = %q, want update_topic", out.Tools.ExcludeTools)
 	})
 
 	t.Run("quotes model", func(t *testing.T) {
