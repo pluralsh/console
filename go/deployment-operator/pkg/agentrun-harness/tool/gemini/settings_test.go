@@ -138,6 +138,30 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 	})
 
+	t.Run("progress-only topic tool is excluded", func(t *testing.T) {
+		input := *baseInput
+		input.AgentRunMode = console.AgentRunModeWrite
+
+		_, content, err := settings(&input)
+		if err != nil {
+			t.Fatalf("settings() failed: %v", err)
+		}
+
+		var out struct {
+			ExcludeTools []string `json:"excludeTools"`
+		}
+		if err := json.Unmarshal([]byte(content), &out); err != nil {
+			t.Fatalf("generated content is not valid JSON: %v", err)
+		}
+
+		for _, tool := range out.ExcludeTools {
+			if tool == "UpdateTopicTool" {
+				return
+			}
+		}
+		t.Errorf("excludeTools = %q, want UpdateTopicTool", out.ExcludeTools)
+	})
+
 	t.Run("quotes model and repository directory", func(t *testing.T) {
 		input := *baseInput
 		input.Model = "gemini-3.1-\"flash\""
