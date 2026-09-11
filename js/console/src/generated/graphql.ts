@@ -3634,6 +3634,12 @@ export enum ComponentState {
   Running = 'RUNNING'
 }
 
+export type ComponentStatusCount = {
+  __typename?: 'ComponentStatusCount';
+  count: Scalars['Int']['output'];
+  state: ComponentState;
+};
+
 /** A tree view of the kubernetes object hierarchy beneath a component */
 export type ComponentTree = {
   __typename?: 'ComponentTree';
@@ -4553,7 +4559,13 @@ export type Flow = {
   __typename?: 'Flow';
   /** the agent runtime for this flow */
   agentRuntime?: Maybe<AgentRuntime>;
+  /** the number of alerts for services in this flow */
+  alertCount?: Maybe<Scalars['Int']['output']>;
   alerts?: Maybe<AlertConnection>;
+  /** the number of service components in this flow */
+  componentCount?: Maybe<Scalars['Int']['output']>;
+  /** a rollup of component states in this flow */
+  componentStatuses?: Maybe<Array<Maybe<ComponentStatusCount>>>;
   description?: Maybe<Scalars['String']['output']>;
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -4563,6 +4575,10 @@ export type Flow = {
   maxPreviews?: Maybe<Scalars['Int']['output']>;
   metadata?: Maybe<Scalars['Map']['output']>;
   name: Scalars['String']['output'];
+  /** the number of pending pipeline gates in this flow */
+  pendingPipelineCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of pipelines in this flow */
+  pipelineCount?: Maybe<Scalars['Int']['output']>;
   pipelines?: Maybe<PipelineConnection>;
   previewEnvironmentInstances?: Maybe<PreviewEnvironmentInstanceConnection>;
   previewEnvironmentTemplates?: Maybe<PreviewEnvironmentTemplateConnection>;
@@ -4575,6 +4591,10 @@ export type Flow = {
   repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** servers that are bound to this flow */
   servers?: Maybe<Array<Maybe<McpServer>>>;
+  /** the number of services in this flow */
+  serviceCount?: Maybe<Scalars['Int']['output']>;
+  /** a rollup of service statuses in this flow */
+  serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   services?: Maybe<ServiceDeploymentConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
@@ -4689,6 +4709,12 @@ export type FlowEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Flow>;
 };
+
+export enum FlowSort {
+  Favorited = 'FAVORITED',
+  Name = 'NAME',
+  ServiceCount = 'SERVICE_COUNT'
+}
 
 export type FlowWorkbenchAttributes = {
   /** the workbench to associate with this flow */
@@ -5725,11 +5751,6 @@ export type IssueEdge = {
 export enum IssueSort {
   InsertedAt = 'INSERTED_AT',
   Title = 'TITLE'
-}
-
-export enum IssueSortDirection {
-  Asc = 'ASC',
-  Desc = 'DESC'
 }
 
 export enum IssueStatus {
@@ -11716,6 +11737,7 @@ export type RootQueryType = {
   /** Fetches the manifests from cache once the agent has given us them, will be null otherwise */
   fetchManifests?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   flow?: Maybe<Flow>;
+  flowServiceCounts?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   flows?: Maybe<FlowConnection>;
   fluxHelmRepositories?: Maybe<Array<Maybe<FluxHelmRepository>>>;
   fluxHelmRepository?: Maybe<FluxHelmRepository>;
@@ -12388,12 +12410,21 @@ export type RootQueryTypeFlowArgs = {
 };
 
 
+export type RootQueryTypeFlowServiceCountsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeFlowsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  direction?: InputMaybe<SortDirection>;
+  favoriteIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  sort?: InputMaybe<FlowSort>;
+  statuses?: InputMaybe<Array<InputMaybe<ServiceDeploymentStatus>>>;
 };
 
 
@@ -14967,6 +14998,11 @@ export type SmtpSettingsAttributes = {
   user: Scalars['String']['input'];
 };
 
+export enum SortDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 export type StackAttributes = {
   /** user id to use for default Plural authentication in this stack */
   actorId?: InputMaybe<Scalars['ID']['input']>;
@@ -16472,7 +16508,7 @@ export type WorkbenchEvalResultsArgs = {
 export type WorkbenchIssuesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  direction?: InputMaybe<IssueSortDirection>;
+  direction?: InputMaybe<SortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>>>;
@@ -20959,9 +20995,9 @@ export type ClusterIsoImagesQueryVariables = Exact<{
 
 export type ClusterIsoImagesQuery = { __typename?: 'RootQueryType', clusterIsoImages?: { __typename?: 'ClusterIsoImageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterIsoImageEdge', node?: { __typename?: 'ClusterIsoImage', id: string, user?: string | null, password?: string | null, registry: string, image: string, insertedAt?: string | null, project?: { __typename?: 'Project', name: string } | null } | null } | null> | null } | null };
 
-export type FlowBasicFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
+export type FlowBasicFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, serviceCount?: number | null, componentCount?: number | null, alertCount?: number | null, pipelineCount?: number | null, pendingPipelineCount?: number | null, project?: { __typename?: 'Project', id: string, name: string } | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null, componentStatuses?: Array<{ __typename?: 'ComponentStatusCount', state: ComponentState, count: number } | null> | null };
 
-export type FlowBasicWithBindingsFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
+export type FlowBasicWithBindingsFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, serviceCount?: number | null, componentCount?: number | null, alertCount?: number | null, pipelineCount?: number | null, pendingPipelineCount?: number | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null, componentStatuses?: Array<{ __typename?: 'ComponentStatusCount', state: ComponentState, count: number } | null> | null };
 
 export type PreviewEnvironmentTemplateFragment = { __typename?: 'PreviewEnvironmentTemplate', id: string, name: string, commentTemplate?: string | null, referenceService?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null };
 
@@ -20975,10 +21011,14 @@ export type FlowsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  statuses?: InputMaybe<Array<InputMaybe<ServiceDeploymentStatus>> | InputMaybe<ServiceDeploymentStatus>>;
+  sort?: InputMaybe<FlowSort>;
+  direction?: InputMaybe<SortDirection>;
+  favoriteIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
 }>;
 
 
-export type FlowsQuery = { __typename?: 'RootQueryType', flows?: { __typename?: 'FlowConnection', edges?: Array<{ __typename?: 'FlowEdge', node?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type FlowsQuery = { __typename?: 'RootQueryType', flows?: { __typename?: 'FlowConnection', edges?: Array<{ __typename?: 'FlowEdge', node?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, serviceCount?: number | null, componentCount?: number | null, alertCount?: number | null, pipelineCount?: number | null, pendingPipelineCount?: number | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null, componentStatuses?: Array<{ __typename?: 'ComponentStatusCount', state: ComponentState, count: number } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null, flowServiceCounts?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
 
 export type FlowQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -20986,7 +21026,7 @@ export type FlowQueryVariables = Exact<{
 }>;
 
 
-export type FlowQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null };
+export type FlowQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, serviceCount?: number | null, componentCount?: number | null, alertCount?: number | null, pipelineCount?: number | null, pendingPipelineCount?: number | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null, componentStatuses?: Array<{ __typename?: 'ComponentStatusCount', state: ComponentState, count: number } | null> | null } | null };
 
 export type FlowServicesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21065,7 +21105,7 @@ export type UpsertFlowMutationVariables = Exact<{
 }>;
 
 
-export type UpsertFlowMutation = { __typename?: 'RootMutationType', upsertFlow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null };
+export type UpsertFlowMutation = { __typename?: 'RootMutationType', upsertFlow?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, serviceCount?: number | null, componentCount?: number | null, alertCount?: number | null, pipelineCount?: number | null, pendingPipelineCount?: number | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null, componentStatuses?: Array<{ __typename?: 'ComponentStatusCount', state: ComponentState, count: number } | null> | null } | null };
 
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, memberCount?: number | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
@@ -22791,7 +22831,7 @@ export type WorkbenchIssuesQueryVariables = Exact<{
   providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>> | InputMaybe<IssueWebhookProvider>>;
   statuses?: InputMaybe<Array<InputMaybe<IssueStatus>> | InputMaybe<IssueStatus>>;
   sort?: InputMaybe<IssueSort>;
-  direction?: InputMaybe<IssueSortDirection>;
+  direction?: InputMaybe<SortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -26362,12 +26402,6 @@ export const ServiceDeploymentBindingsFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
-export const ServiceStatusCountFragmentDoc = gql`
-    fragment ServiceStatusCount on ServiceStatusCount {
-  count
-  status
-}
-    `;
 export const ComponentTreeFragmentDoc = gql`
     fragment ComponentTree on ComponentTree {
   root {
@@ -26545,6 +26579,12 @@ export const IsoImageFragmentDoc = gql`
   }
 }
     `;
+export const ServiceStatusCountFragmentDoc = gql`
+    fragment ServiceStatusCount on ServiceStatusCount {
+  count
+  status
+}
+    `;
 export const FlowBasicFragmentDoc = gql`
     fragment FlowBasic on Flow {
   id
@@ -26557,15 +26597,23 @@ export const FlowBasicFragmentDoc = gql`
     id
     name
   }
-  alerts(first: 500) {
-    edges {
-      node {
-        id
-      }
-    }
+  agentRuntime {
+    id
+  }
+  serviceCount
+  componentCount
+  alertCount
+  pipelineCount
+  pendingPipelineCount
+  serviceStatuses {
+    ...ServiceStatusCount
+  }
+  componentStatuses {
+    state
+    count
   }
 }
-    `;
+    ${ServiceStatusCountFragmentDoc}`;
 export const FlowBasicWithBindingsFragmentDoc = gql`
     fragment FlowBasicWithBindings on Flow {
   ...FlowBasic
@@ -38910,8 +38958,16 @@ export type ClusterIsoImagesLazyQueryHookResult = ReturnType<typeof useClusterIs
 export type ClusterIsoImagesSuspenseQueryHookResult = ReturnType<typeof useClusterIsoImagesSuspenseQuery>;
 export type ClusterIsoImagesQueryResult = Apollo.QueryResult<ClusterIsoImagesQuery, ClusterIsoImagesQueryVariables>;
 export const FlowsDocument = gql`
-    query Flows($first: Int = 100, $after: String, $q: String) {
-  flows(first: $first, after: $after, q: $q) {
+    query Flows($first: Int = 100, $after: String, $q: String, $statuses: [ServiceDeploymentStatus], $sort: FlowSort, $direction: SortDirection, $favoriteIds: [ID]) {
+  flows(
+    first: $first
+    after: $after
+    q: $q
+    statuses: $statuses
+    sort: $sort
+    direction: $direction
+    favoriteIds: $favoriteIds
+  ) {
     edges {
       node {
         ...FlowBasicWithBindings
@@ -38921,9 +38977,13 @@ export const FlowsDocument = gql`
       ...PageInfo
     }
   }
+  flowServiceCounts(q: $q) {
+    ...ServiceStatusCount
+  }
 }
     ${FlowBasicWithBindingsFragmentDoc}
-${PageInfoFragmentDoc}`;
+${PageInfoFragmentDoc}
+${ServiceStatusCountFragmentDoc}`;
 
 /**
  * __useFlowsQuery__
@@ -38940,6 +39000,10 @@ ${PageInfoFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      q: // value for 'q'
+ *      statuses: // value for 'statuses'
+ *      sort: // value for 'sort'
+ *      direction: // value for 'direction'
+ *      favoriteIds: // value for 'favoriteIds'
  *   },
  * });
  */
@@ -46961,7 +47025,7 @@ export type WorkbenchesIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenc
 export type WorkbenchesIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesIssuesSuspenseQuery>;
 export type WorkbenchesIssuesQueryResult = Apollo.QueryResult<WorkbenchesIssuesQuery, WorkbenchesIssuesQueryVariables>;
 export const WorkbenchIssuesDocument = gql`
-    query WorkbenchIssues($id: ID!, $q: String, $providers: [IssueWebhookProvider], $statuses: [IssueStatus], $sort: IssueSort, $direction: IssueSortDirection, $first: Int = 100, $after: String) {
+    query WorkbenchIssues($id: ID!, $q: String, $providers: [IssueWebhookProvider], $statuses: [IssueStatus], $sort: IssueSort, $direction: SortDirection, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
     issueCounts {

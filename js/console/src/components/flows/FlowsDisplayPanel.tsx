@@ -1,4 +1,5 @@
 import { Radio } from '@pluralsh/design-system'
+import { serviceStatusToLabel } from 'components/cd/services/ServiceStatusChip'
 import {
   DisplayFilterRow,
   DisplayFilterRows,
@@ -11,34 +12,21 @@ import {
   toggleListValue,
 } from 'components/utils/display/DisplayPanel'
 import {
-  ISSUE_STATUS_LABELS,
-  ISSUE_STATUS_OPTIONS,
-} from 'components/workbenches/common/issueStatus'
-import {
-  IssueSort,
+  FlowSort,
   SortDirection,
-  IssueStatus,
-  IssueWebhookProvider,
+  ServiceDeploymentStatus,
 } from 'generated/graphql'
-import { startCase } from 'lodash'
-import {
-  visibleIssueProviders,
-  WorkbenchIssuesDisplayState,
-} from './workbenchIssuesDisplay'
+import { FLOW_HEALTH_OPTIONS, FlowsDisplayState } from './flowsDisplay'
 
-export function WorkbenchIssuesDisplayPanel({
+export function FlowsDisplayPanel({
   state,
   onChange,
-  providerCounts,
   statusCounts,
 }: {
-  state: WorkbenchIssuesDisplayState
-  onChange: (next: WorkbenchIssuesDisplayState) => void
-  providerCounts: Partial<Record<IssueWebhookProvider, number>>
-  statusCounts: Partial<Record<IssueStatus, number>>
+  state: FlowsDisplayState
+  onChange: (next: FlowsDisplayState) => void
+  statusCounts: Partial<Record<ServiceDeploymentStatus, number>>
 }) {
-  const providers = visibleIssueProviders(providerCounts)
-
   return (
     <DisplayPanel>
       <DisplayViewToggle
@@ -46,31 +34,12 @@ export function WorkbenchIssuesDisplayPanel({
         onChange={(view) => onChange({ ...state, view })}
       />
       <DisplaySection>
-        <DisplaySectionHeader>Source from</DisplaySectionHeader>
+        <DisplaySectionHeader>Service health</DisplaySectionHeader>
         <DisplayFilterRows>
-          {providers.map((provider) => (
-            <DisplayFilterRow
-              key={provider}
-              label={startCase(provider.toLowerCase())}
-              count={providerCounts[provider] ?? 0}
-              checked={state.providers.includes(provider)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  providers: toggleListValue(state.providers, provider),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
-      <DisplaySection>
-        <DisplaySectionHeader>Ticket status</DisplaySectionHeader>
-        <DisplayFilterRows compact>
-          {ISSUE_STATUS_OPTIONS.map((status) => (
+          {FLOW_HEALTH_OPTIONS.map((status) => (
             <DisplayFilterRow
               key={status}
-              label={ISSUE_STATUS_LABELS[status]}
+              label={serviceStatusToLabel(status)}
               count={statusCounts[status] ?? 0}
               checked={state.statuses.includes(status)}
               onChange={() =>
@@ -98,19 +67,25 @@ export function WorkbenchIssuesDisplayPanel({
         />
         <DisplayRadioGroup
           value={state.sort}
-          onChange={(value) => onChange({ ...state, sort: value as IssueSort })}
+          onChange={(value) => onChange({ ...state, sort: value as FlowSort })}
         >
           <Radio
             small
-            value={IssueSort.InsertedAt}
+            value={FlowSort.Name}
           >
-            Date created
+            Flow name
           </Radio>
           <Radio
             small
-            value={IssueSort.Title}
+            value={FlowSort.ServiceCount}
           >
-            Issue name
+            Number of services
+          </Radio>
+          <Radio
+            small
+            value={FlowSort.Favorited}
+          >
+            Favorited flows
           </Radio>
         </DisplayRadioGroup>
       </DisplaySection>

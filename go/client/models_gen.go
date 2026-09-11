@@ -2973,6 +2973,11 @@ type ComponentContentAttributes struct {
 	Live    *string `json:"live,omitempty"`
 }
 
+type ComponentStatusCount struct {
+	State ComponentState `json:"state"`
+	Count int64          `json:"count"`
+}
+
 // A tree view of the kubernetes object hierarchy beneath a component
 type ComponentTree struct {
 	Root         *KubernetesUnstructured `json:"root,omitempty"`
@@ -3769,7 +3774,21 @@ type Flow struct {
 	// write policy for this flow
 	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// the project this flow belongs to
-	Project                     *Project                              `json:"project,omitempty"`
+	Project *Project `json:"project,omitempty"`
+	// the number of services in this flow
+	ServiceCount *int64 `json:"serviceCount,omitempty"`
+	// the number of service components in this flow
+	ComponentCount *int64 `json:"componentCount,omitempty"`
+	// the number of alerts for services in this flow
+	AlertCount *int64 `json:"alertCount,omitempty"`
+	// the number of pipelines in this flow
+	PipelineCount *int64 `json:"pipelineCount,omitempty"`
+	// the number of pending pipeline gates in this flow
+	PendingPipelineCount *int64 `json:"pendingPipelineCount,omitempty"`
+	// a rollup of service statuses in this flow
+	ServiceStatuses []*ServiceStatusCount `json:"serviceStatuses,omitempty"`
+	// a rollup of component states in this flow
+	ComponentStatuses           []*ComponentStatusCount               `json:"componentStatuses,omitempty"`
 	Services                    *ServiceDeploymentConnection          `json:"services,omitempty"`
 	Pipelines                   *PipelineConnection                   `json:"pipelines,omitempty"`
 	PullRequests                *PullRequestConnection                `json:"pullRequests,omitempty"`
@@ -4130,9 +4149,11 @@ type Group struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	// automatically adds all users in the system to this group
-	Global     *bool   `json:"global,omitempty"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
+	Global *bool `json:"global,omitempty"`
+	// number of users in this group
+	MemberCount *int64  `json:"memberCount,omitempty"`
+	InsertedAt  *string `json:"insertedAt,omitempty"`
+	UpdatedAt   *string `json:"updatedAt,omitempty"`
 }
 
 type GroupAttributes struct {
@@ -14724,6 +14745,63 @@ func (e EvidenceType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type FlowSort string
+
+const (
+	FlowSortName         FlowSort = "NAME"
+	FlowSortServiceCount FlowSort = "SERVICE_COUNT"
+	FlowSortFavorited    FlowSort = "FAVORITED"
+)
+
+var AllFlowSort = []FlowSort{
+	FlowSortName,
+	FlowSortServiceCount,
+	FlowSortFavorited,
+}
+
+func (e FlowSort) IsValid() bool {
+	switch e {
+	case FlowSortName, FlowSortServiceCount, FlowSortFavorited:
+		return true
+	}
+	return false
+}
+
+func (e FlowSort) String() string {
+	return string(e)
+}
+
+func (e *FlowSort) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FlowSort(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FlowSort", str)
+	}
+	return nil
+}
+
+func (e FlowSort) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *FlowSort) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e FlowSort) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type GateState string
 
 const (
@@ -15298,61 +15376,6 @@ func (e *IssueSort) UnmarshalJSON(b []byte) error {
 }
 
 func (e IssueSort) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
-type IssueSortDirection string
-
-const (
-	IssueSortDirectionAsc  IssueSortDirection = "ASC"
-	IssueSortDirectionDesc IssueSortDirection = "DESC"
-)
-
-var AllIssueSortDirection = []IssueSortDirection{
-	IssueSortDirectionAsc,
-	IssueSortDirectionDesc,
-}
-
-func (e IssueSortDirection) IsValid() bool {
-	switch e {
-	case IssueSortDirectionAsc, IssueSortDirectionDesc:
-		return true
-	}
-	return false
-}
-
-func (e IssueSortDirection) String() string {
-	return string(e)
-}
-
-func (e *IssueSortDirection) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = IssueSortDirection(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid IssueSortDirection", str)
-	}
-	return nil
-}
-
-func (e IssueSortDirection) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *IssueSortDirection) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e IssueSortDirection) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -18241,6 +18264,61 @@ func (e *SinkType) UnmarshalJSON(b []byte) error {
 }
 
 func (e SinkType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SortDirection string
+
+const (
+	SortDirectionAsc  SortDirection = "ASC"
+	SortDirectionDesc SortDirection = "DESC"
+)
+
+var AllSortDirection = []SortDirection{
+	SortDirectionAsc,
+	SortDirectionDesc,
+}
+
+func (e SortDirection) IsValid() bool {
+	switch e {
+	case SortDirectionAsc, SortDirectionDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortDirection) String() string {
+	return string(e)
+}
+
+func (e *SortDirection) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortDirection(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortDirection", str)
+	}
+	return nil
+}
+
+func (e SortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SortDirection) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SortDirection) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -1,0 +1,11 @@
+---
+description: Keep Ecto queries inside schema modules
+globs: "**/*.{ex,exs}"
+alwaysApply: false
+---
+
+# Ecto Queries
+
+There should never be queries outside of schema modules (`lib/console/schema`).
+
+Define `from`/`where`/`join` queries on the relevant `Console.Schema.*` module. Resolvers and contexts only compose those functions and call `Repo.all/1`.

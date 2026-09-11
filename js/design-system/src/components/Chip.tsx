@@ -30,6 +30,7 @@ export type ChipProps = ComponentPropsWithRef<typeof Card> & {
   closeButton?: boolean
   closeButtonProps?: ComponentPropsWithRef<'div'>
   clickable?: boolean
+  rounded?: boolean
   truncateWidth?: number
   truncateEdge?: 'start' | 'end'
   tooltip?: boolean | ComponentProps<typeof Tooltip>['label']
@@ -74,6 +75,7 @@ const ChipCardSC = styled(Card)<{
   $truncateWidth?: number
   $truncateEdge?: 'start' | 'end'
   $condensed?: boolean
+  $rounded?: boolean
 }>(({
   $size,
   $severity,
@@ -81,6 +83,7 @@ const ChipCardSC = styled(Card)<{
   $truncateWidth,
   $truncateEdge,
   $condensed,
+  $rounded,
   theme,
 }) => {
   const textColor = $inactive
@@ -108,6 +111,7 @@ const ChipCardSC = styled(Card)<{
       gap: $condensed ? 6 : theme.spacing.xsmall,
       // Chips are dense inline labels — hairline only, no Card elevation shadow
       ...(theme.mode === 'light' && { boxShadow: 'none' }),
+      ...($rounded && { borderRadius: 999, boxShadow: 'none' }),
     },
     '.children': {
       display: 'flex',
@@ -188,6 +192,7 @@ function Chip({
   disabled,
   tooltip,
   tooltipProps,
+  rounded = false,
   ...props
 }: ChipProps) {
   fillLevel = useDecideFillLevel({ fillLevel })
@@ -208,6 +213,7 @@ function Chip({
       $severity={severity}
       $truncateWidth={truncateWidth}
       $truncateEdge={truncateEdge}
+      $rounded={rounded}
       {...props}
     >
       {loading && (

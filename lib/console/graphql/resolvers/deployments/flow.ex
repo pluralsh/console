@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   use Console.GraphQl.Resolvers.Deployments.Base
+  alias Console.Repo
   alias Console.Deployments.{Flows, Policies}
   alias Console.Schema.{
     Flow,
@@ -16,10 +17,38 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   }
 
   def list_flows(args, %{context: %{current_user: user}}) do
-    Flow.ordered()
-    |> Flow.for_user(user)
+    Flow.for_user(user)
     |> maybe_search(Flow, args)
+    |> flow_status_filter(args)
+    |> Flow.by_ids()
+    |> flow_order(args)
     |> paginate(args)
+  end
+
+  defp flow_status_filter(query, %{statuses: statuses}) when is_list(statuses),
+    do: Flow.with_service_statuses(query, statuses)
+  defp flow_status_filter(query, _), do: query
+
+  defp flow_order(query, args) do
+    dir = Map.get(args, :direction) || :asc
+    apply_flow_sort(query, Map.get(args, :sort), dir, args)
+  end
+
+  defp apply_flow_sort(query, :service_count, dir, _),
+    do: Flow.ordered_by_service_count(query, dir)
+  defp apply_flow_sort(query, :favorited, dir, args),
+    do: Flow.ordered_by_favorites(query, Map.get(args, :favorite_ids) || [], dir)
+  defp apply_flow_sort(query, _, dir, _),
+    do: Flow.ordered(query, [{dir, :name}])
+
+  def flow_service_counts(args, %{context: %{current_user: user}}) do
+    Flow.for_user(user)
+    |> maybe_search(Flow, args)
+    |> Flow.ids()
+    |> Service.for_flows()
+    |> Service.statuses()
+    |> Repo.all()
+    |> ok()
   end
 
   def list_mcp_servers(args, %{context: %{current_user: user}}) do

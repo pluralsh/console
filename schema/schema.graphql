@@ -533,7 +533,34 @@ type RootQueryType {
 
   federatedCredential(id: ID!): FederatedCredential
 
-  flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
+  flows(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    q: String
+
+    "return flows that have at least one service in one of these statuses"
+    statuses: [ServiceDeploymentStatus]
+
+    "field to sort flows by"
+    sort: FlowSort
+
+    "sort direction"
+    direction: SortDirection
+
+    "flow ids to rank first when sorting by favorited"
+    favoriteIds: [ID]
+  ): FlowConnection
+
+  flowServiceCounts(
+    "restrict counts to flows matching this search"
+    q: String
+  ): [ServiceStatusCount]
 
   flow(id: ID, name: String): Flow
 
@@ -1854,11 +1881,6 @@ enum IssueStatus {
 enum IssueSort {
   INSERTED_AT
   TITLE
-}
-
-enum IssueSortDirection {
-  ASC
-  DESC
 }
 
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
@@ -4016,7 +4038,7 @@ type Workbench {
     sort: IssueSort
 
     "sort direction"
-    direction: IssueSortDirection
+    direction: SortDirection
   ): IssueConnection
 
   issueCounts: WorkbenchIssueCounts
@@ -6225,6 +6247,12 @@ enum McpServerProtocol {
   STREAMABLE_HTTP
 }
 
+enum FlowSort {
+  NAME
+  SERVICE_COUNT
+  FAVORITED
+}
+
 input FlowAttributes {
   name: String!
 
@@ -6317,6 +6345,11 @@ input PreviewEnvironmentTemplateAttributes {
   previewTtl: String
 }
 
+type ComponentStatusCount {
+  state: ComponentState!
+  count: Int!
+}
+
 type Flow {
   id: ID!
 
@@ -6351,6 +6384,27 @@ type Flow {
 
   "the project this flow belongs to"
   project: Project
+
+  "the number of services in this flow"
+  serviceCount: Int
+
+  "the number of service components in this flow"
+  componentCount: Int
+
+  "the number of alerts for services in this flow"
+  alertCount: Int
+
+  "the number of pipelines in this flow"
+  pipelineCount: Int
+
+  "the number of pending pipeline gates in this flow"
+  pendingPipelineCount: Int
+
+  "a rollup of service statuses in this flow"
+  serviceStatuses: [ServiceStatusCount]
+
+  "a rollup of component states in this flow"
+  componentStatuses: [ComponentStatusCount]
 
   services(after: String, first: Int, before: String, last: Int): ServiceDeploymentConnection
 
@@ -17806,6 +17860,11 @@ enum Delta {
   CREATE
   UPDATE
   DELETE
+}
+
+enum SortDirection {
+  ASC
+  DESC
 }
 
 type MetricResult {
