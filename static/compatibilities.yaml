@@ -232,7 +232,14 @@ addons:
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details provided in the supplied release notes; both versions
+          only point to the upstream CHANGELOG for the full list of changes.]
+      breaking_changes: [No breaking-change details provided in the supplied release
+          notes; both versions only point to the upstream CHANGELOG for the full list
+          of changes.]
     chart_version: 2.66.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.8', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.7',
       'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.6',
@@ -1015,22 +1022,22 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-efs-csi-driver
   versions:
-  - version: 3.4.2
+  - version: 3.5.0
     kube: []
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ["Release notes provided don\u2019t list specific changes; both versions\
-          \ only point to the project CHANGELOG for details."]
-      breaking_changes: [No breaking changes are called out in the provided release
-          notes; consult CHANGELOG-3.x.md for any upgrade-impacting changes between
-          v3.4.0 and v3.4.2.]
-    chart_version: 4.4.2
-    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.5',
-      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.5',
-      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.4.2']
+      features: ["Release notes provided don\u2019t enumerate changes; they point\
+          \ to the upstream CHANGELOG-3.x.md for details."]
+      breaking_changes: [No breaking changes were listed in the provided release notes;
+          review CHANGELOG-3.x.md for any upgrade-impacting changes between v3.4.0
+          and v3.5.0.]
+    chart_version: 4.5.0
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.7',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7',
+      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.0']
   - version: 3.4.0
     kube: []
     requirements: []
@@ -11252,6 +11259,11 @@ addons:
   release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
   helm_repository_url: https://aws.github.io/eks-charts
   versions:
+  - version: 1.23.1
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 1.23.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -16869,6 +16881,84 @@ addons:
   release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/external-dns
   versions:
+  - version: 0.22.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '## Helm chart / values changes to review
+
+
+        - **`extraArgs` now supports booleans** (chart feature). If you previously
+        had to quote booleans (e.g., `"true"`) you can now supply real YAML booleans.
+        Re-check your values to ensure they render the intended CLI flags.
+
+        - **Cross-namespace watch support** (chart feature). If you need ExternalDNS
+        to watch resources outside its release namespace, configure the new chart
+        option(s) for watching other namespaces.
+
+        - **`replicaCount` introduced (0 or 1)**. You can now scale ExternalDNS down
+        to `0` (pause reconciliation) or run `1` replica explicitly; validate your
+        current scaling/HA expectations.
+
+        - **`namespaceOverride` added**. If you deploy into one namespace but want
+        resources labeled/created under another, review this new option.
+
+        - **Optional Kubernetes Service creation**. The chart can now create a Service
+        for the ExternalDNS pods; decide if you want/need it (often only needed for
+        metrics/webhook access).
+
+        - **Gateway API ListenerSets toggle**: new `enableGatewayListenerSets` value;
+        enable only if you use Gateway API ListenerSets.
+
+
+        ## Values / flags that are now effectively mandatory for safe upgrade
+
+
+        - **`--policy` is now required; no default**. Ensure your Helm values set
+        a policy explicitly (commonly `upsert-only`; or temporarily `create-only`
+        during validation).
+
+        - **Annotation prefix change**: Default is now `external-dns.kubernetes.io/`
+        (no fallback). Either migrate annotations in manifests, or set `--annotation-prefix=external-dns.alpha.kubernetes.io/`
+        temporarily during migration.
+
+        '
+      chart_updates: [Chart adds cross-namespace watch capability., Chart adds `replicaCount`
+          (0 or 1) to explicitly scale ExternalDNS down or run single replica., Chart
+          adds `namespaceOverride` option., Chart supports boolean values in `extraArgs`
+          rendering., Chart can optionally create a Kubernetes Service for the ExternalDNS
+          deployment., Chart adds `enableGatewayListenerSets` flag for Gateway API
+          ListenerSets support., Misc Helm quoting/argument rendering fixes (missing
+          quotes) that may change the rendered container args compared to older chart
+          versions.]
+      features: [Adds DNAME record type support., Introduces a CRD-backed registry
+          option as an alternative to TXT ownership records., Adds template scoping
+          via `isSource` and allows repeatable `--fqdn-template/--target-template/--fqdn-target-template`
+          flags., 'AWS: can pin records to a specific hosted zone via annotation;
+          improved alias handling (A vs AAAA).', Adds more consistent RefObject tracking
+          across sources and multiple RefObjects per endpoint/event., 'RFC2136: new
+          `--rfc2136-axfr` flag, deprecating `--rfc2136-tsig-axfr`.', 'Chart-level
+          features: watch other namespaces, optional Service creation, and new toggles
+          for Gateway API ListenerSets.']
+      breaking_changes: ["Default annotation prefix changes to `external-dns.kubernetes.io/`\
+          \ with no fallback; if you don\u2019t migrate annotations or set `--annotation-prefix`,\
+          \ ExternalDNS may stop recognizing existing records and could delete them\
+          \ depending on policy.", '`--policy` must be set explicitly (no default).
+          Upgrades will fail or behave unexpectedly if you relied on an implicit default;
+          wrong policy combined with the annotation-prefix change can delete records.',
+        'Removes in-tree providers: Akamai, Plural, Transip. You must stay on an older
+          version or switch to a webhook-based provider if you used them (Gandi marked
+          for future removal).', Pi-hole v5 API support is removed (v6+ only)., Gateway
+          API `TLSRoute` migrates to `v1` and Ambassador Host CRD to `getambassador.io/v3alpha1`;
+          clusters using older APIs/CRDs must be upgraded before ExternalDNS can read
+          them., AWS TXT ownership for A ALIAS changes from `cname-` to `a-` prefix;
+          migration is automatic but you may need to clean up legacy TXT records with
+          the provided script., 'RFC2136 flag change: `--rfc2136-axfr` replaces deprecated
+          `--rfc2136-tsig-axfr`.']
+    chart_version: 1.22.0
+    images: []
   - version: 0.21.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -19821,6 +19911,26 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 90.1.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Adds secret-based authentication support for control-plane ServiceMonitors
+          (new chart functionality) in 90.0.0., '90.1.1 is primarily maintenance:
+          CI cleanup (remove repo references) and dependency non-major updates via
+          Renovate; no functional chart behavior changes called out.']
+      features: ['Control-plane ServiceMonitors can now use secret-based authentication,
+          enabling secured scraping of control-plane components where credentials
+          are required.']
+      breaking_changes: []
+    chart_version: 90.1.1
+    images: ['docker.io/grafana/grafana:13.2.1-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+      'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 90.0.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -26224,7 +26334,7 @@ addons:
           appset page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug
           fixes from Dex).']
       breaking_changes: []
-    chart_version: 10.8.4
+    chart_version: 10.9.0
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.2']
   - version: 3.5.1
@@ -26786,25 +26896,23 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.1.2
+  - version: 4.1.3
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['MySQL persistence config now correctly applies driver-level options,
-          fixing previously ignored settings.', 'Several dependency bumps address
-          security fixes (fasthttp, cel-go, moby/go-archive).', 'Controller and sync-lock
-          behavior improved: better handling of UID changes, transient lock errors,
-          and shutdown/termination cases.', Server SSO session tokens now use symmetric
-          encryption., Artifact staging behavior corrected to re-enter workingDir
-          after init-less input staging., OpenTelemetry process owner detection is
-          skipped to avoid issues in some environments.]
-      breaking_changes: []
-    chart_version: 2.0.5
-    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.2', 'quay.io/argoproj/argocli:v4.1.2',
-      'quay.io/argoproj/workflow-controller:v4.1.2']
+      features: ["Release notes provided are \u201CQuick Start\u201D boilerplate;\
+          \ no concrete feature list or change log entries are included for 4.1.0\u2192\
+          4.1.3.", 'Practical change visible: new CLI/controller/server artifacts
+          and install manifests are published for v4.1.3 (binaries and install.yaml
+          URLs updated).']
+      breaking_changes: [No breaking changes are listed in the provided notes; they
+          only point to the upgrading guide/changelog for details.]
+    chart_version: 2.0.6
+    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.3', 'quay.io/argoproj/argocli:v4.1.3',
+      'quay.io/argoproj/workflow-controller:v4.1.3']
   - version: 4.1.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
