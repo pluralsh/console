@@ -44,6 +44,7 @@ const (
 	EnvOpenCodeProvider         = "PLRL_OPENCODE_PROVIDER"
 	EnvOpenCodeEndpoint         = "PLRL_OPENCODE_ENDPOINT"
 	EnvOpenCodeModel            = "PLRL_OPENCODE_MODEL"
+	EnvOpenCodeMethod           = "PLRL_OPENCODE_METHOD"
 	EnvOpenCodeToken            = "PLRL_OPENCODE_TOKEN"
 	EnvOpenCodeOpenAICompatible = "PLRL_OPENCODE_OPENAI_COMPATIBLE"
 
@@ -68,6 +69,7 @@ const (
 	EnvPiAPIKey   = "PLRL_PI_API_KEY"
 	EnvPiProvider = "PLRL_PI_PROVIDER"
 	EnvPiEndpoint = "PLRL_PI_ENDPOINT"
+	EnvPiMethod   = "PLRL_PI_METHOD"
 
 	EnvDindEnabled    = "PLRL_DIND_ENABLED"
 	EnvBrowserEnabled = "PLRL_BROWSER_ENABLED"
@@ -582,6 +584,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		result[EnvOpenCodeEndpoint] = lo.FromPtr(config.OpenCode.Endpoint)
 		result[EnvOpenCodeModel] = lo.FromPtr(config.OpenCode.Model)
 		result[EnvOpenCodeToken] = config.OpenCode.Token
+		if config.OpenCode.Method != nil {
+			result[EnvOpenCodeMethod] = config.OpenCode.Method.String()
+		}
 		if config.OpenCode.OpenAICompatible {
 			result[EnvOpenCodeOpenAICompatible] = "true"
 		}
@@ -660,6 +665,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		result[EnvPiModel] = lo.FromPtr(config.Pi.Model)
 		result[EnvPiAPIKey] = config.Pi.APIKey
 		result[EnvPiProvider] = lo.FromPtr(config.Pi.Provider)
+		if config.Pi.Method != nil {
+			result[EnvPiMethod] = config.Pi.Method.String()
+		}
 		if config.Pi.Timeout != nil {
 			result[EnvExecTimeout] = config.Pi.Timeout.Duration.String()
 		}

@@ -34,6 +34,7 @@ func New(config v1.Config) v1.Tool {
 		if runtimeConfig.Provider != "" {
 			result.provider = runtimeConfig.Provider
 		}
+		result.method = runtimeConfig.Method
 		result.apiKey = runtimeConfig.APIKey
 		if runtimeConfig.Endpoint != nil {
 			result.endpoint = *runtimeConfig.Endpoint
@@ -189,7 +190,7 @@ func (in *Pi) mcpConfigPath() string {
 }
 
 func (in *Pi) writeConfig() error {
-	endpoint := in.endpoint
+	endpoint := piOpenAIEndpoint(in.endpoint, in.provider, in.method)
 	if in.Config.Run.IsProxyEnabled() {
 		endpoint = fmt.Sprintf("%s/ext/ai/v1", in.consoleURL)
 		if in.Config.Run.IsStreamingProxyEnabled() {
@@ -214,7 +215,7 @@ func (in *Pi) writeConfig() error {
 		models["providers"].(map[string]any)[provider] = map[string]any{
 			"baseUrl": endpoint,
 			"apiKey":  fmt.Sprintf("$%s", openAIAPIKeyEnv),
-			"api":     "openai-responses",
+			"api":     piOpenAIAPI(in.method),
 			"models": []map[string]any{{
 				"id":            in.model,
 				"contextWindow": 128000,
@@ -256,6 +257,26 @@ func (in *Pi) writeConfig() error {
 		return fmt.Errorf("write pi mcp config: %w", err)
 	}
 	return nil
+}
+
+func piOpenAIAPI(method string) string {
+	if console.OpenAiMethod(method) == console.OpenAiMethodChat {
+		return openAICompletionsAPI
+	}
+	return openAIResponsesAPI
+}
+
+func piOpenAIEndpoint(endpoint, provider, method string) string {
+	if endpoint != "" {
+		return endpoint
+	}
+	switch console.OpenAiMethod(method) {
+	case console.OpenAiMethodChat, console.OpenAiMethodResponses:
+		if provider == openAIProvider {
+			return openAIBaseURL
+		}
+	}
+	return ""
 }
 
 func addExternalMCPServers(servers map[string]any) error {
