@@ -118,7 +118,9 @@
   "username": "plural",
   "provider": {
     "{{ .Provider }}": {
-      {{- if or .OpenAICompatible (eq .Provider "plural") }}
+      {{- if .OpenAICompatible }}
+      "npm": "@ai-sdk/openai-compatible",
+      {{- else if or (eq .Provider "plural") (eq .Provider "openai-compatible") }}
       "npm": "@ai-sdk/openai",
       {{- end }}
       "name": "{{ .Provider }}",
@@ -130,12 +132,11 @@
         "baseURL": "{{ .ConsoleURL }}/ext/ai/v1",
         {{- end }}
         "apiKey": "{{ .ConsoleToken }}"
-        {{- else if .OpenAICompatible }}
-        "baseURL": "{{ .Endpoint }}",
-        "apiKey": "{{ .Token }}"
         {{- else }}
         {{- if .Endpoint }}
         "baseURL": "{{ .Endpoint }}",
+        {{- else if and .OpenAICompatible (eq .Provider "openai") }}
+        "baseURL": "https://api.openai.com/v1",
         {{- end }}
         "apiKey": "{{ .Token }}"
         {{- end }}

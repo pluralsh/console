@@ -1862,6 +1862,17 @@ spec:
                         items:
                           type: string
                         type: array
+                      method:
+                        description: |-
+                          Method configures which OpenAI API OpenCode should use.
+                          CHAT selects @ai-sdk/openai-compatible and forces /chat/completions.
+                          RESPONSES selects @ai-sdk/openai and forces /responses.
+                          AUTO preserves the provider default.
+                        enum:
+                        - CHAT
+                        - RESPONSES
+                        - AUTO
+                        type: string
                       model:
                         description: Model is the LLM model to use.
                         type: string
@@ -1983,6 +1994,17 @@ spec:
                       endpoint:
                         description: Endpoint overrides the OpenAI-compatible provider
                           base URL.
+                        type: string
+                      method:
+                        description: |-
+                          Method configures which OpenAI API Pi should use.
+                          CHAT selects openai-completions and forces /chat/completions.
+                          RESPONSES selects openai-responses and forces /responses.
+                          AUTO preserves the current openai-responses default.
+                        enum:
+                        - CHAT
+                        - RESPONSES
+                        - AUTO
                         type: string
                       model:
                         description: Model is the model id to use.

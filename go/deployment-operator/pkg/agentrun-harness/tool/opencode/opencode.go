@@ -470,7 +470,7 @@ func (in *Opencode) recordSessionID(sessionID string) {
 
 func New(config v1.Config) v1.Tool {
 	oc := config.Run.Runtime.Config.OpenCode
-	settings := resolveOpenCodeSettings(oc.Provider, oc.Model, oc.OpenAICompatible, config.Run.IsProxyEnabled())
+	settings := resolveOpenCodeSettings(oc.Provider, oc.Model, oc.Method, oc.OpenAICompatible, config.Run.IsProxyEnabled())
 
 	result := &Opencode{
 		DefaultTool:      v1.DefaultTool{Config: config},

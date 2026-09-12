@@ -1793,6 +1793,11 @@ func (in *OpenCodeConfig) DeepCopyInto(out *OpenCodeConfig) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Method != nil {
+		in, out := &in.Method, &out.Method
+		*out = new(client.OpenAiMethod)
+		**out = **in
+	}
 	if in.TokenSecretRef != nil {
 		in, out := &in.TokenSecretRef, &out.TokenSecretRef
 		*out = new(v1.SecretKeySelector)
@@ -1836,6 +1841,11 @@ func (in *OpenCodeConfigRaw) DeepCopyInto(out *OpenCodeConfigRaw) {
 	if in.Model != nil {
 		in, out := &in.Model, &out.Model
 		*out = new(string)
+		**out = **in
+	}
+	if in.Method != nil {
+		in, out := &in.Method, &out.Method
+		*out = new(client.OpenAiMethod)
 		**out = **in
 	}
 	if in.Timeout != nil {
@@ -1898,6 +1908,11 @@ func (in *PiConfig) DeepCopyInto(out *PiConfig) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Method != nil {
+		in, out := &in.Method, &out.Method
+		*out = new(client.OpenAiMethod)
+		**out = **in
+	}
 	if in.Endpoint != nil {
 		in, out := &in.Endpoint, &out.Endpoint
 		*out = new(string)
@@ -1931,6 +1946,11 @@ func (in *PiConfigRaw) DeepCopyInto(out *PiConfigRaw) {
 	if in.Model != nil {
 		in, out := &in.Model, &out.Model
 		*out = new(string)
+		**out = **in
+	}
+	if in.Method != nil {
+		in, out := &in.Method, &out.Method
+		*out = new(client.OpenAiMethod)
 		**out = **in
 	}
 	if in.Endpoint != nil {

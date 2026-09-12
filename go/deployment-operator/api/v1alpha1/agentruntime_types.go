@@ -444,6 +444,14 @@ type PiConfig struct {
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API Pi should use.
+	// CHAT selects openai-completions and forces /chat/completions.
+	// RESPONSES selects openai-responses and forces /responses.
+	// AUTO preserves the current openai-responses default.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// Endpoint overrides the OpenAI-compatible provider base URL.
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
@@ -460,6 +468,7 @@ func (in *PiConfig) ToPiConfigRaw(secretGetter func(corev1.SecretKeySelector) (*
 	result := &PiConfigRaw{
 		Provider: in.Provider,
 		Model:    in.Model,
+		Method:   in.Method,
 		Endpoint: in.Endpoint,
 		Timeout:  in.Timeout,
 	}
@@ -480,11 +489,12 @@ func (in *PiConfig) ToPiConfigRaw(secretGetter func(corev1.SecretKeySelector) (*
 
 // PiConfigRaw contains resolved credentials and configuration for Pi.
 type PiConfigRaw struct {
-	APIKey   string           `json:"apiKey,omitempty"`
-	Provider *string          `json:"provider,omitempty"`
-	Model    *string          `json:"model,omitempty"`
-	Endpoint *string          `json:"endpoint,omitempty"`
-	Timeout  *metav1.Duration `json:"timeout,omitempty"`
+	APIKey   string                `json:"apiKey,omitempty"`
+	Provider *string               `json:"provider,omitempty"`
+	Model    *string               `json:"model,omitempty"`
+	Method   *console.OpenAiMethod `json:"method,omitempty"`
+	Endpoint *string               `json:"endpoint,omitempty"`
+	Timeout  *metav1.Duration      `json:"timeout,omitempty"`
 }
 
 type CodexConfig struct {
@@ -642,8 +652,8 @@ func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySele
 const openCodeOpenAICompatibleProvider = "openai-compatible"
 
 // OpenCodeOpenAICompatibleConfig configures a custom OpenAI-compatible API provider in opencode.json.
-// The harness writes a provider block with npm @ai-sdk/openai-compatible. Use this for endpoints
-// that are not listed on https://models.dev (for example LiteLLM, vLLM, or a private gateway).
+// Use this for endpoints that are not listed on https://models.dev (for example LiteLLM, vLLM,
+// or a private gateway).
 //
 // When set and the parent AgentRuntime has spec.aiProxy false, spec.config.opencode.provider and
 // spec.config.opencode.endpoint are ignored in favor of this block.
@@ -694,6 +704,14 @@ type OpenCodeConfig struct {
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API OpenCode should use.
+	// CHAT selects @ai-sdk/openai-compatible and forces /chat/completions.
+	// RESPONSES selects @ai-sdk/openai and forces /responses.
+	// AUTO preserves the provider default.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// TokenSecretRef references a Secret containing the API token for OpenCode.
 	// Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
 	// +kubebuilder:validation:Optional
@@ -720,6 +738,7 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 			Provider:         lo.ToPtr(openCodeOpenAICompatibleProvider),
 			Endpoint:         &compat.Endpoint,
 			Model:            compat.Model,
+			Method:           in.Method,
 			Timeout:          in.Timeout,
 			OpenAICompatible: true,
 		}
@@ -751,6 +770,7 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 		Provider: in.Provider,
 		Endpoint: in.Endpoint,
 		Model:    in.Model,
+		Method:   in.Method,
 		Timeout:  in.Timeout,
 	}
 
@@ -789,6 +809,9 @@ type OpenCodeConfigRaw struct {
 
 	// Model is the LLM model to use.
 	Model *string `json:"model,omitempty"`
+
+	// Method configures which OpenAI API OpenCode should use.
+	Method *console.OpenAiMethod `json:"method,omitempty"`
 
 	// Token is the raw API token for OpenCode.
 	Token string `json:"token,omitempty"`
