@@ -1,6 +1,7 @@
 import { ComponentProps, FormEvent, useCallback, useMemo } from 'react'
 import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
 
+import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { Body2P } from 'components/utils/typography/Text'
 import { useTheme } from 'styled-components'
@@ -17,10 +18,7 @@ import { appendConnection, updateCache } from 'utils/graphql'
 
 import { sinkTypeToIcon } from './NotificationSinksColumns'
 
-const hookUrlMatch = [
-  [SinkType.Slack, /^https:\/\/[^/]*?slack/],
-  [SinkType.Teams, /^https:\/\/[^/]*?office/],
-] as const satisfies [SinkType, RegExp][]
+const slackHookUrlRegex = /^https:\/\/[^/]*?slack/
 
 type ModalBaseProps = {
   mode: 'edit' | 'create'
@@ -39,6 +37,10 @@ function UpsertNotificationSinkModal({
   ...props
 }: ModalProps) {
   const sink = mode === 'edit' ? props.sink : undefined
+  const sinkName = sink?.name
+  const sinkType = sink?.type
+  const slackUrl = sink?.configuration.slack?.url
+  const teamsUrl = sink?.configuration.teams?.url
   const theme = useTheme()
   const initialState = useMemo(
     () => ({
@@ -46,28 +48,25 @@ function UpsertNotificationSinkModal({
       hookUrl: '',
       ...(mode === 'edit'
         ? {
-            name: sink?.name,
-            hookUrl:
-              sink?.configuration.slack?.url || sink?.configuration.teams?.url,
+            name: sinkName,
+            hookUrl: slackUrl || teamsUrl,
           }
         : {}),
     }),
-    [
-      mode,
-      sink?.configuration.slack?.url,
-      sink?.configuration.teams?.url,
-      sink?.name,
-    ]
+    [mode, sinkName, slackUrl, teamsUrl]
   )
   const { state, update, hasUpdates } = useUpdateState<{
     name: string
     hookUrl: string
   }>(initialState)
-  const hookType = hookUrlMatch.find(([_, regex]) =>
-    regex.test(state.hookUrl)
-  )?.[0]
+  const hookType =
+    mode === 'edit' && sinkType
+      ? sinkType
+      : slackHookUrlRegex.test(state.hookUrl)
+        ? SinkType.Slack
+        : SinkType.Teams
 
-  const [mutation, { loading }] = useUpsertNotificationSinkMutation({
+  const [mutation, { loading, error }] = useUpsertNotificationSinkMutation({
     onCompleted: () => onClose?.(),
     update: (cache, { data }) =>
       updateCache(cache, {
@@ -81,7 +80,7 @@ function UpsertNotificationSinkModal({
       }),
   })
 
-  const allowSubmit = hookType && state.name && state.hookUrl && hasUpdates
+  const allowSubmit = state.name && state.hookUrl && hasUpdates
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -166,6 +165,7 @@ function UpsertNotificationSinkModal({
           </InlineLink>{' '}
           webhook url to send this event alert to your team.
         </Body2P>
+        {error && <GqlError error={error} />}
         <FormField label={mode === 'edit' ? `Webhook url` : 'Add sink'}>
           <div css={{ display: 'flex', gap: theme.spacing.xxsmall }}>
             {mode !== 'edit' && (
@@ -178,7 +178,7 @@ function UpsertNotificationSinkModal({
             )}
             <Input2
               value={state.hookUrl}
-              endIcon={sinkTypeToIcon[hookType || '']}
+              endIcon={state.hookUrl ? sinkTypeToIcon[hookType] : undefined}
               onChange={(e) => update({ hookUrl: e.target.value })}
               placeholder="https://hooks.provider.com/..."
               css={{ flex: '1 1 100%' }}

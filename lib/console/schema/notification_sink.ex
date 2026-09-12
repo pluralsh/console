@@ -44,6 +44,8 @@ defmodule Console.Schema.NotificationSink do
   end
 
   @valid ~w(type name)a
+  @slack_webhook_hosts ~w(slack.com slack-gov.com)
+  @teams_webhook_hosts ~w(office.com office365.com powerautomate.com powerplatform.com logic.azure.com)
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -57,8 +59,8 @@ defmodule Console.Schema.NotificationSink do
   defp config_changeset(model, attrs) do
     model
     |> cast(attrs, [])
-    |> cast_embed(:slack, with: &url_changeset/2)
-    |> cast_embed(:teams, with: &url_changeset/2)
+    |> cast_embed(:slack, with: &slack_changeset/2)
+    |> cast_embed(:teams, with: &teams_changeset/2)
     |> cast_embed(:plural, with: &plural_changeset/2)
   end
 
@@ -66,6 +68,52 @@ defmodule Console.Schema.NotificationSink do
     model
     |> cast(attrs, [:url])
     |> validate_required([:url])
+  end
+
+  defp slack_changeset(model, attrs) do
+    model
+    |> url_changeset(attrs)
+    |> validate_change(
+      :url,
+      &validate_webhook_url(&1, &2, @slack_webhook_hosts, "must be a valid Slack webhook URL")
+    )
+  end
+
+  defp teams_changeset(model, attrs) do
+    model
+    |> url_changeset(attrs)
+    |> validate_change(
+      :url,
+      &validate_webhook_url(
+        &1,
+        &2,
+        @teams_webhook_hosts,
+        "must be a valid Microsoft Teams webhook URL"
+      )
+    )
+  end
+
+  defp validate_webhook_url(:url, url, hosts, message) when is_binary(url) do
+    with {:ok, %URI{scheme: "https", host: host, userinfo: nil} = uri} when is_binary(host) <-
+           URI.new(url),
+         true <- valid_port?(uri.port),
+         true <- host_matches?(host, hosts) do
+      []
+    else
+      _ -> [url: message]
+    end
+  end
+
+  defp validate_webhook_url(:url, _, _, message), do: [url: message]
+
+  defp valid_port?(port) when is_integer(port), do: port in 1..65_535
+  defp valid_port?(nil), do: true
+  defp valid_port?(_), do: false
+
+  defp host_matches?(host, hosts) do
+    host = String.downcase(host)
+
+    Enum.any?(hosts, &(host == &1 || String.ends_with?(host, ".#{&1}")))
   end
 
   defp plural_changeset(model, attrs) do
