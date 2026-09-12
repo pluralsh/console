@@ -3,6 +3,82 @@ git_url: https://github.com/kubernetes-sigs/external-dns
 release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/external-dns
 versions:
+- version: 0.22.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '## Helm chart / values changes to review
+
+
+      - **`extraArgs` now supports booleans** (chart feature). If you previously had
+      to quote booleans (e.g., `"true"`) you can now supply real YAML booleans. Re-check
+      your values to ensure they render the intended CLI flags.
+
+      - **Cross-namespace watch support** (chart feature). If you need ExternalDNS
+      to watch resources outside its release namespace, configure the new chart option(s)
+      for watching other namespaces.
+
+      - **`replicaCount` introduced (0 or 1)**. You can now scale ExternalDNS down
+      to `0` (pause reconciliation) or run `1` replica explicitly; validate your current
+      scaling/HA expectations.
+
+      - **`namespaceOverride` added**. If you deploy into one namespace but want resources
+      labeled/created under another, review this new option.
+
+      - **Optional Kubernetes Service creation**. The chart can now create a Service
+      for the ExternalDNS pods; decide if you want/need it (often only needed for
+      metrics/webhook access).
+
+      - **Gateway API ListenerSets toggle**: new `enableGatewayListenerSets` value;
+      enable only if you use Gateway API ListenerSets.
+
+
+      ## Values / flags that are now effectively mandatory for safe upgrade
+
+
+      - **`--policy` is now required; no default**. Ensure your Helm values set a
+      policy explicitly (commonly `upsert-only`; or temporarily `create-only` during
+      validation).
+
+      - **Annotation prefix change**: Default is now `external-dns.kubernetes.io/`
+      (no fallback). Either migrate annotations in manifests, or set `--annotation-prefix=external-dns.alpha.kubernetes.io/`
+      temporarily during migration.
+
+      '
+    chart_updates: [Chart adds cross-namespace watch capability., Chart adds `replicaCount`
+        (0 or 1) to explicitly scale ExternalDNS down or run single replica., Chart
+        adds `namespaceOverride` option., Chart supports boolean values in `extraArgs`
+        rendering., Chart can optionally create a Kubernetes Service for the ExternalDNS
+        deployment., Chart adds `enableGatewayListenerSets` flag for Gateway API ListenerSets
+        support., Misc Helm quoting/argument rendering fixes (missing quotes) that
+        may change the rendered container args compared to older chart versions.]
+    features: [Adds DNAME record type support., Introduces a CRD-backed registry option
+        as an alternative to TXT ownership records., Adds template scoping via `isSource`
+        and allows repeatable `--fqdn-template/--target-template/--fqdn-target-template`
+        flags., 'AWS: can pin records to a specific hosted zone via annotation; improved
+        alias handling (A vs AAAA).', Adds more consistent RefObject tracking across
+        sources and multiple RefObjects per endpoint/event., 'RFC2136: new `--rfc2136-axfr`
+        flag, deprecating `--rfc2136-tsig-axfr`.', 'Chart-level features: watch other
+        namespaces, optional Service creation, and new toggles for Gateway API ListenerSets.']
+    breaking_changes: ["Default annotation prefix changes to `external-dns.kubernetes.io/`\
+        \ with no fallback; if you don\u2019t migrate annotations or set `--annotation-prefix`,\
+        \ ExternalDNS may stop recognizing existing records and could delete them\
+        \ depending on policy.", '`--policy` must be set explicitly (no default).
+        Upgrades will fail or behave unexpectedly if you relied on an implicit default;
+        wrong policy combined with the annotation-prefix change can delete records.',
+      'Removes in-tree providers: Akamai, Plural, Transip. You must stay on an older
+        version or switch to a webhook-based provider if you used them (Gandi marked
+        for future removal).', Pi-hole v5 API support is removed (v6+ only)., Gateway
+        API `TLSRoute` migrates to `v1` and Ambassador Host CRD to `getambassador.io/v3alpha1`;
+        clusters using older APIs/CRDs must be upgraded before ExternalDNS can read
+        them., AWS TXT ownership for A ALIAS changes from `cname-` to `a-` prefix;
+        migration is automatic but you may need to clean up legacy TXT records with
+        the provided script., 'RFC2136 flag change: `--rfc2136-axfr` replaces deprecated
+        `--rfc2136-tsig-axfr`.']
+  chart_version: 1.22.0
+  images: []
 - version: 0.21.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
