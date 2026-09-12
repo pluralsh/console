@@ -130,3 +130,56 @@ func TestWriteSSE(t *testing.T) {
 		t.Fatalf("chunk id = %q, want chatcmpl-1", payload.ID)
 	}
 }
+
+func TestStreamChunksDefaultToolCallRole(t *testing.T) {
+	t.Parallel()
+
+	chunks, err := StreamChunksFromCompletion(openai.ChatCompletion{
+		ID:      "chatcmpl-tools",
+		Created: 1,
+		Model:   "gpt-4",
+		Choices: []openai.ChatCompletionChoice{{
+			Index: 0,
+			Message: openai.ChatCompletionMessage{
+				Role: "assistant",
+				ToolCalls: []openai.ChatCompletionMessageToolCall{{
+					ID:   "call_1",
+					Type: "function",
+					Function: openai.ChatCompletionMessageToolCallFunction{
+						Name:      "lookup",
+						Arguments: `{}`,
+					},
+				}},
+			},
+			FinishReason: "tool_calls",
+		}},
+	})
+	if err != nil {
+		t.Fatalf("StreamChunksFromCompletion() failed: %v", err)
+	}
+
+	foundToolCall := false
+	for _, chunk := range chunks {
+		if len(chunk.Choices) == 0 {
+			continue
+		}
+		choice := chunk.Choices[0]
+		if choice.Delta.Role != "assistant" {
+			t.Fatalf("chunk role = %q, want assistant", choice.Delta.Role)
+		}
+		if len(choice.Delta.ToolCalls) > 0 {
+			foundToolCall = true
+		}
+	}
+	if !foundToolCall {
+		t.Fatal("tool-call chunk not found")
+	}
+
+	var buf bytes.Buffer
+	if err := WriteSSE(&buf, chunks); err != nil {
+		t.Fatalf("WriteSSE() failed: %v", err)
+	}
+	if strings.Contains(buf.String(), `"role":""`) {
+		t.Fatalf("SSE contains empty role: %s", buf.String())
+	}
+}

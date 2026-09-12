@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/deployment-operator/terratest
 
-go 1.26.5
+go 1.27.1
 
 replace (
 	github.com/pluralsh/console/go/client => ../../client
