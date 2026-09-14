@@ -88,9 +88,25 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> build_codemode(policies)
   end
 
-  defp cloud_tools(%Environment{tools: tools}) do
-    Enum.flat_map(tools, fn
-      {_, %WorkbenchTool{tool: :cloud} = tool} -> [
+  @doc """
+  Assembles the infrastructure toolset for a workbench with no job bound, for use outside
+  the agent loop.  Codemode is skipped since it only means something inside the agent loop,
+  as are the flow-scoped service tools, which would silently lose their scoping without a job.
+  """
+  def bench_tools(%Workbench{} = bench, tools, %User{} = user) do
+    cluster_tools(bench, user)
+    |> Enum.concat(stack_tools(bench, user))
+    |> Enum.concat(k8s_tools(bench, user))
+    |> Enum.concat(pod_logs_tools(bench, user))
+    |> Enum.concat(vuln_tools(bench, user))
+    |> Enum.concat(cloud_tools(tools))
+  end
+
+  defp cloud_tools(%Environment{tools: tools}), do: cloud_tools(tools)
+  defp cloud_tools(tools) do
+    tool_values(tools)
+    |> Enum.flat_map(fn
+      %WorkbenchTool{tool: :cloud} = tool -> [
         %CloudSchemas{tool: tool},
         %RawCloudQuery{tool: tool},
         %CloudTables{tool: tool}
@@ -98,6 +114,9 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       _ -> []
     end)
   end
+
+  defp tool_values(tools) when is_map(tools), do: Map.values(tools)
+  defp tool_values(tools) when is_list(tools), do: tools
 
   defp has_cloud_tools?(tools) do
     Enum.any?(tools, fn
@@ -117,6 +136,19 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     ]
   end
   defp svc_tools(_, _, _), do: []
+
+  # the job-free subset of svc_tools/3.  ServiceInspect and ClusterServices scope on the
+  # job's flow, and check_flow/2 is permissive when there's no job, so they're dropped
+  # rather than silently unscoped
+  defp cluster_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, %User{} = user) do
+    if_vector_store_enabled(ServiceComponent) ++ [
+      %Cluster{user: user},
+      %ClusterList{user: user},
+      %ClusterTags{user: user},
+      %Projects{user: user}
+    ]
+  end
+  defp cluster_tools(_, _), do: []
 
   defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}, user) do
     if_vector_store_enabled(Stack) ++ [

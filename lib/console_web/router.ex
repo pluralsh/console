@@ -37,8 +37,19 @@ defmodule ConsoleWeb.Router do
     get "/dashboard/cluster", WebhookController, :cluster
   end
 
+  pipeline :mcp do
+    plug ConsoleWeb.GuardianPipeline
+    plug ConsoleWeb.Plugs.EnsureAuthenticated
+  end
+
   scope "/mcp", ConsoleWeb do
     get "/.well-known/jwks.json", JWKController, :mcp
+
+    scope "/" do
+      pipe_through [:mcp]
+
+      forward "/workbench", Plugs.WorkbenchMCP
+    end
   end
 
   scope "/ext" do

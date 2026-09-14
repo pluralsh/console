@@ -64,7 +64,20 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     |> Enum.concat(plrl_metric_tools(job))
   end
 
-  defp plrl_log_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{logs: true}}}}, %User{} = user) do
+  @doc """
+  Assembles the observability toolset for a workbench with no job bound, for use outside
+  the agent loop.  Everything here derives from the workbench's configuration and the
+  acting user, so no job is needed.
+  """
+  def bench_tools(%Workbench{} = bench, tools, %User{} = user) do
+    obs_tools(tools)
+    |> Enum.concat(plrl_log_tools(bench, user))
+    |> Enum.concat(plrl_metric_tools(bench))
+    |> Enum.concat(pod_logs_tools(bench, user))
+  end
+
+  defp plrl_log_tools(%WorkbenchJob{workbench: %Workbench{} = bench}, %User{} = user), do: plrl_log_tools(bench, user)
+  defp plrl_log_tools(%Workbench{configuration: %{observability: %{logs: true}}}, %User{} = user) do
     [
       %Plrl.Logs{user: user},
       %Plrl.LogsAggregate{user: user},
@@ -77,14 +90,15 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     do: [%PodLogs{user: user}]
   defp pod_logs_tools(_, _), do: []
 
-  defp plrl_metric_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{metrics: true}}}}),
+  defp plrl_metric_tools(%WorkbenchJob{workbench: %Workbench{} = bench}), do: plrl_metric_tools(bench)
+  defp plrl_metric_tools(%Workbench{configuration: %{observability: %{metrics: true}}}),
     do: [Plrl.Metrics, Plrl.MetricsSearch, Plrl.MetricsLabelSearch]
   defp plrl_metric_tools(_), do: []
 
   @allowed_tools MapSet.new(~w(metrics logs traces error_tracking)a)
 
   defp obs_tools(tools) do
-    Enum.map(tools, &elem(&1, 1))
+    tool_values(tools)
     |> Enum.filter(fn
       %WorkbenchTool{tool: t, categories: [_ | _] = categories} when t != :mcp ->
         MapSet.subset?(MapSet.new(categories), @allowed_tools)
@@ -97,6 +111,9 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       _ -> []
     end)
   end
+
+  defp tool_values(tools) when is_map(tools), do: Map.values(tools)
+  defp tool_values(tools) when is_list(tools), do: tools
 
   defp to_tool(%WorkbenchTool{} = tool, :metrics), do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}, %MetricsLabelSearch{tool: tool}]
   defp to_tool(%WorkbenchTool{} = tool, :logs), do: [%Logs{tool: tool}]

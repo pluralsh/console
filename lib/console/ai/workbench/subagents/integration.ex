@@ -71,7 +71,11 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     |> expand_workbench_tools()
   end
 
-  defp workbench_tools(tools) do
+  @doc """
+  Expands every integration tool configured on a workbench.  All of these are derived
+  purely from the `WorkbenchTool` record, so they're safe to build without a job.
+  """
+  def workbench_tools(tools) do
     tools
     |> tool_values()
     |> expand_workbench_tools()
