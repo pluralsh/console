@@ -1,5 +1,5 @@
 import { type AriaLabelingProps, type DOMProps } from '@react-types/shared'
-import { Div, type DivProps, Flex, Label } from 'honorable'
+import { Div, type DivProps, Flex } from 'honorable'
 import { isNil } from 'lodash-es'
 import {
   type LabelHTMLAttributes,
@@ -89,13 +89,8 @@ function FormField({
   const topContent = hasTopContent && (
     <Flex align="center">
       {hasLabel && (
-        <Label
-          caption={small}
-          body2={!small}
-          fontWeight="600"
-          flexShrink={0}
-          flexGrow={1}
-          margin={0}
+        <LabelSC
+          $small={small}
           {...labelProps}
         >
           {label}
@@ -111,7 +106,7 @@ function FormField({
               css={{ display: 'inline-flex', marginLeft: spacing.xxsmall }}
             />
           )}
-        </Label>
+        </LabelSC>
       )}
       {caption && (
         <CaptionSC $small={small}>
@@ -184,6 +179,14 @@ function FormField({
     </FormFieldContext.Provider>
   )
 }
+
+const LabelSC = styled.label<{ $small?: boolean }>(({ theme, $small }) => ({
+  margin: 0,
+  ...($small ? theme.partials.text.caption : theme.partials.text.body2),
+  fontWeight: 600,
+  flexShrink: 0,
+  flexGrow: 1,
+}))
 
 const CaptionSC = styled.p<{ $small?: boolean }>(({ theme, $small }) => ({
   margin: 0,

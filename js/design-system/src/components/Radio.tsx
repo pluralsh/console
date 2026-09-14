@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { type InputProps, Label } from 'honorable'
+import { type InputProps } from 'honorable'
 import { memo, useContext, useEffect, useId, useRef, useState } from 'react'
 import {
   type AriaRadioProps,
@@ -34,11 +34,12 @@ const CheckedIcon = memo(({ small }: { small: boolean }) => {
   )
 })
 
-const HonorableLabelStyled = styled(Label)<{
+const LabelSC = styled.label<{
   $small: boolean
   $isFocusVisible: boolean
   $disabled: boolean
 }>(({ $small = false, $disabled = false, $isFocusVisible, theme }) => ({
+  display: 'flex',
   ...theme.partials.text.body2,
   gap: theme.spacing.small,
   alignItems: 'center',
@@ -172,7 +173,7 @@ function Radio({
   const icon = isSelected ? <CheckedIcon small={!!small} /> : null
 
   return (
-    <HonorableLabelStyled
+    <LabelSC
       htmlFor={inputProps.id}
       id={labelId}
       ref={ref}
@@ -180,8 +181,6 @@ function Radio({
       $isFocusVisible={isFocusVisible}
       $small={!!small}
       $disabled={!!isDisabled}
-      display="flex"
-      marginBottom="0"
       {...props}
     >
       <VisuallyHidden>
@@ -203,7 +202,7 @@ function Radio({
         <div className="icon">{icon}</div>
       </div>
       <div className="label"> {props.children}</div>
-    </HonorableLabelStyled>
+    </LabelSC>
   )
 }
 
