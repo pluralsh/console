@@ -60,7 +60,7 @@ func TestAgentResolveSettingsRejectsUnsupportedProvider(t *testing.T) {
 	}
 }
 
-func TestPiOpenAIAPI(t *testing.T) {
+func TestAgentOpenAIAPI(t *testing.T) {
 	tests := []struct {
 		name   string
 		method string
@@ -74,14 +74,15 @@ func TestPiOpenAIAPI(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := piOpenAIAPI(tt.method); got != tt.want {
-				t.Fatalf("piOpenAIAPI(%q) = %q, want %q", tt.method, got, tt.want)
+			agent := NewAgent(toolv1.Config{})
+			if got := agent.openAIAPI(tt.method); got != tt.want {
+				t.Fatalf("Agent.openAIAPI(%q) = %q, want %q", tt.method, got, tt.want)
 			}
 		})
 	}
 }
 
-func TestPiOpenAIEndpoint(t *testing.T) {
+func TestAgentOpenAIEndpoint(t *testing.T) {
 	tests := []struct {
 		name     string
 		endpoint string
@@ -118,8 +119,9 @@ func TestPiOpenAIEndpoint(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := piOpenAIEndpoint(tt.endpoint, tt.provider, tt.method); got != tt.want {
-				t.Fatalf("piOpenAIEndpoint() = %q, want %q", got, tt.want)
+			agent := NewAgent(toolv1.Config{})
+			if got := agent.openAIEndpoint(tt.endpoint, tt.provider, tt.method); got != tt.want {
+				t.Fatalf("Agent.openAIEndpoint() = %q, want %q", got, tt.want)
 			}
 		})
 	}

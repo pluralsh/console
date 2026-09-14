@@ -97,7 +97,7 @@ func (transport *Transport) modelID(settings toolv1.Settings) string {
 	if provider == providerPlural {
 		return provider + "/" + model
 	}
-	return provider + "/" + stripModelProvider(model, provider, "")
+	return provider + "/" + transport.agent.stripModelProvider(model, provider, "")
 }
 
 func (transport *Transport) launch(options []exec.Option) (*exec.StdioProcess, error) {

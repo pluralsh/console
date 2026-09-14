@@ -55,11 +55,11 @@ const (
 // resolveSettings selects provider/model wiring for opencode.json and ACP.
 // The proxy branch stays separate so proxy behavior remains unchanged when
 // OpenAI-compatible providers are configured.
-func (*Agent) resolveSettings(provider, model, method string, customOpenAICompatible, proxyEnabled bool) opencodeSettings {
+func (agent *Agent) resolveSettings(provider, model, method string, customOpenAICompatible, proxyEnabled bool) opencodeSettings {
 	if model == "" {
 		model = defaultModel
 	}
-	openaiCompatible := useOpenAICompatibleSDK(method, customOpenAICompatible)
+	openaiCompatible := agent.useOpenAICompatibleSDK(method, customOpenAICompatible)
 
 	if proxyEnabled {
 		return opencodeSettings{
@@ -89,7 +89,7 @@ func (*Agent) resolveSettings(provider, model, method string, customOpenAICompat
 	}
 }
 
-func useOpenAICompatibleSDK(method string, customOpenAICompatible bool) bool {
+func (*Agent) useOpenAICompatibleSDK(method string, customOpenAICompatible bool) bool {
 	switch console.OpenAiMethod(method) {
 	case console.OpenAiMethodChat:
 		return true

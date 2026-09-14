@@ -41,7 +41,7 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 		providers[resolved.provider] = map[string]any{
 			"baseUrl": resolved.endpoint,
 			"apiKey":  fmt.Sprintf("$%s", openAIAPIKeyEnv),
-			"api":     piOpenAIAPI(resolved.method),
+			"api":     agent.openAIAPI(resolved.method),
 			"models": []map[string]any{{
 				"id":            resolved.model,
 				"contextWindow": 128000,
@@ -70,7 +70,7 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 			"directTools": true,
 		},
 	}
-	if err := addExternalMCPServers(servers); err != nil {
+	if err := agent.addExternalMCPServers(servers); err != nil {
 		return err
 	}
 	mcpData, err := json.Marshal(map[string]any{"mcpServers": servers})
@@ -90,7 +90,7 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 	return nil
 }
 
-func addExternalMCPServers(servers map[string]any) error {
+func (*Agent) addExternalMCPServers(servers map[string]any) error {
 	external, err := mcp.Load()
 	if err != nil {
 		return fmt.Errorf("load external mcp servers: %w", err)

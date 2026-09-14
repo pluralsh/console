@@ -128,7 +128,7 @@ func TestAgentConfigureUsesOpenAIMethodAPI(t *testing.T) {
 	}
 }
 
-func TestAddExternalMCPServers(t *testing.T) {
+func TestAgentAddExternalMCPServers(t *testing.T) {
 	t.Setenv(mcp.EnvServers, `[{
 		"name":"linear",
 		"url":"https://mcp.linear.app/mcp",
@@ -136,8 +136,9 @@ func TestAddExternalMCPServers(t *testing.T) {
 		"headers":{"Authorization":"Bearer secret"}
 	}]`)
 	servers := map[string]any{}
-	if err := addExternalMCPServers(servers); err != nil {
-		t.Fatalf("addExternalMCPServers() error = %v", err)
+	agent := NewAgent(toolv1.Config{})
+	if err := agent.addExternalMCPServers(servers); err != nil {
+		t.Fatalf("Agent.addExternalMCPServers() error = %v", err)
 	}
 	linear := servers["linear"].(map[string]any)
 	if linear["url"] != "https://mcp.linear.app/mcp" {

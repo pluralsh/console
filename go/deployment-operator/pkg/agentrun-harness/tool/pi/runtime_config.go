@@ -60,7 +60,7 @@ func (agent *Agent) ResolveSettings(run *agentrunv1.AgentRun) (toolv1.Settings, 
 	}, nil
 }
 
-func (*Agent) resolveSettings(run *agentrunv1.AgentRun, config *agentrunv1.PiConfig) piSettings {
+func (agent *Agent) resolveSettings(run *agentrunv1.AgentRun, config *agentrunv1.PiConfig) piSettings {
 	model := config.Model
 	if model == "" {
 		model = defaultModel
@@ -84,20 +84,20 @@ func (*Agent) resolveSettings(run *agentrunv1.AgentRun, config *agentrunv1.PiCon
 
 	return piSettings{
 		provider: provider,
-		model:    stripModelProvider(model, provider, config.Provider),
+		model:    agent.stripModelProvider(model, provider, config.Provider),
 		method:   config.Method,
-		endpoint: piOpenAIEndpoint(lo.FromPtr(config.Endpoint), provider, config.Method),
+		endpoint: agent.openAIEndpoint(lo.FromPtr(config.Endpoint), provider, config.Method),
 	}
 }
 
-func piOpenAIAPI(method string) string {
+func (*Agent) openAIAPI(method string) string {
 	if console.OpenAiMethod(method) == console.OpenAiMethodChat {
 		return openAICompletionsAPI
 	}
 	return openAIResponsesAPI
 }
 
-func piOpenAIEndpoint(endpoint, provider, method string) string {
+func (*Agent) openAIEndpoint(endpoint, provider, method string) string {
 	if endpoint != "" {
 		return endpoint
 	}
@@ -128,7 +128,7 @@ func (agent *Agent) resolvedProvider(config toolv1.Config) string {
 	return pi.Provider
 }
 
-func stripModelProvider(model, provider, configuredProvider string) string {
+func (*Agent) stripModelProvider(model, provider, configuredProvider string) string {
 	for _, prefix := range []string{provider, configuredProvider} {
 		if prefix == "" {
 			continue
@@ -174,14 +174,14 @@ func (agent *Agent) nativeSettings(config toolv1.Config, model string) (piSettin
 	}
 	resolved.model = model
 	if config.Run.IsProxyEnabled() {
-		resolved.endpoint = proxyEndpoint(agent.consoleURL, config.Run.IsStreamingProxyEnabled())
+		resolved.endpoint = agent.proxyEndpoint(config.Run.IsStreamingProxyEnabled())
 	}
 	return resolved, nil
 }
 
-func proxyEndpoint(consoleURL string, streaming bool) string {
+func (agent *Agent) proxyEndpoint(streaming bool) string {
 	if streaming {
 		return common.AgentOpenAIBaseURL
 	}
-	return fmt.Sprintf("%s/ext/ai/v1", consoleURL)
+	return fmt.Sprintf("%s/ext/ai/v1", agent.consoleURL)
 }
