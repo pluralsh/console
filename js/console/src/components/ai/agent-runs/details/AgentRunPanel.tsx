@@ -54,9 +54,9 @@ import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
 export enum AgentRunPanelTab {
+  ImplementationPlan = 'Implementation plan',
   Diff = 'Diff',
   Analysis = 'Analysis',
-  WorkingTheory = 'Working theory',
   PullRequests = 'Pull requests',
 }
 
@@ -87,7 +87,7 @@ type AgentRunPanelContextT = {
 
 const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
   isOpen: false,
-  selectedTab: AgentRunPanelTab.Analysis,
+  selectedTab: AgentRunPanelTab.ImplementationPlan,
   setSelectedTab: () =>
     console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
   requestedTab: null,
@@ -103,7 +103,7 @@ const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
 export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
   const { sidePanel, setSidePanel } = useTopLevelSidePanel()
   const [selectedTab, setSelectedTab] = useState<AgentRunPanelTab>(
-    AgentRunPanelTab.Analysis
+    AgentRunPanelTab.ImplementationPlan
   )
   const [requestedTab, setRequestedTab] = useState<AgentRunPanelTab | null>(
     null
@@ -241,14 +241,14 @@ export function AgentRunPanelContent() {
       selectedTab === AgentRunPanelTab.Analysis &&
       !!run?.analysis) ||
     (showWorkingTheoryTab &&
-      selectedTab === AgentRunPanelTab.WorkingTheory &&
+      selectedTab === AgentRunPanelTab.ImplementationPlan &&
       hasRun) ||
     (showPrsTab && selectedTab === AgentRunPanelTab.PullRequests && !!run)
   const showContentPlaceholder = showTabSkeleton && !showingTabContent
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
+    if (showWorkingTheoryTab) return AgentRunPanelTab.ImplementationPlan
     if (showDiffTab) return AgentRunPanelTab.Diff
     if (showAnalysisTab) return AgentRunPanelTab.Analysis
-    if (showWorkingTheoryTab) return AgentRunPanelTab.WorkingTheory
     if (showPrsTab) return AgentRunPanelTab.PullRequests
     return null
   }, [showDiffTab, showAnalysisTab, showWorkingTheoryTab, showPrsTab])
@@ -291,6 +291,15 @@ export function AgentRunPanelContent() {
                   }}
                   css={{ gap: spacing.small }}
                 >
+                  {showWorkingTheoryTab && (
+                    <PanelSubTabSC
+                      key={AgentRunPanelTab.ImplementationPlan}
+                      textValue={AgentRunPanelTab.ImplementationPlan}
+                    >
+                      <HourglassIcon size={12} />
+                      {AgentRunPanelTab.ImplementationPlan}
+                    </PanelSubTabSC>
+                  )}
                   {showDiffTab && (
                     <PanelSubTabSC
                       key={AgentRunPanelTab.Diff}
@@ -306,15 +315,6 @@ export function AgentRunPanelContent() {
                       textValue={AgentRunPanelTab.Analysis}
                     >
                       Analysis
-                    </PanelSubTabSC>
-                  )}
-                  {showWorkingTheoryTab && (
-                    <PanelSubTabSC
-                      key={AgentRunPanelTab.WorkingTheory}
-                      textValue={AgentRunPanelTab.WorkingTheory}
-                    >
-                      <HourglassIcon size={12} />
-                      {AgentRunPanelTab.WorkingTheory}
                     </PanelSubTabSC>
                   )}
                   {showPrsTab && (
@@ -333,8 +333,8 @@ export function AgentRunPanelContent() {
                     align="center"
                     gap="small"
                   >
+                    {expectsWorkingTheory && <TabSkeletonSC $width={132} />}
                     {expectsAnalysis && <TabSkeletonSC $width={72} />}
-                    {expectsWorkingTheory && <TabSkeletonSC $width={96} />}
                     {expectsPullRequests && <TabSkeletonSC $width={108} />}
                   </Flex>
                 )
@@ -404,7 +404,7 @@ export function AgentRunPanelContent() {
           </ContentWrapperSC>
         )}
       {showWorkingTheoryTab &&
-        selectedTab === AgentRunPanelTab.WorkingTheory &&
+        selectedTab === AgentRunPanelTab.ImplementationPlan &&
         run && (
           <ContentWrapperSC>
             <ContentInnerSC>

@@ -154,6 +154,43 @@ func TestAccountBedrockRuntimeEndpointIsDefault(t *testing.T) {
 	require.Empty(t, keys[0].BedrockKeyConfig.SecretKey.GetValue())
 }
 
+func TestAccountBedrockModelSettingsUseApplicationInferenceProfile(t *testing.T) {
+	modelID := "anthropic.claude-sonnet-4-6"
+	inferenceProfileARN := "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/abcdef123456"
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId: lo.ToPtr(modelID),
+			Region:  lo.ToPtr("us-east-1"),
+			ModelSettings: []*pb.BedrockModelSettings{
+				{
+					ModelId:             modelID,
+					InferenceProfileArn: inferenceProfileARN,
+				},
+			},
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.Contains(t, keys[0].Models, modelID)
+
+	alias, ok := keys[0].Aliases[modelID]
+	require.True(t, ok)
+	require.Equal(t, modelID, alias.ModelID)
+	require.NotNil(t, alias.ModelName)
+	require.Equal(t, modelID, *alias.ModelName)
+	require.NotNil(t, alias.BedrockAliasCfg)
+	require.NotNil(t, alias.InferenceProfileARN)
+	require.Equal(t, inferenceProfileARN, alias.InferenceProfileARN.GetValue())
+}
+
 func TestAccountBedrockMantleEndpointUsesMantleAndRuntimeEmbeddings(t *testing.T) {
 	endpoint := pb.BedrockEndpoint_MANTLE
 	cfg := &pb.AiConfig{
@@ -241,6 +278,7 @@ func TestAccountOpenAICompatibleProvider(t *testing.T) {
 	providerConfig, err := acct.GetConfigForProvider(openAICompatibleProvider)
 	require.NoError(t, err)
 	require.Equal(t, "https://litellm.example", providerConfig.NetworkConfig.BaseURL)
+	require.True(t, providerConfig.NetworkConfig.AllowPrivateNetwork)
 	require.NotNil(t, providerConfig.CustomProviderConfig)
 	require.Equal(t, schemas.OpenAI, providerConfig.CustomProviderConfig.BaseProviderType)
 	require.True(t, providerConfig.CustomProviderConfig.AllowedRequests.ChatCompletion)

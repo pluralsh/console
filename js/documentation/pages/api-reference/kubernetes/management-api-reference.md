@@ -372,6 +372,23 @@ _Appears in:_
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
 
+#### BedrockModelSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [BedrockSettings](#bedrocksettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `modelId` _string_ | ModelID is the foundation model served by the application inference profile. |  | Required: \{\} <br /> |
+| `inferenceProfileArn` _string_ | InferenceProfileARN is the full ARN of the Bedrock application inference profile. |  | Required: \{\} <br /> |
+
+
 #### BedrockSettings
 
 
@@ -395,6 +412,7 @@ _Appears in:_
 | `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
 | `awsSecretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use for authentication |  | Optional: \{\} <br /> |
 | `deployments` _object (keys:string, values:string)_ | Deployments is deprecated for most configurations: prefer regional-prefixed inference profile IDs in<br />modelId, toolModelId, embeddingModel, or proxyModels (Nexus infers Bifrost aliases automatically).<br />Still needed when clients use a logical model name that must resolve to a different Bedrock identifier,<br />for application inference profile resource IDs (use the profile resource suffix, not the full ARN),<br />or other explicit alias overrides. Maps client-facing model ID to inference profile ID. Example:<br />\{"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"\} |  | Optional: \{\} <br /> |
+| `modelSettings` _[BedrockModelSettings](#bedrockmodelsettings) array_ | ModelSettings configures per-model Bedrock options, including application inference profiles. |  | Optional: \{\} <br /> |
 
 
 #### Binding

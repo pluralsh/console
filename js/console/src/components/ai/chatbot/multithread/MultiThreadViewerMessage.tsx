@@ -23,6 +23,7 @@ import {
   getCommand,
   getPython,
   resolveToolCallKind,
+  toolCallDisplayDescription,
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
 } from '../toolCallDisplay'
@@ -89,7 +90,8 @@ export function SimpleToolCall({
   customTitle?: string
   leadingIcon?: ReactNode
 }) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
@@ -122,18 +124,49 @@ export function SimpleToolCall({
     case 'bash':
     case 'command_execution': {
       const command = getCommand(toolName, args)
+      const description = toolCallDisplayDescription(args)
+      const shellLabel = customLabel ?? (
+        <ToolCallLineLabel
+          title={customTitle ?? (description || title)}
+          subtitle={description ? undefined : subtitle}
+          runtime={toolRuntime}
+          isPending={isPending}
+        />
+      )
       return (
-        <SimpleAccordion {...accordionProps}>
-          <Flex
-            direction="column"
-            gap="xsmall"
-            minWidth={0}
-            width="100%"
-            marginTop={spacing.xsmall}
-          >
+        <SimpleAccordion
+          {...accordionProps}
+          label={shellLabel}
+          accordionStyles={
+            description
+              ? {
+                  background: 'transparent',
+                  border: theme.borders['fill-two'],
+                  borderRadius: theme.borderRadiuses.medium,
+                  overflow: 'hidden',
+                }
+              : undefined
+          }
+          triggerWrapperStyles={
+            description
+              ? {
+                  width: '100%',
+                  maxWidth: '100%',
+                  boxSizing: 'border-box',
+                  padding: `${spacing.xsmall}px ${spacing.small}px`,
+                }
+              : undefined
+          }
+        >
+          <ShellCommandBodySC $hasHeader={!!description}>
             <Code
               language="bash"
               showHeader={false}
+              css={{
+                backgroundColor: 'transparent',
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
+              }}
             >
               {`$ ${command}`}
             </Code>
@@ -144,8 +177,11 @@ export function SimpleToolCall({
               hideArguments
               flushTop
               isPending={isPending}
+              transparent
+              maxOutputHeight={240}
+              ansiOutput
             />
-          </Flex>
+          </ShellCommandBodySC>
         </SimpleAccordion>
       )
     }
@@ -502,6 +538,19 @@ const ToolCallLineSC = styled.span(({ theme }) => ({
     flexShrink: 0,
   },
 }))
+
+const ShellCommandBodySC = styled.div<{ $hasHeader: boolean }>(
+  ({ theme, $hasHeader }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 0,
+    minWidth: 0,
+    width: '100%',
+    marginTop: $hasHeader ? 0 : theme.spacing.small,
+    boxSizing: 'border-box',
+    backgroundColor: 'transparent',
+  })
+)
 
 export const ClickableLabelSC = styled.button(() => ({
   background: 'none',

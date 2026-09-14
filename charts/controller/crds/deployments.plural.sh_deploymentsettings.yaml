@@ -270,6 +270,24 @@ spec:
                           Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,
                           global.anthropic.claude-haiku-4-5-20251001-v1:0).
                         type: string
+                      modelSettings:
+                        description: ModelSettings configures per-model Bedrock options,
+                          including application inference profiles.
+                        items:
+                          properties:
+                            inferenceProfileArn:
+                              description: InferenceProfileARN is the full ARN of
+                                the Bedrock application inference profile.
+                              type: string
+                            modelId:
+                              description: ModelID is the foundation model served
+                                by the application inference profile.
+                              type: string
+                          required:
+                          - inferenceProfileArn
+                          - modelId
+                          type: object
+                        type: array
                       proxyModels:
                         description: |-
                           ProxyModels lists additional Bedrock model or inference profile IDs exposed through the Nexus

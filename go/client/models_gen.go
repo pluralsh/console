@@ -1462,8 +1462,10 @@ type BedrockAiAttributes struct {
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID.
 	Deployments *string `json:"deployments,omitempty"`
+	// Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata.
+	ModelSettings []*BedrockModelSettingsAttributes `json:"modelSettings,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1482,8 +1484,22 @@ type BedrockAiSettings struct {
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID.
 	Deployments map[string]any `json:"deployments,omitempty"`
+	// Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata.
+	ModelSettings []*BedrockModelSettings `json:"modelSettings,omitempty"`
+}
+
+type BedrockModelSettings struct {
+	ModelID             *string `json:"modelId,omitempty"`
+	InferenceProfileArn *string `json:"inferenceProfileArn,omitempty"`
+}
+
+type BedrockModelSettingsAttributes struct {
+	// the foundation model ID served by the inference profile
+	ModelID string `json:"modelId"`
+	// the full ARN of the Bedrock application inference profile
+	InferenceProfileArn string `json:"inferenceProfileArn"`
 }
 
 type BindingAttributes struct {

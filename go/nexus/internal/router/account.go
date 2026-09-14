@@ -149,6 +149,7 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 		ConcurrencyAndBufferSize: schemas.DefaultConcurrencyAndBufferSize,
 	}
 	config.NetworkConfig.DefaultRequestTimeoutInSeconds = 300 // 5 minutes
+	config.NetworkConfig.AllowPrivateNetwork = true
 
 	switch provider {
 	case schemas.OpenAI:
