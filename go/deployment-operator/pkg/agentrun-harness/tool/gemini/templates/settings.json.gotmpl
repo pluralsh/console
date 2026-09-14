@@ -8,12 +8,7 @@
     }
   },
   "context": {
-    "fileName": "AGENTS.md",
-    "includeDirectories": [
-      "/plural/contexts",
-      "{{ .RepositoryDir }}"{{ range .ExtraDirectories }},
-      "{{ . }}"{{ end }}
-    ]
+    "fileName": "AGENTS.md"
   },
   "coreTools": {{ if eq .AgentRunMode "WRITE" }}[
     "ReadFileTool",

@@ -139,44 +139,6 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 	})
 
-	t.Run("context.includeDirectories contains repository and extra prebake dirs", func(t *testing.T) {
-		input := *baseInput
-		input.AgentRunMode = console.AgentRunModeWrite
-		input.ExtraDirectories = []string{"/plural/shared/repos"}
-
-		_, content, err := settings(&input)
-		if err != nil {
-			t.Fatalf("settings() failed: %v", err)
-		}
-
-		var out map[string]any
-		if err := json.Unmarshal([]byte(content), &out); err != nil {
-			t.Fatalf("generated content is not valid JSON: %v", err)
-		}
-		context, ok := out["context"].(map[string]any)
-		if !ok {
-			t.Fatal("context missing or not an object")
-		}
-		dirs, ok := context["includeDirectories"].([]any)
-		if !ok {
-			t.Fatal("context.includeDirectories missing or not an array")
-		}
-		for _, want := range []string{"/plural/contexts", "/repo", "/plural/shared/repos"} {
-			found := false
-			for _, d := range dirs {
-				if s, ok := d.(string); ok && s == want {
-					found = true
-					break
-				}
-			}
-			if !found {
-				t.Errorf("expected context.includeDirectories to contain %q, got %#v", want, dirs)
-			}
-		}
-		if _, exists := out["includeDirectories"]; exists {
-			t.Fatal("deprecated top-level includeDirectories must be absent")
-		}
-	})
 }
 
 func TestSettingsTemplate_ExternalMCPServer(t *testing.T) {
