@@ -1,4 +1,5 @@
-import { Div, type DivProps, Flex, H1, H3, P } from 'honorable'
+import { Div, type DivProps, Flex, P } from 'honorable'
+import styled from 'styled-components'
 
 import Card from './Card'
 import AppIcon from './AppIcon'
@@ -62,21 +63,10 @@ function StackCard({
               justify="space-between"
             >
               <Flex direction="column">
-                <H1
-                  subtitle1
-                  color="text"
-                  marginBottom="xxsmall"
-                >
-                  {title}
-                </H1>
-                <H3
-                  body2
-                  fontWeight="300"
-                  color="text-xlight"
-                  marginBottom="xxsmall"
-                >
+                <TitleSC>{title}</TitleSC>
+                <AppCountSC>
                   {apps?.length || 0} APP{apps?.length !== 1 && 'S'}
-                </H3>
+                </AppCountSC>
               </Flex>
               <Chip icon={<StackIcon />}>Stack</Chip>
             </Flex>
@@ -125,5 +115,20 @@ function StackCard({
     </Card>
   )
 }
+
+const TitleSC = styled.h1(({ theme }) => ({
+  margin: 0,
+  marginBottom: theme.spacing.xxsmall,
+  ...theme.partials.text.subtitle1,
+  color: theme.colors.text,
+}))
+
+const AppCountSC = styled.h3(({ theme }) => ({
+  margin: 0,
+  marginBottom: theme.spacing.xxsmall,
+  ...theme.partials.text.body2,
+  fontWeight: 300,
+  color: theme.colors['text-xlight'],
+}))
 
 export default StackCard
