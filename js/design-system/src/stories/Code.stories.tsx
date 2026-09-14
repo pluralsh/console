@@ -1,7 +1,4 @@
-import { Flex } from 'honorable'
-import { useTheme } from 'styled-components'
-
-import { Card, Code, WrapWithIf } from '..'
+import { Card, Code, Flex, WrapWithIf } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
 
 import {
@@ -181,8 +178,6 @@ const tabs = [
 ]
 
 function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
-  const theme = useTheme()
-
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
@@ -196,7 +191,7 @@ function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
       {' '}
       <Flex
         flexDirection="column"
-        gap={theme.spacing.xxlarge}
+        gap="xxlarge"
         width="100%"
       >
         <Flex
@@ -390,8 +385,6 @@ const mermaidTabs = [
 ]
 
 function MermaidWithTabsTemplate({ onFillLevel, title, ...args }: any) {
-  const theme = useTheme()
-
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
@@ -404,7 +397,7 @@ function MermaidWithTabsTemplate({ onFillLevel, title, ...args }: any) {
     >
       <Flex
         flexDirection="column"
-        gap={theme.spacing.xxlarge}
+        gap="xxlarge"
         width="100%"
       >
         <Flex

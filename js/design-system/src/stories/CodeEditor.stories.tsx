@@ -1,13 +1,16 @@
-import { Div, Flex } from 'honorable'
-
 import { Card, CodeEditor, WrapWithIf } from '..'
 
-import { goCode, jsCode, tfCode } from '../constants'
+import { tfCode } from '../constants'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
   title: 'Code Editor',
   component: CodeEditor,
+  parameters: {
+    controls: {
+      exclude: /^(on[A-Z]|options)/,
+    },
+  },
   argTypes: {
     onFillLevel: {
       options: [0, 1, 2, 3],
@@ -16,15 +19,57 @@ const meta = {
         labels: {
           0: '0',
           1: '1',
-          2: "2 - Shouldn't be used",
-          3: "3 - Shouldn't be used",
+          2: '2',
+          3: '3',
         },
       },
     },
+    save: {
+      control: { type: 'boolean' },
+    },
+    saveLabel: {
+      control: { type: 'text' },
+    },
+    saving: {
+      control: { type: 'boolean' },
+    },
+    lineNumbers: {
+      control: { type: 'boolean' },
+    },
+    minimap: {
+      control: { type: 'boolean' },
+    },
+    options: {
+      table: { disable: true },
+    },
+    onSave: {
+      table: { disable: true },
+      control: false,
+    },
+    onChange: {
+      table: { disable: true },
+      control: false,
+    },
+    stretched: {
+      control: { type: 'boolean' },
+    },
+    width: {
+      control: {
+        type: 'range',
+        min: 200,
+        max: 1200,
+        step: 10,
+      },
+      if: { arg: 'stretched', truthy: false },
+    },
     height: {
       control: {
-        type: 'number',
+        type: 'range',
+        min: 120,
+        max: 800,
+        step: 10,
       },
+      if: { arg: 'stretched', truthy: false },
     },
   },
 } satisfies Meta<any>
@@ -32,7 +77,15 @@ const meta = {
 export default meta
 type Story = StoryObj<any>
 
-function Template({ onFillLevel, ...args }: any) {
+function Template({
+  onFillLevel,
+  width,
+  height,
+  stretched,
+  lineNumbers,
+  minimap,
+  ...args
+}: any) {
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
@@ -43,86 +96,32 @@ function Template({ onFillLevel, ...args }: any) {
         />
       }
     >
-      <Flex
-        direction="column"
-        gap="medium"
-      >
-        <CodeEditor
-          language="hcl"
-          value={tfCode}
-          width="1100px"
-          height="550px"
-          save
-          saveLabel="Commit"
-          {...args}
-        />
-        <CodeEditor
-          language="javascript"
-          value={jsCode}
-          width="600px"
-          height="300px"
-          {...args}
-        />
-        <Div height={300}>
-          <CodeEditor
-            language="go"
-            value={goCode}
-            width="700px"
-            {...args}
-          />
-        </Div>
-      </Flex>
+      <CodeEditor
+        language="hcl"
+        value={tfCode}
+        width={stretched ? undefined : width}
+        height={stretched ? undefined : height}
+        {...args}
+        options={{
+          lineNumbers: lineNumbers ? 'on' : 'off',
+          minimap: { enabled: minimap },
+        }}
+      />
     </WrapWithIf>
-  )
-}
-
-function StretchedTemplate({ onFillLevel, ...args }: any) {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        height: '100vh',
-        padding: 32,
-        top: 0,
-      }}
-    >
-      <WrapWithIf
-        condition={onFillLevel > 0}
-        wrapper={
-          <Card
-            fillLevel={onFillLevel}
-            padding="medium"
-          />
-        }
-      >
-        <Flex
-          direction="column"
-          gap="medium"
-          height="100%"
-        >
-          <CodeEditor
-            language="hcl"
-            value={tfCode}
-            width="1100px"
-            height="100%"
-            save
-            saveLabel="Commit"
-            {...args}
-          />
-        </Flex>
-      </WrapWithIf>
-    </div>
   )
 }
 
 export const Default: Story = {
   render: Template,
   args: {
-    options: { lineNumbers: true },
+    lineNumbers: true,
+    minimap: true,
+    save: true,
+    saveLabel: 'Commit',
+    saving: false,
+    stretched: false,
+    width: 800,
+    height: 400,
+    onFillLevel: 0,
   },
-}
-
-export const Stretched: Story = {
-  render: StretchedTemplate,
-  args: {},
 }

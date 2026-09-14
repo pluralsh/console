@@ -6,7 +6,7 @@ import ValidatedInput, {
 } from '../components/ValidatedInput'
 
 const meta = {
-  title: 'ValidatedInput',
+  title: 'Validated Input',
   component: ValidatedInput,
 } satisfies Meta<any>
 

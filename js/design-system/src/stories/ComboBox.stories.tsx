@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import { type ComponentProps, type JSX, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import Fuse from 'fuse.js'
@@ -13,6 +12,7 @@ import {
   Card,
   Chip,
   ComboBox,
+  Flex,
   ListBoxFooterPlus,
   ListBoxItem,
   ListBoxItemChipList,

@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import { type ComponentProps, type Key, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 
@@ -6,7 +5,7 @@ import { isEqual, uniqWith } from 'lodash-es'
 
 import styled from 'styled-components'
 
-import { Card, Chip, ComboBox, ListBoxItem, TagIcon, WrapWithIf } from '..'
+import { Card, Chip, ComboBox, Flex, ListBoxItem, TagIcon, WrapWithIf } from '..'
 
 import { isNonNullable } from '../utils/isNonNullable'
 

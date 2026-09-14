@@ -1,4 +1,3 @@
-import { Div } from 'honorable'
 import { useState } from 'react'
 
 import { type Key } from '@react-types/shared'
@@ -47,7 +46,7 @@ function Template(args: any) {
   return (
     <>
       <h1>Controlled</h1>
-      <Div>
+      <div>
         {Object.entries(checks).map(([value, { label }]) => (
           <Checkbox
             key={value}
@@ -72,9 +71,9 @@ function Template(args: any) {
         >
           Reset
         </Button>
-      </Div>
+      </div>
       <h1>Uncontrolled</h1>
-      <Div>
+      <div>
         {Object.entries(checks).map(([value, { label }]) => (
           <Checkbox
             key={value}
@@ -85,7 +84,7 @@ function Template(args: any) {
             {label}
           </Checkbox>
         ))}
-      </Div>
+      </div>
     </>
   )
 }

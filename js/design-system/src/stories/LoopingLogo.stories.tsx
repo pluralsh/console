@@ -1,10 +1,9 @@
-import { Flex } from 'honorable'
-
 import LoopingLogo, { type LoopingLogoProps } from '../components/LoopingLogo'
+import Flex from '../components/Flex'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'LoopingLogo',
+  title: 'Looping Logo',
   component: LoopingLogo,
 } satisfies Meta<any>
 

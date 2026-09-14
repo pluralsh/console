@@ -16,7 +16,7 @@ const sizes: ComponentProps<typeof Chip>['size'][] = [
 const severities: ComponentProps<typeof Chip>['severity'][] = [...SEVERITIES]
 
 const meta = {
-  title: 'ChipList',
+  title: 'Chip List',
   component: ChipList,
   argTypes: {
     size: {

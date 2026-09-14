@@ -1,5 +1,3 @@
-import { Div, Flex } from 'honorable'
-
 import { type ChangeEvent, useState } from 'react'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
@@ -8,6 +6,7 @@ import CaretDownIcon from '../components/icons/CaretDownIcon'
 import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
 import { Card } from '../index'
+import Flex from '../components/Flex'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
@@ -102,28 +101,28 @@ function CustomInputTemplate(args: any) {
       direction="column"
       maxWidth="500px"
     >
-      <Div>
+      <div>
         <Input
           large
           width="100%"
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
+      </div>
+      <div style={{ marginTop: 16 }}>
         <Input
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
+      </div>
+      <div style={{ marginTop: 16 }}>
         <Input
           small
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
+      </div>
     </Flex>
   )
 }
@@ -144,28 +143,28 @@ function CustomInputV2Template(args: any) {
       direction="column"
       maxWidth="500px"
     >
-      <Div marginTop="medium">
+      <div style={{ marginTop: 16 }}>
         <Input
           size="large"
           width="100%"
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
+      </div>
+      <div style={{ marginTop: 16 }}>
         <Input
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
+      </div>
+      <div style={{ marginTop: 16 }}>
         <Input
           size="small"
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
+      </div>
     </Flex>
   )
 }

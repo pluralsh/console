@@ -1,6 +1,7 @@
 import { type ComponentType, useEffect } from 'react'
-import { Div } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
+
+import Flex from './components/Flex'
 
 import {
   setThemeColorMode,
@@ -24,9 +25,12 @@ function ThemeDecorator(Story: ComponentType, context: any) {
     <StyledThemeProvider theme={styledTheme}>
       <HonorableThemeProvider>
         <StyledCss />
-        <Div padding="xlarge">
+        <Flex
+          padding="xlarge"
+          direction="column"
+        >
           <Story />
-        </Div>
+        </Flex>
       </HonorableThemeProvider>
     </StyledThemeProvider>
   )
