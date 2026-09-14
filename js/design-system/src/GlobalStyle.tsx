@@ -134,12 +134,26 @@ const GlobalStyleSheet = createGlobalStyle(({ theme }) => ({
   },
   html: {
     fontSize: 14,
-    fontFamily: fontFamilies.sans,
+    lineHeight: 1.15,
+    WebkitTextSizeAdjust: '100%',
   },
   // Keep html/body on the app-shell token (index.html reads --color-page-background).
   // This is intentionally NOT fill-zero.
   'html, body': {
     backgroundColor: theme.colors['page-background'],
+    color: theme.colors.text,
+    fontFamily: fontFamilies.sans,
+    WebkitFontSmoothing: 'antialiased',
+    MozOsxFontSmoothing: 'grayscale',
+  },
+  'h1, h2, h3, h4, h5, h6, p': {
+    margin: 0,
+  },
+  'button, input, optgroup, select, textarea': {
+    fontFamily: 'inherit',
+    fontSize: '100%',
+    lineHeight: 1.15,
+    margin: 0,
   },
   '::placeholder': {
     color: theme.colors['text-xlight'],

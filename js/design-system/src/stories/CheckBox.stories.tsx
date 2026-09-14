@@ -2,8 +2,17 @@ import { useState } from 'react'
 
 import { type Key } from '@react-types/shared'
 
+import styled from 'styled-components'
+
 import { Button, Checkbox } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
+
+const H1 = styled.h1(({ theme }) => ({
+  ...theme.partials.text.subtitle1,
+  '&:not(:first-child)': {
+    marginTop: theme.spacing.xxlarge,
+  },
+}))
 
 const meta = {
   title: 'Checkbox',
@@ -45,7 +54,7 @@ function Template(args: any) {
 
   return (
     <>
-      <h1>Controlled</h1>
+      <H1>Controlled</H1>
       <div>
         {Object.entries(checks).map(([value, { label }]) => (
           <Checkbox
@@ -72,7 +81,7 @@ function Template(args: any) {
           Reset
         </Button>
       </div>
-      <h1>Uncontrolled</h1>
+      <H1>Uncontrolled</H1>
       <div>
         {Object.entries(checks).map(([value, { label }]) => (
           <Checkbox
