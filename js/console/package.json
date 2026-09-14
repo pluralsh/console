@@ -95,7 +95,7 @@
     "phoenix": "1.8.9",
     "pluralize": "8.0.0",
     "pretty-ms": "9.3.0",
-    "qs": "6.15.3",
+    "qs": "6.16.0",
     "query-string": "8.2.0",
     "react": "19.2.7",
     "react-diff-view": "3.3.3",
@@ -150,7 +150,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-basic-ssl": "2.3.0",
     "@vitejs/plugin-react": "5.2.0",
-    "@vitest/ui": "3.2.7",
+    "@vitest/ui": "4.1.11",
     "babel-plugin-styled-components": "2.3.0",
     "eslint": "9.39.5",
     "graphql-tag": "2.12.7",
@@ -165,7 +165,7 @@
     "vite": "7.3.6",
     "vite-bundle-visualizer": "1.2.1",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "3.2.7"
+    "vitest": "4.1.11"
   },
   "lint-staged": {
     "./src/**/*.{js,jsx,ts,tsx,graphql,md}": "prettier --write",

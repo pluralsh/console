@@ -12,7 +12,8 @@ FROM $NODE_IMAGE AS node
 # Switch to root temporarily to install global packages
 USER root
 
-RUN apt update && apt install -y curl unzip
+RUN apt-get update && apt-get install -y --no-install-recommends curl unzip && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install OpenCode CLI
 RUN VERSION=$AGENT_VERSION curl -fsSL https://opencode.ai/install | bash

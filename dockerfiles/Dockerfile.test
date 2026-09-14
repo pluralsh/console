@@ -17,8 +17,8 @@ RUN if [ "$OS_VARIANT" = "alpine" ]; then \
       apk update && apk upgrade --no-cache && \
       apk add --no-cache git build-base curl ca-certificates; \
     else \
-      apt-get update && apt-get install -y git build-essential curl ca-certificates; \
-      rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
+      apt-get update && apt-get install -y --no-install-recommends git build-essential curl ca-certificates; \
+      rm -rf /var/lib/apt/lists/* "${RUSTUP_HOME}" "${CARGO_HOME}"; \
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
     fi && \
   if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi && \

@@ -28,6 +28,8 @@
     "postcss": "8.5.23",
     "shell-quote": "1.10.0",
     "lodash": "4.18.1",
-    "lodash-es": "4.18.1"
+    "lodash-es": "4.18.1",
+    "@vitest/mocker": "4.1.11",
+    "decode-uri-component": "0.5.0"
   }
 }
