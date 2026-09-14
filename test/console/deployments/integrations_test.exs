@@ -173,5 +173,207 @@ defmodule Console.Deployments.IntegrationsTest do
 
       assert_receive {:event, %PubSub.IssueCreated{item: ^issue}}
     end
+
+    test "it publishes one actionable notification per workbench when a pull request is reopened" do
+      hook = insert(:issue_webhook, provider: :github)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})
+      comment = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:1",
+        url: "https://github.com/myorg/myrepo/issues/7",
+        status: :completed,
+        workbench: wh.workbench,
+        workbench_webhook: wh
+      )
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{
+        "action" => "reopened",
+        "pull_request" => %{
+          "id" => 2,
+          "title" => "Reopened work",
+          "body" => "Back to the drawing board",
+          "html_url" => "https://github.com/myorg/myrepo/pull/7",
+          "state" => "open"
+        }
+      })
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.status == :open
+      assert refetch(comment).status == :open
+
+      issue_id = issue.id
+      comment_id = comment.id
+      assert_receive {:event, %PubSub.IssueCreated{item: %{id: ^issue_id, status: :open, status_changed: true}}}
+      assert_receive {:event, %PubSub.IssueUpdated{item: %{id: ^comment_id, status: :open, status_changed: false}}}
+    end
+
+    test "it syncs pull request status into every workbench that already has it" do
+      hook = insert(:issue_webhook, provider: :github)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Shared pull request"})
+      same = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:2",
+        url: "https://github.com/myorg/myrepo/issues/9",
+        status: :open,
+        workbench: wh.workbench,
+        workbench_webhook: wh
+      )
+      other = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:3",
+        url: "https://github.com/myorg/myrepo/issues/9",
+        status: :open,
+        workbench: insert(:workbench)
+      )
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{
+        "action" => "closed",
+        "pull_request" => %{
+          "id" => 4,
+          "title" => "Shared pull request",
+          "body" => "Touches a repo tracked by two workbenches",
+          "html_url" => "https://github.com/myorg/myrepo/pull/9",
+          "state" => "closed",
+          "merged" => true
+        }
+      })
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.workbench_id == wh.workbench.id
+      assert issue.status == :completed
+      assert refetch(same).status == :completed
+      assert refetch(other).status == :completed
+    end
+
+    test "it syncs pull request status to comments for every SCM provider" do
+      cases = [
+        {:gitlab, "https://gitlab.com/myorg/myrepo/-/merge_requests/7#note_101",
+         %{
+           "object_kind" => "merge_request",
+           "project" => %{"path_with_namespace" => "myorg/myrepo"},
+           "object_attributes" => %{
+             "iid" => 7,
+             "title" => "Merged GitLab MR",
+             "description" => "done",
+             "url" => "https://gitlab.com/myorg/myrepo/-/merge_requests/7",
+             "state" => "merged"
+           }
+         }},
+        {:bitbucket, "https://bitbucket.org/myorg/bbrepo/pull-requests/7#comment-101",
+         %{
+           "repository" => %{"full_name" => "myorg/bbrepo"},
+           "pullrequest" => %{
+             "id" => 7,
+             "title" => "Merged Bitbucket PR",
+             "description" => "done",
+             "state" => "MERGED",
+             "links" => %{
+               "html" => %{
+                 "href" => "https://bitbucket.org/myorg/bbrepo/pull-requests/7"
+               }
+             }
+           }
+         }},
+        {:bitbucket_datacenter,
+         "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/7#comment-101",
+         %{
+           "eventKey" => "pr:merged",
+           "pullRequest" => %{
+             "id" => 7,
+             "title" => "Merged Bitbucket Data Center PR",
+             "description" => "done",
+             "state" => "MERGED",
+             "toRef" => %{
+               "repository" => %{"slug" => "repo", "project" => %{"key" => "PROJ"}}
+             },
+             "links" => %{
+               "self" => [
+                 %{
+                   "href" =>
+                     "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/7"
+                 }
+               ]
+             }
+           }
+         }},
+        {:azure_devops,
+         "https://dev.azure.com/org/project/_git/repo/pullrequest/7?discussionId=12",
+         %{
+           "eventType" => "git.pullrequest.merged",
+           "resourceContainers" => %{"project" => %{"id" => "project-id"}},
+           "resource" => %{
+             "pullRequest" => %{
+               "pullRequestId" => 7,
+               "title" => "Merged Azure DevOps PR",
+               "description" => "done",
+               "status" => "completed",
+               "url" => "https://dev.azure.com/org/project/_git/repo/pullrequest/7"
+             }
+           }
+         }}
+      ]
+
+      Enum.each(cases, fn {provider, comment_url, scm_payload} ->
+        hook = insert(:issue_webhook, provider: provider)
+        workbench = insert(:workbench)
+
+        comment =
+          insert(:issue,
+            provider: provider,
+            external_id: "#{provider}:comment:101",
+            url: comment_url,
+            status: :open,
+            workbench: workbench
+          )
+
+        {:ok, payload} = Issues.Webhook.payload(hook, scm_payload)
+        {:ok, issue} = Integrations.upsert_issue(payload)
+
+        assert issue.status == :completed
+        assert issue.workbench_id == workbench.id
+        assert refetch(comment).status == :completed
+      end)
+    end
+
+    test "it will not inherit scope when the pull request matches several workbenches" do
+      hook = insert(:issue_webhook, provider: :github)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})
+      url = "https://github.com/myorg/myrepo/issues/11"
+      first_workbench = insert(:workbench)
+      second_workbench = insert(:workbench)
+      first = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:5",
+        url: url,
+        status: :open,
+        workbench: first_workbench
+      )
+      second = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:6",
+        url: url,
+        status: :open,
+        workbench: second_workbench
+      )
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{
+        "action" => "closed",
+        "pull_request" => %{
+          "id" => 7,
+          "title" => "Ambiguous pull request",
+          "body" => "Cannot tell which workbench owns this",
+          "html_url" => "https://github.com/myorg/myrepo/pull/11",
+          "state" => "closed",
+          "merged" => true
+        }
+      })
+
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.id in [first.id, second.id]
+      assert refetch(first).status == :completed
+      assert refetch(second).status == :completed
+      assert Console.Repo.aggregate(Console.Schema.Issue, :count) == 2
+    end
   end
 end

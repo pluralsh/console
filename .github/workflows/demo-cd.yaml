@@ -17,7 +17,14 @@ env:
   GOPROXY: "https://proxy.golang.org"
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   publish-flaky-service-docker:
+    needs: [vouch]
     name: Build and push flaky-service container
     runs-on: ubuntu-latest
     defaults:

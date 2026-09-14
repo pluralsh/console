@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -319,4 +320,17 @@ func TestNewHttpClient(t *testing.T) {
 	client := NewHttpClient("my-token")
 	require.NotNil(t, client)
 	require.NotNil(t, client.Transport)
+}
+
+func TestNewHttpClient_InsecureSkipTLSVerify(t *testing.T) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := NewHttpClient("my-token", true)
+	response, err := client.Get(server.URL)
+	require.NoError(t, err)
+	defer response.Body.Close()
+	assert.Equal(t, http.StatusOK, response.StatusCode)
 }

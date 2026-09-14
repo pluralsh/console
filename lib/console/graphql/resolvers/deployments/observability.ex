@@ -11,9 +11,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Project,
     ServiceComponent,
     Workbench,
-    Monitor
+    Monitor,
+    Dashboard
   }
   alias Console.Deployments.{Settings, Observability, Services}
+  alias Console.Deployments.Observability.Dashboard, as: DashboardRuntime
   alias Console.Services.Observability, as: ObsSvc
 
   @default_offset 30 * 60
@@ -161,6 +163,38 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
 
   def get_monitor(%{id: id}, _), do: {:ok, Observability.get_monitor!(id)}
+
+  def get_dashboard(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.get_dashboard!(id) |> allow(user, :read)
+
+  def dashboard_graph(
+        %Dashboard{} = dashboard,
+        %{identifier: identifier, input: input, time_range: time_range},
+        %{context: %{current_user: user}}
+      ),
+      do: DashboardRuntime.graph(dashboard, identifier, input, time_range, user)
+
+  def dashboard_input(
+        %Dashboard{} = dashboard,
+        %{identifier: identifier, input: input, time_range: time_range},
+        %{context: %{current_user: user}}
+      ),
+      do: DashboardRuntime.input(dashboard, identifier, input, time_range, user)
+
+  def list_dashboards(%Workbench{id: workbench_id}, args, _) do
+    Dashboard.for_workbench(workbench_id)
+    |> Dashboard.ordered()
+    |> paginate(args)
+  end
+
+  def create_dashboard(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.create_dashboard(attrs, user)
+
+  def update_dashboard(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.update_dashboard(attrs, id, user)
+
+  def delete_dashboard(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.delete_dashboard(id, user)
 
   def list_monitors(%Service{id: id}, args, _) do
     Monitor.for_service(id)

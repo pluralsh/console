@@ -4,7 +4,14 @@ on:
     branches: [ master ]
     types: [opened, labeled, unlabeled, synchronize]
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   label:
+    needs: [vouch]
     name: Check that PR has required labels
     runs-on: ubuntu-latest
     permissions:

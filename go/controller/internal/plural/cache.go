@@ -15,7 +15,7 @@ func Cache() ClusterCache {
 	if cache == nil {
 		klog.V(log.LogLevelDefault).InfoS("initializing cluster cache")
 
-		consoleClient := client.New(args.ConsoleUrl(), args.ConsoleToken(), args.DatadogEnabled())
+		consoleClient := client.New(args.ConsoleUrl(), args.ConsoleToken(), args.DatadogEnabled(), args.ConsoleInsecureSkipTLSVerify())
 
 		cache = &pluralCache{
 			consoleClient: consoleClient,

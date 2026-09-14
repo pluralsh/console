@@ -1,5 +1,7 @@
 defmodule Console.Deployments.Issues.Webhook.Gitlab do
   @behaviour Console.Deployments.Issues.Provider
+  @behaviour Console.Deployments.Issues.Scm
+  alias Console.Deployments.Issues.Scm
 
   def body(%{"object_kind" => "note", "object_attributes" => %{"note" => body}}) when is_binary(body), do: body
   def body(%{} = payload), do: string_field(payload, "description") || "{empty}"
@@ -13,6 +15,10 @@ defmodule Console.Deployments.Issues.Webhook.Gitlab do
   def external_id(%{"object_kind" => "work_item"} = payload) do
     iid = field(payload, "iid")
     work_item_external_id(payload, iid)
+  end
+  def external_id(%{"object_kind" => "merge_request"} = payload) do
+    iid = field(payload, "iid")
+    pull_request_external_id(payload, iid)
   end
   def external_id(%{} = payload) do
     iid = field(payload, "iid")
@@ -32,6 +38,12 @@ defmodule Console.Deployments.Issues.Webhook.Gitlab do
     do: "#{infer_project(payload)}:issue:#{iid}"
   defp issue_external_id(_, _), do: nil
 
+  defp pull_request_external_id(payload, iid) when is_integer(iid),
+    do: "#{infer_project(payload)}:pull_request:#{iid}"
+  defp pull_request_external_id(payload, iid) when is_binary(iid),
+    do: "#{infer_project(payload)}:pull_request:#{iid}"
+  defp pull_request_external_id(_, _), do: nil
+
   def title(
         %{
           "object_kind" => "note",
@@ -49,6 +61,10 @@ defmodule Console.Deployments.Issues.Webhook.Gitlab do
   def url(_), do: nil
 
   def status(%{"object_kind" => "note", "merge_request" => %{"state" => state}}), do: map_status(state)
+  def status(%{"object_kind" => "merge_request"} = payload) do
+    field(payload, "state")
+    |> map_merge_request_status()
+  end
   def status(%{} = payload) do
     field(payload, "state")
     |> map_status()
@@ -59,6 +75,11 @@ defmodule Console.Deployments.Issues.Webhook.Gitlab do
   end
   def status(_), do: :open
 
+  def pull_request?(%{"object_kind" => "merge_request"}), do: true
+  def pull_request?(_), do: false
+
+  def reference_urls(url), do: [Scm.base_reference_url(url)]
+
   defp map_status("open"), do: :open
   defp map_status("opened"), do: :open
   defp map_status("reopen"), do: :open
@@ -66,6 +87,10 @@ defmodule Console.Deployments.Issues.Webhook.Gitlab do
   defp map_status("close"), do: :completed
   defp map_status("closed"), do: :completed
   defp map_status(_), do: :open
+
+  defp map_merge_request_status("merged"), do: :completed
+  defp map_merge_request_status("closed"), do: :cancelled
+  defp map_merge_request_status(_), do: :open
 
   defp infer_project(%{"project" => %{"path_with_namespace" => path}}) when is_binary(path), do: path
   defp infer_project(%{} = payload) do

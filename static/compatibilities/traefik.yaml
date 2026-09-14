@@ -4,27 +4,34 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.12
+- version: 3.7.13
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['v3.7.0 introduced a large batch of new capabilities, mostly around
-        Kubernetes integrations (Ingress-NGINX provider annotation compatibility,
-        Gateway API enhancements, and CRD improvements), plus new middleware and UI/observability
-        options.', 'v3.7.12 is primarily a security and stability patch release, fixing
-        three published CVEs and a handful of correctness/robustness issues (HTTP/3
-        timeouts, file provider error context, ingress-nginx edge cases, and service
-        weight validation).']
-    breaking_changes: ['Potential behavior changes within v3.7.x to watch for include
-        stricter handling/sanitization of headers and URLs (e.g., removal of untrusted
-        X- headers with underscores, encoded character handling becoming opt-in) which
-        could affect applications that relied on previously accepted requests.', ForwardAuth.TrustForwardHeader
-        was deprecated in v3.7.0; plan to adjust configurations and validate forward-auth
-        behavior if you were using that option.]
-  chart_version: 41.4.0
+    features: ['Kubernetes ingress-nginx provider gained broad NGINX annotation compatibility
+        (rate limiting, rewrites, auth, buffering, canary, redirects, timeouts, headers,
+        allow/whitelists) and now generates its dynamic config via a metamodel.',
+      Gateway API improvements include support for multiple certificateRefs per listener
+        and secret-based CA refs for BackendTLSPolicy., 'New routing/traffic features:
+        provider routing precedence configuration, wildcard host support in Host/HostSNI
+        matchers, and service-level middleware plus response-status-based failover.',
+      'Observability and ops enhancements include richer Kubernetes access log fields,
+        OTLP + stdout access log support, and a global option to disable X-Forwarded-For
+        appending.', 'Security/TLS and middleware enhancements include encodedCharacters
+        middleware, retry enhancements based on status codes/timeouts/non-idempotent
+        methods, and a new ACME CertificateTimeout option.']
+    breaking_changes: [ForwardAuth.TrustForwardHeader was deprecated; plan to migrate
+        away from it and validate forward-auth header trust behavior after the upgrade.,
+      Behavior around rejecting/sanitizing suspicious encoded characters was tightened
+        and made opt-in via new options; validate any apps relying on unusual URL
+        encoding or underscores in untrusted headers., Ingress-NGINX provider refactors
+        and behavior fixes (notably SSL redirect/rewrite-target handling) may change
+        request/redirect behavior compared to earlier 3.7.x expectations; validate
+        ingress annotations in staging.]
+  chart_version: 41.5.0
   images: []
 - version: 3.7.0
   kube: ['1.36', '1.35', '1.34', '1.33']

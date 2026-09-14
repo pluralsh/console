@@ -5,6 +5,7 @@
 
 import { useMemo, useState } from 'react'
 
+import { Input2, SearchIcon } from '@pluralsh/design-system'
 import NextLink from 'next/link'
 
 import isEmpty from 'lodash/isEmpty'
@@ -14,62 +15,60 @@ import { MethodBadge } from './MethodBadge'
 
 import type { ApiSection, Endpoint } from '@src/lib/openapi-rest'
 
-const Sidebar = styled.aside(({ theme: _theme }) => ({
-  position: 'sticky',
-  top: 'var(--top-nav-height)',
-  height: 'calc(100vh - var(--top-nav-height))',
-  width: 300,
-  flexShrink: 0,
+const Sidebar = styled.aside<{ $overlay?: boolean }>(({ $overlay }) => ({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
+  width: '100%',
+  ...($overlay
+    ? {
+        flex: 1,
+        minHeight: 0,
+        position: 'relative',
+      }
+    : {
+        position: 'sticky',
+        top: 'var(--top-nav-height)',
+        height: 'calc(100vh - var(--top-nav-height))',
+        flexShrink: 0,
+      }),
 }))
 
-const SidebarInner = styled.div(({ theme }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  overflowY: 'auto',
-  backgroundColor: theme.colors['fill-one'],
-  borderRight: theme.borders.default,
-  paddingBottom: theme.spacing.xlarge,
-}))
+const SidebarInner = styled.div<{ $overlay?: boolean }>(
+  ({ theme, $overlay }) => ({
+    overflowY: 'auto',
+    backgroundColor: theme.colors['fill-one'],
+    borderRight: $overlay ? 'none' : theme.borders['fill-one'],
+    paddingBottom: theme.spacing.xlarge,
+    paddingLeft: theme.spacing.medium,
+    paddingRight: theme.spacing.medium,
+    ...($overlay
+      ? {
+          flex: 1,
+          minHeight: 0,
+          position: 'relative',
+        }
+      : {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }),
+  })
+)
 
 const SearchWrapper = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.medium}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium}px 0`,
   position: 'sticky',
   top: 0,
   backgroundColor: theme.colors['fill-one'],
   zIndex: 1,
 }))
 
-const SearchInput = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  background: theme.colors['fill-two'] ?? theme.colors['fill-zero'],
-  border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.medium,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  '&:focus-within': {
-    borderColor: theme.colors['border-primary'],
-  },
-  '.icon': {
-    color: theme.colors['text-xlight'],
-    flexShrink: 0,
-  },
-  input: {
-    flex: 1,
-    background: 'transparent',
-    border: 'none',
-    outline: 'none',
-    color: theme.colors.text,
-    ...theme.partials.text.body2,
-    '::placeholder': { color: theme.colors['text-xlight'] },
-  },
-}))
+const FilterInput = styled(Input2)({
+  width: '100%',
+})
 
 const SectionGroup = styled.div(({ theme }) => ({
   display: 'block',
@@ -94,7 +93,7 @@ const EndpointLabel = styled.span(({ theme }) => ({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   ...theme.partials.text.body2,
-  color: theme.colors['text-light'],
+  color: theme.colors['text-xlight'],
 }))
 
 const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
@@ -110,10 +109,7 @@ const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
     textAlign: 'left',
     textDecoration: 'none',
     color: 'inherit',
-    borderStartStartRadius: theme.borderRadiuses.medium,
-    borderEndStartRadius: theme.borderRadiuses.medium,
-    borderStartEndRadius: 0,
-    borderEndEndRadius: 0,
+    borderRadius: theme.borderRadiuses.medium,
     backgroundColor: $active ? theme.colors['action-primary'] : 'transparent',
     '&:hover': {
       backgroundColor: $active
@@ -125,32 +121,6 @@ const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
     },
   })
 )
-
-function SearchIcon() {
-  return (
-    <svg
-      width={14}
-      height={14}
-      viewBox="0 0 16 16"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        cx="7"
-        cy="7"
-        r="5"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
-      <path
-        d="M10.5 10.5 14 14"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
 
 export const AUTH_PAGE_ID = '__authentication__'
 
@@ -167,12 +137,9 @@ const TopNavItemLink = styled(NextLink)<{ $active: boolean }>(
     cursor: 'pointer',
     textAlign: 'left',
     textDecoration: 'none',
-    borderStartStartRadius: theme.borderRadiuses.medium,
-    borderEndStartRadius: theme.borderRadiuses.medium,
-    borderStartEndRadius: 0,
-    borderEndEndRadius: 0,
+    borderRadius: theme.borderRadiuses.medium,
     backgroundColor: $active ? theme.colors['action-primary'] : 'transparent',
-    color: $active ? theme.colors.text : theme.colors['text-light'],
+    color: $active ? theme.colors.text : theme.colors['text-xlight'],
     '&:hover': {
       backgroundColor: $active
         ? theme.colors['action-primary-hover']
@@ -191,9 +158,11 @@ const TopNavDivider = styled.hr(({ theme }) => ({
 export function SidebarNav({
   sections,
   selectedId,
+  overlay = false,
 }: {
   sections: ApiSection[]
   selectedId: string
+  overlay?: boolean
 }) {
   const [filter, setFilter] = useState('')
 
@@ -220,24 +189,16 @@ export function SidebarNav({
   const showAuthItem = !filter
 
   return (
-    <Sidebar>
-      <SidebarInner>
+    <Sidebar $overlay={overlay}>
+      <SidebarInner $overlay={overlay}>
         <SearchWrapper>
-          <SearchInput>
-            <span
-              className="icon"
-              aria-hidden
-            >
-              <SearchIcon />
-            </span>
-            <input
-              type="search"
-              placeholder="Filter API"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              aria-label="Filter API endpoints"
-            />
-          </SearchInput>
+          <FilterInput
+            placeholder="Filter API"
+            startIcon={<SearchIcon />}
+            value={filter}
+            onChange={(e) => setFilter(e.currentTarget.value)}
+            inputProps={{ 'aria-label': 'Filter API endpoints' }}
+          />
         </SearchWrapper>
         <nav aria-label="REST API endpoints">
           {showAuthItem && (

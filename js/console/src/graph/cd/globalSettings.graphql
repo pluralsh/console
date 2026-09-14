@@ -61,6 +61,7 @@ fragment AiSettings on AiSettings {
     modelId
     toolModelId
     embeddingModel
+    endpoint
     accessKeyId
     region
   }

@@ -16,7 +16,14 @@ env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build:
+    needs: [vouch]
     name: Build
     runs-on: ubuntu-latest
     defaults:
@@ -31,6 +38,7 @@ jobs:
           check-latest: true
       - run: PATH=$PATH:$GOPATH/bin make build
   test:
+    needs: [vouch]
     name: Unit test
     runs-on: ubuntu-latest
     defaults:

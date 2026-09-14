@@ -30,15 +30,28 @@ type client struct {
 	turn              *turnState
 	cwd               string
 	root              *os.Root
+	readOnlyRoots     []fileSystemRoot
 	textFileReadSlots chan struct{}
 	fileSystemWrite   bool
 }
 
-func newClient(turn *turnState, cwd string, root *os.Root, fileSystemWrite bool) *client {
+type fileSystemRoot struct {
+	directory string
+	root      *os.Root
+}
+
+func newClient(
+	turn *turnState,
+	cwd string,
+	root *os.Root,
+	readOnlyRoots []fileSystemRoot,
+	fileSystemWrite bool,
+) *client {
 	return &client{
 		turn:              turn,
 		cwd:               cwd,
 		root:              root,
+		readOnlyRoots:     append([]fileSystemRoot(nil), readOnlyRoots...),
 		textFileReadSlots: make(chan struct{}, maxConcurrentTextFileReads),
 		fileSystemWrite:   fileSystemWrite,
 	}
@@ -117,13 +130,12 @@ func (client *client) readTextFileResponse(reader io.Reader, request acpsdk.Read
 }
 
 func (client *client) openTextFile(path string) (*os.File, error) {
-	relativePath, err := client.rootRelativePath(path)
-
+	root, relativePath, err := client.readRootRelativePath(path)
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := client.root.OpenFile(relativePath, os.O_RDONLY|syscall.O_NONBLOCK, 0)
+	file, err := root.OpenFile(relativePath, os.O_RDONLY|syscall.O_NONBLOCK, 0)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", path, err)
 	}
@@ -260,6 +272,38 @@ func (client *client) rootRelativePath(path string) (string, error) {
 	}
 
 	return relative, nil
+}
+
+func (client *client) readRootRelativePath(path string) (*os.Root, string, error) {
+	if !filepath.IsAbs(path) {
+		return nil, "", fmt.Errorf("acp filesystem path must be absolute: %q", path)
+	}
+	if client.root == nil {
+		return nil, "", errors.New("acp client filesystem root is not set")
+	}
+
+	if relative, ok := relativeToRoot(client.cwd, path); ok {
+		return client.root, relative, nil
+	}
+	for _, root := range client.readOnlyRoots {
+		if root.root == nil {
+			return nil, "", errors.New("acp client read-only filesystem root is not set")
+		}
+		if relative, ok := relativeToRoot(root.directory, path); ok {
+			return root.root, relative, nil
+		}
+	}
+
+	return nil, "", fmt.Errorf("acp filesystem path is outside the readable directories: %q", path)
+}
+
+func relativeToRoot(root, path string) (string, bool) {
+	relative, err := filepath.Rel(root, path)
+	if err != nil || relative == "." || !filepath.IsLocal(relative) {
+		return "", false
+	}
+
+	return relative, true
 }
 
 func (client *client) RequestPermission(_ context.Context, request acpsdk.RequestPermissionRequest) (acpsdk.RequestPermissionResponse, error) {

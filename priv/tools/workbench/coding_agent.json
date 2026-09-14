@@ -4,7 +4,7 @@
         "mode": {
             "type": "string",
             "enum": ["analyze", "write"],
-            "description": "The mode of the coding agent. Use analyze to gather information, write to generate a PR, or review to evaluate and publish a review for an existing PR when review mode is enabled for this job."
+            "description": "The mode of the coding agent. Use analyze to gather information, or write to generate a PR."
         },
         "repository": {
             "type": "string",
@@ -12,7 +12,7 @@
         },
         "base_branch": {
             "type": "string",
-            "description": "Required for review mode; otherwise optional. The branch to clone for a normal run and use as its pull request base. Leave it blank unless explicitly prompted to set it. Do not use this for follow-up runs."
+            "description": "Optional. The branch to clone and use as the pull request base. Leave it blank unless explicitly prompted to set it. Do not use this for follow-up runs."
         },
         "head_branch": {
             "type": "string",
@@ -20,7 +20,7 @@
         },
         "pr_url": {
             "type": "string",
-            "description": "Required for review mode and whenever `followup` is true. The URL of the existing pull request to review or continue. For review runs, this URL is provided directly to the review agent as pull request context."
+            "description": "Required whenever `followup` is true. The URL of the existing pull request to continue."
         },
         "prompt": {
             "type": "string", 

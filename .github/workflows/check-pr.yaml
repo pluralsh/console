@@ -8,7 +8,14 @@ on:
     - terraform/**/*
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   check-pr-body:
+    needs: [vouch]
     name: Ensure PR Body Format
     runs-on: ubuntu-latest
     permissions:

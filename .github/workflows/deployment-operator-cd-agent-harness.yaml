@@ -26,7 +26,14 @@ env:
   REGISTRY_IMAGE: pluralsh/agent-harness-base
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   output-versions:
+    needs: [vouch]
     name: Output versions
     runs-on: ubuntu-latest
     env:
@@ -53,6 +60,7 @@ jobs:
           echo "PI_VERSION=$PI_VERSION"
 
   build-base-image:
+    needs: [vouch]
     name: Build base image
     permissions:
       contents: 'read'

@@ -22,7 +22,14 @@ env:
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/agentk
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build-image:
+    needs: [vouch]
     name: Build agentk image
     permissions:
       contents: 'read'

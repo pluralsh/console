@@ -11,7 +11,8 @@ defmodule Console.Schema.WorkbenchSkill do
     memory: 5,
     skill: 6,
     history: 7,
-    search: 8
+    search: 8,
+    monitoring: 9
 
   schema "workbench_skills" do
     field :name, :string

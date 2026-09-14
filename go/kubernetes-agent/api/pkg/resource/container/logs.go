@@ -26,9 +26,6 @@ import (
 	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/logs"
 )
 
-// maximum number of lines loaded from the apiserver
-var lineReadLimit int64 = 5000
-
 // maximum number of bytes loaded from the apiserver
 var byteReadLimit int64 = 500000
 
@@ -71,6 +68,7 @@ func GetLogDetails(client kubernetes.Interface, namespace, podID string, contain
 	if err != nil {
 		return nil, err
 	}
+
 	details := ConstructLogDetails(podID, rawLogs, container, logSelector)
 	return details, nil
 }
@@ -88,7 +86,8 @@ func mapToLogOptions(container string, logSelector *logs.Selection, previous boo
 	if logSelector.LogFilePosition == logs.Beginning {
 		logOptions.LimitBytes = &byteReadLimit
 	} else {
-		logOptions.TailLines = &lineReadLimit
+		tailLines := int64(logs.NormalizeTailLines(logSelector.TailLines) + 1)
+		logOptions.TailLines = &tailLines
 	}
 
 	return logOptions
@@ -122,6 +121,7 @@ func GetLogFile(client kubernetes.Interface, namespace, podID string, container 
 		Timestamps: opts.Timestamps,
 	}
 	logStream, err := openStream(client, namespace, podID, logOptions)
+
 	return logStream, err
 }
 
@@ -137,9 +137,10 @@ func openStream(client kubernetes.Interface, namespace, podID string, logOptions
 // ConstructLogDetails creates a new log details structure for given parameters.
 func ConstructLogDetails(podID string, rawLogs string, container string, logSelector *logs.Selection) *logs.LogDetails {
 	parsedLines := logs.ToLogLines(rawLogs)
+	parsedLines, tailLimitReached := trimTailLines(parsedLines, logSelector)
 	logLines, fromDate, toDate, logSelection, lastPage := parsedLines.SelectLogs(logSelector)
 
-	readLimitReached := isReadLimitReached(int64(len(rawLogs)), int64(len(parsedLines)), logSelector.LogFilePosition)
+	readLimitReached := isReadLimitReached(int64(len(rawLogs)), &logSelection, tailLimitReached)
 	truncated := readLimitReached && lastPage
 
 	info := logs.LogInfo{
@@ -148,7 +149,9 @@ func ConstructLogDetails(podID string, rawLogs string, container string, logSele
 		FromDate:      fromDate,
 		ToDate:        toDate,
 		Truncated:     truncated,
+		HasMore:       hasMore(logLines, &logSelection, lastPage, readLimitReached),
 	}
+
 	return &logs.LogDetails{
 		Info:      info,
 		Selection: logSelection,
@@ -156,8 +159,29 @@ func ConstructLogDetails(podID string, rawLogs string, container string, logSele
 	}
 }
 
-// Checks if the amount of log file returned from the apiserver is equal to the read limits
-func isReadLimitReached(bytesLoaded int64, linesLoaded int64, logFilePosition string) bool {
-	return (logFilePosition == logs.Beginning && bytesLoaded >= byteReadLimit) ||
-		(logFilePosition == logs.End && linesLoaded >= lineReadLimit)
+func trimTailLines(logLines logs.LogLines, logSelector *logs.Selection) (logs.LogLines, bool) {
+	if logSelector.LogFilePosition == logs.Beginning {
+		return logLines, false
+	}
+
+	tailLines := logs.NormalizeTailLines(logSelector.TailLines)
+	if len(logLines) <= tailLines {
+		return logLines, false
+	}
+
+	return logLines[len(logLines)-tailLines:], true
+}
+
+// Checks whether a configured read limit prevented loading the full log.
+func isReadLimitReached(bytesLoaded int64, logSelector *logs.Selection, tailLimitReached bool) bool {
+	return (logSelector.LogFilePosition == logs.Beginning && bytesLoaded >= byteReadLimit) ||
+		(logSelector.LogFilePosition == logs.End && tailLimitReached)
+}
+
+func hasMore(logLines logs.LogLines, logSelector *logs.Selection, lastPage bool, readLimitReached bool) bool {
+	if !lastPage {
+		return true
+	}
+	return logSelector.LogFilePosition == logs.End && readLimitReached && len(logLines) > 0 &&
+		logs.NormalizeTailLines(logSelector.TailLines) < logs.MaxTailLines
 }

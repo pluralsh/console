@@ -10,7 +10,7 @@ description: Configure agent runtimes and run agent tasks.
 
 ## Configure an AgentRuntime
 
-Use `AgentRuntime` to define the provider, credentials, and runtime options.
+Use `AgentRuntime` to define the provider and runtime options. With `aiProxy: true`, provider API keys are unnecessary because requests are routed through the Console AI proxy.
 For field-level details, see the [AgentRuntime API reference](/api-reference/kubernetes/agent-api-reference#agentruntime) and [AgentRuntimeSpec API reference](/api-reference/kubernetes/agent-api-reference#agentruntimespec).
 
 ```yaml
@@ -21,14 +21,15 @@ metadata:
   namespace: plrl-agents
 spec:
   targetNamespace: plrl-agents
-  type: CLAUDE
+  type: CODEX
   default: true
   aiProxy: true
   config:
-    claude:
-      apiKeySecretRef:
-        name: ai-config
-        key: anthropic
+    codex:
+      # if not using ai proxy, can provide an explicit token
+      # apiKeySecretRef:
+      #   name: ai-config
+      #   key: openai 
       model: claude-3-5-sonnet-latest
 ```
 

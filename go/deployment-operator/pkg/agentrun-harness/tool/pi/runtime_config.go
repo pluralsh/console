@@ -27,11 +27,15 @@ const (
 	providerGoogleVertex     = "google-vertex"
 	providerVertex           = "vertex"
 	providerXAI              = "xai"
+	openAIBaseURL            = "https://api.openai.com/v1"
+	openAICompletionsAPI     = "openai-completions"
+	openAIResponsesAPI       = "openai-responses"
 )
 
 type piSettings struct {
 	provider string
 	model    string
+	method   string
 	endpoint string
 }
 
@@ -67,6 +71,7 @@ func (*Agent) resolveSettings(run *agentrunv1.AgentRun, config *agentrunv1.PiCon
 		return piSettings{
 			provider: providerPlural,
 			model:    proxymodel.ProxyModel(console.AgentRuntimeTypePi, model),
+			method:   config.Method,
 		}
 	}
 
@@ -80,8 +85,30 @@ func (*Agent) resolveSettings(run *agentrunv1.AgentRun, config *agentrunv1.PiCon
 	return piSettings{
 		provider: provider,
 		model:    stripModelProvider(model, provider, config.Provider),
-		endpoint: lo.FromPtr(config.Endpoint),
+		method:   config.Method,
+		endpoint: piOpenAIEndpoint(lo.FromPtr(config.Endpoint), provider, config.Method),
 	}
+}
+
+func piOpenAIAPI(method string) string {
+	if console.OpenAiMethod(method) == console.OpenAiMethodChat {
+		return openAICompletionsAPI
+	}
+	return openAIResponsesAPI
+}
+
+func piOpenAIEndpoint(endpoint, provider, method string) string {
+	if endpoint != "" {
+		return endpoint
+	}
+
+	switch console.OpenAiMethod(method) {
+	case console.OpenAiMethodChat, console.OpenAiMethodResponses:
+		if provider == providerOpenAI {
+			return openAIBaseURL
+		}
+	}
+	return ""
 }
 
 func (agent *Agent) resolvedProvider(config toolv1.Config) string {

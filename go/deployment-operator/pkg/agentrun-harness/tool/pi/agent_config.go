@@ -41,7 +41,7 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 		providers[resolved.provider] = map[string]any{
 			"baseUrl": resolved.endpoint,
 			"apiKey":  fmt.Sprintf("$%s", openAIAPIKeyEnv),
-			"api":     "openai-responses",
+			"api":     piOpenAIAPI(resolved.method),
 			"models": []map[string]any{{
 				"id":            resolved.model,
 				"contextWindow": 128000,

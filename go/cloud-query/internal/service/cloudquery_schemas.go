@@ -30,19 +30,14 @@ func (in *CloudQueryService) Schemas(_ context.Context, input *cloudquery.Schema
 		return nil, status.Error(codes.InvalidArgument, "at least one table is required")
 	}
 
-	c, _, err := in.createProviderConnection(input.GetConnection())
-	if err != nil {
-		return nil, err
-	}
-
-	return in.handleSchemas(c, tables)
-}
-
-func (in *CloudQueryService) handleSchemas(c connection.Connection, tables []string) (*cloudquery.SchemaOutput, error) {
-	result, err := c.Schemas(tables)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to execute schemas query for tables %q: %v", tables, err)
-	}
-
-	return &cloudquery.SchemaOutput{Result: lo.ToSlicePtr(result)}, nil
+	var out *cloudquery.SchemaOutput
+	err := in.withProviderConnection(input.GetConnection(), func(c connection.Connection) error {
+		result, err := c.Schemas(tables)
+		if err != nil {
+			return err
+		}
+		out = &cloudquery.SchemaOutput{Result: lo.ToSlicePtr(result)}
+		return nil
+	})
+	return out, wrapInternal(err, "failed to execute schemas query for tables %q: %v", tables, err)
 }

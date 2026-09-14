@@ -1,11 +1,8 @@
+import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
-
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
-import { SettingsPageHeader } from 'components/settings/Settings'
-
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { Body1P } from 'components/utils/typography/Text'
 import { getUserManagementBreadcrumbs } from '../UserManagement'
-
 import UserInvite from './UserInvite'
 import { UsersList } from './UsersList'
 
@@ -17,13 +14,21 @@ export default function Users() {
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <>
-      <SettingsPageHeader heading="Users">
+    <Flex
+      direction="column"
+      gap="medium"
+      height="100%"
+      minHeight={0}
+    >
+      <StretchedFlex>
+        <Body1P $color="text-light">
+          See users in your org. Change them to admin here.
+        </Body1P>
         {!configuration?.pluralLogin && !configuration?.externalOidc && (
           <UserInvite />
         )}
-      </SettingsPageHeader>
+      </StretchedFlex>
       <UsersList />
-    </>
+    </Flex>
   )
 }

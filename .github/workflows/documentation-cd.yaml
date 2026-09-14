@@ -28,7 +28,14 @@ env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   publish-docker:
+    needs: [vouch]
     name: Build documentation image
     runs-on: ubuntu-latest
     permissions:

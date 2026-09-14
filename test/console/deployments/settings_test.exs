@@ -33,10 +33,13 @@ defmodule Console.Deployments.SettingsTest do
           bedrock: %{
             region: "us-east-1",
             model_id: "anthropic.custom",
+            endpoint: :mantle,
             proxy_models: ["anthropic.proxy"]
           }
         }
       )
+
+      assert Settings.fetch_consistent().ai.bedrock.endpoint == :mantle
 
       assert Enum.map(Settings.available_models(), &Map.take(&1, [:provider, :model])) == [
                %{provider: :openai, model: "gpt-custom"},
@@ -210,6 +213,17 @@ defmodule Console.Deployments.SettingsTest do
       {:ok, _} = Settings.migrate_agents()
 
       [] = Console.Repo.all(Console.Schema.AgentMigration)
+    end
+
+    test "only the elected node can generate agent migrations" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      settings = insert(:deployment_settings)
+      expect(Console.ClusterRing, :node, fn :agent_migrations -> :other_node end)
+
+      {:error, _} = Settings.migrate_agents()
+
+      assert refetch(settings).agent_version == settings.agent_version
+      assert Console.Repo.all(Console.Schema.AgentMigration) == []
     end
 
     test "it will ignore if managing agents is not set" do

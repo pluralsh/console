@@ -235,7 +235,8 @@ def find_nested_images(objs: Any) -> List[str]:
 
         if isinstance(x, dict):
             for k, v in x.items():
-                if k == "image":
+                # CRD schemas also use "image" keys whose values are mappings.
+                if k == "image" and isinstance(v, str) and _looks_like_image(v):
                     images.add(v)
                     continue
                 walk(v)
@@ -490,6 +491,8 @@ def reduce_versions(versions):
             if "chart_version" in data:
                 version_info["chart_version"] = data["chart_version"]
                 version_info["images"] = data.get("images", [])
+            if "eolAt" in data:
+                version_info["eolAt"] = data["eolAt"]
 
             reduced_versions.append(version_info)
 

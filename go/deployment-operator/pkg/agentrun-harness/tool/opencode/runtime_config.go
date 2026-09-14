@@ -55,23 +55,25 @@ const (
 // resolveSettings selects provider/model wiring for opencode.json and ACP.
 // The proxy branch stays separate so proxy behavior remains unchanged when
 // OpenAI-compatible providers are configured.
-func (*Agent) resolveSettings(provider, model string, openaiCompatible, proxyEnabled bool) opencodeSettings {
+func (*Agent) resolveSettings(provider, model, method string, customOpenAICompatible, proxyEnabled bool) opencodeSettings {
 	if model == "" {
 		model = defaultModel
 	}
+	openaiCompatible := useOpenAICompatibleSDK(method, customOpenAICompatible)
 
 	if proxyEnabled {
 		return opencodeSettings{
-			provider: ProviderPlural,
-			model:    proxymodel.ProxyModel(console.AgentRuntimeTypeOpencode, model),
+			provider:         ProviderPlural,
+			model:            proxymodel.ProxyModel(console.AgentRuntimeTypeOpencode, model),
+			openaiCompatible: openaiCompatible,
 		}
 	}
 
-	if openaiCompatible {
+	if customOpenAICompatible {
 		return opencodeSettings{
 			provider:         ProviderOpenAICompatible,
 			model:            strings.TrimPrefix(model, string(ProviderOpenAICompatible)+"/"),
-			openaiCompatible: true,
+			openaiCompatible: openaiCompatible,
 		}
 	}
 
@@ -81,8 +83,20 @@ func (*Agent) resolveSettings(provider, model string, openaiCompatible, proxyEna
 	}
 
 	return opencodeSettings{
-		provider: selectedProvider,
-		model:    strings.TrimPrefix(model, string(selectedProvider)+"/"),
+		provider:         selectedProvider,
+		model:            strings.TrimPrefix(model, string(selectedProvider)+"/"),
+		openaiCompatible: openaiCompatible,
+	}
+}
+
+func useOpenAICompatibleSDK(method string, customOpenAICompatible bool) bool {
+	switch console.OpenAiMethod(method) {
+	case console.OpenAiMethodChat:
+		return true
+	case console.OpenAiMethodResponses:
+		return false
+	default:
+		return customOpenAICompatible
 	}
 }
 
@@ -94,7 +108,7 @@ func (agent *Agent) ResolveSettings(run *agentrunv1.AgentRun) (toolv1.Settings, 
 		return toolv1.Settings{}, err
 	}
 
-	resolved := agent.resolveSettings(openCode.Provider, openCode.Model, openCode.OpenAICompatible, run.IsProxyEnabled())
+	resolved := agent.resolveSettings(openCode.Provider, openCode.Model, openCode.Method, openCode.OpenAICompatible, run.IsProxyEnabled())
 
 	return toolv1.Settings{
 		Mode: run.Mode,

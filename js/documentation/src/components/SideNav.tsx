@@ -60,9 +60,7 @@ const KeyboardNavContext = createContext<{
   keyboardNavigable: true,
 })
 
-const StyledLink = styled(NextLink as any)<{
-  $desktop: boolean
-}>(({ $desktop, theme }) => ({
+const StyledLink = styled(NextLink as any)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   cursor: 'pointer',
@@ -72,7 +70,7 @@ const StyledLink = styled(NextLink as any)<{
   padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   ...theme.partials.text.body2,
   textDecoration: 'none',
-  color: theme.colors['text-light'],
+  color: theme.colors['text-xlight'],
   '.iconRight': {
     display: 'flex',
     justifyContent: 'right',
@@ -86,10 +84,7 @@ const StyledLink = styled(NextLink as any)<{
     boxShadow: 'none',
   },
   '&:focus-visible::after': {
-    borderStartStartRadius: theme.borderRadiuses.medium,
-    borderEndStartRadius: theme.borderRadiuses.medium,
-    borderStartEndRadius: $desktop ? 0 : theme.borderRadiuses.medium,
-    borderEndEndRadius: $desktop ? 0 : theme.borderRadiuses.medium,
+    borderRadius: theme.borderRadiuses.medium,
     ...theme.partials.focus.insetAbsolute,
   },
 }))
@@ -102,12 +97,10 @@ type LinkBaseProps = Partial<ComponentProps<typeof StyledLink>> & {
 const LinkBase = forwardRef<HTMLAnchorElement, LinkBaseProps>(
   ({ className, children, iconLeft, iconRight, href, ...props }, ref) => {
     const { keyboardNavigable } = useContext(KeyboardNavContext)
-    const { desktop } = useContext(NavContext)
     const content = (
       <StyledLink
         href={href}
         className={className}
-        $desktop={desktop}
         tabIndex={keyboardNavigable ? 0 : -1}
         ref={ref}
         {...props}
@@ -285,7 +278,7 @@ function NavLinkUnstyled({
   )
 }
 
-const NavLink = styled(NavLinkUnstyled)(({ desktop, theme }) => ({
+const NavLink = styled(NavLinkUnstyled)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
   position: 'relative',
@@ -295,10 +288,7 @@ const NavLink = styled(NavLinkUnstyled)(({ desktop, theme }) => ({
   padding: 0,
   listStyle: 'none',
 
-  borderStartStartRadius: theme.borderRadiuses.medium,
-  borderEndStartRadius: theme.borderRadiuses.medium,
-  borderStartEndRadius: desktop ? 0 : theme.borderRadiuses.medium,
-  borderEndEndRadius: desktop ? 0 : theme.borderRadiuses.medium,
+  borderRadius: theme.borderRadiuses.medium,
 
   '&:hover': {
     backgroundColor: theme.colors['fill-one-hover'],
@@ -310,6 +300,7 @@ const NavLink = styled(NavLinkUnstyled)(({ desktop, theme }) => ({
   '&.selected': {
     backgroundColor: theme.colors['action-primary'],
     '&:hover': { backgroundColor: theme.colors['action-primary-hover'] },
+    a: { color: theme.colors.text },
   },
 }))
 
@@ -481,8 +472,6 @@ function SubSection({
     </>
   )
 }
-const navLeftOffset = 1000
-
 export const NavPositionWrapper = styled.nav(({ theme: _theme }) => ({
   position: 'sticky',
   height: 'calc(100vh - var(--top-nav-height))',
@@ -506,17 +495,14 @@ const NavScrollContainer = styled.div<{
   borderRight: desktop ? theme.borders['fill-one'] : 'none',
   paddingBottom: `calc(${theme.spacing.xlarge}px + var(--menu-extra-bpad))`,
   paddingTop: padTop ? theme.spacing.large : 0,
-  paddingRight: desktop ? 0 : theme.spacing.medium,
-  paddingLeft: desktop ? 0 : theme.spacing.medium,
-  marginLeft: desktop ? -navLeftOffset : 0,
+  paddingRight: theme.spacing.medium,
+  paddingLeft: theme.spacing.medium,
   display: hide ? 'none' : 'block',
 }))
 
-const Nav = styled.nav<{ $desktop: boolean }>(
-  ({ $desktop: desktop, theme: _theme }) => ({
-    marginLeft: desktop ? navLeftOffset : 0,
-  })
-)
+const Nav = styled.nav(() => ({
+  minHeight: '100%',
+}))
 
 export function SideNav({
   navData,
@@ -586,7 +572,7 @@ export function SideNav({
         $padTop={padTop}
         $hide={hide}
       >
-        <Nav $desktop={desktop}>
+        <Nav>
           {(navData || []).map(({ title, sections }) => (
             <TopSection
               title={title}

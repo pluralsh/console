@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { ChatTypeAttributes } from 'generated/graphql'
 import isJson from 'is-json'
+import { isEmpty } from 'lodash'
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { prettifyToolJson } from './toolCallDisplay'
@@ -148,11 +149,19 @@ export function ToolCallContent({
           minWidth={0}
           width="100%"
         >
-          {isPending ? (
+          {isPending && isEmpty(content) ? (
             <RunningToolOutputCode
               showHeader={false}
               fillLevel={2}
             />
+          ) : isPending ? (
+            <Code
+              fillLevel={2}
+              showHeader={false}
+              css={slimCodeCss}
+            >
+              {content}
+            </Code>
           ) : customResultBody ? (
             customResultBody
           ) : isJson(content) ? (
@@ -163,7 +172,7 @@ export function ToolCallContent({
             >
               {prettifyToolJson(content)}
             </Code>
-          ) : content ? (
+          ) : !isEmpty(content) ? (
             <PreviewablePanel contentKey={`resp:${content.length}:plain`}>
               {plainResponse}
             </PreviewablePanel>
@@ -184,6 +193,7 @@ export function PreviewablePanel({
   contentKey,
   header,
   subtle = false,
+  collapsedLines = 4,
 }: {
   children: ReactNode
   contentKey: string
@@ -191,6 +201,8 @@ export function PreviewablePanel({
   header?: ReactNode
   /** Use a quieter surface for nested content such as activity prompts. */
   subtle?: boolean
+  /** Whole-line clamp while collapsed. */
+  collapsedLines?: number
 }) {
   const [expandedContentKey, setExpandedContentKey] = useState<string | null>(
     null
@@ -228,6 +240,7 @@ export function PreviewablePanel({
         $expanded={expanded}
         $flushBottom={canExpand}
         $fade={!expanded && canExpand}
+        $collapsedLines={collapsedLines}
       >
         {children}
       </PreviewContentSC>
@@ -302,14 +315,15 @@ const PreviewContentSC = styled.div<{
   $expanded: boolean
   $flushBottom: boolean
   $fade?: boolean
-}>(({ theme, $expanded, $flushBottom, $fade }) => ({
+  $collapsedLines: number
+}>(({ theme, $expanded, $flushBottom, $fade, $collapsedLines }) => ({
   minHeight: 0,
   // Margin (not padding) so max-height maps cleanly to whole line boxes.
   margin: theme.spacing.small,
   marginBottom: $flushBottom ? 0 : theme.spacing.small,
   fontSize: theme.partials.text.body2.fontSize,
   lineHeight: 1.45,
-  maxHeight: $expanded ? '16lh' : '4lh',
+  maxHeight: $expanded ? '16lh' : `${$collapsedLines}lh`,
   overflow: $expanded ? 'auto' : 'hidden',
   color: theme.colors['text-long-form'],
   ...($fade && {

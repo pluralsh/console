@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	errors2 "github.com/pluralsh/console/go/deployment-operator/internal/errors"

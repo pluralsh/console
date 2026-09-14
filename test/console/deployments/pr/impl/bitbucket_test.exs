@@ -49,6 +49,65 @@ defmodule Console.Deployments.Pr.Impl.BitBucketTest do
     assert {:ok, "10"} = BitBucket.agent_review(connection, pr, review)
   end
 
+  test "returns the source branch from pull request details" do
+    connection = %ScmConnection{type: :bitbucket, token: "token"}
+
+    expect(Req, :get, fn url, _opts ->
+      assert url == "https://api.bitbucket.org/2.0/repositories/pluralsh/console/pullrequests/42"
+
+      response(%{
+        "title" => "Agent review support",
+        "summary" => %{"raw" => "Adds normalized reviews."},
+        "source" => %{
+          "branch" => %{"name" => "feature/agent-review"},
+          "commit" => %{"hash" => "head-sha"}
+        }
+      })
+    end)
+
+    assert {:ok,
+            %{
+              title: "Agent review support",
+              body: "Adds normalized reviews.",
+              commit_sha: "head-sha",
+              ref: "feature/agent-review"
+            }} =
+             BitBucket.pr_details(connection, "https://bitbucket.org/pluralsh/console/pull-requests/42")
+  end
+
+  test "associates build status with the pull request source branch" do
+    connection = %ScmConnection{type: :bitbucket, token: "token"}
+
+    pr = %PullRequest{
+      url: "https://bitbucket.org/pluralsh/console/pull-requests/42",
+      ref: "feature/agent-review"
+    }
+
+    expect(Req, :post, fn url, opts ->
+      assert url ==
+               "https://api.bitbucket.org/2.0/repositories/pluralsh/console/commit/head-sha/statuses/build"
+
+      assert Jason.decode!(opts[:body]) == %{
+               "key" => "plural-agent-review",
+               "state" => "INPROGRESS",
+               "url" => "https://console.example.com/ai/agent-runs/run-id",
+               "name" => "Plural: Agent review",
+               "description" => "Plural agent review",
+               "refname" => "feature/agent-review"
+             }
+
+      response(%{"key" => "plural-agent-review"})
+    end)
+
+    assert {:ok, "plural-agent-review"} =
+             BitBucket.commit_status(connection, pr, nil, :running, %{
+               sha: "head-sha",
+               url: "https://console.example.com/ai/agent-runs/run-id",
+               name: "Plural: Agent review",
+               description: "Plural agent review"
+             })
+  end
+
   defp response(body) do
     {:ok, %Req.Response{status: 201, body: Jason.encode!(body)}}
   end

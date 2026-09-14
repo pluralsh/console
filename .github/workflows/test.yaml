@@ -9,7 +9,14 @@ on:
   pull_request:
     branches: ["*"]
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build:
+    needs: [vouch]
     name: Test Build Docker image
     runs-on: ubuntu-latest
     steps:
@@ -97,6 +104,7 @@ jobs:
       #       VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
 
   test:
+    needs: [vouch]
     name: Test
     runs-on: ubuntu-latest
     permissions:
@@ -157,6 +165,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
         if: always()
   updateSchema:
+    needs: [vouch]
     name: Check that Schema is up to date
     runs-on: ubuntu-latest
     steps:

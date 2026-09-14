@@ -16,7 +16,14 @@ env:
   REGISTRY_IMAGE: ghcr.io/pluralsh/nexus
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   test:
+    needs: [vouch]
     name: Test
     runs-on: ubuntu-latest
     steps:
@@ -33,6 +40,7 @@ jobs:
         working-directory: go/nexus
 
   build:
+    needs: [vouch]
     name: Build
     runs-on: ubuntu-latest
     steps:

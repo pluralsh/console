@@ -109,6 +109,50 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
     end
   end
 
+  describe "commit_status/5" do
+    test "publishes cancelled runs as cancelled build statuses" do
+      connection = %ScmConnection{
+        type: :bitbucket_datacenter,
+        api_url: "https://bitbucket.example.com",
+        username: "user",
+        token: "token"
+      }
+
+      pr = %PullRequest{
+        url: "https://bitbucket.example.com/projects/PROJ/repos/repo/pull-requests/42"
+      }
+
+      expect(Req, :post, fn url, opts ->
+        assert url ==
+                 "https://bitbucket.example.com/rest/api/latest/projects/PROJ/repos/repo/commits/head-sha/builds"
+
+        assert Jason.decode!(opts[:body]) == %{
+                 "key" => "check-42",
+                 "state" => "CANCELLED",
+                 "url" => "https://console.example.com/ai/agent-runs/run-id",
+                 "name" => "Plural: Agent review",
+                 "description" => "Plural agent review"
+               }
+
+        response(%{})
+      end)
+
+      assert {:ok, "check-42"} =
+               BitBucketDatacenter.commit_status(
+                 connection,
+                 pr,
+                 "check-42",
+                 :cancelled,
+                 %{
+                   sha: "head-sha",
+                   url: "https://console.example.com/ai/agent-runs/run-id",
+                   name: "Plural: Agent review",
+                   description: "Plural agent review"
+                 }
+               )
+    end
+  end
+
   defp response(body) do
     {:ok, %Req.Response{status: 201, body: Jason.encode!(body)}}
   end

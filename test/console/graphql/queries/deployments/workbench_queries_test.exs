@@ -589,6 +589,125 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal(issues)
     end
 
+    test "it can search workbench issues by title or external id" do
+      workbench = insert(:workbench)
+      by_title  = insert(:issue, workbench: workbench, title: "flaky deploy job")
+      by_ext_id = insert(:issue, workbench: workbench, external_id: "PROD-5172", title: "unrelated")
+      insert(:issue, workbench: workbench, title: "something else", external_id: "OPS-1")
+
+      query = """
+        query Workbench($id: ID!, $q: String) {
+          workbench(id: $id) {
+            id
+            issues(first: 5, q: $q) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "q" => "flaky"}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> ids_equal([by_title])
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "q" => "prod-51"}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> ids_equal([by_ext_id])
+    end
+
+    test "it can filter workbench issues by status and provider" do
+      workbench = insert(:workbench)
+      match = insert(:issue, workbench: workbench, status: :open, provider: :github, title: "keep")
+      insert(:issue, workbench: workbench, status: :completed, provider: :github, title: "wrong status")
+      insert(:issue, workbench: workbench, status: :open, provider: :linear, title: "wrong provider")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $statuses: [IssueStatus], $providers: [IssueWebhookProvider]) {
+          workbench(id: $id) {
+            issues(first: 10, statuses: $statuses, providers: $providers) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "statuses" => ["OPEN"], "providers" => ["GITHUB"]}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> ids_equal([match])
+    end
+
+    test "empty status or provider filters return no issues" do
+      workbench = insert(:workbench)
+      insert(:issue, workbench: workbench)
+
+      query = """
+        query Workbench($id: ID!, $statuses: [IssueStatus], $providers: [IssueWebhookProvider]) {
+          workbench(id: $id) {
+            issues(first: 10, statuses: $statuses, providers: $providers) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "statuses" => []}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"]) == []
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "providers" => []}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"]) == []
+    end
+
+    test "it can sort workbench issues by title" do
+      workbench = insert(:workbench)
+      later  = insert(:issue, workbench: workbench, title: "Zulu issue")
+      earlier = insert(:issue, workbench: workbench, title: "Alpha issue")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            issues(first: 10, sort: TITLE, direction: ASC) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> Enum.map(& &1["id"]) == [earlier.id, later.id]
+    end
+
+    test "it can fetch workbench issue counts" do
+      workbench = insert(:workbench)
+      insert(:issue, workbench: workbench, status: :open, provider: :github)
+      insert(:issue, workbench: workbench, status: :open, provider: :github)
+      insert(:issue, workbench: workbench, status: :completed, provider: :linear)
+      insert(:issue, workbench: insert(:workbench), status: :open, provider: :github)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            issueCounts {
+              providers { provider count }
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      providers = Map.new(found["issueCounts"]["providers"], & {&1["provider"], &1["count"]})
+      statuses  = Map.new(found["issueCounts"]["statuses"], & {&1["status"], &1["count"]})
+
+      assert providers == %{"GITHUB" => 2, "LINEAR" => 1}
+      assert statuses == %{"OPEN" => 2, "COMPLETED" => 1}
+    end
+
     test "users field returns users from user and group policy bindings on the workbench" do
       user_direct = insert(:user)
       group = insert(:group)
@@ -736,6 +855,45 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == job.id
       assert found["status"] == to_string(job.status) |> String.upcase()
+    end
+
+    test "it sideloads associated dashboards and monitors" do
+      job = insert(:workbench_job)
+      dashboard = insert(:dashboard, workbench: job.workbench)
+      monitor = insert(:monitor, workbench: job.workbench)
+
+      dashboard_association =
+        insert(:workbench_job_association, workbench_job: job, dashboard: dashboard)
+
+      monitor_association =
+        insert(:workbench_job_association,
+          workbench_job: job,
+          dashboard: nil,
+          monitor: monitor
+        )
+
+      {:ok, %{data: %{"workbenchJob" => found}}} =
+        run_query(
+          """
+          query WorkbenchJob($id: ID!) {
+            workbenchJob(id: $id) {
+              associations {
+                id
+                dashboard { id name }
+                monitor { id name }
+              }
+            }
+          }
+          """,
+          %{"id" => job.id},
+          %{current_user: admin_user()}
+        )
+
+      assert MapSet.new(Enum.map(found["associations"], & &1["id"])) ==
+               MapSet.new([dashboard_association.id, monitor_association.id])
+
+      assert Enum.any?(found["associations"], &(get_in(&1, ["dashboard", "id"]) == dashboard.id))
+      assert Enum.any?(found["associations"], &(get_in(&1, ["monitor", "id"]) == monitor.id))
     end
 
     test "it returns queuedPromptCount for unconsumed prompts" do
@@ -1114,6 +1272,56 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       }, %{current_user: admin_user()})
     end
 
+    test "it returns gRPC metrics errors as GraphQL errors" do
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "prom",
+          tool: :prometheus,
+          categories: [:metrics],
+          configuration: %{
+            prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :metrics, fn :mock_conn, input, _opts ->
+        assert %Toolquery.TimeRange{start: start_ts, end: end_ts} = input.range
+
+        assert DateTime.diff(
+                 Google.Protobuf.to_datetime(end_ts),
+                 Google.Protobuf.to_datetime(start_ts),
+                 :second
+               ) == 3600
+
+        {:error, %GRPC.RPCError{status: 3, message: "time range is required"}}
+      end)
+
+      assert {:ok, %{errors: [%{message: "time range is required"}]}} =
+               run_query(
+                 """
+                 query WorkbenchJob($id: ID!, $arguments: Json) {
+                   workbenchJob(id: $id) {
+                     metricsTool(
+                       name: "workbench_observability_metrics_prom",
+                       arguments: $arguments
+                     ) {
+                       name
+                     }
+                   }
+                 }
+                 """,
+                 %{"id" => job.id, "arguments" => Jason.encode!(%{"query" => "up"})},
+                 %{current_user: admin_user()}
+               )
+    end
+
     test "it resolves tracesTool using the generated observability traces tool name and parses GraphQL output" do
       workbench = insert(:workbench)
       tool = insert(:workbench_tool,
@@ -1133,7 +1341,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       expect(Client, :connect, fn -> {:ok, :mock_conn} end)
       expect(Stub, :traces, fn :mock_conn, input, opts ->
-        assert opts[:timeout] == :timer.minutes(1)
+        assert opts[:timeout] == :timer.minutes(5)
         assert input.query == "{ service.name = \"checkout\" }"
         assert input.limit == 50
 

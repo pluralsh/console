@@ -6,7 +6,18 @@ defmodule Console.AI.Workbench.ToolsTest do
   alias Console.AI.MCP.Tool, as: MCPToolSpec
   alias Console.AI.Tools.Workbench.{Http, FunctionCall}
   alias Console.AI.Tools.Workbench.MCP, as: MCPTool
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, MetricsLabelSearch, Logs, Traces}
+  alias Console.AI.Tools.Workbench.Observability.{
+    ExternalDashboard,
+    ExternalDashboards,
+    ExternalMonitor,
+    ExternalMonitors,
+    LogAggregate,
+    Logs,
+    Metrics,
+    MetricsLabelSearch,
+    MetricsSearch,
+    Traces
+  }
   alias Console.AI.Tools.Workbench.Infrastructure.{CloudSchemas, RawCloudQuery, CloudTables}
   alias Console.AI.Tools.Workbench.Integration.Github.ListIssues
   alias Console.AI.Tools.Workbench.Integration.Sentry.ListIssues, as: SentryListIssues
@@ -87,8 +98,14 @@ defmodule Console.AI.Workbench.ToolsTest do
       loki = insert_associated_tool(workbench, :loki, "loki", [:logs], %{
         loki: %{url: "https://loki.example.com"}
       })
+      victoria_logs = insert_associated_tool(workbench, :victoria_logs, "vlogs", [:logs], %{
+        victoria_logs: %{url: "https://victorialogs.example.com"}
+      })
       tempo = insert_associated_tool(workbench, :tempo, "tempo", [:traces], %{
         tempo: %{url: "https://tempo.example.com"}
+      })
+      datadog = insert_associated_tool(workbench, :datadog, "datadog", [:metrics], %{
+        datadog: %{site: "datadoghq.com", api_key: "api", app_key: "app"}
       })
 
       workbench = Repo.preload(workbench, :tools)
@@ -99,7 +116,34 @@ defmodule Console.AI.Workbench.ToolsTest do
       assert_indexed(index, "sentry_list_issues_sentry", SentryListIssues, sentry)
       assert_indexed(index, "github_gh_list_issues", ListIssues, github)
       assert_indexed(index, "workbench_observability_logs_loki", Logs, loki)
+      assert_indexed(index, "workbench_observability_log_aggregate_loki", LogAggregate, loki)
+      assert_indexed(index, "workbench_observability_logs_vlogs", Logs, victoria_logs)
+      assert_indexed(index, "workbench_observability_log_aggregate_vlogs", LogAggregate, victoria_logs)
       assert_indexed(index, "workbench_observability_traces_tempo", Traces, tempo)
+      assert_indexed(
+        index,
+        "workbench_observability_dashboards_datadog",
+        ExternalDashboards,
+        datadog
+      )
+      assert_indexed(
+        index,
+        "workbench_observability_dashboard_datadog",
+        ExternalDashboard,
+        datadog
+      )
+      assert_indexed(
+        index,
+        "workbench_observability_monitors_datadog",
+        ExternalMonitors,
+        datadog
+      )
+      assert_indexed(
+        index,
+        "workbench_observability_monitor_datadog",
+        ExternalMonitor,
+        datadog
+      )
     end
 
     test "does not treat http function tools as integrations" do

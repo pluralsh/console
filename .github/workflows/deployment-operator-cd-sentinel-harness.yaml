@@ -27,7 +27,14 @@ env:
   REGISTRY_IMAGE: pluralsh/sentinel-harness-base
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build-base-image:
+    needs: [vouch]
     name: Build base image
     permissions:
       contents: 'read'
@@ -202,6 +209,6 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         build-args: |
-          GO_VERSION=1.26.5
+          GO_VERSION=1.27.1
           SENTINEL_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/sentinel-harness-base
           SENTINEL_HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}

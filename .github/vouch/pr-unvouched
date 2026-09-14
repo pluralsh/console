@@ -1,0 +1,9 @@
+Hi @{author}, thanks for your interest in contributing!
+
+This repository requires pull request authors to be vouched, and you are not in `.github/VOUCHED.td`.
+
+This PR will be closed automatically, and its GitHub Actions runs will be cancelled.
+
+To get vouched, open an issue describing how you'd like to contribute. A collaborator with write access can then comment `!vouch` (or `!vouch @{author}`) on that issue or this PR.
+
+Members of @pluralsh/server and @pluralsh/frontend are vouched automatically via CODEOWNERS sync.

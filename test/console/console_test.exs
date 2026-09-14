@@ -26,23 +26,24 @@ defmodule ConsoleTest do
   end
 
   describe "#handle_rpc/1" do
-    test "converts genserver call timeouts into rate limits" do
+    test "converts genserver call timeouts into agent bootstrapping errors" do
       reason = {:timeout, {GenServer, :call, [self(), {:digest, :ref}, 10000]}}
 
-      assert Console.handle_rpc({:rpc, reason}) == {:error, :rate_limited}
-      assert Console.handle_rpc({:erpc, reason}) == {:error, :rate_limited}
-      assert Console.handle_rpc(reason) == {:error, :rate_limited}
-      assert Console.handle_rpc(:timeout) == {:error, :rate_limited}
+      assert Console.handle_rpc({:rpc, reason}) == {:error, :agent_bootstrapping}
+      assert Console.handle_rpc({:erpc, reason}) == {:error, :agent_bootstrapping}
+      assert Console.handle_rpc(reason) == {:error, :agent_bootstrapping}
+      assert Console.handle_rpc(:timeout) == {:error, :agent_bootstrapping}
     end
 
-    test "converts noproc errors from erpc into rate limits" do
+    test "converts noproc errors from erpc into agent bootstrapping errors" do
       reason = {:noproc, {GenServer, :call, [self(), {:digest, :ref}, 10000]}}
 
-      assert Console.handle_rpc({:rpc, reason}) == {:error, :rate_limited}
-      assert Console.handle_rpc({:erpc, {:exception, reason}}) == {:error, :rate_limited}
-      assert Console.handle_rpc({:exception, reason, []}) == {:error, :rate_limited}
-      assert Console.handle_rpc({:error, {:rpc, {:exception, {:norproc, self()}}}}) == {:error, :rate_limited}
-      assert Console.handle_rpc(:noproc) == {:error, :rate_limited}
+      assert Console.handle_rpc({:rpc, reason}) == {:error, :agent_bootstrapping}
+      assert Console.handle_rpc({:erpc, {:exception, reason}}) == {:error, :agent_bootstrapping}
+      assert Console.handle_rpc({:exception, reason, []}) == {:error, :agent_bootstrapping}
+      assert Console.handle_rpc({:error, {:rpc, {:exception, {:norproc, self()}}}}) ==
+               {:error, :agent_bootstrapping}
+      assert Console.handle_rpc(:noproc) == {:error, :agent_bootstrapping}
     end
 
     test "leaves unrelated rpc failures as rpc errors" do

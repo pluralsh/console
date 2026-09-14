@@ -8,7 +8,7 @@ defmodule Console.AI.Bedrock do
 
   require Logger
 
-  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :stream]
+  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :endpoint, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -24,6 +24,7 @@ defmodule Console.AI.Bedrock do
       aws_secret_access_key: opts.aws_secret_access_key,
       access_token: opts.access_token,
       region: opts.region,
+      endpoint: opts.endpoint || :runtime,
       stream: Stream.stream(),
     }
   end
@@ -35,9 +36,15 @@ defmodule Console.AI.Bedrock do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = bedrock, messages, opts) do
+    model = select_model(bedrock, opts[:model], opts[:client])
+
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:model], opts[:client])}", bedrock.stream, base_opts(Keyword.put(provider_options(bedrock), :tools, tools(opts)), opts))
+    |> generate_text(
+      "amazon-bedrock:#{model}",
+      bedrock.stream,
+      request_opts(model, Keyword.put(provider_options(bedrock), :tools, tools(opts)), opts)
+    )
     |> reqllm_result()
   end
 
@@ -46,11 +53,16 @@ defmodule Console.AI.Bedrock do
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = bedrock, messages, tools, opts) do
+    model = select_model(bedrock, opts[:model], opts[:client] || :tool)
     provider_opts = Keyword.put(provider_options(bedrock), :tools, reqllm_tools(tools))
 
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:model], opts[:client] || :tool)}", bedrock.stream, base_opts(provider_opts, opts))
+    |> generate_text(
+      "amazon-bedrock:#{model}",
+      bedrock.stream,
+      request_opts(model, provider_opts, opts)
+    )
     |> reqllm_result()
     |> tool_calls()
   end
@@ -79,8 +91,8 @@ defmodule Console.AI.Bedrock do
 
   def tools?(), do: true
 
-  def provider_options(%__MODULE__{region: region, access_token: token} = bedrock) do
-    [region: region, access_token: token]
+  def provider_options(%__MODULE__{region: region, access_token: token, endpoint: endpoint} = bedrock) do
+    [region: region, api_key: token, endpoint: endpoint || :runtime]
     |> Enum.concat(if is_nil(token), do: aws_auth(bedrock), else: [])
     |> Enum.filter(fn {_, v} -> not is_nil(v) end)
   end
@@ -94,6 +106,21 @@ defmodule Console.AI.Bedrock do
 
   defp maybe_truncate(embeddings, "cohere.embed-english-v3"), do: Enum.map(embeddings, &Enum.take(&1, 512))
   defp maybe_truncate(embeddings, _), do: embeddings
+
+  defp request_opts(model, provider_opts, opts) do
+    provider_opts
+    |> base_opts(opts)
+    |> maybe_set_gpt56_reasoning_low(model)
+  end
+
+  defp maybe_set_gpt56_reasoning_low(opts, model) do
+    if String.starts_with?(model, ["gpt-5.6", "openai.gpt-5.6"]) or
+         String.contains?(model, ".openai.gpt-5.6") do
+      Keyword.put(opts, :reasoning_effort, :low)
+    else
+      opts
+    end
+  end
 
   defp aws_auth(%__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak})
     when is_binary(aid) and is_binary(sak), do: [access_key_id: aid, secret_access_key: sak]

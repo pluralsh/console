@@ -13,6 +13,11 @@ ENV CGO_ENABLED=0 \
     GOARCH=${TARGETARCH} \
     GOCACHE=/sentinel/.cache
 
+# Copy required local modules referenced by go.mod replace directives.
+# terratest/go.mod uses ../../client and ../../polly relative to /sentinel/terratest.
+COPY /client /client
+COPY /polly /polly
+
 WORKDIR /sentinel/terratest
 
 # Copy test files

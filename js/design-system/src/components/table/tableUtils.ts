@@ -13,6 +13,7 @@ import {
   ReactElement,
   type CSSProperties,
   type MouseEvent,
+  type ReactNode,
   type RefObject,
   type UIEventHandler,
 } from 'react'
@@ -60,6 +61,8 @@ export type TableBaseProps = {
   hasNextPage?: boolean
   fetchNextPage?: () => void
   isFetchingNextPage?: boolean
+  /** Content shown after the final page. Requires virtualizeRows. */
+  endRowContent?: ReactNode
   onVirtualSliceChange?: (slice: VirtualSlice) => void
   onScrollCapture?: UIEventHandler<HTMLDivElement>
 }

@@ -35,6 +35,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_one_present([:service_id, :cluster_id])
   end
@@ -51,6 +52,15 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
          {:ok, labels} <- Provider.labels(query),
          {:ok, content} <- Jason.encode(labels) do
       {:ok, Output.truncate(content)}
+    end
+  end
+
+  def structured(%__MODULE__{user: user, field: field} = logs) do
+    query = Logs.logs_query(logs) |> Map.put(:field, field)
+
+    with {:ok, query} <- Query.accessible(query, user),
+         {:ok, labels} <- Provider.labels(query) do
+      {:ok, Enum.map(labels, & &1.label)}
     end
   end
 end

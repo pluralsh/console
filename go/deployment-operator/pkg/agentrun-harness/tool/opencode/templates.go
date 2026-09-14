@@ -23,7 +23,7 @@ type ConfigTemplateInput struct {
 	// Provider is the AI provider to use.
 	Provider Provider
 
-	// OpenAICompatible is true when using a custom OpenAI-compatible provider block (npm @ai-sdk/openai-compatible).
+	// OpenAICompatible selects the OpenAI-compatible chat completions SDK (npm @ai-sdk/openai-compatible).
 	OpenAICompatible bool
 
 	// Endpoint is an optional override for the provider baseURL (for example a custom OpenAI-compatible URL).

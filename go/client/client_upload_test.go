@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 )
 
 func TestCreateAgentRunUploadUsesMultipartVariables(t *testing.T) {

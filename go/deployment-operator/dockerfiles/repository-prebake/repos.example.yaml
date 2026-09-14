@@ -1,0 +1,10 @@
+# List of git repositories to preclone into a repository-prebake image.
+#
+# path is optional and defaults to the repository name (last URL path component,
+# with a trailing .git stripped). branch is optional; when omitted the remote
+# default branch is cloned.
+repositories:
+  - url: https://github.com/pluralsh/console.git
+    path: console
+  - url: https://github.com/pluralsh/plural.git
+    path: plural

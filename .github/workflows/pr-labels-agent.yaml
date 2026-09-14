@@ -5,10 +5,18 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
+  contents: read
   pull-requests: write
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   add-default-label:
+    needs: [vouch]
     name: Add default enhancement label to agent PRs
     if: startsWith(github.event.pull_request.head.ref, 'agent/')
     runs-on: ubuntu-latest

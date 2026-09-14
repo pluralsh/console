@@ -33,6 +33,13 @@ The user has provided the following notes attached to this alert webhook receive
 
 <%= @alert.workbench_webhook.prompt %>
 <% end %>
+<%= if @alert.monitor && @alert.monitor.prompt do %>
+## User Notes
+
+The user has provided the following notes on this monitor, which could be useful for your investigation as well:
+
+<%= @alert.monitor.prompt %>
+<% end %>
 
 An ideal root cause analysis will include:
 

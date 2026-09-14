@@ -189,14 +189,21 @@ export function groupWorkbenchJobActions(
 }
 
 export function getActionDetailButtonLabel(
-  activity: Pick<WorkbenchJobActionFragment, 'status' | 'type'>
+  activity: Pick<WorkbenchJobActionFragment, 'status' | 'type' | 'result'>
 ): string {
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
   const isExec = activity.type === WorkbenchJobActivityType.Exec
+  const isDrain = !!activity.result?.kubeDrain
 
   switch (activity.status) {
     case WorkbenchJobActivityStatus.NeedsApproval:
-      return isKubernetes ? 'View diff' : isExec ? 'View command' : 'View JSON'
+      return isDrain
+        ? 'Review drain'
+        : isKubernetes
+          ? 'View diff'
+          : isExec
+            ? 'View command'
+            : 'View JSON'
     case WorkbenchJobActivityStatus.Failed:
       return 'View error'
     case WorkbenchJobActivityStatus.Successful:
@@ -212,6 +219,8 @@ export function getActionDetailButtonLabel(
 export function getActionTitle(activity: WorkbenchJobActionFragment): string {
   const toolName = activity.result?.functionCall?.tool?.name?.trim()
   if (toolName) return toolName
+
+  if (activity.result?.kubeDrain) return 'Drain node'
 
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
     return getKubeActionTitle(activity.result?.kubeRequest)
@@ -231,6 +240,10 @@ export function getActionSubtitle(
   activity: WorkbenchJobActionFragment
 ): string {
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
+    const drain = activity.result?.kubeDrain
+    if (drain)
+      return [drain.handle, drain.node].filter(isNonNullable).join(' · ')
+
     return getKubeActionSubtitle(activity.result?.kubeRequest)
   }
 
@@ -270,15 +283,20 @@ export function getActionIcon(activity: WorkbenchJobActionFragment) {
     return <CommandIcon size={16} />
 
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
+    if (activity.result?.kubeDrain)
+      return (
+        <KubernetesIcon
+          size={16}
+          color="icon-warning"
+        />
+      )
+
+    const request = activity.result?.kubeRequest
+    const variant = getKubeActionVariant(request?.method)
     return (
       <KubernetesIcon
         size={16}
-        color={
-          getKubeActionVariant(activity.result?.kubeRequest?.method) ===
-          'delete'
-            ? 'icon-danger'
-            : undefined
-        }
+        color={variant === 'delete' ? 'icon-danger' : undefined}
       />
     )
   }
@@ -325,6 +343,14 @@ export function getActionInputJson(
       path: kube.path,
       queryParams: kube.queryParams,
       contentType: kube.contentType,
+    })
+  }
+
+  const drain = activity.result?.kubeDrain
+  if (drain) {
+    return formatActionJson({
+      handle: drain.handle,
+      node: drain.node,
     })
   }
 

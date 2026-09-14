@@ -50,7 +50,24 @@ defmodule Console.AI.Workbench.EnvironmentTest do
 
       assert Environment.subagents(job)
              |> MapSet.new()
-             |> MapSet.equal?(MapSet.new([:observability, :integration, :coding, :infrastructure]))
+             |> MapSet.equal?(
+               MapSet.new([
+                 :observability,
+                 :monitoring,
+                 :integration,
+                 :coding,
+                 :infrastructure
+               ])
+             )
+    end
+  end
+
+  describe "actions/1" do
+    test "advertises kubernetes actions when node drain is enabled" do
+      job = insert(:workbench_job, modes: %{kubernetes: %{drain: true}})
+      environment = Environment.new(job, [], [])
+
+      assert Environment.actions(environment).kubernetes
     end
   end
 

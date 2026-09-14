@@ -77,6 +77,57 @@ func TestAgentConfigure(t *testing.T) {
 	}
 }
 
+func TestAgentConfigureUsesOpenAIMethodAPI(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		want   string
+	}{
+		{name: "chat", method: string(console.OpenAiMethodChat), want: openAICompletionsAPI},
+		{name: "responses", method: string(console.OpenAiMethodResponses), want: openAIResponsesAPI},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			workDir := t.TempDir()
+			run := piTestRun(console.AgentRunModeWrite, providerOpenAI, "gpt-5.4", nil, false)
+			run.Runtime.Config.Pi.Method = tt.method
+			agent := NewAgent(toolv1.Config{
+				WorkDir:       workDir,
+				RepositoryDir: t.TempDir(),
+				Run:           run,
+			})
+			settings, err := agent.ResolveSettings(run)
+			if err != nil {
+				t.Fatalf("ResolveSettings() error = %v", err)
+			}
+			if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
+				Phase:        toolv1.ConfigurePhaseInitial,
+				ConsoleToken: "console-token",
+				Settings:     settings,
+			}); err != nil {
+				t.Fatalf("Configure(initial) error = %v", err)
+			}
+
+			models, err := os.ReadFile(filepath.Join(workDir, ".pi", "agent", modelsFileName))
+			if err != nil {
+				t.Fatalf("read models config: %v", err)
+			}
+			var modelConfig map[string]any
+			if err := json.Unmarshal(models, &modelConfig); err != nil {
+				t.Fatalf("decode models config: %v", err)
+			}
+			provider := modelConfig["providers"].(map[string]any)[providerOpenAI].(map[string]any)
+			if provider["api"] != tt.want {
+				t.Fatalf("api = %v, want %q", provider["api"], tt.want)
+			}
+			if provider["baseUrl"] != openAIBaseURL {
+				t.Fatalf("baseUrl = %v, want %q", provider["baseUrl"], openAIBaseURL)
+			}
+		})
+	}
+}
+
 func TestAddExternalMCPServers(t *testing.T) {
 	t.Setenv(mcp.EnvServers, `[{
 		"name":"linear",

@@ -91,7 +91,7 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 		return err
 	}
 
-	resolved := agent.resolveSettings(openCode.Provider, openCode.Model, openCode.OpenAICompatible, agent.config.Run.IsProxyEnabled())
+	resolved := agent.resolveSettings(openCode.Provider, openCode.Model, openCode.Method, openCode.OpenAICompatible, agent.config.Run.IsProxyEnabled())
 	model := request.Settings.Model.Name
 	if model == "" {
 		model = resolved.model

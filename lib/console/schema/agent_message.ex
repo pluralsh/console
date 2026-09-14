@@ -1,5 +1,5 @@
 defmodule Console.Schema.AgentMessage do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.AgentRun
 
   defmodule Stdout do
@@ -76,6 +76,7 @@ defmodule Console.Schema.AgentMessage do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> sanitize_text([:message])
     |> cast_embed(:cost, with: &cost_changeset/2)
     |> cast_embed(:metadata, with: &metadata_changeset/2)
     |> validate_required(~w(role message)a)
@@ -103,17 +104,20 @@ defmodule Console.Schema.AgentMessage do
   defp reasoning_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(text start end)a)
+    |> sanitize_text([:text])
   end
 
   defp file_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(name text start end)a)
+    |> sanitize_text([:name, :text])
     |> validate_required(~w(name text)a)
   end
 
   defp tool_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(name state input output)a)
+    |> sanitize_text([:name, :input, :output])
     |> validate_required(~w(name state)a)
   end
 end

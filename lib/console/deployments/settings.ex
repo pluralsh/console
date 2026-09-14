@@ -453,6 +453,13 @@ defmodule Console.Deployments.Settings do
   end
 
   def migrate_agents() do
+    case Console.ClusterRing.node(:agent_migrations) do
+      leader when leader == node() -> do_migrate_agents()
+      _ -> {:error, "ignoring agent updates on non-leader node"}
+    end
+  end
+
+  defp do_migrate_agents() do
     vsn = agent_ref()
 
     case fetch_consistent() do

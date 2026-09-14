@@ -85,13 +85,17 @@ export function WorkbenchModesForm({
     kubernetes?.update ? 'Allow updates' : null,
     kubernetes?.delete ? 'Allow deletes' : null,
     kubernetes?.exec ? 'Allow command execution' : null,
+    kubernetes?.drain ? 'Allow node drain' : null,
   ]
     .filter(Boolean)
     .join(', ')
 
   const codingEnabled = coding != null
   const kubernetesEnabled =
-    !!kubernetes?.update || !!kubernetes?.delete || !!kubernetes?.exec
+    !!kubernetes?.update ||
+    !!kubernetes?.delete ||
+    !!kubernetes?.exec ||
+    !!kubernetes?.drain
   const selectedActionKeys = useMemo(() => {
     const keys = new Set<Key>()
     if (codingEnabled) keys.add('coding')
@@ -247,6 +251,7 @@ export function WorkbenchModesForm({
                 allowUpdates={!!kubernetes?.update}
                 allowDeletes={!!kubernetes?.delete}
                 allowExec={!!kubernetes?.exec}
+                allowDrain={!!kubernetes?.drain}
                 onAllowUpdatesChange={(checked) => {
                   onChange({
                     ...value,
@@ -256,9 +261,15 @@ export function WorkbenchModesForm({
                       update: checked,
                       delete: value?.kubernetes?.delete ?? false,
                       exec: value?.kubernetes?.exec ?? false,
+                      drain: value?.kubernetes?.drain ?? false,
                     },
                   })
-                  if (!checked && !kubernetes?.delete && !kubernetes?.exec)
+                  if (
+                    !checked &&
+                    !kubernetes?.delete &&
+                    !kubernetes?.exec &&
+                    !kubernetes?.drain
+                  )
                     setOpenPanel(null)
                 }}
                 onAllowDeletesChange={(checked) => {
@@ -270,9 +281,15 @@ export function WorkbenchModesForm({
                       update: value?.kubernetes?.update ?? false,
                       delete: checked,
                       exec: value?.kubernetes?.exec ?? false,
+                      drain: value?.kubernetes?.drain ?? false,
                     },
                   })
-                  if (!checked && !kubernetes?.update && !kubernetes?.exec)
+                  if (
+                    !checked &&
+                    !kubernetes?.update &&
+                    !kubernetes?.exec &&
+                    !kubernetes?.drain
+                  )
                     setOpenPanel(null)
                 }}
                 onAllowExecChange={(checked) => {
@@ -284,9 +301,34 @@ export function WorkbenchModesForm({
                       update: value?.kubernetes?.update ?? false,
                       delete: value?.kubernetes?.delete ?? false,
                       exec: checked,
+                      drain: value?.kubernetes?.drain ?? false,
                     },
                   })
-                  if (!checked && !kubernetes?.update && !kubernetes?.delete)
+                  if (
+                    !checked &&
+                    !kubernetes?.update &&
+                    !kubernetes?.delete &&
+                    !kubernetes?.drain
+                  )
+                    setOpenPanel(null)
+                }}
+                onAllowDrainChange={(checked) => {
+                  onChange({
+                    ...value,
+                    plan: false,
+                    kubernetes: {
+                      update: value?.kubernetes?.update ?? false,
+                      delete: value?.kubernetes?.delete ?? false,
+                      exec: value?.kubernetes?.exec ?? false,
+                      drain: checked,
+                    },
+                  })
+                  if (
+                    !checked &&
+                    !kubernetes?.update &&
+                    !kubernetes?.delete &&
+                    !kubernetes?.exec
+                  )
                     setOpenPanel(null)
                 }}
               />
@@ -355,6 +397,7 @@ function WorkbenchKubernetesNamespaceFields({
         update: kubernetes?.update ?? false,
         delete: kubernetes?.delete ?? false,
         exec: kubernetes?.exec ?? false,
+        drain: kubernetes?.drain ?? false,
         requireNamespaces,
         excludeNamespaces,
         ...kubernetes,

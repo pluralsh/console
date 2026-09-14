@@ -116,7 +116,7 @@ const cols = [
     header: 'Schedule cron',
     cell: ({ getValue }) => getValue(),
   }),
-  columnHelper.accessor(({ query }) => query.log.query, {
+  columnHelper.accessor(({ query }) => query.log?.query ?? '--', {
     id: 'query',
     header: 'Log query',
     cell: ({ getValue }) => `"${getValue()}"`,

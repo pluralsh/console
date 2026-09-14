@@ -99,6 +99,18 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 		utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
+	if !changed {
+		exists, err := r.flowExists(ctx, flow)
+		if err != nil {
+			logger.Error(err, "unable to get flow from Console API")
+			utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		if !exists {
+			logger.Info("flow not found in Console API, recreating", "flow", flow.FlowName())
+			changed = true
+		}
+	}
 	if changed {
 		project, res, err := common.Project(ctx, r.Client, r.Scheme, flow)
 		if res != nil || err != nil {
@@ -141,6 +153,22 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 	utils.MarkCondition(flow.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return flow.Spec.Reconciliation.Requeue(), nil
+}
+
+func (r *FlowReconciler) flowExists(ctx context.Context, flow *v1alpha1.Flow) (bool, error) {
+	if !flow.Status.HasID() {
+		return false, nil
+	}
+
+	existingFlow, err := r.ConsoleClient.GetFlow(ctx, flow.Status.GetID())
+	if apierrors.IsNotFound(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	return existingFlow != nil, nil
 }
 
 func (r *FlowReconciler) Attributes(

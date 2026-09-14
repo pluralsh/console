@@ -1,4 +1,4 @@
-FROM golang:1.26.6
+FROM golang:1.27.1
 
 ARG MODULE_PATH
 

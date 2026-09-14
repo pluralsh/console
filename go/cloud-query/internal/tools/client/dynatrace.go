@@ -64,6 +64,20 @@ func (in *DynatraceClient) Logs(ctx context.Context, query string) (*datasource.
 	return &resp, nil
 }
 
+func (in *DynatraceClient) LogAggregate(ctx context.Context, query string, start, end time.Time) (*datasource.DynatraceLogsQueryResponse, error) {
+	var resp datasource.DynatraceLogsQueryResponse
+	body := map[string]any{
+		"query":                 query,
+		"defaultTimeframeStart": start.UTC().Format(time.RFC3339Nano),
+		"defaultTimeframeEnd":   end.UTC().Format(time.RFC3339Nano),
+	}
+	if err := in.queryGrailBody(ctx, body, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
 func (in *DynatraceClient) Traces(ctx context.Context, query string) (*datasource.DynatraceTracesQueryResponse, error) {
 	var resp datasource.DynatraceTracesQueryResponse
 	if err := in.queryGrail(ctx, query, &resp); err != nil {
@@ -74,8 +88,10 @@ func (in *DynatraceClient) Traces(ctx context.Context, query string) (*datasourc
 }
 
 func (in *DynatraceClient) queryGrail(ctx context.Context, query string, result any) error {
-	body := map[string]any{"query": query}
+	return in.queryGrailBody(ctx, map[string]any{"query": query}, result)
+}
 
+func (in *DynatraceClient) queryGrailBody(ctx context.Context, body map[string]any, result any) error {
 	var execResp datasource.DynatraceExecutionResponse
 	response, err := in.R().
 		SetContext(ctx).

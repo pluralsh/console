@@ -12,6 +12,7 @@ import (
 	acpsdk "github.com/coder/acp-go-sdk"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
@@ -25,6 +26,7 @@ type sessionAttempt struct {
 	settings        SessionSettings
 	cwd             string
 	root            *os.Root
+	readOnlyRoots   []fileSystemRoot
 	fileSystemWrite bool
 	priorSessionID  string
 	sessionID       string
@@ -206,6 +208,7 @@ func (attempt *sessionAttempt) finishTurn(response acpsdk.PromptResponse) {
 }
 
 func (attempt *sessionAttempt) close() {
+	closeFileSystemRoots(attempt.readOnlyRoots)
 	_ = attempt.root.Close()
 	// The process is stopped explicitly during the run. This final guard
 	// handles setup failures and keeps test launchers from leaking children.
@@ -321,11 +324,17 @@ func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioP
 	if err != nil {
 		return nil, fmt.Errorf("open acp working directory: %w", err)
 	}
+	readOnlyRoots, err := openFileSystemRoots(prebake.ExtraReadDirs())
+	if err != nil {
+		_ = root.Close()
+		return nil, err
+	}
 	turn := newTurn(engine, sink, request.SessionID)
 	protocolClient := newClient(
 		turn,
 		request.Cwd,
 		root,
+		readOnlyRoots,
 		request.FileSystemWrite,
 	)
 	attempt := &sessionAttempt{
@@ -337,10 +346,33 @@ func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioP
 		settings:        request.Settings,
 		cwd:             request.Cwd,
 		root:            root,
+		readOnlyRoots:   readOnlyRoots,
 		fileSystemWrite: request.FileSystemWrite,
 		priorSessionID:  request.SessionID,
 		sessionID:       request.SessionID,
 	}
 	attempt.connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
 	return attempt, nil
+}
+
+func openFileSystemRoots(directories []string) ([]fileSystemRoot, error) {
+	roots := make([]fileSystemRoot, 0, len(directories))
+	for _, directory := range directories {
+		root, err := os.OpenRoot(directory)
+		if err != nil {
+			closeFileSystemRoots(roots)
+			return nil, fmt.Errorf("open acp read-only directory %q: %w", directory, err)
+		}
+		roots = append(roots, fileSystemRoot{directory: directory, root: root})
+	}
+
+	return roots, nil
+}
+
+func closeFileSystemRoots(roots []fileSystemRoot) {
+	for _, root := range roots {
+		if root.root != nil {
+			_ = root.root.Close()
+		}
+	}
 }

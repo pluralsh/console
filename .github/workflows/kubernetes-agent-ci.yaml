@@ -22,7 +22,14 @@ env:
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/kubernetes-agent
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build-api:
+    needs: [vouch]
     name: Build API
     runs-on: ubuntu-latest
     permissions:
@@ -40,6 +47,7 @@ jobs:
       - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C api build
 
   build-kas:
+    needs: [vouch]
     name: Build kas
     runs-on: ubuntu-latest
     permissions:
@@ -57,6 +65,7 @@ jobs:
       - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-kas
 
   build-agentk:
+    needs: [vouch]
     name: Build agentk
     runs-on: ubuntu-latest
     permissions:
@@ -74,6 +83,7 @@ jobs:
       - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-agentk
 
   test:
+    needs: [vouch]
     name: Unit test
     runs-on: ubuntu-latest
     permissions:

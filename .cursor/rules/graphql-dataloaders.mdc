@@ -1,0 +1,11 @@
+---
+description: Use Absinthe dataloaders for batched GraphQL fields
+globs: lib/console/graphql/**/*.ex
+alwaysApply: false
+---
+
+# GraphQL Dataloaders
+
+Use Absinthe dataloaders for batched per-parent fields. Do not use `Absinthe.Resolution.Helpers.batch/3`.
+
+Add a `Dataloader.KV` source in `lib/console/graphql/resolvers/dataloader.ex`, register it in `Console.GraphQl`, and resolve with `manual_dataloader` or the loader's `resolve` helper.

@@ -126,7 +126,7 @@ func TestResolveSettingsProvider(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewAgent(toolv1.Config{}).resolveSettings(tt.provider, "model", false, false).provider
+			got := NewAgent(toolv1.Config{}).resolveSettings(tt.provider, "model", "", false, false).provider
 			if got != tt.want {
 				t.Fatalf("resolveSettings(%q, false, false).provider = %q, want %q", tt.provider, got, tt.want)
 			}
@@ -139,6 +139,7 @@ func TestResolveOpenCodeSettings(t *testing.T) {
 		name             string
 		provider         string
 		model            string
+		method           string
 		openaiCompatible bool
 		proxyEnabled     bool
 		wantProvider     Provider
@@ -162,20 +163,57 @@ func TestResolveOpenCodeSettings(t *testing.T) {
 			wantModel:    "openai/gpt-5.4",
 		},
 		{
-			name:             "aiProxy ignores openaiCompatible",
+			name:             "aiProxy auto uses compatible sdk when requested",
 			provider:         "openai-compatible",
 			model:            "gpt-4",
 			openaiCompatible: true,
 			proxyEnabled:     true,
 			wantProvider:     ProviderPlural,
 			wantModel:        "openai/gpt-4",
+			wantOpenAICompat: true,
 		},
 		{
-			name:             "openaiCompatible uses fixed provider",
+			name:             "aiProxy chat uses compatible sdk",
+			provider:         "openai-compatible",
+			model:            "gpt-4",
+			method:           string(console.OpenAiMethodChat),
+			proxyEnabled:     true,
+			wantProvider:     ProviderPlural,
+			wantModel:        "openai/gpt-4",
+			wantOpenAICompat: true,
+		},
+		{
+			name:         "aiProxy responses uses standard sdk",
+			model:        "gpt-5.4",
+			method:       string(console.OpenAiMethodResponses),
+			proxyEnabled: true,
+			wantProvider: ProviderPlural,
+			wantModel:    "openai/gpt-5.4",
+		},
+		{
+			name:             "custom openaiCompatible auto uses compatible sdk",
 			provider:         "litellm",
 			model:            "gpt-4",
 			openaiCompatible: true,
 			wantProvider:     ProviderOpenAICompatible,
+			wantModel:        "gpt-4",
+			wantOpenAICompat: true,
+		},
+		{
+			name:             "custom openaiCompatible responses uses standard sdk",
+			provider:         "litellm",
+			model:            "gpt-5.4",
+			method:           string(console.OpenAiMethodResponses),
+			openaiCompatible: true,
+			wantProvider:     ProviderOpenAICompatible,
+			wantModel:        "gpt-5.4",
+		},
+		{
+			name:             "native openai chat uses compatible sdk",
+			provider:         "openai",
+			model:            "gpt-4",
+			method:           string(console.OpenAiMethodChat),
+			wantProvider:     ProviderOpenAI,
 			wantModel:        "gpt-4",
 			wantOpenAICompat: true,
 		},
@@ -220,7 +258,7 @@ func TestResolveOpenCodeSettings(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewAgent(toolv1.Config{}).resolveSettings(tt.provider, tt.model, tt.openaiCompatible, tt.proxyEnabled)
+			got := NewAgent(toolv1.Config{}).resolveSettings(tt.provider, tt.model, tt.method, tt.openaiCompatible, tt.proxyEnabled)
 			if got.provider != tt.wantProvider {
 				t.Fatalf("provider = %q, want %q", got.provider, tt.wantProvider)
 			}

@@ -11,6 +11,8 @@ defmodule Console.GraphQl do
     PipelineGateLoader,
     ClusterLoader,
     PolicyCountLoader,
+    GroupMemberCountLoader,
+    FlowSummaryLoader,
     Deployments,
     AI
   }
@@ -38,7 +40,9 @@ defmodule Console.GraphQl do
     HelmRepositoryLoader,
     PipelineGateLoader,
     ClusterLoader,
-    PolicyCountLoader
+    PolicyCountLoader,
+    GroupMemberCountLoader,
+    FlowSummaryLoader
   ]
 
   def context(ctx) do

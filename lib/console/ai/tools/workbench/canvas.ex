@@ -9,7 +9,7 @@ defmodule Console.AI.Tools.Workbench.Canvas do
 
   def json_schema(), do: @json_schema
   def name(), do: "build_dashboard"
-  def description(), do: "runs a subagent tobuild a dashboard to explain the system in question.  Be sure to provide a detailed prompt, including the exact metrics query json details from prior activities that will be needed in the dashboard."
+  def description(), do: "runs a subagent to build a dashboard to explain the system in question. Be sure to provide a detailed prompt, including the exact metrics, logs, and traces query JSON details from prior activities that will be needed in the dashboard. When trace data is available, the dashboard should use the native traces visualization block rather than markdown or ASCII output."
 
   def changeset(model, attrs) do
     model

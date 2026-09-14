@@ -69,6 +69,7 @@ type KAS struct {
 	Deployment common.ManifestKey
 	Service    common.ManifestKey
 	Ingress    common.ManifestKey
+	ConfigMap  common.ManifestKey
 }
 
 type Operator struct {
@@ -175,6 +176,13 @@ func DefaultResources(prefix string) struct {
 				GroupKind: schema.GroupKind{
 					Group: common.GroupNetworking,
 					Kind:  common.KindIngress,
+				},
+			},
+			ConfigMap: common.ManifestKey{
+				Name: fmt.Sprintf("%s-kas-config", prefix),
+				GroupKind: schema.GroupKind{
+					Group: common.GroupCore,
+					Kind:  "ConfigMap",
 				},
 			},
 		},

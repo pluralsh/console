@@ -1590,7 +1590,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       tokenSecretRef:
-                        description: Reference to a secret key containing the bearer
+                        description: Reference to a secret key containing the authentication
                           token.
                         properties:
                           key:
@@ -1614,6 +1614,13 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      tokenType:
+                        default: BEARER
+                        description: Authorization realm used for token authentication.
+                        enum:
+                        - BEARER
+                        - SPLUNK
+                        type: string
                       url:
                         description: Splunk base URL.
                         type: string
@@ -1720,6 +1727,74 @@ spec:
                         x-kubernetes-map-type: atomic
                       url:
                         description: Tempo base URL.
+                        type: string
+                      username:
+                        description: Basic auth username.
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  victoriaLogs:
+                    description: VictoriaLogs connection (logs).
+                    properties:
+                      accountId:
+                        description: Optional AccountID tenant header.
+                        type: string
+                      passwordSecretRef:
+                        description: Reference to a secret key containing the basic
+                          auth password.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      projectId:
+                        description: Optional ProjectID tenant header.
+                        type: string
+                      tokenSecretRef:
+                        description: Reference to a secret key containing the bearer
+                          token or api key.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: VictoriaLogs base URL.
                         type: string
                       username:
                         description: Basic auth username.
@@ -1917,6 +1992,7 @@ spec:
                 - CLOUD_RUN
                 - AZURE_FUNCTION
                 - DOCKER
+                - VICTORIA_LOGS
                 type: string
             required:
             - tool

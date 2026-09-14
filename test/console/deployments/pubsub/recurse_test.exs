@@ -477,21 +477,6 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
-  describe "StackStateInsight" do
-    test "it can send a message on a stack plan insight" do
-      insight = insert(:ai_insight)
-      stack   = insert(:stack, connection: build(:scm_connection))
-      pr      = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/10")
-      run     = insert(:stack_run, status: :successful, stack: stack, pull_request: pr)
-      state   = insert(:stack_state, insight: insight, run: run)
-
-      expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
-
-      event = %PubSub.StackStateInsight{item: {state, insight}}
-      Recurse.handle_event(event)
-    end
-  end
-
   describe "StackRunCompleted" do
     test "it can dequeue a stack run" do
       stack = insert(:stack)
@@ -605,7 +590,144 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
+  describe "AgentRunCreated" do
+    test "it starts an scm check for review-mode runs" do
+      url = "https://github.com/pluralsh/console/pull/123"
+      connection = insert(:scm_connection)
+      runtime = insert(:agent_runtime, connection: connection)
+
+      run =
+        insert(:agent_run,
+          runtime: runtime,
+          mode: :review,
+          status: :pending,
+          followup_pr_url: url
+        )
+
+      expect(Console.Deployments.Pr.Dispatcher, :pr_details, fn conn, ^url ->
+        assert conn.id == connection.id
+        {:ok, %{title: "Review me", body: "", commit_sha: "head-sha"}}
+      end)
+
+      expect(Console.Deployments.Pr.Dispatcher, :commit_status, fn conn, found, nil, :running, attrs ->
+        assert conn.id == connection.id
+        assert is_nil(found.id)
+        assert found.url == url
+        assert attrs.sha == "head-sha"
+        assert attrs.url == Console.url("/ai/agent-runs/#{run.id}")
+        assert attrs.summary == "[View agent run](#{attrs.url})"
+        {:ok, "check-123"}
+      end)
+
+      assert {:ok, updated} =
+               Recurse.handle_event(%PubSub.AgentRunCreated{item: run})
+
+      assert updated.check_id == "check-123"
+      assert refetch(run).check_id == "check-123"
+    end
+  end
+
   describe "AgentRunUpdated" do
+    test "it marks a review check successful when the run succeeds" do
+      url = "https://github.com/pluralsh/console/pull/123"
+      connection = insert(:scm_connection)
+      runtime = insert(:agent_runtime, connection: connection)
+      insert(:pull_request, url: url, commit_sha: "head-sha")
+
+      run =
+        insert(:agent_run,
+          runtime: runtime,
+          mode: :review,
+          status: :successful,
+          followup_pr_url: url,
+          check_id: "check-123"
+        )
+
+      expect(Console.Deployments.Pr.Dispatcher, :commit_status, fn conn, _, "check-123", :successful, attrs ->
+        assert conn.id == connection.id
+        assert attrs.sha == "head-sha"
+        {:ok, "check-123"}
+      end)
+
+      {:ok, recorded} =
+        Recurse.handle_event(%PubSub.AgentRunUpdated{item: run})
+
+      assert recorded.url == run.repository
+    end
+
+    test "it records successful repositories even when the review check fails" do
+      url = "https://github.com/pluralsh/console/pull/125"
+      repository = "https://github.com/pluralsh/check-failure.git"
+      connection = insert(:scm_connection)
+      runtime = insert(:agent_runtime, connection: connection)
+      insert(:pull_request, url: url, commit_sha: "head-sha")
+
+      run =
+        insert(:agent_run,
+          runtime: runtime,
+          mode: :review,
+          status: :successful,
+          repository: repository,
+          followup_pr_url: url,
+          check_id: "check-125"
+        )
+
+      expect(Console.Deployments.Pr.Dispatcher, :commit_status, fn _, _, _, _, _ ->
+        {:error, "check failed"}
+      end)
+
+      assert {:error, "check failed"} =
+               Recurse.handle_event(%PubSub.AgentRunUpdated{item: run})
+
+      assert Repo.get_by(Console.Schema.AgentRunRepository, url: repository)
+    end
+
+    test "it marks a review check failed when the run fails" do
+      url = "https://github.com/pluralsh/console/pull/124"
+      connection = insert(:scm_connection)
+      runtime = insert(:agent_runtime, connection: connection)
+      insert(:pull_request, url: url, commit_sha: "head-sha")
+
+      run =
+        insert(:agent_run,
+          runtime: runtime,
+          mode: :review,
+          status: :failed,
+          followup_pr_url: url,
+          check_id: "check-124"
+        )
+
+      expect(Console.Deployments.Pr.Dispatcher, :commit_status, fn _, _, "check-124", :failed, _ ->
+        {:ok, "check-124"}
+      end)
+
+      assert {:error, _} =
+               Recurse.handle_event(%PubSub.AgentRunUpdated{item: run})
+    end
+
+    test "it cancels a review check when the run is cancelled" do
+      url = "https://github.com/pluralsh/console/pull/126"
+      connection = insert(:scm_connection)
+      runtime = insert(:agent_runtime, connection: connection)
+      insert(:pull_request, url: url, commit_sha: "head-sha")
+
+      run =
+        insert(:agent_run,
+          runtime: runtime,
+          mode: :review,
+          status: :cancelled,
+          followup_pr_url: url,
+          check_id: "check-126"
+        )
+
+      expect(Console.Deployments.Pr.Dispatcher, :commit_status, fn _, _, "check-126", :cancelled, _ ->
+        {:ok, "check-126"}
+      end)
+
+      assert {:error, _} =
+               Recurse.handle_event(%PubSub.AgentRunUpdated{item: run})
+    end
+
     test "it will record the repository for an agent run" do
       run = insert(:agent_run, status: :successful, repository: "https://github.com/pluralsh/console.git")
 
@@ -770,6 +892,40 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
   end
 
   describe "AlertCreated" do
+    test "creates monitor investigations with the monitor actor, prompt, and modes" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      actor = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: nil)
+
+      monitor =
+        insert(:monitor,
+          workbench: workbench,
+          user: actor,
+          prompt: "Focus on the checkout deployment.",
+          modes: %{plan: true, coding: %{review: true}}
+        )
+
+      alert =
+        insert(:alert,
+          monitor: monitor,
+          workbench: workbench,
+          project: workbench.project,
+          title: "Checkout errors",
+          message: "Error rate above threshold"
+        )
+
+      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
+      {:ok, job} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.user_id == actor.id
+      assert job.alert_id == alert.id
+      assert job.modes.plan
+      assert job.modes.coding.review
+      assert job.prompt =~ "Focus on the checkout deployment."
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
     test "creates a workbench job owned by the workbench bot user when alert targets a workbench" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       bot = insert(:user, roles: %{admin: true})

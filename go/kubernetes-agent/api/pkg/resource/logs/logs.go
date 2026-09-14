@@ -25,6 +25,12 @@ var LineIndexNotFound = -1
 // DefaultDisplayNumLogLines returns default number of lines in case of invalid request.
 var DefaultDisplayNumLogLines = 100
 
+// DefaultTailLines is the number of lines loaded from the end of a log by default.
+const DefaultTailLines = 500
+
+// MaxTailLines is the maximum number of lines that can be loaded from the end of a log.
+const MaxTailLines = 16000
+
 // MaxLogLines is a number that will be certainly bigger than any number of logs. Here 2 billion logs is certainly much larger
 // number of log lines than we can handle.
 var MaxLogLines = 2000000000
@@ -58,13 +64,16 @@ var DefaultSelection = &Selection{
 	OffsetTo:        1,
 	ReferencePoint:  NewestLogLineId,
 	LogFilePosition: End,
+	TailLines:       DefaultTailLines,
 }
 
 // AllSelection returns all logs.
 var AllSelection = &Selection{
-	OffsetFrom:     -MaxLogLines,
-	OffsetTo:       MaxLogLines,
-	ReferencePoint: NewestLogLineId,
+	OffsetFrom:      -MaxLogLines,
+	OffsetTo:        MaxLogLines,
+	ReferencePoint:  NewestLogLineId,
+	LogFilePosition: End,
+	TailLines:       MaxTailLines,
 }
 
 // LogDetails returns representation of log lines
@@ -100,6 +109,9 @@ type LogInfo struct {
 
 	// Some log lines in the middle of the log file could not be loaded, because the log file is too large.
 	Truncated bool `json:"truncated"`
+
+	// Whether another page can be returned in the requested direction.
+	HasMore bool `json:"hasMore"`
 }
 
 // Selection of a slice of logs.
@@ -117,6 +129,8 @@ type Selection struct {
 	// The log file is loaded either from the beginning or from the end. This matters only if the log file is too
 	// large to be handled and must be truncated (to avoid oom)
 	LogFilePosition string `json:"logFilePosition"`
+	// Maximum number of log lines to load from the end of the file.
+	TailLines int `json:"tailLines"`
 }
 
 // LogLineId uniquely identifies a line in logs - immune to log addition/deletion.
@@ -152,38 +166,56 @@ type LogTimestamp string
 // SelectLogs returns selected part of LogLines as required by logSelector, moreover it returns IDs of first and last
 // of returned lines and the information of the resulting logView.
 func (in LogLines) SelectLogs(logSelection *Selection) (LogLines, LogTimestamp, LogTimestamp, Selection, bool) {
+	logFilePosition := normalizeLogFilePosition(logSelection.LogFilePosition)
+	tailLines := NormalizeTailLines(logSelection.TailLines)
 	requestedNumItems := logSelection.OffsetTo - logSelection.OffsetFrom
 	referenceLineIndex := in.getLineIndex(&logSelection.ReferencePoint)
 	if referenceLineIndex == LineIndexNotFound || requestedNumItems <= 0 || len(in) == 0 {
 		// Requested reference line could not be found, probably it's already gone or requested no logs. Return no logs.
-		return LogLines{}, "", "", Selection{}, false
+		return LogLines{}, "", "", Selection{}, true
 	}
 	fromIndex := referenceLineIndex + logSelection.OffsetFrom
 	toIndex := referenceLineIndex + logSelection.OffsetTo
 	lastPage := false
-	switch {
-	case requestedNumItems > len(in):
+	if fromIndex <= 0 {
 		fromIndex = 0
+		lastPage = logFilePosition == End
+	}
+	if toIndex >= len(in) {
 		toIndex = len(in)
-		lastPage = true
-	case toIndex > len(in):
-		fromIndex -= toIndex - len(in)
-		toIndex = len(in)
-		lastPage = logSelection.LogFilePosition == Beginning
-	case fromIndex < 0:
-		toIndex += -fromIndex
-		fromIndex = 0
-		lastPage = logSelection.LogFilePosition == End
+		lastPage = lastPage || logFilePosition == Beginning
+	}
+	if fromIndex >= toIndex {
+		return LogLines{}, "", "", Selection{}, true
 	}
 
 	// set the middle of log array as a reference point, this part of array should not be affected by log deletion/addition.
 	newSelection := Selection{
-		ReferencePoint:  *in.createLogLineId(len(in) / 2),
+		ReferencePoint:  *in.createLogLineId(len(in)/2, logFilePosition),
 		OffsetFrom:      fromIndex - len(in)/2,
 		OffsetTo:        toIndex - len(in)/2,
-		LogFilePosition: logSelection.LogFilePosition,
+		LogFilePosition: logFilePosition,
+		TailLines:       tailLines,
 	}
 	return in[fromIndex:toIndex], in[fromIndex].Timestamp, in[toIndex-1].Timestamp, newSelection, lastPage
+}
+
+// NormalizeTailLines returns a bounded tail window size.
+func NormalizeTailLines(tailLines int) int {
+	if tailLines <= 0 {
+		return DefaultTailLines
+	}
+	if tailLines > MaxTailLines {
+		return MaxTailLines
+	}
+	return tailLines
+}
+
+func normalizeLogFilePosition(logFilePosition string) string {
+	if logFilePosition == Beginning {
+		return Beginning
+	}
+	return End
 }
 
 // getLineIndex returns the index of the line (referenced from beginning of log array) with provided logLineId.
@@ -218,16 +250,14 @@ func (in LogLines) getLineIndex(logLineId *LogLineId) int {
 	return LineIndexNotFound
 }
 
-// createLogLineId returns ID of the line with provided lineIndex.
-func (in LogLines) createLogLineId(lineIndex int) *LogLineId {
+// createLogLineId returns an ID for the line at lineIndex.
+func (in LogLines) createLogLineId(lineIndex int, logFilePosition string) *LogLineId {
 	logTimestamp := in[lineIndex].Timestamp
 	// determine whether to use negative or positive indexing
-	// check whether last line has the same index as requested line. If so, we can only use positive referencing
-	// as more lines may appear at the end.
-	// negative referencing is preferred as higher indices disappear later.
+	// End cursors use negative indexing so older tail lines can be prepended.
+	// Other cursors use positive indexing for the newest timestamp group as logs append.
 	var step int
-	if in[len(in)-1].Timestamp == logTimestamp {
-		// use positive referencing
+	if logFilePosition != End && in[len(in)-1].Timestamp == logTimestamp {
 		step = 1
 	} else {
 		step = -1

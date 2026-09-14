@@ -21,9 +21,13 @@ function RadioGroup({
   validationState,
   isRequired,
   children,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
   ...props
 }: RadioGroupProps) {
   const stateProps = {
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
     name,
     label,
     description,

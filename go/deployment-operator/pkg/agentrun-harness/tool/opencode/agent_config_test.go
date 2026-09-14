@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	console "github.com/pluralsh/console/go/client"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
 
@@ -66,5 +67,54 @@ func TestAgentConfigurePreservesNativeConfigForBabysit(t *testing.T) {
 	}
 	if native["model"] != "anthropic/claude-sonnet-4-5" {
 		t.Fatalf("native model = %v", native["model"])
+	}
+}
+
+func TestAgentConfigureUsesOpenAIMethodSDK(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		npm    string
+	}{
+		{name: "chat", method: string(console.OpenAiMethodChat), npm: "@ai-sdk/openai-compatible"},
+		{name: "responses", method: string(console.OpenAiMethodResponses), npm: "@ai-sdk/openai"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			workDir := t.TempDir()
+			run := agentRun("litellm", "gpt-4", true, false)
+			run.Runtime.Config.OpenCode.Method = tt.method
+			run.Runtime.Config.OpenCode.Endpoint = "https://litellm.example/v1"
+			agent := NewAgent(toolv1.Config{
+				WorkDir:       workDir,
+				RepositoryDir: t.TempDir(),
+				Run:           run,
+			})
+			settings, err := agent.ResolveSettings(run)
+			if err != nil {
+				t.Fatalf("ResolveSettings() error = %v", err)
+			}
+			if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
+				Phase:        toolv1.ConfigurePhaseInitial,
+				ConsoleToken: "console-token",
+				Settings:     settings,
+			}); err != nil {
+				t.Fatalf("Configure(initial) error = %v", err)
+			}
+
+			content, err := os.ReadFile(filepath.Join(workDir, ".opencode", ConfigFileName))
+			if err != nil {
+				t.Fatalf("read native config: %v", err)
+			}
+			var config map[string]any
+			if err := json.Unmarshal(content, &config); err != nil {
+				t.Fatalf("decode native config: %v", err)
+			}
+			provider := config["provider"].(map[string]any)[string(ProviderOpenAICompatible)].(map[string]any)
+			if provider["npm"] != tt.npm {
+				t.Fatalf("npm = %v, want %q", provider["npm"], tt.npm)
+			}
+		})
 	}
 }

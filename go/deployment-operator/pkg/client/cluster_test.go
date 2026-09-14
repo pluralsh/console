@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 	console "github.com/pluralsh/console/go/client"
 	pollycache "github.com/pluralsh/console/go/polly/cache"
 	"github.com/stretchr/testify/assert"

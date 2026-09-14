@@ -10,6 +10,9 @@ securityContext:
     type: RuntimeDefault
 
 consoleUrl: ~
+console:
+  tls:
+    enabled: false
 fullnameOverride: console-operator
 
 tokenSecretRef:
@@ -48,3 +51,96 @@ controllerManager:
     annotations: {}
 imagePullSecrets: []
 kubernetesClusterDomain: cluster.local
+
+rbac:
+  configMapsAndNamespaces:
+    resources:
+    - configmaps
+    - namespaces
+    verbs:
+    - create
+    - get
+    - list
+    - patch
+    - update
+    - watch
+  secrets:
+    resources:
+    - secrets
+    verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+  deploymentsPlural:
+    resources:
+    - agentruntimepolicies
+    - bindingpolicies
+    - bootstraptokens
+    - catalogs
+    - cloudconnections
+    - clusterrestores
+    - clusterrestoretriggers
+    - clusters
+    - clustersyncs
+    - compliancereportgenerators
+    - customcompatibilitymatrices
+    - customstackruns
+    - deploymentsettings
+    - federatedcredentials
+    - flows
+    - generatedsecrets
+    - gitrepositories
+    - globalservices
+    - groups
+    - helmrepositories
+    - infrastructurestacks
+    - managednamespaces
+    - mcpservers
+    - namespacecredentials
+    - notificationrouters
+    - notificationsinks
+    - observabilityproviders
+    - observers
+    - oidcproviders
+    - personas
+    - pipelinecontexts
+    - pipelines
+    - policies
+    - prautomations
+    - prautomationtriggers
+    - previewenvironmenttemplates
+    - prgovernances
+    - projects
+    - providers
+    - scmconnections
+    - sentinels
+    - sentineltriggers
+    - serviceaccounts
+    - servicecontexts
+    - servicedeployments
+    - stackdefinitions
+    - upgradeplancallouts
+    - workbenchcrons
+    - workbenches
+    - workbenchprompts
+    - workbenchtools
+    - workbenchwebhooks
+    verbs:
+    - create
+    - delete
+    - deletecollection
+    - get
+    - list
+    - patch
+    - update
+    - watch
+    finalizerVerbs:
+    - update
+    statusVerbs:
+    - get
+    - patch
+    - update

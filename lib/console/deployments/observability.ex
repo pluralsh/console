@@ -3,6 +3,7 @@ defmodule Console.Deployments.Observability do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.Deployments.Observability.Metrics
+  alias Console.AI.Workbench.Toolchain
   alias Console.Deployments.Observability.Monitor, as: MonitorImpl
   alias Prometheus.Client, as: PrometheusClient
   alias Console.Deployments.Settings
@@ -14,6 +15,8 @@ defmodule Console.Deployments.Observability do
     Project,
     Service,
     Monitor,
+    Dashboard,
+    Workbench,
     AlertResolution,
     DeploymentSettings,
     ObservabilityProvider,
@@ -30,10 +33,11 @@ defmodule Console.Deployments.Observability do
   require Logger
 
   @type error :: Console.error
-  @type provider_resp :: {:ok, ObservabilityProvider.t} | error
-  @type webhook_resp  :: {:ok, ObservabilityWebhook.t} | error
-  @type monitor_resp  :: {:ok, Monitor.t} | error
-  @type alert_resp    :: {:ok, Alert.t} | error
+  @type provider_resp  :: {:ok, ObservabilityProvider.t} | error
+  @type webhook_resp   :: {:ok, ObservabilityWebhook.t} | error
+  @type monitor_resp   :: {:ok, Monitor.t} | error
+  @type dashboard_resp :: {:ok, Dashboard.t} | error
+  @type alert_resp     :: {:ok, Alert.t} | error
 
   @spec get_provider(binary) :: ObservabilityProvider.t | nil
   def get_provider(id), do: Repo.get(ObservabilityProvider, id)
@@ -66,6 +70,55 @@ defmodule Console.Deployments.Observability do
   def get_monitor!(id), do: Repo.get!(Monitor, id)
   def get_monitor(id), do: Repo.get(Monitor, id)
 
+  def get_dashboard!(id), do: Repo.get!(Dashboard, id)
+  def get_dashboard(id), do: Repo.get(Dashboard, id)
+
+  @spec create_dashboard(map, User.t()) :: dashboard_resp
+  def create_dashboard(attrs, %User{} = user) do
+    changeset = Dashboard.changeset(%Dashboard{}, attrs)
+
+    with :ok <- validate_dashboard_tools(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write),
+      do: Repo.insert(changeset)
+  end
+
+  @spec update_dashboard(map, binary, User.t()) :: dashboard_resp
+  def update_dashboard(attrs, id, %User{} = user) do
+    changeset = Dashboard.changeset(get_dashboard!(id), Map.drop(attrs, [:workbench_id, "workbench_id"]))
+
+    with :ok <- validate_dashboard_tools(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write),
+      do: Repo.update(changeset)
+  end
+
+  defp validate_dashboard_tools(%Ecto.Changeset{valid?: true} = changeset, %User{} = user) do
+    dashboard = Ecto.Changeset.apply_changes(changeset)
+
+    case Repo.preload(dashboard, :workbench) do
+      %Dashboard{workbench: %Workbench{} = workbench} = dashboard ->
+        Toolchain.validate_all(workbench, dashboard_tool_queries(dashboard), user)
+      _ -> {:error, "dashboard workbench not found"}
+    end
+  end
+  defp validate_dashboard_tools(_, _), do: :ok
+
+  defp dashboard_tool_queries(%Dashboard{graphs: graphs, inputs: inputs}) do
+    Enum.flat_map(graphs ++ inputs, fn
+      %{datasource: %{type: type, tool: tool, input: input}}
+      when type in [:metrics, :logs, :traces, :labels] ->
+        [{type, tool, input || %{}}]
+
+      _ -> []
+    end)
+  end
+
+  @spec delete_dashboard(binary, User.t()) :: dashboard_resp
+  def delete_dashboard(id, %User{} = user) do
+    get_dashboard!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
   @spec get_alert!(binary) :: Alert.t | nil
   def get_alert!(id), do: Repo.get!(Alert, id)
 
@@ -73,9 +126,13 @@ defmodule Console.Deployments.Observability do
   Create a new monitor, cannot be done if the user doesn't have read access to the service it belongs to
   """
   @spec create_monitor(map, User.t) :: monitor_resp
-  def create_monitor(attrs, %User{} = user) do
+  def create_monitor(attrs, %User{id: user_id} = user) do
     %Monitor{}
-    |> Monitor.changeset(Map.put(attrs, :last_run_at, Timex.now()))
+    |> Monitor.changeset(
+      attrs
+      |> Map.put(:last_run_at, Timex.now())
+      |> Map.put(:user_id, user_id)
+    )
     |> allow(user, :read)
     |> when_ok(:insert)
   end
@@ -109,7 +166,7 @@ defmodule Console.Deployments.Observability do
 
   @spec run_monitor(Monitor.t) :: alert_resp | :ignore
   def run_monitor(%Monitor{} = monitor) do
-    monitor = Repo.preload(monitor, [:alert, service: :cluster])
+    monitor = Repo.preload(monitor, [:alert, :workbench, :user, service: :cluster])
     with {:ok, result, results} <- MonitorImpl.query(monitor),
          {:ok, attrs} <- monitor_attrs(monitor, result, results) do
       start_transaction()

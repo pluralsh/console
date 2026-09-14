@@ -37,21 +37,39 @@ For local or self-signed TLS certificates, append `?insecure_skip_verify=true` t
 
 Create a dedicated integration identity. Do **not** use an HTTP Event Collector (HEC) token from **Settings → Data Inputs → HTTP Event Collector**. HEC tokens ingest events; they cannot call the search REST API.
 
-### Option A: authentication token (recommended)
+### Option A: Bearer authentication token (recommended)
 
-These are JWT authentication tokens from **Settings → Tokens**, not HEC tokens.
+Choose **Bearer** in **Token type** for a JWT authentication token. These tokens are created in **Settings → Tokens** and are sent as `Authorization: Bearer <token>`. They are not HEC tokens.
 
 1. Enable token authentication if it is off: **Settings → Tokens → Token Settings → Enable token authentication**. This requires the `edit_tokens_settings` capability (typically `admin` or `sc_admin`).
 2. Create the dedicated user and role described below.
 3. Go to **Settings → Tokens → New Token**.
 4. Set **User** to that dedicated user and **Audience** to a short purpose string such as `plural-workbench`.
 5. Create the token and copy it immediately. Splunk will not show the full value again.
-6. Paste it into **Bearer token**. Leave **Username** and **Password** empty.
+6. Paste it into **Authentication token**, select **Bearer** as **Token type**, and leave **Username** and **Password** empty.
 
-### Option B: username and password
+Administrators can also create the same type of token with `POST /services/authorization/tokens`. See [Create authentication tokens](https://help.splunk.com/en/splunk-cloud-platform/administer/manage-users-and-security/10.5.2605/authenticate-into-the-splunk-platform-with-tokens/create-authentication-tokens) in the Splunk documentation.
+
+### Option B: Splunk session key
+
+Choose **Splunk** in **Token type** only when the value is a session key returned by `POST /services/auth/login`. The integration sends it as `Authorization: Splunk <sessionKey>`.
+
+Create a session key using the dedicated user's username and password:
+
+```shell
+curl -sS -k https://<host>:8089/services/auth/login \
+  --data-urlencode username=<username> \
+  --data-urlencode password=<password>
+```
+
+Copy the value inside `<sessionKey>...</sessionKey>` into **Authentication token**, then select **Splunk** as **Token type**. Leave **Username** and **Password** empty.
+
+Session keys expire according to the Splunk session timeout, so Bearer authentication tokens are usually a better choice for a persistent workbench connection. See [Authentication with HTTP Authorization tokens](https://help.splunk.com/en/splunk-enterprise/leverage-rest-apis/rest-api-user-manual/10.4/rest-api-user-manual/basic-concepts-about-the-splunk-platform-rest-api#authentication-with-http-authorization-tokens) for the session-key flow.
+
+### Option C: username and password
 
 1. Create the dedicated user described below and set a password.
-2. Fill **Username** and **Password**. Leave **Bearer token** empty.
+2. Fill **Username** and **Password**. Leave **Authentication token** empty. **Token type** is ignored when no token is supplied.
 
 ## Grant permissions for the search export API
 
@@ -88,7 +106,8 @@ If these are empty or omit the target index, the export call can succeed with no
 ## Complete the configuration
 
 - **URL:** management/REST API base URL (`https://<host>:8089`, no search path)
-- **Bearer token:** authentication token from **Settings → Tokens**, or
+- **Authentication token:** either a JWT authentication token or session key
+- **Token type:** **Bearer** for JWT tokens from **Settings → Tokens** (default), or **Splunk** for session keys from `/services/auth/login`
 - **Username** + **Password:** dedicated service user
 
 After saving, attach the tool to a workbench and run a log query against an index the role can search.

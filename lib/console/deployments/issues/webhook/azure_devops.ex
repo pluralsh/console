@@ -6,6 +6,8 @@ defmodule Console.Deployments.Issues.Webhook.AzureDevops do
   and [Service hooks events](https://learn.microsoft.com/en-us/azure/devops/service-hooks/events?view=azure-devops).
   """
   @behaviour Console.Deployments.Issues.Provider
+  @behaviour Console.Deployments.Issues.Scm
+  alias Console.Deployments.Issues.Scm
 
   require EEx
 
@@ -75,6 +77,13 @@ defmodule Console.Deployments.Issues.Webhook.AzureDevops do
   def status(%{"resource" => %{"fields" => %{"System.State" => state}}}) when is_binary(state),
     do: map_state(state)
   def status(_), do: :open
+
+  def pull_request?(%{"resource" => %{"pullRequest" => _}} = payload) do
+    not is_map(get_in(payload, ["resource", "comment"]))
+  end
+  def pull_request?(_), do: false
+
+  def reference_urls(url), do: [Scm.base_reference_url(url)]
 
   defp map_pr_status("completed"), do: :completed
   defp map_pr_status("abandoned"), do: :cancelled

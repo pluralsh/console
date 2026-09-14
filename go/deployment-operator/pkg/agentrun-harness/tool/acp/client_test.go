@@ -17,7 +17,7 @@ import acpsdk "github.com/coder/acp-go-sdk"
 
 import console "github.com/pluralsh/console/go/client"
 
-func newTestClient(t *testing.T, fileSystemWrite bool) (*client, string) {
+func newTestClient(t *testing.T, fileSystemWrite bool, readOnlyDirectories ...string) (*client, string) {
 	t.Helper()
 	directory := t.TempDir()
 	root, err := os.OpenRoot(directory)
@@ -25,11 +25,17 @@ func newTestClient(t *testing.T, fileSystemWrite bool) (*client, string) {
 		t.Fatalf("open test root: %v", err)
 	}
 	t.Cleanup(func() { _ = root.Close() })
+	readOnlyRoots, err := openFileSystemRoots(readOnlyDirectories)
+	if err != nil {
+		t.Fatalf("open test read-only roots: %v", err)
+	}
+	t.Cleanup(func() { closeFileSystemRoots(readOnlyRoots) })
 	engine := NewEngine()
 	return newClient(
 		newTurn(engine, &testSink{}, "session-1"),
 		directory,
 		root,
+		readOnlyRoots,
 		fileSystemWrite,
 	), directory
 }
@@ -47,6 +53,103 @@ func TestClientReadsAndWritesTextFiles(t *testing.T) {
 	}
 	if response.Content != "two\nthree" {
 		t.Fatalf("read content = %q", response.Content)
+	}
+}
+
+func TestClientReadsTextFilesFromReadOnlyRoot(t *testing.T) {
+	readOnlyDirectory := t.TempDir()
+	path := filepath.Join(readOnlyDirectory, "nested", "file.txt")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("create read-only directory: %v", err)
+	}
+	if err := os.WriteFile(path, []byte("prebaked content"), 0o600); err != nil {
+		t.Fatalf("write prebaked file: %v", err)
+	}
+	acpClient, _ := newTestClient(t, true, readOnlyDirectory)
+
+	response, err := acpClient.ReadTextFile(context.Background(), acpsdk.ReadTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+	})
+	if err != nil {
+		t.Fatalf("read file from read-only root: %v", err)
+	}
+	if response.Content != "prebaked content" {
+		t.Fatalf("read-only root content = %q, want %q", response.Content, "prebaked content")
+	}
+}
+
+func TestClientRejectsWritesToReadOnlyRoot(t *testing.T) {
+	readOnlyDirectory := t.TempDir()
+	path := filepath.Join(readOnlyDirectory, "file.txt")
+	if err := os.WriteFile(path, []byte("original"), 0o600); err != nil {
+		t.Fatalf("write prebaked file: %v", err)
+	}
+	acpClient, _ := newTestClient(t, true, readOnlyDirectory)
+
+	_, err := acpClient.WriteTextFile(context.Background(), acpsdk.WriteTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+		Content:   "changed",
+	})
+	if err == nil {
+		t.Fatal("write to read-only root unexpectedly succeeded")
+	}
+	content, readErr := os.ReadFile(path)
+	if readErr != nil {
+		t.Fatalf("read prebaked file after denied write: %v", readErr)
+	}
+	if string(content) != "original" {
+		t.Fatalf("prebaked file after denied write = %q, want %q", content, "original")
+	}
+}
+
+func TestClientReadOnlyRootDoesNotAllowUnrelatedReads(t *testing.T) {
+	readOnlyDirectory := t.TempDir()
+	acpClient, _ := newTestClient(t, true, readOnlyDirectory)
+	path := filepath.Join(t.TempDir(), "unrelated.txt")
+	if err := os.WriteFile(path, []byte("unrelated content"), 0o600); err != nil {
+		t.Fatalf("write unrelated file: %v", err)
+	}
+
+	response, err := acpClient.ReadTextFile(context.Background(), acpsdk.ReadTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+	})
+	if err == nil {
+		t.Fatal("unrelated read unexpectedly succeeded")
+	}
+	if response.Content != "" {
+		t.Fatalf("unrelated read returned content %q", response.Content)
+	}
+}
+
+func TestClientRejectsReadsThroughReadOnlyRootSymlinkEscape(t *testing.T) {
+	readOnlyDirectory := t.TempDir()
+	outside := t.TempDir()
+	outsideFile := filepath.Join(outside, "outside.txt")
+	if err := os.WriteFile(outsideFile, []byte("outside content"), 0o600); err != nil {
+		t.Fatalf("write outside file: %v", err)
+	}
+	target, err := filepath.Rel(readOnlyDirectory, outsideFile)
+	if err != nil {
+		t.Fatalf("resolve relative symlink target: %v", err)
+	}
+	path := filepath.Join(readOnlyDirectory, "outside-link")
+	if err := os.Symlink(target, path); err != nil {
+		t.Fatalf("create symlink: %v", err)
+	}
+	acpClient, _ := newTestClient(t, true, readOnlyDirectory)
+
+	response, err := acpClient.ReadTextFile(context.Background(), acpsdk.ReadTextFileRequest{
+		SessionId: "session-1",
+		Path:      path,
+	})
+	if err == nil {
+		t.Fatal("read-only root symlink escape unexpectedly succeeded")
+	}
+	if response.Content != "" {
+		t.Fatalf("read-only root symlink escape returned content %q", response.Content)
 	}
 }
 

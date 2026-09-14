@@ -106,6 +106,17 @@ defmodule Console.Deployments.AgentsTest do
 
       assert refetch(runtime)
     end
+
+    test "cannot delete an agent runtime still referenced by a workbench" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      insert(:workbench, agent_runtime: runtime)
+
+      {:error, %Ecto.Changeset{} = cs} = Agents.delete_agent_runtime(runtime.id, cluster)
+
+      assert elem(cs.errors[:id], 0) =~ "workbenches"
+      assert refetch(runtime)
+    end
   end
 
   describe "create_agent_run/3" do
@@ -972,6 +983,40 @@ defmodule Console.Deployments.AgentsTest do
       assert updated.metadata.tool.state == :completed
       assert updated.metadata.tool.output == "0 failures"
       assert_receive {:event, %PubSub.AgentMessageUpdated{item: ^updated}}
+    end
+
+    test "it strips null bytes from message text and metadata" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      assert {:ok, updated} =
+               Agents.update_agent_message(
+                 %{
+                   message: "completed" <> <<0>>,
+                   role: message.role,
+                   metadata: %{
+                     reasoning: %{text: "reason" <> <<0>>},
+                     file: %{name: "output" <> <<0>>, text: "contents" <> <<0>>},
+                     tool: %{
+                       name: "shell" <> <<0>>,
+                       state: :completed,
+                       input: "mix test" <> <<0>>,
+                       output: "0 failures" <> <<0>>
+                     }
+                   }
+                 },
+                 message.id,
+                 runtime.cluster
+               )
+
+      assert updated.message == "completed"
+      assert updated.metadata.reasoning.text == "reason"
+      assert updated.metadata.file.name == "output"
+      assert updated.metadata.file.text == "contents"
+      assert updated.metadata.tool.name == "shell"
+      assert updated.metadata.tool.input == "mix test"
+      assert updated.metadata.tool.output == "0 failures"
     end
   end
 end

@@ -16,7 +16,14 @@ permissions:
   packages: write
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   publish-test:
+    needs: [vouch]
     name: Publish test charts
     runs-on: ubuntu-latest
     strategy:
@@ -54,6 +61,7 @@ jobs:
         registry_password: ${{ secrets.GITHUB_TOKEN }}
         update_dependencies: "true"
   publish:
+    needs: [vouch]
     name: Publish charts
     runs-on: ubuntu-latest
     strategy:

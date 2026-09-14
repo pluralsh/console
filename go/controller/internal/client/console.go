@@ -3,16 +3,17 @@ package client
 import (
 	"context"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/polly/http"
 )
 
 type client struct {
-	ctx           context.Context
-	url           string
-	consoleClient console.ConsoleClient
+	ctx                   context.Context
+	url                   string
+	insecureSkipTLSVerify bool
+	consoleClient         console.ConsoleClient
 }
 
 type ConsoleClient interface {
@@ -238,15 +239,16 @@ type ConsoleClient interface {
 	RunSentinel(ctx context.Context, id string, overrides *console.SentinelRunOverrides) (*string, error)
 }
 
-func New(url, token string, datadogEnabled bool) ConsoleClient {
+func New(url, token string, datadogEnabled, insecureSkipTLSVerify bool) ConsoleClient {
 	interceptors := []clientv2.RequestInterceptor{console.PersistedQueryInterceptor}
 	if datadogEnabled {
 		interceptors = append(interceptors, console.DatadogTracingInterceptor)
 	}
 
 	return &client{
-		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, interceptors...),
-		url:           url,
-		ctx:           context.Background(),
+		consoleClient:         console.New(http.NewHttpClient(token, insecureSkipTLSVerify), url, nil, interceptors...),
+		url:                   url,
+		insecureSkipTLSVerify: insecureSkipTLSVerify,
+		ctx:                   context.Background(),
 	}
 }

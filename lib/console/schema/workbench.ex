@@ -15,6 +15,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchSkill,
     WorkbenchKnowledge,
     WorkbenchEval,
+    Dashboard,
     PolicyBinding,
     WorkbenchPolicy,
     FlowWorkbench,
@@ -163,6 +164,7 @@ defmodule Console.Schema.Workbench do
     has_many :workbench_skills,    WorkbenchSkill,           on_replace: :delete
     has_many :workbench_knowledge, WorkbenchKnowledge,       on_replace: :delete
     has_many :workbench_policies,  WorkbenchPolicy,          on_replace: :delete
+    has_many :dashboards,          Dashboard,                on_replace: :delete
     has_many :alerts,              Alert
 
     has_one :eval,                 WorkbenchEval

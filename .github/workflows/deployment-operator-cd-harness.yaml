@@ -20,7 +20,14 @@ env:
   REGISTRY_IMAGE: pluralsh/stackrun-harness-base
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build-base-image:
+    needs: [vouch]
     name: Build base image
     permissions:
       contents: "read"

@@ -18,13 +18,16 @@
   "packageManager": "yarn@4.17.1",
   "resolutions": {
     "@types/react": "19.2.17",
-    "brace-expansion@npm:^2.0.1": "2.1.2",
-    "brace-expansion@npm:^2.0.2": "2.1.2",
-    "dompurify": "3.4.12",
+    "brace-expansion@npm:^2.0.1": "2.1.4",
+    "brace-expansion@npm:^2.0.2": "2.1.4",
+    "dompurify": "3.4.13",
     "elkjs": "0.12.0",
-    "fast-uri": "3.1.4",
-    "js-yaml": "4.3.1",
-    "postcss": "8.5.19",
-    "shell-quote": "1.10.0"
+    "fast-uri": "3.1.6",
+    "js-yaml": "4.3.2",
+    "immutable@npm:~3.7.6": "3.8.4",
+    "postcss": "8.5.23",
+    "shell-quote": "1.10.0",
+    "lodash": "4.18.1",
+    "lodash-es": "4.18.1"
   }
 }

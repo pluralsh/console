@@ -1,0 +1,63 @@
+# Runs from the default branch (pull_request_target) so PR authors cannot disable it.
+name: Vouch - Check PR
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write
+
+jobs:
+  check:
+    name: Check PR author is vouched
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/recheck'))
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: mitchellh/vouch/action/check-pr@d66fa29a64600490892131ad87597c30c91fcac4 # v1.5.0
+        id: check
+        with:
+          pr-number: ${{ github.event.pull_request.number || github.event.issue.number }}
+          auto-close: true
+          template-file: .github/vouch/pr-unvouched
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cancel Actions runs for unvouched authors
+        if: steps.check.outputs.status == 'closed'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          sha="${{ github.event.pull_request.head.sha || '' }}"
+          if [ -z "$sha" ]; then
+            sha="$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" --jq .head.sha)"
+          fi
+          runs="$(
+            gh run list \
+              --repo "${{ github.repository }}" \
+              --commit "$sha" \
+              --json databaseId,status \
+              --jq ".[] | select(.databaseId != ${{ github.run_id }} and (.status == \"in_progress\" or .status == \"queued\" or .status == \"pending\" or .status == \"waiting\")) | .databaseId"
+          )"
+          if [ -n "$runs" ]; then
+            echo "$runs" | xargs -n1 gh run cancel --repo "${{ github.repository }}"
+          fi
+
+      - name: Fail if author is not vouched
+        if: steps.check.outputs.status == 'closed'
+        run: |
+          echo "PR author is not vouched"
+          exit 1

@@ -30,6 +30,7 @@ import {
 import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
 import {
   WorkbenchJobKubeActionChips,
+  WorkbenchJobKubeDrainDetails,
   WorkbenchJobKubeUpdateDiff,
 } from './WorkbenchJobKubeUpdateDiff'
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
@@ -51,7 +52,10 @@ export function WorkbenchJobActionDetail({
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
   const isExec = activity.type === WorkbenchJobActivityType.Exec
-  const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
+  const kubeRequest = activity.result?.kubeRequest
+  const kubeDrain = activity.result?.kubeDrain
+  const kubeVariant = getKubeActionVariant(kubeRequest?.method)
+  const isKubeDrain = isKubernetes && !!kubeDrain
   const isKubeDiff =
     isKubernetes &&
     needsApproval &&
@@ -124,7 +128,8 @@ export function WorkbenchJobActionDetail({
           </Flex>
           <WorkbenchJobKubeActionChips
             type={activity.type}
-            method={activity.result?.kubeRequest?.method}
+            method={kubeRequest?.method}
+            drain={!!kubeDrain}
             statusChip={
               <WorkbenchJobActionStatusChip status={activity.status} />
             }
@@ -135,7 +140,12 @@ export function WorkbenchJobActionDetail({
 
       {error && <GqlError error={error} />}
 
-      {isKubeDiff ? (
+      {isKubeDrain ? (
+        <WorkbenchJobKubeDrainDetails
+          node={kubeDrain?.node}
+          explanation={kubeDrain?.explanation ?? activity.result?.explanation}
+        />
+      ) : isKubeDiff ? (
         <WorkbenchJobKubeUpdateDiff
           activityId={activity.id}
           kubeRequest={activity.result?.kubeRequest}

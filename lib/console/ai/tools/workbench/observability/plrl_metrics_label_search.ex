@@ -30,4 +30,11 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.MetricsLabelSearch do
       MetricsLabelSearch.implement(tool)
     end
   end
+
+  def structured(%__MODULE__{metric: m, query: q, label: label, limit: l}) do
+    with {:ok, conn} <- build_tool_connection() do
+      %MetricsLabelSearch{tool: conn, metric: m, query: q, label: label, limit: l}
+      |> MetricsLabelSearch.structured()
+    end
+  end
 end

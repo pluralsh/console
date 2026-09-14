@@ -78,14 +78,16 @@ func (f *Factory) New(config *modserver.Config) (modserver.Module, error) {
 	m := &module{
 		log: config.Log,
 		proxy: kubernetesApiProxy{
-			log:                 config.Log,
-			api:                 config.Api,
-			kubernetesApiClient: rpc.NewKubernetesApiClient(config.AgentConn),
-			pluralUrl:           config.Config.PluralUrl,
-			jwtTokenAuthorizer:  api.NewJWTProxyAuthorizer(config.Log, jwtSecret),
+			log:                         config.Log,
+			api:                         config.Api,
+			kubernetesApiClient:         rpc.NewKubernetesApiClient(config.AgentConn),
+			pluralUrl:                   config.Config.PluralUrl,
+			pluralInsecureSkipTLSVerify: config.Config.PluralInsecureSkipTlsVerify,
+			jwtTokenAuthorizer:          api.NewJWTProxyAuthorizer(config.Log, jwtSecret),
 			auditLogger: api.NewAuditLogBatcher(
 				config.Log,
 				config.Config.PluralUrl,
+				config.Config.PluralInsecureSkipTlsVerify,
 				k8sApi.AuditLogFlushInterval.AsDuration(),
 				k8sApi.AuditLogDrainTimeout.AsDuration(),
 				int(k8sApi.AuditLogFlushEvents),

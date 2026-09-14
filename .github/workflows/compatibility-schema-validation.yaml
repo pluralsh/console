@@ -20,7 +20,14 @@ permissions:
   contents: read
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   validate-compatibility-schemas:
+    needs: [vouch]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

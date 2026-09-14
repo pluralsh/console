@@ -22,6 +22,8 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
   ':root': {
     '--top-nav-height': '72px',
     '--menu-extra-bpad': '0px',
+    '--docs-sidenav-width': '306px',
+    '--docs-sidecar-width': '220px',
   },
   'a:any-link': {
     color: 'unset',
@@ -39,7 +41,7 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
   },
   body: {
     margin: 0,
-    overflowX: 'hidden',
+    overflowX: 'clip',
     color: theme.colors.text,
     backgroundColor: theme.colors['fill-zero'],
     ...fillAvailable('minHeight'),

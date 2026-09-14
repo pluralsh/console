@@ -113,6 +113,24 @@ defmodule Console.GraphQl.UserQueriesTest do
       assert from_connection(found)
              |> ids_equal([group])
     end
+
+    test "it can sideload member counts" do
+      group = insert(:group)
+      insert_list(3, :group_member, group: group)
+      empty = insert(:group)
+
+      {:ok, %{data: %{"groups" => found}}} = run_query("""
+        query {
+          groups(first: 5) {
+            edges { node { id memberCount } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      by_id = Map.new(from_connection(found), & {&1["id"], &1["memberCount"]})
+      assert by_id[group.id] == 3
+      assert by_id[empty.id] == 0
+    end
   end
 
 

@@ -4,12 +4,12 @@ package tools
 
 import (
 	_ "github.com/99designs/gqlgen"
-	_ "github.com/Yamashou/gqlgenc"
 	_ "github.com/a8m/envsubst/cmd/envsubst"
 	_ "github.com/arttor/helmify/cmd/helmify"
 	_ "github.com/elastic/crd-ref-docs"
 	_ "github.com/envoyproxy/protoc-gen-validate"
 	_ "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
+	_ "github.com/gqlgo/gqlgenc"
 	_ "github.com/onsi/ginkgo/v2/ginkgo"
 	_ "github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc"
 	_ "github.com/vektra/mockery/v2"

@@ -26,10 +26,7 @@ import {
 import { WorkbenchJobEvalPromptCard } from './WorkbenchJobEvalPromptCard'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
-import {
-  defaultClosedIds,
-  isActivityTerminal,
-} from './workbenchJobActivityCollapse'
+import { isActivityTerminal } from './workbenchJobActivityCollapse'
 
 /** Cursor-like proximity between top-level activities (~12px). */
 export const ACTIVITY_GAP = 'small' as const
@@ -48,27 +45,24 @@ export function WorkbenchJobActivities({
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 30_000,
+    pollInterval: 15_000,
   })
 
   const job = data?.workbenchJob
-  const activities = mapExistingNodes(job?.activities)
+  const activities = useMemo(
+    () => mapExistingNodes(job?.activities),
+    [job?.activities]
+  )
   const activityGroups = useMemo(
     () => groupConsecutiveMemos(activities),
     [activities]
   )
 
-  const [closedIds, setClosedIds] = useState<Set<string> | null>(null)
-  if (closedIds === null && !!data) setClosedIds(defaultClosedIds(activities))
-
-  const openIds = useMemo(
-    () => activities.filter((a) => !closedIds?.has(a.id)).map((a) => a.id),
-    [activities, closedIds]
-  )
+  const [openIds, setOpenIds] = useState<string[]>([])
 
   const { textStreamMap, jobLevelThinking } = useWorkbenchJobStreams(
     jobId,
-    setClosedIds
+    !!data
   )
 
   const userPromptIndices = useMemo(() => {
@@ -100,15 +94,7 @@ export function WorkbenchJobActivities({
         <ActivitiesAccordionSC
           type="multiple"
           value={openIds}
-          onValueChange={(newOpenIds: string[]) => {
-            setClosedIds(
-              new Set(
-                activities
-                  .filter((a) => !newOpenIds.includes(a.id))
-                  .map((a) => a.id)
-              )
-            )
-          }}
+          onValueChange={setOpenIds}
         >
           <VirtualList
             isReversed

@@ -12,6 +12,9 @@ spec:
     port: 8080
     targetPort: http
     protocol: TCP
+    {{- if .Values.aiProxy.tls.enabled }}
+    appProtocol: https
+    {{- end }}
   selector:
     {{- include "nexus.selectorLabels" . | nindent 4 }}
 {{- end }}

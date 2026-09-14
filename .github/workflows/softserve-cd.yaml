@@ -18,7 +18,14 @@ env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   test-softserve-docker:
+    needs: [vouch]
     name: Test softserve container
     runs-on: ubuntu-latest
     defaults:

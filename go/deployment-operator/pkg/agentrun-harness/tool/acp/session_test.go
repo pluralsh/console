@@ -10,8 +10,33 @@ import (
 	"testing"
 
 	acpsdk "github.com/coder/acp-go-sdk"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
+
+func TestNewSessionAttemptIncludesPrebakeReadOnlyRoot(t *testing.T) {
+	prebakeDirectory := t.TempDir()
+	t.Setenv(prebake.EnvDir, prebakeDirectory)
+	_, process, _ := newTestAgentProcess(newTestState(), true)
+	attempt, err := newSessionAttempt(
+		NewEngine(),
+		context.Background(),
+		process,
+		Request{Cwd: t.TempDir()},
+		&testSink{},
+	)
+	if err != nil {
+		t.Fatalf("create session attempt: %v", err)
+	}
+	t.Cleanup(attempt.close)
+
+	if len(attempt.readOnlyRoots) != 1 {
+		t.Fatalf("read-only root count = %d, want 1", len(attempt.readOnlyRoots))
+	}
+	if attempt.readOnlyRoots[0].directory != prebakeDirectory {
+		t.Fatalf("read-only root = %q, want %q", attempt.readOnlyRoots[0].directory, prebakeDirectory)
+	}
+}
 
 func TestEngineTurnReportsInitializeProcessFailure(t *testing.T) {
 	process, err := exec.StartWithStdio(context.Background(), os.Args[0],

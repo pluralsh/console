@@ -347,6 +347,15 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert {:error, _} = StackInspect.implement(parsed)
     end
 
+    test "returns {:error, _} when the stack does not exist, even for admins" do
+      admin = insert(:user, roles: %{admin: true})
+      missing_id = Ecto.UUID.generate()
+
+      assert {:ok, parsed} = Tool.validate(%StackInspect{user: admin}, %{"stack_id" => missing_id})
+      assert {:error, msg} = StackInspect.implement(parsed)
+      assert msg =~ missing_id
+    end
+
     test "when status is failed, includes latest failed run and failing step logs" do
       user = insert(:user)
       stack = insert(:stack, status: :failed, read_bindings: [%{user_id: user.id}])

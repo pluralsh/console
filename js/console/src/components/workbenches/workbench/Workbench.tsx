@@ -190,6 +190,7 @@ export function WorkbenchPageLayout({
 
   return (
     <Flex
+      align="stretch"
       height="100%"
       minHeight={0}
       overflow="hidden"

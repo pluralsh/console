@@ -190,17 +190,21 @@ end
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
   alias Console.Schema.{StackRun, PullRequest, StackState}
   alias Console.Deployments.Stacks
+  alias Console.AI.Plan
 
   def process(%{item: %{dry_run: true, status: :pending_approval} = run}) do
     case Console.Repo.preload(run, [:pull_request, :state]) do
       %StackRun{pull_request: %PullRequest{}, state: %StackState{plan: p}} = run when is_binary(p) ->
         Stacks.post_comment(run)
+        Plan.enqueue(run)
       _ -> :ok
     end
   end
 
-  def process(%@for{item: %StackRun{status: :pending_approval} = run}),
-    do: Stacks.stack_run_approval(run)
+  def process(%@for{item: %StackRun{status: :pending_approval} = run}) do
+    Plan.enqueue(run)
+    Stacks.stack_run_approval(run)
+  end
 
   def process(%@for{item: %StackRun{pull_request_id: id, status: status} = run})
     when is_binary(id) and status != :queued do
@@ -212,19 +216,6 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
   #   do: Console.Deployments.Stacks.Discovery.runner(run)
 
   def process(_), do: :ok
-end
-
-defimpl Console.PubSub.Recurse, for: Console.PubSub.StackStateInsight do
-  alias Console.Schema.{StackRun, PullRequest, StackState, AiInsight}
-  alias Console.Deployments.Stacks
-
-  def process(%@for{item: {%StackState{} = state, _}}) do
-    case Console.Repo.preload(state, [run: [:pull_request, state: :insight]]) do
-      %StackState{run: %StackRun{pull_request: %PullRequest{}, state: %StackState{insight: %AiInsight{}}} = run} ->
-        Stacks.post_comment(run)
-      _ -> :ok
-    end
-  end
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
@@ -265,6 +256,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
         Console.Repo.delete(stack)
       %StackRun{pull_request: %PullRequest{} = pr} = run ->
         Stacks.post_comment(run)
+        Console.AI.Plan.enqueue(run)
         Stacks.dequeue(pr)
       %StackRun{stack: %Stack{} = stack} ->
         Workbenches.kick_workbench(run)
@@ -306,29 +298,54 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunJobUpdated do
   def process(%@for{item: job}), do: Job.publish(job)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunCreated do
+  alias Console.Deployments.Agents
+
+  def process(%@for{item: run}), do: Agents.agent_review_check(run)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
   alias Console.AI.Workbench.Activity
   alias Console.Deployments.Agents
   alias Console.Schema.AgentRun
+  import Console.Schema.AgentRun, only: [is_terminal: 1]
 
   def process(%@for{item: %AgentRun{} = run}) do
     Activity.publish(run)
-    Agents.record_repository(run)
+
+    case {maybe_review_check(run), Agents.record_repository(run)} do
+      {{:error, _} = error, _} -> error
+      {_, res} -> res
+    end
   end
+
+  defp maybe_review_check(%AgentRun{mode: :review, status: status} = run)
+       when is_terminal(status),
+       do: Agents.agent_review_check(run)
+  defp maybe_review_check(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
+  alias Console.Repo
   alias Console.Schema.Alert
   alias Console.Deployments.Workbenches
   require EEx
 
   def process(%@for{item: %Alert{state: :firing, state_changed: true, workbench_id: wid, id: id} = alert}) when is_binary(wid) do
     Console.debounce({:alert_created, wid, id}, fn ->
-      alert = Console.Repo.preload(alert, [:tags, :workbench_webhook])
-      Workbenches.create_workbench_bot_job(%{
-          prompt: String.trim(prompt(alert: alert)),
-          alert_id: id,
-        }, wid, alert.workbench_webhook)
+      alert = Repo.preload(alert, [:tags, :workbench_webhook, monitor: [user: :groups]])
+      attrs = %{
+        prompt: String.trim(prompt(alert: alert)),
+        alert_id: id,
+      }
+
+      case alert.monitor || alert.workbench_webhook do
+        nil ->
+          {:error, "alert does not have a monitor or workbench webhook"}
+
+        source ->
+          Workbenches.create_workbench_bot_job(attrs, wid, source)
+      end
     end, ttl: :timer.minutes(60))
   end
   def process(_), do: :ok

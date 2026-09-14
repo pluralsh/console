@@ -23,3 +23,8 @@ end
 defimpl Console.GraphQl.Exception, for: Ecto.Query.CastError do
   def error(_), do: {404, "could not find resource"}
 end
+
+defimpl Console.GraphQl.Exception, for: GRPC.RPCError do
+  def error(%GRPC.RPCError{message: message}) when is_binary(message), do: {400, message}
+  def error(_), do: {400, "gRPC request failed"}
+end

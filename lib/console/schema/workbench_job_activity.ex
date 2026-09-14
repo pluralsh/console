@@ -21,9 +21,10 @@ defmodule Console.Schema.WorkbenchJobActivity do
     function: 14,
     kubernetes: 15,
     verify: 16,
-    exec: 17
+    exec: 17,
+    monitoring: 18
 
-  defguard is_action(type) when type in [:function, :kubernetes, :exec]
+  defguard is_action(type) when type in [:function, :kubernetes, :exec, :monitoring]
 
   schema "workbench_job_activities" do
     field :status, Status, default: :pending
@@ -50,6 +51,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
       end
 
       embeds_one :kube_request, Console.AI.Tools.Workbench.KubeRequest, on_replace: :update
+      embeds_one :kube_drain,   Console.AI.Tools.Workbench.KubeDrain, on_replace: :update
       embeds_one :kube_exec,    Console.AI.Tools.Workbench.KubeShell, on_replace: :update
       embeds_many :canvas,      Console.Schema.WorkbenchJobResult.CanvasBlock, on_replace: :delete
 
@@ -177,6 +179,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> cast_embed(:traces_queries)
     |> cast_embed(:canvas)
     |> cast_embed(:kube_request)
+    |> cast_embed(:kube_drain)
     |> cast_embed(:kube_exec)
   end
 
