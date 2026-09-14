@@ -144,6 +144,7 @@ export type CheckboxProps = {
   checked?: boolean
   children?: ReactNode
   name?: string
+  value?: string | null
   small?: boolean
   indeterminate?: boolean
   disabled?: boolean
