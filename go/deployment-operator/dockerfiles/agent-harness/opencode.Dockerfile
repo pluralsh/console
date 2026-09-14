@@ -9,13 +9,18 @@ ARG AGENT_HARNESS_BASE_IMAGE=$AGENT_HARNESS_BASE_IMAGE_REPO:$AGENT_HARNESS_BASE_
 # Stage 1: Install OpenCode CLI from npm in Chainguard Node image
 FROM $NODE_IMAGE AS node
 
+ARG AGENT_VERSION
+
 # Switch to root temporarily to install global packages
 USER root
 
-RUN apt update && apt install -y curl unzip
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl unzip && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install OpenCode CLI
-RUN VERSION=$AGENT_VERSION curl -fsSL https://opencode.ai/install | bash
+RUN curl -fsSL https://opencode.ai/install -o /tmp/opencode-install.sh && \
+    VERSION=$AGENT_VERSION bash /tmp/opencode-install.sh --version "$AGENT_VERSION" --no-modify-path && \
+    rm /tmp/opencode-install.sh
 
 # Verify installation
 RUN /root/.opencode/bin/opencode --version
