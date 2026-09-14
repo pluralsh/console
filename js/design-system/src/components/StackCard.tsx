@@ -1,4 +1,4 @@
-import { Div, type DivProps, Flex, P } from 'honorable'
+import { Div, type DivProps, Flex } from 'honorable'
 import styled from 'styled-components'
 
 import Card from './Card'
@@ -71,22 +71,7 @@ function StackCard({
               <Chip icon={<StackIcon />}>Stack</Chip>
             </Flex>
           </Flex>
-          {description && (
-            <P
-              body2
-              fontWeight="300"
-              color="text-light"
-              marginTop="xsmall"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: '2',
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {description}
-            </P>
-          )}
+          {description && <DescriptionSC>{description}</DescriptionSC>}
           <Div flexGrow={1} />
           {apps?.length > 0 && (
             <Flex
@@ -129,6 +114,18 @@ const AppCountSC = styled.h3(({ theme }) => ({
   ...theme.partials.text.body2,
   fontWeight: 300,
   color: theme.colors['text-xlight'],
+}))
+
+const DescriptionSC = styled.p(({ theme }) => ({
+  margin: 0,
+  marginTop: theme.spacing.xsmall,
+  ...theme.partials.text.body2,
+  fontWeight: 300,
+  color: theme.colors['text-light'],
+  display: '-webkit-box',
+  WebkitLineClamp: '2',
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
 }))
 
 export default StackCard

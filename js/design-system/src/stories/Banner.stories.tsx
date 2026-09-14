@@ -15,7 +15,7 @@ const Heading = styled.h1(({ theme }) => ({
 }))
 
 const meta = {
-  title: 'Banner (AKA Toast Content)',
+  title: 'Banner',
   component: Banner,
   argTypes: {
     closeButton: {
@@ -59,33 +59,6 @@ function Template({ closeButton, ...args }: any) {
         {...args}
       />
       <Banner
-        heading="Success!"
-        action={
-          <Link
-            href="#"
-            onClick={(e) => e.preventDefault()}
-          >
-            Next
-          </Link>
-        }
-        {...args}
-      />
-      <Banner
-        heading="You have an error"
-        {...args}
-      >
-        {
-          'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
-        }
-        <Link
-          href="#"
-          onClick={(e) => e.preventDefault()}
-        >
-          incidents
-        </Link>
-        .
-      </Banner>
-      <Banner
         heading="Here's some info"
         {...args}
       >
@@ -100,34 +73,15 @@ function Template({ closeButton, ...args }: any) {
         </Link>
         .
       </Banner>
-      <Banner
-        heading="Success!"
-        {...args}
-      >
-        {
-          'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
-        }
-        <Link
-          href="#"
-          onClick={(e) => e.preventDefault()}
-        >
-          incidents
-        </Link>
-        .
-      </Banner>
 
-      <Heading>
-        Backwards compatibility only
-      </Heading>
+      <Heading>Backwards compatibility only</Heading>
       <Banner {...args}>
         You really shouldn&apos;t have content here without a heading, but
         including to make sure old usage still looks good.{' '}
         <Link>Now go do something</Link>.
       </Banner>
 
-      <Heading>
-        fullWidth=true
-      </Heading>
+      <Heading>fullWidth=true</Heading>
       <Banner
         {...args}
         fullWidth

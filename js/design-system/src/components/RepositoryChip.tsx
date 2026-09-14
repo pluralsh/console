@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from 'react'
-import { Flex, type FlexProps, Img, P } from 'honorable'
+import { Flex, type FlexProps, Img } from 'honorable'
+import styled from 'styled-components'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import PlusIcon from './icons/PlusIcon'
@@ -77,16 +78,7 @@ function RepositoryChip({
               {...iconProps}
             />
           ) : null}
-          <P
-            body2
-            marginLeft="medium"
-            overflow="hidden"
-            textOverflow="ellipsis"
-            whiteSpace="nowrap"
-            title={label}
-          >
-            {label}
-          </P>
+          <LabelSC title={label}>{label}</LabelSC>
         </Flex>
         <CheckRoundedIcon
           color="border-outline-focused"
@@ -103,5 +95,14 @@ function RepositoryChip({
     </WrapWithIf>
   )
 }
+
+const LabelSC = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.body2,
+  marginLeft: theme.spacing.medium,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}))
 
 export default RepositoryChip

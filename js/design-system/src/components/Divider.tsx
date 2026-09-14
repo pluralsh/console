@@ -1,4 +1,7 @@
-import { Div, Flex, type FlexProps, P } from 'honorable'
+import { Div, Flex, type FlexProps } from 'honorable'
+import styled from 'styled-components'
+
+import { type SemanticColorKey } from '../theme/colors'
 
 type DividerProps = FlexProps & {
   text?: string
@@ -24,14 +27,7 @@ function Divider({
       />
       {!!text && (
         <>
-          <P
-            paddingHorizontal="xsmall"
-            flexShrink={0}
-            color={color}
-            size="small"
-          >
-            {text}
-          </P>
+          <LabelSC $color={color}>{text}</LabelSC>
           <Div
             flexGrow={1}
             height={1}
@@ -42,5 +38,14 @@ function Divider({
     </Flex>
   )
 }
+
+const LabelSC = styled.p<{ $color: string }>(({ theme, $color }) => ({
+  margin: 0,
+  paddingLeft: theme.spacing.xsmall,
+  paddingRight: theme.spacing.xsmall,
+  flexShrink: 0,
+  ...theme.partials.text.body2,
+  color: theme.colors[$color as SemanticColorKey] ?? $color,
+}))
 
 export default Divider

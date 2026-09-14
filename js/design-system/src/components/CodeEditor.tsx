@@ -1,6 +1,6 @@
 import { type Dispatch, useCallback, useEffect, useMemo, useState } from 'react'
-import { Div, Flex, P } from 'honorable'
-import { useTheme } from 'styled-components'
+import { Div, Flex } from 'honorable'
+import styled, { useTheme } from 'styled-components'
 
 import Editor, { useMonaco, type EditorProps } from '@monaco-editor/react'
 import { merge } from 'lodash'
@@ -135,7 +135,7 @@ export default function CodeEditor({
           justify="end"
           padding="large"
         >
-          {changed && <P color="text-light">Unsaved changes</P>}
+          {changed && <UnsavedSC>Unsaved changes</UnsavedSC>}
           <Button
             disabled={!changed}
             loading={saving}
@@ -148,5 +148,11 @@ export default function CodeEditor({
     </Card>
   )
 }
+
+const UnsavedSC = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.body2,
+  color: theme.colors['text-light'],
+}))
 
 export type { CodeEditorProps }

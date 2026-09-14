@@ -1,5 +1,5 @@
-import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
-import { type ReactNode } from 'react'
+import { Div, Flex, type FlexProps } from 'honorable'
+import { type ComponentProps, type ReactNode } from 'react'
 import styled from 'styled-components'
 
 import { type SeverityExt, sanitizeSeverity } from '../types'
@@ -28,7 +28,7 @@ export type BannerProps = FlexProps & {
   severity?: BannerSeverity | 'error'
   heading?: ReactNode
   action?: ReactNode
-  actionProps?: SpanProps
+  actionProps?: ComponentProps<'span'>
   fullWidth?: boolean
   onClose?: () => void
 }
@@ -93,7 +93,7 @@ const Heading = styled.div<{ $bold: boolean }>(({ $bold, theme }) => ({
   color: theme.colors.text,
 }))
 
-const BannerAction = styled(Span)(({ theme }) => ({
+const BannerAction = styled.span(({ theme }) => ({
   marginLeft: theme.spacing.small,
   '&, & a, & a:any-link': {
     ...theme.partials.text.inlineLink,

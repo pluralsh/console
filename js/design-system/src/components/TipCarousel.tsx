@@ -1,5 +1,6 @@
 import { Children, type ReactElement } from 'react'
-import { Div, P } from 'honorable'
+import { Div } from 'honorable'
+import styled from 'styled-components'
 
 import Carousel, { type CarouselProps } from './Carousel'
 
@@ -14,19 +15,19 @@ function TipCarousel({ children, ...props }: CarouselProps) {
           paddingHorizontal="medium"
           mb={-0.5}
         >
-          <P
-            body2
-            color="text-light"
-            fontStyle="italic"
-            textAlign="center"
-            {...props}
-          >
-            {child}
-          </P>
+          <TipSC>{child}</TipSC>
         </Div>
       ))}
     </Carousel>
   )
 }
+
+const TipSC = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.body2,
+  color: theme.colors['text-light'],
+  fontStyle: 'italic',
+  textAlign: 'center',
+}))
 
 export default TipCarousel
