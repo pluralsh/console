@@ -45,6 +45,7 @@ export function AILoadingText({
       <AgentLoadingIcon
         color="icon-xlight"
         size={12}
+        variant="cursorEq"
       />
       <EaseIn currentKey={whimseyText}>
         <Body2P

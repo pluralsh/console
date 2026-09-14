@@ -105,7 +105,10 @@ export function SimpleToolCall({
       leadingIcon={
         leadingIcon ??
         (isPending && kind === 'subagent' ? (
-          <AgentLoadingIcon size={12} />
+          <AgentLoadingIcon
+            size={12}
+            variant="cursorEq"
+          />
         ) : undefined)
       }
     />
