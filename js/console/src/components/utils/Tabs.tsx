@@ -45,5 +45,13 @@ export const LinkTabWrap = styled(LinkTabWrapUnstyled)<{
 }>(({ theme, vertical, subTab, $extendStyle }) => ({
   ...(vertical ? { width: '100%' } : {}),
   ...(subTab ? { borderRadius: theme.borderRadiuses.medium } : {}),
+  color: 'inherit',
+  '&:focus, &:focus-visible': {
+    outline: 'none',
+    color: 'inherit',
+  },
+  '&:focus-visible': {
+    ...theme.partials.focus.default,
+  },
   ...$extendStyle,
 }))
