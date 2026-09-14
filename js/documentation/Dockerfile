@@ -1,4 +1,4 @@
-FROM node:24-alpine AS base
+FROM node:24.11.1-alpine AS base
 
 WORKDIR /app
 
@@ -24,13 +24,18 @@ ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 
 RUN yarn workspace @pluralsh/documentation build:next
 
-FROM node:24-alpine AS production
+FROM node:24.11.1-alpine AS production
 WORKDIR /app
 
-COPY --from=base /app/node_modules/ ./node_modules/
-COPY --from=base /app/documentation/ ./documentation/
+COPY --chown=node:node --from=base /app/node_modules/ ./node_modules/
+COPY --chown=node:node --from=base /app/documentation/ ./documentation/
 
 EXPOSE 3000
 
 WORKDIR /app/documentation
+USER node
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+
 CMD ["node", "/app/node_modules/next/dist/bin/next", "start", "-p", "3000"]
