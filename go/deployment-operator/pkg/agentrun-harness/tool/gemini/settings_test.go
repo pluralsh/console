@@ -139,7 +139,7 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 	})
 
-	t.Run("includeDirectories contains extra prebake dirs", func(t *testing.T) {
+	t.Run("context.includeDirectories contains repository and extra prebake dirs", func(t *testing.T) {
 		input := *baseInput
 		input.AgentRunMode = console.AgentRunModeWrite
 		input.ExtraDirectories = []string{"/plural/shared/repos"}
@@ -153,19 +153,28 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		if err := json.Unmarshal([]byte(content), &out); err != nil {
 			t.Fatalf("generated content is not valid JSON: %v", err)
 		}
-		dirs, ok := out["includeDirectories"].([]any)
+		context, ok := out["context"].(map[string]any)
 		if !ok {
-			t.Fatal("includeDirectories missing or not an array")
+			t.Fatal("context missing or not an object")
 		}
-		found := false
-		for _, d := range dirs {
-			if s, ok := d.(string); ok && s == "/plural/shared/repos" {
-				found = true
-				break
+		dirs, ok := context["includeDirectories"].([]any)
+		if !ok {
+			t.Fatal("context.includeDirectories missing or not an array")
+		}
+		for _, want := range []string{"/plural/contexts", "/repo", "/plural/shared/repos"} {
+			found := false
+			for _, d := range dirs {
+				if s, ok := d.(string); ok && s == want {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("expected context.includeDirectories to contain %q, got %#v", want, dirs)
 			}
 		}
-		if !found {
-			t.Fatalf("expected includeDirectories to contain /plural/shared/repos, got %#v", dirs)
+		if _, exists := out["includeDirectories"]; exists {
+			t.Fatal("deprecated top-level includeDirectories must be absent")
 		}
 	})
 }

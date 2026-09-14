@@ -18,6 +18,10 @@ type ConfigTemplateInput struct {
 	ConsoleToken string
 	AgentRunID   string
 
+	// ReadOnlyDirectories are external directories OpenCode may inspect but
+	// must never edit, such as repository prebake roots.
+	ReadOnlyDirectories []string
+
 	// Fields used when AI proxy is disabled.
 
 	// Provider is the AI provider to use.

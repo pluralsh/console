@@ -36,7 +36,20 @@
           "*": "deny"
         },
         {{- end }}
+        {{- if .ReadOnlyDirectories }}
+        "external_directory": {
+          {{- range $index, $directory := .ReadOnlyDirectories }}
+          {{- if $index }},{{ end }}
+          "{{ $directory }}/**": "allow"
+          {{- end }}
+        },
+        "edit": {
+          "*": "deny"
+          {{- range $directory := .ReadOnlyDirectories }}, "{{ $directory }}/**": "deny"{{ end }}
+        },
+        {{- else }}
         "edit": "deny",
+        {{- end }}
         "webfetch": "allow",
         "skill": {
           "*": "allow"
@@ -70,7 +83,20 @@
           "*": "deny"
         },
         {{- end }}
+        {{- if .ReadOnlyDirectories }}
+        "external_directory": {
+          {{- range $index, $directory := .ReadOnlyDirectories }}
+          {{- if $index }},{{ end }}
+          "{{ $directory }}/**": "allow"
+          {{- end }}
+        },
+        "edit": {
+          "*": "deny"
+          {{- range $directory := .ReadOnlyDirectories }}, "{{ $directory }}/**": "deny"{{ end }}
+        },
+        {{- else }}
         "edit": "deny",
+        {{- end }}
         "webfetch": "allow",
         "skill": {
           "*": "allow"
@@ -91,7 +117,20 @@
       },
       "permission": {
         "bash": "allow",
+        {{- if .ReadOnlyDirectories }}
+        "external_directory": {
+          {{- range $index, $directory := .ReadOnlyDirectories }}
+          {{- if $index }},{{ end }}
+          "{{ $directory }}/**": "allow"
+          {{- end }}
+        },
+        "edit": {
+          "*": "allow"
+          {{- range $directory := .ReadOnlyDirectories }}, "{{ $directory }}/**": "deny"{{ end }}
+        },
+        {{- else }}
         "edit": "allow",
+        {{- end }}
         "webfetch": "allow",
         "git": "deny",
         "skill": {

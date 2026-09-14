@@ -2,6 +2,7 @@ package opencode
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
@@ -116,6 +117,49 @@ func TestConfigTemplate_ReviewAgentIsReadOnly(t *testing.T) {
 	tools := review["tools"].(map[string]any)
 	if tools["plural*"] != true {
 		t.Fatalf("expected review agent to enable plural MCP tools, got %#v", tools)
+	}
+}
+
+func TestConfigTemplate_PreBakedDirectoriesAreReadOnly(t *testing.T) {
+	root := t.TempDir()
+	input := baseInput(console.AgentRunModeWrite)
+	input.ReadOnlyDirectories = []string{root}
+	out := renderJSON(t, input)
+
+	for _, test := range []struct {
+		name         string
+		editWildcard string
+	}{
+		{name: "analysis", editWildcard: "deny"},
+		{name: "review", editWildcard: "deny"},
+		{name: "autonomous", editWildcard: "allow"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			agent := out["agent"].(map[string]any)[test.name].(map[string]any)
+			permission := agent["permission"].(map[string]any)
+			external, ok := permission["external_directory"].(map[string]any)
+			if !ok {
+				t.Fatalf("external_directory permission = %T %v, want path rules", permission["external_directory"], permission["external_directory"])
+			}
+			pattern := filepath.Join(root, "**")
+			if external[pattern] != "allow" {
+				t.Fatalf("external_directory[%q] = %v, want allow", pattern, external[pattern])
+			}
+			if _, ok := external["*"]; ok {
+				t.Fatal("external_directory unexpectedly grants blanket access")
+			}
+
+			edits, ok := permission["edit"].(map[string]any)
+			if !ok {
+				t.Fatalf("edit permission = %T %v, want path rules", permission["edit"], permission["edit"])
+			}
+			if edits["*"] != test.editWildcard {
+				t.Fatalf("edit[*] = %v, want %q", edits["*"], test.editWildcard)
+			}
+			if edits[pattern] != "deny" {
+				t.Fatalf("edit[%q] = %v, want deny", pattern, edits[pattern])
+			}
+		})
 	}
 }
 

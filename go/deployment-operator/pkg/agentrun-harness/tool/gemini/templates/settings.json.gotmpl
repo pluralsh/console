@@ -8,7 +8,12 @@
     }
   },
   "context": {
-    "fileName": "AGENTS.md"
+    "fileName": "AGENTS.md",
+    "includeDirectories": [
+      "/plural/contexts",
+      "{{ .RepositoryDir }}"{{ range .ExtraDirectories }},
+      "{{ . }}"{{ end }}
+    ]
   },
   "coreTools": {{ if eq .AgentRunMode "WRITE" }}[
     "ReadFileTool",
@@ -34,11 +39,6 @@
   ]{{ end }},
   "excludeTools": [
     "ShellTool(rm -rf)"
-  ],
-  "includeDirectories": [
-    "/plural/contexts",
-    "{{ .RepositoryDir }}"{{ range .ExtraDirectories }},
-    "{{ . }}"{{ end }}
   ],
   "model": {
     "name": "{{ .Model }}"

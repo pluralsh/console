@@ -6,6 +6,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
@@ -27,6 +28,7 @@ func (agent *Agent) configureNative(config toolv1.Config, consoleURL, consoleTok
 		ConsoleURL:            consoleURL,
 		ConsoleToken:          consoleToken,
 		AgentRunID:            config.Run.ID,
+		ReadOnlyDirectories:   prebake.ExtraReadDirs(),
 		Provider:              provider,
 		OpenAICompatible:      openaiCompatible,
 		Endpoint:              config.Run.Runtime.Config.OpenCode.Endpoint,
