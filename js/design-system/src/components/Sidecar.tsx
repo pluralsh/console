@@ -1,14 +1,12 @@
-import { Div, type DivProps, Section, type SectionProps } from 'honorable'
-import { type ComponentProps, type ReactNode } from 'react'
+import { Div, type DivProps } from 'honorable'
+import {
+  type ComponentProps,
+  type ComponentPropsWithRef,
+  type ReactNode,
+} from 'react'
 import styled from 'styled-components'
 
-export type SidecarProps = {
-  heading?: ReactNode
-  headingProps?: ComponentProps<typeof ItemHeadingSC>
-  contentProps?: ComponentProps<typeof ItemContentSC>
-}
-
-const SidecarSC = styled(Section)(({ theme }) => ({
+const SidecarSC = styled.section(({ theme }) => ({
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.medium,
   padding: theme.spacing.medium,
@@ -22,13 +20,19 @@ const SidecarHeadingSC = styled.h1(({ theme }) => ({
   marginBottom: theme.spacing.medium,
 }))
 
+export type SidecarProps = {
+  heading?: ReactNode
+  headingProps?: ComponentProps<typeof ItemHeadingSC>
+  contentProps?: ComponentProps<typeof ItemContentSC>
+}
+
 function Sidecar({
   ref,
   heading,
   headingProps,
   children,
   ...props
-}: SidecarProps & SectionProps) {
+}: SidecarProps & ComponentPropsWithRef<typeof SidecarSC>) {
   return (
     <SidecarSC
       ref={ref}
