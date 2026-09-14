@@ -1,10 +1,16 @@
-import { Div, Flex, H4 } from 'honorable'
-
 import RepositoryCard from '../components/RepositoryCard'
+import Flex from '../components/Flex'
 import type { Meta, StoryObj } from '@storybook/react'
+import styled from 'styled-components'
+
+const Heading = styled.h4(({ theme }) => ({
+  margin: 0,
+  marginBottom: 12,
+  ...theme.partials.text.subtitle1,
+}))
 
 const meta = {
-  title: 'RepositoryCard',
+  title: 'Repository Card',
   component: RepositoryCard,
 } satisfies Meta<any>
 
@@ -14,52 +20,43 @@ type Story = StoryObj<any>
 function Template(args: any) {
   return (
     <Flex
-      gap={16}
+      gap="medium"
       direction="column"
       maxWidth={697}
     >
-      <Div marginBottom="large">
-        <H4
-          subtitle
-          marginBottom="small"
-        >
+      <div style={{ marginBottom: 24 }}>
+        <Heading>
           Default
-        </H4>{' '}
+        </Heading>{' '}
         <RepositoryCard {...args} />
-      </Div>
-      <Div marginBottom="large">
-        <H4
-          subtitle
-          marginBottom="small"
-        >
+      </div>
+      <div style={{ marginBottom: 24 }}>
+        <Heading>
           Marketing
-        </H4>
+        </Heading>
         <RepositoryCard
           variant="marketing"
           {...args}
         />
-      </Div>
-      <Div marginBottom="large">
-        <H4
-          subtitle
-          marginBottom="small"
-        >
+      </div>
+      <div style={{ marginBottom: 24 }}>
+        <Heading>
           Medium
-        </H4>
+        </Heading>
         <RepositoryCard
           size="medium"
           mt={1}
           {...args}
         />
-      </Div>
-      <Div marginBottom="large">
-        <h4>Large</h4>
+      </div>
+      <div style={{ marginBottom: 24 }}>
+        <Heading>Large</Heading>
         <RepositoryCard
           size="large"
           mt={1}
           {...args}
         />
-      </Div>
+      </div>
     </Flex>
   )
 }

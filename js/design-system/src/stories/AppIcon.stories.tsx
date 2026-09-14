@@ -1,12 +1,16 @@
-import { Flex, H3 } from 'honorable'
-
-import { Card, PluralLogoMark, WrapWithIf } from '..'
+import { Card, Flex, PluralLogoMark, WrapWithIf } from '..'
+import styled from 'styled-components'
 
 import AppIcon from '../components/AppIcon'
 import type { Meta, StoryObj } from '@storybook/react'
 
+const Heading = styled.h3(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.subtitle1,
+}))
+
 const meta = {
-  title: 'AppIcon',
+  title: 'App Icon',
   component: AppIcon,
   argTypes: {
     icon: {
@@ -58,12 +62,12 @@ function Template({ onFillLevel, icon, ...args }: any) {
 
   return (
     <Flex
-      gap={16}
+      gap="medium"
       direction="column"
     >
       {sizes.map(({ label, size }) => (
         <>
-          <H3>{label}</H3>
+          <Heading>{label}</Heading>
           <WrapWithIf
             condition={onFillLevel > 0}
             wrapper={
@@ -75,7 +79,7 @@ function Template({ onFillLevel, icon, ...args }: any) {
           >
             <Flex
               direction="row"
-              gap={16}
+              gap="medium"
             >
               <AppIcon
                 size={size}

@@ -1,12 +1,22 @@
-import { Div, Flex, H3, P } from 'honorable'
 import { useState } from 'react'
 
 import styled from 'styled-components'
 
-import { Button, Card, Code, FormField, Input, Modal, SearchIcon } from '..'
+import { Button, Card, Code, Flex, FormField, Input, Modal, SearchIcon } from '..'
 import { SEVERITIES } from '../components/Modal'
 import { jsCode } from '../constants'
 import type { Meta, StoryObj } from '@storybook/react'
+
+const Text = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.body2,
+}))
+
+const Heading = styled.h3(({ theme }) => ({
+  margin: 0,
+  marginBottom: 8,
+  ...theme.partials.text.subtitle1,
+}))
 
 const meta = {
   title: 'Modal',
@@ -35,13 +45,16 @@ type Story = StoryObj<any>
 
 function ExtraContent() {
   return (
-    <Div maxWidth={500}>
-      <P marginBottom="medium">
+    <div style={{ maxWidth: 500 }}>
+      <Text style={{ marginBottom: 16 }}>
         Some extra content to check that body scroll is disabled when Modal is
         open.
-      </P>
-      {Array.from({ length: 5 }).map(() => (
-        <P marginBottom="medium">
+      </Text>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Text
+          key={i}
+          style={{ marginBottom: 16 }}
+        >
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
           tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit turpis,
           molestie imperdiet nisi lorem id erat. Vestibulum pellentesque vel
@@ -52,9 +65,9 @@ function ExtraContent() {
           blandit, hendrerit velit non, tincidunt turpis. Ut at lectus ornare,
           volutpat elit interdum, placerat dolor. Pellentesque et semper massa.
           Aliquam nec nisl eu nibh fringilla vehicula. Suspendisse a purus quam.
-        </P>
+        </Text>
       ))}
-    </Div>
+    </div>
   )
 }
 
@@ -63,7 +76,9 @@ function Template(args: any) {
 
   return (
     <>
-      <H3 marginBottom={8}>{args.header} Modal</H3>
+      <Heading>
+        {args.header} Modal
+      </Heading>
       <Button onClick={() => setOpen(true)}>Open</Button>
       <Modal
         open={open}
@@ -98,14 +113,14 @@ function Template(args: any) {
       >
         {!args.form && (
           <>
-            <P marginBottom={16}>
+            <Text style={{ marginBottom: 16 }}>
               Uninstalling this application will disable all future upgrades.
-            </P>
-            <P>
+            </Text>
+            <Text>
               If you&apos;d also like to remove the running instance from your
               cluster, be sure to run `plural destroy` from this
               application&apos;s repository.
-            </P>
+            </Text>
           </>
         )}
 
@@ -123,7 +138,7 @@ function Template(args: any) {
             <FormField label="Repository bindings">
               <Input value="*" />
             </FormField>
-            <P>
+            <Text>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
               tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit
               turpis, molestie imperdiet nisi lorem id erat. Vestibulum
@@ -135,7 +150,7 @@ function Template(args: any) {
               non, tincidunt turpis. Ut at lectus ornare, volutpat elit
               interdum, placerat dolor. Pellentesque et semper massa. Aliquam
               nec nisl eu nibh fringilla vehicula. Suspendisse a purus quam.
-            </P>
+            </Text>
             <FormField label="Repository bindings">
               <Input startIcon={<SearchIcon />} />
             </FormField>
@@ -162,7 +177,9 @@ function NonScrollTemplate(args: any) {
 
   return (
     <>
-      <H3 marginBottom={8}>{args.header} Modal</H3>
+      <Heading>
+        {args.header} Modal
+      </Heading>
       <Button onClick={() => setOpen(true)}>Open</Button>
       <Modal
         open={open}

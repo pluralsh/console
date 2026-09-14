@@ -1,5 +1,4 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { Div, Flex, P } from 'honorable'
 import React, {
   type ComponentProps,
   type ReactElement,
@@ -10,18 +9,24 @@ import React, {
 } from 'react'
 import type { Row } from '@tanstack/react-table'
 
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   AppIcon,
   ArrowRightLeftIcon,
   CollapseIcon,
+  Flex,
   Input,
   LogsIcon,
   Table,
   Tooltip,
 } from '..'
+
+const Text = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.body2,
+}))
 
 type Method = {
   id?: string | number
@@ -218,7 +223,6 @@ function Template(args: any) {
 }
 
 function PagedTemplate({ data, pageSize, ...args }: any) {
-  const theme = useTheme()
   const [endIndex, setEndIndex] = useState(pageSize - 1)
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
   const pagedData = useMemo(
@@ -274,11 +278,11 @@ function PagedTemplate({ data, pageSize, ...args }: any) {
         data={pagedData}
       />
       {virtualSlice && (
-        <p style={{ ...theme.partials.text.body2 }}>
+        <Text>
           Virtual slice start index: {virtualSlice.start?.index}
           <br />
           Virtual slice end index: {virtualSlice.end?.index}
-        </p>
+        </Text>
       )}
     </>
   )
@@ -336,7 +340,7 @@ function FilterableTemplate(args: ComponentProps<typeof Table>) {
   const [globalFilter, setGlobalFilter] = React.useState('')
 
   return (
-    <Div maxWidth="900px">
+    <div style={{ maxWidth: 900 }}>
       <DebouncedInput
         initialValue={globalFilter}
         onChange={(value) => setGlobalFilter(String(value))}
@@ -349,7 +353,7 @@ function FilterableTemplate(args: ComponentProps<typeof Table>) {
         }}
         {...args}
       />
-    </Div>
+    </div>
   )
 }
 
@@ -523,7 +527,7 @@ export const Expandable: StoryObj<Parameters<typeof Template>[0]> = {
     columns: expandingColumns,
     getRowCanExpand: (row: Row<Method>) => row.original.expandable,
     renderExpanded: ({ row }: { row: Row<Method> }) => (
-      <P>{row.original.description}</P>
+      <Text>{row.original.description}</Text>
     ),
   },
 }

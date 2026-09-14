@@ -1,8 +1,22 @@
-import { A, P } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
 import { Banner, Callout, Card, InlineCode } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
+
+const Link = styled.a(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))
+
+const Text = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.body2LooseLineHeight,
+}))
+
+const Heading = styled.h2(({ theme }) => ({
+  ...theme.partials.text.subtitle2,
+  margin: 0,
+  marginBottom: theme.spacing.xxsmall,
+}))
 
 const meta = {
   title: 'Inline Code',
@@ -11,12 +25,6 @@ const meta = {
 
 export default meta
 type Story = StoryObj<any>
-
-const FlexWrap = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: theme.spacing.large,
-}))
 
 const kitchenSink = (
   <InlineCode>
@@ -31,23 +39,21 @@ const dummyText = (
     <InlineCode>inline code</InlineCode>, some{' '}
     <InlineCode>
       inline code with some{' '}
-      <A
-        inline
-        display="inline"
+      <Link
         href="#"
+        style={{ display: 'inline' }}
       >
         link text
-      </A>{' '}
+      </Link>{' '}
       in it
     </InlineCode>
     , a{' '}
-    <A
-      inline
-      display="inline"
+    <Link
       href="#"
+      style={{ display: 'inline' }}
     >
       <InlineCode>code block fully wrapped in a link</InlineCode>
-    </A>
+    </Link>
     , and let&apos;s see how the ends look with ascenders/descenders:{' '}
     <InlineCode>p1p</InlineCode>
     <InlineCode>g0g</InlineCode>
@@ -62,39 +68,43 @@ const dummyText = (
   </>
 )
 
-const MyH = styled.h2(({ theme }) => ({
-  ...theme.partials.text.subtitle2,
-  margin: 0,
-  marginBottom: theme.spacing.xxsmall,
-}))
-
 function Template() {
   const theme = useTheme()
 
   return (
-    <FlexWrap>
+    <div
+      css={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: theme.spacing.large,
+      }}
+    >
       <div>
-        <MyH>In text.body2LooseLineHeight:</MyH>
-        <P body2LooseLineHeight>
+        <Heading>In text.body2LooseLineHeight:</Heading>
+        <Text>
           {dummyText} {kitchenSink}
-        </P>
+        </Text>
       </div>
       <div>
-        <MyH>In marketingText.body1:</MyH>
-        <P {...(theme.partials.marketingText.body1 as any)}>{dummyText}</P>
+        <Heading>In marketingText.body1:</Heading>
+        <p css={{ margin: 0, ...theme.partials.marketingText.body1 }}>
+          {dummyText}
+        </p>
       </div>
       <div>
-        <MyH>In marketing body2:</MyH>
-        <P {...(theme.partials.marketingText.body2 as any)}>{dummyText}</P>
+        <Heading>In marketing body2:</Heading>
+        <p css={{ margin: 0, ...theme.partials.marketingText.body2 }}>
+          {dummyText}
+        </p>
       </div>
       <div>
         <Card
           hue="default"
-          padding={theme.spacing.medium}
+          padding="medium"
           title="In a card (fill-one)"
         >
-          <MyH>In a card (fill-one, body2LooseLineHeight):</MyH>
-          <P body2LooseLineHeight>{dummyText}</P>
+          <Heading>In a card (fill-one, body2LooseLineHeight):</Heading>
+          <Text>{dummyText}</Text>
         </Card>
       </div>
       <div>
@@ -111,7 +121,7 @@ function Template() {
       <div>
         <Banner heading="In a banner">{dummyText}</Banner>
       </div>
-    </FlexWrap>
+    </div>
   )
 }
 

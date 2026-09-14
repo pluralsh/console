@@ -1,7 +1,6 @@
-import { Div, Flex, H1 } from 'honorable'
 import { type ComponentProps } from 'react'
 
-import { StatusOkIcon, WrapWithIf } from '..'
+import { Flex, StatusOkIcon, WrapWithIf } from '..'
 import Chip from '../components/Chip'
 import Card from '../components/Card'
 
@@ -9,6 +8,13 @@ import { SEVERITIES } from '../types'
 
 import { Link } from './NavigationContextStub'
 import type { Meta, StoryObj } from '@storybook/react'
+import styled from 'styled-components'
+
+const Heading = styled.h1(({ theme }) => ({
+  margin: 0,
+  marginBottom: 12,
+  ...theme.partials.text.subtitle2,
+}))
 
 const meta = {
   title: 'Chip',
@@ -60,13 +66,10 @@ function Template({ onFillLevel, asLink, ...args }: any) {
       {/* - With icon */}
       {sizes.map((size) => (
         <div>
-          <H1
-            subtitle2
-            marginBottom="small"
-          >
+          <Heading>
             {`${size[0].toUpperCase()}${size.slice(1)}`}
-          </H1>
-          <Div marginBottom="xlarge">
+          </Heading>
+          <div style={{ marginBottom: 32 }}>
             <WrapWithIf
               condition={onFillLevel > 0}
               wrapper={
@@ -99,17 +102,14 @@ function Template({ onFillLevel, asLink, ...args }: any) {
                 ))}
               </Flex>
             </WrapWithIf>
-          </Div>
+          </div>
         </div>
       ))}
 
       {/* Wrapping */}
-      <H1
-        subtitle2
-        marginBottom="small"
-      >
+      <Heading>
         Wrapping
-      </H1>
+      </Heading>
       <Flex gap="medium">
         <Card
           padding="medium"
@@ -118,7 +118,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               severity="neutral"
@@ -157,7 +157,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               size="small"
@@ -192,7 +192,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               size="small"
@@ -215,7 +215,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               size="small"
