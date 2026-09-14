@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import {
   memo,
-  type ComponentPropsWithoutRef,
+  type ComponentPropsWithRef,
   useContext,
   useEffect,
   useId,
@@ -132,7 +132,7 @@ export type RadioProps = AriaRadioProps & {
   checked?: boolean
   name?: string
   onChange?: (e: { target: { checked: boolean } }) => any
-} & Omit<ComponentPropsWithoutRef<'label'>, 'onChange'>
+} & Omit<ComponentPropsWithRef<'label'>, 'onChange'>
 
 function Radio({
   ref,

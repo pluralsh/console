@@ -1,5 +1,13 @@
 import classNames from 'classnames'
-import { memo, type ComponentPropsWithoutRef, ReactNode, useId, useRef } from 'react'
+import {
+  memo,
+  type ComponentPropsWithoutRef,
+  type FocusEvent,
+  type KeyboardEvent,
+  type ReactNode,
+  useId,
+  useRef,
+} from 'react'
 import { VisuallyHidden, useCheckbox, useFocusRing } from 'react-aria'
 import { useToggleState } from 'react-stately'
 import styled from 'styled-components'
@@ -151,8 +159,15 @@ export type CheckboxProps = {
   defaultSelected?: boolean
   onChange?: (e: { target: { checked: boolean } }) => any
   onFocusChange?: (isFocused: boolean) => void
+  onFocus?: (e: FocusEvent<Element>) => void
+  onBlur?: (e: FocusEvent<Element>) => void
+  onKeyDown?: (e: KeyboardEvent<Element>) => void
+  onKeyUp?: (e: KeyboardEvent<Element>) => void
   tabIndex?: number
-} & Omit<ComponentPropsWithoutRef<'label'>, 'onChange'>
+} & Omit<
+  ComponentPropsWithoutRef<'label'>,
+  'onChange' | 'onFocus' | 'onBlur' | 'onKeyDown' | 'onKeyUp'
+>
 
 function Checkbox({
   small,
@@ -188,7 +203,7 @@ function Checkbox({
       onKeyDown,
       onKeyUp,
       'aria-labelledby': labelId,
-      value: props.value,
+      value: props.value ?? undefined,
       name: props.name,
     },
     toggleState,
