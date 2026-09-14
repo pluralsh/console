@@ -60,7 +60,7 @@ WORKDIR /opt/app
 # This step installs build tools for C NIFs (e.g. argon2_elixir). Rust-based deps use
 # precompiled NIFs and do not require a Rust toolchain in the Alpine builder image.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk update && apk upgrade --no-cache && \
+      apk upgrade --no-cache && \
       apk add --no-cache git build-base curl ca-certificates; \
     else \
       apt-get update && apt-get install -y --no-install-recommends git build-essential curl ca-certificates; \
@@ -91,7 +91,7 @@ ENV CLI_VERSION=v0.12.65
 
 COPY AGENT_VERSION AGENT_VERSION
 
-RUN apk update && apk add --no-cache curl wget unzip
+RUN apk add --no-cache curl wget unzip
 RUN curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION#v}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
   mv plural /usr/local/bin/plural && \
   # curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
@@ -114,7 +114,7 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib musl musl-utils || true
+RUN [ "$OS_VARIANT" = "alpine" ] && apk upgrade --no-cache libexpat zlib musl musl-utils || true
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
