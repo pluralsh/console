@@ -22,7 +22,6 @@ func TestGeminiArgs(t *testing.T) {
 	args := g.args("analyze repo", false)
 	want := []string{
 		"--output-format", "stream-json",
-		"--include-directories", "/plural/contexts",
 		"--include-directories", "/repo",
 		"--include-directories", prebakeDir,
 		"--prompt", "analyze repo",
@@ -43,7 +42,6 @@ func TestGeminiArgsWriteMode(t *testing.T) {
 	want := []string{
 		"--approval-mode", "yolo",
 		"--output-format", "stream-json",
-		"--include-directories", "/plural/contexts",
 		"--include-directories", prebakeDir,
 		"--prompt", "implement feature",
 	}
@@ -65,7 +63,6 @@ func TestGeminiArgsResume(t *testing.T) {
 	want := []string{
 		"--approval-mode", "yolo",
 		"--output-format", "stream-json",
-		"--include-directories", "/plural/contexts",
 		"--include-directories", prebakeDir,
 		"--resume", sessionID,
 		"--prompt", "follow up",
@@ -86,7 +83,6 @@ func TestGeminiArgsDeduplicateIncludeDirectories(t *testing.T) {
 	args := g.args("", false)
 	want := []string{
 		"--output-format", "stream-json",
-		"--include-directories", "/plural/contexts",
 		"--include-directories", prebakeDir,
 		"--prompt", "initial",
 	}

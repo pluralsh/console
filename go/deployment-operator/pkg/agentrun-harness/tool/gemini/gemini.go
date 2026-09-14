@@ -20,8 +20,6 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
-const geminiContextsDir = "/plural/contexts"
-
 // Gemini implements v1.Tool interface.
 type Gemini struct {
 	v1.DefaultTool
@@ -239,7 +237,7 @@ func (in *Gemini) args(prompt string, resume bool) []string {
 }
 
 func (in *Gemini) includeDirectories() []string {
-	candidates := append([]string{geminiContextsDir, in.Config.RepositoryDir}, prebake.ExtraReadDirs()...)
+	candidates := append([]string{in.Config.RepositoryDir}, prebake.ExtraReadDirs()...)
 	dirs := make([]string, 0, len(candidates))
 	seen := make(map[string]struct{}, len(candidates))
 	for _, dir := range candidates {
