@@ -159,7 +159,7 @@ function NetworkGraphInternal({
           isTimestampSet={isTimestampSet}
         />
       </Flex>
-      <Card flex={1}>
+      <Card css={{ flex: 1 }}>
         {isEmpty(networkData) ? (
           loading ? (
             <RectangleSkeleton
