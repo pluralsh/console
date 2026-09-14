@@ -58,11 +58,6 @@ func ExtraReadDirs() []string {
 	return []string{dir}
 }
 
-// ManifestPath is the absolute path to manifest.json in the prebake directory.
-func ManifestPath() string {
-	return filepath.Join(Dir(), ManifestFileName)
-}
-
 // NormalizeGitURL matches Elixir Console.Deployments.Pr.Git.normalize_url/1:
 // strip a trailing .git, then reduce git@host:path and https://host/path to host/path.
 func NormalizeGitURL(raw string) string {
