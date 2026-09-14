@@ -1,5 +1,5 @@
-import { type ReactNode, useState } from 'react'
-import styled from 'styled-components'
+import { type ComponentPropsWithRef, type ReactNode, useState } from 'react'
+import styled, { type StyledObject } from 'styled-components'
 
 import Flex, { type FlexProps } from './Flex'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
@@ -7,7 +7,11 @@ import PlusIcon from './icons/PlusIcon'
 import WrapWithIf from './WrapWithIf'
 import Tooltip from './Tooltip'
 
-type TagProps = Omit<FlexProps, 'tooltip'> & {
+type TagProps = Omit<FlexProps, 'tooltip'> &
+  Pick<
+    ComponentPropsWithRef<'div'>,
+    'onClick' | 'onMouseEnter' | 'onMouseLeave'
+  > & {
   label: string
   imageUrl?: string
   checked?: boolean
@@ -23,6 +27,11 @@ function RepositoryChip({
   disabled = false,
   icon = null,
   tooltip,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  css,
+  className,
   ...props
 }: TagProps) {
   const [hovered, setHovered] = useState(false)
@@ -35,9 +44,17 @@ function RepositoryChip({
       <RepositoryChipSC
         $checked={checked}
         $disabled={disabled}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        {...props}
+        className={className}
+        onClick={onClick}
+        onMouseEnter={(e) => {
+          setHovered(true)
+          onMouseEnter?.(e)
+        }}
+        onMouseLeave={(e) => {
+          setHovered(false)
+          onMouseLeave?.(e)
+        }}
+        css={{ ...props, ...css } as StyledObject}
       >
         <Flex
           align="center"
@@ -71,10 +88,11 @@ function RepositoryChip({
   )
 }
 
-const RepositoryChipSC = styled(Flex)<{
+const RepositoryChipSC = styled.div<{
   $checked: boolean
   $disabled: boolean
 }>(({ theme, $checked, $disabled }) => ({
+  display: 'flex',
   padding: theme.spacing.xsmall,
   alignItems: 'center',
   justifyContent: 'space-between',

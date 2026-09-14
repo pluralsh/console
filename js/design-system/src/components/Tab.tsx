@@ -1,8 +1,8 @@
-import { Icon } from 'honorable'
 import { type ComponentPropsWithRef, type ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import Flex, { type FlexProps } from './Flex'
+import Icon from './Icon'
 import { type TabBaseProps } from './TabList'
 
 type TabProps = ComponentPropsWithRef<typeof TabSC> &

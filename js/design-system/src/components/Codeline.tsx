@@ -90,7 +90,8 @@ const CopyWrapSC = styled(Flex)({
   flexShrink: 0,
 })
 
-const CopyButtonSC = styled(Flex)(({ theme }) => ({
+const CopyButtonSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   width: 32,

@@ -254,7 +254,7 @@ function CodeTabs() {
         stateRef={tabStateRef}
         stateProps={tabListStateProps}
         ref={tabsRef}
-        style={!tabInterface ? { opacity: 0 } : undefined}
+        css={!tabInterface ? { opacity: 0 } : undefined}
       >
         {tabs.map((tab) => {
           if (typeof tab.content !== 'string') {
