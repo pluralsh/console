@@ -1,6 +1,13 @@
 import classNames from 'classnames'
-import { type InputProps } from 'honorable'
-import { memo, useContext, useEffect, useId, useRef, useState } from 'react'
+import {
+  memo,
+  type ComponentPropsWithoutRef,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react'
 import {
   type AriaRadioProps,
   VisuallyHidden,
@@ -124,7 +131,7 @@ export type RadioProps = AriaRadioProps & {
   checked?: boolean
   name?: string
   onChange?: (e: { target: { checked: boolean } }) => any
-} & InputProps
+} & Omit<ComponentPropsWithoutRef<'label'>, 'onChange'>
 
 function Radio({
   ref,

@@ -1,7 +1,7 @@
 // this is deprecated and only still used internally for the Toast component (since it's probably more work than it's worth to migrate)
 // anything else that needs similar functionality should use a ModalWrapper
 import { type UseTransitionProps, useTransition } from '@react-spring/web'
-import { useOutsideClick } from 'honorable'
+import useOutsideClick from '../hooks/useOutsideClick'
 import { isNil } from 'lodash-es'
 import {
   type ComponentProps,

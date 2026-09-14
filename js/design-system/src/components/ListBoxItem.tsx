@@ -5,9 +5,7 @@ import {
   type ElementType,
   type ReactNode,
 } from 'react'
-import styled from 'styled-components'
-
-import theme from 'honorable-theme-default'
+import styled, { useTheme } from 'styled-components'
 
 import Flex from './Flex'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
@@ -209,6 +207,8 @@ function ListBoxFooterPlus({
   children,
   ...props
 }: ListBoxFooterProps) {
+  const theme = useTheme()
+
   return (
     <ListBoxFooterPlusInner
       ref={ref}

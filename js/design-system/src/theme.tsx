@@ -1,7 +1,3 @@
-import { mergeTheme } from 'honorable'
-import mapperRecipe from 'honorable-recipe-mapper'
-import defaultTheme from 'honorable-theme-default'
-
 import { useState } from 'react'
 
 import { useMutationObserver } from '@react-hooks-library/core'
@@ -35,24 +31,6 @@ export const DEFAULT_COLOR_MODE: ColorMode = 'dark'
 
 export type StringObj = { [key: string]: string | StringObj }
 
-// old, phase this out once honorable is all removed
-const spacers = {
-  margin: ['margin'],
-  marginTop: ['marginTop'],
-  marginRight: ['marginRight'],
-  marginBottom: ['marginBottom'],
-  marginLeft: ['marginLeft'],
-  marginHorizontal: ['marginLeft', 'marginRight'],
-  marginVertical: ['marginTop', 'marginBottom'],
-  padding: ['padding'],
-  paddingTop: ['paddingTop'],
-  paddingRight: ['paddingRight'],
-  paddingBottom: ['paddingBottom'],
-  paddingLeft: ['paddingLeft'],
-  paddingHorizontal: ['paddingLeft', 'paddingRight'],
-  paddingVertical: ['paddingTop', 'paddingBottom'],
-}
-
 const portals = {
   default: {
     id: 'honorable-portal',
@@ -80,119 +58,6 @@ const getBaseTheme = ({ mode }: { mode: ColorMode }) =>
       desktopLarge: 1440,
     },
   }) as const
-
-// remove any unused themes as we transition off honorable
-// ultimately we'll be able to get rid of this entirely
-const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
-  const boxShadows = getBoxShadows({ mode })
-
-  return {
-    stylesheet: {
-      html: [
-        {
-          fontSize: 14,
-          fontFamily: fontFamilies.sans,
-          backgroundColor: 'fill-zero',
-        },
-      ],
-      '&::placeholder': [{ color: 'text-xlight' }],
-    },
-    global: [
-      /* Spacing */
-      mapperRecipe('gap', spacing),
-      ...Object.entries(spacers).map(
-        ([key, nextKeys]) =>
-          (props: any) =>
-            props[key] !== null &&
-            typeof props[key] !== 'undefined' &&
-            Object.fromEntries(
-              nextKeys.map((nextKey) => [
-                nextKey,
-                (spacing as any)[props[key]] || props[key],
-              ])
-            )
-      ),
-      /* Border radiuses */
-      mapperRecipe('borderRadius', borderRadiuses),
-      /* Shadows */
-      mapperRecipe('boxShadow', boxShadows),
-      /* Texts */
-      ({ h1 }: any) => h1 && textPartials.h1,
-      ({ h2 }: any) => h2 && textPartials.h2,
-      ({ h3 }: any) => h3 && textPartials.h3,
-      ({ h4 }: any) => h4 && textPartials.h4,
-      ({ title1 }: any) => title1 && textPartials.title1,
-      ({ title2 }: any) => title2 && textPartials.title2,
-      ({ subtitle1 }: any) => subtitle1 && textPartials.subtitle1,
-      ({ subtitle2 }: any) => subtitle2 && textPartials.subtitle2,
-      ({ body1, body2, bold }: any) => ({
-        ...(body1 && textPartials.body1),
-        ...(body2 && textPartials.body2),
-        ...((body1 || body2) && bold && textPartials.bodyBold),
-      }),
-      ({ body2LooseLineHeight, bold }: any) => ({
-        ...(body2LooseLineHeight && textPartials.body2LooseLineHeight),
-        ...(body2LooseLineHeight && bold && textPartials.bodyBold),
-      }),
-      ({ caption }: any) => caption && textPartials.caption,
-      ({ overline }: any) => overline && textPartials.overline,
-      ({ truncate }: any) => truncate && textPartials.truncate,
-    ],
-    A: {
-      Root: [
-        { color: 'text' },
-        ({ inline }: any) => inline && textPartials.inlineLink,
-      ],
-    },
-    H2: { Root: [{ fontFamily: 'Monument' }] },
-    H4: { Root: [{ fontFamily: 'Monument' }] },
-    H5: { Root: [{ fontFamily: 'Monument' }] },
-    H6: { Root: [{ fontFamily: 'Monument' }] },
-    Menu: {
-      Root: [
-        {
-          paddingTop: '4px',
-          paddingBottom: '4px',
-          backgroundColor: 'fill-two',
-          border: '1px solid border',
-          borderRadius: 'medium',
-          boxShadow: 'moderate',
-          elevation: 0, // reset from honorable-theme-default
-        },
-      ],
-    },
-    MenuItem: {
-      Root: [
-        {
-          '& > div': { borderTop: '1px solid border-fill-two' },
-          '&:first-of-type > div': { borderTop: 'none' },
-        },
-      ],
-      Children: [
-        {
-          padding: '8px 16px',
-        },
-        ({ active }: any) =>
-          active && {
-            backgroundColor: 'fill-two-hover',
-            borderColor: 'fill-two-hover',
-          },
-      ],
-    },
-  }
-}
-
-export const honorableThemeDark = mergeTheme(defaultTheme, {
-  ...getBaseTheme({ mode: 'dark' }),
-  colors: colorsDark,
-  ...getHonorableThemeProps({ mode: 'dark' }),
-})
-
-export const honorableThemeLight = mergeTheme(defaultTheme, {
-  ...getBaseTheme({ mode: 'light' }),
-  colors: colorsLight,
-  ...getHonorableThemeProps({ mode: 'light' }),
-})
 
 const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
   ({
@@ -235,7 +100,7 @@ export const styledThemeLight = {
 
 // Deprecate these later?
 export const styledTheme = styledThemeDark
-export default honorableThemeDark
+export default styledThemeDark
 
 const getDocumentElement = () =>
   typeof document === 'undefined' ? undefined : document.documentElement

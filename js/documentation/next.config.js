@@ -12,12 +12,7 @@ const { redirects } = require('./src/routing/docs-structure')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: [
-    '@pluralsh/design-system',
-    'honorable',
-    'honorable-theme-default',
-    'honorable-recipe-mapper',
-  ],
+  transpilePackages: ['@pluralsh/design-system'],
   reactStrictMode: false,
   compiler: {
     // https://nextjs.org/docs/advanced-features/compiler#styled-components

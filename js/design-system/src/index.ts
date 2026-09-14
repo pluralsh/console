@@ -180,20 +180,17 @@ export * from './components/TreeNavigation'
 // Theme
 export { default as GlobalStyle } from './GlobalStyle'
 export {
-  honorableThemeDark,
-  honorableThemeLight,
   setThemeColorMode,
   styledTheme,
   styledThemeDark,
   styledThemeLight,
-  honorableThemeDark as theme,
+  styledThemeDark as theme,
   useThemeColorMode,
 } from './theme'
 export type { SemanticBorderKey } from './theme/borders'
 export { green, orange } from './theme/colors-base'
 export { semanticColorCssVars, semanticColorKeys } from './theme/colors'
 export type { SemanticColorCssVar, SemanticColorKey } from './theme/colors'
-export { default as HonorableThemeProvider } from './theme/HonorableThemeProvider'
 export type { SemanticSpacingKey } from './theme/spacing'
 
 // Utils

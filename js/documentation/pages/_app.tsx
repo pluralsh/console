@@ -10,7 +10,6 @@ import {
 
 import {
   FillLevelProvider,
-  HonorableThemeProvider,
   MarkdocContextProvider,
   NavigationContextProvider,
   type NavigationContextValue,
@@ -213,9 +212,7 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
             <NavDataProvider value={navData}>
               <BreakpointProvider>
                 <StyledThemeProvider theme={docsStyledTheme}>
-                  <HonorableThemeProvider>
-                    <FillLevelProvider value={0}>{app}</FillLevelProvider>
-                  </HonorableThemeProvider>
+                  <FillLevelProvider value={0}>{app}</FillLevelProvider>
                 </StyledThemeProvider>
               </BreakpointProvider>
             </NavDataProvider>

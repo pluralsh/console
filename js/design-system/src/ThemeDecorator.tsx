@@ -10,7 +10,6 @@ import {
   useThemeColorMode,
 } from './theme'
 import StyledCss from './GlobalStyle'
-import { HonorableThemeProvider } from '.'
 
 function ThemeDecorator(Story: ComponentType, context: any) {
   const colorMode = useThemeColorMode()
@@ -23,15 +22,13 @@ function ThemeDecorator(Story: ComponentType, context: any) {
 
   return (
     <StyledThemeProvider theme={styledTheme}>
-      <HonorableThemeProvider>
-        <StyledCss />
-        <Flex
-          padding="xlarge"
-          direction="column"
-        >
-          <Story />
-        </Flex>
-      </HonorableThemeProvider>
+      <StyledCss />
+      <Flex
+        padding="xlarge"
+        direction="column"
+      >
+        <Story />
+      </Flex>
     </StyledThemeProvider>
   )
 }

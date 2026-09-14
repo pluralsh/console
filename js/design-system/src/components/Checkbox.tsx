@@ -1,6 +1,5 @@
 import classNames from 'classnames'
-import { type InputProps } from 'honorable'
-import { memo, ReactNode, useId, useRef } from 'react'
+import { memo, type ComponentPropsWithoutRef, ReactNode, useId, useRef } from 'react'
 import { VisuallyHidden, useCheckbox, useFocusRing } from 'react-aria'
 import { useToggleState } from 'react-stately'
 import styled from 'styled-components'
@@ -152,7 +151,7 @@ export type CheckboxProps = {
   onChange?: (e: { target: { checked: boolean } }) => any
   onFocusChange?: (isFocused: boolean) => void
   tabIndex?: number
-} & Omit<InputProps, 'onChange'>
+} & Omit<ComponentPropsWithoutRef<'label'>, 'onChange'>
 
 function Checkbox({
   small,

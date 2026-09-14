@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle, useTheme } from 'styled-components'
 
 import {
   COLOR_THEME_KEY,
@@ -114,7 +114,7 @@ const darkModeSelectors = `html${darkSelector}:root,\n${cssSwapper(
   lightSelector
 )}`
 
-const GlobalStyle = createGlobalStyle(({ theme }) => ({
+const GlobalStyleSheet = createGlobalStyle(({ theme }) => ({
   ':root': {
     ...baseColorCSSVars,
     ...getSemanticColorCSSVars({ mode: theme.mode }),
@@ -132,12 +132,30 @@ const GlobalStyle = createGlobalStyle(({ theme }) => ({
   [lightModeSelectors]: {
     ...getSemanticColorCSSVars({ mode: 'light' }),
   },
+  html: {
+    fontSize: 14,
+    fontFamily: fontFamilies.sans,
+  },
   // Keep html/body on the app-shell token (index.html reads --color-page-background).
   // This is intentionally NOT fill-zero.
   'html, body': {
     backgroundColor: theme.colors['page-background'],
   },
+  '::placeholder': {
+    color: theme.colors['text-xlight'],
+  },
   '*': theme.partials.scrollBar({ fillLevel: 0 }),
 }))
+
+function GlobalStyle() {
+  const theme = useTheme()
+
+  return (
+    <>
+      <GlobalStyleSheet />
+      <div id={theme.portals.default.id} />
+    </>
+  )
+}
 
 export default GlobalStyle
