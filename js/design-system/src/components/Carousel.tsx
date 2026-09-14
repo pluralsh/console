@@ -1,4 +1,4 @@
-import { Flex } from 'honorable'
+import Flex from './Flex'
 import {
   Children,
   type ComponentPropsWithRef,
@@ -39,9 +39,7 @@ const DotHitAreaSC = styled.div(({ theme }) => ({
 
 const DotSC = styled.div<{ $active: boolean; $size: number }>`
   background-color: ${({ theme, $active }) =>
-    $active
-      ? theme.colors['action-link-inline']
-      : theme.colors['fill-two']};
+    $active ? theme.colors['action-link-inline'] : theme.colors['fill-two']};
   transition: background-color 0.35s cubic-bezier(0.2, 0.55, 0.8, 0.45);
   animation-duration: 0.75s;
   animation-iteration-count: 1;
@@ -108,7 +106,7 @@ const transitionStyles = {
   '&.exit-done': {
     visibility: 'hidden',
   },
-}
+} as const
 
 function CarouselSlide({
   active,
@@ -130,7 +128,7 @@ function CarouselSlide({
         ref={nodeRef}
         width="100%"
         alignItems="center"
-        {...transitionStyles}
+        css={transitionStyles}
       >
         {children}
       </Flex>
@@ -169,8 +167,10 @@ function Carousel({
             flexShrink={0}
             justify="center"
             alignItems="stretch"
-            transform={`translateX(${-i * 100}%)`}
-            pointerEvents={activeIndex === i ? 'auto' : 'none'}
+            css={{
+              transform: `translateX(${-i * 100}%)`,
+              pointerEvents: activeIndex === i ? 'auto' : 'none',
+            }}
           >
             <CarouselSlide active={activeIndex === i}>
               {child as ReactElement}
@@ -181,7 +181,7 @@ function Carousel({
       <Flex
         marginTop="xsmall"
         marginBottom="medium"
-        justifyContent="center"
+        justify="center"
       >
         {Children.toArray(children).map((_child, i) => (
           <Dot

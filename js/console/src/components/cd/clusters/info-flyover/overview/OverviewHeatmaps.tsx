@@ -44,7 +44,7 @@ export function OverviewHeatmaps({ clusterId }: { clusterId: string }) {
           <Flex
             gap="small"
             align="center"
-            textWrap="nowrap"
+            css={{ textWrap: 'nowrap' }}
           >
             <CaptionP $color="text-xlight">Group by</CaptionP>
             <Select

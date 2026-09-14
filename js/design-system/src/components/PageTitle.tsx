@@ -1,6 +1,6 @@
-import { Flex, type FlexProps } from 'honorable'
+import Flex, { type FlexProps } from './Flex'
 import { type ComponentProps, type ReactNode } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 export type PageTitleProps = {
   heading?: ReactNode
@@ -14,10 +14,12 @@ function PageTitle({
   children,
   ...props
 }: PageTitleProps) {
+  const theme = useTheme()
+
   return (
     <Flex
       ref={ref}
-      borderBottom="1px solid border"
+      css={{ borderBottom: theme.borders.default }}
       paddingBottom="large"
       marginBottom="large"
       gap="large"

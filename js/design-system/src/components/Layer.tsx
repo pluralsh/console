@@ -162,7 +162,7 @@ function Layer({
   open,
   wrapperProps,
 }: {
-  ref: RefObject<HTMLDivElement>
+  ref?: RefObject<HTMLDivElement>
   open: boolean
   position: LayerPositionType
   animation?: AnimationType
@@ -175,8 +175,8 @@ function Layer({
   wrapperProps?: ComponentProps<'div'>
 }) {
   const theme = useTheme()
-  const internalRef = useRef<HTMLDivElement>(undefined)
-  const finalRef = ref || internalRef
+  const internalRef = useRef<HTMLDivElement>(null!)
+  const finalRef = ref ?? internalRef
   const [closeComplete, setCloseComplete] = useState(!open)
   const prevOpen = usePrevious(open)
 

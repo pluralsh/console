@@ -342,7 +342,7 @@ function StretchedInputRow({ children }: { children: ReactNode }) {
     <Flex
       gap="medium"
       width="100%"
-      {...{ '& > *': { flex: 1 } }}
+      css={{ '& > *': { flex: 1 } }}
     >
       {children}
     </Flex>

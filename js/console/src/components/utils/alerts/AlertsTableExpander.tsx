@@ -37,7 +37,7 @@ export function AlertsTableExpander({ row }: { row: Row<AlertFragment> }) {
       <Body2BoldP $color="text">{alert.title}</Body2BoldP>
       <Flex
         direction="column"
-        wordBreak="break-word"
+        css={{ wordBreak: 'break-word' }}
       >
         <Markdown text={alert.message ?? ''} />
       </Flex>

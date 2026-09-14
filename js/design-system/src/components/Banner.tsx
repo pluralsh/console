@@ -1,4 +1,4 @@
-import { Flex, type FlexProps } from 'honorable'
+import Flex, { type FlexProps } from './Flex'
 import { type ComponentProps, type ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -56,12 +56,12 @@ const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
   success: CheckRoundedIcon,
 }
 
-const BannerOuter: any = styled.div<{
+const BannerOuter = styled(Flex)<{
   $borderColorKey: SemanticColorKey
   $fullWidth?: boolean
 }>(({ $borderColorKey, $fullWidth, theme }) => ({
   display: 'inline-flex',
-  align: 'flex-start',
+  alignItems: 'flex-start',
   padding: theme.spacing.medium,
   backgroundColor:
     theme.mode === 'light'
@@ -140,7 +140,6 @@ function Banner({
     <BannerOuter
       $borderColorKey={borderColorKey}
       $fullWidth={fullWidth}
-      as={Flex}
       {...props}
     >
       <BannerInner>

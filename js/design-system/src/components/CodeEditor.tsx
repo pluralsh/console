@@ -1,5 +1,5 @@
 import { type Dispatch, useCallback, useEffect, useMemo, useState } from 'react'
-import { Flex } from 'honorable'
+import Flex from './Flex'
 import styled, { useTheme } from 'styled-components'
 
 import Editor, { useMonaco, type EditorProps } from '@monaco-editor/react'
@@ -128,7 +128,7 @@ export default function CodeEditor({
       {save && (
         <Flex
           align="center"
-          borderTop="1px solid border"
+          css={{ borderTop: theme.borders.default }}
           gap="medium"
           justify="end"
           padding="large"

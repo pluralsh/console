@@ -170,9 +170,12 @@ const Button = memo(
         )}
         <Flex
           alignItems="center"
-          visibility={loading ? 'hidden' : 'inherit'}
           width={justifyContent === 'flex-start' ? '100%' : undefined}
           {...innerFlexProps}
+          css={{
+            visibility: loading ? 'hidden' : 'inherit',
+            ...innerFlexProps?.css,
+          }}
         >
           {children}
         </Flex>

@@ -1,13 +1,13 @@
 import { type ReactNode, useState } from 'react'
-import { Flex, type FlexProps } from 'honorable'
 import styled from 'styled-components'
 
+import Flex, { type FlexProps } from './Flex'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import PlusIcon from './icons/PlusIcon'
 import WrapWithIf from './WrapWithIf'
 import Tooltip from './Tooltip'
 
-type TagProps = FlexProps & {
+type TagProps = Omit<FlexProps, 'tooltip'> & {
   label: string
   imageUrl?: string
   checked?: boolean
@@ -32,22 +32,11 @@ function RepositoryChip({
       condition={!!tooltip}
       wrapper={<Tooltip label={tooltip} />}
     >
-      <Flex
-        padding="xsmall"
-        align="center"
-        justify="space-between"
-        cursor={disabled ? 'not-allowed' : 'pointer'}
-        opacity={disabled ? 0.5 : 1}
-        borderRadius="large"
-        border={`1px solid ${
-          checked ? 'border-outline-focused' : 'border-fill-two'
-        }`}
-        backgroundColor="fill-two"
-        _hover={disabled ? {} : { backgroundColor: 'fill-two-hover' }}
-        transition="background-color 200ms ease"
+      <RepositoryChipSC
+        $checked={checked}
+        $disabled={disabled}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        whiteSpace="nowrap"
         {...props}
       >
         <Flex
@@ -55,18 +44,9 @@ function RepositoryChip({
           overflow="hidden"
         >
           {icon ? (
-            <Flex
-              align="center"
-              justify="center"
-              backgroundColor="fill-three"
-              padding={2}
-              border="1px solid border-input"
-              borderRadius="medium"
-              width={24}
-              height={24}
-            >
+            <IconWrapSC>
               {icon}
-            </Flex>
+            </IconWrapSC>
           ) : imageUrl ? (
             <IconImgSC
               src={imageUrl}
@@ -86,10 +66,46 @@ function RepositoryChip({
           marginLeft="small"
           height={16}
         />
-      </Flex>
+      </RepositoryChipSC>
     </WrapWithIf>
   )
 }
+
+const RepositoryChipSC = styled(Flex)<{
+  $checked: boolean
+  $disabled: boolean
+}>(({ theme, $checked, $disabled }) => ({
+  padding: theme.spacing.xsmall,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  cursor: $disabled ? 'not-allowed' : 'pointer',
+  opacity: $disabled ? 0.5 : 1,
+  borderRadius: theme.borderRadiuses.large,
+  border: `1px solid ${
+    $checked
+      ? theme.colors['border-outline-focused']
+      : theme.colors['border-fill-two']
+  }`,
+  backgroundColor: theme.colors['fill-two'],
+  whiteSpace: 'nowrap',
+  transition: 'background-color 200ms ease',
+  ...(!$disabled && {
+    '&:hover': {
+      backgroundColor: theme.colors['fill-two-hover'],
+    },
+  }),
+}))
+
+const IconWrapSC = styled(Flex)(({ theme }) => ({
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: theme.colors['fill-three'],
+  padding: 2,
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+  width: 24,
+  height: 24,
+}))
 
 const LabelSC = styled.p(({ theme }) => ({
   margin: 0,

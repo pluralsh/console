@@ -1,5 +1,5 @@
 import { type AriaLabelingProps, type DOMProps } from '@react-types/shared'
-import { Flex } from 'honorable'
+import Flex from './Flex'
 import { isNil } from 'lodash-es'
 import {
   type ComponentPropsWithRef,
@@ -64,7 +64,8 @@ function FormField({
   small,
   ...props
 }: FormFieldProps) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
   const hasLabel = label || required || infoTooltip
   const hasTopContent = hasLabel || caption
   const hasBottomContent = !isNil(hint) || typeof maxLength === 'number'
@@ -120,8 +121,11 @@ function FormField({
   const bottomContent = hasBottomContent && (
     <Flex
       align="flex-start"
-      color="text-light"
-      marginTop={layout === 'vertical' ? 'xsmall' : 'xxxsmall'}
+      css={{
+        color: theme.colors['text-light'],
+        marginTop:
+          layout === 'vertical' ? spacing.xsmall : spacing.xxxsmall,
+      }}
     >
       {typeof hint === 'string' ? (
         <HintSC $error={error}>{hint}</HintSC>

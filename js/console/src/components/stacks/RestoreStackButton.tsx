@@ -25,7 +25,8 @@ export default function RestoreStackButton({
           error={{ graphQLErrors: [...(error?.graphQLErrors ?? [])] }}
           header="Error (500)"
           margin="xlarge"
-          marginVertical="xxxlarge"
+          marginTop="xxxlarge"
+          marginBottom="xxxlarge"
         />
       )}
       <Button

@@ -188,7 +188,7 @@ function FileMessageContent({
           <Flex
             gap="small"
             align="center"
-            wordBreak="break-word"
+            css={{ wordBreak: 'break-word' }}
             marginRight={theme.spacing.small}
             position="relative"
           >

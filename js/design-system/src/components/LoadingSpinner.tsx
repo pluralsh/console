@@ -1,5 +1,3 @@
-import { keyframes } from '@emotion/react'
-import { Flex } from 'honorable'
 import {
   type ComponentPropsWithRef,
   type ReactNode,
@@ -10,11 +8,12 @@ import {
   useState,
 } from 'react'
 import { CSSTransition } from 'react-transition-group'
-import styled from 'styled-components'
+import styled, { keyframes, useTheme } from 'styled-components'
 
 import { useIsomorphicLayoutEffect } from '@react-spring/web'
 
 import useResizeObserver from '../hooks/useResizeObserver'
+import Flex from './Flex'
 
 export type LoadingSpinnerProps = ComponentPropsWithRef<'div'> & {
   paused?: boolean
@@ -33,12 +32,6 @@ const bgKeyframes = keyframes`
     transform: translate(calc(-200% / 3));
   }
 `
-
-const commonAnimStyles = {
-  animationDuration: '3s',
-  animationTimingFunction: 'linear',
-  animationIterationCount: 'infinite',
-}
 
 const logoEnterStyles = {
   '.enter &': {
@@ -126,6 +119,19 @@ const ScrollingBGImage = styled(ScrollingBGImageBase)`
   }
 `
 
+const BgTrackSC = styled.div<{ $paused?: boolean }>`
+  display: flex;
+  flex-wrap: nowrap;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  animation-name: ${bgKeyframes};
+  animation-play-state: ${({ $paused }) => ($paused ? 'paused' : 'running')};
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+`
+
 function WrapperBase({ children }: { children: ReactNode }) {
   return (
     <Flex
@@ -141,6 +147,7 @@ function WrapperBase({ children }: { children: ReactNode }) {
 }
 
 function CenteringWrapper({ children }: { children: ReactNode }) {
+  const theme = useTheme()
   const [top, setTop] = useState<number | null>(null)
   const [windowHeight, setWindowHeight] = useState<number | null>(
     window.innerHeight
@@ -188,7 +195,10 @@ function CenteringWrapper({ children }: { children: ReactNode }) {
       alignItems="center"
       justifyContent="center"
       overflow="hidden"
-      paddingHorizontal="small"
+      css={{
+        paddingLeft: theme.spacing.small,
+        paddingRight: theme.spacing.small,
+      }}
       width="100%"
       height={wrapperHeight}
     >
@@ -278,19 +288,11 @@ function LoadingSpinner({
           $width={spinnerWidth}
         >
           <HiddenLogoSC src="/logos/plural-logomark-only-white.svg" />
-          <Flex
-            flexWrap="nowrap"
-            height="100%"
-            position="absolute"
-            top="0"
-            animationName={bgKeyframes}
-            animationPlayState={paused ? 'paused' : 'running'}
-            {...commonAnimStyles}
-          >
+          <BgTrackSC $paused={paused}>
             <ScrollingBGImage $height={spinnerWidth} />
             <ScrollingBGImage $height={spinnerWidth} />
             <ScrollingBGImage $height={spinnerWidth} />
-          </Flex>
+          </BgTrackSC>
         </LogoMaskSC>
       </Wrapper>
     </CSSTransition>

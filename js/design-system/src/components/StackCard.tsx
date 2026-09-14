@@ -1,4 +1,4 @@
-import { Flex } from 'honorable'
+import Flex from './Flex'
 import styled, { useTheme } from 'styled-components'
 
 import Card, { type CardProps } from './Card'

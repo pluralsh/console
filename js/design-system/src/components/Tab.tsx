@@ -75,15 +75,14 @@ function Tab({
         paddingTop={theme.spacing.xsmall}
         paddingBottom={theme.spacing.xsmall}
         align="center"
-        borderBottom={
-          vertical
+        {...innerProps}
+        css={{
+          borderBottom: vertical
             ? undefined
             : `${TAB_INDICATOR_THICKNESS - 1}px solid ${
                 active ? theme.colors['border-primary'] : 'transparent'
-              }`
-        }
-        borderRight={
-          vertical
+              }`,
+          borderRight: vertical
             ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${
                 active
                   ? theme.colors['border-primary']
@@ -91,26 +90,24 @@ function Tab({
                     ? theme.colors['border-fill-two']
                     : 'transparent'
               }`
-            : undefined
-        }
-        {...borderRadiuses}
-        color={
-          active || activeSecondary
-            ? theme.colors.text
-            : theme.colors['text-xlight']
-        }
-        backgroundColor={
-          theme.mode === 'light'
-            ? active
-              ? theme.colors['fill-zero-selected']
-              : activeSecondary
-                ? theme.colors['fill-zero-hover']
-                : 'transparent'
-            : !active && activeSecondary
-              ? theme.colors['fill-two']
-              : 'transparent'
-        }
-        {...{
+            : undefined,
+          color:
+            active || activeSecondary
+              ? theme.colors.text
+              : theme.colors['text-xlight'],
+          backgroundColor:
+            theme.mode === 'light'
+              ? active
+                ? theme.colors['fill-zero-selected']
+                : activeSecondary
+                  ? theme.colors['fill-zero-hover']
+                  : 'transparent'
+              : !active && activeSecondary
+                ? theme.colors['fill-two']
+                : 'transparent',
+          transition:
+            'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
+          ...borderRadiuses,
           '&:hover': {
             color: theme.colors.text,
             ...(theme.mode === 'light'
@@ -119,9 +116,8 @@ function Tab({
                 ? { backgroundColor: theme.colors['fill-zero-hover'] }
                 : {}),
           },
+          ...innerProps?.css,
         }}
-        transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
-        {...innerProps}
       >
         {!!startIcon && <Icon marginRight="small">{startIcon}</Icon>}
         {children}
