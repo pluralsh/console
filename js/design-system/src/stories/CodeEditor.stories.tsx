@@ -2,6 +2,7 @@ import { Card, CodeEditor, WrapWithIf } from '..'
 
 import { tfCode } from '../constants'
 import type { Meta, StoryObj } from '@storybook/react'
+import { useTheme } from 'styled-components'
 
 const meta = {
   title: 'Code Editor',
@@ -86,13 +87,15 @@ function Template({
   minimap,
   ...args
 }: any) {
+  const theme = useTheme()
+
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
       wrapper={
         <Card
           fillLevel={onFillLevel}
-          padding="medium"
+          css={{ padding: theme.spacing.medium }}
         />
       }
     >

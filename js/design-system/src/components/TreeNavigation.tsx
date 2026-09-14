@@ -1,12 +1,10 @@
 import { useSpring } from '@react-spring/web'
 import classNames from 'classnames'
-import { Div } from 'honorable'
 import {
   Children,
   type ComponentProps,
   type ComponentPropsWithRef,
   type Key,
-  type MouseEventHandler,
   type PropsWithChildren,
   type ReactElement,
   type ReactNode,
@@ -164,11 +162,10 @@ function NavLink({
         active={active}
         activeSecondary={activeSecondary}
         vertical
-        iconLeft={icon}
-        onClick={(e: MouseEventHandler<HTMLDivElement>) => {
-          onClick(e)
+        onClick={(e) => {
+          onClick?.(e)
         }}
-        width="100%"
+        css={{ width: '100%', textDecoration: 'none' }}
         innerProps={{
           display: 'flex',
           paddingTop: 0,
@@ -176,19 +173,20 @@ function NavLink({
           paddingLeft: 0,
           paddingRight: 0,
         }}
-        textDecoration="none"
         {...(href ? { as: Link, href } : {})}
         {...props}
       >
-        <Div
-          flexGrow={1}
-          paddingTop={theme.spacing.xsmall}
-          paddingBottom={theme.spacing.xsmall}
-          paddingLeft={(depth + 1) * theme.spacing.medium}
-          paddingRight={isSubSection ? 0 : theme.spacing.medium}
+        <div
+          css={{
+            flexGrow: 1,
+            paddingTop: theme.spacing.xsmall,
+            paddingBottom: theme.spacing.xsmall,
+            paddingLeft: (depth + 1) * theme.spacing.medium,
+            paddingRight: isSubSection ? 0 : theme.spacing.medium,
+          }}
         >
           {children}
-        </Div>
+        </div>
         {isSubSection && (
           <CaretButton
             isOpen={isOpen}
@@ -354,7 +352,7 @@ export function TreeNavEntry({
         isOpen={!!(isOpen && hasSections)}
         active={!!(active && !hasActiveDescendents)}
         activeSecondary={hasActiveDescendents}
-        onClick={(e: MouseEventHandler<HTMLAnchorElement>) => {
+        onClick={(e) => {
           onClick?.(e)
           if (hasActiveDescendents) {
             setIsOpen(true)

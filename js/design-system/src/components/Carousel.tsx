@@ -1,14 +1,16 @@
-import { keyframes } from '@emotion/react'
-import { Div, type DivProps, Flex } from 'honorable'
-import { Children, type ReactElement, useEffect, useRef, useState } from 'react'
+import { Flex } from 'honorable'
+import {
+  Children,
+  type ComponentPropsWithRef,
+  type ReactElement,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { CSSTransition } from 'react-transition-group'
+import styled, { keyframes } from 'styled-components'
 
-type DotProps = DivProps & {
-  active?: boolean
-  size?: number
-}
-
-export type CarouselProps = DivProps & {
+export type CarouselProps = ComponentPropsWithRef<typeof CarouselSC> & {
   autoAdvanceTime?: number
 }
 
@@ -24,24 +26,46 @@ const dotAnimationIn = keyframes`
 }
 `
 
-function Dot({ active = false, size = 8, ...props }: DotProps) {
+const CarouselSC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-one'],
+  border: theme.borders.default,
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
+const DotHitAreaSC = styled.div(({ theme }) => ({
+  padding: theme.spacing.xxsmall,
+  cursor: 'pointer',
+}))
+
+const DotSC = styled.div<{ $active: boolean; $size: number }>`
+  background-color: ${({ theme, $active }) =>
+    $active
+      ? theme.colors['action-link-inline']
+      : theme.colors['fill-two']};
+  transition: background-color 0.35s cubic-bezier(0.2, 0.55, 0.8, 0.45);
+  animation-duration: 0.75s;
+  animation-iteration-count: 1;
+  animation-name: ${({ $active }) => ($active ? dotAnimationIn : 'none')};
+  width: ${({ $size }) => $size}px;
+  height: ${({ $size }) => $size}px;
+  border-radius: 50%;
+`
+
+function Dot({
+  active = false,
+  size = 8,
+  ...props
+}: ComponentPropsWithRef<'div'> & {
+  active?: boolean
+  size?: number
+}) {
   return (
-    <Div
-      padding="xxsmall"
-      cursor="pointer"
-      {...props}
-    >
-      <Div
-        backgroundColor={active ? 'action-link-inline' : 'fill-two'}
-        transition="background-color 0.35s cubic-bezier(.20,.55,.80,.45)"
-        animationName={active ? dotAnimationIn : null}
-        animationDuration="0.75s"
-        animationIterationCount="1"
-        width={size}
-        height={size}
-        borderRadius="50%"
+    <DotHitAreaSC {...props}>
+      <DotSC
+        $active={active}
+        $size={size}
       />
-    </Div>
+    </DotHitAreaSC>
   )
 }
 
@@ -136,15 +160,11 @@ function Carousel({
   }, [activeIndex, autoAdvanceTime, children])
 
   return (
-    <Div
-      backgroundColor="fill-one"
-      border="1px solid border"
-      borderRadius="medium"
-      {...props}
-    >
+    <CarouselSC {...props}>
       <Flex overflow="hidden">
-        {Children.map(children, (child: ReactElement<any>, i: number) => (
+        {Children.toArray(children).map((child, i) => (
           <Flex
+            key={i}
             width="100%"
             flexShrink={0}
             justify="center"
@@ -152,7 +172,9 @@ function Carousel({
             transform={`translateX(${-i * 100}%)`}
             pointerEvents={activeIndex === i ? 'auto' : 'none'}
           >
-            <CarouselSlide active={activeIndex === i}>{child}</CarouselSlide>
+            <CarouselSlide active={activeIndex === i}>
+              {child as ReactElement}
+            </CarouselSlide>
           </Flex>
         ))}
       </Flex>
@@ -161,8 +183,9 @@ function Carousel({
         marginBottom="medium"
         justifyContent="center"
       >
-        {Children.map(children, (_child: ReactElement<any>, i: number) => (
+        {Children.toArray(children).map((_child, i) => (
           <Dot
+            key={i}
             active={activeIndex === i}
             onClick={() => {
               setActiveIndex(i)
@@ -170,7 +193,7 @@ function Carousel({
           />
         ))}
       </Flex>
-    </Div>
+    </CarouselSC>
   )
 }
 

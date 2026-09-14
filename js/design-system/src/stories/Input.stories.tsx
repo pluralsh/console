@@ -1,4 +1,5 @@
 import { type ChangeEvent, useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import BrowseAppsIcon from '../components/icons/BrowseAppsIcon'
@@ -42,6 +43,7 @@ function InputSet(props: any) {
 
 function Template(args: any) {
   const [inputVal, setInputVal] = useState('')
+  const theme = useTheme()
 
   const props = {
     value: inputVal,
@@ -66,18 +68,18 @@ function Template(args: any) {
         {...props}
         small
       />
-      <Card padding="large">
+      <Card css={{ padding: theme.spacing.large }}>
         <InputSet {...props} />
       </Card>
       <Card
         fillLevel={2}
-        padding="large"
+        css={{ padding: theme.spacing.large }}
       >
         <InputSet {...props} />
       </Card>
       <Card
         fillLevel={3}
-        padding="large"
+        css={{ padding: theme.spacing.large }}
       >
         <InputSet {...props} />
       </Card>

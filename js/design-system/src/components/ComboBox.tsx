@@ -136,7 +136,7 @@ const InputChipList = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.xxsmall,
 }))
-const onChipClick = (e: Event) => {
+const onChipClick = (e: { stopPropagation(): void }) => {
   e.stopPropagation()
 }
 
@@ -470,7 +470,9 @@ function ComboBox({
                   onClick={onChipClick}
                   closeButtonProps={{
                     onClick: () => {
-                      onDeleteChip?.(chipProps?.key?.toString())
+                      const key = chipProps?.key?.toString()
+
+                      if (key) onDeleteChip?.(key)
                     },
                     'aria-label': `Remove ${chipProps.key}`,
                   }}
@@ -484,8 +486,11 @@ function ComboBox({
       ),
       ...(onDeleteChipProp
         ? {
-            onDeleteInputContent: () =>
-              onDeleteChipProp?.(chips?.[chips.length - 1]?.key?.toString()),
+            onDeleteInputContent: () => {
+              const key = chips?.[chips.length - 1]?.key?.toString()
+
+              if (key) onDeleteChipProp?.(key)
+            },
           }
         : {}),
       ...outerInputProps,

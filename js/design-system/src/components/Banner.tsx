@@ -1,4 +1,4 @@
-import { Div, Flex, type FlexProps } from 'honorable'
+import { Flex, type FlexProps } from 'honorable'
 import { type ComponentProps, type ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -161,7 +161,7 @@ function Banner({
           {children && <Content $hasHeading={!!heading}>{children}</Content>}
         </div>
       </BannerInner>
-      <Div flexGrow={1} />
+      <div css={{ flexGrow: 1 }} />
       {typeof onClose === 'function' && (
         <CloseButton
           size="medium"

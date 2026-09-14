@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { type CssProps, Div, Flex, type FlexProps } from 'honorable'
-import { useTheme } from 'styled-components'
+import { Flex, type FlexProps } from 'honorable'
+import styled from 'styled-components'
 
 import Tooltip from '../components/Tooltip'
 
@@ -18,7 +18,6 @@ function Codeline({
   ...props
 }: CodelineProps) {
   const [copied, setCopied] = useState(false)
-  const theme = useTheme()
 
   const handleCopy = useCallback(() => {
     if (onCopyClick) {
@@ -54,17 +53,7 @@ function Codeline({
         flexGrow={1}
         position="relative"
       >
-        <Div
-          body2
-          {...(theme.partials.text.code as CssProps)}
-          color="text-light"
-          flexGrow={1}
-          whiteSpace="pre"
-          textOverflow="ellipsis"
-          overflow="hidden"
-        >
-          {displayText || children}
-        </Div>
+        <CodeTextSC>{displayText || children}</CodeTextSC>
       </Flex>
       <Flex
         width={38}
@@ -106,5 +95,15 @@ function Codeline({
     </Flex>
   )
 }
+
+const CodeTextSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  ...theme.partials.text.code,
+  color: theme.colors['text-light'],
+  flexGrow: 1,
+  whiteSpace: 'pre',
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+}))
 
 export default Codeline

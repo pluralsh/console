@@ -1,4 +1,3 @@
-import { Div, type DivProps } from 'honorable'
 import {
   type ComponentProps,
   type ComponentPropsWithRef,
@@ -46,7 +45,7 @@ function Sidecar({
   )
 }
 
-const ItemSC = styled(Div)(({ theme }) => ({
+const ItemSC = styled.div(({ theme }) => ({
   marginBottom: theme.spacing.large,
   '&:last-of-type': {
     marginBottom: 0,
@@ -70,7 +69,7 @@ function SidecarItem({
   contentProps,
   children,
   ...props
-}: SidecarProps & DivProps) {
+}: SidecarProps & ComponentPropsWithRef<typeof ItemSC>) {
   return (
     <ItemSC
       ref={ref}

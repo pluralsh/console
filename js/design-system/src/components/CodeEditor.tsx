@@ -1,5 +1,5 @@
 import { type Dispatch, useCallback, useEffect, useMemo, useState } from 'react'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
 import Editor, { useMonaco, type EditorProps } from '@monaco-editor/react'
@@ -95,25 +95,23 @@ export default function CodeEditor({
   return (
     <Card
       fillLevel={toFillLevel(Math.min(parentFillLevel + 1, 2))}
-      borderColor={
-        parentFillLevel >= 1
-          ? theme.colors['border-fill-three']
-          : theme.colors['border-fill-two']
-      }
-      display="flex"
-      flexDirection="column"
-      flexGrow={1}
-      overflow="hidden"
-      height={height}
+      css={{
+        borderColor:
+          parentFillLevel >= 1
+            ? theme.colors['border-fill-three']
+            : theme.colors['border-fill-two'],
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+        overflow: 'hidden',
+        height,
+      }}
       {...props}
     >
-      <Div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-          overflow: 'hidden',
-        }}
+      <Flex
+        direction="column"
+        flexGrow={1}
+        overflow="hidden"
       >
         <Editor
           language={language}
@@ -126,7 +124,7 @@ export default function CodeEditor({
           theme={theme.mode === 'light' ? 'plural-light' : 'plural-dark'}
           onMount={onEditorMount}
         />
-      </Div>
+      </Flex>
       {save && (
         <Flex
           align="center"

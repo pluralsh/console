@@ -57,7 +57,7 @@ function Template({
               clickable={clickable}
               selected={selected}
               disabled={disabled}
-              width={width}
+              css={{ width }}
               cornerSize={cornerSize}
               fillLevel={fillLevel}
               header={{
@@ -106,8 +106,7 @@ function FillLevelTemplate({
             clickable={clickable}
             selected={selected}
             disabled={disabled}
-            width={width}
-            padding="medium"
+            css={{ width, padding: theme.spacing.medium }}
             fillLevel={fillLevel}
             header={{
               content: headerContent,
@@ -121,9 +120,9 @@ function FillLevelTemplate({
             <Card
               clickable={clickable}
               selected={selected}
-              padding="medium"
+              css={{ padding: theme.spacing.medium }}
             >
-              <Card padding="medium">
+              <Card css={{ padding: theme.spacing.medium }}>
                 <br />
                 Each Card background should be one level lighter than its
                 parent, but not exceed fill-three

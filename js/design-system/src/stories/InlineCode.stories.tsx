@@ -99,8 +99,7 @@ function Template() {
       </div>
       <div>
         <Card
-          hue="default"
-          padding="medium"
+          css={{ padding: theme.spacing.medium }}
           title="In a card (fill-one)"
         >
           <Heading>In a card (fill-one, body2LooseLineHeight):</Heading>

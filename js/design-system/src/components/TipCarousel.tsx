@@ -1,26 +1,28 @@
-import { Children, type ReactElement } from 'react'
-import { Div } from 'honorable'
+import { Children, type ComponentPropsWithRef } from 'react'
 import styled from 'styled-components'
 
-import Carousel, { type CarouselProps } from './Carousel'
+import Carousel from './Carousel'
 
-function TipCarousel({ children, ...props }: CarouselProps) {
+function TipCarousel({
+  children,
+  ...props
+}: ComponentPropsWithRef<typeof Carousel>) {
   return (
     <Carousel {...props}>
-      {Children.map(children, (child: ReactElement<any>) => (
-        <Div
-          width="100%"
-          paddingTop="medium"
-          paddingBottom="medium"
-          paddingHorizontal="medium"
-          mb={-0.5}
-        >
+      {Children.toArray(children).map((child, i) => (
+        <SlideSC key={i}>
           <TipSC>{child}</TipSC>
-        </Div>
+        </SlideSC>
       ))}
     </Carousel>
   )
 }
+
+const SlideSC = styled.div(({ theme }) => ({
+  width: '100%',
+  padding: theme.spacing.medium,
+  marginBottom: -0.5,
+}))
 
 const TipSC = styled.p(({ theme }) => ({
   margin: 0,

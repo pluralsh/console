@@ -1,5 +1,5 @@
 import { Card, Flex, PluralLogoMark, WrapWithIf } from '..'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import AppIcon from '../components/AppIcon'
 import type { Meta, StoryObj } from '@storybook/react'
@@ -53,6 +53,7 @@ const sizes = [
 ]
 
 function Template({ onFillLevel, icon, ...args }: any) {
+  const theme = useTheme()
   const iconProps =
     icon === 'Airflow'
       ? { url: '/logos/airflow-logo.svg' }
@@ -73,7 +74,7 @@ function Template({ onFillLevel, icon, ...args }: any) {
             wrapper={
               <Card
                 fillLevel={onFillLevel}
-                padding="small"
+                css={{ padding: theme.spacing.small }}
               />
             }
           >

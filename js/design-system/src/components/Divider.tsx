@@ -1,4 +1,4 @@
-import { Div, Flex, type FlexProps } from 'honorable'
+import { Flex, type FlexProps } from 'honorable'
 import styled from 'styled-components'
 
 import { type SemanticColorKey } from '../theme/colors'
@@ -20,24 +20,25 @@ function Divider({
       align="center"
       {...props}
     >
-      <Div
-        flexGrow={1}
-        height={1}
-        backgroundColor={backgroundColor}
-      />
+      <LineSC $backgroundColor={backgroundColor} />
       {!!text && (
         <>
           <LabelSC $color={color}>{text}</LabelSC>
-          <Div
-            flexGrow={1}
-            height={1}
-            backgroundColor={backgroundColor}
-          />
+          <LineSC $backgroundColor={backgroundColor} />
         </>
       )}
     </Flex>
   )
 }
+
+const LineSC = styled.div<{ $backgroundColor: string }>(
+  ({ theme, $backgroundColor }) => ({
+    flexGrow: 1,
+    height: 1,
+    backgroundColor:
+      theme.colors[$backgroundColor as SemanticColorKey] ?? $backgroundColor,
+  })
+)
 
 const LabelSC = styled.p<{ $color: string }>(({ theme, $color }) => ({
   margin: 0,

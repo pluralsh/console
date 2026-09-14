@@ -1,7 +1,8 @@
 import { type AriaLabelingProps, type DOMProps } from '@react-types/shared'
-import { Div, type DivProps, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { isNil } from 'lodash-es'
 import {
+  type ComponentPropsWithRef,
   type LabelHTMLAttributes,
   type PropsWithChildren,
   type ReactNode,
@@ -15,7 +16,7 @@ import IconFrame from './IconFrame'
 import { InfoOutlineIcon } from '../icons'
 import styled, { useTheme } from 'styled-components'
 
-type FormFieldProps = DivProps &
+type FormFieldProps = ComponentPropsWithRef<'div'> &
   PropsWithChildren<{
     label?: ReactNode
     labelProps?: Omit<LabelHTMLAttributes<HTMLLabelElement>, 'id'>
@@ -136,12 +137,16 @@ function FormField({
   )
 
   const fieldContent = (
-    <Div
-      marginTop={layout === 'vertical' && hasTopContent ? 'xxsmall' : 0}
-      marginBottom={layout === 'vertical' && hasBottomContent ? 'xxsmall' : 0}
+    <div
+      css={{
+        marginTop:
+          layout === 'vertical' && hasTopContent ? spacing.xxsmall : 0,
+        marginBottom:
+          layout === 'vertical' && hasBottomContent ? spacing.xxsmall : 0,
+      }}
     >
       {children}
-    </Div>
+    </div>
   )
 
   const content =
@@ -151,26 +156,20 @@ function FormField({
         gap="medium"
         {...props}
       >
-        <Div
-          flex="1 1 0"
-          minWidth={0}
-        >
+        <div css={{ flex: '1 1 0', minWidth: 0 }}>
           {topContent}
           {bottomContent}
-        </Div>
-        <Div
-          flex="1 1 0"
-          minWidth={0}
-        >
-          {fieldContent}
-        </Div>
+        </div>
+        <div css={{ flex: '1 1 0', minWidth: 0 }}>{fieldContent}</div>
       </Flex>
     ) : (
-      <Div {...props}>
-        {topContent && <Div marginBottom="xsmall">{topContent}</Div>}
+      <div {...props}>
+        {topContent && (
+          <div css={{ marginBottom: spacing.xsmall }}>{topContent}</div>
+        )}
         {fieldContent}
         {bottomContent}
-      </Div>
+      </div>
     )
 
   return (

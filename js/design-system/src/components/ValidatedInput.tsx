@@ -1,5 +1,6 @@
 import {
   type ChangeEvent,
+  type ComponentPropsWithRef,
   type ComponentPropsWithoutRef,
   type PropsWithChildren,
   type ReactNode,
@@ -23,7 +24,7 @@ export type ValidatedInputProps = Omit<
     validation?: (val: string) => ValidationResponse
     width?: string | number
     type?: ComponentPropsWithoutRef<'input'>['type']
-    ref?: ComponentPropsWithoutRef<typeof FormField>['ref']
+    ref?: ComponentPropsWithRef<typeof FormField>['ref']
     value?: InputPropsFull['value'] | null
   }>
 
@@ -56,7 +57,7 @@ function ValidatedInput({
       label={label}
       hint={error?.error ? error.message : hint}
       error={!!error?.error}
-      width={width}
+      css={{ width }}
     >
       <Input
         onChange={wrappedOnChange}

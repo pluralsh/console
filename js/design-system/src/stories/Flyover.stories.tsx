@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { Button, Card, Code, Flex, Flyover, FormField, Input, SearchIcon } from '..'
 import { jsCode } from '../constants'
@@ -56,6 +56,7 @@ function ExtraContent() {
 
 function Template(args: any) {
   const [open, setOpen] = useState(false)
+  const theme = useTheme()
 
   return (
     <>
@@ -122,9 +123,11 @@ function Template(args: any) {
         )}
       </Flyover>
       <Card
-        marginTop="xlarge"
-        width="100%"
-        padding="medium"
+        css={{
+          marginTop: theme.spacing.xlarge,
+          width: '100%',
+          padding: theme.spacing.medium,
+        }}
       >
         <ExtraContent />
       </Card>
@@ -138,6 +141,7 @@ const NonScrollCode = styled(Code)((_) => ({
 
 function NonScrollTemplate(args: any) {
   const [open, setOpen] = useState(false)
+  const theme = useTheme()
 
   return (
     <>
@@ -153,9 +157,11 @@ function NonScrollTemplate(args: any) {
         <NonScrollCode language="js">{jsCode}</NonScrollCode>
       </Flyover>
       <Card
-        marginTop="xlarge"
-        width="100%"
-        padding="medium"
+        css={{
+          marginTop: theme.spacing.xlarge,
+          width: '100%',
+          padding: theme.spacing.medium,
+        }}
       >
         <ExtraContent />
       </Card>

@@ -197,7 +197,6 @@ function Chip({
 
   let content = (
     <ChipCardSC
-      severity={severity}
       cornerSize="medium"
       fillLevel={fillLevel}
       clickable={clickable}

@@ -9,10 +9,10 @@ function Tab({ ...props }: ComponentProps<typeof TabBase>) {
 
   return (
     <TabBase
-      flexGrow={1}
-      flexShrink={1}
-      justifyContent="center"
-      {...{
+      css={{
+        flexGrow: 1,
+        flexShrink: 1,
+        justifyContent: 'center',
         '& div': {
           justifyContent: 'center',
           paddingTop: theme.spacing.xsmall,

@@ -6,6 +6,7 @@ import ChipList from '../components/ChipList'
 import WrapWithIf from '../components/WrapWithIf'
 import { SEVERITIES } from '../types'
 import type { Meta, StoryObj } from '@storybook/react'
+import { useTheme } from 'styled-components'
 
 const sizes: ComponentProps<typeof Chip>['size'][] = [
   'small',
@@ -44,6 +45,7 @@ export default meta
 type Story = StoryObj<any>
 
 function TextTemplate({ onFillLevel, ...args }: any) {
+  const theme = useTheme()
   const VALUES = [
     'avengers',
     'iron man',
@@ -58,8 +60,7 @@ function TextTemplate({ onFillLevel, ...args }: any) {
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          width="600px"
-          padding="medium"
+          css={{ width: 600, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         />
       }
@@ -73,6 +74,7 @@ function TextTemplate({ onFillLevel, ...args }: any) {
 }
 
 function CustomClickTemplate({ onFillLevel, ...args }: any) {
+  const theme = useTheme()
   const VALUES = [
     'avengers',
     'iron man',
@@ -87,8 +89,7 @@ function CustomClickTemplate({ onFillLevel, ...args }: any) {
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          width="600px"
-          padding="medium"
+          css={{ width: 600, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         />
       }
@@ -107,6 +108,7 @@ interface Label {
 }
 
 function LabelTemplate({ onFillLevel, ...args }: any) {
+  const theme = useTheme()
   const VALUES: Array<Label> = [
     { key: 'app', value: 'plural' },
     { key: 'version', value: 'v1.8.11' },
@@ -120,8 +122,7 @@ function LabelTemplate({ onFillLevel, ...args }: any) {
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          width="600px"
-          padding="medium"
+          css={{ width: 600, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         />
       }
@@ -136,13 +137,13 @@ function LabelTemplate({ onFillLevel, ...args }: any) {
 }
 
 function EmptyTemplate({ onFillLevel, ...args }: any) {
+  const theme = useTheme()
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          width="600px"
-          padding="medium"
+          css={{ width: 600, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         />
       }

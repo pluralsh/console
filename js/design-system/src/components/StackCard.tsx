@@ -1,15 +1,16 @@
-import { Div, type DivProps, Flex } from 'honorable'
-import styled from 'styled-components'
+import { Flex } from 'honorable'
+import styled, { useTheme } from 'styled-components'
 
-import Card from './Card'
+import Card, { type CardProps } from './Card'
 import AppIcon from './AppIcon'
 import Tooltip from './Tooltip'
 import Chip from './Chip'
 import StackIcon from './icons/StackIcon'
+import { type SemanticColorKey } from '../theme/colors'
 
 type StackHue = 'neutral' | 'red' | 'green' | 'blue' | 'yellow'
 
-type StackCardProps = DivProps & {
+type StackCardProps = CardProps & {
   title?: string
   description?: string
   apps?: App[]
@@ -27,7 +28,7 @@ const hueToColor = {
   green: 'text-success-light',
   blue: 'border-outline-focused',
   yellow: 'text-warning-light',
-}
+} as const satisfies Record<StackHue, SemanticColorKey>
 
 function StackCard({
   title,
@@ -36,14 +37,17 @@ function StackCard({
   hue = 'neutral',
   ...props
 }: StackCardProps) {
+  const theme = useTheme()
+
   return (
     <Card
       clickable
-      flexDirection="column"
-      padding="large"
-      width="100%"
-      borderColor={hueToColor[hue]}
       fillLevel={1}
+      width="100%"
+      css={{
+        padding: theme.spacing.large,
+        borderColor: theme.colors[hueToColor[hue]],
+      }}
       {...props}
     >
       <Flex
@@ -72,7 +76,7 @@ function StackCard({
             </Flex>
           </Flex>
           {description && <DescriptionSC>{description}</DescriptionSC>}
-          <Div flexGrow={1} />
+          <div css={{ flexGrow: 1 }} />
           {apps?.length > 0 && (
             <Flex
               marginTop="medium"

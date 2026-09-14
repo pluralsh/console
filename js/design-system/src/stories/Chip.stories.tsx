@@ -8,7 +8,7 @@ import { SEVERITIES } from '../types'
 
 import { Link } from './NavigationContextStub'
 import type { Meta, StoryObj } from '@storybook/react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 const Heading = styled.h1(({ theme }) => ({
   margin: 0,
@@ -54,6 +54,8 @@ const versionsArgs = [
 ]
 
 function Template({ onFillLevel, asLink, ...args }: any) {
+  const theme = useTheme()
+
   if (asLink) {
     args = { ...args, as: Link, href: '#' }
   }
@@ -75,7 +77,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
               wrapper={
                 <Card
                   fillLevel={onFillLevel}
-                  padding="small"
+                  css={{ padding: theme.spacing.small }}
                 />
               }
             >
@@ -112,8 +114,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
       </Heading>
       <Flex gap="medium">
         <Card
-          padding="medium"
-          width="160px"
+          css={{ padding: theme.spacing.medium, width: 160 }}
           fillLevel={onFillLevel}
         >
           <Flex
@@ -151,8 +152,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
           </Flex>
         </Card>
         <Card
-          width="400px"
-          padding="medium"
+          css={{ width: 400, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         >
           <Flex
@@ -186,8 +186,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
           </Flex>
         </Card>
         <Card
-          width="200px"
-          padding="medium"
+          css={{ width: 200, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         >
           <Flex
@@ -209,8 +208,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
           </Flex>
         </Card>
         <Card
-          width="120px"
-          padding="medium"
+          css={{ width: 120, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         >
           <Flex

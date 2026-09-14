@@ -3,7 +3,7 @@ import Fuse from 'fuse.js'
 
 import { isEqual, uniqWith } from 'lodash-es'
 
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { Card, Chip, ComboBox, Flex, ListBoxItem, TagIcon, WrapWithIf } from '..'
 
@@ -51,6 +51,7 @@ export function ClusterTagsTemplate({
   withTitleContent: boolean
   loading?: boolean
 }) {
+  const theme = useTheme()
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
   const selectedTagArr = useMemo(() => [...selectedTagKeys], [selectedTagKeys])
   const [inputValue, setInputValue] = useState('')
@@ -99,10 +100,12 @@ export function ClusterTagsTemplate({
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          display="flex"
-          flexDirection="column"
-          gap="large"
-          padding="large"
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            padding: theme.spacing.large,
+          }}
           fillLevel={onFillLevel}
         />
       }
