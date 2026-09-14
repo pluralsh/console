@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react'
-import { Flex, type FlexProps, Img } from 'honorable'
+import { Flex, type FlexProps } from 'honorable'
 import styled from 'styled-components'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
@@ -14,15 +14,6 @@ type TagProps = FlexProps & {
   disabled?: boolean
   icon?: ReactNode
   tooltip?: string
-}
-
-const iconProps = {
-  backgroundColor: 'fill-three',
-  padding: 2,
-  border: '1px solid border-input',
-  borderRadius: 'medium',
-  width: 24,
-  height: 24,
 }
 
 function RepositoryChip({
@@ -67,15 +58,19 @@ function RepositoryChip({
             <Flex
               align="center"
               justify="center"
-              {...iconProps}
+              backgroundColor="fill-three"
+              padding={2}
+              border="1px solid border-input"
+              borderRadius="medium"
+              width={24}
+              height={24}
             >
               {icon}
             </Flex>
           ) : imageUrl ? (
-            <Img
+            <IconImgSC
               src={imageUrl}
-              objectPosition="center"
-              {...iconProps}
+              alt={label}
             />
           ) : null}
           <LabelSC title={label}>{label}</LabelSC>
@@ -103,6 +98,16 @@ const LabelSC = styled.p(({ theme }) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+}))
+
+const IconImgSC = styled.img(({ theme }) => ({
+  objectPosition: 'center',
+  backgroundColor: theme.colors['fill-three'],
+  padding: 2,
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+  width: 24,
+  height: 24,
 }))
 
 export default RepositoryChip

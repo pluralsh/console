@@ -1,5 +1,5 @@
 import { keyframes } from '@emotion/react'
-import { Div, type DivProps, Flex, Img, type ImgProps } from 'honorable'
+import { Div, type DivProps, Flex } from 'honorable'
 import {
   type ReactNode,
   useCallback,
@@ -24,7 +24,7 @@ export type LoadingSpinnerProps = DivProps & {
   animateTransitions?: boolean
 }
 
-type ScrollingBGImageProps = ImgProps & { height: number }
+type ScrollingBGImageProps = DivProps & { height: number }
 
 const bgKeyframes = keyframes`
   0% {
@@ -114,6 +114,12 @@ function ScrollingBGImageBase({
     />
   )
 }
+
+const HiddenLogoSC = styled.img({
+  display: 'block',
+  width: '100%',
+  visibility: 'hidden',
+})
 
 const ScrollingBGImage = styled(ScrollingBGImageBase)`
   @supports (aspect-ratio: 6 / 1) {
@@ -280,12 +286,7 @@ function LoadingSpinner({
           position="relative"
           {...logoEnterStyles}
         >
-          <Img
-            display="block"
-            width="100%"
-            visibility="hidden"
-            src="/logos/plural-logomark-only-white.svg"
-          />
+          <HiddenLogoSC src="/logos/plural-logomark-only-white.svg" />
           <Flex
             flexWrap="nowrap"
             height="100%"
