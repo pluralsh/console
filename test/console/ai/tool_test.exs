@@ -61,6 +61,24 @@ defmodule Console.AI.ToolTest do
       assert {:ok, %ApprovalTool{approval: nil}} =
                Tool.policy(%ApprovalTool{}, %{}, [approval_policy("^other_tool$")])
     end
+
+    test "continues enforcing policies that still use the legacy package" do
+      policy = legacy_policy("^protected_tool$")
+
+      assert {:ok, ProtectedTool} =
+               Tool.policy(ProtectedTool, %{"blocked" => false}, [policy])
+
+      assert {:error, "Policy denied: blocked by legacy policy"} =
+               Tool.policy(ProtectedTool, %{"blocked" => true}, [policy])
+    end
+
+    test "does not evaluate the legacy package when the current package succeeds" do
+      assert {:error, "Policy denied: blocked"} =
+               Tool.policy(ProtectedTool, %{"blocked" => true}, [
+                 policy("^protected_tool$"),
+                 legacy_policy("^protected_tool$")
+               ])
+    end
   end
 
   defp policy(regex) do
@@ -69,7 +87,7 @@ defmodule Console.AI.ToolTest do
       name: "deny-blocked-input",
       policy_id: Ecto.UUID.generate(),
       policy: """
-      package plrl.wb.admission
+      package plrl.workbench
 
       sample := 0
 
@@ -87,7 +105,7 @@ defmodule Console.AI.ToolTest do
       name: "deny-blocked-actor",
       policy_id: Ecto.UUID.generate(),
       policy: """
-      package plrl.wb.admission
+      package plrl.workbench
 
       sample := 0
 
@@ -104,12 +122,29 @@ defmodule Console.AI.ToolTest do
       name: "auto-approve",
       policy_id: Ecto.UUID.generate(),
       policy: """
-      package plrl.wb.admission
+      package plrl.workbench
 
       sample := 0
 
       approve[{"reason": "safe operation"}] if {
         true
+      }
+      """
+    }
+  end
+
+  defp legacy_policy(regex) do
+    %Tool.Policy{
+      regexes: [Regex.compile!(regex)],
+      name: "legacy-deny-blocked-input",
+      policy_id: Ecto.UUID.generate(),
+      policy: """
+      package plrl.wb.admission
+
+      sample := 0
+
+      deny[{"message": "blocked by legacy policy"}] if {
+        input.tool.blocked == true
       }
       """
     }

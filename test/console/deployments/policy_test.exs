@@ -356,12 +356,54 @@ defmodule Console.Deployments.PolicyTest do
       assert result["approve"] == []
       assert result["sample"] == 0
     end
+
+    test "evaluates workbench policies that still use the legacy package" do
+      policy = insert(:policy,
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "blocked by legacy policy"}] if {
+          input.blocked == true
+        }
+        """
+      )
+
+      {:ok, allowed} = Policy.evaluate_policy(policy, %{"blocked" => false})
+      assert allowed["deny"] == []
+      assert allowed["sample"] == 0
+
+      {:ok, denied} = Policy.evaluate_policy(policy, %{"blocked" => true})
+      assert [%{"message" => "blocked by legacy policy"}] = denied["deny"]
+    end
+
+    test "propagates primary query errors instead of falling back" do
+      legacy_policy = %{
+        name: "legacy",
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+        """
+      }
+
+      {:ok, engine, _} = Policy.compile_policies(:workbench, [legacy_policy])
+
+      assert {:error, _} =
+               Policy.eval_policy(
+                 engine,
+                 %{},
+                 [],
+                 {:fallback, "data.plrl.workbench[", "data.plrl.wb.admission.result"}
+               )
+    end
   end
 
   describe "evaluate_custom_policy/3" do
     test "evaluates unsaved source without a stored policy" do
       {:ok, result} = Policy.evaluate_custom_policy(:workbench, """
-        package plrl.wb.admission
+        package plrl.workbench
 
         sample := 0
 

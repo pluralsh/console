@@ -158,8 +158,8 @@ defmodule Console.AI.Tool do
 
   def policy(tool, input, [_ | _] = policies) do
     with [_ | _] = pols <- Enum.filter(policies, &Policy.matches?(&1, name(tool))) do
-      case compile_policies(pols) do
-        {:ok, engine} -> validate_policy(engine, tool,  input, pols)
+      case PolicySvc.compile_policies(:workbench, pols) do
+        {:ok, engine, path} -> validate_policy(engine, path, tool, input, pols)
         err -> err
       end
     else
@@ -168,11 +168,9 @@ defmodule Console.AI.Tool do
   end
   def policy(tool, _, _), do: {:ok, tool}
 
-  @policy_base Console.priv_file!("policy/wb.rego")
-
-  defp validate_policy(engine, tool, input, policies) do
+  defp validate_policy(engine, path, tool, input, policies) do
     Enum.map(policies, & &1.policy_id)
-    |> then(&PolicySvc.eval_policy(engine, maybe_actor(%{"tool" => input, "tool_name" => name(tool)}), &1))
+    |> then(&PolicySvc.eval_policy(engine, maybe_actor(%{"tool" => input, "tool_name" => name(tool)}), &1, path))
     |> case do
       {:ok, %{"deny" => [_ | _] = denials}} -> {:error, "Policy denied: #{PolicySvc.policy_reason(denials)}"}
       {:ok, %{"approve" => [_ | _] = approvals}} ->
@@ -186,22 +184,6 @@ defmodule Console.AI.Tool do
   end
 
   defp maybe_actor(input), do: Map.put(input, "actor", PolicyInput.actor(actor()))
-
-  defp compile_policies(policies) do
-    with {:ok, engine} <- Regolix.new(),
-         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", @policy_base) do
-      Enum.reduce_while(policies, engine, fn %{policy: p, name: n}, eng ->
-        case Regolix.add_policy(eng, n, p) do
-          {:ok, engine} -> {:cont, engine}
-          {:error, reason} -> {:halt, {:error, "Failed to add policy #{n}: #{inspect(reason)}"}}
-        end
-      end)
-      |> case do
-        {:error, _} = error -> error
-        engine -> {:ok, engine}
-      end
-    end
-  end
 
   def validate(tool, input) when is_atom(tool) do
     struct(tool, %{})
