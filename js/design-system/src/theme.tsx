@@ -144,15 +144,6 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         ({ inline }: any) => inline && textPartials.inlineLink,
       ],
     },
-    Avatar: {
-      Root: [
-        {
-          backgroundColor: 'action-primary',
-          borderRadius: 3,
-          fontWeight: 400,
-        },
-      ],
-    },
     H2: { Root: [{ fontFamily: 'Monument' }] },
     H4: { Root: [{ fontFamily: 'Monument' }] },
     H5: { Root: [{ fontFamily: 'Monument' }] },

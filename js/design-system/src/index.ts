@@ -1,6 +1,3 @@
-export { Avatar } from 'honorable'
-
-// Icons
 export type { IconProps } from './components/icons/createIcon'
 export * from './icons'
 
@@ -19,6 +16,8 @@ export {
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { default as AppIcon } from './components/AppIcon'
 export { default as ArrowScroll } from './components/ArrowScroll'
+export { default as Avatar } from './components/Avatar'
+export type { AvatarProps } from './components/Avatar'
 export { default as Banner } from './components/Banner'
 export { Breadcrumbs } from './components/Breadcrumbs'
 export { default as Button, type ButtonProps } from './components/Button'
