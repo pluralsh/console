@@ -29,6 +29,7 @@ names:
 - linkerd
 - longhorn
 - metrics-server
+- kube-state-metrics
 - opentelemetry-operator
 - rook
 - strimzi-kafka
