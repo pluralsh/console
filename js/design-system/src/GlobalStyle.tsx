@@ -152,6 +152,10 @@ const GlobalStyleSheet = createGlobalStyle(({ theme }) => ({
   'h1, h2, h3, h4, h5, h6, p': {
     margin: 0,
   },
+  'a, a:visited, a:hover, a:active': {
+    color: 'inherit',
+    textDecoration: 'inherit',
+  },
   'button, input, optgroup, select, textarea': {
     fontFamily: 'inherit',
     fontSize: '100%',

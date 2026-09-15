@@ -1,29 +1,17 @@
-import { type ComponentPropsWithRef, type ReactNode } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { type ReactNode } from 'react'
+import { useTheme } from 'styled-components'
 
 import Flex, { type FlexProps } from './Flex'
 import Icon from './Icon'
 import { type TabBaseProps } from './TabList'
 
-type TabProps = ComponentPropsWithRef<typeof TabSC> &
+export type TabProps = FlexProps &
   TabBaseProps & {
     startIcon?: ReactNode
     innerProps?: FlexProps
   }
 
 export const TAB_INDICATOR_THICKNESS = 2
-
-const TabSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
-  display: 'block',
-  textDecoration: 'none',
-  userSelect: 'none',
-  cursor: 'pointer',
-  '&:focus-visible': {
-    zIndex: theme.zIndexes.base + 1,
-    ...theme.partials.focus.default,
-  },
-}))
 
 function Tab({
   ref,
@@ -38,7 +26,11 @@ function Tab({
   ...props
 }: TabProps) {
   const theme = useTheme()
-
+  const indicatorColor = active
+    ? theme.colors['border-primary']
+    : activeSecondary
+      ? theme.colors['border-fill-two']
+      : 'transparent'
   const borderRadiuses = {
     borderTopLeftRadius: theme.borderRadiuses.medium,
     borderTopRightRadius: vertical ? 0 : theme.borderRadiuses.medium,
@@ -46,16 +38,28 @@ function Tab({
   }
 
   return (
-    <TabSC
+    <Flex
       ref={ref}
+      display="block"
+      width="100%"
       tabIndex={0}
-      css={{
-        borderBottom: vertical
+      userSelect="none"
+      cursor="pointer"
+      textDecoration="none"
+      color={
+        active || activeSecondary
+          ? theme.colors.text
+          : theme.colors['text-xlight']
+      }
+      borderBottom={
+        vertical
           ? undefined
           : `1px solid ${
               active ? theme.colors['border-primary'] : theme.colors.border
-            }`,
-        borderRight: vertical
+            }`
+      }
+      borderRight={
+        vertical
           ? `1px solid ${
               active
                 ? theme.colors['border-primary']
@@ -63,8 +67,16 @@ function Tab({
                   ? theme.colors['border-fill-two']
                   : theme.colors.border
             }`
-          : undefined,
-        ...borderRadiuses,
+          : undefined
+      }
+      {...borderRadiuses}
+      css={{
+        ...theme.partials.text.body2,
+        '&:hover': { color: theme.colors.text },
+        '&:focus-visible': {
+          zIndex: theme.zIndexes.base + 1,
+          ...theme.partials.focus.default,
+        },
         ...css,
       }}
       {...props}
@@ -75,39 +87,40 @@ function Tab({
         paddingTop={theme.spacing.xsmall}
         paddingBottom={theme.spacing.xsmall}
         align="center"
-        {...innerProps}
-        css={{
-          borderBottom: vertical
+        width="100%"
+        borderBottom={
+          vertical
             ? undefined
             : `${TAB_INDICATOR_THICKNESS - 1}px solid ${
                 active ? theme.colors['border-primary'] : 'transparent'
-              }`,
-          borderRight: vertical
-            ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${
-                active
-                  ? theme.colors['border-primary']
-                  : activeSecondary
-                    ? theme.colors['border-fill-two']
-                    : 'transparent'
               }`
-            : undefined,
-          color:
-            active || activeSecondary
-              ? theme.colors.text
-              : theme.colors['text-xlight'],
-          backgroundColor:
-            theme.mode === 'light'
-              ? active
-                ? theme.colors['fill-zero-selected']
-                : activeSecondary
-                  ? theme.colors['fill-zero-hover']
-                  : 'transparent'
-              : !active && activeSecondary
-                ? theme.colors['fill-two']
-                : 'transparent',
-          transition:
-            'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
-          ...borderRadiuses,
+        }
+        borderRight={
+          vertical
+            ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${indicatorColor}`
+            : undefined
+        }
+        color={
+          active || activeSecondary
+            ? theme.colors.text
+            : theme.colors['text-xlight']
+        }
+        backgroundColor={
+          theme.mode === 'light'
+            ? active
+              ? theme.colors['fill-zero-selected']
+              : activeSecondary
+                ? theme.colors['fill-zero-hover']
+                : 'transparent'
+            : !active && activeSecondary
+              ? theme.colors['fill-two']
+              : 'transparent'
+        }
+        transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
+        {...borderRadiuses}
+        {...innerProps}
+        css={{
+          boxSizing: 'border-box',
           '&:hover': {
             color: theme.colors.text,
             ...(theme.mode === 'light'
@@ -122,9 +135,8 @@ function Tab({
         {!!startIcon && <Icon marginRight="small">{startIcon}</Icon>}
         {children}
       </Flex>
-    </TabSC>
+    </Flex>
   )
 }
 
 export default Tab
-export type { TabProps }

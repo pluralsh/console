@@ -1,8 +1,14 @@
 // almost drop-in replacement for anywhere 'honorable' Flex is used
 
-import { Ref, memo, type CSSProperties, type ReactNode } from 'react'
-import styled, { StyledObject, type DefaultTheme } from 'styled-components'
-import Tooltip, { TooltipProps } from './Tooltip'
+import {
+  type CSSProperties,
+  type ElementType,
+  memo,
+  type ReactNode,
+  type Ref,
+} from 'react'
+import styled, { type DefaultTheme, type StyledObject } from 'styled-components'
+import Tooltip, { type TooltipProps } from './Tooltip'
 import WrapWithIf from './WrapWithIf'
 
 type FlexBaseProps = {
@@ -45,12 +51,30 @@ type FlexBaseProps = {
    */
   css?: StyledObject
 
+  as?: ElementType
   ref?: Ref<HTMLDivElement>
   className?: string
   children?: ReactNode
 }
 
-export type FlexProps = Omit<CSSProperties, keyof FlexBaseProps> & FlexBaseProps
+export type FlexProps = FlexBaseProps &
+  Omit<CSSProperties, keyof FlexBaseProps> &
+  Record<string, any>
+
+const DOM_PROP_RE =
+  /^(as|forwardedAs|href|to|target|rel|download|tabIndex|role|id|type|disabled|name|title|value|children|className|ref|hidden|lang|dir|slot|style|draggable|contentEditable|spellCheck|autoFocus|accessKey|nonce)$|^on[A-Z]|^aria-|^data-/
+
+function splitCssAndDomProps(props: Record<string, unknown>) {
+  const css: StyledObject = {}
+  const rest: Record<string, unknown> = {}
+
+  Object.entries(props).forEach(([key, value]) => {
+    if (DOM_PROP_RE.test(key)) rest[key] = value
+    else (css as Record<string, unknown>)[key] = value
+  })
+
+  return { css, rest }
+}
 
 function BaseFlex({
   ref,
@@ -67,8 +91,13 @@ function BaseFlex({
   tooltip,
   children,
   css,
+  as,
   ...otherProps
 }: FlexProps) {
+  const { css: styleProps, rest } = splitCssAndDomProps(
+    otherProps as Record<string, unknown>
+  )
+
   return (
     <WrapWithIf
       condition={!!tooltip}
@@ -76,19 +105,19 @@ function BaseFlex({
     >
       <FlexSC
         ref={ref}
+        as={as}
         className={className}
-        {...{
-          $direction: direction,
-          $wrap: wrap,
-          $basis: basis,
-          $grow: grow,
-          $shrink: shrink,
-          $align: align,
-          $justify: justify,
-          $gap: gap,
-          $padding: padding,
-        }}
-        css={{ ...otherProps, ...css }}
+        $direction={direction}
+        $wrap={wrap}
+        $basis={basis}
+        $grow={grow}
+        $shrink={shrink}
+        $align={align}
+        $justify={justify}
+        $gap={gap}
+        $padding={padding}
+        $css={{ ...styleProps, ...css }}
+        {...rest}
       >
         {children}
       </FlexSC>
@@ -106,6 +135,7 @@ const FlexSC = styled.div<{
   $justify?: FlexProps['justify']
   $gap?: FlexProps['gap']
   $padding?: FlexProps['padding']
+  $css?: StyledObject
 }>(
   ({
     theme,
@@ -118,6 +148,7 @@ const FlexSC = styled.div<{
     $justify,
     $gap,
     $padding,
+    $css,
   }) => ({
     display: 'flex',
     flexDirection: $direction,
@@ -131,6 +162,7 @@ const FlexSC = styled.div<{
     ...($padding != null
       ? { padding: theme.spacing[$padding] ?? $padding }
       : {}),
+    ...$css,
   })
 )
 
