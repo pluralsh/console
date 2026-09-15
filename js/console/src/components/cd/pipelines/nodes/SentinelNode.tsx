@@ -43,25 +43,25 @@ export function SentinelNode({ id, data }: PipelineGateNodeProps) {
         style={{ textDecoration: 'none' }}
       >
         <Card style={{ padding: spacing.small }}>
-        {sentinelRun ? (
-          <StretchedFlex gap="xlarge">
-            <StackedText
-              first={getRunNameFromId(sentinelRun?.id ?? '')}
-              firstPartialType="body2Bold"
-              firstColor="text"
-              second={
-                sentinelRun.completedAt
-                  ? `Completed ${fromNow(sentinelRun.completedAt)}`
-                  : sentinelRun.insertedAt
-                    ? `Started ${fromNow(sentinelRun.insertedAt)}`
-                    : '---'
-              }
-            />
-            {statusToIcon(sentinelRun?.status, true)}
-          </StretchedFlex>
-        ) : (
-          <Body2P $color="text-xlight">No runs yet</Body2P>
-        )}
+          {sentinelRun ? (
+            <StretchedFlex gap="xlarge">
+              <StackedText
+                first={getRunNameFromId(sentinelRun?.id ?? '')}
+                firstPartialType="body2Bold"
+                firstColor="text"
+                second={
+                  sentinelRun.completedAt
+                    ? `Completed ${fromNow(sentinelRun.completedAt)}`
+                    : sentinelRun.insertedAt
+                      ? `Started ${fromNow(sentinelRun.insertedAt)}`
+                      : '---'
+                }
+              />
+              {statusToIcon(sentinelRun?.status, true)}
+            </StretchedFlex>
+          ) : (
+            <Body2P $color="text-xlight">No runs yet</Body2P>
+          )}
         </Card>
       </Link>
       {[GateState.Pending, GateState.Closed].includes(meta.state) && (
