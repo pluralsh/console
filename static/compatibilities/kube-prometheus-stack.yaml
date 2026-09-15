@@ -5,6 +5,40 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 91.4.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **Grafana datasource provisioning changed**: values examples
+      were corrected and the chart now provisions datasources as **`GrafanaDatasource`**
+      resources. If you previously relied on ConfigMap-based provisioning or had custom
+      templates/values around datasources, review and adjust your `grafana.sidecar.datasources`
+      / provisioning settings accordingly.
+
+      - **Webhook `matchConditions` rendering**: ensure any configured webhook `matchConditions`
+      are provided as a **list/array** in values (not a single object/string), since
+      the chart renders them as a list now.'
+    chart_updates: [Grafana datasource provisioning is now implemented via `GrafanaDatasource`
+        custom resources (instead of the prior approach)., Values example for `GrafanaDatasource`
+        kind was fixed., Admission webhook `matchConditions` are rendered as a list
+        in templates., "CI checks were updated (CRD spec field check; agent instructions\
+        \ correction) \u2014 no runtime impact."]
+    features: ['Grafana datasources can be provisioned as `GrafanaDatasource` resources,
+        aligning provisioning with Grafana Operator-style CRDs and improving manageability
+        via Kubernetes resources.']
+    breaking_changes: [Grafana datasource provisioning behavior may change if you
+        depended on the previous provisioning mechanism; validate that datasources
+        still appear and that RBAC/CRDs for `GrafanaDatasource` exist if required.,
+      'If you set webhook `matchConditions` via values, the expected structure is
+        now a list; misformatted values could cause template/render failures or incorrect
+        webhook configuration.']
+  chart_version: 91.4.0
+  images: ['docker.io/grafana/grafana:13.2.1-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+    'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.94.0',
+    'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+    'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 91.2.1
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25']
