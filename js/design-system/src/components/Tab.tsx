@@ -70,14 +70,18 @@ function Tab({
           : undefined
       }
       {...borderRadiuses}
-      css={{
-        ...theme.partials.text.body2,
-        '&:hover': { color: theme.colors.text },
-        '&:focus-visible': {
-          zIndex: theme.zIndexes.base + 1,
-          ...theme.partials.focus.default,
+      // Pass css directly to Flex: a generated styled wrapper would consume `as`
+      // and bypass Flex's conversion of style props when rendering a link.
+      {...{
+        css: {
+          ...theme.partials.text.body2,
+          '&:hover': { color: theme.colors.text },
+          '&:focus-visible': {
+            zIndex: theme.zIndexes.base + 1,
+            ...theme.partials.focus.default,
+          },
+          ...css,
         },
-        ...css,
       }}
       {...props}
     >

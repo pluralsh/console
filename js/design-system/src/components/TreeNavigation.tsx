@@ -5,6 +5,7 @@ import {
   type ComponentProps,
   type ComponentPropsWithRef,
   type Key,
+  type MouseEvent,
   type PropsWithChildren,
   type ReactElement,
   type ReactNode,
@@ -138,7 +139,7 @@ function NavLink({
   activeSecondary = false,
   onClick,
   onClickCaret,
-  icon,
+  icon: _icon,
   href,
   children,
   ...props
@@ -162,10 +163,9 @@ function NavLink({
         active={active}
         activeSecondary={activeSecondary}
         vertical
-        onClick={(e) => {
-          onClick?.(e)
-        }}
-        css={{ width: '100%', textDecoration: 'none' }}
+        onClick={onClick}
+        width="100%"
+        textDecoration="none"
         innerProps={{
           display: 'flex',
           paddingTop: 0,
@@ -352,7 +352,7 @@ export function TreeNavEntry({
         isOpen={!!(isOpen && hasSections)}
         active={!!(active && !hasActiveDescendents)}
         activeSecondary={hasActiveDescendents}
-        onClick={(e) => {
+        onClick={(e: MouseEvent<HTMLElement>) => {
           onClick?.(e)
           if (hasActiveDescendents) {
             setIsOpen(true)
