@@ -363,6 +363,11 @@ type PersonaFlows struct {
 	// +kubebuilder:validation:Optional
 	Workbenches *bool `json:"workbenches,omitempty"`
 
+	// McpServers enables access to the "Manage MCP servers" action from the flows page when set to true.
+	// This allows personas to navigate to MCP server settings directly from flows.
+	// +kubebuilder:validation:Optional
+	McpServers *bool `json:"mcpServers,omitempty"`
+
 	// Pipelines enables access to flow pipeline features when set to true.
 	// This includes viewing and managing pipelines associated with flows.
 	// +kubebuilder:validation:Optional
@@ -384,6 +389,7 @@ func (in *PersonaFlows) Attributes() *console.PersonaFlowsAttributes {
 		Permissions:       in.Permissions,
 		StartWorkbenchJob: in.StartWorkbenchJob,
 		Workbenches:       in.Workbenches,
+		McpServers:        in.McpServers,
 		Pipelines:         in.Pipelines,
 		Previews:          in.Previews,
 	}

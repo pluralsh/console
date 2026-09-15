@@ -20,6 +20,8 @@ spec:
       pipelines: true
       providers: true
       addOns: true
+    flows:
+      mcpServers: true
     sidebar:
       audits: true
       kubernetes: true
@@ -55,6 +57,8 @@ spec:
       pipelines: true
       providers: false
       addOns: false
+    flows:
+      mcpServers: false
     sidebar:
       audits: false
       kubernetes: false
@@ -91,6 +95,8 @@ spec:
       pipelines: false
       providers: false
       addOns: false
+    flows:
+      mcpServers: false
     sidebar:
       audits: true
       kubernetes: true

@@ -103,6 +103,7 @@ defmodule Console.GraphQl.Users do
     field :permissions, :boolean
     field :start_workbench_job, :boolean
     field :workbenches, :boolean
+    field :mcp_servers, :boolean
     field :pipelines,   :boolean
     field :previews,    :boolean
   end
@@ -339,6 +340,7 @@ defmodule Console.GraphQl.Users do
     field :permissions, :boolean
     field :start_workbench_job, :boolean
     field :workbenches, :boolean
+    field :mcp_servers, :boolean
     field :pipelines,   :boolean
     field :previews,    :boolean
   end
