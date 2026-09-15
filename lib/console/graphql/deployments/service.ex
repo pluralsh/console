@@ -347,6 +347,14 @@ defmodule Console.GraphQl.Deployments.Service do
     field :mem, list_of(:metric_response)
     field :pod_cpu, list_of(:metric_response)
     field :pod_mem, list_of(:metric_response)
+    field :cpu_requests, list_of(:metric_response)
+    field :mem_requests, list_of(:metric_response)
+    field :cpu_limits, list_of(:metric_response)
+    field :mem_limits, list_of(:metric_response)
+    field :pod_cpu_requests, list_of(:metric_response)
+    field :pod_mem_requests, list_of(:metric_response)
+    field :pod_cpu_limits, list_of(:metric_response)
+    field :pod_mem_limits, list_of(:metric_response)
   end
 
   @desc "a representation of a past revision of a service"

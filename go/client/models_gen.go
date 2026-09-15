@@ -4833,6 +4833,22 @@ type KubernetesControllerMetrics struct {
 	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
 	// Memory usage metrics for pods managed by this controller
 	PodMem []*MetricResponse `json:"podMem,omitempty"`
+	// CPU requests for the controller
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// Memory requests for the controller
+	MemRequests []*MetricResponse `json:"memRequests,omitempty"`
+	// CPU limits for the controller
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// Memory limits for the controller
+	MemLimits []*MetricResponse `json:"memLimits,omitempty"`
+	// CPU requests for pods managed by this controller
+	PodCPURequests []*MetricResponse `json:"podCpuRequests,omitempty"`
+	// Memory requests for pods managed by this controller
+	PodMemRequests []*MetricResponse `json:"podMemRequests,omitempty"`
+	// CPU limits for pods managed by this controller
+	PodCPULimits []*MetricResponse `json:"podCpuLimits,omitempty"`
+	// Memory limits for pods managed by this controller
+	PodMemLimits []*MetricResponse `json:"podMemLimits,omitempty"`
 }
 
 type KubernetesUnstructured struct {
@@ -8791,10 +8807,18 @@ type ServiceComponentChild struct {
 }
 
 type ServiceComponentMetrics struct {
-	CPU    []*MetricResponse `json:"cpu,omitempty"`
-	Mem    []*MetricResponse `json:"mem,omitempty"`
-	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
-	PodMem []*MetricResponse `json:"podMem,omitempty"`
+	CPU            []*MetricResponse `json:"cpu,omitempty"`
+	Mem            []*MetricResponse `json:"mem,omitempty"`
+	PodCPU         []*MetricResponse `json:"podCpu,omitempty"`
+	PodMem         []*MetricResponse `json:"podMem,omitempty"`
+	CPURequests    []*MetricResponse `json:"cpuRequests,omitempty"`
+	MemRequests    []*MetricResponse `json:"memRequests,omitempty"`
+	CPULimits      []*MetricResponse `json:"cpuLimits,omitempty"`
+	MemLimits      []*MetricResponse `json:"memLimits,omitempty"`
+	PodCPURequests []*MetricResponse `json:"podCpuRequests,omitempty"`
+	PodMemRequests []*MetricResponse `json:"podMemRequests,omitempty"`
+	PodCPULimits   []*MetricResponse `json:"podCpuLimits,omitempty"`
+	PodMemLimits   []*MetricResponse `json:"podMemLimits,omitempty"`
 }
 
 // a configuration item k/v pair
