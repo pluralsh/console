@@ -72,8 +72,8 @@ export function ProfileMenu() {
           }
         >
           <Avatar
-            name={me?.name}
-            src={me?.profile}
+            name={me?.name ?? undefined}
+            src={me?.profile ?? undefined}
             size={32}
             css={{
               transition: 'background-color 0.1s ease, filter 0.1s ease',

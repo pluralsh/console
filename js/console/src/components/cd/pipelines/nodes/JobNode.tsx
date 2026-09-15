@@ -102,10 +102,7 @@ export function JobNode({ id, data }: PipelineGateNodeProps) {
       </StretchedFlex>
       <NodeCardList>
         <li>
-          <ContainerCard
-            container={containers?.[0]}
-            gate={gate}
-          />
+          <ContainerCard container={containers?.[0]} />
         </li>
       </NodeCardList>
     </PipelineBaseNode>

@@ -13,7 +13,7 @@ import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
 import Button from './Button'
 import { registerRegoLanguage } from './registerRegoLanguage'
 
-type CodeEditorProps = Omit<CardProps, 'children'> & {
+type CodeEditorProps = Omit<CardProps, 'children' | 'onChange'> & {
   value?: string
   onChange?: Dispatch<string>
   language?: string

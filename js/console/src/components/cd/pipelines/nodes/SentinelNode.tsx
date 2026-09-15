@@ -35,15 +35,14 @@ export function SentinelNode({ id, data }: PipelineGateNodeProps) {
         firstColor="text"
         second={sentinel?.name ?? 'Unknown name'}
       />
-      <Card
-        clickable
-        as={Link}
+      <Link
         to={getSentinelRunAbsPath({
           sentinelId: sentinel?.id ?? '',
           runId: sentinelRun?.id ?? '',
         })}
-        style={{ textDecoration: 'none', padding: spacing.small }}
+        style={{ textDecoration: 'none' }}
       >
+        <Card style={{ padding: spacing.small }}>
         {sentinelRun ? (
           <StretchedFlex gap="xlarge">
             <StackedText
@@ -63,7 +62,8 @@ export function SentinelNode({ id, data }: PipelineGateNodeProps) {
         ) : (
           <Body2P $color="text-xlight">No runs yet</Body2P>
         )}
-      </Card>
+        </Card>
+      </Link>
       {[GateState.Pending, GateState.Closed].includes(meta.state) && (
         <ForceGateButton id={gateId ?? ''} />
       )}

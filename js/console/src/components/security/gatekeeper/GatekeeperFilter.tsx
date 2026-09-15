@@ -248,7 +248,7 @@ function GatekeeperFilter({
               <Checkbox
                 small
                 name={namespaceLabel}
-                value={namespace}
+                value={namespace.id}
                 checked={selectedNamespaces.includes(namespace.id)}
                 onChange={({ target: { checked } }: any) =>
                   handleCheckboxChange(

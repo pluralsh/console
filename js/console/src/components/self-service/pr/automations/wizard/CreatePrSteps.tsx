@@ -59,10 +59,7 @@ export function ReviewPrStep({
       )}
 
       {hasConfiguration && (
-        <FormField
-          label="Configuration review"
-          name="configuration"
-        >
+        <FormField label="Configuration review">
           <Code
             language="json"
             showHeader={false}
@@ -74,10 +71,10 @@ export function ReviewPrStep({
       <FormField
         label="Repository"
         required
-        name="repository"
         hint={'Repository slug, i.e. username/infra-repo.'}
       >
         <Input
+          name="repository"
           value={formState.identifier}
           onChange={(e) =>
             setFormState({ ...formState, identifier: e.target.value })
@@ -87,10 +84,10 @@ export function ReviewPrStep({
       <FormField
         label="Branch"
         required
-        name="branch"
         hint="Pull request source branch name. Avoid using existing branches."
       >
         <Input
+          name="branch"
           value={formState.branch}
           onChange={(e) =>
             setFormState({ ...formState, branch: e.target.value })
@@ -98,10 +95,7 @@ export function ReviewPrStep({
         />
       </FormField>
       {confirmation?.checklist && (
-        <FormField
-          label="Ensure the following are done before creating this PR:"
-          name="confirmation"
-        >
+        <FormField label="Ensure the following are done before creating this PR:">
           {Object.entries(formState.checkedItems).map(([label, checked]) => (
             <Checkbox
               key={label}

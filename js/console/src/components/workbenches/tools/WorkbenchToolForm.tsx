@@ -316,8 +316,6 @@ export function WorkbenchToolForm({
             <FormField
               required
               label="Name"
-              value={state.name}
-              onChange={(e) => update({ name: e.target.value })}
             >
               <Input
                 placeholder="Enter a name for the tool"

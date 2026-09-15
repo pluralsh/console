@@ -41,7 +41,7 @@ import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
 import CaretDownIcon from './icons/CaretDownIcon'
 
-type CodeProps = Omit<CardProps, 'children' | 'tabs'> & {
+type CodeProps = Omit<CardProps, 'children' | 'tabs' | 'title'> & {
   children?: string
   language?: string
   showLineNumbers?: boolean
