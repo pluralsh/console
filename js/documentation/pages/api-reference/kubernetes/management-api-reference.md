@@ -3370,6 +3370,7 @@ _Appears in:_
 | `permissions` _boolean_ | Permissions enables the permissions action in the flow header when set to true.<br />This allows personas to manage flow permissions from the flow detail page. |  | Optional: \{\} <br /> |
 | `startWorkbenchJob` _boolean_ | StartWorkbenchJob enables the "Start workbench job" action in the flow header when set to true.<br />This allows personas to launch workbench jobs directly from the flow detail page. |  | Optional: \{\} <br /> |
 | `workbenches` _boolean_ | Workbenches enables access to flow workbench features when set to true.<br />This includes viewing and using workbenches associated with flows. |  | Optional: \{\} <br /> |
+| `mcpServers` _boolean_ | McpServers enables access to the "Manage MCP servers" action from the flows page when set to true.<br />This allows personas to navigate to MCP server settings directly from flows. |  | Optional: \{\} <br /> |
 | `pipelines` _boolean_ | Pipelines enables access to flow pipeline features when set to true.<br />This includes viewing and managing pipelines associated with flows. |  | Optional: \{\} <br /> |
 | `previews` _boolean_ | Previews enables access to flow preview environment features when set to true.<br />This includes viewing and managing preview environments associated with flows. |  | Optional: \{\} <br /> |
 
