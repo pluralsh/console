@@ -29,6 +29,7 @@ defmodule Console.GraphQl.Users do
     field :name,             :string
     field :email,            :string
     field :roles,            :user_role_attributes
+    field :allowed_scopes,   list_of(non_null(:string))
     field :assume_bindings,  list_of(:policy_binding_attributes)
   end
 
@@ -160,6 +161,7 @@ defmodule Console.GraphQl.Users do
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
     field :refresh_token,   :refresh_token
+    field :allowed_scopes,  list_of(non_null(:string))
 
     field :assume_bindings, list_of(:policy_binding), resolve: dataloader(User)
     field :groups, list_of(:group), resolve: dataloader(User)

@@ -89,6 +89,7 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       lockColumnsOnScroll={false}
+      overflowX="hidden"
       data={jobs}
       columns={
         columns ?? [userColumn, promptColumn, usageColumn, ...actionColumns]

@@ -1,5 +1,7 @@
-import { Flex, Input2, SearchIcon } from '@pluralsh/design-system'
-import { useDebounce } from '@react-hooks-library/core'
+import { Flex, SearchIcon } from '@pluralsh/design-system'
+import { useDebounce, useKeyDown } from '@react-hooks-library/core'
+import usePersistedState from 'components/hooks/usePersistedState'
+import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
 import { GqlError } from 'components/utils/Alert'
@@ -8,9 +10,7 @@ import {
   DisplayContentSC,
   DisplayFilterEmpty,
   DisplayMainSC,
-  DisplayToolbarSC,
 } from 'components/utils/display/DisplayPanel'
-import usePersistedState from 'components/hooks/usePersistedState'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   IssueStatus,
@@ -37,6 +37,7 @@ import {
 } from './workbenchIssuesDisplay'
 
 const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
+const SEARCH_INPUT_WIDTH = 520
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -59,6 +60,9 @@ export function WorkbenchIssues() {
     setDisplay(next)
     setPersistedView(next.view)
   }
+  const clearSearch = () => setSearchString('')
+
+  useKeyDown(['Escape'], clearSearch)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -100,25 +104,34 @@ export function WorkbenchIssues() {
   )
 
   return (
-    <WorkbenchPageLayout>
+    <WorkbenchPageLayout
+      showEditWorkbenchButton={false}
+      headerActions={
+        <>
+          <IconExpander
+            tooltip="Search issues"
+            icon={<SearchIcon />}
+            active={!!searchString}
+            onClear={clearSearch}
+          >
+            <ExpandedInput
+              width={SEARCH_INPUT_WIDTH}
+              inputValue={searchString}
+              onChange={setSearchString}
+              placeholder="Search issues"
+            />
+          </IconExpander>
+          <DisplayButton
+            showDot={hasUncheckedIssueFilters(display)}
+            onClick={() => setDisplayOpen(!displayOpen)}
+          />
+        </>
+      }
+    >
       {error ? (
         <GqlError error={error} />
       ) : (
         <WrapperSC>
-          <DisplayToolbarSC>
-            <Input2
-              showClearButton
-              css={{ flex: 1 }}
-              placeholder="Search issues"
-              startIcon={<SearchIcon />}
-              value={searchString}
-              onChange={(e) => setSearchString(e.currentTarget.value)}
-            />
-            <DisplayButton
-              showDot={hasUncheckedIssueFilters(display)}
-              onClick={() => setDisplayOpen(!displayOpen)}
-            />
-          </DisplayToolbarSC>
           <DisplayContentSC>
             <DisplayMainSC>
               {filterEmptyKind ? (

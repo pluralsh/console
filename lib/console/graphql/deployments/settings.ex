@@ -15,9 +15,10 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @bedrock_proxy_models_doc "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
 
-  @bedrock_deployments_doc "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+  @bedrock_deployments_doc "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID."
 
   @bedrock_endpoint_doc "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs."
+  @bedrock_model_settings_doc "Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata."
 
   input_object :project_attributes do
     field :name, non_null(:string)
@@ -292,6 +293,16 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :json, description: @bedrock_deployments_doc
+    field :model_settings, list_of(:bedrock_model_settings_attributes),
+      description: @bedrock_model_settings_doc
+  end
+
+  input_object :bedrock_model_settings_attributes do
+    field :model_id, non_null(:string),
+      description: "the foundation model ID served by the inference profile"
+
+    field :inference_profile_arn, non_null(:string),
+      description: "the full ARN of the Bedrock application inference profile"
   end
 
   input_object :vertex_ai_attributes do
@@ -691,6 +702,13 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :map, description: @bedrock_deployments_doc
+    field :model_settings, list_of(:bedrock_model_settings),
+      description: @bedrock_model_settings_doc
+  end
+
+  object :bedrock_model_settings do
+    field :model_id, :string
+    field :inference_profile_arn, :string
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"

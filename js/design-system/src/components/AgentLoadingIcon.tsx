@@ -344,7 +344,7 @@ function stateDuration(state: AgentLoadingState, variant: AgentLoadingVariant) {
   if (state === 'waiting') {
     if (variant === 'cursor') return '8s'
     if (variant === 'cursorWave') return '2.4s'
-    if (variant === 'cursorEq') return '2.6s'
+    if (variant === 'cursorEq') return '1.8s'
     if (variant === 'whimsy') return '1.8s'
     if (variant === 'aaron') return '1.5s'
     if (variant === 'paper' || variant === 'paperLong') return '1.6s'
@@ -352,7 +352,7 @@ function stateDuration(state: AgentLoadingState, variant: AgentLoadingVariant) {
   }
   if (variant === 'cursor') return '5.8s'
   if (variant === 'cursorWave') return '1.5s'
-  if (variant === 'cursorEq') return '1.55s'
+  if (variant === 'cursorEq') return '1.1s'
   if (variant === 'whimsy') return '1.05s'
   if (variant === 'aaron') return '0.9s'
   if (variant === 'paper' || variant === 'paperLong') return '1s'

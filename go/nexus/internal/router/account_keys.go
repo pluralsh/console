@@ -220,6 +220,7 @@ func (in *Account) bedrockEmbeddingDeployments(config *pb.BedrockConfig) schemas
 		inferenceProfileID, model := in.parseModelID(modelID)
 		aliases[model] = schemas.AliasConfig{ModelID: inferenceProfileID}
 	}
+	in.applyBedrockModelSettings(aliases, config.GetModelSettings())
 	return aliases
 }
 
@@ -267,7 +268,27 @@ func (in *Account) bedrockDeployments(config *pb.BedrockConfig) schemas.KeyAlias
 		deployments[model] = schemas.AliasConfig{ModelID: inferenceProfileID}
 	}
 
+	in.applyBedrockModelSettings(deployments, config.GetModelSettings())
 	return deployments
+}
+
+func (in *Account) applyBedrockModelSettings(aliases schemas.KeyAliases, settings []*pb.BedrockModelSettings) {
+	for _, modelSettings := range settings {
+		modelID := modelSettings.GetModelId()
+		inferenceProfileARN := modelSettings.GetInferenceProfileArn()
+		if modelID == "" || inferenceProfileARN == "" {
+			continue
+		}
+
+		arn := schemas.SecretVar{Val: inferenceProfileARN}
+		aliases[modelID] = schemas.AliasConfig{
+			ModelID:   modelID,
+			ModelName: lo.ToPtr(modelID),
+			BedrockAliasCfg: &schemas.BedrockAliasCfg{
+				InferenceProfileARN: &arn,
+			},
+		}
+	}
 }
 
 func (in *Account) parseModelID(modelID string) (inferenceProfileID string, model string) {
