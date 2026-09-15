@@ -8,20 +8,33 @@ defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
   end
 
   @valid ~w(start end)a
+  @default_lookback_minutes 60
 
-  def default(past \\ 30) do
+  def default(past \\ @default_lookback_minutes) do
+    now = Timex.now()
+
     %__MODULE__{
-      start: Timex.now() |> Timex.shift(minutes: -past),
-      end: Timex.now(),
+      start: Timex.shift(now, minutes: -past),
+      end: now,
     }
   end
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> put_new_change(:start, fn -> Timex.now() |> Timex.shift(minutes: -30) end)
+    |> put_new_change(:start, fn -> Timex.now() |> Timex.shift(minutes: -@default_lookback_minutes) end)
     |> put_new_change(:end, fn -> Timex.now() end)
   end
+
+  def put_default(changeset) do
+    case get_field(changeset, :time_range) do
+      nil -> put_embed(changeset, :time_range, default())
+      _ -> changeset
+    end
+  end
+
+  def ensure(%{time_range: nil} = tool), do: Map.put(tool, :time_range, default())
+  def ensure(tool), do: tool
 
   def safe(%__MODULE__{start: s_ts, end: e_ts}, days \\ 7) do
     case Timex.diff(e_ts, s_ts, :days) < days do

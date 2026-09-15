@@ -2,31 +2,29 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardUpsert do
   use Console.AI.Tools.Workbench.Base
   alias Console.AI.Tools.Workbench.Monitoring
 
-  defmodule Attributes do
+  defmodule Settings do
     use Console.AI.Tools.Workbench.Base
     alias Console.Schema.Dashboard
 
     embedded_schema do
       field :name, :string
       field :description, :string
-      embeds_many :graphs, Dashboard.Graph
       embeds_many :inputs, Dashboard.Input
     end
 
     def changeset(model, attrs) do
       model
       |> cast(attrs, [:name, :description])
-      |> cast_embed(:graphs)
       |> cast_embed(:inputs)
-      |> validate_required([:name])
     end
   end
 
   embedded_schema do
     field :job, :map, virtual: true
     field :user, :map, virtual: true
-    field :dashboard_id, :string
-    embeds_one :attributes, Attributes
+    field :dashboard_name, :string
+    embeds_one :graph, Console.Schema.Dashboard.Graph
+    embeds_one :settings, Settings
   end
 
   @json_schema_path Console.priv_filename("tools/workbench/monitoring/dashboard_upsert.json")
@@ -37,14 +35,23 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardUpsert do
   def json_schema(_), do: @json_schema
 
   def description(_),
-    do: "Create a dashboard in this workbench, or update one when dashboard_id is provided. Graph layout rectangles must not overlap."
+    do:
+      "Insert or replace one graph in a dashboard, creating the dashboard when its name does not exist. Optional settings update dashboard metadata and inputs. Graph layout rectangles must not overlap."
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:dashboard_id])
-    |> cast_embed(:attributes, required: true)
+    |> cast(attrs, [:dashboard_name])
+    |> cast_embed(:graph, required: true)
+    |> cast_embed(:settings)
+    |> validate_required([:dashboard_name])
   end
 
-  def implement(%__MODULE__{job: job, user: user, dashboard_id: id, attributes: attrs}),
-    do: Monitoring.upsert_dashboard(job, user, id, attrs)
+  def implement(%__MODULE__{
+        job: job,
+        user: user,
+        dashboard_name: name,
+        graph: graph,
+        settings: settings
+      }),
+      do: Monitoring.upsert_dashboard(job, user, name, graph, settings)
 end

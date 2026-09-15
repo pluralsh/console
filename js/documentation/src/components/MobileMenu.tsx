@@ -1,15 +1,19 @@
-import { DiscordIcon } from '@pluralsh/design-system'
+import { useRef, useState } from 'react'
+
+import { ArrowLeftIcon, Button, DiscordIcon } from '@pluralsh/design-system'
 
 import styled from 'styled-components'
 import { useIsomorphicLayoutEffect } from 'usehooks-ts'
 
 import { DISCORD_LINK } from '@src/consts'
+import { useRestNav } from '@src/contexts/RestNavContext'
 
-import { FullNav, type NavContextValue } from './FullNav'
+import { FullNav, NavButtons, type NavContextValue } from './FullNav'
 import GithubStars from './GithubStars'
 import useScrollLock from './hooks/useScrollLock'
 import { MainLink } from './PageHeader'
 import { SocialLink } from './PageHeaderButtons'
+import { SidebarNav } from './RestApiReference/SidebarNav'
 import { TopHeading } from './SideNav'
 
 type MobileMenuProps = NavContextValue & {
@@ -73,6 +77,20 @@ export const PluralMenu = styled(PluralMenuContent)(
   })
 )
 
+const Panel = styled.div<{ $hidden: boolean }>(({ $hidden }) => ({
+  display: $hidden ? 'none' : 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+}))
+
+const DocsNavWrap = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+})
+
 const Content = styled.div(({ theme }) => ({
   pointerEvents: 'all',
   position: 'absolute',
@@ -84,23 +102,66 @@ const Content = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],
   display: 'flex',
   flexDirection: 'column',
+  minHeight: 0,
+  overflow: 'hidden',
+  [`${NavButtons}`]: {
+    position: 'relative',
+    zIndex: 1,
+    flexShrink: 0,
+  },
 }))
 
 function MobileMenu({ isOpen, setIsOpen, className }: MobileMenuProps) {
   const [, setScrollLock] = useScrollLock(false)
+  const restNav = useRestNav()
+  const [showDocsMenu, setShowDocsMenu] = useState(false)
 
   useIsomorphicLayoutEffect(() => {
     setScrollLock(isOpen)
   }, [isOpen, setScrollLock])
 
+  const wasOpen = useRef(isOpen)
+
+  useIsomorphicLayoutEffect(() => {
+    if (isOpen && !wasOpen.current) {
+      setShowDocsMenu(false)
+    }
+    wasOpen.current = isOpen
+  }, [isOpen])
+
+  const showRestNav = !!restNav && !showDocsMenu
+
   return (
     <div className={className}>
       <Content>
-        <FullNav
-          desktop={false}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-        />
+        {restNav && (
+          <Panel $hidden={!showRestNav}>
+            <NavButtons desktop={false}>
+              <Button
+                type="button"
+                tertiary
+                startIcon={<ArrowLeftIcon />}
+                onClick={() => setShowDocsMenu(true)}
+              >
+                Docs menu
+              </Button>
+            </NavButtons>
+            <SidebarNav
+              overlay
+              sections={restNav.sections}
+              selectedId={restNav.selectedId}
+            />
+          </Panel>
+        )}
+        <Panel $hidden={showRestNav}>
+          <DocsNavWrap>
+            <FullNav
+              desktop={false}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+            />
+          </DocsNavWrap>
+        </Panel>
       </Content>
     </div>
   )

@@ -74,6 +74,71 @@ func TestArgsWithProxyUsesPluralProvider(t *testing.T) {
 	}
 }
 
+func TestPiOpenAIAPI(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		want   string
+	}{
+		{name: "chat", method: string(console.OpenAiMethodChat), want: openAICompletionsAPI},
+		{name: "responses", method: string(console.OpenAiMethodResponses), want: openAIResponsesAPI},
+		{name: "auto", method: string(console.OpenAiMethodAuto), want: openAIResponsesAPI},
+		{name: "unset", want: openAIResponsesAPI},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := piOpenAIAPI(tt.method); got != tt.want {
+				t.Fatalf("piOpenAIAPI(%q) = %q, want %q", tt.method, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPiOpenAIEndpoint(t *testing.T) {
+	tests := []struct {
+		name     string
+		endpoint string
+		provider string
+		method   string
+		want     string
+	}{
+		{
+			name:     "preserves custom endpoint",
+			endpoint: "https://litellm.example/v1",
+			provider: openAIProvider,
+			method:   string(console.OpenAiMethodChat),
+			want:     "https://litellm.example/v1",
+		},
+		{
+			name:     "chat uses default OpenAI endpoint",
+			provider: openAIProvider,
+			method:   string(console.OpenAiMethodChat),
+			want:     openAIBaseURL,
+		},
+		{
+			name:     "responses uses default OpenAI endpoint",
+			provider: openAIProvider,
+			method:   string(console.OpenAiMethodResponses),
+			want:     openAIBaseURL,
+		},
+		{name: "auto leaves endpoint unset", provider: openAIProvider},
+		{
+			name:     "non-OpenAI provider leaves endpoint unset",
+			provider: "anthropic",
+			method:   string(console.OpenAiMethodChat),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := piOpenAIEndpoint(tt.endpoint, tt.provider, tt.method); got != tt.want {
+				t.Fatalf("piOpenAIEndpoint() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestMapStreamEventMapsToolLifecycle(t *testing.T) {
 	tool := &Pi{}
 	start, callID := tool.mapStreamEvent(&StreamEvent{

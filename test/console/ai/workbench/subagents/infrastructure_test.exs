@@ -23,7 +23,14 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect(Provider, :completion, fn _, opts ->
+        %{enabled: %{tool_names: tool_names}} =
+          Keyword.fetch!(opts, :plural)
+          |> Enum.find(&match?(%Console.AI.Tools.ToolSearch{}, &1))
+
+        assert "api_discovery" in tool_names
+        assert "api_spec" in tool_names
+
         {:ok, "enabling tools", [
           %Tool{name: "enable_tools", arguments: %{"tools" => ["__plrl__service_search"]}, id: "0"}
         ]}

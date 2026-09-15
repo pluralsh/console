@@ -35,6 +35,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_one_present([:service_id, :cluster_id])
   end

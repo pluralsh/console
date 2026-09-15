@@ -191,7 +191,8 @@ export function toolCallGroupHeader(
 export function toolCallDisplayTitle(
   kind: ToolCallKind,
   toolName: string,
-  args?: ToolArguments
+  args?: ToolArguments,
+  isPending?: boolean
 ): string {
   switch (kind) {
     case 'command_execution':
@@ -211,7 +212,7 @@ export function toolCallDisplayTitle(
     case 'grep':
       return 'grep'
     case 'subagent':
-      return 'subagent'
+      return isPending ? formatSubagentTitle(args) : 'subagent'
     case 'subagent_result':
       return 'result'
     case 'enable_tools':
@@ -292,10 +293,13 @@ export function getSubagentPrompt(args?: ToolArguments): string {
   return typeof args.prompt === 'string' ? args.prompt : ''
 }
 
-function formatSubagentSubtitle(args?: ToolArguments): string {
+export function formatSubagentTitle(args?: ToolArguments): string {
   const role = startCase(getSubagentRole(args).replace(/[_-]+/g, ' '))
-  const prompt = getSubagentPrompt(args)
-  return [role, prompt].filter(Boolean).join(' · ')
+  return role ? `${role} subagent` : 'Subagent'
+}
+
+function formatSubagentSubtitle(args?: ToolArguments): string {
+  return getSubagentPrompt(args)
 }
 
 export function getCommand(toolName: string, args?: ToolArguments): string {

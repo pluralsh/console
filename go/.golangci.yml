@@ -24,6 +24,16 @@ linters:
     - usestdlibvars
     - wastedassign
     - whitespace
+  settings:
+    goconst:
+      # Preserve the pre-v2.12 behavior, before composite literals were included.
+      exclude-types:
+        - Call
+        - CompositeLit
+    govet:
+      # Added in Go 1.27; enabling it would introduce unrelated legacy findings.
+      disable:
+        - inline
   exclusions:
     generated: lax
     presets:
@@ -49,6 +59,11 @@ linters:
       - path: (^|/)deployment-operator/internal/controller/agentrun_controller\.go$
         linters:
           - gocyclo
+      # Preserve deprecated AgentRun fields when translating legacy runtime requests.
+      - path: (^|/)deployment-operator/internal/controller/agentruntime_controller\.go$
+        text: 'AgentRunSpec\)\.(Language|LanguageVersion) is deprecated'
+        linters:
+          - staticcheck
 formatters:
   enable:
     - gofmt

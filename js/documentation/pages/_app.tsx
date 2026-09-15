@@ -41,6 +41,7 @@ import MainContent from '@src/components/MainContent'
 import PageFooter from '@src/components/PageFooter'
 import {
   ContentContainer,
+  MainColumn,
   PageGrid,
   SideCarContainer,
   SideNavContainer,
@@ -55,6 +56,7 @@ import {
   ROOT_TITLE,
 } from '@src/consts'
 import { NavDataProvider } from '@src/contexts/NavDataContext'
+import { RestNavProvider } from '@src/contexts/RestNavContext'
 import { collectHeadings } from '@src/markdoc/utils/parseHeadings'
 import { getNavData } from '@src/NavData'
 
@@ -168,29 +170,35 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
                   <FullNav desktop />
                 )}
               </SideNavContainer>
-              <ContentContainer>
-                <MainContent
-                  Component={Component}
-                  title={displayTitle}
-                  description={displayDescription}
-                />
-                <PageFooter />
-              </ContentContainer>
-              <SideCarContainer>
-                {isClient ? (
-                  <Suspense fallback={<div>Loading table of contents...</div>}>
-                    <TableOfContents
-                      key={router.asPath}
-                      toc={toc}
-                    />
-                  </Suspense>
-                ) : (
-                  <TableOfContents
-                    key={router.asPath}
-                    toc={toc}
+              <MainColumn>
+                <ContentContainer>
+                  <MainContent
+                    Component={Component}
+                    title={displayTitle}
+                    description={displayDescription}
                   />
+                  <PageFooter />
+                </ContentContainer>
+                {toc?.length > 0 && (
+                  <SideCarContainer>
+                    {isClient ? (
+                      <Suspense
+                        fallback={<div>Loading table of contents...</div>}
+                      >
+                        <TableOfContents
+                          key={router.asPath}
+                          toc={toc}
+                        />
+                      </Suspense>
+                    ) : (
+                      <TableOfContents
+                        key={router.asPath}
+                        toc={toc}
+                      />
+                    )}
+                  </SideCarContainer>
                 )}
-              </SideCarContainer>
+              </MainColumn>
             </PageGrid>
           )}
         </Page>
@@ -210,11 +218,13 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
         <NavigationContextProvider value={navContextVal}>
           <SWRConfig value={swrConfig}>
             <NavDataProvider value={navData}>
-              <BreakpointProvider>
-                <StyledThemeProvider theme={docsStyledTheme}>
-                  <FillLevelProvider value={0}>{app}</FillLevelProvider>
-                </StyledThemeProvider>
-              </BreakpointProvider>
+              <RestNavProvider>
+                <BreakpointProvider>
+                  <StyledThemeProvider theme={docsStyledTheme}>
+                    <FillLevelProvider value={0}>{app}</FillLevelProvider>
+                  </StyledThemeProvider>
+                </BreakpointProvider>
+              </RestNavProvider>
             </NavDataProvider>
           </SWRConfig>
         </NavigationContextProvider>

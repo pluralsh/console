@@ -1,9 +1,15 @@
 defmodule Console.GraphQl.Deployments.Flow do
   use Console.GraphQl.Schema.Base
   alias Console.Middleware.AdminRequired
-  alias Console.GraphQl.Resolvers.{Deployments, User}
+  alias Console.GraphQl.Resolvers.{Deployments, User, FlowSummaryLoader}
 
   ecto_enum :mcp_server_protocol, Console.Schema.McpServer.Protocol
+
+  enum :flow_sort do
+    value :name
+    value :service_count
+    value :favorited
+  end
 
   input_object :flow_attributes do
     field :name,                non_null(:string)
@@ -59,6 +65,11 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :preview_ttl,          :string, description: "how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)"
   end
 
+  object :component_status_count do
+    field :state, non_null(:component_state)
+    field :count, non_null(:integer)
+  end
+
   object :flow do
     field :id,           non_null(:id)
     field :name,         non_null(:string)
@@ -79,6 +90,27 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this flow"
     field :project,        :project, resolve: dataloader(Deployments), description: "the project this flow belongs to"
 
+    field :service_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:service_count),
+      description: "the number of services in this flow"
+    field :component_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:component_count),
+      description: "the number of service components in this flow"
+    field :alert_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:alert_count),
+      description: "the number of alerts for services in this flow"
+    field :pipeline_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:pipeline_count),
+      description: "the number of pipelines in this flow"
+    field :pending_pipeline_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:pending_pipeline_count),
+      description: "the number of pending pipeline gates in this flow"
+    field :service_statuses, list_of(:service_status_count),
+      resolve: FlowSummaryLoader.resolve(:service_statuses),
+      description: "a rollup of service statuses in this flow"
+    field :component_statuses, list_of(:component_status_count),
+      resolve: FlowSummaryLoader.resolve(:component_statuses),
+      description: "a rollup of component states in this flow"
     connection field :services, node_type: :service_deployment do
       resolve &Deployments.services_for_flow/3
     end
@@ -219,8 +251,24 @@ defmodule Console.GraphQl.Deployments.Flow do
         resource: :flow,
         action: :read
       arg :q, :string
+      arg :statuses, list_of(:service_deployment_status),
+        description: "return flows that have at least one service in one of these statuses"
+      arg :sort, :flow_sort, description: "field to sort flows by"
+      arg :direction, :sort_direction, description: "sort direction"
+      arg :favorite_ids, list_of(:id),
+        description: "flow ids to rank first when sorting by favorited"
 
       resolve &Deployments.list_flows/2
+    end
+
+    field :flow_service_counts, list_of(:service_status_count) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :read
+      arg :q, :string, description: "restrict counts to flows matching this search"
+
+      resolve &Deployments.flow_service_counts/2
     end
 
     field :flow, :flow do

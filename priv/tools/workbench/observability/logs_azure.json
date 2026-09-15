@@ -3,7 +3,7 @@
     "properties": {
         "query": {
             "type": "string",
-            "description": "The query to use to gather logs"
+            "description": "Optional provider-specific query used to gather logs. Leave empty to page logs without a text filter."
         },
         "facets": {
             "type": "array",
@@ -56,6 +56,5 @@
                 }
             }
         }
-    },
-    "required": ["query"]
+    }
 }

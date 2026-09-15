@@ -15,6 +15,7 @@
 package cache
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -124,7 +125,11 @@ func (k Key) SHA() (sha string, err error) {
 // exchangeToken exchanges the token for context identifier using the external source of truth
 // configured via `token-exchange-endpoint` flag.
 func (k Key) exchangeToken(token string) (string, error) {
-	client := &http.Client{Transport: &tokenExchangeTransport{token, http.DefaultTransport}}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	if args.TokenExchangeSkipTLSVerify() {
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec
+	}
+	client := &http.Client{Transport: &tokenExchangeTransport{token, transport}}
 	response, err := client.Get(args.TokenExchangeEndpoint())
 	if err != nil {
 		return "", err

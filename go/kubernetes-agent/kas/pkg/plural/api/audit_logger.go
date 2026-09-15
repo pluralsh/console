@@ -37,25 +37,27 @@ type auditLogTokenBucket struct {
 }
 
 type AuditLogBatcher struct {
-	log          *zap.Logger
-	pluralURL    string
-	flushEvery   time.Duration
-	flushAt      int
-	drainTimeout time.Duration
+	log                   *zap.Logger
+	pluralURL             string
+	insecureSkipTLSVerify bool
+	flushEvery            time.Duration
+	flushAt               int
+	drainTimeout          time.Duration
 
 	queue    chan AuditLogEvent
 	flushNow chan struct{}
 }
 
-func NewAuditLogBatcher(log *zap.Logger, pluralURL string, flushEvery, drainTimeout time.Duration, flushAt int) *AuditLogBatcher {
+func NewAuditLogBatcher(log *zap.Logger, pluralURL string, insecureSkipTLSVerify bool, flushEvery, drainTimeout time.Duration, flushAt int) *AuditLogBatcher {
 	return &AuditLogBatcher{
-		log:          log,
-		pluralURL:    pluralURL,
-		flushEvery:   flushEvery,
-		flushAt:      flushAt,
-		drainTimeout: drainTimeout,
-		queue:        make(chan AuditLogEvent, defaultAuditLogQueueSize),
-		flushNow:     make(chan struct{}, 1),
+		log:                   log,
+		pluralURL:             pluralURL,
+		insecureSkipTLSVerify: insecureSkipTLSVerify,
+		flushEvery:            flushEvery,
+		flushAt:               flushAt,
+		drainTimeout:          drainTimeout,
+		queue:                 make(chan AuditLogEvent, defaultAuditLogQueueSize),
+		flushNow:              make(chan struct{}, 1),
 	}
 }
 
@@ -154,7 +156,7 @@ func addAuditLogEventToBuckets(buckets map[string]*auditLogTokenBucket, totalEve
 
 func (b *AuditLogBatcher) flush(buckets map[string]*auditLogTokenBucket, totalEvents int) int {
 	for token, bucket := range buckets {
-		client := plural.New(b.pluralURL, token)
+		client := plural.New(b.pluralURL, token, b.insecureSkipTLSVerify)
 
 		audits := lo.Map(lo.Values(bucket.events), func(event AuditLogEvent, _ int) console.ClusterAuditAttributes {
 			return console.ClusterAuditAttributes{

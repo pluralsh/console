@@ -70,7 +70,7 @@ gofmt -w pkg/controller/service/reconciler.go pkg/manifests/tarball.go
 
 - A focused test passing is good validation for narrow changes, especially when the full suite is known to depend on external/local fixtures.
 - Full-suite failures like `could not resolve ref main` or `could not resolve ref master` usually indicate git fixture/ref setup problems unless the touched code is in that path.
-- Go failures like `go.work requires go >= 1.26.5` can mean the IDE/linter is using an older local Go. A shell `go test` may still work through Go's auto toolchain download when network and cache permissions are set correctly.
+- Go failures like `go.work requires go >= 1.27.1` can mean the IDE/linter is using an older local Go. A shell `go test` may still work through Go's auto toolchain download when network and cache permissions are set correctly.
 - Sandbox errors writing under `/Users/michaelguarino/go/pkg/sumdb` indicate the Go module/toolchain cache is outside the writable workspace. Prefer setting `GOPATH` and `GOCACHE` inside `/Users/michaelguarino/code/console`.
 - Report full-suite failures honestly, but separate environment/fixture failures from failures in the files being changed.
 

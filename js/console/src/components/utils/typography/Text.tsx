@@ -116,5 +116,8 @@ const sharedTextStyles = ({
     backgroundClip: 'text',
     color: 'transparent',
     animation: `shimmer-text ${SHIMMER_DURATION} linear infinite`,
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '6s',
+    },
   }),
 })

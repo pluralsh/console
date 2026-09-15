@@ -2,6 +2,7 @@ package plural
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 
 	console "github.com/pluralsh/console/go/client"
@@ -22,11 +23,20 @@ type Client struct {
 	Console console.ConsoleClient
 }
 
-func New(url, token string) *Client {
+func transport(insecureSkipTLSVerify bool) http.RoundTripper {
+	base := http.DefaultTransport.(*http.Transport).Clone()
+	if insecureSkipTLSVerify {
+		base.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec
+	}
+	return base
+}
+
+func New(url, token string, insecureSkipTLSVerify ...bool) *Client {
+	insecure := len(insecureSkipTLSVerify) > 0 && insecureSkipTLSVerify[0]
 	httpClient := http.Client{
 		Transport: &authedTransport{
 			token:   token,
-			wrapped: http.DefaultTransport,
+			wrapped: transport(insecure),
 		},
 	}
 
@@ -36,9 +46,10 @@ func New(url, token string) *Client {
 	}
 }
 
-func NewUnauthorized(url string) *Client {
+func NewUnauthorized(url string, insecureSkipTLSVerify ...bool) *Client {
+	insecure := len(insecureSkipTLSVerify) > 0 && insecureSkipTLSVerify[0]
 	return &Client{
-		Console: console.New(http.DefaultClient, url, nil),
+		Console: console.New(&http.Client{Transport: transport(insecure)}, url, nil),
 		ctx:     context.Background(),
 	}
 }

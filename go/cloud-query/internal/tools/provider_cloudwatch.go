@@ -218,8 +218,8 @@ func (in *CloudwatchProvider) Logs(ctx context.Context, input *toolquery.LogsQue
 	if in.conn == nil {
 		return nil, fmt.Errorf("%w: cloudwatch connection is required", ErrInvalidArgument)
 	}
-	if input == nil || input.GetQuery() == "" {
-		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
+	if input == nil {
+		return nil, ErrInvalidArgument
 	}
 
 	cfg, err := in.newAWSConfig(ctx)
@@ -227,7 +227,10 @@ func (in *CloudwatchProvider) Logs(ctx context.Context, input *toolquery.LogsQue
 		return nil, err
 	}
 
-	query := cloudwatchLogsQueryWithFacets(input.GetQuery(), input.GetFacets())
+	query := cloudwatchLogsQueryWithFacets(
+		defaultLogQuery(input.GetQuery(), "fields @timestamp, @message | sort @timestamp desc"),
+		input.GetFacets(),
+	)
 	startQueryInput := &cloudwatchlogs.StartQueryInput{
 		StartTime:   aws.Int64(input.GetRange().GetStart().AsTime().Unix()),
 		EndTime:     aws.Int64(input.GetRange().GetEnd().AsTime().Unix()),
@@ -265,8 +268,8 @@ func (in *CloudwatchProvider) LogAggregate(ctx context.Context, input *toolquery
 	if in.conn == nil {
 		return nil, fmt.Errorf("%w: cloudwatch connection is required", ErrInvalidArgument)
 	}
-	if input == nil || input.GetQuery() == "" {
-		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
+	if input == nil {
+		return nil, ErrInvalidArgument
 	}
 
 	cfg, err := in.newAWSConfig(ctx)
@@ -302,7 +305,7 @@ func (in *CloudwatchProvider) LogAggregate(ctx context.Context, input *toolquery
 }
 
 func cloudwatchLogAggregateStartQueryInput(input *toolquery.LogAggregateInput) *cloudwatchlogs.StartQueryInput {
-	query := cloudwatchLogsQueryWithFacets(input.GetQuery(), input.GetFacets())
+	query := cloudwatchLogsQueryWithFacets(defaultLogQuery(input.GetQuery(), "fields @timestamp"), input.GetFacets())
 	query = fmt.Sprintf("%s | stats count(*) as count by bin(%s) as timestamp", query, input.GetBucketSize())
 	return &cloudwatchlogs.StartQueryInput{
 		StartTime:   aws.Int64(input.GetRange().GetStart().AsTime().Unix()),

@@ -322,6 +322,45 @@ func TestConfigTemplate_Provider(t *testing.T) {
 		}
 	})
 
+	t.Run("openai provider chat method uses compatible sdk and default baseURL", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderOpenAI
+		input.OpenAICompatible = true
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		openai := providers["openai"].(map[string]any)
+		if openai["npm"] != "@ai-sdk/openai-compatible" {
+			t.Fatalf("expected npm=@ai-sdk/openai-compatible, got %v", openai["npm"])
+		}
+		options := openai["options"].(map[string]any)
+		if options["baseURL"] != "https://api.openai.com/v1" {
+			t.Errorf("expected OpenAI baseURL, got %v", options["baseURL"])
+		}
+	})
+
+	t.Run("plural provider with openaiCompatible uses chat completions sdk", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderPlural
+		input.OpenAICompatible = true
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		plural := providers["plural"].(map[string]any)
+		if plural["npm"] != "@ai-sdk/openai-compatible" {
+			t.Fatalf("expected npm=@ai-sdk/openai-compatible, got %v", plural["npm"])
+		}
+		options := plural["options"].(map[string]any)
+		if options["baseURL"] != testConsoleURL+"/ext/ai/v1" {
+			t.Errorf("expected proxy baseURL, got %v", options["baseURL"])
+		}
+		if options["apiKey"] != testConsoleToken {
+			t.Errorf("expected console token, got %v", options["apiKey"])
+		}
+	})
+
 	t.Run("openai compatible provider uses npm package and required baseURL", func(t *testing.T) {
 		input := baseInput(console.AgentRunModeWrite)
 		input.Provider = ProviderOpenAICompatible
@@ -333,8 +372,8 @@ func TestConfigTemplate_Provider(t *testing.T) {
 
 		providers := out["provider"].(map[string]any)
 		compat := providers[string(ProviderOpenAICompatible)].(map[string]any)
-		if compat["npm"] != "@ai-sdk/openai" {
-			t.Errorf("expected npm=@ai-sdk/openai, got %v", compat["npm"])
+		if compat["npm"] != "@ai-sdk/openai-compatible" {
+			t.Errorf("expected npm=@ai-sdk/openai-compatible, got %v", compat["npm"])
 		}
 		options := compat["options"].(map[string]any)
 		if options["baseURL"] != "https://litellm.example/v1" {
@@ -342,6 +381,20 @@ func TestConfigTemplate_Provider(t *testing.T) {
 		}
 		if options["apiKey"] != "litellm-key" {
 			t.Errorf("expected apiKey, got %v", options["apiKey"])
+		}
+	})
+
+	t.Run("openai compatible provider can use responses sdk", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderOpenAICompatible
+		input.Endpoint = "https://litellm.example/v1"
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		compat := providers[string(ProviderOpenAICompatible)].(map[string]any)
+		if compat["npm"] != "@ai-sdk/openai" {
+			t.Errorf("expected npm=@ai-sdk/openai, got %v", compat["npm"])
 		}
 	})
 

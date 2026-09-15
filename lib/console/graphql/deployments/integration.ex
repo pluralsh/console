@@ -12,11 +12,6 @@ defmodule Console.GraphQl.Deployments.Integration do
     value :title
   end
 
-  enum :issue_sort_direction do
-    value :asc
-    value :desc
-  end
-
   @desc "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
   input_object :chat_provider_connection_attributes do
     field :name,           non_null(:string), description: "the name of this chat connection"

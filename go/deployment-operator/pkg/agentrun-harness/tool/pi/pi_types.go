@@ -9,8 +9,11 @@ import (
 )
 
 const (
-	defaultModel   = "gpt-5.4"
-	openAIProvider = "openai"
+	defaultModel         = "gpt-5.4"
+	openAIProvider       = "openai"
+	openAIBaseURL        = "https://api.openai.com/v1"
+	openAICompletionsAPI = "openai-completions"
+	openAIResponsesAPI   = "openai-responses"
 	// proxyProviderKey is the models.json provider block name used when aiProxy is enabled.
 	// Using a non-"openai" name prevents the Pi CLI from stripping the "openai/" prefix
 	// from model IDs (e.g. "openai/gpt-5.4"), ensuring the full provider/model format
@@ -30,6 +33,7 @@ type Pi struct {
 	sessionID    string
 	model        string
 	provider     string
+	method       string
 	apiKey       string
 	endpoint     string
 	consoleURL   string

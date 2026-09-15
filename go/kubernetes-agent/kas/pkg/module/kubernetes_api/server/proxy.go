@@ -76,32 +76,33 @@ type proxyUserCacheKey struct {
 }
 
 type kubernetesApiProxy struct {
-	log                      *zap.Logger
-	api                      modserver.Api
-	kubernetesApiClient      rpc2.KubernetesApiClient
-	pluralUrl                string
-	jwtTokenAuthorizer       *pluralapi.JWTProxyAuthorizer
-	auditLogger              *pluralapi.AuditLogBatcher
-	allowedOriginUrls        []string
-	allowedAgentsCache       *cache.CacheWithErr[string, *pluralapi.AllowedAgentsForJob]
-	authorizeProxyUserCache  *cache.CacheWithErr[proxyUserCacheKey, *pluralapi.AuthorizeProxyUserResponse]
-	requestCounter           usage_metrics.Counter
-	ciTunnelUsersCounter     usage_metrics.UniqueCounter
-	ciAccessRequestCounter   usage_metrics.Counter
-	ciAccessUsersCounter     usage_metrics.UniqueCounter
-	ciAccessAgentsCounter    usage_metrics.UniqueCounter
-	userAccessRequestCounter usage_metrics.Counter
-	userAccessUsersCounter   usage_metrics.UniqueCounter
-	userAccessAgentsCounter  usage_metrics.UniqueCounter
-	patAccessRequestCounter  usage_metrics.Counter
-	patAccessUsersCounter    usage_metrics.UniqueCounter
-	patAccessAgentsCounter   usage_metrics.UniqueCounter
-	responseSerializer       runtime.NegotiatedSerializer
-	traceProvider            trace.TracerProvider
-	tracePropagator          propagation.TextMapPropagator
-	meterProvider            metric.MeterProvider
-	serverName               string
-	serverVia                string
+	log                         *zap.Logger
+	api                         modserver.Api
+	kubernetesApiClient         rpc2.KubernetesApiClient
+	pluralUrl                   string
+	pluralInsecureSkipTLSVerify bool
+	jwtTokenAuthorizer          *pluralapi.JWTProxyAuthorizer
+	auditLogger                 *pluralapi.AuditLogBatcher
+	allowedOriginUrls           []string
+	allowedAgentsCache          *cache.CacheWithErr[string, *pluralapi.AllowedAgentsForJob]
+	authorizeProxyUserCache     *cache.CacheWithErr[proxyUserCacheKey, *pluralapi.AuthorizeProxyUserResponse]
+	requestCounter              usage_metrics.Counter
+	ciTunnelUsersCounter        usage_metrics.UniqueCounter
+	ciAccessRequestCounter      usage_metrics.Counter
+	ciAccessUsersCounter        usage_metrics.UniqueCounter
+	ciAccessAgentsCounter       usage_metrics.UniqueCounter
+	userAccessRequestCounter    usage_metrics.Counter
+	userAccessUsersCounter      usage_metrics.UniqueCounter
+	userAccessAgentsCounter     usage_metrics.UniqueCounter
+	patAccessRequestCounter     usage_metrics.Counter
+	patAccessUsersCounter       usage_metrics.UniqueCounter
+	patAccessAgentsCounter      usage_metrics.UniqueCounter
+	responseSerializer          runtime.NegotiatedSerializer
+	traceProvider               trace.TracerProvider
+	tracePropagator             propagation.TextMapPropagator
+	meterProvider               metric.MeterProvider
+	serverName                  string
+	serverVia                   string
 	// urlPathPrefix is guaranteed to end with / by defaulting.
 	urlPathPrefix       string
 	listenerGracePeriod time.Duration
@@ -295,7 +296,7 @@ func (p *kubernetesApiProxy) authorizeProxyUser(ctx context.Context, log *zap.Lo
 		accessKey: accessKey,
 	}
 	auth, err := p.authorizeProxyUserCache.GetItem(ctx, key, func() (*pluralapi.AuthorizeProxyUserResponse, error) {
-		return pluralapi.AuthorizeProxyUser(ctx, accessKey, clusterId, p.pluralUrl)
+		return pluralapi.AuthorizeProxyUser(ctx, accessKey, clusterId, p.pluralUrl, p.pluralInsecureSkipTLSVerify)
 	})
 	if err != nil {
 		switch {

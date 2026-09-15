@@ -24,6 +24,7 @@ var (
 	argCacheEnabled          = pflag.Bool("cache-enabled", true, "whether client cache should be enabled or not")
 	argClusterContextEnabled = pflag.Bool("cluster-context-enabled", false, "whether multi-cluster cache context support should be enabled or not")
 	argTokenExchangeEndpoint = pflag.String("token-exchange-endpoint", "", "endpoint used in multi-cluster cache to exchange tokens for context identifiers")
+	argTokenExchangeSkipTLS  = pflag.Bool("token-exchange-skip-tls-verify", false, "whether certificate verification should be skipped for the token exchange endpoint")
 	argCacheSize             = pflag.Int("cache-size", 1000, "max number of cache entries")
 	argCacheTTL              = pflag.Duration("cache-ttl", 10*time.Minute, "cache entry TTL")
 	argCacheRefreshDebounce  = pflag.Duration("cache-refresh-debounce", 5*time.Second, "minimal time between cache refreshes in the background")
@@ -45,6 +46,10 @@ func ClusterContextEnabled() bool {
 
 func TokenExchangeEndpoint() string {
 	return *argTokenExchangeEndpoint
+}
+
+func TokenExchangeSkipTLSVerify() bool {
+	return *argTokenExchangeSkipTLS
 }
 
 func CacheSize() int {

@@ -106,6 +106,17 @@ defmodule Console.Deployments.AgentsTest do
 
       assert refetch(runtime)
     end
+
+    test "cannot delete an agent runtime still referenced by a workbench" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      insert(:workbench, agent_runtime: runtime)
+
+      {:error, %Ecto.Changeset{} = cs} = Agents.delete_agent_runtime(runtime.id, cluster)
+
+      assert elem(cs.errors[:id], 0) =~ "workbenches"
+      assert refetch(runtime)
+    end
   end
 
   describe "create_agent_run/3" do

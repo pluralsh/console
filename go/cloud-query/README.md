@@ -80,6 +80,7 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 | Datadog | Yes | Yes | Yes | Yes | Datadog API v1/v2 via `datadog-api-client-go` (requires API key + app key; site optional)            |
 | Elasticsearch | No | No | Yes | No | Elasticsearch typed client v9 Search API (API key required)                                          |
 | Loki | No | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`)                   |
+| VictoriaLogs | No | No | Yes | No | REST client to `/select/logsql/query` and `/select/logsql/hits` (LogsQL; optional AccountID/ProjectID) |
 | Splunk | No | No | Yes | No | Splunk export search API (token or basic auth)                                                       |
 | Tempo | No | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`)    |
 | Jaeger | No | No | No | Yes | Jaeger Query v3 REST API (`GET /api/v3/traces`) with structured trace filters                        |
@@ -107,6 +108,10 @@ ToolQuery also supports cloud function invocation via `InvokeLambda` for AWS Lam
 - `Prometheus` / `Loki` / `Tempo`:
   - Use bearer token and/or basic auth credentials when required by your backend.
   - If multi-tenant, also configure `tenant_id` (`X-Scope-OrgID`).
+- `VictoriaLogs`:
+  - Query language is LogsQL (`/select/logsql/query` for logs, `/select/logsql/hits` for count-over-time).
+  - Use bearer token and/or basic auth credentials when required by your backend.
+  - If multi-tenant, configure `account_id` / `project_id` (`AccountID` / `ProjectID` headers).
 - `Jaeger`:
   - Uses Jaeger stable v3 Query API (`GET /api/v3/traces`).
   - `Traces.query` is interpreted as Jaeger `service_name`.

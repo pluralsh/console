@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -42,8 +43,10 @@ const (
 	gitSigningKeyVolumeName = "git-signing-key"
 	gitSigningKeySecretKey  = "git-signing.key"
 
-	agentBootstrapContainerName = "agent-bootstrap"
-	mcpServerContainerName      = "mcpserver"
+	agentBootstrapContainerName    = "agent-bootstrap"
+	mcpServerContainerName         = "mcpserver"
+	repositoryPrebakeContainerName = "repository-prebake"
+	repositoryPrebakeImageDataDir  = "/data"
 
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
@@ -191,6 +194,8 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 	if runtime.Spec.Git != nil && runtime.Spec.Git.SigningKeyRef != nil {
 		enableGitSigningKey(run.Name, pod)
 	}
+
+	enableRepositoryPrebake(runtime, pod)
 
 	return pod
 }
@@ -597,6 +602,50 @@ func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.
 	}
 
 	return result
+}
+
+func repositoryImage(runtime *v1alpha1.AgentRuntime) string {
+	if runtime != nil && runtime.Spec.RepositoryImage != nil {
+		return strings.TrimSpace(*runtime.Spec.RepositoryImage)
+	}
+	return ""
+}
+
+func getRepositoryPrebakeContainer(image string) corev1.Container {
+	sc := ensureDefaultContainerSecurityContext(nil)
+	sc.ReadOnlyRootFilesystem = lo.ToPtr(true)
+	sc.Capabilities = &corev1.Capabilities{
+		Drop: []corev1.Capability{"ALL"},
+	}
+	return corev1.Container{
+		Name:            repositoryPrebakeContainerName,
+		Image:           image,
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Command:         []string{"/bin/sh", "-c"},
+		Args: []string{
+			"mkdir -p " + common.AgentRunRepositoryPrebakeDir + " && cp -a " + repositoryPrebakeImageDataDir + "/. " + common.AgentRunRepositoryPrebakeDir + "/",
+		},
+		SecurityContext: sc,
+		VolumeMounts: []corev1.VolumeMount{{
+			Name:      sharedContextVolumeName,
+			MountPath: sharedContextVolumePath,
+		}},
+	}
+}
+
+func enableRepositoryPrebake(runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {
+	image := repositoryImage(runtime)
+	if image == "" {
+		return
+	}
+
+	copyContainer := getRepositoryPrebakeContainer(image)
+	pod.Spec.InitContainers = append(
+		[]corev1.Container{copyContainer},
+		algorithms.Filter(pod.Spec.InitContainers, func(container corev1.Container) bool {
+			return container.Name != repositoryPrebakeContainerName
+		})...,
+	)
 }
 
 func enableDind(pod *corev1.Pod) {

@@ -7,6 +7,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Scratchpad,
     History,
     Codemode,
+    Infrastructure.ApiDiscovery,
+    Infrastructure.ApiSpec,
     Infrastructure.RawKubeGet,
     Infrastructure.RawKubeList,
     Infrastructure.Cluster,
@@ -109,6 +111,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp k8s_tools(%Workbench{configuration: %{infrastructure: %{kubernetes: true}}}, %User{} = user) do
     [
       SummarizeComponent,
+      %ApiDiscovery{user: user},
+      %ApiSpec{user: user},
       %RawKubeGet{user: user},
       %RawKubeList{user: user}
     ]

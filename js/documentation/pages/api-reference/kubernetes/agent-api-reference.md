@@ -275,6 +275,7 @@ _Appears in:_
 | `streamingProxy` _boolean_ | StreamingProxy routes OpenAI-compatible LLM requests through the in-pod mcpserver<br />sse conversion proxy before they reach the Console AI proxy (/ext/ai). Only valid when aiProxy<br />is enabled. Applies to CODEX and OPENCODE runtimes. |  | Optional: \{\} <br /> |
 | `dind` _boolean_ | Dind enables Docker-in-Docker for this agent runtime.<br />When true, the runtime will be configured to run with DinD support. |  | Optional: \{\} <br /> |
 | `memory` _boolean_ | Memory enables team-shared codebase-memory persistence for this agent runtime.<br />When true, agents may create and commit .codebase-memory/ graph artifacts<br />by default so future runs can bootstrap from the persisted index. When false<br />or unset, codebase-memory indexes stay in the pod-local cache and generated<br />.codebase-memory/ artifacts are excluded from commits. |  | Optional: \{\} <br /> |
+| `repositoryImage` _string_ | RepositoryImage is an OCI image of precloned git repositories plus manifest.json.<br />When set, an init container copies it into /plural/shared/repos before bootstrap<br />so a matching repo can be copied locally instead of git clone. |  | Optional: \{\} <br /> |
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this runtime. |  | Optional: \{\} <br /> |
 | `browser` _[BrowserConfig](#browserconfig)_ | Browser configuration augments agent runtime with a headless browser.<br />When provided, the runtime will be configured to run with a headless browser available<br />for the agent to use. |  | Optional: \{\} <br /> |
 | `bootstrapScript` _string_ | BootstrapScript is a bash script that will be executed inside the cloned repository<br />directory before the coding agent starts. It can be used to install dependencies,<br />configure tooling, or perform any other setup required by the agent. |  | Optional: \{\} <br /> |
@@ -926,6 +927,7 @@ _Appears in:_
 | `provider` _string_ | Provider is the OpenCode provider id from https://models.dev (for example openai, anthropic,<br />amazon-bedrock, google-vertex, google). Optional.<br />When the parent AgentRuntime has spec.aiProxy enabled, the harness ignores this field and<br />autowires provider "plural", routing requests through the Console AI proxy at /ext/ai/v1<br />using the deploy token. Set spec.config.opencode.model to a bare model id; the harness<br />prefixes it for proxy routing based on runtime type (for example gpt-5.4 -> openai/gpt-5.4).<br />When aiProxy is false, this selects the native OpenCode provider block; credentials come from<br />tokenSecretRef or the provider's usual environment variables. Defaults to plural when omitted.<br />Use exact models.dev slugs (for example amazon-bedrock, google-vertex, google). |  | MaxLength: 128 <br />Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint optionally overrides the provider baseURL in opencode.json.<br />When omitted, the harness omits baseURL so OpenCode uses the models.dev default for the provider. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the LLM model to use. |  | Optional: \{\} <br /> |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method configures which OpenAI API OpenCode should use.<br />CHAT selects @ai-sdk/openai-compatible and forces /chat/completions.<br />RESPONSES selects @ai-sdk/openai and forces /responses.<br />AUTO preserves the provider default. |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef references a Secret containing the API token for OpenCode.<br />Optional when aiProxy is enabled; authentication uses the Console deploy token instead. |  | Optional: \{\} <br /> |
 | `extraArgs` _string array_ | ExtraArgs args for advanced or experimental CLI flags.<br />Deprecated: It is being ignored by the agent harness. |  |  |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single opencode run invocation. |  | Optional: \{\} <br /> |
@@ -952,6 +954,7 @@ _Appears in:_
 | `provider` _string_ | Provider is the OpenCode provider id from https://models.dev. |  |  |
 | `endpoint` _string_ | Endpoint API endpoint for the OpenCode service. |  |  |
 | `model` _string_ | Model is the LLM model to use. |  |  |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method configures which OpenAI API OpenCode should use. |  |  |
 | `token` _string_ | Token is the raw API token for OpenCode. |  |  |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single opencode run invocation. |  | Optional: \{\} <br /> |
 
@@ -961,8 +964,8 @@ _Appears in:_
 
 
 OpenCodeOpenAICompatibleConfig configures a custom OpenAI-compatible API provider in opencode.json.
-The harness writes a provider block with npm @ai-sdk/openai-compatible. Use this for endpoints
-that are not listed on https://models.dev (for example LiteLLM, vLLM, or a private gateway).
+Use this for endpoints that are not listed on https://models.dev (for example LiteLLM, vLLM,
+or a private gateway).
 
 When set and the parent AgentRuntime has spec.aiProxy false, spec.config.opencode.provider and
 spec.config.opencode.endpoint are ignored in favor of this block.
@@ -995,6 +998,7 @@ _Appears in:_
 | `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | APIKeySecretRef references an API key. Optional with aiProxy enabled. |  | Optional: \{\} <br /> |
 | `provider` _string_ | Provider is Pi's provider id. Defaults to openai. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the model id to use. |  | Optional: \{\} <br /> |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method configures which OpenAI API Pi should use.<br />CHAT selects openai-completions and forces /chat/completions.<br />RESPONSES selects openai-responses and forces /responses.<br />AUTO preserves the current openai-responses default. |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint overrides the OpenAI-compatible provider base URL. |  | Optional: \{\} <br /> |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single Pi invocation. |  | Optional: \{\} <br /> |
 
@@ -1015,6 +1019,7 @@ _Appears in:_
 | `apiKey` _string_ |  |  |  |
 | `provider` _string_ |  |  |  |
 | `model` _string_ |  |  |  |
+| `method` _[OpenAiMethod](#openaimethod)_ |  |  |  |
 | `endpoint` _string_ |  |  |  |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ |  |  |  |
 

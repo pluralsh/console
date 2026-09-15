@@ -115,6 +115,32 @@ defmodule Console.AI.Workbench.EngineTest do
       expect(Subagents.Infrastructure, :run, fn _, _, _ -> %{status: :successful, result: %{output: "infrastructure result"}} end)
 
       expect(Provider, :completion, fn _, _ ->
+        {:ok, "complete with invalid metadata", [
+          %Tool{
+            id: "invalid-complete",
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "todo 1", description: "todo 1", done: true}],
+              "metrics_query" => %{
+                "tool_name" => "not_a_real_tool",
+                "tool_args" => %{"query" => "up"}
+              }
+            }
+          }
+        ]}
+      end)
+
+      expect(Provider, :completion, fn messages, _ ->
+        assert Enum.any?(messages, fn
+                 {:tool, content, _} ->
+                   content =~
+                     "failed to call tool: workbench_complete, result: {:error, \"tool not_a_real_tool not found\"}"
+
+                 _ ->
+                   false
+               end)
+
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",

@@ -16,6 +16,7 @@ defmodule Console.AI.Tool do
   alias Console.AI.Chat.Knowledge
   alias Console.Deployments.{Git, Settings, Agents}
   alias Console.Deployments.Policy, as: PolicySvc
+  alias Console.Deployments.Policy.Input, as: PolicyInput
 
   @type t :: %__MODULE__{}
 
@@ -184,7 +185,7 @@ defmodule Console.AI.Tool do
     end
   end
 
-  defp maybe_actor(input), do: Map.put(input, "actor", PolicySvc.actor(actor()))
+  defp maybe_actor(input), do: Map.put(input, "actor", PolicyInput.actor(actor()))
 
   defp compile_policies(policies) do
     with {:ok, engine} <- Regolix.new(),

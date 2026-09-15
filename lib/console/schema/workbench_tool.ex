@@ -35,7 +35,8 @@ defmodule Console.Schema.WorkbenchTool do
     lambda: 26,
     cloud_run: 27,
     azure_function: 28,
-    docker: 29
+    docker: 29,
+    victoria_logs: 30
 
   defenum Category,
     metrics: 0,
@@ -54,6 +55,7 @@ defmodule Console.Schema.WorkbenchTool do
     observability: 13
 
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
+  defenum SplunkTokenType, bearer: 0, splunk: 1
 
   schema "workbench_tools" do
     field :tool,            Tool
@@ -147,11 +149,21 @@ defmodule Console.Schema.WorkbenchTool do
         field :password,  EncryptedString
       end
 
+      embeds_one :victoria_logs, VictoriaLogsConnection, on_replace: :update do
+        field :url,        :string
+        field :token,      EncryptedString
+        field :username,   :string
+        field :password,   EncryptedString
+        field :account_id, :string
+        field :project_id, :string
+      end
+
       embeds_one :splunk, SplunkConnection, on_replace: :update do
-        field :url,      :string
-        field :token,    EncryptedString
-        field :username, :string
-        field :password, EncryptedString
+        field :url,        :string
+        field :token,      EncryptedString
+        field :token_type, SplunkTokenType, default: :bearer
+        field :username,   :string
+        field :password,   EncryptedString
       end
 
       embeds_one :tempo, TempoConnection, on_replace: :update do
@@ -375,6 +387,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:splunk), do: [:logs]
   defp categories(:prometheus), do: [:metrics]
   defp categories(:loki), do: [:logs]
+  defp categories(:victoria_logs), do: [:logs]
   defp categories(:elastic), do: [:logs]
   defp categories(:opensearch), do: [:logs]
   defp categories(:tempo), do: [:traces]
@@ -403,6 +416,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:opensearch, with: &opensearch_configuration_changeset/2)
     |> cast_embed(:prometheus, with: &prom_configuration_changeset/2)
     |> cast_embed(:loki, with: &loki_configuration_changeset/2)
+    |> cast_embed(:victoria_logs, with: &victoria_logs_configuration_changeset/2)
     |> cast_embed(:splunk, with: &splunk_configuration_changeset/2)
     |> cast_embed(:tempo, with: &tempo_configuration_changeset/2)
     |> cast_embed(:jaeger, with: &jaeger_configuration_changeset/2)
@@ -478,6 +492,12 @@ defmodule Console.Schema.WorkbenchTool do
     |> validate_required([:url])
   end
 
+  defp victoria_logs_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token username password account_id project_id)a)
+    |> validate_required([:url])
+  end
+
   defp tempo_configuration_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url token tenant_id username password)a)
@@ -527,7 +547,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp splunk_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url token username password)a)
+    |> cast(attrs, ~w(url token token_type username password)a)
     |> then(fn cs ->
       case {get_field(cs, :token), get_field(cs, :username), get_field(cs, :password)} do
         {token, _, _} when is_binary(token) and token != "" -> cs

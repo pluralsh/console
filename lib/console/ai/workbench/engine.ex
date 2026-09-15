@@ -395,7 +395,7 @@ defmodule Console.AI.Workbench.Engine do
       %FetchNotes{job: job},
       %Codemode{tools: []},
       Notes,
-      Complete,
+      %Complete{job: job, user: env.user},
     ] ++ type_tools(job)
       ++ function_tools(env)
       ++ kube_tools(job)

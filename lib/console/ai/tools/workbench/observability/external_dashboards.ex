@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards do
   use Console.AI.Tools.Workbench.Base
-  alias Console.AI.Tools.Workbench.Observability.ExternalDashboards.Client
+  alias Console.AI.Tools.Workbench.Observability.External.Client
 
   @default_limit 25
   @max_limit 100
@@ -37,7 +37,7 @@ defmodule Console.AI.Tools.Workbench.Observability.ExternalDashboards do
         scope: scope,
         cursor: cursor
       }) do
-    with {:ok, dashboards} <- Client.list(tool, q, limit, scope, cursor) do
+    with {:ok, dashboards} <- Client.list_dashboards(tool, q, limit, scope, cursor) do
       Jason.encode(dashboards)
     end
   end

@@ -47,7 +47,7 @@ jobs:
       - uses: golangci/golangci-lint-action@v9
         with:
           working-directory: go
-          version: v2.11.4
+          version: v2.13.2
           args: -c .golangci.yml ${{ steps.lint-packages.outputs.packages }}
 
   tools:

@@ -78,26 +78,39 @@ type opencodeSettings struct {
 }
 
 // resolveOpenCodeSettings selects provider/model wiring for opencode.json and CLI args.
-// The aiProxy branch is kept separate so proxy behavior stays unchanged when openaiCompatible is added.
-func resolveOpenCodeSettings(provider, model string, openaiCompatible, proxyEnabled bool) opencodeSettings {
+func resolveOpenCodeSettings(provider, model, method string, customOpenAICompatible, proxyEnabled bool) opencodeSettings {
+	openaiCompatible := useOpenAICompatibleSDK(method, customOpenAICompatible)
 	if proxyEnabled {
 		return opencodeSettings{
-			provider: EnsureProvider(provider, true),
-			model:    proxymodel.ProxyModel(console.AgentRuntimeTypeOpencode, string(EnsureModel(model))),
+			provider:         EnsureProvider(provider, true),
+			model:            proxymodel.ProxyModel(console.AgentRuntimeTypeOpencode, string(EnsureModel(model))),
+			openaiCompatible: openaiCompatible,
 		}
 	}
 
-	if openaiCompatible {
+	if customOpenAICompatible {
 		return opencodeSettings{
 			provider:         ProviderOpenAICompatible,
 			model:            string(EnsureModel(model)),
-			openaiCompatible: true,
+			openaiCompatible: openaiCompatible,
 		}
 	}
 
 	return opencodeSettings{
-		provider: EnsureProvider(provider, false),
-		model:    string(EnsureModel(model)),
+		provider:         EnsureProvider(provider, false),
+		model:            string(EnsureModel(model)),
+		openaiCompatible: openaiCompatible,
+	}
+}
+
+func useOpenAICompatibleSDK(method string, customOpenAICompatible bool) bool {
+	switch console.OpenAiMethod(method) {
+	case console.OpenAiMethodChat:
+		return true
+	case console.OpenAiMethodResponses:
+		return false
+	default:
+		return customOpenAICompatible
 	}
 }
 

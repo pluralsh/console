@@ -160,6 +160,31 @@ kind: WorkbenchTool
 metadata:
   labels:
     app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-victoria-logs-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-victoria-logs-sample
+  namespace: default
+spec:
+  name: workbenchtool_victoria_logs_sample
+  tool: VICTORIA_LOGS
+  categories:
+    - LOGS
+  configuration:
+    victoriaLogs:
+      url: https://victorialogs.example.com
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+      accountId: "12"
+      projectId: "34"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
     app.kubernetes.io/instance: workbenchtool-elastic-sample
     app.kubernetes.io/part-of: controller
     app.kubernetes.io/managed-by: kustomize
@@ -877,6 +902,8 @@ spec:
     - name: workbenchtool-prometheus-sample
       namespace: default
     - name: workbenchtool-loki-sample
+      namespace: default
+    - name: workbenchtool-victoria-logs-sample
       namespace: default
     - name: workbenchtool-elastic-sample
       namespace: default

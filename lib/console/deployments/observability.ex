@@ -3,6 +3,7 @@ defmodule Console.Deployments.Observability do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.Deployments.Observability.Metrics
+  alias Console.AI.Workbench.Toolchain
   alias Console.Deployments.Observability.Monitor, as: MonitorImpl
   alias Prometheus.Client, as: PrometheusClient
   alias Console.Deployments.Settings
@@ -15,6 +16,7 @@ defmodule Console.Deployments.Observability do
     Service,
     Monitor,
     Dashboard,
+    Workbench,
     AlertResolution,
     DeploymentSettings,
     ObservabilityProvider,
@@ -73,18 +75,41 @@ defmodule Console.Deployments.Observability do
 
   @spec create_dashboard(map, User.t()) :: dashboard_resp
   def create_dashboard(attrs, %User{} = user) do
-    %Dashboard{}
-    |> Dashboard.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    changeset = Dashboard.changeset(%Dashboard{}, attrs)
+
+    with :ok <- validate_dashboard_tools(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write),
+      do: Repo.insert(changeset)
   end
 
   @spec update_dashboard(map, binary, User.t()) :: dashboard_resp
   def update_dashboard(attrs, id, %User{} = user) do
-    get_dashboard!(id)
-    |> Dashboard.changeset(attrs |> Map.delete(:workbench_id) |> Map.delete("workbench_id"))
-    |> allow(user, :write)
-    |> when_ok(:update)
+    changeset = Dashboard.changeset(get_dashboard!(id), Map.drop(attrs, [:workbench_id, "workbench_id"]))
+
+    with :ok <- validate_dashboard_tools(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write),
+      do: Repo.update(changeset)
+  end
+
+  defp validate_dashboard_tools(%Ecto.Changeset{valid?: true} = changeset, %User{} = user) do
+    dashboard = Ecto.Changeset.apply_changes(changeset)
+
+    case Repo.preload(dashboard, :workbench) do
+      %Dashboard{workbench: %Workbench{} = workbench} = dashboard ->
+        Toolchain.validate_all(workbench, dashboard_tool_queries(dashboard), user)
+      _ -> {:error, "dashboard workbench not found"}
+    end
+  end
+  defp validate_dashboard_tools(_, _), do: :ok
+
+  defp dashboard_tool_queries(%Dashboard{graphs: graphs, inputs: inputs}) do
+    Enum.flat_map(graphs ++ inputs, fn
+      %{datasource: %{type: type, tool: tool, input: input}}
+      when type in [:metrics, :logs, :traces, :labels] ->
+        [{type, tool, input || %{}}]
+
+      _ -> []
+    end)
   end
 
   @spec delete_dashboard(binary, User.t()) :: dashboard_resp

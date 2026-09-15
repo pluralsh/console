@@ -533,7 +533,34 @@ type RootQueryType {
 
   federatedCredential(id: ID!): FederatedCredential
 
-  flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
+  flows(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    q: String
+
+    "return flows that have at least one service in one of these statuses"
+    statuses: [ServiceDeploymentStatus]
+
+    "field to sort flows by"
+    sort: FlowSort
+
+    "sort direction"
+    direction: SortDirection
+
+    "flow ids to rank first when sorting by favorited"
+    favoriteIds: [ID]
+  ): FlowConnection
+
+  flowServiceCounts(
+    "restrict counts to flows matching this search"
+    q: String
+  ): [ServiceStatusCount]
 
   flow(id: ID, name: String): Flow
 
@@ -1856,11 +1883,6 @@ enum IssueSort {
   TITLE
 }
 
-enum IssueSortDirection {
-  ASC
-  DESC
-}
-
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
 input ChatProviderConnectionAttributes {
   "the name of this chat connection"
@@ -2931,6 +2953,7 @@ enum WorkbenchToolType {
   CLOUD_RUN
   AZURE_FUNCTION
   DOCKER
+  VICTORIA_LOGS
 }
 
 enum WorkbenchToolCategory {
@@ -2956,6 +2979,11 @@ enum WorkbenchToolHttpMethod {
   PUT
   DELETE
   PATCH
+}
+
+enum SplunkTokenType {
+  BEARER
+  SPLUNK
 }
 
 enum WorkbenchJobStatus {
@@ -3454,6 +3482,9 @@ input WorkbenchToolConfigurationAttributes {
   "loki connection (logs)"
   loki: WorkbenchToolLokiConnectionAttributes
 
+  "victoria logs connection (logs)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnectionAttributes
+
   "splunk connection (logs)"
   splunk: WorkbenchToolSplunkConnectionAttributes
 
@@ -3607,6 +3638,26 @@ input WorkbenchToolLokiConnectionAttributes {
   tenantId: String
 }
 
+input WorkbenchToolVictoriaLogsConnectionAttributes {
+  "victoria logs base url"
+  url: String!
+
+  "bearer token or api key"
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
+}
+
 input WorkbenchToolTempoConnectionAttributes {
   "tempo base url"
   url: String!
@@ -3642,8 +3693,11 @@ input WorkbenchToolSplunkConnectionAttributes {
   "splunk base url"
   url: String!
 
-  "bearer token"
+  "splunk authentication token"
   token: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String
@@ -4016,7 +4070,7 @@ type Workbench {
     sort: IssueSort
 
     "sort direction"
-    direction: IssueSortDirection
+    direction: SortDirection
   ): IssueConnection
 
   issueCounts: WorkbenchIssueCounts
@@ -5129,6 +5183,9 @@ type WorkbenchToolConfiguration {
   "loki connection (no secrets)"
   loki: WorkbenchToolLokiConnection
 
+  "victoria logs connection (no secrets)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnection
+
   "splunk connection (no secrets)"
   splunk: WorkbenchToolSplunkConnection
 
@@ -5261,6 +5318,20 @@ type WorkbenchToolLokiConnection {
   tenantId: String
 }
 
+type WorkbenchToolVictoriaLogsConnection {
+  "victoria logs base url"
+  url: String
+
+  "basic auth username"
+  username: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
+}
+
 type WorkbenchToolTempoConnection {
   "tempo base url"
   url: String
@@ -5283,6 +5354,9 @@ type WorkbenchToolJaegerConnection {
 type WorkbenchToolSplunkConnection {
   "splunk base url"
   url: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String
@@ -6225,6 +6299,12 @@ enum McpServerProtocol {
   STREAMABLE_HTTP
 }
 
+enum FlowSort {
+  NAME
+  SERVICE_COUNT
+  FAVORITED
+}
+
 input FlowAttributes {
   name: String!
 
@@ -6317,6 +6397,11 @@ input PreviewEnvironmentTemplateAttributes {
   previewTtl: String
 }
 
+type ComponentStatusCount {
+  state: ComponentState!
+  count: Int!
+}
+
 type Flow {
   id: ID!
 
@@ -6351,6 +6436,27 @@ type Flow {
 
   "the project this flow belongs to"
   project: Project
+
+  "the number of services in this flow"
+  serviceCount: Int
+
+  "the number of service components in this flow"
+  componentCount: Int
+
+  "the number of alerts for services in this flow"
+  alertCount: Int
+
+  "the number of pipelines in this flow"
+  pipelineCount: Int
+
+  "the number of pending pipeline gates in this flow"
+  pendingPipelineCount: Int
+
+  "a rollup of service statuses in this flow"
+  serviceStatuses: [ServiceStatusCount]
+
+  "a rollup of component states in this flow"
+  componentStatuses: [ComponentStatusCount]
 
   services(after: String, first: Int, before: String, last: Int): ServiceDeploymentConnection
 
@@ -6622,6 +6728,11 @@ enum OpenAiMethod {
   CHAT
   RESPONSES
   AUTO
+}
+
+enum BedrockEndpoint {
+  RUNTIME
+  MANTLE
 }
 
 enum Provider {
@@ -6943,6 +7054,9 @@ input BedrockAiAttributes {
 
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
+
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
 
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
@@ -7380,6 +7494,9 @@ type BedrockAiSettings {
 
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
+
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
 
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
@@ -17806,6 +17923,11 @@ enum Delta {
   CREATE
   UPDATE
   DELETE
+}
+
+enum SortDirection {
+  ASC
+  DESC
 }
 
 type MetricResult {

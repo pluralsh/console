@@ -5,6 +5,8 @@
 3. Never use a nested case when a with expression is possible.
 4. Defer to ecto for input validation.  You should rarely need to use put_change, trust the builtins.
 5. Avoid usage of `if` and `cond` if a more elegant case expression is possible.
+6. There should never be queries outside of schema modules.
+7. Use Absinthe dataloaders for batched GraphQL fields, not `batch/3`.
 
 ## Broad go guidance
 

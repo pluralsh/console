@@ -110,7 +110,12 @@ spec:
             - --disable-csrf-protection
             - --cluster-context-enabled=true
             - --insecure-bind-address=0.0.0.0
+            {{- if .Values.console.tls.enabled }}
+            - --token-exchange-endpoint=https://$(CONSOLE_HOST)/v1/dashboard/cluster
+            - --token-exchange-skip-tls-verify
+            {{- else }}
             - --token-exchange-endpoint=http://$(CONSOLE_HOST)/v1/dashboard/cluster
+            {{- end }}
           env:
             - name: KAS_HOST
               valueFrom:

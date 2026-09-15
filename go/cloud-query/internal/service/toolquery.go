@@ -109,7 +109,7 @@ func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQuery
 		return nil, status.Error(codes.InvalidArgument, "input is required")
 	}
 
-	if err := in.validateInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+	if err := in.validateLogsInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
 		return nil, err
 	}
 	provider, err := tools.NewProvider(input.GetConnection())
@@ -130,7 +130,7 @@ func (in *ToolQueryService) LogAggregate(ctx context.Context, input *toolquery.L
 		return nil, status.Error(codes.InvalidArgument, "input is required")
 	}
 
-	if err := in.validateInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+	if err := in.validateLogsInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
 		return nil, err
 	}
 	if bucketSize, err := time.ParseDuration(input.GetBucketSize()); err != nil || bucketSize <= 0 {
@@ -241,6 +241,18 @@ func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, 
 
 	if connection.GetDynatrace() != nil {
 		// skip time range validation for dynatrace as it is not required
+		return nil
+	}
+
+	return in.validateTimeRange(timeRange)
+}
+
+func (in *ToolQueryService) validateLogsInput(connection *toolquery.ToolConnection, _ string, timeRange *toolquery.TimeRange) error {
+	if err := in.validateSearchInput(connection); err != nil {
+		return err
+	}
+
+	if connection.GetDynatrace() != nil {
 		return nil
 	}
 

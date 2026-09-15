@@ -3,6 +3,7 @@ package http
 import (
 	"compress/gzip"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
@@ -87,7 +88,12 @@ func newRetryableClient(transport http.RoundTripper, retryMax int, retryWaitMin,
 	return rc.StandardClient()
 }
 
-func NewHttpClient(token string) *http.Client {
-	transport := &tokenTransport{token: token, wrapped: http.DefaultTransport}
+func NewHttpClient(token string, insecureSkipTLSVerify ...bool) *http.Client {
+	baseTransport := http.DefaultTransport.(*http.Transport).Clone()
+	if len(insecureSkipTLSVerify) > 0 && insecureSkipTLSVerify[0] {
+		baseTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec
+	}
+
+	transport := &tokenTransport{token: token, wrapped: baseTransport}
 	return newRetryableClient(transport, 3, 1*time.Second, 10*time.Second)
 }

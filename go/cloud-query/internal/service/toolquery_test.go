@@ -38,3 +38,26 @@ func TestLogAggregateValidation(t *testing.T) {
 	require.Equal(t, codes.InvalidArgument, status.Code(err))
 	require.Contains(t, err.Error(), "bucket_size")
 }
+
+func TestEmptyLogQueryValidation(t *testing.T) {
+	service := &ToolQueryService{}
+	now := time.Now().UTC()
+	timeRange := &toolquery.TimeRange{
+		Start: timestamppb.New(now.Add(-time.Hour)),
+		End:   timestamppb.New(now),
+	}
+	elastic := &toolquery.ToolConnection{
+		Connection: &toolquery.ToolConnection_Elastic{
+			Elastic: &toolquery.ElasticConnection{},
+		},
+	}
+	loki := &toolquery.ToolConnection{
+		Connection: &toolquery.ToolConnection_Loki{
+			Loki: &toolquery.LokiConnection{},
+		},
+	}
+
+	require.NoError(t, service.validateLogsInput(elastic, "", timeRange))
+	require.NoError(t, service.validateLogsInput(loki, "", timeRange))
+	require.Error(t, service.validateInput(loki, "", timeRange))
+}

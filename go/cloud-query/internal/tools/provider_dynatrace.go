@@ -70,7 +70,7 @@ func (in *DynatraceProvider) MetricsLabelSearch(ctx context.Context, input *tool
 }
 
 func (in *DynatraceProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {
-	if in.client == nil {
+	if in.client == nil || input == nil {
 		return nil, ErrInvalidArgument
 	}
 
@@ -80,7 +80,7 @@ func (in *DynatraceProvider) Logs(ctx context.Context, input *toolquery.LogsQuer
 
 	resp, err := in.client.Logs(
 		ctx,
-		input.GetQuery(),
+		defaultLogQuery(input.GetQuery(), "fetch logs"),
 	)
 	if err != nil {
 		return nil, err
@@ -93,11 +93,11 @@ func (in *DynatraceProvider) LogAggregate(ctx context.Context, input *toolquery.
 	if in.client == nil || input == nil {
 		return nil, ErrInvalidArgument
 	}
-	if !strings.HasPrefix(input.GetQuery(), "fetch logs") {
+	if !strings.HasPrefix(defaultLogQuery(input.GetQuery(), "fetch logs"), "fetch logs") {
 		return nil, fmt.Errorf("invalid query: must start with 'fetch logs'")
 	}
 
-	query := dynatraceLogsQueryWithFacets(input.GetQuery(), input.GetFacets(), input.GetOperator())
+	query := dynatraceLogsQueryWithFacets(defaultLogQuery(input.GetQuery(), "fetch logs"), input.GetFacets(), input.GetOperator())
 	query = fmt.Sprintf(
 		"%s | summarize count = count(), by:{timestamp = bin(timestamp, %s)}",
 		query,
@@ -194,7 +194,7 @@ func dynatraceAggregateCount(value any) (int64, bool) {
 }
 
 func (in *DynatraceProvider) validateLogsInput(input *toolquery.LogsQueryInput) error {
-	if !strings.HasPrefix(input.GetQuery(), "fetch logs") {
+	if !strings.HasPrefix(defaultLogQuery(input.GetQuery(), "fetch logs"), "fetch logs") {
 		return fmt.Errorf("invalid query: must start with 'fetch logs'")
 	}
 

@@ -9,7 +9,6 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v9"
 	"github.com/elastic/go-elasticsearch/v9/typedapi/core/search"
-	"github.com/elastic/go-elasticsearch/v9/typedapi/esdsl"
 	"github.com/elastic/go-elasticsearch/v9/typedapi/types"
 	"github.com/elastic/go-elasticsearch/v9/typedapi/types/enums/operator"
 	"github.com/samber/lo"
@@ -42,7 +41,7 @@ func (in *ElasticProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 
@@ -63,7 +62,7 @@ func (in *ElasticProvider) LogAggregate(ctx context.Context, input *toolquery.Lo
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil {
 		return nil, ErrInvalidArgument
 	}
 
@@ -174,21 +173,27 @@ func (in *ElasticProvider) elasticLogsQuery(query string, timeRange *toolquery.T
 		})
 	}
 
-	queryString := esdsl.NewQueryStringQuery(query).
-		AllowLeadingWildcard(true).
-		DefaultField("*").
-		AnalyzeWildcard(true)
+	matchOperator := operator.Or
 	if defaultOperator != nil {
-		queryString.DefaultOperator(*defaultOperator)
+		matchOperator = *defaultOperator
+	}
+
+	messageQuery := types.Query{
+		Match: map[string]types.MatchQuery{
+			"message": {
+				Analyzer: lo.ToPtr("stop"),
+				Operator: &matchOperator,
+				Query:    query,
+			},
+		},
+	}
+	if query == "" || query == "*" {
+		messageQuery = types.Query{MatchAll: &types.MatchAllQuery{}}
 	}
 
 	return &types.Query{
 		Bool: &types.BoolQuery{
-			Must: []types.Query{
-				{
-					QueryString: queryString.QueryStringQueryCaster(),
-				},
-			},
+			Must: []types.Query{messageQuery},
 			Filter: append([]types.Query{
 				{Range: map[string]types.RangeQuery{
 					"@timestamp": types.DateRangeQuery{

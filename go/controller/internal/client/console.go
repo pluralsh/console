@@ -10,9 +10,10 @@ import (
 )
 
 type client struct {
-	ctx           context.Context
-	url           string
-	consoleClient console.ConsoleClient
+	ctx                   context.Context
+	url                   string
+	insecureSkipTLSVerify bool
+	consoleClient         console.ConsoleClient
 }
 
 type ConsoleClient interface {
@@ -238,15 +239,16 @@ type ConsoleClient interface {
 	RunSentinel(ctx context.Context, id string, overrides *console.SentinelRunOverrides) (*string, error)
 }
 
-func New(url, token string, datadogEnabled bool) ConsoleClient {
+func New(url, token string, datadogEnabled, insecureSkipTLSVerify bool) ConsoleClient {
 	interceptors := []clientv2.RequestInterceptor{console.PersistedQueryInterceptor}
 	if datadogEnabled {
 		interceptors = append(interceptors, console.DatadogTracingInterceptor)
 	}
 
 	return &client{
-		consoleClient: console.New(http.NewHttpClient(token), url, nil, interceptors...),
-		url:           url,
-		ctx:           context.Background(),
+		consoleClient:         console.New(http.NewHttpClient(token, insecureSkipTLSVerify), url, nil, interceptors...),
+		url:                   url,
+		insecureSkipTLSVerify: insecureSkipTLSVerify,
+		ctx:                   context.Background(),
 	}
 }

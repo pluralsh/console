@@ -98,6 +98,7 @@ type OpencodeConfig struct {
 	Provider         string        `json:"provider"`
 	Endpoint         string        `json:"endpoint"`
 	Model            string        `json:"model,omitempty"`
+	Method           string        `json:"method,omitempty"`
 	Token            string        `json:"token,omitempty"`
 	OpenAICompatible bool          `json:"openaiCompatible,omitempty"`
 	Timeout          time.Duration `json:"timeout,omitempty"`
@@ -133,6 +134,7 @@ type PiConfig struct {
 	APIKey   string        `json:"apiKey"`
 	Provider string        `json:"provider,omitempty"`
 	Model    string        `json:"model,omitempty"`
+	Method   string        `json:"method,omitempty"`
 	Endpoint *string       `json:"endpoint,omitempty"`
 	Timeout  time.Duration `json:"timeout"`
 }
@@ -264,6 +266,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 			Provider:         helpers.GetPluralEnv(controller.EnvOpenCodeProvider, ""),
 			Endpoint:         helpers.GetPluralEnv(controller.EnvOpenCodeEndpoint, ""),
 			Model:            helpers.GetPluralEnv(controller.EnvOpenCodeModel, ""),
+			Method:           helpers.GetPluralEnv(controller.EnvOpenCodeMethod, ""),
 			Token:            helpers.GetPluralEnv(controller.EnvOpenCodeToken, ""),
 			OpenAICompatible: helpers.GetPluralEnvBool(controller.EnvOpenCodeOpenAICompatible, false),
 			Timeout:          helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
@@ -293,6 +296,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 			APIKey:   helpers.GetPluralEnv(controller.EnvPiAPIKey, ""),
 			Provider: helpers.GetPluralEnv(controller.EnvPiProvider, ""),
 			Model:    helpers.GetPluralEnv(controller.EnvPiModel, ""),
+			Method:   helpers.GetPluralEnv(controller.EnvPiMethod, ""),
 			Timeout:  helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvPiEndpoint, ""); endpoint != "" {

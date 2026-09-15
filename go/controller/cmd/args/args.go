@@ -28,6 +28,8 @@ var (
 		"The url of the console api to fetch services from")
 	argConsoleToken = flag.String("console-token", utils.GetEnv("CONSOLE_TOKEN", ""),
 		"The console token to auth to console api with. Can also be set via CONSOLE_TOKEN environment variable.")
+	argConsoleInsecureSkipTLSVerify = flag.Bool("console-insecure-skip-tls-verify", false,
+		"Skip verification of the Console TLS certificate.")
 	argMetricsBindAddress = flag.String("metrics-bind-address", defaultMetricsAddr,
 		"The address the metric endpoint binds to.")
 	argHealthProbeBindAddress = flag.String("health-probe-bind-address", defaultHealthProbeAddr,
@@ -113,6 +115,10 @@ func ConsoleToken() string {
 	}
 
 	return *argConsoleToken
+}
+
+func ConsoleInsecureSkipTLSVerify() bool {
+	return *argConsoleInsecureSkipTLSVerify
 }
 
 func MetricsBindAddress() string {

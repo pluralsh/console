@@ -71,6 +71,7 @@ func (in *SplunkProvider) Logs(ctx context.Context, input *toolquery.LogsQueryIn
 	client := client.NewSplunkClient(
 		in.conn.GetUrl(),
 		in.conn.GetToken(),
+		in.conn.GetTokenType(),
 		in.conn.GetUsername(),
 		in.conn.GetPassword(),
 	)
@@ -107,6 +108,7 @@ func (in *SplunkProvider) LogAggregate(ctx context.Context, input *toolquery.Log
 	client := client.NewSplunkClient(
 		in.conn.GetUrl(),
 		in.conn.GetToken(),
+		in.conn.GetTokenType(),
 		in.conn.GetUsername(),
 		in.conn.GetPassword(),
 	)

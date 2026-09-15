@@ -17,6 +17,93 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
 
+func TestElasticLogsMessageQuery(t *testing.T) {
+	timeRange := &toolquery.TimeRange{
+		Start: timestamppb.New(time.Unix(1704067200, 0)),
+		End:   timestamppb.New(time.Unix(1704070800, 0)),
+	}
+
+	t.Run("defaults to OR matching on message", func(t *testing.T) {
+		request := (&ElasticProvider{}).toRequest(&toolquery.LogsQueryInput{
+			Query: "error OR failure",
+			Range: timeRange,
+			Facets: []*toolquery.LogsQueryFacet{
+				{Name: "cluster.name.keyword", Value: "mgmt"},
+			},
+		})
+		data, err := json.Marshal(request)
+		if err != nil {
+			t.Fatalf("failed to marshal Elasticsearch logs request: %v", err)
+		}
+
+		body := string(data)
+		for _, expected := range []string{
+			`"match":{"message":`,
+			`"analyzer":"stop"`,
+			`"operator":"or"`,
+			`"query":"error OR failure"`,
+			`"cluster.name.keyword":{"value":"mgmt"}`,
+		} {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("logs request missing %s: %s", expected, body)
+			}
+		}
+	})
+
+	for _, query := range []string{"", "   ", "*"} {
+		t.Run("uses match_all for "+query, func(t *testing.T) {
+			request := (&ElasticProvider{}).toRequest(&toolquery.LogsQueryInput{
+				Query: query,
+				Range: timeRange,
+			})
+			data, err := json.Marshal(request)
+			if err != nil {
+				t.Fatalf("failed to marshal Elasticsearch match-all request: %v", err)
+			}
+
+			body := string(data)
+			if !strings.Contains(body, `"match_all":{}`) {
+				t.Fatalf("empty or wildcard request missing match_all query: %s", body)
+			}
+			if strings.Contains(body, `"match":{"message":`) {
+				t.Fatalf("empty or wildcard request unexpectedly contains a message match: %s", body)
+			}
+		})
+	}
+}
+
+func TestEmptyLogProviderQueryDefaults(t *testing.T) {
+	input := logAggregateTestInput(toolquery.LogQueryOperator_LOG_QUERY_OPERATOR_OR)
+	input.Query = ""
+	input.Facets = nil
+
+	datadogFilter := datadogLogAggregateRequest(input).GetFilter()
+	if got := datadogFilter.GetQuery(); got != "*" {
+		t.Fatalf("unexpected Datadog empty query: %q", got)
+	}
+	if got := splunkSearchWithFacets("", 0, nil); got != "search *" {
+		t.Fatalf("unexpected Splunk empty query: %q", got)
+	}
+	if got := lokiQueryWithFacets("", nil); got != `{job=~".+"}` {
+		t.Fatalf("unexpected Loki empty query: %q", got)
+	}
+	if got := lokiQueryWithFacets("", []*toolquery.LogsQueryFacet{{Name: "namespace", Value: "prod"}}); got != `{namespace="prod"}` {
+		t.Fatalf("unexpected Loki facets-only query: %q", got)
+	}
+	if got := mergeVictoriaLogsQueryWithFacets(defaultLogQuery("", "*"), nil, input.GetOperator()); got != "*" {
+		t.Fatalf("unexpected VictoriaLogs empty query: %q", got)
+	}
+	if got := *azureLogAggregateQueryBody(input).Query; !strings.HasPrefix(got, "search * | summarize") {
+		t.Fatalf("unexpected Azure empty query: %q", got)
+	}
+	if got := *cloudwatchLogAggregateStartQueryInput(input).QueryString; !strings.HasPrefix(got, "fields @timestamp | stats") {
+		t.Fatalf("unexpected CloudWatch empty query: %q", got)
+	}
+	if got := defaultLogQuery("", "fetch logs"); got != "fetch logs" {
+		t.Fatalf("unexpected Dynatrace empty query: %q", got)
+	}
+}
+
 func TestElasticLogAggregateRequestAndResponse(t *testing.T) {
 	input := logAggregateTestInput(toolquery.LogQueryOperator_LOG_QUERY_OPERATOR_OR)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -203,7 +290,9 @@ func assertElasticAggregateBody(t *testing.T, body io.Reader, input *toolquery.L
 		`"size":0`,
 		`"field":"@timestamp"`,
 		`"fixed_interval":"` + input.GetBucketSize() + `"`,
-		`"default_operator":"` + operator + `"`,
+		`"match":{"message":`,
+		`"analyzer":"stop"`,
+		`"operator":"` + operator + `"`,
 		`"query":"error timeout"`,
 		`"gte":"2024-01-01T00:00:00Z"`,
 		`"lte":"2024-01-01T01:00:00Z"`,

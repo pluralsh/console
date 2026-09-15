@@ -1,3 +1,16 @@
+defmodule Toolquery.SplunkTokenType do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "toolquery.SplunkTokenType",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :BEARER, 0
+  field :SPLUNK, 1
+end
+
 defmodule Toolquery.LogQueryOperator do
   @moduledoc false
 
@@ -99,6 +112,22 @@ defmodule Toolquery.LokiConnection do
   field :password, 5, proto3_optional: true, type: :string
 end
 
+defmodule Toolquery.VictoriaLogsConnection do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.VictoriaLogsConnection",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :url, 1, type: :string
+  field :token, 2, proto3_optional: true, type: :string
+  field :username, 3, proto3_optional: true, type: :string
+  field :password, 4, proto3_optional: true, type: :string
+  field :account_id, 5, proto3_optional: true, type: :string, json_name: "accountId"
+  field :project_id, 6, proto3_optional: true, type: :string, json_name: "projectId"
+end
+
 defmodule Toolquery.TempoConnection do
   @moduledoc false
 
@@ -140,6 +169,7 @@ defmodule Toolquery.SplunkConnection do
   field :token, 2, proto3_optional: true, type: :string
   field :username, 3, proto3_optional: true, type: :string
   field :password, 4, proto3_optional: true, type: :string
+  field :token_type, 5, type: Toolquery.SplunkTokenType, json_name: "tokenType", enum: true
 end
 
 defmodule Toolquery.DynatraceConnection do
@@ -206,6 +236,11 @@ defmodule Toolquery.ToolConnection do
   field :azure, 9, type: Toolquery.AzureConnection, oneof: 0
   field :jaeger, 10, type: Toolquery.JaegerConnection, oneof: 0
   field :opensearch, 11, type: Toolquery.OpensearchConnection, oneof: 0
+
+  field :victoria_logs, 12,
+    type: Toolquery.VictoriaLogsConnection,
+    json_name: "victoriaLogs",
+    oneof: 0
 end
 
 defmodule Toolquery.TimeRange do

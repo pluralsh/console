@@ -789,12 +789,14 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			}
 			run := &v1alpha1.AgentRun{}
 			run.Status.ID = lo.ToPtr("run-123")
+			method := console.OpenAiMethodChat
 
 			config := &v1alpha1.AgentRuntimeConfigRaw{
 				OpenCode: &v1alpha1.OpenCodeConfigRaw{
 					Provider: new("openai"),
 					Endpoint: new("https://api.openai.com"),
 					Model:    lo.ToPtr("gpt-4"),
+					Method:   &method,
 					Token:    "openai-token",
 				},
 			}
@@ -803,6 +805,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			Expect(data[EnvOpenCodeProvider]).Should(Equal("openai"))
 			Expect(data[EnvOpenCodeEndpoint]).Should(Equal("https://api.openai.com"))
 			Expect(data[EnvOpenCodeModel]).Should(Equal("gpt-4"))
+			Expect(data[EnvOpenCodeMethod]).Should(Equal("CHAT"))
 			Expect(data[EnvOpenCodeToken]).Should(Equal("openai-token"))
 		})
 
@@ -873,6 +876,27 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			Expect(data[EnvCodexAPIKey]).Should(Equal("codex-api-key"))
 			Expect(data[EnvCodexMethod]).Should(Equal("CHAT"))
 			Expect(data[EnvCodexEndpoint]).Should(Equal("https://litellm.example/v1"))
+		})
+
+		It("should include Pi method in secret data", func() {
+			reconciler := &AgentRunReconciler{
+				ConsoleURL:  "https://console.test.com",
+				DeployToken: "test-token-123",
+			}
+			run := &v1alpha1.AgentRun{}
+			run.Status.ID = lo.ToPtr("run-123")
+			method := console.OpenAiMethodChat
+
+			config := &v1alpha1.AgentRuntimeConfigRaw{
+				Pi: &v1alpha1.PiConfigRaw{
+					Model:  lo.ToPtr("gpt-5.4"),
+					Method: &method,
+				},
+			}
+
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypePi, nil, nil, nil)
+			Expect(data[EnvPiModel]).Should(Equal("gpt-5.4"))
+			Expect(data[EnvPiMethod]).Should(Equal("CHAT"))
 		})
 
 		It("should include extra MCP servers in secret data", func() {
