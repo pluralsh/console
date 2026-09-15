@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Precompile pluralsh/console so agent runs are not compile-from-zero.
-# Runs inside the example compile image with the repository mounted at /src.
+# Precompile this repository so agent runs are not compile-from-zero.
+# Runs inside compile.Dockerfile with the repository mounted at /src.
 set -euo pipefail
 
 cd /src
@@ -24,10 +24,10 @@ mix local.rebar --force
 mix deps.get
 MIX_ENV=test mix compile
 
+# Yarn 4 is vendored; mise shims do not expose a `yarn` binary.
 (
   cd js
-  corepack enable
-  yarn install --immutable
+  node .yarn/releases/yarn-4.17.1.cjs install --immutable
 )
 
 export GOPATH=/src/.gopath

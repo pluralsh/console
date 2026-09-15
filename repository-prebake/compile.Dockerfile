@@ -1,4 +1,4 @@
-# Precompile builder for the pluralsh/console repository-prebake example.
+# Precompile builder for pluralsh/console. Not the image agents pull.
 FROM debian:bookworm-slim
 
 ARG MISE_VERSION=v2026.9.7

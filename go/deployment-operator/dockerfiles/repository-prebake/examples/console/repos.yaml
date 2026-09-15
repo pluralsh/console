@@ -1,7 +1,0 @@
-# Prebake image for pluralsh/console with compile artifacts.
-# Used by the repository-prebake GitHub Action and as the documented example.
-repositories:
-  - url: https://github.com/pluralsh/console.git
-    path: console
-    compileScript: examples/console/precompile.sh
-    compileDockerfile: examples/console/Dockerfile

@@ -44,8 +44,8 @@ Config format:
     - url: https://github.com/org/repo.git
       path: repo                 # optional, defaults to the repo name
       branch: main               # optional, defaults to the remote default branch
-      compileScript: examples/console/precompile.sh   # optional, relative to this directory
-      compileDockerfile: examples/console/Dockerfile  # optional, builder image for compileScript
+      compileScript: precompile.sh          # optional, relative to this directory
+      compileDockerfile: compile.Dockerfile # optional, builder image for compileScript
 
 The resulting image has manifest.json and one directory per repository under /data.
 EOF

@@ -63,12 +63,12 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Build and push
-        working-directory: go/deployment-operator/dockerfiles/repository-prebake
+        working-directory: repository-prebake
         run: |
           set -euo pipefail
           primary="${{ env.REGISTRY_IMAGE }}:${{ steps.tags.outputs.sha }}"
           ./prebake.sh \
-            --config examples/console/repos.yaml \
+            --config repos.yaml \
             --image "$primary" \
             --staging "$(dirname "$GITHUB_WORKSPACE")" \
             --local "console=$GITHUB_WORKSPACE" \

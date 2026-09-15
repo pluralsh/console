@@ -72,11 +72,12 @@ the agent system prompt.
 
 The script clones on the host using your existing git credentials (`ssh-agent`,
 `GIT_ASKPASS`, `~/.git-credentials`, and so on), then `docker build`s the image.
+Run from the console repository root:
 
 ```bash
-./prebake.sh \
-  --config repos.example.yaml \
-  --image ghcr.io/pluralsh/repos:latest \
+./repository-prebake/prebake.sh \
+  --config repository-prebake/repos.yaml \
+  --image ghcr.io/pluralsh/console-repos:local \
   --push
 ```
 
@@ -90,8 +91,8 @@ repositories:
   - url: https://github.com/pluralsh/console.git
     path: console                 # optional, defaults to the repo name
     branch: master                # optional, defaults to the remote default branch
-    compileScript: examples/console/precompile.sh
-    compileDockerfile: examples/console/Dockerfile
+    compileScript: precompile.sh          # optional, relative to this directory
+    compileDockerfile: compile.Dockerfile # optional, builder image for compileScript
   - url: https://github.com/pluralsh/plural.git
 ```
 
@@ -138,9 +139,9 @@ export GOCACHE=/src/.cache/go-build
 export GOMODCACHE=/src/.cache/pkg/mod
 ```
 
-## Console example
+## Console recipe
 
-[`examples/console/`](examples/console/) is the working recipe for `pluralsh/console`: Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, and Go `go test -run='^$'` with in-tree caches.
+This directory is the recipe for `pluralsh/console`: `repos.yaml`, `compile.Dockerfile`, and `precompile.sh` (Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, and Go `go test -run='^$'` with in-tree caches).
 
 CI builds this image on every PR and every push to `master` as `ghcr.io/pluralsh/console-repos:<sha>` (`:pr-<n>` on pull requests, `:latest` on master). To test a branch, set:
 
@@ -149,19 +150,19 @@ spec:
   repositoryImage: ghcr.io/pluralsh/console-repos:<sha>
 ```
 
-Locally, from this directory:
+From the console repository root:
 
 ```bash
-./prebake.sh \
-  --config examples/console/repos.yaml \
+./repository-prebake/prebake.sh \
+  --config repository-prebake/repos.yaml \
   --image ghcr.io/pluralsh/console-repos:local
 ```
 
 To bake the current checkout instead of cloning `master`:
 
 ```bash
-./prebake.sh \
-  --config examples/console/repos.yaml \
+./repository-prebake/prebake.sh \
+  --config repository-prebake/repos.yaml \
   --image ghcr.io/pluralsh/console-repos:local \
   --staging "$(dirname "$PWD")" \
   --local console="$PWD"
