@@ -25,6 +25,8 @@ RUN curl -fsSL https://mise.run | MISE_VERSION="${MISE_VERSION#v}" MISE_INSTALL_
 
 ENV MISE_YES=1 \
     MISE_TRUSTED_CONFIG_PATHS=/src \
-    PATH="/root/.local/share/mise/shims:/usr/local/bin:${PATH}"
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    ELIXIR_ERL_OPTIONS="+fnu"
 
 WORKDIR /src

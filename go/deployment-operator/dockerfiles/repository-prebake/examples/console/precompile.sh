@@ -6,9 +6,17 @@ set -euo pipefail
 cd /src
 
 export MISE_YES=1
+export LANG="${LANG:-C.UTF-8}"
+export LC_ALL="${LC_ALL:-C.UTF-8}"
+export ELIXIR_ERL_OPTIONS="${ELIXIR_ERL_OPTIONS:-+fnu}"
+
+git config --global --add safe.directory /src
+
 mise trust --all || true
 mise install
-mise install go@1.27.1 node@24.11.1
+# .tool-versions has erlang/elixir/rust only. Install node/go and select them so
+# shims like corepack resolve (otherwise: "No version is set for shim: corepack").
+mise use -g go@1.27.1 node@24.11.1
 eval "$(mise activate bash --shims)"
 
 mix local.hex --force
