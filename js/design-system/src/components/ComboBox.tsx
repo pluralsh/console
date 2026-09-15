@@ -474,7 +474,7 @@ function ComboBox({
 
                       if (key) onDeleteChip?.(key)
                     },
-                    'aria-label': `Remove ${chipProps.key}`,
+                    'aria-label': `Remove ${chipProps.key?.toString() ?? ''}`,
                   }}
                   {...{ [CHIP_ATTR_KEY]: chipProps?.key }}
                   {...chipProps}
