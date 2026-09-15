@@ -44,6 +44,26 @@ var _ = Describe("RBAC", func() {
 			})
 		})
 
+		Context(chartEntry.Name+" with legacy values without RBAC configuration", Ordered, func() {
+			var manifests common.ManifestMap
+
+			BeforeAll(func() {
+				chart, err := common.LoadChart(common.WithLocalPath(chartEntry.Path))
+				Expect(err).NotTo(HaveOccurred())
+				delete(chart.Values, "rbac")
+
+				manifestList, err := common.RenderChart(chart, nil)
+				Expect(err).NotTo(HaveOccurred())
+				manifests, err = common.NewManifestMap(manifestList)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should preserve the Console cluster role binding", func() {
+				_, exists := manifests[bindingKey.String()]
+				Expect(exists).To(BeTrue())
+			})
+		})
+
 		Context(chartEntry.Name+" with the Console cluster role binding disabled", Ordered, func() {
 			var manifests common.ManifestMap
 
