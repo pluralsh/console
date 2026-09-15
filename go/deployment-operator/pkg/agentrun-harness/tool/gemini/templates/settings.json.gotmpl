@@ -35,11 +35,6 @@
   "excludeTools": [
     "ShellTool(rm -rf)"
   ],
-  "includeDirectories": [
-    "/plural/contexts",
-    "{{ .RepositoryDir }}"{{ range .ExtraDirectories }},
-    "{{ . }}"{{ end }}
-  ],
   "model": {
     "name": "{{ .Model }}"
   },
