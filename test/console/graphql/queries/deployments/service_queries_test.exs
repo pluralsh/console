@@ -375,7 +375,7 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       )
       deployment_settings(prometheus_connection: %{url: "example.com"})
 
-      expect(Req, :post, 4, fn _, _ ->
+      expect(Req, :post, 12, fn _, _ ->
         {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
           %{values: [[1, "1"]]}
         ]}})}}
