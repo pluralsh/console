@@ -72,7 +72,7 @@ const ItemSC = styled.button<{
     gap: theme.spacing.xsmall,
     textDecoration: 'none',
     whiteSpace: 'nowrap',
-    width: $isExpanded ? '100%' : 40,
+    width: $isExpanded ? 'calc(100% + 16px)' : 40,
     height: 40,
     flexGrow: 0,
     padding: theme.spacing.small,
