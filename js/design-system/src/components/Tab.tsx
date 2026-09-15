@@ -41,7 +41,7 @@ function Tab({
     <Flex
       ref={ref}
       display="block"
-      width="100%"
+      width={vertical ? '100%' : undefined}
       tabIndex={0}
       userSelect="none"
       cursor="pointer"
@@ -91,7 +91,7 @@ function Tab({
         paddingTop={theme.spacing.xsmall}
         paddingBottom={theme.spacing.xsmall}
         align="center"
-        width="100%"
+        width={vertical ? '100%' : undefined}
         borderBottom={
           vertical
             ? undefined
