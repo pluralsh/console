@@ -90,6 +90,8 @@ repositories:
   - url: https://github.com/pluralsh/console.git
     path: console                 # optional, defaults to the repo name
     branch: master                # optional, defaults to the remote default branch
+    compileScript: examples/console/precompile.sh
+    compileDockerfile: examples/console/Dockerfile
   - url: https://github.com/pluralsh/plural.git
 ```
 
@@ -107,6 +109,7 @@ repositories:
 | `--push` | Push the image after a successful build |
 | `--staging DIR` | Write clones into `DIR` instead of a temp directory (kept on exit) |
 | `--keep-staging` | Leave the temp staging directory in place |
+| `--local PATH=DIR` | Use an existing git checkout at `DIR` for `PATH` instead of cloning. `DIR` must be `$STAGING/PATH`. Implies `--keep-staging`. |
 | `--recurse-submodules` | Clone submodules |
 | `--lfs` | Fetch Git LFS objects (skipped by default) |
 | `--dry-run` | Parse the config and print planned clones |
@@ -121,3 +124,48 @@ cid="$(docker create ghcr.io/pluralsh/repos:latest unused)"
 docker cp "$cid:/data/manifest.json" -
 docker rm "$cid"
 ```
+
+## Precompile
+
+Optional `compileScript` and `compileDockerfile` keys run after clone (or a `--local` checkout). The Dockerfile is built as a compiler image; the script runs with the repository mounted at `/src` so `_build`, `deps`, `node_modules`, and Go caches land in the tree that `COPY`s into `/data`.
+
+Go caches must live **inside the copied repository**. If `GOPATH` / `GOBIN` / `GOCACHE` / `GOMODCACHE` point outside that tree, they will not survive `CopyDir` into `/plural/shared/repository`:
+
+```bash
+export GOPATH=/src/.gopath
+export GOBIN=/src/.gopath/bin
+export GOCACHE=/src/.cache/go-build
+export GOMODCACHE=/src/.cache/pkg/mod
+```
+
+## Console example
+
+[`examples/console/`](examples/console/) is the working recipe for `pluralsh/console`: Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, and Go `go test -run='^$'` with in-tree caches.
+
+CI builds this image on every PR and every push to `master` as `ghcr.io/pluralsh/console-repos:<sha>` (`:pr-<n>` on pull requests, `:latest` on master). To test a branch, set:
+
+```yaml
+spec:
+  repositoryImage: ghcr.io/pluralsh/console-repos:<sha>
+```
+
+Locally, from this directory:
+
+```bash
+./prebake.sh \
+  --config examples/console/repos.yaml \
+  --image ghcr.io/pluralsh/console-repos:local
+```
+
+To bake the current checkout instead of cloning `master`:
+
+```bash
+./prebake.sh \
+  --config examples/console/repos.yaml \
+  --image ghcr.io/pluralsh/console-repos:local \
+  --staging "$(dirname "$PWD")" \
+  --local console="$PWD"
+```
+
+(`$PWD` must be a git clone named `console` whose parent is `--staging`.)
+

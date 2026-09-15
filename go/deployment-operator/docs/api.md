@@ -279,6 +279,8 @@ _Appears in:_
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this runtime. |  | Optional: \{\} <br /> |
 | `browser` _[BrowserConfig](#browserconfig)_ | Browser configuration augments agent runtime with a headless browser.<br />When provided, the runtime will be configured to run with a headless browser available<br />for the agent to use. |  | Optional: \{\} <br /> |
 | `bootstrapScript` _string_ | BootstrapScript is a bash script that will be executed inside the cloned repository<br />directory before the coding agent starts. It can be used to install dependencies,<br />configure tooling, or perform any other setup required by the agent. |  | Optional: \{\} <br /> |
+| `readOnlyRootFilesystem` _boolean_ | ReadOnlyRootFilesystem controls the default container securityContext.<br />When unset, the root filesystem stays writable (the current default).<br />Set true when extending a finished image that already contains compilers.<br />Set false (or leave unset) together with mise.config to run<br />`mise bootstrap --yes` at boot: https://mise.jdx.dev/bootstrap.html |  | Optional: \{\} <br /> |
+| `mise` _[MiseSpec](#misespec)_ | Mise supplies a mise.toml applied before the coding agent starts.<br />When the default container root is writable, the harness runs<br />`mise trust` and `mise bootstrap --yes`. When readOnlyRootFilesystem is true,<br />the config is still mounted so mise exec can use [tools] and [env],<br />but bootstrap is skipped. |  | Optional: \{\} <br /> |
 | `git` _[GitSpec](#gitspec)_ | Git configure commit signing on agent run. When provided, the runtime will be configured to sign git commits using the provided key reference. |  |  |
 | `babysitInterval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | BabysitInterval configures the interval for the operator to check on the health of the agent runtime and perform necessary babysitting actions (e.g. restarting unhealthy runtimes). When not provided, a default interval of 1 minute will be used. |  |  |
 | `agentTTL` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | AgentTTL configures the maximum lifetime for agent run pods on this runtime. When not provided, a default TTL of 12 hours will be used. |  | Optional: \{\} <br /> |
@@ -720,6 +722,18 @@ _Appears in:_
 | `inactivityTimeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | InactivityTimeout is the timeout for inactivity during gemini run. |  | Optional: \{\} <br /> |
 | `endpoint` _string_ |  |  | Optional: \{\} <br /> |
 
+
+#### MiseSpec
+
+MiseSpec is an inline mise.toml used for unattended bootstrap.
+See https://mise.jdx.dev/bootstrap.html
+
+_Appears in:_
+- [AgentRuntimeSpec](#agentruntimespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `config` _string_ | Config is the contents of a mise.toml. |  | Optional: \{\} <br /> |
 
 #### GitSpec
 

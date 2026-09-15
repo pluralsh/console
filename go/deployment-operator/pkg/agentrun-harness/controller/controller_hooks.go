@@ -5,12 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	osexec "os/exec"
+	"path/filepath"
 
 	"k8s.io/klog/v2"
 
 	gqlclient "github.com/pluralsh/console/go/client"
 	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 
+	operatorctrl "github.com/pluralsh/console/go/deployment-operator/internal/controller"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
@@ -18,6 +22,8 @@ import (
 )
 
 const bootstrapScriptPath = "/bootstrap/bootstrap.sh"
+
+var miseConfigPath = "/mise/config.toml"
 
 // preStart function is executed before agent run steps
 func (in *agentRunController) preStart(ctx context.Context) error {
@@ -107,6 +113,10 @@ func (in *agentRunController) preExecHook() v1.HookFunction {
 			return err
 		}
 
+		if err := in.runMiseBootstrap(); err != nil {
+			return err
+		}
+
 		return in.runBootstrapScript()
 	}
 }
@@ -127,6 +137,93 @@ func (in *agentRunController) runBootstrapScript() error {
 		exec.WithArgs([]string{bootstrapScriptPath}),
 		exec.WithDir(in.dir),
 	).Run(context.Background())
+}
+
+func (in *agentRunController) repositoryDir() string {
+	return filepath.Join(in.dir, "shared", "repository")
+}
+
+// runMiseBootstrap applies the mounted mise.toml via `mise bootstrap --yes`
+// when the runtime root filesystem is writable. See https://mise.jdx.dev/bootstrap.html
+func (in *agentRunController) runMiseBootstrap() error {
+	if _, err := os.Stat(miseConfigPath); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("failed to stat mise config: %w", err)
+	}
+
+	miseBin, err := ensureMiseBinary()
+	if err != nil {
+		return err
+	}
+
+	repoDir := in.repositoryDir()
+	if err := os.MkdirAll(repoDir, 0755); err != nil {
+		return fmt.Errorf("failed to create repository directory for mise: %w", err)
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("trusting mise configuration", "path", miseConfigPath, "dir", repoDir)
+	if err := exec.NewExecutable(miseBin,
+		exec.WithArgs([]string{"trust", "--all"}),
+		exec.WithDir(repoDir),
+	).Run(context.Background()); err != nil {
+		return fmt.Errorf("mise trust failed: %w", err)
+	}
+
+	if helpers.GetPluralEnvBool(operatorctrl.EnvMiseBootstrap, false) {
+		klog.V(log.LogLevelInfo).InfoS("running mise bootstrap", "path", miseConfigPath, "dir", repoDir)
+		if err := exec.NewExecutable(miseBin,
+			exec.WithArgs([]string{"bootstrap", "--yes"}),
+			exec.WithDir(repoDir),
+		).Run(context.Background()); err != nil {
+			return fmt.Errorf("mise bootstrap failed: %w", err)
+		}
+	}
+
+	prependMiseShimsToPath()
+	return nil
+}
+
+func ensureMiseBinary() (string, error) {
+	if path, err := osexec.LookPath("mise"); err == nil {
+		return path, nil
+	}
+
+	if !helpers.GetPluralEnvBool(operatorctrl.EnvMiseBootstrap, false) {
+		return "", fmt.Errorf("mise is not on PATH; install it in the agent image or disable readOnlyRootFilesystem to bootstrap")
+	}
+
+	dataDir := os.Getenv(operatorctrl.EnvMiseDataDir)
+	if dataDir == "" {
+		dataDir = filepath.Join(os.TempDir(), "mise")
+	}
+	installPath := filepath.Join(dataDir, "bin", "mise")
+	if err := os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
+		return "", fmt.Errorf("failed to create mise install dir: %w", err)
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("installing mise binary", "path", installPath)
+	cmd := osexec.Command("sh", "-c", "curl -fsSL https://mise.run | sh")
+	cmd.Env = append(os.Environ(), "MISE_INSTALL_PATH="+installPath)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("failed to install mise: %w: %s", err, out)
+	}
+	return installPath, nil
+}
+
+func prependMiseShimsToPath() {
+	dataDir := os.Getenv(operatorctrl.EnvMiseDataDir)
+	if dataDir == "" {
+		return
+	}
+	shims := filepath.Join(dataDir, "shims")
+	path := os.Getenv("PATH")
+	if path == "" {
+		_ = os.Setenv("PATH", shims)
+		return
+	}
+	_ = os.Setenv("PATH", shims+string(os.PathListSeparator)+path)
 }
 
 // validateAgentRunStatus checks if agent run can be started
