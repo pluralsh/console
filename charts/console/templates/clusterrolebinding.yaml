@@ -1,4 +1,4 @@
-{{ if not .Values.cloud.enabled }}
+{{ if and (not .Values.cloud.enabled) .Values.rbac.clusterRoleBinding.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:

@@ -385,6 +385,12 @@ serviceAccount:
   create: true
   annotations: { }
 
+# rbac configures the cluster-wide permissions granted to the Console service account.
+rbac:
+  clusterRoleBinding:
+    # enabled determines whether to create the cluster-admin ClusterRoleBinding for the Console service account.
+    enabled: true
+
 # extraEnv is used to add environment variables to the console container
 extraEnv: ~
 # extraSecretEnv is used to add secret key-value pairs to the console container
