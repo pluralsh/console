@@ -141,7 +141,7 @@ export GOMODCACHE=/src/.cache/pkg/mod
 
 ## Console recipe
 
-This directory is the recipe for `pluralsh/console`: `repos.yaml`, `compile.Dockerfile`, and `precompile.sh` (Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, and Go `go test -run='^$'` with in-tree caches).
+This directory is the recipe for `pluralsh/console`: `repos.yaml`, `compile.Dockerfile`, and `precompile.sh` (Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, and Go workspace modules under `go/` with `go test -run='^$'` and in-tree caches).
 
 CI builds this image on every PR and every push to `master` as `ghcr.io/pluralsh/console-repos:<sha>` (`:pr-<n>` on pull requests, `:latest` on master). To test a branch, set:
 

@@ -34,10 +34,13 @@ export GOPATH=/src/.gopath
 export GOBIN=/src/.gopath/bin
 export GOCACHE=/src/.cache/go-build
 export GOMODCACHE=/src/.cache/pkg/mod
+export GOWORK=/src/go/go.work
 mkdir -p "$GOBIN" "$GOCACHE" "$GOMODCACHE"
 export PATH="$GOBIN:$PATH"
 
-(
-  cd /src/go
-  go test -run='^$' ./...
-)
+cd /src/go
+mods=()
+while IFS= read -r dir; do
+  mods+=("${dir}/...")
+done < <(go list -f '{{.Dir}}' -m)
+go test -run='^$' "${mods[@]}"
