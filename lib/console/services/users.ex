@@ -311,10 +311,10 @@ defmodule Console.Services.Users do
     |> execute(extract: :member)
   end
 
-  @spec create_access_token(User.t) :: token_resp
-  def create_access_token(args \\ %{}, %User{id: id}) do
+  @spec create_access_token(map, User.t) :: token_resp
+  def create_access_token(args \\ %{}, %User{id: id} = user) do
     %AccessToken{user_id: id}
-    |> AccessToken.changeset(args)
+    |> AccessToken.changeset(args, user)
     |> Repo.insert()
   end
 

@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,69 @@ import (
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
+
+func TestSplunkProvider_LogsTimestampFallbacks(t *testing.T) {
+	expected := time.Date(2026, time.September, 15, 20, 26, 40, 816574048, time.UTC)
+	provider := &SplunkProvider{}
+
+	for _, field := range splunkRawTimestampFields {
+		t.Run(field, func(t *testing.T) {
+			raw, err := json.Marshal(map[string]string{
+				field: expected.Format(time.RFC3339Nano),
+				"log": "audit event",
+			})
+			if err != nil {
+				t.Fatalf("json.Marshal() raw error = %v", err)
+			}
+			response, err := json.Marshal(SplunkSearchResponse{
+				Result: SplunkSearchResponseResult{
+					Timestamp: "2026-09-15 13:26:40.816 Pacific Daylight Time",
+					Message:   string(raw),
+					IndexTime: "1789504009",
+				},
+			})
+			if err != nil {
+				t.Fatalf("json.Marshal() response error = %v", err)
+			}
+
+			output, err := provider.toLogsQueryOutput(string(response))
+			if err != nil {
+				t.Fatalf("toLogsQueryOutput() error = %v", err)
+			}
+			if len(output.GetLogs()) != 1 {
+				t.Fatalf("logs count = %d, want 1", len(output.GetLogs()))
+			}
+			if got := output.GetLogs()[0].GetTimestamp().AsTime(); !got.Equal(expected) {
+				t.Fatalf("timestamp = %s, want %s", got, expected)
+			}
+		})
+	}
+}
+
+func TestSplunkProvider_LogsFallsBackToIndexTime(t *testing.T) {
+	provider := &SplunkProvider{}
+	response, err := json.Marshal(SplunkSearchResponse{
+		Result: SplunkSearchResponseResult{
+			Timestamp: "2026-09-15 13:26:40.816 Pacific Daylight Time",
+			Message:   "plain text event",
+			IndexTime: "1789504009",
+		},
+	})
+	if err != nil {
+		t.Fatalf("json.Marshal() error = %v", err)
+	}
+
+	output, err := provider.toLogsQueryOutput(string(response))
+	if err != nil {
+		t.Fatalf("toLogsQueryOutput() error = %v", err)
+	}
+	if len(output.GetLogs()) != 1 {
+		t.Fatalf("logs count = %d, want 1", len(output.GetLogs()))
+	}
+	if got, want := output.GetLogs()[0].GetTimestamp().AsTime(), time.Unix(1789504009, 0).UTC(); !got.Equal(want) {
+		t.Fatalf("timestamp = %s, want %s", got, want)
+	}
+}
 
 func TestSplunkProvider_LogAggregate(t *testing.T) {
 	start := time.Date(2026, time.September, 8, 12, 0, 0, 0, time.UTC)

@@ -8746,6 +8746,7 @@ type ServiceAccountAttributes struct {
 	Name           *string                    `json:"name,omitempty"`
 	Email          *string                    `json:"email,omitempty"`
 	Roles          *UserRoleAttributes        `json:"roles,omitempty"`
+	AllowedScopes  []string                   `json:"allowedScopes,omitempty"`
 	AssumeBindings []*PolicyBindingAttributes `json:"assumeBindings,omitempty"`
 }
 
@@ -10152,6 +10153,7 @@ type User struct {
 	ReadTimestamp       *string          `json:"readTimestamp,omitempty"`
 	BuildTimestamp      *string          `json:"buildTimestamp,omitempty"`
 	RefreshToken        *RefreshToken    `json:"refreshToken,omitempty"`
+	AllowedScopes       []string         `json:"allowedScopes,omitempty"`
 	AssumeBindings      []*PolicyBinding `json:"assumeBindings,omitempty"`
 	Groups              []*Group         `json:"groups,omitempty"`
 	Personas            []*Persona       `json:"personas,omitempty"`

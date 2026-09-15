@@ -17421,6 +17421,7 @@ input ServiceAccountAttributes {
   name: String
   email: String
   roles: UserRoleAttributes
+  allowedScopes: [String!]
   assumeBindings: [PolicyBindingAttributes]
 }
 
@@ -17577,6 +17578,7 @@ type User {
   readTimestamp: DateTime
   buildTimestamp: DateTime
   refreshToken: RefreshToken
+  allowedScopes: [String!]
   assumeBindings: [PolicyBinding]
   groups: [Group]
   personas: [Persona]

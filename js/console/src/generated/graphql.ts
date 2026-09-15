@@ -14392,6 +14392,7 @@ export type Service = {
 };
 
 export type ServiceAccountAttributes = {
+  allowedScopes?: InputMaybe<Array<Scalars['String']['input']>>;
   assumeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   email?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -16038,6 +16039,7 @@ export type UrlSinkConfiguration = {
 
 export type User = {
   __typename?: 'User';
+  allowedScopes?: Maybe<Array<Scalars['String']['output']>>;
   assumeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   backgroundColor?: Maybe<Scalars['String']['output']>;
   boundRoles?: Maybe<Array<Maybe<Role>>>;
