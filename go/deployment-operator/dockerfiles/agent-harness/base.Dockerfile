@@ -183,6 +183,12 @@ COPY --from=builder /agent-harness /agent-harness
 COPY --from=builder /agent-mcpserver /agent-mcpserver
 COPY --from=builder /agent-bootstrap /agent-bootstrap
 
+# Pin mise so agent runtimes can `mise bootstrap --yes` without downloading
+# the installer on every start. See https://mise.jdx.dev/bootstrap.html
+ARG MISE_VERSION=v2026.9.7
+RUN curl -fsSL https://mise.run | MISE_VERSION="${MISE_VERSION#v}" MISE_INSTALL_PATH=/usr/local/bin/mise sh \
+    && mise --version
+
 # Copy the entrypoint wrapper that starts `podman system service` when DIND_ENABLED=true
 COPY deployment-operator/dockerfiles/agent-harness/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

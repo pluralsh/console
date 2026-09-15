@@ -159,3 +159,31 @@ If your agent needs to build images or run containers, enable DinD in the runtim
 spec:
   dind: true
 ```
+
+## Optional: Prebake repositories and mise toolchains
+
+Point `spec.repositoryImage` at an OCI image of precloned (and optionally precompiled) git repositories so bootstrap copies locally instead of `git clone`. The console image is `ghcr.io/pluralsh/console-repos:<sha>` (see the [repository prebake README](https://github.com/pluralsh/console/blob/master/repository-prebake/README.md)).
+
+To install language tools **in the agent container** without wrapping compiles in DinD, supply a [mise](https://mise.jdx.dev/bootstrap.html) config and keep the default container writable:
+
+```yaml
+spec:
+  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  readOnlyRootFilesystem: false
+  mise:
+    config: |
+      [tools]
+      elixir = "1.19.4"
+      go = "1.27.1"
+      node = "24.11.1"
+      [env]
+      GOPATH = "{{config_root}}/.gopath"
+      GOBIN = "{{config_root}}/.gopath/bin"
+      GOCACHE = "{{config_root}}/.cache/go-build"
+      GOMODCACHE = "{{config_root}}/.cache/pkg/mod"
+```
+
+The harness runs `mise trust` and `mise bootstrap --yes` before the coding agent starts. `[bootstrap.packages]` that use apt still need a root container; `[tools]` install into `MISE_DATA_DIR` as the non-root agent user.
+
+If you extend a finished image that already ran `mise bootstrap` at build time, keep `readOnlyRootFilesystem: true`. The same `mise.config` is still mounted so `mise exec` sees `[tools]` and `[env]`, but bootstrap is skipped.
+

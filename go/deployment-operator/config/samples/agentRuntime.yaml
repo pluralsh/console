@@ -55,4 +55,19 @@ spec:
           args:
             - --v=3
   dind: true
-  repositoryImage: ghcr.io/pluralsh/repos:latest
+  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  readOnlyRootFilesystem: false
+  mise:
+    config: |
+      [tools]
+      erlang = "28.5"
+      elixir = "1.19.4"
+      rust = "stable"
+      go = "1.27.1"
+      node = "24.11.1"
+
+      [env]
+      GOPATH = "{{config_root}}/.gopath"
+      GOBIN = "{{config_root}}/.gopath/bin"
+      GOCACHE = "{{config_root}}/.cache/go-build"
+      GOMODCACHE = "{{config_root}}/.cache/pkg/mod"

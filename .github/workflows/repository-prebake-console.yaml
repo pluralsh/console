@@ -1,0 +1,82 @@
+name: CD / Console repository prebake
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY_IMAGE: ghcr.io/pluralsh/console-repos
+
+jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
+  build:
+    name: Build console prebake image
+    needs: [vouch]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image tags
+        id: tags
+        run: |
+          sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          {
+            echo "tags<<EOF"
+            echo "${{ env.REGISTRY_IMAGE }}:${sha}"
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "${{ env.REGISTRY_IMAGE }}:pr-${{ github.event.pull_request.number }}"
+            fi
+            if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+              echo "${{ env.REGISTRY_IMAGE }}:latest"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        working-directory: repository-prebake
+        run: |
+          set -euo pipefail
+          primary="${{ env.REGISTRY_IMAGE }}:${{ steps.tags.outputs.sha }}"
+          ./prebake.sh \
+            --config repos.yaml \
+            --image "$primary" \
+            --staging "$(dirname "$GITHUB_WORKSPACE")" \
+            --local "console=$GITHUB_WORKSPACE" \
+            --push
+          while IFS= read -r tag; do
+            [ -n "$tag" ] || continue
+            if [ "$tag" != "$primary" ]; then
+              docker tag "$primary" "$tag"
+              docker push "$tag"
+            fi
+          done <<< "${{ steps.tags.outputs.tags }}"
