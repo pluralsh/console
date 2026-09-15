@@ -119,7 +119,9 @@ export function DateTimeFormInput({
         <SegmentedInput
           ref={dateInputRef}
           {...(isSetToNow && !isFocused && { value: 'Today' })}
-          style={{ borderColor: dateError && colors['border-danger'] }}
+          style={{
+            borderColor: dateError ? colors['border-danger'] : undefined,
+          }}
           prefix="Date"
           endIcon={<Body2P $color="text-xlight">{dateLabel}</Body2P>}
           onChange={setDateStr}
@@ -133,7 +135,9 @@ export function DateTimeFormInput({
         <SegmentedInput
           ref={timeInputRef}
           {...(isSetToNow && !isFocused && { value: 'Now' })}
-          style={{ borderColor: timeError && colors['border-danger'] }}
+          style={{
+            borderColor: timeError ? colors['border-danger'] : undefined,
+          }}
           prefix="Time"
           endIcon={<Body2P $color="text-xlight">UTC</Body2P>}
           onChange={setTimeStr}

@@ -81,7 +81,7 @@ export function NotificationsPanel({
           align="center"
           gap="xsmall"
           padding="small"
-          borderBottom={theme.borders['fill-two']}
+          css={{ borderBottom: theme.borders['fill-two'] }}
         >
           <IconFrame icon={<BellIcon color="icon-xlight" />} />
           <Overline css={{ flexGrow: 1 }}>Notifications</Overline>

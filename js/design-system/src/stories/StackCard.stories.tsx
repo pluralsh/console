@@ -1,10 +1,9 @@
-import { Flex } from 'honorable'
-
+import Flex from '../components/Flex'
 import StackCard from '../components/StackCard'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'StackCard',
+  title: 'Stack Card',
   component: StackCard,
 } satisfies Meta<any>
 

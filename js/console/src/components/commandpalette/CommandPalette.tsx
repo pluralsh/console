@@ -366,7 +366,7 @@ const CommandEmptyState = ({ value }: { value: string }) => {
       gap="xxsmall"
       padding="xlarge"
       align="center"
-      textAlign="center"
+      css={{ textAlign: 'center' }}
     >
       <Body1BoldP>No results found.</Body1BoldP>
       <Body2P

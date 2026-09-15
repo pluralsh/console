@@ -41,7 +41,7 @@ import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
 import CaretDownIcon from './icons/CaretDownIcon'
 
-type CodeProps = Omit<CardProps, 'children'> & {
+type CodeProps = Omit<CardProps, 'children' | 'tabs' | 'title'> & {
   children?: string
   language?: string
   showLineNumbers?: boolean
@@ -254,7 +254,7 @@ function CodeTabs() {
         stateRef={tabStateRef}
         stateProps={tabListStateProps}
         ref={tabsRef}
-        style={!tabInterface ? { opacity: 0 } : undefined}
+        css={!tabInterface ? { opacity: 0 } : undefined}
       >
         {tabs.map((tab) => {
           if (typeof tab.content !== 'string') {
@@ -472,11 +472,12 @@ function CodeUnstyled({
           ? 1
           : toFillLevel(Math.min(inferredFillLevel + 1, 2))
       }
-      borderColor={
-        inferredFillLevel >= 1
-          ? theme.colors['border-fill-three']
-          : theme.colors['border-fill-two']
-      }
+      css={{
+        borderColor:
+          inferredFillLevel >= 1
+            ? theme.colors['border-fill-three']
+            : theme.colors['border-fill-two'],
+      }}
       {...props}
     >
       <Flex

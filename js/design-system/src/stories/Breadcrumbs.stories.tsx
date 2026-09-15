@@ -1,5 +1,3 @@
-import { Flex, Span } from 'honorable'
-
 import { useState } from 'react'
 
 import {
@@ -11,6 +9,7 @@ import { Breadcrumbs } from '../components/Breadcrumbs'
 import { Select } from '../components/Select'
 import { ListBoxItem } from '../components/ListBoxItem'
 import FormField from '../components/FormField'
+import Flex from '../components/Flex'
 
 import { NavContextProviderStub } from './NavigationContextStub'
 import type { Meta, StoryObj } from '@storybook/react'
@@ -33,7 +32,7 @@ const crumbList: Breadcrumb[] = [
   },
   {
     url: 'http://stuff.com/link1/link2',
-    label: <Span>Level 2</Span>,
+    label: 'Level 2',
     textValue: 'Level 2',
   },
   {

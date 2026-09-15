@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle, useTheme } from 'styled-components'
 
 import {
   COLOR_THEME_KEY,
@@ -114,7 +114,7 @@ const darkModeSelectors = `html${darkSelector}:root,\n${cssSwapper(
   lightSelector
 )}`
 
-const GlobalStyle = createGlobalStyle(({ theme }) => ({
+const GlobalStyleSheet = createGlobalStyle(({ theme }) => ({
   ':root': {
     ...baseColorCSSVars,
     ...getSemanticColorCSSVars({ mode: theme.mode }),
@@ -132,12 +132,51 @@ const GlobalStyle = createGlobalStyle(({ theme }) => ({
   [lightModeSelectors]: {
     ...getSemanticColorCSSVars({ mode: 'light' }),
   },
+  '*, *::before, *::after': {
+    boxSizing: 'border-box',
+  },
+  html: {
+    fontSize: 14,
+    lineHeight: 1.15,
+    WebkitTextSizeAdjust: '100%',
+  },
   // Keep html/body on the app-shell token (index.html reads --color-page-background).
   // This is intentionally NOT fill-zero.
   'html, body': {
     backgroundColor: theme.colors['page-background'],
+    color: theme.colors.text,
+    fontFamily: fontFamilies.sans,
+    WebkitFontSmoothing: 'antialiased',
+    MozOsxFontSmoothing: 'grayscale',
+  },
+  'h1, h2, h3, h4, h5, h6, p': {
+    margin: 0,
+  },
+  'a, a:visited, a:hover, a:active': {
+    color: 'inherit',
+    textDecoration: 'inherit',
+  },
+  'button, input, optgroup, select, textarea': {
+    fontFamily: 'inherit',
+    fontSize: '100%',
+    lineHeight: 1.15,
+    margin: 0,
+  },
+  '::placeholder': {
+    color: theme.colors['text-xlight'],
   },
   '*': theme.partials.scrollBar({ fillLevel: 0 }),
 }))
+
+function GlobalStyle() {
+  const theme = useTheme()
+
+  return (
+    <>
+      <GlobalStyleSheet />
+      <div id={theme.portals.default.id} />
+    </>
+  )
+}
 
 export default GlobalStyle

@@ -46,7 +46,8 @@ export default function KickButton({
           error={{ ...error }}
           header="Error (500)"
           margin="xlarge"
-          marginVertical="xxxlarge"
+          marginTop="xxxlarge"
+          marginBottom="xxxlarge"
         />
       )}
       <Tooltip

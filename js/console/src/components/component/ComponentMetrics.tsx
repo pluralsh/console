@@ -7,7 +7,7 @@ import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 
 import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
-import { useMemo, useState } from 'react'
+import { type CSSProperties, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -34,8 +34,8 @@ function Metric({
   componentId?: string
   podReservations?: PodResourceReservation[]
   duration: Duration
-  maxHeight?: string
-  overflowY?: string
+  maxHeight?: CSSProperties['maxHeight']
+  overflowY?: CSSProperties['overflowY']
 }) {
   const theme = useTheme()
   const start = useMetricsQueryStart(offset)

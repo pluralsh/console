@@ -14,7 +14,11 @@ export function SimpleToastChip({
   onClose,
   delayTimeout = 5000,
   ...props
-}: { show: boolean; delayTimeout?: number | 'none' } & ChipProps) {
+}: {
+  show: boolean
+  delayTimeout?: number | 'none'
+  onClose?: () => void
+} & ChipProps) {
   const transitions = useTransition(show ? [true] : [], {
     from: { transform: 'translateX(-50%) translateY(100%)' },
     enter: { transform: 'translateX(-50%) translateY(0)' },

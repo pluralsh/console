@@ -1,6 +1,5 @@
-import { Flex } from 'honorable'
 import { type ComponentProps, type JSX, useMemo, useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import Fuse from 'fuse.js'
 
 import { isEqual, uniqWith } from 'lodash-es'
@@ -13,6 +12,7 @@ import {
   Card,
   Chip,
   ComboBox,
+  Flex,
   ListBoxFooterPlus,
   ListBoxItem,
   ListBoxItemChipList,
@@ -200,6 +200,7 @@ function Template({
   withTitleContent: boolean
   loading?: boolean
 }) {
+  const theme = useTheme()
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
 
@@ -252,10 +253,12 @@ function Template({
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          display="flex"
-          flexDirection="column"
-          gap="large"
-          padding="large"
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            padding: theme.spacing.large,
+          }}
           fillLevel={onFillLevel}
         />
       }
@@ -331,6 +334,7 @@ function TagsTemplate({
   withTitleContent: boolean
   loading?: boolean
 }) {
+  const theme = useTheme()
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -405,10 +409,12 @@ function TagsTemplate({
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          display="flex"
-          flexDirection="column"
-          gap="large"
-          padding="large"
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            padding: theme.spacing.large,
+          }}
           fillLevel={onFillLevel}
         />
       }

@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   Modal,
   ValidatedInput,
 } from '@pluralsh/design-system'
@@ -113,7 +113,7 @@ export function PersonaAttributes({
         {viewOnly ? (
           <Body2P css={{ color: theme.colors['text-light'] }}>{name}</Body2P>
         ) : (
-          <Input2
+          <Input
             disabled={viewOnly}
             value={name}
             onChange={({ target: { value } }) => setName?.(value || '')}
@@ -126,7 +126,7 @@ export function PersonaAttributes({
             {description}
           </Body2P>
         ) : (
-          <Input2
+          <Input
             value={description}
             disabled={viewOnly}
             onChange={({ target: { value } }) => setDescription?.(value || '')}

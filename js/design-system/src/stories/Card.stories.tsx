@@ -18,6 +18,18 @@ const meta = {
     headerContent: {
       control: { type: 'text' },
     },
+    width: {
+      options: ['undefined', 150, 300, 400, 600],
+      mapping: {
+        undefined,
+      },
+      control: {
+        type: 'select',
+        labels: {
+          undefined: 'undefined',
+        },
+      },
+    },
   },
 } satisfies Meta<any>
 
@@ -37,7 +49,7 @@ function Template({
   headerSize,
   headerContent,
 }: {
-  width: number
+  width?: number
   height: number
   headerSize: NonNullable<ComponentProps<typeof Card>['header']>['size']
   headerContent: ReactNode
@@ -57,13 +69,12 @@ function Template({
               clickable={clickable}
               selected={selected}
               disabled={disabled}
-              width={width}
+              {...(width != null ? { width } : {})}
               cornerSize={cornerSize}
               fillLevel={fillLevel}
               header={{
                 size: headerSize,
                 content: headerContent,
-                outerProps: { style: { width: width } },
               }}
             >
               <Flex
@@ -89,8 +100,13 @@ function FillLevelTemplate({
   selected,
   disabled,
   width,
+  headerSize,
   headerContent,
-}: { width: number; headerContent: ReactNode } & CardProps) {
+}: {
+  width?: number
+  headerSize: NonNullable<ComponentProps<typeof Card>['header']>['size']
+  headerContent: ReactNode
+} & CardProps) {
   const theme = useTheme()
 
   return (
@@ -106,10 +122,11 @@ function FillLevelTemplate({
             clickable={clickable}
             selected={selected}
             disabled={disabled}
-            width={width}
-            padding="medium"
+            {...(width != null ? { width } : {})}
+            css={{ padding: theme.spacing.medium }}
             fillLevel={fillLevel}
             header={{
+              size: headerSize,
               content: headerContent,
             }}
           >
@@ -121,9 +138,9 @@ function FillLevelTemplate({
             <Card
               clickable={clickable}
               selected={selected}
-              padding="medium"
+              css={{ padding: theme.spacing.medium }}
             >
-              <Card padding="medium">
+              <Card css={{ padding: theme.spacing.medium }}>
                 <br />
                 Each Card background should be one level lighter than its
                 parent, but not exceed fill-three

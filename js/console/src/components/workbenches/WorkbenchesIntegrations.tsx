@@ -158,7 +158,7 @@ export function WorkbenchesIntegrations() {
               showClearButton
               placeholder="Search workbench connectors"
               startIcon={<MagnifyingGlassIcon color="icon-light" />}
-              width="100%"
+              css={{ flexGrow: 1 }}
             />
             <Button
               secondary

@@ -3,7 +3,7 @@ import AWSIcon, { AWSIconName } from '../components/icons/AWSIcon'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'AWSIcon',
+  title: 'AWS Icon',
   component: AWSIcon,
 } satisfies Meta<any>
 

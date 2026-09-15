@@ -1,6 +1,4 @@
-import { Flex } from 'honorable'
-
-import { Codeline } from '..'
+import { Codeline, Flex } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {

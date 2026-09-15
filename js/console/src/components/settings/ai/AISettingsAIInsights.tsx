@@ -3,7 +3,7 @@ import {
   Card,
   Divider,
   Flex,
-  Input2,
+  Input,
   Switch,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -111,7 +111,7 @@ export function AISettingsAIInsights() {
               </Body2P>
             </InsightCopySC>
             <ControlSC>
-              <Input2
+              <Input
                 suffix="Duration"
                 value={fastInterval}
                 error={!isValidDuration(fastInterval)}
@@ -130,7 +130,7 @@ export function AISettingsAIInsights() {
               </Body2P>
             </InsightCopySC>
             <ControlSC>
-              <Input2
+              <Input
                 suffix="Duration"
                 value={slowInterval}
                 error={!isValidDuration(slowInterval)}

@@ -1,4 +1,4 @@
-import { Flex, type FlexProps } from 'honorable'
+import Flex, { type FlexProps } from './Flex'
 import styled from 'styled-components'
 
 import Divider from './Divider'

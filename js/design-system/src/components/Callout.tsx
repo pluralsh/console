@@ -8,7 +8,7 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import { Flex } from 'honorable'
+import Flex from './Flex'
 import AnimateHeight from 'react-animate-height'
 
 import { type SeverityExt, sanitizeSeverity } from '../types'

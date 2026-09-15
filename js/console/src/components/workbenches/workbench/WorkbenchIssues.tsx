@@ -1,4 +1,4 @@
-import { Flex, Input2, SearchIcon } from '@pluralsh/design-system'
+import { Flex, Input, SearchIcon } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
@@ -106,7 +106,7 @@ export function WorkbenchIssues() {
       ) : (
         <WrapperSC>
           <DisplayToolbarSC>
-            <Input2
+            <Input
               showClearButton
               css={{ flex: 1 }}
               placeholder="Search issues"

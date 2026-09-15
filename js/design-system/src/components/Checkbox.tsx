@@ -1,6 +1,13 @@
 import classNames from 'classnames'
-import { type InputProps, Label } from 'honorable'
-import { memo, ReactNode, useId, useRef } from 'react'
+import {
+  memo,
+  type ComponentPropsWithoutRef,
+  type FocusEvent,
+  type KeyboardEvent,
+  type ReactNode,
+  useId,
+  useRef,
+} from 'react'
 import { VisuallyHidden, useCheckbox, useFocusRing } from 'react-aria'
 import { useToggleState } from 'react-stately'
 import styled from 'styled-components'
@@ -50,7 +57,7 @@ const IndeterminateIcon = memo(({ small }: { small: boolean }) => {
   )
 })
 
-const HonorableLabelStyled = styled(Label)<{
+const LabelSC = styled.label<{
   $small: boolean
   $isFocusVisible: boolean
   $disabled: boolean
@@ -58,6 +65,7 @@ const HonorableLabelStyled = styled(Label)<{
   // Makes sure visually hidden <input> is positioned relative to <label> as to
   // avoid overflow issues when cropped by Accordions, etc.
   position: 'relative',
+  display: 'flex',
   ...theme.partials.text.body2,
   gap: theme.spacing.small,
   alignItems: 'center',
@@ -144,14 +152,22 @@ export type CheckboxProps = {
   checked?: boolean
   children?: ReactNode
   name?: string
+  value?: string | null
   small?: boolean
   indeterminate?: boolean
   disabled?: boolean
   defaultSelected?: boolean
   onChange?: (e: { target: { checked: boolean } }) => any
   onFocusChange?: (isFocused: boolean) => void
+  onFocus?: (e: FocusEvent<Element>) => void
+  onBlur?: (e: FocusEvent<Element>) => void
+  onKeyDown?: (e: KeyboardEvent<Element>) => void
+  onKeyUp?: (e: KeyboardEvent<Element>) => void
   tabIndex?: number
-} & Omit<InputProps, 'onChange'>
+} & Omit<
+  ComponentPropsWithoutRef<'label'>,
+  'onChange' | 'onFocus' | 'onBlur' | 'onKeyDown' | 'onKeyUp'
+>
 
 function Checkbox({
   small,
@@ -187,7 +203,7 @@ function Checkbox({
       onKeyDown,
       onKeyUp,
       'aria-labelledby': labelId,
-      value: props.value,
+      value: props.value ?? undefined,
       name: props.name,
     },
     toggleState,
@@ -201,7 +217,7 @@ function Checkbox({
   ) : null
 
   return (
-    <HonorableLabelStyled
+    <LabelSC
       htmlFor={inputProps.id}
       id={labelId}
       className={classNames({
@@ -211,8 +227,6 @@ function Checkbox({
       $isFocusVisible={isFocusVisible}
       $small={!!small}
       $disabled={!!disabled}
-      display="flex"
-      marginBottom="0"
       {...props}
     >
       <VisuallyHidden>
@@ -233,7 +247,7 @@ function Checkbox({
         <div className="icon">{icon}</div>
       </div>
       {children && <div className="label"> {children}</div>}
-    </HonorableLabelStyled>
+    </LabelSC>
   )
 }
 

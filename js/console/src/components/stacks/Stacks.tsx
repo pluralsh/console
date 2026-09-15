@@ -271,13 +271,13 @@ export function Stacks() {
       >
         <Flex gap="small">
           <Input
-            flexGrow={1}
             placeholder="Search stacks"
             startIcon={<SearchIcon />}
             value={searchString}
             onChange={(e) => {
               setSearchString?.(e.currentTarget.value)
             }}
+            css={{ flexGrow: 1 }}
           />
           {!filterExpanded && (
             <Button

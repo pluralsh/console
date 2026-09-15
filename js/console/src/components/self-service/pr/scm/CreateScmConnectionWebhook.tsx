@@ -1,5 +1,5 @@
 import { ComponentProps, useCallback, useState } from 'react'
-import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 
@@ -172,7 +172,7 @@ export function ScmConnectionWebhookForm({
       }
       required
     >
-      <Input2
+      <Input
         value={formState.owner}
         onChange={(e) => updateFormState({ owner: e.target.value })}
       />
