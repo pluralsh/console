@@ -87,6 +87,7 @@ defmodule Console.GraphQl.Users do
     field :flows,       :persona_flows_attributes, description: "enable individual parts of the flows views"
     field :sidebar,     :persona_sidebar_attributes, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services_attributes, description: "enable individual parts of the services views"
+    field :settings,    :persona_settings_attributes, description: "enable individual settings tabs"
     field :ai,          :persona_ai_attributes, description: "enable individual parts of the ai views"
   end
 
@@ -131,6 +132,19 @@ defmodule Console.GraphQl.Users do
   input_object :persona_services_attributes do
     field :secrets, :boolean
     field :configuration, :boolean
+  end
+
+  input_object :persona_settings_attributes do
+    field :user_management,   :boolean
+    field :global,            :boolean
+    field :ai,                :boolean
+    field :webhooks,          :boolean
+    field :chatbots,          :boolean
+    field :cloud_connections, :boolean
+    field :projects,          :boolean
+    field :notifications,     :boolean
+    field :audits,            :boolean
+    field :access_tokens,     :boolean
   end
 
   input_object :persona_ai_attributes do
@@ -324,6 +338,7 @@ defmodule Console.GraphQl.Users do
     field :flows,       :persona_flows, description: "enable individual parts of the flows views"
     field :sidebar,     :persona_sidebar, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services, description: "enable individual parts of the services views"
+    field :settings,    :persona_settings, description: "enable individual settings tabs"
     field :ai,          :persona_ai, description: "enable individual parts of the ai views"
   end
 
@@ -368,6 +383,19 @@ defmodule Console.GraphQl.Users do
   object :persona_services do
     field :secrets,       :boolean
     field :configuration, :boolean
+  end
+
+  object :persona_settings do
+    field :user_management,   :boolean
+    field :global,            :boolean
+    field :ai,                :boolean
+    field :webhooks,          :boolean
+    field :chatbots,          :boolean
+    field :cloud_connections, :boolean
+    field :projects,          :boolean
+    field :notifications,     :boolean
+    field :audits,            :boolean
+    field :access_tokens,     :boolean
   end
 
   object :persona_ai do

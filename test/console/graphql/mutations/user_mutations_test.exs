@@ -583,15 +583,31 @@ defmodule Console.GraphQl.UserMutationsTest do
           createPersona(attributes: $attrs) {
             id
             bindings { group { id } }
+            configuration {
+              settings {
+                userManagement
+                accessTokens
+              }
+            }
           }
         }
       """, %{"attrs" => %{
         "name" => "some-persona",
         "bindings" => [%{"groupId" => group.id}],
+        "configuration" => %{
+          "settings" => %{
+            "userManagement" => false,
+            "accessTokens" => true,
+          },
+        },
       }}, %{current_user: admin_user()})
 
       assert persona["id"]
       assert hd(persona["bindings"])["group"]["id"] == group.id
+      assert persona["configuration"]["settings"] == %{
+        "userManagement" => false,
+        "accessTokens" => true,
+      }
     end
 
     test "nonadmins cannot create a persona" do

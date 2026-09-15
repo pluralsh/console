@@ -3343,6 +3343,7 @@ _Appears in:_
 | `flows` _[PersonaFlows](#personaflows)_ | Flows controls access to flow-related features and sections.<br />This includes workbenches, pipelines, and preview environments grouped under flows. |  | Optional: \{\} <br /> |
 | `sidebar` _[PersonaSidebar](#personasidebar)_ | Sidebar configures which navigation items and sections are visible in the main sidebar.<br />This allows personas to have streamlined navigation focused on their primary workflows<br />while hiding irrelevant or restricted functionality. |  | Optional: \{\} <br /> |
 | `services` _[PersonaServices](#personaservices)_ | Services controls access to service-specific features and configuration options.<br />This includes service configuration, secrets management, and other service-level operations. |  | Optional: \{\} <br /> |
+| `settings` _[PersonaSettings](#personasettings)_ | Settings controls which tabs are visible within the Console settings page.<br />Tabs are visible by default and can be hidden by explicitly setting them to false. |  | Optional: \{\} <br /> |
 | `ai` _[PersonaAI](#personaai)_ | AI configures access to AI-powered features and capabilities within the Console.<br />This includes AI-assisted operations, automated suggestions, and other intelligent features. |  | Optional: \{\} <br /> |
 
 
@@ -3428,6 +3429,31 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `secrets` _boolean_ | Secrets enables access to service secrets management when set to true.<br />This includes viewing, creating, and modifying secrets associated with services.<br />Typically restricted to platform engineers and senior developers who need<br />to manage service authentication and configuration secrets. |  | Optional: \{\} <br /> |
 | `configuration` _boolean_ | Configuration enables access to service configuration management when set to true.<br />This includes modifying service deployment settings, environment variables,<br />and other configuration parameters that affect service behavior. |  | Optional: \{\} <br /> |
+
+
+#### PersonaSettings
+
+
+
+PersonaSettings defines the visibility of tabs on the Console settings page.
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `userManagement` _boolean_ |  |  | Optional: \{\} <br /> |
+| `global` _boolean_ |  |  | Optional: \{\} <br /> |
+| `ai` _boolean_ |  |  | Optional: \{\} <br /> |
+| `webhooks` _boolean_ |  |  | Optional: \{\} <br /> |
+| `chatbots` _boolean_ |  |  | Optional: \{\} <br /> |
+| `cloudConnections` _boolean_ |  |  | Optional: \{\} <br /> |
+| `projects` _boolean_ |  |  | Optional: \{\} <br /> |
+| `notifications` _boolean_ |  |  | Optional: \{\} <br /> |
+| `audits` _boolean_ |  |  | Optional: \{\} <br /> |
+| `accessTokens` _boolean_ |  |  | Optional: \{\} <br /> |
 
 
 #### PersonaSidebar

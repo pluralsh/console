@@ -178,6 +178,11 @@ type PersonaConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Services *PersonaServices `json:"services,omitempty"`
 
+	// Settings controls which tabs are visible within the Console settings page.
+	// Tabs are visible by default and can be hidden by explicitly setting them to false.
+	// +kubebuilder:validation:Optional
+	Settings *PersonaSettings `json:"settings,omitempty"`
+
 	// AI configures access to AI-powered features and capabilities within the Console.
 	// This includes AI-assisted operations, automated suggestions, and other intelligent features.
 	// +kubebuilder:validation:Optional
@@ -197,6 +202,7 @@ func (in *PersonaConfiguration) Attributes() *console.PersonaConfigurationAttrib
 		Flows:       in.Flows.Attributes(),
 		Sidebar:     in.Sidebar.Attributes(),
 		Services:    in.Services.Attributes(),
+		Settings:    in.Settings.Attributes(),
 		Ai:          in.AI.Attributes(),
 	}
 }
@@ -278,6 +284,59 @@ func (in *PersonaServices) Attributes() *console.PersonaServicesAttributes {
 	return &console.PersonaServicesAttributes{
 		Secrets:       in.Secrets,
 		Configuration: in.Configuration,
+	}
+}
+
+// PersonaSettings defines the visibility of tabs on the Console settings page.
+type PersonaSettings struct {
+	// +kubebuilder:validation:Optional
+	UserManagement *bool `json:"userManagement,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Global *bool `json:"global,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AI *bool `json:"ai,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Webhooks *bool `json:"webhooks,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Chatbots *bool `json:"chatbots,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	CloudConnections *bool `json:"cloudConnections,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Projects *bool `json:"projects,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Notifications *bool `json:"notifications,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Audits *bool `json:"audits,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	AccessTokens *bool `json:"accessTokens,omitempty"`
+}
+
+// Attributes converts the PersonaSettings to Console API attributes.
+func (in *PersonaSettings) Attributes() *console.PersonaSettingsAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PersonaSettingsAttributes{
+		UserManagement:   in.UserManagement,
+		Global:           in.Global,
+		Ai:               in.AI,
+		Webhooks:         in.Webhooks,
+		Chatbots:         in.Chatbots,
+		CloudConnections: in.CloudConnections,
+		Projects:         in.Projects,
+		Notifications:    in.Notifications,
+		Audits:           in.Audits,
+		AccessTokens:     in.AccessTokens,
 	}
 }
 

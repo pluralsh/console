@@ -6381,6 +6381,8 @@ type PersonaConfiguration struct {
 	Sidebar *PersonaSidebar `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServices `json:"services,omitempty"`
+	// enable individual settings tabs
+	Settings *PersonaSettings `json:"settings,omitempty"`
 	// enable individual parts of the ai views
 	Ai *PersonaAi `json:"ai,omitempty"`
 }
@@ -6398,6 +6400,8 @@ type PersonaConfigurationAttributes struct {
 	Sidebar *PersonaSidebarAttributes `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServicesAttributes `json:"services,omitempty"`
+	// enable individual settings tabs
+	Settings *PersonaSettingsAttributes `json:"settings,omitempty"`
 	// enable individual parts of the ai views
 	Ai *PersonaAiAttributes `json:"ai,omitempty"`
 }
@@ -6466,6 +6470,32 @@ type PersonaServices struct {
 type PersonaServicesAttributes struct {
 	Secrets       *bool `json:"secrets,omitempty"`
 	Configuration *bool `json:"configuration,omitempty"`
+}
+
+type PersonaSettings struct {
+	UserManagement   *bool `json:"userManagement,omitempty"`
+	Global           *bool `json:"global,omitempty"`
+	Ai               *bool `json:"ai,omitempty"`
+	Webhooks         *bool `json:"webhooks,omitempty"`
+	Chatbots         *bool `json:"chatbots,omitempty"`
+	CloudConnections *bool `json:"cloudConnections,omitempty"`
+	Projects         *bool `json:"projects,omitempty"`
+	Notifications    *bool `json:"notifications,omitempty"`
+	Audits           *bool `json:"audits,omitempty"`
+	AccessTokens     *bool `json:"accessTokens,omitempty"`
+}
+
+type PersonaSettingsAttributes struct {
+	UserManagement   *bool `json:"userManagement,omitempty"`
+	Global           *bool `json:"global,omitempty"`
+	Ai               *bool `json:"ai,omitempty"`
+	Webhooks         *bool `json:"webhooks,omitempty"`
+	Chatbots         *bool `json:"chatbots,omitempty"`
+	CloudConnections *bool `json:"cloudConnections,omitempty"`
+	Projects         *bool `json:"projects,omitempty"`
+	Notifications    *bool `json:"notifications,omitempty"`
+	Audits           *bool `json:"audits,omitempty"`
+	AccessTokens     *bool `json:"accessTokens,omitempty"`
 }
 
 type PersonaSidebar struct {

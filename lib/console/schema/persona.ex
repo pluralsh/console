@@ -21,6 +21,21 @@ defmodule Console.Schema.Persona do
         boolean_fields [:secrets, :configuration]
       end
 
+      embeds_one :settings, Settings, on_replace: :update do
+        boolean_fields [
+          :user_management,
+          :global,
+          :ai,
+          :webhooks,
+          :chatbots,
+          :cloud_connections,
+          :projects,
+          :notifications,
+          :audits,
+          :access_tokens
+        ]
+      end
+
       embeds_one :flows, Flows, on_replace: :update do
         boolean_fields [:permissions, :start_workbench_job, :workbenches, :pipelines, :previews]
       end
@@ -41,6 +56,7 @@ defmodule Console.Schema.Persona do
       |> cast_embed(:sidebar, with: &sidebar_cs/2)
       |> cast_embed(:home, with: &home_cs/2)
       |> cast_embed(:services, with: &services_cs/2)
+      |> cast_embed(:settings, with: &settings_cs/2)
       |> cast_embed(:flows, with: &flows_cs/2)
       |> cast_embed(:ai, with: &ai_cs/2)
     end
@@ -65,6 +81,11 @@ defmodule Console.Schema.Persona do
       |> cast(attrs, services_fields())
     end
 
+    defp settings_cs(model, attrs) do
+      model
+      |> cast(attrs, settings_fields())
+    end
+
     defp ai_cs(model, attrs) do
       model
       |> cast(attrs, ai_fields())
@@ -79,6 +100,7 @@ defmodule Console.Schema.Persona do
     defp sidebar_fields(), do: __MODULE__.Sidebar.__schema__(:fields) -- [:id]
     defp home_fields(), do: __MODULE__.Home.__schema__(:fields) -- [:id]
     defp services_fields(), do: __MODULE__.Services.__schema__(:fields) -- [:id]
+    defp settings_fields(), do: __MODULE__.Settings.__schema__(:fields) -- [:id]
     defp ai_fields(), do: __MODULE__.AI.__schema__(:fields) -- [:id]
     defp flows_fields(), do: __MODULE__.Flows.__schema__(:fields) -- [:id]
   end

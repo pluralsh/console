@@ -37,6 +37,18 @@ fragment PersonaConfiguration on PersonaConfiguration {
     configuration
     secrets
   }
+  settings {
+    accessTokens
+    ai
+    audits
+    chatbots
+    cloudConnections
+    global
+    notifications
+    projects
+    userManagement
+    webhooks
+  }
   ai {
     pr
   }
