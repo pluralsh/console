@@ -132,6 +132,9 @@ const GlobalStyleSheet = createGlobalStyle(({ theme }) => ({
   [lightModeSelectors]: {
     ...getSemanticColorCSSVars({ mode: 'light' }),
   },
+  '*, *::before, *::after': {
+    boxSizing: 'border-box',
+  },
   html: {
     fontSize: 14,
     lineHeight: 1.15,
@@ -167,7 +170,17 @@ function GlobalStyle() {
   return (
     <>
       <GlobalStyleSheet />
-      <div id={theme.portals.default.id} />
+      <div
+        id={theme.portals.default.id}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0,
+          overflow: 'visible',
+        }}
+      />
     </>
   )
 }

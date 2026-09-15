@@ -127,8 +127,10 @@ const FlexSC = styled.div<{
     flexShrink: $shrink,
     alignItems: $align,
     justifyContent: $justify,
-    gap: ($gap != null ? theme.spacing[$gap] : 0) || 0,
-    padding: ($padding != null ? theme.spacing[$padding] : 0) || 0,
+    ...($gap != null ? { gap: theme.spacing[$gap] ?? $gap } : {}),
+    ...($padding != null
+      ? { padding: theme.spacing[$padding] ?? $padding }
+      : {}),
   })
 )
 

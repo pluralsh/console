@@ -64,6 +64,7 @@ const ItemSC = styled.button<{
   const lightHover = navInteractionFill(accent, 0.025)
 
   return {
+    boxSizing: 'border-box',
     ...theme.partials.reset.button,
     display: 'flex',
     alignItems: 'center',
