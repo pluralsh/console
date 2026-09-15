@@ -1,8 +1,4 @@
-import {
-  type ComponentPropsWithRef,
-  useLayoutEffect,
-  useState,
-} from 'react'
+import { type ComponentPropsWithRef, useLayoutEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import { toInitials } from './AppIcon'
@@ -39,13 +35,7 @@ function useImageLoad(src?: string) {
   return [loaded, error] as const
 }
 
-function Avatar({
-  ref,
-  size = 40,
-  src,
-  name,
-  ...props
-}: AvatarProps) {
+function Avatar({ ref, size = 40, src, name, ...props }: AvatarProps) {
   const [loaded, error] = useImageLoad(src)
   const showImage = !!(src && loaded && !error)
 

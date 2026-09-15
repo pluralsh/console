@@ -129,7 +129,11 @@ function TabList({
 
   if (renderer) {
     return renderer(
-      { ...props, ...tabListProps, ...{ children: tabChildren } } as HTMLAttributes<HTMLElement>,
+      {
+        ...props,
+        ...tabListProps,
+        ...{ children: tabChildren },
+      } as HTMLAttributes<HTMLElement>,
       mergedRef,
       state
     )

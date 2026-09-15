@@ -68,9 +68,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
       {/* - With icon */}
       {sizes.map((size) => (
         <div>
-          <Heading>
-            {`${size[0].toUpperCase()}${size.slice(1)}`}
-          </Heading>
+          <Heading>{`${size[0].toUpperCase()}${size.slice(1)}`}</Heading>
           <div style={{ marginBottom: 32 }}>
             <WrapWithIf
               condition={onFillLevel > 0}
@@ -109,9 +107,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
       ))}
 
       {/* Wrapping */}
-      <Heading>
-        Wrapping
-      </Heading>
+      <Heading>Wrapping</Heading>
       <Flex gap="medium">
         <Card
           css={{ padding: theme.spacing.medium, width: 160 }}

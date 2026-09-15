@@ -2,7 +2,16 @@ import { type FormEvent, useState } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
-import { Button, Card, Code, Flex, Flyover, FormField, Input, SearchIcon } from '..'
+import {
+  Button,
+  Card,
+  Code,
+  Flex,
+  Flyover,
+  FormField,
+  Input,
+  SearchIcon,
+} from '..'
 import { jsCode } from '../constants'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -60,9 +69,7 @@ function Template(args: any) {
 
   return (
     <>
-      <Heading>
-        {args.header} Flyover
-      </Heading>
+      <Heading>{args.header} Flyover</Heading>
       <Button onClick={() => setOpen(true)}>Open</Button>
       <Flyover
         open={open}
@@ -145,9 +152,7 @@ function NonScrollTemplate(args: any) {
 
   return (
     <>
-      <Heading>
-        {args.header} Flyover
-      </Heading>
+      <Heading>{args.header} Flyover</Heading>
       <Button onClick={() => setOpen(true)}>Open</Button>
       <Flyover
         open={open}

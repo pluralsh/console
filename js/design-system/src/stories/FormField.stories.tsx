@@ -201,9 +201,7 @@ export const ArbitraryHintContent: Story = {
   render: AllSizesTemplate,
   args: {
     label: 'Label',
-    hint: (
-      <HintBox>Put whatever you want in the hint!</HintBox>
-    ),
+    hint: <HintBox>Put whatever you want in the hint!</HintBox>,
   },
 }
 

@@ -110,11 +110,7 @@ function FormField({
           )}
         </LabelSC>
       )}
-      {caption && (
-        <CaptionSC $small={small}>
-          {caption}
-        </CaptionSC>
-      )}
+      {caption && <CaptionSC $small={small}>{caption}</CaptionSC>}
     </Flex>
   )
 
@@ -123,15 +119,10 @@ function FormField({
       align="flex-start"
       css={{
         color: theme.colors['text-light'],
-        marginTop:
-          layout === 'vertical' ? spacing.xsmall : spacing.xxxsmall,
+        marginTop: layout === 'vertical' ? spacing.xsmall : spacing.xxxsmall,
       }}
     >
-      {typeof hint === 'string' ? (
-        <HintSC $error={error}>{hint}</HintSC>
-      ) : (
-        hint
-      )}
+      {typeof hint === 'string' ? <HintSC $error={error}>{hint}</HintSC> : hint}
       {typeof maxLength === 'number' && (
         <LengthSC $hasHint={!!hint}>
           {length} / {maxLength}
@@ -143,8 +134,7 @@ function FormField({
   const fieldContent = (
     <div
       css={{
-        marginTop:
-          layout === 'vertical' && hasTopContent ? spacing.xxsmall : 0,
+        marginTop: layout === 'vertical' && hasTopContent ? spacing.xxsmall : 0,
         marginBottom:
           layout === 'vertical' && hasBottomContent ? spacing.xxsmall : 0,
       }}

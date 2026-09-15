@@ -339,8 +339,12 @@ function Card({
               : wrapWidth != null
                 ? { width: wrapWidth }
                 : {}),
-            ...(!hasChrome && wrapMinWidth != null ? { minWidth: wrapMinWidth } : {}),
-            ...(!hasChrome && wrapMaxWidth != null ? { maxWidth: wrapMaxWidth } : {}),
+            ...(!hasChrome && wrapMinWidth != null
+              ? { minWidth: wrapMinWidth }
+              : {}),
+            ...(!hasChrome && wrapMaxWidth != null
+              ? { maxWidth: wrapMaxWidth }
+              : {}),
             ...(height != null ? { height } : {}),
             ...(minHeight != null ? { minHeight } : {}),
             ...(maxHeight != null ? { maxHeight } : {}),

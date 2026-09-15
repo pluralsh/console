@@ -25,24 +25,17 @@ function Template(args: any) {
       maxWidth={697}
     >
       <div style={{ marginBottom: 24 }}>
-        <Heading>
-          Default
-        </Heading>{' '}
-        <RepositoryCard {...args} />
+        <Heading>Default</Heading> <RepositoryCard {...args} />
       </div>
       <div style={{ marginBottom: 24 }}>
-        <Heading>
-          Marketing
-        </Heading>
+        <Heading>Marketing</Heading>
         <RepositoryCard
           variant="marketing"
           {...args}
         />
       </div>
       <div style={{ marginBottom: 24 }}>
-        <Heading>
-          Medium
-        </Heading>
+        <Heading>Medium</Heading>
         <RepositoryCard
           size="medium"
           mt={1}

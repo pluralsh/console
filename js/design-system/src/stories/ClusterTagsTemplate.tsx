@@ -5,7 +5,15 @@ import { isEqual, uniqWith } from 'lodash-es'
 
 import styled, { useTheme } from 'styled-components'
 
-import { Card, Chip, ComboBox, Flex, ListBoxItem, TagIcon, WrapWithIf } from '..'
+import {
+  Card,
+  Chip,
+  ComboBox,
+  Flex,
+  ListBoxItem,
+  TagIcon,
+  WrapWithIf,
+} from '..'
 
 import { isNonNullable } from '../utils/isNonNullable'
 

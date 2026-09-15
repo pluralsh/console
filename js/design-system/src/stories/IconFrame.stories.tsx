@@ -39,9 +39,7 @@ function Template({
     <>
       {types.map((type) => (
         <div key={type}>
-          <Caption style={{ marginBottom: 4 }}>
-            type=&quot;{type}&quot;
-          </Caption>
+          <Caption style={{ marginBottom: 4 }}>type=&quot;{type}&quot;</Caption>
           <Flex
             gap="xsmall"
             marginBottom={32}

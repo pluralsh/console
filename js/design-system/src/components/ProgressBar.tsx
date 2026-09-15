@@ -53,9 +53,7 @@ function resolveThemeColor(theme: ReturnType<typeof useTheme>, value: string) {
     const groupColors = (theme.colors as Record<string, unknown>)[group]
 
     if (groupColors && typeof groupColors === 'object') {
-      return (
-        (groupColors as Record<string, string>)[shade] ?? value
-      )
+      return (groupColors as Record<string, string>)[shade] ?? value
     }
   }
 
@@ -93,26 +91,29 @@ const IndeterminateBarSC = styled.div<{ $paused: boolean }>`
   }
 `
 
-const CompleteFillSC = styled.div<{ $complete: boolean }>(({ theme, $complete }) => ({
-  position: 'absolute',
-  width: '100%',
-  height: '100%',
-  opacity: $complete ? 1 : 0,
-  transform: $complete ? 'translateX(0)' : 'translateX(-100%)',
-  transition: 'transform 0.15s ease-out',
-  backgroundColor: theme.colors['border-success'],
-}))
-
-const DeterminateFillSC = styled.div<{ $color: string; $width: string | number }>(
-  ({ $color, $width }) => ({
+const CompleteFillSC = styled.div<{ $complete: boolean }>(
+  ({ theme, $complete }) => ({
     position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: $color,
-    width: $width,
+    width: '100%',
+    height: '100%',
+    opacity: $complete ? 1 : 0,
+    transform: $complete ? 'translateX(0)' : 'translateX(-100%)',
+    transition: 'transform 0.15s ease-out',
+    backgroundColor: theme.colors['border-success'],
   })
 )
+
+const DeterminateFillSC = styled.div<{
+  $color: string
+  $width: string | number
+}>(({ $color, $width }) => ({
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  bottom: 0,
+  backgroundColor: $color,
+  width: $width,
+}))
 
 const TrackSC = styled.div<{ $height: number; $trackColor: string }>(
   ({ $height, $trackColor }) => ({

@@ -12,13 +12,13 @@ type TagProps = Omit<FlexProps, 'tooltip'> &
     ComponentPropsWithRef<'div'>,
     'onClick' | 'onMouseEnter' | 'onMouseLeave'
   > & {
-  label: string
-  imageUrl?: string
-  checked?: boolean
-  disabled?: boolean
-  icon?: ReactNode
-  tooltip?: string
-}
+    label: string
+    imageUrl?: string
+    checked?: boolean
+    disabled?: boolean
+    icon?: ReactNode
+    tooltip?: string
+  }
 
 function RepositoryChip({
   label,
@@ -61,9 +61,7 @@ function RepositoryChip({
           overflow="hidden"
         >
           {icon ? (
-            <IconWrapSC>
-              {icon}
-            </IconWrapSC>
+            <IconWrapSC>{icon}</IconWrapSC>
           ) : imageUrl ? (
             <IconImgSC
               src={imageUrl}

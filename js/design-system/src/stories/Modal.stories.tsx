@@ -2,7 +2,16 @@ import { useState } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
-import { Button, Card, Code, Flex, FormField, Input, Modal, SearchIcon } from '..'
+import {
+  Button,
+  Card,
+  Code,
+  Flex,
+  FormField,
+  Input,
+  Modal,
+  SearchIcon,
+} from '..'
 import { SEVERITIES } from '../components/Modal'
 import { jsCode } from '../constants'
 import type { Meta, StoryObj } from '@storybook/react'
@@ -77,9 +86,7 @@ function Template(args: any) {
 
   return (
     <>
-      <Heading>
-        {args.header} Modal
-      </Heading>
+      <Heading>{args.header} Modal</Heading>
       <Button onClick={() => setOpen(true)}>Open</Button>
       <Modal
         open={open}
@@ -181,9 +188,7 @@ function NonScrollTemplate(args: any) {
 
   return (
     <>
-      <Heading>
-        {args.header} Modal
-      </Heading>
+      <Heading>{args.header} Modal</Heading>
       <Button onClick={() => setOpen(true)}>Open</Button>
       <Modal
         open={open}
