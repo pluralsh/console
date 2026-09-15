@@ -18,7 +18,8 @@ import { appendConnection, updateCache } from 'utils/graphql'
 
 import { sinkTypeToIcon } from './NotificationSinksColumns'
 
-const slackHookUrlRegex = /^https:\/\/[^/]*?slack/
+// URL validity is enforced server-side. This only preserves Slack vs Teams payload selection.
+const slackUrlTypeHintRegex = /^https:\/\/[^/]*?slack/
 
 type ModalBaseProps = {
   mode: 'edit' | 'create'
@@ -62,7 +63,7 @@ function UpsertNotificationSinkModal({
   const hookType =
     mode === 'edit' && sinkType
       ? sinkType
-      : slackHookUrlRegex.test(state.hookUrl)
+      : slackUrlTypeHintRegex.test(state.hookUrl)
         ? SinkType.Slack
         : SinkType.Teams
 

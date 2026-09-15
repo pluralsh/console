@@ -94,9 +94,8 @@ defmodule Console.Schema.NotificationSink do
   end
 
   defp validate_webhook_url(:url, url, hosts, message) when is_binary(url) do
-    with {:ok, %URI{scheme: "https", host: host, userinfo: nil} = uri} when is_binary(host) <-
+    with {:ok, %URI{scheme: "https", host: host, userinfo: nil}} when is_binary(host) <-
            URI.new(url),
-         true <- valid_port?(uri.port),
          true <- host_matches?(host, hosts) do
       []
     else
@@ -105,10 +104,6 @@ defmodule Console.Schema.NotificationSink do
   end
 
   defp validate_webhook_url(:url, _, _, message), do: [url: message]
-
-  defp valid_port?(port) when is_integer(port), do: port in 1..65_535
-  defp valid_port?(nil), do: true
-  defp valid_port?(_), do: false
 
   defp host_matches?(host, hosts) do
     host = String.downcase(host)
