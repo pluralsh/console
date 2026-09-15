@@ -93,26 +93,52 @@ export function getPodResourceReservationsFromList(
 export function addPodResourceReservationSeries(
   graph: GraphSeries[],
   reservations: PodResourceReservation[] | undefined,
-  type: 'cpu' | 'memory'
+  type: 'cpu' | 'memory',
+  promRequests?: GraphSeries[],
+  promLimits?: GraphSeries[]
 ): GraphSeries[] {
   const reservationsByPod = new Map(
     reservations?.map((reservation) => [reservation.pod, reservation]) ?? []
+  )
+  const requestsByPod = new Map(
+    (promRequests ?? []).map((series) => [String(series.id), series.data])
+  )
+  const limitsByPod = new Map(
+    (promLimits ?? []).map((series) => [String(series.id), series.data])
   )
 
   return graph.flatMap((series) => {
     const pod = String(series.id)
     const podReservations = reservationsByPod.get(pod)?.[type]
     const resourceSeries = [
-      toResourceSeries(
+      toPromOrStaticSeries(
         `${pod} - requests`,
+        requestsByPod.get(pod),
         podReservations?.requests,
         series.data
       ),
-      toResourceSeries(`${pod} - limits`, podReservations?.limits, series.data),
+      toPromOrStaticSeries(
+        `${pod} - limits`,
+        limitsByPod.get(pod),
+        podReservations?.limits,
+        series.data
+      ),
     ].filter((series): series is GraphSeries => !!series)
 
     return [{ ...series, id: `${pod}` }, ...resourceSeries]
   })
+}
+
+function toPromOrStaticSeries(
+  id: string,
+  promData: GraphPoint[] | undefined,
+  staticValue: number | undefined,
+  usagePoints: GraphPoint[]
+): Nullable<GraphSeries> {
+  if (promData && promData.length > 0)
+    return { id, data: promData, dashed: true }
+
+  return toResourceSeries(id, staticValue, usagePoints)
 }
 
 function toResourceSeries(

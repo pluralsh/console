@@ -14,6 +14,7 @@ import {
 type GraphSeries = {
   id: string
   data: { x: Date; y: number }[]
+  dashed?: boolean
 }
 
 type MetricGraph = {
@@ -85,46 +86,93 @@ export function ResourceMetricsGraphs({
   mem,
   podCpu,
   podMem,
+  cpuRequests,
+  memRequests,
+  cpuLimits,
+  memLimits,
+  podCpuRequests,
+  podMemRequests,
+  podCpuLimits,
+  podMemLimits,
   podReservations,
 }: {
   cpu: MetricResponseFragment[]
   mem: MetricResponseFragment[]
   podCpu: MetricResponseFragment[]
   podMem: MetricResponseFragment[]
+  cpuRequests?: MetricResponseFragment[]
+  memRequests?: MetricResponseFragment[]
+  cpuLimits?: MetricResponseFragment[]
+  memLimits?: MetricResponseFragment[]
+  podCpuRequests?: MetricResponseFragment[]
+  podMemRequests?: MetricResponseFragment[]
+  podCpuLimits?: MetricResponseFragment[]
+  podMemLimits?: MetricResponseFragment[]
   podReservations?: PodResourceReservation[]
 }) {
-  const overallGraphs = useMemo(
-    () => [
+  const overallGraphs = useMemo(() => {
+    const toOverallSeries = (
+      usage: MetricResponseFragment[],
+      requests: MetricResponseFragment[] | undefined,
+      limits: MetricResponseFragment[] | undefined,
+      usageId: string
+    ): GraphSeries[] => {
+      const series: GraphSeries[] = []
+      const usageData = usage[0]?.values
+        ? convertVals(usage[0].values)
+        : ([] as GraphSeries['data'])
+
+      if (usageData.length > 0) series.push({ id: usageId, data: usageData })
+
+      const requestsData = requests?.[0]?.values
+        ? convertVals(requests[0].values)
+        : []
+
+      if (requestsData.length > 0)
+        series.push({ id: 'requests', data: requestsData, dashed: true })
+
+      const limitsData = limits?.[0]?.values
+        ? convertVals(limits[0].values)
+        : []
+
+      if (limitsData.length > 0)
+        series.push({ id: 'limits', data: limitsData, dashed: true })
+
+      return series
+    }
+
+    return [
       {
-        data: cpu[0]?.values
-          ? [{ id: 'cpu', data: convertVals(cpu[0].values) }]
-          : [],
+        data: toOverallSeries(cpu, cpuRequests, cpuLimits, 'cpu'),
         format: 'cpu' as const,
         title: 'Overall CPU Usage (cores)',
       },
       {
-        data: mem[0]?.values
-          ? [{ id: 'memory', data: convertVals(mem[0].values) }]
-          : [],
+        data: toOverallSeries(mem, memRequests, memLimits, 'memory'),
         format: 'memory' as const,
         title: 'Overall Memory Usage (bytes)',
       },
-    ],
-    [cpu, mem]
-  )
+    ]
+  }, [cpu, mem, cpuRequests, memRequests, cpuLimits, memLimits])
   const podGraphs = useMemo(() => {
-    const cpuGraph = podCpu.map(({ metric, values }) => ({
-      id: getMetricPod(metric),
-      data: convertVals(values),
-    }))
-    const memGraph = podMem.map(({ metric, values }) => ({
-      id: getMetricPod(metric),
-      data: convertVals(values),
-    }))
+    const toPodGraph = (metrics: MetricResponseFragment[]): GraphSeries[] =>
+      metrics.map(({ metric, values }) => ({
+        id: getMetricPod(metric),
+        data: convertVals(values),
+      }))
+
+    const cpuGraph = toPodGraph(podCpu)
+    const memGraph = toPodGraph(podMem)
 
     return [
       {
-        data: addPodResourceReservationSeries(cpuGraph, podReservations, 'cpu'),
+        data: addPodResourceReservationSeries(
+          cpuGraph,
+          podReservations,
+          'cpu',
+          podCpuRequests ? toPodGraph(podCpuRequests) : undefined,
+          podCpuLimits ? toPodGraph(podCpuLimits) : undefined
+        ),
         format: 'cpu' as const,
         title: 'Pod CPU Usage (cores)',
       },
@@ -132,13 +180,23 @@ export function ResourceMetricsGraphs({
         data: addPodResourceReservationSeries(
           memGraph,
           podReservations,
-          'memory'
+          'memory',
+          podMemRequests ? toPodGraph(podMemRequests) : undefined,
+          podMemLimits ? toPodGraph(podMemLimits) : undefined
         ),
         format: 'memory' as const,
         title: 'Pod Memory Usage (bytes)',
       },
     ]
-  }, [podCpu, podMem, podReservations])
+  }, [
+    podCpu,
+    podMem,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+    podReservations,
+  ])
 
   return (
     <>

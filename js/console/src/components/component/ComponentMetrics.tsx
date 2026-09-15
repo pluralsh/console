@@ -52,15 +52,48 @@ function Metric({
     fetchPolicy: 'cache-and-network',
   })
 
-  const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } =
-      data?.serviceDeployment?.componentMetrics || {}
+  const {
+    cpu,
+    mem,
+    podCpu,
+    podMem,
+    cpuRequests,
+    memRequests,
+    cpuLimits,
+    memLimits,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+  } = useMemo(() => {
+    const {
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    } = data?.serviceDeployment?.componentMetrics || {}
 
     return {
       cpu: (cpu || []).filter(isNonNullable),
       mem: (mem || []).filter(isNonNullable),
       podCpu: (podCpu || []).filter(isNonNullable),
       podMem: (podMem || []).filter(isNonNullable),
+      cpuRequests: (cpuRequests || []).filter(isNonNullable),
+      memRequests: (memRequests || []).filter(isNonNullable),
+      cpuLimits: (cpuLimits || []).filter(isNonNullable),
+      memLimits: (memLimits || []).filter(isNonNullable),
+      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
+      podMemRequests: (podMemRequests || []).filter(isNonNullable),
+      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
+      podMemLimits: (podMemLimits || []).filter(isNonNullable),
     }
   }, [data])
 
@@ -73,6 +106,14 @@ function Metric({
         mem={mem}
         podCpu={podCpu}
         podMem={podMem}
+        cpuRequests={cpuRequests}
+        memRequests={memRequests}
+        cpuLimits={cpuLimits}
+        memLimits={memLimits}
+        podCpuRequests={podCpuRequests}
+        podMemRequests={podMemRequests}
+        podCpuLimits={podCpuLimits}
+        podMemLimits={podMemLimits}
         podReservations={podReservations}
       />
     )
