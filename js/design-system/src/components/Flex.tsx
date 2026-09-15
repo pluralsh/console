@@ -1,4 +1,4 @@
-// almost drop-in replacement for anywhere 'honorable' Flex is used
+// Flexible Box layout primitive with shorthand style props
 
 import {
   type CSSProperties,

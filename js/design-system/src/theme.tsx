@@ -33,7 +33,7 @@ export type StringObj = { [key: string]: string | StringObj }
 
 const portals = {
   default: {
-    id: 'honorable-portal',
+    id: 'ds-portal',
   },
 }
 

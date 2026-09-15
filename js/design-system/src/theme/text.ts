@@ -156,7 +156,6 @@ const textPartials = {
     textOverflow: 'ellipsis',
   },
   inlineLink: {
-    // Intermediate variables needed to avoid mangling by Honorable
     // Must declare all intermediate color variables at style root due to
     // security restritions on setting properties for :visited pseudo-class
     '--inline-link-c': semanticColorCssVars['action-link-inline'],
