@@ -160,6 +160,11 @@ spec:
                           Permissions enables the permissions action in the flow header when set to true.
                           This allows personas to manage flow permissions from the flow detail page.
                         type: boolean
+                      mcpServers:
+                        description: |-
+                          McpServers enables access to the "Manage MCP servers" action from the flows page when set to true.
+                          This allows personas to navigate to MCP server settings directly from flows.
+                        type: boolean
                       pipelines:
                         description: |-
                           Pipelines enables access to flow pipeline features when set to true.

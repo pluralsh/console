@@ -6420,6 +6420,7 @@ type PersonaFlows struct {
 	Permissions       *bool `json:"permissions,omitempty"`
 	StartWorkbenchJob *bool `json:"startWorkbenchJob,omitempty"`
 	Workbenches       *bool `json:"workbenches,omitempty"`
+	McpServers        *bool `json:"mcpServers,omitempty"`
 	Pipelines         *bool `json:"pipelines,omitempty"`
 	Previews          *bool `json:"previews,omitempty"`
 }
@@ -6428,6 +6429,7 @@ type PersonaFlowsAttributes struct {
 	Permissions       *bool `json:"permissions,omitempty"`
 	StartWorkbenchJob *bool `json:"startWorkbenchJob,omitempty"`
 	Workbenches       *bool `json:"workbenches,omitempty"`
+	McpServers        *bool `json:"mcpServers,omitempty"`
 	Pipelines         *bool `json:"pipelines,omitempty"`
 	Previews          *bool `json:"previews,omitempty"`
 }

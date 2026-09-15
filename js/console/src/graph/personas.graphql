@@ -15,6 +15,7 @@ fragment PersonaConfiguration on PersonaConfiguration {
   flows {
     permissions
     startWorkbenchJob
+    mcpServers
     pipelines
     previews
     workbenches

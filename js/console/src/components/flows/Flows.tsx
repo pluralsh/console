@@ -27,6 +27,8 @@ import {
 import usePersistedState from 'components/hooks/usePersistedState'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
+import { useLogin } from 'components/contexts'
+import { hasAccess } from 'components/utils/persona'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayButton,
@@ -56,6 +58,7 @@ const FLOWS_FAVORITES_STORAGE_KEY = 'flows-favorites'
 export function Flows() {
   useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
+  const { personaConfiguration } = useLogin()
   const [searchParams, setSearchParams] = useSearchParams()
   const searchString = searchParams.get('q') ?? ''
   const debouncedSearchString = useThrottle(searchString, 200)
@@ -87,6 +90,10 @@ export function Flows() {
   const toggleFavorite = (id: string) => {
     setFavoriteIds((ids) => toggleListValue(ids, id))
   }
+  const showManageMcpServers = hasAccess(
+    personaConfiguration,
+    'flows.mcpServers'
+  )
 
   const {
     data,
@@ -194,14 +201,16 @@ export function Flows() {
             units. <InlineA href={FLOW_DOCS_URL}>Learn more</InlineA>
           </Body2P>
         </Flex>
-        <Button
-          secondary
-          as={Link}
-          to={AI_MCP_SERVERS_ABS_PATH}
-          endIcon={<ArrowTopRightIcon />}
-        >
-          Manage MCP servers
-        </Button>
+        {showManageMcpServers && (
+          <Button
+            secondary
+            as={Link}
+            to={AI_MCP_SERVERS_ABS_PATH}
+            endIcon={<ArrowTopRightIcon />}
+          >
+            Manage MCP servers
+          </Button>
+        )}
       </HeaderSC>
       <DisplayToolbarSC>
         <Input2
