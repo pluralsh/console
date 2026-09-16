@@ -126,7 +126,7 @@
     "@graphql-codegen/typescript-react-apollo": "5.0.0",
     "@hey-api/openapi-ts": "0.99.0",
     "@pluralsh/eslint-config-pluralsh": "workspace:*",
-    "@pluralsh/stylelint-config": "2.0.10",
+    "@pluralsh/stylelint-config": "workspace:*",
     "@react-types/shared": "3.36.1",
     "@replit/graphql-codegen-persisted-queries": "0.1.2",
     "@rolldown/plugin-babel": "0.2.4",

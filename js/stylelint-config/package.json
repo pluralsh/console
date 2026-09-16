@@ -1,31 +1,39 @@
 {
   "name": "@pluralsh/stylelint-config",
-  "version": "1.0.0",
+  "version": "2.0.10",
   "description": "A modern stylelint configuration",
   "author": "Plural (https://plural.sh)",
   "license": "MIT",
-  "homepage": "https://github.com/pluralsh/stylelint-config#readme",
+  "homepage": "https://github.com/pluralsh/console/tree/master/js/stylelint-config#readme",
   "bugs": {
-    "url": "https://github.com/pluralsh/stylelint-config/issues"
+    "url": "https://github.com/pluralsh/console/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pluralsh/stylelint-config.git"
+    "url": "git+https://github.com/pluralsh/console.git",
+    "directory": "js/stylelint-config"
   },
   "keywords": [
-    "stylelint"
+    "stylelint",
+    "plural",
+    "pluralsh"
+  ],
+  "files": [
+    "index.js"
   ],
   "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "lint": "eslint .",
     "fix": "eslint . --fix"
   },
   "engines": {
-    "node": "18.20.8"
-  },
-  "packageManager": "yarn@3.8.7",
-  "peerDependencies": {
-    "stylelint": ">= 14.9.1"
+    "node": ">=20.9.0"
   },
   "dependencies": {
     "stylelint": "15.11.0",
@@ -33,13 +41,15 @@
     "stylelint-no-unsupported-browser-features": "6.1.0",
     "stylelint-order": "6.0.4"
   },
+  "peerDependencies": {
+    "stylelint": ">= 14.9.1"
+  },
   "devDependencies": {
-    "conventional-changelog-conventionalcommits": "6.1.0",
-    "eslint": "8.57.1",
-    "eslint-config-pluralsh": "3.1.0",
-    "eslint-plugin-import": "2.31.0",
-    "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "4.6.0"
+    "@pluralsh/eslint-config-pluralsh": "workspace:*",
+    "conventional-changelog-conventionalcommits": "10.2.1",
+    "eslint": "9.39.5",
+    "globals": "17.7.0",
+    "prettier": "3.9.5",
+    "typescript": "6.0.3"
   }
 }

@@ -1,0 +1,59 @@
+name: CD / Stylelint config
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/stylelint-config-publish.yaml"
+      - "js/stylelint-config/**"
+      - "js/package.json"
+      - "js/yarn.lock"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
+  publish:
+    needs: [vouch]
+    name: Publish npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
+      - working-directory: js
+        run: yarn --immutable
+      - name: Bootstrap migrated release history
+        run: |
+          if [[ -z "$(git tag --list 'stylelint-config-v*')" ]]; then
+            git tag stylelint-config-v2.0.10 HEAD
+            git push origin stylelint-config-v2.0.10
+          fi
+      - name: Semantic release
+        uses: cycjimmy/semantic-release-action@v6
+        with:
+          working_directory: js/stylelint-config
+          tag_format: stylelint-config-v${version}
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@10.2.1
+            semantic-release-monorepo@8.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NPM_CONFIG_PROVENANCE: true

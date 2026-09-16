@@ -77,7 +77,7 @@
     "@graphql-codegen/cli": "4.0.1",
     "@graphql-codegen/client-preset": "4.0.0",
     "@pluralsh/eslint-config-pluralsh": "workspace:*",
-    "@pluralsh/stylelint-config": "2.0.10",
+    "@pluralsh/stylelint-config": "workspace:*",
     "@types/eslint-plugin-jsx-a11y": "6.10.1",
     "@types/glob": "8.1.0",
     "@types/node": "20.4.2",

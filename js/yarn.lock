@@ -5405,7 +5405,7 @@ __metadata:
     "@open-draft/until": "npm:2.1.0"
     "@pluralsh/design-system": "workspace:*"
     "@pluralsh/eslint-config-pluralsh": "workspace:*"
-    "@pluralsh/stylelint-config": "npm:2.0.10"
+    "@pluralsh/stylelint-config": "workspace:*"
     "@react-aria/ssr": "npm:3.6.0"
     "@react-spring/web": "npm:10.1.2"
     "@react-stately/list": "npm:3.8.1"
@@ -5482,19 +5482,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pluralsh/stylelint-config@npm:2.0.10":
-  version: 2.0.10
-  resolution: "@pluralsh/stylelint-config@npm:2.0.10"
+"@pluralsh/stylelint-config@workspace:*, @pluralsh/stylelint-config@workspace:stylelint-config":
+  version: 0.0.0-use.local
+  resolution: "@pluralsh/stylelint-config@workspace:stylelint-config"
   dependencies:
+    "@pluralsh/eslint-config-pluralsh": "workspace:*"
+    conventional-changelog-conventionalcommits: "npm:10.2.1"
+    eslint: "npm:9.39.5"
+    globals: "npm:17.7.0"
+    prettier: "npm:3.9.5"
     stylelint: "npm:15.11.0"
     stylelint-config-standard: "npm:34.0.0"
     stylelint-no-unsupported-browser-features: "npm:6.1.0"
     stylelint-order: "npm:6.0.4"
+    typescript: "npm:6.0.3"
   peerDependencies:
     stylelint: ">= 14.9.1"
-  checksum: 10/e5d5bc0f27feed6e17d5971cdc247d0a1a6cec7e780e0983524919c399785bac664b1ab9022734443f58e1b044152d3ba48dc571f7fa01951bd0c1c297d62e01
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "@polka/url@npm:^1.0.0-next.24":
   version: 1.0.0-next.29
@@ -10486,7 +10491,7 @@ __metadata:
     "@nivo/treemap": "npm:0.99.0"
     "@pluralsh/design-system": "workspace:*"
     "@pluralsh/eslint-config-pluralsh": "workspace:*"
-    "@pluralsh/stylelint-config": "npm:2.0.10"
+    "@pluralsh/stylelint-config": "workspace:*"
     "@react-hooks-library/core": "npm:0.6.2"
     "@react-spring/web": "npm:10.1.2"
     "@react-types/shared": "npm:3.36.1"
