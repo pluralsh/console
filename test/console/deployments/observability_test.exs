@@ -486,7 +486,7 @@ defmodule Console.Deployments.ObservabilityTest do
         insert(:policy,
           project: workbench.project,
           policy: """
-          package plrl.wb.admission
+          package plrl.workbench
           sample := 0
           deny[{"message": "monitor query blocked"}] if {
             input.tool_name == "workbench_observability_metrics_prom"

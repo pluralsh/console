@@ -219,6 +219,32 @@ spec:
                           to manage service authentication and configuration secrets.
                         type: boolean
                     type: object
+                  settings:
+                    description: |-
+                      Settings controls which tabs are visible within the Console settings page.
+                      Tabs are visible by default and can be hidden by explicitly setting them to false.
+                    properties:
+                      accessTokens:
+                        type: boolean
+                      ai:
+                        type: boolean
+                      audits:
+                        type: boolean
+                      chatbots:
+                        type: boolean
+                      cloudConnections:
+                        type: boolean
+                      global:
+                        type: boolean
+                      notifications:
+                        type: boolean
+                      projects:
+                        type: boolean
+                      userManagement:
+                        type: boolean
+                      webhooks:
+                        type: boolean
+                    type: object
                   sidebar:
                     description: |-
                       Sidebar configures which navigation items and sections are visible in the main sidebar.

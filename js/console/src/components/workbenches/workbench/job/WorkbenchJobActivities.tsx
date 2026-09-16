@@ -141,7 +141,7 @@ export function WorkbenchJobActivities({
                   jobLevelThinking.length === 0 && (
                     <AILoadingText
                       jobId={jobId}
-                      marginTop={spacing.small}
+                      marginTop={textStreamMap['none'] ? spacing.small : 0}
                     />
                   )}
               </>

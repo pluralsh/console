@@ -75,6 +75,18 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     secrets: true,
     configuration: true,
   },
+  settings: {
+    accessTokens: true,
+    ai: true,
+    audits: true,
+    chatbots: true,
+    cloudConnections: true,
+    global: true,
+    notifications: true,
+    projects: true,
+    userManagement: true,
+    webhooks: true,
+  },
   ai: {
     pr: true,
   },

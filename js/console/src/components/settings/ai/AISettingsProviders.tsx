@@ -1,4 +1,14 @@
-import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
+import {
+  Accordion,
+  AccordionItem,
+  Button,
+  ChipList,
+  Flex,
+  FormField,
+  Input,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
 import { FileDrop, FileDropFile } from 'components/utils/FileDrop.tsx'
 import { isEmpty } from 'lodash'
 import { useCallback, useState } from 'react'
@@ -8,6 +18,7 @@ import {
   AiSettings,
   AiSettingsAttributes,
   BedrockEndpoint,
+  BedrockModelSettingsAttributes,
   ModelDefault,
   OpenAiMethod,
 } from '../../../generated/graphql.ts'
@@ -118,6 +129,10 @@ export function initialSettingsAttributes(
                 modelId: ai.bedrock.modelId,
                 toolModelId: ai.bedrock.toolModelId,
                 embeddingModel: ai.bedrock.embeddingModel,
+                modelSettings: ai.bedrock.modelSettings?.map((settings) => ({
+                  modelId: settings?.modelId ?? '',
+                  inferenceProfileArn: settings?.inferenceProfileArn ?? '',
+                })),
                 awsAccessKeyId: ai.bedrock.accessKeyId,
               }
             : {}),
@@ -397,10 +412,35 @@ export function BedrockSettings({
   ) => void
 }) {
   const region = settings?.region ?? DEFAULT_BEDROCK_REGION
+  const [modelId, setModelId] = useState('')
+  const [inferenceProfileArn, setInferenceProfileArn] = useState('')
+  const modelSettings = (settings?.modelSettings ?? []).filter(
+    (settings): settings is BedrockModelSettingsAttributes => !!settings
+  )
   const regionOptions =
     region && !BEDROCK_REGIONS.some(({ value }) => value === region)
       ? [...BEDROCK_REGIONS, { value: region, label: region }]
       : BEDROCK_REGIONS
+
+  const addModelSettings = () => {
+    const normalizedModelId = modelId.trim()
+    const normalizedInferenceProfileArn = inferenceProfileArn.trim()
+    if (!normalizedModelId || !normalizedInferenceProfileArn) return
+
+    updateSettings({
+      modelSettings: [
+        ...modelSettings.filter(
+          (settings) => settings.modelId !== normalizedModelId
+        ),
+        {
+          modelId: normalizedModelId,
+          inferenceProfileArn: normalizedInferenceProfileArn,
+        },
+      ],
+    })
+    setModelId('')
+    setInferenceProfileArn('')
+  }
 
   return (
     <>
@@ -513,6 +553,75 @@ export function BedrockSettings({
           />
         </Select>
       </FormField>
+      <Accordion type="single">
+        <AccordionItem trigger="Advanced settings">
+          <FormField
+            label="Model settings"
+            infoTooltip="Route a foundation model through an application inference profile ARN."
+          >
+            <Flex
+              direction="column"
+              gap="medium"
+            >
+              <Flex gap="medium">
+                <Input
+                  aria-label="Model ID"
+                  disabled={!enabled}
+                  placeholder="Model ID"
+                  value={modelId}
+                  onChange={(event) => setModelId(event.currentTarget.value)}
+                />
+                <Input
+                  aria-label="Inference profile ARN"
+                  disabled={!enabled}
+                  placeholder="Inference profile ARN"
+                  value={inferenceProfileArn}
+                  onChange={(event) =>
+                    setInferenceProfileArn(event.currentTarget.value)
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter') return
+                    event.preventDefault()
+                    addModelSettings()
+                  }}
+                />
+              </Flex>
+              <Button
+                type="button"
+                secondary
+                small
+                width="fit-content"
+                disabled={
+                  !enabled || !modelId.trim() || !inferenceProfileArn.trim()
+                }
+                onClick={addModelSettings}
+              >
+                Add mapping
+              </Button>
+              {modelSettings.length > 0 && (
+                <ChipList
+                  values={modelSettings}
+                  transformValue={(settings) =>
+                    `${settings.modelId} -> ${settings.inferenceProfileArn}`
+                  }
+                  limit={Infinity}
+                  size="small"
+                  closeButton
+                  emptyState={null}
+                  onClickCondition={() => true}
+                  onClick={(selected) =>
+                    updateSettings({
+                      modelSettings: modelSettings.filter(
+                        (settings) => settings.modelId !== selected.modelId
+                      ),
+                    })
+                  }
+                />
+              )}
+            </Flex>
+          </FormField>
+        </AccordionItem>
+      </Accordion>
     </>
   )
 }

@@ -7061,8 +7061,19 @@ input BedrockAiAttributes {
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
 
-  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID."
   deployments: Json
+
+  "Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata."
+  modelSettings: [BedrockModelSettingsAttributes]
+}
+
+input BedrockModelSettingsAttributes {
+  "the foundation model ID served by the inference profile"
+  modelId: String!
+
+  "the full ARN of the Bedrock application inference profile"
+  inferenceProfileArn: String!
 }
 
 input VertexAiAttributes {
@@ -7501,8 +7512,16 @@ type BedrockAiSettings {
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
 
-  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID."
   deployments: Map
+
+  "Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata."
+  modelSettings: [BedrockModelSettings]
+}
+
+type BedrockModelSettings {
+  modelId: String
+  inferenceProfileArn: String
 }
 
 "Settings for usage of GCP VertexAI for LLMs"
@@ -17402,6 +17421,7 @@ input ServiceAccountAttributes {
   name: String
   email: String
   roles: UserRoleAttributes
+  allowedScopes: [String!]
   assumeBindings: [PolicyBindingAttributes]
 }
 
@@ -17478,6 +17498,9 @@ input PersonaConfigurationAttributes {
   "enable individual parts of the services views"
   services: PersonaServicesAttributes
 
+  "enable individual settings tabs"
+  settings: PersonaSettingsAttributes
+
   "enable individual parts of the ai views"
   ai: PersonaAiAttributes
 }
@@ -17525,6 +17548,19 @@ input PersonaServicesAttributes {
   configuration: Boolean
 }
 
+input PersonaSettingsAttributes {
+  userManagement: Boolean
+  global: Boolean
+  ai: Boolean
+  webhooks: Boolean
+  chatbots: Boolean
+  cloudConnections: Boolean
+  projects: Boolean
+  notifications: Boolean
+  audits: Boolean
+  accessTokens: Boolean
+}
+
 input PersonaAiAttributes {
   pr: Boolean
 }
@@ -17558,6 +17594,7 @@ type User {
   readTimestamp: DateTime
   buildTimestamp: DateTime
   refreshToken: RefreshToken
+  allowedScopes: [String!]
   assumeBindings: [PolicyBinding]
   groups: [Group]
   personas: [Persona]
@@ -17731,6 +17768,9 @@ type PersonaConfiguration {
   "enable individual parts of the services views"
   services: PersonaServices
 
+  "enable individual settings tabs"
+  settings: PersonaSettings
+
   "enable individual parts of the ai views"
   ai: PersonaAi
 }
@@ -17776,6 +17816,19 @@ type PersonaHome {
 type PersonaServices {
   secrets: Boolean
   configuration: Boolean
+}
+
+type PersonaSettings {
+  userManagement: Boolean
+  global: Boolean
+  ai: Boolean
+  webhooks: Boolean
+  chatbots: Boolean
+  cloudConnections: Boolean
+  projects: Boolean
+  notifications: Boolean
+  audits: Boolean
+  accessTokens: Boolean
 }
 
 type PersonaAi {

@@ -117,6 +117,18 @@ defmodule Plrl.VertexAiConfig do
   field :proxyModels, 9, repeated: true, type: :string
 end
 
+defmodule Plrl.BedrockModelSettings do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "plrl.BedrockModelSettings",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :modelId, 1, type: :string
+  field :inferenceProfileArn, 2, type: :string
+end
+
 defmodule Plrl.BedrockConfig.DeploymentsEntry do
   @moduledoc false
 
@@ -148,6 +160,7 @@ defmodule Plrl.BedrockConfig do
   field :proxyModels, 8, repeated: true, type: :string
   field :deployments, 9, repeated: true, type: Plrl.BedrockConfig.DeploymentsEntry, map: true
   field :endpoint, 10, proto3_optional: true, type: Plrl.BedrockEndpoint, enum: true
+  field :modelSettings, 11, repeated: true, type: Plrl.BedrockModelSettings
 end
 
 defmodule Plrl.AzureOpenAiConfig.DeploymentsEntry do

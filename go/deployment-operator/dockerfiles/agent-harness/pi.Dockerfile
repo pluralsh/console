@@ -1,6 +1,7 @@
 ARG NODE_IMAGE_TAG=24
 ARG NODE_IMAGE=node:${NODE_IMAGE_TAG}-slim
 ARG AGENT_VERSION=0.84.1
+ARG ACP_VERSION=0.0.33
 ARG MCP_ADAPTER_VERSION=2.21.2
 
 ARG AGENT_HARNESS_BASE_IMAGE_TAG=latest
@@ -10,12 +11,16 @@ ARG AGENT_HARNESS_BASE_IMAGE=$AGENT_HARNESS_BASE_IMAGE_REPO:$AGENT_HARNESS_BASE_
 FROM $NODE_IMAGE AS node
 
 ARG AGENT_VERSION
+ARG ACP_VERSION
 ARG MCP_ADAPTER_VERSION
 
 USER root
-RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent@${AGENT_VERSION} && \
+RUN npm install -g --ignore-scripts \
+      @earendil-works/pi-coding-agent@${AGENT_VERSION} \
+      pi-acp@${ACP_VERSION} && \
     npm install --ignore-scripts --prefix /opt/pi-mcp-adapter pi-mcp-adapter@${MCP_ADAPTER_VERSION} && \
-    pi --version
+    pi --version && \
+    pi-acp --version
 
 FROM $AGENT_HARNESS_BASE_IMAGE AS final
 
@@ -27,7 +32,8 @@ ENV NODE_PATH=/usr/local/lib/node_modules
 
 USER root
 RUN ln -s ../lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/local/bin/pi && \
-    chown -R 65532:65532 /usr/local/bin/node /usr/local/lib/node_modules /opt/pi-mcp-adapter
+    ln -s ../lib/node_modules/pi-acp/dist/index.js /usr/local/bin/pi-acp && \
+    chown -R 65532:65532 /usr/local/bin/node /usr/local/bin/pi /usr/local/bin/pi-acp /usr/local/lib/node_modules /opt/pi-mcp-adapter
 USER 65532:65532
 
 # The base entrypoint execs /agent-harness as PID 1; verify that the active harness process remains alive.

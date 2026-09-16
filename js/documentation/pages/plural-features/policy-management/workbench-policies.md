@@ -5,7 +5,7 @@ description: Control and approve workbench tool calls with Rego guardrails
 
 Workbench policies evaluate each matching tool call made by a workbench agent. They extend Plural RBAC and tool permissions with authorization rules that understand the current actor, the requested tool, and its arguments.
 
-Workbench policies use the `plrl.wb.admission` Rego package.
+Workbench policies use the `plrl.workbench` Rego package.
 
 {% callout severity="info" %}
 A policy cannot make an unavailable tool accessible or grant permissions the actor does not already have. It adds guardrails to the existing workbench authorization model.
@@ -46,7 +46,7 @@ A denial takes precedence when multiple rules or attached policies produce decis
 This policy blocks non-SRE users from deleting resources in `kube-system` and automatically approves SRE updates outside that namespace:
 
 ```rego
-package plrl.wb.admission
+package plrl.workbench
 
 actor_is_sre if {
 	input.actor.groups[_] == "sre"

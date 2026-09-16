@@ -60,7 +60,8 @@ var _ = Describe("ServiceAccount Controller", Ordered, func() {
 					Namespace: namespace,
 				},
 				Spec: v1alpha1.ServiceAccountSpec{
-					Email: email,
+					Email:         email,
+					AllowedScopes: []string{"service.read"},
 					TokenSecretRef: &corev1.SecretReference{
 						Name:      tokenSecretName,
 						Namespace: namespace,
@@ -156,7 +157,12 @@ var _ = Describe("ServiceAccount Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetServiceAccount", mock.Anything, email).Return(nil, errors.NewNotFound(schema.GroupResource{}, email)).Twice()
 			fakeConsoleClient.On("IsServiceAccountExists", mock.Anything, mock.Anything).Return(false, nil)
-			fakeConsoleClient.On("CreateServiceAccount", mock.Anything, mock.Anything).Return(&gqlclient.UserFragment{ID: id}, nil)
+			fakeConsoleClient.On("CreateServiceAccount", mock.Anything, mock.Anything).
+				Run(func(args mock.Arguments) {
+					attributes := args.Get(1).(gqlclient.ServiceAccountAttributes)
+					Expect(attributes.AllowedScopes).To(Equal([]string{"service.read"}))
+				}).
+				Return(&gqlclient.UserFragment{ID: id}, nil)
 			fakeConsoleClient.On("CreateServiceAccountToken", mock.Anything, id, mock.Anything, mock.Anything).
 				Return(&gqlclient.AccessTokenFragment{Token: lo.ToPtr(tokenValue)}, nil)
 
@@ -198,6 +204,7 @@ var _ = Describe("ServiceAccount Controller", Ordered, func() {
 			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.ServiceAccount{
 				ObjectMeta: metav1.ObjectMeta{Name: saUpdateName, Namespace: namespace},
 			}, func(sa *v1alpha1.ServiceAccount) {
+				sa.Spec.AllowedScopes = []string{"cluster.read"}
 				sa.Spec.Scopes = []v1alpha1.ServiceAccountScope{
 					{API: &scopeAPI},
 				}
@@ -216,8 +223,18 @@ var _ = Describe("ServiceAccount Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetServiceAccount", mock.Anything, updateEmail).Return(&gqlclient.UserFragment{ID: updateID}, nil).Twice()
-			fakeConsoleClient.On("UpdateServiceAccount", mock.Anything, updateID, mock.Anything).Return(&gqlclient.UserFragment{ID: updateID}, nil)
+			fakeConsoleClient.On("UpdateServiceAccount", mock.Anything, updateID, mock.Anything).
+				Run(func(args mock.Arguments) {
+					attributes := args.Get(2).(gqlclient.ServiceAccountAttributes)
+					Expect(attributes.AllowedScopes).To(Equal([]string{"cluster.read"}))
+				}).
+				Return(&gqlclient.UserFragment{ID: updateID}, nil)
 			fakeConsoleClient.On("CreateServiceAccountToken", mock.Anything, updateID, mock.Anything, mock.Anything).
+				Run(func(args mock.Arguments) {
+					scopes := args.Get(2).([]*gqlclient.ScopeAttributes)
+					Expect(scopes).To(HaveLen(1))
+					Expect(scopes[0].API).To(Equal(&scopeAPI))
+				}).
 				Return(&gqlclient.AccessTokenFragment{Token: lo.ToPtr(updatedTokenValue)}, nil)
 
 			reconciler := &controller.ServiceAccountReconciler{

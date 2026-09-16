@@ -266,6 +266,18 @@ export function toolCallDisplaySubtitle(
   return truncate(preview.replace(/\s+/g, ' ').trim(), { length: 72 })
 }
 
+/** Natural-language heading for a shell command, when supplied by the agent. */
+export function toolCallDisplayDescription(args?: ToolArguments): string {
+  if (args && !Array.isArray(args)) {
+    for (const key of ['description', 'explanation', 'summary'] as const) {
+      const value = args[key]
+      if (typeof value === 'string' && value.trim()) return value.trim()
+    }
+  }
+
+  return ''
+}
+
 export function humanizeToolName(toolName: string): string {
   const lower = toolName.toLowerCase().trim()
   if (!lower) return 'tool'

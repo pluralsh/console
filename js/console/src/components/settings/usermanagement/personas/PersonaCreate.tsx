@@ -75,6 +75,18 @@ const DEFAULT_CONFIGURATION = {
     secrets: true,
     configuration: true,
   },
+  settings: {
+    accessTokens: true,
+    ai: true,
+    audits: true,
+    chatbots: true,
+    cloudConnections: true,
+    global: true,
+    notifications: true,
+    projects: true,
+    userManagement: true,
+    webhooks: true,
+  },
   ai: {
     pr: true,
   },
@@ -86,6 +98,7 @@ export const configTabs = {
   flows: 'Flows',
   sidebar: 'Sidebar',
   services: 'Services',
+  settings: 'Settings',
   ai: 'AI',
 } as const satisfies Record<
   Exclude<keyof typeof DEFAULT_CONFIGURATION, 'all'>,
