@@ -9,14 +9,14 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCP do
   @behaviour Plug
   import Plug.Conn
   alias Anubis.Server.Transport.StreamableHTTP
-  alias Console.AI.Workbench.MCPServer
+  alias Console.AI.Workbench.MCP.Server
   alias Console.Deployments.{Policies, Workbenches}
   alias Console.Repo
   alias Console.Schema.{User, Workbench, WorkbenchTool}
 
   @impl Plug
   def init(opts) do
-    Keyword.put_new(opts, :server, MCPServer)
+    Keyword.put_new(opts, :server, Server)
     |> StreamableHTTP.Plug.init()
   end
 
@@ -29,9 +29,11 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCP do
          {:filter, {:ok, filter}} <- {:filter, filter(conn.query_params)},
          {:allow, {:ok, %Workbench{} = bench}} <- {:allow, Policies.allow(bench, user, :read)} do
       conn
-      |> assign(:mcp_user, user)
-      |> assign(:mcp_workbench, Repo.preload(bench, [:agent_runtime]))
-      |> assign(:mcp_filter, filter)
+      |> assign(:mcp, %{
+        user: user,
+        workbench: Repo.preload(bench, [:agent_runtime]),
+        filter: filter
+      })
       |> StreamableHTTP.Plug.call(opts)
     else
       {:user, _} -> deny(conn, 401, "unauthenticated")

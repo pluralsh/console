@@ -1,4 +1,4 @@
-defmodule Console.AI.Workbench.Toolset.Classify do
+defmodule Console.AI.Workbench.MCP.Toolset.Classify do
   @moduledoc """
   Static metadata about expanded workbench tools, for surfaces that need to reason about a
   tool before running it.

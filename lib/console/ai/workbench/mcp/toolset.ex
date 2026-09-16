@@ -1,4 +1,4 @@
-defmodule Console.AI.Workbench.Toolset do
+defmodule Console.AI.Workbench.MCP.Toolset do
   @moduledoc """
   Assembles the tools a workbench exposes with no `WorkbenchJob` bound, so a workbench can be
   driven from outside the agent loop.
@@ -15,7 +15,7 @@ defmodule Console.AI.Workbench.Toolset do
   alias Console.Repo
   alias Console.AI.Tool
   alias Console.AI.Workbench.Tools
-  alias Console.AI.Workbench.Toolset.Classify
+  alias Console.AI.Workbench.MCP.Toolset.Classify
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Tools.Workbench.SummarizeComponent
   alias Console.AI.Tools.Workbench.Infrastructure.{
@@ -37,6 +37,9 @@ defmodule Console.AI.Workbench.Toolset do
   alias Console.Schema.{User, Workbench, WorkbenchTool}
 
   @type filter :: :all | {:names, [binary]} | {:categories, [atom]}
+
+  # MCP tool names are [a-zA-Z0-9_-]; workbench names allow dots and similar.
+  @invalid_chars ~r/[^a-zA-Z0-9_-]/
 
   @preloads [tools: [:mcp_server, :cloud_connection, :scm_connection]]
 
@@ -63,12 +66,15 @@ defmodule Console.AI.Workbench.Toolset do
   @doc """
   Narrows an expanded toolset, either to an explicit set of tool names or to the workbench
   tool categories the tools were derived from.
+
+  Name filters are compared after `mcp_name/1`, so either the raw `Tool.name/1` or the
+  advertised MCP name will match.
   """
   @spec filter([term], filter) :: [term]
   def filter(tools, :all), do: tools
   def filter(tools, {:names, names}) do
-    allowed = MapSet.new(names)
-    Enum.filter(tools, & MapSet.member?(allowed, Tool.name(&1)))
+    allowed = MapSet.new(names, &mcp_name/1)
+    Enum.filter(tools, & MapSet.member?(allowed, mcp_name(&1)))
   end
   def filter(tools, {:categories, categories}) do
     allowed = MapSet.new(categories)
@@ -76,6 +82,33 @@ defmodule Console.AI.Workbench.Toolset do
       categories(tool)
       |> Enum.any?(& MapSet.member?(allowed, &1))
     end)
+  end
+
+  @doc """
+  MCP-safe form of a tool name.  Characters outside `[a-zA-Z0-9_-]` become `_`,
+  matching what we advertise to clients.
+  """
+  @spec mcp_name(term) :: binary
+  def mcp_name(name) when is_binary(name), do: String.replace(name, @invalid_chars, "_")
+  def mcp_name(tool), do: mcp_name(Tool.name(tool))
+
+  @doc """
+  Indexes tools by `mcp_name/1`.  Distinct workbench names that sanitize to the
+  same identifier are an error rather than a silent overwrite.
+  """
+  @spec mcp_index([term]) :: {:ok, %{binary => term}} | {:error, binary}
+  def mcp_index(tools), do: Enum.reduce_while(tools, {:ok, %{}}, &index_one/2)
+
+  defp index_one(tool, {:ok, acc}) do
+    name = mcp_name(tool)
+    case acc do
+      %{^name => existing} -> {:halt, {:error, collision(existing, tool, name)}}
+      _ -> {:cont, {:ok, Map.put(acc, name, tool)}}
+    end
+  end
+
+  defp collision(existing, tool, name) do
+    "MCP tool name collision: #{Tool.name(existing)} and #{Tool.name(tool)} both map to #{name}"
   end
 
   # config-gated tools that aren't derived from a WorkbenchTool.  ServiceInspect and

@@ -96,11 +96,53 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
       refute "http_integration_#{second.name}" in Enum.map(tools, & &1["name"])
     end
 
+    test "it can be narrowed by the advertised MCP name when the tool name contains dots" do
+      user = admin()
+      bench = insert(:workbench)
+      dotted = http_tool(bench, :get, name: "search.prod")
+      other = http_tool(bench, :get)
+
+      query = "?tools=http_integration_search_prod"
+      {user, bench, session} = handshake(user, bench, query)
+      %{"result" => %{"tools" => tools}} = call(user, bench, session, "tools/list", %{}, query)
+
+      assert Enum.map(tools, & &1["name"]) == ["http_integration_search_prod"]
+      refute "http_integration_#{other.name}" in Enum.map(tools, & &1["name"])
+      assert dotted.name == "search.prod"
+    end
+
+    test "it errors when distinct tool names sanitize to the same MCP name" do
+      user = admin()
+      bench = insert(:workbench)
+      http_tool(bench, :get, name: "my.tool")
+      http_tool(bench, :get, name: "my_tool")
+
+      {user, bench, session} = handshake(user, bench)
+      %{"error" => error} = call(user, bench, session, "tools/list", %{})
+
+      assert error["message"] =~ "collision"
+      assert error["message"] =~ "http_integration_my_tool"
+    end
+
     test "it rejects an unknown category filter" do
       bench = insert(:workbench)
 
       request(admin(), bench, initialize(), query: "?categories=bogus")
       |> response(400)
+    end
+
+    test "it won't list tools as a different user of the same workbench" do
+      owner = admin()
+      other = admin()
+      bench = insert(:workbench)
+      http_tool(bench, :get)
+
+      {_owner, bench, session} = handshake(owner, bench)
+
+      %{"error" => error} = call(other, bench, session, "tools/list", %{})
+
+      assert error["message"] =~ "not bound"
+      refute owner.id == other.id
     end
   end
 
@@ -150,6 +192,32 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
       assert error["code"] == -32602
     end
 
+    test "it enforces workbench admission policies on tool calls" do
+      user = admin()
+      bench = insert(:workbench)
+      tool = http_tool(bench, :get)
+      policy = insert(:policy, policy: """
+      package plrl.wb.admission
+
+      sample := 0
+
+      deny[{"message": "blocked"}] if {
+        true
+      }
+      """)
+      insert(:workbench_policy, workbench: bench, policy: policy, matches: %{regexes: [".*"]})
+
+      {user, bench, session} = handshake(user, bench)
+
+      %{"error" => error} =
+        call(user, bench, session, "tools/call", %{
+          "name" => "http_integration_#{tool.name}",
+          "arguments" => %{"input" => %{"query" => "postgres"}}
+        })
+
+      assert error["message"] =~ "Policy denied"
+    end
+
     test "it won't run a session against a workbench it wasn't bound to" do
       user = admin()
       bound = insert(:workbench)
@@ -168,23 +236,45 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
       assert error["message"] =~ "not bound"
       refute bound.id == other.id
     end
+
+    test "it won't run a session as a different user of the same workbench" do
+      owner = admin()
+      other = admin()
+      bench = insert(:workbench)
+      tool = http_tool(bench, :get)
+
+      {_owner, bench, session} = handshake(owner, bench)
+
+      %{"error" => error} =
+        call(other, bench, session, "tools/call", %{
+          "name" => "http_integration_#{tool.name}",
+          "arguments" => %{"input" => %{"query" => "postgres"}}
+        })
+
+      assert error["message"] =~ "not bound"
+      refute owner.id == other.id
+    end
   end
 
   defp admin(), do: insert(:user, roles: %{admin: true})
 
   defp http_tool(bench, method, opts \\ []) do
-    tool = insert(:workbench_tool,
-      tool: :http,
-      configuration: %Configuration{
-        http: %HttpConfiguration{
-          url: "https://example.com/search",
-          method: method,
-          function: Keyword.get(opts, :function, false),
-          body: ~s({"q": "{{ input.query }}"}),
-          input_schema: @input_schema
+    attrs =
+      [
+        tool: :http,
+        configuration: %Configuration{
+          http: %HttpConfiguration{
+            url: "https://example.com/search",
+            method: method,
+            function: Keyword.get(opts, :function, false),
+            body: ~s({"q": "{{ input.query }}"}),
+            input_schema: @input_schema
+          }
         }
-      }
-    )
+      ]
+      |> Keyword.merge(Keyword.take(opts, [:name]))
+
+    tool = insert(:workbench_tool, attrs)
 
     insert(:workbench_tool_association, workbench: bench, tool: tool)
     tool

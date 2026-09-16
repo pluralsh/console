@@ -39,8 +39,12 @@ defmodule Console.Application do
       :hackney_pool.child_spec(:kazan_pool, [max_connections: 100, max_per_host: 100]),
       Console.Bootstrapper,
       # the transport is driven by ConsoleWeb.Plugs.WorkbenchMCP off our own router, so it
-      # needs to be up regardless of whether anubis thinks an http server is running
-      {Console.AI.Workbench.MCPServer, transport: {:streamable_http, start: true}},
+      # needs to be up regardless of whether anubis thinks an http server is running.
+      # Registry.PG publishes session pids over the erlang cluster so a tool call can
+      # land on a different console pod than initialize without 404ing.
+      {Console.AI.Workbench.MCP.Server,
+        transport: {:streamable_http, start: true},
+        registry: {Anubis.Server.Registry.PG, []}},
       ConsoleWeb.Endpoint,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Stacks.Supervisor,
