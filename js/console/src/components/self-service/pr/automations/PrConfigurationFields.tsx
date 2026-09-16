@@ -73,7 +73,7 @@ export function PrConfigurationFields({
                     >
                       <Flex
                         align="center"
-                        cursor="pointer"
+                        css={{ cursor: 'pointer' }}
                       >
                         <HelpIcon
                           size={16}

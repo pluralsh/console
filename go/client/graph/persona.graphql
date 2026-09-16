@@ -43,6 +43,18 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
         cd
         ai
     }
+    settings {
+        accessTokens
+        ai
+        audits
+        chatbots
+        cloudConnections
+        global
+        notifications
+        projects
+        userManagement
+        webhooks
+    }
 }
 
 query GetPersona($id: ID!) {

@@ -1,4 +1,3 @@
-import { Div } from 'honorable'
 import { type ComponentProps, useEffect, useState } from 'react'
 
 import { useNavigationContext } from '../components/contexts/NavigationContext'
@@ -188,7 +187,7 @@ function TemplateInner() {
   const currentPath = usePathname()
 
   return (
-    <Div maxWidth={200}>
+    <div style={{ maxWidth: 200 }}>
       <TreeNav>
         {getDirectory().map((entry) => {
           const isExactCurrentPath = currentPath === entry.path
@@ -215,7 +214,7 @@ function TemplateInner() {
           )
         })}
       </TreeNav>
-    </Div>
+    </div>
   )
 }
 

@@ -4,7 +4,7 @@ import {
   Card,
   EmptyState,
   Flex,
-  Input2,
+  Input,
   SearchIcon,
 } from '@pluralsh/design-system'
 import * as DesignSystem from '@pluralsh/design-system'
@@ -77,7 +77,7 @@ export function WorkbenchesList() {
         icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
         description="Build-your-own agents for common DevOps tasks. Each workbench bundles tools and skills, and orchestrates subagents tailored to observability, infra analysis, and coding tasks."
       />
-      <Input2
+      <Input
         showClearButton
         placeholder="Search workbenches"
         startIcon={<SearchIcon />}

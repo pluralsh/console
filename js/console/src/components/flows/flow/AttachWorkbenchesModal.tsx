@@ -3,7 +3,7 @@ import {
   Card,
   Flex,
   InfoOutlineIcon,
-  Input2,
+  Input,
   Modal,
   SearchIcon,
   Spinner,
@@ -170,7 +170,7 @@ export function AttachWorkbenchesModal({
       >
         {error && <GqlError error={error} />}
         {mutationError && <GqlError error={mutationError} />}
-        <Input2
+        <Input
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
           startIcon={<SearchIcon />}

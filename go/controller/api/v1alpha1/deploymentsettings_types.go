@@ -773,6 +773,13 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			deployments = lo.ToPtr(string(json))
 		}
 
+		modelSettings := lo.Map(in.Bedrock.ModelSettings, func(settings BedrockModelSettings, _ int) *console.BedrockModelSettingsAttributes {
+			return &console.BedrockModelSettingsAttributes{
+				ModelID:             settings.ModelID,
+				InferenceProfileArn: settings.InferenceProfileARN,
+			}
+		})
+
 		attr.Bedrock = &console.BedrockAiAttributes{
 			ModelID:            in.Bedrock.ModelID,
 			ToolModelID:        in.Bedrock.ToolModelId,
@@ -784,6 +791,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AWSSecretAccessKey: secretKey,
 			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
 			Deployments:        deployments,
+			ModelSettings:      modelSettings,
 		}
 	}
 
@@ -1093,6 +1101,18 @@ type AzureOpenAISettings struct {
 	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
 }
 
+type BedrockModelSettings struct {
+	// ModelID is the foundation model served by the application inference profile.
+	//
+	// +kubebuilder:validation:Required
+	ModelID string `json:"modelId"`
+
+	// InferenceProfileARN is the full ARN of the Bedrock application inference profile.
+	//
+	// +kubebuilder:validation:Required
+	InferenceProfileARN string `json:"inferenceProfileArn"`
+}
+
 type BedrockSettings struct {
 	// ModelID is the primary AWS Bedrock model or inference profile identifier.
 	// Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,
@@ -1155,6 +1175,11 @@ type BedrockSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Deployments map[string]string `json:"deployments,omitempty"`
+
+	// ModelSettings configures per-model Bedrock options, including application inference profiles.
+	//
+	// +kubebuilder:validation:Optional
+	ModelSettings []BedrockModelSettings `json:"modelSettings,omitempty"`
 }
 
 type VertexSettings struct {

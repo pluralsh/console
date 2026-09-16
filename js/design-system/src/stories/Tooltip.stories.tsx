@@ -1,7 +1,6 @@
-import { Button, Div, Flex, type FlexProps } from 'honorable'
 import { type ComponentProps, useState } from 'react'
 
-import { IconFrame, InfoIcon, Modal } from '..'
+import { Button, Flex, type FlexProps, IconFrame, InfoIcon, Modal } from '..'
 
 import Tooltip from '../components/Tooltip'
 import type { Meta, StoryObj } from '@storybook/react'
@@ -19,7 +18,7 @@ function CornerBox({ ref, ...props }: FlexProps) {
     <Flex
       ref={ref}
       width="100%"
-      padding={20}
+      css={{ padding: 20 }}
       {...props}
     />
   )
@@ -94,7 +93,7 @@ function Template(args: any) {
   const [showModal, setShowModal] = useState(false)
 
   return (
-    <Div margin="-32px">
+    <div style={{ margin: -32 }}>
       <Flex
         width="100%"
         height="33vh"
@@ -163,7 +162,7 @@ function Template(args: any) {
         onClose={() => setShowModal(false)}
         tipProps={args}
       />
-    </Div>
+    </div>
   )
 }
 

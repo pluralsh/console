@@ -59,7 +59,7 @@ export function GroupsList({
         placeholder="Search groups"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        flexShrink={0}
+        css={{ flexShrink: 0 }}
       />
       <Table
         fullHeightWrap

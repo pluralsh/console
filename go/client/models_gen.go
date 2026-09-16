@@ -1462,8 +1462,10 @@ type BedrockAiAttributes struct {
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID.
 	Deployments *string `json:"deployments,omitempty"`
+	// Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata.
+	ModelSettings []*BedrockModelSettingsAttributes `json:"modelSettings,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1482,8 +1484,22 @@ type BedrockAiSettings struct {
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID.
 	Deployments map[string]any `json:"deployments,omitempty"`
+	// Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata.
+	ModelSettings []*BedrockModelSettings `json:"modelSettings,omitempty"`
+}
+
+type BedrockModelSettings struct {
+	ModelID             *string `json:"modelId,omitempty"`
+	InferenceProfileArn *string `json:"inferenceProfileArn,omitempty"`
+}
+
+type BedrockModelSettingsAttributes struct {
+	// the foundation model ID served by the inference profile
+	ModelID string `json:"modelId"`
+	// the full ARN of the Bedrock application inference profile
+	InferenceProfileArn string `json:"inferenceProfileArn"`
 }
 
 type BindingAttributes struct {
@@ -6381,6 +6397,8 @@ type PersonaConfiguration struct {
 	Sidebar *PersonaSidebar `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServices `json:"services,omitempty"`
+	// enable individual settings tabs
+	Settings *PersonaSettings `json:"settings,omitempty"`
 	// enable individual parts of the ai views
 	Ai *PersonaAi `json:"ai,omitempty"`
 }
@@ -6398,6 +6416,8 @@ type PersonaConfigurationAttributes struct {
 	Sidebar *PersonaSidebarAttributes `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServicesAttributes `json:"services,omitempty"`
+	// enable individual settings tabs
+	Settings *PersonaSettingsAttributes `json:"settings,omitempty"`
 	// enable individual parts of the ai views
 	Ai *PersonaAiAttributes `json:"ai,omitempty"`
 }
@@ -6466,6 +6486,32 @@ type PersonaServices struct {
 type PersonaServicesAttributes struct {
 	Secrets       *bool `json:"secrets,omitempty"`
 	Configuration *bool `json:"configuration,omitempty"`
+}
+
+type PersonaSettings struct {
+	UserManagement   *bool `json:"userManagement,omitempty"`
+	Global           *bool `json:"global,omitempty"`
+	Ai               *bool `json:"ai,omitempty"`
+	Webhooks         *bool `json:"webhooks,omitempty"`
+	Chatbots         *bool `json:"chatbots,omitempty"`
+	CloudConnections *bool `json:"cloudConnections,omitempty"`
+	Projects         *bool `json:"projects,omitempty"`
+	Notifications    *bool `json:"notifications,omitempty"`
+	Audits           *bool `json:"audits,omitempty"`
+	AccessTokens     *bool `json:"accessTokens,omitempty"`
+}
+
+type PersonaSettingsAttributes struct {
+	UserManagement   *bool `json:"userManagement,omitempty"`
+	Global           *bool `json:"global,omitempty"`
+	Ai               *bool `json:"ai,omitempty"`
+	Webhooks         *bool `json:"webhooks,omitempty"`
+	Chatbots         *bool `json:"chatbots,omitempty"`
+	CloudConnections *bool `json:"cloudConnections,omitempty"`
+	Projects         *bool `json:"projects,omitempty"`
+	Notifications    *bool `json:"notifications,omitempty"`
+	Audits           *bool `json:"audits,omitempty"`
+	AccessTokens     *bool `json:"accessTokens,omitempty"`
 }
 
 type PersonaSidebar struct {
@@ -8746,6 +8792,7 @@ type ServiceAccountAttributes struct {
 	Name           *string                    `json:"name,omitempty"`
 	Email          *string                    `json:"email,omitempty"`
 	Roles          *UserRoleAttributes        `json:"roles,omitempty"`
+	AllowedScopes  []string                   `json:"allowedScopes,omitempty"`
 	AssumeBindings []*PolicyBindingAttributes `json:"assumeBindings,omitempty"`
 }
 
@@ -10160,6 +10207,7 @@ type User struct {
 	ReadTimestamp       *string          `json:"readTimestamp,omitempty"`
 	BuildTimestamp      *string          `json:"buildTimestamp,omitempty"`
 	RefreshToken        *RefreshToken    `json:"refreshToken,omitempty"`
+	AllowedScopes       []string         `json:"allowedScopes,omitempty"`
 	AssumeBindings      []*PolicyBinding `json:"assumeBindings,omitempty"`
 	Groups              []*Group         `json:"groups,omitempty"`
 	Personas            []*Persona       `json:"personas,omitempty"`

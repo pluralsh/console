@@ -3,7 +3,6 @@ import { ApolloProvider } from '@apollo/client'
 import { loadDevMessages, loadErrorMessages } from '@apollo/client/dev'
 import {
   GlobalStyle,
-  HonorableThemeProvider,
   styledThemeDark,
   styledThemeLight,
   useThemeColorMode,
@@ -56,11 +55,9 @@ function ThemeProviders({ children }: { children: ReactNode }) {
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
       <StyledThemeProvider theme={styledTheme}>
-        <HonorableThemeProvider>
-          <GlobalStyle />
-          <DocSearchStyles />
-          <PluralErrorBoundary>{children}</PluralErrorBoundary>
-        </HonorableThemeProvider>
+        <GlobalStyle />
+        <DocSearchStyles />
+        <PluralErrorBoundary>{children}</PluralErrorBoundary>
       </StyledThemeProvider>
     </StyleSheetManager>
   )

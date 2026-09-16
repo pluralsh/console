@@ -4,7 +4,6 @@ import {
   Flex,
   FormField,
   Input,
-  Input2,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -207,7 +206,7 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
               width="100%"
             >
               <FormField label="Title">
-                <Input2
+                <Input
                   value={formState.title}
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, title: e.target.value }))
@@ -234,7 +233,7 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
                 />
               </FormField>
               <FormField label="Category">
-                <Input2
+                <Input
                   value={formState.category}
                   onChange={(e) =>
                     setFormState((prev) => ({

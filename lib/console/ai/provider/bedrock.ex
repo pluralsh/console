@@ -8,7 +8,7 @@ defmodule Console.AI.Bedrock do
 
   require Logger
 
-  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :endpoint, :stream]
+  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :endpoint, :model_settings, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -25,6 +25,7 @@ defmodule Console.AI.Bedrock do
       access_token: opts.access_token,
       region: opts.region,
       endpoint: opts.endpoint || :runtime,
+      model_settings: opts.model_settings || [],
       stream: Stream.stream(),
     }
   end
@@ -43,7 +44,7 @@ defmodule Console.AI.Bedrock do
     |> generate_text(
       "amazon-bedrock:#{model}",
       bedrock.stream,
-      request_opts(model, Keyword.put(provider_options(bedrock), :tools, tools(opts)), opts)
+      request_opts(bedrock, model, Keyword.put(provider_options(bedrock), :tools, tools(opts)), opts)
     )
     |> reqllm_result()
   end
@@ -61,7 +62,7 @@ defmodule Console.AI.Bedrock do
     |> generate_text(
       "amazon-bedrock:#{model}",
       bedrock.stream,
-      request_opts(model, provider_opts, opts)
+      request_opts(bedrock, model, provider_opts, opts)
     )
     |> reqllm_result()
     |> tool_calls()
@@ -72,6 +73,7 @@ defmodule Console.AI.Bedrock do
     chunked = Utils.chunk(text, chunk_size("amazon-bedrock:#{bedrock.embedding_model}"))
 
     provider_options(bedrock)
+    |> maybe_inference_profile(bedrock, bedrock.embedding_model)
     |> maybe_dims(bedrock.embedding_model)
     |> then(&ReqLLM.embed("amazon-bedrock:#{bedrock.embedding_model}", chunked, &1))
     |> case do
@@ -107,11 +109,24 @@ defmodule Console.AI.Bedrock do
   defp maybe_truncate(embeddings, "cohere.embed-english-v3"), do: Enum.map(embeddings, &Enum.take(&1, 512))
   defp maybe_truncate(embeddings, _), do: embeddings
 
-  defp request_opts(model, provider_opts, opts) do
+  defp request_opts(bedrock, model, provider_opts, opts) do
     provider_opts
     |> base_opts(opts)
+    |> maybe_inference_profile(bedrock, model)
     |> maybe_set_gpt56_reasoning_low(model)
   end
+
+  defp maybe_inference_profile(opts, %__MODULE__{model_settings: settings}, model)
+       when is_list(settings) and is_binary(model) do
+    case Enum.find(settings, & Map.get(&1, :model_id) == model) do
+      %{inference_profile_arn: arn} when is_binary(arn) ->
+        Keyword.put(opts, :inference_profile_arn, arn)
+
+      _ ->
+        opts
+    end
+  end
+  defp maybe_inference_profile(opts, _, _), do: opts
 
   defp maybe_set_gpt56_reasoning_low(opts, model) do
     if String.starts_with?(model, ["gpt-5.6", "openai.gpt-5.6"]) or

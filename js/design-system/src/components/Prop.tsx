@@ -1,4 +1,4 @@
-import { Div, type DivProps } from 'honorable'
+import { type ComponentPropsWithRef } from 'react'
 import styled from 'styled-components'
 
 const PropSC = styled.div<{ $margin?: string | number }>(
@@ -21,11 +21,11 @@ export default function Prop({
 }: {
   title: string
   margin?: string | number
-} & DivProps) {
+} & ComponentPropsWithRef<'div'>) {
   return (
     <PropSC $margin={margin}>
       <div className="prop-title">{title}</div>
-      <Div {...props}>{children}</Div>
+      <div {...props}>{children}</div>
     </PropSC>
   )
 }

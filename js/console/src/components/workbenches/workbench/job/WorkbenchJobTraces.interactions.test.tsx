@@ -7,10 +7,7 @@ import {
 } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ThemeProvider } from 'styled-components'
-import {
-  HonorableThemeProvider,
-  styledThemeDark,
-} from '@pluralsh/design-system'
+import { styledThemeDark } from '@pluralsh/design-system'
 import { TraceWaterfall } from './WorkbenchJobTraces'
 
 // Graph layout requires browser measurements; these tests exercise the shared controls.
@@ -23,21 +20,19 @@ afterEach(cleanup)
 function renderTrace() {
   return render(
     <ThemeProvider theme={styledThemeDark}>
-      <HonorableThemeProvider>
-        <TraceWaterfall
-          traces={[
-            {
-              traceId: 'trace',
-              spanId: 'root',
-              name: 'GET /example',
-              service: 'console',
-              start: '2026-09-07T08:00:00Z',
-              end: '2026-09-07T08:00:01Z',
-              tags: { 'http.status_code': 503 },
-            },
-          ]}
-        />
-      </HonorableThemeProvider>
+      <TraceWaterfall
+        traces={[
+          {
+            traceId: 'trace',
+            spanId: 'root',
+            name: 'GET /example',
+            service: 'console',
+            start: '2026-09-07T08:00:00Z',
+            end: '2026-09-07T08:00:01Z',
+            tags: { 'http.status_code': 503 },
+          },
+        ]}
+      />
     </ThemeProvider>
   )
 }

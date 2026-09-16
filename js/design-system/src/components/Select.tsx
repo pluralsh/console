@@ -121,7 +121,7 @@ export const TitleContent = styled.div<{
     display: 'flex',
     flexDirection: 'row',
     fontWeight: 600,
-    // Must specify individual padding to override Honorable styles on <Input>
+    // Must specify individual padding to override <Input> default padding
     paddingTop: vPad,
     paddingBottom: vPad,
     paddingLeft: hPad,

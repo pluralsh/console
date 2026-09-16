@@ -39,10 +39,10 @@ export default function StackRunProgress(): ReactNode {
       noPadding
     >
       <Card
-        flexGrow={1}
         overflowY="auto"
         maxHeight="100%"
         minHeight={0}
+        css={{ flexGrow: 1 }}
       >
         {sorted?.map((s) => (
           <Step

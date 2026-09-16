@@ -1,9 +1,8 @@
 import styled, { useTheme } from 'styled-components'
 import { partition } from 'lodash-es'
 
-import { Flex } from 'honorable'
-
 import Divider from '../components/Divider'
+import Flex from '../components/Flex'
 
 import { FlexWrap } from './FlexWrap'
 import { FilledBox } from './FilledBox'

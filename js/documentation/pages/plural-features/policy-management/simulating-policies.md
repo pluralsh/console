@@ -58,7 +58,7 @@ The [policy examples repository](https://github.com/pluralsh/policy-examples) us
 Place tests next to their policy and name them `*_test.rego`. Use the same package as the policy and evaluate its rules with a supplied input:
 
 ```rego
-package plrl.wb.admission
+package plrl.workbench
 
 test_non_sre_cannot_delete_from_kube_system if {
 	deny[{"msg": "deleting resources in the kube-system namespace is not allowed"}] with input as {

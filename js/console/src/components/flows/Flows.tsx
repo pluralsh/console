@@ -4,7 +4,7 @@ import {
   Button,
   Flex,
   FlowIcon,
-  Input2,
+  Input,
   SearchIcon,
   useSetBreadcrumbs,
   Card,
@@ -204,7 +204,7 @@ export function Flows() {
         </Button>
       </HeaderSC>
       <DisplayToolbarSC>
-        <Input2
+        <Input
           showClearButton
           css={{ flex: 1 }}
           placeholder="Search flows"

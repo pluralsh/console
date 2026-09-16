@@ -620,6 +620,75 @@ defmodule Console.Services.UsersTest do
       [scope] = token.scopes
       assert scope.api == "updateServiceDeployment"
     end
+
+    test "a service account can create an access token with an allowed scope subset" do
+      service_account =
+        insert(:user,
+          service_account: true,
+          allowed_scopes: ["service.read", "service.write", "cluster.read"]
+        )
+
+      assert {:ok, token} =
+        Users.create_access_token(%{
+          scopes: [
+            %{api: "service.read"},
+            %{apis: ["service.write", "cluster.read"]}
+          ]
+        }, service_account)
+
+      assert length(token.scopes) == 2
+    end
+
+    test "a service account cannot create an access token outside its allowed scopes" do
+      service_account =
+        insert(:user,
+          service_account: true,
+          allowed_scopes: ["service.read"]
+        )
+
+      assert {:error, changeset} =
+        Users.create_access_token(%{
+          scopes: [%{apis: ["service.read", "service.write"]}]
+        }, service_account)
+
+      assert %{scopes: ["must be a subset of the service account's allowed scopes"]} =
+        errors_on(changeset)
+    end
+
+    test "a service account with allowed scopes can create an unscoped access token" do
+      service_account =
+        insert(:user,
+          service_account: true,
+          allowed_scopes: ["service.read"]
+        )
+
+      assert {:ok, token} = Users.create_access_token(service_account)
+      assert token.scopes == []
+    end
+
+    test "an empty allowed scope list does not restrict access token scopes" do
+      service_account = insert(:user, service_account: true, allowed_scopes: [])
+
+      assert {:ok, token} =
+        Users.create_access_token(%{
+          scopes: [%{api: "service.write"}]
+        }, service_account)
+
+      assert [%{api: "service.write"}] = token.scopes
+    end
+
+    test "nil allowed scopes remain distinct and do not restrict access token scopes" do
+      service_account = insert(:user, service_account: true)
+
+      assert is_nil(service_account.allowed_scopes)
+
+      assert {:ok, token} =
+        Users.create_access_token(%{
+          scopes: [%{api: "service.write"}]
+        }, service_account)
+
+      assert [%{api: "service.write"}] = token.scopes
+    end
   end
 
   describe "#create_service_account_token/4" do

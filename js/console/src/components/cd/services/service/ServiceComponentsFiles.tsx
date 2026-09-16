@@ -91,7 +91,7 @@ const TreeItemText = styled.span({
 })
 
 // mui components need a proper mui theme where theme.spacing is a function
-// otherwise HonorableThemeProvider leaks in and crashes things
+// otherwise a styled-components theme leaks in and crashes things
 const muiTheme = createTheme()
 
 const FILE_TYPE_ICON_PATH = '/file-type-icons' as const

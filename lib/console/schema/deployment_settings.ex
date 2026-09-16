@@ -323,6 +323,11 @@ defmodule Console.Schema.DeploymentSettings do
         # Deprecated for most configs; maps client model ID -> inference profile ID when aliases cannot be inferred (e.g. application profile suffixes).
         field :deployments,           :map
         field :endpoint,              BedrockEndpoint, default: :runtime
+
+        embeds_many :model_settings, ModelSettings, on_replace: :delete do
+          field :model_id,              :string
+          field :inference_profile_arn, :string
+        end
       end
 
       embeds_one :vertex, Vertex, on_replace: :update do
@@ -473,8 +478,15 @@ defmodule Console.Schema.DeploymentSettings do
   defp bedrock_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments endpoint)a)
+    |> cast_embed(:model_settings, with: &bedrock_model_settings_changeset/2)
     |> trim_changes(~w(access_token aws_access_key_id aws_secret_access_key)a)
     |> validate_required(~w(region)a)
+  end
+
+  defp bedrock_model_settings_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(model_id inference_profile_arn)a)
+    |> validate_required(~w(model_id inference_profile_arn)a)
   end
 
   defp vertex_changeset(model, attrs) do

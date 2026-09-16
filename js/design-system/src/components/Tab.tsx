@@ -1,11 +1,11 @@
-import { Div, type DivProps, Icon } from 'honorable'
 import { type ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
 import Flex, { type FlexProps } from './Flex'
+import Icon from './Icon'
 import { type TabBaseProps } from './TabList'
 
-type TabProps = DivProps &
+export type TabProps = FlexProps &
   TabBaseProps & {
     startIcon?: ReactNode
     innerProps?: FlexProps
@@ -22,10 +22,15 @@ function Tab({
   vertical,
   textValue: _textValue,
   innerProps,
+  css,
   ...props
 }: TabProps) {
   const theme = useTheme()
-
+  const indicatorColor = active
+    ? theme.colors['border-primary']
+    : activeSecondary
+      ? theme.colors['border-fill-two']
+      : 'transparent'
   const borderRadiuses = {
     borderTopLeftRadius: theme.borderRadiuses.medium,
     borderTopRightRadius: vertical ? 0 : theme.borderRadiuses.medium,
@@ -33,34 +38,50 @@ function Tab({
   }
 
   return (
-    <Div
+    <Flex
       ref={ref}
-      body2
       display="block"
-      textDecoration="none"
+      width={vertical ? '100%' : undefined}
       tabIndex={0}
       userSelect="none"
       cursor="pointer"
+      textDecoration="none"
+      color={
+        active || activeSecondary
+          ? theme.colors.text
+          : theme.colors['text-xlight']
+      }
       borderBottom={
         vertical
           ? undefined
-          : `1px solid ${active ? 'border-primary' : 'border'}`
+          : `1px solid ${
+              active ? theme.colors['border-primary'] : theme.colors.border
+            }`
       }
       borderRight={
         vertical
           ? `1px solid ${
               active
-                ? 'border-primary'
+                ? theme.colors['border-primary']
                 : activeSecondary
-                  ? 'border-fill-two'
-                  : 'border'
+                  ? theme.colors['border-fill-two']
+                  : theme.colors.border
             }`
           : undefined
       }
       {...borderRadiuses}
-      _focusVisible={{
-        zIndex: theme.zIndexes.base + 1,
-        ...theme.partials.focus.default,
+      // Pass css directly to Flex: a generated styled wrapper would consume `as`
+      // and bypass Flex's conversion of style props when rendering a link.
+      {...{
+        css: {
+          ...theme.partials.text.body2,
+          '&:hover': { color: theme.colors.text },
+          '&:focus-visible': {
+            zIndex: theme.zIndexes.base + 1,
+            ...theme.partials.focus.default,
+          },
+          ...css,
+        },
       }}
       {...props}
     >
@@ -70,6 +91,7 @@ function Tab({
         paddingTop={theme.spacing.xsmall}
         paddingBottom={theme.spacing.xsmall}
         align="center"
+        width={vertical ? '100%' : undefined}
         borderBottom={
           vertical
             ? undefined
@@ -79,16 +101,9 @@ function Tab({
         }
         borderRight={
           vertical
-            ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${
-                active
-                  ? theme.colors['border-primary']
-                  : activeSecondary
-                    ? theme.colors['border-fill-two']
-                    : 'transparent'
-              }`
+            ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${indicatorColor}`
             : undefined
         }
-        {...borderRadiuses}
         color={
           active || activeSecondary
             ? theme.colors.text
@@ -105,7 +120,11 @@ function Tab({
               ? theme.colors['fill-two']
               : 'transparent'
         }
-        {...{
+        transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
+        {...borderRadiuses}
+        {...innerProps}
+        css={{
+          boxSizing: 'border-box',
           '&:hover': {
             color: theme.colors.text,
             ...(theme.mode === 'light'
@@ -114,16 +133,14 @@ function Tab({
                 ? { backgroundColor: theme.colors['fill-zero-hover'] }
                 : {}),
           },
+          ...innerProps?.css,
         }}
-        transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
-        {...innerProps}
       >
         {!!startIcon && <Icon marginRight="small">{startIcon}</Icon>}
         {children}
       </Flex>
-    </Div>
+    </Flex>
   )
 }
 
 export default Tab
-export type { TabProps }

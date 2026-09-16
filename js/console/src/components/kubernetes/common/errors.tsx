@@ -44,7 +44,8 @@ function ErrorToast({ errors }: ErrorToastProps): Nullable<ReactElement<any>> {
         error={{ graphQLErrors: [{ message: error.ErrStatus.message }] }}
         header={`${error.ErrStatus?.reason} (${error.ErrStatus?.code})`}
         margin="xlarge"
-        marginVertical="xxxlarge"
+        marginTop="xxxlarge"
+        marginBottom="xxxlarge"
         onClose={onClose}
       />
     )

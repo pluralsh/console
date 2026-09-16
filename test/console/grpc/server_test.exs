@@ -54,12 +54,19 @@ defmodule Console.GRPC.ServerTest do
     end
 
     test "forwards configured Bedrock bearer tokens" do
+      model_id = "anthropic.claude-sonnet-4-6"
+      inference_profile_arn =
+        "arn:aws:bedrock:us-east-2:123456789012:inference-profile/us.openai.gpt-5.6-luna"
+
       deployment_settings(
         ai: %{
           enabled: true,
           bedrock: %{
             access_token: "bedrock-token",
-            endpoint: :mantle
+            endpoint: :mantle,
+            model_settings: [
+              %{model_id: model_id, inference_profile_arn: inference_profile_arn}
+            ]
           }
         }
       )
@@ -68,6 +75,12 @@ defmodule Console.GRPC.ServerTest do
 
       assert config.bedrock.accessToken == "bedrock-token"
       assert config.bedrock.endpoint == :MANTLE
+      assert config.bedrock.modelSettings == [
+               %Plrl.BedrockModelSettings{
+                 modelId: model_id,
+                 inferenceProfileArn: inference_profile_arn
+               }
+             ]
     end
 
     test "returns xAI configuration" do

@@ -3,7 +3,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Select,
   SidePanelOpenIcon,
@@ -140,7 +140,7 @@ export function McpServerCreateForm() {
             required
             label="Name"
           >
-            <Input2
+            <Input
               placeholder="MCP server name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -151,7 +151,7 @@ export function McpServerCreateForm() {
             label="URL"
             hint="The MCP server endpoint URL."
           >
-            <Input2
+            <Input
               placeholder="https://example.com/mcp"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -195,7 +195,7 @@ export function McpServerCreateForm() {
                     key={header.id}
                     $showDelete={canRemove}
                   >
-                    <Input2
+                    <Input
                       placeholder="Name"
                       value={header.name}
                       onChange={(e) => {
@@ -208,7 +208,7 @@ export function McpServerCreateForm() {
                         )
                       }}
                     />
-                    <Input2
+                    <Input
                       placeholder="Value"
                       value={header.value}
                       onChange={(e) => {

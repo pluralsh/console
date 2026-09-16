@@ -18,8 +18,6 @@ export default defineConfig({
         'styled-components',
         '@emotion/react',
         '@emotion/styled',
-        'honorable',
-        'honorable-theme-default',
         'react-transition-group',
       ],
       output: {

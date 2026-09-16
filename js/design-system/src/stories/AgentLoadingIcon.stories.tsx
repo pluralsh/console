@@ -1,7 +1,8 @@
-import { Div } from 'honorable'
 import type { Meta, StoryObj } from '@storybook/react'
 import { type ComponentProps, type ReactNode } from 'react'
 import styled, { css, keyframes, useTheme } from 'styled-components'
+
+import Flex from '../components/Flex'
 
 import {
   AgentLoadingIcon,
@@ -364,7 +365,7 @@ export const Gallery: Story = {
     const size = args.size ?? 16
 
     return (
-      <Div
+      <Flex
         padding="medium"
         backgroundColor={theme.colors['fill-zero']}
         width="100%"
@@ -391,7 +392,7 @@ export const Gallery: Story = {
             ))
           })}
         </BoardSC>
-      </Div>
+      </Flex>
     )
   },
 }

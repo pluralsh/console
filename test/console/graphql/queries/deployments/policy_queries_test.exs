@@ -431,7 +431,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       policy = insert(:policy,
         project: project,
         policy: """
-        package plrl.wb.admission
+        package plrl.workbench
 
         sample := 0
 
@@ -456,7 +456,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       policy = insert(:policy,
         project: project,
         policy: """
-        package plrl.wb.admission
+        package plrl.workbench
 
         sample := 0
 
@@ -474,7 +474,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
         "policyId" => policy.id,
         "input" => Jason.encode!(%{}),
         "policy" => """
-        package plrl.wb.admission
+        package plrl.workbench
 
         sample := 0
 
@@ -511,7 +511,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       policy = insert(:policy,
         project: project,
         policy: """
-        package plrl.wb.admission
+        package plrl.workbench
 
         sample := 0
 

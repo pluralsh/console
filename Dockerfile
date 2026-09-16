@@ -15,6 +15,7 @@ COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
 COPY js/documentation/package.json ./documentation/package.json
 COPY js/eslint-config/package.json ./eslint-config/package.json
+COPY js/stylelint-config/package.json ./stylelint-config/package.json
 
 RUN corepack enable \
   && yarn install --immutable

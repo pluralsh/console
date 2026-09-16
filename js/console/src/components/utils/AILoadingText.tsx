@@ -1,4 +1,4 @@
-import { AgentLoadingIcon, Flex, FlexProps } from '@pluralsh/design-system'
+import { Flex, FlexProps } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobActivityWhimseyTextQuery,
@@ -42,10 +42,6 @@ export function AILoadingText({
       gap="xsmall"
       {...props}
     >
-      <AgentLoadingIcon
-        color="icon-xlight"
-        size={12}
-      />
       <EaseIn currentKey={whimseyText}>
         <Body2P
           $color="text-xlight"

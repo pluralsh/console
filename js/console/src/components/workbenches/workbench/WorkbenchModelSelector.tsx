@@ -219,7 +219,6 @@ export function WorkbenchModelSelector({
           <DropdownSearchHeaderSC>
             <Input
               small
-              type="text"
               showClearButton
               placeholder="Search for model"
               value={query}
