@@ -116,6 +116,7 @@ export default defineConfig({
     react(),
     babel({
       plugins: ['styled-components'],
+      exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]generated[/\\]/],
     }),
     tsconfigPaths({ loose: true }),
     objectStoreDevProxy,
