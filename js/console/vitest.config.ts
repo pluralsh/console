@@ -1,5 +1,4 @@
-import { defineConfig, Plugin } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
+import { defineConfig } from 'vitest/config'
 
 // https://vitest.dev/config/
 export default defineConfig({
@@ -11,8 +10,8 @@ export default defineConfig({
   },
   cacheDir: '../node_modules/',
   oxc: { jsx: { runtime: 'automatic' } },
-  plugins: [tsconfigPaths() as Plugin],
   resolve: {
+    tsconfigPaths: true,
     mainFields: ['module'],
   },
 })

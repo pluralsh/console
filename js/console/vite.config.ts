@@ -4,7 +4,6 @@ import babel from '@rolldown/plugin-babel'
 import { Readable } from 'node:stream'
 import { resolve } from 'path'
 import { defineConfig, type Plugin } from 'vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
 
 const API_URL = process.env.BASE_URL
   ? `https://${process.env.BASE_URL}`
@@ -118,7 +117,6 @@ export default defineConfig({
       plugins: ['styled-components'],
       exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]generated[/\\]/],
     }),
-    tsconfigPaths({ loose: true }),
     objectStoreDevProxy,
     // this was very memory intensive (from source maps) and ultimately not that useful
     // could consider reenabling in the future if we rework DS bundling/publishing
@@ -161,8 +159,12 @@ export default defineConfig({
     },
   },
   resolve: {
+    tsconfigPaths: true,
     alias: {
-      '@pluralsh/design-system': resolve(__dirname, '../design-system/src'),
+      '@pluralsh/design-system': resolve(
+        import.meta.dirname,
+        '../design-system/src'
+      ),
     },
   },
 })
