@@ -99,7 +99,7 @@ Private remotes: pass credentials the same way as any Docker build (`RUN
 --mount=type=secret`, `GIT_ASKPASS`, `.netrc`). Do not leave tokens in
 `repos.yaml`; `prebake` strips URL userinfo from `origin` and `manifest.json`.
 
-CI publishes `ghcr.io/pluralsh/repository-prebake:<sha>` (`:latest` on
+CI publishes `ghcr.io/pluralsh/repository-prebake:sha-<short>` (`:latest` on
 `master`).
 
 From this repository:
@@ -142,12 +142,12 @@ the git checkout to `/data/console`, `prebake`, then [`precompile.sh`](precompil
 modules under `go/` with `go test -run='^$'`).
 
 CI builds it on every PR and every push to `master` as
-`ghcr.io/pluralsh/console-repos:<sha>` (`:pr-<n>` on pull requests, `:latest`
+`ghcr.io/pluralsh/console-repos:sha-<short>` (`:pr-<n>` on pull requests, `:latest`
 on master). To test a branch, set:
 
 ```yaml
 spec:
-  repositoryImage: ghcr.io/pluralsh/console-repos:<sha>
+  repositoryImage: ghcr.io/pluralsh/console-repos:sha-<short>
 ```
 
 Locally, from the console repository root (use the console ignore file so

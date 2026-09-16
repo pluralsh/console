@@ -1,4 +1,4 @@
-name: CD / Console repository prebake
+name: CD / Repository prebake
 
 on:
   pull_request:
@@ -15,6 +15,7 @@ permissions:
 env:
   BASE_IMAGE: ghcr.io/pluralsh/repository-prebake
   CONSOLE_IMAGE: ghcr.io/pluralsh/console-repos
+  DOCKER_METADATA_PR_HEAD_SHA: "true"
 
 jobs:
   vouch:
@@ -23,8 +24,58 @@ jobs:
     permissions:
       contents: read
 
-  build:
-    name: Build prebake images
+  base:
+    name: Build repository-prebake
+    needs: [vouch]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.BASE_IMAGE }}
+          flavor: |
+            latest=false
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: repository-prebake/Dockerfile
+          target: base
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha,scope=repository-prebake-base
+          cache-to: type=gha,mode=max,scope=repository-prebake-base
+
+  console:
+    name: Build console-repos
     needs: [vouch]
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -52,51 +103,27 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker meta (base)
-        id: meta-base
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.BASE_IMAGE }}
-          flavor: |
-            latest=false
-          tags: |
-            type=raw,value=${{ github.event.pull_request.head.sha || github.sha }}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
-
-      - name: Docker meta (console)
-        id: meta-console
+      - name: Docker meta
+        id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.CONSOLE_IMAGE }}
           flavor: |
             latest=false
           tags: |
-            type=raw,value=${{ github.event.pull_request.head.sha || github.sha }}
+            type=sha,prefix=sha-,format=short
             type=raw,value=pr-${{ github.event.pull_request.number }},enable=${{ github.event_name == 'pull_request' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
 
-      - name: Build and push base image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: repository-prebake/Dockerfile
-          target: base
-          push: true
-          tags: ${{ steps.meta-base.outputs.tags }}
-          labels: ${{ steps.meta-base.outputs.labels }}
-          platforms: linux/amd64
-          cache-from: type=gha,scope=repository-prebake
-          cache-to: type=gha,mode=max,scope=repository-prebake
-
-      - name: Build and push console image
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           file: repository-prebake/Dockerfile
           target: console
           push: true
-          tags: ${{ steps.meta-console.outputs.tags }}
-          labels: ${{ steps.meta-console.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha,scope=repository-prebake
-          cache-to: type=gha,mode=max,scope=repository-prebake
+          cache-from: type=gha,scope=repository-prebake-console
+          cache-to: type=gha,mode=max,scope=repository-prebake-console

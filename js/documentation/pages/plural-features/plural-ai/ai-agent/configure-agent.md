@@ -162,7 +162,7 @@ spec:
 
 ## Optional: Prebake repositories and mise toolchains
 
-Point `spec.repositoryImage` at an OCI image of precloned (and optionally precompiled) git repositories so bootstrap copies locally instead of `git clone`. Extend [`ghcr.io/pluralsh/repository-prebake`](https://github.com/pluralsh/console/blob/master/repository-prebake/README.md) and `RUN prebake` in a normal Dockerfile (`docker/build-push-action` works). The console image is `ghcr.io/pluralsh/console-repos:<sha>`.
+Point `spec.repositoryImage` at an OCI image of precloned (and optionally precompiled) git repositories so bootstrap copies locally instead of `git clone`. Extend [`ghcr.io/pluralsh/repository-prebake`](https://github.com/pluralsh/console/blob/master/repository-prebake/README.md) and `RUN prebake` in a normal Dockerfile (`docker/build-push-action` works). The console image is `ghcr.io/pluralsh/console-repos:sha-<short>`.
 
 To install language tools **in the agent container** without wrapping compiles in DinD, supply a [mise](https://mise.jdx.dev/bootstrap.html) config and keep the default container writable:
 
