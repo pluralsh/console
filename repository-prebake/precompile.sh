@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 # Precompile this repository so agent runs are not compile-from-zero.
-# Runs inside compile.Dockerfile with the repository mounted at /src.
+# Runs in the console prebake image with PRECOMPILE_ROOT (default /data/console).
 set -euo pipefail
 
-cd /src
+ROOT="${PRECOMPILE_ROOT:-/data/console}"
+cd "$ROOT"
 
 export MISE_YES=1
 export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="${LC_ALL:-C.UTF-8}"
 export ELIXIR_ERL_OPTIONS="${ELIXIR_ERL_OPTIONS:-+fnu}"
 
-git config --global --add safe.directory /src
+git config --global --add safe.directory "$ROOT"
 
 mise trust --all || true
 mise install
@@ -30,15 +31,15 @@ MIX_ENV=test mix compile
   node .yarn/releases/yarn-4.17.1.cjs install --immutable
 )
 
-export GOPATH=/src/.gopath
-export GOBIN=/src/.gopath/bin
-export GOCACHE=/src/.cache/go-build
-export GOMODCACHE=/src/.cache/pkg/mod
-export GOWORK=/src/go/go.work
+export GOPATH="$ROOT/.gopath"
+export GOBIN="$ROOT/.gopath/bin"
+export GOCACHE="$ROOT/.cache/go-build"
+export GOMODCACHE="$ROOT/.cache/pkg/mod"
+export GOWORK="$ROOT/go/go.work"
 mkdir -p "$GOBIN" "$GOCACHE" "$GOMODCACHE"
 export PATH="$GOBIN:$PATH"
 
-cd /src/go
+cd "$ROOT/go"
 mods=()
 while IFS= read -r dir; do
   mods+=("${dir}/...")

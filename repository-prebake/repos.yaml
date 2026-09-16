@@ -1,7 +1,4 @@
 # Prebake image for this repository with compile artifacts.
-# Used by the repository-prebake GitHub Action.
 repositories:
   - url: https://github.com/pluralsh/console.git
     path: console
-    compileScript: precompile.sh
-    compileDockerfile: compile.Dockerfile

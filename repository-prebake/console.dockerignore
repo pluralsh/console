@@ -1,0 +1,27 @@
+# Context ignore file for --target console. CI copies this over .dockerignore.
+.idea/
+.vscode/
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+erl_crash.dump
+*.ez
+watchman-*.tar
+/priv/data
+/data
+secrets/
+.gopath/
+.cache/
+/target/
+**/node_modules/
+.pnp.*
+/js/.yarn/*
+!/js/.yarn/releases/
+!/js/.yarn/releases/**
+/js/console/build/
+/js/design-system/dist/
+/js/design-system/storybook-static/
+/js/documentation/.next/
+gha-creds-*.json
