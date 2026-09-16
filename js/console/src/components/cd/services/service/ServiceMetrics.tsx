@@ -32,7 +32,10 @@ import {
 import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
-import { ResourceMetricsGraphs, hasResourceMetrics } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import {
+  ResourceMetricsGraphs,
+  hasResourceMetrics,
+} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'

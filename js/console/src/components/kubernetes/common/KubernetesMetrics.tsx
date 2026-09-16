@@ -13,7 +13,10 @@ import { GqlError } from 'components/utils/Alert.tsx'
 import { MetricsEmptyState } from '../../cd/cluster/ClusterMetrics.tsx'
 import { RectangleSkeleton } from '../../utils/SkeletonLoaders.tsx'
 import { PodResourceReservation } from 'components/utils/metrics/podResourceReservations.ts'
-import { ResourceMetricsGraphs, hasResourceMetrics } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import {
+  ResourceMetricsGraphs,
+  hasResourceMetrics,
+} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { useKubernetesPodResourceReservations } from 'components/utils/metrics/useKubernetesPodResourceReservations.ts'
 
 function Metric({

@@ -17,7 +17,10 @@ import {
   PodResourceReservation,
   getPodResourceReservations,
 } from 'components/utils/metrics/podResourceReservations.ts'
-import { ResourceMetricsGraphs, hasResourceMetrics } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import {
+  ResourceMetricsGraphs,
+  hasResourceMetrics,
+} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { ComponentDetailsWithPodsT } from './useFetchComponentDetails.tsx'
 
 type Duration = (typeof DURATIONS)[number]
