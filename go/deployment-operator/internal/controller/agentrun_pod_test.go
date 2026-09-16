@@ -645,6 +645,39 @@ func TestBuildAgentRunPod_ReadOnlyRootFilesystemAndMise(t *testing.T) {
 		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "false"})
 	})
 
+	t.Run("partial template security context fills read-only", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:                   console.AgentRuntimeTypeClaude,
+				TargetNamespace:        "default",
+				ReadOnlyRootFilesystem: lo.ToPtr(true),
+				Mise:                   &v1alpha1.MiseSpec{Config: &miseConfig},
+				Template: &corev1.PodTemplateSpec{
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{{
+							Name: defaultContainer,
+							SecurityContext: &corev1.SecurityContext{
+								RunAsUser: lo.ToPtr(int64(1000)),
+							},
+						}},
+					},
+				},
+			},
+		}
+		pod := buildAgentRunPod(run, runtime)
+		defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+		if assert.NotNil(t, defaultC.SecurityContext) {
+			if assert.NotNil(t, defaultC.SecurityContext.RunAsUser) {
+				assert.Equal(t, int64(1000), *defaultC.SecurityContext.RunAsUser)
+			}
+			if assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+				assert.True(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+			}
+		}
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "false"})
+	})
+
 	t.Run("omits mise volume when unset", func(t *testing.T) {
 		runtime := &v1alpha1.AgentRuntime{
 			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
@@ -660,6 +693,42 @@ func TestBuildAgentRunPod_ReadOnlyRootFilesystemAndMise(t *testing.T) {
 			assert.NotEqual(t, miseConfigVolumeName, volume.Name)
 		}
 	})
+}
+
+func TestBuildAgentRunPod_DindClearsReadOnlyRootFilesystem(t *testing.T) {
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:                   console.AgentRuntimeTypeClaude,
+			TargetNamespace:        "default",
+			Dind:                   lo.ToPtr(true),
+			ReadOnlyRootFilesystem: lo.ToPtr(true),
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+	if !assert.NotNil(t, defaultC.SecurityContext) {
+		return
+	}
+	if assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+		assert.False(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+	}
+	if assert.NotNil(t, defaultC.SecurityContext.Privileged) {
+		assert.True(t, *defaultC.SecurityContext.Privileged)
+	}
 }
 
 func TestGetAgentRunPodCompletion(t *testing.T) {

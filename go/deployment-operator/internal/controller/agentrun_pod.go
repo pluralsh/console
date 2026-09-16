@@ -406,6 +406,9 @@ func ensureDefaultEnvVars(existing []corev1.EnvVar, runtime *v1alpha1.AgentRunti
 
 func ensureDefaultContainerSecurityContext(sc *corev1.SecurityContext, readOnlyRootFilesystem bool) *corev1.SecurityContext {
 	if sc != nil {
+		if sc.ReadOnlyRootFilesystem == nil {
+			sc.ReadOnlyRootFilesystem = lo.ToPtr(readOnlyRootFilesystem)
+		}
 		return sc
 	}
 
@@ -705,6 +708,7 @@ func enableDind(pod *corev1.Pod) {
 		sc.Privileged = lo.ToPtr(true)
 		sc.RunAsNonRoot = lo.ToPtr(false)
 		sc.AllowPrivilegeEscalation = lo.ToPtr(true)
+		sc.ReadOnlyRootFilesystem = lo.ToPtr(false)
 		// Run as root so Podman operates in rootful mode, avoiding newuidmap
 		// user-namespace issues with rootless Podman inside a privileged pod.
 		sc.RunAsUser = lo.ToPtr(int64(0))
