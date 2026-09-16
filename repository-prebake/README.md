@@ -136,10 +136,11 @@ export GOMODCACHE=/data/console/.cache/pkg/mod
 
 ## Console image
 
-This directory's Dockerfile `--target console` bakes `pluralsh/console`: copy
-the git checkout to `/data/console`, `prebake`, then [`precompile.sh`](precompile.sh)
-(Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, Go workspace
-modules under `go/` with `go test -run='^$'`).
+This directory's Dockerfile `--target console` extends the published base
+image: copy the git checkout to `/data/console`, `prebake`, then
+[`precompile.sh`](precompile.sh) (Elixir `MIX_ENV=test mix compile`, JS
+`yarn install --immutable`, Go workspace modules under `go/` with
+`go test -run='^$'`).
 
 CI builds it on every PR and every push to `master` as
 `ghcr.io/pluralsh/console-repos:sha-<short>` (`:pr-<n>` on pull requests, `:latest`
@@ -151,10 +152,13 @@ spec:
 ```
 
 Locally, from the console repository root (use the console ignore file so
-`.git` is copied and build artifacts are not):
+`.git` is copied and build artifacts are not). Build the base image first:
 
 ```bash
+docker build -f repository-prebake/Dockerfile --target base \
+  -t ghcr.io/pluralsh/repository-prebake:local .
 cp repository-prebake/console.dockerignore .dockerignore
 docker build -f repository-prebake/Dockerfile --target console \
+  --build-arg PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:local \
   -t ghcr.io/pluralsh/console-repos:local .
 ```

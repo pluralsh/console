@@ -2,16 +2,19 @@
 #
 # Targets:
 #   base     (default) — git + prebake CLI. Users extend this image and RUN prebake.
-#   console            — pluralsh/console checkout plus compile caches.
+#   console            — FROM the published base image, plus Console compile caches.
 #
-#   docker build -f repository-prebake/Dockerfile --target base -t ghcr.io/pluralsh/repository-prebake .
-#   docker build -f repository-prebake/Dockerfile --target console -t ghcr.io/pluralsh/console-repos .
+#   docker build -f repository-prebake/Dockerfile --target base -t ghcr.io/pluralsh/repository-prebake:local .
+#   docker build -f repository-prebake/Dockerfile --target console \
+#     --build-arg PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:local \
+#     -t ghcr.io/pluralsh/console-repos:local .
 #
 # Console builds should use repository-prebake/console.dockerignore as the
 # context ignore file (CI copies it over .dockerignore).
 
 ARG GO_VERSION=1.27.1
 ARG MISE_VERSION=v2026.9.7
+ARG PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:latest
 
 FROM golang:${GO_VERSION}-bookworm AS cli
 WORKDIR /src
@@ -29,7 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=cli /prebake /usr/local/bin/prebake
 WORKDIR /data
 
-FROM runtime AS console
+FROM ${PREBAKE_IMAGE} AS console
 ARG MISE_VERSION
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl \

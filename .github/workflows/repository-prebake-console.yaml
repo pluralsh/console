@@ -29,6 +29,8 @@ jobs:
     needs: [vouch]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
     permissions:
       contents: read
       id-token: write
@@ -76,7 +78,7 @@ jobs:
 
   console:
     name: Build console-repos
-    needs: [vouch]
+    needs: [vouch, base]
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     permissions:
@@ -122,8 +124,11 @@ jobs:
           file: repository-prebake/Dockerfile
           target: console
           push: true
+          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
+          build-args: |
+            PREBAKE_IMAGE=${{ env.BASE_IMAGE }}:${{ needs.base.outputs.version }}
           cache-from: type=gha,scope=repository-prebake-console
           cache-to: type=gha,mode=max,scope=repository-prebake-console
