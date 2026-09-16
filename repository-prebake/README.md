@@ -25,6 +25,14 @@ if the image is private.
 
 The image must include `/bin/sh` and `cp`, with repos under `/data`.
 
+## Layout
+
+```
+repository-prebake/
+  base/       # ghcr.io/pluralsh/repository-prebake (CLI + git)
+  console/    # ghcr.io/pluralsh/console-repos (extends base)
+```
+
 ## Image layout
 
 ```
@@ -76,7 +84,7 @@ host-side wrapper around `docker build`.
 ```dockerfile
 FROM ghcr.io/pluralsh/repository-prebake:latest
 COPY repos.yaml /config/repos.yaml
-RUN prebake --config /config/repos.yaml --dest /data --chown 65532:65532
+RUN prebake --config /config/repos.yaml --chown 65532:65532
 ```
 
 ```yaml
@@ -92,8 +100,12 @@ If `/data/<path>` already contains a `.git` directory, `prebake` keeps that
 checkout instead of cloning (use `COPY` of a local tree, then `RUN prebake`).
 
 ```text
-prebake --config repos.yaml --dest /data [--recurse-submodules] [--lfs] [--chown uid:gid]
+prebake --config repos.yaml [--dest /data] [--recurse-submodules] [--lfs] [--chown uid:gid]
 ```
+
+`--dest` defaults to `/data`, which the agent-run init container copies into
+the pod. Extra compile steps belong after `prebake` and must write under
+`/data/<path>`.
 
 Private remotes: pass credentials the same way as any Docker build (`RUN
 --mount=type=secret`, `GIT_ASKPASS`, `.netrc`). Do not leave tokens in
@@ -105,8 +117,9 @@ CI publishes `ghcr.io/pluralsh/repository-prebake:sha-<short>` (`:latest` on
 From this repository:
 
 ```bash
-docker build -f repository-prebake/Dockerfile --target base \
-  -t ghcr.io/pluralsh/repository-prebake:local .
+docker build -f repository-prebake/base/Dockerfile \
+  -t ghcr.io/pluralsh/repository-prebake:local \
+  go/repository-prebake
 ```
 
 ## Inspect
@@ -136,11 +149,10 @@ export GOMODCACHE=/data/console/.cache/pkg/mod
 
 ## Console image
 
-This directory's Dockerfile `--target console` extends the published base
-image: copy the git checkout to `/data/console`, `prebake`, then
-[`precompile.sh`](precompile.sh) (Elixir `MIX_ENV=test mix compile`, JS
-`yarn install --immutable`, Go workspace modules under `go/` with
-`go test -run='^$'`).
+[`console/`](console/) extends the published base image: copy this checkout to
+`/data/console`, `prebake`, then [`console/precompile.sh`](console/precompile.sh)
+(Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, Go workspace
+modules under `go/` with `go test -run='^$'`).
 
 CI builds it on every PR and every push to `master` as
 `ghcr.io/pluralsh/console-repos:sha-<short>` (`:pr-<n>` on pull requests, `:latest`
@@ -151,14 +163,15 @@ spec:
   repositoryImage: ghcr.io/pluralsh/console-repos:sha-<short>
 ```
 
-Locally, from the console repository root (use the console ignore file so
-`.git` is copied and build artifacts are not). Build the base image first:
+Locally, from the console repository root. Build the base image first:
 
 ```bash
-docker build -f repository-prebake/Dockerfile --target base \
-  -t ghcr.io/pluralsh/repository-prebake:local .
-cp repository-prebake/console.dockerignore .dockerignore
-docker build -f repository-prebake/Dockerfile --target console \
+docker build -f repository-prebake/base/Dockerfile \
+  -t ghcr.io/pluralsh/repository-prebake:local \
+  go/repository-prebake
+cp repository-prebake/console/.dockerignore .dockerignore
+docker build -f repository-prebake/console/Dockerfile \
   --build-arg PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:local \
-  -t ghcr.io/pluralsh/console-repos:local .
+  -t ghcr.io/pluralsh/console-repos:local \
+  .
 ```

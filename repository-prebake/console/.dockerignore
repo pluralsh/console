@@ -1,4 +1,4 @@
-# Context ignore file for --target console. CI copies this over .dockerignore.
+# Context ignore file for the console prebake image. CI copies this over .dockerignore.
 .idea/
 .vscode/
 /_build/

@@ -66,9 +66,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: repository-prebake/Dockerfile
-          target: base
+          context: go/repository-prebake
+          file: repository-prebake/base/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -93,7 +92,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Use console dockerignore
-        run: cp repository-prebake/console.dockerignore .dockerignore
+        run: cp repository-prebake/console/.dockerignore .dockerignore
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -121,8 +120,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: repository-prebake/Dockerfile
-          target: console
+          file: repository-prebake/console/Dockerfile
           push: true
           pull: true
           tags: ${{ steps.meta.outputs.tags }}
