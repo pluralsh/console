@@ -1,10 +1,15 @@
 defmodule ConsoleWeb.GitController do
   use ConsoleWeb, :controller
+  use Nebulex.Caching
   alias Console.SmartFile
-  alias Console.Deployments.{Services, Stacks, Sentinels}
+  alias Console.Deployments.{Services, Settings, Stacks, Sentinels}
   alias Console.Schema.{Cluster, Service}
   alias Console.Deployments.Local.Server, as: FileServer
   require Logger
+
+  @local_cache Console.conf(:local_cache)
+  @agent_ref Settings.agent_ref()
+  @agent_vsn Settings.agent_vsn()
 
   def proceed(conn, params) do
     with %Service{} = svc <- get_service(params),
@@ -65,7 +70,7 @@ defmodule ConsoleWeb.GitController do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
          svc <- Console.Repo.preload(svc, [:revision]),
-         {{:ok, sha}, _} <- {Services.digest(svc), svc} do
+         {{:ok, sha}, _} <- {fetch_digest(svc), svc} do
       send_resp(conn, 200, sha)
     else
       {{:error, :agent_bootstrapping}, svc} ->
@@ -112,16 +117,29 @@ defmodule ConsoleWeb.GitController do
       do: {:ok, f, sha}
   end
 
+  defp fetch_digest(%Service{name: "deploy-operator", git: %Service.Git{ref: @agent_ref}}),
+    do: {:ok, agent_chart_digest()}
+  defp fetch_digest(%Service{} = svc), do: Services.digest(svc)
+
   defp stringify(err) when is_binary(err), do: err
   defp stringify(err), do: inspect(err)
 
   defp get_digest(%{"digest" => digest}, _), do: {:ok, digest}
-  defp get_digest(_, %Service{} = svc), do: Services.digest(svc)
+  defp get_digest(_, %Service{} = svc), do: fetch_digest(svc)
 
+  defp fetch_tarball(_, %Service{name: "deploy-operator", git: %Service.Git{ref: @agent_ref}}),
+    do: {:ok, Settings.agent_service_chart(), agent_chart_digest()}
   defp fetch_tarball(params, svc) do
     with {:ok, sha} <- get_digest(params, svc),
       do: FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end)
   end
+
+  @decorate cacheable(
+              cache: @local_cache,
+              key: {:agent_chart_digest, @agent_vsn},
+              opts: [ttl: :timer.hours(24)]
+            )
+  defp agent_chart_digest(), do: Console.sha_file(Settings.agent_service_chart())
 
   defp agent_bootstrapping(conn),
     do: send_resp(conn, 425, "Git or Helm agent is not ready")
