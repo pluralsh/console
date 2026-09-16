@@ -8,10 +8,19 @@ export function reloadApplicationUpdate() {
   window.location.reload()
 }
 
+/** Same gate as the former `ApplicationUpdateToast` (prod only). */
+export function isProductionConsole(): boolean {
+  return import.meta.env.MODE === 'production'
+}
+
 /** True when the API reports a newer console frontend than this bundle. */
 export function useApplicationUpdateAvailable(): boolean {
   const { configuration } = useContext(LoginContext)
   const serverCommit = configuration?.gitCommit
 
-  return !!serverCommit && serverCommit !== BUNDLED_GIT_COMMIT
+  return (
+    isProductionConsole() &&
+    !!serverCommit &&
+    serverCommit !== BUNDLED_GIT_COMMIT
+  )
 }
