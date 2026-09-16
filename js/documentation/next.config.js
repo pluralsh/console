@@ -21,6 +21,9 @@ const nextConfig = {
   },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   webpack: (config) => {
+    // Share the theme context with design-system sources across workspaces.
+    config.resolve.alias['styled-components'] =
+      require.resolve('styled-components')
     config.resolve.alias['@pluralsh/design-system'] = path.resolve(
       __dirname,
       '../design-system/src/index.ts'
