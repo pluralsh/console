@@ -1,6 +1,6 @@
 import {
   ComponentProps,
-  FormEventHandler,
+  SubmitEventHandler,
   useCallback,
   useContext,
   useState,
@@ -192,7 +192,7 @@ export function PersonaCreateModal({
   const attributesValid = !!name
   const allowSubmit = attributesValid
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+  const onSubmit: SubmitEventHandler<HTMLElement> = useCallback(
     (e) => {
       e.preventDefault()
       if (bindings && allowSubmit) {

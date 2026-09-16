@@ -25,8 +25,8 @@ import { PersonaConfiguration } from './PersonaConfiguration'
 import { mergeWith } from 'lodash'
 import {
   ComponentProps,
-  FormEventHandler,
   ReactNode,
+  SubmitEventHandler,
   useCallback,
   useEffect,
   useMemo,
@@ -227,7 +227,7 @@ export function EditPersonaAttributesModal({
 
   const allowSubmit = hasUpdates && !!name
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+  const onSubmit: SubmitEventHandler<HTMLElement> = useCallback(
     (e) => {
       e.preventDefault()
       if (allowSubmit) {
