@@ -1146,6 +1146,25 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       refute Enum.empty?(found["bugFixes"])
       refute found["apiUpdates"]
     end
+
+    test "it serializes api updates from the kubernetes 1.36 changelog" do
+      {:ok, %{data: %{"kubernetesChangelog" => found}}} = run_query("""
+        query {
+          kubernetesChangelog(version: "1.36") {
+            version
+            apiUpdates
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert found["version"] == "1.36"
+      assert found["apiUpdates"] == [
+               "admissionregistration / policies: `MutatingAdmissionPolicy` is GA (v1) and enabled by default; plus optional manifest-based admission configuration via AdmissionConfiguration static manifests.",
+               "resource.k8s.io (DRA): Multiple versioned capabilities: v1beta* for core DRA features (binding conditions, taints/tolerations) and v1alpha1 APIs like ResourcePoolStatusRequest; also introduces granular RBAC requirements when `DRAResourceClaimGranularStatusAuthorization` is enabled.",
+               "scheduling.k8s.io/v1alpha2: Introduces the newer Workload/PodGroup API version; v1alpha1 Workload removed, so controllers/schedulers integrating these must update.",
+               "storage.k8s.io: VolumeAttributesClass locked enabled and preferred storage version updated to `storage.k8s.io/v1`; SnapshotMetadataService promoted to v1beta1 (v1alpha1 removed)."
+             ]
+    end
   end
 
   describe "projectUsageHistory" do
