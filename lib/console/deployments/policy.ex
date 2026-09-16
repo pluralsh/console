@@ -104,10 +104,26 @@ defmodule Console.Deployments.Policy do
     |> when_ok(:delete)
   end
 
-  def eval_policy(engine, input, ids, path \\ "data.plrl.wb.admission.result") do
+  def eval_policy(
+        engine,
+        input,
+        ids,
+        path \\ {:fallback, "data.plrl.workbench.result", "data.plrl.wb.admission.result"}
+      ) do
     with {:ok, engine} <- Regolix.set_input(engine, input) do
-      Regolix.eval_query(engine, path)
+      eval_policy_paths(engine, path)
       |> maybe_sample(input, ids)
+    end
+  end
+
+  defp eval_policy_paths(engine, path) when is_binary(path),
+    do: Regolix.eval_query(engine, path)
+
+  defp eval_policy_paths(engine, {:fallback, primary, fallback}) do
+    case Regolix.eval_query(engine, primary) do
+      {:ok, nil} -> Regolix.eval_query(engine, fallback)
+      {:ok, :undefined} -> Regolix.eval_query(engine, fallback)
+      result -> result
     end
   end
 
@@ -158,16 +174,31 @@ defmodule Console.Deployments.Policy do
   @external_resource @binding_rego
   @external_resource @stack_rego
   @workbench_policy_base File.read!(@workbench_rego)
+  @legacy_workbench_policy_base String.replace(
+                                  @workbench_policy_base,
+                                  "package plrl.workbench",
+                                  "package plrl.wb.admission",
+                                  global: false
+                                )
   @binding_policy_base File.read!(@binding_rego)
   @stack_policy_base File.read!(@stack_rego)
 
   def compile_policies(type, policies) when is_list(policies) do
-    with {:ok, base, path} <- evaluation_base(type),
+    with {:ok, bases, path} <- evaluation_base(type, policies),
          {:ok, engine} <- Regolix.new(),
-         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", base),
+         {:ok, engine} <- add_policy_bases(engine, bases),
          {:ok, engine} <- add_policies(engine, policies) do
       {:ok, engine, path}
     end
+  end
+
+  defp add_policy_bases(engine, bases) do
+    Enum.reduce_while(bases, {:ok, engine}, fn {name, base}, {:ok, eng} ->
+      case Regolix.add_policy(eng, name, base) do
+        {:ok, engine} -> {:cont, {:ok, engine}}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
   end
 
   defp add_policies(engine, policies) do
@@ -179,10 +210,36 @@ defmodule Console.Deployments.Policy do
     end)
   end
 
-  defp evaluation_base(:workbench), do: {:ok, @workbench_policy_base, "data.plrl.wb.admission.result"}
-  defp evaluation_base(:binding), do: {:ok, @binding_policy_base, "data.plrl.binding.result"}
-  defp evaluation_base(:stack), do: {:ok, @stack_policy_base, "data.plrl.stack.result"}
-  defp evaluation_base(type), do: {:error, "policy type #{type} cannot be evaluated"}
+  defp evaluation_base(:workbench, policies) do
+    current? = Enum.any?(policies, &package?(&1, "plrl.workbench"))
+    legacy? = Enum.any?(policies, &package?(&1, "plrl.wb.admission"))
+    path = {:fallback, "data.plrl.workbench.result", "data.plrl.wb.admission.result"}
+
+    case {current?, legacy?} do
+      {true, true} ->
+        {:ok,
+         [
+           {"plrl.rego", @workbench_policy_base},
+           {"plrl-legacy.rego", @legacy_workbench_policy_base}
+         ],
+         path}
+
+      {false, true} ->
+        {:ok, [{"plrl-legacy.rego", @legacy_workbench_policy_base}], path}
+
+      _ ->
+        {:ok, [{"plrl.rego", @workbench_policy_base}], path}
+    end
+  end
+
+  defp evaluation_base(:binding, _), do: {:ok, [{"plrl.rego", @binding_policy_base}], "data.plrl.binding.result"}
+  defp evaluation_base(:stack, _), do: {:ok, [{"plrl.rego", @stack_policy_base}], "data.plrl.stack.result"}
+  defp evaluation_base(type, _), do: {:error, "policy type #{type} cannot be evaluated"}
+
+  defp package?(%{policy: policy}, package) when is_binary(policy),
+    do: Regex.match?(~r/^\s*package\s+#{Regex.escape(package)}\s*$/m, policy)
+
+  defp package?(_, _), do: false
 
   def next_binding_poll(%BindingPolicy{} = binding) do
     binding

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   humanizeToolName,
   resolveToolCallKind,
+  toolCallDisplayDescription,
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
   toolCallGroupHeader,
@@ -80,6 +81,25 @@ describe('toolCallDisplaySubtitle', () => {
         query: '{namespace="prod"}',
       })
     ).toBe('{namespace="prod"}')
+  })
+})
+
+describe('toolCallDisplayDescription', () => {
+  it('uses an explicit command description', () => {
+    expect(
+      toolCallDisplayDescription({
+        command: 'git status',
+        description: 'Check the working tree',
+      })
+    ).toBe('Check the working tree')
+  })
+
+  it('returns no header when command metadata has no description', () => {
+    expect(
+      toolCallDisplayDescription({
+        command: 'git log --oneline',
+      })
+    ).toBe('')
   })
 })
 

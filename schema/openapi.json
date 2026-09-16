@@ -3302,6 +3302,12 @@
         "title": "User",
         "description": "A registed user",
         "properties": {
+          "allowed_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "email": {
             "format": "email",
             "type": "string"

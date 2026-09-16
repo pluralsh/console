@@ -7,6 +7,8 @@ defmodule Console.AI.Provider.BedrockTest do
   alias ReqLLM.{Message, Message.ContentPart, Response, ToolCall}
 
   @inference_profile_id "us.anthropic.claude-sonnet-4-6"
+  @application_profile_arn "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/abcdef123456"
+  @encoded_application_profile_arn URI.encode(@application_profile_arn, &URI.char_unreserved?/1)
   @region "us-east-2"
   @usage %{input_tokens: 10, output_tokens: 5, total_tokens: 15}
 
@@ -99,6 +101,49 @@ defmodule Console.AI.Provider.BedrockTest do
   end
 
   describe "completion/3" do
+    test "routes a configured model through its application inference profile ARN" do
+      model_id = "anthropic.claude-sonnet-4-6"
+
+      bedrock =
+        Bedrock.new(%BedrockSettings{
+          model_id: model_id,
+          model_settings: [
+            %{model_id: model_id, inference_profile_arn: @application_profile_arn}
+          ],
+          region: @region,
+          aws_access_key_id: "test-access-key",
+          aws_secret_access_key: "test-secret-key"
+        })
+
+      expected_url =
+        "https://bedrock-runtime.#{@region}.amazonaws.com/model/#{@encoded_application_profile_arn}/invoke"
+
+      expect(Req, :request, fn %Req.Request{} = request ->
+        assert request.method == :post
+        assert URI.to_string(request.url) == expected_url
+
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body: %Response{
+             id: "test-response",
+             model: model_id,
+             context: %ReqLLM.Context{messages: []},
+             message: %Message{
+               role: :assistant,
+               content: [%ContentPart{type: :text, text: "hello through profile"}]
+             },
+             finish_reason: :stop,
+             usage: @usage,
+             stream?: false
+           }
+         }}
+      end)
+
+      assert {:ok, "hello through profile"} =
+               Bedrock.completion(bedrock, [{:user, "hi"}], [])
+    end
+
     test "calls and SigV4-signs the configured Bedrock Mantle endpoint" do
       model_id = "anthropic.claude-sonnet-4-6"
 

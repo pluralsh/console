@@ -53,6 +53,8 @@ type SplunkAggregateResponseResult struct {
 	Count     string `json:"count"`
 }
 
+var splunkRawTimestampFields = []string{"time", "timestamp", "@timestamp"}
+
 func NewSplunkProvider(conn *toolquery.SplunkConnection) LogsProvider {
 	return &SplunkProvider{conn: conn}
 }
@@ -154,7 +156,7 @@ func (in *SplunkProvider) toLogsQueryOutput(responseBody string) (*toolquery.Log
 			continue
 		}
 
-		if item.Preview || item.Result.Message == "" || item.Result.Timestamp == "" {
+		if item.Preview || item.Result.Message == "" {
 			continue
 		}
 
@@ -212,7 +214,7 @@ func (in *SplunkProvider) toLogAggregateOutput(responseBody string) (*toolquery.
 }
 
 func (in *SplunkProvider) toLogEntry(result SplunkSearchResponseResult) (*toolquery.LogEntry, error) {
-	timestamp, err := in.parseTime(result.Timestamp)
+	timestamp, err := in.parseLogTime(result)
 	if err != nil {
 		return nil, err
 	}
@@ -222,6 +224,55 @@ func (in *SplunkProvider) toLogEntry(result SplunkSearchResponseResult) (*toolqu
 		Message:   result.Message,
 		Labels:    in.toLabels(result),
 	}, nil
+}
+
+func (in *SplunkProvider) parseLogTime(result SplunkSearchResponseResult) (time.Time, error) {
+	candidates := []string{result.Timestamp}
+
+	var rawFields map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(result.Message), &rawFields); err == nil {
+		for _, field := range splunkRawTimestampFields {
+			if value := splunkRawTimestampValue(rawFields[field]); value != "" {
+				candidates = append(candidates, value)
+			}
+		}
+	}
+	candidates = append(candidates, result.IndexTime)
+
+	var lastErr error
+	for _, candidate := range candidates {
+		if strings.TrimSpace(candidate) == "" {
+			continue
+		}
+		if timestamp, err := in.parseTime(candidate); err == nil {
+			return timestamp, nil
+		} else {
+			lastErr = err
+		}
+	}
+
+	if lastErr != nil {
+		return time.Time{}, lastErr
+	}
+	return time.Time{}, fmt.Errorf("%w: missing splunk log timestamp", ErrInvalidArgument)
+}
+
+func splunkRawTimestampValue(value json.RawMessage) string {
+	if len(value) == 0 {
+		return ""
+	}
+
+	var text string
+	if err := json.Unmarshal(value, &text); err == nil {
+		return text
+	}
+
+	var number json.Number
+	if err := json.Unmarshal(value, &number); err == nil {
+		return number.String()
+	}
+
+	return ""
 }
 
 func (in *SplunkProvider) toLabels(result SplunkSearchResponseResult) map[string]string {
@@ -254,6 +305,10 @@ func (in *SplunkProvider) parseTime(value string) (time.Time, error) {
 	if raw == "" {
 		klog.V(log.LogLevelInfo).InfoS("empty splunk log timestamp value, defaulting to zero time")
 		return time.Time{}, nil
+	}
+
+	if unixSeconds, err := strconv.ParseInt(raw, 10, 64); err == nil {
+		return time.Unix(unixSeconds, 0).UTC(), nil
 	}
 
 	if unixFloat, err := strconv.ParseFloat(raw, 64); err == nil {

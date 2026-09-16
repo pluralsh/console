@@ -14,7 +14,7 @@ spec:
   type: WORKBENCH
   description: "Denies workbench tools when the prompt contains forbidden SQL keywords."
   policy: |
-    package plrl.wb.admission
+    package plrl.workbench
 
     sample := 0
 

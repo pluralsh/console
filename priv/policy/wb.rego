@@ -1,4 +1,4 @@
-package plrl.wb.admission
+package plrl.workbench
 
 result := {
     "sample": sample,

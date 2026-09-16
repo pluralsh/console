@@ -4720,6 +4720,7 @@ type PersonaConfigurationFragment struct {
 	Home        *PersonaConfigurationFragment_Home        "json:\"home,omitempty\" graphql:\"home\""
 	Flows       *PersonaConfigurationFragment_Flows       "json:\"flows,omitempty\" graphql:\"flows\""
 	Sidebar     *PersonaConfigurationFragment_Sidebar     "json:\"sidebar,omitempty\" graphql:\"sidebar\""
+	Settings    *PersonaConfigurationFragment_Settings    "json:\"settings,omitempty\" graphql:\"settings\""
 }
 
 func (t *PersonaConfigurationFragment) GetAll() *bool {
@@ -4751,6 +4752,12 @@ func (t *PersonaConfigurationFragment) GetSidebar() *PersonaConfigurationFragmen
 		t = &PersonaConfigurationFragment{}
 	}
 	return t.Sidebar
+}
+func (t *PersonaConfigurationFragment) GetSettings() *PersonaConfigurationFragment_Settings {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.Settings
 }
 
 type PipelineFragment struct {
@@ -9912,6 +9919,80 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 	return t.Workbenches
 }
 
+type PersonaFragment_Configuration_PersonaConfigurationFragment_Settings struct {
+	AccessTokens     *bool "json:\"accessTokens,omitempty\" graphql:\"accessTokens\""
+	Ai               *bool "json:\"ai,omitempty\" graphql:\"ai\""
+	Audits           *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Chatbots         *bool "json:\"chatbots,omitempty\" graphql:\"chatbots\""
+	CloudConnections *bool "json:\"cloudConnections,omitempty\" graphql:\"cloudConnections\""
+	Global           *bool "json:\"global,omitempty\" graphql:\"global\""
+	Notifications    *bool "json:\"notifications,omitempty\" graphql:\"notifications\""
+	Projects         *bool "json:\"projects,omitempty\" graphql:\"projects\""
+	UserManagement   *bool "json:\"userManagement,omitempty\" graphql:\"userManagement\""
+	Webhooks         *bool "json:\"webhooks,omitempty\" graphql:\"webhooks\""
+}
+
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAccessTokens() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.AccessTokens
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAi() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Ai
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAudits() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Audits
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetChatbots() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Chatbots
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetCloudConnections() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.CloudConnections
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetGlobal() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Global
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetNotifications() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Notifications
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetProjects() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Projects
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetUserManagement() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.UserManagement
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetWebhooks() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Webhooks
+}
+
 type PersonaConfigurationFragment_Deployments struct {
 	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
 	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
@@ -10087,6 +10168,80 @@ func (t *PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Workbenches
+}
+
+type PersonaConfigurationFragment_Settings struct {
+	AccessTokens     *bool "json:\"accessTokens,omitempty\" graphql:\"accessTokens\""
+	Ai               *bool "json:\"ai,omitempty\" graphql:\"ai\""
+	Audits           *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Chatbots         *bool "json:\"chatbots,omitempty\" graphql:\"chatbots\""
+	CloudConnections *bool "json:\"cloudConnections,omitempty\" graphql:\"cloudConnections\""
+	Global           *bool "json:\"global,omitempty\" graphql:\"global\""
+	Notifications    *bool "json:\"notifications,omitempty\" graphql:\"notifications\""
+	Projects         *bool "json:\"projects,omitempty\" graphql:\"projects\""
+	UserManagement   *bool "json:\"userManagement,omitempty\" graphql:\"userManagement\""
+	Webhooks         *bool "json:\"webhooks,omitempty\" graphql:\"webhooks\""
+}
+
+func (t *PersonaConfigurationFragment_Settings) GetAccessTokens() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.AccessTokens
+}
+func (t *PersonaConfigurationFragment_Settings) GetAi() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.Ai
+}
+func (t *PersonaConfigurationFragment_Settings) GetAudits() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.Audits
+}
+func (t *PersonaConfigurationFragment_Settings) GetChatbots() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.Chatbots
+}
+func (t *PersonaConfigurationFragment_Settings) GetCloudConnections() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.CloudConnections
+}
+func (t *PersonaConfigurationFragment_Settings) GetGlobal() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.Global
+}
+func (t *PersonaConfigurationFragment_Settings) GetNotifications() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.Notifications
+}
+func (t *PersonaConfigurationFragment_Settings) GetProjects() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.Projects
+}
+func (t *PersonaConfigurationFragment_Settings) GetUserManagement() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.UserManagement
+}
+func (t *PersonaConfigurationFragment_Settings) GetWebhooks() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Settings{}
+	}
+	return t.Webhooks
 }
 
 type PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -25830,6 +25985,80 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 	return t.Workbenches
 }
 
+type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings struct {
+	AccessTokens     *bool "json:\"accessTokens,omitempty\" graphql:\"accessTokens\""
+	Ai               *bool "json:\"ai,omitempty\" graphql:\"ai\""
+	Audits           *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Chatbots         *bool "json:\"chatbots,omitempty\" graphql:\"chatbots\""
+	CloudConnections *bool "json:\"cloudConnections,omitempty\" graphql:\"cloudConnections\""
+	Global           *bool "json:\"global,omitempty\" graphql:\"global\""
+	Notifications    *bool "json:\"notifications,omitempty\" graphql:\"notifications\""
+	Projects         *bool "json:\"projects,omitempty\" graphql:\"projects\""
+	UserManagement   *bool "json:\"userManagement,omitempty\" graphql:\"userManagement\""
+	Webhooks         *bool "json:\"webhooks,omitempty\" graphql:\"webhooks\""
+}
+
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAccessTokens() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.AccessTokens
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAi() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Ai
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAudits() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Audits
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetChatbots() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Chatbots
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetCloudConnections() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.CloudConnections
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetGlobal() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Global
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetNotifications() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Notifications
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetProjects() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Projects
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetUserManagement() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.UserManagement
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetWebhooks() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Webhooks
+}
+
 type GetPersonaTiny_Persona struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -26025,6 +26254,80 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Workbenches
 }
 
+type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings struct {
+	AccessTokens     *bool "json:\"accessTokens,omitempty\" graphql:\"accessTokens\""
+	Ai               *bool "json:\"ai,omitempty\" graphql:\"ai\""
+	Audits           *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Chatbots         *bool "json:\"chatbots,omitempty\" graphql:\"chatbots\""
+	CloudConnections *bool "json:\"cloudConnections,omitempty\" graphql:\"cloudConnections\""
+	Global           *bool "json:\"global,omitempty\" graphql:\"global\""
+	Notifications    *bool "json:\"notifications,omitempty\" graphql:\"notifications\""
+	Projects         *bool "json:\"projects,omitempty\" graphql:\"projects\""
+	UserManagement   *bool "json:\"userManagement,omitempty\" graphql:\"userManagement\""
+	Webhooks         *bool "json:\"webhooks,omitempty\" graphql:\"webhooks\""
+}
+
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAccessTokens() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.AccessTokens
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAi() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Ai
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAudits() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Audits
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetChatbots() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Chatbots
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetCloudConnections() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.CloudConnections
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetGlobal() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Global
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetNotifications() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Notifications
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetProjects() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Projects
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetUserManagement() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.UserManagement
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetWebhooks() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Webhooks
+}
+
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
 	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
 	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
@@ -26202,6 +26505,80 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Workbenches
 }
 
+type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings struct {
+	AccessTokens     *bool "json:\"accessTokens,omitempty\" graphql:\"accessTokens\""
+	Ai               *bool "json:\"ai,omitempty\" graphql:\"ai\""
+	Audits           *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Chatbots         *bool "json:\"chatbots,omitempty\" graphql:\"chatbots\""
+	CloudConnections *bool "json:\"cloudConnections,omitempty\" graphql:\"cloudConnections\""
+	Global           *bool "json:\"global,omitempty\" graphql:\"global\""
+	Notifications    *bool "json:\"notifications,omitempty\" graphql:\"notifications\""
+	Projects         *bool "json:\"projects,omitempty\" graphql:\"projects\""
+	UserManagement   *bool "json:\"userManagement,omitempty\" graphql:\"userManagement\""
+	Webhooks         *bool "json:\"webhooks,omitempty\" graphql:\"webhooks\""
+}
+
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAccessTokens() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.AccessTokens
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAi() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Ai
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAudits() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Audits
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetChatbots() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Chatbots
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetCloudConnections() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.CloudConnections
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetGlobal() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Global
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetNotifications() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Notifications
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetProjects() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Projects
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetUserManagement() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.UserManagement
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetWebhooks() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Webhooks
+}
+
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
 	AddOns       *bool "json:\"addOns,omitempty\" graphql:\"addOns\""
 	Clusters     *bool "json:\"clusters,omitempty\" graphql:\"clusters\""
@@ -26377,6 +26754,80 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Workbenches
+}
+
+type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings struct {
+	AccessTokens     *bool "json:\"accessTokens,omitempty\" graphql:\"accessTokens\""
+	Ai               *bool "json:\"ai,omitempty\" graphql:\"ai\""
+	Audits           *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Chatbots         *bool "json:\"chatbots,omitempty\" graphql:\"chatbots\""
+	CloudConnections *bool "json:\"cloudConnections,omitempty\" graphql:\"cloudConnections\""
+	Global           *bool "json:\"global,omitempty\" graphql:\"global\""
+	Notifications    *bool "json:\"notifications,omitempty\" graphql:\"notifications\""
+	Projects         *bool "json:\"projects,omitempty\" graphql:\"projects\""
+	UserManagement   *bool "json:\"userManagement,omitempty\" graphql:\"userManagement\""
+	Webhooks         *bool "json:\"webhooks,omitempty\" graphql:\"webhooks\""
+}
+
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAccessTokens() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.AccessTokens
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAi() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Ai
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetAudits() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Audits
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetChatbots() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Chatbots
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetCloudConnections() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.CloudConnections
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetGlobal() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Global
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetNotifications() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Notifications
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetProjects() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Projects
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetUserManagement() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.UserManagement
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings) GetWebhooks() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Settings{}
+	}
+	return t.Webhooks
 }
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -62794,6 +63245,18 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		cd
 		ai
 	}
+	settings {
+		accessTokens
+		ai
+		audits
+		chatbots
+		cloudConnections
+		global
+		notifications
+		projects
+		userManagement
+		webhooks
+	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -62908,6 +63371,18 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		cd
 		ai
 	}
+	settings {
+		accessTokens
+		ai
+		audits
+		chatbots
+		cloudConnections
+		global
+		notifications
+		projects
+		userManagement
+		webhooks
+	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -62996,6 +63471,18 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		workbenches
 		cd
 		ai
+	}
+	settings {
+		accessTokens
+		ai
+		audits
+		chatbots
+		cloudConnections
+		global
+		notifications
+		projects
+		userManagement
+		webhooks
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -63086,6 +63573,18 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		workbenches
 		cd
 		ai
+	}
+	settings {
+		accessTokens
+		ai
+		audits
+		chatbots
+		cloudConnections
+		global
+		notifications
+		projects
+		userManagement
+		webhooks
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {

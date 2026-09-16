@@ -545,7 +545,7 @@ defmodule Console.AI.Workbench.EngineTest do
         insert(:policy,
           project: project,
           policy: """
-          package plrl.wb.admission
+          package plrl.workbench
 
           sample := 0
 

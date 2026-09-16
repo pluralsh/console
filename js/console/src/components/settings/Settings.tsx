@@ -15,10 +15,12 @@ import {
   GridLayoutWithSideNav,
 } from 'components/utils/layout/ResponsiveGridLayouts'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { hasAccess } from 'components/utils/persona'
 import { PersonaConfigurationFragment } from 'generated/graphql'
 import { ReactNode, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
+  ACCESS_TOKENS_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
   CHATBOTS_SETTINGS_REL_PATH,
@@ -32,25 +34,63 @@ import {
 } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 
-const getDirectory = (
+export const getDirectory = (
   personaConfiguration: Nullable<PersonaConfigurationFragment>
 ): Directory => [
-  { path: USER_MANAGEMENT_REL_PATH, label: 'User management' },
-  { path: GLOBAL_SETTINGS_REL_PATH, label: 'Global settings' },
-  { path: AI_SETTINGS_REL_PATH, label: 'AI settings' },
-  { path: WEBHOOKS_SETTINGS_REL_PATH, label: 'Webhooks settings' },
-  { path: CHATBOTS_SETTINGS_REL_PATH, label: 'Chatbots settings' },
-  { path: CLOUD_CONNECTIONS_SETTINGS_REL_PATH, label: 'Cloud Connections' },
-  { path: PROJECT_SETTINGS_REL_PATH, label: 'Project settings' },
-  { path: NOTIFICATIONS_REL_PATH, label: 'Notifications' },
+  {
+    path: USER_MANAGEMENT_REL_PATH,
+    label: 'User management',
+    enabled: hasAccess(personaConfiguration, 'settings.userManagement', true),
+  },
+  {
+    path: GLOBAL_SETTINGS_REL_PATH,
+    label: 'Global settings',
+    enabled: hasAccess(personaConfiguration, 'settings.global', true),
+  },
+  {
+    path: AI_SETTINGS_REL_PATH,
+    label: 'AI settings',
+    enabled: hasAccess(personaConfiguration, 'settings.ai', true),
+  },
+  {
+    path: WEBHOOKS_SETTINGS_REL_PATH,
+    label: 'Webhooks settings',
+    enabled: hasAccess(personaConfiguration, 'settings.webhooks', true),
+  },
+  {
+    path: CHATBOTS_SETTINGS_REL_PATH,
+    label: 'Chatbots settings',
+    enabled: hasAccess(personaConfiguration, 'settings.chatbots', true),
+  },
+  {
+    path: CLOUD_CONNECTIONS_SETTINGS_REL_PATH,
+    label: 'Cloud Connections',
+    enabled: hasAccess(personaConfiguration, 'settings.cloudConnections', true),
+  },
+  {
+    path: PROJECT_SETTINGS_REL_PATH,
+    label: 'Project settings',
+    enabled: hasAccess(personaConfiguration, 'settings.projects', true),
+  },
+  {
+    path: NOTIFICATIONS_REL_PATH,
+    label: 'Notifications',
+    enabled: hasAccess(personaConfiguration, 'settings.notifications', true),
+  },
   {
     path: AUDITS_REL_PATH,
     label: 'Audit logs',
-    enabled: !!(
-      personaConfiguration?.all || personaConfiguration?.sidebar?.audits
+    enabled: hasAccess(
+      personaConfiguration,
+      'settings.audits',
+      hasAccess(personaConfiguration, 'sidebar.audits')
     ),
   },
-  { path: 'access-tokens', label: 'Access tokens' },
+  {
+    path: ACCESS_TOKENS_REL_PATH,
+    label: 'Access tokens',
+    enabled: hasAccess(personaConfiguration, 'settings.accessTokens', true),
+  },
 ]
 
 export const SETTINGS_BREADCRUMBS: Breadcrumb[] = [

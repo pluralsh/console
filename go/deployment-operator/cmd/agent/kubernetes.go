@@ -16,6 +16,7 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -61,7 +62,11 @@ func initKubeManagerOrDie(config *rest.Config) manager.Manager {
 	}
 
 	mgr, err := ctrl.NewManager(config, ctrl.Options{
-		NewClient:              ctrlclient.New, // client reads directly from the API server
+		Client: ctrlclient.Options{
+			Cache: &ctrlclient.CacheOptions{
+				DisableFor: []ctrlclient.Object{&corev1.Secret{}},
+			},
+		},
 		Logger:                 setupLog,
 		Scheme:                 scheme,
 		LeaderElection:         args.EnableLeaderElection(),

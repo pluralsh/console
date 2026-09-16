@@ -491,7 +491,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         insert(:policy,
           project: workbench.project,
           policy: """
-          package plrl.wb.admission
+          package plrl.workbench
 
           sample := 0
 

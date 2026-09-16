@@ -63,7 +63,6 @@ func TestAgentConfigure(t *testing.T) {
 	if !strings.Contains(string(settingsConfig), piMCPExtensionPath) {
 		t.Fatalf("MCP extension missing from Pi settings: %s", settingsConfig)
 	}
-
 	before := string(models)
 	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{Phase: toolv1.ConfigurePhaseBabysit}); err != nil {
 		t.Fatalf("Configure(babysit) error = %v", err)
