@@ -16,6 +16,5 @@ module.exports = {
     'order/properties-alphabetical-order': true,
     'plugin/no-unsupported-browser-features': [true, { severity: 'warning' }],
     'selector-pseudo-element-no-unknown': true,
-    'string-quotes': 'single',
   },
 }
