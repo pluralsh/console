@@ -1,4 +1,5 @@
 import {
+  ArrowTopRightIcon,
   Button,
   EyeIcon,
   Flex,
@@ -11,6 +12,8 @@ import {
 } from '@pluralsh/design-system'
 import { McpServerFragment } from 'generated/graphql'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
 import { McpAuditModal } from './McpAuditTable'
 
@@ -45,6 +48,16 @@ export function ViewMcpServerDetails({
           >
             <span>View MCP server</span>
             <Flex gap="small">
+              <Button
+                secondary
+                as={Link}
+                to={AI_MCP_SERVERS_ABS_PATH}
+                onClick={() => setShowDetailsModal(false)}
+                endIcon={<ArrowTopRightIcon />}
+                style={{ textTransform: 'none' }}
+              >
+                Edit MCP servers
+              </Button>
               <Button
                 secondary
                 startIcon={<ListIcon />}

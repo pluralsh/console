@@ -68,6 +68,7 @@ import {
   WEBHOOKS_SETTINGS_REL_PATH,
 } from './settingsRoutesConst'
 import { AISettings } from 'components/settings/ai/AISettings'
+import { McpServers } from 'components/settings/ai/mcp/McpServers'
 import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
 import WebhooksSettings from '../components/settings/webhooks/WebhooksSettings'
 import ChatbotsSettings from '../components/settings/chatbots/ChatbotsSettings'
@@ -78,7 +79,6 @@ import { ChatbotEditSettings } from 'components/settings/chatbots/ChatbotEditSet
 import CloudConnectionsSettings from 'components/settings/cloud-connections/CloudConnectionsSettings'
 import { CloudConnectionCreateSettings } from 'components/settings/cloud-connections/CloudConnectionCreateSettings'
 import { CloudConnectionEditSettings } from 'components/settings/cloud-connections/CloudConnectionEditSettings'
-import { WORKBENCHES_ABS_PATH } from './workbenchesRoutesConsts'
 
 const userManagementRoutes = (
   <Route
@@ -213,12 +213,7 @@ const aiSettingsRoutes = (
     />
     <Route
       path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
-      element={
-        <Navigate
-          replace
-          to={WORKBENCHES_ABS_PATH}
-        />
-      }
+      element={<McpServers />}
     />
   </Route>
 )

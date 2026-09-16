@@ -8,6 +8,7 @@ import {
   AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
   AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
+  AI_SETTINGS_MCP_SERVERS_REL_PATH,
   AI_SETTINGS_MODEL_ROUTING_REL_PATH,
 } from 'routes/settingsRoutesConst'
 
@@ -37,6 +38,7 @@ const directory = [
     requiresAi: true,
   },
   { path: AI_SETTINGS_AGENT_RUNTIMES_REL_PATH, label: 'Agent runtimes' },
+  { path: AI_SETTINGS_MCP_SERVERS_REL_PATH, label: 'MCP servers' },
 ]
 
 export function AISettings() {

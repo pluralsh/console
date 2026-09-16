@@ -1,6 +1,10 @@
+import { AI_SETTINGS_MCP_SERVERS_ABS_PATH } from './settingsRoutesConst'
+
 export const AI_ABS_PATH = '/ai'
 
 export const AI_THREADS_REL_PATH = 'threads'
+
+export const AI_MCP_SERVERS_REL_PATH = 'mcp-servers'
 
 export const AI_INFRA_RESEARCH_REL_PATH = 'infra-research'
 export const AI_INFRA_RESEARCH_ABS_PATH = `${AI_ABS_PATH}/${AI_INFRA_RESEARCH_REL_PATH}`
@@ -14,6 +18,7 @@ export const AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH = 'job'
 export const AI_AGENT_RUNS_REL_PATH = 'agent-runs'
 
 export const AI_AGENT_RUNS_ABS_PATH = `${AI_ABS_PATH}/${AI_AGENT_RUNS_REL_PATH}`
+export const AI_MCP_SERVERS_ABS_PATH = AI_SETTINGS_MCP_SERVERS_ABS_PATH
 export const AI_SENTINELS_ABS_PATH = `${AI_ABS_PATH}/${AI_SENTINELS_REL_PATH}`
 
 export const AI_SENTINELS_RUNS_PARAM_SENTINEL_ID = 'id'

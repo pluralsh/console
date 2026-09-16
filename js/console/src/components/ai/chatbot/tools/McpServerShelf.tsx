@@ -5,6 +5,7 @@ import {
   CloseIcon,
   EyeIcon,
   Flex,
+  GearTrainIcon,
   IconFrame,
   ToolIcon,
 } from '@pluralsh/design-system'
@@ -16,6 +17,8 @@ import { Body1P, Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import { McpToolFragment } from 'generated/graphql'
 import { groupBy } from 'lodash'
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { SIDE_PANEL_HEADER_HEIGHT } from '../SidePanelShared'
@@ -59,6 +62,15 @@ export function McpServerShelf({ zIndex }: { zIndex?: number }) {
       <HeaderSC>
         <Body2BoldP>MCP servers</Body2BoldP>
         <Flex gap="xsmall">
+          <IconFrame
+            clickable
+            as={Link}
+            type="tertiary"
+            to={AI_MCP_SERVERS_ABS_PATH}
+            onClick={() => setMcpPanelOpen(false)}
+            tooltip="Go to MCP server settings"
+            icon={<GearTrainIcon />}
+          />
           <IconFrame
             clickable
             type="tertiary"
