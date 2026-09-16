@@ -44,7 +44,6 @@ import {
   AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
   AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
-  AI_SETTINGS_MCP_SERVERS_REL_PATH,
   AI_SETTINGS_MODEL_ROUTING_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
@@ -68,7 +67,6 @@ import {
   WEBHOOKS_SETTINGS_REL_PATH,
 } from './settingsRoutesConst'
 import { AISettings } from 'components/settings/ai/AISettings'
-import { McpServers } from 'components/settings/ai/mcp/McpServers'
 import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
 import WebhooksSettings from '../components/settings/webhooks/WebhooksSettings'
 import ChatbotsSettings from '../components/settings/chatbots/ChatbotsSettings'
@@ -210,10 +208,6 @@ const aiSettingsRoutes = (
     <Route
       path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}
       element={<AIAgentRuntimes />}
-    />
-    <Route
-      path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
-      element={<McpServers />}
     />
   </Route>
 )

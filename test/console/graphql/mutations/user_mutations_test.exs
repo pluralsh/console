@@ -587,45 +587,6 @@ defmodule Console.GraphQl.UserMutationsTest do
       assert hd(persona["bindings"])["group"]["id"] == group.id
     end
 
-    test "persists flows.mcpServers configuration" do
-      {:ok, %{data: %{"createPersona" => persona}}} = run_query("""
-        mutation Create($attrs: PersonaAttributes!) {
-          createPersona(attributes: $attrs) {
-            id
-            configuration {
-              flows {
-                mcpServers
-              }
-            }
-          }
-        }
-      """, %{"attrs" => %{
-        "name" => "mcp-persona",
-        "configuration" => %{
-          "flows" => %{
-            "mcpServers" => true
-          }
-        }
-      }}, %{current_user: admin_user()})
-
-      assert persona["configuration"]["flows"]["mcpServers"] == true
-
-      {:ok, %{data: %{"persona" => reloaded}}} = run_query("""
-        query Persona($id: ID!) {
-          persona(id: $id) {
-            id
-            configuration {
-              flows {
-                mcpServers
-              }
-            }
-          }
-        }
-      """, %{"id" => persona["id"]}, %{current_user: admin_user()})
-
-      assert reloaded["configuration"]["flows"]["mcpServers"] == true
-    end
-
     test "nonadmins cannot create a persona" do
       group = insert(:group)
       {:ok, %{errors: [_ | _]}} = run_query("""
@@ -660,51 +621,6 @@ defmodule Console.GraphQl.UserMutationsTest do
 
       assert updated["id"] == persona.id
       assert hd(updated["bindings"])["group"]["id"] == group.id
-    end
-
-    test "persists updated flows.mcpServers configuration" do
-      persona = insert(:persona)
-      admin = admin_user()
-
-      {:ok, %{data: %{"updatePersona" => updated}}} = run_query("""
-        mutation Update($id: ID!, $attrs: PersonaAttributes!) {
-          updatePersona(id: $id, attributes: $attrs) {
-            id
-            configuration {
-              flows {
-                mcpServers
-              }
-            }
-          }
-        }
-      """, %{
-        "id" => persona.id,
-        "attrs" => %{
-          "name" => "updated-mcp-persona",
-          "configuration" => %{
-            "flows" => %{
-              "mcpServers" => true
-            }
-          }
-        }
-      }, %{current_user: admin})
-
-      assert updated["configuration"]["flows"]["mcpServers"] == true
-
-      {:ok, %{data: %{"persona" => reloaded}}} = run_query("""
-        query Persona($id: ID!) {
-          persona(id: $id) {
-            id
-            configuration {
-              flows {
-                mcpServers
-              }
-            }
-          }
-        }
-      """, %{"id" => persona.id}, %{current_user: admin})
-
-      assert reloaded["configuration"]["flows"]["mcpServers"] == true
     end
 
     test "nonadmins cannot update a persona" do

@@ -6033,11 +6033,6 @@ func (in *PersonaFlows) DeepCopyInto(out *PersonaFlows) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.McpServers != nil {
-		in, out := &in.McpServers, &out.McpServers
-		*out = new(bool)
-		**out = **in
-	}
 	if in.Pipelines != nil {
 		in, out := &in.Pipelines, &out.Pipelines
 		*out = new(bool)

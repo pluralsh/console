@@ -9800,7 +9800,6 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSec
 }
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	McpServers        *bool "json:\"mcpServers,omitempty\" graphql:\"mcpServers\""
 	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
 	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
 	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
@@ -9808,12 +9807,6 @@ type PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
 	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
-func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetMcpServers() *bool {
-	if t == nil {
-		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
-	}
-	return t.McpServers
-}
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
 	if t == nil {
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -9984,7 +9977,6 @@ func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
 }
 
 type PersonaConfigurationFragment_Flows struct {
-	McpServers        *bool "json:\"mcpServers,omitempty\" graphql:\"mcpServers\""
 	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
 	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
 	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
@@ -9992,12 +9984,6 @@ type PersonaConfigurationFragment_Flows struct {
 	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
-func (t *PersonaConfigurationFragment_Flows) GetMcpServers() *bool {
-	if t == nil {
-		t = &PersonaConfigurationFragment_Flows{}
-	}
-	return t.McpServers
-}
 func (t *PersonaConfigurationFragment_Flows) GetPermissions() *bool {
 	if t == nil {
 		t = &PersonaConfigurationFragment_Flows{}
@@ -25732,7 +25718,6 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 }
 
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	McpServers        *bool "json:\"mcpServers,omitempty\" graphql:\"mcpServers\""
 	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
 	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
 	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
@@ -25740,12 +25725,6 @@ type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragme
 	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
-func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetMcpServers() *bool {
-	if t == nil {
-		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
-	}
-	return t.McpServers
-}
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
 	if t == nil {
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -25934,7 +25913,6 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	McpServers        *bool "json:\"mcpServers,omitempty\" graphql:\"mcpServers\""
 	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
 	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
 	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
@@ -25942,12 +25920,6 @@ type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
-func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetMcpServers() *bool {
-	if t == nil {
-		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
-	}
-	return t.McpServers
-}
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
 	if t == nil {
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -26118,7 +26090,6 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	McpServers        *bool "json:\"mcpServers,omitempty\" graphql:\"mcpServers\""
 	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
 	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
 	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
@@ -26126,12 +26097,6 @@ type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
-func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetMcpServers() *bool {
-	if t == nil {
-		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
-	}
-	return t.McpServers
-}
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
 	if t == nil {
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -26302,7 +26267,6 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	McpServers        *bool "json:\"mcpServers,omitempty\" graphql:\"mcpServers\""
 	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
 	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
 	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
@@ -26310,12 +26274,6 @@ type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
-func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetMcpServers() *bool {
-	if t == nil {
-		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
-	}
-	return t.McpServers
-}
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
 	if t == nil {
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -62820,7 +62778,6 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 	flows {
 		permissions
 		startWorkbenchJob
-		mcpServers
 		pipelines
 		previews
 		workbenches
@@ -62935,7 +62892,6 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 	flows {
 		permissions
 		startWorkbenchJob
-		mcpServers
 		pipelines
 		previews
 		workbenches
@@ -63025,7 +62981,6 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 	flows {
 		permissions
 		startWorkbenchJob
-		mcpServers
 		pipelines
 		previews
 		workbenches
@@ -63116,7 +63071,6 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 	flows {
 		permissions
 		startWorkbenchJob
-		mcpServers
 		pipelines
 		previews
 		workbenches

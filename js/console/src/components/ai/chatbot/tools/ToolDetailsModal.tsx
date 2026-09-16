@@ -1,8 +1,6 @@
 import { Button, Card, Code, Flex, Modal } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText'
 import { McpToolFragment } from 'generated/graphql'
-import { Link } from 'react-router-dom'
-import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { useTheme } from 'styled-components'
 
 export function ToolDetailsModal({
@@ -35,15 +33,6 @@ export function ToolDetailsModal({
               onClick={onClose}
             >
               Close
-            </Button>
-            <Button
-              as={Link}
-              secondary
-              to={AI_MCP_SERVERS_ABS_PATH}
-              onClick={() => onClose()}
-              style={{ textTransform: 'none' }}
-            >
-              View all MCP servers
             </Button>
           </Flex>
         </Flex>

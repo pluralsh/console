@@ -17496,7 +17496,6 @@ input PersonaFlowsAttributes {
   permissions: Boolean
   startWorkbenchJob: Boolean
   workbenches: Boolean
-  mcpServers: Boolean
   pipelines: Boolean
   previews: Boolean
 }
@@ -17750,7 +17749,6 @@ type PersonaFlows {
   permissions: Boolean
   startWorkbenchJob: Boolean
   workbenches: Boolean
-  mcpServers: Boolean
   pipelines: Boolean
   previews: Boolean
 }
