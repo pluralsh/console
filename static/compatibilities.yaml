@@ -19911,6 +19911,27 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 91.4.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['CI: baseline chart installation now uses target values (affects
+          CI/testing only; no runtime behavior expected).', Grafana image tag bumped
+          to v13.2.5., 'Admission webhook template change: `matchConditions` is rendered
+          as a YAML list (template output change).', CI guard added to check for new
+          Prometheus Operator CRD spec fields when bumping operator versions.]
+      features: [Grafana is updated to v13.2.5 (includes upstream Grafana fixes/changes).]
+      breaking_changes: ['If you set/override webhook `matchConditions` in values,
+          ensure it is provided as a list; prior rendering may have accepted/produced
+          a different structure, so validate your rendered manifests before upgrading.']
+    chart_version: 91.4.1
+    images: ['docker.io/grafana/grafana:13.2.2-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.94.0',
+      'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 91.2.1
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -23326,6 +23347,12 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.159.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.158.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -26358,25 +26385,18 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.5.2
+  - version: 3.5.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['ApplicationSet: restores `ignoreApplicationDifferences` behavior
-          after normalization, which improves diff/sync accuracy when using AppSet-generated
-          apps.', 'Repository/Helm sources: fixes handling of an untyped Helm source
-          in `UpdateRevisionForPaths`, reducing errors when path-based revision updates
-          run against Helm repos.', 'UI: applications and appset pages receive small
-          improvements (operation state visible in app list; remove kind filter on
-          appset page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug
-          fixes from Dex).']
+      features: []
       breaking_changes: []
-    chart_version: 10.9.0
+    chart_version: 10.9.1
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.5.2']
+      'quay.io/argoproj/argocd:v3.5.3']
   - version: 3.5.1
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -30208,6 +30228,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
+  - version: 9.5.4
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 9.5.4
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.5.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []
