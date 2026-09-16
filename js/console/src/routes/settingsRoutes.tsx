@@ -44,6 +44,7 @@ import {
   AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
   AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
+  AI_SETTINGS_MCP_SERVERS_REL_PATH,
   AI_SETTINGS_MODEL_ROUTING_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
@@ -77,6 +78,7 @@ import { ChatbotEditSettings } from 'components/settings/chatbots/ChatbotEditSet
 import CloudConnectionsSettings from 'components/settings/cloud-connections/CloudConnectionsSettings'
 import { CloudConnectionCreateSettings } from 'components/settings/cloud-connections/CloudConnectionCreateSettings'
 import { CloudConnectionEditSettings } from 'components/settings/cloud-connections/CloudConnectionEditSettings'
+import { WORKBENCHES_ABS_PATH } from './workbenchesRoutesConsts'
 
 const userManagementRoutes = (
   <Route
@@ -208,6 +210,15 @@ const aiSettingsRoutes = (
     <Route
       path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}
       element={<AIAgentRuntimes />}
+    />
+    <Route
+      path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
+      element={
+        <Navigate
+          replace
+          to={WORKBENCHES_ABS_PATH}
+        />
+      }
     />
   </Route>
 )
