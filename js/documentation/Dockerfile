@@ -16,6 +16,7 @@ RUN corepack enable \
 
 COPY js/design-system/ ./design-system/
 COPY js/documentation/ ./documentation/
+COPY js/eslint-config/ ./eslint-config/
 
 ARG NEXT_PUBLIC_ROOT_URL
 ARG NEXT_PUBLIC_GA_ID
