@@ -4,7 +4,6 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import RangePicker from 'components/utils/RangePicker'
 
 import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
-import isEmpty from 'lodash/isEmpty'
 
 import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { type CSSProperties, useMemo, useState } from 'react'
@@ -18,7 +17,7 @@ import {
   PodResourceReservation,
   getPodResourceReservations,
 } from 'components/utils/metrics/podResourceReservations.ts'
-import { ResourceMetricsGraphs } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import { ResourceMetricsGraphs, hasResourceMetrics } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { ComponentDetailsWithPodsT } from './useFetchComponentDetails.tsx'
 
 type Duration = (typeof DURATIONS)[number]
@@ -99,7 +98,22 @@ function Metric({
 
   let content = <EmptyState message="No metrics available" />
 
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
+  if (
+    hasResourceMetrics({
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    })
+  ) {
     content = (
       <ResourceMetricsGraphs
         cpu={cpu}

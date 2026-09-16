@@ -3,7 +3,6 @@ import { Card, EmptyState } from '@pluralsh/design-system'
 import RangePicker from 'components/utils/RangePicker'
 
 import { useClusterKubernetesMetricsQuery } from 'generated/graphql'
-import isEmpty from 'lodash/isEmpty'
 
 import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
 import { useMemo, useState } from 'react'
@@ -14,7 +13,7 @@ import { GqlError } from 'components/utils/Alert.tsx'
 import { MetricsEmptyState } from '../../cd/cluster/ClusterMetrics.tsx'
 import { RectangleSkeleton } from '../../utils/SkeletonLoaders.tsx'
 import { PodResourceReservation } from 'components/utils/metrics/podResourceReservations.ts'
-import { ResourceMetricsGraphs } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import { ResourceMetricsGraphs, hasResourceMetrics } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { useKubernetesPodResourceReservations } from 'components/utils/metrics/useKubernetesPodResourceReservations.ts'
 
 function Metric({
@@ -109,7 +108,22 @@ function Metric({
     return <GqlError error={error} />
   }
 
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
+  if (
+    hasResourceMetrics({
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    })
+  ) {
     content = (
       <ResourceMetricsGraphs
         cpu={cpu}

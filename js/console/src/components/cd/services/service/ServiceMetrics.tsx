@@ -18,7 +18,7 @@ import {
   useServiceHeatMapQuery,
   useServiceMetricsQuery,
 } from 'generated/graphql'
-import { capitalize, isEmpty } from 'lodash'
+import { capitalize } from 'lodash'
 import { useTheme } from 'styled-components'
 
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
@@ -32,7 +32,7 @@ import {
 import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
-import { ResourceMetricsGraphs } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import { ResourceMetricsGraphs, hasResourceMetrics } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
@@ -273,7 +273,22 @@ function ServiceMetricsTimeseries() {
 
   let content = <EmptyState message="No metrics available" />
 
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
+  if (
+    hasResourceMetrics({
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    })
+  ) {
     content = (
       <ResourceMetricsGraphs
         cpu={cpu}

@@ -81,6 +81,51 @@ function MetricsRow({
   )
 }
 
+type ResourceMetricsInput = {
+  cpu?: MetricResponseFragment[]
+  mem?: MetricResponseFragment[]
+  podCpu?: MetricResponseFragment[]
+  podMem?: MetricResponseFragment[]
+  cpuRequests?: MetricResponseFragment[]
+  memRequests?: MetricResponseFragment[]
+  cpuLimits?: MetricResponseFragment[]
+  memLimits?: MetricResponseFragment[]
+  podCpuRequests?: MetricResponseFragment[]
+  podMemRequests?: MetricResponseFragment[]
+  podCpuLimits?: MetricResponseFragment[]
+  podMemLimits?: MetricResponseFragment[]
+}
+
+export function hasResourceMetrics({
+  cpu,
+  mem,
+  podCpu,
+  podMem,
+  cpuRequests,
+  memRequests,
+  cpuLimits,
+  memLimits,
+  podCpuRequests,
+  podMemRequests,
+  podCpuLimits,
+  podMemLimits,
+}: ResourceMetricsInput): boolean {
+  return [
+    cpu,
+    mem,
+    podCpu,
+    podMem,
+    cpuRequests,
+    memRequests,
+    cpuLimits,
+    memLimits,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+  ].some((series) => !isEmpty(series))
+}
+
 export function ResourceMetricsGraphs({
   cpu,
   mem,
@@ -95,19 +140,11 @@ export function ResourceMetricsGraphs({
   podCpuLimits,
   podMemLimits,
   podReservations,
-}: {
+}: ResourceMetricsInput & {
   cpu: MetricResponseFragment[]
   mem: MetricResponseFragment[]
   podCpu: MetricResponseFragment[]
   podMem: MetricResponseFragment[]
-  cpuRequests?: MetricResponseFragment[]
-  memRequests?: MetricResponseFragment[]
-  cpuLimits?: MetricResponseFragment[]
-  memLimits?: MetricResponseFragment[]
-  podCpuRequests?: MetricResponseFragment[]
-  podMemRequests?: MetricResponseFragment[]
-  podCpuLimits?: MetricResponseFragment[]
-  podMemLimits?: MetricResponseFragment[]
   podReservations?: PodResourceReservation[]
 }) {
   const overallGraphs = useMemo(() => {

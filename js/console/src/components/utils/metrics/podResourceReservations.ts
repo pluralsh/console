@@ -106,26 +106,37 @@ export function addPodResourceReservationSeries(
   const limitsByPod = new Map(
     (promLimits ?? []).map((series) => [String(series.id), series.data])
   )
+  const usageByPod = new Map(
+    graph.map((series) => [String(series.id), series.data])
+  )
+  const pods = new Set([
+    ...usageByPod.keys(),
+    ...requestsByPod.keys(),
+    ...limitsByPod.keys(),
+    ...reservationsByPod.keys(),
+  ])
 
-  return graph.flatMap((series) => {
-    const pod = String(series.id)
+  return [...pods].flatMap((pod) => {
+    const usagePoints = usageByPod.get(pod) ?? []
     const podReservations = reservationsByPod.get(pod)?.[type]
     const resourceSeries = [
       toPromOrStaticSeries(
         `${pod} - requests`,
         requestsByPod.get(pod),
         podReservations?.requests,
-        series.data
+        usagePoints
       ),
       toPromOrStaticSeries(
         `${pod} - limits`,
         limitsByPod.get(pod),
         podReservations?.limits,
-        series.data
+        usagePoints
       ),
     ].filter((series): series is GraphSeries => !!series)
 
-    return [{ ...series, id: `${pod}` }, ...resourceSeries]
+    if (usagePoints.length === 0) return resourceSeries
+
+    return [{ id: pod, data: usagePoints }, ...resourceSeries]
   })
 }
 
