@@ -7,9 +7,14 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import styled, { type DefaultTheme, type StyledObject } from 'styled-components'
+import styled, {
+  type DefaultTheme,
+  type StyledObject,
+  useTheme,
+} from 'styled-components'
 import Tooltip, { type TooltipProps } from './Tooltip'
 import WrapWithIf from './WrapWithIf'
+import { resolveSpacersAndSanitizeCss } from '../theme/spacing'
 
 type FlexBaseProps = {
   /**
@@ -94,8 +99,13 @@ function BaseFlex({
   as,
   ...otherProps
 }: FlexProps) {
-  const { css: styleProps, rest } = splitCssAndDomProps(
+  const theme = useTheme()
+  const { css: unprocessedStyleProps, rest } = splitCssAndDomProps(
     otherProps as Record<string, unknown>
+  )
+  const { css: styleProps } = resolveSpacersAndSanitizeCss(
+    unprocessedStyleProps,
+    theme
   )
 
   return (

@@ -1,4 +1,5 @@
 import {
+  type AriaAttributes,
   type ComponentProps,
   type ComponentPropsWithoutRef,
   type CSSProperties,
@@ -68,6 +69,7 @@ export type InputProps = {
   onClick?: MouseEventHandler<HTMLDivElement>
 }
 export type InputPropsFull = InputProps &
+  AriaAttributes &
   SpacerProps &
   Pick<
     CSSProperties,
@@ -463,7 +465,16 @@ function Input({
     el.style.height = `${maxH != null ? Math.min(measured, maxH) : measured}px`
   }, [effectiveValue, maxRows, minRows, multiline])
 
-  const { rest, css } = resolveSpacersAndSanitizeCss(props, theme)
+  const { rest: unprocessedRest, css } = resolveSpacersAndSanitizeCss(
+    props,
+    theme
+  )
+  const inputAccessibilityProps: Record<string, unknown> = {}
+  const rest: Record<string, unknown> = {}
+  Object.entries(unprocessedRest).forEach(([key, propValue]) => {
+    if (key.startsWith('aria-')) inputAccessibilityProps[key] = propValue
+    else rest[key] = propValue
+  })
   const fieldPad = {
     $padStart: (!inputContent ? inputPadStart : 'xsmall') as
       'xsmall' | 'small' | 'medium' | null,
@@ -558,6 +569,7 @@ function Input({
             {...(nativeFieldProps as unknown as ComponentProps<
               typeof TextAreaBaseSC
             >)}
+            {...inputAccessibilityProps}
             {...(inputProps as unknown as ComponentProps<
               typeof TextAreaBaseSC
             >)}
@@ -567,6 +579,7 @@ function Input({
             {...fieldPad}
             type={type}
             {...nativeFieldProps}
+            {...inputAccessibilityProps}
             {...inputProps}
           />
         )}
