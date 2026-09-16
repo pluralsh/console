@@ -1,5 +1,6 @@
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import react from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import { Readable } from 'node:stream'
 import { resolve } from 'path'
 import { defineConfig, type Plugin } from 'vite'
@@ -78,7 +79,7 @@ const objectStoreDevProxy = {
                 'query($id:ID!){agentRun(id:$id){upload{patch session screenRecording}}}',
               variables: { id: dl[1] },
             }),
-          }).then((r) => r.json())
+          }).then((r) => r.json() as Promise<{ data?: any; errors?: any[] }>)
           const field = dl[2] === 'screen_recording' ? 'screenRecording' : dl[2]
           const upload = data?.agentRun?.upload?.[field]
           if (errors?.length || !upload) throw new Error()
@@ -112,12 +113,9 @@ const objectStoreDevProxy = {
 export default defineConfig({
   plugins: [
     basicSsl(),
-    react({
-      babel: {
-        plugins: ['styled-components'],
-        babelrc: false,
-        configFile: false,
-      },
+    react(),
+    babel({
+      plugins: ['styled-components'],
     }),
     tsconfigPaths({ loose: true }),
     objectStoreDevProxy,

@@ -10,7 +10,7 @@ export default defineConfig({
     root: 'src',
   },
   cacheDir: '../node_modules/',
-  esbuild: { jsx: 'automatic' },
+  oxc: { jsx: { runtime: 'automatic' } },
   plugins: [tsconfigPaths() as Plugin],
   resolve: {
     mainFields: ['module'],
