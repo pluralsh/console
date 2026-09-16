@@ -115,14 +115,14 @@
     "vite-plugin-dts": "5.0.3",
     "vitest": "3.2.7"
   },
-  "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
-  },
   "peerDependencies": {
     "@apollo/client": ">=3.14.1",
     "react": ">=19.1.1",
     "react-dom": ">=19.1.1",
     "react-transition-group": ">=4.4.5",
     "styled-components": ">=6.2.0"
+  },
+  "lint-staged": {
+    "./src/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
   }
 }
