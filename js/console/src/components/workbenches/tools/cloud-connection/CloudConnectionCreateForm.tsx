@@ -620,6 +620,7 @@ function VSphereFields({
         />
       </FormField>
       <Switch
+        size="small"
         checked={!!state.allowUnverifiedSsl}
         onChange={(checked) =>
           setState({ ...state, allowUnverifiedSsl: checked })

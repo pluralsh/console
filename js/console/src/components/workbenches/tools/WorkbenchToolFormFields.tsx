@@ -240,6 +240,7 @@ function OpensearchFormFields({
         }
       />
       <Switch
+        size="small"
         checked={usePodIdentity}
         onChange={(checked) =>
           set({
@@ -605,6 +606,7 @@ function PrometheusFormFields({
         setConfig={set}
       />
       <Switch
+        size="small"
         checked={sigv4Enabled}
         onChange={(checked) =>
           set({

@@ -41,6 +41,7 @@ export function UserAdminCell({ user }: { user: UserFragment }) {
       {!editable && isAdmin && <Chip>Admin</Chip>}
       {editable && (
         <AdminSwitchSC
+          size="small"
           aria-label="Admin"
           checked={isAdmin}
           disabled={loading}

@@ -354,7 +354,6 @@ export function ClustersTable({
   return (
     <>
       <Table
-        loose
         data={data || []}
         columns={columns}
         reactTableOptions={reactTableOptions}

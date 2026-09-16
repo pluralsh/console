@@ -522,6 +522,7 @@ function GitRepositoryImportSubStep({
           }}
         >
           <Switch
+            size="small"
             checked={showAdvanced}
             onChange={(val) => setShowAdvanced(val)}
             css={{ width: 'fit-content' }}

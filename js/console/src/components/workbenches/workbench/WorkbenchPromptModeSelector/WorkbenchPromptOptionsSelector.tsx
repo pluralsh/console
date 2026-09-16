@@ -418,7 +418,7 @@ function PromptOptionSwitch({
 }) {
   return (
     <Flex
-      align="flex-start"
+      align="center"
       gap="small"
     >
       <Flex
@@ -430,6 +430,7 @@ function PromptOptionSwitch({
         <CaptionP $color="text-xlight">{hint}</CaptionP>
       </Flex>
       <Switch
+        size="small"
         aria-label={label}
         checked={checked}
         onChange={onChange}
