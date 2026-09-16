@@ -9,6 +9,26 @@ import (
 	operatorctrl "github.com/pluralsh/console/go/deployment-operator/internal/controller"
 )
 
+func TestRunMiseBootstrap_MissingBinaryContinues(t *testing.T) {
+	dir := t.TempDir()
+	cfg := filepath.Join(dir, "config.toml")
+	if err := os.WriteFile(cfg, []byte("[tools]\nnode = \"24\"\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	orig := miseConfigPath
+	miseConfigPath = cfg
+	t.Cleanup(func() { miseConfigPath = orig })
+
+	t.Setenv("PATH", t.TempDir())
+	t.Setenv(operatorctrl.EnvMiseBootstrap, "true")
+
+	in := &agentRunController{dir: dir}
+	if err := in.runMiseBootstrap(); err != nil {
+		t.Fatalf("runMiseBootstrap() missing mise: %v", err)
+	}
+}
+
 func TestRunMiseBootstrap_SkipWhenConfigMissing(t *testing.T) {
 	orig := miseConfigPath
 	miseConfigPath = filepath.Join(t.TempDir(), "missing.toml")

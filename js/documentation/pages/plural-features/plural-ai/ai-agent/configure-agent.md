@@ -183,7 +183,7 @@ spec:
       GOMODCACHE = "{{config_root}}/.cache/pkg/mod"
 ```
 
-The harness runs `mise trust` and `mise bootstrap --yes` before the coding agent starts. `[bootstrap.packages]` that use apt still need a root container; `[tools]` install into `MISE_DATA_DIR` as the non-root agent user.
+`mise` must already be in the agent image (the harness image includes it). The harness runs `mise trust` and `mise bootstrap --yes` before the coding agent starts. If `mise` is missing, the run continues without toolchain bootstrap. `[bootstrap.packages]` that use apt still need a root container; `[tools]` install into `MISE_DATA_DIR` as the non-root agent user.
 
 If you extend a finished image that already ran `mise bootstrap` at build time, keep `readOnlyRootFilesystem: true`. The same `mise.config` is still mounted so `mise exec` sees `[tools]` and `[env]`, but bootstrap is skipped.
 

@@ -153,9 +153,10 @@ func (in *agentRunController) runMiseBootstrap() error {
 		return fmt.Errorf("failed to stat mise config: %w", err)
 	}
 
-	miseBin, err := ensureMiseBinary()
+	miseBin, err := osexec.LookPath("mise")
 	if err != nil {
-		return err
+		klog.ErrorS(err, "mise is not on PATH; install it in the agent image")
+		return nil
 	}
 
 	repoDir := in.repositoryDir()
@@ -183,33 +184,6 @@ func (in *agentRunController) runMiseBootstrap() error {
 
 	prependMiseShimsToPath()
 	return nil
-}
-
-func ensureMiseBinary() (string, error) {
-	if path, err := osexec.LookPath("mise"); err == nil {
-		return path, nil
-	}
-
-	if !helpers.GetPluralEnvBool(operatorctrl.EnvMiseBootstrap, false) {
-		return "", fmt.Errorf("mise is not on PATH; install it in the agent image or disable readOnlyRootFilesystem to bootstrap")
-	}
-
-	dataDir := os.Getenv(operatorctrl.EnvMiseDataDir)
-	if dataDir == "" {
-		dataDir = filepath.Join(os.TempDir(), "mise")
-	}
-	installPath := filepath.Join(dataDir, "bin", "mise")
-	if err := os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
-		return "", fmt.Errorf("failed to create mise install dir: %w", err)
-	}
-
-	klog.V(log.LogLevelInfo).InfoS("installing mise binary", "path", installPath)
-	cmd := osexec.Command("sh", "-c", "curl -fsSL https://mise.run | sh")
-	cmd.Env = append(os.Environ(), "MISE_INSTALL_PATH="+installPath)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return "", fmt.Errorf("failed to install mise: %w: %s", err, out)
-	}
-	return installPath, nil
 }
 
 func prependMiseShimsToPath() {

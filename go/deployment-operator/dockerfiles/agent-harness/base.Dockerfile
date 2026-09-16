@@ -183,8 +183,8 @@ COPY --from=builder /agent-harness /agent-harness
 COPY --from=builder /agent-mcpserver /agent-mcpserver
 COPY --from=builder /agent-bootstrap /agent-bootstrap
 
-# Pin mise so agent runtimes can `mise bootstrap --yes` without downloading
-# the installer on every start. See https://mise.jdx.dev/bootstrap.html
+# Pin mise in the base agent image. The harness looks it up on PATH and does
+# not download an installer at runtime. See https://mise.jdx.dev/bootstrap.html
 ARG MISE_VERSION=v2026.9.7
 RUN curl -fsSL https://mise.run | MISE_VERSION="${MISE_VERSION#v}" MISE_INSTALL_PATH=/usr/local/bin/mise sh \
     && mise --version
