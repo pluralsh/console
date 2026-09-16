@@ -17,7 +17,7 @@ import { Key } from '@react-types/shared'
 import { Node, NodeProps, ReactFlowProvider } from '@xyflow/react'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { LayoutOptions } from 'elkjs'
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import { dump } from 'js-yaml'
 import { isEmpty } from 'lodash'
 import {
@@ -75,7 +75,7 @@ const nodeTypes = {
   [ServiceComponentChildNodeKey]: ServiceComponentTreeNode,
 }
 
-const searchOptions: Fuse.IFuseOptions<ServiceDeploymentComponentWithChildrenFragment> =
+const searchOptions: IFuseOptions<ServiceDeploymentComponentWithChildrenFragment> =
   {
     keys: [
       'name',

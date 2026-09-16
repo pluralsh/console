@@ -18,7 +18,7 @@ import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { StackedText } from 'components/utils/table/StackedText'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_TOOLS_CREATE_ABS_PATH } from 'routes/workbenchesRoutesConsts'
@@ -35,7 +35,7 @@ import {
   workbenchToolCardGridStyles,
 } from './tools/workbenchToolsUtils'
 
-const SEARCH_OPTIONS: Fuse.IFuseOptions<WorkbenchToolCard> = {
+const SEARCH_OPTIONS: IFuseOptions<WorkbenchToolCard> = {
   keys: ['label', 'description', 'categoryLabels', 'type', 'provider'],
   threshold: 0.25,
 }
