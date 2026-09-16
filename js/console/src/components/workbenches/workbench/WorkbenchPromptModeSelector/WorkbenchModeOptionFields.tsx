@@ -32,6 +32,7 @@ export function WorkbenchVerificationLoopControl({
       gap="small"
     >
       <Switch
+        size="small"
         aria-label={VERIFICATION_LOOP_LABEL}
         checked={checked}
         disabled={disabled}

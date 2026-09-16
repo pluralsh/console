@@ -16,7 +16,7 @@ import {
   componentHealthCounts,
   flowTabPath,
 } from 'components/flows/flowHealth'
-import { Body1BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
@@ -51,15 +51,15 @@ export function FlowCard({
       />
       <ContentSC>
         <HeaderSC>
-          <CardAppIconSC
-            size="xsmall"
+          <AppIcon
+            size="xxsmall"
             url={flow.icon || undefined}
             icon={<FlowIcon size={20} />}
           />
           <HeaderTextSC>
-            <Body1BoldP css={{ minWidth: 0, ...LINE_CLAMP }}>
+            <Body2BoldP css={{ minWidth: 0, ...LINE_CLAMP }}>
               {flow.name}
-            </Body1BoldP>
+            </Body2BoldP>
             <MetaSC>
               <span>
                 <MetaLabelSC>Components</MetaLabelSC> {flow.componentCount ?? 0}
@@ -144,13 +144,6 @@ export function FlowCard({
   )
 }
 
-const CardAppIconSC = styled(AppIcon)({
-  '& img, & svg': {
-    width: 20,
-    height: 20,
-  },
-})
-
 const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -158,13 +151,12 @@ const HeaderSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
-const HeaderTextSC = styled.div(({ theme }) => ({
+const HeaderTextSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
   minWidth: 0,
-  gap: theme.spacing.xxsmall,
-}))
+})
 
 const MetaSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,

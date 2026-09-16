@@ -222,6 +222,7 @@ export function WorkbenchEvalSettings() {
                   gap="large"
                 >
                   <Switch
+                    size="small"
                     checked={evalsEnabled}
                     onChange={(checked) => setEvalsEnabled(checked)}
                   >
