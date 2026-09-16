@@ -35,11 +35,10 @@ export function GitHubAppSetup({
       {showIdInput ? (
         <Flex gap="small">
           <Input
-            background="transparent"
-            flex={1}
             placeholder="Installation ID"
             value={installationId}
             onChange={(e) => setInstallationId(e.target.value)}
+            css={{ flex: 1, background: 'transparent' }}
           />
           <Button
             secondary

@@ -1,5 +1,6 @@
-import { Button, Div, Flex, P } from 'honorable'
+import { useTheme } from 'styled-components'
 
+import { Button, Flex } from '..'
 import PageTitle, { type PageTitleProps } from '../components/PageTitle'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -12,19 +13,43 @@ export default meta
 type Story = StoryObj<any>
 
 function Template({ heading, ...props }: PageTitleProps) {
+  const theme = useTheme()
+
   return (
-    <Div>
+    <div>
       <PageTitle
         heading={heading}
         {...props}
       />
-      <P body2>
+      <p css={{ margin: 0, ...theme.partials.text.body2 }}>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi quasi
         beatae sed est vitae, autem voluptatum ducimus ipsa accusantium, qui
         illo repellat earum placeat nesciunt in accusamus deserunt. Odio,
         excepturi!
-      </P>
-    </Div>
+      </p>
+    </div>
+  )
+}
+
+function UnsavedHint() {
+  const theme = useTheme()
+
+  return (
+    <Flex justify="flex-end">
+      <p
+        css={{
+          margin: 0,
+          marginRight: 16,
+          textAlign: 'right',
+          alignSelf: 'center',
+          ...theme.partials.text.body2,
+          color: theme.colors['text-xlight'],
+        }}
+      >
+        Unsaved changes
+      </p>
+      <Button>Save</Button>
+    </Flex>
   )
 }
 
@@ -39,23 +64,10 @@ export const WithContent: Story = {
   render: Template,
   args: {
     heading: (
-      <Div>
+      <div>
         <strong>Customized</strong> <em>page</em> title
-      </Div>
+      </div>
     ),
-    children: (
-      <Flex justifyContent="flex-end">
-        <Flex
-          marginRight="medium"
-          alignItems="center"
-          textAlign="right"
-          body2
-          color="text-xlight"
-        >
-          Unsaved changes
-        </Flex>
-        <Button>Save</Button>
-      </Flex>
-    ),
+    children: <UnsavedHint />,
   },
 }

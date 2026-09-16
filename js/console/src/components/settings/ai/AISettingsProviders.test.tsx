@@ -1,7 +1,4 @@
-import {
-  HonorableThemeProvider,
-  styledThemeDark,
-} from '@pluralsh/design-system'
+import { styledThemeDark } from '@pluralsh/design-system'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { ThemeProvider } from 'styled-components'
 import { describe, expect, it, vi } from 'vitest'
@@ -17,22 +14,20 @@ const existingProfileArn =
 function renderBedrockSettings(updateSettings = vi.fn()) {
   render(
     <ThemeProvider theme={styledThemeDark}>
-      <HonorableThemeProvider>
-        <BedrockSettings
-          enabled
-          settings={{
-            region: 'us-east-1',
-            endpoint: BedrockEndpoint.Runtime,
-            modelSettings: [
-              {
-                modelId: existingModelId,
-                inferenceProfileArn: existingProfileArn,
-              },
-            ],
-          }}
-          updateSettings={updateSettings}
-        />
-      </HonorableThemeProvider>
+      <BedrockSettings
+        enabled
+        settings={{
+          region: 'us-east-1',
+          endpoint: BedrockEndpoint.Runtime,
+          modelSettings: [
+            {
+              modelId: existingModelId,
+              inferenceProfileArn: existingProfileArn,
+            },
+          ],
+        }}
+        updateSettings={updateSettings}
+      />
     </ThemeProvider>
   )
 

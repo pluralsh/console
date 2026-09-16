@@ -203,7 +203,7 @@ function HeaderChip({ stage, isOpen, setIsOpen, status }) {
           clickable
           onClick={(e) => {
             setIsOpen(true)
-            e.target?.blur()
+            e.currentTarget.blur()
           }}
           errors={stage.errors}
         />

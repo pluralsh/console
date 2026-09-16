@@ -137,7 +137,8 @@ function Template({
       <Typography exampleText={exampleText} />
       <Divider
         text="Marketing Typography"
-        marginVertical="xxlarge"
+        marginTop="xxlarge"
+        marginBottom="xxlarge"
       />
       <MarketingTypography exampleText={exampleText} />
     </>

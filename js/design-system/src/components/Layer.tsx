@@ -1,7 +1,7 @@
 // this is deprecated and only still used internally for the Toast component (since it's probably more work than it's worth to migrate)
 // anything else that needs similar functionality should use a ModalWrapper
 import { type UseTransitionProps, useTransition } from '@react-spring/web'
-import { useOutsideClick } from 'honorable'
+import useOutsideClick from '../hooks/useOutsideClick'
 import { isNil } from 'lodash-es'
 import {
   type ComponentProps,
@@ -162,7 +162,7 @@ function Layer({
   open,
   wrapperProps,
 }: {
-  ref: RefObject<HTMLDivElement>
+  ref?: RefObject<HTMLDivElement>
   open: boolean
   position: LayerPositionType
   animation?: AnimationType
@@ -175,8 +175,8 @@ function Layer({
   wrapperProps?: ComponentProps<'div'>
 }) {
   const theme = useTheme()
-  const internalRef = useRef<HTMLDivElement>(undefined)
-  const finalRef = ref || internalRef
+  const internalRef = useRef<HTMLDivElement>(null!)
+  const finalRef = ref ?? internalRef
   const [closeComplete, setCloseComplete] = useState(!open)
   const prevOpen = usePrevious(open)
 

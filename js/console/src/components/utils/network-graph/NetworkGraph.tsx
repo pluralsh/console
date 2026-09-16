@@ -12,7 +12,7 @@ import { Node, ReactFlowProvider, useReactFlow } from '@xyflow/react'
 import { DELIMITER } from 'components/ai/insights/InsightEvidence'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { NamespaceFilter } from 'components/kubernetes/common/NamespaceFilter'
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import {
   NetworkMeshEdgeFragment,
   NetworkMeshStatisticsFragment,
@@ -40,7 +40,7 @@ export type NetworkEdgeData = {
   }[]
 }
 
-const searchOptions: Fuse.IFuseOptions<NetworkMeshEdgeFragment> = {
+const searchOptions: IFuseOptions<NetworkMeshEdgeFragment> = {
   keys: ['from.name', 'from.service', 'to.name', 'to.service'],
   threshold: 0.25,
   ignoreLocation: true,
@@ -126,7 +126,7 @@ function NetworkGraphInternal({
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search service names"
           startIcon={<SearchIcon color="icon-light" />}
-          flex={1}
+          css={{ flex: 1 }}
         />
         {enableNamespaceFilter && (
           <NamespaceFilter
@@ -159,7 +159,7 @@ function NetworkGraphInternal({
           isTimestampSet={isTimestampSet}
         />
       </Flex>
-      <Card flex={1}>
+      <Card css={{ flex: 1 }}>
         {isEmpty(networkData) ? (
           loading ? (
             <RectangleSkeleton

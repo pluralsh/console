@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Select,
   SidePanelOpenIcon,
@@ -314,7 +314,7 @@ export function CloudConnectionCreateForm({
               required
               label="Name"
             >
-              <Input2
+              <Input
                 placeholder="Connection name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -451,7 +451,7 @@ function AwsFields({
         label="Access key ID"
         hint="Optional when the console uses workload identity (IRSA) or another ambient credential."
       >
-        <Input2
+        <Input
           value={state.accessKeyId ?? ''}
           onChange={(e) => setState({ ...state, accessKeyId: e.target.value })}
         />
@@ -468,7 +468,7 @@ function AwsFields({
         />
       </FormField>
       <FormField label="Region">
-        <Input2
+        <Input
           placeholder="us-east-1"
           value={state.region ?? ''}
           onChange={(e) => setState({ ...state, region: e.target.value })}
@@ -478,7 +478,7 @@ function AwsFields({
         label="Assume role ARN"
         hint="Optional IAM role ARN for the console to assume when using this connection."
       >
-        <Input2
+        <Input
           placeholder="arn:aws:iam::123456789012:role/my-role"
           value={state.assumeRoleArn ?? ''}
           onChange={(e) =>
@@ -503,7 +503,7 @@ function GcpFields({
         required
         label="Project ID"
       >
-        <Input2
+        <Input
           value={state.projectId}
           onChange={(e) => setState({ ...state, projectId: e.target.value })}
         />
@@ -539,7 +539,7 @@ function AzureFields({
         required
         label="Subscription ID"
       >
-        <Input2
+        <Input
           placeholder="00000000-0000-0000-0000-000000000000"
           value={state.subscriptionId}
           onChange={(e) =>
@@ -551,7 +551,7 @@ function AzureFields({
         required
         label="Tenant ID"
       >
-        <Input2
+        <Input
           placeholder="00000000-0000-0000-0000-000000000000"
           value={state.tenantId}
           onChange={(e) => setState({ ...state, tenantId: e.target.value })}
@@ -561,7 +561,7 @@ function AzureFields({
         required
         label="Client ID"
       >
-        <Input2
+        <Input
           placeholder="00000000-0000-0000-0000-000000000000"
           value={state.clientId}
           onChange={(e) => setState({ ...state, clientId: e.target.value })}
@@ -594,7 +594,7 @@ function VSphereFields({
         label="vCenter SDK endpoint"
         hint="Use the vCenter SOAP SDK endpoint."
       >
-        <Input2
+        <Input
           placeholder="https://vcenter.example.com/sdk"
           value={state.server}
           onChange={(e) => setState({ ...state, server: e.target.value })}
@@ -604,7 +604,7 @@ function VSphereFields({
         required
         label="User"
       >
-        <Input2
+        <Input
           placeholder="administrator@vsphere.local"
           value={state.user}
           onChange={(e) => setState({ ...state, user: e.target.value })}

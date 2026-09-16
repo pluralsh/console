@@ -1,14 +1,16 @@
-import { Div, type DivProps, Flex, H1, H3, P } from 'honorable'
+import Flex from './Flex'
+import styled, { useTheme } from 'styled-components'
 
-import Card from './Card'
+import Card, { type CardProps } from './Card'
 import AppIcon from './AppIcon'
 import Tooltip from './Tooltip'
 import Chip from './Chip'
 import StackIcon from './icons/StackIcon'
+import { type SemanticColorKey } from '../theme/colors'
 
 type StackHue = 'neutral' | 'red' | 'green' | 'blue' | 'yellow'
 
-type StackCardProps = DivProps & {
+type StackCardProps = CardProps & {
   title?: string
   description?: string
   apps?: App[]
@@ -26,7 +28,7 @@ const hueToColor = {
   green: 'text-success-light',
   blue: 'border-outline-focused',
   yellow: 'text-warning-light',
-}
+} as const satisfies Record<StackHue, SemanticColorKey>
 
 function StackCard({
   title,
@@ -35,14 +37,17 @@ function StackCard({
   hue = 'neutral',
   ...props
 }: StackCardProps) {
+  const theme = useTheme()
+
   return (
     <Card
       clickable
-      flexDirection="column"
-      padding="large"
-      width="100%"
-      borderColor={hueToColor[hue]}
       fillLevel={1}
+      width="100%"
+      css={{
+        padding: theme.spacing.large,
+        borderColor: theme.colors[hueToColor[hue]],
+      }}
       {...props}
     >
       <Flex
@@ -62,42 +67,16 @@ function StackCard({
               justify="space-between"
             >
               <Flex direction="column">
-                <H1
-                  subtitle1
-                  color="text"
-                  marginBottom="xxsmall"
-                >
-                  {title}
-                </H1>
-                <H3
-                  body2
-                  fontWeight="300"
-                  color="text-xlight"
-                  marginBottom="xxsmall"
-                >
+                <TitleSC>{title}</TitleSC>
+                <AppCountSC>
                   {apps?.length || 0} APP{apps?.length !== 1 && 'S'}
-                </H3>
+                </AppCountSC>
               </Flex>
               <Chip icon={<StackIcon />}>Stack</Chip>
             </Flex>
           </Flex>
-          {description && (
-            <P
-              body2
-              fontWeight="300"
-              color="text-light"
-              marginTop="xsmall"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: '2',
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {description}
-            </P>
-          )}
-          <Div flexGrow={1} />
+          {description && <DescriptionSC>{description}</DescriptionSC>}
+          <div css={{ flexGrow: 1 }} />
           {apps?.length > 0 && (
             <Flex
               marginTop="medium"
@@ -125,5 +104,32 @@ function StackCard({
     </Card>
   )
 }
+
+const TitleSC = styled.h1(({ theme }) => ({
+  margin: 0,
+  marginBottom: theme.spacing.xxsmall,
+  ...theme.partials.text.subtitle1,
+  color: theme.colors.text,
+}))
+
+const AppCountSC = styled.h3(({ theme }) => ({
+  margin: 0,
+  marginBottom: theme.spacing.xxsmall,
+  ...theme.partials.text.body2,
+  fontWeight: 300,
+  color: theme.colors['text-xlight'],
+}))
+
+const DescriptionSC = styled.p(({ theme }) => ({
+  margin: 0,
+  marginTop: theme.spacing.xsmall,
+  ...theme.partials.text.body2,
+  fontWeight: 300,
+  color: theme.colors['text-light'],
+  display: '-webkit-box',
+  WebkitLineClamp: '2',
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+}))
 
 export default StackCard

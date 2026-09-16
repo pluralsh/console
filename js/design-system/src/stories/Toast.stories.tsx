@@ -1,8 +1,8 @@
-import { Button, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { type LayerPositionType } from '../components/Layer'
 import { GraphQLToast, Toast, type ToastSeverity } from '../components/Toast'
+import { Button, Flex } from '..'
 import { ApolloError } from '@apollo/client'
 import type { Meta, StoryObj } from '@storybook/react'
 

@@ -3,7 +3,7 @@ import StackIcon from '../components/icons/StackIcon'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'RepositoryChip',
+  title: 'Repository Chip',
   component: RepositoryChip,
 } satisfies Meta<any>
 

@@ -1,8 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import {
-  HonorableThemeProvider,
-  styledThemeDark,
-} from '@pluralsh/design-system'
+import { styledThemeDark } from '@pluralsh/design-system'
 import { MemoryRouter } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { describe, expect, it } from 'vitest'
@@ -20,13 +17,11 @@ function renderPipelineChip({
   return render(
     <MemoryRouter>
       <ThemeProvider theme={styledThemeDark}>
-        <HonorableThemeProvider>
-          <FlowPipelineChip
-            pipelineCount={pipelineCount}
-            pendingCount={pendingCount}
-            stoppedCount={stoppedCount}
-          />
-        </HonorableThemeProvider>
+        <FlowPipelineChip
+          pipelineCount={pipelineCount}
+          pendingCount={pendingCount}
+          stoppedCount={stoppedCount}
+        />
       </ThemeProvider>
     </MemoryRouter>
   )

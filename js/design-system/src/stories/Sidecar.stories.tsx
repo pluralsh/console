@@ -1,4 +1,4 @@
-import { A, Div } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import { Sidecar, SidecarItem, type SidecarProps } from '../index'
 import type { Meta, StoryObj } from '@storybook/react'
@@ -19,12 +19,15 @@ const wordWrapOnSlashes = (url: string) =>
     )
 
 function Template({ heading, ...props }: SidecarProps) {
+  const theme = useTheme()
+
   return (
-    <Div>
-      <Div
-        marginBottom="xxlarge"
-        maxWidth="200px"
-        _last={{ marginBottom: 0 }}
+    <div>
+      <div
+        style={{
+          marginBottom: 48,
+          maxWidth: 200,
+        }}
       >
         <Sidecar
           heading={heading}
@@ -34,25 +37,24 @@ function Template({ heading, ...props }: SidecarProps) {
             cf0e8944-af70-49ae-b08c-7b38b706fe85
           </SidecarItem>
           <SidecarItem heading="Git url">
-            <A
-              inline
+            <a
               target="_blank"
-              noreferrer
-              noopener
+              rel="noreferrer noopener"
               href="http://github.com/pluralsh/plural"
+              css={theme.partials.text.inlineLink}
             >
               {wordWrapOnSlashes(
                 'github.com/areallylongstringwithnohyphens/plural/anotherlongstring'
               )}
-            </A>
+            </a>
           </SidecarItem>
           <SidecarItem heading="Acked">
             01814fdf-09b2-4ea5-b2d3-277192808b28
           </SidecarItem>
           <SidecarItem heading="Last pinged">Jun 14, 2022 11:34 AM</SidecarItem>
         </Sidecar>
-      </Div>
-    </Div>
+      </div>
+    </div>
   )
 }
 

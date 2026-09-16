@@ -81,11 +81,11 @@ export function CostManagementDetailsRecommendations() {
     >
       <Flex gap="medium">
         <Input
-          flex={1}
           startIcon={<SearchIcon />}
           placeholder="Search by resource name"
           value={recommendationsQ}
           onChange={(e) => setRecommendationsQ(e.target.value)}
+          css={{ flex: 1 }}
         />
         <Select
           triggerButton={

@@ -5,7 +5,7 @@
 
 import { useMemo, useState } from 'react'
 
-import { Input2, SearchIcon } from '@pluralsh/design-system'
+import { Input, SearchIcon } from '@pluralsh/design-system'
 import NextLink from 'next/link'
 
 import isEmpty from 'lodash/isEmpty'
@@ -66,7 +66,7 @@ const SearchWrapper = styled.div(({ theme }) => ({
   zIndex: 1,
 }))
 
-const FilterInput = styled(Input2)({
+const FilterInput = styled(Input)({
   width: '100%',
 })
 

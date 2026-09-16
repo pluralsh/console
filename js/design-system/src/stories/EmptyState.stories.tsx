@@ -1,11 +1,10 @@
-import { Button } from 'honorable'
-
 import BellIcon from '../components/icons/BellIcon'
+import Button from '../components/Button'
 import EmptyState from '../components/EmptyState'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'EmptyState',
+  title: 'Empty State',
   component: EmptyState,
 } satisfies Meta<any>
 

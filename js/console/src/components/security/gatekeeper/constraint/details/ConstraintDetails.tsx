@@ -77,9 +77,11 @@ function ConstraintDetails() {
         </ScrollablePage>
       </div>
       <Sidecar
-        width={200}
-        minWidth={200}
-        marginTop={57}
+        css={{
+          width: 200,
+          minWidth: 200,
+          marginTop: 57,
+        }}
       >
         <SidecarItem heading="Policy name"> {name}</SidecarItem>
         <SidecarItem heading="Last Updated">

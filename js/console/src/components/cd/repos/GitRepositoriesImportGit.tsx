@@ -308,7 +308,7 @@ export function GitAuthFields({
       <FormField label="Passphrase">
         <Input
           inputProps={{ type: 'password' }}
-          value={passphrase}
+          value={passphrase ?? ''}
           onChange={(e) => {
             setPassphrase(e.currentTarget.value)
           }}
@@ -328,7 +328,7 @@ export function GitAuthFields({
     >
       <FormField label="User name">
         <Input
-          value={username}
+          value={username ?? ''}
           onChange={(e) => {
             setUsername(e.currentTarget.value)
           }}
@@ -338,7 +338,7 @@ export function GitAuthFields({
       <FormField label="Password">
         <Input
           inputProps={{ type: 'password' }}
-          value={password}
+          value={password ?? ''}
           onChange={(e) => {
             setPassword(e.currentTarget.value)
           }}

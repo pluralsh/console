@@ -131,7 +131,7 @@ export default function ViolationExpansionPanel({
 
                       return `${isEmpty ? '..' : l?.line} ${firstChar}${midChar}${lastChar} ${isEmpty ? '' : l?.content}`
                     })
-                    .join('\n')}
+                    .join('\n') ?? ''}
                 </Code>
               </div>
             )

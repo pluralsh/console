@@ -1,4 +1,4 @@
-import { Flex, Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import { Flex, Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 
 import { usePullRequestsQuery } from 'generated/graphql'
@@ -46,7 +46,7 @@ export function OutstandingPrs() {
       height="100%"
       overflow="hidden"
     >
-      <Input2
+      <Input
         placeholder="Search PRs"
         startIcon={<SearchIcon />}
         showClearButton

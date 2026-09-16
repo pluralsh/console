@@ -1,4 +1,3 @@
-import { Button, Flex, P } from 'honorable'
 import { type ReactElement, useEffect, useMemo, useState } from 'react'
 
 import FormField from '../components/FormField'
@@ -16,7 +15,9 @@ import { Picker, type StepConfig } from '../components/wizard/Picker'
 import { Step } from '../components/wizard/Step'
 import { Stepper } from '../components/wizard/Stepper'
 import { Wizard } from '../components/wizard/Wizard'
+import { Button, Flex } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
+import { useTheme } from 'styled-components'
 
 const meta = {
   title: 'Wizard',
@@ -31,6 +32,7 @@ interface FormData {
 }
 
 function Application({ ...props }: any): ReactElement<any> {
+  const theme = useTheme()
   const { active, setData } = useActive<FormData>()
   const [domain, setDomain] = useState<string>(active?.data?.domain ?? '')
 
@@ -46,13 +48,16 @@ function Application({ ...props }: any): ReactElement<any> {
       data={data}
       {...props}
     >
-      <P
-        overline
-        color="text-xlight"
-        paddingBottom="medium"
+      <p
+        css={{
+          margin: 0,
+          paddingBottom: 16,
+          ...theme.partials.text.overline,
+          color: theme.colors['text-xlight'],
+        }}
       >
         configure {active?.label}
-      </P>
+      </p>
       <FormField
         label="Domain"
         required
@@ -134,6 +139,7 @@ const DEFAULT_STEPS: Array<StepConfig> = [
 ]
 
 function ModalTemplate() {
+  const theme = useTheme()
   const [open, setOpen] = useState(true)
   const [confirmClose, setConfirmClose] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -195,10 +201,10 @@ function ModalTemplate() {
           padding: 0,
         }}
       >
-        <P>
+        <p css={{ margin: 0, ...theme.partials.text.body2 }}>
           Are you sure you want to cancel installation? You will lose all
           progress.
-        </P>
+        </p>
       </Modal>
 
       {visible && (

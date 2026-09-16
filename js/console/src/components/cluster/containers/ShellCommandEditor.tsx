@@ -150,7 +150,7 @@ export function ShellCommandEditor({
             onChange={({ target: { value } }) => {
               setInputVal(value)
             }}
-            onKeyDown={(e: KeyboardEvent) => {
+            onKeyDown={(e) => {
               if (e.code.toLowerCase() === 'escape') {
                 setIsEditing(false)
               }

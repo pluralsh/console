@@ -21,7 +21,7 @@ data:
 `
 
 const meta = {
-  title: 'DiffViewer',
+  title: 'Diff Viewer',
   component: DiffViewer,
   argTypes: {
     splitView: {

@@ -128,7 +128,7 @@ function ConsoleContent() {
             flexGrow={1}
             overflowX="hidden"
             position="relative"
-            container="console / inline-size"
+            css={{ container: 'console / inline-size' }}
           >
             <Subheader />
             <Suspense fallback={<LoadingIndicator />}>

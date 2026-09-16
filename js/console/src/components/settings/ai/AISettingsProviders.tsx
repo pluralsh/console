@@ -256,7 +256,7 @@ export function OpenAISettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -267,7 +267,7 @@ export function OpenAISettings({
       <FormField
         label="Embedding Model"
         infoTooltip={embeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -282,7 +282,7 @@ export function OpenAISettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -293,18 +293,18 @@ export function OpenAISettings({
       <FormField
         label="Base URL"
         infoTooltip="Optional custom API base URL for OpenAI-compatible providers. Leave blank to use OpenAI."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.baseUrl}
+          value={settings?.baseUrl ?? ''}
           onChange={(e) => updateSettings({ baseUrl: e.currentTarget.value })}
         />
       </FormField>
       <FormField
         label="API method"
         infoTooltip="Choose which OpenAI API style to use. Auto lets Plural select the best method for each request."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Select
           isDisabled={!enabled}
@@ -330,7 +330,7 @@ export function OpenAISettings({
       <FormField
         label="Access token"
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -362,7 +362,7 @@ export function AnthropicSettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -373,7 +373,7 @@ export function AnthropicSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -384,7 +384,7 @@ export function AnthropicSettings({
       <FormField
         label="Access token"
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -448,7 +448,7 @@ export function BedrockSettings({
         label="Region"
         infoTooltip={bedrockRegionTooltip}
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Select
           isDisabled={!enabled}
@@ -467,7 +467,7 @@ export function BedrockSettings({
       <FormField
         label="Model ID"
         infoTooltip={bedrockModelIdTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -478,7 +478,7 @@ export function BedrockSettings({
       <FormField
         label="Embedding Model ID"
         infoTooltip={bedrockEmbeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -493,7 +493,7 @@ export function BedrockSettings({
       <FormField
         label="Tool model ID"
         infoTooltip={bedrockToolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -506,11 +506,11 @@ export function BedrockSettings({
       <FormField
         label="AWS access key ID"
         infoTooltip="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.awsAccessKeyId}
+          value={settings?.awsAccessKeyId ?? ''}
           onChange={(e) =>
             updateSettings({ awsAccessKeyId: e.currentTarget.value })
           }
@@ -519,7 +519,7 @@ export function BedrockSettings({
       <FormField
         label="AWS secret access key"
         infoTooltip="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -532,7 +532,7 @@ export function BedrockSettings({
       <FormField
         label="Endpoint"
         infoTooltip={bedrockEndpointTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Select
           isDisabled={!enabled}
@@ -645,7 +645,7 @@ export function OllamaSettings({
         label="Model"
         infoTooltip={modelTooltip}
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -656,7 +656,7 @@ export function OllamaSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -668,7 +668,7 @@ export function OllamaSettings({
         label="URL"
         infoTooltip="The URL your Ollama deployment is hosted on."
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -679,7 +679,7 @@ export function OllamaSettings({
       <FormField
         label="Authorization"
         infoTooltip="Optional HTTP Authorization header to use on calls to the Ollama API."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -711,7 +711,7 @@ export function AzureSettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -722,11 +722,11 @@ export function AzureSettings({
       <FormField
         label="API version"
         infoTooltip="Optional Azure OpenAI API version. Leave blank to use the provider default."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.apiVersion}
+          value={settings?.apiVersion ?? ''}
           onChange={(e) =>
             updateSettings({ apiVersion: e.currentTarget.value })
           }
@@ -735,7 +735,7 @@ export function AzureSettings({
       <FormField
         label="Embedding Model"
         infoTooltip={embeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -750,7 +750,7 @@ export function AzureSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -762,11 +762,11 @@ export function AzureSettings({
         label="Endpoint"
         infoTooltip="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments."
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.endpoint}
+          value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>
@@ -774,7 +774,7 @@ export function AzureSettings({
         label="Access token"
         infoTooltip="The Azure OpenAI access token to use."
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -846,7 +846,7 @@ export function VertexSettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -857,7 +857,7 @@ export function VertexSettings({
       <FormField
         label="Embedding Model"
         infoTooltip={embeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -872,7 +872,7 @@ export function VertexSettings({
       <FormField
         label="Project"
         infoTooltip="The GCP Project ID"
-        flex={1}
+        style={{ flex: 1 }}
         required={enabled}
       >
         <Input
@@ -884,7 +884,7 @@ export function VertexSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -895,7 +895,7 @@ export function VertexSettings({
       <FormField
         label="Location"
         infoTooltip="The GCP Location you're querying from."
-        flex={1}
+        style={{ flex: 1 }}
         required={enabled}
       >
         <Input
@@ -907,11 +907,11 @@ export function VertexSettings({
       <FormField
         label="Endpoint"
         infoTooltip="Custom Vertex AI endpoint for dedicated deployments. Leave blank to use the default endpoint."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.endpoint}
+          value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>

@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   IconFrame,
-  Input2,
+  Input,
   PencilIcon,
   SearchIcon,
   Spinner,
@@ -56,7 +56,7 @@ export function ServiceMonitors() {
           Create Monitor
         </Button>
       </StretchedFlex>
-      <Input2
+      <Input
         startIcon={<SearchIcon />}
         placeholder="Search monitors"
         value={q}

@@ -1,6 +1,7 @@
-import { A, Button, Div, Flex, Span } from 'honorable'
 import { useCallback, useState } from 'react'
+import { useTheme } from 'styled-components'
 
+import { Button, Flex } from '..'
 import { Checklist, type ChecklistStateProps } from '../components/Checklist'
 import { ChecklistItem } from '../components/ChecklistItem'
 import DownloadIcon from '../components/icons/DownloadIcon'
@@ -18,6 +19,7 @@ export default meta
 type Story = StoryObj<any>
 
 function Template() {
+  const theme = useTheme()
   const [selected, setSelected] = useState<number | null>(0)
   const [focused, setFocused] = useState<number>(-1)
   const [completed, setCompleted] = useState<number>(-1)
@@ -62,7 +64,7 @@ function Template() {
     <Flex
       grow={1}
       justify="center"
-      style={{
+      css={{
         bottom: 0,
         position: 'fixed',
       }}
@@ -111,23 +113,27 @@ function Template() {
             gap="medium"
           >
             <Flex
-              paddingHorizontal="large"
               gap="medium"
+              css={{ paddingLeft: 24, paddingRight: 24 }}
             >
               <Flex
                 gap="xxsmall"
                 direction="column"
               >
-                <Span subtitle1>Congratulations!</Span>
+                <h3 css={{ margin: 0, ...theme.partials.text.subtitle1 }}>
+                  Congratulations!
+                </h3>
               </Flex>
             </Flex>
-            <Div
-              height={1}
-              backgroundColor="border-input"
+            <div
+              css={{
+                height: 1,
+                backgroundColor: theme.colors['border-input'],
+              }}
             />
             <Flex
               gap="small"
-              paddingHorizontal="large"
+              css={{ paddingLeft: 24, paddingRight: 24 }}
             >
               <Button
                 small
@@ -162,10 +168,11 @@ function Template() {
             direction="column"
             gap="medium"
           >
-            <Span>
+            <p css={{ margin: 0, ...theme.partials.text.body2 }}>
               If you&apos;d prefer to use Plural on your local machine, get
-              started with the <A inline>Plural CLI</A>.
-            </Span>
+              started with the{' '}
+              <a css={theme.partials.text.inlineLink}>Plural CLI</a>.
+            </p>
             <Flex gap="small">
               <Button
                 small

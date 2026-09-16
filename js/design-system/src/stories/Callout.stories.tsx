@@ -1,9 +1,7 @@
-import { Div, Flex } from 'honorable'
-
 import { useState } from 'react'
 
 import { type FillLevel } from '../components/contexts/FillLevelContext'
-import { Button, Callout, type CalloutProps, Card } from '..'
+import { Button, Callout, type CalloutProps, Card, Flex } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
@@ -70,7 +68,7 @@ function Template({
   noContent?: boolean
   onFillLevel: FillLevel
 }) {
-  let Wrapper = Div
+  let Wrapper: typeof Flex | typeof Card = Flex
   let wrapperProps = {}
 
   if (onFillLevel > 0) {

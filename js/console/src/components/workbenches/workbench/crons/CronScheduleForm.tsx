@@ -4,7 +4,7 @@ import {
   EmptyState,
   Flex,
   FormField,
-  Input2,
+  Input,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -336,7 +336,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                           )
                         }
                       >
-                        <Input2
+                        <Input
                           value={formState.crontab}
                           error={hasCronError}
                           onChange={(e) =>

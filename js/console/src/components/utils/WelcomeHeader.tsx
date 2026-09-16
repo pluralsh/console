@@ -1,6 +1,8 @@
 import { CSSProperties } from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
 
+import { Title1H1 } from 'components/utils/typography/Text'
+
 export function WelcomeHeader({
   heading = 'Welcome to Plural Console',
   marginBottom,
@@ -13,14 +15,17 @@ export function WelcomeHeader({
   const theme = useTheme()
   return (
     <div
-      css={{
+      style={{
         ...props,
         marginBottom: marginBottom ? theme.spacing[marginBottom] : undefined,
       }}
     >
-      <h1 css={{ ...theme.partials.text.title1, margin: 0, textAlign }}>
+      <Title1H1
+        $color="text"
+        style={{ margin: 0, textAlign }}
+      >
         {heading}
-      </h1>
+      </Title1H1>
     </div>
   )
 }

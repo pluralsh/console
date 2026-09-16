@@ -1,7 +1,7 @@
 import { mergeRefs } from '@react-aria/utils'
-import { Div, type DivProps } from 'honorable'
 import {
   type ComponentProps,
+  type ComponentPropsWithRef,
   type ReactElement,
   type Ref,
   cloneElement,
@@ -36,7 +36,7 @@ mode='singlepanel' (default)
 */
 type Mode = 'multipanel' | 'singlepanel'
 
-export type WrappedTabPanelProps = DivProps & {
+export type WrappedTabPanelProps = ComponentPropsWithRef<'div'> & {
   stateRef: TabStateRef
   renderer?: Renderer
   as: ReactElement<any>
@@ -101,7 +101,6 @@ function WrappedTabPanel({
   }
 
   if (renderer) {
-    // @ts-expect-error
     return renderer(mergeProps(tabPanelProps, props), ref, state)
   }
 
@@ -155,7 +154,7 @@ function TabPanel({
   })
 
   if (!renderer && !as) {
-    as = <Div {...props} />
+    as = <div {...props} />
   }
 
   if (stateRef.current) {
@@ -174,7 +173,7 @@ function TabPanel({
   }
 
   if (renderer) {
-    return renderer({ ...props }, null, null)
+    return renderer({ ...props }, { current: null }, null)
   }
 
   return (

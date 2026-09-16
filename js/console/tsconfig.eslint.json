@@ -4,7 +4,7 @@
     "rootDir": ".",
     "types": ["@types/node"],
     "allowJs": true,
-    "moduleResolution": "Node"
+    "moduleResolution": "bundler"
   },
   "include": ["eslint.config.mjs"]
 }

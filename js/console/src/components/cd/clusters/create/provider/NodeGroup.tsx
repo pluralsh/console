@@ -8,14 +8,7 @@ import {
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import {
-  Dispatch,
-  Key,
-  ReactElement,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { Dispatch, ReactElement, useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { disabledNumberInputArrows, RegionsForProvider } from '../helpers'
@@ -41,7 +34,7 @@ function NodeGroup({
 }: NodeGroupProps): ReactElement<any> {
   const theme = useTheme()
   const regions = useMemo(() => RegionsForProvider[provider], [provider])
-  const [selectedRegion, setSelectedRegion] = useState<Nullable<Key>>(
+  const [selectedRegion, setSelectedRegion] = useState<Nullable<string>>(
     initialNodeGroup.nodeType
   )
   const [nodeGroup, setNodeGroup] = useState<NodeGroupType>(initialNodeGroup)
@@ -75,7 +68,7 @@ function NodeGroup({
       >
         <FormField
           label="Name"
-          width="fit-content"
+          style={{ width: 'fit-content' }}
           required
         >
           <Input
@@ -104,7 +97,7 @@ function NodeGroup({
           label="Min nodes"
           required
           hint="Production clusters should have a minimum of 3 nodes."
-          width="100%"
+          style={{ width: '100%' }}
         >
           <Input
             placeholder="3"
@@ -115,7 +108,7 @@ function NodeGroup({
                 minNodes: Number.parseInt(value),
               }))
             }
-            type="number"
+            inputProps={{ type: 'number' }}
             css={disabledNumberInputArrows}
           />
         </FormField>
@@ -124,7 +117,7 @@ function NodeGroup({
           label="Max nodes"
           required
           hint="No more than 5,000 nodes."
-          width="100%"
+          style={{ width: '100%' }}
         >
           <Input
             placeholder="2500"
@@ -135,7 +128,7 @@ function NodeGroup({
                 maxNodes: Number.parseInt(value),
               }))
             }
-            type="number"
+            inputProps={{ type: 'number' }}
             css={disabledNumberInputArrows}
           />
         </FormField>
@@ -143,13 +136,12 @@ function NodeGroup({
         <FormField
           label="Node type"
           required
-          width="100%"
+          style={{ width: '100%' }}
         >
-          {/* @ts-ignore */}
           <Select
             aria-label="node type"
             selectedKey={selectedRegion}
-            onSelectionChange={setSelectedRegion}
+            onSelectionChange={(key) => setSelectedRegion(String(key))}
           >
             {regions.map((r) => (
               <ListBoxItem

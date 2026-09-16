@@ -7,7 +7,7 @@ import {
   CodeEditor,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   AddIcon,
   MinusIcon,
@@ -358,13 +358,13 @@ function HttpFormFields({
               gap="xsmall"
               align="center"
             >
-              <Input2
+              <Input
                 placeholder="Name"
                 value={h.name ?? ''}
                 onChange={(e) => setHeader(i, 'name', e.target.value)}
                 css={{ flex: 1 }}
               />
-              <Input2
+              <Input
                 placeholder="Value"
                 value={h.value ?? ''}
                 onChange={(e) => setHeader(i, 'value', e.target.value)}
@@ -1500,7 +1500,7 @@ function JsonEditorField({
 
 type InputFieldProps = { label: string; hint?: string; required?: boolean } & (
   | ({ multiline: true } & ComponentProps<typeof EditableDiv>)
-  | ({ multiline?: false; revealer?: boolean } & ComponentProps<typeof Input2>)
+  | ({ multiline?: false; revealer?: boolean } & ComponentProps<typeof Input>)
 )
 function InputField({ label, hint, required, ...props }: InputFieldProps) {
   return (
@@ -1516,7 +1516,7 @@ function InputField({ label, hint, required, ...props }: InputFieldProps) {
       ) : props.revealer ? (
         <InputRevealer {...props} />
       ) : (
-        <Input2 {...props} />
+        <Input {...props} />
       )}
     </FormField>
   )

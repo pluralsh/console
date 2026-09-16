@@ -170,7 +170,7 @@ function TagInput({
         label={label}
         hint={hint}
         layout={layout}
-        width={width}
+        style={{ width }}
       >
         <ComboBox
           aria-label={label}

@@ -131,7 +131,7 @@ export function OidcProvider({
               </FormField>
               <FormField label="Description">
                 <Input
-                  value={state.description}
+                  value={state.description ?? ''}
                   placeholder="Enter description"
                   onChange={(e) =>
                     update({ ...state, description: e.target.value })

@@ -1,6 +1,5 @@
-import { keyframes } from '@emotion/react'
-import { Div, type DivProps, Flex, Img, type ImgProps } from 'honorable'
 import {
+  type ComponentPropsWithRef,
   type ReactNode,
   useCallback,
   useEffect,
@@ -9,13 +8,14 @@ import {
   useState,
 } from 'react'
 import { CSSTransition } from 'react-transition-group'
-import styled from 'styled-components'
+import styled, { keyframes, useTheme } from 'styled-components'
 
 import { useIsomorphicLayoutEffect } from '@react-spring/web'
 
 import useResizeObserver from '../hooks/useResizeObserver'
+import Flex from './Flex'
 
-export type LoadingSpinnerProps = DivProps & {
+export type LoadingSpinnerProps = ComponentPropsWithRef<'div'> & {
   paused?: boolean
   show?: boolean
   spinnerWidth?: number
@@ -23,8 +23,6 @@ export type LoadingSpinnerProps = DivProps & {
   centered?: boolean
   animateTransitions?: boolean
 }
-
-type ScrollingBGImageProps = ImgProps & { height: number }
 
 const bgKeyframes = keyframes`
   0% {
@@ -35,12 +33,6 @@ const bgKeyframes = keyframes`
   }
 `
 
-const commonAnimStyles = {
-  animationDuration: '3s',
-  animationTimingFunction: 'linear',
-  animationIterationCount: 'infinite',
-}
-
 const logoEnterStyles = {
   '.enter &': {
     opacity: 0,
@@ -49,7 +41,7 @@ const logoEnterStyles = {
   '.enter-active &, .enter-done &': {
     opacity: 1,
     transform: 'scale(1)',
-    visibility: 'visible',
+    visibility: 'visible' as const,
   },
   '.enter-active &': {
     transition: 'all 0.3s cubic-bezier(.37,1.4,.62,1)',
@@ -91,29 +83,33 @@ const CenteringWrapperBase = styled(WrapperBase)<{ areaHeight: any }>`
   transform: translateY(var(--translateAmt));
 `
 
-function ScrollingBGImageBase({
-  ref: _ref,
-  height,
-  ...props
-}: ScrollingBGImageProps) {
-  const styles = {
-    background: 'url(/page-load-spinner/page-load-spinner-bg.png)',
-    backgroundSize: '100% auto',
-    backgroundRepeat: 'repeat-y',
-    height,
-    width: height * 6,
-    '&:nth-child(2n)': {
-      transform: 'rotate(180deg)',
-    },
-  }
+const ScrollingBGImageBase = styled.div<{ $height: number }>(({ $height }) => ({
+  background: 'url(/page-load-spinner/page-load-spinner-bg.png)',
+  backgroundSize: '100% auto',
+  backgroundRepeat: 'repeat-y',
+  height: $height,
+  width: $height * 6,
+  '&:nth-child(2n)': {
+    transform: 'rotate(180deg)',
+  },
+}))
 
-  return (
-    <Div
-      {...styles}
-      {...props}
-    />
-  )
-}
+const HiddenLogoSC = styled.img({
+  display: 'block',
+  width: '100%',
+  visibility: 'hidden',
+})
+
+const LogoMaskSC = styled.div<{ $width: number }>(({ $width }) => ({
+  mask: 'url(/logos/plural-logomark-only-white.svg) 0 0 / contain no-repeat',
+  background: 'url(/logos/plural-logomark-only-white.svg)',
+  backgroundSize: 'contain',
+  overflow: 'hidden',
+  width: $width,
+  height: 'auto',
+  position: 'relative',
+  ...logoEnterStyles,
+}))
 
 const ScrollingBGImage = styled(ScrollingBGImageBase)`
   @supports (aspect-ratio: 6 / 1) {
@@ -121,6 +117,19 @@ const ScrollingBGImage = styled(ScrollingBGImageBase)`
     width: auto;
     aspect-ratio: 6 / 1;
   }
+`
+
+const BgTrackSC = styled.div<{ $paused?: boolean }>`
+  display: flex;
+  flex-wrap: nowrap;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  animation-name: ${bgKeyframes};
+  animation-play-state: ${({ $paused }) => ($paused ? 'paused' : 'running')};
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 `
 
 function WrapperBase({ children }: { children: ReactNode }) {
@@ -138,6 +147,7 @@ function WrapperBase({ children }: { children: ReactNode }) {
 }
 
 function CenteringWrapper({ children }: { children: ReactNode }) {
+  const theme = useTheme()
   const [top, setTop] = useState<number | null>(null)
   const [windowHeight, setWindowHeight] = useState<number | null>(
     window.innerHeight
@@ -185,7 +195,10 @@ function CenteringWrapper({ children }: { children: ReactNode }) {
       alignItems="center"
       justifyContent="center"
       overflow="hidden"
-      paddingHorizontal="small"
+      css={{
+        paddingLeft: theme.spacing.small,
+        paddingRight: theme.spacing.small,
+      }}
       width="100%"
       height={wrapperHeight}
     >
@@ -196,16 +209,17 @@ function CenteringWrapper({ children }: { children: ReactNode }) {
   )
 }
 
+const WrapperSC = styled.div(exitStyles)
+
 function Wrapper({
   ref,
   centered,
   children,
   ...props
-}: DivProps & { centered: boolean }) {
+}: ComponentPropsWithRef<'div'> & { centered: boolean }) {
   return (
-    <Div
+    <WrapperSC
       ref={ref}
-      {...exitStyles}
       {...props}
     >
       {centered ? (
@@ -213,7 +227,7 @@ function Wrapper({
       ) : (
         <WrapperBase>{children}</WrapperBase>
       )}
-    </Div>
+    </WrapperSC>
   )
 }
 
@@ -269,37 +283,17 @@ function LoadingSpinner({
         className="wrapper"
         {...props}
       >
-        <Div
+        <LogoMaskSC
           ref={nodeRef}
-          mask="url(/logos/plural-logomark-only-white.svg) 0 0 / contain no-repeat"
-          background="url(/logos/plural-logomark-only-white.svg)"
-          backgroundSize="contain"
-          overflow="hidden"
-          width={spinnerWidth}
-          height="auto"
-          position="relative"
-          {...logoEnterStyles}
+          $width={spinnerWidth}
         >
-          <Img
-            display="block"
-            width="100%"
-            visibility="hidden"
-            src="/logos/plural-logomark-only-white.svg"
-          />
-          <Flex
-            flexWrap="nowrap"
-            height="100%"
-            position="absolute"
-            top="0"
-            animationName={bgKeyframes}
-            animationPlayState={paused ? 'paused' : 'running'}
-            {...commonAnimStyles}
-          >
-            <ScrollingBGImage height={spinnerWidth} />
-            <ScrollingBGImage height={spinnerWidth} />
-            <ScrollingBGImage height={spinnerWidth} />
-          </Flex>
-        </Div>
+          <HiddenLogoSC src="/logos/plural-logomark-only-white.svg" />
+          <BgTrackSC $paused={paused}>
+            <ScrollingBGImage $height={spinnerWidth} />
+            <ScrollingBGImage $height={spinnerWidth} />
+            <ScrollingBGImage $height={spinnerWidth} />
+          </BgTrackSC>
+        </LogoMaskSC>
       </Wrapper>
     </CSSTransition>
   )

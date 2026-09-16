@@ -1,17 +1,26 @@
-import { Button, Div, Flex, H1 } from 'honorable'
 import { type ComponentProps, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
 import type { Meta, StoryObj } from '@storybook/react'
 
+import type { SemanticColorKey } from '../theme/colors'
+
 import {
+  Button,
+  Flex,
   Tab,
   type TabBaseProps,
   TabList,
   type TabListStateProps,
   TabPanel,
 } from '../index'
+
+const Heading = styled.h1(({ theme }) => ({
+  margin: 0,
+  marginBottom: 16,
+  ...theme.partials.text.title1,
+}))
 
 const meta = {
   title: 'Tab List',
@@ -20,6 +29,39 @@ const meta = {
 
 export default meta
 type Story = StoryObj<any>
+
+const CustomTabLabel = styled.div<{ $bg: SemanticColorKey }>(
+  ({ theme, $bg }) => ({
+    ...theme.partials.text.subtitle2,
+    padding: theme.spacing.small,
+    backgroundColor: theme.colors[$bg],
+  })
+)
+
+const CustomTabListAs = styled.div<{
+  $borderColor: SemanticColorKey
+}>(({ theme, $borderColor }) => ({
+  flexShrink: 0,
+  marginRight: theme.spacing.large,
+  width: 200,
+  padding: 10,
+  border: `1px solid ${theme.colors[$borderColor]}`,
+}))
+
+const TigerWrap = styled.div(({ theme }) => ({
+  width: '100%',
+  border: `2px solid ${theme.colors['border-danger']}`,
+}))
+
+const CustomTabRoot = styled.div(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
+  padding: 20,
+  textAlign: 'center',
+  border: theme.borders['fill-two'],
+}))
 
 const tabs = {
   lions: {
@@ -122,7 +164,7 @@ function TemplateBasic(args: any) {
   const tabList = (args.tabs ?? tabs) as typeof tabs
 
   return (
-    <Div>
+    <div>
       <Flex
         flexDirection={orientation === 'vertical' ? 'row' : 'column'}
         maxWidth={800}
@@ -145,13 +187,8 @@ function TemplateBasic(args: any) {
             </Tab>
           ))}
         </TabList>
-        <Div>
-          <H1
-            title1
-            marginBottom="medium"
-          >
-            {(tabList as any)[selectedKey]?.label}
-          </H1>
+        <div>
+          <Heading>{(tabList as any)[selectedKey]?.label}</Heading>
           <TabPanel
             stateRef={tabStateRef}
             paddingTop="large"
@@ -161,9 +198,9 @@ function TemplateBasic(args: any) {
           >
             {(tabList as any)[selectedKey]?.content}
           </TabPanel>
-        </Div>
+        </div>
       </Flex>
-    </Div>
+    </div>
   )
 }
 
@@ -203,30 +240,19 @@ const CustomLinkWrappedTab = styled(
 }))
 
 function MyCustomTab2({ selectedKey, ...props }: any) {
+  const bg: SemanticColorKey =
+    selectedKey === 'bears'
+      ? 'action-primary'
+      : selectedKey === 'tigers'
+        ? 'icon-danger'
+        : 'fill-two'
+
   return (
-    <Flex
-      justifyContent="center"
-      alignItems="center"
-      {...props}
-      width="100%"
-      padding="20px"
-      textAlign="center"
-      border="1px solid border-fill-two"
-    >
-      <Div
-        subtitle2
-        padding="small"
-        background={
-          selectedKey === 'bears'
-            ? 'action-primary'
-            : selectedKey === 'tigers'
-              ? 'icon-danger'
-              : 'fill-two'
-        }
-      >
+    <CustomTabRoot {...props}>
+      <CustomTabLabel $bg={bg}>
         Com&shy;plete&shy;ly custom bears
-      </Div>
-    </Flex>
+      </CustomTabLabel>
+    </CustomTabRoot>
   )
 }
 
@@ -244,22 +270,16 @@ function TemplateComplex() {
   }
 
   return (
-    <Div>
+    <div>
       <Flex flexDirection={orientation === 'vertical' ? 'row' : 'column'}>
         <TabList
           stateRef={tabStateRef}
           stateProps={tabListStateProps}
           as={
-            <Div
-              flexShrink={0}
-              marginRight={orientation === 'vertical' ? 'large' : 0}
-              marginBottom={orientation === 'vertical' ? 0 : 'xlarge'}
-              width={orientation === 'vertical' ? '200px' : '100%'}
-              padding="10px"
-              border="1px solid"
-              borderColor={
+            <CustomTabListAs
+              $borderColor={
                 selectedKey === 'lions'
-                  ? 'border.primary'
+                  ? 'border-primary'
                   : selectedKey === 'tigers'
                     ? 'border-warning'
                     : selectedKey === 'bears'
@@ -279,14 +299,12 @@ function TemplateComplex() {
             key="tigers"
             textValue="Tigers"
             renderer={({ children, ...props }, ref) => (
-              <Div
+              <TigerWrap
                 {...props}
                 ref={ref}
-                width="100%"
-                border="2px solid border-danger"
               >
                 {children}
-              </Div>
+              </TigerWrap>
             )}
           >
             Wrapped tigers
@@ -304,13 +322,8 @@ function TemplateComplex() {
           </CustomLinkWrappedTab>
         </TabList>
 
-        <Div>
-          <H1
-            title1
-            marginBottom="medium"
-          >
-            {(tabs as any)[selectedKey]?.label}
-          </H1>
+        <div>
+          <Heading>{(tabs as any)[selectedKey]?.label}</Heading>
           <TabPanel
             stateRef={tabStateRef}
             paddingTop="large"
@@ -321,9 +334,9 @@ function TemplateComplex() {
           >
             {(tabs as any)[selectedKey]?.content}
           </TabPanel>
-        </Div>
+        </div>
       </Flex>
-    </Div>
+    </div>
   )
 }
 

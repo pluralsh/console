@@ -43,7 +43,7 @@ export function UsersList() {
         placeholder="Search users"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        flexShrink={0}
+        css={{ flexShrink: 0 }}
       />
       <Table
         fullHeightWrap

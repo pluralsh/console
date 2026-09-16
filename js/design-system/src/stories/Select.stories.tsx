@@ -264,10 +264,12 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
         condition={onFillLevel > 0}
         wrapper={
           <Card
-            display="flex"
-            flexDirection="column"
-            gap="large"
-            padding="large"
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.large,
+              padding: theme.spacing.large,
+            }}
             fillLevel={onFillLevel}
           />
         }
@@ -482,10 +484,12 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
         condition={onFillLevel > 0}
         wrapper={
           <Card
-            display="flex"
-            flexDirection="column"
-            gap="large"
-            padding="large"
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.large,
+              padding: theme.spacing.large,
+            }}
             fillLevel={onFillLevel}
           />
         }

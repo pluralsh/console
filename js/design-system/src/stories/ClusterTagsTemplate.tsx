@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import { type ComponentProps, type Key, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 
@@ -6,10 +5,17 @@ import { isEqual, uniqWith } from 'lodash-es'
 
 import styled, { useTheme } from 'styled-components'
 
-import { Card, Chip, ComboBox, ListBoxItem, TagIcon, WrapWithIf } from '..'
+import {
+  Card,
+  Chip,
+  ComboBox,
+  Flex,
+  ListBoxItem,
+  TagIcon,
+  WrapWithIf,
+} from '..'
 
 import { isNonNullable } from '../utils/isNonNullable'
-import TextSwitch from '../components/TextSwitch'
 
 const TagPicker = styled.div(({ theme }) => ({
   display: 'flex',
@@ -58,7 +64,6 @@ export function ClusterTagsTemplate({
   const selectedTagArr = useMemo(() => [...selectedTagKeys], [selectedTagKeys])
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
-  const [searchLogic, setSearchLogic] = useState<string>('AND')
 
   const fuse = useMemo(
     () =>
@@ -103,10 +108,12 @@ export function ClusterTagsTemplate({
       condition={onFillLevel > 0}
       wrapper={
         <Card
-          display="flex"
-          flexDirection="column"
-          gap="large"
-          padding="large"
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            padding: theme.spacing.large,
+          }}
           fillLevel={onFillLevel}
         />
       }
@@ -121,23 +128,6 @@ export function ClusterTagsTemplate({
             inputValue={inputValue}
             onSelectionChange={onSelectionChange}
             onInputChange={onInputChange}
-            inputContent={
-              selectedTagArr.length > -1 && (
-                <TextSwitch
-                  onClick={(e) => e.stopPropagation()}
-                  size="small"
-                  value={searchLogic}
-                  onChange={(value) => setSearchLogic(value as string)}
-                  options={[
-                    { label: 'All', value: 'AND' },
-                    { label: 'Any', value: 'OR' },
-                  ]}
-                  style={{ marginRight: theme.spacing.xxsmall }}
-                  label="Match"
-                  labelPosition="start"
-                />
-              )
-            }
             chips={selectedTagArr.map((key) => ({
               key,
               children: key,
