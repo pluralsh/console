@@ -67,6 +67,8 @@ After the init container copies that tree, the harness sees:
 
 Files are owned by uid `65532` (nonroot) so agent-run pods can read them.
 
+User-facing walkthrough: [Prebaked repositories](https://docs.plural.sh/plural-features/plural-ai/ai-agent/repository-prebake).
+
 When `/plural/shared/repos/manifest.json` is present, agent-bootstrap matches
 the run repository URL (https and ssh forms of the same repo are equivalent)
 and copies that tree into `/plural/shared/repository`. Fetch of the requested
