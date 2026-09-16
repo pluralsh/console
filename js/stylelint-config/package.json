@@ -1,0 +1,45 @@
+{
+  "name": "@pluralsh/stylelint-config",
+  "version": "1.0.0",
+  "description": "A modern stylelint configuration",
+  "author": "Plural (https://plural.sh)",
+  "license": "MIT",
+  "homepage": "https://github.com/pluralsh/stylelint-config#readme",
+  "bugs": {
+    "url": "https://github.com/pluralsh/stylelint-config/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pluralsh/stylelint-config.git"
+  },
+  "keywords": [
+    "stylelint"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "fix": "eslint . --fix"
+  },
+  "engines": {
+    "node": "18.20.8"
+  },
+  "packageManager": "yarn@3.8.7",
+  "peerDependencies": {
+    "stylelint": ">= 14.9.1"
+  },
+  "dependencies": {
+    "stylelint": "15.11.0",
+    "stylelint-config-standard": "34.0.0",
+    "stylelint-no-unsupported-browser-features": "6.1.0",
+    "stylelint-order": "6.0.4"
+  },
+  "devDependencies": {
+    "conventional-changelog-conventionalcommits": "6.1.0",
+    "eslint": "8.57.1",
+    "eslint-config-pluralsh": "3.1.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "4.6.0"
+  }
+}

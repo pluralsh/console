@@ -1,0 +1,14 @@
+# IDE
+.vscode
+.idea
+
+# Yarn
+yarn-error.log
+.pnp.*
+.yarn/*
+node_modules
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
