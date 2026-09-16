@@ -723,18 +723,6 @@ _Appears in:_
 | `endpoint` _string_ |  |  | Optional: \{\} <br /> |
 
 
-#### MiseSpec
-
-MiseSpec is an inline mise.toml used for unattended bootstrap.
-See https://mise.jdx.dev/bootstrap.html
-
-_Appears in:_
-- [AgentRuntimeSpec](#agentruntimespec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `config` _string_ | Config is the contents of a mise.toml. |  | Optional: \{\} <br /> |
-
 #### GitSpec
 
 
@@ -922,6 +910,23 @@ MetricsAggregate
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 
 
+
+
+#### MiseSpec
+
+
+
+MiseSpec is an inline mise.toml used for unattended bootstrap.
+See https://mise.jdx.dev/bootstrap.html
+
+
+
+_Appears in:_
+- [AgentRuntimeSpec](#agentruntimespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `config` _string_ | Config is the contents of a mise.toml. |  | Optional: \{\} <br /> |
 
 
 #### OpenCodeConfig
