@@ -1,7 +1,9 @@
 import {
   ReactNode,
   type ComponentProps,
+  type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
+  type DOMAttributes,
   type ReactElement,
 } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
@@ -28,7 +30,15 @@ export type ChipProps = ComponentPropsWithRef<typeof Card> & {
   endIcon?: ReactNode
   loading?: boolean
   closeButton?: boolean
-  closeButtonProps?: ComponentPropsWithRef<'div'>
+  // Ref is omitted: the close control renders as a <button>, or as a <div>
+  // when the chip itself is clickable (nested buttons are invalid HTML), so a
+  // single ref type cannot cover both. Handlers are generalized to
+  // HTMLElement so the same props work for either element.
+  closeButtonProps?: Omit<
+    ComponentPropsWithoutRef<'div'>,
+    keyof DOMAttributes<HTMLElement>
+  > &
+    DOMAttributes<HTMLElement>
   clickable?: boolean
   rounded?: boolean
   truncateWidth?: number
@@ -233,13 +243,12 @@ function Chip({
       {endIcon}
       {closeButton && (
         <CloseButtonSC
-          disabled={disabled}
           $fillLevel={fillLevel}
           {...{
             [CHIP_CLOSE_ATTR_KEY]: '',
           }}
-          {...(clickable ? { as: 'div' } : {})}
-          {...(closeButtonProps || {})}
+          {...(clickable ? { as: 'div' as const } : { disabled })}
+          {...closeButtonProps}
         >
           <CloseIcon
             className="closeIcon"

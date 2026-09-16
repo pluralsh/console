@@ -8,14 +8,7 @@ import {
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import {
-  Dispatch,
-  Key,
-  ReactElement,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { Dispatch, ReactElement, useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { disabledNumberInputArrows, RegionsForProvider } from '../helpers'
@@ -41,7 +34,7 @@ function NodeGroup({
 }: NodeGroupProps): ReactElement<any> {
   const theme = useTheme()
   const regions = useMemo(() => RegionsForProvider[provider], [provider])
-  const [selectedRegion, setSelectedRegion] = useState<Nullable<Key>>(
+  const [selectedRegion, setSelectedRegion] = useState<Nullable<string>>(
     initialNodeGroup.nodeType
   )
   const [nodeGroup, setNodeGroup] = useState<NodeGroupType>(initialNodeGroup)
@@ -145,11 +138,10 @@ function NodeGroup({
           required
           style={{ width: '100%' }}
         >
-          {/* @ts-ignore */}
           <Select
             aria-label="node type"
             selectedKey={selectedRegion}
-            onSelectionChange={setSelectedRegion}
+            onSelectionChange={(key) => setSelectedRegion(String(key))}
           >
             {regions.map((r) => (
               <ListBoxItem
