@@ -103,10 +103,9 @@ function BaseFlex({
   const { css: unprocessedStyleProps, rest } = splitCssAndDomProps(
     otherProps as Record<string, unknown>
   )
-  const { css: styleProps } = resolveSpacersAndSanitizeCss(
-    unprocessedStyleProps,
-    theme
-  )
+  const { rest: nonSpacingProps, css: spacingProps } =
+    resolveSpacersAndSanitizeCss(unprocessedStyleProps, theme)
+  const styleProps = { ...nonSpacingProps, ...spacingProps }
 
   return (
     <WrapWithIf
