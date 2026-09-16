@@ -115,7 +115,7 @@
   },
   "devDependencies": {
     "@apollo/sandbox": "2.7.4",
-    "@babel/core": "8.0.5",
+    "@babel/core": "7.29.7",
     "@graphql-codegen/add": "7.1.0",
     "@graphql-codegen/cli": "7.4.1",
     "@graphql-codegen/fragment-matcher": "7.1.0",
