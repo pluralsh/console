@@ -139,6 +139,7 @@ const GlobalStyleSheet = createGlobalStyle(({ theme }) => ({
     fontSize: 14,
     lineHeight: 1.15,
     WebkitTextSizeAdjust: '100%',
+    colorScheme: theme.mode,
   },
   // Keep html/body on the app-shell token (index.html reads --color-page-background).
   // This is intentionally NOT fill-zero.
@@ -151,6 +152,7 @@ const GlobalStyleSheet = createGlobalStyle(({ theme }) => ({
   },
   'h1, h2, h3, h4, h5, h6, p': {
     margin: 0,
+    color: 'inherit',
   },
   'a, a:visited, a:hover, a:active': {
     color: 'inherit',
