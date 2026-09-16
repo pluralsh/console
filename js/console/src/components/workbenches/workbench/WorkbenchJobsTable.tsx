@@ -44,6 +44,9 @@ import {
   chatProviderConnectionLabel,
 } from './chatbots/utils'
 
+const WORKBENCH_JOB_ROW_HEIGHT = 52
+const getWorkbenchJobRowHeight = () => WORKBENCH_JOB_ROW_HEIGHT
+
 export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -89,6 +92,10 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       lockColumnsOnScroll={false}
+      reactVirtualOptions={{
+        estimateSize: getWorkbenchJobRowHeight,
+        measureElement: getWorkbenchJobRowHeight,
+      }}
       overflowX="hidden"
       data={jobs}
       columns={
