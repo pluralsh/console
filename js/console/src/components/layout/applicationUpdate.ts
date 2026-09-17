@@ -13,10 +13,22 @@ export function isProductionConsole(): boolean {
   return import.meta.env.MODE === 'production'
 }
 
+/** Dev-only: set `VITE_PREVIEW_APPLICATION_UPDATE=true` in `.env` to review sidebar UI. */
+export function isApplicationUpdatePreviewEnabled(): boolean {
+  return (
+    import.meta.env.DEV &&
+    import.meta.env.VITE_PREVIEW_APPLICATION_UPDATE === 'true'
+  )
+}
+
 /** True when the API reports a newer console frontend than this bundle. */
 export function useApplicationUpdateAvailable(): boolean {
   const { configuration } = useContext(LoginContext)
   const serverCommit = configuration?.gitCommit
+
+  if (isApplicationUpdatePreviewEnabled()) {
+    return true
+  }
 
   return (
     isProductionConsole() &&
