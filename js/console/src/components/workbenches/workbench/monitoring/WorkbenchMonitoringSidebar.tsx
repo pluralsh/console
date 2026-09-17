@@ -488,25 +488,21 @@ const GroupListSC = styled.div(({ theme }) => ({
   paddingBottom: theme.spacing.xsmall,
 }))
 
+// IconFrame small (24) + gap + IconFrame small; matches inline confirm.
+const ROW_ACTION_WIDTH = 52
+
 const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
   alignItems: 'center',
   // Note: Figma fill tokens predate the DS rename; these current tokens
   // match the Figma rendered hexes (selected #2A2E37, hover #252932).
   backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
   display: 'flex',
-  gap: theme.spacing.medium,
-  padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.medium}px`,
-  position: 'relative',
+  gap: theme.spacing.xsmall,
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   '&:hover': {
     backgroundColor: $selected
       ? theme.colors['fill-two-selected']
       : theme.colors['fill-one-hover'],
-  },
-  '& .delete-action, & .inline-confirm': {
-    backgroundColor: $selected
-      ? theme.colors['fill-two-selected']
-      : theme.colors['fill-one-hover'],
-    borderRadius: theme.borderRadiuses.medium,
   },
   '& .delete-action': {
     opacity: 0,
@@ -560,22 +556,20 @@ const RowSubtitleSC = styled.span(({ theme }) => ({
   color: theme.colors['text-light'],
 }))
 
-const DeleteSC = styled.span(({ theme }) => ({
+const DeleteSC = styled.span({
+  alignItems: 'center',
+  display: 'flex',
   flexShrink: 0,
-  position: 'absolute',
-  right: theme.spacing.medium,
-  top: '50%',
-  transform: 'translateY(-50%)',
+  justifyContent: 'flex-end',
   transition: 'opacity 0.15s ease',
-}))
+  width: ROW_ACTION_WIDTH,
+})
 
 const InlineConfirmSC = styled.span(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
   flexShrink: 0,
   gap: theme.spacing.xxsmall,
-  position: 'absolute',
-  right: theme.spacing.medium,
-  top: '50%',
-  transform: 'translateY(-50%)',
+  justifyContent: 'flex-end',
+  width: ROW_ACTION_WIDTH,
 }))
