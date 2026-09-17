@@ -27,7 +27,11 @@ func CopyDir(src, dst string) error {
 		return err
 	}
 
-	return filepath.WalkDir(src, func(path string, d os.DirEntry, err error) error {
+	// Go module caches use 0555 directories. WalkDir visits a directory before
+	// its children, so mkdir with the source mode would make copyFile fail with
+	// permission denied. Create dirs writable, then restore source perms.
+	var dirPerms []copiedDir
+	if err := filepath.WalkDir(src, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -56,7 +60,11 @@ func CopyDir(src, dst string) error {
 			if err != nil {
 				return err
 			}
-			return os.MkdirAll(target, dirInfo.Mode().Perm())
+			if err := os.MkdirAll(target, 0755); err != nil {
+				return err
+			}
+			dirPerms = append(dirPerms, copiedDir{path: target, perm: dirInfo.Mode().Perm()})
+			return nil
 		case d.Type().IsRegular():
 			fileInfo, err := d.Info()
 			if err != nil {
@@ -66,7 +74,21 @@ func CopyDir(src, dst string) error {
 		default:
 			return nil
 		}
-	})
+	}); err != nil {
+		return err
+	}
+
+	for i := len(dirPerms) - 1; i >= 0; i-- {
+		if err := os.Chmod(dirPerms[i].path, dirPerms[i].perm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type copiedDir struct {
+	path string
+	perm os.FileMode
 }
 
 func copyFile(src, dst string, mode os.FileMode) error {
