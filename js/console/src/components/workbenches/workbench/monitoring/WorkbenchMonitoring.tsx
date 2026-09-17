@@ -17,14 +17,18 @@ import { WorkbenchMonitoringBuild } from './WorkbenchMonitoringBuild'
 import { WorkbenchMonitoringSidebar } from './WorkbenchMonitoringSidebar'
 
 export function WorkbenchMonitoring() {
-  const { workbenchId, isLoading } =
-    useOutletContext<WorkbenchOutletContext>()
+  const { workbenchId, isLoading } = useOutletContext<WorkbenchOutletContext>()
   const params = useParams()
   const dashboardId = params[WORKBENCH_MONITORING_DASHBOARD_PARAM_ID]
   const monitorId = params[WORKBENCH_MONITORING_MONITOR_PARAM_ID]
 
+  // Tab strip height matches the sidebar filter row:
+  // 2x16 padding + 32 input + 1 border.
   return (
     <WorkbenchPageLayout
+      contentBackground="fill-accent"
+      tabStripBackground="fill-zero-selected"
+      tabStripHeight={65}
       sidebar={{
         kind: 'custom',
         content: <WorkbenchMonitoringSidebar workbenchId={workbenchId} />,
@@ -76,16 +80,30 @@ function DashboardDetail({ dashboardId }: { dashboardId: string }) {
   if (loading) return <MonitoringDetailSkeleton />
   if (error) return <GqlError error={error} />
   const dashboard = data?.workbenchDashboard
-  if (!dashboard)
-    return <EmptyState message="Dashboard not found." />
+  if (!dashboard) return <EmptyState message="Dashboard not found." />
 
+  return (
+    <DashboardDetailView
+      name={dashboard.name}
+      description={dashboard.description}
+    />
+  )
+}
+
+function DashboardDetailView({
+  name,
+  description,
+}: {
+  name: string
+  description: Nullable<string>
+}) {
   return (
     <Flex
       direction="column"
       gap="medium"
     >
-      <h2>{dashboard.name}</h2>
-      {dashboard.description && <p>{dashboard.description}</p>}
+      <h2>{name}</h2>
+      {description && <p>{description}</p>}
       <Card css={{ padding: 24 }}>
         <EmptyState message="Dashboard panels are coming soon." />
       </Card>
@@ -105,12 +123,27 @@ function MonitorDetail({ monitorId }: { monitorId: string }) {
   if (!monitor) return <EmptyState message="Monitor not found." />
 
   return (
+    <MonitorDetailView
+      name={monitor.name}
+      description={monitor.description}
+    />
+  )
+}
+
+function MonitorDetailView({
+  name,
+  description,
+}: {
+  name: string
+  description: Nullable<string>
+}) {
+  return (
     <Flex
       direction="column"
       gap="medium"
     >
-      <h2>{monitor.name}</h2>
-      {monitor.description && <p>{monitor.description}</p>}
+      <h2>{name}</h2>
+      {description && <p>{description}</p>}
       <Card css={{ padding: 24 }}>
         <EmptyState message="Monitor details are coming soon." />
       </Card>

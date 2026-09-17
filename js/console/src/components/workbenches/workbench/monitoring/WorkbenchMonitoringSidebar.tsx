@@ -2,13 +2,11 @@ import {
   AddIcon,
   CheckIcon,
   CloseIcon,
-  DashboardIcon,
   EmptyState,
   Flex,
   IconFrame,
   Input,
   SearchIcon,
-  SirenIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -45,6 +43,13 @@ function isNearBottom(el: HTMLElement) {
   return el.scrollHeight - el.scrollTop - el.clientHeight < 200
 }
 
+function initials(name: string) {
+  const words = name.split(/[^A-Za-z0-9]+/).filter(Boolean)
+  if (words.length === 0) return '?'
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+  return `${words[0][0]}${words[1][0]}`.toUpperCase()
+}
+
 export function WorkbenchMonitoringSidebar({
   workbenchId,
 }: {
@@ -64,7 +69,10 @@ export function WorkbenchMonitoringSidebar({
     { id: workbenchId, q: trimmedFilter || undefined }
   )
   const monitors = useFetchPaginatedData(
-    { queryHook: useWorkbenchMonitorsQuery, keyPath: ['workbench', 'monitors'] },
+    {
+      queryHook: useWorkbenchMonitorsQuery,
+      keyPath: ['workbench', 'monitors'],
+    },
     { id: workbenchId, q: trimmedFilter || undefined }
   )
 
@@ -86,6 +94,7 @@ export function WorkbenchMonitoringSidebar({
       <FilterSC>
         <Input
           showClearButton
+          size="small"
           startIcon={<SearchIcon />}
           placeholder="Filter dashboards and monitors"
           value={filter}
@@ -116,7 +125,11 @@ export function WorkbenchMonitoringSidebar({
                   }
                 />
               </GroupHeaderSC>
-              {dashboards.error && <GqlError error={dashboards.error} />}
+              {dashboards.error && (
+                <PaddedSC>
+                  <GqlError error={dashboards.error} />
+                </PaddedSC>
+              )}
               <GroupListSC
                 aria-label="Dashboards"
                 onScroll={(e) => {
@@ -127,13 +140,17 @@ export function WorkbenchMonitoringSidebar({
                 }}
               >
                 {dashboardsLoading ? (
-                  <MonitoringListSkeleton count={3} />
+                  <PaddedSC>
+                    <MonitoringListSkeleton count={3} />
+                  </PaddedSC>
                 ) : dashboardNodes.length === 0 ? (
-                  <CaptionP $color="text-xlight">
-                    {hasFilter
-                      ? 'No dashboards match this filter.'
-                      : 'No dashboards yet.'}
-                  </CaptionP>
+                  <PaddedSC>
+                    <CaptionP $color="text-xlight">
+                      {hasFilter
+                        ? 'No dashboards match this filter.'
+                        : 'No dashboards yet.'}
+                    </CaptionP>
+                  </PaddedSC>
                 ) : (
                   dashboardNodes.map((dashboard) => (
                     <DashboardRow
@@ -161,7 +178,11 @@ export function WorkbenchMonitoringSidebar({
                   }
                 />
               </GroupHeaderSC>
-              {monitors.error && <GqlError error={monitors.error} />}
+              {monitors.error && (
+                <PaddedSC>
+                  <GqlError error={monitors.error} />
+                </PaddedSC>
+              )}
               <GroupListSC
                 aria-label="Monitors"
                 onScroll={(e) => {
@@ -172,13 +193,17 @@ export function WorkbenchMonitoringSidebar({
                 }}
               >
                 {monitorsLoading ? (
-                  <MonitoringListSkeleton count={3} />
+                  <PaddedSC>
+                    <MonitoringListSkeleton count={3} />
+                  </PaddedSC>
                 ) : monitorNodes.length === 0 ? (
-                  <CaptionP $color="text-xlight">
-                    {hasFilter
-                      ? 'No monitors match this filter.'
-                      : 'No monitors yet.'}
-                  </CaptionP>
+                  <PaddedSC>
+                    <CaptionP $color="text-xlight">
+                      {hasFilter
+                        ? 'No monitors match this filter.'
+                        : 'No monitors yet.'}
+                    </CaptionP>
+                  </PaddedSC>
                 ) : (
                   monitorNodes.map((monitor) => (
                     <MonitorRow
@@ -245,7 +270,7 @@ function DashboardRow({
   const { popToast } = useSimpleToast()
   const selectedId = useParams()[WORKBENCH_MONITORING_DASHBOARD_PARAM_ID]
   const [confirming, setConfirming] = useState(false)
-  const [deleteDashboard, { loading }] = useDeleteWorkbenchDashboardMutation({
+  const [deleteDashboard] = useDeleteWorkbenchDashboardMutation({
     variables: { id: dashboard.id },
     awaitRefetchQueries: true,
     refetchQueries: ['WorkbenchDashboards'],
@@ -267,12 +292,7 @@ function DashboardRow({
         })}
         aria-label={`Dashboard ${dashboard.name}`}
       >
-        <IconFrame
-          circle
-          size="large"
-          type="secondary"
-          icon={<DashboardIcon />}
-        />
+        <RowAvatarSC aria-hidden="true">{initials(dashboard.name)}</RowAvatarSC>
         <RowTextSC>
           <RowTitleSC>{dashboard.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -283,7 +303,7 @@ function DashboardRow({
         </RowTextSC>
       </RowLinkSC>
       {confirming ? (
-        <InlineConfirmSC>
+        <InlineConfirmSC className="inline-confirm">
           <IconFrame
             clickable
             size="small"
@@ -313,7 +333,6 @@ function DashboardRow({
           />
         </DeleteSC>
       )}
-      {loading && <RectangleSkeleton $height="xsmall" />}
     </RowSC>
   )
 }
@@ -329,7 +348,7 @@ function MonitorRow({
   const { popToast } = useSimpleToast()
   const selectedId = useParams()[WORKBENCH_MONITORING_MONITOR_PARAM_ID]
   const [confirming, setConfirming] = useState(false)
-  const [deleteMonitor, { loading }] = useDeleteMonitorMutation({
+  const [deleteMonitor] = useDeleteMonitorMutation({
     variables: { id: monitor.id },
     awaitRefetchQueries: true,
     refetchQueries: ['WorkbenchMonitors'],
@@ -351,12 +370,7 @@ function MonitorRow({
         })}
         aria-label={`Monitor ${monitor.name}`}
       >
-        <IconFrame
-          circle
-          size="large"
-          type="secondary"
-          icon={<SirenIcon />}
-        />
+        <RowAvatarSC aria-hidden="true">{initials(monitor.name)}</RowAvatarSC>
         <RowTextSC>
           <RowTitleSC>{monitor.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -367,7 +381,7 @@ function MonitorRow({
         </RowTextSC>
       </RowLinkSC>
       {confirming ? (
-        <InlineConfirmSC>
+        <InlineConfirmSC className="inline-confirm">
           <IconFrame
             clickable
             size="small"
@@ -397,14 +411,14 @@ function MonitorRow({
           />
         </DeleteSC>
       )}
-      {loading && <RectangleSkeleton $height="xsmall" />}
     </RowSC>
   )
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
-  backgroundColor: theme.colors['fill-zero'],
+  // Figma renders the sidebar one step lighter than the main panel (#171A21).
+  backgroundColor: theme.colors['fill-zero-selected'],
   borderRight: theme.borders.default,
   boxSizing: 'border-box',
   display: 'flex',
@@ -435,21 +449,23 @@ const NoMatchesSC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
 }))
 
-const GroupSC = styled.div<{ $first?: boolean }>(
-  ({ theme, $first }) => ({
-    display: 'flex',
-    flex: '1 1 0',
-    flexDirection: 'column',
-    gap: theme.spacing.xsmall,
-    minHeight: 0,
-    overflow: 'hidden',
-    padding: `0 ${theme.spacing.medium}px ${theme.spacing.medium}px`,
-    ...(!$first && {
-      borderTop: theme.borders.default,
-      paddingTop: theme.spacing.medium,
-    }),
-  })
-)
+const GroupSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
+  display: 'flex',
+  flex: '1 1 0',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  minHeight: 0,
+  overflow: 'hidden',
+  paddingBottom: theme.spacing.medium,
+  ...(!$first && {
+    borderTop: theme.borders.default,
+    paddingTop: theme.spacing.large,
+  }),
+}))
+
+const PaddedSC = styled.div(({ theme }) => ({
+  padding: `0 ${theme.spacing.medium}px`,
+}))
 
 const GroupHeaderSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
@@ -458,7 +474,7 @@ const GroupHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   justifyContent: 'space-between',
-  padding: `${theme.spacing.xsmall}px 0`,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px ${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
 }))
 
 const GroupListSC = styled.div(({ theme }) => ({
@@ -472,27 +488,33 @@ const GroupListSC = styled.div(({ theme }) => ({
   paddingBottom: theme.spacing.xsmall,
 }))
 
-const RowSC = styled.div<{ $selected?: boolean }>(
-  ({ theme, $selected }) => ({
-    alignItems: 'center',
-    backgroundColor: $selected ? theme.colors['fill-one-selected'] : undefined,
+const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
+  alignItems: 'center',
+  // Note: Figma fill tokens predate the DS rename; these current tokens
+  // match the Figma rendered hexes (selected #2A2E37, hover #252932).
+  backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
+  display: 'flex',
+  gap: theme.spacing.medium,
+  padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.medium}px`,
+  position: 'relative',
+  '&:hover': {
+    backgroundColor: $selected
+      ? theme.colors['fill-two-selected']
+      : theme.colors['fill-one-hover'],
+  },
+  '& .delete-action, & .inline-confirm': {
+    backgroundColor: $selected
+      ? theme.colors['fill-two-selected']
+      : theme.colors['fill-one-hover'],
     borderRadius: theme.borderRadiuses.medium,
-    display: 'flex',
-    gap: theme.spacing.xsmall,
-    padding: `${theme.spacing.small}px ${theme.spacing.xsmall}px`,
-    '&:hover': {
-      backgroundColor: $selected
-        ? theme.colors['fill-one-selected']
-        : theme.colors['fill-one-hover'],
-    },
-    '& .delete-action': {
-      opacity: 0,
-    },
-    '&:hover .delete-action, &:focus-within .delete-action': {
-      opacity: 1,
-    },
-  })
-)
+  },
+  '& .delete-action': {
+    opacity: 0,
+  },
+  '&:hover .delete-action, &:focus-within .delete-action': {
+    opacity: 1,
+  },
+}))
 
 const RowLinkSC = styled(Link)({
   alignItems: 'center',
@@ -502,6 +524,20 @@ const RowLinkSC = styled(Link)({
   minWidth: 0,
   textDecoration: 'none',
 })
+
+const RowAvatarSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  border: theme.borders.default,
+  borderRadius: '50%',
+  color: theme.colors.text,
+  display: 'flex',
+  flexShrink: 0,
+  fontFamily: theme.fontFamilies.mono,
+  fontSize: 18,
+  height: 40,
+  justifyContent: 'center',
+  width: 40,
+}))
 
 const RowTextSC = styled.div({
   display: 'flex',
@@ -524,14 +560,22 @@ const RowSubtitleSC = styled.span(({ theme }) => ({
   color: theme.colors['text-light'],
 }))
 
-const DeleteSC = styled.span({
+const DeleteSC = styled.span(({ theme }) => ({
   flexShrink: 0,
+  position: 'absolute',
+  right: theme.spacing.medium,
+  top: '50%',
+  transform: 'translateY(-50%)',
   transition: 'opacity 0.15s ease',
-})
+}))
 
 const InlineConfirmSC = styled.span(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
   flexShrink: 0,
   gap: theme.spacing.xxsmall,
+  position: 'absolute',
+  right: theme.spacing.medium,
+  top: '50%',
+  transform: 'translateY(-50%)',
 }))

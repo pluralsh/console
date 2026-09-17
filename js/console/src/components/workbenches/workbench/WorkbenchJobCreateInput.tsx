@@ -66,6 +66,7 @@ export function WorkbenchJobCreateInput({
   onCreated,
   placeholder = 'Send a job to your workbench.  Use / for skills and @ to mention clusters, services, stacks or repositories',
   wrapperStyles,
+  bgColor,
 }: {
   workbenchId: Nullable<string>
   flowId?: Nullable<string>
@@ -76,6 +77,7 @@ export function WorkbenchJobCreateInput({
   onCreated?: (job: WorkbenchJobFragment) => void
   placeholder?: string
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
+  bgColor?: ComponentProps<typeof ChatInputSimple>['bgColor']
 }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -253,6 +255,7 @@ export function WorkbenchJobCreateInput({
             </Flex>
           }
           wrapperStyles={{ maxWidth: MAX_WIDTH, ...wrapperStyles }}
+          bgColor={bgColor}
         />
       </InputWrapperSC>
     </>

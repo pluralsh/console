@@ -90,6 +90,7 @@ export function WorkbenchMonitoringBuild({
         workbenchId={workbenchId}
         workbenchLoading={workbenchLoading}
         placeholder="Describe what you want to build or questions you have on your clusters."
+        bgColor="fill-one-selected"
       />
       <SuggestionsSC>
         {SUGGESTIONS[kind].map((suggestion) => (
@@ -120,7 +121,7 @@ export function WorkbenchMonitoringBuild({
       <Flex justify="center">
         <Button
           small
-          secondary
+          floating
           as={Link}
           to={getWorkbenchMonitoringAbsPath(workbenchId)}
         >
@@ -162,7 +163,8 @@ const SuggestionsSC = styled.div({
 
 const SuggestionCardSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,
-  backgroundColor: theme.colors['fill-one'],
+  // fill-one-selected matches Figma fill/one #21242C (pre-rename tokens)
+  backgroundColor: theme.colors['fill-one-selected'],
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
   cursor: 'pointer',
@@ -195,7 +197,8 @@ const PromptSC = styled(Body2P)(({ theme }) => ({
 
 const ArrowSC = styled.div(({ theme }) => ({
   alignItems: 'center',
-  backgroundColor: theme.colors['fill-two'],
+  // fill-two-selected matches Figma fill/two #2A2E37 (pre-rename tokens)
+  backgroundColor: theme.colors['fill-two-selected'],
   borderRadius: '50%',
   color: theme.colors['icon-light'],
   display: 'flex',

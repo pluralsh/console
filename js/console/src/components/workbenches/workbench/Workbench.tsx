@@ -8,6 +8,7 @@ import {
   GearTrainIcon,
   ListBoxItem,
   ReturnIcon,
+  SemanticColorKey,
   ToolsIcon,
   TrashCanIcon,
   TuningIcon,
@@ -96,6 +97,9 @@ export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
   showEditWorkbenchButton?: boolean
   headerActions?: ReactNode
+  contentBackground?: SemanticColorKey
+  tabStripBackground?: SemanticColorKey
+  tabStripHeight?: number
   children?: ReactNode
 }
 
@@ -103,6 +107,9 @@ export function WorkbenchPageLayout({
   sidebar = { kind: 'default' },
   showEditWorkbenchButton = true,
   headerActions,
+  contentBackground,
+  tabStripBackground,
+  tabStripHeight,
   children,
 }: WorkbenchPageLayoutProps) {
   const theme = useTheme()
@@ -207,12 +214,26 @@ export function WorkbenchPageLayout({
         minHeight={0}
         minWidth={0}
         overflow="auto"
+        css={
+          contentBackground
+            ? { backgroundColor: theme.colors[contentBackground] }
+            : undefined
+        }
       >
         <Flex
           align="center"
           gap="small"
           css={{
-            padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+            backgroundColor:
+              tabStripBackground && theme.colors[tabStripBackground],
+            ...(tabStripHeight
+              ? {
+                  height: tabStripHeight,
+                  padding: `0 ${theme.spacing.large}px`,
+                }
+              : {
+                  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+                }),
             position: 'relative',
             zIndex: 1,
           }}
