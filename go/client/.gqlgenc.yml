@@ -21,6 +21,11 @@ models:
     model: github.com/99designs/gqlgen/graphql.String
   UploadOrUrl:
     model: github.com/99designs/gqlgen/graphql.String
+  # Preserve omitted versus explicitly empty container lists in job inputs.
+  GateJobAttributes:
+    fields:
+      containers:
+        type: "*[]*github.com/pluralsh/console/go/client.ContainerAttributes"
 schema:
   - "../../schema/*.graphql"
 query:

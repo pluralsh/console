@@ -10967,6 +10967,7 @@ input GateJobAttributes {
   "if you'd rather define the job spec via straight k8s yaml"
   raw: String
 
+  "containers to run in this job; an empty list clears configured containers"
   containers: [ContainerAttributes]
 
   labels: Json
