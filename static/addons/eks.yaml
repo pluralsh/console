@@ -4531,6 +4531,13 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.21.2-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.21.1-eksbuild.6
     compatibilities:
     - '1.36'
@@ -5363,6 +5370,15 @@
   publisher: Chainguard
 - name: chainguard_aws-vpc-cni-fips
   versions:
+  - version: v1.22.10004020260915-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.22.10004020260907-eksbuild.1
     compatibilities:
     - '1.35'
@@ -10231,6 +10247,15 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.20.0-eksbuild.6
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.20.0-eksbuild.5
     compatibilities:
     - '1.36'
@@ -10699,6 +10724,11 @@
   publisher: leaksignal
 - name: metrics-server
   versions:
+  - version: v0.9.0-eksbuild.11
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v0.9.0-eksbuild.10
     compatibilities:
     - '1.36'
@@ -10744,6 +10774,14 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v0.8.1-eksbuild.20
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.8.1-eksbuild.19
     compatibilities:
     - '1.36'
@@ -11260,6 +11298,15 @@
   publisher: Nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.12.1-eksbuild.7
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.12.1-eksbuild.6
     compatibilities:
     - '1.36'
@@ -12741,6 +12788,18 @@
   publisher: Uptycs
 - name: upwind-security_upwind-operator
   versions:
+  - version: v0.7.28-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.7.1-eksbuild.1
     compatibilities:
     - '1.34'
