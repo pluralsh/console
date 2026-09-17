@@ -44,21 +44,54 @@ defmodule Console.Services.UsersTest do
       assert hydrated.refresh_token.token
       refute hydrated.refresh_token.token == old.token
 
-      refute Users.get_refresh_token(old.token)
-      assert Users.get_refresh_token(hydrated.refresh_token.token)
+      persisted = Users.get_refresh_token(old.token)
+      assert persisted
+      assert persisted.expires_at
+      assert Timex.after?(persisted.expires_at, Timex.now())
+      assert Timex.before?(persisted.expires_at, Timex.shift(Timex.now(), hours: 2, minutes: 5))
+      refute Users.get_refresh_token(hydrated.refresh_token.token).expires_at
       assert refetch(keep)
+
+      {:ok, again} = Users.authorize_refresh(hydrated.refresh_token.token)
+      assert again.refresh_token.token != hydrated.refresh_token.token
+      assert Users.get_refresh_token(hydrated.refresh_token.token).expires_at
     end
 
-    test "it cannot reuse a rotated refresh token" do
+    test "concurrent tabs can still refresh the prior token during the grace period" do
       user = insert(:user)
       old = insert(:refresh_token, user: user)
 
-      {:ok, hydrated} = Users.authorize_refresh(old.token)
-      {:error, _} = Users.authorize_refresh(old.token)
-      {:ok, again} = Users.authorize_refresh(hydrated.refresh_token.token)
+      {:ok, first} = Users.authorize_refresh(old.token)
+      {:ok, second} = Users.authorize_refresh(old.token)
 
-      assert again.refresh_token.token != hydrated.refresh_token.token
-      refute Users.get_refresh_token(hydrated.refresh_token.token)
+      assert first.refresh_token.token != old.token
+      assert second.refresh_token.token != old.token
+      assert second.refresh_token.token != first.refresh_token.token
+
+      persisted = Users.get_refresh_token(old.token)
+      assert persisted.expires_at
+      assert Users.get_refresh_token(first.refresh_token.token)
+      assert Users.get_refresh_token(second.refresh_token.token)
+    end
+
+    test "reusing a rotated token does not extend its grace period" do
+      user = insert(:user)
+      expires_at = Timex.shift(Timex.now(), hours: 1)
+      old = insert(:refresh_token, user: user, expires_at: expires_at)
+
+      {:ok, hydrated} = Users.authorize_refresh(old.token)
+
+      persisted = Users.get_refresh_token(old.token)
+      assert Timex.equal?(persisted.expires_at, expires_at, :seconds)
+      refute hydrated.refresh_token.token == old.token
+      assert Users.get_refresh_token(hydrated.refresh_token.token)
+    end
+
+    test "it cannot refresh after the grace period expires" do
+      user = insert(:user)
+      old = insert(:refresh_token, user: user, expires_at: Timex.shift(Timex.now(), hours: -1))
+
+      {:error, "could not fetch refresh token"} = Users.authorize_refresh(old.token)
     end
 
     test "it fails if the token does not exist" do

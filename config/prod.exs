@@ -47,7 +47,7 @@ config :console, Console.Cron.Scheduler,
   # overlap: false,
   jobs: [
     {"@daily",         {Console.Cron.Jobs, :prune_invites, []}},
-    {"*/30 * * * *",   {Console.Cron.Jobs, :prune_refresh_tokens, []}},
+    {"0 * * * *",      {Console.Cron.Jobs, :prune_refresh_tokens, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :prune_clusters, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :prune_services, []}},
     {"*/5 * * * *",    {Console.Deployments.Cron, :install_clusters, []}},
