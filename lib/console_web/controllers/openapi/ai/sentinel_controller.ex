@@ -11,8 +11,8 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   alias Console.Deployments.Sentinels
   alias Console.Schema.Sentinel
 
-  plug Scope, [resource: :ai, action: :read] when action in [:show, :show_by_name, :index]
-  plug Scope, [resource: :ai, action: :write] when action in [:trigger]
+  plug Scope, [resource: :sentinel, action: :read] when action in [:show, :show_by_name, :index]
+  plug Scope, [resource: :sentinel, action: :write] when action in [:trigger]
 
   @doc """
   Fetches a sentinel by id.
@@ -20,7 +20,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   operation :show,
     operation_id: "GetSentinel",
     tags: ["sentinel"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["sentinel.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the sentinel"]
     ],
@@ -38,7 +38,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   operation :show_by_name,
     operation_id: "GetSentinelByName",
     tags: ["sentinel"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["sentinel.read"],
     parameters: [
       name: [in: :query, schema: %{type: :string}, required: true, description: "The exact name of the sentinel"]
     ],
@@ -56,7 +56,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   operation :index,
     operation_id: "ListSentinels",
     tags: ["sentinel"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["sentinel.read"],
     parameters: [
       status: [in: :query, schema: %{type: :string, enum: [:pending, :success, :failed]}, required: false, description: "Filter by sentinel status"],
       q: [in: :query, schema: %{type: :string}, required: false, description: "Search sentinels by name"],
@@ -93,7 +93,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   operation :trigger,
     operation_id: "TriggerSentinel",
     tags: ["sentinel"],
-    "x-required-scopes": ["ai.write"],
+    "x-required-scopes": ["sentinel.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The sentinel ID or name:<name> reference to trigger"]
     ],

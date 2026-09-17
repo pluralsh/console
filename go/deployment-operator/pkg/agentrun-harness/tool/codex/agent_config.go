@@ -15,6 +15,8 @@ import (
 // configuration.
 const (
 	gitAccessTokenEnv = "GIT_ACCESS_TOKEN"
+	gitUsernameEnv    = "GIT_USERNAME"
+	gitAskpassEnv     = "GIT_ASKPASS"
 	pathEnv           = "PATH"
 	homeEnv           = "HOME"
 	gitSigningKeyEnv  = "GIT_SIGNING_KEY_PATH"
@@ -116,7 +118,7 @@ func (agent *Agent) nativeMCPServers(external []mcpcfg.Server) []configTemplateM
 }
 
 func (agent *Agent) shellEnvironmentVariables(dindEnabled bool) []string {
-	vars := []string{pathEnv, homeEnv, gitAccessTokenEnv}
+	vars := []string{pathEnv, homeEnv, gitAccessTokenEnv, gitUsernameEnv, gitAskpassEnv}
 	if _, err := os.Stat(gitSigningKeyPath); err == nil {
 		vars = append(vars, gitSigningKeyEnv)
 	}

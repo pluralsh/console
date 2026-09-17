@@ -94,3 +94,21 @@ func TestResolveProviderSettingsPreservesProxyEndpointAndWirePolicy(t *testing.T
 		t.Fatalf("custom provider settings = %q, %q, %q", provider, baseURL, wireAPI)
 	}
 }
+
+func TestShellEnvironmentVariablesIncludeGitBasicAuth(t *testing.T) {
+	agent := NewAgent(toolConfigForTemplateTests())
+	vars := agent.shellEnvironmentVariables(false)
+	want := []string{gitAccessTokenEnv, gitUsernameEnv, gitAskpassEnv}
+	for _, name := range want {
+		found := false
+		for _, got := range vars {
+			if got == name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("shellEnvironmentVariables() = %v, missing %q", vars, name)
+		}
+	}
+}
