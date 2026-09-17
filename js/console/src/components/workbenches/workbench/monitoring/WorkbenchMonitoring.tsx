@@ -13,10 +13,12 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
+import { WorkbenchMonitoringBuild } from './WorkbenchMonitoringBuild'
 import { WorkbenchMonitoringSidebar } from './WorkbenchMonitoringSidebar'
 
 export function WorkbenchMonitoring() {
-  const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
+  const { workbenchId, isLoading } =
+    useOutletContext<WorkbenchOutletContext>()
   const params = useParams()
   const dashboardId = params[WORKBENCH_MONITORING_DASHBOARD_PARAM_ID]
   const monitorId = params[WORKBENCH_MONITORING_MONITOR_PARAM_ID]
@@ -31,9 +33,11 @@ export function WorkbenchMonitoring() {
       <DetailSC>
         {dashboardId ? (
           dashboardId === WORKBENCHES_CREATE_REL_PATH ? (
-            <Card css={{ padding: 24 }}>
-              <EmptyState message="Dashboard builder is coming soon." />
-            </Card>
+            <WorkbenchMonitoringBuild
+              workbenchId={workbenchId}
+              workbenchLoading={isLoading}
+              kind="dashboard"
+            />
           ) : (
             <DashboardDetail
               key={dashboardId}
@@ -42,9 +46,11 @@ export function WorkbenchMonitoring() {
           )
         ) : monitorId ? (
           monitorId === WORKBENCHES_CREATE_REL_PATH ? (
-            <Card css={{ padding: 24 }}>
-              <EmptyState message="Monitor builder is coming soon." />
-            </Card>
+            <WorkbenchMonitoringBuild
+              workbenchId={workbenchId}
+              workbenchLoading={isLoading}
+              kind="monitor"
+            />
           ) : (
             <MonitorDetail
               key={monitorId}

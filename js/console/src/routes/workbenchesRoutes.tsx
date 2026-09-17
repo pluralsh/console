@@ -157,15 +157,7 @@ export const workbenchesRoutes = [
       element={<WorkbenchMonitoring />}
     />
     <Route
-      path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_DASHBOARDS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
-      element={<WorkbenchMonitoring />}
-    />
-    <Route
       path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_DASHBOARDS_REL_PATH}/:${WORKBENCH_MONITORING_DASHBOARD_PARAM_ID}`}
-      element={<WorkbenchMonitoring />}
-    />
-    <Route
-      path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
       element={<WorkbenchMonitoring />}
     />
     <Route
