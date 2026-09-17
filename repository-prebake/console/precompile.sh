@@ -10,12 +10,14 @@ export MISE_YES=1
 export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="${LC_ALL:-C.UTF-8}"
 export ELIXIR_ERL_OPTIONS="${ELIXIR_ERL_OPTIONS:-+fnu}"
-# Keep Hex/Rebar inside the copied tree. A runtime mise Elixir has an empty
-# default MIX_HOME (~/.mix), so mix compile would prompt for Hex even when
-# deps/ and _build/ are already present.
+# Keep Hex/Rebar inside the copied tree. mise's elixir plugin sets
+# MIX_ARCHIVES to <elixir-install>/.mix/archives unless it is already set, so
+# mix local.hex would install Hex outside /data and the runtime mix (new mise
+# prefix) would prompt for Hex even with deps/ and _build/ present.
 export MIX_HOME="$ROOT/.mix"
+export MIX_ARCHIVES="$ROOT/.mix/archives"
 export HEX_HOME="$ROOT/.hex"
-mkdir -p "$MIX_HOME" "$HEX_HOME"
+mkdir -p "$MIX_HOME" "$MIX_ARCHIVES" "$HEX_HOME"
 
 git config --global --add safe.directory "$ROOT"
 
@@ -25,6 +27,9 @@ mise install
 # shims like corepack resolve (otherwise: "No version is set for shim: corepack").
 mise use -g go@1.27.1 node@24.11.1
 eval "$(mise activate bash --shims)"
+export MIX_HOME="$ROOT/.mix"
+export MIX_ARCHIVES="$ROOT/.mix/archives"
+export HEX_HOME="$ROOT/.hex"
 
 mix local.hex --force
 mix local.rebar --force

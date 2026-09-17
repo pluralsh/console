@@ -139,13 +139,15 @@ later `RUN` steps in **your** Dockerfile so they land under `/data/<path>`
 (`_build`, `deps`, `node_modules`, in-tree Go caches).
 
 Go caches and Mix archives must live **inside** the copied repository. If
-`GOPATH` / `GOBIN` / `GOCACHE` / `GOMODCACHE` / `MIX_HOME` point outside that
-tree, they will not survive `CopyDir` into `/plural/shared/repository`. A
-runtime mise Elixir has an empty default `~/.mix`, so Hex must be installed
-under the repo during precompile:
+`GOPATH` / `GOBIN` / `GOCACHE` / `GOMODCACHE` / `MIX_HOME` / `MIX_ARCHIVES`
+point outside that tree, they will not survive `CopyDir` into
+`/plural/shared/repository`. mise's elixir plugin sets `MIX_ARCHIVES` to the
+runtime Elixir prefix unless you override it, so Hex must be installed under
+the repo during precompile:
 
 ```bash
 export MIX_HOME=/data/console/.mix
+export MIX_ARCHIVES=/data/console/.mix/archives
 export HEX_HOME=/data/console/.hex
 export GOPATH=/data/console/.gopath
 export GOBIN=/data/console/.gopath/bin

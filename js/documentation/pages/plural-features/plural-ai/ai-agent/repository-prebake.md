@@ -200,6 +200,7 @@ spec:
       node = "24.11.1"
       [env]
       MIX_HOME = "/plural/shared/repository/.mix"
+      MIX_ARCHIVES = "/plural/shared/repository/.mix/archives"
       HEX_HOME = "/plural/shared/repository/.hex"
       ELIXIR_ERL_OPTIONS = "+fnu"
       GOPATH = "/plural/shared/repository/.gopath"
@@ -209,7 +210,7 @@ spec:
       GOWORK = "/plural/shared/repository/go/go.work"
 ```
 
-The harness runs `mise trust` and `mise bootstrap --yes` before the coding agent starts. `[tools]` install into `MISE_DATA_DIR` as the non-root agent user. Erlang is installed from Bob precompiled Ubuntu builds (`compile = false`); do not rely on kerl/source — the agent image has no C compiler. The global mise file is `/mise/config.toml`, so `{{config_root}}` is `/mise`, not the git checkout. Point Mix home, `GOWORK`, and Go caches at `/plural/shared/repository` so Hex archives and `GOMODCACHE` survive from the prebake copy. `[bootstrap.packages]` that use apt still need a root container.
+The harness runs `mise trust` and `mise bootstrap --yes` before the coding agent starts. `[tools]` install into `MISE_DATA_DIR` as the non-root agent user. Erlang is installed from Bob precompiled Ubuntu builds (`compile = false`); do not rely on kerl/source — the agent image has no C compiler. The global mise file is `/mise/config.toml`, so `{{config_root}}` is `/mise`, not the git checkout. Point Mix home, `MIX_ARCHIVES`, `GOWORK`, and Go caches at `/plural/shared/repository` so Hex archives and `GOMODCACHE` survive from the prebake copy. mise otherwise puts `MIX_ARCHIVES` under the runtime Elixir install, which is empty. `[bootstrap.packages]` that use apt still need a root container.
 
 If you extend a finished image that already ran `mise bootstrap` at build time, set `readOnlyRootFilesystem: true`. The same `mise.config` is still mounted so `mise exec` sees `[tools]` and `[env]`, but bootstrap is skipped.
 
