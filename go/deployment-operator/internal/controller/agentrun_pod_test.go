@@ -589,6 +589,8 @@ func TestBuildAgentRunPod_ReadOnlyRootFilesystemAndMise(t *testing.T) {
 		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "true"})
 		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseGlobalConfigFile, Value: miseConfigMountPath})
 		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseDataDir, Value: miseDataDir})
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseErlangCompile, Value: "false"})
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseErlangPrecompiledOS, Value: miseErlangPrecompiledOS})
 		assert.Contains(t, defaultC.VolumeMounts, corev1.VolumeMount{
 			Name:      miseConfigVolumeName,
 			MountPath: miseConfigMountPath,

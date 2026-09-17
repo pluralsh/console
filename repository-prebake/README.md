@@ -138,15 +138,20 @@ docker rm "$cid"
 later `RUN` steps in **your** Dockerfile so they land under `/data/<path>`
 (`_build`, `deps`, `node_modules`, in-tree Go caches).
 
-Go caches must live **inside** the copied repository. If `GOPATH` / `GOBIN` /
-`GOCACHE` / `GOMODCACHE` point outside that tree, they will not survive
-`CopyDir` into `/plural/shared/repository`:
+Go caches and Mix archives must live **inside** the copied repository. If
+`GOPATH` / `GOBIN` / `GOCACHE` / `GOMODCACHE` / `MIX_HOME` point outside that
+tree, they will not survive `CopyDir` into `/plural/shared/repository`. A
+runtime mise Elixir has an empty default `~/.mix`, so Hex must be installed
+under the repo during precompile:
 
 ```bash
+export MIX_HOME=/data/console/.mix
+export HEX_HOME=/data/console/.hex
 export GOPATH=/data/console/.gopath
 export GOBIN=/data/console/.gopath/bin
 export GOCACHE=/data/console/.cache/go-build
 export GOMODCACHE=/data/console/.cache/pkg/mod
+export GOWORK=/data/console/go/go.work
 ```
 
 ## Console image

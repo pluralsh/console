@@ -59,6 +59,10 @@ spec:
   readOnlyRootFilesystem: false
   mise:
     config: |
+      [settings.erlang]
+      compile = false
+      precompiled_os = "ubuntu-24.04"
+
       [tools]
       erlang = "28.5"
       elixir = "1.19.4"
@@ -67,7 +71,11 @@ spec:
       node = "24.11.1"
 
       [env]
-      GOPATH = "{{config_root}}/.gopath"
-      GOBIN = "{{config_root}}/.gopath/bin"
-      GOCACHE = "{{config_root}}/.cache/go-build"
-      GOMODCACHE = "{{config_root}}/.cache/pkg/mod"
+      MIX_HOME = "/plural/shared/repository/.mix"
+      HEX_HOME = "/plural/shared/repository/.hex"
+      ELIXIR_ERL_OPTIONS = "+fnu"
+      GOPATH = "/plural/shared/repository/.gopath"
+      GOBIN = "/plural/shared/repository/.gopath/bin"
+      GOCACHE = "/plural/shared/repository/.cache/go-build"
+      GOMODCACHE = "/plural/shared/repository/.cache/pkg/mod"
+      GOWORK = "/plural/shared/repository/go/go.work"

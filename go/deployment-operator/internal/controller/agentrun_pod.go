@@ -44,6 +44,9 @@ const (
 	miseConfigMountPath    = "/mise/config.toml"
 	miseConfigConfigMapKey = "config.toml"
 	miseDataDir            = defaultTmpVolumePath + "/mise"
+	// Bob publishes OTP for Ubuntu, not Debian. Pin a glibc-compatible target so
+	// mise downloads a precompiled Erlang instead of compiling with kerl.
+	miseErlangPrecompiledOS = "ubuntu-24.04"
 
 	gitSigningKeyVolumeName = "git-signing-key"
 	gitSigningKeySecretKey  = "git-signing.key"
@@ -364,6 +367,10 @@ func getDefaultEnvVars(runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 		envVars = append(envVars,
 			corev1.EnvVar{Name: EnvMiseGlobalConfigFile, Value: miseConfigMountPath},
 			corev1.EnvVar{Name: EnvMiseDataDir, Value: miseDataDir},
+			// The harness image is Debian, which has no Bob OTP build. Pin Ubuntu
+			// precompiled binaries so mise does not fall back to kerl/source.
+			corev1.EnvVar{Name: EnvMiseErlangCompile, Value: "false"},
+			corev1.EnvVar{Name: EnvMiseErlangPrecompiledOS, Value: miseErlangPrecompiledOS},
 		)
 	}
 

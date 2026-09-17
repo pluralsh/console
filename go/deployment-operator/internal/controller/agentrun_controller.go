@@ -77,8 +77,10 @@ const (
 	EnvMiseBootstrap  = "PLRL_MISE_BOOTSTRAP"
 	EnvExecTimeout    = "PLRL_EXEC_TIMEOUT"
 
-	EnvMiseGlobalConfigFile = "MISE_GLOBAL_CONFIG_FILE"
-	EnvMiseDataDir          = "MISE_DATA_DIR"
+	EnvMiseGlobalConfigFile    = "MISE_GLOBAL_CONFIG_FILE"
+	EnvMiseDataDir             = "MISE_DATA_DIR"
+	EnvMiseErlangCompile       = "MISE_ERLANG_COMPILE"
+	EnvMiseErlangPrecompiledOS = "MISE_ERLANG_PRECOMPILED_OS"
 
 	EnvGitProxy = "PLRL_GIT_PROXY"
 

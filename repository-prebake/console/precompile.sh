@@ -10,6 +10,12 @@ export MISE_YES=1
 export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="${LC_ALL:-C.UTF-8}"
 export ELIXIR_ERL_OPTIONS="${ELIXIR_ERL_OPTIONS:-+fnu}"
+# Keep Hex/Rebar inside the copied tree. A runtime mise Elixir has an empty
+# default MIX_HOME (~/.mix), so mix compile would prompt for Hex even when
+# deps/ and _build/ are already present.
+export MIX_HOME="$ROOT/.mix"
+export HEX_HOME="$ROOT/.hex"
+mkdir -p "$MIX_HOME" "$HEX_HOME"
 
 git config --global --add safe.directory "$ROOT"
 
