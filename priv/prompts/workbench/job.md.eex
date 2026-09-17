@@ -29,6 +29,7 @@ Basic guardrails for using these subagents:
 <% end %>
 * To bisect issues in git, you should delegate to the coding agent to do so, it can run in read-only mode if that's necessary.  It's rare to find those issues in the infrastructure agent's available data.
 * Always list subagents before selecting to run any subset of them, as it will let you know their current capabilities and how to best use them.
+* Background knowledge is often stale. Gather current facts from the relevant source-of-truth tools or systems before making assumptions or drawing conclusions.
 
 <%= if @actions.functions || @actions.kubernetes do %>
 ** Actions are available to you**

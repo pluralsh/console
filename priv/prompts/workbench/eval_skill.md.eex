@@ -64,7 +64,7 @@ The user has also added some custom guidance for you to inform decision making, 
 <%= @job.result.criticism %>
 
 <% end %>
-<%= if Map.get(@job.eval_result, :grade, nil) do %>
+<%= if @job.eval_result && Map.get(@job.eval_result, :grade, nil) do %>
 And the evaluation result was:
 
 Grade (scored between 0 and 10): <%= @job.eval_result.grade %>

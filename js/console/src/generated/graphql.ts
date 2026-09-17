@@ -17047,6 +17047,8 @@ export type WorkbenchEdge = {
 
 export type WorkbenchEval = {
   __typename?: 'WorkbenchEval';
+  /** automation for creating skill-update jobs from low-scoring evals */
+  automation?: Maybe<WorkbenchEvalAutomation>;
   /** rules for evaluating job conclusions */
   conclusionRules?: Maybe<Scalars['String']['output']>;
   /** the id of the eval configuration */
@@ -17062,12 +17064,37 @@ export type WorkbenchEval = {
 };
 
 export type WorkbenchEvalAttributes = {
+  /** optional automation for creating skill-update jobs from low-scoring evals */
+  automation?: InputMaybe<WorkbenchEvalAutomationAttributes>;
   /** rules for evaluating job conclusions */
   conclusionRules?: InputMaybe<Scalars['String']['input']>;
   /** rules for evaluating job progress */
   progressRules?: InputMaybe<Scalars['String']['input']>;
   /** rules for evaluating job prompts */
   promptRules?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchEvalAutomation = {
+  __typename?: 'WorkbenchEvalAutomation';
+  /** whether low-scoring evals automatically create skill-update jobs */
+  enabled: Scalars['Boolean']['output'];
+  /** optional guidance included in automatically created skill-update jobs */
+  instructions?: Maybe<Scalars['String']['output']>;
+  /** exclusive upper grade threshold for triggering a skill-update job (0–10) */
+  maxScore?: Maybe<Scalars['Int']['output']>;
+  /** maximum number of skills the workbench may have when automation creates a new skill */
+  maxSkills: Scalars['Int']['output'];
+};
+
+export type WorkbenchEvalAutomationAttributes = {
+  /** whether low-scoring evals automatically create skill-update jobs */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** optional guidance included in automatically created skill-update jobs */
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  /** exclusive upper grade threshold for triggering a skill-update job (0–10) */
+  maxScore?: InputMaybe<Scalars['Int']['input']>;
+  /** maximum number of skills the workbench may have when automation creates a new skill */
+  maxSkills?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type WorkbenchEvalFeedback = {
@@ -22870,7 +22897,7 @@ export type WorkbenchEvalSettingsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchEvalSettingsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, eval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null } | null } | null };
+export type WorkbenchEvalSettingsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, eval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null, automation?: { __typename?: 'WorkbenchEvalAutomation', enabled: boolean, maxScore?: number | null, maxSkills: number, instructions?: string | null } | null } | null } | null };
 
 export type WorkbenchJobsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23206,7 +23233,7 @@ export type CreateWorkbenchEvalMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchEvalMutation = { __typename?: 'RootMutationType', createWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null } | null };
+export type CreateWorkbenchEvalMutation = { __typename?: 'RootMutationType', createWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null, automation?: { __typename?: 'WorkbenchEvalAutomation', enabled: boolean, maxScore?: number | null, maxSkills: number, instructions?: string | null } | null } | null };
 
 export type UpdateWorkbenchEvalMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23214,7 +23241,7 @@ export type UpdateWorkbenchEvalMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchEvalMutation = { __typename?: 'RootMutationType', updateWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null } | null };
+export type UpdateWorkbenchEvalMutation = { __typename?: 'RootMutationType', updateWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null, automation?: { __typename?: 'WorkbenchEvalAutomation', enabled: boolean, maxScore?: number | null, maxSkills: number, instructions?: string | null } | null } | null };
 
 export type DeleteWorkbenchEvalMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -46800,6 +46827,12 @@ export const WorkbenchEvalSettingsDocument = gql`
       promptRules
       conclusionRules
       progressRules
+      automation {
+        enabled
+        maxScore
+        maxSkills
+        instructions
+      }
     }
   }
 }
@@ -48838,6 +48871,12 @@ export const CreateWorkbenchEvalDocument = gql`
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
     `;
@@ -48875,6 +48914,12 @@ export const UpdateWorkbenchEvalDocument = gql`
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
     `;

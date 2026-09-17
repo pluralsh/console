@@ -90,7 +90,10 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect(Provider, :completion, fn _, opts ->
+        assert opts[:preface] =~ "Background knowledge is often stale"
+        assert opts[:preface] =~ "Gather current facts"
+
         {:ok, "make notes", [
           %Tool{
             id: "2",
