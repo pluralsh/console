@@ -483,7 +483,7 @@ export function JobActivityMetrics({
   return chartBlock
 }
 
-type MetricsTimeRange = '1d' | '1m' | '1y' | 'max'
+export type MetricsTimeRange = '1d' | '1m' | '1y' | 'max'
 
 const METRICS_TIME_RANGES: { label: string; value: MetricsTimeRange }[] = [
   { label: '1D', value: '1d' },
@@ -492,7 +492,7 @@ const METRICS_TIME_RANGES: { label: string; value: MetricsTimeRange }[] = [
   { label: 'Max', value: 'max' },
 ]
 
-function MetricsRangeControl({
+export function MetricsRangeControl({
   value,
   onChange,
 }: {
