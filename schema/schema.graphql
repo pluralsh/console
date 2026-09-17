@@ -4025,6 +4025,9 @@ type Workbench {
 
     "show runs spawned from issues"
     issue: Boolean
+
+    "show runs spawned from a specific monitor"
+    monitorId: ID
   ): WorkbenchJobConnection
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
@@ -4035,7 +4038,31 @@ type Workbench {
 
   workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection
 
-  workbenchDashboards(after: String, first: Int, before: String, last: Int): WorkbenchDashboardConnection
+  workbenchDashboards(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search dashboards by name"
+    q: String
+  ): WorkbenchDashboardConnection
+
+  monitors(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search monitors by name"
+    q: String
+  ): MonitorConnection
 
   "eval configuration for this workbench (at most one; null if none configured)"
   eval: WorkbenchEval
