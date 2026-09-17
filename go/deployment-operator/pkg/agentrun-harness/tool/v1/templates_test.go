@@ -40,8 +40,12 @@ func TestSystemPromptTemplate_EmbedsOriginalPrompt(t *testing.T) {
 			if !strings.Contains(content, prompt) {
 				t.Fatalf("expected original prompt %q in rendered system prompt", prompt)
 			}
-			if tc.name == "analyze" && !strings.Contains(content, "updateAgentRunAnalysis") {
-				t.Fatal("expected updateAgentRunAnalysis in analyze system prompt")
+			if tc.name == "analyze" {
+				for _, expected := range []string{"updateAgentRunAnalysis", "tool_search", "list_mcp_resources"} {
+					if !strings.Contains(content, expected) {
+						t.Fatalf("expected analyze instructions to contain %q", expected)
+					}
+				}
 			}
 			if tc.name == "review" {
 				for _, expected := range []string{

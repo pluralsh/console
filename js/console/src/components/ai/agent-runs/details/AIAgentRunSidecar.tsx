@@ -45,9 +45,7 @@ export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
       {run.runtime?.name && (
         <Flex gap="xxsmall">
           <RuntimeIcon fullColor />
-          <CaptionP $color="text-xlight">
-            {capitalize(run.runtime.name)}
-          </CaptionP>
+          <CaptionP $color="text-xlight">{run.runtime.name}</CaptionP>
         </Flex>
       )}
       {run.babysit && (

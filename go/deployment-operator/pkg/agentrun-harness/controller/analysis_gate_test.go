@@ -58,6 +58,8 @@ func TestBuildAnalysisFollowUpPrompt(t *testing.T) {
 	p := buildAnalysisFollowUpPrompt(2)
 	require.Contains(t, p, "follow-up 2/3")
 	require.Contains(t, p, "updateAgentRunAnalysis")
+	require.Contains(t, p, "tool_search")
+	require.Contains(t, p, "resources are not tools")
 }
 
 func TestUpdateAgentRunPersistsBufferedUsageWithoutMutatingFetchedRun(t *testing.T) {

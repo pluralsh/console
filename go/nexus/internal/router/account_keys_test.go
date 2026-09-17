@@ -150,6 +150,7 @@ func TestAccountBedrockRuntimeEndpointIsDefault(t *testing.T) {
 	require.Len(t, keys, 1)
 	require.NotNil(t, keys[0].BedrockKeyConfig)
 	require.Nil(t, keys[0].BedrockMantleKeyConfig)
+	require.Nil(t, keys[0].UseOpenAIEndpoints)
 	require.Empty(t, keys[0].BedrockKeyConfig.AccessKey.GetValue())
 	require.Empty(t, keys[0].BedrockKeyConfig.SecretKey.GetValue())
 }

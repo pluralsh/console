@@ -31,6 +31,7 @@ const gitSigningKeyPath = common.GitSigningKeyMountPath
 const (
 	sandboxModeHarness  = "danger-full-access"
 	approvalPolicyNever = "never"
+	pluralMCPNamespace  = "mcp__plural"
 )
 
 func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error {
@@ -61,15 +62,16 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 	templateInput := &ConfigTemplateInput{
 		RepositoryDir: config.RepositoryDir,
 		Settings: configTemplateSettings{
-			Model:                  model,
-			ModelProvider:          provider,
-			SandboxMode:            sandboxModeHarness,
-			ApprovalPolicy:         approvalPolicyNever,
-			ModelReasoningEffort:   defaultReasoning,
-			ShellEnvironmentPolicy: agent.shellEnvironmentPolicy(config.Run.DindEnabled),
-			EnableWebSearch:        true,
-			EnableShellCache:       true,
-			ModelInstructionsFile:  modelInstructionsFile,
+			Model:                    model,
+			ModelProvider:            provider,
+			SandboxMode:              sandboxModeHarness,
+			ApprovalPolicy:           approvalPolicyNever,
+			ModelReasoningEffort:     defaultReasoning,
+			ShellEnvironmentPolicy:   agent.shellEnvironmentPolicy(config.Run.DindEnabled),
+			DirectOnlyToolNamespaces: agent.directOnlyToolNamespaces(),
+			EnableWebSearch:          true,
+			EnableShellCache:         true,
+			ModelInstructionsFile:    modelInstructionsFile,
 		},
 		Providers:  providers,
 		MCPServers: agent.nativeMCPServers(external),
@@ -86,8 +88,9 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 
 func (agent *Agent) nativeMCPServers(external []mcpcfg.Server) []configTemplateMCP {
 	result := []configTemplateMCP{{
-		Name: pluralProvider,
-		URL:  common.AgentMCPServerURL,
+		Name:     pluralProvider,
+		URL:      common.AgentMCPServerURL,
+		Required: true,
 	}, {
 		Name:    common.CodebaseMemoryMCPServerName,
 		Command: common.CodebaseMemoryMCPCommand,
@@ -115,6 +118,13 @@ func (agent *Agent) nativeMCPServers(external []mcpcfg.Server) []configTemplateM
 		result = append(result, input)
 	}
 	return result
+}
+
+func (*Agent) directOnlyToolNamespaces() []string {
+	// GPT-5.6 code-mode sessions can defer MCP tools without exposing a usable
+	// tool_search path on custom providers. Every run mode depends on Plural
+	// tools, so keep that namespace directly visible.
+	return []string{pluralMCPNamespace}
 }
 
 func (agent *Agent) shellEnvironmentVariables(dindEnabled bool) []string {

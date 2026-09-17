@@ -11,15 +11,16 @@ type ConfigTemplateInput struct {
 }
 
 type configTemplateSettings struct {
-	Model                  string
-	ModelProvider          string
-	SandboxMode            string
-	ApprovalPolicy         string
-	ModelReasoningEffort   string
-	ShellEnvironmentPolicy *configTemplateShellEnvironmentPolicy
-	EnableWebSearch        bool
-	EnableShellCache       bool
-	ModelInstructionsFile  string
+	Model                    string
+	ModelProvider            string
+	SandboxMode              string
+	ApprovalPolicy           string
+	ModelReasoningEffort     string
+	ShellEnvironmentPolicy   *configTemplateShellEnvironmentPolicy
+	DirectOnlyToolNamespaces []string
+	EnableWebSearch          bool
+	EnableShellCache         bool
+	ModelInstructionsFile    string
 }
 
 type configTemplateShellEnvironmentPolicy struct {
@@ -45,6 +46,7 @@ type configTemplateMCP struct {
 	EnvHTTPHeaders []configTemplateKeyValue
 	EnabledTools   []string
 	DisabledTools  []string
+	Required       bool
 }
 
 type configTemplateKeyValue struct {

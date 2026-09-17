@@ -157,6 +157,42 @@ func TestOpenAIResponsesRawBodyEligibility(t *testing.T) {
 	}
 }
 
+func TestBedrockRuntimeResponsesRetainsNamespaceToolsForFlattening(t *testing.T) {
+	model := "us.openai.gpt-5.6-terra"
+	router := &OpenAIRouter{
+		GenericRouter: &GenericRouter{},
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{
+			Enabled: true,
+			Bedrock: &pb.BedrockConfig{ModelId: &model},
+		}},
+	}
+	body := `{"model":"bedrock/us.openai.gpt-5.6-terra","input":"inspect the repository","tools":[{"type":"namespace","name":"mcp__plural","tools":[{"type":"function","name":"updateAgentRunAnalysis","parameters":{"type":"object"}}]}]}`
+	request := router.responsesRequestTypeInstance()
+	require.NoError(t, router.responsesRequestParser(
+		httptest.NewRequest(http.MethodPost, string(RouteResponses), strings.NewReader(body)),
+		request,
+	))
+	ctx, _ := schemas.NewBifrostContextWithCancel(context.Background())
+	converted, err := router.responsesRequestConverter(ctx, request)
+	require.NoError(t, err)
+	require.NotNil(t, converted.ResponsesRequest)
+	require.Equal(t, schemas.Bedrock, converted.ResponsesRequest.Provider)
+	require.Equal(t, model, converted.ResponsesRequest.Model)
+	require.Empty(t, converted.ResponsesRequest.RawRequestBody)
+	require.NotNil(t, converted.ResponsesRequest.Params)
+	require.Len(t, converted.ResponsesRequest.Params.Tools, 1)
+
+	namespace := converted.ResponsesRequest.Params.Tools[0]
+	require.Equal(t, schemas.ResponsesToolTypeNamespace, namespace.Type)
+	require.NotNil(t, namespace.Name)
+	require.Equal(t, "mcp__plural", *namespace.Name)
+	require.NotNil(t, namespace.ResponsesToolNamespace)
+	require.Len(t, namespace.ResponsesToolNamespace.Tools, 1)
+	tool := namespace.ResponsesToolNamespace.Tools[0]
+	require.NotNil(t, tool.Name)
+	require.Equal(t, "updateAgentRunAnalysis", *tool.Name)
+}
+
 func assertOpenAIResponsesStreamError(t *testing.T, body, message, code string) {
 	t.Helper()
 	require.NotContains(t, body, "[DONE]")
