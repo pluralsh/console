@@ -52,6 +52,7 @@ import {
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
+  WORKBENCHES_MONITORING_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
@@ -149,6 +150,10 @@ export function WorkbenchPageLayout({
       {
         label: 'Evals',
         path: `${workbenchBasePath}/${WORKBENCHES_EVALS_REL_PATH}`,
+      },
+      {
+        label: 'Monitoring',
+        path: `${workbenchBasePath}/${WORKBENCHES_MONITORING_REL_PATH}`,
       },
     ],
     [workbenchBasePath, jobsTabPath, hasInProgressJobs]
