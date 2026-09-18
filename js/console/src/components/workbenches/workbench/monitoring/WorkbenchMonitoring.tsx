@@ -77,7 +77,7 @@ function MonitorDetail({ monitorId }: { monitorId: string }) {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (loading) return <MonitoringDetailSkeleton />
+  if (loading && !data) return <MonitoringDetailSkeleton />
   if (error) return <GqlError error={error} />
   const monitor = data?.monitor
   if (!monitor) return <EmptyState message="Monitor not found." />

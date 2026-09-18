@@ -29,7 +29,7 @@ export function DashboardDetail({ dashboardId }: { dashboardId: string }) {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (loading) return <MonitoringDetailSkeleton />
+  if (loading && !data) return <MonitoringDetailSkeleton />
   if (error) return <GqlError error={error} />
   const dashboard = data?.workbenchDashboard
   if (!dashboard) return <EmptyState message="Dashboard not found." />
@@ -87,6 +87,8 @@ function DashboardDetailView({
     [graphs]
   )
 
+  const hasFilters = inputs.length > 0
+
   return (
     <Flex
       direction="column"
@@ -97,7 +99,7 @@ function DashboardDetailView({
         <EyebrowSC>Dashboard</EyebrowSC>
         <CaptionP $color="text-xlight">
           {dashboard.updatedAt
-            ? `Updated ${fromNow(dashboard.updatedAt)}`
+            ? `updated ${fromNow(dashboard.updatedAt)}`
             : 'Never updated'}
         </CaptionP>
       </StripSC>
@@ -113,37 +115,45 @@ function DashboardDetailView({
             </Body1P>
           )}
         </TitleBlockSC>
-        <FiltersWrapSC>
-          <WorkbenchDashboardFilters
-            dashboardId={dashboard.id}
-            inputs={inputs}
-            values={filters}
-            variables={variables}
-            timeRange={timeRange}
-            onChange={(name, value) =>
-              setFilters((prev) => ({ ...prev, [name]: value }))
-            }
-            onClear={() =>
-              setFilters(
-                Object.fromEntries(
-                  inputs.map((input) => [
-                    input.name,
-                    defaultDashboardFilter(input),
-                  ])
+        <ToolbarSC $hasFilters={hasFilters}>
+          {hasFilters ? (
+            <WorkbenchDashboardFilters
+              dashboardId={dashboard.id}
+              inputs={inputs}
+              values={filters}
+              variables={variables}
+              timeRange={timeRange}
+              onChange={(name, value) =>
+                setFilters((prev) => ({ ...prev, [name]: value }))
+              }
+              onClear={() =>
+                setFilters(
+                  Object.fromEntries(
+                    inputs.map((input) => [
+                      input.name,
+                      defaultDashboardFilter(input),
+                    ])
+                  )
                 )
-              )
-            }
-          />
-        </FiltersWrapSC>
-        <MetaRowSC>
-          <Body2P $color="text-long-form">
-            {metaText(graphs.length, sources)}
-          </Body2P>
+              }
+            />
+          ) : (
+            <Body2P $color="text-long-form">
+              {metaText(graphs.length, sources)}
+            </Body2P>
+          )}
           <MetricsRangeControl
             value={range}
             onChange={setRange}
           />
-        </MetaRowSC>
+        </ToolbarSC>
+        {hasFilters && (
+          <MetaRowSC>
+            <Body2P $color="text-long-form">
+              {metaText(graphs.length, sources)}
+            </Body2P>
+          </MetaRowSC>
+        )}
         <PanelsSC>
           <WorkbenchDashboardPanels
             dashboardId={dashboard.id}
@@ -165,7 +175,6 @@ function rangeStart(
   end: Date
 ) {
   if (range === 'max') {
-    // Max covers everything since the dashboard was created, capped at a year.
     const yearAgo = new Date(end.getTime() - 365 * DAY_MS)
     const created = insertedAt ? new Date(insertedAt) : null
     return created && created > yearAgo ? created : yearAgo
@@ -189,28 +198,48 @@ export function MonitoringDetailSkeleton() {
   return (
     <Flex
       direction="column"
-      gap="medium"
+      flex={1}
+      minHeight={0}
     >
-      <RectangleSkeleton
-        $height="large"
-        $width="40%"
-      />
-      <RectangleSkeleton
-        $height="small"
-        $width="70%"
-      />
-      <RectangleSkeleton $height={200} />
-      <Flex gap="medium">
-        <RectangleSkeleton $height={160} />
-        <RectangleSkeleton $height={160} />
-      </Flex>
+      <StripSC>
+        <RectangleSkeleton
+          $height={16}
+          $width={96}
+        />
+        <RectangleSkeleton
+          $height={16}
+          $width={160}
+        />
+      </StripSC>
+      <BodySC>
+        <RectangleSkeleton
+          $height="large"
+          $width="40%"
+        />
+        <RectangleSkeleton
+          $height="small"
+          $width="70%"
+          style={{ marginTop: 8 }}
+        />
+        <RectangleSkeleton
+          $height={40}
+          $width="100%"
+          style={{ marginTop: 24 }}
+        />
+        <Flex
+          gap="medium"
+          marginTop="medium"
+        >
+          <RectangleSkeleton $height={200} />
+          <RectangleSkeleton $height={200} />
+        </Flex>
+      </BodySC>
     </Flex>
   )
 }
 
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
-  // Bleeds to the DetailSC edges (padding 16px 24px) for a full-width bar.
   boxSizing: 'border-box',
   margin: '-16px -24px 0',
   // fill-one-selected matches Figma fill/one #21242C (pre-rename tokens).
@@ -230,7 +259,6 @@ const EyebrowSC = styled.p(({ theme }) => ({
 }))
 
 const BodySC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero-selected'],
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
@@ -254,15 +282,18 @@ const TitleSC = styled.h2(({ theme }) => ({
   margin: 0,
 }))
 
-const FiltersWrapSC = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.large,
-}))
+const ToolbarSC = styled.div<{ $hasFilters: boolean }>(
+  ({ theme, $hasFilters }) => ({
+    alignItems: $hasFilters ? 'flex-end' : 'center',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing.small,
+    justifyContent: 'space-between',
+    marginTop: theme.spacing.large,
+  })
+)
 
 const MetaRowSC = styled.div(({ theme }) => ({
-  alignItems: 'flex-end',
-  display: 'flex',
-  gap: theme.spacing.small,
-  justifyContent: 'space-between',
   marginTop: theme.spacing.medium,
 }))
 
