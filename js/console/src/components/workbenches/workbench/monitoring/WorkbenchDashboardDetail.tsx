@@ -88,7 +88,11 @@ function DashboardDetailView({
   )
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      flex={1}
+      minHeight={0}
+    >
       <StripSC>
         <EyebrowSC>Dashboard</EyebrowSC>
         <CaptionP $color="text-xlight">
@@ -97,56 +101,58 @@ function DashboardDetailView({
             : 'Never updated'}
         </CaptionP>
       </StripSC>
-      <TitleBlockSC>
-        <TitleSC>{dashboard.name}</TitleSC>
-        {dashboard.description && (
-          <Body1P
-            $color="text-long-form"
-            css={{ letterSpacing: '0.25px' }}
-          >
-            {dashboard.description}
-          </Body1P>
-        )}
-      </TitleBlockSC>
-      <FiltersWrapSC>
-        <WorkbenchDashboardFilters
-          dashboardId={dashboard.id}
-          inputs={inputs}
-          values={filters}
-          variables={variables}
-          timeRange={timeRange}
-          onChange={(name, value) =>
-            setFilters((prev) => ({ ...prev, [name]: value }))
-          }
-          onClear={() =>
-            setFilters(
-              Object.fromEntries(
-                inputs.map((input) => [
-                  input.name,
-                  defaultDashboardFilter(input),
-                ])
+      <BodySC>
+        <TitleBlockSC>
+          <TitleSC>{dashboard.name}</TitleSC>
+          {dashboard.description && (
+            <Body1P
+              $color="text-long-form"
+              css={{ letterSpacing: '0.25px' }}
+            >
+              {dashboard.description}
+            </Body1P>
+          )}
+        </TitleBlockSC>
+        <FiltersWrapSC>
+          <WorkbenchDashboardFilters
+            dashboardId={dashboard.id}
+            inputs={inputs}
+            values={filters}
+            variables={variables}
+            timeRange={timeRange}
+            onChange={(name, value) =>
+              setFilters((prev) => ({ ...prev, [name]: value }))
+            }
+            onClear={() =>
+              setFilters(
+                Object.fromEntries(
+                  inputs.map((input) => [
+                    input.name,
+                    defaultDashboardFilter(input),
+                  ])
+                )
               )
-            )
-          }
-        />
-      </FiltersWrapSC>
-      <MetaRowSC>
-        <Body2P $color="text-long-form">
-          {metaText(graphs.length, sources)}
-        </Body2P>
-        <MetricsRangeControl
-          value={range}
-          onChange={setRange}
-        />
-      </MetaRowSC>
-      <PanelsSC>
-        <WorkbenchDashboardPanels
-          dashboardId={dashboard.id}
-          graphs={graphs}
-          variables={variables}
-          timeRange={timeRange}
-        />
-      </PanelsSC>
+            }
+          />
+        </FiltersWrapSC>
+        <MetaRowSC>
+          <Body2P $color="text-long-form">
+            {metaText(graphs.length, sources)}
+          </Body2P>
+          <MetricsRangeControl
+            value={range}
+            onChange={setRange}
+          />
+        </MetaRowSC>
+        <PanelsSC>
+          <WorkbenchDashboardPanels
+            dashboardId={dashboard.id}
+            graphs={graphs}
+            variables={variables}
+            timeRange={timeRange}
+          />
+        </PanelsSC>
+      </BodySC>
     </Flex>
   )
 }
@@ -205,14 +211,16 @@ export function MonitoringDetailSkeleton() {
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   // Bleeds to the DetailSC edges (padding 16px 24px) for a full-width bar.
+  boxSizing: 'border-box',
   margin: '-16px -24px 0',
   // fill-one-selected matches Figma fill/one #21242C (pre-rename tokens).
   backgroundColor: theme.colors['fill-one-selected'],
   borderBottom: theme.borders.default,
   display: 'flex',
   gap: theme.spacing.small,
+  height: 40,
   justifyContent: 'space-between',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}px`,
 }))
 
 const EyebrowSC = styled.p(({ theme }) => ({
@@ -221,11 +229,20 @@ const EyebrowSC = styled.p(({ theme }) => ({
   margin: 0,
 }))
 
+const BodySC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-zero-selected'],
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  margin: `0 -${theme.spacing.large}px`,
+  minHeight: 0,
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+}))
+
 const TitleBlockSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
-  marginTop: theme.spacing.medium,
 }))
 
 const TitleSC = styled.h2(({ theme }) => ({
