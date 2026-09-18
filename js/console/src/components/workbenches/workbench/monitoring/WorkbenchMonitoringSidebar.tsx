@@ -25,7 +25,7 @@ import {
   WorkbenchMonitorSummaryFragment,
 } from 'generated/graphql'
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchMonitoringAbsPath,
   getWorkbenchMonitoringDashboardAbsPath,
@@ -76,6 +76,7 @@ export function WorkbenchMonitoringSidebar({
     { id: workbenchId, q: trimmedFilter || undefined }
   )
 
+  const params = useParams()
   const dashboardNodes = mapExistingNodes(
     dashboards.data?.workbench?.workbenchDashboards
   )
@@ -89,8 +90,32 @@ export function WorkbenchMonitoringSidebar({
     dashboardNodes.length === 0 &&
     monitorNodes.length === 0
 
+  const nothingSelected =
+    !params[WORKBENCH_MONITORING_DASHBOARD_PARAM_ID] &&
+    !params[WORKBENCH_MONITORING_MONITOR_PARAM_ID]
+  const autoSelectTo =
+    nothingSelected && !hasFilter && !dashboardsLoading && !monitorsLoading
+      ? dashboardNodes[0]
+        ? getWorkbenchMonitoringDashboardAbsPath({
+            workbenchId,
+            dashboardId: dashboardNodes[0].id,
+          })
+        : monitorNodes[0]
+          ? getWorkbenchMonitoringMonitorAbsPath({
+              workbenchId,
+              monitorId: monitorNodes[0].id,
+            })
+          : null
+      : null
+
   return (
     <WrapperSC>
+      {autoSelectTo && (
+        <Navigate
+          to={autoSelectTo}
+          replace
+        />
+      )}
       <FilterSC>
         <Input
           showClearButton
