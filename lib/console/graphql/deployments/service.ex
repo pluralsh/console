@@ -636,7 +636,10 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "fetches details of this service deployment, and can be called by the deploy operator"
     field :service_deployment, :service_deployment do
       middleware Authenticated, :cluster
-      middleware Scope, api: "serviceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :read,
+        api: "serviceDeployment"
       arg :id,      :id
       arg :cluster, :string, description: "the handle of the cluster for this service"
       arg :name,    :string

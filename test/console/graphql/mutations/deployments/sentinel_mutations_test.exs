@@ -40,6 +40,77 @@ defmodule Console.GraphQl.Deployments.SentinelMutationsTest do
     end
   end
 
+  describe "runSentinel" do
+    test "project readers can run a sentinel" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project, checks: [
+        %{type: :log, name: "test", configuration: %{log: %{namespace: "test", duration: "1h", query: "error"}}}
+      ])
+
+      {:ok, %{data: %{"runSentinel" => run}}} = run_query("""
+        mutation RunSentinel($id: ID!) {
+          runSentinel(id: $id) {
+            id
+            status
+            sentinel { id }
+          }
+        }
+      """, %{"id" => sentinel.id}, %{current_user: user})
+
+      assert run["status"] == "PENDING"
+      assert run["sentinel"]["id"] == sentinel.id
+    end
+
+    test "sentinel.read scoped tokens can run a sentinel" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project)
+      scoped_user = %{user | scopes: [build(:scope, api: "sentinel.read")]}
+
+      {:ok, %{data: %{"runSentinel" => run}}} = run_query("""
+        mutation RunSentinel($id: ID!) {
+          runSentinel(id: $id) {
+            id
+            status
+          }
+        }
+      """, %{"id" => sentinel.id}, %{current_user: scoped_user})
+
+      assert run["status"] == "PENDING"
+    end
+
+    test "project readers can run a sentinel by name" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project, name: "readable-sentinel")
+
+      {:ok, %{data: %{"runSentinel" => run}}} = run_query("""
+        mutation RunSentinel($name: String!) {
+          runSentinel(name: $name) {
+            id
+            status
+            sentinel { id }
+          }
+        }
+      """, %{"name" => sentinel.name}, %{current_user: user})
+
+      assert run["status"] == "PENDING"
+      assert run["sentinel"]["id"] == sentinel.id
+    end
+
+    test "users without sentinel read access cannot run a sentinel" do
+      user = insert(:user)
+      sentinel = insert(:sentinel)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation RunSentinel($id: ID!) {
+          runSentinel(id: $id) { id }
+        }
+      """, %{"id" => sentinel.id}, %{current_user: user})
+    end
+  end
+
   describe "deleteSentinel" do
     test "it can delete a sentinel" do
       sentinel = insert(:sentinel)

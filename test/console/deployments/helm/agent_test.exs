@@ -58,10 +58,12 @@ defmodule Console.Deployments.Helm.AgentTest do
     end
 
     test "it can handle https chart museum helm repos" do
-      repo = "https://app.plural.sh/cm/rabbitmq"
+      # ChartMuseum-style repos advertise relative chart urls (charts/*.tgz).
+      # app.plural.sh/cm/* currently 500s on chart downloads, so use jetstack instead.
+      repo = "https://charts.jetstack.io"
       {:ok, pid} = Agent.start(repo) |> handle()
 
-      {:ok, f, _, _} = Agent.fetch(pid, "cluster-operator", "x.x.x")
+      {:ok, f, _, _} = Agent.fetch(pid, "cert-manager", "x.x.x")
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]

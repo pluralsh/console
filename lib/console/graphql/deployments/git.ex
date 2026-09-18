@@ -1132,7 +1132,7 @@ defmodule Console.GraphQl.Deployments.Git do
     connection field :scm_connections, node_type: :scm_connection do
       middleware Authenticated
       middleware Scope,
-        resource: :repos,
+        resource: :self_service,
         action: :read
 
       arg :type, :scm_type, description: "when set, only connections of this SCM provider type are returned"

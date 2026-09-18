@@ -10,8 +10,8 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
   alias Console.Deployments.Git
   alias Console.Schema.PrAutomation
 
-  plug Scope, [resource: :catalog, action: :read] when action in [:show, :show_by_name, :index, :index_for_catalog]
-  plug Scope, [resource: :catalog, action: :write] when action in [:invoke]
+  plug Scope, [resource: :self_service, action: :read] when action in [:show, :show_by_name, :index, :index_for_catalog]
+  plug Scope, [resource: :catalog, action: :write, api: "createPullRequest"] when action in [:invoke]
 
   @doc """
   Fetches a PR automation by id.
@@ -19,7 +19,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
   operation :show,
     operation_id: "GetPrAutomation",
     tags: ["prautomation"],
-    "x-required-scopes": ["catalog.read"],
+    "x-required-scopes": ["self_service.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -35,7 +35,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
   operation :show_by_name,
     operation_id: "GetPrAutomationByName",
     tags: ["prautomation"],
-    "x-required-scopes": ["catalog.read"],
+    "x-required-scopes": ["self_service.read"],
     parameters: [
       name: [in: :query, schema: %{type: :string}, required: true, description: "The exact name of the PR automation"]
     ],
@@ -51,7 +51,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
   operation :index,
     operation_id: "ListPrAutomations",
     tags: ["prautomation"],
-    "x-required-scopes": ["catalog.read"],
+    "x-required-scopes": ["self_service.read"],
     parameters: [
       project_id: [in: :query, schema: %{type: :string}, required: false, description: "Filter by project id"],
       catalog_id: [in: :query, schema: %{type: :string}, required: false, description: "Filter by catalog id"],
@@ -75,7 +75,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
   operation :index_for_catalog,
     operation_id: "ListPrAutomationsForCatalog",
     tags: ["prautomation"],
-    "x-required-scopes": ["catalog.read"],
+    "x-required-scopes": ["self_service.read"],
     parameters: [
       catalog_id: [in: :path, schema: %{type: :string}, required: true, description: "The catalog id to list PR automations for"],
       q: [in: :query, schema: %{type: :string}, required: false, description: "Search PR automations by name"],

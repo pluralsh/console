@@ -11,8 +11,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   alias Console.Deployments.Sentinels
   alias Console.Schema.Sentinel
 
-  plug Scope, [resource: :sentinel, action: :read] when action in [:show, :show_by_name, :index]
-  plug Scope, [resource: :sentinel, action: :write] when action in [:trigger]
+  plug Scope, [resource: :sentinel, action: :read] when action in [:show, :show_by_name, :index, :trigger]
 
   @doc """
   Fetches a sentinel by id.
@@ -93,7 +92,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   operation :trigger,
     operation_id: "TriggerSentinel",
     tags: ["sentinel"],
-    "x-required-scopes": ["sentinel.write"],
+    "x-required-scopes": ["sentinel.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The sentinel ID or name:<name> reference to trigger"]
     ],

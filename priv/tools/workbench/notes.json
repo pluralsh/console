@@ -3,11 +3,11 @@
     "properties": {
         "status": {
             "type": "object",
-            "description": "The notes to update",
+            "description": "The notes to update on the workbench result. On a user resteer, this must reset `objective` (and replace todos and working_theory) to the new task.",
             "properties": {
                 "todos": {
                     "type": "array",
-                    "description": "The todos to update.  You can add/remove/update todos if the plan needs to change, but always pass the full list of todos",
+                    "description": "The todos to update. Always pass the full list. If a user resteers, replace this list to match the new objective rather than carrying over todos from the previous task.",
                     "items": {
                         "type": "object",
                         "properties": {
@@ -33,11 +33,11 @@
                 },
                 "objective": {
                     "type": "string",
-                    "description": "The sole current objective for this investigation. Update it when a user redefines the task; otherwise pass the existing objective unchanged."
+                    "description": "The sole current objective for this investigation, persisted on the workbench result. You MUST reset this whenever a user resteers or sends a follow-up that redefines the task — write the new objective, do not reuse the previous one. Leaving the old objective after a resteer is incorrect; the result field is not cleared unless you overwrite it. Pass the existing objective unchanged only when the latest user prompt does not change the task."
                 },
                 "working_theory": {
                     "type": "string",
-                    "description": "The current working theory you might want to update.  Pass the old theory if no changes are needed."
+                    "description": "The current working theory. If a user resteers, rewrite this for the new objective instead of keeping the previous theory. Pass the old theory only if the task has not changed."
                 }
             },
             "required": []

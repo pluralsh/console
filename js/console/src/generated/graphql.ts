@@ -4761,6 +4761,7 @@ export type FluxHelmRepository = {
 /** spec for a job gate */
 export type GateJobAttributes = {
   annotations?: InputMaybe<Scalars['Json']['input']>;
+  /** containers to run in this job; an empty list clears configured containers */
   containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
   labels?: InputMaybe<Scalars['Json']['input']>;
   namespace: Scalars['String']['input'];

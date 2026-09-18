@@ -10946,6 +10946,8 @@ type WorkbenchEval struct {
 	PromptRules *string `json:"promptRules,omitempty"`
 	// rules for evaluating job progress
 	ProgressRules *string `json:"progressRules,omitempty"`
+	// automation for creating skill-update jobs from low-scoring evals
+	Automation *WorkbenchEvalAutomation `json:"automation,omitempty"`
 	// the workbench this eval belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -10959,6 +10961,30 @@ type WorkbenchEvalAttributes struct {
 	PromptRules *string `json:"promptRules,omitempty"`
 	// rules for evaluating job progress
 	ProgressRules *string `json:"progressRules,omitempty"`
+	// optional automation for creating skill-update jobs from low-scoring evals
+	Automation *WorkbenchEvalAutomationAttributes `json:"automation,omitempty"`
+}
+
+type WorkbenchEvalAutomation struct {
+	// whether low-scoring evals automatically create skill-update jobs
+	Enabled bool `json:"enabled"`
+	// exclusive upper grade threshold for triggering a skill-update job (0–10)
+	MaxScore *int64 `json:"maxScore,omitempty"`
+	// maximum number of skills the workbench may have when automation creates a new skill
+	MaxSkills int64 `json:"maxSkills"`
+	// optional guidance included in automatically created skill-update jobs
+	Instructions *string `json:"instructions,omitempty"`
+}
+
+type WorkbenchEvalAutomationAttributes struct {
+	// whether low-scoring evals automatically create skill-update jobs
+	Enabled *bool `json:"enabled,omitempty"`
+	// exclusive upper grade threshold for triggering a skill-update job (0–10)
+	MaxScore *int64 `json:"maxScore,omitempty"`
+	// maximum number of skills the workbench may have when automation creates a new skill
+	MaxSkills *int64 `json:"maxSkills,omitempty"`
+	// optional guidance included in automatically created skill-update jobs
+	Instructions *string `json:"instructions,omitempty"`
 }
 
 type WorkbenchEvalFeedback struct {

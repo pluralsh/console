@@ -11,7 +11,9 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
   alias Console.Schema.Cluster
 
   plug Scope, [resource: :cluster, action: :read] when action in [:show, :index]
-  plug Scope, [resource: :cluster, action: :write] when action in [:create, :update, :delete]
+  plug Scope, [resource: :cluster, action: :write, api: "createCluster"] when action in [:create]
+  plug Scope, [resource: :cluster, action: :write, api: "updateCluster"] when action in [:update]
+  plug Scope, [resource: :cluster, action: :write, api: "deleteCluster"] when action in [:delete]
 
   @doc """
   Fetches a cluster by id.

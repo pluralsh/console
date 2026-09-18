@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRuntimeController do
   alias Console.Deployments.Agents
   alias Console.Schema.AgentRuntime
 
-  plug Scope, [resource: :ai, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :agent, action: :read] when action in [:show, :index]
 
   @doc """
   Fetches an agent runtime by id.
@@ -19,7 +19,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRuntimeController do
   operation :show,
     operation_id: "GetAgentRuntime",
     tags: ["agent"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["agent.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the agent runtime"]
     ],
@@ -37,7 +37,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRuntimeController do
   operation :index,
     operation_id: "ListAgentRuntimes",
     tags: ["agent"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["agent.read"],
     parameters: [
       type: [in: :query, schema: %{type: :string, enum: [:claude, :opencode, :gemini, :custom]}, required: false, description: "Filter by runtime type"],
       page: [in: :query, schema: %{type: :integer}, required: false, description: "Page number for pagination"],
