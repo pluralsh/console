@@ -3366,6 +3366,23 @@ input WorkbenchEvalAttributes {
 
   "rules for evaluating job progress"
   progressRules: String
+
+  "optional automation for creating skill-update jobs from low-scoring evals"
+  automation: WorkbenchEvalAutomationAttributes
+}
+
+input WorkbenchEvalAutomationAttributes {
+  "whether low-scoring evals automatically create skill-update jobs"
+  enabled: Boolean
+
+  "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+  maxScore: Int
+
+  "maximum number of skills the workbench may have when automation creates a new skill"
+  maxSkills: Int
+
+  "optional guidance included in automatically created skill-update jobs"
+  instructions: String
 }
 
 input WorkbenchWebhookMatchesAttributes {
@@ -4928,12 +4945,29 @@ type WorkbenchEval {
   "rules for evaluating job progress"
   progressRules: String
 
+  "automation for creating skill-update jobs from low-scoring evals"
+  automation: WorkbenchEvalAutomation
+
   "the workbench this eval belongs to"
   workbench: Workbench
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchEvalAutomation {
+  "whether low-scoring evals automatically create skill-update jobs"
+  enabled: Boolean!
+
+  "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+  maxScore: Int
+
+  "maximum number of skills the workbench may have when automation creates a new skill"
+  maxSkills: Int!
+
+  "optional guidance included in automatically created skill-update jobs"
+  instructions: String
 }
 
 type WorkbenchEvalFeedback {

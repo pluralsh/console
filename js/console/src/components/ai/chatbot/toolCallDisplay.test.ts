@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   humanizeToolName,
   resolveToolCallKind,
+  shouldUnfurlCmdTool,
   toolCallDisplayDescription,
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
@@ -109,6 +110,37 @@ describe('humanizeToolName', () => {
     expect(humanizeToolName('workbench_activity_search')).toBe(
       'activity search'
     )
+  })
+})
+
+describe('shouldUnfurlCmdTool', () => {
+  it('unfurls running bash and command_execution tools', () => {
+    expect(shouldUnfurlCmdTool({ kind: 'bash', isPending: true })).toBe(true)
+    expect(
+      shouldUnfurlCmdTool({ kind: 'command_execution', isPending: true })
+    ).toBe(true)
+  })
+
+  it('does not unfurl other running tools', () => {
+    expect(shouldUnfurlCmdTool({ kind: 'read', isPending: true })).toBe(false)
+    expect(
+      shouldUnfurlCmdTool({ kind: 'python_sandbox', isPending: true })
+    ).toBe(false)
+  })
+
+  it('collapses cmd tools as soon as they complete', () => {
+    expect(
+      shouldUnfurlCmdTool({
+        kind: 'bash',
+        isPending: false,
+      })
+    ).toBe(false)
+    expect(
+      shouldUnfurlCmdTool({
+        kind: 'command_execution',
+        isPending: false,
+      })
+    ).toBe(false)
   })
 })
 

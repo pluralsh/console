@@ -255,20 +255,30 @@ defmodule Console.Services.Users do
   end
 
   @doc """
-  Determines if a user can refresh their jwt and returns the user back if so
+  Determines if a user can refresh their jwt and returns the user back if so.
+
+  The prior refresh token is kept valid for a short grace period so concurrent
+  tabs can still refresh if they race with rotation.
   """
   @spec authorize_refresh(binary) :: user_resp
   def authorize_refresh(token) when is_binary(token) do
     start_transaction()
     |> add_operation(:token, fn _ ->
       case Repo.preload(get_refresh_token(token), [:user]) do
-        %RefreshToken{user: %User{}} = rt -> {:ok, rt}
+        %RefreshToken{user: %User{}} = rt ->
+          if RefreshToken.expired?(rt),
+            do: {:error, "could not fetch refresh token"},
+            else: {:ok, rt}
         _ -> {:error, "could not fetch refresh token"}
       end
     end)
     |> add_operation(:user, fn %{token: token} -> {:ok, token.user} end)
     |> add_refresh_token()
-    |> add_operation(:clean, fn %{token: token} -> Repo.delete(token) end)
+    |> add_operation(:retire, fn %{token: token} ->
+      token
+      |> RefreshToken.retire()
+      |> Repo.update()
+    end)
     |> execute(extract: :hydrated)
   end
   def authorize_refresh(_), do: {:error, "no refresh token provided"}

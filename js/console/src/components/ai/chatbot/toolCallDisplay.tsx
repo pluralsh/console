@@ -102,6 +102,21 @@ export function resolveToolCallKind(
   return 'generic'
 }
 
+export function isCmdToolKind(kind: ToolCallKind): boolean {
+  return kind === 'bash' || kind === 'command_execution'
+}
+
+/** Running cmds stay open so stdout can be watched; they collapse as soon as they complete. */
+export function shouldUnfurlCmdTool({
+  kind,
+  isPending,
+}: {
+  kind: ToolCallKind
+  isPending?: boolean
+}): boolean {
+  return isCmdToolKind(kind) && !!isPending
+}
+
 /** Key used when batching consecutive tool calls in a group header. */
 export function toolCallBatchKey(kind: ToolCallKind): string {
   switch (kind) {

@@ -177,6 +177,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
     field :prompt_rules,     :string, description: "rules for evaluating job prompts"
     field :progress_rules,   :string, description: "rules for evaluating job progress"
+    field :automation,       :workbench_eval_automation_attributes,
+      description: "optional automation for creating skill-update jobs from low-scoring evals"
+  end
+
+  input_object :workbench_eval_automation_attributes do
+    field :enabled,      :boolean, description: "whether low-scoring evals automatically create skill-update jobs"
+    field :max_score,    :integer, description: "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+    field :max_skills,   :integer, description: "maximum number of skills the workbench may have when automation creates a new skill"
+    field :instructions, :string, description: "optional guidance included in automatically created skill-update jobs"
   end
 
   input_object :workbench_webhook_matches_attributes do
@@ -1082,10 +1091,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
     field :prompt_rules,     :string, description: "rules for evaluating job prompts"
     field :progress_rules,   :string, description: "rules for evaluating job progress"
+    field :automation,       :workbench_eval_automation,
+      description: "automation for creating skill-update jobs from low-scoring evals"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this eval belongs to"
 
     timestamps()
+  end
+
+  object :workbench_eval_automation do
+    field :enabled,      non_null(:boolean), description: "whether low-scoring evals automatically create skill-update jobs"
+    field :max_score,    :integer, description: "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+    field :max_skills,   non_null(:integer), description: "maximum number of skills the workbench may have when automation creates a new skill"
+    field :instructions, :string, description: "optional guidance included in automatically created skill-update jobs"
   end
 
   object :workbench_eval_feedback do

@@ -280,15 +280,35 @@ func (in *Account) applyBedrockModelSettings(aliases schemas.KeyAliases, setting
 			continue
 		}
 
-		arn := schemas.SecretVar{Val: inferenceProfileARN}
+		// Bifrost builds the Bedrock model identifier by joining
+		// InferenceProfileARN and ModelID before URL-encoding it. Console stores
+		// the full application inference profile ARN, so split off its resource
+		// ID to avoid appending the foundation model ID to an already-complete
+		// ARN (for example, .../profile-id/anthropic.claude-*).
+		profileARN, profileID, ok := splitBedrockInferenceProfileARN(inferenceProfileARN)
+		if !ok {
+			profileARN, profileID = inferenceProfileARN, modelID
+		}
+		arn := schemas.SecretVar{Val: profileARN}
 		aliases[modelID] = schemas.AliasConfig{
-			ModelID:   modelID,
+			ModelID:   profileID,
 			ModelName: lo.ToPtr(modelID),
 			BedrockAliasCfg: &schemas.BedrockAliasCfg{
 				InferenceProfileARN: &arn,
 			},
 		}
 	}
+}
+
+func splitBedrockInferenceProfileARN(arn string) (prefix, resourceID string, ok bool) {
+	if separator := strings.LastIndexByte(arn, '/'); strings.HasPrefix(arn, "arn:") && separator > 0 && separator < len(arn)-1 {
+		return arn[:separator], arn[separator+1:], true
+	}
+
+	// Preserve the previous shape for malformed or prefix-only values. The
+	// Console schema validates presence, while Bedrock remains responsible for
+	// validating the identifier itself.
+	return "", "", false
 }
 
 func (in *Account) parseModelID(modelID string) (inferenceProfileID string, model string) {

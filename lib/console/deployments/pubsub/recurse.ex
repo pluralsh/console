@@ -403,6 +403,54 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobCreated do
   def process(%{item: job}), do: Console.Pipelines.AI.Workbench.Producer.kick(job)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchEvalResultCreated do
+  alias Console.Deployments.Workbenches
+  alias Console.Schema.{User, WorkbenchEval, WorkbenchEvalResult, WorkbenchJob}
+
+  def process(%@for{item: %WorkbenchEvalResult{} = result}) do
+    result
+    |> Console.Repo.preload([
+      workbench_eval: [workbench: [bot_user: :groups]],
+      workbench_job: [user: :groups]
+    ])
+    |> maybe_create_skill_job()
+  end
+
+  def process(_), do: :ok
+
+  defp maybe_create_skill_job(%WorkbenchEvalResult{
+         grade: grade,
+         workbench_eval: %WorkbenchEval{
+           automation: %{enabled: true, max_score: max_score, max_skills: max_skills} = automation,
+           workbench: workbench
+         },
+         workbench_job: %WorkbenchJob{type: :job, user: %User{} = user}
+       } = result)
+       when is_integer(grade) and is_integer(max_score) and grade < max_score do
+    Workbenches.workbench_eval_skill(
+      result,
+      automation_prompt(grade, max_score, max_skills, automation.instructions),
+      workbench.bot_user || user
+    )
+  end
+
+  defp maybe_create_skill_job(_), do: :ok
+
+  defp automation_prompt(grade, max_score, max_skills, instructions) do
+    """
+    Assess the completed job and its evaluation for durable skill updates.
+
+    The job scored #{grade}/10, below the configured automation threshold of #{max_score}.
+    Prefer updating an existing skill. The workbench must never exceed #{max_skills} total skills;
+    if it is already at that limit, do not create a new skill.
+
+    Additional instructions:
+    #{instructions || "No additional instructions were provided."}
+    """
+    |> String.trim()
+  end
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchQueuedPromptCreated do
   def process(%{item: prompt}), do: Console.Pipelines.AI.QueuedPrompt.Producer.kick(prompt)
 end

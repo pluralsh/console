@@ -33,6 +33,8 @@ func buildAnalysisFollowUpPrompt(attempt int) string {
 	return fmt.Sprintf(
 		"You finished the previous turn without calling the MCP tool updateAgentRunAnalysis (follow-up %d/%d). "+
 			"You must call updateAgentRunAnalysis now with a non-empty summary and detailed analysis reflecting your investigation. "+
+			"If it is not directly visible and tool_search is available, use tool_search for the exact name updateAgentRunAnalysis; "+
+			"do not use list_mcp_resources because resources are not tools. "+
 			"Do not end the session until that tool call succeeds.",
 		attempt,
 		maxAnalysisFollowUps,

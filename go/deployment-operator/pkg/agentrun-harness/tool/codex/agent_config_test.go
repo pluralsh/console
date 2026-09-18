@@ -55,6 +55,8 @@ func TestAgentPrepareAndConfigurePhases(t *testing.T) {
 	}
 	if !strings.Contains(string(native), "https://console.example/ext/ai/v1") ||
 		!strings.Contains(string(native), `model = "openai/gpt-5.1-codex"`) ||
+		!strings.Contains(string(native), "[mcp_servers.\"plural\"]") ||
+		!strings.Contains(string(native), "required = true") ||
 		!strings.Contains(string(native), "web_search_request = true") ||
 		!strings.Contains(string(native), "shell_snapshot = true") {
 		t.Fatalf("native config lost proxy settings: %s", native)
@@ -92,5 +94,30 @@ func TestResolveProviderSettingsPreservesProxyEndpointAndWirePolicy(t *testing.T
 	provider, baseURL, _, wireAPI = agent.resolveProviderSettings(config)
 	if provider != customProvider || baseURL != endpoint || wireAPI != responsesWireAPI {
 		t.Fatalf("custom provider settings = %q, %q, %q", provider, baseURL, wireAPI)
+	}
+}
+
+func TestDirectOnlyToolNamespaces(t *testing.T) {
+	agent := NewAgent(toolConfigForTemplateTests())
+	if got := agent.directOnlyToolNamespaces(); len(got) != 1 || got[0] != pluralMCPNamespace {
+		t.Fatalf("direct-only namespaces = %v", got)
+	}
+}
+
+func TestShellEnvironmentVariablesIncludeGitBasicAuth(t *testing.T) {
+	agent := NewAgent(toolConfigForTemplateTests())
+	vars := agent.shellEnvironmentVariables(false)
+	want := []string{gitAccessTokenEnv, gitUsernameEnv, gitAskpassEnv}
+	for _, name := range want {
+		found := false
+		for _, got := range vars {
+			if got == name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("shellEnvironmentVariables() = %v, missing %q", vars, name)
+		}
 	}
 }

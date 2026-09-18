@@ -144,6 +144,7 @@ defmodule Console.PubSub.WorkbenchKnowledgeDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchEvalCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchEvalUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchEvalDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchEvalResultCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookDeleted, do: use Piazza.PubSub.Event

@@ -3905,7 +3905,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -3967,7 +3967,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -4000,7 +4000,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -4033,7 +4033,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -4076,7 +4076,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "ai.write"
+          "sentinel.write"
         ]
       }
     },
@@ -4125,7 +4125,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },

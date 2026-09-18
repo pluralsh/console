@@ -57,6 +57,94 @@ func TestCommitIdentityPrefersInitiatingUser(t *testing.T) {
 	}
 }
 
+func TestGitAskpassScriptAnswersUsernameAndPasswordPrompts(t *testing.T) {
+	script := filepath.Join(t.TempDir(), gitAskpassFileName)
+	if err := os.WriteFile(script, []byte(gitAskpassScript()), 0700); err != nil {
+		t.Fatal(err)
+	}
+
+	env := []string{EnvGitUsername + "=mjg", EnvGitAccessToken + "=some-pat"}
+	if got := runAskpass(t, script, env, "Username for 'https://bitbucket.example.com': "); got != "mjg" {
+		t.Fatalf("username prompt = %q, want mjg", got)
+	}
+	if got := runAskpass(t, script, env, "Password for 'https://mjg@bitbucket.example.com': "); got != "some-pat" {
+		t.Fatalf("password prompt = %q, want some-pat", got)
+	}
+}
+
+func TestGitAskpassScriptDefaultsUsernameWhenUnset(t *testing.T) {
+	script := filepath.Join(t.TempDir(), gitAskpassFileName)
+	if err := os.WriteFile(script, []byte(gitAskpassScript()), 0700); err != nil {
+		t.Fatal(err)
+	}
+
+	env := []string{EnvGitAccessToken + "=some-pat"}
+	if got := runAskpass(t, script, env, "Username for 'https://github.com': "); got != defaultGitUsername {
+		t.Fatalf("username prompt = %q, want %s", got, defaultGitUsername)
+	}
+}
+
+func TestConfigureGitCredentialsSetsAskpassEnv(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv(EnvGitAccessToken, "")
+	t.Setenv(EnvGitUsername, "")
+	t.Setenv(EnvGitAskpass, "")
+
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{Username: "mjg", Token: "some-pat"},
+		},
+		dir: workDir,
+	}
+
+	askpassPath, err := env.configureGitCredentials()
+	if err != nil {
+		t.Fatalf("configureGitCredentials() error = %v", err)
+	}
+	if askpassPath == "" {
+		t.Fatal("expected askpass path")
+	}
+	if os.Getenv(EnvGitUsername) != "mjg" {
+		t.Fatalf("GIT_USERNAME = %q, want mjg", os.Getenv(EnvGitUsername))
+	}
+	if os.Getenv(EnvGitAccessToken) != "some-pat" {
+		t.Fatalf("GIT_ACCESS_TOKEN = %q, want some-pat", os.Getenv(EnvGitAccessToken))
+	}
+	if os.Getenv(EnvGitAskpass) != askpassPath {
+		t.Fatalf("GIT_ASKPASS = %q, want %s", os.Getenv(EnvGitAskpass), askpassPath)
+	}
+
+	if got := runAskpass(t, askpassPath, os.Environ(), "Username for 'https://bitbucket.example.com': "); got != "mjg" {
+		t.Fatalf("username prompt = %q, want mjg", got)
+	}
+	if got := runAskpass(t, askpassPath, os.Environ(), "Password for 'https://bitbucket.example.com': "); got != "some-pat" {
+		t.Fatalf("password prompt = %q, want some-pat", got)
+	}
+}
+
+func TestConfigureGitCredentialsDefaultsEmptyUsername(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv(EnvGitUsername, "")
+
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{Token: "some-pat"},
+		},
+		dir: t.TempDir(),
+	}
+	if _, err := env.configureGitCredentials(); err != nil {
+		t.Fatalf("configureGitCredentials() error = %v", err)
+	}
+	if os.Getenv(EnvGitUsername) != defaultGitUsername {
+		t.Fatalf("GIT_USERNAME = %q, want %s", os.Getenv(EnvGitUsername), defaultGitUsername)
+	}
+}
+
 func TestCommitIdentityFallsBackToScmCredentials(t *testing.T) {
 	env := &environment{
 		agentRun: &v1.AgentRun{
@@ -279,6 +367,17 @@ func initGitRepo(t *testing.T, contents string) string {
 	runGit(t, dir, "add", "README")
 	runGit(t, dir, "commit", "-m", "init")
 	return dir
+}
+
+func runAskpass(t *testing.T, script string, env []string, prompt string) string {
+	t.Helper()
+	cmd := exec.Command(script, prompt)
+	cmd.Env = env
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("askpass %q: %v: %s", prompt, err, out)
+	}
+	return strings.TrimSpace(string(out))
 }
 
 func runGit(t *testing.T, dir string, args ...string) {

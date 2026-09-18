@@ -395,11 +395,11 @@ defmodule Console.GraphQl.UserQueriesTest do
       assert found["jwt"]
       assert found["refreshToken"]["token"]
       refute found["refreshToken"]["token"] == token.token
-      refute Console.Services.Users.get_refresh_token(token.token)
+      assert Console.Services.Users.get_refresh_token(token.token).expires_at
       assert Console.Services.Users.get_refresh_token(found["refreshToken"]["token"])
     end
 
-    test "it cannot reuse a rotated refresh token" do
+    test "concurrent tabs can reuse a rotated refresh token during the grace period" do
       user = insert(:user)
       token = insert(:refresh_token, user: user)
 
@@ -412,9 +412,12 @@ defmodule Console.GraphQl.UserQueriesTest do
         }
       """, %{"token" => token.token}, %{current_user: user})
 
-      {:ok, %{errors: [_ | _]}} = run_query("""
+      {:ok, %{data: %{"refresh" => raced}}} = run_query("""
         query Refresh($token: String!) {
-          refresh(token: $token) { jwt }
+          refresh(token: $token) {
+            jwt
+            refreshToken { token }
+          }
         }
       """, %{"token" => token.token}, %{current_user: user})
 
@@ -427,9 +430,24 @@ defmodule Console.GraphQl.UserQueriesTest do
         }
       """, %{"token" => found["refreshToken"]["token"]}, %{current_user: user})
 
+      assert raced["jwt"]
+      assert raced["refreshToken"]["token"]
+      refute raced["refreshToken"]["token"] == token.token
+      refute raced["refreshToken"]["token"] == found["refreshToken"]["token"]
       assert again["jwt"]
       assert again["refreshToken"]["token"]
       refute again["refreshToken"]["token"] == found["refreshToken"]["token"]
+    end
+
+    test "it cannot refresh after the grace period expires" do
+      user = insert(:user)
+      token = insert(:refresh_token, user: user, expires_at: Timex.shift(Timex.now(), hours: -1))
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Refresh($token: String!) {
+          refresh(token: $token) { jwt }
+        }
+      """, %{"token" => token.token}, %{current_user: user})
     end
   end
 

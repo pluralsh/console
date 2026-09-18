@@ -22,7 +22,9 @@ import { ToolCallContent } from '../ToolCallContent'
 import {
   getCommand,
   getPython,
+  isCmdToolKind,
   resolveToolCallKind,
+  shouldUnfurlCmdTool,
   toolCallDisplayDescription,
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
@@ -95,6 +97,14 @@ export function SimpleToolCall({
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
+  const autoUnfurl = shouldUnfurlCmdTool({ kind, isPending })
+  const [cmdOpen, setCmdOpen] = useState(autoUnfurl)
+  const [prevAutoUnfurl, setPrevAutoUnfurl] = useState(autoUnfurl)
+  if (autoUnfurl !== prevAutoUnfurl) {
+    setPrevAutoUnfurl(autoUnfurl)
+    setCmdOpen(autoUnfurl)
+  }
+
   const title =
     customTitle ?? toolCallDisplayTitle(kind, toolName, args, isPending)
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
@@ -118,6 +128,7 @@ export function SimpleToolCall({
   const accordionProps = {
     label,
     hoverCaret: true,
+    ...(isCmdToolKind(kind) && { isOpen: cmdOpen, setIsOpen: setCmdOpen }),
   }
 
   switch (kind) {
