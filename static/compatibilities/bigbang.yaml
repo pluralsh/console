@@ -3,6 +3,114 @@ icon: https://artifacthub.io/image/0ca7dd5c-47ec-4d6a-87b7-2f2b74a3cca5
 git_url: https://repo1.dso.mil/big-bang/bigbang
 release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
 versions:
+- version: 3.33.0
+  kube: ['1.36']
+  requirements:
+  - name: Alloy
+    version: 4.3.2-bb.0
+  - name: Anchore Enterprise
+    version: 4.1.2-bb.0
+  - name: Argocd
+    version: 10.2.1-bb.2
+  - name: Authservice
+    version: 1.1.8-bb.3
+  - name: Cert Manager
+    version: v1.20.3-bb.2
+  - name: Eck Operator
+    version: 3.5.0-bb.0
+  - name: Elasticsearch Kibana
+    version: 1.43.0-bb.0
+  - name: External Secrets Operator
+    version: 2.10.0-bb.2
+  - name: Fluentbit
+    version: 0.58.2-bb.0
+  - name: Fortify
+    version: 26.2.0-bb.4
+  - name: Gatekeeper
+    version: 3.23.1-bb.0
+  - name: Gateway Api
+    version: 1.6.1-bb.0
+  - name: Gitlab
+    version: 10.3.2-bb.1
+  - name: Gitlab Runner
+    version: 0.91.2-bb.2
+  - name: Grafana
+    version: 12.10.0-bb.0
+  - name: Harbor
+    version: 1.19.2-bb.1
+  - name: Headlamp
+    version: 0.45.0-bb.0
+  - name: Istio Cni
+    version: 1.30.4-bb.0
+  - name: Istio Crds
+    version: 1.30.4-bb.0
+  - name: Istio Gateway
+    version: 1.30.4-bb.0
+  - name: Istiod
+    version: 1.30.4-bb.0
+  - name: Keycloak
+    version: 7.3.0-bb.0
+  - name: Kiali
+    version: 2.31.0-bb.0
+  - name: Kyverno
+    version: 3.9.1-bb.0
+  - name: Kyverno Policies
+    version: 3.3.4-bb.87
+  - name: Kyverno Reporter
+    version: 3.10.0-bb.2
+  - name: Loki
+    version: 6.55.0-bb.7
+  - name: Mattermost
+    version: 11.10.1-bb.0
+  - name: Mattermost Operator
+    version: 1.25.9-bb.0
+  - name: Metrics Server
+    version: 3.14.0-bb.0
+  - name: Mimir
+    version: 6.1.0-bb.1
+  - name: Minio
+    version: 7.1.1-bb.24
+  - name: Minio Operator
+    version: 7.1.1-bb.10
+  - name: Monitoring
+    version: 88.6.2-bb.0
+  - name: Neuvector
+    version: 2.11.1-bb.0
+  - name: Prometheus Operator Crds
+    version: 31.0.1-bb.0
+  - name: Renovate
+    version: 46.289.4-bb.0
+  - name: Sonarqube
+    version: 2026.4.1-bb.1
+  - name: Tempo
+    version: 2.1.0-bb.2
+  - name: Thanos
+    version: 17.6.0-bb.1
+  - name: Twistlock
+    version: 0.30.0-bb.2
+  - name: Vault
+    version: 0.34.1-bb.1
+  - name: Velero
+    version: 12.1.0-bb.4
+  - name: Wrapper
+    version: 0.4.15
+  - name: Ztunnel
+    version: 1.30.4-bb.0
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Big Bang 3.33.0 updates a large set of embedded charts; most version
+        bumps are patch-level but a few are major/minor upgrades that may require
+        extra validation.]
+    features: ['General dependency refresh across security, observability, and CI/CD
+        components.', Improved stability/bugfix releases across several bundled charts
+        (patch bumps).]
+    breaking_changes: ["Potential breaking change risk from major upgrades (notably\
+        \ Anchore Enterprise 3.x \u2192 4.x and Grafana 10.x \u2192 12.x); review\
+        \ component-specific upgrade notes and test dashboards/scans before promoting\
+        \ to prod."]
+  chart_version: 3.33.0
+  images: ['registry1.dso.mil/ironbank/bitnami/mysql8:8.0.36-debian-11-r1', 'registry1.dso.mil/ironbank/opensource/mysql/mysql8:8.4.11']
 - version: 3.32.0
   kube: ['1.36']
   requirements:

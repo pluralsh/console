@@ -55,6 +55,7 @@ import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import { WORKBENCHES_ABS_PATH } from '../../routes/workbenchesRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
+import { ApplicationUpdateNavButton } from './ApplicationUpdateNavButton.tsx'
 import { AINavIcon } from 'components/ai/AINavIcon'
 import { StacksNavIcon } from 'components/awaiting-review/StacksNavIcon'
 
@@ -291,6 +292,7 @@ export function Sidebar() {
         ))}
         <Flex flex={1} />
         <HelpLauncher />
+        <ApplicationUpdateNavButton />
         {configuration?.consoleVersion && (
           <ConsoleVersion version={configuration.consoleVersion} />
         )}

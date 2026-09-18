@@ -3,11 +3,12 @@ package common
 import (
 	"encoding/json"
 
+	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/polly/algorithms"
-	"github.com/samber/lo"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func GateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error) {
@@ -63,7 +64,7 @@ func GateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 		Namespace: job.Namespace,
 		Raw:       raw,
 		Resources: containerResourcesAttributes(job.Resources),
-		Containers: algorithms.Map(job.Containers,
+		Containers: new(algorithms.Map(job.Containers,
 			func(c *v1alpha1.Container) *console.ContainerAttributes {
 				return &console.ContainerAttributes{
 					Image: c.Image,
@@ -77,7 +78,7 @@ func GateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 						return &console.EnvFromAttributes{Secret: e.Secret, ConfigMap: e.ConfigMap}
 					}),
 				}
-			}),
+			})),
 		Labels:         labels,
 		Annotations:    annotations,
 		NodeSelector:   nodeSelector,
