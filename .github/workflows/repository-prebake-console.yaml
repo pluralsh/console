@@ -94,17 +94,20 @@ jobs:
       - name: Use console dockerignore
         run: cp repository-prebake/console/.dockerignore .dockerignore
 
-      # GITHUB_TOKEN cannot clone private sibling repos. PLURAL_BOT_PAT is the
-      # in-tree PAT name, but it is not set on this repository, so skip
-      # plrl-up-demos until that secret exists (contents:read on that repo).
+      # GITHUB_TOKEN cannot clone private sibling repos. Skip plrl-up-demos
+      # until PLURAL_BOT_PAT is set (contents:read on that repo). Check the
+      # env var — secrets are not allowed in step if: conditionals.
       - name: Drop private extra-context without PAT
-        if: ${{ secrets.PLURAL_BOT_PAT == '' }}
+        env:
+          PAT: ${{ secrets.PLURAL_BOT_PAT }}
         run: |
-          cat > repository-prebake/console/repos.yaml <<'EOF'
-          repositories:
-            - url: https://github.com/pluralsh/console.git
-              path: console
-          EOF
+          if [ -z "$PAT" ]; then
+            printf '%s\n' \
+              'repositories:' \
+              '  - url: https://github.com/pluralsh/console.git' \
+              '    path: console' \
+              > repository-prebake/console/repos.yaml
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -141,6 +144,6 @@ jobs:
           build-args: |
             PREBAKE_IMAGE=${{ env.BASE_IMAGE }}:${{ needs.base.outputs.version }}
           secrets: |
-            git_token=${{ secrets.PLURAL_BOT_PAT != '' && secrets.PLURAL_BOT_PAT || github.token }}
+            git_token=${{ secrets.PLURAL_BOT_PAT || github.token }}
           cache-from: type=gha,scope=repository-prebake-console
           cache-to: type=gha,mode=max,scope=repository-prebake-console
