@@ -2,7 +2,7 @@
 
 Build a container image that holds full git clones plus a `manifest.json`.
 Set it on `AgentRuntime.spec.repositoryImage` so agent-run pods copy it into
-`/plural/shared/repos` before bootstrap. Bootstrap then copies a matching repo
+`/plural/shared/repos` before bootstrap. Bootstrap then moves a matching repo
 into `/plural/shared/repository` instead of cloning over the network, and
 agents can read the other prebaked repos as extra context.
 
@@ -71,7 +71,8 @@ User-facing walkthrough: [Prebaked repositories](https://docs.plural.sh/plural-f
 
 When `/plural/shared/repos/manifest.json` is present, agent-bootstrap matches
 the run repository URL (https and ssh forms of the same repo are equivalent)
-and copies that tree into `/plural/shared/repository`. Fetch of the requested
+and moves that tree into `/plural/shared/repository` (rename on the same
+volume; copy+delete if rename is not possible). Fetch of the requested
 branch is best-effort; an airgapped or stale remote keeps the prebaked copy.
 Other prebaked repos stay at `/plural/shared/repos/<path>` and are listed in
 the agent system prompt.

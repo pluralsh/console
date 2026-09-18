@@ -83,3 +83,29 @@ func TestCopyDirRejectsFileSource(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not a directory")
 }
+
+func TestMoveDir(t *testing.T) {
+	parent := t.TempDir()
+	src := filepath.Join(parent, "src")
+	require.NoError(t, os.Mkdir(src, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(src, "readme"), []byte("moved"), 0644))
+
+	dst := filepath.Join(parent, "dst")
+	require.NoError(t, MoveDir(src, dst))
+
+	_, err := os.Stat(src)
+	require.Error(t, err)
+	assert.True(t, os.IsNotExist(err))
+
+	body, err := os.ReadFile(filepath.Join(dst, "readme"))
+	require.NoError(t, err)
+	assert.Equal(t, "moved", string(body))
+}
+
+func TestMoveDirRejectsExistingDestination(t *testing.T) {
+	src := t.TempDir()
+	dst := t.TempDir()
+	err := MoveDir(src, dst)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "already exists")
+}

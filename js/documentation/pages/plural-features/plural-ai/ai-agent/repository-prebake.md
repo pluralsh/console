@@ -3,7 +3,7 @@ title: Prebaked repositories
 description: Speed up agent bootstrap with precloned git repositories, and extend the repository-prebake base image.
 ---
 
-Agent bootstrap normally clones the run repository over the network. A **prebake image** is an OCI image of full git clones plus a `manifest.json`. Point `AgentRuntime.spec.repositoryImage` at that image so the pod copies a matching checkout locally instead of `git clone`. Other prebaked repos stay on disk as extra context.
+Agent bootstrap normally clones the run repository over the network. A **prebake image** is an OCI image of full git clones plus a `manifest.json`. Point `AgentRuntime.spec.repositoryImage` at that image so the pod copies it into `/plural/shared/repos` before bootstrap. Bootstrap then moves a matching checkout into `/plural/shared/repository` instead of cloning over the network. Other prebaked repos stay on disk as extra context.
 
 For field-level details, see the [AgentRuntimeSpec API reference](/api-reference/kubernetes/agent-api-reference#agentruntimespec).
 
@@ -34,7 +34,7 @@ To test a branch, use the matching `sha-<short>` tag. If the image is private, s
 
 1. The operator starts a `repository-prebake` init container from `repositoryImage`.
 2. That container copies `/data/.` into the existing `shared-context` emptyDir at `/plural/shared/repos`.
-3. `agent-bootstrap` matches the run repository URL (https and ssh forms of the same repo are equivalent) and copies that tree into `/plural/shared/repository`.
+3. `agent-bootstrap` matches the run repository URL (https and ssh forms of the same repo are equivalent) and **moves** that tree into `/plural/shared/repository` so the working copy does not duplicate disk. If rename is not possible, it copies then deletes the source. Other prebaked repos stay under `/plural/shared/repos/<path>`.
 4. Fetch of the requested branch is best-effort. An airgapped or stale remote keeps the prebaked copy.
 
 No extra volume and no Kubernetes image-volume feature gate. The image must include `/bin/sh` and `cp`, with repos under `/data`, owned by uid `65532` so the non-root agent can read them.

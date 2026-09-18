@@ -113,3 +113,38 @@ func copyFile(src, dst string, mode os.FileMode) error {
 	}
 	return out.Chmod(mode)
 }
+
+// MoveDir relocates src to dst. It tries rename first (same filesystem, no extra
+// disk). If rename fails, it copies then removes src. dst must not already exist.
+func MoveDir(src, dst string) error {
+	src = filepath.Clean(src)
+	dst = filepath.Clean(dst)
+
+	info, err := os.Lstat(src)
+	if err != nil {
+		return fmt.Errorf("move: stat source: %w", err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("move: source is not a directory: %s", src)
+	}
+	if _, err := os.Lstat(dst); err == nil {
+		return fmt.Errorf("move: destination already exists: %s", dst)
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+
+	if err := CopyDir(src, dst); err != nil {
+		_ = os.RemoveAll(dst)
+		return err
+	}
+	if err := os.RemoveAll(src); err != nil {
+		return fmt.Errorf("move: copied to %s but failed to remove %s: %w", dst, src, err)
+	}
+	return nil
+}

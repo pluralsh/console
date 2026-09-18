@@ -122,13 +122,17 @@ func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
 		return false, nil
 	}
 
-	klog.V(log.LogLevelInfo).InfoS("copying prebaked repository", "src", match.Dir, "dst", repoDirPath, "url", in.agentRun.Repository)
-	if err := fs.CopyDir(match.Dir, repoDirPath); err != nil {
-		if removeErr := os.RemoveAll(repoDirPath); removeErr != nil {
-			klog.ErrorS(removeErr, "failed to clean up incomplete prebake copy", "dir", repoDirPath)
+	klog.V(log.LogLevelInfo).InfoS("placing prebaked repository", "src", match.Dir, "dst", repoDirPath, "url", in.agentRun.Repository)
+	if err := fs.MoveDir(match.Dir, repoDirPath); err != nil {
+		if _, statErr := os.Stat(filepath.Join(repoDirPath, ".git")); statErr == nil {
+			klog.ErrorS(err, "prebake source leftover after placing working copy", "src", match.Dir, "dst", repoDirPath)
+		} else {
+			if removeErr := os.RemoveAll(repoDirPath); removeErr != nil {
+				klog.ErrorS(removeErr, "failed to clean up incomplete prebake copy", "dir", repoDirPath)
+			}
+			klog.ErrorS(err, "prebake place failed, falling back to git clone", "src", match.Dir)
+			return false, nil
 		}
-		klog.ErrorS(err, "prebake copy failed, falling back to git clone", "src", match.Dir)
-		return false, nil
 	}
 
 	if err := exec.NewExecutable("git",
@@ -139,7 +143,7 @@ func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
 			exec.WithArgs([]string{"remote", "add", "origin", in.agentRun.Repository}),
 			exec.WithDir(repoDirPath),
 		).Run(context.Background()); addErr != nil {
-			return false, fmt.Errorf("failed to set origin remote after prebake copy: %w", err)
+			return false, fmt.Errorf("failed to set origin remote after prebake place: %w", err)
 		}
 	}
 
