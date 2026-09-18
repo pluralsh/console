@@ -170,6 +170,91 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
     end
   end
 
+  describe "workbench monitoring" do
+    @monitoring_query """
+    query Monitoring($id: ID!, $q: String, $first: Int!, $after: String) {
+      workbench(id: $id) {
+        monitors(q: $q, first: $first, after: $after) {
+          pageInfo { hasNextPage endCursor }
+          edges { node { id name } }
+        }
+        workbenchDashboards(q: $q, first: $first) {
+          edges { node { id name } }
+        }
+      }
+    }
+    """
+
+    test "searches and paginates monitors within the workbench" do
+      workbench = insert(:workbench)
+      second = insert(:monitor, name: "cpu-b", service: nil, workbench: workbench)
+      first = insert(:monitor, name: "cpu-a", service: nil, workbench: workbench)
+      insert(:monitor, name: "memory", service: nil, workbench: workbench)
+      insert(:monitor, name: "cpu-other", service: nil, workbench: insert(:workbench))
+      dashboard = insert(:dashboard, name: "cpu-dashboard", workbench: workbench)
+      insert(:dashboard, name: "memory-dashboard", workbench: workbench)
+      insert(:dashboard, name: "cpu-other")
+
+      vars = %{"id" => workbench.id, "q" => "cpu", "first" => 1}
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(@monitoring_query, vars, %{current_user: admin_user()})
+
+      assert ids_equal(from_connection(found["monitors"]), [first])
+      assert ids_equal(from_connection(found["workbenchDashboards"]), [dashboard])
+      assert found["monitors"]["pageInfo"]["hasNextPage"]
+
+      vars = Map.put(vars, "after", found["monitors"]["pageInfo"]["endCursor"])
+      {:ok, %{data: %{"workbench" => next}}} =
+        run_query(@monitoring_query, vars, %{current_user: admin_user()})
+
+      assert ids_equal(from_connection(next["monitors"]), [second])
+      refute next["monitors"]["pageInfo"]["hasNextPage"]
+    end
+
+    test "does not expose monitoring for an inaccessible workbench" do
+      workbench = insert(:workbench)
+      insert(:monitor, service: nil, workbench: workbench)
+      insert(:dashboard, workbench: workbench)
+
+      {:ok, %{errors: [_ | _], data: %{"workbench" => nil}}} =
+        run_query(@monitoring_query, %{"id" => workbench.id, "first" => 10}, %{current_user: insert(:user)})
+    end
+
+    test "returns empty connections when no names match" do
+      workbench = insert(:workbench)
+      insert(:monitor, service: nil, workbench: workbench)
+      insert(:dashboard, workbench: workbench)
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(@monitoring_query, %{"id" => workbench.id, "q" => "absent", "first" => 10}, %{current_user: admin_user()})
+
+      assert from_connection(found["monitors"]) == []
+      assert from_connection(found["workbenchDashboards"]) == []
+    end
+
+    test "lists only jobs triggered by the selected monitor in this workbench" do
+      workbench = insert(:workbench)
+      monitor = insert(:monitor, service: nil, workbench: workbench)
+      alert = insert(:alert, monitor: monitor, workbench: workbench)
+      job = insert(:workbench_job, workbench: workbench, alert: alert)
+      insert(:workbench_job, alert: alert)
+      insert(:workbench_job, workbench: workbench)
+      insert(:workbench_job, workbench: workbench, alert: insert(:alert))
+
+      {:ok, %{data: %{"workbench" => %{"runs" => found}}}} = run_query("""
+        query MonitorJobs($id: ID!, $monitorId: ID!) {
+          workbench(id: $id) {
+            runs(monitorId: $monitorId, first: 10) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "monitorId" => monitor.id}, %{current_user: admin_user()})
+
+      assert ids_equal(from_connection(found), [job])
+    end
+  end
+
   describe "dashboard datasource fields" do
     test "fetches graph metrics and input labels with substituted variables and time ranges" do
       workbench = insert(:workbench)
@@ -226,6 +311,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       expect(Stub, :metrics, fn :mock_conn, input, opts ->
         assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total{namespace=\"production\"}[5m]))"
+        assert input.step == "15s"
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 

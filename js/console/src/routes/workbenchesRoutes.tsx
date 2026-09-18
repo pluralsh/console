@@ -26,6 +26,8 @@ import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronSch
 import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/WebhookTriggerForm'
 import { WorkbenchEvalSettings } from 'components/workbenches/workbench/evals/WorkbenchEvalSettings'
 import { WorkbenchEvals } from 'components/workbenches/workbench/evals/WorkbenchEvals'
+import { WorkbenchMonitoring } from 'components/workbenches/workbench/monitoring/WorkbenchMonitoring'
+import { WorkbenchMonitorSettings } from 'components/workbenches/workbench/monitoring/WorkbenchMonitorSettings'
 import { Navigate, Route } from 'react-router-dom'
 import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from './settingsRoutesConst'
 import {
@@ -33,6 +35,11 @@ import {
   WORKBENCH_EVAL_RESULT_PARAM_ID,
   WORKBENCH_JOBS_PARAM_JOB,
   WORKBENCH_JOBS_REL_PATH,
+  WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
+  WORKBENCH_MONITORING_DASHBOARDS_REL_PATH,
+  WORKBENCH_MONITORING_MONITOR_PARAM_ID,
+  WORKBENCH_MONITORING_MONITORS_REL_PATH,
+  WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
@@ -40,6 +47,7 @@ import {
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
+  WORKBENCHES_MONITORING_REL_PATH,
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_CREATE_CLOUD_CONNECTION_ABS_PATH,
@@ -146,6 +154,18 @@ export const workbenchesRoutes = [
       path={`${WORKBENCH_JOBS_REL_PATH}/:${WORKBENCH_JOBS_PARAM_JOB}`}
       element={<WorkbenchJob />}
     />
+    <Route
+      path={WORKBENCHES_MONITORING_REL_PATH}
+      element={<WorkbenchMonitoring />}
+    />
+    <Route
+      path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_DASHBOARDS_REL_PATH}/:${WORKBENCH_MONITORING_DASHBOARD_PARAM_ID}`}
+      element={<WorkbenchMonitoring />}
+    />
+    <Route
+      path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/:${WORKBENCH_MONITORING_MONITOR_PARAM_ID}`}
+      element={<WorkbenchMonitoring />}
+    />
   </Route>,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
@@ -215,5 +235,9 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_EVAL_SETTINGS_REL_PATH}`}
     element={<WorkbenchEvalSettings />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/:${WORKBENCH_MONITORING_MONITOR_PARAM_ID}/${WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH}`}
+    element={<WorkbenchMonitorSettings />}
   />,
 ]

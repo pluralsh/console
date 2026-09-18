@@ -525,6 +525,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Nested, check: true, msg: "workbench runs cannot be fetched through a policy"
       arg :alert, :boolean, description: "show runs spawned from alerts"
       arg :issue, :boolean, description: "show runs spawned from issues"
+      arg :monitor_id, :id, description: "show runs spawned from a specific monitor"
 
       resolve &Deployments.list_workbench_runs/3
     end
@@ -551,7 +552,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :workbench_dashboards, node_type: :workbench_dashboard do
       middleware Nested, check: true, msg: "workbench dashboards cannot be fetched through a policy"
+      arg :q, :string, description: "search dashboards by name"
       resolve &Deployments.list_dashboards/3
+    end
+
+    connection field :monitors, node_type: :monitor do
+      middleware Nested, check: true, msg: "workbench monitors cannot be fetched through a policy"
+      arg :q, :string, description: "search monitors by name"
+      resolve &Deployments.list_monitors/3
     end
 
     field :eval, :workbench_eval, description: "eval configuration for this workbench (at most one; null if none configured)" do

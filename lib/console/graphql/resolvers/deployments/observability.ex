@@ -183,6 +183,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def list_dashboards(%Workbench{id: workbench_id}, args, _) do
     Dashboard.for_workbench(workbench_id)
+    |> maybe_search(Dashboard, args)
     |> Dashboard.ordered()
     |> paginate(args)
   end
@@ -200,6 +201,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Monitor.for_service(id)
     |> maybe_search(Monitor, args)
     |> Monitor.ordered()
+    |> paginate(args)
+  end
+
+  def list_monitors(%Workbench{id: id}, args, _) do
+    Monitor.for_workbench(id)
+    |> maybe_search(Monitor, args)
+    |> Monitor.ordered(asc: :name, asc: :id)
     |> paginate(args)
   end
 
