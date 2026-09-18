@@ -3,6 +3,7 @@ import {
   Flex,
   IconFrame,
   ListIcon,
+  PencilIcon,
   PeopleIcon,
   Spinner,
   TrashCanIcon,
@@ -11,6 +12,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
 import { McpServerFragment } from 'generated/graphql'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getAiSettingsMcpServerEditAbsPath } from 'routes/settingsRoutesConst'
 import { McpAuditModal } from './McpAuditTable'
 import { ViewMcpServerDetails } from './McpServerDetails'
 import {
@@ -19,7 +22,7 @@ import {
 } from 'components/cd/utils/PermissionsModal'
 
 export type McpTableAction =
-  'audit' | 'permissions' | 'view' | 'removeConnection'
+  'audit' | 'permissions' | 'view' | 'edit' | 'removeConnection'
 
 const columnHelper = createColumnHelper<McpServerFragment>()
 
@@ -61,6 +64,7 @@ export const ColActions = columnHelper.accessor((server) => server, {
     const server = getValue()
     return (
       <Flex gap="xsmall">
+        {actions?.includes('edit') && <EditAction server={server} />}
         {actions?.includes('audit') && (
           <AuditAction
             id={server.id}
@@ -88,6 +92,20 @@ export const ColActions = columnHelper.accessor((server) => server, {
     )
   },
 })
+
+function EditAction({ server }: { server: McpServerFragment }) {
+  const navigate = useNavigate()
+  return (
+    <IconFrame
+      clickable
+      tooltip="Edit MCP server"
+      icon={<PencilIcon />}
+      onClick={() =>
+        navigate(getAiSettingsMcpServerEditAbsPath({ mcpServerId: server.id }))
+      }
+    />
+  )
+}
 
 function AuditAction({ id, name }: { id: string; name: string }) {
   const [showModal, setShowModal] = useState(false)

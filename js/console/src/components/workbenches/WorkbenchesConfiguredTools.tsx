@@ -66,7 +66,15 @@ export function WorkbenchesConfiguredTools() {
             styles={workbenchToolCardGridStyles(320)}
           >
             {tools.map(
-              ({ id, name, tool: type, categories, cloudConnection }) => (
+              ({
+                id,
+                name,
+                tool: type,
+                categories,
+                cloudConnection,
+                configuration,
+                mcpServer,
+              }) => (
                 <ToolCardSC key={id}>
                   <WorkbenchToolCardBody>
                     <Flex
@@ -92,8 +100,9 @@ export function WorkbenchesConfiguredTools() {
                       />
                     </Flex>
                     <WorkbenchesConfiguredToolMetadata
-                      toolId={id}
                       toolType={type}
+                      configuration={configuration ?? null}
+                      mcpServer={mcpServer}
                     />
                     <Flex
                       gap="xsmall"

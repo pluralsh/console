@@ -346,6 +346,17 @@ defmodule Console.GraphQl.Deployments.Flow do
       resolve &Deployments.upsert_mcp_server/2
     end
 
+    field :update_mcp_server, :mcp_server do
+      middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:mcp_server_attributes)
+
+      resolve &Deployments.update_mcp_server/2
+    end
+
     field :delete_mcp_server, :mcp_server do
       middleware Authenticated
       middleware Scope,

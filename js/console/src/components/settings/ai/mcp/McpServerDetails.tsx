@@ -13,7 +13,7 @@ import {
 import { McpServerFragment } from 'generated/graphql'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
+import { getAiSettingsMcpServerEditAbsPath } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
 import { McpAuditModal } from './McpAuditTable'
 
@@ -51,12 +51,14 @@ export function ViewMcpServerDetails({
               <Button
                 secondary
                 as={Link}
-                to={AI_MCP_SERVERS_ABS_PATH}
+                to={getAiSettingsMcpServerEditAbsPath({
+                  mcpServerId: server.id,
+                })}
                 onClick={() => setShowDetailsModal(false)}
                 endIcon={<ArrowTopRightIcon />}
                 style={{ textTransform: 'none' }}
               >
-                Edit MCP servers
+                Edit MCP server
               </Button>
               <Button
                 secondary

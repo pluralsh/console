@@ -1401,6 +1401,8 @@ type RootMutationType {
 
   upsertMcpServer(attributes: McpServerAttributes!): McpServer
 
+  updateMcpServer(id: ID!, attributes: McpServerAttributes!): McpServer
+
   deleteMcpServer(id: ID!): McpServer
 
   upsertPreviewEnvironmentTemplate(attributes: PreviewEnvironmentTemplateAttributes!): PreviewEnvironmentTemplate
