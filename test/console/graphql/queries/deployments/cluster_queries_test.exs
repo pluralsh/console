@@ -402,9 +402,40 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       cluster = insert(:cluster)
       deployment_settings(prometheus_connection: %{url: "example.com"})
 
-      expect(Req, :post, 4, fn _, _ ->
+      expect(Req, :post, 12, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        value =
+          cond do
+            String.contains?(query, "container_cpu_usage_seconds_total") and String.contains?(query, "by (pod)") ->
+              "pod-cpu"
+            String.contains?(query, "container_memory_working_set_bytes") and String.contains?(query, "by (pod)") ->
+              "pod-mem"
+            String.contains?(query, "container_cpu_usage_seconds_total") ->
+              "cpu"
+            String.contains?(query, "container_memory_working_set_bytes") ->
+              "mem"
+            String.contains?(query, "resource_requests{unit=\"core\"") and String.contains?(query, "by (pod)") ->
+              "pod-cpu-requests"
+            String.contains?(query, "resource_requests{unit=\"byte\"") and String.contains?(query, "by (pod)") ->
+              "pod-mem-requests"
+            String.contains?(query, "resource_limits{unit=\"core\"") and String.contains?(query, "by (pod)") ->
+              "pod-cpu-limits"
+            String.contains?(query, "resource_limits{unit=\"byte\"") and String.contains?(query, "by (pod)") ->
+              "pod-mem-limits"
+            String.contains?(query, "resource_requests{unit=\"core\"") ->
+              "cpu-requests"
+            String.contains?(query, "resource_requests{unit=\"byte\"") ->
+              "mem-requests"
+            String.contains?(query, "resource_limits{unit=\"core\"") ->
+              "cpu-limits"
+            String.contains?(query, "resource_limits{unit=\"byte\"") ->
+              "mem-limits"
+            true ->
+              "unknown"
+          end
+
         {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
-          %{values: [[1, "1"]]}
+          %{values: [[1, value]]}
         ]}})}}
       end)
       expect(Clusters, :api_discovery, fn _ -> %{} end)
@@ -417,13 +448,36 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
             id
             componentMetrics(group: "apps", version: "v1", kind: "Deployment", name: "nginx", namespace: "default") {
               cpu { values { timestamp value } }
+              mem { values { timestamp value } }
+              podCpu { values { timestamp value } }
+              podMem { values { timestamp value } }
+              cpuRequests { values { timestamp value } }
+              memRequests { values { timestamp value } }
+              cpuLimits { values { timestamp value } }
+              memLimits { values { timestamp value } }
+              podCpuRequests { values { timestamp value } }
+              podMemRequests { values { timestamp value } }
+              podCpuLimits { values { timestamp value } }
+              podMemLimits { values { timestamp value } }
             }
           }
         }
       """, %{"id" => cluster.id}, %{current_user: user})
 
       assert found["id"] == cluster.id
-      refute Enum.empty?(found["componentMetrics"]["cpu"])
+      metrics = found["componentMetrics"]
+      assert hd(hd(metrics["cpu"])["values"])["value"] == "cpu"
+      assert hd(hd(metrics["mem"])["values"])["value"] == "mem"
+      assert hd(hd(metrics["podCpu"])["values"])["value"] == "pod-cpu"
+      assert hd(hd(metrics["podMem"])["values"])["value"] == "pod-mem"
+      assert hd(hd(metrics["cpuRequests"])["values"])["value"] == "cpu-requests"
+      assert hd(hd(metrics["memRequests"])["values"])["value"] == "mem-requests"
+      assert hd(hd(metrics["cpuLimits"])["values"])["value"] == "cpu-limits"
+      assert hd(hd(metrics["memLimits"])["values"])["value"] == "mem-limits"
+      assert hd(hd(metrics["podCpuRequests"])["values"])["value"] == "pod-cpu-requests"
+      assert hd(hd(metrics["podMemRequests"])["values"])["value"] == "pod-mem-requests"
+      assert hd(hd(metrics["podCpuLimits"])["values"])["value"] == "pod-cpu-limits"
+      assert hd(hd(metrics["podMemLimits"])["values"])["value"] == "pod-mem-limits"
     end
 
     test "it can fetch a cluster heat map" do
