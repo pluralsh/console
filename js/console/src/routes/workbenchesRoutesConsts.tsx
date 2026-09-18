@@ -234,3 +234,14 @@ export const getWorkbenchMonitoringMonitorAbsPath = ({
   monitorId: Nullable<string>
 }) =>
   `${getWorkbenchMonitoringAbsPath(workbenchId)}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/${monitorId ?? ''}`
+
+export const WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH = 'settings'
+
+export const getWorkbenchMonitoringMonitorSettingsAbsPath = ({
+  workbenchId,
+  monitorId,
+}: {
+  workbenchId: Nullable<string>
+  monitorId: Nullable<string>
+}) =>
+  `${getWorkbenchMonitoringMonitorAbsPath({ workbenchId, monitorId })}/${WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH}`

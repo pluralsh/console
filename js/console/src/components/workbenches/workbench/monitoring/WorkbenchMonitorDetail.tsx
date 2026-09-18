@@ -4,6 +4,7 @@ import {
   EmptyState,
   ExpandIcon,
   Flex,
+  GearTrainIcon,
   HamburgerMenuCollapsedIcon,
   IconFrame,
   useResizeObserver,
@@ -41,7 +42,10 @@ import {
 import { isEmpty, isNil } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
+import {
+  getWorkbenchJobAbsPath,
+  getWorkbenchMonitoringMonitorSettingsAbsPath,
+} from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { formatMinutesAsDuration, fromNow, toDateOrUndef } from 'utils/datetime'
@@ -176,6 +180,20 @@ function MonitorDetailView({
                 kind="monitor"
                 pathname={pathname}
               />
+              {workbenchId && (
+                <IconFrame
+                  clickable
+                  size="small"
+                  type="tertiary"
+                  icon={<GearTrainIcon />}
+                  textValue="Monitor settings"
+                  as={Link}
+                  to={getWorkbenchMonitoringMonitorSettingsAbsPath({
+                    workbenchId,
+                    monitorId: monitor.id,
+                  })}
+                />
+              )}
               <IconFrame
                 ref={fullscreenTriggerRef}
                 clickable

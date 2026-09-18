@@ -27,6 +27,7 @@ import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/We
 import { WorkbenchEvalSettings } from 'components/workbenches/workbench/evals/WorkbenchEvalSettings'
 import { WorkbenchEvals } from 'components/workbenches/workbench/evals/WorkbenchEvals'
 import { WorkbenchMonitoring } from 'components/workbenches/workbench/monitoring/WorkbenchMonitoring'
+import { WorkbenchMonitorSettings } from 'components/workbenches/workbench/monitoring/WorkbenchMonitorSettings'
 import { Navigate, Route } from 'react-router-dom'
 import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from './settingsRoutesConst'
 import {
@@ -38,6 +39,7 @@ import {
   WORKBENCH_MONITORING_DASHBOARDS_REL_PATH,
   WORKBENCH_MONITORING_MONITOR_PARAM_ID,
   WORKBENCH_MONITORING_MONITORS_REL_PATH,
+  WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
@@ -233,5 +235,9 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_EVAL_SETTINGS_REL_PATH}`}
     element={<WorkbenchEvalSettings />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/:${WORKBENCH_MONITORING_MONITOR_PARAM_ID}/${WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH}`}
+    element={<WorkbenchMonitorSettings />}
   />,
 ]
