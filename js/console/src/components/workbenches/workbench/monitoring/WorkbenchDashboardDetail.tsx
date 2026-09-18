@@ -1,4 +1,4 @@
-import { Card, EmptyState, Flex } from '@pluralsh/design-system'
+import { EmptyState, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
@@ -15,11 +15,13 @@ import {
   MetricsRangeControl,
   type MetricsTimeRange,
 } from '../job/WorkbenchJobActivityResults'
+import { toolDisplayName } from './dashboardToolIcon'
 import {
   DashboardFilterValue,
   defaultDashboardFilter,
   WorkbenchDashboardFilters,
 } from './WorkbenchDashboardFilters'
+import { WorkbenchDashboardPanels } from './WorkbenchDashboardPanels'
 
 export function DashboardDetail({ dashboardId }: { dashboardId: string }) {
   const { data, loading, error } = useWorkbenchMonitoringDashboardQuery({
@@ -137,11 +139,14 @@ function DashboardDetailView({
           onChange={setRange}
         />
       </MetaRowSC>
-      <PanelsPlaceholderSC>
-        <Card css={{ padding: 24 }}>
-          <EmptyState message="Dashboard panels are coming soon." />
-        </Card>
-      </PanelsPlaceholderSC>
+      <PanelsSC>
+        <WorkbenchDashboardPanels
+          dashboardId={dashboard.id}
+          graphs={graphs}
+          variables={variables}
+          timeRange={timeRange}
+        />
+      </PanelsSC>
     </Flex>
   )
 }
@@ -161,11 +166,6 @@ function rangeStart(
   }
   const days = range === '1d' ? 1 : range === '1m' ? 30 : 365
   return new Date(end.getTime() - days * DAY_MS)
-}
-
-function toolDisplayName(tool: string) {
-  const words = tool.replace(/_/g, ' ')
-  return words.charAt(0).toUpperCase() + words.slice(1)
 }
 
 function metaText(panelCount: number, sources: string[]) {
@@ -249,6 +249,6 @@ const MetaRowSC = styled.div(({ theme }) => ({
   marginTop: theme.spacing.medium,
 }))
 
-const PanelsPlaceholderSC = styled.div(({ theme }) => ({
+const PanelsSC = styled.div(({ theme }) => ({
   marginTop: theme.spacing.medium,
 }))
