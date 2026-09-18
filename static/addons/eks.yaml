@@ -5148,6 +5148,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v2.0.10000020260915-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.0.10000020260912-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5175,6 +5183,14 @@
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
+  - version: v4.5.10000020260916-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.5.10000020260914-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5562,6 +5578,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.47.10001020260916-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.47.10001020260913-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5671,6 +5692,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.20009020260425-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10009020260916-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
