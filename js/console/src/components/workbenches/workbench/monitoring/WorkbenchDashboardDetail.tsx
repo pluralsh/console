@@ -8,11 +8,14 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
+  DashboardInputType,
   DashboardTimeRangeAttributes,
   useWorkbenchMonitoringDashboardQuery,
   WorkbenchDashboardDetailsFragment,
+  WorkbenchDashboardInput,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -25,11 +28,13 @@ import {
   dashboardDefinitionYaml,
   monitoringDefinitionFilename,
 } from './definitionYaml'
+import { parseMonitoringShareSearch } from './monitoringShare'
 import {
   DefinitionPanelShell,
   useDefinitionPanelContainer,
   WorkbenchMonitoringDefinitionPanel,
 } from './WorkbenchMonitoringDefinitionPanel'
+import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopover'
 import {
   DashboardFilterValue,
   defaultDashboardFilter,
@@ -61,6 +66,7 @@ function DashboardDetailView({
 }: {
   dashboard: WorkbenchDashboardDetailsFragment
 }) {
+  const { pathname, search } = useLocation()
   const graphs = useMemo(
     () => dashboard.graphs?.filter(isNonNullable) ?? [],
     [dashboard.graphs]
@@ -69,14 +75,13 @@ function DashboardDetailView({
     () => dashboard.inputs?.filter(isNonNullable) ?? [],
     [dashboard.inputs]
   )
+  const shared = useMemo(() => parseMonitoringShareSearch(search), [search])
   const [filters, setFilters] = useState<
     Record<string, DashboardFilterValue | undefined>
-  >(() =>
-    Object.fromEntries(
-      inputs.map((input) => [input.name, defaultDashboardFilter(input)])
-    )
+  >(() => initialDashboardFilters(inputs, shared.variables))
+  const [range, setRange] = useState<MetricsTimeRange>(
+    () => shared.range ?? '1d'
   )
-  const [range, setRange] = useState<MetricsTimeRange>('1d')
 
   const timeRange = useMemo<DashboardTimeRangeAttributes>(() => {
     const end = new Date()
@@ -140,6 +145,13 @@ function DashboardDetailView({
                 ? `updated ${fromNow(dashboard.updatedAt)}`
                 : 'Never updated'}
             </CaptionP>
+            <WorkbenchMonitoringSharePopover
+              kind="dashboard"
+              title={dashboard.name}
+              pathname={pathname}
+              range={range}
+              variables={variables}
+            />
             <IconFrame
               clickable
               size="small"
@@ -216,6 +228,26 @@ function DashboardDetailView({
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+function initialDashboardFilters(
+  inputs: WorkbenchDashboardInput[],
+  sharedVariables: Record<string, string | string[]>
+) {
+  return Object.fromEntries(
+    inputs.map((input) => {
+      const shared = sharedVariables[input.name]
+      if (shared === undefined)
+        return [input.name, defaultDashboardFilter(input)]
+      if (input.type === DashboardInputType.MultiSelect) {
+        return [
+          input.name,
+          Array.isArray(shared) ? shared : shared ? [shared] : [],
+        ]
+      }
+      return [input.name, Array.isArray(shared) ? (shared[0] ?? '') : shared]
+    })
+  )
+}
 
 function rangeStart(
   range: MetricsTimeRange,

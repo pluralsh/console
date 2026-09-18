@@ -38,7 +38,7 @@ import {
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
@@ -56,6 +56,7 @@ import {
   useDefinitionPanelContainer,
   WorkbenchMonitoringDefinitionPanel,
 } from './WorkbenchMonitoringDefinitionPanel'
+import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopover'
 import parseDuration from 'parse-duration-ms'
 
 const CHART_HEIGHT_PX = 280
@@ -98,6 +99,7 @@ function MonitorDetailView({
     monitor.type === MonitorType.Metrics
       ? monitor.query?.metrics?.duration
       : monitor.query?.log?.duration
+  const { pathname } = useLocation()
   const [definitionOpen, setDefinitionOpen] = useState(false)
   const containerRef = useDefinitionPanelContainer()
   const definitionYaml = useMemo(
@@ -125,11 +127,26 @@ function MonitorDetailView({
       <MainSC>
         <StripSC>
           <EyebrowSC>Monitor</EyebrowSC>
-          <CaptionP $color="text-xlight">
-            {monitor.updatedAt
-              ? `updated ${fromNow(monitor.updatedAt)}`
-              : 'Never updated'}
-          </CaptionP>
+          <StripActionsSC>
+            <CaptionP $color="text-xlight">
+              {monitor.updatedAt
+                ? `updated ${fromNow(monitor.updatedAt)}`
+                : 'Never updated'}
+            </CaptionP>
+            <WorkbenchMonitoringSharePopover
+              kind="monitor"
+              title={monitor.name}
+              pathname={pathname}
+            />
+            <IconFrame
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<HamburgerMenuCollapsedIcon />}
+              textValue="Definition"
+              onClick={() => setDefinitionOpen(true)}
+            />
+          </StripActionsSC>
         </StripSC>
         <BodySC>
           <TitleBlockSC>
@@ -580,6 +597,12 @@ const StripSC = styled.div(({ theme }) => ({
   height: 40,
   justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
+}))
+
+const StripActionsSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.small,
 }))
 
 const EyebrowSC = styled.p(({ theme }) => ({
