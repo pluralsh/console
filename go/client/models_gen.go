@@ -5110,8 +5110,9 @@ type ManifestNetwork struct {
 }
 
 type McpHeaderAttributes struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	ID    *string `json:"id,omitempty"`
+	Name  string  `json:"name"`
+	Value string  `json:"value"`
 }
 
 type McpServer struct {
@@ -5196,7 +5197,9 @@ type McpServerEdge struct {
 }
 
 type McpServerHeader struct {
-	Name  string `json:"name"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// obfuscated header value; the real secret is never returned over GraphQL
 	Value string `json:"value"`
 }
 
@@ -12006,6 +12009,10 @@ type WorkbenchToolConfiguration struct {
 	Teams *WorkbenchToolTeamsConnection `json:"teams,omitempty"`
 	// atlassian connection (no secrets)
 	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
+	// jira cloud connection (no secrets)
+	Jira *WorkbenchToolJiraConnection `json:"jira,omitempty"`
+	// jira data center connection (no secrets)
+	JiraDatacenter *WorkbenchToolJiraDatacenterConnection `json:"jiraDatacenter,omitempty"`
 	// exa connection (no secrets)
 	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
 	// github connection (no secrets)
@@ -12067,6 +12074,10 @@ type WorkbenchToolConfigurationAttributes struct {
 	Teams *WorkbenchToolTeamsConnectionAttributes `json:"teams,omitempty"`
 	// atlassian/jira connection (ticketing)
 	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
+	// jira cloud connection (ticketing)
+	Jira *WorkbenchToolJiraConnectionAttributes `json:"jira,omitempty"`
+	// jira data center connection (ticketing)
+	JiraDatacenter *WorkbenchToolJiraDatacenterConnectionAttributes `json:"jiraDatacenter,omitempty"`
 	// exa connection (search)
 	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
 	// github connection (integration)
@@ -12267,6 +12278,34 @@ type WorkbenchToolJaegerConnectionAttributes struct {
 	Username *string `json:"username,omitempty"`
 	// basic auth password
 	Password *string `json:"password,omitempty"`
+}
+
+type WorkbenchToolJiraConnection struct {
+	// jira cloud site URL
+	URL string `json:"url"`
+	// atlassian account email (API token never exposed)
+	Email string `json:"email"`
+}
+
+type WorkbenchToolJiraConnectionAttributes struct {
+	// jira cloud site URL (for example, https://example.atlassian.net)
+	URL string `json:"url"`
+	// atlassian API token
+	APIToken string `json:"apiToken"`
+	// atlassian account email
+	Email string `json:"email"`
+}
+
+type WorkbenchToolJiraDatacenterConnection struct {
+	// jira data center base URL (PAT never exposed)
+	URL string `json:"url"`
+}
+
+type WorkbenchToolJiraDatacenterConnectionAttributes struct {
+	// jira data center base URL
+	URL string `json:"url"`
+	// jira data center personal access token
+	APIToken string `json:"apiToken"`
 }
 
 type WorkbenchToolLambdaConnection struct {
@@ -19973,6 +20012,8 @@ const (
 	WorkbenchToolTypeAzureFunction       WorkbenchToolType = "AZURE_FUNCTION"
 	WorkbenchToolTypeDocker              WorkbenchToolType = "DOCKER"
 	WorkbenchToolTypeVictoriaLogs        WorkbenchToolType = "VICTORIA_LOGS"
+	WorkbenchToolTypeJira                WorkbenchToolType = "JIRA"
+	WorkbenchToolTypeJiraDatacenter      WorkbenchToolType = "JIRA_DATACENTER"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -20007,11 +20048,13 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeAzureFunction,
 	WorkbenchToolTypeDocker,
 	WorkbenchToolTypeVictoriaLogs,
+	WorkbenchToolTypeJira,
+	WorkbenchToolTypeJiraDatacenter,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs, WorkbenchToolTypeJira, WorkbenchToolTypeJiraDatacenter:
 		return true
 	}
 	return false

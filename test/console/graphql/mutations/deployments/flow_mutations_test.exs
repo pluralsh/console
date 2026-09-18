@@ -100,6 +100,64 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
 
       assert server["name"] == "test"
     end
+
+    test "it obfuscates header values on upsert and keeps secrets when the placeholder is sent back" do
+      {:ok, %{data: %{"upsertMcpServer" => created}}} = run_query("""
+        mutation upsert($attrs: McpServerAttributes!) {
+          upsertMcpServer(attributes: $attrs) {
+            id
+            name
+            authentication {
+              headers { id name value }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "secret-mcp",
+          "url" => "https://example.com",
+          "authentication" => %{
+            "headers" => [%{"name" => "Authorization", "value" => "super-secret"}]
+          }
+        }
+      }, %{current_user: admin_user()})
+
+      obfuscated = Console.Schema.McpServer.obfuscated_header_value()
+      [header] = created["authentication"]["headers"]
+      assert header["name"] == "Authorization"
+      assert header["value"] == obfuscated
+
+      {:ok, %{data: %{"upsertMcpServer" => updated}}} = run_query("""
+        mutation upsert($attrs: McpServerAttributes!) {
+          upsertMcpServer(attributes: $attrs) {
+            id
+            authentication {
+              headers { name value }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "secret-mcp",
+          "url" => "https://example.com",
+          "authentication" => %{
+            "headers" => [%{
+              "id" => header["id"],
+              "name" => "Authorization",
+              "value" => obfuscated
+            }]
+          }
+        }
+      }, %{current_user: admin_user()})
+
+      assert updated["id"] == created["id"]
+      [updated_header] = updated["authentication"]["headers"]
+      assert updated_header["value"] == obfuscated
+
+      persisted = Console.Deployments.Flows.get_mcp_server!(created["id"])
+      [stored] = persisted.authentication.headers
+      assert stored.value == "super-secret"
+    end
   end
 
   describe "updateMcpServer" do

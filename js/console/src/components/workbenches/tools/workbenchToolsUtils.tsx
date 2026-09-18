@@ -15,6 +15,7 @@ import {
   GoogleCloudRunIcon,
   IconFrame,
   IconProps,
+  JiraLogoIcon,
   LambdaIcon,
   LinearLogoIcon,
   LokiLogoIcon,
@@ -54,6 +55,8 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Tempo,
   WorkbenchToolType.Jaeger,
   WorkbenchToolType.Atlassian,
+  WorkbenchToolType.Jira,
+  WorkbenchToolType.JiraDatacenter,
   WorkbenchToolType.Linear,
   WorkbenchToolType.Slack,
   WorkbenchToolType.Pagerduty,
@@ -97,6 +100,8 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Pagerduty]: 'pagerduty',
   [WorkbenchToolType.Teams]: 'teams',
   [WorkbenchToolType.Atlassian]: 'atlassian',
+  [WorkbenchToolType.Jira]: 'jira',
+  [WorkbenchToolType.JiraDatacenter]: 'jiraDatacenter',
   [WorkbenchToolType.Exa]: 'exa',
   [WorkbenchToolType.Github]: 'github',
   [WorkbenchToolType.Gitlab]: 'gitlab',
@@ -174,6 +179,8 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Tempo]: 'Tempo',
   [WorkbenchToolType.Datadog]: 'Datadog',
   [WorkbenchToolType.Atlassian]: 'Atlassian',
+  [WorkbenchToolType.Jira]: 'Jira Cloud',
+  [WorkbenchToolType.JiraDatacenter]: 'Jira Data Center',
   [WorkbenchToolType.Linear]: 'Linear',
   [WorkbenchToolType.Slack]: 'Slack',
   [WorkbenchToolType.Pagerduty]: 'PagerDuty',
@@ -246,6 +253,8 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.VictoriaLogs]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Jira]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.JiraDatacenter]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Slack]: [WorkbenchToolCategory.Chat],
   [WorkbenchToolType.Pagerduty]: [WorkbenchToolCategory.Integration],
@@ -305,6 +314,10 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Query trace data from Grafana Tempo for distributed tracing.',
   [WorkbenchToolType.Atlassian]:
     'Connect to Jira, Confluence, and other Atlassian products.',
+  [WorkbenchToolType.Jira]:
+    'Manage Jira Cloud issues and comments through the Jira REST API.',
+  [WorkbenchToolType.JiraDatacenter]:
+    'Manage Jira Data Center issues and comments through the Jira REST API.',
   [WorkbenchToolType.Linear]:
     'Connect to Linear for issue tracking and project management.',
   [WorkbenchToolType.Slack]:
@@ -522,6 +535,8 @@ const toolToIcon: Record<
   [WorkbenchToolType.Tempo]: TempoLogoIcon,
   [WorkbenchToolType.Http]: ToolsIcon,
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
+  [WorkbenchToolType.Jira]: JiraLogoIcon,
+  [WorkbenchToolType.JiraDatacenter]: JiraLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
   [WorkbenchToolType.Slack]: SlackLogoIcon,
   [WorkbenchToolType.Pagerduty]: PagerdutyLogoIcon,

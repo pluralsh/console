@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "issue_id": {
+      "type": "string",
+      "description": "Jira issue key or numeric ID."
+    },
+    "comment_id": {
+      "type": "string",
+      "description": "Existing comment ID to update. Omit when creating."
+    },
+    "body": {
+      "type": "string",
+      "description": "Comment text using Jira wiki markup where supported."
+    },
+    "visibility": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional Jira comment visibility object, usually with type and value."
+    }
+  },
+  "required": ["issue_id", "body"]
+}

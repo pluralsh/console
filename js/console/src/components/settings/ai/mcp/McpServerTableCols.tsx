@@ -15,14 +15,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAiSettingsMcpServerEditAbsPath } from 'routes/settingsRoutesConst'
 import { McpAuditModal } from './McpAuditTable'
-import { ViewMcpServerDetails } from './McpServerDetails'
 import {
   PermissionsIdType,
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
 
 export type McpTableAction =
-  'audit' | 'permissions' | 'view' | 'edit' | 'removeConnection'
+  'audit' | 'permissions' | 'edit' | 'removeConnection'
 
 const columnHelper = createColumnHelper<McpServerFragment>()
 
@@ -80,13 +79,6 @@ export const ColActions = columnHelper.accessor((server) => server, {
         )}
         {actions?.includes('permissions') && (
           <PermissionsAction server={server} />
-        )}
-        {actions?.includes('view') && (
-          <ViewAction
-            server={server}
-            removeServer={removeServer}
-            loading={loading}
-          />
         )}
         {actions?.includes('removeConnection') && (
           <RemoveConnectionAction
@@ -158,25 +150,6 @@ function PermissionsAction({
         onClose={() => setShowPermissions(false)}
       />
     </>
-  )
-}
-
-function ViewAction({
-  server,
-  removeServer,
-  loading,
-}: {
-  server: McpServerFragment
-  removeServer?: (server: McpServerFragment) => void
-  loading?: boolean
-}) {
-  const onDisconnect = removeServer ? () => removeServer(server) : undefined
-  return (
-    <ViewMcpServerDetails
-      server={server}
-      onDisconnect={onDisconnect}
-      loading={loading}
-    />
   )
 }
 

@@ -137,6 +137,57 @@ defmodule Console.Deployments.FlowsTest do
       assert upd.url == "https://example.com"
     end
 
+    test "it keeps existing header secrets when the obfuscated placeholder is sent" do
+      admin = admin_user()
+      {:ok, mcp_server} = Flows.upsert_mcp_server(%{
+        name: "secret-mcp",
+        url: "https://example.com",
+        authentication: %{headers: [%{name: "Authorization", value: "super-secret"}]}
+      }, admin)
+      [existing_header] = mcp_server.authentication.headers
+
+      {:ok, updated} = Flows.upsert_mcp_server(%{
+        name: mcp_server.name,
+        url: mcp_server.url,
+        authentication: %{
+          headers: [%{
+            id: existing_header.id,
+            name: "Authorization",
+            value: Console.Schema.McpServer.obfuscated_header_value()
+          }]
+        }
+      }, admin)
+
+      [header] = updated.authentication.headers
+      assert header.name == "Authorization"
+      assert header.value == "super-secret"
+    end
+
+    test "it updates header secrets when a new value is sent" do
+      admin = admin_user()
+      {:ok, mcp_server} = Flows.upsert_mcp_server(%{
+        name: "secret-mcp",
+        url: "https://example.com",
+        authentication: %{headers: [%{name: "Authorization", value: "super-secret"}]}
+      }, admin)
+      [existing_header] = mcp_server.authentication.headers
+
+      {:ok, updated} = Flows.upsert_mcp_server(%{
+        name: mcp_server.name,
+        url: mcp_server.url,
+        authentication: %{
+          headers: [%{
+            id: existing_header.id,
+            name: "Authorization",
+            value: "new-secret"
+          }]
+        }
+      }, admin)
+
+      [header] = updated.authentication.headers
+      assert header.value == "new-secret"
+    end
+
     test "nonwriters cannot grant themselves write access while updating an mcp_server" do
       user = insert(:user)
       mcp_server = insert(:mcp_server)

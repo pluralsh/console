@@ -260,6 +260,13 @@ fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
     email
     url
   }
+  jira {
+    email
+    url
+  }
+  jiraDatacenter {
+    url
+  }
   linear {
     url
   }

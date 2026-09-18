@@ -9,6 +9,7 @@ import {
   SidePanelOpenIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import {
   bindingToBindingAttributes,
   FormBindings,
@@ -56,10 +57,11 @@ function headersFromServer(server?: McpServerFragment): HeaderField[] {
   const existing =
     server?.authentication?.headers
       ?.filter(
-        (header): header is { name: string; value: string } => !!header?.name
+        (header): header is { id: string; name: string; value: string } =>
+          !!header?.name
       )
       .map((header) => ({
-        id: crypto.randomUUID(),
+        id: header.id,
         name: header.name,
         value: header.value ?? '',
       })) ?? []
@@ -115,7 +117,8 @@ export function McpServerCreateForm({
     if (!trimmedName || !trimmedUrl) return null
 
     const configuredHeaders = headers
-      .map(({ name: headerName, value }) => ({
+      .map(({ id, name: headerName, value }) => ({
+        id,
         name: headerName.trim(),
         value: value.trim(),
       }))
@@ -237,7 +240,11 @@ export function McpServerCreateForm({
           </FormField>
           <FormField
             label="Headers"
-            hint="Optional authentication or other HTTP headers sent to the MCP server."
+            hint={
+              isEditing
+                ? 'Header values are secrets. Leave the masked value unchanged to keep the existing secret.'
+                : 'Header values are stored as secrets and are not shown after save.'
+            }
           >
             <Flex
               direction="column"
@@ -264,8 +271,9 @@ export function McpServerCreateForm({
                         )
                       }}
                     />
-                    <Input
+                    <InputRevealer
                       placeholder="Value"
+                      defaultRevealed={false}
                       value={header.value}
                       onChange={(e) => {
                         setHeaders((prev) =>

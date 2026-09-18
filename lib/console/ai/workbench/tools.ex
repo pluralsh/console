@@ -31,7 +31,8 @@ defmodule Console.AI.Workbench.Tools do
     Pagerduty,
     Docker,
     Sentry,
-    Slack
+    Slack,
+    Jira
   }
   alias Console.Repo
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchTool}
@@ -42,7 +43,7 @@ defmodule Console.AI.Workbench.Tools do
   @tool_preloads [:cloud_connection, :mcp_server, :scm_connection]
 
   @obs_categories MapSet.new(~w(metrics logs traces error_tracking)a)
-  @integration_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker)a
+  @integration_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker jira jira_datacenter)a
 
   @doc """
   Maps each constructed tool name to `{module, workbench_tool}`.
@@ -209,6 +210,10 @@ defmodule Console.AI.Workbench.Tools do
   defp expand_integration(%WorkbenchTool{tool: :teams} = tool), do: Teams.Tools.expand(tool)
   defp expand_integration(%WorkbenchTool{tool: :pagerduty} = tool), do: Pagerduty.Tools.expand(tool)
   defp expand_integration(%WorkbenchTool{tool: :docker} = tool), do: Docker.Tools.expand(tool)
+  defp expand_integration(%WorkbenchTool{tool: type} = tool)
+       when type in [:jira, :jira_datacenter],
+       do: Jira.Tools.expand(tool)
+
   defp expand_integration(_), do: []
 
   defp function_tool?(%WorkbenchTool{categories: [_ | _] = categories}), do: :function in categories

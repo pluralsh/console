@@ -12,6 +12,7 @@ fragment McpServer on McpServer {
   }
   authentication {
     headers {
+      id
       name
       value
     }

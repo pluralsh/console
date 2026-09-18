@@ -26,6 +26,8 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Prometheus]: extractPrometheusMetadata,
   [WorkbenchToolType.Tempo]: extractTempoMetadata,
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
+  [WorkbenchToolType.Jira]: extractJiraMetadata,
+  [WorkbenchToolType.JiraDatacenter]: extractJiraDatacenterMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
   [WorkbenchToolType.Slack]: extractSlackMetadata,
   [WorkbenchToolType.Pagerduty]: extractPagerdutyMetadata,
@@ -190,6 +192,21 @@ function extractAtlassianMetadata(
     { label: 'URL', value: configuration?.atlassian?.url },
     { label: 'Email', value: configuration?.atlassian?.email },
   ]
+}
+
+function extractJiraMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'URL', value: configuration?.jira?.url },
+    { label: 'Email', value: configuration?.jira?.email },
+  ]
+}
+
+function extractJiraDatacenterMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.jiraDatacenter?.url }]
 }
 
 function extractLinearMetadata(
