@@ -1,0 +1,149 @@
+name: CD / Repository prebake
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE_IMAGE: ghcr.io/pluralsh/repository-prebake
+  CONSOLE_IMAGE: ghcr.io/pluralsh/console-repos
+  DOCKER_METADATA_PR_HEAD_SHA: "true"
+
+jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
+  base:
+    name: Build repository-prebake
+    needs: [vouch]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.BASE_IMAGE }}
+          flavor: |
+            latest=false
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: go/repository-prebake
+          file: repository-prebake/base/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha,scope=repository-prebake-base
+          cache-to: type=gha,mode=max,scope=repository-prebake-base
+
+  console:
+    name: Build console-repos
+    needs: [vouch, base]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Use console dockerignore
+        run: cp repository-prebake/console/.dockerignore .dockerignore
+
+      # GITHUB_TOKEN cannot clone private sibling repos. Skip plrl-up-demos
+      # until PLURAL_BOT_PAT is set (contents:read on that repo). Check the
+      # env var — secrets are not allowed in step if: conditionals.
+      - name: Drop private extra-context without PAT
+        env:
+          PAT: ${{ secrets.PLURAL_BOT_PAT }}
+        run: |
+          if [ -z "$PAT" ]; then
+            printf '%s\n' \
+              'repositories:' \
+              '  - url: https://github.com/pluralsh/console.git' \
+              '    path: console' \
+              > repository-prebake/console/repos.yaml
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.CONSOLE_IMAGE }}
+          flavor: |
+            latest=false
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=pr-${{ github.event.pull_request.number }},enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: repository-prebake/console/Dockerfile
+          push: true
+          pull: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          build-args: |
+            PREBAKE_IMAGE=${{ env.BASE_IMAGE }}:${{ needs.base.outputs.version }}
+          secrets: |
+            git_token=${{ secrets.PLURAL_BOT_PAT || github.token }}
+          cache-from: type=gha,scope=repository-prebake-console
+          cache-to: type=gha,mode=max,scope=repository-prebake-console
