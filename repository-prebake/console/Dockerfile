@@ -22,10 +22,10 @@ ENV LANG=C.UTF-8 \
 COPY repository-prebake/console/repos.yaml /config/repos.yaml
 COPY repository-prebake/console/precompile.sh /usr/local/bin/precompile.sh
 COPY . /data/console
-RUN --mount=type=secret,id=git_token \
+RUN --mount=type=secret,id=git_token,required=false \
     chmod +x /usr/local/bin/precompile.sh \
  && git config --global --add safe.directory /data/console \
- && GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
+ && GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token 2>/dev/null || true)" \
     prebake --config /config/repos.yaml \
  && precompile.sh \
  && chown -R 65532:65532 /data

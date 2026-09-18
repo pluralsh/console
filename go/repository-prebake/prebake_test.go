@@ -71,6 +71,30 @@ func TestRunStripsOriginUserinfo(t *testing.T) {
 	assertManifest(t, dest, want, "console", "master")
 }
 
+func TestRunKeepsDetachedCheckout(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not installed")
+	}
+
+	remote := initTestRepo(t, "source")
+	dest := t.TempDir()
+	clone := filepath.Join(dest, "console")
+	if err := gitClone(remote, clone, "master", false, false, nil); err != nil {
+		t.Fatal(err)
+	}
+	runGitChecked(t, clone, "checkout", "--detach", "HEAD")
+
+	cfgPath := filepath.Join(t.TempDir(), "repos.yaml")
+	yaml := "repositories:\n  - url: " + remote + "\n    path: console\n"
+	if err := os.WriteFile(cfgPath, []byte(yaml), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Run(Options{Config: cfgPath, Dest: dest}); err != nil {
+		t.Fatalf("Run() = %v", err)
+	}
+	assertManifest(t, dest, remote, "console", "HEAD")
+}
+
 func TestRunNonRepoDest(t *testing.T) {
 	dir := t.TempDir()
 	dest := t.TempDir()

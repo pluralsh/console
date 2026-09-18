@@ -42,7 +42,7 @@ func gitUnsetExtraHeader(dest string) error {
 }
 
 func gitHeadBranch(dest string) (string, error) {
-	out, err := gitOutput(dest, "symbolic-ref", "--short", "HEAD")
+	out, err := gitOutput(dest, "symbolic-ref", "-q", "--short", "HEAD")
 	if err == nil {
 		return out, nil
 	}
