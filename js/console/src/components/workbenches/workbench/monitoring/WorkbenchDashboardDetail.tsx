@@ -1,8 +1,10 @@
 import {
   EmptyState,
+  ExpandIcon,
   Flex,
   HamburgerMenuCollapsedIcon,
   IconFrame,
+  ModalWrapper,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -14,9 +16,9 @@ import {
   WorkbenchDashboardDetailsFragment,
   WorkbenchDashboardInput,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
@@ -113,6 +115,9 @@ function DashboardDetailView({
 
   const hasFilters = inputs.length > 0
   const [definitionOpen, setDefinitionOpen] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+  const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
+  const theme = useTheme()
   const containerRef = useDefinitionPanelContainer()
   const definitionYaml = useMemo(
     () => dashboardDefinitionYaml(dashboard),
@@ -123,12 +128,87 @@ function DashboardDetailView({
     dashboard.name
   )
 
+  const openFullscreen = () => {
+    setDefinitionOpen(false)
+    setFullscreen(true)
+  }
+
+  const detailBody = (
+    <>
+      <TitleBlockSC>
+        <TitleSC>{dashboard.name}</TitleSC>
+        {dashboard.description && (
+          <Body1P
+            $color="text-long-form"
+            css={{ letterSpacing: '0.25px' }}
+          >
+            {dashboard.description}
+          </Body1P>
+        )}
+        {fullscreen && (
+          <CaptionP $color="text-xlight">
+            {dashboard.updatedAt
+              ? `updated ${fromNow(dashboard.updatedAt)}`
+              : 'Never updated'}
+          </CaptionP>
+        )}
+      </TitleBlockSC>
+      <ToolbarSC $hasFilters={hasFilters}>
+        {hasFilters ? (
+          <WorkbenchDashboardFilters
+            dashboardId={dashboard.id}
+            inputs={inputs}
+            values={filters}
+            variables={variables}
+            timeRange={timeRange}
+            onChange={(name, value) =>
+              setFilters((prev) => ({ ...prev, [name]: value }))
+            }
+            onClear={() =>
+              setFilters(
+                Object.fromEntries(
+                  inputs.map((input) => [
+                    input.name,
+                    defaultDashboardFilter(input),
+                  ])
+                )
+              )
+            }
+          />
+        ) : (
+          <Body2P $color="text-long-form">
+            {metaText(graphs.length, sources)}
+          </Body2P>
+        )}
+        <MetricsRangeControl
+          value={range}
+          onChange={setRange}
+        />
+      </ToolbarSC>
+      {hasFilters && (
+        <MetaRowSC>
+          <Body2P $color="text-long-form">
+            {metaText(graphs.length, sources)}
+          </Body2P>
+        </MetaRowSC>
+      )}
+      <PanelsSC>
+        <WorkbenchDashboardPanels
+          dashboardId={dashboard.id}
+          graphs={graphs}
+          variables={variables}
+          timeRange={timeRange}
+        />
+      </PanelsSC>
+    </>
+  )
+
   return (
     <DefinitionPanelShell
       containerRef={containerRef}
       panel={
         <WorkbenchMonitoringDefinitionPanel
-          open={definitionOpen}
+          open={definitionOpen && !fullscreen}
           onClose={() => setDefinitionOpen(false)}
           filename={definitionFilename}
           yaml={definitionYaml}
@@ -147,10 +227,18 @@ function DashboardDetailView({
             </CaptionP>
             <WorkbenchMonitoringSharePopover
               kind="dashboard"
-              title={dashboard.name}
               pathname={pathname}
               range={range}
               variables={variables}
+            />
+            <IconFrame
+              ref={fullscreenTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon />}
+              textValue="Full screen"
+              onClick={openFullscreen}
             />
             <IconFrame
               clickable
@@ -162,67 +250,42 @@ function DashboardDetailView({
             />
           </StripActionsSC>
         </StripSC>
-        <BodySC>
-          <TitleBlockSC>
-            <TitleSC>{dashboard.name}</TitleSC>
-            {dashboard.description && (
-              <Body1P
-                $color="text-long-form"
-                css={{ letterSpacing: '0.25px' }}
-              >
-                {dashboard.description}
-              </Body1P>
-            )}
-          </TitleBlockSC>
-          <ToolbarSC $hasFilters={hasFilters}>
-            {hasFilters ? (
-              <WorkbenchDashboardFilters
-                dashboardId={dashboard.id}
-                inputs={inputs}
-                values={filters}
-                variables={variables}
-                timeRange={timeRange}
-                onChange={(name, value) =>
-                  setFilters((prev) => ({ ...prev, [name]: value }))
-                }
-                onClear={() =>
-                  setFilters(
-                    Object.fromEntries(
-                      inputs.map((input) => [
-                        input.name,
-                        defaultDashboardFilter(input),
-                      ])
-                    )
-                  )
-                }
-              />
-            ) : (
-              <Body2P $color="text-long-form">
-                {metaText(graphs.length, sources)}
-              </Body2P>
-            )}
-            <MetricsRangeControl
-              value={range}
-              onChange={setRange}
-            />
-          </ToolbarSC>
-          {hasFilters && (
-            <MetaRowSC>
-              <Body2P $color="text-long-form">
-                {metaText(graphs.length, sources)}
-              </Body2P>
-            </MetaRowSC>
-          )}
-          <PanelsSC>
-            <WorkbenchDashboardPanels
-              dashboardId={dashboard.id}
-              graphs={graphs}
-              variables={variables}
-              timeRange={timeRange}
-            />
-          </PanelsSC>
-        </BodySC>
+        <BodySC>{!fullscreen && detailBody}</BodySC>
       </MainSC>
+      <ModalWrapper
+        open={fullscreen}
+        onOpenChange={setFullscreen}
+        title={dashboard.name}
+        overlayStyles={{
+          padding: 0,
+          alignItems: 'stretch',
+          justifyContent: 'stretch',
+          backgroundColor: theme.colors['fill-accent'],
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
+        }}
+        css={{
+          width: '100%',
+          height: '100%',
+          maxHeight: '100%',
+          borderRadius: 0,
+          boxShadow: 'none',
+          backgroundColor: theme.colors['fill-accent'],
+          overflow: 'auto',
+        }}
+      >
+        <FullscreenHeaderSC>
+          <ExitFullscreenSC
+            type="button"
+            onClick={() => setFullscreen(false)}
+          >
+            Exit full screen
+          </ExitFullscreenSC>
+        </FullscreenHeaderSC>
+        <FullscreenBodySC>{detailBody}</FullscreenBodySC>
+      </ModalWrapper>
     </DefinitionPanelShell>
   )
 }
@@ -391,4 +454,28 @@ const MetaRowSC = styled.div(({ theme }) => ({
 
 const PanelsSC = styled.div(({ theme }) => ({
   marginTop: theme.spacing.medium,
+}))
+
+const FullscreenHeaderSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flexShrink: 0,
+  justifyContent: 'flex-end',
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px 0`,
+}))
+
+const FullscreenBodySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+  padding: `0 ${theme.spacing.large}px ${theme.spacing.large}px`,
+}))
+
+const ExitFullscreenSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.buttonSmall,
+  color: theme.colors['text-light'],
+  cursor: 'pointer',
+  '&:hover': { color: theme.colors.text },
 }))

@@ -2,9 +2,11 @@ import {
   Card,
   Chip,
   EmptyState,
+  ExpandIcon,
   Flex,
   HamburgerMenuCollapsedIcon,
   IconFrame,
+  ModalWrapper,
 } from '@pluralsh/design-system'
 import { ResponsiveLine } from '@nivo/line'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
@@ -37,7 +39,7 @@ import {
   WorkbenchMonitorDetailsFragment,
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
@@ -100,7 +102,10 @@ function MonitorDetailView({
       ? monitor.query?.metrics?.duration
       : monitor.query?.log?.duration
   const { pathname } = useLocation()
+  const theme = useTheme()
   const [definitionOpen, setDefinitionOpen] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+  const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
   const containerRef = useDefinitionPanelContainer()
   const definitionYaml = useMemo(
     () => monitorDefinitionYaml(monitor),
@@ -111,12 +116,110 @@ function MonitorDetailView({
     monitor.name
   )
 
+  const openFullscreen = () => {
+    setDefinitionOpen(false)
+    setFullscreen(true)
+  }
+
+  const detailBody = (
+    <>
+      <TitleBlockSC>
+        <TitleSC>{monitor.name}</TitleSC>
+        {monitor.description && (
+          <Body1P
+            $color="text-long-form"
+            css={{ letterSpacing: '0.25px' }}
+          >
+            {monitor.description}
+          </Body1P>
+        )}
+        {fullscreen && (
+          <CaptionP $color="text-xlight">
+            {monitor.updatedAt
+              ? `updated ${fromNow(monitor.updatedAt)}`
+              : 'Never updated'}
+          </CaptionP>
+        )}
+      </TitleBlockSC>
+      <ColumnsSC>
+        <DefinitionCardSC>
+          <DefinitionHeaderSC>
+            <Body1P css={{ margin: 0 }}>Definition</Body1P>
+            {!fullscreen && (
+              <IconFrame
+                clickable
+                size="small"
+                type="tertiary"
+                icon={<HamburgerMenuCollapsedIcon />}
+                textValue="Definition"
+                onClick={() => setDefinitionOpen(true)}
+              />
+            )}
+          </DefinitionHeaderSC>
+          <SectionSC>
+            <QueryHeaderSC>
+              <Body2P $color="text-xlight">Query</Body2P>
+              {toolName && (
+                <Flex
+                  align="center"
+                  gap="xsmall"
+                >
+                  <DashboardToolIcon
+                    tool={toolName}
+                    size={12}
+                  />
+                  <Body2P>{toolDisplayName(toolName)}</Body2P>
+                </Flex>
+              )}
+            </QueryHeaderSC>
+            <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
+          </SectionSC>
+          <SectionSC>
+            <FiresWhenSC>
+              <Body2P $color="text-xlight">Fires when</Body2P>
+              <ChipsSC>
+                <FireChip
+                  label="Condition"
+                  value={conditionLabel(monitor.threshold)}
+                  $tone="success"
+                />
+                <FireChip
+                  label="For"
+                  value={forLabel(forDuration)}
+                />
+                <FireChip
+                  label="Evaluate"
+                  value={evaluateLabel(monitor.evaluationCron)}
+                />
+                <FireChip
+                  label="Severity"
+                  value={severityLabel(monitor.severity)}
+                  $tone={severityTone(monitor.severity)}
+                />
+              </ChipsSC>
+            </FiresWhenSC>
+            <ChartWrapSC>
+              <MonitorThresholdChart monitor={monitor} />
+            </ChartWrapSC>
+          </SectionSC>
+        </DefinitionCardSC>
+        {workbenchId && (
+          <MonitorRecentJobs
+            workbenchId={workbenchId}
+            monitorId={monitor.id}
+            monitorName={monitor.name}
+          />
+        )}
+      </ColumnsSC>
+    </>
+  )
+
   return (
     <DefinitionPanelShell
       containerRef={containerRef}
       panel={
         <WorkbenchMonitoringDefinitionPanel
-          open={definitionOpen}
+          open={definitionOpen && !fullscreen}
           onClose={() => setDefinitionOpen(false)}
           filename={definitionFilename}
           yaml={definitionYaml}
@@ -135,8 +238,16 @@ function MonitorDetailView({
             </CaptionP>
             <WorkbenchMonitoringSharePopover
               kind="monitor"
-              title={monitor.name}
               pathname={pathname}
+            />
+            <IconFrame
+              ref={fullscreenTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon />}
+              textValue="Full screen"
+              onClick={openFullscreen}
             />
             <IconFrame
               clickable
@@ -148,88 +259,42 @@ function MonitorDetailView({
             />
           </StripActionsSC>
         </StripSC>
-        <BodySC>
-          <TitleBlockSC>
-            <TitleSC>{monitor.name}</TitleSC>
-            {monitor.description && (
-              <Body1P
-                $color="text-long-form"
-                css={{ letterSpacing: '0.25px' }}
-              >
-                {monitor.description}
-              </Body1P>
-            )}
-          </TitleBlockSC>
-          <ColumnsSC>
-            <DefinitionCardSC>
-              <DefinitionHeaderSC>
-                <Body1P css={{ margin: 0 }}>Definition</Body1P>
-                <IconFrame
-                  clickable
-                  size="small"
-                  type="tertiary"
-                  icon={<HamburgerMenuCollapsedIcon />}
-                  textValue="Definition"
-                  onClick={() => setDefinitionOpen(true)}
-                />
-              </DefinitionHeaderSC>
-              <SectionSC>
-                <QueryHeaderSC>
-                  <Body2P $color="text-xlight">Query</Body2P>
-                  {toolName && (
-                    <Flex
-                      align="center"
-                      gap="xsmall"
-                    >
-                      <DashboardToolIcon
-                        tool={toolName}
-                        size={12}
-                      />
-                      <Body2P>{toolDisplayName(toolName)}</Body2P>
-                    </Flex>
-                  )}
-                </QueryHeaderSC>
-                <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
-              </SectionSC>
-              <SectionSC>
-                <FiresWhenSC>
-                  <Body2P $color="text-xlight">Fires when</Body2P>
-                  <ChipsSC>
-                    <FireChip
-                      label="Condition"
-                      value={conditionLabel(monitor.threshold)}
-                      $tone="success"
-                    />
-                    <FireChip
-                      label="For"
-                      value={forLabel(forDuration)}
-                    />
-                    <FireChip
-                      label="Evaluate"
-                      value={evaluateLabel(monitor.evaluationCron)}
-                    />
-                    <FireChip
-                      label="Severity"
-                      value={severityLabel(monitor.severity)}
-                      $tone={severityTone(monitor.severity)}
-                    />
-                  </ChipsSC>
-                </FiresWhenSC>
-                <ChartWrapSC>
-                  <MonitorThresholdChart monitor={monitor} />
-                </ChartWrapSC>
-              </SectionSC>
-            </DefinitionCardSC>
-            {workbenchId && (
-              <MonitorRecentJobs
-                workbenchId={workbenchId}
-                monitorId={monitor.id}
-                monitorName={monitor.name}
-              />
-            )}
-          </ColumnsSC>
-        </BodySC>
+        <BodySC>{!fullscreen && detailBody}</BodySC>
       </MainSC>
+      <ModalWrapper
+        open={fullscreen}
+        onOpenChange={setFullscreen}
+        title={monitor.name}
+        overlayStyles={{
+          padding: 0,
+          alignItems: 'stretch',
+          justifyContent: 'stretch',
+          backgroundColor: theme.colors['fill-accent'],
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
+        }}
+        css={{
+          width: '100%',
+          height: '100%',
+          maxHeight: '100%',
+          borderRadius: 0,
+          boxShadow: 'none',
+          backgroundColor: theme.colors['fill-accent'],
+          overflow: 'auto',
+        }}
+      >
+        <FullscreenHeaderSC>
+          <ExitFullscreenSC
+            type="button"
+            onClick={() => setFullscreen(false)}
+          >
+            Exit full screen
+          </ExitFullscreenSC>
+        </FullscreenHeaderSC>
+        <FullscreenBodySC>{detailBody}</FullscreenBodySC>
+      </ModalWrapper>
     </DefinitionPanelShell>
   )
 }
@@ -751,4 +816,28 @@ const JobCardSC = styled(Card)(({ theme }) => ({
   minHeight: 140,
   padding: theme.spacing.medium,
   textDecoration: 'none',
+}))
+
+const FullscreenHeaderSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flexShrink: 0,
+  justifyContent: 'flex-end',
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px 0`,
+}))
+
+const FullscreenBodySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+  padding: `0 ${theme.spacing.large}px ${theme.spacing.large}px`,
+}))
+
+const ExitFullscreenSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.buttonSmall,
+  color: theme.colors['text-light'],
+  cursor: 'pointer',
+  '&:hover': { color: theme.colors.text },
 }))

@@ -38,11 +38,6 @@ export function buildMonitoringShareUrl({
   return url.toString()
 }
 
-export function buildMonitoringEmbedSnippet(url: string, title: string) {
-  const safeTitle = title.replace(/"/g, '&quot;')
-  return `<iframe src="${url}" title="${safeTitle}" width="100%" height="720" style="border:0" loading="lazy" allowfullscreen></iframe>`
-}
-
 export function parseMonitoringShareSearch(search: string): {
   range?: MetricsTimeRange
   variables: Record<string, string | string[]>

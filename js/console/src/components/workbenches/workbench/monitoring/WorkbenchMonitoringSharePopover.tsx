@@ -8,33 +8,24 @@ import {
 } from '@pluralsh/design-system'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
-import { ButtonGroup } from 'components/utils/ButtonGroup'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import type { MetricsTimeRange } from '../job/WorkbenchJobActivityResults'
-import {
-  buildMonitoringEmbedSnippet,
-  buildMonitoringShareUrl,
-} from './monitoringShare'
-
-type ShareTab = 'link' | 'embed'
+import { buildMonitoringShareUrl } from './monitoringShare'
 
 export function WorkbenchMonitoringSharePopover({
   kind,
-  title,
   pathname,
   range,
   variables,
 }: {
   kind: 'dashboard' | 'monitor'
-  title: string
   pathname: string
   range?: MetricsTimeRange
   variables?: Record<string, string | string[]>
 }) {
   const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState<ShareTab>('link')
   const [includeFiltersAndRange, setIncludeFiltersAndRange] = useState(true)
   const btnRef = useRef<HTMLDivElement>(null)
   useOutsideClick(btnRef, () => setOpen(false))
@@ -50,12 +41,7 @@ export function WorkbenchMonitoringSharePopover({
       }),
     [pathname, range, variables, canIncludeState, includeFiltersAndRange]
   )
-  const embedSnippet = useMemo(
-    () => buildMonitoringEmbedSnippet(shareUrl, title),
-    [shareUrl, title]
-  )
-  const copyValue = tab === 'link' ? shareUrl : embedSnippet
-  const { copied, handleCopy } = useCopyText(copyValue)
+  const { copied, handleCopy } = useCopyText(shareUrl)
 
   return (
     <WrapSC>
@@ -85,22 +71,12 @@ export function WorkbenchMonitoringSharePopover({
         >
           Share {kind}
         </CaptionP>
-        <ButtonGroup
-          tab={tab}
-          onClick={(next) => setTab(next as ShareTab)}
-          directory={[
-            { path: 'link', label: 'Link' },
-            { path: 'embed', label: 'Embed' },
-          ]}
-          fillLevel={2}
-        />
         <Code
-          language={tab === 'embed' ? 'html' : undefined}
           showHeader={false}
           showLineNumbers={false}
           css={{ maxHeight: 120, overflow: 'auto' }}
         >
-          {copyValue}
+          {shareUrl}
         </Code>
         {canIncludeState && (
           <Checkbox
@@ -120,11 +96,7 @@ export function WorkbenchMonitoringSharePopover({
           onClick={handleCopy}
           css={{ width: '100%' }}
         >
-          {copied
-            ? 'Copied!'
-            : tab === 'link'
-              ? 'Copy link'
-              : 'Copy embed code'}
+          {copied ? 'Copied!' : 'Copy link'}
         </Button>
       </ShareMenuSC>
     </WrapSC>
