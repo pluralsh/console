@@ -119,7 +119,6 @@ function DashboardInputControl({
     variables: {
       id: dashboardId,
       identifier: input.name,
-      // Absinthe :json only accepts string-encoded JSON, not raw objects.
       input: JSON.stringify(omit(variables, input.name)),
       timeRange,
     },

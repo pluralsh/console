@@ -131,7 +131,6 @@ function DashboardPanel({
     variables: {
       id: dashboardId,
       identifier: graph.identifier,
-      // Absinthe :json only accepts string-encoded JSON, not raw objects.
       input: JSON.stringify(variables),
       timeRange,
     },

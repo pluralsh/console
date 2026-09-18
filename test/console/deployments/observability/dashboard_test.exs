@@ -22,4 +22,20 @@ defmodule Console.Deployments.Observability.DashboardTest do
              }
     end
   end
+
+  describe "metric_query_step/1" do
+    test "picks a fine step for short ranges" do
+      start_at = ~U[2026-09-07 21:00:00Z]
+      end_at = ~U[2026-09-07 22:00:00Z]
+
+      assert Dashboard.metric_query_step(%{start: start_at, end: end_at}) == "15s"
+    end
+
+    test "coarsens step for year-long ranges so queries stay under max points" do
+      end_at = ~U[2026-09-18 12:00:00Z]
+      start_at = DateTime.add(end_at, -365, :day)
+
+      assert Dashboard.metric_query_step(%{"start" => start_at, "end" => end_at}) == "2h"
+    end
+  end
 end

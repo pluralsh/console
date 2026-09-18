@@ -311,6 +311,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       expect(Stub, :metrics, fn :mock_conn, input, opts ->
         assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total{namespace=\"production\"}[5m]))"
+        assert input.step == "15s"
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 

@@ -59,6 +59,20 @@ defmodule Console.Deployments.Observability.Dashboard do
   defp execute_graph(_, _, _, _, _),
     do: {:error, "graph datasource must return metrics, logs, or traces"}
 
+  @metric_target_points 240
+  @metric_step_candidates [
+    {15, "15s"},
+    {30, "30s"},
+    {60, "1m"},
+    {120, "2m"},
+    {300, "5m"},
+    {600, "10m"},
+    {900, "15m"},
+    {1_800, "30m"},
+    {3_600, "1h"},
+    {7_200, "2h"},
+  ]
+
   defp execute(%Dashboard{} = dashboard, %Datasource{} = datasource, input, time_range, user) do
     dashboard = Repo.preload(dashboard, :workbench)
 
@@ -66,6 +80,7 @@ defmodule Console.Deployments.Observability.Dashboard do
       datasource.input
       |> substitute(input)
       |> Map.put("time_range", time_range)
+      |> maybe_put_metric_step(datasource.type, time_range)
 
     case datasource.type do
       :metrics -> Toolchain.metrics(dashboard.workbench, datasource.tool, args, user)
@@ -74,6 +89,33 @@ defmodule Console.Deployments.Observability.Dashboard do
       :labels -> Toolchain.labels(dashboard.workbench, datasource.tool, args, user)
     end
   end
+
+  defp maybe_put_metric_step(args, :metrics, time_range) do
+    case metric_query_step(time_range) do
+      step when is_binary(step) -> Map.put(args, "step", step)
+      _ -> args
+    end
+  end
+  defp maybe_put_metric_step(args, _, _), do: args
+
+  def metric_query_step(time_range) do
+    with {start_at, end_at} <- time_range_bounds(time_range),
+         seconds when seconds > 0 <- DateTime.diff(end_at, start_at, :second) do
+      target = seconds / @metric_target_points
+
+      @metric_step_candidates
+      |> Enum.min_by(fn {candidate, _} -> abs(candidate - target) end)
+      |> elem(1)
+    else
+      _ -> nil
+    end
+  end
+
+  defp time_range_bounds(%{start: start_at, end: end_at}),
+    do: {start_at, end_at}
+  defp time_range_bounds(%{"start" => start_at, "end" => end_at}),
+    do: {start_at, end_at}
+  defp time_range_bounds(_), do: :error
 
   defp stringify(value) when is_list(value), do: Enum.map_join(value, ",", &stringify/1)
   defp stringify(value) when is_map(value), do: Jason.encode!(value)
