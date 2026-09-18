@@ -1,4 +1,4 @@
-import { ResponsiveLine, ResponsiveLineCanvas } from '@nivo/line'
+import { Line, LineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
@@ -14,6 +14,7 @@ import {
   Modal,
   NotebookIcon,
   useCopyText,
+  useResizeObserver,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
@@ -321,11 +322,20 @@ export function JobActivityMetricsChart({
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
   lineProps?: Partial<
-    ComponentPropsWithRef<typeof ResponsiveLine> &
-      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+    ComponentPropsWithRef<typeof Line> & ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
+  const chartRef = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState({ width: 0, height: 0 })
+
+  useResizeObserver(chartRef, (rect) => {
+    const width = Math.floor(rect.width)
+    const height = Math.floor(rect.height)
+    setSize((prev) =>
+      prev.width === width && prev.height === height ? prev : { width, height }
+    )
+  })
 
   const graphData = useMemo(() => {
     return getMetricSeries(metrics)
@@ -348,20 +358,30 @@ export function JobActivityMetricsChart({
     tooltip: SliceTooltip,
   }
 
+  const ready = size.width > 0 && size.height > 0
+
   return (
-    <MetricsChartSC {...props}>
-      {metrics.length > CANVAS_THRESHOLD ? (
-        <ResponsiveLineCanvas
-          {...sharedProps}
-          {...lineProps}
-        />
-      ) : (
-        <ResponsiveLine
-          {...sharedProps}
-          useMesh
-          {...lineProps}
-        />
-      )}
+    <MetricsChartSC
+      ref={chartRef}
+      {...props}
+    >
+      {ready &&
+        (metrics.length > CANVAS_THRESHOLD ? (
+          <LineCanvas
+            width={size.width}
+            height={size.height}
+            {...sharedProps}
+            {...lineProps}
+          />
+        ) : (
+          <Line
+            width={size.width}
+            height={size.height}
+            {...sharedProps}
+            useMesh
+            {...lineProps}
+          />
+        ))}
     </MetricsChartSC>
   )
 }
@@ -392,8 +412,7 @@ export function JobActivityMetrics({
   title?: Nullable<string>
   skeletonHeight?: number
   lineProps?: Partial<
-    ComponentPropsWithRef<typeof ResponsiveLine> &
-      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+    ComponentPropsWithRef<typeof Line> & ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const [timeRange, setTimeRange] = useState<MetricsTimeRange>('max')
