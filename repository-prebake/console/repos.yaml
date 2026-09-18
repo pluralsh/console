@@ -1,4 +1,7 @@
-# Prebake image for this repository with compile artifacts.
+# Prebake image for this repository with compile artifacts, plus an authed
+# extra-context repo.
 repositories:
   - url: https://github.com/pluralsh/console.git
     path: console
+  - url: https://github.com/pluralsh/plrl-up-demos.git
+    path: plrl-up-demos

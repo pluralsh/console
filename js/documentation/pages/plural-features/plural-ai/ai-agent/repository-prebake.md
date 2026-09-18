@@ -81,7 +81,7 @@ docker rm "$cid"
 
 ## Extend the base image
 
-`ghcr.io/pluralsh/repository-prebake` is Debian plus `git` and a `prebake` binary. **Clone and write the manifest inside the image you push.** Users build with a normal `Dockerfile` and `docker/build-push-action`. The CLI is not a host-side wrapper around `docker build`.
+`ghcr.io/pluralsh/repository-prebake` is Debian plus `git`, `mise`, a compile toolchain, and a `prebake` binary. **Clone and write the manifest inside the image you push.** Users build with a normal `Dockerfile` and `docker/build-push-action`. The CLI is not a host-side wrapper around `docker build`.
 
 ```dockerfile
 FROM ghcr.io/pluralsh/repository-prebake:latest
@@ -185,7 +185,7 @@ RUN mix deps.get && MIX_ENV=test mix compile \
 
 ## Console image
 
-The in-tree [`repository-prebake/console`](https://github.com/pluralsh/console/tree/master/repository-prebake/console) Dockerfile extends the published base: `COPY` this checkout to `/data/console`, `RUN prebake`, then `precompile.sh` (Elixir `MIX_ENV=test mix compile`, JS yarn install, Go workspace modules). CI builds it as `ghcr.io/pluralsh/console-repos`.
+The in-tree [`repository-prebake/console`](https://github.com/pluralsh/console/tree/master/repository-prebake/console) Dockerfile extends the published base: `COPY` this checkout to `/data/console`, `RUN prebake` (Console plus authed `plrl-up-demos` extra context), then `precompile.sh`. CI builds it as `ghcr.io/pluralsh/console-repos`. Pass `GIT_ACCESS_TOKEN` as a BuildKit secret so `prebake` can clone the private repo.
 
 Locally, from the Console repository root, build the base image first:
 
@@ -196,13 +196,14 @@ docker build -f repository-prebake/base/Dockerfile \
 cp repository-prebake/console/.dockerignore .dockerignore
 docker build -f repository-prebake/console/Dockerfile \
   --build-arg PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:local \
+  --secret id=git_token,env=GIT_ACCESS_TOKEN \
   -t ghcr.io/pluralsh/console-repos:local \
   .
 ```
 
 ## Mise toolchains at agent boot
 
-To install language tools **in the agent container** without wrapping compiles in DinD, supply a [mise](https://mise.jdx.dev/bootstrap.html) config and keep the default container writable. `mise` must already be in the agent image (the harness image includes it). If it is missing, the run logs an error and continues without toolchain bootstrap.
+To install language tools **in the agent container** without wrapping compiles in DinD, supply a [mise](https://mise.jdx.dev/bootstrap.html) config and keep the default container writable. `mise` is already in the agent-harness image (and in `repository-prebake` for image builds). If it is missing at run time, the harness logs an error and continues without toolchain bootstrap.
 
 ```yaml
 spec:
@@ -210,11 +211,7 @@ spec:
   readOnlyRootFilesystem: false
   mise:
     config: |
-      [settings.erlang]
-      compile = false
-      precompiled_os = "ubuntu-24.04"
       [tools]
-      erlang = "28.5"
       elixir = "1.19.4"
       go = "1.27.1"
       node = "24.11.1"
@@ -222,7 +219,6 @@ spec:
       MIX_HOME = "/plural/shared/repository/.mix"
       MIX_ARCHIVES = "/plural/shared/repository/.mix/archives"
       HEX_HOME = "/plural/shared/repository/.hex"
-      ELIXIR_ERL_OPTIONS = "+fnu"
       GOPATH = "/plural/shared/repository/.gopath"
       GOBIN = "/plural/shared/repository/.gopath/bin"
       GOCACHE = "/plural/shared/repository/.cache/go-build"
@@ -230,7 +226,7 @@ spec:
       GOWORK = "/plural/shared/repository/go/go.work"
 ```
 
-The harness runs `mise trust` and `mise bootstrap --yes` before the coding agent starts. `[tools]` install into `MISE_DATA_DIR` as the non-root agent user. Erlang is installed from Bob precompiled Ubuntu builds (`compile = false`); do not rely on kerl/source — the agent image has no C compiler. The global mise file is `/mise/config.toml`, so `{{config_root}}` is `/mise`, not the git checkout. Point Mix home, `MIX_ARCHIVES`, `GOWORK`, and Go caches at `/plural/shared/repository` so Hex archives and `GOMODCACHE` survive from the prebake copy. mise otherwise puts `MIX_ARCHIVES` under the runtime Elixir install, which is empty. `[bootstrap.packages]` that use apt still need a root container.
+The harness runs `mise trust` and `mise bootstrap --yes` before the coding agent starts. Point Mix home, `MIX_ARCHIVES`, `GOWORK`, and Go caches at `/plural/shared/repository` so those directories survive from the prebake copy.
 
 If you extend a finished image that already ran `mise bootstrap` at build time, set `readOnlyRootFilesystem: true`. The same `mise.config` is still mounted so `mise exec` sees `[tools]` and `[env]`, but bootstrap is skipped.
 

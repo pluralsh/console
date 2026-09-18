@@ -79,10 +79,10 @@ the agent system prompt.
 
 ## Base image
 
-`ghcr.io/pluralsh/repository-prebake` is Debian plus `git` and a `prebake`
-binary. Extend it and run clone + manifest **inside** the image you push
-(`docker build`, `docker/build-push-action`, and so on). The CLI is not a
-host-side wrapper around `docker build`.
+`ghcr.io/pluralsh/repository-prebake` is Debian plus `git`, `mise`, a compile
+toolchain, and a `prebake` binary. Extend it and run clone + manifest **inside**
+the image you push (`docker build`, `docker/build-push-action`, and so on). The
+CLI is not a host-side wrapper around `docker build`.
 
 ```dockerfile
 FROM ghcr.io/pluralsh/repository-prebake:latest
@@ -175,9 +175,11 @@ export GOWORK=/data/console/go/go.work
 ## Console image
 
 [`console/`](console/) extends the published base image: copy this checkout to
-`/data/console`, `prebake`, then [`console/precompile.sh`](console/precompile.sh)
+`/data/console`, `prebake` (Console plus authed `plrl-up-demos` extra context),
+then [`console/precompile.sh`](console/precompile.sh)
 (Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, Go workspace
-modules under `go/` with `go test -run='^$'`).
+modules under `go/` with `go test -run='^$'`). Pass `GIT_ACCESS_TOKEN` as a
+BuildKit secret so `prebake` can clone the private repo.
 
 CI builds it on every PR and every push to `master` as
 `ghcr.io/pluralsh/console-repos:sha-<short>` (`:pr-<n>` on pull requests, `:latest`
@@ -197,6 +199,7 @@ docker build -f repository-prebake/base/Dockerfile \
 cp repository-prebake/console/.dockerignore .dockerignore
 docker build -f repository-prebake/console/Dockerfile \
   --build-arg PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:local \
+  --secret id=git_token,env=GIT_ACCESS_TOKEN \
   -t ghcr.io/pluralsh/console-repos:local \
   .
 ```
