@@ -129,6 +129,6 @@ jobs:
           build-args: |
             PREBAKE_IMAGE=${{ env.BASE_IMAGE }}:${{ needs.base.outputs.version }}
           secrets: |
-            git_token=${{ secrets.GIT_ACCESS_TOKEN }}
+            git_token=${{ secrets.PLURAL_BOT_PAT }}
           cache-from: type=gha,scope=repository-prebake-console
           cache-to: type=gha,mode=max,scope=repository-prebake-console
