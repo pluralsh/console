@@ -256,6 +256,7 @@ function PanelContent({
           <WorkbenchJobMetricsLegend
             series={getMetricSeries(metrics)}
             paddingLeft={0}
+            maxHeight={88}
           />
           <JobActivityMetricsChart
             metrics={metrics}

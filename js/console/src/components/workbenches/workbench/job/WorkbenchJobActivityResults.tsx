@@ -614,9 +614,11 @@ export function JobActivityTraces({
 
 export function WorkbenchJobMetricsLegend({
   series,
+  maxHeight,
   ...props
 }: {
   series: MetricSeries[]
+  maxHeight?: number
 } & FlexProps) {
   if (isEmpty(series)) return null
 
@@ -625,6 +627,15 @@ export function WorkbenchJobMetricsLegend({
       wrap="wrap"
       gap="small"
       align="center"
+      css={
+        maxHeight != null
+          ? {
+              alignContent: 'flex-start',
+              maxHeight,
+              overflowY: 'auto',
+            }
+          : undefined
+      }
       {...props}
     >
       {series.map(({ id, label }, i) => (
