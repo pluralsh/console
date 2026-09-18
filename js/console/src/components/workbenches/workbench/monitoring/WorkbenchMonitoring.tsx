@@ -1,6 +1,4 @@
-import { Card, EmptyState, Flex } from '@pluralsh/design-system'
-import { GqlError } from 'components/utils/Alert'
-import { useWorkbenchMonitorQuery } from 'generated/graphql'
+import { Card, EmptyState } from '@pluralsh/design-system'
 import { useOutletContext, useParams } from 'react-router-dom'
 import {
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
@@ -9,10 +7,8 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
-import {
-  DashboardDetail,
-  MonitoringDetailSkeleton,
-} from './WorkbenchDashboardDetail'
+import { DashboardDetail } from './WorkbenchDashboardDetail'
+import { MonitorDetail } from './WorkbenchMonitorDetail'
 import { WorkbenchMonitoringBuild } from './WorkbenchMonitoringBuild'
 import { WorkbenchMonitoringSidebar } from './WorkbenchMonitoringSidebar'
 
@@ -68,46 +64,6 @@ export function WorkbenchMonitoring() {
         )}
       </DetailSC>
     </WorkbenchPageLayout>
-  )
-}
-
-function MonitorDetail({ monitorId }: { monitorId: string }) {
-  const { data, loading, error } = useWorkbenchMonitorQuery({
-    variables: { id: monitorId },
-    fetchPolicy: 'cache-and-network',
-  })
-
-  if (loading && !data) return <MonitoringDetailSkeleton />
-  if (error) return <GqlError error={error} />
-  const monitor = data?.monitor
-  if (!monitor) return <EmptyState message="Monitor not found." />
-
-  return (
-    <MonitorDetailView
-      name={monitor.name}
-      description={monitor.description}
-    />
-  )
-}
-
-function MonitorDetailView({
-  name,
-  description,
-}: {
-  name: string
-  description: Nullable<string>
-}) {
-  return (
-    <Flex
-      direction="column"
-      gap="medium"
-    >
-      <h2>{name}</h2>
-      {description && <p>{description}</p>}
-      <Card css={{ padding: 24 }}>
-        <EmptyState message="Monitor details are coming soon." />
-      </Card>
-    </Flex>
   )
 }
 
