@@ -10,8 +10,8 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionController do
   alias Console.AI.Chat
   alias Console.Schema.AgentSession
 
-  plug Scope, [resource: :ai, action: :read] when action in [:show, :index]
-  plug Scope, [resource: :ai, action: :write] when action in [:create]
+  plug Scope, [resource: :agent, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :agent, action: :write] when action in [:create]
 
   @doc """
   Fetches an agent session by id.
@@ -19,7 +19,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionController do
   operation :show,
     operation_id: "GetAgentSession",
     tags: ["agent"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["agent.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the agent session"]
     ],
@@ -38,7 +38,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionController do
   operation :index,
     operation_id: "ListAgentSessions",
     tags: ["agent"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["agent.read"],
     parameters: [
       page: [in: :query, schema: %{type: :integer}, required: false, description: "Page number for pagination"],
       per_page: [in: :query, schema: %{type: :integer}, required: false, description: "Number of items per page"]
@@ -63,7 +63,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionController do
   operation :create,
     operation_id: "CreateAgentSession",
     tags: ["agent"],
-    "x-required-scopes": ["ai.write"],
+    "x-required-scopes": ["agent.write"],
     request_body: OpenAPI.AI.AgentSessionInput,
     responses: [ok: OpenAPI.AI.AgentSession]
   def create(conn, _) do

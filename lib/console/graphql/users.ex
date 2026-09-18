@@ -816,6 +816,9 @@ defmodule Console.GraphQl.Users do
     field :create_service_account_token, :access_token do
       middleware Authenticated
       middleware AdminRequired
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id,     non_null(:id)
       arg :scopes, list_of(:scope_attributes)
       arg :expiry, :string, description: "the ttl of the access token, e.g. 1h, 1d, 1w"
@@ -828,6 +831,9 @@ defmodule Console.GraphQl.Users do
     """
     field :service_account_access_token, :access_token do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id,         non_null(:id)
       arg :refresh,    :boolean, description: "whether to wipe all old tokens for this service account transactionally"
       arg :attributes, non_null(:access_token_attributes)

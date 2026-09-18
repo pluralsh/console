@@ -27,7 +27,7 @@ A good skill has a few qualities:
 1. Explicit guidance on how to use the tools at your disposal. If the prompt you were given isn't sufficient to gather that guidance, explain that if you chose to ignore skill updates.
 2. A decent sequential workflow to leverage the tools in question.
 3. Background knowledge is often stale. Explicitly direct future investigations to gather current facts from the relevant source-of-truth tools before making assumptions or applying interpretation.
-4. Documentation of some system, codebase, or architecture that might be needed in future investigations.  This should be structured effictively in markdown to convey rich semantic meaning.
+4. Documentation of some system, codebase, or architecture that might be needed in future investigations.  This should be structured effectively in markdown to convey rich semantic meaning.
 
 The specific investigation was prompted with:
 
