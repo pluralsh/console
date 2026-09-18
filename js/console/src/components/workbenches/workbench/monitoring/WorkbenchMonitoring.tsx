@@ -33,11 +33,13 @@ export function WorkbenchMonitoring() {
       <DetailSC>
         {dashboardId ? (
           dashboardId === WORKBENCHES_CREATE_REL_PATH ? (
-            <WorkbenchMonitoringBuild
-              workbenchId={workbenchId}
-              workbenchLoading={isLoading}
-              kind="dashboard"
-            />
+            <PaddedSC>
+              <WorkbenchMonitoringBuild
+                workbenchId={workbenchId}
+                workbenchLoading={isLoading}
+                kind="dashboard"
+              />
+            </PaddedSC>
           ) : (
             <DashboardDetail
               key={dashboardId}
@@ -46,11 +48,13 @@ export function WorkbenchMonitoring() {
           )
         ) : monitorId ? (
           monitorId === WORKBENCHES_CREATE_REL_PATH ? (
-            <WorkbenchMonitoringBuild
-              workbenchId={workbenchId}
-              workbenchLoading={isLoading}
-              kind="monitor"
-            />
+            <PaddedSC>
+              <WorkbenchMonitoringBuild
+                workbenchId={workbenchId}
+                workbenchLoading={isLoading}
+                kind="monitor"
+              />
+            </PaddedSC>
           ) : (
             <MonitorDetail
               key={monitorId}
@@ -58,18 +62,27 @@ export function WorkbenchMonitoring() {
             />
           )
         ) : (
-          <Card css={{ padding: 24 }}>
-            <EmptyState message="Select a dashboard or monitor to view details." />
-          </Card>
+          <PaddedSC>
+            <Card css={{ padding: 24 }}>
+              <EmptyState message="Select a dashboard or monitor to view details." />
+            </Card>
+          </PaddedSC>
         )}
       </DetailSC>
     </WorkbenchPageLayout>
   )
 }
 
-const DetailSC = styled.div(({ theme }) => ({
+const DetailSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+})
+
+const PaddedSC = styled.div(({ theme }) => ({
   flex: 1,
   minHeight: 0,
   overflow: 'auto',

@@ -1,4 +1,9 @@
-import { EmptyState, Flex } from '@pluralsh/design-system'
+import {
+  EmptyState,
+  Flex,
+  HamburgerMenuCollapsedIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
@@ -17,6 +22,15 @@ import {
 } from '../job/WorkbenchJobActivityResults'
 import { toolDisplayName } from './dashboardToolIcon'
 import {
+  dashboardDefinitionYaml,
+  monitoringDefinitionFilename,
+} from './definitionYaml'
+import {
+  DefinitionPanelShell,
+  useDefinitionPanelContainer,
+  WorkbenchMonitoringDefinitionPanel,
+} from './WorkbenchMonitoringDefinitionPanel'
+import {
   DashboardFilterValue,
   defaultDashboardFilter,
   WorkbenchDashboardFilters,
@@ -32,7 +46,12 @@ export function DashboardDetail({ dashboardId }: { dashboardId: string }) {
   if (loading && !data) return <MonitoringDetailSkeleton />
   if (error) return <GqlError error={error} />
   const dashboard = data?.workbenchDashboard
-  if (!dashboard) return <EmptyState message="Dashboard not found." />
+  if (!dashboard)
+    return (
+      <MainSC>
+        <EmptyState message="Dashboard not found." />
+      </MainSC>
+    )
 
   return <DashboardDetailView dashboard={dashboard} />
 }
@@ -88,82 +107,111 @@ function DashboardDetailView({
   )
 
   const hasFilters = inputs.length > 0
+  const [definitionOpen, setDefinitionOpen] = useState(false)
+  const containerRef = useDefinitionPanelContainer()
+  const definitionYaml = useMemo(
+    () => dashboardDefinitionYaml(dashboard),
+    [dashboard]
+  )
+  const definitionFilename = monitoringDefinitionFilename(
+    'dashboard',
+    dashboard.name
+  )
 
   return (
-    <Flex
-      direction="column"
-      flex={1}
-      minHeight={0}
+    <DefinitionPanelShell
+      containerRef={containerRef}
+      panel={
+        <WorkbenchMonitoringDefinitionPanel
+          open={definitionOpen}
+          onClose={() => setDefinitionOpen(false)}
+          filename={definitionFilename}
+          yaml={definitionYaml}
+          containerRef={containerRef}
+        />
+      }
     >
-      <StripSC>
-        <EyebrowSC>Dashboard</EyebrowSC>
-        <CaptionP $color="text-xlight">
-          {dashboard.updatedAt
-            ? `updated ${fromNow(dashboard.updatedAt)}`
-            : 'Never updated'}
-        </CaptionP>
-      </StripSC>
-      <BodySC>
-        <TitleBlockSC>
-          <TitleSC>{dashboard.name}</TitleSC>
-          {dashboard.description && (
-            <Body1P
-              $color="text-long-form"
-              css={{ letterSpacing: '0.25px' }}
-            >
-              {dashboard.description}
-            </Body1P>
+      <MainSC>
+        <StripSC>
+          <EyebrowSC>Dashboard</EyebrowSC>
+          <StripActionsSC>
+            <CaptionP $color="text-xlight">
+              {dashboard.updatedAt
+                ? `updated ${fromNow(dashboard.updatedAt)}`
+                : 'Never updated'}
+            </CaptionP>
+            <IconFrame
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<HamburgerMenuCollapsedIcon />}
+              textValue="Definition"
+              onClick={() => setDefinitionOpen(true)}
+            />
+          </StripActionsSC>
+        </StripSC>
+        <BodySC>
+          <TitleBlockSC>
+            <TitleSC>{dashboard.name}</TitleSC>
+            {dashboard.description && (
+              <Body1P
+                $color="text-long-form"
+                css={{ letterSpacing: '0.25px' }}
+              >
+                {dashboard.description}
+              </Body1P>
+            )}
+          </TitleBlockSC>
+          <ToolbarSC $hasFilters={hasFilters}>
+            {hasFilters ? (
+              <WorkbenchDashboardFilters
+                dashboardId={dashboard.id}
+                inputs={inputs}
+                values={filters}
+                variables={variables}
+                timeRange={timeRange}
+                onChange={(name, value) =>
+                  setFilters((prev) => ({ ...prev, [name]: value }))
+                }
+                onClear={() =>
+                  setFilters(
+                    Object.fromEntries(
+                      inputs.map((input) => [
+                        input.name,
+                        defaultDashboardFilter(input),
+                      ])
+                    )
+                  )
+                }
+              />
+            ) : (
+              <Body2P $color="text-long-form">
+                {metaText(graphs.length, sources)}
+              </Body2P>
+            )}
+            <MetricsRangeControl
+              value={range}
+              onChange={setRange}
+            />
+          </ToolbarSC>
+          {hasFilters && (
+            <MetaRowSC>
+              <Body2P $color="text-long-form">
+                {metaText(graphs.length, sources)}
+              </Body2P>
+            </MetaRowSC>
           )}
-        </TitleBlockSC>
-        <ToolbarSC $hasFilters={hasFilters}>
-          {hasFilters ? (
-            <WorkbenchDashboardFilters
+          <PanelsSC>
+            <WorkbenchDashboardPanels
               dashboardId={dashboard.id}
-              inputs={inputs}
-              values={filters}
+              graphs={graphs}
               variables={variables}
               timeRange={timeRange}
-              onChange={(name, value) =>
-                setFilters((prev) => ({ ...prev, [name]: value }))
-              }
-              onClear={() =>
-                setFilters(
-                  Object.fromEntries(
-                    inputs.map((input) => [
-                      input.name,
-                      defaultDashboardFilter(input),
-                    ])
-                  )
-                )
-              }
             />
-          ) : (
-            <Body2P $color="text-long-form">
-              {metaText(graphs.length, sources)}
-            </Body2P>
-          )}
-          <MetricsRangeControl
-            value={range}
-            onChange={setRange}
-          />
-        </ToolbarSC>
-        {hasFilters && (
-          <MetaRowSC>
-            <Body2P $color="text-long-form">
-              {metaText(graphs.length, sources)}
-            </Body2P>
-          </MetaRowSC>
-        )}
-        <PanelsSC>
-          <WorkbenchDashboardPanels
-            dashboardId={dashboard.id}
-            graphs={graphs}
-            variables={variables}
-            timeRange={timeRange}
-          />
-        </PanelsSC>
-      </BodySC>
-    </Flex>
+          </PanelsSC>
+        </BodySC>
+      </MainSC>
+    </DefinitionPanelShell>
   )
 }
 
@@ -196,11 +244,7 @@ function metaText(panelCount: number, sources: string[]) {
 
 export function MonitoringDetailSkeleton() {
   return (
-    <Flex
-      direction="column"
-      flex={1}
-      minHeight={0}
-    >
+    <MainSC>
       <StripSC>
         <RectangleSkeleton
           $height={16}
@@ -234,22 +278,39 @@ export function MonitoringDetailSkeleton() {
           <RectangleSkeleton $height={200} />
         </Flex>
       </BodySC>
-    </Flex>
+    </MainSC>
   )
 }
+
+const MainSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+  minWidth: 0,
+  overflow: 'auto',
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+}))
 
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  margin: '-16px -24px 0',
+  margin: `-${theme.spacing.medium}px -${theme.spacing.large}px 0`,
   // fill-one-selected matches Figma fill/one #21242C (pre-rename tokens).
   backgroundColor: theme.colors['fill-one-selected'],
   borderBottom: theme.borders.default,
+  borderTop: theme.borders.default,
   display: 'flex',
   gap: theme.spacing.small,
   height: 40,
   justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
+}))
+
+const StripActionsSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.small,
 }))
 
 const EyebrowSC = styled.p(({ theme }) => ({
@@ -262,9 +323,8 @@ const BodySC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
-  margin: `0 -${theme.spacing.large}px`,
   minHeight: 0,
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  paddingTop: theme.spacing.medium,
 }))
 
 const TitleBlockSC = styled.div(({ theme }) => ({

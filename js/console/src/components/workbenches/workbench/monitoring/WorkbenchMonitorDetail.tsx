@@ -1,9 +1,9 @@
 import {
   Card,
   Chip,
-  DocumentIcon,
   EmptyState,
   Flex,
+  HamburgerMenuCollapsedIcon,
   IconFrame,
 } from '@pluralsh/design-system'
 import { ResponsiveLine } from '@nivo/line'
@@ -37,7 +37,7 @@ import {
   WorkbenchMonitorDetailsFragment,
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
@@ -47,6 +47,15 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { MonitoringDetailSkeleton } from './WorkbenchDashboardDetail'
 import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
+import {
+  monitorDefinitionYaml,
+  monitoringDefinitionFilename,
+} from './definitionYaml'
+import {
+  DefinitionPanelShell,
+  useDefinitionPanelContainer,
+  WorkbenchMonitoringDefinitionPanel,
+} from './WorkbenchMonitoringDefinitionPanel'
 import parseDuration from 'parse-duration-ms'
 
 const CHART_HEIGHT_PX = 280
@@ -61,7 +70,12 @@ export function MonitorDetail({ monitorId }: { monitorId: string }) {
   if (loading && !data) return <MonitoringDetailSkeleton />
   if (error) return <GqlError error={error} />
   const monitor = data?.monitor
-  if (!monitor) return <EmptyState message="Monitor not found." />
+  if (!monitor)
+    return (
+      <MainSC>
+        <EmptyState message="Monitor not found." />
+      </MainSC>
+    )
 
   return <MonitorDetailView monitor={monitor} />
 }
@@ -84,101 +98,122 @@ function MonitorDetailView({
     monitor.type === MonitorType.Metrics
       ? monitor.query?.metrics?.duration
       : monitor.query?.log?.duration
+  const [definitionOpen, setDefinitionOpen] = useState(false)
+  const containerRef = useDefinitionPanelContainer()
+  const definitionYaml = useMemo(
+    () => monitorDefinitionYaml(monitor),
+    [monitor]
+  )
+  const definitionFilename = monitoringDefinitionFilename(
+    'monitor',
+    monitor.name
+  )
 
   return (
-    <Flex
-      direction="column"
-      flex={1}
-      minHeight={0}
+    <DefinitionPanelShell
+      containerRef={containerRef}
+      panel={
+        <WorkbenchMonitoringDefinitionPanel
+          open={definitionOpen}
+          onClose={() => setDefinitionOpen(false)}
+          filename={definitionFilename}
+          yaml={definitionYaml}
+          containerRef={containerRef}
+        />
+      }
     >
-      <StripSC>
-        <EyebrowSC>Monitor</EyebrowSC>
-        <CaptionP $color="text-xlight">
-          {monitor.updatedAt
-            ? `updated ${fromNow(monitor.updatedAt)}`
-            : 'Never updated'}
-        </CaptionP>
-      </StripSC>
-      <BodySC>
-        <TitleBlockSC>
-          <TitleSC>{monitor.name}</TitleSC>
-          {monitor.description && (
-            <Body1P
-              $color="text-long-form"
-              css={{ letterSpacing: '0.25px' }}
-            >
-              {monitor.description}
-            </Body1P>
-          )}
-        </TitleBlockSC>
-        <ColumnsSC>
-          <DefinitionCardSC>
-            <DefinitionHeaderSC>
-              <Body1P css={{ margin: 0 }}>Definition</Body1P>
-              <IconFrame
-                size="small"
-                type="tertiary"
-                icon={<DocumentIcon />}
-                textValue="Definition"
-              />
-            </DefinitionHeaderSC>
-            <SectionSC>
-              <QueryHeaderSC>
-                <Body2P $color="text-xlight">Query</Body2P>
-                {toolName && (
-                  <Flex
-                    align="center"
-                    gap="xsmall"
-                  >
-                    <DashboardToolIcon
-                      tool={toolName}
-                      size={12}
+      <MainSC>
+        <StripSC>
+          <EyebrowSC>Monitor</EyebrowSC>
+          <CaptionP $color="text-xlight">
+            {monitor.updatedAt
+              ? `updated ${fromNow(monitor.updatedAt)}`
+              : 'Never updated'}
+          </CaptionP>
+        </StripSC>
+        <BodySC>
+          <TitleBlockSC>
+            <TitleSC>{monitor.name}</TitleSC>
+            {monitor.description && (
+              <Body1P
+                $color="text-long-form"
+                css={{ letterSpacing: '0.25px' }}
+              >
+                {monitor.description}
+              </Body1P>
+            )}
+          </TitleBlockSC>
+          <ColumnsSC>
+            <DefinitionCardSC>
+              <DefinitionHeaderSC>
+                <Body1P css={{ margin: 0 }}>Definition</Body1P>
+                <IconFrame
+                  clickable
+                  size="small"
+                  type="tertiary"
+                  icon={<HamburgerMenuCollapsedIcon />}
+                  textValue="Definition"
+                  onClick={() => setDefinitionOpen(true)}
+                />
+              </DefinitionHeaderSC>
+              <SectionSC>
+                <QueryHeaderSC>
+                  <Body2P $color="text-xlight">Query</Body2P>
+                  {toolName && (
+                    <Flex
+                      align="center"
+                      gap="xsmall"
+                    >
+                      <DashboardToolIcon
+                        tool={toolName}
+                        size={12}
+                      />
+                      <Body2P>{toolDisplayName(toolName)}</Body2P>
+                    </Flex>
+                  )}
+                </QueryHeaderSC>
+                <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
+              </SectionSC>
+              <SectionSC>
+                <FiresWhenSC>
+                  <Body2P $color="text-xlight">Fires when</Body2P>
+                  <ChipsSC>
+                    <FireChip
+                      label="Condition"
+                      value={conditionLabel(monitor.threshold)}
+                      $tone="success"
                     />
-                    <Body2P>{toolDisplayName(toolName)}</Body2P>
-                  </Flex>
-                )}
-              </QueryHeaderSC>
-              <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
-            </SectionSC>
-            <SectionSC>
-              <FiresWhenSC>
-                <Body2P $color="text-xlight">Fires when</Body2P>
-                <ChipsSC>
-                  <FireChip
-                    label="Condition"
-                    value={conditionLabel(monitor.threshold)}
-                    $tone="success"
-                  />
-                  <FireChip
-                    label="For"
-                    value={forLabel(forDuration)}
-                  />
-                  <FireChip
-                    label="Evaluate"
-                    value={evaluateLabel(monitor.evaluationCron)}
-                  />
-                  <FireChip
-                    label="Severity"
-                    value={severityLabel(monitor.severity)}
-                    $tone={severityTone(monitor.severity)}
-                  />
-                </ChipsSC>
-              </FiresWhenSC>
-              <ChartWrapSC>
-                <MonitorThresholdChart monitor={monitor} />
-              </ChartWrapSC>
-            </SectionSC>
-          </DefinitionCardSC>
-          {workbenchId && (
-            <MonitorRecentJobs
-              workbenchId={workbenchId}
-              monitorId={monitor.id}
-              monitorName={monitor.name}
-            />
-          )}
-        </ColumnsSC>
-      </BodySC>
-    </Flex>
+                    <FireChip
+                      label="For"
+                      value={forLabel(forDuration)}
+                    />
+                    <FireChip
+                      label="Evaluate"
+                      value={evaluateLabel(monitor.evaluationCron)}
+                    />
+                    <FireChip
+                      label="Severity"
+                      value={severityLabel(monitor.severity)}
+                      $tone={severityTone(monitor.severity)}
+                    />
+                  </ChipsSC>
+                </FiresWhenSC>
+                <ChartWrapSC>
+                  <MonitorThresholdChart monitor={monitor} />
+                </ChartWrapSC>
+              </SectionSC>
+            </DefinitionCardSC>
+            {workbenchId && (
+              <MonitorRecentJobs
+                workbenchId={workbenchId}
+                monitorId={monitor.id}
+                monitorName={monitor.name}
+              />
+            )}
+          </ColumnsSC>
+        </BodySC>
+      </MainSC>
+    </DefinitionPanelShell>
   )
 }
 
@@ -523,12 +558,23 @@ function severityTone(
   }
 }
 
+const MainSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+  minWidth: 0,
+  overflow: 'auto',
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+}))
+
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  margin: '-16px -24px 0',
+  margin: `-${theme.spacing.medium}px -${theme.spacing.large}px 0`,
   backgroundColor: theme.colors['fill-one-selected'],
   borderBottom: theme.borders.default,
+  borderTop: theme.borders.default,
   display: 'flex',
   gap: theme.spacing.small,
   height: 40,
@@ -546,9 +592,8 @@ const BodySC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
-  margin: `0 -${theme.spacing.large}px`,
   minHeight: 0,
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  paddingTop: theme.spacing.medium,
 }))
 
 const TitleBlockSC = styled.div(({ theme }) => ({
