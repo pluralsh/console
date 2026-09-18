@@ -90,6 +90,22 @@ COPY repos.yaml /config/repos.yaml
 RUN prebake --config /config/repos.yaml --chown 65532:65532
 ```
 
+Private HTTPS remotes: leave `url:` without userinfo and pass the token at build time. When `GIT_ACCESS_TOKEN` or `GIT_PASSWORD` is set, `prebake` wires `GIT_ASKPASS` (`GIT_USERNAME` defaults to `x-access-token`):
+
+```dockerfile
+FROM ghcr.io/pluralsh/repository-prebake:latest
+COPY repos.yaml /config/repos.yaml
+RUN --mount=type=secret,id=git_token \
+    GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
+    prebake --config /config/repos.yaml --chown 65532:65532
+```
+
+```bash
+docker build --secret id=git_token,env=GIT_ACCESS_TOKEN -t ghcr.io/org/my-repos:local .
+```
+
+Do not put tokens in `repos.yaml` or a Docker `ARG`. `prebake` strips URL userinfo from `origin` and `manifest.json`.
+
 ```yaml
 # repos.yaml
 repositories:
@@ -117,6 +133,8 @@ prebake --config repos.yaml [--dest /data] [--recurse-submodules] [--lfs] [--cho
 | `--lfs` | off | Fetch Git LFS objects |
 | `--chown` | unset | `uid:gid` (or `uid`) applied recursively to `--dest` |
 
+HTTPS auth (env, not flags): `GIT_ACCESS_TOKEN` or `GIT_PASSWORD`, optional `GIT_USERNAME` (default `x-access-token`).
+
 If `/data/<path>` already contains a `.git` directory, `prebake` keeps that checkout instead of cloning. Use that to bake the CI checkout SHA:
 
 ```dockerfile
@@ -128,7 +146,7 @@ RUN git config --global --add safe.directory /data/app \
  && chown -R 65532:65532 /data
 ```
 
-`prebake` strips URL userinfo from `origin` and `manifest.json`. Do not leave tokens in `repos.yaml`. For private remotes, use BuildKit secrets, `GIT_ASKPASS`, or `.netrc`, the same as any other Docker build.
+`prebake` strips URL userinfo from `origin` and `manifest.json`. Do not leave tokens in `repos.yaml`.
 
 ### Build with GitHub Actions
 
@@ -140,6 +158,8 @@ RUN git config --global --add safe.directory /data/app \
     file: Dockerfile
     push: true
     tags: ghcr.io/org/my-repos:sha-${{ github.sha }}
+    secrets: |
+      git_token=${{ secrets.GIT_ACCESS_TOKEN }}
 ```
 
 ## Precompile after prebake

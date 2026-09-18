@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func gitClone(cloneURL, dest, branch string, recurse, lfs bool) error {
+func gitClone(cloneURL, dest, branch string, recurse, lfs bool, auth *gitAuth) error {
 	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func gitClone(cloneURL, dest, branch string, recurse, lfs bool) error {
 		args = append(args, "--branch", branch)
 	}
 	args = append(args, cloneURL, dest)
-	return runGit(nil, args, gitEnv(lfs))
+	return runGit(nil, args, gitEnv(lfs, auth))
 }
 
 func gitSetOrigin(dest, originURL string) error {
@@ -77,11 +77,42 @@ func dirEmpty(path string) (bool, error) {
 	return len(entries) == 0, nil
 }
 
-func gitEnv(lfs bool) []string {
-	if lfs {
-		return nil
+func gitEnv(lfs bool, auth *gitAuth) []string {
+	if auth == nil {
+		if lfs {
+			return nil
+		}
+		return append(os.Environ(), "GIT_LFS_SKIP_SMUDGE=1")
 	}
-	return append(os.Environ(), "GIT_LFS_SKIP_SMUDGE=1")
+
+	env := withoutEnv(os.Environ(), "GIT_ASKPASS", "GIT_TERMINAL_PROMPT", "GIT_ACCESS_TOKEN", "GIT_USERNAME", "GIT_LFS_SKIP_SMUDGE")
+	if !lfs {
+		env = append(env, "GIT_LFS_SKIP_SMUDGE=1")
+	}
+	return append(env,
+		"GIT_ASKPASS="+auth.askpassPath,
+		"GIT_TERMINAL_PROMPT=0",
+		"GIT_ACCESS_TOKEN="+auth.token,
+		"GIT_USERNAME="+auth.username,
+	)
+}
+
+func withoutEnv(env []string, keys ...string) []string {
+	drop := make(map[string]struct{}, len(keys))
+	for _, k := range keys {
+		drop[k] = struct{}{}
+	}
+	out := make([]string, 0, len(env))
+	for _, kv := range env {
+		k, _, ok := strings.Cut(kv, "=")
+		if ok {
+			if _, skip := drop[k]; skip {
+				continue
+			}
+		}
+		out = append(out, kv)
+	}
+	return out
 }
 
 func gitOutput(dir string, args ...string) (string, error) {

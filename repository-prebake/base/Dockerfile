@@ -11,12 +11,15 @@
 #
 # Extra compile/install steps belong after prebake and must write under
 # /data/<path> (_build, node_modules, in-tree Go caches). Anything outside
-# /data is not copied into the pod. Private remotes: BuildKit secrets /
-# GIT_ASKPASS, not tokens in the YAML.
+# /data is not copied into the pod. Private HTTPS remotes: mount a BuildKit
+# secret and set GIT_ACCESS_TOKEN or GIT_PASSWORD (optional GIT_USERNAME,
+# default x-access-token). Do not put tokens in repos.yaml.
 #
 #   FROM ghcr.io/pluralsh/repository-prebake:latest
 #   COPY repos.yaml /config/repos.yaml
-#   RUN prebake --config /config/repos.yaml
+#   RUN --mount=type=secret,id=git_token \
+#       GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
+#       prebake --config /config/repos.yaml --chown 65532:65532
 #   WORKDIR /data/repo
 #   RUN mix deps.get && MIX_ENV=test mix compile   # optional
 #   RUN chown -R 65532:65532 /data

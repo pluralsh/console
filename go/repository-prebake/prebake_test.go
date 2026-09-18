@@ -50,7 +50,7 @@ func TestRunStripsOriginUserinfo(t *testing.T) {
 
 	remote := initTestRepo(t, "source")
 	dest := t.TempDir()
-	if err := gitClone(remote, filepath.Join(dest, "console"), "master", false, false); err != nil {
+	if err := gitClone(remote, filepath.Join(dest, "console"), "master", false, false, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -88,6 +88,39 @@ func TestRunNonRepoDest(t *testing.T) {
 	err := Run(Options{Config: cfgPath, Dest: dest})
 	if err == nil || !strings.Contains(err.Error(), "not a git repository") {
 		t.Fatalf("Run() err = %v, want not a git repository", err)
+	}
+}
+
+func TestRunWithGitPasswordLeavesDestClean(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not installed")
+	}
+
+	t.Setenv("GIT_PASSWORD", "s3cret")
+	t.Setenv("GIT_ACCESS_TOKEN", "")
+	t.Setenv("GIT_USERNAME", "ci-bot")
+
+	remote := initTestRepo(t, "source")
+	dest := t.TempDir()
+	cfgPath := filepath.Join(t.TempDir(), "repos.yaml")
+	yaml := "repositories:\n  - url: " + remote + "\n    path: console\n    branch: master\n"
+	if err := os.WriteFile(cfgPath, []byte(yaml), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Run(Options{Config: cfgPath, Dest: dest}); err != nil {
+		t.Fatalf("Run() = %v", err)
+	}
+	assertManifest(t, dest, remote, "console", "master")
+	if err := filepath.WalkDir(dest, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.Name() == "askpass" {
+			t.Errorf("askpass helper copied into dest: %s", path)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 }
 

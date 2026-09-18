@@ -89,6 +89,25 @@ COPY repos.yaml /config/repos.yaml
 RUN prebake --config /config/repos.yaml --chown 65532:65532
 ```
 
+Private HTTPS remotes: keep `url:` token-free and pass the password at build time.
+`prebake` installs a `GIT_ASKPASS` helper when `GIT_ACCESS_TOKEN` or
+`GIT_PASSWORD` is set (`GIT_USERNAME` defaults to `x-access-token`):
+
+```dockerfile
+FROM ghcr.io/pluralsh/repository-prebake:latest
+COPY repos.yaml /config/repos.yaml
+RUN --mount=type=secret,id=git_token \
+    GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
+    prebake --config /config/repos.yaml --chown 65532:65532
+```
+
+```bash
+docker build --secret id=git_token,env=GIT_ACCESS_TOKEN -t my-repos:local .
+```
+
+Do not put tokens in `repos.yaml` or a Docker `ARG`. `prebake` still strips
+URL userinfo from `origin` and `manifest.json`.
+
 ```yaml
 # repos.yaml
 repositories:
@@ -108,10 +127,6 @@ prebake --config repos.yaml [--dest /data] [--recurse-submodules] [--lfs] [--cho
 `--dest` defaults to `/data`, which the agent-run init container copies into
 the pod. Extra compile steps belong after `prebake` and must write under
 `/data/<path>`.
-
-Private remotes: pass credentials the same way as any Docker build (`RUN
---mount=type=secret`, `GIT_ASKPASS`, `.netrc`). Do not leave tokens in
-`repos.yaml`; `prebake` strips URL userinfo from `origin` and `manifest.json`.
 
 CI publishes `ghcr.io/pluralsh/repository-prebake:sha-<short>` (`:latest` on
 `master`).

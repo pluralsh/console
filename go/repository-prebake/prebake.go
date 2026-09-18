@@ -28,7 +28,8 @@ func Main(args []string) error {
 	fs.Usage = func() {
 		fmt.Fprintf(fs.Output(), "Usage: prebake --config repos.yaml [--dest /data] [options]\n\n")
 		fmt.Fprintf(fs.Output(), "Clone the repositories listed in a YAML config into --dest and write manifest.json.\n")
-		fmt.Fprintf(fs.Output(), "If --dest/<path> already contains a git checkout, it is kept (no clone).\n\n")
+		fmt.Fprintf(fs.Output(), "If --dest/<path> already contains a git checkout, it is kept (no clone).\n")
+		fmt.Fprintf(fs.Output(), "Private HTTPS remotes: set GIT_ACCESS_TOKEN or GIT_PASSWORD (and optional GIT_USERNAME).\n\n")
 		fs.PrintDefaults()
 	}
 	if err := fs.Parse(args); err != nil {
@@ -54,13 +55,19 @@ func Run(opts Options) error {
 		return fmt.Errorf("create dest %q: %w", opts.Dest, err)
 	}
 
+	auth, cleanup, err := prepareGitAuth()
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
 	repos := make([]ManifestRepo, 0, len(cfg.Repositories))
 	for _, repo := range cfg.Repositories {
 		full, err := resolveDest(opts.Dest, repo.Path)
 		if err != nil {
 			return err
 		}
-		branch, err := materializeRepo(full, repo, opts)
+		branch, err := materializeRepo(full, repo, opts, auth)
 		if err != nil {
 			return err
 		}
@@ -84,9 +91,12 @@ func Run(opts Options) error {
 	return chownTree(opts.Dest, uid, gid)
 }
 
-func materializeRepo(dest string, repo Repository, opts Options) (string, error) {
+func materializeRepo(dest string, repo Repository, opts Options, auth *gitAuth) (string, error) {
 	cloneURL := repo.cloneURL
 	if cloneURL == "" {
+		cloneURL = repo.URL
+	}
+	if auth != nil {
 		cloneURL = repo.URL
 	}
 
@@ -107,7 +117,7 @@ func materializeRepo(dest string, repo Repository, opts Options) (string, error)
 			}
 		}
 		fmt.Fprintf(os.Stderr, "cloning %s -> %s\n", repo.URL, dest)
-		if err := gitClone(cloneURL, dest, repo.Branch, opts.RecurseSubmodules, opts.LFS); err != nil {
+		if err := gitClone(cloneURL, dest, repo.Branch, opts.RecurseSubmodules, opts.LFS, auth); err != nil {
 			return "", err
 		}
 	}
