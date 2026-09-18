@@ -71,7 +71,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   input_object :gate_job_attributes do
     field :namespace,       non_null(:string)
     field :raw,             :string, description: "if you'd rather define the job spec via straight k8s yaml"
-    field :containers,      list_of(:container_attributes)
+    field :containers,      list_of(:container_attributes), description: "containers to run in this job; an empty list clears configured containers"
     field :labels,          :json
     field :annotations,     :json
     field :node_selector,   :json

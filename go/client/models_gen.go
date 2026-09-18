@@ -3869,8 +3869,9 @@ type FluxHelmRepository struct {
 type GateJobAttributes struct {
 	Namespace string `json:"namespace"`
 	// if you'd rather define the job spec via straight k8s yaml
-	Raw            *string                    `json:"raw,omitempty"`
-	Containers     []*ContainerAttributes     `json:"containers,omitempty"`
+	Raw *string `json:"raw,omitempty"`
+	// containers to run in this job; an empty list clears configured containers
+	Containers     *[]*ContainerAttributes    `json:"containers,omitempty"`
 	Labels         *string                    `json:"labels,omitempty"`
 	Annotations    *string                    `json:"annotations,omitempty"`
 	NodeSelector   *string                    `json:"nodeSelector,omitempty"`
