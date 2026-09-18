@@ -131,6 +131,16 @@ defmodule Console.AI.Workbench.Tools do
     end)
   end
 
+  @doc "Docker/OCI registry tools (`SearchTags`, `FetchManifest`) for `:docker` workbench tools."
+  @spec docker_tools(Workbench.t | [WorkbenchTool.t] | map) :: [struct]
+  def docker_tools(%Workbench{tools: tools}), do: docker_tools(tools)
+  def docker_tools(tools) do
+    Enum.flat_map(preload(tools), fn
+      %WorkbenchTool{tool: :docker} = tool -> Docker.Tools.expand(tool)
+      _ -> []
+    end)
+  end
+
   @doc "Integration tools (HTTP, Slack, SCM, chat, PagerDuty, Docker, etc.)."
   @spec integration_tools(Workbench.t | [WorkbenchTool.t] | map) :: [struct]
   def integration_tools(%Workbench{tools: tools}), do: integration_tools(tools)

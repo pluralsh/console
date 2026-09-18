@@ -71,6 +71,8 @@ defmodule Console.Schema.McpServer do
     model
     |> cast(attrs, ~w(url name confirm project_id protocol)a)
     |> cast_embed(:authentication, with: &auth_changeset/2)
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:project_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)

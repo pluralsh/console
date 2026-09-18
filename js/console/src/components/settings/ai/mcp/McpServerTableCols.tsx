@@ -12,7 +12,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
 import { McpServerFragment } from 'generated/graphql'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { getAiSettingsMcpServerEditAbsPath } from 'routes/settingsRoutesConst'
 import { McpAuditModal } from './McpAuditTable'
 import { ViewMcpServerDetails } from './McpServerDetails'
@@ -29,11 +29,12 @@ const columnHelper = createColumnHelper<McpServerFragment>()
 export const ColInfo = columnHelper.accessor((server) => server, {
   id: 'name',
   header: '',
-  meta: { gridTemplate: '1fr' },
+  meta: { gridTemplate: 'minmax(0, 1fr)' },
   cell: function Cell({ getValue }) {
     const { name, url } = getValue()
     return (
       <StackedText
+        truncate
         first={name}
         firstPartialType="body2Bold"
         firstColor="text"
@@ -54,6 +55,7 @@ export const ColConfirm = columnHelper.accessor((server) => server.confirm, {
 export const ColActions = columnHelper.accessor((server) => server, {
   id: 'actions',
   header: '',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue, table: { options } }) {
     const { actions, removeServer, loading } =
       (options.meta as {
@@ -63,8 +65,13 @@ export const ColActions = columnHelper.accessor((server) => server, {
       }) ?? {}
     const server = getValue()
     return (
-      <Flex gap="xsmall">
-        {actions?.includes('edit') && <EditAction server={server} />}
+      <Flex
+        gap="xsmall"
+        align="center"
+        justify="flex-end"
+        css={{ flexShrink: 0 }}
+      >
+        <EditAction server={server} />
         {actions?.includes('audit') && (
           <AuditAction
             id={server.id}
@@ -94,15 +101,13 @@ export const ColActions = columnHelper.accessor((server) => server, {
 })
 
 function EditAction({ server }: { server: McpServerFragment }) {
-  const navigate = useNavigate()
   return (
     <IconFrame
       clickable
+      as={Link}
+      to={getAiSettingsMcpServerEditAbsPath({ mcpServerId: server.id })}
       tooltip="Edit MCP server"
       icon={<PencilIcon />}
-      onClick={() =>
-        navigate(getAiSettingsMcpServerEditAbsPath({ mcpServerId: server.id }))
-      }
     />
   )
 }

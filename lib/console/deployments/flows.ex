@@ -246,16 +246,15 @@ defmodule Console.Deployments.Flows do
   @doc """
   Updates an existing MCP server
   """
-  @spec update_mcp_server(binary, McpServer.t | binary, User.t) :: server_resp
+  @spec update_mcp_server(map, McpServer.t | binary, User.t) :: server_resp
   def update_mcp_server(attrs, %McpServer{} = server, %User{} = user) do
-    start_transaction()
-    |> add_operation(:allow, fn _ -> allow(server, user, :write) end)
-    |> add_operation(:update, fn %{allow: server} ->
+    server
+    |> allow(user, :write)
+    |> when_ok(fn server ->
       Repo.preload(server, [:read_bindings, :write_bindings])
       |> McpServer.changeset(attrs)
-      |> Repo.update()
     end)
-    |> execute(extract: :update)
+    |> when_ok(:update)
     |> notify(:update, user)
   end
   def update_mcp_server(attrs, id, %User{} = user) when is_binary(id),

@@ -60,6 +60,29 @@ defmodule Console.AI.Workbench.EnvironmentTest do
                ])
              )
     end
+
+    test "exposes docker/oci tools on both the infrastructure and integration subagents" do
+      workbench = insert(:workbench)
+      docker_tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          tool: :docker,
+          name: "dockerhub",
+          configuration: %{docker: %{url: "registry-1.docker.io"}}
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: docker_tool)
+
+      job =
+        insert(:workbench_job, workbench: workbench)
+        |> Repo.preload(workbench: :tools)
+
+      subagents = Environment.subagents(job) |> MapSet.new()
+      assert MapSet.member?(subagents, :infrastructure)
+      assert MapSet.member?(subagents, :integration)
+      assert Environment.subagent_tool?(docker_tool, :infrastructure)
+      assert Environment.subagent_tool?(docker_tool, :integration)
+    end
   end
 
   describe "actions/1" do

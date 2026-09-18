@@ -137,6 +137,42 @@ defmodule Console.Deployments.FlowsTest do
       assert upd.url == "https://example.com"
     end
 
+    test "nonwriters cannot grant themselves write access while updating an mcp_server" do
+      user = insert(:user)
+      mcp_server = insert(:mcp_server)
+
+      {:error, _} = Flows.upsert_mcp_server(%{
+        name: mcp_server.name,
+        url: "https://example.com",
+        write_bindings: [%{user_id: user.id}]
+      }, user)
+
+      persisted = Flows.get_mcp_server!(mcp_server.id) |> Console.Repo.preload(:write_bindings)
+
+      assert persisted.url == mcp_server.url
+      refute Enum.any?(persisted.write_bindings, & &1.user_id == user.id)
+    end
+
+    test "writers can update mcp_server bindings" do
+      writer = insert(:user)
+      other = insert(:user)
+      mcp_server = insert(:mcp_server, write_bindings: [%{user_id: writer.id}])
+
+      {:ok, updated} = Flows.upsert_mcp_server(%{
+        name: mcp_server.name,
+        url: mcp_server.url,
+        write_bindings: [
+          %{user_id: writer.id},
+          %{user_id: other.id}
+        ]
+      }, writer)
+
+      updated = Console.Repo.preload(updated, :write_bindings)
+
+      assert Enum.any?(updated.write_bindings, & &1.user_id == writer.id)
+      assert Enum.any?(updated.write_bindings, & &1.user_id == other.id)
+    end
+
     test "project writers can upsert a mcp_server" do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])

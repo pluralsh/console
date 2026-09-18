@@ -105,6 +105,7 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
   describe "updateMcpServer" do
     test "admins can update mcp servers by id" do
       mcp_server = insert(:mcp_server, name: "old name")
+      reader = insert(:user)
 
       {:ok, %{data: %{"updateMcpServer" => server}}} = run_query("""
         mutation update($id: ID!, $attrs: McpServerAttributes!) {
@@ -112,16 +113,27 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
             id
             name
             url
+            readBindings {
+              user {
+                id
+              }
+            }
           }
         }
       """, %{
         "id" => mcp_server.id,
-        "attrs" => %{"name" => "new name", "url" => "https://example.com/mcp"}
+        "attrs" => %{
+          "name" => "new name",
+          "url" => "https://example.com/mcp",
+          "readBindings" => [%{"userId" => reader.id}]
+        }
       }, %{current_user: admin_user()})
 
       assert server["id"] == mcp_server.id
       assert server["name"] == "new name"
       assert server["url"] == "https://example.com/mcp"
+      assert [%{"user" => %{"id" => reader_id}}] = server["readBindings"]
+      assert reader_id == reader.id
     end
   end
 

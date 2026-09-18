@@ -113,5 +113,23 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
       assert result[:status] == :successful
       assert result[:result][:output] == "complete"
     end
+
+    test "includes docker/oci registry tools in the infrastructure toolset" do
+      workbench = insert(:workbench, configuration: %{infrastructure: %{services: true}})
+      docker =
+        insert(:workbench_tool,
+          project: workbench.project,
+          tool: :docker,
+          name: "dockerhub",
+          configuration: %{docker: %{url: "registry-1.docker.io"}}
+        )
+      job = insert(:workbench_job, workbench: workbench) |> Repo.preload([:user, :workbench])
+      env = Environment.new(job, [docker], [])
+
+      names = Subagents.Infrastructure.core_tools(job, env) |> Enum.map(&Tool.name/1)
+
+      assert "docker_dockerhub_search_tags" in names
+      assert "docker_dockerhub_fetch_manifest" in names
+    end
   end
 end

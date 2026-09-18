@@ -228,6 +228,24 @@ defmodule Console.AI.Workbench.ToolsTest do
     end
   end
 
+  describe "docker_tools/1" do
+    test "expands docker workbench tools and keeps them in integration_tools" do
+      tool = insert(:workbench_tool,
+        tool: :docker,
+        name: "hub",
+        configuration: %{docker: %{url: "registry-1.docker.io"}}
+      )
+
+      docker_names = Tools.docker_tools([tool]) |> Enum.map(&Console.AI.Tool.name/1)
+      integration_names = Tools.integration_tools([tool]) |> Enum.map(&Console.AI.Tool.name/1)
+
+      assert "docker_hub_search_tags" in docker_names
+      assert "docker_hub_fetch_manifest" in docker_names
+      assert "docker_hub_search_tags" in integration_names
+      assert "docker_hub_fetch_manifest" in integration_names
+    end
+  end
+
   describe "cloud_tools/1" do
     test "expands cloud workbench tools" do
       tool = insert(:workbench_tool,
