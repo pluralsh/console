@@ -1,4 +1,9 @@
 import { Card, EmptyState } from '@pluralsh/design-system'
+import {
+  useWorkbenchMonitoringDashboardQuery,
+  useWorkbenchMonitorQuery,
+} from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import {
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
@@ -11,12 +16,49 @@ import { DashboardDetail } from './WorkbenchDashboardDetail'
 import { MonitorDetail } from './WorkbenchMonitorDetail'
 import { WorkbenchMonitoringBuild } from './WorkbenchMonitoringBuild'
 import { WorkbenchMonitoringSidebar } from './WorkbenchMonitoringSidebar'
+import {
+  WorkbenchMonitoringUpdateButton,
+  WorkbenchMonitoringUpdatePanel,
+} from './WorkbenchMonitoringUpdatePanel'
 
 export function WorkbenchMonitoring() {
   const { workbenchId, isLoading } = useOutletContext<WorkbenchOutletContext>()
   const params = useParams()
   const dashboardId = params[WORKBENCH_MONITORING_DASHBOARD_PARAM_ID]
   const monitorId = params[WORKBENCH_MONITORING_MONITOR_PARAM_ID]
+  const isDashboardCreate = dashboardId === WORKBENCHES_CREATE_REL_PATH
+  const isMonitorCreate = monitorId === WORKBENCHES_CREATE_REL_PATH
+  const [updateOpen, setUpdateOpen] = useState(false)
+
+  const { data: dashboardData } = useWorkbenchMonitoringDashboardQuery({
+    variables: { id: dashboardId ?? '' },
+    skip: !dashboardId || isDashboardCreate,
+  })
+  const { data: monitorData } = useWorkbenchMonitorQuery({
+    variables: { id: monitorId ?? '' },
+    skip: !monitorId || isMonitorCreate,
+  })
+
+  const updateTarget = useMemo(() => {
+    if (dashboardId && !isDashboardCreate) {
+      const name = dashboardData?.workbenchDashboard?.name
+      if (!name) return null
+      return { kind: 'dashboard' as const, id: dashboardId, name }
+    }
+    if (monitorId && !isMonitorCreate) {
+      const name = monitorData?.monitor?.name
+      if (!name) return null
+      return { kind: 'monitor' as const, id: monitorId, name }
+    }
+    return null
+  }, [
+    dashboardData?.workbenchDashboard?.name,
+    dashboardId,
+    isDashboardCreate,
+    isMonitorCreate,
+    monitorData?.monitor?.name,
+    monitorId,
+  ])
 
   // Tab strip height matches the sidebar filter row:
   // 2x16 padding + 32 input + 1 border.
@@ -25,14 +67,24 @@ export function WorkbenchMonitoring() {
       contentBackground="fill-accent"
       tabStripBackground="fill-zero-selected"
       tabStripHeight={65}
+      showEditWorkbenchButton={!updateTarget}
       sidebar={{
         kind: 'custom',
         content: <WorkbenchMonitoringSidebar workbenchId={workbenchId} />,
       }}
+      headerActions={
+        updateTarget ? (
+          <WorkbenchMonitoringUpdateButton
+            kind={updateTarget.kind}
+            name={updateTarget.name}
+            onClick={() => setUpdateOpen(true)}
+          />
+        ) : undefined
+      }
     >
       <DetailSC>
         {dashboardId ? (
-          dashboardId === WORKBENCHES_CREATE_REL_PATH ? (
+          isDashboardCreate ? (
             <PaddedSC>
               <WorkbenchMonitoringBuild
                 workbenchId={workbenchId}
@@ -44,10 +96,11 @@ export function WorkbenchMonitoring() {
             <DashboardDetail
               key={dashboardId}
               dashboardId={dashboardId}
+              onUpdateViaPrompt={() => setUpdateOpen(true)}
             />
           )
         ) : monitorId ? (
-          monitorId === WORKBENCHES_CREATE_REL_PATH ? (
+          isMonitorCreate ? (
             <PaddedSC>
               <WorkbenchMonitoringBuild
                 workbenchId={workbenchId}
@@ -59,6 +112,7 @@ export function WorkbenchMonitoring() {
             <MonitorDetail
               key={monitorId}
               monitorId={monitorId}
+              onUpdateViaPrompt={() => setUpdateOpen(true)}
             />
           )
         ) : (
@@ -69,6 +123,15 @@ export function WorkbenchMonitoring() {
           </PaddedSC>
         )}
       </DetailSC>
+      {updateTarget && (
+        <WorkbenchMonitoringUpdatePanel
+          open={updateOpen}
+          onClose={() => setUpdateOpen(false)}
+          kind={updateTarget.kind}
+          id={updateTarget.id}
+          name={updateTarget.name}
+        />
+      )}
     </WorkbenchPageLayout>
   )
 }

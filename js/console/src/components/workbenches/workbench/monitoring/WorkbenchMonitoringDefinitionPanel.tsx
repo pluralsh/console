@@ -1,4 +1,5 @@
 import {
+  ChatOutlineIcon,
   Code,
   Flex,
   Flyover,
@@ -32,12 +33,14 @@ export function WorkbenchMonitoringDefinitionPanel({
   filename,
   yaml,
   containerRef,
+  onUpdateViaPrompt,
 }: {
   open: boolean
   onClose: () => void
   filename: string
   yaml: string
   containerRef: RefObject<HTMLElement | null>
+  onUpdateViaPrompt?: () => void
 }) {
   const [containerWidth, setContainerWidth] = useState<number | null>(null)
   useResizeObserver(containerRef, (rect) => setContainerWidth(rect.width))
@@ -66,6 +69,7 @@ export function WorkbenchMonitoringDefinitionPanel({
       filename={filename}
       yaml={yaml}
       onClose={onClose}
+      onUpdateViaPrompt={onUpdateViaPrompt}
     />
   )
 
@@ -100,10 +104,12 @@ function DefinitionPanelBody({
   filename,
   yaml,
   onClose,
+  onUpdateViaPrompt,
 }: {
   filename: string
   yaml: string
   onClose: () => void
+  onUpdateViaPrompt?: () => void
 }) {
   return (
     <BodySC>
@@ -129,6 +135,16 @@ function DefinitionPanelBody({
             {filename}
           </CaptionP>
         </Flex>
+        {onUpdateViaPrompt && (
+          <IconFrame
+            clickable
+            size="medium"
+            type="tertiary"
+            icon={<ChatOutlineIcon />}
+            textValue="Update via prompt"
+            onClick={onUpdateViaPrompt}
+          />
+        )}
         <IconFrame
           clickable
           size="medium"

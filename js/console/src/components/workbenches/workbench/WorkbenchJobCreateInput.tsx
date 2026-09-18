@@ -67,6 +67,7 @@ export function WorkbenchJobCreateInput({
   placeholder = 'Send a job to your workbench.  Use / for skills and @ to mention clusters, services, stacks or repositories',
   wrapperStyles,
   bgColor,
+  seedPrompt,
 }: {
   workbenchId: Nullable<string>
   flowId?: Nullable<string>
@@ -78,6 +79,7 @@ export function WorkbenchJobCreateInput({
   placeholder?: string
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
   bgColor?: ComponentProps<typeof ChatInputSimple>['bgColor']
+  seedPrompt?: string
 }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -96,6 +98,12 @@ export function WorkbenchJobCreateInput({
     selectedModelState.workbenchId === workbenchId
       ? selectedModelState.model
       : null
+
+  useEffect(() => {
+    if (seedPrompt == null) return
+    setPrompt(seedPrompt)
+    setPromptSyncKey((key) => key + 1)
+  }, [seedPrompt, setPrompt, setPromptSyncKey])
 
   const { data } = useWorkbenchQuery({
     variables: { id: workbenchId },

@@ -5,6 +5,8 @@ import {
   useClustersTinyQuery,
   useServiceDeploymentsQuery,
   useStacksQuery,
+  useWorkbenchDashboardsQuery,
+  useWorkbenchMonitorsQuery,
   useWorkbenchSkillsQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -14,6 +16,7 @@ import {
   ClusterChipAttrs,
   MentionKind,
   MentionTrigger,
+  MonitoringChipAttrs,
   RepositoryChipAttrs,
   ServiceChipAttrs,
   SkillChipAttrs,
@@ -89,6 +92,28 @@ export function useMentionDataSources({
     loading: stacksLoading,
   } = useStacksQuery({ ...atOptions, skip: !wantsAt || !!flowId })
   const stackData = stkCur || stkPrev
+
+  const {
+    data: dashCur,
+    previousData: dashPrev,
+    loading: dashboardsLoading,
+  } = useWorkbenchDashboardsQuery({
+    variables: { id: workbenchId ?? '', ...baseAtVariables },
+    skip: !wantsAt || !workbenchId,
+    fetchPolicy: 'cache-and-network',
+  })
+  const dashboardData = dashCur || dashPrev
+
+  const {
+    data: monCur,
+    previousData: monPrev,
+    loading: monitorsLoading,
+  } = useWorkbenchMonitorsQuery({
+    variables: { id: workbenchId ?? '', ...baseAtVariables },
+    skip: !wantsAt || !workbenchId,
+    fetchPolicy: 'cache-and-network',
+  })
+  const monitorData = monCur || monPrev
 
   const {
     data: sklData,
@@ -168,16 +193,47 @@ export function useMentionDataSources({
     [stackData]
   )
 
+  const monitoring = useMemo<MonitoringChipAttrs[]>(() => {
+    if (!workbenchId) return []
+    const dashboards = mapExistingNodes(
+      dashboardData?.workbench?.workbenchDashboards
+    )
+      .filter((n) => !!n.id)
+      .map(
+        (n): MonitoringChipAttrs => ({
+          kind: MentionKind.Monitoring,
+          'item-id': n.id,
+          'item-name': n.name,
+          'resource-type': 'dashboard',
+          'workbench-id': workbenchId,
+        })
+      )
+    const monitors = mapExistingNodes(monitorData?.workbench?.monitors)
+      .filter((n) => !!n.id)
+      .map(
+        (n): MonitoringChipAttrs => ({
+          kind: MentionKind.Monitoring,
+          'item-id': n.id,
+          'item-name': n.name,
+          'resource-type': 'monitor',
+          'workbench-id': workbenchId,
+        })
+      )
+    return [...dashboards, ...monitors].slice(0, MAX_PER_KIND)
+  }, [dashboardData, monitorData, workbenchId])
+
   const skills = useMemo<SkillChipAttrs[]>(() => {
     const all = (skillData?.workbench?.allSkills ?? [])
       .flatMap((n) => (n ? [n] : []))
-      .map((n): SkillChipAttrs => ({
-        kind: MentionKind.Skill,
-        'item-id': n.id ?? `skill:${n.name ?? ''}`,
-        'item-name': n.name ?? '',
-        description: n.description ?? undefined,
-        subagents: n.subagents?.flatMap((s) => (s ? [s] : [])).join(','),
-      }))
+      .map(
+        (n): SkillChipAttrs => ({
+          kind: MentionKind.Skill,
+          'item-id': n.id ?? `skill:${n.name ?? ''}`,
+          'item-name': n.name ?? '',
+          description: n.description ?? undefined,
+          subagents: n.subagents?.flatMap((s) => (s ? [s] : [])).join(','),
+        })
+      )
 
     if (!throttled) return all.slice(0, MAX_PER_KIND)
     return new Fuse(all, skillFuseOptions)
@@ -215,7 +271,7 @@ export function useMentionDataSources({
     if (wantsAt)
       return flowId
         ? [...services, ...repositories]
-        : [...clusters, ...services, ...stacks, ...repositories]
+        : [...clusters, ...services, ...stacks, ...monitoring, ...repositories]
     if (wantsSlash) return skills
     return []
   }, [
@@ -225,6 +281,7 @@ export function useMentionDataSources({
     clusters,
     services,
     stacks,
+    monitoring,
     repositories,
     skills,
   ])
@@ -237,10 +294,13 @@ export function useMentionDataSources({
       : isEmpty(clusters) &&
         isEmpty(services) &&
         isEmpty(stacks) &&
+        isEmpty(monitoring) &&
         isEmpty(repositories) &&
         (clustersLoading ||
           servicesLoading ||
           stacksLoading ||
+          dashboardsLoading ||
+          monitorsLoading ||
           repositoriesLoading)
     : wantsSlash
       ? isEmpty(skills) && skillsLoading

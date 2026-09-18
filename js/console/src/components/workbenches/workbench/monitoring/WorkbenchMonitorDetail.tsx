@@ -65,7 +65,13 @@ import parseDuration from 'parse-duration-ms'
 const CHART_HEIGHT_PX = 280
 const RECENT_JOBS_COUNT = 6
 
-export function MonitorDetail({ monitorId }: { monitorId: string }) {
+export function MonitorDetail({
+  monitorId,
+  onUpdateViaPrompt,
+}: {
+  monitorId: string
+  onUpdateViaPrompt?: () => void
+}) {
   const { data, loading, error } = useWorkbenchMonitorQuery({
     variables: { id: monitorId },
     fetchPolicy: 'cache-and-network',
@@ -81,13 +87,20 @@ export function MonitorDetail({ monitorId }: { monitorId: string }) {
       </MainSC>
     )
 
-  return <MonitorDetailView monitor={monitor} />
+  return (
+    <MonitorDetailView
+      monitor={monitor}
+      onUpdateViaPrompt={onUpdateViaPrompt}
+    />
+  )
 }
 
 function MonitorDetailView({
   monitor,
+  onUpdateViaPrompt,
 }: {
   monitor: WorkbenchMonitorDetailsFragment
+  onUpdateViaPrompt?: () => void
 }) {
   const workbenchId = monitor.workbench?.id
   const queryText =
@@ -145,6 +158,7 @@ function MonitorDetailView({
           filename={definitionFilename}
           yaml={definitionYaml}
           containerRef={containerRef}
+          onUpdateViaPrompt={onUpdateViaPrompt}
         />
       }
     >
