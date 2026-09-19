@@ -4133,6 +4133,17 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.8-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.1.6-eksbuild.1
     compatibilities:
     - '1.36'
@@ -5839,6 +5850,10 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.14.3-eksbuild.23
+    compatibilities:
+    - '1.36'
+    - '1.35'
   - version: v1.14.3-eksbuild.22
     compatibilities:
     - '1.36'
@@ -5867,6 +5882,12 @@
     compatibilities:
     - '1.36'
     - '1.35'
+  - version: v1.13.2-eksbuild.31
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.13.2-eksbuild.30
     compatibilities:
     - '1.36'
@@ -5930,6 +5951,11 @@
   - version: v1.13.1-eksbuild.1
     compatibilities:
     - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v1.12.4-eksbuild.38
+    compatibilities:
     - '1.35'
     - '1.34'
     - '1.33'
@@ -6008,6 +6034,14 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.11.4-eksbuild.60
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.4-eksbuild.59
     compatibilities:
     - '1.34'
@@ -7838,6 +7872,15 @@
   publisher: Elastic
 - name: external-dns
   versions:
+  - version: v0.21.0-eksbuild.10
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v0.21.0-eksbuild.9
     compatibilities:
     - '1.36'
@@ -8070,6 +8113,15 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v5.1.2-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v5.1.1-eksbuild.1
     compatibilities:
     - '1.36'
@@ -12425,6 +12477,15 @@
   publisher: Splunk
 - name: sriov-network-metrics-exporter
   versions:
+  - version: v1.2.0-eksbuild.12
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.0-eksbuild.11
     compatibilities:
     - '1.36'
