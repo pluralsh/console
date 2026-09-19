@@ -44,6 +44,7 @@ names:
 - gpu-operator
 - harbor
 - elastic-agent
+- envoy-gateway
 - rabbitmq-cluster-operator
 - kserve
 - kubescape-operator
