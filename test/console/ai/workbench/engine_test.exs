@@ -295,7 +295,12 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect(Provider, :completion, fn _, opts ->
+        assert opts[:preface] =~ "Evaluation summary from feedback"
+        assert opts[:preface] =~ "Prompt feedback"
+        assert opts[:preface] =~ "Conclusion feedback"
+        assert opts[:preface] =~ "Logic feedback"
+
         {:ok, "make notes", [
           %Tool{
             id: "2",
@@ -333,6 +338,19 @@ defmodule Console.AI.Workbench.EngineTest do
 
       workbench = insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
       referenced_job = insert(:workbench_job, workbench: workbench)
+      eval = insert(:workbench_eval, workbench: workbench)
+
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: referenced_job,
+        feedback: %{
+          summary: "Evaluation summary from feedback",
+          prompt: "Prompt feedback",
+          result: "Conclusion feedback",
+          logic: "Logic feedback"
+        }
+      )
+
       job = insert(:workbench_job, workbench: workbench, type: :skill, referenced_job: referenced_job)
 
       {:ok, engine} = Engine.new(job)

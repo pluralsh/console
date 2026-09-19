@@ -99,7 +99,7 @@ export function McpServerCreateForm({
   const [name, setName] = useState(existingServer?.name ?? '')
   const [url, setUrl] = useState(existingServer?.url ?? '')
   const [protocol, setProtocol] = useState<McpServerProtocol>(
-    existingServer?.protocol ?? McpServerProtocol.Sse
+    existingServer?.protocol ?? McpServerProtocol.StreamableHttp
   )
   const [headers, setHeaders] = useState<HeaderField[]>(() =>
     headersFromServer(existingServer)
@@ -218,23 +218,25 @@ export function McpServerCreateForm({
           </FormField>
           <FormField
             label="Protocol"
-            hint="Transport protocol used by the MCP server."
+            hint="Streamable HTTP is recommended. SSE is deprecated and should only be used when necessary."
           >
             <Select
               selectedKey={protocol}
               onSelectionChange={(key) =>
-                setProtocol((key as McpServerProtocol) ?? McpServerProtocol.Sse)
+                setProtocol(
+                  (key as McpServerProtocol) ?? McpServerProtocol.StreamableHttp
+                )
               }
               selectionMode="single"
               label="Protocol"
             >
               <ListBoxItem
-                key={McpServerProtocol.Sse}
-                label="SSE"
-              />
-              <ListBoxItem
                 key={McpServerProtocol.StreamableHttp}
                 label="Streamable HTTP"
+              />
+              <ListBoxItem
+                key={McpServerProtocol.Sse}
+                label="SSE (deprecated)"
               />
             </Select>
           </FormField>
