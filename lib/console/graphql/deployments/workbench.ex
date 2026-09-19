@@ -1176,6 +1176,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,     :workbench, description: "the workbench this usage data is associated with"
     field :input_tokens,  :integer, description: "number of input tokens consumed during this interval"
     field :output_tokens, :integer, description: "number of output tokens produced during this interval"
+    field :total_tokens,  :integer, description: "total tokens consumed during this interval"
     field :total_cost,    :float, description: "total cost for this interval, in USD"
   end
 

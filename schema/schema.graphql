@@ -5088,6 +5088,9 @@ type WorkbenchUsageTimeseries {
   "number of output tokens produced during this interval"
   outputTokens: Int
 
+  "total tokens consumed during this interval"
+  totalTokens: Int
+
   "total cost for this interval, in USD"
   totalCost: Float
 }

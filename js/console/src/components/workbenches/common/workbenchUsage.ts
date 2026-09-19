@@ -37,9 +37,9 @@ export function promptTokenCount(usage?: Nullable<TokenUsageCounts>) {
 
 export function billedTokenCount(usage?: Nullable<TokenUsageCounts>) {
   const reported = asCount(usage?.totalTokens)
-  if (reported > 0) return reported
+  const reconstructed = promptTokenCount(usage) + asCount(usage?.outputTokens)
 
-  return Math.max(asCount(usage?.inputTokens) + asCount(usage?.outputTokens), 1)
+  return Math.max(reported, reconstructed)
 }
 
 export function cachedShareOfPrompt(usage?: Nullable<TokenUsageCounts>) {

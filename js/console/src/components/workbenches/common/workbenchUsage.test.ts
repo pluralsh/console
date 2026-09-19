@@ -68,6 +68,11 @@ describe('workbench usage formatting', () => {
 })
 
 describe('workbench token usage shares', () => {
+  it('returns zero when no token usage was reported', () => {
+    expect(billedTokenCount()).toBe(0)
+    expect(billedTokenCount({ totalTokens: 0 })).toBe(0)
+  })
+
   it('treats OpenAI-style cache reads as a subset of input tokens', () => {
     const usage = {
       inputTokens: 1_000,
@@ -96,8 +101,9 @@ describe('workbench token usage shares', () => {
     expect(cachedShareOfPrompt(usage)).toBeCloseTo(667_000 / 667_824)
     expect(cachedPromptPercentageLabel(usage)).toBe('100% of input')
     expect(cachedShareOfPrompt(usage)).toBeLessThanOrEqual(1)
-    expect(inputShareOfTotal(usage)).toBeCloseTo(824 / 57_140)
-    expect(outputShareOfTotal(usage)).toBeCloseTo(19_000 / 57_140)
+    expect(billedTokenCount(usage)).toBe(686_824)
+    expect(inputShareOfTotal(usage)).toBeCloseTo(824 / 686_824)
+    expect(outputShareOfTotal(usage)).toBeCloseTo(19_000 / 686_824)
   })
 
   it('measures reasoning against output rather than job total', () => {
@@ -111,7 +117,7 @@ describe('workbench token usage shares', () => {
     expect(reasoningShareOfOutput(usage)).toBeCloseTo(0.25)
   })
 
-  it('does not fold nested cache or reasoning counts into a fallback total', () => {
+  it('adds cache tokens reported separately from input to a fallback total', () => {
     expect(
       billedTokenCount({
         inputTokens: 50,
@@ -119,7 +125,7 @@ describe('workbench token usage shares', () => {
         cachedTokens: 10_000,
         reasoningTokens: 4,
       })
-    ).toBe(60)
+    ).toBe(10_060)
   })
 
   it('omits a cache percentage when no tokens were cached', () => {

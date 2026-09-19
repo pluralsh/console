@@ -168,6 +168,7 @@ defmodule Console.Schema.WorkbenchJob do
         timestamp: r.timestamp,
         input_tokens: r.input_tokens,
         output_tokens: r.output_tokens,
+        total_tokens: r.total_tokens,
         total_cost: r.total_cost
       },
       order_by: [asc: r.timestamp]
@@ -188,6 +189,28 @@ defmodule Console.Schema.WorkbenchJob do
         timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, j.inserted_at),
         input_tokens: fragment("sum(coalesce((?->>'input_tokens')::integer, 0))", j.usage),
         output_tokens: fragment("sum(coalesce((?->>'output_tokens')::integer, 0))", j.usage),
+        total_tokens:
+          fragment(
+            """
+            sum(greatest(
+              coalesce((?->>'total_tokens')::integer, 0),
+              coalesce((?->>'input_tokens')::integer, 0) +
+              coalesce((?->>'output_tokens')::integer, 0) +
+              case
+                when coalesce((?->>'cached_tokens')::integer, 0) >
+                     coalesce((?->>'input_tokens')::integer, 0)
+                then coalesce((?->>'cached_tokens')::integer, 0)
+                else 0
+              end
+            ))
+            """,
+            j.usage,
+            j.usage,
+            j.usage,
+            j.usage,
+            j.usage,
+            j.usage
+          ),
         total_cost: fragment("sum(coalesce((?->>'total_cost')::double precision, 0.0))", j.usage)
       },
       order_by: [asc: 2]

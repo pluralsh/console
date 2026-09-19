@@ -2217,7 +2217,13 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       insert(:workbench_job,
         workbench: workbench,
-        usage: %{input_tokens: 10, output_tokens: 5, total_cost: 0.25},
+        usage: %{
+          input_tokens: 10,
+          output_tokens: 5,
+          total_tokens: 15,
+          cached_tokens: 50,
+          total_cost: 0.25
+        },
         inserted_at: timestamp,
         updated_at: timestamp
       )
@@ -2242,6 +2248,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             timestamp
             inputTokens
             outputTokens
+            totalTokens
             totalCost
             workbench { id }
           }
@@ -2251,6 +2258,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert row["workbench"]["id"] == workbench.id
       assert row["inputTokens"] == 12
       assert row["outputTokens"] == 5
+      assert row["totalTokens"] == 67
       assert row["totalCost"] == 0.25
       assert row["timestamp"]
     end
