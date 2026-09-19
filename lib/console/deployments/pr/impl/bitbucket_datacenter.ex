@@ -8,13 +8,13 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   @behaviour Console.Deployments.Pr.Dispatcher
 
   defmodule Connection do
-    defstruct [:host, :password, :username]
+    defstruct [:host, :token, :username]
 
-    def new(host, username, password), do: %__MODULE__{host: host, username: username, password: password}
+    def new(host, username, token), do: %__MODULE__{host: host, username: username, token: token}
 
-    def headers(%__MODULE__{username: username, password: password}) do
+    def headers(%__MODULE__{token: token}) do
       [
-        {"Authorization", "Basic #{Base.encode64("#{username}:#{password}")}"},
+        {"Authorization", "Bearer #{token}"},
         {"Content-Type", "application/json"},
         {"Accept", "application/json;charset=UTF-8"}
       ]

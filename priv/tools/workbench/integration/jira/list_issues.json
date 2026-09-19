@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "jql": {
+      "type": "string",
+      "description": "Jira Query Language expression used to select and order issues."
+    },
+    "fields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Issue fields to return. Omit for Jira's default field set."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque nextCursor from a previous response."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 50,
+      "description": "Maximum issues to return."
+    }
+  },
+  "required": ["jql"]
+}

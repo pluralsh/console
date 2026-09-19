@@ -33,11 +33,10 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools = tools(job, environment, FileCache.new())
-    objective = WorkbenchJob.objective(job)
 
     MemoryEngine.new(tools, 50,
       engine_opts(environment) ++ [
-        system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment), engine: &1)),
+        system_prompt: &String.trim(system_prompt(cloud_tools: has_cloud_tools?(environment), docker_tools: has_docker_tools?(environment), engine: &1)),
         acc: %{},
         continue_msg: cont_msg(),
         tool_search: length(tools) > 10,
@@ -81,11 +80,14 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat(pod_logs_tools(bench, user))
     |> Enum.concat(Tools.cloud_tools(environment.tools))
+    |> Enum.concat(Tools.docker_tools(environment.tools))
     |> build_codemode(policies)
   end
 
   defp has_cloud_tools?(%Environment{tools: tools}), do: Tools.cloud_tools(tools) != []
   defp has_cloud_tools?(tools), do: Tools.cloud_tools(tools) != []
+
+  defp has_docker_tools?(%Environment{tools: tools}), do: Tools.docker_tools(tools) != []
 
   defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, %WorkbenchJob{} = job, user) do
     if_vector_store_enabled(ServiceComponent) ++ [

@@ -156,4 +156,4 @@ const WrapperSC = styled.div(({ theme }) => ({
 }))
 
 const cols = [ColInfo, ColConfirm, ColActions]
-const actions: McpTableAction[] = ['audit', 'permissions', 'view']
+const actions: McpTableAction[] = ['audit', 'permissions']

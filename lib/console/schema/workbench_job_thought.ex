@@ -8,6 +8,12 @@ defmodule Console.Schema.WorkbenchJobThought do
     field :tool_name,  :string
     field :tool_args,  :map
 
+    embeds_one :tool_call, ToolCall, on_replace: :update do
+      field :call_id,   :string
+      field :name,      :string
+      field :arguments, :map
+    end
+
     embeds_one :attributes, Attributes, on_replace: :update do
       embeds_many :metrics, Metric, on_replace: :delete
       embeds_many :logs, Log, on_replace: :delete
@@ -35,6 +41,7 @@ defmodule Console.Schema.WorkbenchJobThought do
     |> cast(attrs, @valid)
     |> sanitize_text([:content, :tool_name, :tool_args])
     |> cast_embed(:attributes, with: &attributes_changeset/2)
+    |> cast_embed(:tool_call, with: &WorkbenchJobActivity.tool_call_changeset/2)
     |> foreign_key_constraint(:activity_id)
     |> foreign_key_constraint(:tool_id)
     |> validate_required([:activity_id])

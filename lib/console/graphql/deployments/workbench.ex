@@ -250,6 +250,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :pagerduty,            :workbench_tool_pagerduty_connection_attributes, description: "pagerduty connection (integration)"
     field :teams,                :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
     field :atlassian,            :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
+    field :jira,                 :workbench_tool_jira_connection_attributes, description: "jira cloud connection (ticketing)"
+    field :jira_datacenter,      :workbench_tool_jira_datacenter_connection_attributes, description: "jira data center connection (ticketing)"
     field :exa,                  :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,               :workbench_tool_github_connection_attributes, description: "github connection (integration)"
     field :gitlab,               :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
@@ -390,6 +392,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :service_account, :string, description: "encrypted service account JSON (alternative to api_token + email)"
     field :api_token,       :string, description: "atlassian API token (required if not using service_account)"
     field :email,           :string, description: "atlassian account email (required if not using service_account)"
+  end
+
+  input_object :workbench_tool_jira_connection_attributes do
+    field :url,       non_null(:string), description: "jira cloud site URL (for example, https://example.atlassian.net)"
+    field :api_token, non_null(:string), description: "atlassian API token"
+    field :email,     non_null(:string), description: "atlassian account email"
+  end
+
+  input_object :workbench_tool_jira_datacenter_connection_attributes do
+    field :url,       non_null(:string), description: "jira data center base URL"
+    field :api_token, non_null(:string), description: "jira data center personal access token"
   end
 
   input_object :workbench_tool_exa_connection_attributes do
@@ -1163,6 +1176,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,     :workbench, description: "the workbench this usage data is associated with"
     field :input_tokens,  :integer, description: "number of input tokens consumed during this interval"
     field :output_tokens, :integer, description: "number of output tokens produced during this interval"
+    field :total_tokens,  :integer, description: "total tokens consumed during this interval"
     field :total_cost,    :float, description: "total cost for this interval, in USD"
   end
 
@@ -1255,6 +1269,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :pagerduty, :workbench_tool_pagerduty_connection, description: "pagerduty connection (no secrets)"
     field :teams,     :workbench_tool_teams_connection, description: "microsoft teams / graph connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
+    field :jira,      :workbench_tool_jira_connection, description: "jira cloud connection (no secrets)"
+    field :jira_datacenter, :workbench_tool_jira_datacenter_connection,
+      description: "jira data center connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
     field :gitlab,    :workbench_tool_gitlab_connection, description: "gitlab connection (no secrets)"
@@ -1378,6 +1395,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.atlassian.com/v1/mcp"} end,
       description: "static MCP URL for Atlassian/Jira (credentials never exposed)"
     field :email, :string, description: "atlassian account email for use with PAT authentication"
+  end
+
+  object :workbench_tool_jira_connection do
+    field :url,   non_null(:string), description: "jira cloud site URL"
+    field :email, non_null(:string), description: "atlassian account email (API token never exposed)"
+  end
+
+  object :workbench_tool_jira_datacenter_connection do
+    field :url, non_null(:string), description: "jira data center base URL (PAT never exposed)"
   end
 
   object :workbench_tool_exa_connection do
