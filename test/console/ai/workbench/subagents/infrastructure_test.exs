@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.AI.Workbench.{Subagents, Environment}
-  alias Console.AI.{Provider, Tool, VectorStore}
+  alias Console.AI.{Tool, VectorStore}
   import ElasticsearchUtils
 
   setup :set_mimic_global
@@ -23,7 +23,7 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
         }
       )
 
-      expect(Provider, :completion, fn _, opts ->
+      expect_reqllm_completion(fn _, opts ->
         %{enabled: %{tool_names: tool_names}} =
           Keyword.fetch!(opts, :plural)
           |> Enum.find(&match?(%Console.AI.Tools.ToolSearch{}, &1))
@@ -35,7 +35,7 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
           %Tool{name: "enable_tools", arguments: %{"tools" => ["__plrl__service_search"]}, id: "0"}
         ]}
       end)
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "try infrastructure", [
           %Tool{name: "__plrl__service_search", arguments: %{"query" => "error"}, id: "1"}
         ]}
@@ -55,12 +55,12 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
           }
         ]}
       end)
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{name: "enable_tools", arguments: %{"tools" => ["subagent_result"]}, id: "2"}
         ]}
       end)
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}
         ]}
@@ -89,7 +89,7 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
         }
       )
 
-      expect(Provider, :completion, fn _, opts ->
+      expect_reqllm_completion(fn _, opts ->
         %{enabled: %{tool_names: tool_names}} =
           Keyword.fetch!(opts, :plural)
           |> Enum.find(&match?(%Console.AI.Tools.ToolSearch{}, &1))

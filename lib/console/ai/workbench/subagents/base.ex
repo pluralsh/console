@@ -81,7 +81,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
     %WorkbenchJobActivity{id: activity_id} = activity,
     %Environment{} = environment,
     content,
-    %{name: name, arguments: args, attributes: %{} = attributes}
+    %{name: name, arguments: args, attributes: %{} = attributes} = tool_call
   ) when is_binary(content) and is_binary(activity_id) do
     %WorkbenchJobThought{activity_id: activity_id, activity: activity}
     |> WorkbenchJobThought.changeset(%{
@@ -89,6 +89,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
       attributes: attributes,
       tool_name: name,
       tool_args: if(is_map(args), do: args),
+      tool_call: Map.take(tool_call, [:call_id, :name, :arguments]),
       tool_id: thought_tool_id(environment, name)
     })
     |> Repo.insert()

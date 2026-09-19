@@ -35,7 +35,7 @@ defmodule Console.AI.Bedrock do
   @doc """
   Generate a openai completion
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = bedrock, messages, opts) do
     model = select_model(bedrock, opts[:model], opts[:client])
 
@@ -46,7 +46,6 @@ defmodule Console.AI.Bedrock do
       bedrock.stream,
       request_opts(bedrock, model, Keyword.put(provider_options(bedrock), :tools, tools(opts)), opts)
     )
-    |> reqllm_result()
   end
 
   @doc """

@@ -140,8 +140,9 @@ defmodule Console.AI.Provider.BedrockTest do
          }}
       end)
 
-      assert {:ok, "hello through profile"} =
+      assert {:ok, %Response{} = response} =
                Bedrock.completion(bedrock, [{:user, "hi"}], [])
+      assert Response.text(response) == "hello through profile"
     end
 
     test "calls and SigV4-signs the configured Bedrock Mantle endpoint" do
@@ -181,8 +182,9 @@ defmodule Console.AI.Provider.BedrockTest do
          }}
       end)
 
-      assert {:ok, "hello from mantle"} =
+      assert {:ok, %Response{} = response} =
                Bedrock.completion(bedrock, [{:user, "hi"}], [])
+      assert Response.text(response) == "hello from mantle"
     end
 
     test "sets GPT-5.6 reasoning to low without lowering its output token limit" do
@@ -224,8 +226,9 @@ defmodule Console.AI.Provider.BedrockTest do
          }}
       end)
 
-      assert {:ok, "hello with low reasoning"} =
+      assert {:ok, %Response{} = response} =
                Bedrock.completion(bedrock, [{:user, "hi"}], [])
+      assert Response.text(response) == "hello with low reasoning"
     end
 
     test "calls the configured inference profile id in the Bedrock runtime REST URL" do
@@ -262,8 +265,9 @@ defmodule Console.AI.Provider.BedrockTest do
          }}
       end)
 
-      assert {:ok, "hello"} =
+      assert {:ok, %Response{} = response} =
                Bedrock.completion(bedrock, [{:user, "hi"}], [])
+      assert Response.text(response) == "hello"
     end
   end
 end

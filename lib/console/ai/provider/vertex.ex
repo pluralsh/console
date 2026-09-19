@@ -32,13 +32,12 @@ defmodule Console.AI.Vertex do
   @doc """
   Generate a openai completion
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = vtx, messages, opts) do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
       |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client]))}", vtx.stream, base_opts(Keyword.put(provider_options, :tools, tools(opts)), opts))
-      |> reqllm_result()
     end
   end
 
