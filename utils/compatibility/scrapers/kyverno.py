@@ -8,64 +8,79 @@ from bs4 import BeautifulSoup
 from utils import (
     expand_kube_versions,
     fetch_page,
-    print_error,
-    read_yaml,
-    update_chart_versions,
-    update_compatibility_info,
     get_chart_versions,
+    print_error,
+    update_compatibility_info,
 )
 
 app_name = "kyverno"
-compatibility_url = "https://kyverno.io/docs/installation/"
+compatibility_url = "https://kyverno.io/docs/installation/releases/"
 
 
 def _find_compat_table(soup: BeautifulSoup):
-    # Look for the Compatibility Matrix section and grab the following table
-    h2 = soup.find("h2", id="compatibility-matrix")
-    if not h2:
-        # Fallback: search by heading text in case id changes
-        for candidate in soup.find_all("h2"):
-            if candidate.get_text(strip=True).lower() == "compatibility matrix":
-                h2 = candidate
-                break
-    if not h2:
-        return None
-    return h2.find_next("table")
+    """Find the release support table by its row labels.
+
+    Kyverno's releases page currently publishes compatibility as a two-column
+    key/value table instead of the older three-column compatibility matrix.
+    """
+    for table in soup.find_all("table"):
+        labels = {
+            cells[0].get_text(" ", strip=True).rstrip(":").lower()
+            for row in table.find_all("tr")
+            if len(cells := row.find_all(["td", "th"])) >= 2
+        }
+        if {
+            "supported release",
+            "kubernetes versions supported",
+        }.issubset(labels):
+            return table
+    return None
 
 
 def _normalize_version(ver: str) -> Optional[str]:
-    # Accept formats like "1.13.x", "v1.13.x", or "1.13"
-    m = re.search(r"v?(\d+)\.(\d+)", ver.strip())
-    if not m:
+    # Accept formats like "1.19.x", "v1.19", or "v1.19 (released: Aug 2026)".
+    match = re.search(r"v?(\d+)\.(\d+)", ver.strip())
+    if not match:
         return None
-    major, minor = m.groups()
+    major, minor = match.groups()
     return f"{major}.{minor}.0"
 
 
+def _parse_kube_range(value: str) -> list[str]:
+    match = re.search(
+        r"v?(\d+\.\d+)\s*(?:-|–|—|to)\s*v?(\d+\.\d+)",
+        value,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return []
+
+    start, end = match.groups()
+    try:
+        return expand_kube_versions(start, end)
+    except (ValueError, AttributeError):
+        return []
+
+
 def _parse_rows(table) -> list[OrderedDict[str, object]]:
-    rows: list[OrderedDict[str, object]] = []
-    tbody = table.find("tbody") or table
+    values: dict[str, str] = {}
+    for row in table.find_all("tr"):
+        cells = row.find_all(["td", "th"])
+        if len(cells) < 2:
+            continue
+        key = cells[0].get_text(" ", strip=True).rstrip(":").lower()
+        values[key] = cells[1].get_text(" ", strip=True)
+
+    kyverno_version = _normalize_version(values.get("supported release", ""))
+    kube_versions = _parse_kube_range(
+        values.get("kubernetes versions supported", "")
+    )
+    if not kyverno_version or not kube_versions:
+        return []
+
     chart_versions = get_chart_versions(app_name)
-    for tr in tbody.find_all("tr"):
-        cols = [c.get_text(strip=True) for c in tr.find_all(["td", "th"])]
-        if len(cols) < 3:
-            continue
-        kyverno_ver_raw, kube_min_raw, kube_max_raw = cols[:3]
-
-        kyverno_version = _normalize_version(kyverno_ver_raw)
-        if not kyverno_version:
-            continue
-
-        kube_min = kube_min_raw.lstrip("v").strip()
-        kube_max = kube_max_raw.lstrip("v").strip()
-        if not kube_min or not kube_max:
-            continue
-
-        kube_versions = expand_kube_versions(kube_min, kube_max)
-        if not kube_versions:
-            continue
-
-        version_info = OrderedDict(
+    return [
+        OrderedDict(
             [
                 ("version", kyverno_version),
                 ("kube", kube_versions),
@@ -74,9 +89,7 @@ def _parse_rows(table) -> list[OrderedDict[str, object]]:
                 ("chart_version", chart_versions.get(kyverno_version)),
             ]
         )
-        rows.append(version_info)
-
-    return rows
+    ]
 
 
 def scrape() -> None:
@@ -87,7 +100,7 @@ def scrape() -> None:
     soup = BeautifulSoup(page_content, "html.parser")
     table = _find_compat_table(soup)
     if not table:
-        print_error("Kyverno compatibility matrix table not found")
+        print_error("Kyverno release compatibility table not found")
         return
 
     rows = _parse_rows(table)
