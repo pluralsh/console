@@ -7,12 +7,12 @@ defmodule Console.AI.Workbench.Subagents.Integration do
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{}, %Environment{} = environment) do
     tools = tools(environment)
 
     MemoryEngine.new(tools, 20,
       engine_opts(environment) ++ [
-        system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
+        system_prompt: &String.trim(system_prompt(engine: &1)),
         acc: %{},
         tool_search: length(tools) > 10,
         pre_enable: [Result | skill_knowledge_pre_enable()],

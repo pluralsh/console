@@ -83,6 +83,5 @@ Do not expect to do investigation that would be better suited for another subage
 The final result should summarize the full result of what's made so future reanalysis is not necessary.  You should make it clear to any coding agent it should send that back as part of its analysis,
 and summarize any results provided effectively once completed.
 
-The overarching task is as follows:
-
-<%= @prompt %>
+The `workbench_context` tool is useful when the current objective, an authoritative time anchor, or
+the workbench run URL would help accomplish the delegated task.

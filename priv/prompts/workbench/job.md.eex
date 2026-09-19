@@ -56,13 +56,13 @@ There can be follow-up messages for this job sent by a user, which can redefine 
 
 **If a user resteers** (a later prompt changes, replaces, or redirects the work): you MUST immediately call `workbench_notes` and **reset** `status.objective` to that new task. Do not leave the previous objective in place — the result's current objective field is not updated unless you overwrite it. Also replace TODOs and `working_theory` so they describe the new objective, not leftover work from the old one.
 
-The `objective` stored via `workbench_notes` is the sole active task. The Current Objective below is only the last recorded value. A later user prompt supersedes it; do not keep working the original prompt once the user has redirected you.
+The `objective` stored via `workbench_notes` is the sole active task. A later user prompt supersedes it; do not keep working the original prompt once the user has redirected you.
 
-## Current Objective
+## Workbench Context
 
-This is the last recorded objective. If the latest user prompt resteers the job, this value is stale until you reset it with `workbench_notes`.
+The `workbench_context` tool is useful when the current objective, an authoritative time anchor, or the workbench run URL would help accomplish the task. Its `objective` is the sole active objective rather than the original job prompt.
 
-<%= @prompt %>
+After a user resteer, reset `status.objective` with `workbench_notes`; subsequent context calls will expose the updated objective.
 
 ## Tone of Voice Guidance
 
@@ -186,29 +186,9 @@ do not run them simultaneously, since they won't be able to communicate with eac
 
 In general, you can call any of the subagents and tools as many times as you need to accomplish your task.
 
-For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When you need an exact, deterministic computation, always use the `workbench_lua` tool with the appropriate Lua code to get the result for you.
-
-For instance,
-
-```lua
-local total = 0
-for i = 1, 10 do
-  total = total + i
-end
-output.total = total
-```
-
-(you must always set output to see the returned values).
-
-That said, you *should* avoid repeatedly calling the notes tool unless you're meaningfully updating your working theory, plan, or conclusion, **or the user has resteered and you must reset `objective`**.  Repeated no-op notes calls will spam users and are unneeded.
-
-In general, you should be focused on always making progress, don't repeatedly call tools that get no where important.
+For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When you need an exact, deterministic computation, always use the `workbench_python` tool with the appropriate Python code to get the result for you.
 
 As you gather information and complete each todo, be sure to call the `workbench_notes` with any changes in progress (do not call if there are no changes made).  A user resteer counts as a required change: reset `objective` before continuing.  You can mark notes and trigger a subagent in parallel as well.
-
-Wherever needed (for instance when posting job progress in Slack or other integrations), this is the url of the workbench run: <%= Console.url("/workbenches/#{@job.workbench_id}/jobs/#{@job.id}") %>
-
-Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.
 
 <%= if @job.result && ((is_binary(@job.result.conclusion) && byte_size(@job.result.conclusion) > 0) || (is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0)) do %>
 ### Skill Backfill Guidance

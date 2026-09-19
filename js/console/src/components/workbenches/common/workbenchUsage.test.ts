@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { formatTokenCost, formatTokenCount } from './workbenchUsage'
+import {
+  billedTokenCount,
+  cachedPromptPercentageLabel,
+  cachedShareOfPrompt,
+  formatTokenCost,
+  formatTokenCount,
+  inputShareOfTotal,
+  outputShareOfTotal,
+  promptTokenCount,
+  reasoningShareOfOutput,
+} from './workbenchUsage'
 
 describe('workbench usage formatting', () => {
   it('formats token counts below 1K as 1K', () => {
@@ -54,5 +64,67 @@ describe('workbench usage formatting', () => {
 
   it('does not format zero cost values', () => {
     expect(formatTokenCost(0)).toBeUndefined()
+  })
+})
+
+describe('workbench token usage shares', () => {
+  it('treats OpenAI-style cache reads as a subset of input tokens', () => {
+    const usage = {
+      inputTokens: 1_000,
+      cachedTokens: 800,
+      outputTokens: 200,
+      totalTokens: 1_200,
+    }
+
+    expect(promptTokenCount(usage)).toBe(1_000)
+    expect(cachedShareOfPrompt(usage)).toBeCloseTo(0.8)
+    expect(cachedPromptPercentageLabel(usage)).toBe('80% of input')
+    expect(inputShareOfTotal(usage)).toBeCloseTo(1_000 / 1_200)
+    expect(outputShareOfTotal(usage)).toBeCloseTo(200 / 1_200)
+  })
+
+  it('does not divide Anthropic/Gemini cache reads by uncached input tokens', () => {
+    const usage = {
+      inputTokens: 824,
+      cachedTokens: 667_000,
+      outputTokens: 19_000,
+      reasoningTokens: 0,
+      totalTokens: 57_140,
+    }
+
+    expect(promptTokenCount(usage)).toBe(667_824)
+    expect(cachedShareOfPrompt(usage)).toBeCloseTo(667_000 / 667_824)
+    expect(cachedPromptPercentageLabel(usage)).toBe('100% of input')
+    expect(cachedShareOfPrompt(usage)).toBeLessThanOrEqual(1)
+    expect(inputShareOfTotal(usage)).toBeCloseTo(824 / 57_140)
+    expect(outputShareOfTotal(usage)).toBeCloseTo(19_000 / 57_140)
+  })
+
+  it('measures reasoning against output rather than job total', () => {
+    const usage = {
+      inputTokens: 100,
+      outputTokens: 400,
+      reasoningTokens: 100,
+      totalTokens: 500,
+    }
+
+    expect(reasoningShareOfOutput(usage)).toBeCloseTo(0.25)
+  })
+
+  it('does not fold nested cache or reasoning counts into a fallback total', () => {
+    expect(
+      billedTokenCount({
+        inputTokens: 50,
+        outputTokens: 10,
+        cachedTokens: 10_000,
+        reasoningTokens: 4,
+      })
+    ).toBe(60)
+  })
+
+  it('omits a cache percentage when no tokens were cached', () => {
+    expect(
+      cachedPromptPercentageLabel({ inputTokens: 1_000, cachedTokens: 0 })
+    ).toBeUndefined()
   })
 })

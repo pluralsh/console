@@ -427,10 +427,8 @@ defmodule Console.AI.Workbench.Engine do
   defp sysprompt(%WorkbenchJob{type: :skill, referenced_job: job} = workbench_job, _, _),
     do: String.trim(skill_system_prompt(job: job, prompt: WorkbenchJob.objective(workbench_job)))
   defp sysprompt(%WorkbenchJob{} = job, environment, engine) do
-    objective = WorkbenchJob.objective(job)
     String.trim(system_prompt(
       job: job,
-      prompt: objective,
       engine: engine,
       actions: Environment.actions(environment),
       review: WorkbenchJob.coding_review?(job)
