@@ -118,7 +118,7 @@ defmodule Console.AI.Bedrock do
 
   defp maybe_inference_profile(opts, %__MODULE__{model_settings: settings}, model)
        when is_list(settings) and is_binary(model) do
-    case Enum.find(settings, & Map.get(&1, :model_id) == model) do
+    case Enum.find(settings, &matches_inference_profile_model?(&1, model)) do
       %{inference_profile_arn: arn} when is_binary(arn) ->
         Keyword.put(opts, :inference_profile_arn, arn)
 
@@ -127,6 +127,18 @@ defmodule Console.AI.Bedrock do
     end
   end
   defp maybe_inference_profile(opts, _, _), do: opts
+
+  defp matches_inference_profile_model?(%{model_id: configured}, model) do
+    inference_profile_model_id(configured) == inference_profile_model_id(model)
+  end
+  defp matches_inference_profile_model?(_, _), do: false
+
+  # ReqLLM preserves regional Bedrock inference-profile IDs for the provider's
+  # native request format. Deployment settings intentionally use the portable
+  # provider.model form, so compare those two equivalent forms for profile
+  # lookup without changing the identifier passed to ReqLLM.
+  defp inference_profile_model_id("us." <> model), do: model
+  defp inference_profile_model_id(model), do: model
 
   defp maybe_set_gpt56_reasoning_low(opts, model) do
     if String.starts_with?(model, ["gpt-5.6", "openai.gpt-5.6"]) or
