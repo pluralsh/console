@@ -35,5 +35,5 @@ EXPOSE 8080
 EXPOSE 8081
 
 # Command to run the application
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["curl", "-fsS", "http://127.0.0.1:8081/metrics"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8081/metrics"]
 CMD ["./flaky-service", "--response-behavior-modifier=timestamp", "--behavior-modifier-timestamp-modulus=3"]

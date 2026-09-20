@@ -100,9 +100,15 @@ services:
       - opensearch
       - localstack
       - sigv4-proxy
+    # Perform cache-volume migration as root, then run the test command as the image's non-root app user.
+    user: root
     entrypoint:
       - "/bin/sh"
-      - "-c"
+      - "-ec"
+      - |
+        chown -R app:app /app/deps /app/_build
+        exec su app -s /bin/sh -c "$*"
+      - "--"
     command: ${CONSOLE_CMD:-"MIX_ENV=test mix deps.get && mix compile"}
 
 volumes:
