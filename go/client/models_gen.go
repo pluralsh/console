@@ -12562,6 +12562,8 @@ type WorkbenchUsageTimeseries struct {
 	InputTokens *int64 `json:"inputTokens,omitempty"`
 	// number of output tokens produced during this interval
 	OutputTokens *int64 `json:"outputTokens,omitempty"`
+	// total tokens consumed during this interval
+	TotalTokens *int64 `json:"totalTokens,omitempty"`
 	// total cost for this interval, in USD
 	TotalCost *float64 `json:"totalCost,omitempty"`
 }
