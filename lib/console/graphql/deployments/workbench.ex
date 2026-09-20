@@ -1449,8 +1449,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url, :string,
       description: "Docker/OCI registry host in use (credentials never exposed)",
       resolve: fn
-        %{url: url}, _ when is_binary(url) and byte_size(url) > 0 -> {:ok, url}
-        _, _ -> {:ok, "registry-1.docker.io"}
+        %{url: url}, _, _ when is_binary(url) and byte_size(url) > 0 -> {:ok, url}
+        _, _, _ -> {:ok, "registry-1.docker.io"}
       end
 
     field :provider, :helm_auth_provider, description: "registry authentication provider"
@@ -1458,8 +1458,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :proxy, :http_proxy_configuration,
       description: "optional HTTP proxy for registry requests",
       resolve: fn
-        %{auth: %{proxy: proxy}}, _ -> {:ok, proxy}
-        _, _ -> {:ok, nil}
+        %{auth: %{proxy: proxy}}, _, _ -> {:ok, proxy}
+        _, _, _ -> {:ok, nil}
       end
   end
 

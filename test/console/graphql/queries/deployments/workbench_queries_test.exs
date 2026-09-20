@@ -207,6 +207,44 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert ids_equal(found["tools"], [tool1, tool2])
     end
 
+    test "it returns the configured Docker registry URL" do
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "ghcr",
+          tool: :docker,
+          configuration: %{docker: %{url: "ghcr.io", provider: :basic}}
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(
+          """
+          query Workbench($id: ID!) {
+            workbench(id: $id) {
+              tools {
+                id
+                configuration {
+                  docker {
+                    url
+                  }
+                }
+              }
+            }
+          }
+          """,
+          %{"id" => workbench.id},
+          %{current_user: admin_user()}
+        )
+
+      assert [found_tool] = found["tools"]
+      assert found_tool["id"] == tool.id
+      assert found_tool["configuration"]["docker"]["url"] == "ghcr.io"
+    end
+
     test "it can fetch workbench crons" do
       workbench = insert(:workbench)
       cron1 = insert(:workbench_cron, workbench: workbench, crontab: "*/5 * * * *", prompt: "run 1")
