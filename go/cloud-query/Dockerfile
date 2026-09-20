@@ -16,7 +16,7 @@ COPY internal/ internal/
 # Build the cloud-query binary
 RUN CGO_ENABLED=0 go build -o bin/cloud-query cmd/*.go
 
-FROM cgr.dev/chainguard/wolfi-base AS final
+FROM cgr.dev/chainguard/wolfi-base@sha256:1d95114038f76513a9ace6fca107d5582b08c65981f81f61cb56bf7fd2ef216d AS final
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -41,5 +41,6 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
 COPY --from=builder /workspace/bin/cloud-query /usr/local/bin/cloud-query
 
 USER nonroot
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["/usr/bin/busybox", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
 
 CMD ["/usr/local/bin/cloud-query"]

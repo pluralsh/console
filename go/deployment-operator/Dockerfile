@@ -55,4 +55,5 @@ USER 65532:65532
 
 ENV GOMONTY_FFI_CACHE_DIR=/tmp/gomonty
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9001/healthz"]
 ENTRYPOINT ["/workspace/deployment-agent"]

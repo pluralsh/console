@@ -25,13 +25,16 @@ FROM alpine:3.22.1
 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+RUN addgroup -g 65532 mcp && adduser -u 65532 -G mcp -D mcp
+WORKDIR /app
 
 # Copy the binary from the builder stage
-COPY --from=builder /workspace/deployment-operator/terraform-mcpserver .
+COPY --chown=mcp:mcp --from=builder /workspace/deployment-operator/terraform-mcpserver .
 
 # Expose stdio for MCP communication
 # The MCP server uses stdio transport, so no network ports needed
 
 # Run the MCP server
+USER mcp
+HEALTHCHECK NONE
 CMD ["./terraform-mcpserver"]

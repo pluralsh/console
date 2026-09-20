@@ -29,10 +29,12 @@ RUN yarn workspace @pluralsh/documentation build:next
 FROM node:24-alpine AS production
 WORKDIR /app
 
-COPY --from=base /app/node_modules/ ./node_modules/
-COPY --from=base /app/documentation/ ./documentation/
+COPY --chown=node:node --from=base /app/node_modules/ ./node_modules/
+COPY --chown=node:node --from=base /app/documentation/ ./documentation/
 
 EXPOSE 3000
 
 WORKDIR /app/documentation
+USER node
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/"]
 CMD ["node", "/app/node_modules/next/dist/bin/next", "start", "-p", "3000"]

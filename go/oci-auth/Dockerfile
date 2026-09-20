@@ -28,3 +28,5 @@ COPY --from=builder /workspace/oci-auth/oci-auth .
 USER 65532:65532
 
 ENTRYPOINT ["/oci-auth"]
+
+HEALTHCHECK NONE

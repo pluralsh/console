@@ -17,4 +17,7 @@ COPY js/console/ ./console/
 COPY js/design-system/ ./design-system/
 
 WORKDIR /app/console
+RUN chown -R node:node /app
+USER node
+HEALTHCHECK NONE
 CMD ["yarn", "build"]

@@ -149,4 +149,6 @@ USER console
 
 EXPOSE 4000 6000 4369 50051
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:4000/health"]
+
 CMD mkdir -p /tmp/sqlite; /opt/app/bin/console start

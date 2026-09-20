@@ -104,6 +104,7 @@ COPY --from=builder /binaries/agentk /agentk
 # Users can override with: docker run image /api or /agentk
 
 # Default to kas for backward compatibility
+USER nonroot:nonroot
 ENTRYPOINT ["/kas"]
 
 # Expose common ports
@@ -117,3 +118,5 @@ ENTRYPOINT ["/kas"]
 # 8154 - Kubernetes API
 # 8155 - Internal API
 EXPOSE 8000 8001 8150 8151 8153 8154 8155
+
+HEALTHCHECK NONE

@@ -6,3 +6,6 @@
 #   /data/<path>/          # full git clone, including .git
 FROM busybox:1.37
 COPY --chown=65532:65532 . /data
+
+USER 65532:65532
+HEALTHCHECK NONE

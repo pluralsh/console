@@ -39,3 +39,5 @@ COPY --from=builder /workspace/ai-proxy .
 USER 65532:65532
 
 ENTRYPOINT ["/ai-proxy"]
+
+HEALTHCHECK NONE

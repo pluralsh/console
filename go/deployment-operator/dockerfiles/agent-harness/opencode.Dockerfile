@@ -36,3 +36,5 @@ USER 65532:65532
 
 # The entrypoint remains the agent-harness binary
 # The agent-harness will call the opencode CLI as needed
+
+HEALTHCHECK NONE

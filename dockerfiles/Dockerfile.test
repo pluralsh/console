@@ -17,10 +17,20 @@ RUN if [ "$OS_VARIANT" = "alpine" ]; then \
       apk update && apk upgrade --no-cache && \
       apk add --no-cache git build-base curl ca-certificates; \
     else \
-      apt-get update && apt-get install -y git build-essential curl ca-certificates; \
+      apt-get update && apt-get install -y --no-install-recommends git build-essential curl ca-certificates && rm -rf /var/lib/apt/lists/*; \
       rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
     fi && \
-  if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi && \
-  mix local.rebar --force && \
-  mix local.hex --force
+  if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi
+
+RUN if [ "$OS_VARIANT" = "alpine" ]; then addgroup -S app && adduser -S -G app app; else groupadd --system app && useradd --system --gid app --create-home app; fi && \
+  chown -R app:app /app && \
+  if [ -d "${RUSTUP_HOME}" ]; then chown -R app:app "${RUSTUP_HOME}"; fi && \
+  if [ -d "${CARGO_HOME}" ]; then chown -R app:app "${CARGO_HOME}"; fi
+
+USER app
+ENV HOME=/home/app
+RUN mix local.rebar --force && mix local.hex --force
+
+# This image is a build/test environment, not a long-running service.
+HEALTHCHECK NONE

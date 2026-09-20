@@ -65,3 +65,5 @@ USER nonroot:nonroot
 ENTRYPOINT ["/app/nexus"]
 CMD ["--config", "/app/config/config.yaml"]
 
+
+HEALTHCHECK NONE
