@@ -32,6 +32,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     acc: [],
     tool_fmt: &Console.identity/1,
     tool_search: false,
+    return_context: false,
   ]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
@@ -67,6 +68,27 @@ defmodule Console.AI.Chat.MemoryEngine do
   def reduce(%__MODULE__{} = engine, %Context{messages: [_ | _]} = context, reducer)
       when is_function(reducer, 2) do
     engine = setup_toolsearch(%__MODULE__{engine | reducer: reducer})
+
+    append_context(engine, context)
+    |> loop()
+  end
+
+  @doc """
+  Reduces the engine from a ReqLLM context and returns both the reduction and the
+  canonical context produced by the run.
+  """
+  def reduce_with_context(
+        %__MODULE__{} = engine,
+        %Context{messages: [_ | _]} = context,
+        reducer
+      )
+      when is_function(reducer, 2) do
+    engine =
+      setup_toolsearch(%__MODULE__{
+        engine
+        | reducer: reducer,
+          return_context: true
+      })
 
     append_context(engine, context)
     |> loop()
@@ -174,15 +196,14 @@ defmodule Console.AI.Chat.MemoryEngine do
       err -> err
     end)
   end
-
-  defp loop(%__MODULE__{acc: acc}, _), do: {:ok, acc}
+  defp loop(%__MODULE__{acc: acc} = engine, _), do: finish(engine, acc)
 
   defp finalize_loop(msgs, %__MODULE__{reducer: fun} = engine, acc, iter)
        when is_function(fun, 2) do
     Enum.map(msgs, &msg(&1, :result))
     |> fun.(acc)
     |> case do
-      {:halt, res} -> {:ok, res}
+      {:halt, res} -> finish(engine, res)
       {:messages, [_ | _] = msgs} ->
         loop(%{append_reducer_messages(engine, msgs) | acc: acc}, iter + 1)
 
@@ -204,6 +225,10 @@ defmodule Console.AI.Chat.MemoryEngine do
   end
 
   defp append_continue(context, _), do: context
+
+  defp finish(%__MODULE__{return_context: true, context: %Context{} = context}, result),
+    do: {:ok, {result, context}}
+  defp finish(_, result), do: {:ok, result}
 
   defp build_preface(str, _) when is_binary(str), do: str
   defp build_preface(fun, engine) when is_function(fun, 1), do: fun.(engine)

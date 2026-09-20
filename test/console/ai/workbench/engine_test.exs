@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.EngineTest do
   use Mimic
   alias Console.AI.Workbench.{Activity, Engine, Heartbeat, Skills, Subagents}
   alias Console.AI.Tool
-  alias Console.Deployments.Clusters
+  alias Console.Deployments.{Clusters, Workbenches}
   alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
   require Record
@@ -222,6 +222,67 @@ defmodule Console.AI.Workbench.EngineTest do
       end)
     end
 
+    test "hydrates the initial ReqLLM context from persisted activities" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      expect_reqllm_completion(fn messages, _ ->
+        assert Enum.count(messages, &match?({:user, "original objective"}, &1)) == 1
+
+        assert Enum.any?(messages, fn
+                 {:tool, content, %{call_id: "prior-call"}} ->
+                   content =~ "prior result"
+
+                 _ ->
+                   false
+               end)
+
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "done", description: "done", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, prompt: "original objective")
+
+      assert {:ok, _activity} =
+               Workbenches.create_job_activity(
+                 %{
+                   type: :observability,
+                   status: :successful,
+                   prompt: "investigate",
+                   result: %{output: "prior result"},
+                   tool_call: %{
+                     call_id: "prior-call",
+                     name: "workbench_subagent",
+                     arguments: %{"prompt" => "investigate"}
+                   }
+                 },
+                 job
+               )
+
+      {:ok, engine} = Engine.new(job)
+      assert {:ok, result} = Engine.run(engine)
+      assert result.status == :successful
+    end
+
     test "refreshes the job after memos before running subagents from the same response" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
@@ -260,7 +321,26 @@ defmodule Console.AI.Workbench.EngineTest do
         %{status: :successful, result: %{output: "infrastructure result"}}
       end)
 
-      expect_reqllm_completion(fn _, _ ->
+      expect_reqllm_completion(fn messages, _ ->
+        assert Enum.count(messages, fn
+                 {:tool, _, %{call_id: "memo", name: "workbench_notes"}} -> true
+                 _ -> false
+               end) == 1
+
+        assert Enum.count(messages, fn
+                 {:tool, _, %{call_id: "subagent", name: "workbench_subagent"}} -> true
+                 _ -> false
+               end) == 1
+
+        assert {:tool, memo_result, %{call_id: "memo"}} =
+                 Enum.find(messages, fn
+                   {:tool, _, %{call_id: "memo"}} -> true
+                   _ -> false
+                 end)
+
+        refute memo_result =~ "failed to run activity"
+        assert memo_result =~ "Recorded notes of progress done so far"
+
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",

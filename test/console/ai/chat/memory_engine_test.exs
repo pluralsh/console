@@ -43,6 +43,26 @@ defmodule Console.AI.Chat.MemoryEngineTest do
 
   setup :set_mimic_global
 
+  test "returns the final ReqLLM context with the reduction" do
+    stub(Provider, :context_window, fn :tool -> 100_000 end)
+
+    expect(Provider, :reqllm_completion, fn context, _opts ->
+      {:ok, response(context, Context.assistant("done"), :stop)}
+    end)
+
+    reducer = fn
+      [{:assistant, "done"}], _acc -> {:halt, :done}
+    end
+
+    context = Context.new([Context.user("start")])
+
+    assert {:ok, {:done, %Context{} = context}} =
+             MemoryEngine.new([], 1, system_prompt: "test", acc: [])
+             |> MemoryEngine.reduce_with_context(context, reducer)
+
+    assert Enum.map(context.messages, & &1.role) == [:system, :user, :assistant]
+  end
+
   test "keeps resolved tool exchanges in a ReqLLM context" do
     stub(Provider, :context_window, fn :tool -> 100_000 end)
 
