@@ -24,6 +24,7 @@ import {
   WorkbenchDashboardSummaryFragment,
   WorkbenchMonitorSummaryFragment,
 } from 'generated/graphql'
+import { times } from 'lodash'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -267,7 +268,7 @@ function MonitoringListSkeleton({ count }: { count: number }) {
       direction="column"
       gap="small"
     >
-      {Array.from({ length: count }).map((_, i) => (
+      {times(count, (i) => (
         <Flex
           key={i}
           gap="medium"

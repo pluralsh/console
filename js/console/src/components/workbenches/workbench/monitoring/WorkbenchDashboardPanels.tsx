@@ -21,7 +21,7 @@ import {
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityTraceFragment,
 } from 'generated/graphql'
-import { groupBy, isEmpty, maxBy } from 'lodash'
+import { groupBy, isEmpty, maxBy, sortBy } from 'lodash'
 import { useMemo } from 'react'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
@@ -68,14 +68,13 @@ export function WorkbenchDashboardPanels({
 
   const rows = useMemo(() => {
     const grouped = groupBy(graphs, (graph) => graph.layout?.y ?? 0)
-    return Object.entries(grouped)
-      .map(([yKey, rowGraphs]) => ({
+    return sortBy(
+      Object.entries(grouped).map(([yKey, rowGraphs]) => ({
         y: Number(yKey),
-        graphs: [...rowGraphs].sort(
-          (a, b) => (a.layout?.x ?? 0) - (b.layout?.x ?? 0)
-        ),
-      }))
-      .sort((a, b) => a.y - b.y)
+        graphs: sortBy(rowGraphs, (graph) => graph.layout?.x ?? 0),
+      })),
+      'y'
+    )
   }, [graphs])
 
   if (graphs.length === 0) {

@@ -1,6 +1,7 @@
 import {
   Card,
   Chip,
+  ChipSeverity,
   EmptyState,
   ExpandIcon,
   Flex,
@@ -13,6 +14,7 @@ import { Line } from '@nivo/line'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
+import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -24,7 +26,6 @@ import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/
 import { WorkbenchJobActionsRow } from 'components/workbenches/workbench/WorkbenchJobsTable'
 import { cronToExplanation } from 'components/workbenches/workbench/crons/utils'
 import {
-  AlertSeverity,
   InputMaybe,
   LogQueryOperator,
   MonitorAggregate,
@@ -36,7 +37,7 @@ import {
   WorkbenchJobTinyFragment,
   WorkbenchMonitorDetailsFragment,
 } from 'generated/graphql'
-import { isEmpty, isNil, truncate } from 'lodash'
+import { isEmpty, isNil, times, truncate, upperFirst } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
@@ -274,7 +275,7 @@ function MonitorDetailView({
                     <FireChip
                       label="Condition"
                       value={conditionLabel(monitor.threshold)}
-                      $tone="success"
+                      severity="success"
                     />
                     <FireChip
                       label="For"
@@ -286,8 +287,8 @@ function MonitorDetailView({
                     />
                     <FireChip
                       label="Severity"
-                      value={severityLabel(monitor.severity)}
-                      $tone={severityTone(monitor.severity)}
+                      value={upperFirst(monitor.severity.toLowerCase())}
+                      severity={alertSeverityToChipSeverity[monitor.severity]}
                     />
                   </ChipsSC>
                 </FiresWhenSC>
@@ -659,7 +660,7 @@ function MonitorRecentJobs({
       {error && <GqlError error={error} />}
       {loading && isEmpty(jobs) ? (
         <JobsGridSC>
-          {Array.from({ length: 3 }).map((_, i) => (
+          {times(3, (i) => (
             <RectangleSkeleton
               key={i}
               $height={140}
@@ -737,24 +738,18 @@ function MonitorJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
 function FireChip({
   label,
   value,
-  $tone = 'default',
+  severity = 'neutral',
 }: {
   label: string
   value: string
-  $tone?: 'default' | 'success' | 'warning'
+  severity?: ChipSeverity
 }) {
   return (
     <FireChipSC>
       <CaptionP $color="text-input-disabled">{label}</CaptionP>
       <Chip
         size="small"
-        severity={
-          $tone === 'success'
-            ? 'success'
-            : $tone === 'warning'
-              ? 'warning'
-              : 'neutral'
-        }
+        severity={severity}
       >
         {value}
       </Chip>
@@ -787,34 +782,6 @@ function evaluateLabel(cron: string) {
     return cronToExplanation({ crontab: cron }).replace(/, next at.*$/, '')
   } catch {
     return cron
-  }
-}
-
-function severityLabel(severity: AlertSeverity) {
-  switch (severity) {
-    case AlertSeverity.Critical:
-      return 'Critical'
-    case AlertSeverity.High:
-      return 'High'
-    case AlertSeverity.Medium:
-      return 'Medium'
-    case AlertSeverity.Low:
-      return 'Low'
-    default:
-      return 'Undefined'
-  }
-}
-
-function severityTone(
-  severity: AlertSeverity
-): 'default' | 'success' | 'warning' {
-  switch (severity) {
-    case AlertSeverity.Critical:
-    case AlertSeverity.High:
-    case AlertSeverity.Medium:
-      return 'warning'
-    default:
-      return 'default'
   }
 }
 
