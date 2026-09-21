@@ -189,102 +189,104 @@ function MonitorDetailView({
             </StripActionsSC>
           </StripSC>
         )}
-        <BodySC>
-          <TitleRowSC>
-            <TitleBlockSC>
-              <TitleSC>{monitor.name}</TitleSC>
-              {monitor.description && (
-                <Body1P
-                  $color="text-long-form"
-                  css={{ letterSpacing: '0.25px' }}
-                >
-                  {monitor.description}
-                </Body1P>
-              )}
-              {fullscreen && (
-                <CaptionP $color="text-xlight">
-                  {monitor.updatedAt
-                    ? `updated ${fromNow(monitor.updatedAt)}`
-                    : 'Never updated'}
-                </CaptionP>
-              )}
-            </TitleBlockSC>
-            {fullscreen && (
-              <ExitFullscreenButton onClick={() => setFullscreen(false)} />
-            )}
-          </TitleRowSC>
-          <ColumnsSC>
-            <DefinitionCardSC>
-              <DefinitionHeaderSC>
-                <Body1P css={{ margin: 0 }}>Definition</Body1P>
-                {!fullscreen && (
-                  <IconFrame
-                    clickable
-                    size="small"
-                    type="tertiary"
-                    icon={<HamburgerMenuCollapsedIcon />}
-                    textValue="Definition"
-                    onClick={() => setDefinitionOpen(true)}
-                  />
+        <ScrollSC>
+          <BodySC>
+            <TitleRowSC>
+              <TitleBlockSC>
+                <TitleSC>{monitor.name}</TitleSC>
+                {monitor.description && (
+                  <Body1P
+                    $color="text-long-form"
+                    css={{ letterSpacing: '0.25px' }}
+                  >
+                    {monitor.description}
+                  </Body1P>
                 )}
-              </DefinitionHeaderSC>
-              <SectionSC>
-                <QueryHeaderSC>
-                  <Body2P $color="text-xlight">Query</Body2P>
-                  {toolName && (
-                    <Flex
-                      align="center"
-                      gap="xsmall"
-                    >
-                      <DashboardToolIcon
-                        tool={toolName}
-                        size={12}
-                      />
-                      <Body2P>{toolDisplayName(toolName)}</Body2P>
-                    </Flex>
+                {fullscreen && (
+                  <CaptionP $color="text-xlight">
+                    {monitor.updatedAt
+                      ? `updated ${fromNow(monitor.updatedAt)}`
+                      : 'Never updated'}
+                  </CaptionP>
+                )}
+              </TitleBlockSC>
+              {fullscreen && (
+                <ExitFullscreenButton onClick={() => setFullscreen(false)} />
+              )}
+            </TitleRowSC>
+            <ColumnsSC>
+              <DefinitionCardSC>
+                <DefinitionHeaderSC>
+                  <Body1P css={{ margin: 0 }}>Definition</Body1P>
+                  {!fullscreen && (
+                    <IconFrame
+                      clickable
+                      size="small"
+                      type="tertiary"
+                      icon={<HamburgerMenuCollapsedIcon />}
+                      textValue="Definition"
+                      onClick={() => setDefinitionOpen(true)}
+                    />
                   )}
-                </QueryHeaderSC>
-                <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
-              </SectionSC>
-              <SectionSC>
-                <FiresWhenSC>
-                  <Body2P $color="text-xlight">Fires when</Body2P>
-                  <ChipsSC>
-                    <FireChip
-                      label="Condition"
-                      value={conditionLabel(monitor.threshold)}
-                      severity="success"
-                    />
-                    <FireChip
-                      label="For"
-                      value={forLabel(forDuration)}
-                    />
-                    <FireChip
-                      label="Evaluate"
-                      value={evaluateLabel(monitor.evaluationCron)}
-                    />
-                    <FireChip
-                      label="Severity"
-                      value={upperFirst(monitor.severity.toLowerCase())}
-                      severity={alertSeverityToChipSeverity[monitor.severity]}
-                    />
-                  </ChipsSC>
-                </FiresWhenSC>
-                <ChartWrapSC>
-                  <MonitorThresholdChart monitor={monitor} />
-                </ChartWrapSC>
-              </SectionSC>
-            </DefinitionCardSC>
-            {workbenchId && (
-              <MonitorRecentJobs
-                workbenchId={workbenchId}
-                monitorId={monitor.id}
-                monitorName={monitor.name}
-                spawnPrompt={monitor.prompt}
-              />
-            )}
-          </ColumnsSC>
-        </BodySC>
+                </DefinitionHeaderSC>
+                <SectionSC>
+                  <QueryHeaderSC>
+                    <Body2P $color="text-xlight">Query</Body2P>
+                    {toolName && (
+                      <Flex
+                        align="center"
+                        gap="xsmall"
+                      >
+                        <DashboardToolIcon
+                          tool={toolName}
+                          size={12}
+                        />
+                        <Body2P>{toolDisplayName(toolName)}</Body2P>
+                      </Flex>
+                    )}
+                  </QueryHeaderSC>
+                  <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
+                </SectionSC>
+                <SectionSC>
+                  <FiresWhenSC>
+                    <Body2P $color="text-xlight">Fires when</Body2P>
+                    <ChipsSC>
+                      <FireChip
+                        label="Condition"
+                        value={conditionLabel(monitor.threshold)}
+                        severity="success"
+                      />
+                      <FireChip
+                        label="For"
+                        value={forLabel(forDuration)}
+                      />
+                      <FireChip
+                        label="Evaluate"
+                        value={evaluateLabel(monitor.evaluationCron)}
+                      />
+                      <FireChip
+                        label="Severity"
+                        value={upperFirst(monitor.severity.toLowerCase())}
+                        severity={alertSeverityToChipSeverity[monitor.severity]}
+                      />
+                    </ChipsSC>
+                  </FiresWhenSC>
+                  <ChartWrapSC>
+                    <MonitorThresholdChart monitor={monitor} />
+                  </ChartWrapSC>
+                </SectionSC>
+              </DefinitionCardSC>
+              {workbenchId && (
+                <MonitorRecentJobs
+                  workbenchId={workbenchId}
+                  monitorId={monitor.id}
+                  monitorName={monitor.name}
+                  spawnPrompt={monitor.prompt}
+                />
+              )}
+            </ColumnsSC>
+          </BodySC>
+        </ScrollSC>
       </MainSC>
     </DefinitionPanelShell>
   )
@@ -788,8 +790,7 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
     flexDirection: 'column',
     minHeight: 0,
     minWidth: 0,
-    overflow: 'auto',
-    padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+    overflow: 'hidden',
     ...($fullscreen && {
       backgroundColor: theme.colors['fill-accent'],
       height: '100%',
@@ -804,15 +805,17 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  margin: `-${theme.spacing.medium}px -${theme.spacing.large}px 0`,
   backgroundColor: theme.colors['fill-one-selected'],
   borderBottom: theme.borders.default,
   borderTop: theme.borders.default,
   display: 'flex',
+  flexShrink: 0,
   gap: theme.spacing.small,
   height: 40,
   justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
+  position: 'relative',
+  zIndex: 1,
 }))
 
 const StripActionsSC = styled.div(({ theme }) => ({
@@ -827,13 +830,21 @@ const EyebrowSC = styled.p(({ theme }) => ({
   margin: 0,
 }))
 
-const BodySC = styled.div(({ theme }) => ({
+const ScrollSC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
   minHeight: 0,
-  paddingTop: theme.spacing.medium,
+  overflow: 'auto',
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
 }))
+
+const BodySC = styled.div({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+})
 
 const TitleBlockSC = styled.div(({ theme }) => ({
   display: 'flex',

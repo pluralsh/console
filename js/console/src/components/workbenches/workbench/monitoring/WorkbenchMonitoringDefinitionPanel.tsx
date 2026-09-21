@@ -244,6 +244,7 @@ const BodySC = styled.div({
   flexDirection: 'column',
   minHeight: 0,
   minWidth: 0,
+  overflow: 'hidden',
 })
 
 const HeaderSC = styled.div(({ theme }) => ({

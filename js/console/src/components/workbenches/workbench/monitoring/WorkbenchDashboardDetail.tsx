@@ -186,78 +186,80 @@ function DashboardDetailView({
             </StripActionsSC>
           </StripSC>
         )}
-        <BodySC>
-          <TitleRowSC>
-            <TitleBlockSC>
-              <TitleSC>{dashboard.name}</TitleSC>
-              {dashboard.description && (
-                <Body1P
-                  $color="text-long-form"
-                  css={{ letterSpacing: '0.25px' }}
-                >
-                  {dashboard.description}
-                </Body1P>
-              )}
+        <ScrollSC>
+          <BodySC>
+            <TitleRowSC>
+              <TitleBlockSC>
+                <TitleSC>{dashboard.name}</TitleSC>
+                {dashboard.description && (
+                  <Body1P
+                    $color="text-long-form"
+                    css={{ letterSpacing: '0.25px' }}
+                  >
+                    {dashboard.description}
+                  </Body1P>
+                )}
+                {fullscreen && (
+                  <CaptionP $color="text-xlight">
+                    {dashboard.updatedAt
+                      ? `updated ${fromNow(dashboard.updatedAt)}`
+                      : 'Never updated'}
+                  </CaptionP>
+                )}
+              </TitleBlockSC>
               {fullscreen && (
-                <CaptionP $color="text-xlight">
-                  {dashboard.updatedAt
-                    ? `updated ${fromNow(dashboard.updatedAt)}`
-                    : 'Never updated'}
-                </CaptionP>
+                <ExitFullscreenButton onClick={() => setFullscreen(false)} />
               )}
-            </TitleBlockSC>
-            {fullscreen && (
-              <ExitFullscreenButton onClick={() => setFullscreen(false)} />
+            </TitleRowSC>
+            <ToolbarSC $hasFilters={hasFilters}>
+              {hasFilters ? (
+                <WorkbenchDashboardFilters
+                  dashboardId={dashboard.id}
+                  inputs={inputs}
+                  values={filters}
+                  variables={variables}
+                  timeRange={timeRange}
+                  onChange={(name, value) =>
+                    setFilters((prev) => ({ ...prev, [name]: value }))
+                  }
+                  onClear={() =>
+                    setFilters(
+                      Object.fromEntries(
+                        inputs.map((input) => [
+                          input.name,
+                          defaultDashboardFilter(input),
+                        ])
+                      )
+                    )
+                  }
+                />
+              ) : (
+                <Body2P $color="text-long-form">
+                  {metaText(graphs.length, sources)}
+                </Body2P>
+              )}
+              <MetricsRangeControl
+                value={range}
+                onChange={setRange}
+              />
+            </ToolbarSC>
+            {hasFilters && (
+              <MetaRowSC>
+                <Body2P $color="text-long-form">
+                  {metaText(graphs.length, sources)}
+                </Body2P>
+              </MetaRowSC>
             )}
-          </TitleRowSC>
-          <ToolbarSC $hasFilters={hasFilters}>
-            {hasFilters ? (
-              <WorkbenchDashboardFilters
+            <PanelsSC>
+              <WorkbenchDashboardPanels
                 dashboardId={dashboard.id}
-                inputs={inputs}
-                values={filters}
+                graphs={graphs}
                 variables={variables}
                 timeRange={timeRange}
-                onChange={(name, value) =>
-                  setFilters((prev) => ({ ...prev, [name]: value }))
-                }
-                onClear={() =>
-                  setFilters(
-                    Object.fromEntries(
-                      inputs.map((input) => [
-                        input.name,
-                        defaultDashboardFilter(input),
-                      ])
-                    )
-                  )
-                }
               />
-            ) : (
-              <Body2P $color="text-long-form">
-                {metaText(graphs.length, sources)}
-              </Body2P>
-            )}
-            <MetricsRangeControl
-              value={range}
-              onChange={setRange}
-            />
-          </ToolbarSC>
-          {hasFilters && (
-            <MetaRowSC>
-              <Body2P $color="text-long-form">
-                {metaText(graphs.length, sources)}
-              </Body2P>
-            </MetaRowSC>
-          )}
-          <PanelsSC>
-            <WorkbenchDashboardPanels
-              dashboardId={dashboard.id}
-              graphs={graphs}
-              variables={variables}
-              timeRange={timeRange}
-            />
-          </PanelsSC>
-        </BodySC>
+            </PanelsSC>
+          </BodySC>
+        </ScrollSC>
       </MainSC>
     </DefinitionPanelShell>
   )
@@ -323,29 +325,31 @@ export function MonitoringDetailSkeleton() {
           $width={160}
         />
       </StripSC>
-      <BodySC>
-        <RectangleSkeleton
-          $height="large"
-          $width="40%"
-        />
-        <RectangleSkeleton
-          $height="small"
-          $width="70%"
-          style={{ marginTop: 8 }}
-        />
-        <RectangleSkeleton
-          $height={40}
-          $width="100%"
-          style={{ marginTop: 24 }}
-        />
-        <Flex
-          gap="medium"
-          marginTop="medium"
-        >
-          <RectangleSkeleton $height={200} />
-          <RectangleSkeleton $height={200} />
-        </Flex>
-      </BodySC>
+      <ScrollSC>
+        <BodySC>
+          <RectangleSkeleton
+            $height="large"
+            $width="40%"
+          />
+          <RectangleSkeleton
+            $height="small"
+            $width="70%"
+            style={{ marginTop: 8 }}
+          />
+          <RectangleSkeleton
+            $height={40}
+            $width="100%"
+            style={{ marginTop: 24 }}
+          />
+          <Flex
+            gap="medium"
+            marginTop="medium"
+          >
+            <RectangleSkeleton $height={200} />
+            <RectangleSkeleton $height={200} />
+          </Flex>
+        </BodySC>
+      </ScrollSC>
     </MainSC>
   )
 }
@@ -357,8 +361,7 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
     flexDirection: 'column',
     minHeight: 0,
     minWidth: 0,
-    overflow: 'auto',
-    padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+    overflow: 'hidden',
     ...($fullscreen && {
       backgroundColor: theme.colors['fill-accent'],
       height: '100%',
@@ -373,16 +376,18 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  margin: `-${theme.spacing.medium}px -${theme.spacing.large}px 0`,
   // fill-one-selected matches Figma fill/one #21242C (pre-rename tokens).
   backgroundColor: theme.colors['fill-one-selected'],
   borderBottom: theme.borders.default,
   borderTop: theme.borders.default,
   display: 'flex',
+  flexShrink: 0,
   gap: theme.spacing.small,
   height: 40,
   justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
+  position: 'relative',
+  zIndex: 1,
 }))
 
 const StripActionsSC = styled.div(({ theme }) => ({
@@ -397,13 +402,21 @@ const EyebrowSC = styled.p(({ theme }) => ({
   margin: 0,
 }))
 
-const BodySC = styled.div(({ theme }) => ({
+const ScrollSC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
   minHeight: 0,
-  paddingTop: theme.spacing.medium,
+  overflow: 'auto',
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
 }))
+
+const BodySC = styled.div({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+})
 
 const TitleBlockSC = styled.div(({ theme }) => ({
   display: 'flex',
