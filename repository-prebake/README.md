@@ -175,7 +175,8 @@ export GOWORK=/data/console/go/go.work
 ## Console image
 
 [`console/`](console/) extends the published base image: copy this checkout to
-`/data/console`, `prebake` (Console plus authed `plrl-up-demos` extra context),
+`/data/console`, `prebake` (Console plus `plural-cli`, `plural`, and authed
+`plrl-up-demos` extra context),
 then [`console/precompile.sh`](console/precompile.sh)
 (Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, Go workspace
 modules under `go/` with `go test -run='^$'`). Pass `GIT_ACCESS_TOKEN` as a

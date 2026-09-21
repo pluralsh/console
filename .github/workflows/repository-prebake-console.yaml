@@ -94,9 +94,9 @@ jobs:
       - name: Use console dockerignore
         run: cp repository-prebake/console/.dockerignore .dockerignore
 
-      # GITHUB_TOKEN cannot clone private sibling repos. Skip plrl-up-demos
-      # until PLURAL_BOT_PAT is set (contents:read on that repo). Check the
-      # env var — secrets are not allowed in step if: conditionals.
+      # GITHUB_TOKEN cannot clone private sibling repos. Keep public extras
+      # (plural-cli, plural) and skip plrl-up-demos until PLURAL_BOT_PAT is set.
+      # Check the env var — secrets are not allowed in step if: conditionals.
       - name: Drop private extra-context without PAT
         env:
           PAT: ${{ secrets.PLURAL_BOT_PAT }}
@@ -106,6 +106,10 @@ jobs:
               'repositories:' \
               '  - url: https://github.com/pluralsh/console.git' \
               '    path: console' \
+              '  - url: https://github.com/pluralsh/plural-cli.git' \
+              '    path: plural-cli' \
+              '  - url: https://github.com/pluralsh/plural.git' \
+              '    path: plural' \
               > repository-prebake/console/repos.yaml
           fi
 

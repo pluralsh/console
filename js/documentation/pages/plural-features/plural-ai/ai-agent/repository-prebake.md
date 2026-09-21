@@ -185,7 +185,7 @@ RUN mix deps.get && MIX_ENV=test mix compile \
 
 ## Console image
 
-The in-tree [`repository-prebake/console`](https://github.com/pluralsh/console/tree/master/repository-prebake/console) Dockerfile extends the published base: `COPY` this checkout to `/data/console`, `RUN prebake` (Console plus authed `plrl-up-demos` extra context), then `precompile.sh`. CI builds it as `ghcr.io/pluralsh/console-repos`. Pass `GIT_ACCESS_TOKEN` as a BuildKit secret so `prebake` can clone the private repo.
+The in-tree [`repository-prebake/console`](https://github.com/pluralsh/console/tree/master/repository-prebake/console) Dockerfile extends the published base: `COPY` this checkout to `/data/console`, `RUN prebake` (Console plus `plural-cli`, `plural`, and authed `plrl-up-demos` extra context), then `precompile.sh`. CI builds it as `ghcr.io/pluralsh/console-repos`. Pass `GIT_ACCESS_TOKEN` as a BuildKit secret so `prebake` can clone the private repo.
 
 Locally, from the Console repository root, build the base image first:
 
