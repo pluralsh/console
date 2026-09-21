@@ -26,10 +26,7 @@ import {
   type MetricsTimeRange,
 } from '../job/WorkbenchJobActivityResults'
 import { toolDisplayName } from './dashboardToolIcon'
-import {
-  dashboardDefinitionYaml,
-  monitoringDefinitionFilename,
-} from './definitionYaml'
+import { dashboardDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
 import { parseMonitoringShareSearch } from './monitoringShare'
 import {
@@ -134,10 +131,6 @@ function DashboardDetailView({
     () => dashboardDefinitionYaml(dashboard),
     [dashboard]
   )
-  const definitionFilename = monitoringDefinitionFilename(
-    'dashboard',
-    dashboard.name
-  )
 
   const openFullscreen = () => {
     setDefinitionOpen(false)
@@ -165,7 +158,6 @@ function DashboardDetailView({
         <WorkbenchMonitoringDefinitionPanel
           open={definitionOpen && !fullscreen}
           onClose={() => setDefinitionOpen(false)}
-          filename={definitionFilename}
           yaml={definitionYaml}
           containerRef={containerRef}
           onUpdateViaPrompt={onUpdateViaPrompt}

@@ -8,7 +8,6 @@ import {
   useResizeObserver,
 } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
-import { CaptionP } from 'components/utils/typography/Text'
 import { clamp } from 'lodash'
 import {
   type ReactNode,
@@ -30,14 +29,12 @@ const STORAGE_KEY = 'workbench-monitoring-definition-panel-width'
 export function WorkbenchMonitoringDefinitionPanel({
   open,
   onClose,
-  filename,
   yaml,
   containerRef,
   onUpdateViaPrompt,
 }: {
   open: boolean
   onClose: () => void
-  filename: string
   yaml: string
   containerRef: RefObject<HTMLElement | null>
   onUpdateViaPrompt?: () => void
@@ -66,7 +63,6 @@ export function WorkbenchMonitoringDefinitionPanel({
 
   const body = (
     <DefinitionPanelBody
-      filename={filename}
       yaml={yaml}
       onClose={onClose}
       onUpdateViaPrompt={onUpdateViaPrompt}
@@ -101,12 +97,10 @@ export function WorkbenchMonitoringDefinitionPanel({
 }
 
 function DefinitionPanelBody({
-  filename,
   yaml,
   onClose,
   onUpdateViaPrompt,
 }: {
-  filename: string
   yaml: string
   onClose: () => void
   onUpdateViaPrompt?: () => void
@@ -114,45 +108,30 @@ function DefinitionPanelBody({
   return (
     <BodySC>
       <HeaderSC>
+        <EyebrowSC>Definition</EyebrowSC>
         <Flex
           align="center"
-          gap="medium"
-          flex={1}
-          minWidth={0}
-          justify="space-between"
+          gap="xsmall"
         >
-          <EyebrowSC>Definition</EyebrowSC>
-          <CaptionP
-            $color="text-xlight"
-            css={{
-              flexShrink: 1,
-              minWidth: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {filename}
-          </CaptionP>
-        </Flex>
-        {onUpdateViaPrompt && (
+          {onUpdateViaPrompt && (
+            <IconFrame
+              clickable
+              size="medium"
+              type="tertiary"
+              icon={<ChatOutlineIcon />}
+              textValue="Update via prompt"
+              onClick={onUpdateViaPrompt}
+            />
+          )}
           <IconFrame
             clickable
             size="medium"
             type="tertiary"
-            icon={<ChatOutlineIcon />}
-            textValue="Update via prompt"
-            onClick={onUpdateViaPrompt}
+            icon={<HamburgerMenuCollapseIcon />}
+            textValue="Close definition"
+            onClick={onClose}
           />
-        )}
-        <IconFrame
-          clickable
-          size="medium"
-          type="tertiary"
-          icon={<HamburgerMenuCollapseIcon />}
-          textValue="Close definition"
-          onClick={onClose}
-        />
+        </Flex>
       </HeaderSC>
       <CodeWrapSC>
         <DefinitionCode yaml={yaml} />
@@ -298,6 +277,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   flexShrink: 0,
   gap: theme.spacing.xsmall,
   height: 40,
+  justifyContent: 'space-between',
   paddingLeft: theme.spacing.medium,
   paddingRight: theme.spacing.xsmall,
 }))

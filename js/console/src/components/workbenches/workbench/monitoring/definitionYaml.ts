@@ -1,5 +1,4 @@
 import { dump } from 'js-yaml'
-import { kebabCase } from 'lodash'
 import {
   MonitorType,
   WorkbenchDashboardDetailsFragment,
@@ -11,14 +10,6 @@ import { isNonNullable } from 'utils/isNonNullable'
 const YAML_DUMP_OPTS = { lineWidth: -1, noRefs: true, sortKeys: false } as const
 
 const COMMENT = '# managed by workbench - edits arrive as workbench jobs\n'
-
-export function monitoringDefinitionFilename(
-  kind: 'dashboard' | 'monitor',
-  name: string
-) {
-  const slug = kebabCase(name) || 'untitled'
-  return `${kind === 'dashboard' ? 'dashboards' : 'monitors'}/${slug}.yml`
-}
 
 /** Mirrors workbench_dashboard tool / Dashboard schema fields agents upsert. */
 export function dashboardDefinitionYaml(

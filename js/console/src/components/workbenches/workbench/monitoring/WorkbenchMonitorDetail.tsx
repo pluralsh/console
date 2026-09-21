@@ -56,10 +56,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { MonitoringDetailSkeleton } from './WorkbenchDashboardDetail'
 import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
-import {
-  monitorDefinitionYaml,
-  monitoringDefinitionFilename,
-} from './definitionYaml'
+import { monitorDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
 import {
   DefinitionPanelShell,
@@ -125,10 +122,6 @@ function MonitorDetailView({
     () => monitorDefinitionYaml(monitor),
     [monitor]
   )
-  const definitionFilename = monitoringDefinitionFilename(
-    'monitor',
-    monitor.name
-  )
 
   const openFullscreen = () => {
     setDefinitionOpen(false)
@@ -156,7 +149,6 @@ function MonitorDetailView({
         <WorkbenchMonitoringDefinitionPanel
           open={definitionOpen && !fullscreen}
           onClose={() => setDefinitionOpen(false)}
-          filename={definitionFilename}
           yaml={definitionYaml}
           containerRef={containerRef}
           onUpdateViaPrompt={onUpdateViaPrompt}
