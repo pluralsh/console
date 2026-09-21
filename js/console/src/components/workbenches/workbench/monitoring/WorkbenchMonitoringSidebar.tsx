@@ -186,7 +186,7 @@ export function WorkbenchMonitoringSidebar({
                         workbenchId={workbenchId}
                       />
                     ))}
-                    {dashboards.loading && dashboardNodes.length > 0 && (
+                    {dashboards.fetchingMore && (
                       <PaddedSC>
                         <MonitoringListSkeleton count={1} />
                       </PaddedSC>
@@ -246,7 +246,7 @@ export function WorkbenchMonitoringSidebar({
                         workbenchId={workbenchId}
                       />
                     ))}
-                    {monitors.loading && monitorNodes.length > 0 && (
+                    {monitors.fetchingMore && (
                       <PaddedSC>
                         <MonitoringListSkeleton count={1} />
                       </PaddedSC>

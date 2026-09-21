@@ -126,7 +126,12 @@ function DashboardPanel({
 }) {
   const needsFetch =
     graph.type !== DashboardGraphType.Markdown && !!graph.datasource
-  const { data, loading, error } = useWorkbenchDashboardGraphQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useWorkbenchDashboardGraphQuery({
     variables: {
       id: dashboardId,
       identifier: graph.identifier,
@@ -136,6 +141,7 @@ function DashboardPanel({
     skip: !needsFetch,
     fetchPolicy: 'cache-and-network',
   })
+  const data = currentData ?? previousData
 
   const result = data?.workbenchDashboard?.graph
   const metrics = result?.metrics?.filter(isNonNullable) ?? []
@@ -185,7 +191,7 @@ function DashboardPanel({
           <ChatMarkdown text={graph.markdown || '_No content._'} />
         ) : !graph.datasource ? (
           <EmptyState message="This panel has no data source." />
-        ) : error ? (
+        ) : error && !data ? (
           <GqlError
             error={error}
             css={{ wordBreak: 'break-word' }}

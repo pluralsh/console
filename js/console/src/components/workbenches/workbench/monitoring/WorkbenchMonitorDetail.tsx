@@ -375,10 +375,16 @@ function MetricsThresholdPreview({
 }) {
   const graphTheme = useGraphTheme()
   const { colors } = useTheme()
-  const { data, loading, error } = useWorkbenchMonitorPreviewQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useWorkbenchMonitorPreviewQuery({
     variables: { id: monitorId },
     fetchPolicy: 'cache-and-network',
   })
+  const data = currentData ?? previousData
 
   const graphData = useMemo(() => {
     const metrics = data?.monitor?.preview?.metrics?.filter(isNonNullable) ?? []
@@ -436,7 +442,7 @@ function MetricsThresholdPreview({
         $width="100%"
       />
     )
-  if (error) return <GqlError error={error} />
+  if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
     return (
       <EmptyState
@@ -510,7 +516,12 @@ function LogThresholdPreview({
 }) {
   const graphTheme = useGraphTheme()
   const { colors } = useTheme()
-  const { data, loading, error } = useLogAggregationBucketsQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useLogAggregationBucketsQuery({
     variables: {
       serviceId,
       query,
@@ -521,6 +532,7 @@ function LogThresholdPreview({
     },
     fetchPolicy: 'cache-and-network',
   })
+  const data = currentData ?? previousData
 
   const buckets = useMemo(
     () => data?.logAggregationBuckets?.filter(isNonNullable) ?? [],
@@ -580,7 +592,7 @@ function LogThresholdPreview({
         $width="100%"
       />
     )
-  if (error) return <GqlError error={error} />
+  if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
     return <EmptyState message="No log data found for this query." />
 
@@ -641,11 +653,17 @@ function MonitorRecentJobs({
   monitorName: string
   spawnPrompt?: string | null
 }) {
-  const { data, loading, error } = useWorkbenchMonitorJobsQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useWorkbenchMonitorJobsQuery({
     variables: { id: workbenchId, monitorId, first: RECENT_JOBS_COUNT },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+  const data = currentData ?? previousData
   const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
   const spawnDescription = useMemo(() => {
     const trimmed = spawnPrompt?.trim()
@@ -658,7 +676,7 @@ function MonitorRecentJobs({
     <RecentSectionSC>
       <Body1P css={{ margin: 0 }}>Recent jobs</Body1P>
       {error && <GqlError error={error} />}
-      {loading && isEmpty(jobs) ? (
+      {!data && loading ? (
         <JobsGridSC>
           {times(3, (i) => (
             <RectangleSkeleton

@@ -64,7 +64,7 @@ export function WorkbenchMonitorSettings() {
   const { data, loading, error } = useWorkbenchMonitorQuery({
     variables: { id: monitorId },
     skip: !monitorId,
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
   })
   const monitor = data?.monitor
 
@@ -78,7 +78,7 @@ export function WorkbenchMonitorSettings() {
     )
   )
 
-  if (error) return <GqlError error={error} />
+  if (error && !monitor) return <GqlError error={error} />
   if (!monitor && loading)
     return (
       <PageSC>
