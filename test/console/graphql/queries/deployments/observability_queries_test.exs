@@ -90,6 +90,37 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found["threshold"]["aggregate"] == "MAX"
       assert found["threshold"]["value"] == 1.0
     end
+
+    test "it can preview live threshold timeseries for a monitor" do
+      monitor =
+        insert(:monitor,
+          threshold: %{aggregate: :max, value: 2.0},
+          query: %{log: %{query: "error", bucket_size: "5m", duration: "10m", facets: []}}
+        )
+
+      ts = DateTime.utc_now() |> DateTime.truncate(:second)
+      expect(Console.Logs.Provider, :aggregate, fn _query ->
+        {:ok, [%Console.Logs.AggregationBucket{count: 3.5, timestamp: ts}]}
+      end)
+
+      {:ok, %{data: %{"monitor" => found}}} = run_query("""
+        query Monitor($id: ID!) {
+          monitor(id: $id) {
+            id
+            preview {
+              threshold
+              metrics { timestamp value }
+            }
+          }
+        }
+      """, %{"id" => monitor.id}, %{current_user: admin_user()})
+
+      assert found["id"] == monitor.id
+      assert found["preview"]["threshold"] == 2.0
+      assert [point] = found["preview"]["metrics"]
+      assert point["timestamp"] == DateTime.to_unix(ts)
+      assert point["value"] == "3.5"
+    end
   end
 
   describe "serviceDeployment monitors" do

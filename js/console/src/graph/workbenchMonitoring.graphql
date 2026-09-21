@@ -195,6 +195,19 @@ query WorkbenchMonitor($id: ID!) {
   }
 }
 
+query WorkbenchMonitorPreview($id: ID!) {
+  monitor(id: $id) {
+    id
+    preview {
+      threshold
+      metrics {
+        timestamp
+        value
+      }
+    }
+  }
+}
+
 query WorkbenchMonitorJobs(
   $id: ID!
   $monitorId: ID!

@@ -164,6 +164,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def get_monitor(%{id: id}, _), do: {:ok, Observability.get_monitor!(id)}
 
+  def monitor_preview(%Monitor{} = monitor, _, _),
+    do: Observability.preview_monitor(monitor)
+
   def get_dashboard(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.get_dashboard!(id) |> allow(user, :read)
 

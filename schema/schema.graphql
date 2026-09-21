@@ -8202,6 +8202,9 @@ type Monitor {
   "Threshold configuration that determines when the monitor should fire"
   threshold: MonitorThreshold!
 
+  "Live threshold preview from evaluating this monitor's query"
+  preview: AlertTimeseries
+
   "The service deployment this monitor is attached to"
   service: ServiceDeployment
 

@@ -18,11 +18,7 @@ import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { TRUNCATE } from 'components/utils/truncate'
-import {
-  Body1P,
-  Body2P,
-  CaptionP,
-} from 'components/utils/typography/Text'
+import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsageChips'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import { WorkbenchJobActionsRow } from 'components/workbenches/workbench/WorkbenchJobsTable'
@@ -35,6 +31,7 @@ import {
   MonitorType,
   useLogAggregationBucketsQuery,
   useWorkbenchMonitorJobsQuery,
+  useWorkbenchMonitorPreviewQuery,
   useWorkbenchMonitorQuery,
   WorkbenchJobTinyFragment,
   WorkbenchMonitorDetailsFragment,
@@ -323,25 +320,29 @@ function MonitorThresholdChart({
   const serviceId = monitor.service?.id
   const log = monitor.query?.log
   const isLog = monitor.type === MonitorType.Log && !!log && !!serviceId
+  const isMetrics = monitor.type === MonitorType.Metrics
 
-  if (!isLog) {
-    const metrics = monitor.query?.metrics
-    const isMetrics = monitor.type === MonitorType.Metrics
+  if (isMetrics) {
     return (
-      <EmptyState
-        message={
-          isMetrics
-            ? 'Live threshold preview is not available for metrics monitors yet.'
-            : 'Threshold preview is available for log monitors with a linked service.'
-        }
-        description={
-          isMetrics && metrics?.query
-            ? `Query: ${metrics.query} · fires when ${conditionLabel(monitor.threshold)}${
-                metrics.duration ? ` for ${forLabel(metrics.duration)}` : ''
+      <MetricsThresholdPreview
+        monitorId={monitor.id}
+        threshold={monitor.threshold}
+        emptyDescription={
+          monitor.query?.metrics?.query
+            ? `Query: ${monitor.query.metrics.query} · fires when ${conditionLabel(monitor.threshold)}${
+                monitor.query.metrics.duration
+                  ? ` for ${forLabel(monitor.query.metrics.duration)}`
+                  : ''
               }`
             : undefined
         }
       />
+    )
+  }
+
+  if (!isLog) {
+    return (
+      <EmptyState message="Threshold preview is available for log monitors with a linked service." />
     )
   }
 
@@ -360,6 +361,132 @@ function MonitorThresholdChart({
       }
       threshold={monitor.threshold}
     />
+  )
+}
+
+function MetricsThresholdPreview({
+  monitorId,
+  threshold,
+  emptyDescription,
+}: {
+  monitorId: string
+  threshold: { aggregate: MonitorAggregate; value: number }
+  emptyDescription?: string
+}) {
+  const graphTheme = useGraphTheme()
+  const { colors } = useTheme()
+  const { data, loading, error } = useWorkbenchMonitorPreviewQuery({
+    variables: { id: monitorId },
+    fetchPolicy: 'cache-and-network',
+  })
+
+  const graphData = useMemo(() => {
+    const metrics = data?.monitor?.preview?.metrics?.filter(isNonNullable) ?? []
+    return [
+      {
+        id: 'Metric',
+        data: metrics
+          .map((m) => {
+            const ts = m.timestamp
+            const value = m.value != null ? parseFloat(m.value) : NaN
+            if (ts == null || Number.isNaN(value)) return null
+            return { x: new Date(ts * 1000), y: value }
+          })
+          .filter((point): point is { x: Date; y: number } => point != null),
+      },
+    ]
+  }, [data])
+
+  const thresholdLayer = useCallback(
+    ({ yScale }: { yScale: (v: number) => number }) => {
+      const y = yScale(threshold.value)
+      return (
+        <text
+          y={y}
+          textAnchor="end"
+          css={{ fill: colors['border-danger'], fontSize: 11 }}
+        >
+          <tspan
+            x={-8}
+            dy="-0.5em"
+          >
+            Threshold {threshold.value}
+          </tspan>
+        </text>
+      )
+    },
+    [colors, threshold.value]
+  )
+
+  const chartRef = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState({ width: 0, height: 0 })
+  useResizeObserver(chartRef, (rect) => {
+    const width = Math.floor(rect.width)
+    const height = Math.floor(rect.height)
+    setSize((prev) =>
+      prev.width === width && prev.height === height ? prev : { width, height }
+    )
+  })
+
+  if (!data && loading)
+    return (
+      <RectangleSkeleton
+        $height={CHART_HEIGHT_PX}
+        $width="100%"
+      />
+    )
+  if (error) return <GqlError error={error} />
+  if (isEmpty(graphData[0].data))
+    return (
+      <EmptyState
+        message="No metric data found for this query."
+        description={emptyDescription}
+      />
+    )
+
+  return (
+    <GraphWrapperSC ref={chartRef}>
+      {size.width > 0 && size.height > 0 && (
+        <Line
+          width={size.width}
+          height={size.height}
+          theme={graphTheme}
+          data={graphData}
+          tooltip={SliceTooltip}
+          colors={COLORS}
+          layers={[
+            'grid',
+            'axes',
+            'areas',
+            'crosshair',
+            'lines',
+            'markers',
+            thresholdLayer,
+            'points',
+            'slices',
+            'mesh',
+          ]}
+          margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
+          xScale={{ type: 'time', format: 'native' }}
+          yScale={{ type: 'linear', min: 0, max: 'auto' }}
+          xFormat={dateFormat}
+          lineWidth={1}
+          enablePoints={false}
+          useMesh
+          axisBottom={{ format: '%H:%M', tickRotation: 20 }}
+          markers={[
+            {
+              axis: 'y',
+              value: threshold.value,
+              lineStyle: {
+                stroke: colors['border-danger'],
+                strokeDasharray: '6 4',
+              },
+            },
+          ]}
+        />
+      )}
+    </GraphWrapperSC>
   )
 }
 
@@ -518,10 +645,7 @@ function MonitorRecentJobs({
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-  const jobs = useMemo(
-    () => mapExistingNodes(data?.workbench?.runs),
-    [data]
-  )
+  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
   const spawnDescription = useMemo(() => {
     const trimmed = spawnPrompt?.trim()
     if (!trimmed) return undefined

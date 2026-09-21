@@ -183,6 +183,33 @@ defmodule Console.Deployments.Observability do
     end
   end
 
+  @doc """
+  Live threshold preview for a monitor: runs the configured query and returns
+  timeseries points plus the threshold for charting in the UI.
+  """
+  @spec preview_monitor(Monitor.t) :: {:ok, map} | Console.error
+  def preview_monitor(%Monitor{} = monitor) do
+    monitor = Repo.preload(monitor, [:workbench, :user, service: :cluster])
+    with {:ok, _state, results} <- MonitorImpl.query(monitor) do
+      {:ok, %{
+        threshold: monitor.threshold && monitor.threshold.value,
+        metrics: Enum.map(results, &preview_metric/1)
+      }}
+    end
+  end
+
+  defp preview_metric(%{timestamp: ts, count: count}),
+    do: %{timestamp: preview_unix(ts), value: to_string(count)}
+  defp preview_metric(%{timestamp: ts, value: value}),
+    do: %{timestamp: preview_unix(ts), value: to_string(value)}
+  defp preview_metric(_), do: %{timestamp: 0, value: "0"}
+
+  defp preview_unix(%DateTime{} = dt), do: DateTime.to_unix(dt)
+  defp preview_unix(%NaiveDateTime{} = ndt),
+    do: DateTime.from_naive!(ndt, "Etc/UTC") |> DateTime.to_unix()
+  defp preview_unix(n) when is_number(n), do: n
+  defp preview_unix(_), do: 0
+
   defp monitor_alert(%Monitor{alert: %Alert{} = alert}, attrs, :resolved) do
     Alert.changeset(alert, attrs)
     |> Repo.update()

@@ -5281,6 +5281,8 @@ type Monitor struct {
 	Query MonitorQuery `json:"query"`
 	// Threshold configuration that determines when the monitor should fire
 	Threshold MonitorThreshold `json:"threshold"`
+	// Live threshold preview from evaluating this monitor's query
+	Preview *AlertTimeseries `json:"preview,omitempty"`
 	// The service deployment this monitor is attached to
 	Service *ServiceDeployment `json:"service,omitempty"`
 	// The workbench this monitor is attached to
@@ -10553,6 +10555,7 @@ type Workbench struct {
 	WorkbenchSkills     *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
 	WorkbenchKnowledge  *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
 	WorkbenchDashboards *WorkbenchDashboardConnection `json:"workbenchDashboards,omitempty"`
+	Monitors            *MonitorConnection            `json:"monitors,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`

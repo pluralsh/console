@@ -4761,6 +4761,7 @@ export type FluxHelmRepository = {
 /** spec for a job gate */
 export type GateJobAttributes = {
   annotations?: InputMaybe<Scalars['Json']['input']>;
+  /** containers to run in this job; an empty list clears configured containers */
   containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
   labels?: InputMaybe<Scalars['Json']['input']>;
   namespace: Scalars['String']['input'];
@@ -6453,6 +6454,8 @@ export type Monitor = {
   name: Scalars['String']['output'];
   /** Next scheduled time this monitor will be evaluated, if any */
   nextRunAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Live threshold preview from evaluating this monitor's query */
+  preview?: Maybe<AlertTimeseries>;
   /** Prompt used when this monitor starts a workbench investigation */
   prompt?: Maybe<Scalars['String']['output']>;
   /** Underlying query configuration used to fetch data for this monitor */
@@ -23568,6 +23571,13 @@ export type WorkbenchMonitorQueryVariables = Exact<{
 
 
 export type WorkbenchMonitorQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', alertTemplate?: string | null, evaluationCron: string, nextRunAt?: string | null, prompt?: string | null, id: string, name: string, description?: string | null, type: MonitorType, state?: AlertState | null, severity: AlertSeverity, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', tool?: string | null, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, query: string, options?: { __typename?: 'MonitorLogOptions', azure?: { __typename?: 'MonitorLogAzureOptions', resourceId?: string | null } | null } | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } | null, metrics?: { __typename?: 'MonitorMetricsQuery', tool?: string | null, query: string, step?: string | null, duration?: string | null, options?: { __typename?: 'MonitorMetricsOptions', azure?: { __typename?: 'MonitorMetricsAzureOptions', resourceId?: string | null, metricsNamespace?: string | null, aggregation?: string | null, filter?: string | null, orderBy?: string | null, rollUpBy?: string | null, metricsEndpoint?: string | null } | null } | null } | null }, workbench?: { __typename?: 'Workbench', id: string } | null, service?: { __typename?: 'ServiceDeployment', id: string } | null } | null };
+
+export type WorkbenchMonitorPreviewQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchMonitorPreviewQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', id: string, preview?: { __typename?: 'AlertTimeseries', threshold?: number | null, metrics?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null } | null };
 
 export type WorkbenchMonitorJobsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -50694,6 +50704,56 @@ export type WorkbenchMonitorQueryHookResult = ReturnType<typeof useWorkbenchMoni
 export type WorkbenchMonitorLazyQueryHookResult = ReturnType<typeof useWorkbenchMonitorLazyQuery>;
 export type WorkbenchMonitorSuspenseQueryHookResult = ReturnType<typeof useWorkbenchMonitorSuspenseQuery>;
 export type WorkbenchMonitorQueryResult = Apollo.QueryResult<WorkbenchMonitorQuery, WorkbenchMonitorQueryVariables>;
+export const WorkbenchMonitorPreviewDocument = gql`
+    query WorkbenchMonitorPreview($id: ID!) {
+  monitor(id: $id) {
+    id
+    preview {
+      threshold
+      metrics {
+        timestamp
+        value
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchMonitorPreviewQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchMonitorPreviewQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchMonitorPreviewQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchMonitorPreviewQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchMonitorPreviewQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables> & ({ variables: WorkbenchMonitorPreviewQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>(WorkbenchMonitorPreviewDocument, options);
+      }
+export function useWorkbenchMonitorPreviewLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>(WorkbenchMonitorPreviewDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchMonitorPreviewSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>;
+export function useWorkbenchMonitorPreviewSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchMonitorPreviewQuery | undefined, WorkbenchMonitorPreviewQueryVariables>;
+export function useWorkbenchMonitorPreviewSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>(WorkbenchMonitorPreviewDocument, options);
+        }
+export type WorkbenchMonitorPreviewQueryHookResult = ReturnType<typeof useWorkbenchMonitorPreviewQuery>;
+export type WorkbenchMonitorPreviewLazyQueryHookResult = ReturnType<typeof useWorkbenchMonitorPreviewLazyQuery>;
+export type WorkbenchMonitorPreviewSuspenseQueryHookResult = ReturnType<typeof useWorkbenchMonitorPreviewSuspenseQuery>;
+export type WorkbenchMonitorPreviewQueryResult = Apollo.QueryResult<WorkbenchMonitorPreviewQuery, WorkbenchMonitorPreviewQueryVariables>;
 export const WorkbenchMonitorJobsDocument = gql`
     query WorkbenchMonitorJobs($id: ID!, $monitorId: ID!, $first: Int = 20, $after: String) {
   workbench(id: $id) {
@@ -51092,6 +51152,7 @@ export const namedOperations = {
     WorkbenchDashboardGraph: 'WorkbenchDashboardGraph',
     WorkbenchDashboardInput: 'WorkbenchDashboardInput',
     WorkbenchMonitor: 'WorkbenchMonitor',
+    WorkbenchMonitorPreview: 'WorkbenchMonitorPreview',
     WorkbenchMonitorJobs: 'WorkbenchMonitorJobs'
   },
   Mutation: {
