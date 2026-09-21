@@ -830,21 +830,20 @@ const EyebrowSC = styled.p(({ theme }) => ({
   margin: 0,
 }))
 
-const ScrollSC = styled.div(({ theme }) => ({
-  display: 'flex',
+const ScrollSC = styled.div({
   flex: 1,
-  flexDirection: 'column',
   minHeight: 0,
   overflow: 'auto',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-}))
-
-const BodySC = styled.div({
-  display: 'flex',
-  flex: 1,
-  flexDirection: 'column',
-  minHeight: 0,
 })
+
+const BodySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  // Padding lives on the scroll child — flex scroll containers drop
+  // padding-bottom from the scrollable overflow area.
+  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  paddingBottom: theme.spacing.xlarge,
+}))
 
 const TitleBlockSC = styled.div(({ theme }) => ({
   display: 'flex',
