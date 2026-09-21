@@ -48,7 +48,9 @@ defmodule Console.AI.Provider.OpenAITest do
          }}
       end)
 
-      assert {:ok, "ok"} = Provider.completion([{:user, "ping"}], preface: :ignore)
+      assert {:ok, %Response{} = response} =
+               Provider.reqllm_completion([{:user, "ping"}], preface: :ignore)
+      assert Response.text(response) == "ok"
     end
 
     test "passes configured accept header through to Req" do

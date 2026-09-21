@@ -15,7 +15,16 @@ import {
 } from 'components/utils/typography/Text'
 import { WorkbenchJobUsageFragment } from 'generated/graphql'
 import { DefaultTheme, useTheme } from 'styled-components'
-import { formatTokenCost, formatTokenCount } from '../../common/workbenchUsage'
+import {
+  billedTokenCount,
+  cachedPromptPercentageLabel,
+  cachedShareOfPrompt,
+  formatTokenCost,
+  formatTokenCount,
+  inputShareOfTotal,
+  outputShareOfTotal,
+  reasoningShareOfOutput,
+} from '../../common/workbenchUsage'
 import { useMemo } from 'react'
 
 function usageCardBackground(theme: DefaultTheme) {
@@ -101,11 +110,7 @@ function TokenBreakdown({
     usage?.reasoningTokens != null
 
   const rows = useMemo(() => deriveTokenRows(usage, theme), [usage, theme])
-  const derivedTotalTokens = rows.reduce((sum, row) => sum + row.value, 0)
-  const totalTokens =
-    usage?.totalTokens && usage.totalTokens > 0
-      ? usage.totalTokens
-      : Math.max(derivedTotalTokens, 1)
+  const totalTokens = billedTokenCount(usage)
 
   if (!hasAnyTokens) {
     return (
@@ -189,7 +194,7 @@ function TokenBreakdown({
               css={{ gridColumn: '1 / -1', marginTop: 0 }}
               height={8}
               mode="determinate"
-              progress={Math.min(row.value / totalTokens, 1)}
+              progress={row.progress}
               progressColor={row.color}
               completeColor={row.color}
             />
@@ -314,6 +319,7 @@ type BreakdownRow = {
   name: string
   extras?: string
   value: number
+  progress: number
   color: string
 }
 
@@ -321,30 +327,27 @@ function deriveTokenRows(
   usage: Nullable<WorkbenchJobUsageFragment>,
   theme: DefaultTheme
 ): Array<BreakdownRow> {
-  const cachedTokensPercentage =
-    ((usage?.cachedTokens ?? 0) / Math.max(usage?.inputTokens ?? 1, 1)) * 100
-
   return [
     {
       id: 'input-tokens',
       name: 'Input tokens',
       value: usage?.inputTokens ?? -1,
+      progress: inputShareOfTotal(usage),
       color: theme.colors['graph-blue'],
     },
     {
       id: 'output-tokens',
       name: 'Output tokens',
       value: usage?.outputTokens ?? -1,
+      progress: outputShareOfTotal(usage),
       color: theme.colors['graph-green'],
     },
     {
       id: 'cached-tokens',
       name: 'Cached tokens',
-      extras:
-        cachedTokensPercentage > 0
-          ? `${cachedTokensPercentage.toFixed(0)}% of input`
-          : undefined,
+      extras: cachedPromptPercentageLabel(usage),
       value: usage?.cachedTokens ?? -1,
+      progress: cachedShareOfPrompt(usage),
       color: theme.colors['graph-lilac'],
     },
     {
@@ -352,6 +355,7 @@ function deriveTokenRows(
       name: 'Reasoning tokens',
       extras: 'incl. in output',
       value: usage?.reasoningTokens ?? -1,
+      progress: reasoningShareOfOutput(usage),
       color: theme.colors['graph-red'],
     },
   ].filter((row) => row.value > -1)

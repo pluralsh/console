@@ -32,12 +32,11 @@ defmodule Console.AI.Azure do
   @doc """
   Generate a openai completion
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = az, messages, opts) do
     messages
     |> reqllm_messages()
     |> generate_text("azure:#{select_model(az, opts[:model], opts[:client])}", az.stream, base_opts(provider_options(az, az.model) ++ [tools: tools(opts)], opts))
-    |> reqllm_result()
   end
 
   @doc """

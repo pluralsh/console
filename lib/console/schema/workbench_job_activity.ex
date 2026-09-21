@@ -156,7 +156,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> validate_required([:status, :type, :prompt, :workbench_job_id])
   end
 
-  defp tool_call_changeset(model, attrs) do
+  def tool_call_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(call_id name arguments)a)
     |> sanitize_text([:call_id, :name, :arguments])

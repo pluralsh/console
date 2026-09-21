@@ -152,6 +152,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
   def upsert_mcp_server(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Flows.upsert_mcp_server(attrs, user)
 
+  def update_mcp_server(
+        %{id: id, attributes: attrs},
+        %{context: %{current_user: user}}
+      ),
+    do: Flows.update_mcp_server(attrs, id, user)
+
   def delete_mcp_server(%{id: id}, %{context: %{current_user: user}}),
     do: Flows.delete_mcp_server(id, user)
 

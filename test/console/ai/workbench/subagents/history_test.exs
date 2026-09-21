@@ -4,7 +4,7 @@ defmodule Console.AI.Workbench.Subagents.HistoryTest do
   use Mimic
 
   alias Console.AI.Workbench.{Subagents.History, Environment}
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
 
   import ElasticsearchUtils
 
@@ -54,7 +54,7 @@ defmodule Console.AI.Workbench.Subagents.HistoryTest do
           prompt: "What did we conclude about DATABASE_TIMEOUT?"
         )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "Searching prior activities",
          [
            %Tool{
@@ -65,7 +65,7 @@ defmodule Console.AI.Workbench.Subagents.HistoryTest do
          ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "Summarizing",
          [
            %Tool{

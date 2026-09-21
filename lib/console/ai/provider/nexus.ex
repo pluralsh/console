@@ -84,7 +84,7 @@ defmodule Console.AI.Nexus do
 
   Delegates to the OpenAI provider with the Nexus URL and token configured.
   """
-  @spec completion(t(), Console.AI.Provider.history(), keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{url: url, model: model} = nexus, messages, opts) when is_binary(url) do
     openai_client(nexus, model)
     |> OpenAI.completion(messages, opts)

@@ -3,6 +3,7 @@ import {
   Flex,
   IconFrame,
   ListIcon,
+  PencilIcon,
   PeopleIcon,
   Spinner,
   TrashCanIcon,
@@ -11,26 +12,28 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
 import { McpServerFragment } from 'generated/graphql'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getAiSettingsMcpServerEditAbsPath } from 'routes/settingsRoutesConst'
 import { McpAuditModal } from './McpAuditTable'
-import { ViewMcpServerDetails } from './McpServerDetails'
 import {
   PermissionsIdType,
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
 
 export type McpTableAction =
-  'audit' | 'permissions' | 'view' | 'removeConnection'
+  'audit' | 'permissions' | 'edit' | 'removeConnection'
 
 const columnHelper = createColumnHelper<McpServerFragment>()
 
 export const ColInfo = columnHelper.accessor((server) => server, {
   id: 'name',
   header: '',
-  meta: { gridTemplate: '1fr' },
+  meta: { gridTemplate: 'minmax(0, 1fr)' },
   cell: function Cell({ getValue }) {
     const { name, url } = getValue()
     return (
       <StackedText
+        truncate
         first={name}
         firstPartialType="body2Bold"
         firstColor="text"
@@ -51,6 +54,7 @@ export const ColConfirm = columnHelper.accessor((server) => server.confirm, {
 export const ColActions = columnHelper.accessor((server) => server, {
   id: 'actions',
   header: '',
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue, table: { options } }) {
     const { actions, removeServer, loading } =
       (options.meta as {
@@ -60,7 +64,13 @@ export const ColActions = columnHelper.accessor((server) => server, {
       }) ?? {}
     const server = getValue()
     return (
-      <Flex gap="xsmall">
+      <Flex
+        gap="xsmall"
+        align="center"
+        justify="flex-end"
+        css={{ flexShrink: 0 }}
+      >
+        <EditAction server={server} />
         {actions?.includes('audit') && (
           <AuditAction
             id={server.id}
@@ -69,13 +79,6 @@ export const ColActions = columnHelper.accessor((server) => server, {
         )}
         {actions?.includes('permissions') && (
           <PermissionsAction server={server} />
-        )}
-        {actions?.includes('view') && (
-          <ViewAction
-            server={server}
-            removeServer={removeServer}
-            loading={loading}
-          />
         )}
         {actions?.includes('removeConnection') && (
           <RemoveConnectionAction
@@ -88,6 +91,18 @@ export const ColActions = columnHelper.accessor((server) => server, {
     )
   },
 })
+
+function EditAction({ server }: { server: McpServerFragment }) {
+  return (
+    <IconFrame
+      clickable
+      as={Link}
+      to={getAiSettingsMcpServerEditAbsPath({ mcpServerId: server.id })}
+      tooltip="Edit MCP server"
+      icon={<PencilIcon />}
+    />
+  )
+}
 
 function AuditAction({ id, name }: { id: string; name: string }) {
   const [showModal, setShowModal] = useState(false)
@@ -135,25 +150,6 @@ function PermissionsAction({
         onClose={() => setShowPermissions(false)}
       />
     </>
-  )
-}
-
-function ViewAction({
-  server,
-  removeServer,
-  loading,
-}: {
-  server: McpServerFragment
-  removeServer?: (server: McpServerFragment) => void
-  loading?: boolean
-}) {
-  const onDisconnect = removeServer ? () => removeServer(server) : undefined
-  return (
-    <ViewMcpServerDetails
-      server={server}
-      onDisconnect={onDisconnect}
-      loading={loading}
-    />
   )
 }
 

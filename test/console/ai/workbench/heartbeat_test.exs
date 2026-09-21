@@ -16,6 +16,65 @@ defmodule Console.AI.Workbench.HeartbeatTest do
   }
 
   describe "usage_callback/2" do
+    test "includes separate Bedrock Anthropic cache counters in total tokens" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "anthropic.claude-sonnet-4-6",
+        nil,
+        %{
+          input_tokens: 824,
+          output_tokens: 19_000,
+          total_tokens: 19_824,
+          cached_tokens: 667_000,
+          cache_creation_tokens: 1_000
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.input_tokens == 824
+      assert usage.output_tokens == 19_000
+      assert usage.cached_tokens == 667_000
+      assert usage.total_tokens == 687_824
+    end
+
+    test "preserves a larger provider total for Bedrock Anthropic usage" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "anthropic.claude-sonnet-4-6",
+        nil,
+        %{
+          input_tokens: 100,
+          output_tokens: 50,
+          total_tokens: 1_000,
+          cached_tokens: 600,
+          cache_creation_tokens: 150
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.total_tokens == 1_000
+    end
+
     test "backfills missing costs using the configured tool model price sheet" do
       settings = deployment_settings(ai: %{
         enabled: true,

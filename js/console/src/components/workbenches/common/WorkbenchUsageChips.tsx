@@ -1,12 +1,16 @@
 import { Chip } from '@pluralsh/design-system'
-import { formatTokenCost, formatTokenCount } from './workbenchUsage'
+import {
+  billedTokenCount,
+  formatTokenCost,
+  formatTokenCount,
+  type TokenUsageCounts,
+} from './workbenchUsage'
 import { CaptionP } from '../../utils/typography/Text'
 import { useTheme } from 'styled-components'
 import type { WorkbenchJobBudget } from 'generated/graphql'
 
-type UsageChipData = {
+type UsageChipData = TokenUsageCounts & {
   totalCost?: Nullable<number>
-  totalTokens?: Nullable<number>
 }
 
 type BudgetChipData = Pick<WorkbenchJobBudget, 'cost' | 'tokens'>
@@ -23,8 +27,14 @@ export function isUsageOverBudget(
 ) {
   if (!usage || !budget) return false
 
-  if (budget.tokens != null && budget.tokens > 0 && usage.totalTokens != null)
-    return usage.totalTokens >= budget.tokens
+  if (
+    budget.tokens != null &&
+    budget.tokens > 0 &&
+    (usage.totalTokens != null ||
+      usage.inputTokens != null ||
+      usage.outputTokens != null)
+  )
+    return billedTokenCount(usage) >= budget.tokens
 
   if (budget.cost != null && budget.cost > 0 && usage.totalCost != null)
     return usage.totalCost >= budget.cost
@@ -106,7 +116,7 @@ export function WorkbenchUsageSummaryChip({
   }
 
   const cost = formatTokenCost(usage?.totalCost)
-  const tokens = formatTokenCount(usage?.totalTokens)
+  const tokens = usage ? formatTokenCount(billedTokenCount(usage)) : undefined
 
   if (!cost && !tokens) return <>-</>
 
@@ -155,7 +165,7 @@ export function WorkbenchUsageChips({
   }
 
   const cost = formatTokenCost(usage?.totalCost)
-  const tokens = formatTokenCount(usage?.totalTokens)
+  const tokens = usage ? formatTokenCount(billedTokenCount(usage)) : undefined
 
   if (!cost && !tokens) return null
 

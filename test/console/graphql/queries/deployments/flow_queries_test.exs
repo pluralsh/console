@@ -451,6 +451,32 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
 
       assert found["id"] == mcp_server.id
     end
+
+    test "it obfuscates mcp server header values" do
+      user = insert(:user)
+      mcp_server = insert(:mcp_server,
+        read_bindings: [%{user_id: user.id}],
+        authentication: %{headers: [%{name: "Authorization", value: "super-secret"}]}
+      )
+
+      {:ok, %{data: %{"mcpServer" => found}}} = run_query("""
+        query mcpServer($id: ID!) {
+          mcpServer(id: $id) {
+            authentication {
+              headers {
+                name
+                value
+              }
+            }
+          }
+        }
+      """, %{"id" => mcp_server.id}, %{current_user: user})
+
+      [header] = found["authentication"]["headers"]
+      assert header["name"] == "Authorization"
+      assert header["value"] == Console.Schema.McpServer.obfuscated_header_value()
+      refute header["value"] == "super-secret"
+    end
   end
 
   describe "previewEnvironmentTemplate" do
