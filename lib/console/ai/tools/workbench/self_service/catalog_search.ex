@@ -28,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.SelfService.CatalogSearch do
 
   def implement(%__MODULE__{query: query}) do
     with {:actor, %{} = user} <- {:actor, Tool.actor()},
-         {:search, user, {:ok, results}} <- {:search, user, Git.catalog_search(query, user: user)} do
+         {:search, ^user, {:ok, results}} <- {:search, user, Git.catalog_search(query, user: user)} do
       format_results(results)
     else
       {:actor, _} ->
