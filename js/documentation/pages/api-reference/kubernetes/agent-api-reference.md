@@ -14,6 +14,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [AgentRuntime](#agentruntime)
 - [ClusterDrain](#clusterdrain)
 - [CustomHealth](#customhealth)
+- [ImageWarmer](#imagewarmer)
 - [IngressReplica](#ingressreplica)
 - [KubecostExtractor](#kubecostextractor)
 - [MetricsAggregate](#metricsaggregate)
@@ -276,6 +277,7 @@ _Appears in:_
 | `dind` _boolean_ | Dind enables Docker-in-Docker for this agent runtime.<br />When true, the runtime will be configured to run with DinD support. |  | Optional: \{\} <br /> |
 | `memory` _boolean_ | Memory enables team-shared codebase-memory persistence for this agent runtime.<br />When true, agents may create and commit .codebase-memory/ graph artifacts<br />by default so future runs can bootstrap from the persisted index. When false<br />or unset, codebase-memory indexes stay in the pod-local cache and generated<br />.codebase-memory/ artifacts are excluded from commits. |  | Optional: \{\} <br /> |
 | `repositoryImage` _string_ | RepositoryImage is an OCI image of precloned git repositories plus manifest.json.<br />When set, an init container copies it into /plural/shared/repos before bootstrap<br />so a matching repo can be copied locally instead of git clone. |  | Optional: \{\} <br /> |
+| `prewarm` _[RepositoryImagePrewarm](#repositoryimageprewarm)_ | Prewarm periodically pulls RepositoryImage onto selected nodes before<br />agent runs are scheduled. |  | Optional: \{\} <br /> |
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this runtime. |  | Optional: \{\} <br /> |
 | `browser` _[BrowserConfig](#browserconfig)_ | Browser configuration augments agent runtime with a headless browser.<br />When provided, the runtime will be configured to run with a headless browser available<br />for the agent to use. |  | Optional: \{\} <br /> |
 | `bootstrapScript` _string_ | BootstrapScript is a bash script that will be executed inside the cloned repository<br />directory before the coding agent starts. It can be used to install dependencies,<br />configure tooling, or perform any other setup required by the agent. |  | Optional: \{\} <br /> |
@@ -287,6 +289,8 @@ _Appears in:_
 | `scmConnection` _string_ | ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.<br />This should match the name of an existing ScmConnection resource or connection created in the Plural UI. |  | Optional: \{\} <br /> |
 | `exaConnection` _[ExaConnection](#exaconnection)_ | ExaConnection enables Exa web search and content retrieval tools on the Plural MCP server. |  |  |
 | `mcpServers` _[MCPServer](#mcpserver) array_ | MCPServers are additional remote MCP servers made available to coding agents<br />on this runtime. Servers are expected to already be deployed and reachable<br />at the given URL. Built-in servers named "plural" and "codebase-memory-mcp"<br />are reserved and cannot be overridden. |  | Optional: \{\} <br /> |
+
+
 
 
 #### Binding
@@ -780,6 +784,46 @@ _Appears in:_
 | `vcluster` _[VClusterHelmConfiguration](#vclusterhelmconfiguration)_ | VCluster allows configuring vcluster specific helm chart options. |  | Optional: \{\} <br /> |
 
 
+#### ImageWarmer
+
+
+
+ImageWarmer is the Schema for the imagewarmers API.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `ImageWarmer` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[ImageWarmerSpec](#imagewarmerspec)_ |  |  |  |
+
+
+#### ImageWarmerSpec
+
+
+
+ImageWarmerSpec defines an image that should periodically be pulled onto
+every selected node.
+
+
+
+_Appears in:_
+- [ImageWarmer](#imagewarmer)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `cron` _string_ | Cron is a standard five-field cron expression controlling how often the<br />image is refreshed. |  | MinLength: 1 <br />Required: \{\} <br /> |
+| `image` _string_ | Image is the OCI image to warm. |  | MinLength: 1 <br />Required: \{\} <br /> |
+| `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template optionally overrides the secure default warmer pod template. |  | Optional: \{\} <br /> |
+| `selector` _[LabelSelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#labelselector-v1-meta)_ | Selector restricts warming to nodes matching this label selector. |  | Optional: \{\} <br /> |
+
+
+
+
 #### IngressReplica
 
 
@@ -1155,6 +1199,24 @@ _Appears in:_
 | `requireAnnotations` _object (keys:string, values:string)_ |  |  |  |
 
 
+#### RepositoryImagePrewarm
+
+
+
+RepositoryImagePrewarm configures periodic repository image warming.
+
+
+
+_Appears in:_
+- [AgentRuntimeSpec](#agentruntimespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `cron` _string_ | Cron is a standard five-field cron expression controlling how often the<br />repository image is refreshed. |  | MinLength: 1 <br />Required: \{\} <br /> |
+| `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template optionally overrides the secure default warmer pod template. |  | Optional: \{\} <br /> |
+| `selector` _[LabelSelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#labelselector-v1-meta)_ | Selector restricts warming to nodes matching this label selector. |  | Optional: \{\} <br /> |
+
+
 #### SentinelRunJob
 
 
@@ -1237,6 +1299,7 @@ _Appears in:_
 
 _Appears in:_
 - [AgentRunStatus](#agentrunstatus)
+- [AgentRuntimeStatus](#agentruntimestatus)
 - [SentinelRunJobStatus](#sentinelrunjobstatus)
 - [StackRunJobStatus](#stackrunjobstatus)
 - [VirtualClusterStatus](#virtualclusterstatus)

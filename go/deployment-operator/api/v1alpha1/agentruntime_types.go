@@ -20,6 +20,7 @@ func secretKeySelectorSet(ref *corev1.SecretKeySelector) bool {
 // AgentRuntimeSpec defines the desired state of AgentRuntime
 //
 // +kubebuilder:validation:XValidation:rule="!has(self.streamingProxy) || !self.streamingProxy || (has(self.aiProxy) && self.aiProxy)",message="streamingProxy requires aiProxy to be enabled"
+// +kubebuilder:validation:XValidation:rule="!has(self.prewarm) || has(self.repositoryImage)",message="prewarm requires repositoryImage"
 type AgentRuntimeSpec struct {
 	// Name of this AgentRuntime.
 	// If not provided, the name from AgentRuntime.ObjectMeta will be used.
@@ -90,6 +91,11 @@ type AgentRuntimeSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryImage *string `json:"repositoryImage,omitempty"`
 
+	// Prewarm periodically pulls RepositoryImage onto selected nodes before
+	// agent runs are scheduled.
+	// +kubebuilder:validation:Optional
+	Prewarm *RepositoryImagePrewarm `json:"prewarm,omitempty"`
+
 	// AllowedRepositories the git repositories allowed to be used with this runtime.
 	// +kubebuilder:validation:Optional
 	AllowedRepositories []string `json:"allowedRepositories,omitempty"`
@@ -148,6 +154,23 @@ type AgentRuntimeSpec struct {
 	// +listType=map
 	// +listMapKey=name
 	MCPServers []MCPServer `json:"mcpServers,omitempty"`
+}
+
+// RepositoryImagePrewarm configures periodic repository image warming.
+type RepositoryImagePrewarm struct {
+	// Cron is a standard five-field cron expression controlling how often the
+	// repository image is refreshed.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	Cron string `json:"cron"`
+
+	// Template optionally overrides the secure default warmer pod template.
+	// +kubebuilder:validation:Optional
+	Template *corev1.PodTemplateSpec `json:"template,omitempty"`
+
+	// Selector restricts warming to nodes matching this label selector.
+	// +kubebuilder:validation:Optional
+	Selector *metav1.LabelSelector `json:"selector,omitempty"`
 }
 
 // MCPServer is a remote MCP server exposed to agent runtimes.
@@ -930,6 +953,15 @@ type AgentRuntimeBindings struct {
 	Create []Binding `json:"create,omitempty"`
 }
 
+type AgentRuntimeStatus struct {
+	Status `json:",inline"`
+
+	// ImageWarmerName is the generated name of the ImageWarmer managed for
+	// this runtime.
+	// +kubebuilder:validation:Optional
+	ImageWarmerName *string `json:"imageWarmerName,omitempty"`
+}
+
 func (in *AgentRuntime) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	currentSha, err := hasher(in.Attributes())
 	if err != nil {
@@ -1005,8 +1037,8 @@ type AgentRuntime struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   AgentRuntimeSpec `json:"spec,omitempty"`
-	Status Status           `json:"status,omitempty"`
+	Spec   AgentRuntimeSpec   `json:"spec,omitempty"`
+	Status AgentRuntimeStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

@@ -29,6 +29,45 @@ Tags:
 
 Pin the date tag for reproducible runs. If the image is private, set `spec.template.spec.imagePullSecrets`.
 
+## Prewarm the image on cluster nodes
+
+Pulling a large repository image when an agent starts can still add latency. Add `spec.prewarm` to pull `repositoryImage` onto eligible nodes ahead of time:
+
+```yaml
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentRuntime
+metadata:
+  name: claude
+spec:
+  type: CLAUDE
+  targetNamespace: agents
+  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  prewarm:
+    cron: "0 * * * *"
+    selector:
+      matchLabels:
+        plural.sh/agent-pool: default
+    template:
+      spec:
+        tolerations:
+          - key: plural.sh/agent
+            operator: Exists
+        imagePullSecrets:
+          - name: repository-registry
+        containers:
+          - name: image-warmer
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+```
+
+`cron` is a standard five-field cron expression. The operator warms once when the configuration is first created, then follows the schedule. `selector` matches node labels; omit it to warm all schedulable nodes. `template` optionally overrides the generated warmer pod template. Container-specific overrides must target the `image-warmer` container by name. For a private image, repeat the required `imagePullSecrets` in this prewarm template; the agent pod template is configured separately.
+
+Under the hood, the operator creates an `ImageWarmer` resource in its own namespace and a temporary DaemonSet with `imagePullPolicy: Always`. Its generated name is recorded in `AgentRuntime.status.imageWarmerName`. After its pod is ready on every selected node, the operator removes the DaemonSet; the pulled image remains in each node's container image cache. The default pod runs as uid/gid `65532`, drops all capabilities, uses a read-only root filesystem and runtime-default seccomp, disallows privilege escalation, and does not mount a service account token. Template settings can override these defaults when required.
+
+Changing `repositoryImage` updates the generated `ImageWarmer`. Removing `prewarm` removes it. Prewarming reduces image-pull latency, but node image garbage collection may evict the cached image before the next scheduled refresh.
+
 ## How it works
 
 1. The operator starts a `repository-prebake` init container from `repositoryImage`.

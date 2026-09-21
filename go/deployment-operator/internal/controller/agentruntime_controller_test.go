@@ -3,13 +3,58 @@ package controller
 import (
 	"context"
 	"errors"
+	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
 	"github.com/stretchr/testify/mock"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
+
+func TestAgentRuntimeReconcileImageWarmer(t *testing.T) {
+	g := NewWithT(t)
+	scheme := runtime.NewScheme()
+	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+
+	image := "example.com/repository:v1"
+	agentRuntime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "claude", UID: types.UID("runtime-uid")},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			RepositoryImage: &image,
+			Prewarm:         &v1alpha1.RepositoryImagePrewarm{Cron: "0 * * * *"},
+		},
+	}
+	k8sClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+	reconciler := &AgentRuntimeReconciler{
+		Client:            k8sClient,
+		Scheme:            scheme,
+		OperatorNamespace: "plrl-deploy-operator",
+	}
+
+	g.Expect(reconciler.reconcileImageWarmer(context.Background(), agentRuntime)).To(Succeed())
+	g.Expect(agentRuntime.Status.ImageWarmerName).NotTo(BeNil())
+	g.Expect(*agentRuntime.Status.ImageWarmerName).To(MatchRegexp(`^claude-[a-z0-9]{4}$`))
+
+	key := client.ObjectKey{Name: *agentRuntime.Status.ImageWarmerName, Namespace: reconciler.OperatorNamespace}
+	warmer := &v1alpha1.ImageWarmer{}
+	g.Expect(k8sClient.Get(context.Background(), key, warmer)).To(Succeed())
+	g.Expect(warmer.Spec.Image).To(Equal(image))
+	g.Expect(metav1.IsControlledBy(warmer, agentRuntime)).To(BeTrue())
+
+	agentRuntime.Spec.Prewarm = nil
+	g.Expect(reconciler.reconcileImageWarmer(context.Background(), agentRuntime)).To(Succeed())
+	g.Expect(agentRuntime.Status.ImageWarmerName).To(BeNil())
+	err := k8sClient.Get(context.Background(), key, &v1alpha1.ImageWarmer{})
+	g.Expect(k8serrors.IsNotFound(err)).To(BeTrue())
+}
 
 var _ = Describe("AgentRuntime Controller", func() {
 	Describe("createRunFromID", func() {

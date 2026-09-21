@@ -56,6 +56,11 @@ spec:
             - --v=3
   dind: true
   repositoryImage: docker.io/pluralsh/console-repos:latest
+  prewarm:
+    cron: "0 * * * *"
+    selector:
+      matchLabels:
+        plural.sh/agent-pool: default
   readOnlyRootFilesystem: false
   mise:
     config: |

@@ -33,6 +33,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	consoleclient "github.com/pluralsh/console/go/deployment-operator/pkg/client"
@@ -143,6 +144,11 @@ func registerKubeReconcilersOrDie(
 	cluster, err := extConsoleClient.MyCluster()
 	if err != nil {
 		setupLog.Error(err, "unable to get cluster information from console")
+		os.Exit(1)
+	}
+	operatorNamespace, err := utils.GetOperatorNamespace()
+	if err != nil {
+		setupLog.Error(err, "unable to get operator namespace")
 		os.Exit(1)
 	}
 
@@ -314,17 +320,25 @@ func registerKubeReconcilersOrDie(
 	}
 
 	agentRuntimeReconciler := &controller.AgentRuntimeReconciler{
-		Client:           manager.GetClient(),
-		Scheme:           manager.GetScheme(),
-		ConsoleClient:    extConsoleClient,
-		CacheSyncTimeout: args.PollInterval() * 3,
-		Ctx:              ctx,
-		ClusterID:        cluster.MyCluster.ID,
+		Client:            manager.GetClient(),
+		Scheme:            manager.GetScheme(),
+		ConsoleClient:     extConsoleClient,
+		CacheSyncTimeout:  args.PollInterval() * 3,
+		Ctx:               ctx,
+		ClusterID:         cluster.MyCluster.ID,
+		OperatorNamespace: operatorNamespace,
 	}
 	if err := agentRuntimeReconciler.SetupWithManager(manager); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "AgentRuntime")
 	}
 	consoleManager.Socket.AddPublisher("agent_run", agentRuntimeReconciler)
+
+	if err := (&controller.ImageWarmerReconciler{
+		Client: manager.GetClient(),
+		Scheme: manager.GetScheme(),
+	}).SetupWithManager(manager); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ImageWarmer")
+	}
 
 	if err := (&controller.AgentRunReconciler{
 		Client:           manager.GetClient(),

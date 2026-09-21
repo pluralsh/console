@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
@@ -12,11 +13,13 @@ import (
 	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	k8srand "k8s.io/apimachinery/pkg/util/rand"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -38,16 +41,18 @@ var pendingAgentRunFetchDelay = 2 * time.Second
 // AgentRuntimeReconciler reconciles a AgentRuntime object
 type AgentRuntimeReconciler struct {
 	client.Client
-	ConsoleClient    consoleclient.Client
-	Scheme           *runtime.Scheme
-	CacheSyncTimeout time.Duration
-	Ctx              context.Context
-	ClusterID        string
+	ConsoleClient     consoleclient.Client
+	Scheme            *runtime.Scheme
+	CacheSyncTimeout  time.Duration
+	Ctx               context.Context
+	ClusterID         string
+	OperatorNamespace string
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=agentruntimes,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=agentruntimes/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=agentruntimes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=imagewarmers,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -114,6 +119,11 @@ func (r *AgentRuntimeReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	// Mark as synchronized after the agent runtime is synchronized with the Console API.
 	utils.MarkCondition(agentRuntime.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
+	if err := r.reconcileImageWarmer(ctx, agentRuntime); err != nil {
+		utils.MarkCondition(agentRuntime.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	var allErrors []error
 	pager := r.ListAgentRuntimePendingRuns(ctx, agentRuntime.Status.GetID())
 	for pager.HasNext() {
@@ -146,7 +156,104 @@ func (r *AgentRuntimeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1, CacheSyncTimeout: r.CacheSyncTimeout}).
 		For(&v1alpha1.AgentRuntime{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&v1alpha1.ImageWarmer{}).
 		Complete(r)
+}
+
+func (r *AgentRuntimeReconciler) reconcileImageWarmer(ctx context.Context, agentRuntime *v1alpha1.AgentRuntime) error {
+	enabled := agentRuntime.Spec.Prewarm != nil &&
+		agentRuntime.Spec.RepositoryImage != nil &&
+		*agentRuntime.Spec.RepositoryImage != ""
+	if !enabled {
+		if agentRuntime.Status.ImageWarmerName == nil {
+			return nil
+		}
+		key := client.ObjectKey{Name: *agentRuntime.Status.ImageWarmerName, Namespace: r.OperatorNamespace}
+		current := &v1alpha1.ImageWarmer{}
+		if err := r.Get(ctx, key, current); err == nil {
+			if err := r.Delete(ctx, current); err != nil {
+				return fmt.Errorf("failed to delete image warmer: %w", err)
+			}
+		} else if !errors.IsNotFound(err) {
+			return fmt.Errorf("failed to get image warmer: %w", err)
+		}
+		agentRuntime.Status.ImageWarmerName = nil
+		return nil
+	}
+
+	desiredSpec := v1alpha1.ImageWarmerSpec{
+		Cron:     agentRuntime.Spec.Prewarm.Cron,
+		Image:    *agentRuntime.Spec.RepositoryImage,
+		Template: agentRuntime.Spec.Prewarm.Template,
+		Selector: agentRuntime.Spec.Prewarm.Selector,
+	}
+
+	if agentRuntime.Status.ImageWarmerName == nil {
+		name, err := r.availableImageWarmerName(ctx, agentRuntime.Name)
+		if err != nil {
+			return err
+		}
+		agentRuntime.Status.ImageWarmerName = &name
+	}
+
+	key := client.ObjectKey{Name: *agentRuntime.Status.ImageWarmerName, Namespace: r.OperatorNamespace}
+	current := &v1alpha1.ImageWarmer{}
+	err := r.Get(ctx, key, current)
+	if errors.IsNotFound(err) {
+		warmer := &v1alpha1.ImageWarmer{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      key.Name,
+				Namespace: key.Namespace,
+				Labels:    map[string]string{v1alpha1.AgentRuntimeNameLabel: agentRuntime.Name},
+			},
+			Spec: desiredSpec,
+		}
+		// Kubernetes permits a namespaced dependent to reference a
+		// cluster-scoped owner. Garbage collection is a fallback to the
+		// explicit status-based cleanup.
+		if err := controllerutil.SetControllerReference(agentRuntime, warmer, r.Scheme); err != nil {
+			return fmt.Errorf("failed to set image warmer owner: %w", err)
+		}
+		if err := r.Create(ctx, warmer); err != nil {
+			return fmt.Errorf("failed to create image warmer: %w", err)
+		}
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("failed to get image warmer: %w", err)
+	}
+
+	if !apiequality.Semantic.DeepEqual(current.Spec, desiredSpec) {
+		current.Spec = desiredSpec
+		if err := r.Update(ctx, current); err != nil {
+			return fmt.Errorf("failed to update image warmer: %w", err)
+		}
+	}
+	return nil
+}
+
+func (r *AgentRuntimeReconciler) availableImageWarmerName(ctx context.Context, runtimeName string) (string, error) {
+	const (
+		suffixLength  = 4
+		maxAttempts   = 10
+		maxNameLength = 253
+	)
+
+	base := runtimeName
+	if len(base) > maxNameLength-suffixLength-1 {
+		base = strings.TrimRight(base[:maxNameLength-suffixLength-1], "-")
+	}
+	for range maxAttempts {
+		name := fmt.Sprintf("%s-%s", base, k8srand.String(suffixLength))
+		err := r.Get(ctx, client.ObjectKey{Name: name, Namespace: r.OperatorNamespace}, &v1alpha1.ImageWarmer{})
+		if errors.IsNotFound(err) {
+			return name, nil
+		}
+		if err != nil {
+			return "", fmt.Errorf("failed to check image warmer name availability: %w", err)
+		}
+	}
+	return "", fmt.Errorf("failed to generate an available image warmer name")
 }
 
 func (r *AgentRuntimeReconciler) ListAgentRuntimePendingRuns(ctx context.Context, id string) *algorithms.Pager[*console.ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges] {
@@ -174,6 +281,22 @@ func (r *AgentRuntimeReconciler) addOrRemoveFinalizer(ctx context.Context, agent
 
 	// If the agent runtime is being deleted, cleanup and remove the finalizer.
 	if !agentRuntime.GetDeletionTimestamp().IsZero() {
+		if agentRuntime.Status.ImageWarmerName != nil {
+			warmer := &v1alpha1.ImageWarmer{}
+			key := client.ObjectKey{Name: *agentRuntime.Status.ImageWarmerName, Namespace: r.OperatorNamespace}
+			if err := r.Get(ctx, key, warmer); err == nil {
+				if err := r.Delete(ctx, warmer); err != nil {
+					utils.MarkCondition(agentRuntime.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+					return lo.ToPtr(jitterRequeue(requeueWaitForResources, jitter))
+				}
+				return lo.ToPtr(jitterRequeue(requeueWaitForResources, jitter))
+			} else if !errors.IsNotFound(err) {
+				utils.MarkCondition(agentRuntime.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				return lo.ToPtr(jitterRequeue(requeueAfter, jitter))
+			}
+			agentRuntime.Status.ImageWarmerName = nil
+		}
+
 		existingAgentRuntime, err := r.ConsoleClient.GetAgentRuntimeByName(ctx, agentRuntime.ConsoleName(), r.ClusterID)
 		if err != nil {
 			if errors.IsNotFound(err) {
