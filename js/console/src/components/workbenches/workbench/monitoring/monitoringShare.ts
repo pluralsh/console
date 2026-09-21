@@ -24,14 +24,12 @@ export function buildMonitoringShareUrl({
   if (includeFiltersAndRange) {
     if (range) url.searchParams.set(MONITORING_SHARE_RANGE_PARAM, range)
     for (const [name, value] of Object.entries(variables ?? {})) {
+      const key = `${MONITORING_SHARE_INPUT_PREFIX}${name}`
       if (Array.isArray(value)) {
-        if (value.length === 0) continue
-        url.searchParams.set(
-          `${MONITORING_SHARE_INPUT_PREFIX}${name}`,
-          value.join(',')
-        )
+        // Repeated params (not comma-joined): option values may contain commas.
+        for (const v of value.filter(Boolean)) url.searchParams.append(key, v)
       } else if (value !== '') {
-        url.searchParams.set(`${MONITORING_SHARE_INPUT_PREFIX}${name}`, value)
+        url.searchParams.set(key, value)
       }
     }
   }
@@ -50,13 +48,12 @@ export function parseMonitoringShareSearch(search: string): {
     rangeParam && isMetricsTimeRange(rangeParam) ? rangeParam : undefined
 
   const variables: Record<string, string | string[]> = {}
-  for (const [key, value] of params.entries()) {
+  for (const key of new Set(params.keys())) {
     if (!key.startsWith(MONITORING_SHARE_INPUT_PREFIX)) continue
     const name = key.slice(MONITORING_SHARE_INPUT_PREFIX.length)
     if (!name) continue
-    variables[name] = value.includes(',')
-      ? value.split(',').filter(Boolean)
-      : value
+    const values = params.getAll(key)
+    variables[name] = values.length > 1 ? values : (values[0] ?? '')
   }
 
   return { range, variables }
