@@ -142,8 +142,6 @@ const DetailSC = styled.div({
   minHeight: 0,
   minWidth: 0,
   overflow: 'hidden',
-  position: 'relative',
-  zIndex: 2,
 })
 
 const PaddedSC = styled.div(({ theme }) => ({

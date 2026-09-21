@@ -39,6 +39,7 @@ import {
 } from 'generated/graphql'
 import { isEmpty, isNil, times, truncate, upperFirst } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
@@ -129,6 +130,156 @@ function MonitorDetailView({
     requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
   }, [fullscreen])
 
+  const main = (
+    <MainSC $fullscreen={fullscreen}>
+      {!fullscreen && (
+        <StripSC>
+          <EyebrowSC>Monitor</EyebrowSC>
+          <StripActionsSC>
+            <CaptionP $color="text-xlight">
+              {monitor.updatedAt
+                ? `updated ${fromNow(monitor.updatedAt)}`
+                : 'Never updated'}
+            </CaptionP>
+            <WorkbenchMonitoringSharePopover
+              kind="monitor"
+              pathname={pathname}
+            />
+            {workbenchId && (
+              <IconFrame
+                clickable
+                size="small"
+                type="tertiary"
+                icon={<GearTrainIcon />}
+                textValue="Monitor settings"
+                as={Link}
+                to={getWorkbenchMonitoringMonitorSettingsAbsPath({
+                  workbenchId,
+                  monitorId: monitor.id,
+                })}
+              />
+            )}
+            <IconFrame
+              ref={fullscreenTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon />}
+              textValue="Full screen"
+              onClick={openFullscreen}
+            />
+            <IconFrame
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<HamburgerMenuCollapsedIcon />}
+              textValue="Definition"
+              onClick={() => setDefinitionOpen(true)}
+            />
+          </StripActionsSC>
+        </StripSC>
+      )}
+      <ScrollSC>
+        <BodySC>
+          <TitleRowSC>
+            <TitleBlockSC>
+              <TitleSC>{monitor.name}</TitleSC>
+              {monitor.description && (
+                <Body1P
+                  $color="text-long-form"
+                  css={{ letterSpacing: '0.25px' }}
+                >
+                  {monitor.description}
+                </Body1P>
+              )}
+              {fullscreen && (
+                <CaptionP $color="text-xlight">
+                  {monitor.updatedAt
+                    ? `updated ${fromNow(monitor.updatedAt)}`
+                    : 'Never updated'}
+                </CaptionP>
+              )}
+            </TitleBlockSC>
+            {fullscreen && (
+              <ExitFullscreenButton onClick={() => setFullscreen(false)} />
+            )}
+          </TitleRowSC>
+          <ColumnsSC>
+            <DefinitionCardSC>
+              <DefinitionHeaderSC>
+                <Body1P css={{ margin: 0 }}>Definition</Body1P>
+                {!fullscreen && (
+                  <IconFrame
+                    clickable
+                    size="small"
+                    type="tertiary"
+                    icon={<HamburgerMenuCollapsedIcon />}
+                    textValue="Definition"
+                    onClick={() => setDefinitionOpen(true)}
+                  />
+                )}
+              </DefinitionHeaderSC>
+              <SectionSC>
+                <QueryHeaderSC>
+                  <Body2P $color="text-xlight">Query</Body2P>
+                  {toolName && (
+                    <Flex
+                      align="center"
+                      gap="xsmall"
+                    >
+                      <DashboardToolIcon
+                        tool={toolName}
+                        size={12}
+                      />
+                      <Body2P>{toolDisplayName(toolName)}</Body2P>
+                    </Flex>
+                  )}
+                </QueryHeaderSC>
+                <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
+              </SectionSC>
+              <SectionSC>
+                <FiresWhenSC>
+                  <Body2P $color="text-xlight">Fires when</Body2P>
+                  <ChipsSC>
+                    <FireChip
+                      label="Condition"
+                      value={conditionLabel(monitor.threshold)}
+                      severity="success"
+                    />
+                    <FireChip
+                      label="For"
+                      value={forLabel(forDuration)}
+                    />
+                    <FireChip
+                      label="Evaluate"
+                      value={evaluateLabel(monitor.evaluationCron)}
+                    />
+                    <FireChip
+                      label="Severity"
+                      value={upperFirst(monitor.severity.toLowerCase())}
+                      severity={alertSeverityToChipSeverity[monitor.severity]}
+                    />
+                  </ChipsSC>
+                </FiresWhenSC>
+                <ChartWrapSC>
+                  <MonitorThresholdChart monitor={monitor} />
+                </ChartWrapSC>
+              </SectionSC>
+            </DefinitionCardSC>
+            {workbenchId && (
+              <MonitorRecentJobs
+                workbenchId={workbenchId}
+                monitorId={monitor.id}
+                monitorName={monitor.name}
+                spawnPrompt={monitor.prompt}
+              />
+            )}
+          </ColumnsSC>
+        </BodySC>
+      </ScrollSC>
+    </MainSC>
+  )
+
   return (
     <DefinitionPanelShell
       containerRef={containerRef}
@@ -141,153 +292,7 @@ function MonitorDetailView({
         />
       }
     >
-      <MainSC $fullscreen={fullscreen}>
-        {!fullscreen && (
-          <StripSC>
-            <EyebrowSC>Monitor</EyebrowSC>
-            <StripActionsSC>
-              <CaptionP $color="text-xlight">
-                {monitor.updatedAt
-                  ? `updated ${fromNow(monitor.updatedAt)}`
-                  : 'Never updated'}
-              </CaptionP>
-              <WorkbenchMonitoringSharePopover
-                kind="monitor"
-                pathname={pathname}
-              />
-              {workbenchId && (
-                <IconFrame
-                  clickable
-                  size="small"
-                  type="tertiary"
-                  icon={<GearTrainIcon />}
-                  textValue="Monitor settings"
-                  as={Link}
-                  to={getWorkbenchMonitoringMonitorSettingsAbsPath({
-                    workbenchId,
-                    monitorId: monitor.id,
-                  })}
-                />
-              )}
-              <IconFrame
-                ref={fullscreenTriggerRef}
-                clickable
-                size="small"
-                type="tertiary"
-                icon={<ExpandIcon />}
-                textValue="Full screen"
-                onClick={openFullscreen}
-              />
-              <IconFrame
-                clickable
-                size="small"
-                type="tertiary"
-                icon={<HamburgerMenuCollapsedIcon />}
-                textValue="Definition"
-                onClick={() => setDefinitionOpen(true)}
-              />
-            </StripActionsSC>
-          </StripSC>
-        )}
-        <ScrollSC>
-          <BodySC>
-            <TitleRowSC>
-              <TitleBlockSC>
-                <TitleSC>{monitor.name}</TitleSC>
-                {monitor.description && (
-                  <Body1P
-                    $color="text-long-form"
-                    css={{ letterSpacing: '0.25px' }}
-                  >
-                    {monitor.description}
-                  </Body1P>
-                )}
-                {fullscreen && (
-                  <CaptionP $color="text-xlight">
-                    {monitor.updatedAt
-                      ? `updated ${fromNow(monitor.updatedAt)}`
-                      : 'Never updated'}
-                  </CaptionP>
-                )}
-              </TitleBlockSC>
-              {fullscreen && (
-                <ExitFullscreenButton onClick={() => setFullscreen(false)} />
-              )}
-            </TitleRowSC>
-            <ColumnsSC>
-              <DefinitionCardSC>
-                <DefinitionHeaderSC>
-                  <Body1P css={{ margin: 0 }}>Definition</Body1P>
-                  {!fullscreen && (
-                    <IconFrame
-                      clickable
-                      size="small"
-                      type="tertiary"
-                      icon={<HamburgerMenuCollapsedIcon />}
-                      textValue="Definition"
-                      onClick={() => setDefinitionOpen(true)}
-                    />
-                  )}
-                </DefinitionHeaderSC>
-                <SectionSC>
-                  <QueryHeaderSC>
-                    <Body2P $color="text-xlight">Query</Body2P>
-                    {toolName && (
-                      <Flex
-                        align="center"
-                        gap="xsmall"
-                      >
-                        <DashboardToolIcon
-                          tool={toolName}
-                          size={12}
-                        />
-                        <Body2P>{toolDisplayName(toolName)}</Body2P>
-                      </Flex>
-                    )}
-                  </QueryHeaderSC>
-                  <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
-                </SectionSC>
-                <SectionSC>
-                  <FiresWhenSC>
-                    <Body2P $color="text-xlight">Fires when</Body2P>
-                    <ChipsSC>
-                      <FireChip
-                        label="Condition"
-                        value={conditionLabel(monitor.threshold)}
-                        severity="success"
-                      />
-                      <FireChip
-                        label="For"
-                        value={forLabel(forDuration)}
-                      />
-                      <FireChip
-                        label="Evaluate"
-                        value={evaluateLabel(monitor.evaluationCron)}
-                      />
-                      <FireChip
-                        label="Severity"
-                        value={upperFirst(monitor.severity.toLowerCase())}
-                        severity={alertSeverityToChipSeverity[monitor.severity]}
-                      />
-                    </ChipsSC>
-                  </FiresWhenSC>
-                  <ChartWrapSC>
-                    <MonitorThresholdChart monitor={monitor} />
-                  </ChartWrapSC>
-                </SectionSC>
-              </DefinitionCardSC>
-              {workbenchId && (
-                <MonitorRecentJobs
-                  workbenchId={workbenchId}
-                  monitorId={monitor.id}
-                  monitorName={monitor.name}
-                  spawnPrompt={monitor.prompt}
-                />
-              )}
-            </ColumnsSC>
-          </BodySC>
-        </ScrollSC>
-      </MainSC>
+      {fullscreen ? createPortal(main, document.body) : main}
     </DefinitionPanelShell>
   )
 }
@@ -814,8 +819,9 @@ const StripSC = styled.div(({ theme }) => ({
   height: 40,
   justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
+  // Above the tab strip (z-index 1) without trapping fullscreen stacking.
   position: 'relative',
-  zIndex: 1,
+  zIndex: 2,
 }))
 
 const StripActionsSC = styled.div(({ theme }) => ({

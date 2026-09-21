@@ -17,6 +17,7 @@ import {
 } from 'generated/graphql'
 import { uniq } from 'lodash'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
@@ -138,6 +139,122 @@ function DashboardDetailView({
     requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
   }, [fullscreen])
 
+  const main = (
+    <MainSC $fullscreen={fullscreen}>
+      {!fullscreen && (
+        <StripSC>
+          <EyebrowSC>Dashboard</EyebrowSC>
+          <StripActionsSC>
+            <CaptionP $color="text-xlight">
+              {dashboard.updatedAt
+                ? `updated ${fromNow(dashboard.updatedAt)}`
+                : 'Never updated'}
+            </CaptionP>
+            <WorkbenchMonitoringSharePopover
+              kind="dashboard"
+              pathname={pathname}
+              range={range}
+              variables={variables}
+            />
+            <IconFrame
+              ref={fullscreenTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon />}
+              textValue="Full screen"
+              onClick={openFullscreen}
+            />
+            <IconFrame
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<HamburgerMenuCollapsedIcon />}
+              textValue="Definition"
+              onClick={() => setDefinitionOpen(true)}
+            />
+          </StripActionsSC>
+        </StripSC>
+      )}
+      <ScrollSC>
+        <BodySC>
+          <TitleRowSC>
+            <TitleBlockSC>
+              <TitleSC>{dashboard.name}</TitleSC>
+              {dashboard.description && (
+                <Body1P
+                  $color="text-long-form"
+                  css={{ letterSpacing: '0.25px' }}
+                >
+                  {dashboard.description}
+                </Body1P>
+              )}
+              {fullscreen && (
+                <CaptionP $color="text-xlight">
+                  {dashboard.updatedAt
+                    ? `updated ${fromNow(dashboard.updatedAt)}`
+                    : 'Never updated'}
+                </CaptionP>
+              )}
+            </TitleBlockSC>
+            {fullscreen && (
+              <ExitFullscreenButton onClick={() => setFullscreen(false)} />
+            )}
+          </TitleRowSC>
+          <ToolbarSC $hasFilters={hasFilters}>
+            {hasFilters ? (
+              <WorkbenchDashboardFilters
+                dashboardId={dashboard.id}
+                inputs={inputs}
+                values={filters}
+                variables={variables}
+                timeRange={timeRange}
+                onChange={(name, value) =>
+                  setFilters((prev) => ({ ...prev, [name]: value }))
+                }
+                onClear={() =>
+                  setFilters(
+                    Object.fromEntries(
+                      inputs.map((input) => [
+                        input.name,
+                        defaultDashboardFilter(input),
+                      ])
+                    )
+                  )
+                }
+              />
+            ) : (
+              <Body2P $color="text-long-form">
+                {metaText(graphs.length, sources)}
+              </Body2P>
+            )}
+            <MetricsRangeControl
+              value={range}
+              onChange={setRange}
+            />
+          </ToolbarSC>
+          {hasFilters && (
+            <MetaRowSC>
+              <Body2P $color="text-long-form">
+                {metaText(graphs.length, sources)}
+              </Body2P>
+            </MetaRowSC>
+          )}
+          <PanelsSC>
+            <WorkbenchDashboardPanels
+              dashboardId={dashboard.id}
+              graphs={graphs}
+              variables={variables}
+              timeRange={timeRange}
+            />
+          </PanelsSC>
+        </BodySC>
+      </ScrollSC>
+    </MainSC>
+  )
+
+  // Portal fullscreen to body so it covers the app sidebar; ancestors with
+  // container queries / overflow otherwise trap position:fixed.
   return (
     <DefinitionPanelShell
       containerRef={containerRef}
@@ -150,117 +267,7 @@ function DashboardDetailView({
         />
       }
     >
-      <MainSC $fullscreen={fullscreen}>
-        {!fullscreen && (
-          <StripSC>
-            <EyebrowSC>Dashboard</EyebrowSC>
-            <StripActionsSC>
-              <CaptionP $color="text-xlight">
-                {dashboard.updatedAt
-                  ? `updated ${fromNow(dashboard.updatedAt)}`
-                  : 'Never updated'}
-              </CaptionP>
-              <WorkbenchMonitoringSharePopover
-                kind="dashboard"
-                pathname={pathname}
-                range={range}
-                variables={variables}
-              />
-              <IconFrame
-                ref={fullscreenTriggerRef}
-                clickable
-                size="small"
-                type="tertiary"
-                icon={<ExpandIcon />}
-                textValue="Full screen"
-                onClick={openFullscreen}
-              />
-              <IconFrame
-                clickable
-                size="small"
-                type="tertiary"
-                icon={<HamburgerMenuCollapsedIcon />}
-                textValue="Definition"
-                onClick={() => setDefinitionOpen(true)}
-              />
-            </StripActionsSC>
-          </StripSC>
-        )}
-        <ScrollSC>
-          <BodySC>
-            <TitleRowSC>
-              <TitleBlockSC>
-                <TitleSC>{dashboard.name}</TitleSC>
-                {dashboard.description && (
-                  <Body1P
-                    $color="text-long-form"
-                    css={{ letterSpacing: '0.25px' }}
-                  >
-                    {dashboard.description}
-                  </Body1P>
-                )}
-                {fullscreen && (
-                  <CaptionP $color="text-xlight">
-                    {dashboard.updatedAt
-                      ? `updated ${fromNow(dashboard.updatedAt)}`
-                      : 'Never updated'}
-                  </CaptionP>
-                )}
-              </TitleBlockSC>
-              {fullscreen && (
-                <ExitFullscreenButton onClick={() => setFullscreen(false)} />
-              )}
-            </TitleRowSC>
-            <ToolbarSC $hasFilters={hasFilters}>
-              {hasFilters ? (
-                <WorkbenchDashboardFilters
-                  dashboardId={dashboard.id}
-                  inputs={inputs}
-                  values={filters}
-                  variables={variables}
-                  timeRange={timeRange}
-                  onChange={(name, value) =>
-                    setFilters((prev) => ({ ...prev, [name]: value }))
-                  }
-                  onClear={() =>
-                    setFilters(
-                      Object.fromEntries(
-                        inputs.map((input) => [
-                          input.name,
-                          defaultDashboardFilter(input),
-                        ])
-                      )
-                    )
-                  }
-                />
-              ) : (
-                <Body2P $color="text-long-form">
-                  {metaText(graphs.length, sources)}
-                </Body2P>
-              )}
-              <MetricsRangeControl
-                value={range}
-                onChange={setRange}
-              />
-            </ToolbarSC>
-            {hasFilters && (
-              <MetaRowSC>
-                <Body2P $color="text-long-form">
-                  {metaText(graphs.length, sources)}
-                </Body2P>
-              </MetaRowSC>
-            )}
-            <PanelsSC>
-              <WorkbenchDashboardPanels
-                dashboardId={dashboard.id}
-                graphs={graphs}
-                variables={variables}
-                timeRange={timeRange}
-              />
-            </PanelsSC>
-          </BodySC>
-        </ScrollSC>
-      </MainSC>
+      {fullscreen ? createPortal(main, document.body) : main}
     </DefinitionPanelShell>
   )
 }
@@ -386,8 +393,9 @@ const StripSC = styled.div(({ theme }) => ({
   height: 40,
   justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
+  // Above the tab strip (z-index 1) without trapping fullscreen stacking.
   position: 'relative',
-  zIndex: 1,
+  zIndex: 2,
 }))
 
 const StripActionsSC = styled.div(({ theme }) => ({
