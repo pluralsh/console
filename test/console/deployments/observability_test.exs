@@ -365,6 +365,22 @@ defmodule Console.Deployments.ObservabilityTest do
       assert deleted.id == monitor.id
       refute refetch(monitor)
     end
+
+    test "user with workbench read access can delete a service-less monitor" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      monitor = insert(:monitor, service: nil, workbench: workbench)
+
+      {:ok, %Monitor{}} = Observability.delete_monitor(monitor.id, user)
+      refute refetch(monitor)
+    end
+
+    test "user without workbench access cannot delete a service-less monitor" do
+      workbench = insert(:workbench)
+      monitor = insert(:monitor, service: nil, workbench: workbench)
+
+      {:error, _} = Observability.delete_monitor(monitor.id, insert(:user))
+    end
   end
 
   describe "#run_monitor/1" do

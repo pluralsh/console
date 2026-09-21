@@ -122,6 +122,47 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert point["timestamp"] == to_string(DateTime.to_unix(ts))
       assert point["value"] == "3.5"
     end
+
+    test "a workbench member can preview a service-less monitor" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      monitor =
+        insert(:monitor,
+          service: nil,
+          workbench: workbench,
+          threshold: %{aggregate: :max, value: 2.0},
+          query: %{log: %{query: "error", bucket_size: "5m", duration: "10m", facets: []}}
+        )
+
+      expect(Console.Logs.Provider, :aggregate, fn _query ->
+        {:ok, [%Console.Logs.AggregationBucket{count: 1.0, timestamp: DateTime.utc_now()}]}
+      end)
+
+      {:ok, %{data: %{"monitor" => found}}} = run_query("""
+        query Monitor($id: ID!) {
+          monitor(id: $id) {
+            id
+            preview { threshold metrics { timestamp value } }
+          }
+        }
+      """, %{"id" => monitor.id}, %{current_user: user})
+
+      assert found["id"] == monitor.id
+      assert found["preview"]["threshold"] == 2.0
+    end
+
+    test "a user without access cannot fetch or preview a monitor" do
+      monitor = insert(:monitor, service: nil, workbench: insert(:workbench))
+
+      {:ok, %{errors: [_ | _], data: %{"monitor" => nil}}} = run_query("""
+        query Monitor($id: ID!) {
+          monitor(id: $id) {
+            id
+            preview { threshold metrics { timestamp value } }
+          }
+        }
+      """, %{"id" => monitor.id}, %{current_user: insert(:user)})
+    end
   end
 
   describe "serviceDeployment monitors" do

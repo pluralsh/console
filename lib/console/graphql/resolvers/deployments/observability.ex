@@ -162,10 +162,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Project{id: id}), do: Alert.for_project(id)
   defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
 
-  def get_monitor(%{id: id}, _), do: {:ok, Observability.get_monitor!(id)}
+  def get_monitor(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.get_monitor!(id) |> allow(user, :read)
 
-  def monitor_preview(%Monitor{} = monitor, _, _),
-    do: Observability.preview_monitor(monitor)
+  def monitor_preview(%Monitor{} = monitor, _, %{context: %{current_user: user}}) do
+    case allow(monitor, user, :read) do
+      {:ok, monitor} -> Observability.preview_monitor(monitor)
+      error -> error
+    end
+  end
 
   def get_dashboard(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.get_dashboard!(id) |> allow(user, :read)
