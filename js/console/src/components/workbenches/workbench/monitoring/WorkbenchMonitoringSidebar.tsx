@@ -493,13 +493,10 @@ const GroupSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
   display: 'flex',
   flex: '1 1 0',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
   minHeight: 0,
   overflow: 'hidden',
-  paddingBottom: theme.spacing.medium,
   ...(!$first && {
     borderTop: theme.borders.default,
-    paddingTop: theme.spacing.large,
   }),
 }))
 
@@ -514,18 +511,16 @@ const GroupHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   justifyContent: 'space-between',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px ${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
 }))
 
 const GroupListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
   minHeight: 0,
   overflowX: 'hidden',
   overflowY: 'auto',
-  paddingBottom: theme.spacing.xsmall,
 }))
 
 // IconFrame small (24) + gap + IconFrame small; matches inline confirm.
