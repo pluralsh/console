@@ -1248,6 +1248,11 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 		return err
 	}
 
+	labels, err := encodeComponentLabels(obj)
+	if err != nil {
+		return err
+	}
+
 	conn, cancelFunc, err := in.take()
 	if err != nil {
 		return err
@@ -1269,7 +1274,8 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 			END,
 			transient_manifest_sha = NULL,
 			manifest = 1,
-			applied = 1
+			applied = 1,
+			labels = ?
 		WHERE "group" = ? 
 		  AND version = ? 
 		  AND kind = ? 
@@ -1277,8 +1283,9 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 		  AND name = ?
 	`, &sqlitex.ExecOptions{
 		Args: []interface{}{
-			sha,                                                                 // Apply SHA.
-			sha,                                                                 // Server SHA.
+			sha, // Apply SHA.
+			sha, // Server SHA.
+			labels,
 			gvk.Group, gvk.Version, gvk.Kind, obj.GetNamespace(), obj.GetName(), // WHERE clause parameters.
 		},
 	})

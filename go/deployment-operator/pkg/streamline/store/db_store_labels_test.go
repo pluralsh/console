@@ -78,6 +78,24 @@ func TestComponentCache_Labels(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, map[string]string{"v": "2"}, got.Labels)
 	})
+
+	t.Run("SyncAppliedResource persists labels from the live object", func(t *testing.T) {
+		manifest := createComponent("applied-uid", WithName("applied-labels"), WithGVK("apps", "v1", "Deployment"))
+		require.NoError(t, storeInstance.SaveUnsyncedComponents([]unstructured.Unstructured{manifest}))
+
+		before, err := storeInstance.GetAppliedComponent(manifest)
+		require.NoError(t, err)
+		require.Nil(t, before)
+
+		applied := createComponent("applied-uid", WithName("applied-labels"), WithGVK("apps", "v1", "Deployment"), WithLabels(map[string]string{"app": "observe"}))
+		require.NoError(t, storeInstance.SyncAppliedResource(applied))
+
+		got, err := storeInstance.GetAppliedComponent(applied)
+		require.NoError(t, err)
+		require.NotNil(t, got)
+		require.Equal(t, "applied-uid", got.UID)
+		require.Equal(t, map[string]string{"app": "observe"}, got.Labels)
+	})
 }
 
 func TestComponentCache_LabelsColumnMigratesExistingFile(t *testing.T) {
