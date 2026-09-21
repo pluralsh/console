@@ -305,6 +305,7 @@ function MonitorDetailView({
                 workbenchId={workbenchId}
                 monitorId={monitor.id}
                 monitorName={monitor.name}
+                spawnPrompt={monitor.prompt}
               />
             )}
           </ColumnsSC>
@@ -324,8 +325,23 @@ function MonitorThresholdChart({
   const isLog = monitor.type === MonitorType.Log && !!log && !!serviceId
 
   if (!isLog) {
+    const metrics = monitor.query?.metrics
+    const isMetrics = monitor.type === MonitorType.Metrics
     return (
-      <EmptyState message="Threshold preview is available for log monitors with a linked service." />
+      <EmptyState
+        message={
+          isMetrics
+            ? 'Live threshold preview is not available for metrics monitors yet.'
+            : 'Threshold preview is available for log monitors with a linked service.'
+        }
+        description={
+          isMetrics && metrics?.query
+            ? `Query: ${metrics.query} · fires when ${conditionLabel(monitor.threshold)}${
+                metrics.duration ? ` for ${forLabel(metrics.duration)}` : ''
+              }`
+            : undefined
+        }
+      />
     )
   }
 
@@ -490,10 +506,12 @@ function MonitorRecentJobs({
   workbenchId,
   monitorId,
   monitorName,
+  spawnPrompt,
 }: {
   workbenchId: string
   monitorId: string
   monitorName: string
+  spawnPrompt?: string | null
 }) {
   const { data, loading, error } = useWorkbenchMonitorJobsQuery({
     variables: { id: workbenchId, monitorId, first: RECENT_JOBS_COUNT },
@@ -504,6 +522,13 @@ function MonitorRecentJobs({
     () => mapExistingNodes(data?.workbench?.runs),
     [data]
   )
+  const spawnDescription = useMemo(() => {
+    const trimmed = spawnPrompt?.trim()
+    if (!trimmed) return undefined
+    const preview =
+      trimmed.length > 160 ? `${trimmed.slice(0, 157).trimEnd()}…` : trimmed
+    return `When ${monitorName} fires it will spawn a job: ${preview}`
+  }, [monitorName, spawnPrompt])
 
   return (
     <RecentSectionSC>
@@ -522,7 +547,8 @@ function MonitorRecentJobs({
       ) : isEmpty(jobs) ? (
         <EmptyJobsSC>
           <EmptyState
-            message={`No recent jobs yet, ${monitorName} has not fired.`}
+            message="No recent jobs yet, this monitor has not fired"
+            description={spawnDescription}
           />
         </EmptyJobsSC>
       ) : (
@@ -853,6 +879,7 @@ const JobsGridSC = styled.div(({ theme }) => ({
 
 const EmptyJobsSC = styled(Card)(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
+  minHeight: 72,
   padding: theme.spacing.medium,
 }))
 

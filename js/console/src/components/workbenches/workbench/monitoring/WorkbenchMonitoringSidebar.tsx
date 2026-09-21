@@ -177,13 +177,20 @@ export function WorkbenchMonitoringSidebar({
                     </CaptionP>
                   </PaddedSC>
                 ) : (
-                  dashboardNodes.map((dashboard) => (
-                    <DashboardRow
-                      key={dashboard.id}
-                      dashboard={dashboard}
-                      workbenchId={workbenchId}
-                    />
-                  ))
+                  <>
+                    {dashboardNodes.map((dashboard) => (
+                      <DashboardRow
+                        key={dashboard.id}
+                        dashboard={dashboard}
+                        workbenchId={workbenchId}
+                      />
+                    ))}
+                    {dashboards.loading && dashboardNodes.length > 0 && (
+                      <PaddedSC>
+                        <MonitoringListSkeleton count={1} />
+                      </PaddedSC>
+                    )}
+                  </>
                 )}
               </GroupListSC>
             </GroupSC>
@@ -230,13 +237,20 @@ export function WorkbenchMonitoringSidebar({
                     </CaptionP>
                   </PaddedSC>
                 ) : (
-                  monitorNodes.map((monitor) => (
-                    <MonitorRow
-                      key={monitor.id}
-                      monitor={monitor}
-                      workbenchId={workbenchId}
-                    />
-                  ))
+                  <>
+                    {monitorNodes.map((monitor) => (
+                      <MonitorRow
+                        key={monitor.id}
+                        monitor={monitor}
+                        workbenchId={workbenchId}
+                      />
+                    ))}
+                    {monitors.loading && monitorNodes.length > 0 && (
+                      <PaddedSC>
+                        <MonitoringListSkeleton count={1} />
+                      </PaddedSC>
+                    )}
+                  </>
                 )}
               </GroupListSC>
             </GroupSC>
