@@ -1,5 +1,5 @@
 import { EmptyState } from '@pluralsh/design-system'
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -12,7 +12,7 @@ import ComponentCard from './ComponentCard'
 import { compareComponents } from './Components.tsx'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 
-const searchOptions: Fuse.IFuseOptions<ServiceDeploymentComponentFragment> = {
+const searchOptions: IFuseOptions<ServiceDeploymentComponentFragment> = {
   keys: ['name', 'kind', 'namespace'],
   threshold: 0.25,
   ignoreLocation: true,

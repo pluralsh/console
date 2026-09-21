@@ -16,9 +16,18 @@ defmodule Console.AI.Tools.Workbench.Http do
     }
   }), do: "The #{name} HTTP integration tool, which makes a #{method} request to #{url} with the given input."
 
+  # the configured schema describes the request payload, but the changeset casts it off an
+  # :input key, so the schema we advertise has to describe that wrapper or callers can't
+  # produce arguments that validate
   def json_schema(%__MODULE__{tool: %WorkbenchTool{
     configuration: %Configuration{http: %HttpConfiguration{input_schema: %{} = input_schema}}
-  }}), do: input_schema
+  }}) do
+    %{
+      "type" => "object",
+      "properties" => %{"input" => input_schema},
+      "required" => ["input"]
+    }
+  end
 
 
   def changeset(%__MODULE__{tool: %WorkbenchTool{configuration: %{http: %{input_schema: %{} = schema}}}} = model, attrs) do

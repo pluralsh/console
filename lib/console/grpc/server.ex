@@ -161,7 +161,8 @@ defmodule Console.GRPC.Server do
       awsSecretAccessKey: Map.get(bedrock, :aws_secret_access_key),
       proxyModels: proxy_models(bedrock, defaults),
       deployments: to_string_map(Map.get(bedrock, :deployments)),
-      endpoint: bedrock_endpoint_to_pb(Map.get(bedrock, :endpoint))
+      endpoint: bedrock_endpoint_to_pb(Map.get(bedrock, :endpoint)),
+      modelSettings: bedrock_model_settings(Map.get(bedrock, :model_settings))
     }
   end
   defp to_bedrock_pb(_), do: nil
@@ -200,6 +201,18 @@ defmodule Console.GRPC.Server do
     |> Map.new()
   end
   defp to_string_map(_), do: %{}
+
+  defp bedrock_model_settings(settings) when is_list(settings) do
+    Enum.flat_map(settings, fn
+      %{model_id: model_id, inference_profile_arn: arn}
+      when is_binary(model_id) and is_binary(arn) ->
+        [%Plrl.BedrockModelSettings{modelId: model_id, inferenceProfileArn: arn}]
+
+      _ ->
+        []
+    end)
+  end
+  defp bedrock_model_settings(_), do: []
 
   defp my_cluster_pb(%Cluster{} = cluster) do
     %Plrl.VerifyClusterResponse{

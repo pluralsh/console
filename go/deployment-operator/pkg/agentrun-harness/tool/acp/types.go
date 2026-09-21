@@ -25,6 +25,10 @@ type Request struct {
 	SessionID       string
 	Settings        SessionSettings
 	FileSystemWrite bool
+	// McpServers are connected for this session. When nil, the engine injects
+	// the harness built-in and extra MCP servers so ACP adapters that ignore
+	// native config files still receive Plural MCP tools.
+	McpServers []acpsdk.McpServer
 }
 
 // Result contains the latest session state observed by the ACP engine.
@@ -42,8 +46,9 @@ type Sink interface {
 
 // SessionRestoreRequest identifies a prior session and its workspace.
 type SessionRestoreRequest struct {
-	Cwd       string
-	SessionID string
+	Cwd        string
+	SessionID  string
+	McpServers []acpsdk.McpServer
 }
 
 // SessionRestoreResponse contains the setup state returned after restoring a
@@ -61,7 +66,7 @@ type SessionRestorer func(context.Context, *acpsdk.ClientSideConnection, Session
 // method. It is the default for providers that support it.
 func ResumeSession(ctx context.Context, connection *acpsdk.ClientSideConnection, request SessionRestoreRequest) (SessionRestoreResponse, error) {
 	response, err := connection.ResumeSession(ctx, acpsdk.ResumeSessionRequest{
-		Cwd: request.Cwd, McpServers: []acpsdk.McpServer{}, SessionId: acpsdk.SessionId(request.SessionID),
+		Cwd: request.Cwd, McpServers: mcpServersOrEmpty(request.McpServers), SessionId: acpsdk.SessionId(request.SessionID),
 	})
 	if err != nil {
 		return SessionRestoreResponse{}, err
@@ -72,7 +77,7 @@ func ResumeSession(ctx context.Context, connection *acpsdk.ClientSideConnection,
 // LoadSession restores sessions through ACP's session/load method.
 func LoadSession(ctx context.Context, connection *acpsdk.ClientSideConnection, request SessionRestoreRequest) (SessionRestoreResponse, error) {
 	response, err := connection.LoadSession(ctx, acpsdk.LoadSessionRequest{
-		Cwd: request.Cwd, McpServers: []acpsdk.McpServer{}, SessionId: acpsdk.SessionId(request.SessionID),
+		Cwd: request.Cwd, McpServers: mcpServersOrEmpty(request.McpServers), SessionId: acpsdk.SessionId(request.SessionID),
 	})
 	if err != nil {
 		return SessionRestoreResponse{}, err
@@ -126,4 +131,11 @@ func WithUsageResolver(resolver UsageResolver) Option {
 			engine.usageResolver = resolver
 		}
 	}
+}
+
+func mcpServersOrEmpty(servers []acpsdk.McpServer) []acpsdk.McpServer {
+	if servers == nil {
+		return []acpsdk.McpServer{}
+	}
+	return servers
 }

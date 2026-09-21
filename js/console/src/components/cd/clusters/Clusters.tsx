@@ -285,8 +285,10 @@ export default function Clusters() {
         condition={showGettingStarted}
         wrapper={
           <Flex
-            border={theme.borders['fill-two']}
-            borderRadius={theme.borderRadiuses.medium}
+            css={{
+              border: theme.borders['fill-two'],
+              borderRadius: theme.borderRadiuses.medium,
+            }}
             direction="column"
             overflow="auto"
             height="100%"
@@ -352,7 +354,6 @@ export function ClustersTable({
   return (
     <>
       <Table
-        loose
         data={data || []}
         columns={columns}
         reactTableOptions={reactTableOptions}

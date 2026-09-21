@@ -769,6 +769,30 @@ fragment ClusterKubernetesMetrics on Cluster {
     podMem {
       ...MetricResponse
     }
+    cpuRequests {
+      ...MetricResponse
+    }
+    memRequests {
+      ...MetricResponse
+    }
+    cpuLimits {
+      ...MetricResponse
+    }
+    memLimits {
+      ...MetricResponse
+    }
+    podCpuRequests {
+      ...MetricResponse
+    }
+    podMemRequests {
+      ...MetricResponse
+    }
+    podCpuLimits {
+      ...MetricResponse
+    }
+    podMemLimits {
+      ...MetricResponse
+    }
   }
 }
 

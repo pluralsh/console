@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import { useState } from 'react'
 
 import ErrorIcon from '../components/icons/ErrorIcon'
@@ -6,6 +5,7 @@ import ErrorIcon from '../components/icons/ErrorIcon'
 import Tab from '../components/Tab'
 import SubTab from '../components/SubTab'
 import Card from '../components/Card'
+import Flex from '../components/Flex'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
@@ -44,7 +44,7 @@ function Template(args: any) {
           Inactive tab
         </Tab>
       </Flex>
-      <Flex marginTop="xlarge">
+      <Flex marginTop={32}>
         <Tab
           startIcon={<ErrorIcon />}
           active={active === 0}
@@ -111,7 +111,7 @@ function Template2(args: any) {
         </Tab>
       </Flex>
       <Flex
-        marginTop="xlarge"
+        marginTop={32}
         direction="column"
         width={256 - 64}
       >

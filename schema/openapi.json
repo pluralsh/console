@@ -3302,6 +3302,12 @@
         "title": "User",
         "description": "A registed user",
         "properties": {
+          "allowed_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "email": {
             "format": "email",
             "type": "string"
@@ -3714,7 +3720,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "agent.read"
         ]
       },
       "post": {
@@ -3745,7 +3751,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "ai.write"
+          "agent.write"
         ]
       }
     },
@@ -3778,7 +3784,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "agent.read"
         ]
       }
     },
@@ -3833,7 +3839,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "agent.read"
         ]
       }
     },
@@ -3866,7 +3872,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "agent.read"
         ]
       }
     },
@@ -3899,7 +3905,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -3961,7 +3967,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -3994,7 +4000,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -4027,7 +4033,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -4070,7 +4076,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "ai.write"
+          "sentinel.read"
         ]
       }
     },
@@ -4119,7 +4125,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "sentinel.read"
         ]
       }
     },
@@ -4160,7 +4166,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "agent.read"
         ]
       },
       "post": {
@@ -4191,7 +4197,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "ai.write"
+          "agent.write"
         ]
       }
     },
@@ -4224,7 +4230,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "agent.read"
         ]
       }
     },
@@ -4314,7 +4320,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "workbench.read"
         ]
       }
     },
@@ -4357,7 +4363,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "workbench.read"
+          "workbench.write"
         ]
       }
     },
@@ -4423,7 +4429,7 @@
           }
         ],
         "x-required-scopes": [
-          "workbench.read"
+          "workbench.write"
         ]
       }
     },
@@ -4456,7 +4462,7 @@
           }
         ],
         "x-required-scopes": [
-          "ai.read"
+          "workbench.read"
         ]
       }
     },
@@ -4546,7 +4552,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "workbench.read"
+          "workbench.write"
         ]
       }
     },
@@ -5543,7 +5549,7 @@
         ],
         "summary": "List all pipelines",
         "x-required-scopes": [
-          "pipelines.read"
+          "pipeline.read"
         ]
       }
     },
@@ -5578,7 +5584,7 @@
         ],
         "summary": "Get a pipeline by name",
         "x-required-scopes": [
-          "pipelines.read"
+          "pipeline.read"
         ]
       }
     },
@@ -5613,7 +5619,7 @@
         ],
         "summary": "Get a pipeline by ID",
         "x-required-scopes": [
-          "pipelines.read"
+          "pipeline.read"
         ]
       }
     },
@@ -5658,7 +5664,7 @@
         },
         "summary": "Trigger a pipeline run",
         "x-required-scopes": [
-          "pipelines.write"
+          "pipeline.write"
         ]
       }
     },
@@ -5940,7 +5946,7 @@
         ],
         "summary": "List all projects",
         "x-required-scopes": [
-          "projects.read"
+          "project.read"
         ]
       }
     },
@@ -5976,7 +5982,7 @@
         ],
         "summary": "Get a project by ID",
         "x-required-scopes": [
-          "projects.read"
+          "project.read"
         ]
       }
     },
@@ -6121,7 +6127,7 @@
           }
         ],
         "x-required-scopes": [
-          "catalog.read"
+          "self_service.read"
         ]
       }
     },
@@ -6267,7 +6273,7 @@
           }
         ],
         "x-required-scopes": [
-          "scm.read"
+          "self_service.read"
         ]
       },
       "post": {
@@ -6298,7 +6304,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "scm.write"
+          "catalog.write"
         ]
       }
     },
@@ -6331,7 +6337,7 @@
           }
         ],
         "x-required-scopes": [
-          "scm.write"
+          "catalog.write"
         ]
       },
       "get": {
@@ -6362,7 +6368,7 @@
           }
         ],
         "x-required-scopes": [
-          "scm.read"
+          "self_service.read"
         ]
       },
       "put": {
@@ -6403,7 +6409,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "scm.write"
+          "catalog.write"
         ]
       }
     },
@@ -6468,7 +6474,7 @@
           }
         ],
         "x-required-scopes": [
-          "catalog.read"
+          "self_service.read"
         ]
       }
     },
@@ -6501,7 +6507,7 @@
           }
         ],
         "x-required-scopes": [
-          "catalog.read"
+          "self_service.read"
         ]
       }
     },
@@ -6534,7 +6540,7 @@
           }
         ],
         "x-required-scopes": [
-          "catalog.read"
+          "self_service.read"
         ]
       }
     },
@@ -6916,7 +6922,7 @@
           }
         ],
         "x-required-scopes": [
-          "stacks.read"
+          "stack.read"
         ]
       },
       "post": {
@@ -6947,7 +6953,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "stacks.write"
+          "stack.write"
         ]
       }
     },
@@ -6988,7 +6994,7 @@
           }
         ],
         "x-required-scopes": [
-          "stacks.write"
+          "stack.write"
         ]
       },
       "get": {
@@ -7019,7 +7025,7 @@
           }
         ],
         "x-required-scopes": [
-          "stacks.read"
+          "stack.read"
         ]
       },
       "put": {
@@ -7060,7 +7066,7 @@
           "required": true
         },
         "x-required-scopes": [
-          "stacks.write"
+          "stack.write"
         ]
       }
     },
@@ -7093,7 +7099,7 @@
           }
         ],
         "x-required-scopes": [
-          "stacks.write"
+          "stack.write"
         ]
       }
     },
@@ -7126,7 +7132,7 @@
           }
         ],
         "x-required-scopes": [
-          "stacks.write"
+          "stack.write"
         ]
       }
     },
@@ -7159,7 +7165,7 @@
           }
         ],
         "x-required-scopes": [
-          "stacks.write"
+          "stack.write"
         ]
       }
     }

@@ -341,8 +341,16 @@ func (in *environment) configureGitCredentials() (string, error) {
 		return "", nil
 	}
 
-	klog.V(log.LogLevelDefault).InfoS("configuring git credentials", "username", in.agentRun.ScmCreds.Username)
-	if err := os.Setenv("GIT_ACCESS_TOKEN", in.agentRun.ScmCreds.Token); err != nil {
+	username := strings.TrimSpace(in.agentRun.ScmCreds.Username)
+	if username == "" {
+		username = defaultGitUsername
+	}
+
+	klog.V(log.LogLevelDefault).InfoS("configuring git credentials", "username", username)
+	if err := os.Setenv(EnvGitAccessToken, in.agentRun.ScmCreds.Token); err != nil {
+		return "", err
+	}
+	if err := os.Setenv(EnvGitUsername, username); err != nil {
 		return "", err
 	}
 
@@ -357,15 +365,28 @@ func (in *environment) configureGitCredentials() (string, error) {
 		return "", err
 	}
 
-	if err := os.Setenv("GIT_ASKPASS", askpassPath); err != nil {
+	if err := os.Setenv(EnvGitAskpass, askpassPath); err != nil {
 		return "", err
 	}
 
 	return askpassPath, nil
 }
 
+// gitAskpassScript answers git credential prompts for HTTP Basic.
+// Git calls ASKPASS once for "Username for ..." and once for "Password for ...".
+// Bitbucket Data Center requires the real username plus the PAT as password;
+// returning the token for both prompts 401s.
 func gitAskpassScript() string {
-	return "#!/bin/sh\necho ${GIT_ACCESS_TOKEN}"
+	return `#!/bin/sh
+case "$1" in
+*[Uu]sername*)
+	printf '%s\n' "${GIT_USERNAME:-apikey}"
+	;;
+*)
+	printf '%s\n' "${GIT_ACCESS_TOKEN}"
+	;;
+esac
+`
 }
 
 // configureGitSigning configures SSH commit signing using the mounted private key.

@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   Modal,
   ValidatedInput,
 } from '@pluralsh/design-system'
@@ -25,8 +25,8 @@ import { PersonaConfiguration } from './PersonaConfiguration'
 import { mergeWith } from 'lodash'
 import {
   ComponentProps,
-  FormEventHandler,
   ReactNode,
+  SubmitEventHandler,
   useCallback,
   useEffect,
   useMemo,
@@ -75,6 +75,18 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     secrets: true,
     configuration: true,
   },
+  settings: {
+    accessTokens: true,
+    ai: true,
+    audits: true,
+    chatbots: true,
+    cloudConnections: true,
+    global: true,
+    notifications: true,
+    projects: true,
+    userManagement: true,
+    webhooks: true,
+  },
   ai: {
     pr: true,
   },
@@ -113,7 +125,7 @@ export function PersonaAttributes({
         {viewOnly ? (
           <Body2P css={{ color: theme.colors['text-light'] }}>{name}</Body2P>
         ) : (
-          <Input2
+          <Input
             disabled={viewOnly}
             value={name}
             onChange={({ target: { value } }) => setName?.(value || '')}
@@ -126,7 +138,7 @@ export function PersonaAttributes({
             {description}
           </Body2P>
         ) : (
-          <Input2
+          <Input
             value={description}
             disabled={viewOnly}
             onChange={({ target: { value } }) => setDescription?.(value || '')}
@@ -215,7 +227,7 @@ export function EditPersonaAttributesModal({
 
   const allowSubmit = hasUpdates && !!name
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+  const onSubmit: SubmitEventHandler<HTMLElement> = useCallback(
     (e) => {
       e.preventDefault()
       if (allowSubmit) {

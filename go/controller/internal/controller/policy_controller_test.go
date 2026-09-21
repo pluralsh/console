@@ -33,7 +33,7 @@ var _ = Describe("Policy Controller", Ordered, func() {
 			readonlyID         = "policy-readonly-123"
 			projectPolicyID    = "policy-project-123"
 			projectID          = "project-policy-123"
-			rego               = "package plrl.wb.admission\n\nsample := 0"
+			rego               = "package plrl.workbench\n\nsample := 0"
 		)
 
 		ctx := context.Background()

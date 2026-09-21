@@ -1462,8 +1462,10 @@ type BedrockAiAttributes struct {
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID.
 	Deployments *string `json:"deployments,omitempty"`
+	// Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata.
+	ModelSettings []*BedrockModelSettingsAttributes `json:"modelSettings,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1482,8 +1484,22 @@ type BedrockAiSettings struct {
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
 	ProxyModels []*string `json:"proxyModels,omitempty"`
-	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {"anthropic.claude-3-5-sonnet-20241022-v2:0": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}
+	// Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID.
 	Deployments map[string]any `json:"deployments,omitempty"`
+	// Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata.
+	ModelSettings []*BedrockModelSettings `json:"modelSettings,omitempty"`
+}
+
+type BedrockModelSettings struct {
+	ModelID             *string `json:"modelId,omitempty"`
+	InferenceProfileArn *string `json:"inferenceProfileArn,omitempty"`
+}
+
+type BedrockModelSettingsAttributes struct {
+	// the foundation model ID served by the inference profile
+	ModelID string `json:"modelId"`
+	// the full ARN of the Bedrock application inference profile
+	InferenceProfileArn string `json:"inferenceProfileArn"`
 }
 
 type BindingAttributes struct {
@@ -3853,8 +3869,9 @@ type FluxHelmRepository struct {
 type GateJobAttributes struct {
 	Namespace string `json:"namespace"`
 	// if you'd rather define the job spec via straight k8s yaml
-	Raw            *string                    `json:"raw,omitempty"`
-	Containers     []*ContainerAttributes     `json:"containers,omitempty"`
+	Raw *string `json:"raw,omitempty"`
+	// containers to run in this job; an empty list clears configured containers
+	Containers     *[]*ContainerAttributes    `json:"containers,omitempty"`
 	Labels         *string                    `json:"labels,omitempty"`
 	Annotations    *string                    `json:"annotations,omitempty"`
 	NodeSelector   *string                    `json:"nodeSelector,omitempty"`
@@ -4833,6 +4850,22 @@ type KubernetesControllerMetrics struct {
 	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
 	// Memory usage metrics for pods managed by this controller
 	PodMem []*MetricResponse `json:"podMem,omitempty"`
+	// CPU requests for the controller
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// Memory requests for the controller
+	MemRequests []*MetricResponse `json:"memRequests,omitempty"`
+	// CPU limits for the controller
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// Memory limits for the controller
+	MemLimits []*MetricResponse `json:"memLimits,omitempty"`
+	// CPU requests for pods managed by this controller
+	PodCPURequests []*MetricResponse `json:"podCpuRequests,omitempty"`
+	// Memory requests for pods managed by this controller
+	PodMemRequests []*MetricResponse `json:"podMemRequests,omitempty"`
+	// CPU limits for pods managed by this controller
+	PodCPULimits []*MetricResponse `json:"podCpuLimits,omitempty"`
+	// Memory limits for pods managed by this controller
+	PodMemLimits []*MetricResponse `json:"podMemLimits,omitempty"`
 }
 
 type KubernetesUnstructured struct {
@@ -6365,6 +6398,8 @@ type PersonaConfiguration struct {
 	Sidebar *PersonaSidebar `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServices `json:"services,omitempty"`
+	// enable individual settings tabs
+	Settings *PersonaSettings `json:"settings,omitempty"`
 	// enable individual parts of the ai views
 	Ai *PersonaAi `json:"ai,omitempty"`
 }
@@ -6382,6 +6417,8 @@ type PersonaConfigurationAttributes struct {
 	Sidebar *PersonaSidebarAttributes `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
 	Services *PersonaServicesAttributes `json:"services,omitempty"`
+	// enable individual settings tabs
+	Settings *PersonaSettingsAttributes `json:"settings,omitempty"`
 	// enable individual parts of the ai views
 	Ai *PersonaAiAttributes `json:"ai,omitempty"`
 }
@@ -6450,6 +6487,32 @@ type PersonaServices struct {
 type PersonaServicesAttributes struct {
 	Secrets       *bool `json:"secrets,omitempty"`
 	Configuration *bool `json:"configuration,omitempty"`
+}
+
+type PersonaSettings struct {
+	UserManagement   *bool `json:"userManagement,omitempty"`
+	Global           *bool `json:"global,omitempty"`
+	Ai               *bool `json:"ai,omitempty"`
+	Webhooks         *bool `json:"webhooks,omitempty"`
+	Chatbots         *bool `json:"chatbots,omitempty"`
+	CloudConnections *bool `json:"cloudConnections,omitempty"`
+	Projects         *bool `json:"projects,omitempty"`
+	Notifications    *bool `json:"notifications,omitempty"`
+	Audits           *bool `json:"audits,omitempty"`
+	AccessTokens     *bool `json:"accessTokens,omitempty"`
+}
+
+type PersonaSettingsAttributes struct {
+	UserManagement   *bool `json:"userManagement,omitempty"`
+	Global           *bool `json:"global,omitempty"`
+	Ai               *bool `json:"ai,omitempty"`
+	Webhooks         *bool `json:"webhooks,omitempty"`
+	Chatbots         *bool `json:"chatbots,omitempty"`
+	CloudConnections *bool `json:"cloudConnections,omitempty"`
+	Projects         *bool `json:"projects,omitempty"`
+	Notifications    *bool `json:"notifications,omitempty"`
+	Audits           *bool `json:"audits,omitempty"`
+	AccessTokens     *bool `json:"accessTokens,omitempty"`
 }
 
 type PersonaSidebar struct {
@@ -8730,6 +8793,7 @@ type ServiceAccountAttributes struct {
 	Name           *string                    `json:"name,omitempty"`
 	Email          *string                    `json:"email,omitempty"`
 	Roles          *UserRoleAttributes        `json:"roles,omitempty"`
+	AllowedScopes  []string                   `json:"allowedScopes,omitempty"`
 	AssumeBindings []*PolicyBindingAttributes `json:"assumeBindings,omitempty"`
 }
 
@@ -8791,10 +8855,18 @@ type ServiceComponentChild struct {
 }
 
 type ServiceComponentMetrics struct {
-	CPU    []*MetricResponse `json:"cpu,omitempty"`
-	Mem    []*MetricResponse `json:"mem,omitempty"`
-	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
-	PodMem []*MetricResponse `json:"podMem,omitempty"`
+	CPU            []*MetricResponse `json:"cpu,omitempty"`
+	Mem            []*MetricResponse `json:"mem,omitempty"`
+	PodCPU         []*MetricResponse `json:"podCpu,omitempty"`
+	PodMem         []*MetricResponse `json:"podMem,omitempty"`
+	CPURequests    []*MetricResponse `json:"cpuRequests,omitempty"`
+	MemRequests    []*MetricResponse `json:"memRequests,omitempty"`
+	CPULimits      []*MetricResponse `json:"cpuLimits,omitempty"`
+	MemLimits      []*MetricResponse `json:"memLimits,omitempty"`
+	PodCPURequests []*MetricResponse `json:"podCpuRequests,omitempty"`
+	PodMemRequests []*MetricResponse `json:"podMemRequests,omitempty"`
+	PodCPULimits   []*MetricResponse `json:"podCpuLimits,omitempty"`
+	PodMemLimits   []*MetricResponse `json:"podMemLimits,omitempty"`
 }
 
 // a configuration item k/v pair
@@ -10136,6 +10208,7 @@ type User struct {
 	ReadTimestamp       *string          `json:"readTimestamp,omitempty"`
 	BuildTimestamp      *string          `json:"buildTimestamp,omitempty"`
 	RefreshToken        *RefreshToken    `json:"refreshToken,omitempty"`
+	AllowedScopes       []string         `json:"allowedScopes,omitempty"`
 	AssumeBindings      []*PolicyBinding `json:"assumeBindings,omitempty"`
 	Groups              []*Group         `json:"groups,omitempty"`
 	Personas            []*Persona       `json:"personas,omitempty"`
@@ -10873,6 +10946,8 @@ type WorkbenchEval struct {
 	PromptRules *string `json:"promptRules,omitempty"`
 	// rules for evaluating job progress
 	ProgressRules *string `json:"progressRules,omitempty"`
+	// automation for creating skill-update jobs from low-scoring evals
+	Automation *WorkbenchEvalAutomation `json:"automation,omitempty"`
 	// the workbench this eval belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -10886,6 +10961,30 @@ type WorkbenchEvalAttributes struct {
 	PromptRules *string `json:"promptRules,omitempty"`
 	// rules for evaluating job progress
 	ProgressRules *string `json:"progressRules,omitempty"`
+	// optional automation for creating skill-update jobs from low-scoring evals
+	Automation *WorkbenchEvalAutomationAttributes `json:"automation,omitempty"`
+}
+
+type WorkbenchEvalAutomation struct {
+	// whether low-scoring evals automatically create skill-update jobs
+	Enabled bool `json:"enabled"`
+	// exclusive upper grade threshold for triggering a skill-update job (0–10)
+	MaxScore *int64 `json:"maxScore,omitempty"`
+	// maximum number of skills the workbench may have when automation creates a new skill
+	MaxSkills int64 `json:"maxSkills"`
+	// optional guidance included in automatically created skill-update jobs
+	Instructions *string `json:"instructions,omitempty"`
+}
+
+type WorkbenchEvalAutomationAttributes struct {
+	// whether low-scoring evals automatically create skill-update jobs
+	Enabled *bool `json:"enabled,omitempty"`
+	// exclusive upper grade threshold for triggering a skill-update job (0–10)
+	MaxScore *int64 `json:"maxScore,omitempty"`
+	// maximum number of skills the workbench may have when automation creates a new skill
+	MaxSkills *int64 `json:"maxSkills,omitempty"`
+	// optional guidance included in automatically created skill-update jobs
+	Instructions *string `json:"instructions,omitempty"`
 }
 
 type WorkbenchEvalFeedback struct {

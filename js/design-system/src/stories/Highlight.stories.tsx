@@ -1,8 +1,6 @@
-import { Flex } from 'honorable'
-
 import { goCode, jsCode, tfCode } from '../constants'
 
-import { Divider, Highlight } from '..'
+import { Divider, Flex, Highlight } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {

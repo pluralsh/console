@@ -1,5 +1,5 @@
 import { type ComponentProps, useCallback } from 'react'
-import { Button, FormField, Modal, Input2 } from '@pluralsh/design-system'
+import { Button, FormField, Modal, Input } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import {
@@ -179,7 +179,7 @@ export function ObservabilityProviderForm({
         label="Name"
         required
       >
-        <Input2
+        <Input
           value={formState.name}
           onChange={(e) => updateFormState({ name: e.target.value })}
           disabled={operationType === 'update'}

@@ -220,6 +220,7 @@ func (in *Account) bedrockEmbeddingDeployments(config *pb.BedrockConfig) schemas
 		inferenceProfileID, model := in.parseModelID(modelID)
 		aliases[model] = schemas.AliasConfig{ModelID: inferenceProfileID}
 	}
+	in.applyBedrockModelSettings(aliases, config.GetModelSettings())
 	return aliases
 }
 
@@ -267,7 +268,47 @@ func (in *Account) bedrockDeployments(config *pb.BedrockConfig) schemas.KeyAlias
 		deployments[model] = schemas.AliasConfig{ModelID: inferenceProfileID}
 	}
 
+	in.applyBedrockModelSettings(deployments, config.GetModelSettings())
 	return deployments
+}
+
+func (in *Account) applyBedrockModelSettings(aliases schemas.KeyAliases, settings []*pb.BedrockModelSettings) {
+	for _, modelSettings := range settings {
+		modelID := modelSettings.GetModelId()
+		inferenceProfileARN := modelSettings.GetInferenceProfileArn()
+		if modelID == "" || inferenceProfileARN == "" {
+			continue
+		}
+
+		// Bifrost builds the Bedrock model identifier by joining
+		// InferenceProfileARN and ModelID before URL-encoding it. Console stores
+		// the full application inference profile ARN, so split off its resource
+		// ID to avoid appending the foundation model ID to an already-complete
+		// ARN (for example, .../profile-id/anthropic.claude-*).
+		profileARN, profileID, ok := splitBedrockInferenceProfileARN(inferenceProfileARN)
+		if !ok {
+			profileARN, profileID = inferenceProfileARN, modelID
+		}
+		arn := schemas.SecretVar{Val: profileARN}
+		aliases[modelID] = schemas.AliasConfig{
+			ModelID:   profileID,
+			ModelName: lo.ToPtr(modelID),
+			BedrockAliasCfg: &schemas.BedrockAliasCfg{
+				InferenceProfileARN: &arn,
+			},
+		}
+	}
+}
+
+func splitBedrockInferenceProfileARN(arn string) (prefix, resourceID string, ok bool) {
+	if separator := strings.LastIndexByte(arn, '/'); strings.HasPrefix(arn, "arn:") && separator > 0 && separator < len(arn)-1 {
+		return arn[:separator], arn[separator+1:], true
+	}
+
+	// Preserve the previous shape for malformed or prefix-only values. The
+	// Console schema validates presence, while Bedrock remains responsible for
+	// validating the identifier itself.
+	return "", "", false
 }
 
 func (in *Account) parseModelID(modelID string) (inferenceProfileID string, model string) {

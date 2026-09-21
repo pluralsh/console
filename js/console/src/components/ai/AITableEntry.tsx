@@ -89,7 +89,7 @@ export function AITableEntry({
       <AIEntryLabel
         isStale={isStale}
         thread={thread}
-        opacity={isStale ? 0.6 : 1}
+        css={{ opacity: isStale ? 0.6 : 1 }}
       />
       <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
         {fromNow(timestamp)}

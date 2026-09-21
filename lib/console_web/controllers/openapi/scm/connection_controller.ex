@@ -3,13 +3,14 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionController do
   alias Console.Deployments.Git
   alias Console.Schema.ScmConnection
 
-  plug Scope, [resource: :scm, action: :read] when action in [:show, :index]
-  plug Scope, [resource: :scm, action: :write] when action in [:create, :update, :delete]
+  plug Scope, [resource: :self_service, action: :read] when action in [:show]
+  plug Scope, [resource: :self_service, action: :read] when action in [:index]
+  plug Scope, [resource: :catalog, action: :write] when action in [:create, :update, :delete]
 
   operation :show,
     operation_id: "GetScmConnection",
     tags: ["scm"],
-    "x-required-scopes": ["scm.read"],
+    "x-required-scopes": ["self_service.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -23,7 +24,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionController do
   operation :index,
     operation_id: "ListScmConnections",
     tags: ["scm"],
-    "x-required-scopes": ["scm.read"],
+    "x-required-scopes": ["self_service.read"],
     parameters: [
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
@@ -37,7 +38,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionController do
   operation :create,
     operation_id: "CreateScmConnection",
     tags: ["scm"],
-    "x-required-scopes": ["scm.write"],
+    "x-required-scopes": ["catalog.write"],
     request_body: OpenAPI.SCM.ConnectionInput,
     responses: [ok: OpenAPI.SCM.Connection]
   def create(conn, _) do
@@ -50,7 +51,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionController do
   operation :update,
     operation_id: "UpdateScmConnection",
     tags: ["scm"],
-    "x-required-scopes": ["scm.write"],
+    "x-required-scopes": ["catalog.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -67,7 +68,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionController do
   operation :delete,
     operation_id: "DeleteScmConnection",
     tags: ["scm"],
-    "x-required-scopes": ["scm.write"],
+    "x-required-scopes": ["catalog.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],

@@ -6,7 +6,7 @@ import {
   DiscoverIcon,
   Flex,
   FormField,
-  Input2,
+  Input,
   KubernetesIcon,
   ListIcon,
   ListBoxItem,
@@ -460,7 +460,7 @@ function NamespaceListField({
         gap="xsmall"
         width="100%"
       >
-        <Input2
+        <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {

@@ -31,7 +31,6 @@ import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import { QoveScriptLoader } from '../QoveScriptLoader'
 import { SentryInitializer } from '../SentryInitializer'
-import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
 import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
@@ -85,7 +84,6 @@ export default function Console() {
 }
 
 function ConsoleContent() {
-  const isProduction = import.meta.env.MODE === 'production'
   const isCloudSetupUnfinished = useCloudSetupUnfinished()
   const { setActionsPanelOpen } = useChatbot()
 
@@ -113,7 +111,6 @@ function ConsoleContent() {
         minWidth={0}
         zIndex={0} // needed so chatbot flyovers render over main console content
       >
-        {isProduction && <ApplicationUpdateToast />}
         {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
         <Header />
         <Flex
@@ -128,7 +125,7 @@ function ConsoleContent() {
             flexGrow={1}
             overflowX="hidden"
             position="relative"
-            container="console / inline-size"
+            css={{ container: 'console / inline-size' }}
           >
             <Subheader />
             <Suspense fallback={<LoadingIndicator />}>

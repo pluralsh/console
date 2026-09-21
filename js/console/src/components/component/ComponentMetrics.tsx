@@ -4,10 +4,9 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import RangePicker from 'components/utils/RangePicker'
 
 import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
-import isEmpty from 'lodash/isEmpty'
 
 import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
-import { useMemo, useState } from 'react'
+import { type CSSProperties, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -18,7 +17,10 @@ import {
   PodResourceReservation,
   getPodResourceReservations,
 } from 'components/utils/metrics/podResourceReservations.ts'
-import { ResourceMetricsGraphs } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import {
+  ResourceMetricsGraphs,
+  hasResourceMetrics,
+} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { ComponentDetailsWithPodsT } from './useFetchComponentDetails.tsx'
 
 type Duration = (typeof DURATIONS)[number]
@@ -34,8 +36,8 @@ function Metric({
   componentId?: string
   podReservations?: PodResourceReservation[]
   duration: Duration
-  maxHeight?: string
-  overflowY?: string
+  maxHeight?: CSSProperties['maxHeight']
+  overflowY?: CSSProperties['overflowY']
 }) {
   const theme = useTheme()
   const start = useMetricsQueryStart(offset)
@@ -52,27 +54,83 @@ function Metric({
     fetchPolicy: 'cache-and-network',
   })
 
-  const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } =
-      data?.serviceDeployment?.componentMetrics || {}
+  const {
+    cpu,
+    mem,
+    podCpu,
+    podMem,
+    cpuRequests,
+    memRequests,
+    cpuLimits,
+    memLimits,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+  } = useMemo(() => {
+    const {
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    } = data?.serviceDeployment?.componentMetrics || {}
 
     return {
       cpu: (cpu || []).filter(isNonNullable),
       mem: (mem || []).filter(isNonNullable),
       podCpu: (podCpu || []).filter(isNonNullable),
       podMem: (podMem || []).filter(isNonNullable),
+      cpuRequests: (cpuRequests || []).filter(isNonNullable),
+      memRequests: (memRequests || []).filter(isNonNullable),
+      cpuLimits: (cpuLimits || []).filter(isNonNullable),
+      memLimits: (memLimits || []).filter(isNonNullable),
+      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
+      podMemRequests: (podMemRequests || []).filter(isNonNullable),
+      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
+      podMemLimits: (podMemLimits || []).filter(isNonNullable),
     }
   }, [data])
 
   let content = <EmptyState message="No metrics available" />
 
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
+  if (
+    hasResourceMetrics({
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    })
+  ) {
     content = (
       <ResourceMetricsGraphs
         cpu={cpu}
         mem={mem}
         podCpu={podCpu}
         podMem={podMem}
+        cpuRequests={cpuRequests}
+        memRequests={memRequests}
+        cpuLimits={cpuLimits}
+        memLimits={memLimits}
+        podCpuRequests={podCpuRequests}
+        podMemRequests={podMemRequests}
+        podCpuLimits={podCpuLimits}
+        podMemLimits={podMemLimits}
         podReservations={podReservations}
       />
     )

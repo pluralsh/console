@@ -18,12 +18,11 @@ const MetadataGridGrid = styled.div<{ $maxCols: number }>(
   })
 )
 
-export function MetadataCard({ children, ...props }: CardProps) {
+export function MetadataCard({ children, css, ...props }: CardProps) {
   const { spacing } = useTheme()
   return (
     <Card
-      display="flex"
-      justifyContent="center"
+      css={{ display: 'flex', justifyContent: 'center', ...css }}
       {...props}
     >
       {/* 1526 is magic number which is the card's width when screen is 1940px wide */}

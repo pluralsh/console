@@ -1,6 +1,13 @@
 import classNames from 'classnames'
-import { type InputProps, Label } from 'honorable'
-import { memo, useContext, useEffect, useId, useRef, useState } from 'react'
+import {
+  memo,
+  type ComponentPropsWithRef,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react'
 import {
   type AriaRadioProps,
   VisuallyHidden,
@@ -34,11 +41,12 @@ const CheckedIcon = memo(({ small }: { small: boolean }) => {
   )
 })
 
-const HonorableLabelStyled = styled(Label)<{
+const LabelSC = styled.label<{
   $small: boolean
   $isFocusVisible: boolean
   $disabled: boolean
 }>(({ $small = false, $disabled = false, $isFocusVisible, theme }) => ({
+  display: 'flex',
   ...theme.partials.text.body2,
   gap: theme.spacing.small,
   alignItems: 'center',
@@ -120,10 +128,11 @@ export type RadioProps = AriaRadioProps & {
   small?: boolean
   disabled?: boolean
   defaultSelected?: boolean
+  defaultChecked?: boolean
   checked?: boolean
   name?: string
   onChange?: (e: { target: { checked: boolean } }) => any
-} & InputProps
+} & Omit<ComponentPropsWithRef<'label'>, 'onChange'>
 
 function Radio({
   ref,
@@ -172,7 +181,7 @@ function Radio({
   const icon = isSelected ? <CheckedIcon small={!!small} /> : null
 
   return (
-    <HonorableLabelStyled
+    <LabelSC
       htmlFor={inputProps.id}
       id={labelId}
       ref={ref}
@@ -180,8 +189,6 @@ function Radio({
       $isFocusVisible={isFocusVisible}
       $small={!!small}
       $disabled={!!isDisabled}
-      display="flex"
-      marginBottom="0"
       {...props}
     >
       <VisuallyHidden>
@@ -203,7 +210,7 @@ function Radio({
         <div className="icon">{icon}</div>
       </div>
       <div className="label"> {props.children}</div>
-    </HonorableLabelStyled>
+    </LabelSC>
   )
 }
 

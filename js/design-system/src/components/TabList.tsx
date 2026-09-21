@@ -1,7 +1,7 @@
 import { mergeRefs } from '@react-aria/utils'
 import { type Key, type Node } from '@react-types/shared'
 import { type AriaTabListProps } from '@react-types/tabs'
-import { Flex, type FlexProps } from 'honorable'
+import Flex, { type FlexProps } from './Flex'
 import {
   Children,
   type ComponentProps,
@@ -129,7 +129,11 @@ function TabList({
 
   if (renderer) {
     return renderer(
-      { ...props, ...tabListProps, ...{ children: tabChildren } },
+      {
+        ...props,
+        ...tabListProps,
+        ...{ children: tabChildren },
+      } as HTMLAttributes<HTMLElement>,
       mergedRef,
       state
     )

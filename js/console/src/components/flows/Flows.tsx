@@ -4,7 +4,7 @@ import {
   Button,
   Flex,
   FlowIcon,
-  Input2,
+  Input,
   SearchIcon,
   useSetBreadcrumbs,
   Card,
@@ -42,8 +42,7 @@ import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
 import { ServiceDeploymentStatus, useFlowsQuery } from 'generated/graphql'
 import { compact, isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
+import { useSearchParams } from 'react-router-dom'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -190,21 +189,13 @@ export function Flows() {
         <Flex direction="column">
           <Subtitle1H1>Flows</Subtitle1H1>
           <Body2P $color="text-light">
-            Organize services, pipelines, MCP servers, and more into holistic
+            Organize services, pipelines, workbenches, and more into holistic
             units. <InlineA href={FLOW_DOCS_URL}>Learn more</InlineA>
           </Body2P>
         </Flex>
-        <Button
-          secondary
-          as={Link}
-          to={AI_MCP_SERVERS_ABS_PATH}
-          endIcon={<ArrowTopRightIcon />}
-        >
-          Manage MCP servers
-        </Button>
       </HeaderSC>
       <DisplayToolbarSC>
-        <Input2
+        <Input
           showClearButton
           css={{ flex: 1 }}
           placeholder="Search flows"

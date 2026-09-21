@@ -11,7 +11,7 @@ import {
   Flex,
   FormField,
   IconFrame,
-  Input2,
+  Input,
   isValidRepoUrl,
   ListBoxItem,
   Select,
@@ -144,7 +144,7 @@ export function WorkbenchSetupStep({
         infoTooltip="Name must be unique"
         label="Workbench name"
       >
-        <Input2
+        <Input
           placeholder="Enter a name"
           value={formState.name}
           onChange={(e) =>
@@ -155,7 +155,7 @@ export function WorkbenchSetupStep({
         />
       </FormField>
       <FormField label="Workbench description">
-        <Input2
+        <Input
           placeholder="Enter a description"
           value={formState.description ?? ''}
           onChange={(e) =>
@@ -522,6 +522,7 @@ function GitRepositoryImportSubStep({
           }}
         >
           <Switch
+            size="small"
             checked={showAdvanced}
             onChange={(val) => setShowAdvanced(val)}
             css={{ width: 'fit-content' }}
@@ -661,7 +662,7 @@ export function WorkbenchCodingAgentStep({
             width="100%"
           >
             <Flex gap="xsmall">
-              <Input2
+              <Input
                 value={repoInput}
                 onChange={(e) => {
                   setRepoInput(e.target.value)

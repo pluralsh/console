@@ -81,21 +81,28 @@ defmodule Console.AI.Workbench.Environment do
   end
   defp model_opts(job, _), do: [usage_callback: &usage_callback(job, nil, &1)]
 
-  defp policies(%WorkbenchJob{workbench_id: id}) when is_binary(id) do
+  @doc """
+  Compiles the admission policies attached to a workbench into `Tool.Policy`
+  structs, which `Tool.policy/3` can apply to a tool call.
+  """
+  def policies(%Workbench{id: id}), do: policies(id)
+  def policies(%WorkbenchJob{workbench_id: id}), do: policies(id)
+  def policies(id) when is_binary(id) do
     Workbenches.get_workbench_policies(id)
-    |> Enum.map(fn
-      %{policy: %{id: id, name: name, policy: source}, matches: matches} ->
-        matches = matches || %{}
-        %Tool.Policy{
-          regexes: Map.get(matches, :parsed_regexes, []),
-          ignore: Map.get(matches, :ignore, []),
-          name: name,
-          policy: source,
-          policy_id: id
-        }
-    end)
+    |> Enum.map(&to_tool_policy/1)
   end
-  defp policies(_), do: []
+  def policies(_), do: []
+
+  defp to_tool_policy(%{policy: %{id: id, name: name, policy: source}, matches: matches}) do
+    matches = matches || %{}
+    %Tool.Policy{
+      regexes: Map.get(matches, :parsed_regexes, []),
+      ignore: Map.get(matches, :ignore, []),
+      name: name,
+      policy: source,
+      policy_id: id
+    }
+  end
 
   def actions(%__MODULE__{functions: funcs, job: job}) do
     %Actions{

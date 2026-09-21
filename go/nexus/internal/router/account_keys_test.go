@@ -150,8 +150,75 @@ func TestAccountBedrockRuntimeEndpointIsDefault(t *testing.T) {
 	require.Len(t, keys, 1)
 	require.NotNil(t, keys[0].BedrockKeyConfig)
 	require.Nil(t, keys[0].BedrockMantleKeyConfig)
+	require.Nil(t, keys[0].UseOpenAIEndpoints)
 	require.Empty(t, keys[0].BedrockKeyConfig.AccessKey.GetValue())
 	require.Empty(t, keys[0].BedrockKeyConfig.SecretKey.GetValue())
+}
+
+func TestAccountBedrockModelSettingsUseApplicationInferenceProfile(t *testing.T) {
+	modelID := "anthropic.claude-sonnet-4-6"
+	inferenceProfileARN := "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/abcdef123456"
+	inferenceProfilePrefix := "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile"
+	inferenceProfileID := "abcdef123456"
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId: lo.ToPtr(modelID),
+			Region:  lo.ToPtr("us-east-1"),
+			ModelSettings: []*pb.BedrockModelSettings{
+				{
+					ModelId:             modelID,
+					InferenceProfileArn: inferenceProfileARN,
+				},
+			},
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.Contains(t, keys[0].Models, modelID)
+
+	alias, ok := keys[0].Aliases[modelID]
+	require.True(t, ok)
+	require.Equal(t, inferenceProfileID, alias.ModelID)
+	require.NotNil(t, alias.ModelName)
+	require.Equal(t, modelID, *alias.ModelName)
+	require.NotNil(t, alias.BedrockAliasCfg)
+	require.NotNil(t, alias.InferenceProfileARN)
+	require.Equal(t, inferenceProfilePrefix, alias.InferenceProfileARN.GetValue())
+	require.Equal(t,
+		inferenceProfileARN,
+		alias.InferenceProfileARN.GetValue()+"/"+alias.ModelID,
+		"Bifrost should reconstruct the exact application inference profile ARN",
+	)
+}
+
+func TestSplitBedrockInferenceProfileARN(t *testing.T) {
+	t.Run("splits a full application inference profile ARN", func(t *testing.T) {
+		prefix, resourceID, ok := splitBedrockInferenceProfileARN(
+			"arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/abcdef123456",
+		)
+
+		require.True(t, ok)
+		require.Equal(t, "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile", prefix)
+		require.Equal(t, "abcdef123456", resourceID)
+	})
+
+	t.Run("rejects a prefix-only ARN", func(t *testing.T) {
+		prefix, resourceID, ok := splitBedrockInferenceProfileARN(
+			"arn:aws:bedrock:us-east-1:123456789012:application-inference-profile",
+		)
+
+		require.False(t, ok)
+		require.Empty(t, prefix)
+		require.Empty(t, resourceID)
+	})
 }
 
 func TestAccountBedrockMantleEndpointUsesMantleAndRuntimeEmbeddings(t *testing.T) {
@@ -241,6 +308,7 @@ func TestAccountOpenAICompatibleProvider(t *testing.T) {
 	providerConfig, err := acct.GetConfigForProvider(openAICompatibleProvider)
 	require.NoError(t, err)
 	require.Equal(t, "https://litellm.example", providerConfig.NetworkConfig.BaseURL)
+	require.True(t, providerConfig.NetworkConfig.AllowPrivateNetwork)
 	require.NotNil(t, providerConfig.CustomProviderConfig)
 	require.Equal(t, schemas.OpenAI, providerConfig.CustomProviderConfig.BaseProviderType)
 	require.True(t, providerConfig.CustomProviderConfig.AllowedRequests.ChatCompletion)

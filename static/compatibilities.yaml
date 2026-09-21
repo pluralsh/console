@@ -53,7 +53,7 @@ addons:
           performance improvements (less pod listing) and safer handling to prevent
           panics.']
       breaking_changes: []
-    chart_version: 2.43.1
+    chart_version: 2.43.2
     images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
   - version: 1.9.1
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -1842,6 +1842,114 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.33.0
+    kube: ['1.36']
+    requirements:
+    - name: Alloy
+      version: 4.3.2-bb.0
+    - name: Anchore Enterprise
+      version: 4.1.2-bb.0
+    - name: Argocd
+      version: 10.2.1-bb.2
+    - name: Authservice
+      version: 1.1.8-bb.3
+    - name: Cert Manager
+      version: v1.20.3-bb.2
+    - name: Eck Operator
+      version: 3.5.0-bb.0
+    - name: Elasticsearch Kibana
+      version: 1.43.0-bb.0
+    - name: External Secrets Operator
+      version: 2.10.0-bb.2
+    - name: Fluentbit
+      version: 0.58.2-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.4
+    - name: Gatekeeper
+      version: 3.23.1-bb.0
+    - name: Gateway Api
+      version: 1.6.1-bb.0
+    - name: Gitlab
+      version: 10.3.2-bb.1
+    - name: Gitlab Runner
+      version: 0.91.2-bb.2
+    - name: Grafana
+      version: 12.10.0-bb.0
+    - name: Harbor
+      version: 1.19.2-bb.1
+    - name: Headlamp
+      version: 0.45.0-bb.0
+    - name: Istio Cni
+      version: 1.30.4-bb.0
+    - name: Istio Crds
+      version: 1.30.4-bb.0
+    - name: Istio Gateway
+      version: 1.30.4-bb.0
+    - name: Istiod
+      version: 1.30.4-bb.0
+    - name: Keycloak
+      version: 7.3.0-bb.0
+    - name: Kiali
+      version: 2.31.0-bb.0
+    - name: Kyverno
+      version: 3.9.1-bb.0
+    - name: Kyverno Policies
+      version: 3.3.4-bb.87
+    - name: Kyverno Reporter
+      version: 3.10.0-bb.2
+    - name: Loki
+      version: 6.55.0-bb.7
+    - name: Mattermost
+      version: 11.10.1-bb.0
+    - name: Mattermost Operator
+      version: 1.25.9-bb.0
+    - name: Metrics Server
+      version: 3.14.0-bb.0
+    - name: Mimir
+      version: 6.1.0-bb.1
+    - name: Minio
+      version: 7.1.1-bb.24
+    - name: Minio Operator
+      version: 7.1.1-bb.10
+    - name: Monitoring
+      version: 88.6.2-bb.0
+    - name: Neuvector
+      version: 2.11.1-bb.0
+    - name: Prometheus Operator Crds
+      version: 31.0.1-bb.0
+    - name: Renovate
+      version: 46.289.4-bb.0
+    - name: Sonarqube
+      version: 2026.4.1-bb.1
+    - name: Tempo
+      version: 2.1.0-bb.2
+    - name: Thanos
+      version: 17.6.0-bb.1
+    - name: Twistlock
+      version: 0.30.0-bb.2
+    - name: Vault
+      version: 0.34.1-bb.1
+    - name: Velero
+      version: 12.1.0-bb.4
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.4-bb.0
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Big Bang 3.33.0 updates a large set of embedded charts; most
+          version bumps are patch-level but a few are major/minor upgrades that may
+          require extra validation.]
+      features: ['General dependency refresh across security, observability, and CI/CD
+          components.', Improved stability/bugfix releases across several bundled
+          charts (patch bumps).]
+      breaking_changes: ["Potential breaking change risk from major upgrades (notably\
+          \ Anchore Enterprise 3.x \u2192 4.x and Grafana 10.x \u2192 12.x); review\
+          \ component-specific upgrade notes and test dashboards/scans before promoting\
+          \ to prod."]
+    chart_version: 3.33.0
+    images: ['registry1.dso.mil/ironbank/bitnami/mysql8:8.0.36-debian-11-r1', 'registry1.dso.mil/ironbank/opensource/mysql/mysql8:8.4.11']
   - version: 3.32.0
     kube: ['1.36']
     requirements:
@@ -12944,31 +13052,23 @@ addons:
   helm_values: debug.verbose=flow
   eolApiSlug: cilium
   versions:
-  - version: 1.20.1
-    kube: ['1.36', '1.35', '1.34']
+  - version: 1.20.2
+    kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- **New/adjusted Helm values surfaced by this patch:**\n  - `envoy.httpUpstreamLingerTimeout`\
-        \ now **accepts `0`** and will be correctly templated into the Envoy config\
-        \ ConfigMap (previously `0` could be treated as \u201Cunset\u201D).\n  - `endpointPolicyUpdateTimeoutDuration`\
-        \ can now be **set via Helm** (previously not configurable from chart values).\n\
-        \n- **Potential behavior change to watch for (no action unless you rely on\
-        \ old behavior):**\n  - Envoy route idle timeout behavior is restored to use\
-        \ `http-idle-timeout` as the source again; if you had workarounds/tuning around\
-        \ idle timeouts, re-validate after upgrade."
-      chart_updates: [ClusterMesh documentation and guidance is updated/overhauled
-          (Helm-first setup and cert configuration instructions)., Fix for ClusterMesh
-          MCS-API CRD install/upgrade race when `clustermesh-apiserver` starts before
-          the CRD version is present., 'Helm templating fix so `envoy.httpUpstreamLingerTimeout:
-          0` is rendered into the ConfigMap.', Helm support added to pass through
-          `endpointPolicyUpdateTimeoutDuration`.]
-      features: [ClusterMesh documentation is substantially improved with Helm-first
-          setup and clearer certificate configuration guidance., Faster recovery for
-          disrupted TCP connections when accessing DSR-enabled Services (improves
-          resiliency/perceived reliability).]
+      helm_changes: ''
+      chart_updates: ["No Helm chart changelog was provided in the notes you shared;\
+          \ summary below is based on Cilium application release notes only. Expect\
+          \ this to be a patch-level chart/app bump with no intentional values changes,\
+          \ but validate against the chart\u2019s own CHANGELOG/values.schema.json\
+          \ before upgrading."]
+      features: ['Gateway API: adds a node label selector to control Gateway API behavior
+          when `hostNetwork` is enabled (minor functional enhancement).', 'Operational
+          extension: adds extension points for `cilium-envoy` DaemonSet readiness/liveness/startup
+          probes (helps tailoring probe config via Helm/overrides).']
       breaking_changes: []
-    chart_version: 1.20.1
+    chart_version: 1.20.2
     images: []
   - version: 1.20.0
     kube: ['1.36', '1.35', '1.34']
@@ -13015,6 +13115,53 @@ addons:
           from 0.3.1 to 1.0.0, which can affect clusters using custom CNI config management
           or validating CNI config schema/format.']
     chart_version: 1.20.0
+    images: []
+  - version: 1.19.8
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / configuration items to review\n\n- **EndpointSlice\
+        \ label filtering when `k8s-service-proxy-name` is used (already in 1.19.4):**\
+        \ If you set `--k8s-service-proxy-name`, any **hand-managed `EndpointSlice`\
+        \ objects must carry** the label `service.kubernetes.io/service-proxy-name`\
+        \ to be watched/used.\n- **Flags/values that were previously accepted but\
+        \ ignored are now honored (1.19.8):**\n  - `vtep-sync-interval`\n  - `enable-xt-socket-fallback`\n\
+        \  - `eni-delete-on-termination` **when using a custom CNI config**\n  - `enableIdentityMark`\
+        \ **Helm value outside CNI chaining mode**\n  - `lb-retry-backoff-max`\n \
+        \ - Hubble: **four config knobs** that previously didn\u2019t reach their\
+        \ sink (verify your Hubble config behaves as expected after upgrade).\n- **Helm\
+        \ chart image overrides:** 1.19.8 adds **general busybox image values** for\
+        \ substitution (helps with air-gapped/custom registries). If you previously\
+        \ patched templates or used ad-hoc overrides, consider switching to the new\
+        \ values.\n- **clustermesh-apiserver etcd user/role management:** A bug was\
+        \ fixed around revoking stale roles on config change; **Helm-chart-provisioned\
+        \ configuration is noted as not affected**, but if you run custom etcd roles/users\
+        \ you should re-check post-upgrade behavior.\n- **Operator networking/health\
+        \ ports (from 1.19.4):** Chart ensured operator health port is **not set as\
+        \ hostPort when hostNetwork is disabled**. If you relied on hostPort exposure\
+        \ without hostNetwork, verify your access pattern.\n\n## Practical upgrade\
+        \ notes (what to validate)\n\n- If you currently set any of the \u201Cpreviously\
+        \ ignored\u201D options above, **expect behavior to change** after upgrading\
+        \ to 1.19.8 (because they\u2019ll start taking effect). Review your `values.yaml`/CLI\
+        \ flags and confirm the intended behavior.\n- If you use Gateway API with\
+        \ default `bpf.tproxy=false`, ensure nodes have **iptables + netfilter TPROXY\
+        \ modules** available (documented in 1.19.8)."
+      chart_updates: [Added extension points for `cilium-envoy` DaemonSet readiness/liveness/startup
+          probes (allows customization without patching manifests)., Added Helm support
+          for substituting a general BusyBox image via values (improves custom-registry/air-gapped
+          deployments).]
+      features: ["More configurable health probing for the cilium-envoy DaemonSet\
+          \ via probe \u201Cextension points\u201D, making it easier to tailor readiness/liveness\
+          \ behavior to your environment.", Improved chart flexibility for custom
+          registries by adding generic BusyBox image values for substitution.]
+      breaking_changes: [Configuration options that were previously accepted but silently
+          ignored are now applied; clusters relying on the old no-op behavior may
+          see changes in networking/LB/IPAM behavior after the upgrade., 'If you set
+          `k8s-service-proxy-name` and manage EndpointSlices manually, missing `service.kubernetes.io/service-proxy-name`
+          labels will cause those EndpointSlices to be ignored (service routing may
+          break).']
+    chart_version: 1.19.8
     images: []
   - version: 1.19.4
     kube: ['1.36', '1.35', '1.34']
@@ -13098,6 +13245,23 @@ addons:
           ensure all nodes are correctly enrolled/compatible before turning it on.]
     chart_version: 1.19.0
     images: []
+  - version: 1.18.14
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Adds Helm values to override a general-purpose BusyBox image
+          used by chart hooks/jobs., 'Adds extension points (values/templating) for
+          cilium-envoy DaemonSet readiness, liveness, and startup probes.']
+      features: ['No major new user-facing features; this is a patch release focused
+          on bugfixes, hardening, and dependency updates.']
+      breaking_changes: [None called out in the provided notes; treat as a patch upgrade
+          but validate any previously ignored config options now being enforced.]
+    chart_version: 1.18.14
+    images: ['quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463',
+      'quay.io/cilium/cilium:v1.18.14@sha256:0e65a0910d74be4d56ebc8f8a010b566f9177444667dbb8eb5b2d8d840ea5406',
+      'quay.io/cilium/operator-generic:v1.18.14@sha256:6a77082c3938edad0433f53c46a90b8da08c9e4a9a255e51a1c2ff410db60104']
   - version: 1.18.10
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -19911,6 +20075,25 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 91.4.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Render webhook `matchConditions` as a list (template behavior
+          change for admission webhooks)., Update Grafana image tag to `v13.2.5`.,
+        'CI-only: check for new CRD spec fields when bumping prometheus-operator.',
+        'CI-only: use target values for baseline chart installation.']
+      features: [Grafana bundled with the chart is bumped to v13.2.5 (includes upstream
+          Grafana fixes).]
+      breaking_changes: []
+    chart_version: 91.4.1
+    images: ['docker.io/grafana/grafana:13.2.2-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.94.0',
+      'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 91.2.1
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -23326,6 +23509,12 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.159.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.158.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -24369,7 +24558,7 @@ addons:
           and behavior fixes (notably SSL redirect/rewrite-target handling) may change
           request/redirect behavior compared to earlier 3.7.x expectations; validate
           ingress annotations in staging.]
-    chart_version: 41.5.0
+    chart_version: 41.6.0
     images: []
   - version: 3.7.0
     kube: ['1.36', '1.35', '1.34', '1.33']
@@ -26358,25 +26547,18 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.5.2
+  - version: 3.5.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['ApplicationSet: restores `ignoreApplicationDifferences` behavior
-          after normalization, which improves diff/sync accuracy when using AppSet-generated
-          apps.', 'Repository/Helm sources: fixes handling of an untyped Helm source
-          in `UpdateRevisionForPaths`, reducing errors when path-based revision updates
-          run against Helm repos.', 'UI: applications and appset pages receive small
-          improvements (operation state visible in app list; remove kind filter on
-          appset page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug
-          fixes from Dex).']
+      features: []
       breaking_changes: []
-    chart_version: 10.9.0
+    chart_version: 10.9.2
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.5.2']
+      'quay.io/argoproj/argocd:v3.5.3']
   - version: 3.5.1
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -26936,23 +27118,14 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.1.3
+  - version: 4.1.4
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ["Release notes provided are \u201CQuick Start\u201D boilerplate;\
-          \ no concrete feature list or change log entries are included for 4.1.0\u2192\
-          4.1.3.", 'Practical change visible: new CLI/controller/server artifacts
-          and install manifests are published for v4.1.3 (binaries and install.yaml
-          URLs updated).']
-      breaking_changes: [No breaking changes are listed in the provided notes; they
-          only point to the upgrading guide/changelog for details.]
-    chart_version: 2.0.6
-    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.3', 'quay.io/argoproj/argocli:v4.1.3',
-      'quay.io/argoproj/workflow-controller:v4.1.3']
+    summary: null
+    chart_version: 2.0.7
+    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
+      'quay.io/argoproj/workflow-controller:v4.1.4']
   - version: 4.1.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -30208,6 +30381,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
+  - version: 9.5.4
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 9.5.4
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.5.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []

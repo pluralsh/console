@@ -1,6 +1,7 @@
 import { FormField, Input } from '@pluralsh/design-system'
 
 import { ComponentPropsWithoutRef, ReactNode, RefObject } from 'react'
+import { useTheme } from 'styled-components'
 
 export function LabelledInput({
   ref,
@@ -17,7 +18,7 @@ export function LabelledInput({
   inputProps,
   ...props
 }: {
-  ref?: RefObject<HTMLInputElement>
+  ref?: RefObject<HTMLInputElement | null>
   label?: string
   value?: string
   onChange?: (value: string) => void
@@ -29,28 +30,33 @@ export function LabelledInput({
   required?: boolean
   disabled?: boolean
   inputProps?: ComponentPropsWithoutRef<typeof Input>
-} & ComponentPropsWithoutRef<typeof FormField>) {
+} & Omit<ComponentPropsWithoutRef<typeof FormField>, 'onChange'>) {
+  const theme = useTheme()
+
   return (
     <FormField
       label={label}
       caption={caption}
       hint={hint}
-      marginBottom="small"
+      style={{ marginBottom: theme.spacing.small }}
       error={error}
       required={required}
       {...props}
     >
       <Input
-        ref={ref}
         width="100%"
-        name={label}
-        type={type}
         value={value || ''}
         onChange={onChange && (({ target: { value } }) => onChange(value))}
         placeholder={placeholder}
         error={error}
         disabled={disabled}
         {...inputProps}
+        inputProps={{
+          name: label,
+          type,
+          ref,
+          ...inputProps?.inputProps,
+        }}
       />
     </FormField>
   )

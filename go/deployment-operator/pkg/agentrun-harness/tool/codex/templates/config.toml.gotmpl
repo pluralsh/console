@@ -31,6 +31,11 @@ web_search_request = true
 shell_snapshot = true
 {{ end }}
 
+{{ if .Settings.DirectOnlyToolNamespaces }}
+[features.code_mode]
+direct_only_tool_namespaces = [{{ range $index, $value := .Settings.DirectOnlyToolNamespaces }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+
 [projects.{{ quote .RepositoryDir }}]
 trust_level = "trusted"
 
@@ -66,6 +71,9 @@ enabled_tools = [{{ range $index, $value := .EnabledTools }}{{ if $index }}, {{ 
 {{ end }}
 {{ if .DisabledTools }}
 disabled_tools = [{{ range $index, $value := .DisabledTools }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+{{ if .Required }}
+required = true
 {{ end }}
 {{ if .Env }}
 [mcp_servers.{{ quote .Name }}.env]

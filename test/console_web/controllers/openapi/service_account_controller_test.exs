@@ -49,7 +49,7 @@ defmodule ConsoleWeb.OpenAPI.ServiceAccountControllerTest do
   describe "#show/2" do
     test "returns the service account by id", %{conn: conn} do
       user = admin_user()
-      account = insert(:user, service_account: true)
+      account = insert(:user, service_account: true, allowed_scopes: ["service.read"])
 
       result =
         conn
@@ -60,6 +60,7 @@ defmodule ConsoleWeb.OpenAPI.ServiceAccountControllerTest do
       assert result["id"] == account.id
       assert result["email"] == account.email
       assert result["service_account"]
+      assert result["allowed_scopes"] == ["service.read"]
     end
   end
 
@@ -95,6 +96,26 @@ defmodule ConsoleWeb.OpenAPI.ServiceAccountControllerTest do
 
       assert result["token"]
       assert result["expires_at"]
+    end
+
+    test "rejects access token scopes outside the service account allowlist", %{conn: conn} do
+      user = insert(:user)
+      account =
+        insert(:user,
+          service_account: true,
+          allowed_scopes: ["service.read"],
+          assume_bindings: [%{user_id: user.id}]
+        )
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> json_post("/v1/api/serviceaccounts/#{account.id}/token", %{
+          scopes: [%{api: "service.write"}]
+        })
+        |> json_response(422)
+
+      assert result["error"] == ["scopes must be a subset of the service account's allowed scopes"]
     end
   end
 end

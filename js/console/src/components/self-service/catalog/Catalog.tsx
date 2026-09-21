@@ -114,9 +114,11 @@ export function Catalog() {
             <CatalogPRAutomations catalogId={id} />
           </Flex>
           <Sidecar
-            height={'fit-content'}
-            marginLeft={'large'}
-            width={220}
+            css={{
+              height: 'fit-content',
+              marginLeft: theme.spacing.large,
+              width: 220,
+            }}
           >
             <SidecarItem heading="Author">{catalog.author}</SidecarItem>
             {catalog.category && (

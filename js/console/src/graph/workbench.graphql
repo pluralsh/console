@@ -927,6 +927,12 @@ query WorkbenchEvalSettings($id: ID!) {
       promptRules
       conclusionRules
       progressRules
+      automation {
+        enabled
+        maxScore
+        maxSkills
+        instructions
+      }
     }
   }
 }
@@ -1562,6 +1568,12 @@ mutation CreateWorkbenchEval(
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
 
@@ -1571,6 +1583,12 @@ mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
 

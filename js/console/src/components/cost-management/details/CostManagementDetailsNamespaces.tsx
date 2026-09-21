@@ -124,11 +124,11 @@ export function CostManagementDetailsNamespaces() {
         overflow="hidden"
       >
         <Input
-          flexShrink={0}
           startIcon={<SearchIcon />}
           placeholder="Search by namespace"
           value={namespaceQ}
           onChange={(e) => setNamespaceQ(e.target.value)}
+          css={{ flexShrink: 0 }}
         />
         <Card
           css={{ overflow: 'hidden', maxHeight: 500 }}

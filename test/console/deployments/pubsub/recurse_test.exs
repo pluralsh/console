@@ -816,6 +816,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
   use Mimic
   alias Console.PubSub
   alias Console.PubSub.Consumers.Recurse
+  alias Console.Schema.{WorkbenchEval, WorkbenchJob}
 
   setup :set_mimic_global
 
@@ -1033,6 +1034,77 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert job.user_id == bot.id
       assert job.issue_id == issue.id
       assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+  end
+
+  describe "WorkbenchEvalResultCreated" do
+    test "creates a bounded skill job when automation is enabled and the grade is below the threshold" do
+      user = insert(:user)
+      bot = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}, %{user_id: bot.id}])
+      workbench = insert(:workbench, project: project, bot_user: bot)
+
+      eval =
+        insert(:workbench_eval,
+          workbench: workbench,
+          automation: %WorkbenchEval.Automation{
+            enabled: true,
+            max_score: 8,
+            max_skills: 12,
+            instructions: "Focus on authoritative runbook queries."
+          }
+        )
+
+      job = insert(:workbench_job, workbench: workbench, user: user, type: :job)
+      result = insert(:workbench_eval_result, workbench_eval: eval, workbench_job: job, grade: 7)
+
+      assert {:ok, %WorkbenchJob{} = skill_job} =
+               Recurse.handle_event(%PubSub.WorkbenchEvalResultCreated{item: result})
+
+      assert skill_job.type == :skill
+      assert skill_job.referenced_job_id == job.id
+      assert skill_job.user_id == bot.id
+      assert skill_job.prompt =~ "below the configured automation threshold of 8"
+      assert skill_job.prompt =~ "never exceed 12 total skills"
+      assert skill_job.prompt =~ "Focus on authoritative runbook queries."
+    end
+
+    test "does not create a skill job at or above the threshold" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      eval =
+        insert(:workbench_eval,
+          workbench: workbench,
+          automation: %WorkbenchEval.Automation{enabled: true, max_score: 8, max_skills: 12}
+        )
+
+      job = insert(:workbench_job, workbench: workbench, user: user, type: :job)
+      result = insert(:workbench_eval_result, workbench_eval: eval, workbench_job: job, grade: 8)
+
+      assert :ok = Recurse.handle_event(%PubSub.WorkbenchEvalResultCreated{item: result})
+
+      refute Repo.get_by(WorkbenchJob, type: :skill, referenced_job_id: job.id)
+    end
+
+    test "does not create a skill job when automation is disabled" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      eval =
+        insert(:workbench_eval,
+          workbench: workbench,
+          automation: %WorkbenchEval.Automation{enabled: false, max_skills: 12}
+        )
+
+      job = insert(:workbench_job, workbench: workbench, user: user, type: :job)
+      result = insert(:workbench_eval_result, workbench_eval: eval, workbench_job: job, grade: 1)
+
+      assert :ok = Recurse.handle_event(%PubSub.WorkbenchEvalResultCreated{item: result})
+
+      refute Repo.get_by(WorkbenchJob, type: :skill, referenced_job_id: job.id)
     end
   end
 end

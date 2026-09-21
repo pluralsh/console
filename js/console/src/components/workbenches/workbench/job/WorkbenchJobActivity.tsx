@@ -1,5 +1,6 @@
 import {
   AccordionItem,
+  AgentLoadingIcon,
   Card,
   CaretDownIcon,
   DiffMethod,
@@ -7,7 +8,6 @@ import {
   FailedFilledIcon,
   Flex,
   IconFrame,
-  SpinnerAlt,
   TimeSeriesIcon,
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
@@ -960,7 +960,10 @@ function ActivityStatusIcon({
 
   return (
     <ActivityStatusIconSC>
-      <SpinnerAlt size={ACTIVITY_STATUS_ICON_SIZE} />
+      <AgentLoadingIcon
+        size={ACTIVITY_STATUS_ICON_SIZE}
+        variant="cursorEq"
+      />
     </ActivityStatusIconSC>
   )
 }

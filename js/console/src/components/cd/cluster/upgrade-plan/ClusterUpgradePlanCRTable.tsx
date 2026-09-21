@@ -18,7 +18,7 @@ import { Key } from '@react-types/shared'
 import { clusterDeprecatedCustomResourcesColumns } from 'components/cd/clusters/clusterDeprecatedCustomResourcesColumns'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { CaptionP } from 'components/utils/typography/Text'
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import { ClusterUpgradeDeprecatedCustomResourceFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
@@ -26,7 +26,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { ConfettiEmptyState, UpgradeAccordionName } from './ClusterUpgradePlan'
 import { ClusterUpgradePlanAccordion } from './ClusterUpgradePlanAccordion'
 
-const deprecatedCRSearchOptions: Fuse.IFuseOptions<ClusterUpgradeDeprecatedCustomResourceFragment> =
+const deprecatedCRSearchOptions: IFuseOptions<ClusterUpgradeDeprecatedCustomResourceFragment> =
   {
     keys: ['name', 'namespace', 'group'],
     threshold: 0.25,

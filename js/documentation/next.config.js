@@ -12,12 +12,7 @@ const { redirects } = require('./src/routing/docs-structure')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: [
-    '@pluralsh/design-system',
-    'honorable',
-    'honorable-theme-default',
-    'honorable-recipe-mapper',
-  ],
+  transpilePackages: ['@pluralsh/design-system'],
   reactStrictMode: false,
   compiler: {
     // https://nextjs.org/docs/advanced-features/compiler#styled-components
@@ -26,6 +21,9 @@ const nextConfig = {
   },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   webpack: (config) => {
+    // Share the theme context with design-system sources across workspaces.
+    config.resolve.alias['styled-components'] =
+      require.resolve('styled-components')
     config.resolve.alias['@pluralsh/design-system'] = path.resolve(
       __dirname,
       '../design-system/src/index.ts'

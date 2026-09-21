@@ -12,6 +12,7 @@ import (
 	acpsdk "github.com/coder/acp-go-sdk"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -30,6 +31,7 @@ type sessionAttempt struct {
 	fileSystemWrite bool
 	priorSessionID  string
 	sessionID       string
+	mcpServers      []acpsdk.McpServer
 }
 
 type sessionDetails struct {
@@ -47,6 +49,9 @@ func (attempt *sessionAttempt) run(prompt string) error {
 		return attempt.fail(fmt.Errorf("acp protocol version %d is unsupported", initialize.ProtocolVersion), false)
 	}
 	if err = attempt.authenticate(initialize.AuthMethods); err != nil {
+		return attempt.fail(err, attempt.cancelled())
+	}
+	if err = attempt.resolveMCPServers(); err != nil {
 		return attempt.fail(err, attempt.cancelled())
 	}
 
@@ -154,10 +159,22 @@ func (attempt *sessionAttempt) openSession(cwd string) (sessionDetails, error) {
 	return attempt.resumeSession(cwd, existingSession)
 }
 
+func (attempt *sessionAttempt) resolveMCPServers() error {
+	if attempt.mcpServers != nil {
+		return nil
+	}
+	servers, err := mcp.ACPServers()
+	if err != nil {
+		return fmt.Errorf("resolve acp mcp servers: %w", err)
+	}
+	attempt.mcpServers = servers
+	return nil
+}
+
 func (attempt *sessionAttempt) createSession(cwd string) (sessionDetails, error) {
 	created, err := attempt.connection.NewSession(attempt.ctx, acpsdk.NewSessionRequest{
 		Cwd:        cwd,
-		McpServers: []acpsdk.McpServer{},
+		McpServers: mcpServersOrEmpty(attempt.mcpServers),
 	})
 	if err != nil {
 		return sessionDetails{}, fmt.Errorf("acp session/new: %w", err)
@@ -182,7 +199,9 @@ func (attempt *sessionAttempt) createSession(cwd string) (sessionDetails, error)
 func (attempt *sessionAttempt) resumeSession(cwd, sessionID string) (sessionDetails, error) {
 	attempt.turn.setRestoring(true)
 	defer attempt.turn.setRestoring(false)
-	resumed, err := attempt.engine.restoreSession(attempt.ctx, attempt.connection, SessionRestoreRequest{Cwd: cwd, SessionID: sessionID})
+	resumed, err := attempt.engine.restoreSession(attempt.ctx, attempt.connection, SessionRestoreRequest{
+		Cwd: cwd, SessionID: sessionID, McpServers: mcpServersOrEmpty(attempt.mcpServers),
+	})
 	if err != nil {
 		return sessionDetails{}, fmt.Errorf("acp session restore: %w", err)
 	}
@@ -350,6 +369,7 @@ func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioP
 		fileSystemWrite: request.FileSystemWrite,
 		priorSessionID:  request.SessionID,
 		sessionID:       request.SessionID,
+		mcpServers:      request.McpServers,
 	}
 	attempt.connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
 	return attempt, nil

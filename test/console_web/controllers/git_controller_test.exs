@@ -10,6 +10,28 @@ defmodule ConsoleWeb.GitControllerTest do
   end
 
   describe "#tarball/2" do
+    test "it serves the embedded chart for the current deploy operator", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        name: "deploy-operator",
+        repository: git,
+        git: %{ref: Console.Deployments.Settings.agent_ref(), folder: "charts/deployment-operator"}
+      )
+      chart = Console.Deployments.Settings.agent_service_chart()
+      digest = Console.sha_file(chart)
+
+      conn =
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/v1/git/tarballs", %{id: svc.id})
+
+      body = response(conn, 200)
+      assert body == File.read!(chart)
+      assert {:ok, files} = :erl_tar.extract({:binary, body}, [:compressed, :memory])
+      assert List.keymember?(files, ~c"Chart.yaml", 0)
+      assert get_resp_header(conn, "x-plrl-digest") == [digest]
+    end
+
     test "it will download git content for valid deploy tokens", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
@@ -112,6 +134,23 @@ defmodule ConsoleWeb.GitControllerTest do
   end
 
   describe "#digest/2" do
+    test "it returns the embedded chart digest for the current deploy operator", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        name: "deploy-operator",
+        repository: git,
+        git: %{ref: Console.Deployments.Settings.agent_ref(), folder: "charts/deployment-operator"}
+      )
+
+      response =
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/ext/v1/digests", %{id: svc.id})
+        |> response(200)
+
+      assert response == Console.sha_file(Console.Deployments.Settings.agent_service_chart())
+    end
+
     test "it will return digests for valid deploy tokens", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})

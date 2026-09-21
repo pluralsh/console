@@ -2,7 +2,7 @@ import {
   Card,
   ChartIcon,
   Flex,
-  Input2,
+  Input,
   SearchIcon,
 } from '@pluralsh/design-system'
 import { useCallback, useMemo, useState } from 'react'
@@ -140,7 +140,7 @@ export function Logs({
             setFilters({ ...filters, queryOperator })
           }
         />
-        <Input2
+        <Input
           placeholder="Filter logs"
           startIcon={<SearchIcon size={14} />}
           value={q}

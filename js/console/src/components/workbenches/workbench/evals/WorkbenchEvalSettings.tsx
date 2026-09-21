@@ -4,6 +4,8 @@ import {
   EmptyState,
   Flex,
   FormField,
+  Input,
+  Slider,
   Switch,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -38,9 +40,13 @@ const EVAL_SETTINGS_STEPS = [
   'Prompt quality',
   'Conclusion rules',
   'Progress thought rules',
+  'Automation',
 ] as const
 
 type EvalSettingsStep = (typeof EVAL_SETTINGS_STEPS)[number]
+
+const DEFAULT_MAX_SCORE = 6
+const DEFAULT_MAX_SKILLS = 50
 
 export function WorkbenchEvalSettings() {
   const navigate = useNavigate()
@@ -51,6 +57,10 @@ export function WorkbenchEvalSettings() {
   const [promptQualityRules, setPromptQualityRules] = useState('')
   const [conclusionRules, setConclusionRules] = useState('')
   const [progressAndThoughtsRules, setProgressAndThoughtsRules] = useState('')
+  const [automationEnabled, setAutomationEnabled] = useState(false)
+  const [maxScore, setMaxScore] = useState(DEFAULT_MAX_SCORE)
+  const [maxSkills, setMaxSkills] = useState(DEFAULT_MAX_SKILLS)
+  const [automationInstructions, setAutomationInstructions] = useState('')
   const [isEvalStateInitialized, setIsEvalStateInitialized] = useState(false)
   const curStepIndex = EVAL_SETTINGS_STEPS.indexOf(curStep)
   const isLastStep = curStepIndex === EVAL_SETTINGS_STEPS.length - 1
@@ -81,6 +91,10 @@ export function WorkbenchEvalSettings() {
     setPromptQualityRules(workbenchEval?.promptRules ?? '')
     setConclusionRules(workbenchEval?.conclusionRules ?? '')
     setProgressAndThoughtsRules(workbenchEval?.progressRules ?? '')
+    setAutomationEnabled(workbenchEval?.automation?.enabled ?? false)
+    setMaxScore(workbenchEval?.automation?.maxScore ?? DEFAULT_MAX_SCORE)
+    setMaxSkills(workbenchEval?.automation?.maxSkills ?? DEFAULT_MAX_SKILLS)
+    setAutomationInstructions(workbenchEval?.automation?.instructions ?? '')
     setIsEvalStateInitialized(true)
   }, [evalLoading, isEvalStateInitialized, workbenchEval])
 
@@ -136,6 +150,12 @@ export function WorkbenchEvalSettings() {
           promptRules: promptQualityRules || null,
           conclusionRules: conclusionRules || null,
           progressRules: progressAndThoughtsRules || null,
+          automation: {
+            enabled: automationEnabled,
+            maxScore,
+            maxSkills,
+            instructions: automationInstructions || null,
+          },
         }
 
         if (workbenchEval?.id) {
@@ -222,6 +242,7 @@ export function WorkbenchEvalSettings() {
                   gap="large"
                 >
                   <Switch
+                    size="small"
                     checked={evalsEnabled}
                     onChange={(checked) => setEvalsEnabled(checked)}
                   >
@@ -256,6 +277,65 @@ export function WorkbenchEvalSettings() {
                   />
                 </FormField>
               )}
+              {curStep === 'Automation' && (
+                <Flex
+                  direction="column"
+                  gap="large"
+                >
+                  <Switch
+                    size="small"
+                    checked={automationEnabled}
+                    disabled={!evalsEnabled}
+                    onChange={setAutomationEnabled}
+                  >
+                    Automatically create skill-update jobs for low-scoring evals
+                  </Switch>
+                  <Slider
+                    label="Maximum score"
+                    thumbRadius={8}
+                    minValue={0}
+                    maxValue={10}
+                    step={1}
+                    value={maxScore}
+                    isDisabled={!evalsEnabled || !automationEnabled}
+                    tickMarks={[{ value: 0 }, { value: 5 }, { value: 10 }]}
+                    onChange={(value) =>
+                      setMaxScore(Array.isArray(value) ? value[0] : value)
+                    }
+                  />
+                  <FormField
+                    label="Maximum skills"
+                    hint="Automation can update existing skills at the limit, but cannot create additional skills."
+                  >
+                    <Input
+                      type="number"
+                      min={1}
+                      value={maxSkills}
+                      disabled={!evalsEnabled || !automationEnabled}
+                      onChange={(event) =>
+                        setMaxSkills(
+                          Number.parseInt(event.target.value, 10) || 0
+                        )
+                      }
+                    />
+                  </FormField>
+                  <FormField
+                    label="Instructions"
+                    hint="Optional guidance for automatically created skill-update jobs."
+                  >
+                    <Input
+                      multiline
+                      minRows={6}
+                      value={automationInstructions}
+                      disabled={!evalsEnabled || !automationEnabled}
+                      placeholder="Add guidance for deciding which skills to create or update."
+                      onChange={(event) =>
+                        setAutomationInstructions(event.target.value)
+                      }
+                    />
+                  </FormField>
+                </Flex>
+              )}
               <StickyActionsFooterSC>
                 <Flex
                   align="center"
@@ -278,6 +358,10 @@ export function WorkbenchEvalSettings() {
                         setPromptQualityRules('')
                         setConclusionRules('')
                         setProgressAndThoughtsRules('')
+                        setAutomationEnabled(false)
+                        setMaxScore(DEFAULT_MAX_SCORE)
+                        setMaxSkills(DEFAULT_MAX_SKILLS)
+                        setAutomationInstructions('')
                       }}
                     >
                       Reset to default

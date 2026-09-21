@@ -43,10 +43,31 @@ defmodule Console.Schema.AccessToken do
     |> validate_required(~w(user_id token)a)
   end
 
+  def changeset(model, attrs, %User{allowed_scopes: allowed_scopes}) do
+    model
+    |> changeset(attrs)
+    |> validate_allowed_scopes(allowed_scopes)
+  end
+
   def scope_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(api apis ids identifier)a)
   end
+
+  defp validate_allowed_scopes(changeset, [_ | _] = allowed_scopes) do
+    requested_scopes =
+      changeset
+      |> get_field(:scopes, [])
+      |> Enum.flat_map(fn scope -> List.wrap(scope.api) ++ List.wrap(scope.apis) end)
+      |> MapSet.new()
+
+    if MapSet.subset?(requested_scopes, MapSet.new(allowed_scopes)) do
+      changeset
+    else
+      add_error(changeset, :scopes, "must be a subset of the service account's allowed scopes")
+    end
+  end
+  defp validate_allowed_scopes(changeset, _), do: changeset
 
   defp save_expiry(cs, %{expiry: expiry}) when is_binary(expiry) do
     case Console.convert_duration(expiry) do

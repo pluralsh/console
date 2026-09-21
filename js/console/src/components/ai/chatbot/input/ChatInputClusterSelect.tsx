@@ -116,8 +116,7 @@ export function ChatInputClusterSelect({
             Cluster
             <Input
               small
-              inputProps={{ lineHeight: '12px' }}
-              type="text"
+              inputProps={{ css: { lineHeight: '12px' } }}
               showClearButton
               placeholder="Search..."
               value={inputValue}

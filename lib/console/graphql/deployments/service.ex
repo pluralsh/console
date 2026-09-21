@@ -347,6 +347,14 @@ defmodule Console.GraphQl.Deployments.Service do
     field :mem, list_of(:metric_response)
     field :pod_cpu, list_of(:metric_response)
     field :pod_mem, list_of(:metric_response)
+    field :cpu_requests, list_of(:metric_response)
+    field :mem_requests, list_of(:metric_response)
+    field :cpu_limits, list_of(:metric_response)
+    field :mem_limits, list_of(:metric_response)
+    field :pod_cpu_requests, list_of(:metric_response)
+    field :pod_mem_requests, list_of(:metric_response)
+    field :pod_cpu_limits, list_of(:metric_response)
+    field :pod_mem_limits, list_of(:metric_response)
   end
 
   @desc "a representation of a past revision of a service"
@@ -628,7 +636,10 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "fetches details of this service deployment, and can be called by the deploy operator"
     field :service_deployment, :service_deployment do
       middleware Authenticated, :cluster
-      middleware Scope, api: "serviceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :read,
+        api: "serviceDeployment"
       arg :id,      :id
       arg :cluster, :string, description: "the handle of the cluster for this service"
       arg :name,    :string

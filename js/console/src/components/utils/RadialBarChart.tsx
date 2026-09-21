@@ -1,5 +1,3 @@
-// install (please make sure versions match peerDependencies)
-// yarn add @nivo/core @nivo/radial-bar
 import { ResponsiveRadialBar } from '@nivo/radial-bar'
 import { ComponentProps, useMemo } from 'react'
 

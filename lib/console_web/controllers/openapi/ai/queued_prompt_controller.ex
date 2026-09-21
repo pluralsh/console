@@ -5,7 +5,7 @@ defmodule ConsoleWeb.OpenAPI.AI.QueuedPromptController do
   use ConsoleWeb, :api_controller
   alias Console.Deployments.Workbenches
 
-  plug Scope, [resource: :ai, action: :read] when action in [:create, :delete]
+  plug Scope, [resource: :workbench, action: :write] when action in [:create, :delete]
 
   @doc """
   Queues a prompt to be sent to a workbench job later.
@@ -13,7 +13,7 @@ defmodule ConsoleWeb.OpenAPI.AI.QueuedPromptController do
   operation :create,
     operation_id: "CreateQueuedPrompt",
     tags: ["workbench"],
-    "x-required-scopes": ["workbench.read"],
+    "x-required-scopes": ["workbench.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the workbench job"]
     ],
@@ -33,7 +33,7 @@ defmodule ConsoleWeb.OpenAPI.AI.QueuedPromptController do
   operation :delete,
     operation_id: "DeleteQueuedPrompt",
     tags: ["workbench"],
-    "x-required-scopes": ["workbench.read"],
+    "x-required-scopes": ["workbench.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the queued prompt"]
     ],

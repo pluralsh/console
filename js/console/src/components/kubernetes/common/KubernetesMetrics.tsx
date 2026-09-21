@@ -3,7 +3,6 @@ import { Card, EmptyState } from '@pluralsh/design-system'
 import RangePicker from 'components/utils/RangePicker'
 
 import { useClusterKubernetesMetricsQuery } from 'generated/graphql'
-import isEmpty from 'lodash/isEmpty'
 
 import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
 import { useMemo, useState } from 'react'
@@ -14,7 +13,10 @@ import { GqlError } from 'components/utils/Alert.tsx'
 import { MetricsEmptyState } from '../../cd/cluster/ClusterMetrics.tsx'
 import { RectangleSkeleton } from '../../utils/SkeletonLoaders.tsx'
 import { PodResourceReservation } from 'components/utils/metrics/podResourceReservations.ts'
-import { ResourceMetricsGraphs } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import {
+  ResourceMetricsGraphs,
+  hasResourceMetrics,
+} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { useKubernetesPodResourceReservations } from 'components/utils/metrics/useKubernetesPodResourceReservations.ts'
 
 function Metric({
@@ -58,14 +60,48 @@ function Metric({
     fetchPolicy: 'cache-and-network',
   })
 
-  const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } = data?.cluster?.componentMetrics || {}
+  const {
+    cpu,
+    mem,
+    podCpu,
+    podMem,
+    cpuRequests,
+    memRequests,
+    cpuLimits,
+    memLimits,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+  } = useMemo(() => {
+    const {
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    } = data?.cluster?.componentMetrics || {}
 
     return {
       cpu: (cpu || []).filter(isNonNullable),
       mem: (mem || []).filter(isNonNullable),
       podCpu: (podCpu || []).filter(isNonNullable),
       podMem: (podMem || []).filter(isNonNullable),
+      cpuRequests: (cpuRequests || []).filter(isNonNullable),
+      memRequests: (memRequests || []).filter(isNonNullable),
+      cpuLimits: (cpuLimits || []).filter(isNonNullable),
+      memLimits: (memLimits || []).filter(isNonNullable),
+      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
+      podMemRequests: (podMemRequests || []).filter(isNonNullable),
+      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
+      podMemLimits: (podMemLimits || []).filter(isNonNullable),
     }
   }, [data])
 
@@ -75,13 +111,36 @@ function Metric({
     return <GqlError error={error} />
   }
 
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
+  if (
+    hasResourceMetrics({
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    })
+  ) {
     content = (
       <ResourceMetricsGraphs
         cpu={cpu}
         mem={mem}
         podCpu={podCpu}
         podMem={podMem}
+        cpuRequests={cpuRequests}
+        memRequests={memRequests}
+        cpuLimits={cpuLimits}
+        memLimits={memLimits}
+        podCpuRequests={podCpuRequests}
+        podMemRequests={podMemRequests}
+        podCpuLimits={podCpuLimits}
+        podMemLimits={podMemLimits}
         podReservations={podReservations}
       />
     )

@@ -115,6 +115,12 @@ defmodule Console.Deployments.Settings do
   @spec agent_chart() :: binary
   def agent_chart(), do: Path.join(:code.priv_dir(:console), "agent-chart.tgz")
 
+  @doc """
+  Local agent chart tarball with its contents rooted for service rendering
+  """
+  @spec agent_service_chart() :: binary
+  def agent_service_chart(), do: Path.join(:code.priv_dir(:console), "agent-service-chart.tgz")
+
   @doc "same as fetch/0 but always reads from db"
   def fetch_consistent() do
     Console.Repo.get_by(DeploymentSettings, name: "global")

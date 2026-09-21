@@ -12,7 +12,9 @@ import (
 
 	acpsdk "github.com/coder/acp-go-sdk"
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
 
@@ -408,6 +410,110 @@ func TestEngineTurnCreatesAndResumesSession(t *testing.T) {
 	}
 	if strings.Join(prompts, ",") != "first,second" {
 		t.Fatalf("prompts = %v", prompts)
+	}
+}
+
+func TestEngineTurnInjectsHarnessMCPServersOnNewAndResume(t *testing.T) {
+	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp"}]`)
+	state := newTestState()
+	engine := NewEngine(WithStopTimeout(time.Second))
+	_, firstProcess, _ := newTestAgentProcess(state, true)
+	first, err := engine.Turn(context.Background(), firstProcess, Request{Cwd: t.TempDir(), Prompt: "first"}, &testSink{})
+	if err != nil {
+		t.Fatalf("create turn: %v", err)
+	}
+	_, secondProcess, _ := newTestAgentProcess(state, true)
+	if _, err := engine.Turn(context.Background(), secondProcess, Request{Cwd: t.TempDir(), Prompt: "second", SessionID: first.SessionID}, &testSink{}); err != nil {
+		t.Fatalf("resume turn: %v", err)
+	}
+
+	state.mu.Lock()
+	newSessions := append([]acpsdk.NewSessionRequest(nil), state.newSessions...)
+	resumes := append([]acpsdk.ResumeSessionRequest(nil), state.resumedSessions...)
+	state.mu.Unlock()
+	if len(newSessions) != 1 || len(resumes) != 1 {
+		t.Fatalf("sessions = new %d resume %d", len(newSessions), len(resumes))
+	}
+	requireMCPServerNames(t, newSessions[0].McpServers, "plural", common.CodebaseMemoryMCPServerName, "linear")
+	requireMCPServerNames(t, resumes[0].McpServers, "plural", common.CodebaseMemoryMCPServerName, "linear")
+}
+
+func TestEngineTurnInjectsHarnessMCPServersOnLoad(t *testing.T) {
+	t.Setenv(mcp.EnvServers, "")
+	state := newTestState()
+	engine := NewEngine(WithSessionRestorer(LoadSession))
+	_, process, _ := newTestAgentProcess(state, true)
+	if _, err := engine.Turn(context.Background(), process, Request{
+		Cwd: t.TempDir(), Prompt: "load", SessionID: "session-1",
+	}, &testSink{}); err != nil {
+		t.Fatalf("load turn: %v", err)
+	}
+	state.mu.Lock()
+	loads := append([]acpsdk.LoadSessionRequest(nil), state.loadedSessions...)
+	state.mu.Unlock()
+	if len(loads) != 1 {
+		t.Fatalf("loads = %#v", loads)
+	}
+	requireMCPServerNames(t, loads[0].McpServers, "plural", common.CodebaseMemoryMCPServerName)
+}
+
+func TestEngineTurnUsesExplicitMCPServers(t *testing.T) {
+	state := newTestState()
+	_, process, _ := newTestAgentProcess(state, true)
+	custom := []acpsdk.McpServer{mcp.HTTPServer("custom", "http://127.0.0.1:9/mcp", nil)}
+	if _, err := NewEngine().Turn(context.Background(), process, Request{
+		Cwd: t.TempDir(), Prompt: "custom", McpServers: custom,
+	}, &testSink{}); err != nil {
+		t.Fatalf("turn: %v", err)
+	}
+	state.mu.Lock()
+	newSessions := append([]acpsdk.NewSessionRequest(nil), state.newSessions...)
+	state.mu.Unlock()
+	if len(newSessions) != 1 {
+		t.Fatalf("new sessions = %#v", newSessions)
+	}
+	requireMCPServerNames(t, newSessions[0].McpServers, "custom")
+}
+
+func TestEngineTurnFailsWhenMCPServersAreInvalid(t *testing.T) {
+	t.Setenv(mcp.EnvServers, "{not-json")
+	state := newTestState()
+	_, process, processFixture := newTestAgentProcess(state, false)
+	_, err := NewEngine(WithStopTimeout(10*time.Millisecond)).Turn(
+		context.Background(),
+		process,
+		Request{Cwd: t.TempDir(), Prompt: "new"},
+		&testSink{},
+	)
+	if err == nil || !strings.Contains(err.Error(), "resolve acp mcp servers") {
+		t.Fatalf("invalid mcp error = %v", err)
+	}
+	if processFixture.killCount() == 0 {
+		t.Fatal("invalid mcp config did not stop the process")
+	}
+	state.mu.Lock()
+	newSessions := len(state.newSessions)
+	state.mu.Unlock()
+	if newSessions != 0 {
+		t.Fatalf("new sessions = %d", newSessions)
+	}
+}
+
+func requireMCPServerNames(t *testing.T, servers []acpsdk.McpServer, want ...string) {
+	t.Helper()
+	got := make([]string, 0, len(servers))
+	for _, server := range servers {
+		switch {
+		case server.Http != nil:
+			got = append(got, server.Http.Name)
+		case server.Stdio != nil:
+			got = append(got, server.Stdio.Name)
+		default:
+			t.Fatalf("unrecognized mcp server %#v", server)
+		}
+	}
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("mcp servers = %v, want %v", got, want)
 	}
 }
 

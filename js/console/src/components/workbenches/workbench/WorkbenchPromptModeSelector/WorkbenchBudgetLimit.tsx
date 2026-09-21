@@ -66,6 +66,7 @@ export function WorkbenchBudgetLimitControl({
         gap="small"
       >
         <Switch
+          size="small"
           aria-label="Set token limit"
           checked={enabled}
           disabled={disabled}

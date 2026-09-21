@@ -21,8 +21,8 @@ export function TagSelection({
   const theme = useTheme()
   const [tagName, setTagName] = useState('')
   const [tagValue, setTagValue] = useState('')
-  const tagNameRef = useRef<HTMLInputElement>(undefined)
-  const tagValueRef = useRef<HTMLInputElement>(undefined)
+  const tagNameRef = useRef<HTMLInputElement>(null)
+  const tagValueRef = useRef<HTMLInputElement>(null)
   const sortedTags = useMemo(
     () => sortBy(tagsToNameValue(tags), ['name']),
     [tags]

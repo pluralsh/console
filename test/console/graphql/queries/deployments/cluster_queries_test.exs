@@ -402,9 +402,40 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       cluster = insert(:cluster)
       deployment_settings(prometheus_connection: %{url: "example.com"})
 
-      expect(Req, :post, 4, fn _, _ ->
+      expect(Req, :post, 12, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        value =
+          cond do
+            String.contains?(query, "container_cpu_usage_seconds_total") and String.contains?(query, "by (pod)") ->
+              "pod-cpu"
+            String.contains?(query, "container_memory_working_set_bytes") and String.contains?(query, "by (pod)") ->
+              "pod-mem"
+            String.contains?(query, "container_cpu_usage_seconds_total") ->
+              "cpu"
+            String.contains?(query, "container_memory_working_set_bytes") ->
+              "mem"
+            String.contains?(query, "resource_requests{unit=\"core\"") and String.contains?(query, "by (pod)") ->
+              "pod-cpu-requests"
+            String.contains?(query, "resource_requests{unit=\"byte\"") and String.contains?(query, "by (pod)") ->
+              "pod-mem-requests"
+            String.contains?(query, "resource_limits{unit=\"core\"") and String.contains?(query, "by (pod)") ->
+              "pod-cpu-limits"
+            String.contains?(query, "resource_limits{unit=\"byte\"") and String.contains?(query, "by (pod)") ->
+              "pod-mem-limits"
+            String.contains?(query, "resource_requests{unit=\"core\"") ->
+              "cpu-requests"
+            String.contains?(query, "resource_requests{unit=\"byte\"") ->
+              "mem-requests"
+            String.contains?(query, "resource_limits{unit=\"core\"") ->
+              "cpu-limits"
+            String.contains?(query, "resource_limits{unit=\"byte\"") ->
+              "mem-limits"
+            true ->
+              "unknown"
+          end
+
         {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
-          %{values: [[1, "1"]]}
+          %{values: [[1, value]]}
         ]}})}}
       end)
       expect(Clusters, :api_discovery, fn _ -> %{} end)
@@ -417,13 +448,36 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
             id
             componentMetrics(group: "apps", version: "v1", kind: "Deployment", name: "nginx", namespace: "default") {
               cpu { values { timestamp value } }
+              mem { values { timestamp value } }
+              podCpu { values { timestamp value } }
+              podMem { values { timestamp value } }
+              cpuRequests { values { timestamp value } }
+              memRequests { values { timestamp value } }
+              cpuLimits { values { timestamp value } }
+              memLimits { values { timestamp value } }
+              podCpuRequests { values { timestamp value } }
+              podMemRequests { values { timestamp value } }
+              podCpuLimits { values { timestamp value } }
+              podMemLimits { values { timestamp value } }
             }
           }
         }
       """, %{"id" => cluster.id}, %{current_user: user})
 
       assert found["id"] == cluster.id
-      refute Enum.empty?(found["componentMetrics"]["cpu"])
+      metrics = found["componentMetrics"]
+      assert hd(hd(metrics["cpu"])["values"])["value"] == "cpu"
+      assert hd(hd(metrics["mem"])["values"])["value"] == "mem"
+      assert hd(hd(metrics["podCpu"])["values"])["value"] == "pod-cpu"
+      assert hd(hd(metrics["podMem"])["values"])["value"] == "pod-mem"
+      assert hd(hd(metrics["cpuRequests"])["values"])["value"] == "cpu-requests"
+      assert hd(hd(metrics["memRequests"])["values"])["value"] == "mem-requests"
+      assert hd(hd(metrics["cpuLimits"])["values"])["value"] == "cpu-limits"
+      assert hd(hd(metrics["memLimits"])["values"])["value"] == "mem-limits"
+      assert hd(hd(metrics["podCpuRequests"])["values"])["value"] == "pod-cpu-requests"
+      assert hd(hd(metrics["podMemRequests"])["values"])["value"] == "pod-mem-requests"
+      assert hd(hd(metrics["podCpuLimits"])["values"])["value"] == "pod-cpu-limits"
+      assert hd(hd(metrics["podMemLimits"])["values"])["value"] == "pod-mem-limits"
     end
 
     test "it can fetch a cluster heat map" do
@@ -1145,6 +1199,25 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       refute Enum.empty?(found["features"])
       refute Enum.empty?(found["bugFixes"])
       refute found["apiUpdates"]
+    end
+
+    test "it serializes api updates from the kubernetes 1.36 changelog" do
+      {:ok, %{data: %{"kubernetesChangelog" => found}}} = run_query("""
+        query {
+          kubernetesChangelog(version: "1.36") {
+            version
+            apiUpdates
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert found["version"] == "1.36"
+      assert found["apiUpdates"] == [
+               "admissionregistration / policies: `MutatingAdmissionPolicy` is GA (v1) and enabled by default; plus optional manifest-based admission configuration via AdmissionConfiguration static manifests.",
+               "resource.k8s.io (DRA): Multiple versioned capabilities: v1beta* for core DRA features (binding conditions, taints/tolerations) and v1alpha1 APIs like ResourcePoolStatusRequest; also introduces granular RBAC requirements when `DRAResourceClaimGranularStatusAuthorization` is enabled.",
+               "scheduling.k8s.io/v1alpha2: Introduces the newer Workload/PodGroup API version; v1alpha1 Workload removed, so controllers/schedulers integrating these must update.",
+               "storage.k8s.io: VolumeAttributesClass locked enabled and preferred storage version updated to `storage.k8s.io/v1`; SnapshotMetadataService promoted to v1beta1 (v1alpha1 removed)."
+             ]
     end
   end
 

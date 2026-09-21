@@ -29,6 +29,7 @@ defmodule Console.GraphQl.Users do
     field :name,             :string
     field :email,            :string
     field :roles,            :user_role_attributes
+    field :allowed_scopes,   list_of(non_null(:string))
     field :assume_bindings,  list_of(:policy_binding_attributes)
   end
 
@@ -86,6 +87,7 @@ defmodule Console.GraphQl.Users do
     field :flows,       :persona_flows_attributes, description: "enable individual parts of the flows views"
     field :sidebar,     :persona_sidebar_attributes, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services_attributes, description: "enable individual parts of the services views"
+    field :settings,    :persona_settings_attributes, description: "enable individual settings tabs"
     field :ai,          :persona_ai_attributes, description: "enable individual parts of the ai views"
   end
 
@@ -132,6 +134,19 @@ defmodule Console.GraphQl.Users do
     field :configuration, :boolean
   end
 
+  input_object :persona_settings_attributes do
+    field :user_management,   :boolean
+    field :global,            :boolean
+    field :ai,                :boolean
+    field :webhooks,          :boolean
+    field :chatbots,          :boolean
+    field :cloud_connections, :boolean
+    field :projects,          :boolean
+    field :notifications,     :boolean
+    field :audits,            :boolean
+    field :access_tokens,     :boolean
+  end
+
   input_object :persona_ai_attributes do
     field :pr,  :boolean
   end
@@ -160,6 +175,7 @@ defmodule Console.GraphQl.Users do
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
     field :refresh_token,   :refresh_token
+    field :allowed_scopes,  list_of(non_null(:string))
 
     field :assume_bindings, list_of(:policy_binding), resolve: dataloader(User)
     field :groups, list_of(:group), resolve: dataloader(User)
@@ -322,6 +338,7 @@ defmodule Console.GraphQl.Users do
     field :flows,       :persona_flows, description: "enable individual parts of the flows views"
     field :sidebar,     :persona_sidebar, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services, description: "enable individual parts of the services views"
+    field :settings,    :persona_settings, description: "enable individual settings tabs"
     field :ai,          :persona_ai, description: "enable individual parts of the ai views"
   end
 
@@ -366,6 +383,19 @@ defmodule Console.GraphQl.Users do
   object :persona_services do
     field :secrets,       :boolean
     field :configuration, :boolean
+  end
+
+  object :persona_settings do
+    field :user_management,   :boolean
+    field :global,            :boolean
+    field :ai,                :boolean
+    field :webhooks,          :boolean
+    field :chatbots,          :boolean
+    field :cloud_connections, :boolean
+    field :projects,          :boolean
+    field :notifications,     :boolean
+    field :audits,            :boolean
+    field :access_tokens,     :boolean
   end
 
   object :persona_ai do
@@ -786,6 +816,9 @@ defmodule Console.GraphQl.Users do
     field :create_service_account_token, :access_token do
       middleware Authenticated
       middleware AdminRequired
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id,     non_null(:id)
       arg :scopes, list_of(:scope_attributes)
       arg :expiry, :string, description: "the ttl of the access token, e.g. 1h, 1d, 1w"
@@ -798,6 +831,9 @@ defmodule Console.GraphQl.Users do
     """
     field :service_account_access_token, :access_token do
       middleware Authenticated
+      middleware Scope,
+        resource: :user,
+        action: :write
       arg :id,         non_null(:id)
       arg :refresh,    :boolean, description: "whether to wipe all old tokens for this service account transactionally"
       arg :attributes, non_null(:access_token_attributes)

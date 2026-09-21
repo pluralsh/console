@@ -616,25 +616,78 @@ func (x *VertexAiConfig) GetProxyModels() []string {
 	return nil
 }
 
+type BedrockModelSettings struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	ModelId             string                 `protobuf:"bytes,1,opt,name=modelId,proto3" json:"modelId,omitempty"`
+	InferenceProfileArn string                 `protobuf:"bytes,2,opt,name=inferenceProfileArn,proto3" json:"inferenceProfileArn,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *BedrockModelSettings) Reset() {
+	*x = BedrockModelSettings{}
+	mi := &file_console_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BedrockModelSettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BedrockModelSettings) ProtoMessage() {}
+
+func (x *BedrockModelSettings) ProtoReflect() protoreflect.Message {
+	mi := &file_console_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BedrockModelSettings.ProtoReflect.Descriptor instead.
+func (*BedrockModelSettings) Descriptor() ([]byte, []int) {
+	return file_console_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *BedrockModelSettings) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *BedrockModelSettings) GetInferenceProfileArn() string {
+	if x != nil {
+		return x.InferenceProfileArn
+	}
+	return ""
+}
+
 type BedrockConfig struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	ModelId            *string                `protobuf:"bytes,1,opt,name=modelId,proto3,oneof" json:"modelId,omitempty"`
-	ToolModelId        *string                `protobuf:"bytes,2,opt,name=toolModelId,proto3,oneof" json:"toolModelId,omitempty"`
-	AccessToken        *string                `protobuf:"bytes,3,opt,name=accessToken,proto3,oneof" json:"accessToken,omitempty"`
-	Region             *string                `protobuf:"bytes,4,opt,name=region,proto3,oneof" json:"region,omitempty"`
-	EmbeddingModelId   *string                `protobuf:"bytes,5,opt,name=embeddingModelId,proto3,oneof" json:"embeddingModelId,omitempty"`
-	AwsAccessKeyId     *string                `protobuf:"bytes,6,opt,name=awsAccessKeyId,proto3,oneof" json:"awsAccessKeyId,omitempty"`
-	AwsSecretAccessKey *string                `protobuf:"bytes,7,opt,name=awsSecretAccessKey,proto3,oneof" json:"awsSecretAccessKey,omitempty"`
-	ProxyModels        []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
-	Deployments        map[string]string      `protobuf:"bytes,9,rep,name=deployments,proto3" json:"deployments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Endpoint           *BedrockEndpoint       `protobuf:"varint,10,opt,name=endpoint,proto3,enum=plrl.BedrockEndpoint,oneof" json:"endpoint,omitempty"`
+	state              protoimpl.MessageState  `protogen:"open.v1"`
+	ModelId            *string                 `protobuf:"bytes,1,opt,name=modelId,proto3,oneof" json:"modelId,omitempty"`
+	ToolModelId        *string                 `protobuf:"bytes,2,opt,name=toolModelId,proto3,oneof" json:"toolModelId,omitempty"`
+	AccessToken        *string                 `protobuf:"bytes,3,opt,name=accessToken,proto3,oneof" json:"accessToken,omitempty"`
+	Region             *string                 `protobuf:"bytes,4,opt,name=region,proto3,oneof" json:"region,omitempty"`
+	EmbeddingModelId   *string                 `protobuf:"bytes,5,opt,name=embeddingModelId,proto3,oneof" json:"embeddingModelId,omitempty"`
+	AwsAccessKeyId     *string                 `protobuf:"bytes,6,opt,name=awsAccessKeyId,proto3,oneof" json:"awsAccessKeyId,omitempty"`
+	AwsSecretAccessKey *string                 `protobuf:"bytes,7,opt,name=awsSecretAccessKey,proto3,oneof" json:"awsSecretAccessKey,omitempty"`
+	ProxyModels        []string                `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
+	Deployments        map[string]string       `protobuf:"bytes,9,rep,name=deployments,proto3" json:"deployments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Endpoint           *BedrockEndpoint        `protobuf:"varint,10,opt,name=endpoint,proto3,enum=plrl.BedrockEndpoint,oneof" json:"endpoint,omitempty"`
+	ModelSettings      []*BedrockModelSettings `protobuf:"bytes,11,rep,name=modelSettings,proto3" json:"modelSettings,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
 
 func (x *BedrockConfig) Reset() {
 	*x = BedrockConfig{}
-	mi := &file_console_proto_msgTypes[6]
+	mi := &file_console_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -646,7 +699,7 @@ func (x *BedrockConfig) String() string {
 func (*BedrockConfig) ProtoMessage() {}
 
 func (x *BedrockConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[6]
+	mi := &file_console_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -659,7 +712,7 @@ func (x *BedrockConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BedrockConfig.ProtoReflect.Descriptor instead.
 func (*BedrockConfig) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{6}
+	return file_console_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *BedrockConfig) GetModelId() string {
@@ -732,6 +785,13 @@ func (x *BedrockConfig) GetEndpoint() BedrockEndpoint {
 	return BedrockEndpoint_RUNTIME
 }
 
+func (x *BedrockConfig) GetModelSettings() []*BedrockModelSettings {
+	if x != nil {
+		return x.ModelSettings
+	}
+	return nil
+}
+
 type AzureOpenAiConfig struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ApiVersion     *string                `protobuf:"bytes,1,opt,name=apiVersion,proto3,oneof" json:"apiVersion,omitempty"`
@@ -748,7 +808,7 @@ type AzureOpenAiConfig struct {
 
 func (x *AzureOpenAiConfig) Reset() {
 	*x = AzureOpenAiConfig{}
-	mi := &file_console_proto_msgTypes[7]
+	mi := &file_console_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -760,7 +820,7 @@ func (x *AzureOpenAiConfig) String() string {
 func (*AzureOpenAiConfig) ProtoMessage() {}
 
 func (x *AzureOpenAiConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[7]
+	mi := &file_console_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -773,7 +833,7 @@ func (x *AzureOpenAiConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AzureOpenAiConfig.ProtoReflect.Descriptor instead.
 func (*AzureOpenAiConfig) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{7}
+	return file_console_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AzureOpenAiConfig) GetApiVersion() string {
@@ -841,7 +901,7 @@ type ProxyAuthenticationRequest struct {
 
 func (x *ProxyAuthenticationRequest) Reset() {
 	*x = ProxyAuthenticationRequest{}
-	mi := &file_console_proto_msgTypes[8]
+	mi := &file_console_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -853,7 +913,7 @@ func (x *ProxyAuthenticationRequest) String() string {
 func (*ProxyAuthenticationRequest) ProtoMessage() {}
 
 func (x *ProxyAuthenticationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[8]
+	mi := &file_console_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -866,7 +926,7 @@ func (x *ProxyAuthenticationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProxyAuthenticationRequest.ProtoReflect.Descriptor instead.
 func (*ProxyAuthenticationRequest) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{8}
+	return file_console_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ProxyAuthenticationRequest) GetToken() string {
@@ -885,7 +945,7 @@ type ProxyAuthenticationResponse struct {
 
 func (x *ProxyAuthenticationResponse) Reset() {
 	*x = ProxyAuthenticationResponse{}
-	mi := &file_console_proto_msgTypes[9]
+	mi := &file_console_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -897,7 +957,7 @@ func (x *ProxyAuthenticationResponse) String() string {
 func (*ProxyAuthenticationResponse) ProtoMessage() {}
 
 func (x *ProxyAuthenticationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[9]
+	mi := &file_console_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -910,7 +970,7 @@ func (x *ProxyAuthenticationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProxyAuthenticationResponse.ProtoReflect.Descriptor instead.
 func (*ProxyAuthenticationResponse) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{9}
+	return file_console_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ProxyAuthenticationResponse) GetAuthenticated() bool {
@@ -930,7 +990,7 @@ type VerifyClusterRequest struct {
 
 func (x *VerifyClusterRequest) Reset() {
 	*x = VerifyClusterRequest{}
-	mi := &file_console_proto_msgTypes[10]
+	mi := &file_console_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -942,7 +1002,7 @@ func (x *VerifyClusterRequest) String() string {
 func (*VerifyClusterRequest) ProtoMessage() {}
 
 func (x *VerifyClusterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[10]
+	mi := &file_console_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -955,7 +1015,7 @@ func (x *VerifyClusterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyClusterRequest.ProtoReflect.Descriptor instead.
 func (*VerifyClusterRequest) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{10}
+	return file_console_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *VerifyClusterRequest) GetToken() string {
@@ -976,7 +1036,7 @@ type VerifyClusterResponse struct {
 
 func (x *VerifyClusterResponse) Reset() {
 	*x = VerifyClusterResponse{}
-	mi := &file_console_proto_msgTypes[11]
+	mi := &file_console_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -988,7 +1048,7 @@ func (x *VerifyClusterResponse) String() string {
 func (*VerifyClusterResponse) ProtoMessage() {}
 
 func (x *VerifyClusterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[11]
+	mi := &file_console_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1001,7 +1061,7 @@ func (x *VerifyClusterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyClusterResponse.ProtoReflect.Descriptor instead.
 func (*VerifyClusterResponse) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{11}
+	return file_console_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *VerifyClusterResponse) GetId() string {
@@ -1033,7 +1093,7 @@ type ObservabilityConfig struct {
 
 func (x *ObservabilityConfig) Reset() {
 	*x = ObservabilityConfig{}
-	mi := &file_console_proto_msgTypes[12]
+	mi := &file_console_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1045,7 +1105,7 @@ func (x *ObservabilityConfig) String() string {
 func (*ObservabilityConfig) ProtoMessage() {}
 
 func (x *ObservabilityConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[12]
+	mi := &file_console_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1058,7 +1118,7 @@ func (x *ObservabilityConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObservabilityConfig.ProtoReflect.Descriptor instead.
 func (*ObservabilityConfig) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{12}
+	return file_console_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ObservabilityConfig) GetPrometheusUsername() string {
@@ -1119,7 +1179,7 @@ type MeterMetricsRequest struct {
 
 func (x *MeterMetricsRequest) Reset() {
 	*x = MeterMetricsRequest{}
-	mi := &file_console_proto_msgTypes[13]
+	mi := &file_console_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1131,7 +1191,7 @@ func (x *MeterMetricsRequest) String() string {
 func (*MeterMetricsRequest) ProtoMessage() {}
 
 func (x *MeterMetricsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[13]
+	mi := &file_console_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1144,7 +1204,7 @@ func (x *MeterMetricsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MeterMetricsRequest.ProtoReflect.Descriptor instead.
 func (*MeterMetricsRequest) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{13}
+	return file_console_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *MeterMetricsRequest) GetBytes() int64 {
@@ -1163,7 +1223,7 @@ type MeterMetricsResponse struct {
 
 func (x *MeterMetricsResponse) Reset() {
 	*x = MeterMetricsResponse{}
-	mi := &file_console_proto_msgTypes[14]
+	mi := &file_console_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1175,7 +1235,7 @@ func (x *MeterMetricsResponse) String() string {
 func (*MeterMetricsResponse) ProtoMessage() {}
 
 func (x *MeterMetricsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[14]
+	mi := &file_console_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1188,7 +1248,7 @@ func (x *MeterMetricsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MeterMetricsResponse.ProtoReflect.Descriptor instead.
 func (*MeterMetricsResponse) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{14}
+	return file_console_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *MeterMetricsResponse) GetSuccess() bool {
@@ -1206,7 +1266,7 @@ type ObservabilityConfigRequest struct {
 
 func (x *ObservabilityConfigRequest) Reset() {
 	*x = ObservabilityConfigRequest{}
-	mi := &file_console_proto_msgTypes[15]
+	mi := &file_console_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1218,7 +1278,7 @@ func (x *ObservabilityConfigRequest) String() string {
 func (*ObservabilityConfigRequest) ProtoMessage() {}
 
 func (x *ObservabilityConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[15]
+	mi := &file_console_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1231,7 +1291,7 @@ func (x *ObservabilityConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObservabilityConfigRequest.ProtoReflect.Descriptor instead.
 func (*ObservabilityConfigRequest) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{15}
+	return file_console_proto_rawDescGZIP(), []int{16}
 }
 
 var File_console_proto protoreflect.FileDescriptor
@@ -1310,7 +1370,10 @@ const file_console_proto_rawDesc = "" +
 	"_toolModelB\n" +
 	"\n" +
 	"\b_projectB\v\n" +
-	"\t_location\"\x91\x05\n" +
+	"\t_location\"b\n" +
+	"\x14BedrockModelSettings\x12\x18\n" +
+	"\amodelId\x18\x01 \x01(\tR\amodelId\x120\n" +
+	"\x13inferenceProfileArn\x18\x02 \x01(\tR\x13inferenceProfileArn\"\xd3\x05\n" +
 	"\rBedrockConfig\x12\x1d\n" +
 	"\amodelId\x18\x01 \x01(\tH\x00R\amodelId\x88\x01\x01\x12%\n" +
 	"\vtoolModelId\x18\x02 \x01(\tH\x01R\vtoolModelId\x88\x01\x01\x12%\n" +
@@ -1322,7 +1385,8 @@ const file_console_proto_rawDesc = "" +
 	"\vproxyModels\x18\b \x03(\tR\vproxyModels\x12F\n" +
 	"\vdeployments\x18\t \x03(\v2$.plrl.BedrockConfig.DeploymentsEntryR\vdeployments\x126\n" +
 	"\bendpoint\x18\n" +
-	" \x01(\x0e2\x15.plrl.BedrockEndpointH\aR\bendpoint\x88\x01\x01\x1a>\n" +
+	" \x01(\x0e2\x15.plrl.BedrockEndpointH\aR\bendpoint\x88\x01\x01\x12@\n" +
+	"\rmodelSettings\x18\v \x03(\v2\x1a.plrl.BedrockModelSettingsR\rmodelSettings\x1a>\n" +
 	"\x10DeploymentsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
@@ -1414,7 +1478,7 @@ func file_console_proto_rawDescGZIP() []byte {
 }
 
 var file_console_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_console_proto_goTypes = []any{
 	(OpenAiMethod)(0),                   // 0: plrl.OpenAiMethod
 	(BedrockEndpoint)(0),                // 1: plrl.BedrockEndpoint
@@ -1424,47 +1488,49 @@ var file_console_proto_goTypes = []any{
 	(*OpenAiConfig)(nil),                // 5: plrl.OpenAiConfig
 	(*AnthropicConfig)(nil),             // 6: plrl.AnthropicConfig
 	(*VertexAiConfig)(nil),              // 7: plrl.VertexAiConfig
-	(*BedrockConfig)(nil),               // 8: plrl.BedrockConfig
-	(*AzureOpenAiConfig)(nil),           // 9: plrl.AzureOpenAiConfig
-	(*ProxyAuthenticationRequest)(nil),  // 10: plrl.ProxyAuthenticationRequest
-	(*ProxyAuthenticationResponse)(nil), // 11: plrl.ProxyAuthenticationResponse
-	(*VerifyClusterRequest)(nil),        // 12: plrl.VerifyClusterRequest
-	(*VerifyClusterResponse)(nil),       // 13: plrl.VerifyClusterResponse
-	(*ObservabilityConfig)(nil),         // 14: plrl.ObservabilityConfig
-	(*MeterMetricsRequest)(nil),         // 15: plrl.MeterMetricsRequest
-	(*MeterMetricsResponse)(nil),        // 16: plrl.MeterMetricsResponse
-	(*ObservabilityConfigRequest)(nil),  // 17: plrl.ObservabilityConfigRequest
-	nil,                                 // 18: plrl.BedrockConfig.DeploymentsEntry
-	nil,                                 // 19: plrl.AzureOpenAiConfig.DeploymentsEntry
+	(*BedrockModelSettings)(nil),        // 8: plrl.BedrockModelSettings
+	(*BedrockConfig)(nil),               // 9: plrl.BedrockConfig
+	(*AzureOpenAiConfig)(nil),           // 10: plrl.AzureOpenAiConfig
+	(*ProxyAuthenticationRequest)(nil),  // 11: plrl.ProxyAuthenticationRequest
+	(*ProxyAuthenticationResponse)(nil), // 12: plrl.ProxyAuthenticationResponse
+	(*VerifyClusterRequest)(nil),        // 13: plrl.VerifyClusterRequest
+	(*VerifyClusterResponse)(nil),       // 14: plrl.VerifyClusterResponse
+	(*ObservabilityConfig)(nil),         // 15: plrl.ObservabilityConfig
+	(*MeterMetricsRequest)(nil),         // 16: plrl.MeterMetricsRequest
+	(*MeterMetricsResponse)(nil),        // 17: plrl.MeterMetricsResponse
+	(*ObservabilityConfigRequest)(nil),  // 18: plrl.ObservabilityConfigRequest
+	nil,                                 // 19: plrl.BedrockConfig.DeploymentsEntry
+	nil,                                 // 20: plrl.AzureOpenAiConfig.DeploymentsEntry
 }
 var file_console_proto_depIdxs = []int32{
 	5,  // 0: plrl.AiConfig.openai:type_name -> plrl.OpenAiConfig
 	6,  // 1: plrl.AiConfig.anthropic:type_name -> plrl.AnthropicConfig
 	7,  // 2: plrl.AiConfig.vertexAi:type_name -> plrl.VertexAiConfig
-	8,  // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
-	9,  // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
+	9,  // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
+	10, // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
 	5,  // 5: plrl.AiConfig.openaiCompatible:type_name -> plrl.OpenAiConfig
 	5,  // 6: plrl.AiConfig.xai:type_name -> plrl.OpenAiConfig
 	4,  // 7: plrl.OpenAiConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
 	0,  // 8: plrl.OpenAiConfig.method:type_name -> plrl.OpenAiMethod
-	18, // 9: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
+	19, // 9: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
 	1,  // 10: plrl.BedrockConfig.endpoint:type_name -> plrl.BedrockEndpoint
-	19, // 11: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
-	15, // 12: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
-	2,  // 13: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
-	17, // 14: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
-	10, // 15: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
-	12, // 16: plrl.PluralServer.VerifyCluster:input_type -> plrl.VerifyClusterRequest
-	16, // 17: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
-	3,  // 18: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
-	14, // 19: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
-	11, // 20: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
-	13, // 21: plrl.PluralServer.VerifyCluster:output_type -> plrl.VerifyClusterResponse
-	17, // [17:22] is the sub-list for method output_type
-	12, // [12:17] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	8,  // 11: plrl.BedrockConfig.modelSettings:type_name -> plrl.BedrockModelSettings
+	20, // 12: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
+	16, // 13: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
+	2,  // 14: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
+	18, // 15: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
+	11, // 16: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
+	13, // 17: plrl.PluralServer.VerifyCluster:input_type -> plrl.VerifyClusterRequest
+	17, // 18: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
+	3,  // 19: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
+	15, // 20: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
+	12, // 21: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
+	14, // 22: plrl.PluralServer.VerifyCluster:output_type -> plrl.VerifyClusterResponse
+	18, // [18:23] is the sub-list for method output_type
+	13, // [13:18] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_console_proto_init() }
@@ -1476,16 +1542,16 @@ func file_console_proto_init() {
 	file_console_proto_msgTypes[3].OneofWrappers = []any{}
 	file_console_proto_msgTypes[4].OneofWrappers = []any{}
 	file_console_proto_msgTypes[5].OneofWrappers = []any{}
-	file_console_proto_msgTypes[6].OneofWrappers = []any{}
 	file_console_proto_msgTypes[7].OneofWrappers = []any{}
-	file_console_proto_msgTypes[12].OneofWrappers = []any{}
+	file_console_proto_msgTypes[8].OneofWrappers = []any{}
+	file_console_proto_msgTypes[13].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_console_proto_rawDesc), len(file_console_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   18,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

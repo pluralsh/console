@@ -615,6 +615,18 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Persists a workbench eval result and publishes it for downstream automation.
+  """
+  @spec create_workbench_eval_result(map, WorkbenchEval.t(), WorkbenchJob.t()) ::
+          {:ok, WorkbenchEvalResult.t()} | error
+  def create_workbench_eval_result(attrs, %WorkbenchEval{id: eval_id}, %WorkbenchJob{id: job_id}) do
+    %WorkbenchEvalResult{workbench_eval_id: eval_id, workbench_job_id: job_id}
+    |> WorkbenchEvalResult.changeset(attrs)
+    |> Repo.insert()
+    |> notify(:create)
+  end
+
+  @doc """
   Runs an agent on an eval result to update the workbench skills as necessary based on its findings.
   """
   @spec workbench_eval_skill(binary | WorkbenchEvalResult.t(), prompt :: binary | nil, User.t()) :: job_resp
@@ -1671,6 +1683,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchJobThoughtCreated, thought)
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
     do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity)
+  def notify({:ok, %WorkbenchEvalResult{} = result}, :create),
+    do: handle_notify(PubSub.WorkbenchEvalResultCreated, result)
   def notify({:ok, %WorkbenchJob{} = job}, :update),
     do: handle_notify(PubSub.WorkbenchJobUpdated, job)
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),

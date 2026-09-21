@@ -1,5 +1,5 @@
-import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
-import { type ReactNode } from 'react'
+import Flex, { type FlexProps } from './Flex'
+import { type ComponentProps, type ReactNode } from 'react'
 import styled from 'styled-components'
 
 import { type SeverityExt, sanitizeSeverity } from '../types'
@@ -28,7 +28,7 @@ export type BannerProps = FlexProps & {
   severity?: BannerSeverity | 'error'
   heading?: ReactNode
   action?: ReactNode
-  actionProps?: SpanProps
+  actionProps?: ComponentProps<'span'>
   fullWidth?: boolean
   onClose?: () => void
 }
@@ -56,12 +56,12 @@ const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
   success: CheckRoundedIcon,
 }
 
-const BannerOuter: any = styled.div<{
+const BannerOuter = styled(Flex)<{
   $borderColorKey: SemanticColorKey
   $fullWidth?: boolean
 }>(({ $borderColorKey, $fullWidth, theme }) => ({
   display: 'inline-flex',
-  align: 'flex-start',
+  alignItems: 'flex-start',
   padding: theme.spacing.medium,
   backgroundColor:
     theme.mode === 'light'
@@ -93,7 +93,7 @@ const Heading = styled.div<{ $bold: boolean }>(({ $bold, theme }) => ({
   color: theme.colors.text,
 }))
 
-const BannerAction = styled(Span)(({ theme }) => ({
+const BannerAction = styled.span(({ theme }) => ({
   marginLeft: theme.spacing.small,
   '&, & a, & a:any-link': {
     ...theme.partials.text.inlineLink,
@@ -140,7 +140,6 @@ function Banner({
     <BannerOuter
       $borderColorKey={borderColorKey}
       $fullWidth={fullWidth}
-      as={Flex}
       {...props}
     >
       <BannerInner>
@@ -161,7 +160,7 @@ function Banner({
           {children && <Content $hasHeading={!!heading}>{children}</Content>}
         </div>
       </BannerInner>
-      <Div flexGrow={1} />
+      <div css={{ flexGrow: 1 }} />
       {typeof onClose === 'function' && (
         <CloseButton
           size="medium"
