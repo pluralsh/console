@@ -9,7 +9,14 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/pluralsh/console/go/deployment-operator/pkg/python"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 )
 
 func TestPythonValuesUsesBindingsAndFolderOrder(t *testing.T) {
@@ -27,11 +34,11 @@ func TestPythonValuesUsesBindingsAndFolderOrder(t *testing.T) {
 		Name:      "demo",
 		Namespace: "default",
 		Cluster: &console.ServiceDeploymentForAgent_Cluster{
-			Version: new("1.2.3"),
+			Version: lo.ToPtr("1.2.3"),
 		},
 		Helm: &console.ServiceDeploymentForAgent_Helm{
-			PythonFolder: new("python"),
-			PythonScript: new(`
+			PythonFolder: lo.ToPtr("python"),
+			PythonScript: lo.ToPtr(`
 values["order"] += "-main"
 values["version"] = cluster["version"]
 valuesFiles.append("generated.yaml")
@@ -68,8 +75,8 @@ func TestPythonValuesInlineScriptWinsOverFile(t *testing.T) {
 
 	svc := &console.ServiceDeploymentForAgent{
 		Helm: &console.ServiceDeploymentForAgent_Helm{
-			PythonFile:   new("values.py"),
-			PythonScript: new(`values["source"] = "inline"`),
+			PythonFile:   lo.ToPtr("values.py"),
+			PythonScript: lo.ToPtr(`values["source"] = "inline"`),
 		},
 	}
 	result, _, err := (&helm{dir: dir, pythonPool: p}).pythonValues(context.Background(), svc)
@@ -117,7 +124,7 @@ func TestPythonValuesCannotReadPythonFileOutsideDirectory(t *testing.T) {
 	for _, test := range paths {
 		t.Run(test.name, func(t *testing.T) {
 			svc := &console.ServiceDeploymentForAgent{
-				Helm: &console.ServiceDeploymentForAgent_Helm{PythonFile: new(test.path)},
+				Helm: &console.ServiceDeploymentForAgent_Helm{PythonFile: lo.ToPtr(test.path)},
 			}
 			_, _, err := (&helm{dir: dir, pythonPool: p}).pythonValues(context.Background(), svc)
 			if err == nil {
@@ -177,7 +184,7 @@ func TestTemplateValuesCannotReadValuesFileOutsideDirectory(t *testing.T) {
 
 	svc := &console.ServiceDeploymentForAgent{
 		Helm: &console.ServiceDeploymentForAgent_Helm{
-			PythonScript: new(fmt.Sprintf("valuesFiles.append(%q)", outsidePath)),
+			PythonScript: lo.ToPtr(fmt.Sprintf("valuesFiles.append(%q)", outsidePath)),
 		},
 	}
 	if _, err := (&helm{dir: dir, pythonPool: p}).templateValues(svc); err == nil {
@@ -194,7 +201,7 @@ func TestPythonValuesErrorIsContextualized(t *testing.T) {
 
 	svc := &console.ServiceDeploymentForAgent{
 		Helm: &console.ServiceDeploymentForAgent_Helm{
-			PythonScript: new(`raise ValueError("not safe to render")`),
+			PythonScript: lo.ToPtr(`raise ValueError("not safe to render")`),
 		},
 	}
 	_, _, err = (&helm{dir: t.TempDir(), pythonPool: p}).pythonValues(context.Background(), svc)
@@ -216,9 +223,9 @@ func TestTemplateValuesRunsLuaBeforePython(t *testing.T) {
 
 	svc := &console.ServiceDeploymentForAgent{
 		Helm: &console.ServiceDeploymentForAgent_Helm{
-			LuaScript: new(`values["collision"] = "lua"
+			LuaScript: lo.ToPtr(`values["collision"] = "lua"
 valuesFiles[1] = "lua.yaml"`),
-			PythonScript: new(`values["collision"] = "python"
+			PythonScript: lo.ToPtr(`values["collision"] = "python"
 valuesFiles.append("python.yaml")`),
 		},
 	}
@@ -229,6 +236,99 @@ valuesFiles.append("python.yaml")`),
 	if result["collision"] != "python" || result["fromLua"] != true || result["fromPython"] != true {
 		t.Fatalf("unexpected merged values: %#v", result)
 	}
+}
+
+func TestPythonValuesK8sObjectMeta(t *testing.T) {
+	python.SetObjectMetaLookup(streamline.LookupObjectMeta)
+	t.Cleanup(func() { python.SetObjectMetaLookup(nil) })
+
+	t.Run("reads kube-system metadata from the cache", func(t *testing.T) {
+		streamline.ResetGlobalStore()
+		storeInstance, err := store.NewDatabaseStore(context.Background())
+		if err != nil {
+			t.Fatalf("NewDatabaseStore: %v", err)
+		}
+		t.Cleanup(func() {
+			streamline.ResetGlobalStore()
+			_ = storeInstance.Shutdown()
+		})
+		streamline.InitGlobalStore(storeInstance)
+
+		ns := unstructured.Unstructured{}
+		ns.SetGroupVersionKind(schema.GroupVersionKind{Version: "v1", Kind: "Namespace"})
+		ns.SetName("kube-system")
+		ns.SetUID(types.UID("cfb1383b-37cc-4d91-b943-aab5119e4cb1"))
+		ns.SetLabels(map[string]string{"kubernetes.io/metadata.name": "kube-system"})
+		if err := storeInstance.SaveComponent(ns); err != nil {
+			t.Fatalf("SaveComponent: %v", err)
+		}
+
+		p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+		if err != nil {
+			t.Fatalf("NewPoolWithConfig: %v", err)
+		}
+		t.Cleanup(func() { _ = p.Close() })
+
+		svc := &console.ServiceDeploymentForAgent{
+			Helm: &console.ServiceDeploymentForAgent_Helm{
+				PythonScript: lo.ToPtr(`
+ns = k8s_object_meta("", "v1", "Namespace", "", "kube-system")
+values["observeClusterId"] = ns["uid"]
+values["name"] = ns["name"]
+values["namespace"] = ns["namespace"]
+values["label"] = ns["labels"]["kubernetes.io/metadata.name"]
+`),
+			},
+		}
+		result, _, err := (&helm{dir: t.TempDir(), pythonPool: p}).pythonValues(context.Background(), svc)
+		if err != nil {
+			t.Fatalf("pythonValues: %v", err)
+		}
+		if result["observeClusterId"] != "cfb1383b-37cc-4d91-b943-aab5119e4cb1" {
+			t.Fatalf("unexpected uid: %#v", result)
+		}
+		if result["name"] != "kube-system" || result["namespace"] != "" {
+			t.Fatalf("unexpected identity: %#v", result)
+		}
+		if result["label"] != "kube-system" {
+			t.Fatalf("unexpected label: %#v", result)
+		}
+	})
+
+	t.Run("returns None on a cache miss", func(t *testing.T) {
+		streamline.ResetGlobalStore()
+		storeInstance, err := store.NewDatabaseStore(context.Background())
+		if err != nil {
+			t.Fatalf("NewDatabaseStore: %v", err)
+		}
+		t.Cleanup(func() {
+			streamline.ResetGlobalStore()
+			_ = storeInstance.Shutdown()
+		})
+		streamline.InitGlobalStore(storeInstance)
+
+		p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+		if err != nil {
+			t.Fatalf("NewPoolWithConfig: %v", err)
+		}
+		t.Cleanup(func() { _ = p.Close() })
+
+		svc := &console.ServiceDeploymentForAgent{
+			Helm: &console.ServiceDeploymentForAgent_Helm{
+				PythonScript: lo.ToPtr(`
+missing = k8s_object_meta("apps", "v1", "Deployment", "default", "missing")
+values["missing"] = missing is None
+`),
+			},
+		}
+		result, _, err := (&helm{dir: t.TempDir(), pythonPool: p}).pythonValues(context.Background(), svc)
+		if err != nil {
+			t.Fatalf("pythonValues: %v", err)
+		}
+		if result["missing"] != true {
+			t.Fatalf("expected None on cache miss: %#v", result)
+		}
+	})
 }
 
 func writePythonFile(t *testing.T, dir, name, contents string) {

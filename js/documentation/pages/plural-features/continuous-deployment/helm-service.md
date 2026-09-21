@@ -63,6 +63,33 @@ spec:
 ```
 For more information, see [Dynamic Helm Configuration with Lua Scripts](lua.md).
 
+## Dynamic Helm Configuration via pythonScript
+
+The same `values` / `valuesFiles` overlay is available from a sandboxed Python script. The sandbox does not expose OS, filesystem, or network access. The only host callback is `k8s_object_meta`, which reads cached Kubernetes object metadata (uid, name, namespace, and labels) from the agent. Cluster-scoped objects use an empty namespace. A cache miss returns `None`.
+
+```yaml
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: observe
+  namespace: infra
+spec:
+  namespace: observe
+  name: observe
+  cluster: k3s
+  helm:
+    version: 1.x.x
+    chart: observe
+    url: https://example.invalid/charts
+    pythonScript: |
+      ns = k8s_object_meta("", "v1", "Namespace", "", "kube-system")
+      if ns:
+          values["observeClusterId"] = ns["uid"]
+          values["label"] = ns["labels"]["kubernetes.io/metadata.name"]
+```
+
+The Lua equivalent of `k8s_object_meta` is documented in [Dynamic Helm Configuration with Lua Scripts](lua.md#kubernetes-object-metadata).
+
 ## Multi-Source Helm
 
 Say you want to source the helm templates from an upstream helm repository, but the values files from a Git repository.  In that case, you can define a multi-sourced service, which has both a git and helm repository defined.  It would look like so:

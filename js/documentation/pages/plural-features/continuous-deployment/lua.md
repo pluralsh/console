@@ -270,6 +270,35 @@ values["templatePath"] = templatePath
 valuesFiles = {templatePath}
 ```
 
+## Kubernetes Object Metadata
+
+Helm Lua scripts can look up cached Kubernetes object metadata from the deployment agent. This is a read against the agent's applied-object cache, not a live API request. Annotations are not included.
+
+### `k8s_object_meta(group, version, kind, namespace, name) -> table | nil`
+
+**Parameters:**
+- `group` (string): API group. Use `""` for core objects such as Namespace
+- `version` (string): API version, for example `"v1"`
+- `kind` (string): Kind, for example `"Namespace"`
+- `namespace` (string): Namespace, or `""` for cluster-scoped objects
+- `name` (string): Object name
+
+**Returns:**
+- `table` with `uid`, `name`, `namespace`, and `labels` when the object is cached
+- `nil` when the object is not in the cache
+
+Store errors raise a Lua error.
+
+```lua
+local ns = k8s_object_meta("", "v1", "Namespace", "", "kube-system")
+if ns then
+    values["observeClusterId"] = ns.uid
+    values["name"] = ns.name
+    values["namespace"] = ns.namespace
+    values["label"] = ns.labels["kubernetes.io/metadata.name"]
+end
+```
+
 ## Error Handling
 
 All functions return errors in a consistent format:
