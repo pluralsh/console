@@ -27,38 +27,42 @@ defmodule Console.AI.Tools.Workbench.SelfService.CatalogSearch do
   end
 
   def implement(%__MODULE__{query: query}) do
-    case Tool.actor() do
-      %{} = user ->
-        case Git.catalog_search(query, user: user) do
-          {:ok, results} -> format_results(results)
-          {:error, _} -> fallback_search(query, user)
-        end
-      _ ->
+    with {:actor, %{} = user} <- {:actor, Tool.actor()},
+         {:search, user, {:ok, results}} <- {:search, user, Git.catalog_search(query, user: user)} do
+      format_results(results)
+    else
+      {:actor, _} ->
         {:ok, "not logged in"}
+      {:search, user, {:error, _}} ->
+        fallback_search(query, user)
     end
   end
 
   defp fallback_search(query, user) do
-    catalogs =
-      Catalog.search(query)
-      |> Catalog.for_user(user)
-      |> Repo.all()
-      |> Enum.map(&%{catalog: Map.take(&1, [:id, :name, :description, :category])})
+    catalog_hits(query, user)
+    |> Enum.concat(automation_hits(query, user))
+    |> Jason.encode()
+  end
 
-    pr_automations =
-      PrAutomation.search(query)
-      |> Repo.all()
-      |> Repo.preload([:catalog])
-      |> Enum.filter(&readable?(&1, user))
-      |> Enum.map(fn pra ->
-        %{
-          pr_automation: Map.take(pra, [:id, :name, :documentation, :title, :branch])
-          |> Map.put(:description, pra.documentation)
-          |> Map.put(:catalog, pra.catalog && Map.take(pra.catalog, [:id, :name]))
-        }
-      end)
+  defp catalog_hits(query, user) do
+    Catalog.search(query)
+    |> Catalog.for_user(user)
+    |> Repo.all()
+    |> Enum.map(&%{catalog: Map.take(&1, [:id, :name, :description, :category])})
+  end
 
-    Jason.encode(catalogs ++ pr_automations)
+  defp automation_hits(query, user) do
+    PrAutomation.search(query)
+    |> Repo.all()
+    |> Repo.preload([:catalog])
+    |> Enum.filter(&readable?(&1, user))
+    |> Enum.map(fn pra ->
+      %{
+        pr_automation: Map.take(pra, [:id, :name, :documentation, :title, :branch])
+        |> Map.put(:description, pra.documentation)
+        |> Map.put(:catalog, pra.catalog && Map.take(pra.catalog, [:id, :name]))
+      }
+    end)
   end
 
   defp readable?(%PrAutomation{catalog: %Catalog{} = catalog}, user),
