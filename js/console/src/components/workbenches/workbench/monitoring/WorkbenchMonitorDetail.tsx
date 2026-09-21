@@ -36,7 +36,7 @@ import {
   WorkbenchJobTinyFragment,
   WorkbenchMonitorDetailsFragment,
 } from 'generated/graphql'
-import { isEmpty, isNil } from 'lodash'
+import { isEmpty, isNil, truncate } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
@@ -649,8 +649,7 @@ function MonitorRecentJobs({
   const spawnDescription = useMemo(() => {
     const trimmed = spawnPrompt?.trim()
     if (!trimmed) return undefined
-    const preview =
-      trimmed.length > 160 ? `${trimmed.slice(0, 157).trimEnd()}…` : trimmed
+    const preview = truncate(trimmed, { length: 160, omission: '…' })
     return `When ${monitorName} fires it will spawn a job: ${preview}`
   }, [monitorName, spawnPrompt])
 

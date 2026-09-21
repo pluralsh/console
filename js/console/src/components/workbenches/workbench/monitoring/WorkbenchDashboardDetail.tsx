@@ -15,6 +15,7 @@ import {
   WorkbenchDashboardDetailsFragment,
   WorkbenchDashboardInput,
 } from 'generated/graphql'
+import { uniq } from 'lodash'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
@@ -118,11 +119,9 @@ function DashboardDetailView({
 
   const sources = useMemo(
     () =>
-      [
-        ...new Set(
-          graphs.map((graph) => graph.datasource?.tool).filter(isNonNullable)
-        ),
-      ].map(toolDisplayName),
+      uniq(
+        graphs.map((graph) => graph.datasource?.tool).filter(isNonNullable)
+      ).map(toolDisplayName),
     [graphs]
   )
 

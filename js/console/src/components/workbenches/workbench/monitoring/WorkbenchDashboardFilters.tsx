@@ -12,7 +12,7 @@ import {
   useWorkbenchDashboardInputQuery,
   WorkbenchDashboardInput,
 } from 'generated/graphql'
-import { omit } from 'lodash'
+import { isEqual, omit } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export type DashboardFilterValue = string | string[]
@@ -24,20 +24,6 @@ export function defaultDashboardFilter(
   return input.type === DashboardInputType.MultiSelect
     ? [input.default]
     : input.default
-}
-
-function filterEquals(
-  a: DashboardFilterValue | undefined,
-  b: DashboardFilterValue | undefined
-) {
-  if (Array.isArray(a) || Array.isArray(b))
-    return (
-      Array.isArray(a) &&
-      Array.isArray(b) &&
-      a.length === b.length &&
-      a.every((value, i) => value === b[i])
-    )
-  return (a ?? undefined) === (b ?? undefined)
 }
 
 export function WorkbenchDashboardFilters({
@@ -60,7 +46,7 @@ export function WorkbenchDashboardFilters({
   if (inputs.length === 0) return null
 
   const dirty = inputs.some(
-    (input) => !filterEquals(values[input.name], defaultDashboardFilter(input))
+    (input) => !isEqual(values[input.name], defaultDashboardFilter(input))
   )
 
   return (

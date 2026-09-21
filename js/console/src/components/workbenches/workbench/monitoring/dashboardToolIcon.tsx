@@ -10,6 +10,7 @@ import {
   TempoLogoIcon,
   VictoriaLogsLogoIcon,
 } from '@pluralsh/design-system'
+import { upperFirst } from 'lodash'
 import { ComponentType } from 'react'
 
 const TOOL_ICONS: { match: RegExp; Icon: ComponentType<IconProps> }[] = [
@@ -27,7 +28,7 @@ const TOOL_ICONS: { match: RegExp; Icon: ComponentType<IconProps> }[] = [
 export function toolDisplayName(tool: string) {
   const words = tool.replace(/[_-]+/g, ' ').trim()
   if (!words) return tool
-  return words.charAt(0).toUpperCase() + words.slice(1)
+  return upperFirst(words)
 }
 
 export function DashboardToolIcon({

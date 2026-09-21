@@ -21,7 +21,7 @@ import {
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityTraceFragment,
 } from 'generated/graphql'
-import { groupBy, isEmpty } from 'lodash'
+import { groupBy, isEmpty, maxBy } from 'lodash'
 import { useMemo } from 'react'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
@@ -273,9 +273,7 @@ function StatContent({
   metrics: WorkbenchJobActivityMetricFragment[]
 }) {
   if (isEmpty(metrics)) return <NoDataState />
-  const latest = [...metrics].sort((a, b) =>
-    String(b.timestamp ?? '').localeCompare(String(a.timestamp ?? ''))
-  )[0]
+  const latest = maxBy(metrics, (metric) => metric.timestamp ?? '')
   const series = getMetricSeries(metrics)
 
   return (
@@ -284,7 +282,7 @@ function StatContent({
       gap="xsmall"
     >
       <StatValueSC>
-        {latest.value != null ? formatStat(latest.value) : '—'}
+        {latest?.value != null ? formatStat(latest.value) : '—'}
       </StatValueSC>
       {series[0] && <Body2P $color="text-light">{series[0].label}</Body2P>}
     </Flex>

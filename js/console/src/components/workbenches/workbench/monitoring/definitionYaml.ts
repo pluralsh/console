@@ -1,4 +1,5 @@
 import { dump } from 'js-yaml'
+import { kebabCase } from 'lodash'
 import {
   MonitorType,
   WorkbenchDashboardDetailsFragment,
@@ -15,12 +16,7 @@ export function monitoringDefinitionFilename(
   kind: 'dashboard' | 'monitor',
   name: string
 ) {
-  const slug =
-    name
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'untitled'
+  const slug = kebabCase(name) || 'untitled'
   return `${kind === 'dashboard' ? 'dashboards' : 'monitors'}/${slug}.yml`
 }
 
@@ -238,6 +234,7 @@ function omitEmpty<T extends Record<string, unknown>>(obj: T): Partial<T> {
   ) as Partial<T>
 }
 
+// Local guard (lodash's isPlainObject doesn't narrow types).
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
 }
