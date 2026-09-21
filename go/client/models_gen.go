@@ -4850,6 +4850,22 @@ type KubernetesControllerMetrics struct {
 	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
 	// Memory usage metrics for pods managed by this controller
 	PodMem []*MetricResponse `json:"podMem,omitempty"`
+	// CPU requests for the controller
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// Memory requests for the controller
+	MemRequests []*MetricResponse `json:"memRequests,omitempty"`
+	// CPU limits for the controller
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// Memory limits for the controller
+	MemLimits []*MetricResponse `json:"memLimits,omitempty"`
+	// CPU requests for pods managed by this controller
+	PodCPURequests []*MetricResponse `json:"podCpuRequests,omitempty"`
+	// Memory requests for pods managed by this controller
+	PodMemRequests []*MetricResponse `json:"podMemRequests,omitempty"`
+	// CPU limits for pods managed by this controller
+	PodCPULimits []*MetricResponse `json:"podCpuLimits,omitempty"`
+	// Memory limits for pods managed by this controller
+	PodMemLimits []*MetricResponse `json:"podMemLimits,omitempty"`
 }
 
 type KubernetesUnstructured struct {
@@ -8841,10 +8857,18 @@ type ServiceComponentChild struct {
 }
 
 type ServiceComponentMetrics struct {
-	CPU    []*MetricResponse `json:"cpu,omitempty"`
-	Mem    []*MetricResponse `json:"mem,omitempty"`
-	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
-	PodMem []*MetricResponse `json:"podMem,omitempty"`
+	CPU            []*MetricResponse `json:"cpu,omitempty"`
+	Mem            []*MetricResponse `json:"mem,omitempty"`
+	PodCPU         []*MetricResponse `json:"podCpu,omitempty"`
+	PodMem         []*MetricResponse `json:"podMem,omitempty"`
+	CPURequests    []*MetricResponse `json:"cpuRequests,omitempty"`
+	MemRequests    []*MetricResponse `json:"memRequests,omitempty"`
+	CPULimits      []*MetricResponse `json:"cpuLimits,omitempty"`
+	MemLimits      []*MetricResponse `json:"memLimits,omitempty"`
+	PodCPURequests []*MetricResponse `json:"podCpuRequests,omitempty"`
+	PodMemRequests []*MetricResponse `json:"podMemRequests,omitempty"`
+	PodCPULimits   []*MetricResponse `json:"podCpuLimits,omitempty"`
+	PodMemLimits   []*MetricResponse `json:"podMemLimits,omitempty"`
 }
 
 // a configuration item k/v pair
@@ -10925,6 +10949,8 @@ type WorkbenchEval struct {
 	PromptRules *string `json:"promptRules,omitempty"`
 	// rules for evaluating job progress
 	ProgressRules *string `json:"progressRules,omitempty"`
+	// automation for creating skill-update jobs from low-scoring evals
+	Automation *WorkbenchEvalAutomation `json:"automation,omitempty"`
 	// the workbench this eval belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -10938,6 +10964,30 @@ type WorkbenchEvalAttributes struct {
 	PromptRules *string `json:"promptRules,omitempty"`
 	// rules for evaluating job progress
 	ProgressRules *string `json:"progressRules,omitempty"`
+	// optional automation for creating skill-update jobs from low-scoring evals
+	Automation *WorkbenchEvalAutomationAttributes `json:"automation,omitempty"`
+}
+
+type WorkbenchEvalAutomation struct {
+	// whether low-scoring evals automatically create skill-update jobs
+	Enabled bool `json:"enabled"`
+	// exclusive upper grade threshold for triggering a skill-update job (0–10)
+	MaxScore *int64 `json:"maxScore,omitempty"`
+	// maximum number of skills the workbench may have when automation creates a new skill
+	MaxSkills int64 `json:"maxSkills"`
+	// optional guidance included in automatically created skill-update jobs
+	Instructions *string `json:"instructions,omitempty"`
+}
+
+type WorkbenchEvalAutomationAttributes struct {
+	// whether low-scoring evals automatically create skill-update jobs
+	Enabled *bool `json:"enabled,omitempty"`
+	// exclusive upper grade threshold for triggering a skill-update job (0–10)
+	MaxScore *int64 `json:"maxScore,omitempty"`
+	// maximum number of skills the workbench may have when automation creates a new skill
+	MaxSkills *int64 `json:"maxSkills,omitempty"`
+	// optional guidance included in automatically created skill-update jobs
+	Instructions *string `json:"instructions,omitempty"`
 }
 
 type WorkbenchEvalFeedback struct {

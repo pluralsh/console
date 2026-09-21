@@ -171,6 +171,22 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       assert result["sentinel_id"] == sentinel.id
     end
 
+    test "sentinel.read scoped tokens can trigger a sentinel run", %{conn: conn} do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project)
+      token = insert(:access_token, user: user, scopes: [build(:scope, api: "sentinel.read")])
+
+      result =
+        conn
+        |> add_auth_headers(token)
+        |> json_post("/v1/api/ai/sentinels/#{sentinel.id}/trigger", %{})
+        |> json_response(200)
+
+      assert result["sentinel_id"] == sentinel.id
+      assert result["status"] == "pending"
+    end
+
     test "admin users can trigger sentinels", %{conn: conn} do
       sentinel = insert(:sentinel)
 
@@ -198,21 +214,40 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       assert result["sentinel_id"] == sentinel.id
     end
 
-    test "does not trigger a sentinel by name without write access", %{conn: conn} do
+    test "project readers can trigger a sentinel by name", %{conn: conn} do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
-      insert(:sentinel, project: project, name: "forbidden-named-sentinel")
+      sentinel = insert(:sentinel, project: project, name: "readable-named-sentinel")
 
-      conn
-      |> add_auth_headers(user)
-      |> json_post("/v1/api/ai/sentinels/name:forbidden-named-sentinel/trigger", %{})
-      |> json_response(403)
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> json_post("/v1/api/ai/sentinels/name:readable-named-sentinel/trigger", %{})
+        |> json_response(200)
+
+      assert result["sentinel_id"] == sentinel.id
+      assert result["status"] == "pending"
     end
 
-    test "users without write access cannot trigger sentinels", %{conn: conn} do
+    test "project readers can trigger sentinels", %{conn: conn} do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
       sentinel = insert(:sentinel, project: project)
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> json_post("/v1/api/ai/sentinels/#{sentinel.id}/trigger", %{})
+        |> json_response(200)
+
+      assert result["id"]
+      assert result["status"] == "pending"
+      assert result["sentinel_id"] == sentinel.id
+    end
+
+    test "users without sentinel read access cannot trigger sentinels", %{conn: conn} do
+      user = insert(:user)
+      sentinel = insert(:sentinel)
 
       conn
       |> add_auth_headers(user)

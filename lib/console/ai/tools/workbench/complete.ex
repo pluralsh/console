@@ -25,7 +25,7 @@ defmodule Console.AI.Tools.Workbench.Complete do
   def name(_), do: name()
   def json_schema(), do: @json_schema
   def json_schema(_), do: json_schema()
-  def description(), do: "Complete the workbench job, with the final conclusion given and any relevant metrics or logs to include in the result metadata.  Be sure to always mark the final status of all todos as well."
+  def description(), do: "Complete the workbench job, with the final conclusion given and any relevant metrics or logs to include in the result metadata.  Be sure to always mark the final status of all todos as well. This tool does not reset the result's current objective; if the user resteered, call `workbench_notes` first and overwrite `status.objective`."
   def description(_), do: description()
 
   def changeset(model, attrs) do

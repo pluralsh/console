@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.EvalTest do
   use Mimic
   alias Console.AI.OpenAI
   alias Console.AI.Workbench.Eval
+  alias Console.PubSub
 
   describe "evaluate/1" do
     test "evaluates a workbench job" do
@@ -39,6 +40,7 @@ defmodule Console.AI.Workbench.EvalTest do
       assert job_eval.grade == 10
       assert job_eval.workbench_job_id == job.id
       assert job_eval.workbench_eval_id == eval.id
+      assert_receive {:event, %PubSub.WorkbenchEvalResultCreated{item: ^job_eval}}
     end
   end
 end

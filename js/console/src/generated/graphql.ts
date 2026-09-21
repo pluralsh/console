@@ -5945,12 +5945,28 @@ export type KubernetesControllerMetrics = {
   __typename?: 'KubernetesControllerMetrics';
   /** CPU usage metrics for the controller */
   cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** CPU limits for the controller */
+  cpuLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** CPU requests for the controller */
+  cpuRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   /** Memory usage metrics for the controller */
   mem?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** Memory limits for the controller */
+  memLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** Memory requests for the controller */
+  memRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   /** CPU usage metrics for pods managed by this controller */
   podCpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** CPU limits for pods managed by this controller */
+  podCpuLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** CPU requests for pods managed by this controller */
+  podCpuRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   /** Memory usage metrics for pods managed by this controller */
   podMem?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** Memory limits for pods managed by this controller */
+  podMemLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** Memory requests for pods managed by this controller */
+  podMemRequests?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
 export type KubernetesUnstructured = {
@@ -14495,9 +14511,17 @@ export type ServiceComponentChild = {
 export type ServiceComponentMetrics = {
   __typename?: 'ServiceComponentMetrics';
   cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  cpuLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  cpuRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   mem?: Maybe<Array<Maybe<MetricResponse>>>;
+  memLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  memRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   podCpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  podCpuLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  podCpuRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   podMem?: Maybe<Array<Maybe<MetricResponse>>>;
+  podMemLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  podMemRequests?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
 /** a configuration item k/v pair */
@@ -17062,6 +17086,8 @@ export type WorkbenchEdge = {
 
 export type WorkbenchEval = {
   __typename?: 'WorkbenchEval';
+  /** automation for creating skill-update jobs from low-scoring evals */
+  automation?: Maybe<WorkbenchEvalAutomation>;
   /** rules for evaluating job conclusions */
   conclusionRules?: Maybe<Scalars['String']['output']>;
   /** the id of the eval configuration */
@@ -17077,12 +17103,37 @@ export type WorkbenchEval = {
 };
 
 export type WorkbenchEvalAttributes = {
+  /** optional automation for creating skill-update jobs from low-scoring evals */
+  automation?: InputMaybe<WorkbenchEvalAutomationAttributes>;
   /** rules for evaluating job conclusions */
   conclusionRules?: InputMaybe<Scalars['String']['input']>;
   /** rules for evaluating job progress */
   progressRules?: InputMaybe<Scalars['String']['input']>;
   /** rules for evaluating job prompts */
   promptRules?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchEvalAutomation = {
+  __typename?: 'WorkbenchEvalAutomation';
+  /** whether low-scoring evals automatically create skill-update jobs */
+  enabled: Scalars['Boolean']['output'];
+  /** optional guidance included in automatically created skill-update jobs */
+  instructions?: Maybe<Scalars['String']['output']>;
+  /** exclusive upper grade threshold for triggering a skill-update job (0–10) */
+  maxScore?: Maybe<Scalars['Int']['output']>;
+  /** maximum number of skills the workbench may have when automation creates a new skill */
+  maxSkills: Scalars['Int']['output'];
+};
+
+export type WorkbenchEvalAutomationAttributes = {
+  /** whether low-scoring evals automatically create skill-update jobs */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** optional guidance included in automatically created skill-update jobs */
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  /** exclusive upper grade threshold for triggering a skill-update job (0–10) */
+  maxScore?: InputMaybe<Scalars['Int']['input']>;
+  /** maximum number of skills the workbench may have when automation creates a new skill */
+  maxSkills?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type WorkbenchEvalFeedback = {
@@ -20231,7 +20282,7 @@ export type ClusterNetworkGraphQueryVariables = Exact<{
 
 export type ClusterNetworkGraphQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, networkGraph?: Array<{ __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } } | null> | null } | null };
 
-export type ClusterKubernetesMetricsFragment = { __typename?: 'Cluster', id: string, componentMetrics?: { __typename?: 'KubernetesControllerMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
+export type ClusterKubernetesMetricsFragment = { __typename?: 'Cluster', id: string, componentMetrics?: { __typename?: 'KubernetesControllerMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
 export type ClusterKubernetesMetricsQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -20246,9 +20297,9 @@ export type ClusterKubernetesMetricsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterKubernetesMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, componentMetrics?: { __typename?: 'KubernetesControllerMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+export type ClusterKubernetesMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, componentMetrics?: { __typename?: 'KubernetesControllerMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
 
-export type ComponentMetricsFragmentFragment = { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
+export type ComponentMetricsFragmentFragment = { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentComponentMetricsQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -20261,7 +20312,7 @@ export type ServiceDeploymentComponentMetricsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceDeploymentComponentMetricsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+export type ServiceDeploymentComponentMetricsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
 
 export type UsageQueryVariables = Exact<{
   cpu: Scalars['String']['input'];
@@ -21781,7 +21832,7 @@ export type ServiceMetricsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceMetricsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, serviceMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+export type ServiceMetricsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, serviceMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
 
 export type MonitorThresholdFragment = { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number };
 
@@ -22885,7 +22936,7 @@ export type WorkbenchEvalSettingsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchEvalSettingsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, eval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null } | null } | null };
+export type WorkbenchEvalSettingsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, eval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null, automation?: { __typename?: 'WorkbenchEvalAutomation', enabled: boolean, maxScore?: number | null, maxSkills: number, instructions?: string | null } | null } | null } | null };
 
 export type WorkbenchJobsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23221,7 +23272,7 @@ export type CreateWorkbenchEvalMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchEvalMutation = { __typename?: 'RootMutationType', createWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null } | null };
+export type CreateWorkbenchEvalMutation = { __typename?: 'RootMutationType', createWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null, automation?: { __typename?: 'WorkbenchEvalAutomation', enabled: boolean, maxScore?: number | null, maxSkills: number, instructions?: string | null } | null } | null };
 
 export type UpdateWorkbenchEvalMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23229,7 +23280,7 @@ export type UpdateWorkbenchEvalMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchEvalMutation = { __typename?: 'RootMutationType', updateWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null } | null };
+export type UpdateWorkbenchEvalMutation = { __typename?: 'RootMutationType', updateWorkbenchEval?: { __typename?: 'WorkbenchEval', id: string, promptRules?: string | null, conclusionRules?: string | null, progressRules?: string | null, automation?: { __typename?: 'WorkbenchEvalAutomation', enabled: boolean, maxScore?: number | null, maxSkills: number, instructions?: string | null } | null } | null };
 
 export type DeleteWorkbenchEvalMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -25485,6 +25536,30 @@ export const ClusterKubernetesMetricsFragmentDoc = gql`
     podMem {
       ...MetricResponse
     }
+    cpuRequests {
+      ...MetricResponse
+    }
+    memRequests {
+      ...MetricResponse
+    }
+    cpuLimits {
+      ...MetricResponse
+    }
+    memLimits {
+      ...MetricResponse
+    }
+    podCpuRequests {
+      ...MetricResponse
+    }
+    podMemRequests {
+      ...MetricResponse
+    }
+    podCpuLimits {
+      ...MetricResponse
+    }
+    podMemLimits {
+      ...MetricResponse
+    }
   }
 }
     ${MetricResponseFragmentDoc}`;
@@ -25506,6 +25581,30 @@ export const ComponentMetricsFragmentFragmentDoc = gql`
       ...MetricResponse
     }
     podMem {
+      ...MetricResponse
+    }
+    cpuRequests {
+      ...MetricResponse
+    }
+    memRequests {
+      ...MetricResponse
+    }
+    cpuLimits {
+      ...MetricResponse
+    }
+    memLimits {
+      ...MetricResponse
+    }
+    podCpuRequests {
+      ...MetricResponse
+    }
+    podMemRequests {
+      ...MetricResponse
+    }
+    podCpuLimits {
+      ...MetricResponse
+    }
+    podMemLimits {
       ...MetricResponse
     }
   }
@@ -42170,6 +42269,30 @@ export const ServiceMetricsDocument = gql`
       podMem {
         ...MetricResponse
       }
+      cpuRequests {
+        ...MetricResponse
+      }
+      memRequests {
+        ...MetricResponse
+      }
+      cpuLimits {
+        ...MetricResponse
+      }
+      memLimits {
+        ...MetricResponse
+      }
+      podCpuRequests {
+        ...MetricResponse
+      }
+      podMemRequests {
+        ...MetricResponse
+      }
+      podCpuLimits {
+        ...MetricResponse
+      }
+      podMemLimits {
+        ...MetricResponse
+      }
     }
   }
 }
@@ -47029,6 +47152,12 @@ export const WorkbenchEvalSettingsDocument = gql`
       promptRules
       conclusionRules
       progressRules
+      automation {
+        enabled
+        maxScore
+        maxSkills
+        instructions
+      }
     }
   }
 }
@@ -49067,6 +49196,12 @@ export const CreateWorkbenchEvalDocument = gql`
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
     `;
@@ -49104,6 +49239,12 @@ export const UpdateWorkbenchEvalDocument = gql`
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
     `;

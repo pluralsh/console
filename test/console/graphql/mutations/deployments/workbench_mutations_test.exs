@@ -1552,6 +1552,12 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             conclusionRules
             promptRules
             progressRules
+            automation {
+              enabled
+              maxScore
+              maxSkills
+              instructions
+            }
             workbench { id }
           }
         }
@@ -1560,7 +1566,13 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         "attributes" => %{
           "conclusionRules" => "c1",
           "promptRules" => "p1",
-          "progressRules" => "g1"
+          "progressRules" => "g1",
+          "automation" => %{
+            "enabled" => true,
+            "maxScore" => 8,
+            "maxSkills" => 12,
+            "instructions" => "Prioritize runbooks."
+          }
         }
       }, %{current_user: admin_user()})
 
@@ -1568,6 +1580,28 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert eval["conclusionRules"] == "c1"
       assert eval["promptRules"] == "p1"
       assert eval["progressRules"] == "g1"
+      assert eval["automation"] == %{
+               "enabled" => true,
+               "maxScore" => 8,
+               "maxSkills" => 12,
+               "instructions" => "Prioritize runbooks."
+             }
+    end
+
+    test "requires a max score when automation is enabled" do
+      workbench = insert(:workbench)
+
+      {:ok, %{errors: [_ | _]}} =
+        run_query("""
+          mutation CreateWorkbenchEval($workbenchId: ID!, $attributes: WorkbenchEvalAttributes!) {
+            createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {
+              id
+            }
+          }
+        """, %{
+          "workbenchId" => workbench.id,
+          "attributes" => %{"automation" => %{"enabled" => true}}
+        }, %{current_user: admin_user()})
     end
 
     test "project readers cannot create an eval" do

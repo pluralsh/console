@@ -651,6 +651,30 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :pod_mem, list_of(:metric_response),
       description: "Memory usage metrics for pods managed by this controller"
+
+    field :cpu_requests, list_of(:metric_response),
+      description: "CPU requests for the controller"
+
+    field :mem_requests, list_of(:metric_response),
+      description: "Memory requests for the controller"
+
+    field :cpu_limits, list_of(:metric_response),
+      description: "CPU limits for the controller"
+
+    field :mem_limits, list_of(:metric_response),
+      description: "Memory limits for the controller"
+
+    field :pod_cpu_requests, list_of(:metric_response),
+      description: "CPU requests for pods managed by this controller"
+
+    field :pod_mem_requests, list_of(:metric_response),
+      description: "Memory requests for pods managed by this controller"
+
+    field :pod_cpu_limits, list_of(:metric_response),
+      description: "CPU limits for pods managed by this controller"
+
+    field :pod_mem_limits, list_of(:metric_response),
+      description: "Memory limits for pods managed by this controller"
   end
 
   @desc "Time series data associated with an alert evaluation"

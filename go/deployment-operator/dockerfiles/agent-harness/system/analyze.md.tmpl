@@ -64,6 +64,10 @@ When analysis is finished, you **must** persist the report by calling the Plural
 
 - This is the **only** way to save your report. Do not write it to disk or return it only in chat.
 - The tool name is exactly **`updateAgentRunAnalysis`** (on the `plural` MCP server).
+- If MCP functions are deferred and `updateAgentRunAnalysis` is not directly visible, use
+  **`tool_search`** to search for that exact tool name before calling it. Do not use
+  `list_mcp_resources` or `list_mcp_resource_templates`; those APIs list MCP resources,
+  not callable MCP tools, and an empty resources list does not mean the tool is unavailable.
 - Pass `summary`, `analysis` (full Markdown report), and `bullets` — see §6 for the payload format.
 
 ---

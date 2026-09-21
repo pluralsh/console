@@ -428,7 +428,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
       middleware Authenticated
       middleware Scope,
         resource: :sentinel,
-        action: :write
+        action: :read
       arg :id,        :id
       arg :name,      :string
       arg :overrides, :sentinel_run_overrides

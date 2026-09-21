@@ -3366,6 +3366,23 @@ input WorkbenchEvalAttributes {
 
   "rules for evaluating job progress"
   progressRules: String
+
+  "optional automation for creating skill-update jobs from low-scoring evals"
+  automation: WorkbenchEvalAutomationAttributes
+}
+
+input WorkbenchEvalAutomationAttributes {
+  "whether low-scoring evals automatically create skill-update jobs"
+  enabled: Boolean
+
+  "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+  maxScore: Int
+
+  "maximum number of skills the workbench may have when automation creates a new skill"
+  maxSkills: Int
+
+  "optional guidance included in automatically created skill-update jobs"
+  instructions: String
 }
 
 input WorkbenchWebhookMatchesAttributes {
@@ -4955,12 +4972,29 @@ type WorkbenchEval {
   "rules for evaluating job progress"
   progressRules: String
 
+  "automation for creating skill-update jobs from low-scoring evals"
+  automation: WorkbenchEvalAutomation
+
   "the workbench this eval belongs to"
   workbench: Workbench
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchEvalAutomation {
+  "whether low-scoring evals automatically create skill-update jobs"
+  enabled: Boolean!
+
+  "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+  maxScore: Int
+
+  "maximum number of skills the workbench may have when automation creates a new skill"
+  maxSkills: Int!
+
+  "optional guidance included in automatically created skill-update jobs"
+  instructions: String
 }
 
 type WorkbenchEvalFeedback {
@@ -8544,6 +8578,30 @@ type KubernetesControllerMetrics {
 
   "Memory usage metrics for pods managed by this controller"
   podMem: [MetricResponse]
+
+  "CPU requests for the controller"
+  cpuRequests: [MetricResponse]
+
+  "Memory requests for the controller"
+  memRequests: [MetricResponse]
+
+  "CPU limits for the controller"
+  cpuLimits: [MetricResponse]
+
+  "Memory limits for the controller"
+  memLimits: [MetricResponse]
+
+  "CPU requests for pods managed by this controller"
+  podCpuRequests: [MetricResponse]
+
+  "Memory requests for pods managed by this controller"
+  podMemRequests: [MetricResponse]
+
+  "CPU limits for pods managed by this controller"
+  podCpuLimits: [MetricResponse]
+
+  "Memory limits for pods managed by this controller"
+  podMemLimits: [MetricResponse]
 }
 
 "Time series data associated with an alert evaluation"
@@ -11993,6 +12051,14 @@ type ServiceComponentMetrics {
   mem: [MetricResponse]
   podCpu: [MetricResponse]
   podMem: [MetricResponse]
+  cpuRequests: [MetricResponse]
+  memRequests: [MetricResponse]
+  cpuLimits: [MetricResponse]
+  memLimits: [MetricResponse]
+  podCpuRequests: [MetricResponse]
+  podMemRequests: [MetricResponse]
+  podCpuLimits: [MetricResponse]
+  podMemLimits: [MetricResponse]
 }
 
 "a representation of a past revision of a service"

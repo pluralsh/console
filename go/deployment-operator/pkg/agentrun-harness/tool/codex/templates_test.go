@@ -15,13 +15,14 @@ func TestConfigTemplateProxyResponses(t *testing.T) {
 	doc := renderConfigTemplate(t, ConfigTemplateInput{
 		RepositoryDir: "/repo",
 		Settings: configTemplateSettings{
-			Model:                "openai/gpt-5.4",
-			ModelProvider:        pluralProvider,
-			SandboxMode:          sandboxModeHarness,
-			ApprovalPolicy:       approvalPolicyNever,
-			ModelReasoningEffort: defaultReasoning,
-			EnableWebSearch:      true,
-			EnableShellCache:     true,
+			Model:                    "openai/gpt-5.4",
+			ModelProvider:            pluralProvider,
+			SandboxMode:              sandboxModeHarness,
+			ApprovalPolicy:           approvalPolicyNever,
+			ModelReasoningEffort:     defaultReasoning,
+			DirectOnlyToolNamespaces: []string{pluralMCPNamespace},
+			EnableWebSearch:          true,
+			EnableShellCache:         true,
 		},
 		Providers: []configTemplateProvider{{
 			Name:    pluralProvider,
@@ -43,6 +44,11 @@ func TestConfigTemplateProxyResponses(t *testing.T) {
 	}
 	if features["web_search_request"] != true || features["shell_snapshot"] != true {
 		t.Fatalf("features = %#v", features)
+	}
+	codeMode := tableValue(t, features, "code_mode")
+	namespaces, ok := codeMode["direct_only_tool_namespaces"].([]any)
+	if !ok || len(namespaces) != 1 || namespaces[0] != pluralMCPNamespace {
+		t.Fatalf("code mode namespaces = %#v", codeMode["direct_only_tool_namespaces"])
 	}
 	provider := tableValue(t, tableValue(t, doc, "model_providers"), pluralProvider)
 	if provider["base_url"] != "https://console.plural.sh/ext/ai/v1" || provider["env_key"] != consoleTokenEnv || provider["wire_api"] != responsesWireAPI {
@@ -140,7 +146,7 @@ func TestConfigTemplateBuiltInAndExternalMCP(t *testing.T) {
 	})
 	mcps := tableValue(t, doc, "mcp_servers")
 	plural := tableValue(t, mcps, pluralProvider)
-	if plural["url"] != common.AgentMCPServerURL {
+	if plural["url"] != common.AgentMCPServerURL || plural["required"] != true {
 		t.Fatalf("plural MCP = %#v", plural)
 	}
 	codebase := tableValue(t, mcps, common.CodebaseMemoryMCPServerName)

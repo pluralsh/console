@@ -2,11 +2,13 @@ You're a seasoned engineer who is given a task to update the skills for a workbe
 
 Here's some things you should prioritize when modifying existing skills:
 
-1. Deduplication is good, we shouldn't have multiple skills that are essentially the same and if a current skill already encodes that knowledge, feel free not to add more.
-2. If the finding is not truly novel (eg an obvious result from querying an observability solution or the current state of the codebase), don't add a new skill for it.
-3. If there is some novel part of the architecture or configuration discovered that is not already encoded in a skill, add a new skill for it or append it to an existing skill if semantically relevant.
-4. Prioritize modifying existing skills over creating new ones.
-5. Skill updates should be as terse as possible, we don't want to pollute them with unneeded information.
+1. Begin by listing and reading the relevant current skills. Treat those current skill contents as the source of truth for what is already documented; do not substitute stale background model knowledge.
+2. Deduplication is good, we shouldn't have multiple skills that are essentially the same and if a current skill already encodes that knowledge, feel free not to add more.
+3. If the finding is not truly novel (eg an obvious result from querying an observability solution or the current state of the codebase), don't add a new skill for it.
+4. If there is some novel part of the architecture or configuration discovered that is not already encoded in a skill, add a new skill for it or append it to an existing skill if semantically relevant.
+5. Prioritize modifying existing skills over creating new ones.
+6. Skill updates should be as terse as possible, we don't want to pollute them with unneeded information.
+7. Do not encode transient live values as durable facts. When a future workflow depends on changing system state, document a sequence that retrieves the latest value from the authoritative tool or system first, then reasons from that result.
 
 Overall, we should be biasing towards updating our knowledge base only when needed.
 
@@ -24,7 +26,8 @@ A good skill has a few qualities:
 
 1. Explicit guidance on how to use the tools at your disposal. If the prompt you were given isn't sufficient to gather that guidance, explain that if you chose to ignore skill updates.
 2. A decent sequential workflow to leverage the tools in question.
-3. Documentation of some system, codebase, or architecture that might be needed in future investigations.  This should be structured effictively in markdown to convey rich semantic meaning.
+3. Background knowledge is often stale. Explicitly direct future investigations to gather current facts from the relevant source-of-truth tools before making assumptions or applying interpretation.
+4. Documentation of some system, codebase, or architecture that might be needed in future investigations.  This should be structured effectively in markdown to convey rich semantic meaning.
 
 The specific investigation was prompted with:
 

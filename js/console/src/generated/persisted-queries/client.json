@@ -647,15 +647,15 @@
          "name": "ClusterNetworkGraph",
          "body": "query ClusterNetworkGraph($clusterId: ID!, $time: DateTime) {\n  cluster(id: $clusterId) {\n    id\n    networkGraph(time: $time) {\n      ...NetworkMeshEdge\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment NetworkMeshEdge on NetworkMeshEdge {\n  id\n  from {\n    ...NetworkMeshWorkload\n    __typename\n  }\n  to {\n    ...NetworkMeshWorkload\n    __typename\n  }\n  statistics {\n    ...NetworkMeshStatistics\n    __typename\n  }\n  __typename\n}\n\nfragment NetworkMeshWorkload on NetworkMeshWorkload {\n  id\n  name\n  namespace\n  service\n  __typename\n}\n\nfragment NetworkMeshStatistics on NetworkMeshStatistics {\n  bytes\n  packets\n  connections\n  http200\n  http400\n  http500\n  httpClientLatency\n  __typename\n}"
       },
-      "sha256:9f094e970df11adabb6148c0ffcbcc2fca20176705b34bf1110f35320fe8b564": {
+      "sha256:6944f4dc5ca919f7fed23a91b68fbbf6e8f5dda15833589a18d324674c3cc137": {
          "type": "query",
          "name": "ClusterKubernetesMetrics",
-         "body": "query ClusterKubernetesMetrics($clusterId: ID!, $group: String!, $version: String!, $kind: String!, $name: String!, $namespace: String!, $start: DateTime, $stop: DateTime, $step: String) {\n  cluster(id: $clusterId) {\n    ...ClusterKubernetesMetrics\n    __typename\n  }\n}\n\nfragment ClusterKubernetesMetrics on Cluster {\n  id\n  componentMetrics(\n    group: $group\n    version: $version\n    kind: $kind\n    name: $name\n    namespace: $namespace\n    start: $start\n    stop: $stop\n    step: $step\n  ) {\n    cpu {\n      ...MetricResponse\n      __typename\n    }\n    mem {\n      ...MetricResponse\n      __typename\n    }\n    podCpu {\n      ...MetricResponse\n      __typename\n    }\n    podMem {\n      ...MetricResponse\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
+         "body": "query ClusterKubernetesMetrics($clusterId: ID!, $group: String!, $version: String!, $kind: String!, $name: String!, $namespace: String!, $start: DateTime, $stop: DateTime, $step: String) {\n  cluster(id: $clusterId) {\n    ...ClusterKubernetesMetrics\n    __typename\n  }\n}\n\nfragment ClusterKubernetesMetrics on Cluster {\n  id\n  componentMetrics(\n    group: $group\n    version: $version\n    kind: $kind\n    name: $name\n    namespace: $namespace\n    start: $start\n    stop: $stop\n    step: $step\n  ) {\n    cpu {\n      ...MetricResponse\n      __typename\n    }\n    mem {\n      ...MetricResponse\n      __typename\n    }\n    podCpu {\n      ...MetricResponse\n      __typename\n    }\n    podMem {\n      ...MetricResponse\n      __typename\n    }\n    cpuRequests {\n      ...MetricResponse\n      __typename\n    }\n    memRequests {\n      ...MetricResponse\n      __typename\n    }\n    cpuLimits {\n      ...MetricResponse\n      __typename\n    }\n    memLimits {\n      ...MetricResponse\n      __typename\n    }\n    podCpuRequests {\n      ...MetricResponse\n      __typename\n    }\n    podMemRequests {\n      ...MetricResponse\n      __typename\n    }\n    podCpuLimits {\n      ...MetricResponse\n      __typename\n    }\n    podMemLimits {\n      ...MetricResponse\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
-      "sha256:67942576f712b8192cdd8eedb1f00c9ccc8243b981eb463c2347fc1bc45f58fc": {
+      "sha256:2c25fa615c78b54eabbcf3ec42a187d3eb9809e88c260157425f28d0f83e8566": {
          "type": "query",
          "name": "ServiceDeploymentComponentMetrics",
-         "body": "query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {\n  serviceDeployment(id: $id, name: $name, cluster: $cluster) {\n    ...ComponentMetricsFragment\n    __typename\n  }\n}\n\nfragment ComponentMetricsFragment on ServiceDeployment {\n  componentMetrics(\n    componentId: $componentId\n    start: $start\n    stop: $stop\n    step: $step\n  ) {\n    cpu {\n      ...MetricResponse\n      __typename\n    }\n    mem {\n      ...MetricResponse\n      __typename\n    }\n    podCpu {\n      ...MetricResponse\n      __typename\n    }\n    podMem {\n      ...MetricResponse\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
+         "body": "query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {\n  serviceDeployment(id: $id, name: $name, cluster: $cluster) {\n    ...ComponentMetricsFragment\n    __typename\n  }\n}\n\nfragment ComponentMetricsFragment on ServiceDeployment {\n  componentMetrics(\n    componentId: $componentId\n    start: $start\n    stop: $stop\n    step: $step\n  ) {\n    cpu {\n      ...MetricResponse\n      __typename\n    }\n    mem {\n      ...MetricResponse\n      __typename\n    }\n    podCpu {\n      ...MetricResponse\n      __typename\n    }\n    podMem {\n      ...MetricResponse\n      __typename\n    }\n    cpuRequests {\n      ...MetricResponse\n      __typename\n    }\n    memRequests {\n      ...MetricResponse\n      __typename\n    }\n    cpuLimits {\n      ...MetricResponse\n      __typename\n    }\n    memLimits {\n      ...MetricResponse\n      __typename\n    }\n    podCpuRequests {\n      ...MetricResponse\n      __typename\n    }\n    podMemRequests {\n      ...MetricResponse\n      __typename\n    }\n    podCpuLimits {\n      ...MetricResponse\n      __typename\n    }\n    podMemLimits {\n      ...MetricResponse\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:d041ecc56d9fab9ecdb8d9f754196092d7ccbc1779e7a2059c4b41a63706a6d2": {
          "type": "query",
@@ -1417,10 +1417,10 @@
          "name": "ServiceHeatMap",
          "body": "query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {\n  serviceDeployment(id: $serviceId) {\n    id\n    heatMap(flavor: $flavor) {\n      ...UtilizationHeatMap\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UtilizationHeatMap on UtilizationHeatMap {\n  cpu {\n    ...MetricPointResponse\n    __typename\n  }\n  memory {\n    ...MetricPointResponse\n    __typename\n  }\n  __typename\n}\n\nfragment MetricPointResponse on MetricPointResponse {\n  metric\n  value {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
-      "sha256:68268b84b4c1910ef268d86028b5a8f20674cbe60096b76bc887bf384916b100": {
+      "sha256:36a0a1d33f474d9300b726c63654c2fd2835629d24b41382f969841e2ebb4c05": {
          "type": "query",
          "name": "ServiceMetrics",
-         "body": "query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {\n  serviceDeployment(id: $id) {\n    id\n    serviceMetrics(step: $step, start: $start) {\n      cpu {\n        ...MetricResponse\n        __typename\n      }\n      mem {\n        ...MetricResponse\n        __typename\n      }\n      podCpu {\n        ...MetricResponse\n        __typename\n      }\n      podMem {\n        ...MetricResponse\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
+         "body": "query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {\n  serviceDeployment(id: $id) {\n    id\n    serviceMetrics(step: $step, start: $start) {\n      cpu {\n        ...MetricResponse\n        __typename\n      }\n      mem {\n        ...MetricResponse\n        __typename\n      }\n      podCpu {\n        ...MetricResponse\n        __typename\n      }\n      podMem {\n        ...MetricResponse\n        __typename\n      }\n      cpuRequests {\n        ...MetricResponse\n        __typename\n      }\n      memRequests {\n        ...MetricResponse\n        __typename\n      }\n      cpuLimits {\n        ...MetricResponse\n        __typename\n      }\n      memLimits {\n        ...MetricResponse\n        __typename\n      }\n      podCpuRequests {\n        ...MetricResponse\n        __typename\n      }\n      podMemRequests {\n        ...MetricResponse\n        __typename\n      }\n      podCpuLimits {\n        ...MetricResponse\n        __typename\n      }\n      podMemLimits {\n        ...MetricResponse\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:206b232a4515c88fba850747e7ede196c84b92126e6bb117acf768924ac86b57": {
          "type": "query",
@@ -1982,10 +1982,10 @@
          "name": "WorkbenchAccessibleUsers",
          "body": "query WorkbenchAccessibleUsers($id: ID!) {\n  workbench(id: $id) {\n    id\n    users {\n      ...WorkbenchAccessibleUser\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkbenchAccessibleUser on User {\n  id\n  name\n  email\n  profile\n  __typename\n}"
       },
-      "sha256:ce96d29543e43c8a3051606d97a7bb7ccb82015d4947e3b6958638b048e31af4": {
+      "sha256:f2747986651de2055c3365edf2b0520235757845a4fbe50a1494babf662c158d": {
          "type": "query",
          "name": "WorkbenchEvalSettings",
-         "body": "query WorkbenchEvalSettings($id: ID!) {\n  workbench(id: $id) {\n    id\n    eval {\n      id\n      promptRules\n      conclusionRules\n      progressRules\n      __typename\n    }\n    __typename\n  }\n}"
+         "body": "query WorkbenchEvalSettings($id: ID!) {\n  workbench(id: $id) {\n    id\n    eval {\n      id\n      promptRules\n      conclusionRules\n      progressRules\n      automation {\n        enabled\n        maxScore\n        maxSkills\n        instructions\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"
       },
       "sha256:e315f607ba4d56fac9393a57419dce2062de5650d4860bba153bcab624046633": {
          "type": "query",
@@ -2187,15 +2187,15 @@
          "name": "DeleteWorkbenchKnowledge",
          "body": "mutation DeleteWorkbenchKnowledge($id: ID!) {\n  deleteWorkbenchKnowledge(id: $id) {\n    id\n    __typename\n  }\n}"
       },
-      "sha256:6bdd9295cb14dc91a238b8bb12b0b9b2781f2c6789194acd1364f8fe10bb3f6a": {
+      "sha256:64a9b23642b67774db9de3bb35c36c9a170eb2590f5885e4438232eca919d516": {
          "type": "mutation",
          "name": "CreateWorkbenchEval",
-         "body": "mutation CreateWorkbenchEval($workbenchId: ID!, $attributes: WorkbenchEvalAttributes!) {\n  createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {\n    id\n    promptRules\n    conclusionRules\n    progressRules\n    __typename\n  }\n}"
+         "body": "mutation CreateWorkbenchEval($workbenchId: ID!, $attributes: WorkbenchEvalAttributes!) {\n  createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {\n    id\n    promptRules\n    conclusionRules\n    progressRules\n    automation {\n      enabled\n      maxScore\n      maxSkills\n      instructions\n      __typename\n    }\n    __typename\n  }\n}"
       },
-      "sha256:6eda42c4bb7c281b39282fe052a7040ed7acbfb00b62a98ff7e353e856bd0f95": {
+      "sha256:f63e2e4d64520d75b9fade6d90dc1ccdef6fb71b767a7a630cb6437ead4698d8": {
          "type": "mutation",
          "name": "UpdateWorkbenchEval",
-         "body": "mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {\n  updateWorkbenchEval(id: $id, attributes: $attributes) {\n    id\n    promptRules\n    conclusionRules\n    progressRules\n    __typename\n  }\n}"
+         "body": "mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {\n  updateWorkbenchEval(id: $id, attributes: $attributes) {\n    id\n    promptRules\n    conclusionRules\n    progressRules\n    automation {\n      enabled\n      maxScore\n      maxSkills\n      instructions\n      __typename\n    }\n    __typename\n  }\n}"
       },
       "sha256:36f1fefc3306438523902da1d184f401510f2ab8efc781f5f256152278a6dd73": {
          "type": "mutation",

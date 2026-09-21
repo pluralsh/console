@@ -12,16 +12,13 @@ import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
-import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
 import RangePicker from 'components/utils/RangePicker'
 import {
   HeatMapFlavor,
-  MetricResponseFragment,
   useServiceHeatMapQuery,
   useServiceMetricsQuery,
 } from 'generated/graphql'
-import { capitalize, isEmpty } from 'lodash'
+import { capitalize } from 'lodash'
 import { useTheme } from 'styled-components'
 
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
@@ -34,8 +31,11 @@ import {
 } from 'react-router-dom'
 import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { Prometheus } from 'utils/prometheus.ts'
 import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
+import {
+  ResourceMetricsGraphs,
+  hasResourceMetrics,
+} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
@@ -209,130 +209,6 @@ function ServiceMetricsHeatmap() {
   )
 }
 
-const convertVals = (values) =>
-  values.map(({ timestamp, value }) => ({
-    x: new Date(timestamp * 1000),
-    y: parseFloat(value),
-  }))
-
-function Graphs({
-  cpu: [cpu],
-  mem: [mem],
-}: {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-}) {
-  const theme = useTheme()
-
-  const { cpuValues, memValues } = useMemo(
-    () => ({
-      cpuValues: cpu?.values ? convertVals(cpu?.values) : null,
-      memValues: mem?.values ? convertVals(mem?.values) : null,
-    }),
-    [cpu, mem]
-  )
-
-  if (!memValues && !cpuValues) return null
-
-  return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
-    >
-      {cpuValues && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Overall CPU Usage (cores)" />
-          <Graph
-            data={[{ id: 'cpu', data: cpuValues }]}
-            yFormat={(v) => Prometheus.format(v, 'cpu')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-      {memValues && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Overall Memory Usage (bytes)" />
-          <Graph
-            data={[{ id: 'memory', data: memValues }]}
-            yFormat={(v) => Prometheus.format(v, 'memory')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-    </div>
-  )
-}
-
-function PodGraphs({
-  cpu,
-  mem,
-}: {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-}) {
-  const { cpuGraph, memGraph } = useMemo(() => {
-    const cpuGraph = cpu.map(({ metric, values }) => ({
-      id: (metric as any)?.pod,
-      data: convertVals(values),
-    }))
-    const memGraph = mem.map(({ metric, values }) => ({
-      id: (metric as any)?.pod,
-      data: convertVals(values),
-    }))
-
-    return { cpuGraph, memGraph }
-  }, [cpu, mem])
-
-  if (!memGraph && !cpuGraph) return null
-
-  return (
-    <Flex
-      gap="large"
-      grow={1}
-      height={320}
-      padding="large"
-    >
-      {!isEmpty(cpuGraph) && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Pod CPU Usage (cores)" />
-          <Graph
-            data={cpuGraph}
-            yFormat={(v) => Prometheus.format(v, 'cpu')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-      {!isEmpty(memGraph) && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Pod Memory Usage (bytes)" />
-          <Graph
-            data={memGraph}
-            yFormat={(v) => Prometheus.format(v, 'memory')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-    </Flex>
-  )
-}
-
 function ServiceMetricsTimeseries() {
   const theme = useTheme()
   const { serviceId } = useParams()
@@ -353,32 +229,84 @@ function ServiceMetricsTimeseries() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } =
-      data?.serviceDeployment?.serviceMetrics || {}
+  const {
+    cpu,
+    mem,
+    podCpu,
+    podMem,
+    cpuRequests,
+    memRequests,
+    cpuLimits,
+    memLimits,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+  } = useMemo(() => {
+    const {
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    } = data?.serviceDeployment?.serviceMetrics || {}
 
     return {
       cpu: (cpu || []).filter(isNonNullable),
       mem: (mem || []).filter(isNonNullable),
       podCpu: (podCpu || []).filter(isNonNullable),
       podMem: (podMem || []).filter(isNonNullable),
+      cpuRequests: (cpuRequests || []).filter(isNonNullable),
+      memRequests: (memRequests || []).filter(isNonNullable),
+      cpuLimits: (cpuLimits || []).filter(isNonNullable),
+      memLimits: (memLimits || []).filter(isNonNullable),
+      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
+      podMemRequests: (podMemRequests || []).filter(isNonNullable),
+      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
+      podMemLimits: (podMemLimits || []).filter(isNonNullable),
     }
   }, [data])
 
   let content = <EmptyState message="No metrics available" />
 
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
+  if (
+    hasResourceMetrics({
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    })
+  ) {
     content = (
-      <>
-        <Graphs
-          cpu={cpu}
-          mem={mem}
-        />
-        <PodGraphs
-          cpu={podCpu}
-          mem={podMem}
-        />
-      </>
+      <ResourceMetricsGraphs
+        cpu={cpu}
+        mem={mem}
+        podCpu={podCpu}
+        podMem={podMem}
+        cpuRequests={cpuRequests}
+        memRequests={memRequests}
+        cpuLimits={cpuLimits}
+        memLimits={memLimits}
+        podCpuRequests={podCpuRequests}
+        podMemRequests={podMemRequests}
+        podCpuLimits={podCpuLimits}
+        podMemLimits={podMemLimits}
+      />
     )
   }
 
