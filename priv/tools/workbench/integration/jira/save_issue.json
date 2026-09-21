@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "issue_id": {
+      "type": "string",
+      "description": "Existing Jira issue key or numeric ID to update. Omit when creating."
+    },
+    "project": {
+      "type": "string",
+      "description": "Project key. Required when creating."
+    },
+    "issue_type": {
+      "type": "string",
+      "description": "Issue type name, such as Bug or Task. Required when creating."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Issue summary. Required when creating."
+    },
+    "description": {
+      "type": "string",
+      "description": "Issue description as text using Jira wiki markup where supported."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Additional or custom Jira fields. Common top-level arguments override duplicate keys."
+    }
+  }
+}

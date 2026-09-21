@@ -100,6 +100,99 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
 
       assert server["name"] == "test"
     end
+
+    test "it obfuscates header values on upsert and keeps secrets when the placeholder is sent back" do
+      {:ok, %{data: %{"upsertMcpServer" => created}}} = run_query("""
+        mutation upsert($attrs: McpServerAttributes!) {
+          upsertMcpServer(attributes: $attrs) {
+            id
+            name
+            authentication {
+              headers { id name value }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "secret-mcp",
+          "url" => "https://example.com",
+          "authentication" => %{
+            "headers" => [%{"name" => "Authorization", "value" => "super-secret"}]
+          }
+        }
+      }, %{current_user: admin_user()})
+
+      obfuscated = Console.Schema.McpServer.obfuscated_header_value()
+      [header] = created["authentication"]["headers"]
+      assert header["name"] == "Authorization"
+      assert header["value"] == obfuscated
+
+      {:ok, %{data: %{"upsertMcpServer" => updated}}} = run_query("""
+        mutation upsert($attrs: McpServerAttributes!) {
+          upsertMcpServer(attributes: $attrs) {
+            id
+            authentication {
+              headers { name value }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "secret-mcp",
+          "url" => "https://example.com",
+          "authentication" => %{
+            "headers" => [%{
+              "id" => header["id"],
+              "name" => "Authorization",
+              "value" => obfuscated
+            }]
+          }
+        }
+      }, %{current_user: admin_user()})
+
+      assert updated["id"] == created["id"]
+      [updated_header] = updated["authentication"]["headers"]
+      assert updated_header["value"] == obfuscated
+
+      persisted = Console.Deployments.Flows.get_mcp_server!(created["id"])
+      [stored] = persisted.authentication.headers
+      assert stored.value == "super-secret"
+    end
+  end
+
+  describe "updateMcpServer" do
+    test "admins can update mcp servers by id" do
+      mcp_server = insert(:mcp_server, name: "old name")
+      reader = insert(:user)
+
+      {:ok, %{data: %{"updateMcpServer" => server}}} = run_query("""
+        mutation update($id: ID!, $attrs: McpServerAttributes!) {
+          updateMcpServer(id: $id, attributes: $attrs) {
+            id
+            name
+            url
+            readBindings {
+              user {
+                id
+              }
+            }
+          }
+        }
+      """, %{
+        "id" => mcp_server.id,
+        "attrs" => %{
+          "name" => "new name",
+          "url" => "https://example.com/mcp",
+          "readBindings" => [%{"userId" => reader.id}]
+        }
+      }, %{current_user: admin_user()})
+
+      assert server["id"] == mcp_server.id
+      assert server["name"] == "new name"
+      assert server["url"] == "https://example.com/mcp"
+      assert [%{"user" => %{"id" => reader_id}}] = server["readBindings"]
+      assert reader_id == reader.id
+    end
   end
 
   describe "deleteMcpServer" do

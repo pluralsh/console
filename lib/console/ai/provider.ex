@@ -4,15 +4,19 @@ defmodule Console.AI.Provider do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.Deployments.Settings
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
+  alias Console.AI.Provider.Base
   alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, XAI, Nexus, Tool}
+  alias ReqLLM.Context
 
   @type sender :: :system | :user | :assistant
   @type error :: Console.error
   @type tool :: %{call_id: binary, name: binary, arguments: map}
   @type message :: {sender, binary} | {:tool, binary, tool}
   @type history :: [message]
+  @type context :: history | Context.t()
   @type tool_result :: [Tool.t]
   @type completion_result :: {:ok, binary} | {:ok, binary, [Tool.t]} | Console.error
+  @type reqllm_completion_result :: {:ok, ReqLLM.Response.t()} | Console.error
 
   @default_context_window 128_000 * 4
   @local_cache Console.conf(:local_cache)
@@ -45,7 +49,7 @@ defmodule Console.AI.Provider do
 
   @callback defaults() :: map
 
-  @callback completion(struct, history, keyword) :: completion_result
+  @callback completion(struct, context, keyword) :: reqllm_completion_result
 
   @callback tool_call(struct, history, [atom], keyword) :: {:ok, binary | tool_result} | error
 
@@ -110,10 +114,22 @@ defmodule Console.AI.Provider do
       do: mod.proxy(client)
   end
 
-  def completion([_ | _] = history, opts \\ []) do
+  def completion(history, opts \\ []) do
+    history
+    |> reqllm_completion(opts)
+    |> Base.reqllm_result()
+  end
+
+  def reqllm_completion(context, opts \\ [])
+  def reqllm_completion([_ | _] = history, opts) do
     settings = Settings.cached()
     with {:ok, %mod{} = client} <- client(settings, opts[:client]),
       do: mod.completion(client, add_preface(history, opts), opts)
+  end
+  def reqllm_completion(%Context{messages: [_ | _]} = context, opts) do
+    settings = Settings.cached()
+    with {:ok, %mod{} = client} <- client(settings, opts[:client]),
+      do: mod.completion(client, add_preface(context, opts), opts)
   end
 
   def tool_call([_ | _] = history, tools, opts \\ []) do
@@ -223,11 +239,18 @@ defmodule Console.AI.Provider do
   end
   defp handle_tool_calls(res, _) when is_binary(res), do: {:ok, res}
 
-  defp add_preface(history, opts) do
+  defp add_preface(history, opts) when is_list(history) do
     case opts[:preface] do
       val when is_binary(val) -> [{:system, val} | history]
       :ignore -> history
       _ -> [@preface | history]
+    end
+  end
+  defp add_preface(%Context{} = context, opts) do
+    case opts[:preface] do
+      val when is_binary(val) -> Context.prepend(context, Context.system(val))
+      :ignore -> context
+      _ -> Context.prepend(context, Context.system(elem(@preface, 1)))
     end
   end
 end

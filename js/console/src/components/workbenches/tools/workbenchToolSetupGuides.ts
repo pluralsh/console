@@ -16,6 +16,8 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Slack]: '/setup-guides/tools/slack.md',
   [WorkbenchToolType.Pagerduty]: '/setup-guides/tools/pagerduty.md',
   [WorkbenchToolType.Atlassian]: '/setup-guides/tools/atlassian.md',
+  [WorkbenchToolType.Jira]: '/setup-guides/tools/jira.md',
+  [WorkbenchToolType.JiraDatacenter]: '/setup-guides/tools/jira_datacenter.md',
   [WorkbenchToolType.Exa]: '/setup-guides/tools/exa.md',
   [WorkbenchToolType.Github]: '/setup-guides/tools/github.md',
   [WorkbenchToolType.Gitlab]: '/setup-guides/tools/gitlab.md',
@@ -56,6 +58,10 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://developer.pagerduty.com/docs/rest-api-v2/authentication/',
   [WorkbenchToolType.Atlassian]:
     'https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/',
+  [WorkbenchToolType.Jira]:
+    'https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/',
+  [WorkbenchToolType.JiraDatacenter]:
+    'https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html',
   [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',
   [WorkbenchToolType.Github]:
     'https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens',

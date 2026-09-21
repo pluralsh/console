@@ -2,8 +2,8 @@ defmodule Console.AI.Workbench.EngineTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.AI.Workbench.{Activity, Engine, Heartbeat, Skills, Subagents}
-  alias Console.AI.{Provider, Tool}
-  alias Console.Deployments.Clusters
+  alias Console.AI.Tool
+  alias Console.Deployments.{Clusters, Workbenches}
   alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
   require Record
@@ -90,7 +90,7 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, opts ->
+      expect_reqllm_completion(fn _, opts ->
         assert opts[:preface] =~ "Background knowledge is often stale"
         assert opts[:preface] =~ "Gather current facts"
 
@@ -103,7 +103,7 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "try infrastructure", [
           %Tool{
             id: "3",
@@ -113,11 +113,11 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, _ -> {:ok, "need more information"} end)
+      expect_reqllm_completion(fn _, _ -> {:ok, "need more information"} end)
 
       expect(Subagents.Infrastructure, :run, fn _, _, _ -> %{status: :successful, result: %{output: "infrastructure result"}} end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete with invalid metadata", [
           %Tool{
             id: "invalid-complete",
@@ -134,7 +134,7 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn messages, _ ->
+      expect_reqllm_completion(fn messages, _ ->
         assert Enum.any?(messages, fn
                  {:tool, content, _} ->
                    content =~
@@ -222,6 +222,67 @@ defmodule Console.AI.Workbench.EngineTest do
       end)
     end
 
+    test "hydrates the initial ReqLLM context from persisted activities" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      expect_reqllm_completion(fn messages, _ ->
+        assert Enum.count(messages, &match?({:user, "original objective"}, &1)) == 1
+
+        assert Enum.any?(messages, fn
+                 {:tool, content, %{call_id: "prior-call"}} ->
+                   content =~ "prior result"
+
+                 _ ->
+                   false
+               end)
+
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "done", description: "done", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, prompt: "original objective")
+
+      assert {:ok, _activity} =
+               Workbenches.create_job_activity(
+                 %{
+                   type: :observability,
+                   status: :successful,
+                   prompt: "investigate",
+                   result: %{output: "prior result"},
+                   tool_call: %{
+                     call_id: "prior-call",
+                     name: "workbench_subagent",
+                     arguments: %{"prompt" => "investigate"}
+                   }
+                 },
+                 job
+               )
+
+      {:ok, engine} = Engine.new(job)
+      assert {:ok, result} = Engine.run(engine)
+      assert result.status == :successful
+    end
+
     test "refreshes the job after memos before running subagents from the same response" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
@@ -237,7 +298,7 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "update the objective and investigate", [
           %Tool{
             id: "memo",
@@ -260,7 +321,26 @@ defmodule Console.AI.Workbench.EngineTest do
         %{status: :successful, result: %{output: "infrastructure result"}}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn messages, _ ->
+        assert Enum.count(messages, fn
+                 {:tool, _, %{call_id: "memo", name: "workbench_notes"}} -> true
+                 _ -> false
+               end) == 1
+
+        assert Enum.count(messages, fn
+                 {:tool, _, %{call_id: "subagent", name: "workbench_subagent"}} -> true
+                 _ -> false
+               end) == 1
+
+        assert {:tool, memo_result, %{call_id: "memo"}} =
+                 Enum.find(messages, fn
+                   {:tool, _, %{call_id: "memo"}} -> true
+                   _ -> false
+                 end)
+
+        refute memo_result =~ "failed to run activity"
+        assert memo_result =~ "Recorded notes of progress done so far"
+
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
@@ -295,7 +375,12 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, opts ->
+        assert opts[:preface] =~ "Evaluation summary from feedback"
+        assert opts[:preface] =~ "Prompt feedback"
+        assert opts[:preface] =~ "Conclusion feedback"
+        assert opts[:preface] =~ "Logic feedback"
+
         {:ok, "make notes", [
           %Tool{
             id: "2",
@@ -305,7 +390,7 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "try infrastructure", [
           %Tool{
             id: "3",
@@ -315,11 +400,11 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, _ -> {:ok, "need more information"} end)
+      expect_reqllm_completion(fn _, _ -> {:ok, "need more information"} end)
 
       expect(Subagents.Infrastructure, :run, fn _, _, _ -> %{status: :successful, result: %{output: "infrastructure result"}} end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
@@ -333,6 +418,19 @@ defmodule Console.AI.Workbench.EngineTest do
 
       workbench = insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
       referenced_job = insert(:workbench_job, workbench: workbench)
+      eval = insert(:workbench_eval, workbench: workbench)
+
+      insert(:workbench_eval_result,
+        workbench_eval: eval,
+        workbench_job: referenced_job,
+        feedback: %{
+          summary: "Evaluation summary from feedback",
+          prompt: "Prompt feedback",
+          result: "Conclusion feedback",
+          logic: "Logic feedback"
+        }
+      )
+
       job = insert(:workbench_job, workbench: workbench, type: :skill, referenced_job: referenced_job)
 
       {:ok, engine} = Engine.new(job)
@@ -357,7 +455,7 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "call function", [
           %Tool{
             id: "1",
@@ -370,7 +468,7 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, opts ->
+      expect_reqllm_completion(fn _, opts ->
         subagent_tool = Enum.find(opts[:plural], &(Tool.name(&1) == "workbench_subagent"))
         subagents = get_in(Tool.json_schema(subagent_tool), ["properties", "subagent", "enum"])
 
@@ -430,7 +528,7 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "build a dashboard", [
           %Tool{
             id: "1",
@@ -442,7 +540,7 @@ defmodule Console.AI.Workbench.EngineTest do
 
       expect(Subagents.Canvas, :run, fn _, _, _ -> "canvas subagent result" end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
@@ -486,7 +584,7 @@ defmodule Console.AI.Workbench.EngineTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "build a dashboard", [
           %Tool{id: "1", name: "build_dashboard", arguments: %{"prompt" => "go"}}
         ]}
@@ -494,7 +592,7 @@ defmodule Console.AI.Workbench.EngineTest do
 
       expect(Subagents.Canvas, :run, fn _, _, _ -> "ok" end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
@@ -581,7 +679,7 @@ defmodule Console.AI.Workbench.EngineTest do
           })
       }
 
-      expect(Provider, :completion, fn _, opts ->
+      expect_reqllm_completion(fn _, opts ->
         assert Enum.any?(opts[:plural], &(Tool.name(&1) == "update_k8s_resource"))
 
         {:ok, "update deployment", [
@@ -593,7 +691,7 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
@@ -676,7 +774,7 @@ defmodule Console.AI.Workbench.EngineTest do
 
       cluster = insert(:cluster, handle: "exec-activity-cluster")
 
-      expect(Provider, :completion, fn _, opts ->
+      expect_reqllm_completion(fn _, opts ->
         assert Enum.any?(opts[:plural], &(Tool.name(&1) == "exec_k8s_pod"))
 
         {:ok, "inspect the pod", [
@@ -695,7 +793,7 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",

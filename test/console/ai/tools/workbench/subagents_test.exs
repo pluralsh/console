@@ -48,6 +48,21 @@ defmodule Console.AI.Tools.Workbench.SubagentsTest do
   end
 
   describe "implement/1" do
+    test "describes infrastructure as covering kubernetes, IaaS, and Docker/OCI" do
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:infrastructure],
+          categories: []
+        })
+
+      assert [%{"name" => "infrastructure", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "Docker/OCI"
+    end
+
     test "describes monitoring as persistent dashboard and monitor management" do
       {:ok, encoded} =
         Subagents.implement(%Subagents{

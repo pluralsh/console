@@ -38,6 +38,35 @@ func TestCopyDir(t *testing.T) {
 	assert.Equal(t, os.FileMode(0755), info.Mode().Perm())
 }
 
+func TestCopyDirReadOnlyModuleCacheLayout(t *testing.T) {
+	src := t.TempDir()
+	mod := filepath.Join(src, "pkg", "mod", "cel.dev", "expr@v0.25.2")
+	require.NoError(t, os.MkdirAll(mod, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(mod, ".bazelversion"), []byte("7\n"), 0444))
+	require.NoError(t, os.Chmod(mod, 0555))
+	t.Cleanup(func() { _ = os.Chmod(mod, 0755) })
+
+	dst := filepath.Join(t.TempDir(), "copy")
+	require.NoError(t, CopyDir(src, dst))
+	t.Cleanup(func() {
+		_ = filepath.WalkDir(dst, func(path string, d os.DirEntry, err error) error {
+			if err == nil && d.IsDir() {
+				_ = os.Chmod(path, 0755)
+			}
+			return nil
+		})
+	})
+
+	copied := filepath.Join(dst, "pkg", "mod", "cel.dev", "expr@v0.25.2", ".bazelversion")
+	body, err := os.ReadFile(copied)
+	require.NoError(t, err)
+	assert.Equal(t, "7\n", string(body))
+
+	info, err := os.Stat(filepath.Dir(copied))
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0555), info.Mode().Perm())
+}
+
 func TestCopyDirRejectsExistingDestination(t *testing.T) {
 	src := t.TempDir()
 	dst := t.TempDir()
@@ -53,4 +82,30 @@ func TestCopyDirRejectsFileSource(t *testing.T) {
 	err := CopyDir(src, filepath.Join(dir, "dst"))
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not a directory")
+}
+
+func TestMoveDir(t *testing.T) {
+	parent := t.TempDir()
+	src := filepath.Join(parent, "src")
+	require.NoError(t, os.Mkdir(src, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(src, "readme"), []byte("moved"), 0644))
+
+	dst := filepath.Join(parent, "dst")
+	require.NoError(t, MoveDir(src, dst))
+
+	_, err := os.Stat(src)
+	require.Error(t, err)
+	assert.True(t, os.IsNotExist(err))
+
+	body, err := os.ReadFile(filepath.Join(dst, "readme"))
+	require.NoError(t, err)
+	assert.Equal(t, "moved", string(body))
+}
+
+func TestMoveDirRejectsExistingDestination(t *testing.T) {
+	src := t.TempDir()
+	dst := t.TempDir()
+	err := MoveDir(src, dst)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "already exists")
 }

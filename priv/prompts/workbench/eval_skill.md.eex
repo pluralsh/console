@@ -65,13 +65,14 @@ The user has also added some custom guidance for you to inform decision making, 
 
 <% end %>
 <%= if @job.eval_result && Map.get(@job.eval_result, :grade, nil) do %>
+<% feedback = @job.eval_result.feedback || %{} %>
 And the evaluation result was:
 
 Grade (scored between 0 and 10): <%= @job.eval_result.grade %>
 
 # Summary
 
-<%= @job.eval_result.summary %>
+<%= Map.get(feedback, :summary) || "N/A" %>
 
 # Analysis Breakdown
 
@@ -79,13 +80,13 @@ This is a breakdown of the agents entire process and conclusion
 
 ## Prompt - Feedback on the prompt used, to potentially aid human operators in steering their agent
 
-<%= @job.eval_result.prompt || "N/A" %>
+<%= Map.get(feedback, :prompt) || "N/A" %>
 
 ## Conclusion - Feedback on the conclusion generated itself
 
-<%= @job.eval_result.result || "N/A" %>
+<%= Map.get(feedback, :result) || "N/A" %>
 
 ## Logic - Feedback on the logic used to justify the grade, useful to guide future runs and potentially tune tool calls
 
-<%= @job.eval_result.logic || "N/A" %>
+<%= Map.get(feedback, :logic) || "N/A" %>
 <% end %>

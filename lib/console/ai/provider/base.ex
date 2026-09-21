@@ -54,7 +54,8 @@ defmodule Console.AI.Provider.Base do
     end
   end
 
-  def reqllm_messages(messages) do
+  def reqllm_messages(%Context{} = context), do: context
+  def reqllm_messages(messages) when is_list(messages) do
     Enum.flat_map(messages, fn
       {:system, content} -> [Context.system(content)]
       {:user, content} -> [Context.user(content)]
@@ -126,7 +127,7 @@ defmodule Console.AI.Provider.Base do
   defp model(%LLMDB.Model{} = model), do: {:ok, model}
   defp model(model), do: {:error, "invalid model: #{inspect(model)}"}
 
-  defp to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}) do
+  def to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}) do
     case JSON.decode(args) do
       {:ok, args} -> %Tool{id: id, name: name, arguments: args}
       _ -> %Tool{id: id, name: name, arguments: %{}}

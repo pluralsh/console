@@ -32,7 +32,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
   describe "#list/2" do
     test "returns the list of clusters", %{conn: conn} do
       user = insert(:user)
-      clusters = insert_list(3, :cluster, read_bindings: [%{user_id: user.id}])
+      clusters = insert_list(3, :cluster, health_score: 82, read_bindings: [%{user_id: user.id}])
       insert_list(3, :cluster)
 
       %{"data" => results} =
@@ -42,6 +42,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
         |> json_response(200)
 
       assert ids_equal(results, clusters)
+      assert Enum.all?(results, &(&1["health_score"] == 82))
     end
 
     test "filters by project_id", %{conn: conn} do
@@ -88,6 +89,40 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
 
       assert length(results) == 1
       assert hd(results)["id"] == cluster1.id
+    end
+
+    test "filters by minimum and maximum health score", %{conn: conn} do
+      user = insert(:user)
+      bindings = [%{user_id: user.id}]
+      low = insert(:cluster, health_score: 20, read_bindings: bindings)
+      mid = insert(:cluster, health_score: 50, read_bindings: bindings)
+      high = insert(:cluster, health_score: 80, read_bindings: bindings)
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/clusters?min_health_score=40&max_health_score=60")
+        |> json_response(200)
+
+      assert ids_equal(results, [mid])
+
+      %{"data" => results} =
+        conn
+        |> recycle()
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/clusters?min_health_score=50")
+        |> json_response(200)
+
+      assert ids_equal(results, [mid, high])
+
+      %{"data" => results} =
+        conn
+        |> recycle()
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/clusters?max_health_score=50")
+        |> json_response(200)
+
+      assert ids_equal(results, [low, mid])
     end
 
     test "returns project_id in cluster response", %{conn: conn} do

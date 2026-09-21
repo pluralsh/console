@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.AI.Workbench.{Subagents, Environment}
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
   alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
 
@@ -24,7 +24,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "analyze", [
           %Tool{name: "workbench_coding_agent", arguments: %{
             "mode" => "write",
@@ -34,7 +34,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
         ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete", [
           %Tool{name: "subagent_result", arguments: %{"output" => "some workbench result"}}
         ]}
@@ -85,7 +85,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "delegate both changes", [
           %Tool{name: "workbench_coding_agent", arguments: %{
             "mode" => "write",
@@ -102,7 +102,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
 
       me = self()
 
-      expect(Provider, :completion, fn messages, _ ->
+      expect_reqllm_completion(fn messages, _ ->
         tool_messages = Enum.filter(messages, &match?({:tool, _, _}, &1))
         send(me, {:agent_results, tool_messages})
 

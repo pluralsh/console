@@ -19,7 +19,7 @@ defmodule Console.AI.Workbench.Subagents.Monitoring do
       engine_opts(environment) ++
         [
           system_prompt:
-            &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
+            &String.trim(system_prompt(engine: &1)),
           acc: %{},
           callback: &callback(activity, environment, &1),
           tool_search: length(tools) > 10,

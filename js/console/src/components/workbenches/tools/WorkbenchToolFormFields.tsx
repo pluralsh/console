@@ -92,6 +92,10 @@ export function WorkbenchToolFormFields({
       return render(type, JaegerFormFields)
     case WorkbenchToolType.Atlassian:
       return render(type, AtlassianFormFields)
+    case WorkbenchToolType.Jira:
+      return render(type, JiraFormFields)
+    case WorkbenchToolType.JiraDatacenter:
+      return render(type, JiraDatacenterFormFields)
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
     case WorkbenchToolType.Slack:
@@ -698,6 +702,64 @@ function AtlassianFormFields({
         onChange={(e) =>
           set({ ...c, serviceAccount: e.target.value || undefined })
         }
+      />
+    </>
+  )
+}
+
+function JiraFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Jira>) {
+  return (
+    <>
+      <InputField
+        label="Jira Cloud URL"
+        hint="Your Jira site URL, for example https://example.atlassian.net"
+        placeholder="https://example.atlassian.net"
+        required
+        value={c.url}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Email"
+        hint="Email address for the Atlassian account that owns the API token"
+        required
+        value={c.email}
+        onChange={(e) => set({ ...c, email: e.target.value })}
+      />
+      <InputField
+        label="API token"
+        hint="Leave blank when editing to keep the stored token unless you are rotating it."
+        required
+        revealer
+        value={c.apiToken}
+        onChange={(e) => set({ ...c, apiToken: e.target.value })}
+      />
+    </>
+  )
+}
+
+function JiraDatacenterFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.JiraDatacenter>) {
+  return (
+    <>
+      <InputField
+        label="Jira Data Center URL"
+        placeholder="https://jira.example.com"
+        required
+        value={c.url}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Personal access token"
+        hint="Leave blank when editing to keep the stored token unless you are rotating it."
+        required
+        revealer
+        value={c.apiToken}
+        onChange={(e) => set({ ...c, apiToken: e.target.value })}
       />
     </>
   )

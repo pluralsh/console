@@ -958,7 +958,15 @@ export function WorkbenchAttachToolsStep({
           }}
         >
           {selectedTools.map(
-            ({ id, name, tool: type, categories, cloudConnection }) => (
+            ({
+              id,
+              name,
+              tool: type,
+              categories,
+              cloudConnection,
+              configuration,
+              mcpServer,
+            }) => (
               <Card key={id}>
                 <WorkbenchToolCardBody>
                   <Flex
@@ -1007,8 +1015,9 @@ export function WorkbenchAttachToolsStep({
                     />
                   </Flex>
                   <WorkbenchesConfiguredToolMetadata
-                    toolId={id}
                     toolType={type}
+                    configuration={configuration ?? null}
+                    mcpServer={mcpServer}
                   />
                   <Flex
                     gap="xsmall"

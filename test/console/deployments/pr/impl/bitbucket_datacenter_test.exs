@@ -86,6 +86,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
         })
 
       expect(Req, :post, 2, fn _, opts ->
+        assert_bearer_auth(opts)
         body = Jason.decode!(opts[:body])
 
         case body["anchor"] do
@@ -123,6 +124,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
       }
 
       expect(Req, :post, fn url, opts ->
+        assert_bearer_auth(opts)
         assert url ==
                  "https://bitbucket.example.com/rest/api/latest/projects/PROJ/repos/repo/commits/head-sha/builds"
 
@@ -151,6 +153,14 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
                  }
                )
     end
+  end
+
+  defp assert_bearer_auth(opts) do
+    assert {"Authorization", "Bearer token"} in opts[:headers]
+    refute Enum.any?(opts[:headers], fn
+             {"Authorization", "Basic " <> _} -> true
+             _ -> false
+           end)
   end
 
   defp response(body) do

@@ -183,6 +183,8 @@ defmodule Console.AI.Workbench.Environment do
     do: Enum.filter(tools, &subagent_tool?(&1, subagent))
   def subagent_tools(%{} = tools, subagent), do: subagent_tools(Map.values(tools), subagent)
 
+  def subagent_tool?(%WorkbenchTool{tool: :docker}, subagent)
+      when subagent in [:integration, :infrastructure], do: true
   def subagent_tool?(%WorkbenchTool{categories: categories}, subagent) when is_list(categories),
     do: Enum.any?(categories, & category_to_subagent(&1) == subagent)
   def subagent_tool?(_, :integration), do: true
@@ -217,6 +219,7 @@ defmodule Console.AI.Workbench.Environment do
 
   defp tool_agents(tools) do
     Enum.flat_map(tools || [], fn
+      %{tool: :docker} -> [:integration, :infrastructure]
       %{categories: [_ | _] = categories} -> categories
       _ -> [:integration]
     end)
