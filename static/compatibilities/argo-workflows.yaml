@@ -8,7 +8,16 @@ versions:
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No concrete feature details are included in the provided release notes;
+        both v4.1.0 and v4.1.4 sections point to external blog/changelog for 'What's
+        New'., v4.1.4 provides updated install manifests and refreshed CLI binaries
+        for multiple platforms compared to v4.1.0.]
+    breaking_changes: [No breaking changes are enumerated in the provided notes; they
+        direct readers to the upgrading guide and GitHub issues for breaking changes/known
+        issues.]
   chart_version: 2.0.7
   images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
     'quay.io/argoproj/workflow-controller:v4.1.4']
