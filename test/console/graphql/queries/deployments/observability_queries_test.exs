@@ -343,7 +343,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       expect(Stub, :metrics, fn :mock_conn, input, opts ->
         assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total{namespace=\"production\"}[5m]))"
-        assert input.step == "15s"
+        assert input.step == "30s"
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 
@@ -406,6 +406,113 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found["graphData"]["logs"] == nil
       assert found["graphData"]["traces"] == nil
       assert found["inputValues"] == ["production", "staging"]
+    end
+
+    test "formats computed metric steps per provider and omits them for dynatrace" do
+      workbench = insert(:workbench)
+
+      azure =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "azuremon",
+          tool: :azure,
+          categories: [:metrics],
+          configuration: %{
+            azure: %{
+              subscription_id: "sub",
+              tenant_id: "tenant",
+              client_id: "client",
+              client_secret: "secret"
+            }
+          }
+        )
+
+      dynatrace =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "dt",
+          tool: :dynatrace,
+          categories: [:metrics],
+          configuration: %{
+            dynatrace: %{url: "https://dt.example.com", platform_token: "token"}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: azure)
+      insert(:workbench_tool_association, workbench: workbench, tool: dynatrace)
+
+      dashboard =
+        insert(:dashboard,
+          workbench: workbench,
+          graphs: [
+            %Dashboard.Graph{
+              identifier: "azure_cpu",
+              type: :timeseries,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{
+                type: :metrics,
+                tool: "workbench_observability_metrics_azuremon",
+                input: %{"query" => "azure_cpu"}
+              }
+            },
+            %Dashboard.Graph{
+              identifier: "dt_cpu",
+              type: :timeseries,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 2, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{
+                type: :metrics,
+                tool: "workbench_observability_metrics_dt",
+                input: %{"query" => "dynatrace_cpu"}
+              }
+            }
+          ]
+        )
+
+      start_at = ~U[2026-09-07 21:00:00Z]
+      end_at = ~U[2026-09-07 22:00:00Z]
+
+      expect(Client, :connect, 2, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :metrics, 2, fn :mock_conn, input, _opts ->
+        case input.query do
+          "azure_cpu" ->
+            assert input.step == "PT15S"
+            refute is_nil(input.range)
+          "dynatrace_cpu" ->
+            assert is_nil(input.step)
+            assert is_nil(input.range)
+        end
+
+        {:ok, %MetricsQueryOutput{metrics: []}}
+      end)
+
+      {:ok, %{data: %{"workbenchDashboard" => found}}} =
+        run_query(
+          """
+          query Dashboard($id: ID!, $input: Json!, $timeRange: DashboardTimeRangeAttributes!) {
+            workbenchDashboard(id: $id) {
+              azure: graph(identifier: "azure_cpu", input: $input, timeRange: $timeRange) {
+                metrics { timestamp name value labels }
+              }
+              dynatrace: graph(identifier: "dt_cpu", input: $input, timeRange: $timeRange) {
+                metrics { timestamp name value labels }
+              }
+            }
+          }
+          """,
+          %{
+            "id" => dashboard.id,
+            "input" => Jason.encode!(%{}),
+            "timeRange" => %{
+              "start" => DateTime.to_iso8601(start_at),
+              "end" => DateTime.to_iso8601(end_at)
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert found["azure"]["metrics"] == []
+      assert found["dynatrace"]["metrics"] == []
     end
 
     test "fetches typed log results for log graphs" do

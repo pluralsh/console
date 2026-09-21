@@ -1,10 +1,11 @@
 defmodule Console.Deployments.Observability.Dashboard do
   alias Console.Repo
   alias Console.AI.Workbench.Toolchain
-  alias Console.Schema.{Dashboard, User}
+  alias Console.Schema.{Dashboard, User, Workbench, WorkbenchTool}
   alias Console.Schema.Dashboard.{Datasource, Graph, Input}
 
   @variable ~r/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/
+  @metrics_tool_prefix "workbench_observability_metrics_"
 
   @spec graph(Dashboard.t(), binary, map, map, User.t()) :: {:ok, map} | Console.error()
   def graph(%Dashboard{} = dashboard, identifier, input, time_range, %User{} = user) do
@@ -61,26 +62,30 @@ defmodule Console.Deployments.Observability.Dashboard do
 
   @metric_target_points 240
   @metric_step_candidates [
-    {15, "15s"},
-    {30, "30s"},
-    {60, "1m"},
-    {120, "2m"},
-    {300, "5m"},
-    {600, "10m"},
-    {900, "15m"},
-    {1_800, "30m"},
-    {3_600, "1h"},
-    {7_200, "2h"},
+    15,
+    30,
+    60,
+    120,
+    300,
+    600,
+    900,
+    1_800,
+    3_600,
+    7_200,
+    21_600,
+    43_200,
+    86_400,
+    172_800,
   ]
 
   defp execute(%Dashboard{} = dashboard, %Datasource{} = datasource, input, time_range, user) do
-    dashboard = Repo.preload(dashboard, :workbench)
+    dashboard = Repo.preload(dashboard, workbench: :tools)
 
     args =
       datasource.input
       |> substitute(input)
       |> Map.put("time_range", time_range)
-      |> maybe_put_metric_step(datasource.type, time_range)
+      |> maybe_put_metric_step(datasource, dashboard.workbench, time_range)
 
     case datasource.type do
       :metrics -> Toolchain.metrics(dashboard.workbench, datasource.tool, args, user)
@@ -90,24 +95,75 @@ defmodule Console.Deployments.Observability.Dashboard do
     end
   end
 
-  defp maybe_put_metric_step(args, :metrics, time_range) do
-    case metric_query_step(time_range) do
-      step when is_binary(step) -> Map.put(args, "step", step)
-      _ -> args
+  defp maybe_put_metric_step(args, %Datasource{type: :metrics} = datasource, workbench, time_range) do
+    if explicit_step?(args) do
+      args
+    else
+      case metric_query_step(time_range, metric_step_dialect(datasource, workbench)) do
+        step when is_binary(step) -> Map.put(args, "step", step)
+        _ -> args
+      end
     end
   end
-  defp maybe_put_metric_step(args, _, _), do: args
+  defp maybe_put_metric_step(args, _, _, _), do: args
 
-  def metric_query_step(time_range) do
+  defp explicit_step?(%{"step" => step}) when is_binary(step),
+    do: String.trim(step) != ""
+  defp explicit_step?(_), do: false
+
+  defp metric_step_dialect(%Datasource{tool: @metrics_tool_prefix <> name}, %Workbench{tools: tools})
+       when is_list(tools) do
+    case Enum.find(tools, &(&1.name == name)) do
+      %WorkbenchTool{tool: :dynatrace} -> :none
+      %WorkbenchTool{tool: :azure, configuration: %{azure: %{prometheus_url: url}}}
+        when is_binary(url) -> :prometheus
+      %WorkbenchTool{tool: :azure} -> :iso8601
+      _ -> :prometheus
+    end
+  end
+  defp metric_step_dialect(_, _), do: :prometheus
+
+  def metric_query_step(time_range, dialect \\ :prometheus)
+
+  def metric_query_step(_, :none), do: nil
+  def metric_query_step(time_range, dialect) do
     with {start_at, end_at} <- time_range_bounds(time_range),
          seconds when seconds > 0 <- DateTime.diff(end_at, start_at, :second) do
-      target = seconds / @metric_target_points
-
-      @metric_step_candidates
-      |> Enum.min_by(fn {candidate, _} -> abs(candidate - target) end)
-      |> elem(1)
+      seconds
+      |> ceil_div(@metric_target_points)
+      |> ceiling_candidate()
+      |> format_step(dialect)
     else
       _ -> nil
+    end
+  end
+
+  defp ceil_div(n, d), do: div(n + d - 1, d)
+
+  defp ceiling_candidate(target) do
+    Enum.find(@metric_step_candidates, &(&1 >= target)) || day_fallback(target)
+  end
+
+  # Larger than any static candidate: round up to whole days so the point
+  # target holds for arbitrarily long ranges.
+  defp day_fallback(target) do
+    ceil_div(target, 86_400) * 86_400
+  end
+
+  defp format_step(seconds, :iso8601) do
+    cond do
+      rem(seconds, 86_400) == 0 -> "P#{div(seconds, 86_400)}D"
+      rem(seconds, 3_600) == 0 -> "PT#{div(seconds, 3_600)}H"
+      rem(seconds, 60) == 0 -> "PT#{div(seconds, 60)}M"
+      true -> "PT#{seconds}S"
+    end
+  end
+  defp format_step(seconds, _) do
+    cond do
+      rem(seconds, 86_400) == 0 -> "#{div(seconds, 86_400)}d"
+      rem(seconds, 3_600) == 0 -> "#{div(seconds, 3_600)}h"
+      rem(seconds, 60) == 0 -> "#{div(seconds, 60)}m"
+      true -> "#{seconds}s"
     end
   end
 
