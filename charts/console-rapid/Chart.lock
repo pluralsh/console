@@ -12,4 +12,4 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 2.34.0
 digest: sha256:f4afdb103bc904073a2943c43dd87feab558851c153cdd3c4b1de4d05e6ac65c
-generated: "2026-09-21T15:28:30.168950415Z"
+generated: "2026-09-21T15:26:37.984102317Z"
