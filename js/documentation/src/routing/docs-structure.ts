@@ -259,6 +259,10 @@ export const docsStructure: DocSection[] = [
                 title: 'Agent configuration and usage',
               },
               {
+                path: 'repository-prebake',
+                title: 'Prebaked repositories',
+              },
+              {
                 path: 'remote-browser',
                 title: 'Remote browser setup',
               },

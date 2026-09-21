@@ -207,6 +207,9 @@ func TestCloneRepositoryCopiesPrebakeMatch(t *testing.T) {
 	if string(contents) != "prebaked\n" {
 		t.Fatalf("copied README = %q, want prebaked", contents)
 	}
+	if _, err := os.Stat(prebakedCopy); !os.IsNotExist(err) {
+		t.Fatalf("expected prebake source to be moved, stat(%s)=%v", prebakedCopy, err)
+	}
 	origin, err := exec.Command("git", "-C", dest, "remote", "get-url", "origin").Output()
 	if err != nil {
 		t.Fatal(err)
