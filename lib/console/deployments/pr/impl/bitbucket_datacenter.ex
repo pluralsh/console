@@ -12,13 +12,21 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
     def new(host, username, token), do: %__MODULE__{host: host, username: username, token: token}
 
-    def headers(%__MODULE__{token: token}) do
+    def headers(%__MODULE__{username: username, token: token}) do
       [
-        {"Authorization", "Bearer #{token}"},
+        {"Authorization", authorization(username, token)},
         {"Content-Type", "application/json"},
         {"Accept", "application/json;charset=UTF-8"}
       ]
     end
+
+    defp authorization(username, token) when is_binary(username) do
+      case String.trim(username) do
+        "" -> "Bearer #{token}"
+        username -> "Basic #{Base.encode64("#{username}:#{token}")}"
+      end
+    end
+    defp authorization(_, token), do: "Bearer #{token}"
   end
 
   def create(pr, branch, ctx, _labels \\ []) do
@@ -260,11 +268,11 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   defp connection(%PrAutomation{connection: %ScmConnection{} = conn}), do: connection(conn)
   defp connection(%ScmConnection{api_url: url, username: username, token: password})
-    when is_binary(username) and is_binary(password) and is_binary(url), do: {:ok, Connection.new(url, username, password)}
+    when is_binary(password) and is_binary(url), do: {:ok, Connection.new(url, username, password)}
   defp connection(%ScmConnection{base_url: url, username: username, token: password})
-    when is_binary(username) and is_binary(password) and is_binary(url), do: {:ok, Connection.new(url, username, password)}
+    when is_binary(password) and is_binary(url), do: {:ok, Connection.new(url, username, password)}
   defp connection(_),
-    do: {:error, "Bitbucket datacenter connection improperly configured, must include a username and password and either a base url or api url"}
+    do: {:error, "Bitbucket datacenter connection improperly configured, must include a token and either a base url or api url"}
 
   defp parse_identifier(%PrAutomation{identifier: identifier}), do: parse_identifier(identifier)
   defp parse_identifier(identifier) when is_binary(identifier) do

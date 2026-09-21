@@ -235,6 +235,7 @@ defmodule Console.Schema.WorkbenchTool do
 
       embeds_one :bitbucket_datacenter, BitbucketDatacenterConnection, on_replace: :update do
         field :url,      :string
+        field :username, :string
         field :token,    EncryptedString
       end
 
@@ -670,7 +671,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp bitbucket_datacenter_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url token)a)
+    |> cast(attrs, ~w(url username token)a)
     |> validate_required([:url, :token])
   end
 

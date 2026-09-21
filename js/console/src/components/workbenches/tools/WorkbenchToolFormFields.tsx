@@ -959,6 +959,14 @@ function BitbucketDatacenterFormFields({
         onChange={(e) => set({ ...c, url: e.target.value })}
       />
       <InputField
+        label="Username"
+        hint="For a user access token, enter the Bitbucket username. Leave blank for project or repository tokens."
+        value={c.username ?? ''}
+        onChange={(e) =>
+          set({ ...c, username: e.target.value || undefined })
+        }
+      />
+      <InputField
         label="HTTP access token"
         required
         revealer

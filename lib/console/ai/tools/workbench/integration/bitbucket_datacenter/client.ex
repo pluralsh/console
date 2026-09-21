@@ -6,18 +6,46 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketDatacenterConnection}
 
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
-  def build(%WorkbenchTool{scm_connection: %ScmConnection{api_url: url, token: token}}),
-    do:
-      {:ok,
-       %{api_base: api_base(url), reactions_base: reactions_base(api_base(url)), token: token}}
+  def build(%WorkbenchTool{
+        scm_connection: %ScmConnection{
+          api_url: api_url,
+          base_url: base_url,
+          username: username,
+          token: token
+        }
+      }) do
+    case api_url || base_url do
+      url when is_binary(url) ->
+        {:ok,
+         %{
+           api_base: api_base(url),
+           reactions_base: reactions_base(api_base(url)),
+           username: username,
+           token: token
+         }}
+
+      _ ->
+        {:error, "Bitbucket Data Center connection is missing an API or base URL."}
+    end
+  end
 
   def build(%WorkbenchTool{
         configuration: %Configuration{
-          bitbucket_datacenter: %BitbucketDatacenterConnection{token: token, url: url}
+          bitbucket_datacenter: %BitbucketDatacenterConnection{
+            token: token,
+            url: url,
+            username: username
+          }
         }
       }) do
     api_base = api_base(url)
-    {:ok, %{api_base: api_base, reactions_base: reactions_base(api_base), token: token}}
+    {:ok,
+     %{
+       api_base: api_base,
+       reactions_base: reactions_base(api_base),
+       username: username,
+       token: token
+     }}
   end
 
   def build(%WorkbenchTool{}),
@@ -47,36 +75,37 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
   end
 
   @spec get(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
-  def get(%{api_base: base, token: token}, path, query \\ %{}) when is_binary(path) do
+  def get(%{api_base: base, username: username, token: token}, path, query \\ %{})
+      when is_binary(path) do
     url = base <> path <> Query.query_string(query)
 
-    Req.get(url, [headers: auth_headers(token)] ++ http_opts())
+    Req.get(url, [headers: auth_headers(username, token)] ++ http_opts())
     |> Http.handle("Bitbucket Data Center")
   end
 
   @spec post_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
-  def post_json(%{api_base: base, token: token}, path, body_map)
+  def post_json(%{api_base: base, username: username, token: token}, path, body_map)
       when is_binary(path) and is_map(body_map) do
     url = base <> path
-    headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
+    headers = auth_headers(username, token) ++ [{"Content-Type", "application/json"}]
 
     Req.post(url, [headers: headers, body: Jason.encode!(body_map)] ++ http_opts())
     |> Http.handle("Bitbucket Data Center")
   end
 
   @spec put_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
-  def put_json(%{api_base: base, token: token}, path, body_map)
+  def put_json(%{api_base: base, username: username, token: token}, path, body_map)
       when is_binary(path) and is_map(body_map) do
     url = base <> path
-    headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
+    headers = auth_headers(username, token) ++ [{"Content-Type", "application/json"}]
 
     Req.put(url, [headers: headers, body: Jason.encode!(body_map)] ++ http_opts())
     |> Http.handle("Bitbucket Data Center")
   end
 
   @spec put_empty(map(), String.t()) :: {:ok, term()} | {:error, String.t()}
-  def put_empty(%{token: token}, url) when is_binary(url) do
-    headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
+  def put_empty(%{username: username, token: token}, url) when is_binary(url) do
+    headers = auth_headers(username, token) ++ [{"Content-Type", "application/json"}]
 
     Req.put(url, [headers: headers, body: ""] ++ http_opts())
     |> Http.handle("Bitbucket Data Center")
@@ -119,12 +148,22 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
 
   defp enc_seg(s) when is_binary(s), do: URI.encode(String.trim(s), &URI.char_unreserved?/1)
 
-  # PAT as HTTP Basic password (any non-empty username works; x-token-auth is conventional for Bitbucket Server).
-  defp auth_headers(token) do
-    basic = Base.encode64("x-token-auth:" <> token)
-
+  defp auth_headers(username, token) when is_binary(username) do
+    case String.trim(username) do
+      "" -> auth_headers(nil, token)
+      username -> basic_auth_headers(username, token)
+    end
+  end
+  defp auth_headers(_, token) do
     [
-      {"Authorization", "Basic #{basic}"},
+      {"Authorization", "Bearer #{token}"},
+      {"Accept", "application/json"}
+    ]
+  end
+
+  defp basic_auth_headers(username, token) do
+    [
+      {"Authorization", "Basic #{Base.encode64("#{username}:#{token}")}"},
       {"Accept", "application/json"}
     ]
   end

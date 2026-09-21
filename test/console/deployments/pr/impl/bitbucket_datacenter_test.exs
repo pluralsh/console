@@ -86,7 +86,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
         })
 
       expect(Req, :post, 2, fn _, opts ->
-        assert_bearer_auth(opts)
+        assert_basic_auth(opts, "user", "token")
         body = Jason.decode!(opts[:body])
 
         case body["anchor"] do
@@ -108,6 +108,25 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
 
       assert {:ok, "10"} = BitBucketDatacenter.agent_review(connection, pr, review)
     end
+
+    test "uses bearer authentication when the connection has no username" do
+      connection = %ScmConnection{
+        type: :bitbucket_datacenter,
+        api_url: "https://bitbucket.example.com",
+        token: "token"
+      }
+
+      pr = %PullRequest{
+        url: "https://bitbucket.example.com/projects/PROJ/repos/repo/pull-requests/42"
+      }
+
+      expect(Req, :post, fn _, opts ->
+        assert_bearer_auth(opts)
+        response(%{"id" => 10})
+      end)
+
+      assert {:ok, "10"} = BitBucketDatacenter.review(connection, pr, "Review body")
+    end
   end
 
   describe "commit_status/5" do
@@ -124,7 +143,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
       }
 
       expect(Req, :post, fn url, opts ->
-        assert_bearer_auth(opts)
+        assert_basic_auth(opts, "user", "token")
         assert url ==
                  "https://bitbucket.example.com/rest/api/latest/projects/PROJ/repos/repo/commits/head-sha/builds"
 
@@ -153,6 +172,11 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
                  }
                )
     end
+  end
+
+  defp assert_basic_auth(opts, username, token) do
+    expected = Base.encode64("#{username}:#{token}")
+    assert {"Authorization", "Basic #{expected}"} in opts[:headers]
   end
 
   defp assert_bearer_auth(opts) do
