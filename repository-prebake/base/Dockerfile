@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# ghcr.io/pluralsh/repository-prebake is a Debian image with git, mise, a C
+# docker.io/pluralsh/repository-prebake is a Debian image with git, mise, a C
 # toolchain for precompile, and the prebake CLI. Extend it, RUN prebake at
 # build time, and push with a normal docker build / build-push-action.
 #
@@ -15,7 +15,7 @@
 # secret and set GIT_ACCESS_TOKEN or GIT_PASSWORD (optional GIT_USERNAME,
 # default x-access-token). Do not put tokens in repos.yaml.
 #
-#   FROM ghcr.io/pluralsh/repository-prebake:latest
+#   FROM docker.io/pluralsh/repository-prebake:latest
 #   COPY repos.yaml /config/repos.yaml
 #   RUN --mount=type=secret,id=git_token \
 #       GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
@@ -26,7 +26,7 @@
 #
 # Build from this repo (context is the Go module):
 #   docker build -f repository-prebake/base/Dockerfile \
-#     -t ghcr.io/pluralsh/repository-prebake:local go/repository-prebake
+#     -t docker.io/pluralsh/repository-prebake:local go/repository-prebake
 
 ARG GO_VERSION=1.27.1
 ARG MISE_VERSION=v2026.9.7
