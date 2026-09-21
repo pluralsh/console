@@ -514,7 +514,7 @@ const GroupHeaderSC = styled.div(({ theme }) => ({
   padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
 }))
 
-const GroupListSC = styled.div(({ theme }) => ({
+const GroupListSC = styled.div(() => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
