@@ -90,6 +90,7 @@ fragment Workbench on Workbench {
     id
   }
   configuration {
+    selfService
     infrastructure {
       services
       stacks

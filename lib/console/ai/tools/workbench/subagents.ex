@@ -46,6 +46,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   defp subagent_description(_, :history, _, _), do: "Invoke a history subagent to search past workbench activities.  Useful to remember what has been done so far, with regex support for finding past work."
   defp subagent_description(_, :search, _, _), do: "Invoke a web search subagent to search the public web for information.  Useful to find documentation, public pricing information, and anything else that's not specific to deployed infrastructure."
   defp subagent_description(_, :verify, _, _), do: "Invoke a verification subagent to verify the job was successfully completed based on infrastructure and observability state."
+  defp subagent_description(_, :self_service, _, _), do: "Invoke a self-service subagent to discover Plural catalogs and PR automations, then invoke a clear GitOps provisioning pathway. Prefer this for repeatable golden-path provisioning; punt undefined or custom code work to the coding subagent."
   defp subagent_description(_, _, _, _), do: "Unknown subagent"
 
   defp infra_description(%{vulnerabilities: vulns, pod_logs: logs}) when vulns or logs do

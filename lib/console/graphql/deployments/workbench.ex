@@ -89,6 +89,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_configuration_attributes do
+    field :self_service,   :boolean, description: "enable the self-service subagent for catalog and PR automation workflows"
     field :infrastructure, :workbench_infrastructure_attributes, description: "infrastructure capabilities (services, stacks, kubernetes)"
     field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories, babysitting)"
     field :observability,  :workbench_observability_attributes, description: "observability capabilities (logs, metrics)"
@@ -962,6 +963,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_configuration do
+    field :self_service,   :boolean, description: "self-service subagent capability enabled"
     field :infrastructure, :workbench_infrastructure, description: "infrastructure capabilities"
     field :coding,         :workbench_coding, description: "coding capabilities"
     field :observability,  :workbench_observability, description: "observability capabilities"

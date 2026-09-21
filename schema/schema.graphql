@@ -3025,6 +3025,7 @@ enum WorkbenchJobActivityType {
   VERIFY
   EXEC
   MONITORING
+  SELF_SERVICE
 }
 
 enum WorkbenchCanvasBlockType {
@@ -3047,6 +3048,7 @@ enum WorkbenchSkillSubagent {
   HISTORY
   SEARCH
   MONITORING
+  SELF_SERVICE
 }
 
 enum WorkbenchChatbotMessageBehavior {
@@ -3201,6 +3203,9 @@ input WorkbenchAttributes {
 }
 
 input WorkbenchConfigurationAttributes {
+  "enable the self-service subagent for catalog and PR automation workflows"
+  selfService: Boolean
+
   "infrastructure capabilities (services, stacks, kubernetes)"
   infrastructure: WorkbenchInfrastructureAttributes
 
@@ -4699,6 +4704,9 @@ type WorkbenchJobResultTodo {
 }
 
 type WorkbenchConfiguration {
+  "self-service subagent capability enabled"
+  selfService: Boolean
+
   "infrastructure capabilities"
   infrastructure: WorkbenchInfrastructure
 

@@ -588,7 +588,8 @@ function sanitizeInitialForm({
   readBindings,
   writeBindings,
 }: WorkbenchFragment): WorkbenchFormState {
-  const { infrastructure, coding, observability } = configuration ?? {}
+  const { infrastructure, coding, observability, selfService } =
+    configuration ?? {}
   const { kubernetes, services, stacks, podLogs, vulnerabilities } =
     infrastructure ?? {}
   const { logs, metrics } = observability ?? {}
@@ -628,6 +629,7 @@ function sanitizeInitialForm({
     repositoryId: repository?.id ?? null,
     overrideBotUser: false,
     configuration: {
+      selfService: selfService ?? false,
       infrastructure: {
         kubernetes,
         services,

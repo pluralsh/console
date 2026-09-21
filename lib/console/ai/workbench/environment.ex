@@ -136,6 +136,7 @@ defmodule Console.AI.Workbench.Environment do
     |> Enum.concat(type_subagents(job))
     |> Enum.concat(coding_agents(bench))
     |> Enum.concat(infra_agents(bench))
+    |> Enum.concat(self_service_agents(bench))
     |> Enum.filter(&allow_subagent?(job, &1))
   end
 
@@ -207,6 +208,9 @@ defmodule Console.AI.Workbench.Environment do
     end
   end
   defp infra_agents(_), do: []
+
+  defp self_service_agents(%Workbench{configuration: %{self_service: true}}), do: [:self_service]
+  defp self_service_agents(_), do: []
 
   defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]
   defp type_subagents(_), do: [:monitoring]

@@ -211,7 +211,7 @@ defmodule Console.AI.Workbench.Engine do
     end)
   end
 
-  @supported_subagents ~w(infrastructure integration coding observability monitoring memory skill history search verify)a
+  @supported_subagents ~w(infrastructure integration coding observability monitoring memory skill history search verify self_service)a
 
   defp spawn_activity(action, %__MODULE__{job: job} = engine) do
     Tracking.with_activity(action, job, fn ->
@@ -363,6 +363,7 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:skill), do: SA.Skill
   defp subagent_module(:search), do: SA.Search
   defp subagent_module(:verify), do: SA.Verify
+  defp subagent_module(:self_service), do: SA.SelfService
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}

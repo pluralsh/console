@@ -22,7 +22,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
     kubernetes: 15,
     verify: 16,
     exec: 17,
-    monitoring: 18
+    monitoring: 18,
+    self_service: 19
 
   defguard is_action(type) when type in [:function, :kubernetes, :exec, :monitoring]
 

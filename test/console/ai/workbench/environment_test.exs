@@ -60,6 +60,20 @@ defmodule Console.AI.Workbench.EnvironmentTest do
                ])
              )
     end
+
+    test "includes self_service when configuration.self_service is enabled" do
+      workbench = insert(:workbench, configuration: %{self_service: true})
+      job = insert(:workbench_job, workbench: workbench) |> Repo.preload(workbench: :tools)
+
+      assert :self_service in Environment.subagents(job)
+    end
+
+    test "excludes self_service when configuration.self_service is absent" do
+      workbench = insert(:workbench, configuration: %{infrastructure: %{services: true}})
+      job = insert(:workbench_job, workbench: workbench) |> Repo.preload(workbench: :tools)
+
+      refute :self_service in Environment.subagents(job)
+    end
   end
 
   describe "actions/1" do

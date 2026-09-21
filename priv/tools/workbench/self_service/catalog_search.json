@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Semantic or name search query for catalogs and PR automations"
+    }
+  },
+  "required": ["query"]
+}
