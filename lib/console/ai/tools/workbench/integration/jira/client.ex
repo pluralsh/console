@@ -47,7 +47,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.Client do
 
   @doc false
   def api_root(url, :cloud), do: normalize_url(url) <> "/rest/api/2"
-  def api_root(url, :datacenter), do: normalize_url(url) <> "/rest/api/latest"
+  def api_root(url, :datacenter), do: normalize_url(url) <> "/rest/api/2"
 
   @spec get(t, String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def get(client, path, query \\ %{}), do: request(client, :get, path, query: query)
@@ -105,6 +105,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.Client do
     url
     |> String.trim()
     |> String.trim_trailing("/")
+    |> String.replace(~r{/rest/api/(latest|[0-9]+)\z}i, "")
   end
 
   defp http_opts,

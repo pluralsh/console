@@ -3901,9 +3901,6 @@ input WorkbenchToolBitbucketDatacenterConnectionAttributes {
   "Bitbucket Data Center REST API base URL"
   url: String!
 
-  "Username for user access tokens; omit for project or repository tokens"
-  username: String
-
   "HTTP access token or personal access token (encrypted at rest)"
   token: String
 }
@@ -5583,9 +5580,6 @@ type WorkbenchToolBitbucketConnection {
 type WorkbenchToolBitbucketDatacenterConnection {
   "Bitbucket Data Center REST API base URL (tokens never exposed)"
   url: String
-
-  "Bitbucket username when user-token authentication is configured"
-  username: String
 }
 
 type WorkbenchToolAzureDevopsConnection {

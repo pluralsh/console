@@ -434,9 +434,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_bitbucket_datacenter_connection_attributes do
-    field :url,      non_null(:string), description: "Bitbucket Data Center REST API base URL"
-    field :username, :string, description: "Username for user access tokens; omit for project or repository tokens"
-    field :token,    :string, description: "HTTP access token or personal access token (encrypted at rest)"
+    field :url,   non_null(:string), description: "Bitbucket Data Center REST API base URL"
+    field :token, :string, description: "HTTP access token or personal access token (encrypted at rest)"
   end
 
   input_object :workbench_tool_azure_devops_connection_attributes do
@@ -1446,8 +1445,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_bitbucket_datacenter_connection do
-    field :url,      :string, description: "Bitbucket Data Center REST API base URL (tokens never exposed)"
-    field :username, :string, description: "Bitbucket username when user-token authentication is configured"
+    field :url, :string, description: "Bitbucket Data Center REST API base URL (tokens never exposed)"
   end
 
   object :workbench_tool_azure_devops_connection do

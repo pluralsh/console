@@ -13,7 +13,7 @@
     },
     "cursor": {
       "type": "string",
-      "description": "Opaque nextCursor from a previous response."
+      "description": "nextCursor from a previous response. Jira Cloud uses an opaque token; Jira Data Center uses a non-negative numeric offset."
     },
     "limit": {
       "type": "integer",

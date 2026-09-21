@@ -327,10 +327,7 @@ function extractBitbucketMetadata(
 function extractBitbucketDatacenterMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
-  return [
-    { label: 'URL', value: configuration?.bitbucketDatacenter?.url },
-    { label: 'User', value: configuration?.bitbucketDatacenter?.username },
-  ]
+  return [{ label: 'URL', value: configuration?.bitbucketDatacenter?.url }]
 }
 
 function extractAzureDevopsMetadata(

@@ -317,7 +317,6 @@ fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
   }
   bitbucketDatacenter {
     url
-    username
   }
   azureDevops {
     url

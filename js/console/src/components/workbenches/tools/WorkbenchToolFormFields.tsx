@@ -748,6 +748,7 @@ function JiraDatacenterFormFields({
     <>
       <InputField
         label="Jira Data Center URL"
+        hint="Instance URL or REST API URL. Requests use the stable /rest/api/2 API."
         placeholder="https://jira.example.com"
         required
         value={c.url}
@@ -957,14 +958,6 @@ function BitbucketDatacenterFormFields({
         placeholder="https://bitbucket.example.com/rest/api/1.0"
         value={c.url ?? ''}
         onChange={(e) => set({ ...c, url: e.target.value })}
-      />
-      <InputField
-        label="Username"
-        hint="For a user access token, enter the Bitbucket username. Leave blank for project or repository tokens."
-        value={c.username ?? ''}
-        onChange={(e) =>
-          set({ ...c, username: e.target.value || undefined })
-        }
       />
       <InputField
         label="HTTP access token"

@@ -30,13 +30,13 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ClientTest do
                Client.build(
                  tool(:jira_datacenter, %{
                    jira_datacenter: %{
-                     url: "https://jira.example.com/",
+                    url: "https://jira.example.com/rest/api/latest/",
                      api_token: "dc-token"
                    }
                  })
                )
 
-      assert client.base_url == "https://jira.example.com/rest/api/latest"
+      assert client.base_url == "https://jira.example.com/rest/api/2"
       assert client.deployment == :datacenter
       assert {"Authorization", "Bearer dc-token"} in client.headers
     end
@@ -67,7 +67,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ClientTest do
 
     test "uses offset search for Jira Data Center" do
       expect(Req, :request, fn opts ->
-        assert opts[:url] =~ "/rest/api/latest/search?"
+        assert opts[:url] =~ "/rest/api/2/search?"
         assert opts[:url] =~ "startAt=20"
         refute opts[:url] =~ "nextPageToken"
         {:ok, %Req.Response{status: 200, body: ~s({"issues":[]})}}

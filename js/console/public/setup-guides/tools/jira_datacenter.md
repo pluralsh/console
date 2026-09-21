@@ -16,7 +16,7 @@ needs.
 - **Personal access token:** the token created above.
 
 The tool sends the token as a Bearer credential and uses the instance's
-`/rest/api/latest` API.
+stable `/rest/api/2` API.
 
 ## 3) Limit project permissions
 

@@ -717,11 +717,10 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     return { bitbucket: { url: url ?? undefined, token: '' } }
   },
   [WorkbenchToolType.BitbucketDatacenter]: (config) => {
-    const { url, username } = config?.bitbucketDatacenter ?? {}
+    const { url } = config?.bitbucketDatacenter ?? {}
     return {
       bitbucketDatacenter: {
         url: url ?? '',
-        username: username ?? undefined,
         token: '',
       },
     }
