@@ -68,13 +68,7 @@ import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopov
 const CHART_HEIGHT_PX = 280
 const RECENT_JOBS_COUNT = 6
 
-export function MonitorDetail({
-  monitorId,
-  onUpdateViaPrompt,
-}: {
-  monitorId: string
-  onUpdateViaPrompt?: () => void
-}) {
+export function MonitorDetail({ monitorId }: { monitorId: string }) {
   const { data, loading, error } = useWorkbenchMonitorQuery({
     variables: { id: monitorId },
     fetchPolicy: 'cache-and-network',
@@ -90,20 +84,13 @@ export function MonitorDetail({
       </MainSC>
     )
 
-  return (
-    <MonitorDetailView
-      monitor={monitor}
-      onUpdateViaPrompt={onUpdateViaPrompt}
-    />
-  )
+  return <MonitorDetailView monitor={monitor} />
 }
 
 function MonitorDetailView({
   monitor,
-  onUpdateViaPrompt,
 }: {
   monitor: WorkbenchMonitorDetailsFragment
-  onUpdateViaPrompt?: () => void
 }) {
   const workbenchId = monitor.workbench?.id
   const activeQuery =
@@ -151,7 +138,6 @@ function MonitorDetailView({
           onClose={() => setDefinitionOpen(false)}
           yaml={definitionYaml}
           containerRef={containerRef}
-          onUpdateViaPrompt={onUpdateViaPrompt}
         />
       }
     >

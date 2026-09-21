@@ -96,7 +96,6 @@ export function WorkbenchMonitoring() {
             <DashboardDetail
               key={dashboardId}
               dashboardId={dashboardId}
-              onUpdateViaPrompt={() => setUpdateOpen(true)}
             />
           )
         ) : monitorId ? (
@@ -112,7 +111,6 @@ export function WorkbenchMonitoring() {
             <MonitorDetail
               key={monitorId}
               monitorId={monitorId}
-              onUpdateViaPrompt={() => setUpdateOpen(true)}
             />
           )
         ) : (

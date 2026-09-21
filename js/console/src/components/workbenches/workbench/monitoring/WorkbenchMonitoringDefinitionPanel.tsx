@@ -1,7 +1,5 @@
 import {
-  ChatOutlineIcon,
   Code,
-  Flex,
   Flyover,
   HamburgerMenuCollapseIcon,
   IconFrame,
@@ -31,13 +29,11 @@ export function WorkbenchMonitoringDefinitionPanel({
   onClose,
   yaml,
   containerRef,
-  onUpdateViaPrompt,
 }: {
   open: boolean
   onClose: () => void
   yaml: string
   containerRef: RefObject<HTMLElement | null>
-  onUpdateViaPrompt?: () => void
 }) {
   const [containerWidth, setContainerWidth] = useState<number | null>(null)
   useResizeObserver(containerRef, (rect) => setContainerWidth(rect.width))
@@ -65,7 +61,6 @@ export function WorkbenchMonitoringDefinitionPanel({
     <DefinitionPanelBody
       yaml={yaml}
       onClose={onClose}
-      onUpdateViaPrompt={onUpdateViaPrompt}
     />
   )
 
@@ -99,39 +94,22 @@ export function WorkbenchMonitoringDefinitionPanel({
 function DefinitionPanelBody({
   yaml,
   onClose,
-  onUpdateViaPrompt,
 }: {
   yaml: string
   onClose: () => void
-  onUpdateViaPrompt?: () => void
 }) {
   return (
     <BodySC>
       <HeaderSC>
         <EyebrowSC>Definition</EyebrowSC>
-        <Flex
-          align="center"
-          gap="xsmall"
-        >
-          {onUpdateViaPrompt && (
-            <IconFrame
-              clickable
-              size="medium"
-              type="tertiary"
-              icon={<ChatOutlineIcon />}
-              textValue="Update via prompt"
-              onClick={onUpdateViaPrompt}
-            />
-          )}
-          <IconFrame
-            clickable
-            size="medium"
-            type="tertiary"
-            icon={<HamburgerMenuCollapseIcon />}
-            textValue="Close definition"
-            onClick={onClose}
-          />
-        </Flex>
+        <IconFrame
+          clickable
+          size="medium"
+          type="tertiary"
+          icon={<HamburgerMenuCollapseIcon />}
+          textValue="Close definition"
+          onClick={onClose}
+        />
       </HeaderSC>
       <CodeWrapSC>
         <DefinitionCode yaml={yaml} />
