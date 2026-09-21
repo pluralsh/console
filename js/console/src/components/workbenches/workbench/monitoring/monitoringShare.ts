@@ -54,7 +54,9 @@ export function parseMonitoringShareSearch(search: string): {
     if (!key.startsWith(MONITORING_SHARE_INPUT_PREFIX)) continue
     const name = key.slice(MONITORING_SHARE_INPUT_PREFIX.length)
     if (!name) continue
-    variables[name] = value.includes(',') ? value.split(',').filter(Boolean) : value
+    variables[name] = value.includes(',')
+      ? value.split(',').filter(Boolean)
+      : value
   }
 
   return { range, variables }

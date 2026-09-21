@@ -9,8 +9,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 const YAML_DUMP_OPTS = { lineWidth: -1, noRefs: true, sortKeys: false } as const
 
-const COMMENT =
-  '# managed by workbench - edits arrive as workbench jobs\n'
+const COMMENT = '# managed by workbench - edits arrive as workbench jobs\n'
 
 export function monitoringDefinitionFilename(
   kind: 'dashboard' | 'monitor',
@@ -168,12 +167,10 @@ function modesYaml(modes: Nullable<WorkbenchJobModesFieldsFragment>) {
           delete: modes.kubernetes.delete,
           exec: modes.kubernetes.exec,
           drain: modes.kubernetes.drain,
-          exclude_namespaces: modes.kubernetes.excludeNamespaces?.filter(
-            isNonNullable
-          ),
-          require_namespaces: modes.kubernetes.requireNamespaces?.filter(
-            isNonNullable
-          ),
+          exclude_namespaces:
+            modes.kubernetes.excludeNamespaces?.filter(isNonNullable),
+          require_namespaces:
+            modes.kubernetes.requireNamespaces?.filter(isNonNullable),
         })
       : undefined,
   })

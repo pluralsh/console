@@ -159,7 +159,7 @@ function WorkbenchMonitorSettingsInner({
   const { state, update, hasUpdates, reset } =
     useUpdateState<ServiceMonitorAttributes>(
       withLogTool(
-        sanitizeInitialFormState(monitor as never, monitor.service?.id ?? ''),
+        sanitizeInitialFormState(monitor, monitor.service?.id ?? ''),
         monitor.query?.log?.tool
       )
     )

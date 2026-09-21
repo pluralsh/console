@@ -1,6 +1,6 @@
 import { Button, Flex, Flyover } from '@pluralsh/design-system'
 import type { MonitoringResourceType } from 'components/ai/chatbot/input/autocomplete/mentionTypes'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { WorkbenchOutletContext } from '../Workbench'
@@ -45,13 +45,14 @@ export function WorkbenchMonitoringUpdatePanel({
     useOutletContext<WorkbenchOutletContext>()
   const [jobId, setJobId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!open) setJobId(null)
-  }, [open])
-
-  useEffect(() => {
+  // Reset the in-flyover chat when the panel closes or is retargeted. Adjusted
+  // during render (React-endorsed) instead of setState-in-effect.
+  const targetKey = `${kind}:${id}:${open ? 'open' : 'closed'}`
+  const [prevTargetKey, setPrevTargetKey] = useState(targetKey)
+  if (prevTargetKey !== targetKey) {
+    setPrevTargetKey(targetKey)
     setJobId(null)
-  }, [kind, id])
+  }
 
   return (
     <Flyover

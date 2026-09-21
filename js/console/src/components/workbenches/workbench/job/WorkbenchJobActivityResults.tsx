@@ -322,7 +322,8 @@ export function JobActivityMetricsChart({
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
   lineProps?: Partial<
-    ComponentPropsWithRef<typeof Line> & ComponentPropsWithRef<typeof LineCanvas>
+    ComponentPropsWithRef<typeof Line> &
+      ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
@@ -412,7 +413,8 @@ export function JobActivityMetrics({
   title?: Nullable<string>
   skeletonHeight?: number
   lineProps?: Partial<
-    ComponentPropsWithRef<typeof Line> & ComponentPropsWithRef<typeof LineCanvas>
+    ComponentPropsWithRef<typeof Line> &
+      ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const [timeRange, setTimeRange] = useState<MetricsTimeRange>('max')

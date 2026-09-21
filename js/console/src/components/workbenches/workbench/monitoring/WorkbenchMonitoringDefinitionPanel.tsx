@@ -195,7 +195,10 @@ function useDefinitionPanelWidth() {
         clamp(
           next,
           DOCK_MIN_WIDTH,
-          Math.max(DOCK_MIN_WIDTH, window.innerWidth * (DOCK_MAX_WIDTH_VW / 100))
+          Math.max(
+            DOCK_MIN_WIDTH,
+            window.innerWidth * (DOCK_MAX_WIDTH_VW / 100)
+          )
         )
       )
     },

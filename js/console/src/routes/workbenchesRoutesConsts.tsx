@@ -203,9 +203,8 @@ export const WORKBENCH_MONITORING_MONITORS_REL_PATH = 'monitors'
 export const WORKBENCH_MONITORING_DASHBOARD_PARAM_ID = 'monitoringDashboardId'
 export const WORKBENCH_MONITORING_MONITOR_PARAM_ID = 'monitoringMonitorId'
 
-export const getWorkbenchMonitoringAbsPath = (
-  workbenchId: Nullable<string>
-) => `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_MONITORING_REL_PATH}`
+export const getWorkbenchMonitoringAbsPath = (workbenchId: Nullable<string>) =>
+  `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_MONITORING_REL_PATH}`
 
 export const getWorkbenchMonitoringDashboardCreateAbsPath = (
   workbenchId: Nullable<string>

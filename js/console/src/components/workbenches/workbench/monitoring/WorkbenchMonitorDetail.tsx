@@ -45,7 +45,12 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
-import { formatMinutesAsDuration, fromNow, toDateOrUndef } from 'utils/datetime'
+import {
+  formatMinutesAsDuration,
+  fromNow,
+  parseDurationToMinutes,
+  toDateOrUndef,
+} from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { MonitoringDetailSkeleton } from './WorkbenchDashboardDetail'
@@ -61,7 +66,6 @@ import {
   WorkbenchMonitoringDefinitionPanel,
 } from './WorkbenchMonitoringDefinitionPanel'
 import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopover'
-import parseDuration from 'parse-duration-ms'
 
 const CHART_HEIGHT_PX = 280
 const RECENT_JOBS_COUNT = 6
@@ -104,18 +108,13 @@ function MonitorDetailView({
   onUpdateViaPrompt?: () => void
 }) {
   const workbenchId = monitor.workbench?.id
-  const queryText =
+  const activeQuery =
     monitor.type === MonitorType.Metrics
-      ? monitor.query?.metrics?.query
-      : monitor.query?.log?.query
-  const toolName =
-    monitor.type === MonitorType.Metrics
-      ? monitor.query?.metrics?.tool
-      : monitor.query?.log?.tool
-  const forDuration =
-    monitor.type === MonitorType.Metrics
-      ? monitor.query?.metrics?.duration
-      : monitor.query?.log?.duration
+      ? monitor.query?.metrics
+      : monitor.query?.log
+  const queryText = activeQuery?.query
+  const toolName = activeQuery?.tool
+  const forDuration = activeQuery?.duration
   const { pathname } = useLocation()
   const [definitionOpen, setDefinitionOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
@@ -387,9 +386,10 @@ function MetricsThresholdPreview({
         id: 'Metric',
         data: metrics
           .map((m) => {
-            const ts = m.timestamp
+            // :long arrives as a string over the wire
+            const ts = m.timestamp != null ? Number(m.timestamp) : NaN
             const value = m.value != null ? parseFloat(m.value) : NaN
-            if (ts == null || Number.isNaN(value)) return null
+            if (Number.isNaN(ts) || Number.isNaN(value)) return null
             return { x: new Date(ts * 1000), y: value }
           })
           .filter((point): point is { x: Date; y: number } => point != null),
@@ -468,7 +468,7 @@ function MetricsThresholdPreview({
           ]}
           margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
           xScale={{ type: 'time', format: 'native' }}
-          yScale={{ type: 'linear', min: 0, max: 'auto' }}
+          yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
           xFormat={dateFormat}
           lineWidth={1}
           enablePoints={false}
@@ -778,9 +778,9 @@ function conditionLabel(threshold: {
 
 function forLabel(duration?: string | null) {
   if (!duration) return '—'
-  const ms = parseDuration(duration)
-  if (ms == null) return duration
-  return formatMinutesAsDuration(Math.round(ms / 60_000)) || duration
+  const minutes = parseDurationToMinutes(duration)
+  if (minutes == null) return duration
+  return formatMinutesAsDuration(minutes) || duration
 }
 
 function evaluateLabel(cron: string) {
@@ -996,9 +996,6 @@ const JobsGridSC = styled.div(({ theme }) => ({
   display: 'grid',
   gap: theme.spacing.medium,
   gridTemplateColumns: '1fr',
-  [`@container (min-width: 960px)`]: {
-    gridTemplateColumns: '1fr',
-  },
 }))
 
 const EmptyJobsSC = styled(Card)(({ theme }) => ({

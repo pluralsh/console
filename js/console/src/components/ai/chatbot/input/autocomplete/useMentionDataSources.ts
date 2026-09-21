@@ -199,41 +199,35 @@ export function useMentionDataSources({
       dashboardData?.workbench?.workbenchDashboards
     )
       .filter((n) => !!n.id)
-      .map(
-        (n): MonitoringChipAttrs => ({
-          kind: MentionKind.Monitoring,
-          'item-id': n.id,
-          'item-name': n.name,
-          'resource-type': 'dashboard',
-          'workbench-id': workbenchId,
-        })
-      )
+      .map((n): MonitoringChipAttrs => ({
+        kind: MentionKind.Monitoring,
+        'item-id': n.id,
+        'item-name': n.name,
+        'resource-type': 'dashboard',
+        'workbench-id': workbenchId,
+      }))
     const monitors = mapExistingNodes(monitorData?.workbench?.monitors)
       .filter((n) => !!n.id)
-      .map(
-        (n): MonitoringChipAttrs => ({
-          kind: MentionKind.Monitoring,
-          'item-id': n.id,
-          'item-name': n.name,
-          'resource-type': 'monitor',
-          'workbench-id': workbenchId,
-        })
-      )
+      .map((n): MonitoringChipAttrs => ({
+        kind: MentionKind.Monitoring,
+        'item-id': n.id,
+        'item-name': n.name,
+        'resource-type': 'monitor',
+        'workbench-id': workbenchId,
+      }))
     return [...dashboards, ...monitors].slice(0, MAX_PER_KIND)
   }, [dashboardData, monitorData, workbenchId])
 
   const skills = useMemo<SkillChipAttrs[]>(() => {
     const all = (skillData?.workbench?.allSkills ?? [])
       .flatMap((n) => (n ? [n] : []))
-      .map(
-        (n): SkillChipAttrs => ({
-          kind: MentionKind.Skill,
-          'item-id': n.id ?? `skill:${n.name ?? ''}`,
-          'item-name': n.name ?? '',
-          description: n.description ?? undefined,
-          subagents: n.subagents?.flatMap((s) => (s ? [s] : [])).join(','),
-        })
-      )
+      .map((n): SkillChipAttrs => ({
+        kind: MentionKind.Skill,
+        'item-id': n.id ?? `skill:${n.name ?? ''}`,
+        'item-name': n.name ?? '',
+        description: n.description ?? undefined,
+        subagents: n.subagents?.flatMap((s) => (s ? [s] : [])).join(','),
+      }))
 
     if (!throttled) return all.slice(0, MAX_PER_KIND)
     return new Fuse(all, skillFuseOptions)

@@ -193,16 +193,16 @@ defmodule Console.Deployments.Observability do
     with {:ok, _state, results} <- MonitorImpl.query(monitor) do
       {:ok, %{
         threshold: monitor.threshold && monitor.threshold.value,
-        metrics: Enum.map(results, &preview_metric/1)
+        metrics: Enum.flat_map(results, &preview_metric/1)
       }}
     end
   end
 
   defp preview_metric(%{timestamp: ts, count: count}),
-    do: %{timestamp: preview_unix(ts), value: to_string(count)}
+    do: [%{timestamp: preview_unix(ts), value: to_string(count)}]
   defp preview_metric(%{timestamp: ts, value: value}),
-    do: %{timestamp: preview_unix(ts), value: to_string(value)}
-  defp preview_metric(_), do: %{timestamp: 0, value: "0"}
+    do: [%{timestamp: preview_unix(ts), value: to_string(value)}]
+  defp preview_metric(_), do: []
 
   defp preview_unix(%DateTime{} = dt), do: DateTime.to_unix(dt)
   defp preview_unix(%NaiveDateTime{} = ndt),

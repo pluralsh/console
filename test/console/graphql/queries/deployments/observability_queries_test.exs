@@ -118,7 +118,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found["id"] == monitor.id
       assert found["preview"]["threshold"] == 2.0
       assert [point] = found["preview"]["metrics"]
-      assert point["timestamp"] == DateTime.to_unix(ts)
+      # :long serializes as a string over the wire
+      assert point["timestamp"] == to_string(DateTime.to_unix(ts))
       assert point["value"] == "3.5"
     end
   end
