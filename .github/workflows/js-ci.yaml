@@ -80,3 +80,23 @@ jobs:
       - run: corepack enable
       - run: yarn --immutable
       - run: yarn test
+
+  typecheck:
+    needs: [vouch]
+    name: Typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
+      - run: yarn --immutable
+      - run: yarn workspace @pluralsh/design-system build
+      - run: yarn workspace console typecheck

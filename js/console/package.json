@@ -12,6 +12,7 @@
     "build": "yarn design-system:build && tsc --build && vite build",
     "build:no-ds": "tsc --build && vite build",
     "build:no-tsc": "vite build",
+    "typecheck": "tsc --build",
     "design-system:build": "yarn workspace @pluralsh/design-system build",
     "design-system:build:watch": "yarn workspace @pluralsh/design-system build:watch",
     "test": "vitest --run",

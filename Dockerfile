@@ -17,8 +17,12 @@ COPY js/documentation/package.json ./documentation/package.json
 COPY js/eslint-config/package.json ./eslint-config/package.json
 COPY js/stylelint-config/package.json ./stylelint-config/package.json
 
+# Focus skips documentation, Storybook, ESLint, and Stylelint. Vite bundles
+# the design system from source, so the image only needs those two workspaces.
+# Immutable installs match `yarn install --immutable` (CI is unset in Docker).
 RUN corepack enable \
-  && yarn install --immutable
+  && YARN_ENABLE_IMMUTABLE_INSTALLS=true \
+    yarn workspaces focus console @pluralsh/design-system
 
 COPY js/console/ ./console/
 COPY js/design-system/ ./design-system/
@@ -33,7 +37,9 @@ ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY} \
     VITE_SENTRY_DSN=${VITE_SENTRY_DSN} \
     SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
-RUN yarn workspace console build
+# Typecheck is the js-ci Typecheck job. tsconfig.app.json is noEmit and
+# the production bundle aliases @pluralsh/design-system to src.
+RUN yarn workspace console build:no-tsc
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-${OS_VARIANT}-${OS_VERSION} AS builder
 
