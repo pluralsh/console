@@ -1,14 +1,21 @@
 import {
+  Button,
   Card,
   Chip,
   ChipSeverity,
   DocsIcon,
   EmptyState,
+  ErrorIcon,
   ExpandIcon,
   Flex,
   GearTrainIcon,
   HamburgerMenuCollapsedIcon,
   IconFrame,
+  Markdown,
+  Modal,
+  PaperCheckIcon,
+  PrClosedIcon,
+  PrIcon,
   Tooltip,
   useResizeObserver,
 } from '@pluralsh/design-system'
@@ -20,34 +27,35 @@ import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { TRUNCATE } from 'components/utils/truncate'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
-import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsageChips'
-import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
-import { WorkbenchJobActionsRow } from 'components/workbenches/workbench/WorkbenchJobsTable'
+import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
+import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { cronToExplanation } from 'components/workbenches/workbench/crons/utils'
 import {
+  AlertState,
   InputMaybe,
   LogQueryOperator,
   MonitorAggregate,
   MonitorType,
+  PrStatus,
   useLogAggregationBucketsQuery,
   useWorkbenchMonitorJobsQuery,
   useWorkbenchMonitorPreviewQuery,
   useWorkbenchMonitorQuery,
+  WorkbenchJobStatus,
   WorkbenchJobTinyFragment,
   WorkbenchMonitorDetailsFragment,
 } from 'generated/graphql'
 import { isEmpty, isNil, times, upperFirst } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
+  getWorkbenchEvalResultAbsPath,
   getWorkbenchJobAbsPath,
   getWorkbenchMonitoringMonitorSettingsAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled, { keyframes, useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import {
   formatMinutesAsDuration,
@@ -70,6 +78,18 @@ import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopov
 
 const CHART_HEIGHT_PX = 280
 const RECENT_JOBS_COUNT = 6
+
+function recentJobTime(date: string) {
+  const elapsedMs = Date.now() - new Date(date).getTime()
+  if (Number.isNaN(elapsedMs)) return ''
+  const minutes = Math.max(0, Math.round(elapsedMs / 60_000))
+  if (minutes < 60) return `${minutes} min ago`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return hours === 1 ? '1 hour ago' : `${hours} hours ago`
+  const days = Math.round(hours / 24)
+  if (days === 1) return 'Yesterday'
+  return `${days} days ago`
+}
 
 export function MonitorDetail({ monitorId }: { monitorId: string }) {
   const { data, loading, error } = useWorkbenchMonitorQuery({
@@ -666,7 +686,10 @@ function MonitorRecentJobs({
     pollInterval: POLL_INTERVAL,
   })
   const data = currentData ?? previousData
-  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
+  const jobs = useMemo(
+    () => mapExistingNodes(data?.workbench?.runs),
+    [data]
+  )
 
   return (
     <RecentSectionSC>
@@ -710,44 +733,204 @@ function MonitorJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
   if (!workbenchId) return null
 
   return (
-    <JobCardSC
-      clickable
-      forwardedAs={Link}
-      to={getWorkbenchJobAbsPath({ workbenchId, jobId: job.id })}
-    >
-      <StretchedFlex>
+    <JobCardSC to={getWorkbenchJobAbsPath({ workbenchId, jobId: job.id })}>
+      <JobMetaSC>
+        <MonitorJobStatus status={job.status} />
         <CaptionP
           $color="text-xlight"
-          css={TRUNCATE}
+          css={{ margin: 0, whiteSpace: 'nowrap' }}
         >
-          {job.user?.name ?? '—'}
+          {job.insertedAt ? recentJobTime(job.insertedAt) : ''}
         </CaptionP>
-        <Flex
-          align="center"
-          gap="small"
-        >
-          <CaptionP $color="text-xlight">{fromNow(job.insertedAt)}</CaptionP>
-          <RunStatusIcon
-            fullColor
-            status={job.status}
-          />
-        </Flex>
-      </StretchedFlex>
-      <WorkbenchStoredPromptMarkdown
-        text={job.prompt ?? ''}
-        density="jobCard"
-        clampLines={2}
-      />
-      <WorkbenchUsageChips
-        usage={job.usage}
-        budget={job.modes?.budget}
-        error={job.error}
-      />
-      <WorkbenchJobActionsRow
-        job={job}
-        chipFillLevel={2}
-      />
+      </JobMetaSC>
+      <JobPromptSC>{job.prompt || '—'}</JobPromptSC>
+      <CaptionP
+        $color="text-xlight"
+        css={{
+          margin: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {job.user?.name ?? '—'}
+      </CaptionP>
+      <MonitorJobFooter job={job} />
     </JobCardSC>
+  )
+}
+
+function MonitorJobStatus({
+  status,
+}: {
+  status: WorkbenchJobTinyFragment['status']
+}) {
+  if (
+    status === WorkbenchJobStatus.Running ||
+    status === WorkbenchJobStatus.Pending
+  )
+    return <RunningSpinner />
+
+  return (
+    <RunStatusIcon
+      fullColor
+      status={status}
+    />
+  )
+}
+
+function RunningSpinner() {
+  const theme = useTheme()
+
+  return (
+    <RunningSpinnerSC
+      viewBox="0 0 14 14.0001"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M2.01749 7.4203C2.06566 7.99143 2.21227 8.55051 2.45044 9.07319C2.72273 9.67067 3.11016 10.2086 3.59037 10.6564C4.07059 11.1042 4.63426 11.4532 5.24929 11.6832C5.86426 11.9131 6.51836 12.0199 7.1745 11.997C7.83064 11.9741 8.47569 11.8219 9.07313 11.5496C9.67062 11.2773 10.2086 10.8899 10.6564 10.4097C11.1042 9.92947 11.4531 9.3658 11.6831 8.75077C11.913 8.1358 12.0199 7.4817 11.997 6.82556C11.974 6.16942 11.8218 5.52437 11.5496 4.92693C11.2773 4.32944 10.8898 3.79149 10.4096 3.34368C9.92942 2.89588 9.36574 2.54692 8.75072 2.31697C8.13575 2.08707 7.48164 1.98019 6.8255 2.0031C6.16936 2.02602 5.52431 2.17826 4.92688 2.4505C4.32939 2.72279 3.79143 3.11022 3.34362 3.59043C2.89582 4.07064 2.54686 4.63432 2.31691 5.24934C2.11578 5.78736 2.00853 6.3553 2.00032 6.92841L2.00305 7.17456L2.01749 7.4203ZM0.00105338 6.90051C0.0124701 6.09781 0.161921 5.30221 0.443659 4.54867C0.765588 3.68765 1.25315 2.89792 1.88006 2.22564C2.50698 1.55336 3.26078 1.01189 4.09724 0.630687C4.93372 0.249479 5.83701 0.0364045 6.75571 0.00432295C7.6744 -0.0277585 8.59035 0.121787 9.45139 0.443716C10.3124 0.765645 11.1021 1.25321 11.7744 1.88012C12.4467 2.50703 12.9882 3.26083 13.3694 4.09729C13.7506 4.93378 13.9637 5.83707 13.9957 6.75576C14.0278 7.67446 13.8783 8.59041 13.5563 9.45145C13.2344 10.3125 12.7469 11.1022 12.1199 11.7745C11.493 12.4468 10.7392 12.9882 9.90277 13.3694C9.06628 13.7506 8.16299 13.9637 7.2443 13.9958C6.32561 14.0279 5.40965 13.8783 4.54861 13.5564C3.6876 13.2345 2.89786 12.7469 2.22558 12.12C1.5533 11.4931 1.01184 10.7393 0.63063 9.90283C0.249423 9.06634 0.036348 8.16305 0.00426638 7.24436L0.00105338 6.90051Z"
+        fill={theme.colors['border-fill-two']}
+      />
+      <path
+        d="M2.00305 7.17456C2.02232 7.72651 1.5905 8.18957 1.03856 8.20885C0.48661 8.22812 0.0235412 7.7963 0.00426673 7.24436C-0.0342823 6.14045 0.188826 5.04304 0.655596 4.04194C1.12245 3.04077 1.82012 2.16411 2.69061 1.48401C3.56108 0.803963 4.58033 0.339184 5.66465 0.128414C6.74892 -0.0822906 7.86767 -0.03306 8.92944 0.271397C9.46032 0.423636 9.76684 0.97712 9.61461 1.508C9.46238 2.03889 8.90893 2.34638 8.37804 2.19416C7.61956 1.97667 6.82045 1.94134 6.0459 2.09189C5.27145 2.24244 4.54387 2.57446 3.92215 3.06015C3.30037 3.54594 2.8019 4.17227 2.46843 4.88739C2.13508 5.60242 1.97552 6.38612 2.00305 7.17456Z"
+        fill={theme.colors['icon-secondary']}
+      />
+    </RunningSpinnerSC>
+  )
+}
+
+function MonitorJobFooter({ job }: { job: WorkbenchJobTinyFragment }) {
+  const theme = useTheme()
+  const navigate = useNavigate()
+  const prs = job.pullRequests?.filter((pr) => pr != null) ?? []
+  const grade = job.evalResult?.grade
+  const workbenchId = job.workbench?.id
+  const singlePr = prs.length === 1 ? prs[0] : null
+
+  return (
+    <JobFooterSC
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }}
+    >
+      {job.result?.conclusion && (
+        <ConclusionButton conclusion={job.result.conclusion} />
+      )}
+      {singlePr && (
+        <IconFrame
+          clickable
+          size="medium"
+          type="tertiary"
+          textValue="Pull request"
+          icon={
+            singlePr.status === PrStatus.Open ? (
+              <PrIcon color="icon-light" />
+            ) : (
+              <PrClosedIcon color="icon-light" />
+            )
+          }
+          onClick={() =>
+            window.open(singlePr.url, '_blank', 'noopener,noreferrer')
+          }
+        />
+      )}
+      {prs.length > 1 && (
+        <PrCountSC>
+          <span css={{ color: theme.colors['text-xlight'] }}>{prs.length}</span>
+          <span css={{ color: theme.colors['text-light'] }}>PRs</span>
+        </PrCountSC>
+      )}
+      {grade != null && workbenchId && job.evalResult?.id && (
+        <GradeSC
+          type="button"
+          $color={evalGradeToColor(grade)}
+          onClick={() =>
+            navigate(
+              getWorkbenchEvalResultAbsPath({
+                workbenchId,
+                evalResultId: job.evalResult?.id ?? '',
+              })
+            )
+          }
+        >
+          {Math.round(grade)}
+        </GradeSC>
+      )}
+      {job.alert?.state === AlertState.Firing && (
+        <JobMetaChipSC
+          {...(job.alert.url
+            ? {
+                as: 'a' as const,
+                href: job.alert.url,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+              }
+            : {})}
+        >
+          <ErrorIcon
+            color="icon-light"
+            size={12}
+          />
+          Firing
+        </JobMetaChipSC>
+      )}
+      {job.issue && (
+        <IssueStatusChip
+          status={job.issue.status}
+          {...(job.issue.url
+            ? {
+                as: 'a' as const,
+                href: job.issue.url,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+              }
+            : {})}
+        />
+      )}
+    </JobFooterSC>
+  )
+}
+
+function ConclusionButton({ conclusion }: { conclusion: string }) {
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <IconFrame
+        clickable
+        size="medium"
+        type="tertiary"
+        tooltip="View conclusion"
+        textValue="View conclusion"
+        icon={<PaperCheckIcon color="icon-xlight" />}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setOpen(true)
+        }}
+      />
+      <Modal
+        header="Conclusion"
+        size="large"
+        open={open}
+        onClose={() => setOpen(false)}
+        actions={
+          <Button
+            secondary
+            onClick={() => setOpen(false)}
+          >
+            Close
+          </Button>
+        }
+      >
+        <Card css={{ padding: theme.spacing.large, overflow: 'auto' }}>
+          <Markdown text={conclusion} />
+        </Card>
+      </Modal>
+    </>
   )
 }
 
@@ -990,6 +1173,8 @@ const GraphWrapperSC = styled.div({
 })
 
 const RecentSectionSC = styled.div(({ theme }) => ({
+  containerName: 'recent-jobs',
+  containerType: 'inline-size',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
@@ -1007,8 +1192,14 @@ const SectionTitleSC = styled.h3(({ theme }) => ({
 
 const JobsGridSC = styled.div(({ theme }) => ({
   display: 'grid',
-  gap: theme.spacing.medium,
-  gridTemplateColumns: '1fr',
+  gap: theme.spacing.small,
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  '@container recent-jobs (min-width: 560px)': {
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  },
+  '@container recent-jobs (min-width: 840px)': {
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  },
 }))
 
 const EmptyJobsSC = styled.div(({ theme }) => ({
@@ -1024,12 +1215,107 @@ const EmptyJobsSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
-const JobCardSC = styled(Card)(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero'],
+const JobCardSC = styled(Link)(({ theme }) => ({
+  backgroundColor: theme.colors['fill-one-raised'],
+  border: theme.borders.default,
+  borderRadius: theme.borderRadiuses.large,
+  boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  minHeight: 140,
+  minWidth: 0,
   padding: theme.spacing.medium,
   textDecoration: 'none',
+  '&:hover': {
+    backgroundColor: theme.colors['fill-one-hover'],
+  },
+}))
+
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`
+
+const RunningSpinnerSC = styled.svg`
+  animation: ${spin} 1s linear infinite;
+  display: block;
+  flex-shrink: 0;
+  height: 16px;
+  width: 16px;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
+
+const JobMetaSC = styled.div({
+  alignItems: 'center',
+  display: 'flex',
+  justifyContent: 'space-between',
+  width: '100%',
+})
+
+const JobPromptSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-light'],
+  display: '-webkit-box',
+  height: 40,
+  margin: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  width: '100%',
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 2,
+}))
+
+const JobFooterSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.small,
+  minWidth: 0,
+}))
+
+const JobMetaChipSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  alignItems: 'center',
+  backgroundColor: theme.colors['fill-one-raised'],
+  border: `0.75px solid ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.medium,
+  boxSizing: 'border-box',
+  color: theme.colors.text,
+  display: 'inline-flex',
+  flexShrink: 0,
+  gap: theme.spacing.xsmall,
+  padding: '2px 8px',
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+  '&:hover, &:visited': {
+    color: theme.colors.text,
+  },
+}))
+
+const PrCountSC = styled(JobMetaChipSC)(({ theme }) => ({
+  backgroundColor: 'transparent',
+  gap: theme.spacing.xxxsmall,
+  letterSpacing: 0,
+}))
+
+const GradeSC = styled.button<{ $color: string }>(({ theme, $color }) => ({
+  alignItems: 'center',
+  backgroundColor: theme.colors['fill-one-raised'],
+  border: `1px solid ${theme.colors['border-fill-two']}`,
+  borderRadius: '50%',
+  boxSizing: 'border-box',
+  color: $color,
+  cursor: 'pointer',
+  display: 'flex',
+  flexShrink: 0,
+  fontFamily: theme.fontFamilies.sans,
+  fontSize: 8,
+  fontWeight: 700,
+  height: 24,
+  justifyContent: 'center',
+  lineHeight: '8px',
+  padding: 0,
+  width: 24,
 }))
