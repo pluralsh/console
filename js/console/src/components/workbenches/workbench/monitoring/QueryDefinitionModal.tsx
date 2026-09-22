@@ -7,21 +7,6 @@ import {
 } from '@pluralsh/design-system'
 import styled from 'styled-components'
 
-export function datasourceQuery(input: unknown): string | null {
-  const value = typeof input === 'string' ? parseJson(input) : input
-  if (!value || typeof value !== 'object') return null
-  const query = (value as { query?: unknown }).query
-  return typeof query === 'string' && query.trim() ? query : null
-}
-
-function parseJson(input: string): unknown {
-  try {
-    return JSON.parse(input)
-  } catch {
-    return null
-  }
-}
-
 export function QueryDefinitionModal({
   open,
   onClose,

@@ -35,11 +35,26 @@ import {
 import { getMetricSeries } from '../job/workbenchJobMetrics'
 import { TraceWaterfall } from '../job/WorkbenchJobTraces'
 import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
-import { datasourceQuery, QueryDefinitionModal } from './QueryDefinitionModal'
+import { QueryDefinitionModal } from './QueryDefinitionModal'
 
 type DashboardGraph = NonNullable<
   NonNullable<WorkbenchDashboardDetailsFragment['graphs']>[number]
 >
+
+function datasourceQuery(input: unknown): string | null {
+  const value = typeof input === 'string' ? parseJson(input) : input
+  if (!value || typeof value !== 'object') return null
+  const query = (value as { query?: unknown }).query
+  return typeof query === 'string' && query.trim() ? query : null
+}
+
+function parseJson(input: string): unknown {
+  try {
+    return JSON.parse(input)
+  } catch {
+    return null
+  }
+}
 
 const COLLAPSE_AT_PX = 640
 const ROW_UNIT_PX = 48

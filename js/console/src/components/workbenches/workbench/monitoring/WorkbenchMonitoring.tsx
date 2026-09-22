@@ -112,6 +112,7 @@ export function WorkbenchMonitoring() {
             <MonitorDetail
               key={monitorId}
               monitorId={monitorId}
+              onUpdate={() => setUpdateOpen(true)}
             />
           )
         ) : (

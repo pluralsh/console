@@ -69,6 +69,7 @@ import { MonitoringDetailSkeleton } from './WorkbenchDashboardDetail'
 import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
 import { monitorDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
+import { QueryDefinitionModal } from './QueryDefinitionModal'
 import {
   DefinitionPanelShell,
   useDefinitionPanelContainer,
@@ -91,7 +92,13 @@ function recentJobTime(date: string) {
   return `${days} days ago`
 }
 
-export function MonitorDetail({ monitorId }: { monitorId: string }) {
+export function MonitorDetail({
+  monitorId,
+  onUpdate,
+}: {
+  monitorId: string
+  onUpdate?: () => void
+}) {
   const { data, loading, error } = useWorkbenchMonitorQuery({
     variables: { id: monitorId },
     fetchPolicy: 'cache-and-network',
@@ -108,13 +115,20 @@ export function MonitorDetail({ monitorId }: { monitorId: string }) {
       </MainSC>
     )
 
-  return <MonitorDetailView monitor={monitor} />
+  return (
+    <MonitorDetailView
+      monitor={monitor}
+      onUpdate={onUpdate}
+    />
+  )
 }
 
 function MonitorDetailView({
   monitor,
+  onUpdate,
 }: {
   monitor: WorkbenchMonitorDetailsFragment
+  onUpdate?: () => void
 }) {
   const workbenchId = monitor.workbench?.id
   const activeQuery =
@@ -126,6 +140,7 @@ function MonitorDetailView({
   const forDuration = activeQuery?.duration
   const { pathname } = useLocation()
   const [definitionOpen, setDefinitionOpen] = useState(false)
+  const [queryOpen, setQueryOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
   const containerRef = useDefinitionPanelContainer()
@@ -265,8 +280,8 @@ function MonitorDetailView({
                     size="small"
                     type="tertiary"
                     icon={<DocsIcon />}
-                    textValue="Definition"
-                    onClick={() => setDefinitionOpen((open) => !open)}
+                    textValue="Query"
+                    onClick={() => setQueryOpen(true)}
                   />
                 )}
               </DefinitionHeaderSC>
@@ -341,6 +356,13 @@ function MonitorDetailView({
       }
     >
       {fullscreen ? createPortal(main, document.body) : main}
+      <QueryDefinitionModal
+        open={queryOpen}
+        onClose={() => setQueryOpen(false)}
+        title={monitor.name}
+        query={queryText || '—'}
+        onUpdate={onUpdate}
+      />
     </DefinitionPanelShell>
   )
 }
@@ -693,10 +715,7 @@ function useMonitorJobs(workbenchId: string | undefined, monitorId: string) {
     pollInterval: POLL_INTERVAL,
   })
   const data = result.data ?? result.previousData
-  const jobs = useMemo(
-    () => mapExistingNodes(data?.workbench?.runs),
-    [data]
-  )
+  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
 
   return { ...result, data, jobs }
 }
