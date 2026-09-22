@@ -2,6 +2,7 @@ import {
   Card,
   Chip,
   ChipSeverity,
+  DocsIcon,
   EmptyState,
   ExpandIcon,
   Flex,
@@ -231,9 +232,9 @@ function MonitorDetailView({
                     clickable
                     size="small"
                     type="tertiary"
-                    icon={<HamburgerMenuCollapsedIcon />}
+                    icon={<DocsIcon />}
                     textValue="Definition"
-                    onClick={() => setDefinitionOpen(true)}
+                    onClick={() => setDefinitionOpen((open) => !open)}
                   />
                 )}
               </DefinitionHeaderSC>
