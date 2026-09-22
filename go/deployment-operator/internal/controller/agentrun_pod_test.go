@@ -520,6 +520,9 @@ func TestBuildAgentRunPod_RepositoryImage(t *testing.T) {
 	prebake := requireContainer(t, pod.Spec.InitContainers, repositoryPrebakeContainerName)
 	assert.Equal(t, image, prebake.Image)
 	assert.Equal(t, []string{"/bin/sh", "-c"}, prebake.Command)
+	assert.Equal(t, []string{repositoryPrebakeCopyCommand}, prebake.Args)
+	assert.Contains(t, prebake.Args[0], "command -v fcp")
+	assert.Contains(t, prebake.Args[0], "cp -a")
 	assert.Contains(t, prebake.VolumeMounts, corev1.VolumeMount{
 		Name:      sharedContextVolumeName,
 		MountPath: sharedContextVolumePath,

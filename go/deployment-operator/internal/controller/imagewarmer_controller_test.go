@@ -70,6 +70,76 @@ func TestImageWarmerReconcile(t *testing.T) {
 	g.Expect(updated.Status.LastSuccessfulTime.Time.After(completedAt.Add(time.Second))).To(BeFalse())
 }
 
+func TestImageWarmerDoesNotCompleteWithoutScheduledNodes(t *testing.T) {
+	g := NewWithT(t)
+	scheme := runtime.NewScheme()
+	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+	g.Expect(appsv1.AddToScheme(scheme)).To(Succeed())
+
+	warmer := &v1alpha1.ImageWarmer{
+		ObjectMeta: metav1.ObjectMeta{Name: "runtime", Namespace: "agents"},
+		Spec: v1alpha1.ImageWarmerSpec{
+			Cron:  "0 * * * *",
+			Image: "example.com/repository:v1",
+		},
+	}
+	k8sClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithStatusSubresource(&v1alpha1.ImageWarmer{}, &appsv1.DaemonSet{}).
+		WithObjects(warmer).
+		Build()
+	reconciler := &ImageWarmerReconciler{Client: k8sClient, Scheme: scheme}
+	request := ctrl.Request{NamespacedName: types.NamespacedName{Name: warmer.Name, Namespace: warmer.Namespace}}
+
+	_, err := reconciler.Reconcile(context.Background(), request)
+	g.Expect(err).NotTo(HaveOccurred())
+
+	daemonSet := &appsv1.DaemonSet{}
+	g.Expect(k8sClient.Get(context.Background(), request.NamespacedName, daemonSet)).To(Succeed())
+	daemonSet.Status.ObservedGeneration = daemonSet.Generation
+	daemonSet.Status.DesiredNumberScheduled = 0
+	daemonSet.Status.NumberReady = 0
+	g.Expect(k8sClient.Status().Update(context.Background(), daemonSet)).To(Succeed())
+
+	result, err := reconciler.Reconcile(context.Background(), request)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(result.RequeueAfter).To(Equal(imageWarmerPollInterval))
+	g.Expect(k8sClient.Get(context.Background(), request.NamespacedName, &appsv1.DaemonSet{})).To(Succeed())
+
+	updated := &v1alpha1.ImageWarmer{}
+	g.Expect(k8sClient.Get(context.Background(), request.NamespacedName, updated)).To(Succeed())
+	g.Expect(updated.Status.LastSuccessfulTime).To(BeNil())
+}
+
+func TestImageWarmerDoesNotDeleteForeignDaemonSet(t *testing.T) {
+	g := NewWithT(t)
+	scheme := runtime.NewScheme()
+	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+	g.Expect(appsv1.AddToScheme(scheme)).To(Succeed())
+
+	warmer := &v1alpha1.ImageWarmer{
+		ObjectMeta: metav1.ObjectMeta{Name: "runtime", Namespace: "agents"},
+		Spec: v1alpha1.ImageWarmerSpec{
+			Cron:  "0 * * * *",
+			Image: "example.com/repository:v1",
+		},
+	}
+	foreign := &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{Name: warmer.Name, Namespace: warmer.Namespace},
+	}
+	k8sClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithStatusSubresource(&v1alpha1.ImageWarmer{}, &appsv1.DaemonSet{}).
+		WithObjects(warmer, foreign).
+		Build()
+	reconciler := &ImageWarmerReconciler{Client: k8sClient, Scheme: scheme}
+	request := ctrl.Request{NamespacedName: types.NamespacedName{Name: warmer.Name, Namespace: warmer.Namespace}}
+
+	_, err := reconciler.Reconcile(context.Background(), request)
+	g.Expect(err).To(MatchError(ContainSubstring("is not controlled by ImageWarmer")))
+	g.Expect(k8sClient.Get(context.Background(), request.NamespacedName, &appsv1.DaemonSet{})).To(Succeed())
+}
+
 func TestImageWarmerDaemonSet(t *testing.T) {
 	t.Run("builds a secure pull-always DaemonSet", func(t *testing.T) {
 		g := NewWithT(t)

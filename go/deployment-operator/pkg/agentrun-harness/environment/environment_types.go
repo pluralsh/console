@@ -16,6 +16,8 @@ type environment struct {
 	dir string
 	// console is the Plural Console Client
 	consoleTokenClient console.Client // Console token client for Me()
+	// movePrebakedRepository moves the selected prebake into the working directory.
+	movePrebakedRepository func(src, dst string) error
 }
 
 // Option allows modifying Environment behavior.

@@ -73,6 +73,14 @@ func (r *ImageWarmerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	daemonSet := &appsv1.DaemonSet{}
 	err = r.Get(ctx, key, daemonSet)
 	if err == nil {
+		if !metav1.IsControlledBy(daemonSet, warmer) {
+			return ctrl.Result{}, fmt.Errorf(
+				"DaemonSet %s/%s is not controlled by ImageWarmer",
+				daemonSet.Namespace,
+				daemonSet.Name,
+			)
+		}
+
 		expectedSHA, hashErr := utils.HashObject(warmer.Spec)
 		if hashErr != nil {
 			return ctrl.Result{}, hashErr
@@ -85,6 +93,7 @@ func (r *ImageWarmerReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 
 		if daemonSet.Status.ObservedGeneration >= daemonSet.Generation &&
+			daemonSet.Status.DesiredNumberScheduled > 0 &&
 			daemonSet.Status.NumberReady == daemonSet.Status.DesiredNumberScheduled &&
 			daemonSet.Status.NumberUnavailable == 0 {
 			if err := r.Delete(ctx, daemonSet); err != nil {

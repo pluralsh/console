@@ -51,6 +51,10 @@ RUN CGO_ENABLED=0 \
     -o /agent-bootstrap \
     cmd/agent-bootstrap/main.go
 
+FROM rust:1.90-bookworm AS fcp
+ARG FCP_VERSION=0.2.2
+RUN cargo install fcp --version "${FCP_VERSION}" --locked --root /opt/fcp
+
 FROM nixos/nix:latest@sha256:7a007c766426c1877758ddc5cb87a965ac131fc78c582ce0083d922d51ae945c AS podman
 
 ARG NIXPKGS_REVISION=afe3d8ac4395617bdcdac9f188ac8717a062e014
@@ -182,6 +186,7 @@ ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
 COPY --from=builder /agent-harness /agent-harness
 COPY --from=builder /agent-mcpserver /agent-mcpserver
 COPY --from=builder /agent-bootstrap /agent-bootstrap
+COPY --from=fcp /opt/fcp/bin/fcp /usr/local/bin/fcp
 
 # Pin mise in the base agent image. The harness looks it up on PATH and does
 # not download an installer at runtime. See https://mise.jdx.dev/bootstrap.html

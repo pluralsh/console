@@ -55,6 +55,10 @@ const (
 	mcpServerContainerName         = "mcpserver"
 	repositoryPrebakeContainerName = "repository-prebake"
 	repositoryPrebakeImageDataDir  = "/data"
+	repositoryPrebakeCopyCommand   = "if command -v fcp >/dev/null 2>&1; then " +
+		"fcp " + repositoryPrebakeImageDataDir + " " + common.AgentRunRepositoryPrebakeDir + "; " +
+		"else mkdir -p " + common.AgentRunRepositoryPrebakeDir + " && " +
+		"cp -a " + repositoryPrebakeImageDataDir + "/. " + common.AgentRunRepositoryPrebakeDir + "/; fi"
 
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
@@ -672,9 +676,7 @@ func getRepositoryPrebakeContainer(image string) corev1.Container {
 		Image:           image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command:         []string{"/bin/sh", "-c"},
-		Args: []string{
-			"mkdir -p " + common.AgentRunRepositoryPrebakeDir + " && cp -a " + repositoryPrebakeImageDataDir + "/. " + common.AgentRunRepositoryPrebakeDir + "/",
-		},
+		Args:            []string{repositoryPrebakeCopyCommand},
 		SecurityContext: sc,
 		VolumeMounts: []corev1.VolumeMount{{
 			Name:      sharedContextVolumeName,

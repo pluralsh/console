@@ -25,6 +25,8 @@ import {
   WorkbenchToolHttpMethod,
   WorkbenchToolType,
   HelmAuthProvider,
+  OauthTokenExchangeAttributes,
+  OauthTokenExchangeType,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isValidJson } from 'utils/isValidJson'
@@ -41,6 +43,7 @@ import { McpServerSelectField } from './mcp-server/McpServerSelectField'
 import { ScmConnectionWorkbenchSelect } from './scm-connection/ScmConnectionWorkbenchSelect'
 import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
+import { oauthTokenExchangeIsComplete } from './OauthTokenExchangeFormFields'
 import {
   categoryToLabel,
   cloudFunctionProviderForWorkbenchTool,
@@ -137,6 +140,19 @@ function bitbucketDatacenterConfigurationIsComplete(
   return (c?.url ?? '').trim().length > 0 && scmTokenIsSet(c?.token)
 }
 
+function jiraDatacenterConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['jiraDatacenter'] | null | undefined,
+  oauth: Nullable<OauthTokenExchangeAttributes>,
+  persistedOauthType: Nullable<OauthTokenExchangeType>,
+  isEditing: boolean
+): boolean {
+  if (!(c?.url ?? '').trim()) return false
+  if (oauth?.enabled)
+    return oauthTokenExchangeIsComplete(oauth, persistedOauthType)
+
+  return isEditing || scmTokenIsSet(c?.apiToken)
+}
+
 export type WorkbenchToolFormState = Omit<
   Pick<
     WorkbenchToolAttributes,
@@ -147,6 +163,7 @@ export type WorkbenchToolFormState = Omit<
     | 'mcpServerId'
     | 'scmConnectionId'
     | 'approval'
+    | 'oauth'
     | 'readBindings'
     | 'writeBindings'
   >,
@@ -204,6 +221,18 @@ export function WorkbenchToolForm({
     name: tool?.name ?? '',
     categories: tool?.categories ?? defaultCategories,
     configuration: sanitizeInitialConfiguration(tool),
+    oauth: tool?.oauth
+      ? {
+          enabled: tool.oauth.enabled !== false,
+          type: tool.oauth.type ?? OauthTokenExchangeType.ClientSecret,
+          tokenUrl: tool.oauth.tokenUrl,
+          clientId: tool.oauth.clientId,
+          keyId: tool.oauth.keyId,
+          audience: tool.oauth.audience,
+          resource: tool.oauth.resource,
+          scopes: tool.oauth.scopes,
+        }
+      : undefined,
     cloudConnectionId: tool?.cloudConnection?.id,
     mcpServerId: tool?.mcpServer?.id,
     scmConnectionId: tool?.scmConnection?.id,
@@ -243,6 +272,13 @@ export function WorkbenchToolForm({
       hasRegisteredScm ||
       bitbucketDatacenterConfigurationIsComplete(
         state.configuration?.bitbucketDatacenter
+      )) &&
+    (type !== WorkbenchToolType.JiraDatacenter ||
+      jiraDatacenterConfigurationIsComplete(
+        state.configuration?.jiraDatacenter,
+        state.oauth,
+        tool?.oauth?.type,
+        !!tool?.id
       )) &&
     (type !== WorkbenchToolType.AzureDevops ||
       hasRegisteredScm ||
@@ -387,6 +423,7 @@ export function WorkbenchToolForm({
                   type={type}
                   state={state}
                   update={update}
+                  persistedOauthType={tool?.oauth?.type}
                 />
               </>
             ) : null}

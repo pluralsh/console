@@ -25,3 +25,11 @@ func WithConsoleTokenClient(client console.Client) Option {
 		e.consoleTokenClient = client
 	}
 }
+
+// WithFastPrebakeCopy enables the fcp-assisted cross-filesystem fallback used
+// by agent-bootstrap. Other environment consumers retain polly/fs behavior.
+func WithFastPrebakeCopy() Option {
+	return func(e *environment) {
+		e.movePrebakedRepository = movePrebakedRepositoryFast
+	}
+}
