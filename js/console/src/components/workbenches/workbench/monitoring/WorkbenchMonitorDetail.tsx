@@ -253,7 +253,11 @@ function MonitorDetailView({
                     </Flex>
                   )}
                 </QueryHeaderSC>
-                <QueryBlockSC>{queryText || '—'}</QueryBlockSC>
+                <QueryBlockSC
+                  $nowrap={!!queryText && !queryText.includes('\n')}
+                >
+                  {queryText || '—'}
+                </QueryBlockSC>
               </SectionSC>
               <SectionSC>
                 <FiresWhenSC>
@@ -939,18 +943,22 @@ const QueryHeaderSC = styled.div({
   width: '100%',
 })
 
-const QueryBlockSC = styled.pre(({ theme }) => ({
-  ...theme.partials.text.code,
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
-  borderRadius: theme.borderRadiuses.medium,
-  color: theme.colors['text-xlight'],
-  margin: 0,
-  overflowX: 'auto',
-  padding: theme.spacing.medium,
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word',
-}))
+const QueryBlockSC = styled.pre<{ $nowrap?: boolean }>(
+  ({ theme, $nowrap }) => ({
+    ...theme.partials.text.code,
+    backgroundColor: theme.colors['fill-two'],
+    border: theme.borders['fill-two'],
+    borderRadius: theme.borderRadiuses.medium,
+    color: theme.colors['text-xlight'],
+    margin: 0,
+    maxWidth: '100%',
+    minWidth: 0,
+    overflowX: 'auto',
+    padding: theme.spacing.medium,
+    whiteSpace: $nowrap ? 'pre' : 'pre-wrap',
+    wordBreak: $nowrap ? 'normal' : 'break-word',
+  })
+)
 
 const FiresWhenSC = styled.div(({ theme }) => ({
   alignItems: 'center',
