@@ -52,7 +52,11 @@ jobs:
           cache: yarn
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
-      - run: yarn --immutable
+      - run: >-
+          YARN_ENABLE_IMMUTABLE_INSTALLS=true
+          yarn workspaces focus
+          console @pluralsh/design-system
+          @pluralsh/eslint-config-pluralsh @pluralsh/stylelint-config
       - name: Restore ESLint cache
         uses: actions/cache@v6
         with:
@@ -78,7 +82,9 @@ jobs:
           cache: yarn
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
-      - run: yarn --immutable
+      - run: >-
+          YARN_ENABLE_IMMUTABLE_INSTALLS=true
+          yarn workspaces focus console @pluralsh/design-system
       - run: yarn test
 
   typecheck:
@@ -97,6 +103,8 @@ jobs:
           cache: yarn
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
-      - run: yarn --immutable
+      - run: >-
+          YARN_ENABLE_IMMUTABLE_INSTALLS=true
+          yarn workspaces focus console @pluralsh/design-system
       - run: yarn workspace @pluralsh/design-system build
       - run: yarn workspace console typecheck
