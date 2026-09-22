@@ -2282,8 +2282,9 @@ spec:
                   type: object
                   x-kubernetes-validations:
                   - message: mcpServers name cannot collide with built-in servers
-                      plural or codebase-memory-mcp
+                      plural, codebase-memory-mcp, or workbench
                     rule: self.name != 'plural' && self.name != 'codebase-memory-mcp'
+                      && self.name != 'workbench'
                 type: array
                 x-kubernetes-list-map-keys:
                 - name
@@ -19417,6 +19418,43 @@ spec:
                 - PI
                 - CUSTOM
                 type: string
+              workbenchMcp:
+                description: |-
+                  WorkbenchMCP exposes the originating workbench's read-only tools to coding
+                  agents through the credential-isolating MCP sidecar.
+                properties:
+                  categories:
+                    description: |-
+                      Categories limits the exposed workbench tools. When omitted, the default
+                      set is metrics, logs, traces, ticketing, search, scm, and infrastructure.
+                    items:
+                      description: WorkbenchMCPCategory is a workbench tool category
+                        accepted by the Console MCP endpoint.
+                      enum:
+                      - metrics
+                      - logs
+                      - integration
+                      - ticketing
+                      - traces
+                      - error_tracking
+                      - infrastructure
+                      - search
+                      - scm
+                      - chat
+                      - function
+                      - coding
+                      - verification
+                      - observability
+                      type: string
+                    type: array
+                  enabled:
+                    default: false
+                    description: Enabled controls whether workbench tools are available
+                      to coding agents.
+                    type: boolean
+                required:
+                - enabled
+                type: object
             required:
             - targetNamespace
             - type

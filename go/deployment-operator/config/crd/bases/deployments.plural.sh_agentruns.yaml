@@ -86,6 +86,11 @@ spec:
                 required:
                 - name
                 type: object
+              workbenchMcpUrl:
+                description: |-
+                  WorkbenchMCPURL is the Console MCP endpoint for the workbench that
+                  originated this run. It is populated by the AgentRuntime controller.
+                type: string
             required:
             - mode
             - prompt

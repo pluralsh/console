@@ -154,6 +154,53 @@ type AgentRuntimeSpec struct {
 	// +listType=map
 	// +listMapKey=name
 	MCPServers []MCPServer `json:"mcpServers,omitempty"`
+
+	// WorkbenchMCP exposes the originating workbench's read-only tools to coding
+	// agents through the credential-isolating MCP sidecar.
+	// +kubebuilder:validation:Optional
+	WorkbenchMCP *WorkbenchMCPConfig `json:"workbenchMcp,omitempty"`
+}
+
+// WorkbenchMCPCategory is a workbench tool category accepted by the Console MCP endpoint.
+// +kubebuilder:validation:Enum=metrics;logs;integration;ticketing;traces;error_tracking;infrastructure;search;scm;chat;function;coding;verification;observability
+type WorkbenchMCPCategory string
+
+const (
+	WorkbenchMCPCategoryMetrics        WorkbenchMCPCategory = "metrics"
+	WorkbenchMCPCategoryLogs           WorkbenchMCPCategory = "logs"
+	WorkbenchMCPCategoryIntegration    WorkbenchMCPCategory = "integration"
+	WorkbenchMCPCategoryTicketing      WorkbenchMCPCategory = "ticketing"
+	WorkbenchMCPCategoryTraces         WorkbenchMCPCategory = "traces"
+	WorkbenchMCPCategoryErrorTracking  WorkbenchMCPCategory = "error_tracking"
+	WorkbenchMCPCategoryInfrastructure WorkbenchMCPCategory = "infrastructure"
+	WorkbenchMCPCategorySearch         WorkbenchMCPCategory = "search"
+	WorkbenchMCPCategorySCM            WorkbenchMCPCategory = "scm"
+	WorkbenchMCPCategoryChat           WorkbenchMCPCategory = "chat"
+	WorkbenchMCPCategoryFunction       WorkbenchMCPCategory = "function"
+	WorkbenchMCPCategoryCoding         WorkbenchMCPCategory = "coding"
+	WorkbenchMCPCategoryVerification   WorkbenchMCPCategory = "verification"
+	WorkbenchMCPCategoryObservability  WorkbenchMCPCategory = "observability"
+)
+
+var defaultWorkbenchMCPCategories = []WorkbenchMCPCategory{
+	WorkbenchMCPCategoryMetrics,
+	WorkbenchMCPCategoryLogs,
+	WorkbenchMCPCategoryTraces,
+	WorkbenchMCPCategoryTicketing,
+	WorkbenchMCPCategorySearch,
+	WorkbenchMCPCategorySCM,
+	WorkbenchMCPCategoryInfrastructure,
+}
+
+type WorkbenchMCPConfig struct {
+	// Enabled controls whether workbench tools are available to coding agents.
+	// +kubebuilder:default:=false
+	Enabled bool `json:"enabled"`
+
+	// Categories limits the exposed workbench tools. When omitted, the default
+	// set is metrics, logs, traces, ticketing, search, scm, and infrastructure.
+	// +kubebuilder:validation:Optional
+	Categories []WorkbenchMCPCategory `json:"categories,omitempty"`
 }
 
 // RepositoryImagePrewarm configures periodic repository image warming.
@@ -175,7 +222,7 @@ type RepositoryImagePrewarm struct {
 
 // MCPServer is a remote MCP server exposed to agent runtimes.
 //
-// +kubebuilder:validation:XValidation:rule="self.name != 'plural' && self.name != 'codebase-memory-mcp'",message="mcpServers name cannot collide with built-in servers plural or codebase-memory-mcp"
+// +kubebuilder:validation:XValidation:rule="self.name != 'plural' && self.name != 'codebase-memory-mcp' && self.name != 'workbench'",message="mcpServers name cannot collide with built-in servers plural, codebase-memory-mcp, or workbench"
 type MCPServer struct {
 	// Name is the MCP server identifier used by the coding agent.
 	// +kubebuilder:validation:Required
@@ -977,6 +1024,20 @@ func (in *AgentRuntime) IsAiProxyEnabled() bool {
 
 func (in *AgentRuntime) IsStreamingProxyEnabled() bool {
 	return in.IsAiProxyEnabled() && in.Spec.StreamingProxy != nil && *in.Spec.StreamingProxy
+}
+
+func (in *AgentRuntime) IsWorkbenchMCPEnabled() bool {
+	return in != nil && in.Spec.WorkbenchMCP != nil && in.Spec.WorkbenchMCP.Enabled
+}
+
+func (in *AgentRuntime) WorkbenchMCPCategories() []WorkbenchMCPCategory {
+	if !in.IsWorkbenchMCPEnabled() {
+		return nil
+	}
+	if len(in.Spec.WorkbenchMCP.Categories) > 0 {
+		return in.Spec.WorkbenchMCP.Categories
+	}
+	return append([]WorkbenchMCPCategory(nil), defaultWorkbenchMCPCategories...)
 }
 
 func (in *AgentRuntime) ConsoleName() string {

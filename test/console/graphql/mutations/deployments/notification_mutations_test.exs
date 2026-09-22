@@ -16,13 +16,16 @@ defmodule Console.GraphQl.Deployments.NotificationMutationsTest do
         "attrs" => %{
           "name" => "sink",
           "type" => "SLACK",
-          "configuration" => %{"slack" => %{"url" => "https://example.com"}}
+          "configuration" => %{
+            "slack" => %{"url" => "https://hooks.slack.com/services/test"}
+          }
         }
       }, %{current_user: admin_user()})
 
       assert sink["name"] == "sink"
       assert sink["type"] == "SLACK"
-      assert sink["configuration"]["slack"]["url"] == "https://example.com"
+      assert sink["configuration"]["slack"]["url"] ==
+               "https://hooks.slack.com/services/test"
     end
   end
 

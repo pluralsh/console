@@ -88,6 +88,7 @@ const (
 	EnvMcpExcludeTools = "PLRL_EXCLUDE_TOOLS"
 	EnvStreamingProxy  = "PLRL_STREAMING_PROXY"
 	EnvMCPServers      = "PLRL_MCP_SERVERS"
+	EnvWorkbenchMCPURL = "PLRL_WORKBENCH_MCP_URL"
 )
 
 var (
@@ -530,6 +531,7 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve mcp servers: %w", err)
 	}
+	mcpServers = withWorkbenchMCPServer(mcpServers, run, runtime)
 
 	var exaConnection *v1alpha1.ExaConnectionRaw
 	if runtime.Spec.ExaConnection != nil {

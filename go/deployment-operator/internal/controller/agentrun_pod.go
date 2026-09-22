@@ -522,6 +522,7 @@ func enableMCPServer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, pod
 	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext, false)
 	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
 	pod.Spec.InitContainers[index].Env = ensureMCPServerEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
+	pod.Spec.InitContainers[index].Env = ensureWorkbenchMCPProxyEnvVar(pod.Spec.InitContainers[index].Env, run, runtime)
 	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
 	pod.Spec.InitContainers[index].RestartPolicy = lo.ToPtr(corev1.ContainerRestartPolicyAlways)
 	if pod.Spec.InitContainers[index].StartupProbe == nil {
@@ -544,7 +545,7 @@ func getMCPServerContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntim
 		Image:           image,
 		SecurityContext: ensureDefaultContainerSecurityContext(nil, false),
 		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
-		Env:             getMCPServerEnvVars(run, runtime),
+		Env:             ensureWorkbenchMCPProxyEnvVar(getMCPServerEnvVars(run, runtime), run, runtime),
 		Command:         []string{"/agent-mcpserver"},
 		Args: []string{
 			"--address", common.AgentMCPServerAddress,
@@ -634,6 +635,14 @@ func ensureMCPServerEnvVars(existing []corev1.EnvVar, run *v1alpha1.AgentRun, ru
 	}
 
 	return existing
+}
+
+func ensureWorkbenchMCPProxyEnvVar(existing []corev1.EnvVar, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	upstream := workbenchMCPUpstreamURL(run, runtime)
+	if upstream == "" {
+		return existing
+	}
+	return upsertEnvVar(existing, corev1.EnvVar{Name: EnvWorkbenchMCPURL, Value: upstream})
 }
 
 func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.AgentRuntime) []corev1.VolumeMount {

@@ -473,6 +473,8 @@ type AgentRun struct {
 	Todos       []*AgentTodo `json:"todos,omitempty"`
 	ScmCreds    *ScmCreds    `json:"scmCreds,omitempty"`
 	PluralCreds *PluralCreds `json:"pluralCreds,omitempty"`
+	// the MCP endpoint for the workbench that spawned this run, if any
+	WorkbenchMcpURL *string `json:"workbenchMcpUrl,omitempty"`
 	// the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)
 	Pod *Pod `json:"pod,omitempty"`
 	// the prompts this agent run has received

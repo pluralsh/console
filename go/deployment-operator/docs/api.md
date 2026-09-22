@@ -174,6 +174,7 @@ _Appears in:_
 | `mode` _[AgentRunMode](#agentrunmode)_ | Mode defines how the agent should run (ANALYZE, WRITE, REVIEW) |  | Required: \{\} <br /> |
 | `reviewDepth` _[AgentReviewDepth](#agentreviewdepth)_ | ReviewDepth controls how far a review run explores code adjacent to the pull request changes. |  | Optional: \{\} <br /> |
 | `flowId` _string_ | FlowID is the flow this agent run is associated with (optional) |  | Optional: \{\} <br /> |
+| `workbenchMcpUrl` _string_ | WorkbenchMCPURL is the Console MCP endpoint for the workbench that<br />originated this run. It is populated by the AgentRuntime controller. |  | Optional: \{\} <br /> |
 | `language` _[AgentRunLanguage](#agentrunlanguage)_ | Language is the programming language used in the agent run.<br />Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead. |  | Optional: \{\} <br /> |
 | `languageVersion` _string_ | LanguageVersion is the version of the language to use, if you wish to specify.<br />Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead. |  | Optional: \{\} <br /> |
 
@@ -289,6 +290,7 @@ _Appears in:_
 | `scmConnection` _string_ | ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.<br />This should match the name of an existing ScmConnection resource or connection created in the Plural UI. |  | Optional: \{\} <br /> |
 | `exaConnection` _[ExaConnection](#exaconnection)_ | ExaConnection enables Exa web search and content retrieval tools on the Plural MCP server. |  |  |
 | `mcpServers` _[MCPServer](#mcpserver) array_ | MCPServers are additional remote MCP servers made available to coding agents<br />on this runtime. Servers are expected to already be deployed and reachable<br />at the given URL. Built-in servers named "plural" and "codebase-memory-mcp"<br />are reserved and cannot be overridden. |  | Optional: \{\} <br /> |
+| `workbenchMcp` _[WorkbenchMCPConfig](#workbenchmcpconfig)_ | WorkbenchMCP exposes the originating workbench's read-only tools to coding<br />agents through the credential-isolating MCP sidecar. |  | Optional: \{\} <br /> |
 
 
 
@@ -1408,5 +1410,52 @@ _Appears in:_
 | `helm` _[HelmSpec](#helmspec)_ | Helm allows configuring helm chart options of both agent and vcluster.<br />It is then deployed by the [VirtualCluster] CRD controller. |  | Optional: \{\} <br /> |
 
 
+
+
+#### WorkbenchMCPCategory
+
+_Underlying type:_ _string_
+
+WorkbenchMCPCategory is a workbench tool category accepted by the Console MCP endpoint.
+
+_Validation:_
+- Enum: [metrics logs integration ticketing traces error_tracking infrastructure search scm chat function coding verification observability]
+
+_Appears in:_
+- [WorkbenchMCPConfig](#workbenchmcpconfig)
+
+| Field | Description |
+| --- | --- |
+| `metrics` |  |
+| `logs` |  |
+| `integration` |  |
+| `ticketing` |  |
+| `traces` |  |
+| `error_tracking` |  |
+| `infrastructure` |  |
+| `search` |  |
+| `scm` |  |
+| `chat` |  |
+| `function` |  |
+| `coding` |  |
+| `verification` |  |
+| `observability` |  |
+
+
+#### WorkbenchMCPConfig
+
+
+
+
+
+
+
+_Appears in:_
+- [AgentRuntimeSpec](#agentruntimespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled controls whether workbench tools are available to coding agents. | false |  |
+| `categories` _[WorkbenchMCPCategory](#workbenchmcpcategory) array_ | Categories limits the exposed workbench tools. When omitted, the default<br />set is metrics, logs, traces, ticketing, search, scm, and infrastructure. |  | Enum: [metrics logs integration ticketing traces error_tracking infrastructure search scm chat function coding verification observability] <br />Optional: \{\} <br /> |
 
 

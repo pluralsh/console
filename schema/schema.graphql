@@ -2610,6 +2610,9 @@ type AgentRun {
 
   pluralCreds: PluralCreds
 
+  "the MCP endpoint for the workbench that spawned this run, if any"
+  workbenchMcpUrl: String
+
   "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
   pod: Pod
 

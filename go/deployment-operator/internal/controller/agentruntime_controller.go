@@ -444,6 +444,7 @@ func (r *AgentRuntimeReconciler) createAgentRun(ctx context.Context, agentRuntim
 			ReviewDepth:     run.ReviewDepth,
 			Language:        run.Language,
 			LanguageVersion: run.LanguageVersion,
+			WorkbenchMCPURL: run.WorkbenchMcpURL,
 		},
 	}
 	if run.Flow != nil {

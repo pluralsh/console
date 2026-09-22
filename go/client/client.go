@@ -675,6 +675,7 @@ type AgentRunFragment struct {
 	Usage           *AgentRunFragment_Usage    "json:\"usage,omitempty\" graphql:\"usage\""
 	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
 	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	WorkbenchMcpURL *string                    "json:\"workbenchMcpUrl,omitempty\" graphql:\"workbenchMcpUrl\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
 	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
@@ -801,6 +802,12 @@ func (t *AgentRunFragment) GetPluralCreds() *PluralCredsFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.PluralCreds
+}
+func (t *AgentRunFragment) GetWorkbenchMcpURL() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.WorkbenchMcpURL
 }
 func (t *AgentRunFragment) GetRuntime() *AgentRuntimeFragment {
 	if t == nil {
@@ -49088,6 +49095,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -49324,6 +49332,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -49583,6 +49592,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -49829,6 +49839,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -50013,6 +50024,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}

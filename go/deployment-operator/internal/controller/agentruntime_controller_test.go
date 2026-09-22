@@ -11,6 +11,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -54,6 +55,37 @@ func TestAgentRuntimeReconcileImageWarmer(t *testing.T) {
 	g.Expect(agentRuntime.Status.ImageWarmerName).To(BeNil())
 	err := k8sClient.Get(context.Background(), key, &v1alpha1.ImageWarmer{})
 	g.Expect(k8serrors.IsNotFound(err)).To(BeTrue())
+}
+
+func TestCreateAgentRunPropagatesWorkbenchMCPURL(t *testing.T) {
+	g := NewWithT(t)
+	scheme := runtime.NewScheme()
+	g.Expect(corev1.AddToScheme(scheme)).To(Succeed())
+	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+
+	k8sClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+	reconciler := &AgentRuntimeReconciler{Client: k8sClient}
+	agentRuntime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			TargetNamespace: "agents",
+		},
+	}
+	workbenchMCPURL := "https://console.example/mcp/workbench/workbench-id"
+	run := &console.AgentRunFragment{
+		ID:              "run-id",
+		Prompt:          "investigate",
+		Repository:      "https://github.com/pluralsh/console",
+		Mode:            console.AgentRunModeAnalyze,
+		WorkbenchMcpURL: &workbenchMCPURL,
+		Runtime:         &console.AgentRuntimeFragment{Name: "runtime"},
+	}
+
+	g.Expect(reconciler.createAgentRun(context.Background(), agentRuntime, run)).To(Succeed())
+	created := &v1alpha1.AgentRun{}
+	g.Expect(k8sClient.Get(context.Background(), client.ObjectKey{Name: run.ID, Namespace: "agents"}, created)).To(Succeed())
+	g.Expect(created.Spec.WorkbenchMCPURL).NotTo(BeNil())
+	g.Expect(*created.Spec.WorkbenchMCPURL).To(Equal(workbenchMCPURL))
 }
 
 var _ = Describe("AgentRuntime Controller", func() {

@@ -621,6 +621,15 @@ defmodule Console.Deployments.Agents do
       do: {:ok, %{token: token, url: Console.graphql_endpoint()}}
   end
 
+  def workbench_mcp_url(%AgentRun{} = run) do
+    case Repo.preload(run, workbench_job: :workbench) do
+      %{workbench_job: %{workbench: %{id: id}}} when is_binary(id) ->
+        {:ok, Console.url("/mcp/workbench/#{id}")}
+      _ ->
+        {:ok, nil}
+    end
+  end
+
   @doc """
   Resolves the SCM connection for an agent runtime or run, preferring the runtime's
   bound connection before falling back to deployment settings / default.

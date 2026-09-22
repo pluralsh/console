@@ -52,3 +52,15 @@ func WithOpenAIProxy(chatCompletionsURL, responsesURL string) Option {
 		}
 	}
 }
+
+// WithWorkbenchMCPProxy registers a local reverse proxy that authenticates to
+// the originating workbench with the agent run's short-lived user token.
+func WithWorkbenchMCPProxy(upstreamURL string, token func() string) Option {
+	return func(s *Server) {
+		handler, err := newWorkbenchMCPProxy(upstreamURL, token)
+		if err != nil {
+			klog.Fatalf("could not configure workbench mcp proxy: %v", err)
+		}
+		s.workbenchMCPProxy = handler
+	}
+}
