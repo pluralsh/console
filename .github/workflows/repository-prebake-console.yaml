@@ -1,21 +1,21 @@
 name: CD / Repository prebake
 
 on:
-  pull_request:
-    branches:
-      - master
+  # Temporary development build for the current PR branch. GitHub's
+  # pull_request.branches filter only matches the base branch, not the head.
   push:
     branches:
-      - master
+      - image-prebake-improvements
+  schedule:
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
-  BASE_IMAGE: ghcr.io/pluralsh/repository-prebake
-  CONSOLE_IMAGE: ghcr.io/pluralsh/console-repos
-  DOCKER_METADATA_PR_HEAD_SHA: "true"
+  BASE_IMAGE: docker.io/pluralsh/repository-prebake
+  CONSOLE_IMAGE: docker.io/pluralsh/console-repos
 
 jobs:
   vouch:
@@ -40,10 +40,28 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
+          service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          create_credentials_file: true
+
+      - uses: google-github-actions/setup-gcloud@v1.0.1
+
+      - name: Login to GCR
+        run: gcloud auth configure-docker -q
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -52,16 +70,24 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate date tag
+        id: tags
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.BASE_IMAGE }}
+          images: |
+            gcr.io/pluralsh/repository-prebake
+            docker.io/pluralsh/repository-prebake
+            ghcr.io/pluralsh/repository-prebake
           flavor: |
             latest=false
           tags: |
-            type=sha,prefix=sha-,format=short
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=${{ steps.tags.outputs.date }},priority=1000,enable=${{ github.event_name != 'push' }}
+            type=raw,value=latest,priority=900,enable=${{ github.event_name != 'push' }}
+            type=sha,prefix=dev-,format=short,priority=800,enable=${{ github.event_name == 'push' }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -82,14 +108,12 @@ jobs:
     timeout-minutes: 180
     permissions:
       contents: read
-      id-token: write
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
 
       - name: Use console dockerignore
         run: cp repository-prebake/console/.dockerignore .dockerignore
@@ -116,12 +140,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GHCR
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Generate date tag
+        id: tags
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
 
       - name: Docker meta
         id: meta
@@ -131,9 +158,9 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=sha,prefix=sha-,format=short
-            type=raw,value=pr-${{ github.event.pull_request.number }},enable=${{ github.event_name == 'pull_request' }}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=${{ steps.tags.outputs.date }},priority=1000,enable=${{ github.event_name != 'push' }}
+            type=raw,value=latest,priority=900,enable=${{ github.event_name != 'push' }}
+            type=sha,prefix=dev-,format=short,priority=800,enable=${{ github.event_name == 'push' }}
 
       - name: Build and push
         uses: docker/build-push-action@v6

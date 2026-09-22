@@ -55,7 +55,7 @@ spec:
           args:
             - --v=3
   dind: true
-  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  repositoryImage: docker.io/pluralsh/console-repos:latest
   readOnlyRootFilesystem: false
   mise:
     config: |
