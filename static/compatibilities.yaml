@@ -17562,6 +17562,28 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.11.0
+    kube: ['1.36']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- **New value:** `global.imageRegistry` added to the `external-secrets`
+        chart. Use this to prefix all images with a private registry/mirror if needed
+        (e.g., `global.imageRegistry: my-registry.example.com`).
+
+        - No other Helm values changes were called out in the provided notes.'
+      chart_updates: [Added `global.imageRegistry` support in the Helm chart., Grafana
+          dashboard ConfigMap can now be created in a specified namespace (chart-related
+          capability noted in release notes).]
+      features: [OpenStack Barbican provider now supports authentication via Application
+          Credentials., Grafana dashboard ConfigMap namespace can be specified (useful
+          when you install dashboards into a central monitoring namespace)., Webhook
+          provider now returns a clear "not supported" error for `GetAllSecrets` instead
+          of ambiguous behavior., KeeperSecurity provider improved behavior for missing
+          records and folderID handling when pushing secrets.]
+      breaking_changes: []
+    chart_version: 2.11.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.11.0']
   - version: 2.10.0
     kube: ['1.36']
     requirements: []
@@ -19084,11 +19106,26 @@ addons:
   chart_name: istiod
   eolApiSlug: istio
   versions:
-  - version: 1.31.0
+  - version: 1.31.1
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary: null
+    chart_version: 1.31.1
+    images: ['docker.io/istio/pilot:1.31.1']
+    eolAt: '2027-02-28'
+  - version: 1.31.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No actionable feature details were included in the provided release
+          notes excerpt; only metadata (tag/date/assets) was shown.]
+      breaking_changes: [No breaking changes were included in the provided release
+          notes excerpt; further details from the full Istio 1.31.0 release notes/changelog
+          are required.]
     chart_version: 1.31.0
     images: ['docker.io/istio/pilot:1.31.0']
     eolAt: '2027-02-28'
@@ -27132,7 +27169,7 @@ addons:
       breaking_changes: [No breaking changes are enumerated in the provided notes;
           they direct readers to the upgrading guide and GitHub issues for breaking
           changes/known issues.]
-    chart_version: 2.0.7
+    chart_version: 2.0.8
     images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
       'quay.io/argoproj/workflow-controller:v4.1.4']
   - version: 4.1.0
@@ -32398,6 +32435,27 @@ addons:
   release_url: https://github.com/ray-project/kuberay/releases/tag/v{vsn}
   helm_repository_url: https://ray-project.github.io/kuberay-helm
   versions:
+  - version: 1.7.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- No Helm values changes are called out in the **v1.7.1** release\
+        \ notes.\n- If your current values were last adjusted around **v1.7.0**, make\
+        \ sure you already handled the earlier Helm breaking change from v1.7.0: `metrics.serviceMonitor.selector`\
+        \ \u2192 `metrics.serviceMonitor.additionalLabels` (and empty labels are no\
+        \ longer emitted)."
+      chart_updates: [No chart-template changes are explicitly mentioned in the v1.7.1
+          notes; this looks like a patch release primarily containing bug fixes and
+          a default-behavior change for the History Server.]
+      features: []
+      breaking_changes: ['History Server live-cluster support is now **disabled by
+          default** to avoid unintended proxying to running clusters. If you relied
+          on live-cluster proxying, you must explicitly re-enable it in your History
+          Server configuration and validate auth/proxy behavior.']
+    chart_version: 1.7.1
+    images: ['quay.io/kuberay/operator:v1.7.1']
   - version: 1.7.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23']
