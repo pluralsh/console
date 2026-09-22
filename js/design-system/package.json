@@ -31,7 +31,7 @@
     "test:ui": "vitest --ui",
     "lint": "run-p lint:format lint:js",
     "lint:format": "prettier --check ./src",
-    "lint:js": "eslint ./src",
+    "lint:js": "eslint ./src --cache",
     "fix": "run-s fix:format fix:js",
     "fix:format": "prettier --write --no-error-on-unmatched-pattern ./src",
     "fix:js": "eslint ./src --fix",

@@ -20,7 +20,7 @@
     "design-system:test": "yarn workspace @pluralsh/design-system test",
     "lint": "run-p lint:format lint:js lint:css design-system:lint",
     "lint:format": "prettier --check ./src",
-    "lint:js": "eslint ./src",
+    "lint:js": "eslint ./src --cache",
     "lint:css": "stylelint src/**/*.css",
     "design-system:lint": "yarn workspace @pluralsh/design-system lint",
     "fix": "run-s fix:js fix:css",

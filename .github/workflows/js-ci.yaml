@@ -53,6 +53,11 @@ jobs:
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
       - run: yarn --immutable
+      - name: Restore ESLint cache
+        uses: actions/cache@v6
+        with:
+          path: js/*/.eslintcache
+          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('js/yarn.lock', 'js/.yarnrc.yml', 'js/**/eslint.config.*', 'js/**/tsconfig*.json') }}
       - run: yarn workspace @pluralsh/eslint-config-pluralsh lint
       - run: yarn workspace @pluralsh/stylelint-config lint
       - run: yarn workspace console lint
