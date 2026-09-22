@@ -1,9 +1,9 @@
 // Package python executes the user-provided Python used by Helm value
 // templating.
 //
-// Scripts run in a fresh Gomonty REPL for every job. The package deliberately
-// does not provide any Gomonty host callbacks, so scripts cannot access the
-// operator process, filesystem, network, or environment.
+// Scripts run in a fresh Gomonty REPL for every job. The sandbox does not
+// expose OS, filesystem, network, or environment access. The only host
+// callback is the read-only k8s_object_meta lookup against the agent cache.
 package python
 
 import (
@@ -292,14 +292,14 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		"service = __helm_bindings.get('service')\n" +
 		"values = {}\n" +
 		"valuesFiles = []\n"
-	if _, err := repl.FeedRun(ctx, initialization, monty.FeedOptions{}); err != nil {
+	if _, err := repl.FeedRun(ctx, initialization, p.feedOptions()); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
-	if _, err := repl.FeedRun(ctx, script, monty.FeedOptions{}); err != nil {
+	if _, err := repl.FeedRun(ctx, script, p.feedOptions()); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
 
-	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles})", monty.FeedOptions{})
+	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles})", p.feedOptions())
 	if err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}

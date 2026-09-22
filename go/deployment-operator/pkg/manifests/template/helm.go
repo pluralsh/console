@@ -228,6 +228,8 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any
 	L := luautils.NewLuaState(h.dir)
 	defer L.Close()
 
+	registerLuaFunctions(L)
+
 	// Register global values and valuesFiles in Lua
 	valuesTable := L.NewTable()
 	L.SetGlobal("values", valuesTable)

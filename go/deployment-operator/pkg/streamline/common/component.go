@@ -25,6 +25,7 @@ type Component struct {
 	TransientManifestSHA string
 	ApplySHA             string
 	ServerSHA            string
+	Labels               map[string]string
 }
 
 func (in *Component) GroupVersionKind() schema.GroupVersionKind {
