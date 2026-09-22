@@ -225,6 +225,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
     field :scm_connection_id,    :id, description: "the SCM connection for this tool (e.g. shared Git provider credentials)"
     field :approval,             :boolean, description: "whether this tool requires approval before execution"
+    field :oauth,                :oauth_token_exchange_attributes, description: "OAuth2 client credentials token exchange"
     field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
     field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
@@ -402,7 +403,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_jira_datacenter_connection_attributes do
     field :url,       non_null(:string), description: "jira data center base URL"
-    field :api_token, non_null(:string), description: "jira data center personal access token"
+    field :api_token, :string, description: "jira data center personal access token"
   end
 
   input_object :workbench_tool_exa_connection_attributes do
@@ -1232,6 +1233,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
     field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
     field :approval,         :boolean, description: "whether this tool requires approval before execution"
+    field :oauth,            :oauth_token_exchange, description: "OAuth2 client credentials token exchange"
     field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
     field :read_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this tool"
     field :write_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this tool"

@@ -3477,6 +3477,9 @@ input WorkbenchToolAttributes {
   "whether this tool requires approval before execution"
   approval: Boolean
 
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchangeAttributes
+
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
 
@@ -3853,7 +3856,7 @@ input WorkbenchToolJiraDatacenterConnectionAttributes {
   url: String!
 
   "jira data center personal access token"
-  apiToken: String!
+  apiToken: String
 }
 
 input WorkbenchToolExaConnectionAttributes {
@@ -5221,6 +5224,9 @@ type WorkbenchTool {
   "whether this tool requires approval before execution"
   approval: Boolean
 
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchange
+
   "the project of this tool"
   project: Project
 
@@ -6411,6 +6417,11 @@ enum McpServerProtocol {
   STREAMABLE_HTTP
 }
 
+enum OauthTokenExchangeType {
+  CLIENT_SECRET
+  CLIENT_ASSERTION
+}
+
 enum FlowSort {
   NAME
   SERVICE_COUNT
@@ -6465,6 +6476,19 @@ input McpServerAttributes {
   writeBindings: [PolicyBindingAttributes]
 }
 
+input OauthTokenExchangeAttributes {
+  enabled: Boolean
+  type: OauthTokenExchangeType
+  tokenUrl: String
+  clientId: String
+  clientSecret: String
+  privateKey: String
+  keyId: String
+  audience: String
+  resource: String
+  scopes: [String]
+}
+
 input McpServerAssociationAttributes {
   serverId: ID
 }
@@ -6477,6 +6501,9 @@ input FlowWorkbenchAttributes {
 input McpServerAuthenticationAttributes {
   "whether to use Plural's built-in JWT authentication"
   plural: Boolean
+
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchangeAttributes
 
   headers: [McpHeaderAttributes]
 }
@@ -6650,9 +6677,23 @@ type McpServer {
   updatedAt: DateTime
 }
 
+type OauthTokenExchange {
+  enabled: Boolean
+  type: OauthTokenExchangeType
+  tokenUrl: String
+  clientId: String
+  keyId: String
+  audience: String
+  resource: String
+  scopes: [String]
+}
+
 type McpServerAuthentication {
   "built-in Plural JWT authentication"
   plural: Boolean
+
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchange
 
   "any custom HTTP headers needed for authentication"
   headers: [McpServerHeader]
@@ -7083,12 +7124,24 @@ input OpenaiHeaderAttributes {
 input OpenaiTokenExchangeAttributes {
   enabled: Boolean
 
+  type: OauthTokenExchangeType
+
   "token endpoint URL"
   tokenUrl: String
 
   clientId: String
 
   clientSecret: String
+
+  privateKey: String
+
+  keyId: String
+
+  audience: String
+
+  resource: String
+
+  scopes: [String]
 }
 
 input AnthropicSettingsAttributes {
@@ -7554,10 +7607,20 @@ type OpenaiHeader {
 type OpenaiTokenExchange {
   enabled: Boolean
 
+  type: OauthTokenExchangeType
+
   "token endpoint URL"
   tokenUrl: String
 
   clientId: String
+
+  keyId: String
+
+  audience: String
+
+  resource: String
+
+  scopes: [String]
 }
 
 "Anthropic connection information"

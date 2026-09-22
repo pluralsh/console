@@ -100,7 +100,7 @@ defmodule Console.AI.XAI do
   end
 
   defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
-    case TokenExchange.exchange(token.token_url, token.client_id, token.client_secret) do
+    case TokenExchange.exchange(token) do
       {:ok, %OAuth2.AccessToken{access_token: token}} when is_binary(token) -> {:ok, token}
       {:ok, token} when is_binary(token) -> {:ok, token}
       err -> err

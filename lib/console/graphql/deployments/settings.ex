@@ -214,9 +214,15 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   input_object :openai_token_exchange_attributes do
     field :enabled, :boolean
+    field :type, :oauth_token_exchange_type
     field :token_url, :string, description: "token endpoint URL"
     field :client_id, :string
     field :client_secret, :string
+    field :private_key, :string
+    field :key_id, :string
+    field :audience, :string
+    field :resource, :string
+    field :scopes, list_of(:string)
   end
 
   input_object :anthropic_settings_attributes do
@@ -632,8 +638,13 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "OAuth2 token endpoint client credentials for OpenAI-compatible APIs"
   object :openai_token_exchange do
     field :enabled, :boolean
+    field :type, :oauth_token_exchange_type
     field :token_url, :string, description: "token endpoint URL"
     field :client_id, :string
+    field :key_id, :string
+    field :audience, :string
+    field :resource, :string
+    field :scopes, list_of(:string)
   end
 
   @desc "Anthropic connection information"

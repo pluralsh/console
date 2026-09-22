@@ -1,6 +1,7 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
   alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient, HelmRepository, OCIAuth}
+  alias Console.Schema.DeploymentSettings.OauthToken, as: TokenExchange
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
@@ -64,6 +65,8 @@ defmodule Console.Schema.WorkbenchTool do
     field :categories,      {:array, Category}
     field :name,            :string
     field :approval,        :boolean, default: false
+
+    embeds_one :oauth, TokenExchange, on_replace: :update
 
     embeds_one :oauth_token, OauthToken, on_replace: :update do
       field :access_token,  :string
@@ -340,8 +343,10 @@ defmodule Console.Schema.WorkbenchTool do
     |> unique_constraint(:name)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> cast_embed(:oauth)
     |> cast_embed(:oauth_token, with: &oauth_token_changeset/2)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
+    |> validate_jira_datacenter_auth()
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cloud_connection_id)
     |> foreign_key_constraint(:mcp_server_id)
@@ -647,8 +652,24 @@ defmodule Console.Schema.WorkbenchTool do
   defp jira_datacenter_configuration_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url api_token)a)
-    |> validate_required([:url, :api_token])
+    |> validate_required([:url])
   end
+
+  defp validate_jira_datacenter_auth(changeset) do
+    with :jira_datacenter <- get_field(changeset, :tool),
+         %{jira_datacenter: jira} <- get_field(changeset, :configuration),
+         false <- present?(jira && jira.api_token),
+         false <- oauth_configured?(get_field(changeset, :oauth)) do
+      add_error(changeset, :configuration, "jira data center requires an API token or OAuth token exchange")
+    else
+      _ -> changeset
+    end
+  end
+
+  defp oauth_configured?(%TokenExchange{enabled: enabled}) when enabled != false, do: true
+  defp oauth_configured?(_), do: false
+
+  defp present?(value), do: is_binary(value) and String.trim(value) != ""
 
   defp github_configuration_changeset(model, attrs) do
     model

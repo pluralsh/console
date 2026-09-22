@@ -6343,12 +6343,16 @@ export type McpServerAuthentication = {
   __typename?: 'McpServerAuthentication';
   /** any custom HTTP headers needed for authentication */
   headers?: Maybe<Array<Maybe<McpServerHeader>>>;
+  /** OAuth2 client credentials token exchange */
+  oauth?: Maybe<OauthTokenExchange>;
   /** built-in Plural JWT authentication */
   plural?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type McpServerAuthenticationAttributes = {
   headers?: InputMaybe<Array<InputMaybe<McpHeaderAttributes>>>;
+  /** OAuth2 client credentials token exchange */
+  oauth?: InputMaybe<OauthTokenExchangeAttributes>;
   /** whether to use Plural's built-in JWT authentication */
   plural?: InputMaybe<Scalars['Boolean']['input']>;
 };
@@ -7050,6 +7054,36 @@ export type OauthResponse = {
   redirectTo: Scalars['String']['output'];
 };
 
+export type OauthTokenExchange = {
+  __typename?: 'OauthTokenExchange';
+  audience?: Maybe<Scalars['String']['output']>;
+  clientId?: Maybe<Scalars['String']['output']>;
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  keyId?: Maybe<Scalars['String']['output']>;
+  resource?: Maybe<Scalars['String']['output']>;
+  scopes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  tokenUrl?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<OauthTokenExchangeType>;
+};
+
+export type OauthTokenExchangeAttributes = {
+  audience?: InputMaybe<Scalars['String']['input']>;
+  clientId?: InputMaybe<Scalars['String']['input']>;
+  clientSecret?: InputMaybe<Scalars['String']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  keyId?: InputMaybe<Scalars['String']['input']>;
+  privateKey?: InputMaybe<Scalars['String']['input']>;
+  resource?: InputMaybe<Scalars['String']['input']>;
+  scopes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  tokenUrl?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<OauthTokenExchangeType>;
+};
+
+export enum OauthTokenExchangeType {
+  ClientAssertion = 'CLIENT_ASSERTION',
+  ClientSecret = 'CLIENT_SECRET'
+}
+
 export type ObjectReference = {
   __typename?: 'ObjectReference';
   name?: Maybe<Scalars['String']['output']>;
@@ -7652,18 +7686,29 @@ export type OpenaiSettingsAttributes = {
 /** OAuth2 token endpoint client credentials for OpenAI-compatible APIs */
 export type OpenaiTokenExchange = {
   __typename?: 'OpenaiTokenExchange';
+  audience?: Maybe<Scalars['String']['output']>;
   clientId?: Maybe<Scalars['String']['output']>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
+  keyId?: Maybe<Scalars['String']['output']>;
+  resource?: Maybe<Scalars['String']['output']>;
+  scopes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** token endpoint URL */
   tokenUrl?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<OauthTokenExchangeType>;
 };
 
 export type OpenaiTokenExchangeAttributes = {
+  audience?: InputMaybe<Scalars['String']['input']>;
   clientId?: InputMaybe<Scalars['String']['input']>;
   clientSecret?: InputMaybe<Scalars['String']['input']>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  keyId?: InputMaybe<Scalars['String']['input']>;
+  privateKey?: InputMaybe<Scalars['String']['input']>;
+  resource?: InputMaybe<Scalars['String']['input']>;
+  scopes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** token endpoint URL */
   tokenUrl?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<OauthTokenExchangeType>;
 };
 
 export type OpensearchConnection = {
@@ -18092,6 +18137,8 @@ export type WorkbenchTool = {
   mcpServer?: Maybe<McpServer>;
   /** the name of the tool */
   name: Scalars['String']['output'];
+  /** OAuth2 client credentials token exchange */
+  oauth?: Maybe<OauthTokenExchange>;
   /** the project of this tool */
   project?: Maybe<Project>;
   /** read policy for this tool */
@@ -18140,6 +18187,8 @@ export type WorkbenchToolAttributes = {
   mcpServerId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of the tool (a-z, 0-9, underscores) */
   name: Scalars['String']['input'];
+  /** OAuth2 client credentials token exchange */
+  oauth?: InputMaybe<OauthTokenExchangeAttributes>;
   /** the project for this tool */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** users who can read and execute this tool */
@@ -18656,7 +18705,7 @@ export type WorkbenchToolJiraDatacenterConnection = {
 
 export type WorkbenchToolJiraDatacenterConnectionAttributes = {
   /** jira data center personal access token */
-  apiToken: Scalars['String']['input'];
+  apiToken?: InputMaybe<Scalars['String']['input']>;
   /** jira data center base URL */
   url: Scalars['String']['input'];
 };

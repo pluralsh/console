@@ -5176,14 +5176,18 @@ type McpServerAuditEdge struct {
 type McpServerAuthentication struct {
 	// built-in Plural JWT authentication
 	Plural *bool `json:"plural,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth *OauthTokenExchange `json:"oauth,omitempty"`
 	// any custom HTTP headers needed for authentication
 	Headers []*McpServerHeader `json:"headers,omitempty"`
 }
 
 type McpServerAuthenticationAttributes struct {
 	// whether to use Plural's built-in JWT authentication
-	Plural  *bool                  `json:"plural,omitempty"`
-	Headers []*McpHeaderAttributes `json:"headers,omitempty"`
+	Plural *bool `json:"plural,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth   *OauthTokenExchangeAttributes `json:"oauth,omitempty"`
+	Headers []*McpHeaderAttributes        `json:"headers,omitempty"`
 }
 
 type McpServerConnection struct {
@@ -5792,6 +5796,30 @@ type OauthResponse struct {
 	RedirectTo string `json:"redirectTo"`
 }
 
+type OauthTokenExchange struct {
+	Enabled  *bool                   `json:"enabled,omitempty"`
+	Type     *OauthTokenExchangeType `json:"type,omitempty"`
+	TokenURL *string                 `json:"tokenUrl,omitempty"`
+	ClientID *string                 `json:"clientId,omitempty"`
+	KeyID    *string                 `json:"keyId,omitempty"`
+	Audience *string                 `json:"audience,omitempty"`
+	Resource *string                 `json:"resource,omitempty"`
+	Scopes   []*string               `json:"scopes,omitempty"`
+}
+
+type OauthTokenExchangeAttributes struct {
+	Enabled      *bool                   `json:"enabled,omitempty"`
+	Type         *OauthTokenExchangeType `json:"type,omitempty"`
+	TokenURL     *string                 `json:"tokenUrl,omitempty"`
+	ClientID     *string                 `json:"clientId,omitempty"`
+	ClientSecret *string                 `json:"clientSecret,omitempty"`
+	PrivateKey   *string                 `json:"privateKey,omitempty"`
+	KeyID        *string                 `json:"keyId,omitempty"`
+	Audience     *string                 `json:"audience,omitempty"`
+	Resource     *string                 `json:"resource,omitempty"`
+	Scopes       []*string               `json:"scopes,omitempty"`
+}
+
 type ObjectReference struct {
 	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
@@ -6296,18 +6324,29 @@ type OpenaiSettingsAttributes struct {
 
 // OAuth2 token endpoint client credentials for OpenAI-compatible APIs
 type OpenaiTokenExchange struct {
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled *bool                   `json:"enabled,omitempty"`
+	Type    *OauthTokenExchangeType `json:"type,omitempty"`
 	// token endpoint URL
-	TokenURL *string `json:"tokenUrl,omitempty"`
-	ClientID *string `json:"clientId,omitempty"`
+	TokenURL *string   `json:"tokenUrl,omitempty"`
+	ClientID *string   `json:"clientId,omitempty"`
+	KeyID    *string   `json:"keyId,omitempty"`
+	Audience *string   `json:"audience,omitempty"`
+	Resource *string   `json:"resource,omitempty"`
+	Scopes   []*string `json:"scopes,omitempty"`
 }
 
 type OpenaiTokenExchangeAttributes struct {
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled *bool                   `json:"enabled,omitempty"`
+	Type    *OauthTokenExchangeType `json:"type,omitempty"`
 	// token endpoint URL
-	TokenURL     *string `json:"tokenUrl,omitempty"`
-	ClientID     *string `json:"clientId,omitempty"`
-	ClientSecret *string `json:"clientSecret,omitempty"`
+	TokenURL     *string   `json:"tokenUrl,omitempty"`
+	ClientID     *string   `json:"clientId,omitempty"`
+	ClientSecret *string   `json:"clientSecret,omitempty"`
+	PrivateKey   *string   `json:"privateKey,omitempty"`
+	KeyID        *string   `json:"keyId,omitempty"`
+	Audience     *string   `json:"audience,omitempty"`
+	Resource     *string   `json:"resource,omitempty"`
+	Scopes       []*string `json:"scopes,omitempty"`
 }
 
 type OpensearchConnection struct {
@@ -11785,6 +11824,8 @@ type WorkbenchTool struct {
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
 	// whether this tool requires approval before execution
 	Approval *bool `json:"approval,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth *OauthTokenExchange `json:"oauth,omitempty"`
 	// the project of this tool
 	Project *Project `json:"project,omitempty"`
 	// read policy for this tool
@@ -11841,6 +11882,8 @@ type WorkbenchToolAttributes struct {
 	ScmConnectionID *string `json:"scmConnectionId,omitempty"`
 	// whether this tool requires approval before execution
 	Approval *bool `json:"approval,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth *OauthTokenExchangeAttributes `json:"oauth,omitempty"`
 	// users who can read and execute this tool
 	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	// users who can modify this tool
@@ -12308,7 +12351,7 @@ type WorkbenchToolJiraDatacenterConnectionAttributes struct {
 	// jira data center base URL
 	URL string `json:"url"`
 	// jira data center personal access token
-	APIToken string `json:"apiToken"`
+	APIToken *string `json:"apiToken,omitempty"`
 }
 
 type WorkbenchToolLambdaConnection struct {
@@ -16353,6 +16396,61 @@ func (e *NotificationStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e NotificationStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type OauthTokenExchangeType string
+
+const (
+	OauthTokenExchangeTypeClientSecret    OauthTokenExchangeType = "CLIENT_SECRET"
+	OauthTokenExchangeTypeClientAssertion OauthTokenExchangeType = "CLIENT_ASSERTION"
+)
+
+var AllOauthTokenExchangeType = []OauthTokenExchangeType{
+	OauthTokenExchangeTypeClientSecret,
+	OauthTokenExchangeTypeClientAssertion,
+}
+
+func (e OauthTokenExchangeType) IsValid() bool {
+	switch e {
+	case OauthTokenExchangeTypeClientSecret, OauthTokenExchangeTypeClientAssertion:
+		return true
+	}
+	return false
+}
+
+func (e OauthTokenExchangeType) String() string {
+	return string(e)
+}
+
+func (e *OauthTokenExchangeType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OauthTokenExchangeType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OauthTokenExchangeType", str)
+	}
+	return nil
+}
+
+func (e OauthTokenExchangeType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *OauthTokenExchangeType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e OauthTokenExchangeType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

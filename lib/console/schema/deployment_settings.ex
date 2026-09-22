@@ -36,20 +36,38 @@ defmodule Console.Schema.DeploymentSettings do
 
   defmodule OauthToken do
     use Console.Schema.Base
+    import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
     alias Piazza.Ecto.EncryptedString
+
+    defenum Type, client_secret: 0, client_assertion: 1
 
     embedded_schema do
       field :enabled,       :boolean
+      field :type,          Type, default: :client_secret
       field :token_url,     :string
       field :client_id,     :string
       field :client_secret, EncryptedString
+      field :private_key,   EncryptedString
+      field :key_id,        :string
+      field :audience,      :string
+      field :resource,      :string
+      field :scopes,        {:array, :string}
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(enabled token_url client_id client_secret)a)
-      |> trim_changes(~w(client_secret)a)
-      |> validate_required([:token_url, :client_id, :client_secret])
+      |> cast(attrs, ~w(enabled type token_url client_id client_secret private_key key_id audience resource scopes)a)
+      |> trim_changes(~w(client_secret private_key)a)
+      |> validate_required([:type, :token_url, :client_id])
+      |> validate_credentials()
+      |> validate_private_key(:private_key)
+    end
+
+    defp validate_credentials(changeset) do
+      case get_field(changeset, :type) do
+        :client_assertion -> validate_required(changeset, [:private_key])
+        _ -> validate_required(changeset, [:client_secret])
+      end
     end
   end
 
