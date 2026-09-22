@@ -38,7 +38,7 @@ import {
   WorkbenchJobTinyFragment,
   WorkbenchMonitorDetailsFragment,
 } from 'generated/graphql'
-import { isEmpty, isNil, times, truncate, upperFirst } from 'lodash'
+import { isEmpty, isNil, times, upperFirst } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
@@ -292,8 +292,6 @@ function MonitorDetailView({
               <MonitorRecentJobs
                 workbenchId={workbenchId}
                 monitorId={monitor.id}
-                monitorName={monitor.name}
-                spawnPrompt={monitor.prompt}
               />
             )}
           </ColumnsSC>
@@ -652,13 +650,9 @@ function LogThresholdPreview({
 function MonitorRecentJobs({
   workbenchId,
   monitorId,
-  monitorName,
-  spawnPrompt,
 }: {
   workbenchId: string
   monitorId: string
-  monitorName: string
-  spawnPrompt?: string | null
 }) {
   const {
     data: currentData,
@@ -672,12 +666,6 @@ function MonitorRecentJobs({
   })
   const data = currentData ?? previousData
   const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
-  const spawnDescription = useMemo(() => {
-    const trimmed = spawnPrompt?.trim()
-    if (!trimmed) return undefined
-    const preview = truncate(trimmed, { length: 160, omission: '…' })
-    return `When ${monitorName} fires it will spawn a job: ${preview}`
-  }, [monitorName, spawnPrompt])
 
   return (
     <RecentSectionSC>
@@ -695,10 +683,12 @@ function MonitorRecentJobs({
         </JobsGridSC>
       ) : isEmpty(jobs) ? (
         <EmptyJobsSC>
-          <EmptyState
-            message="No recent jobs yet, this monitor has not fired"
-            description={spawnDescription}
-          />
+          <Body2P
+            $color="text-light"
+            css={{ margin: 0, textAlign: 'center' }}
+          >
+            No recent jobs yet, this job has not fired
+          </Body2P>
         </EmptyJobsSC>
       ) : (
         <JobsGridSC>
@@ -1020,10 +1010,17 @@ const JobsGridSC = styled.div(({ theme }) => ({
   gridTemplateColumns: '1fr',
 }))
 
-const EmptyJobsSC = styled(Card)(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero'],
+const EmptyJobsSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  border: `1px dashed ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.large,
+  boxSizing: 'border-box',
+  display: 'flex',
+  justifyContent: 'center',
+  maxWidth: 456,
   minHeight: 72,
   padding: theme.spacing.medium,
+  width: '100%',
 }))
 
 const JobCardSC = styled(Card)(({ theme }) => ({
