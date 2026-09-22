@@ -659,7 +659,7 @@ function MonitorRecentJobs({
 
   return (
     <RecentSectionSC>
-      <Body1P css={{ margin: 0 }}>Recent jobs</Body1P>
+      <SectionTitleSC>Recent jobs</SectionTitleSC>
       {error && <GqlError error={error} />}
       {!data && loading ? (
         <JobsGridSC>
@@ -966,8 +966,17 @@ const GraphWrapperSC = styled.div({
 const RecentSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
+  gap: theme.spacing.large,
   minWidth: 0,
+}))
+
+const SectionTitleSC = styled.h3(({ theme }) => ({
+  color: theme.colors.text,
+  fontFamily: theme.fontFamilies.mono,
+  fontSize: 18,
+  fontWeight: 400,
+  lineHeight: '24px',
+  margin: 0,
 }))
 
 const JobsGridSC = styled.div(({ theme }) => ({
