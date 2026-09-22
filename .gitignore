@@ -86,3 +86,6 @@ data/
 
 # Agents
 .codex/
+
+# Rust
+go/deployment-operator/rust/**/target/
