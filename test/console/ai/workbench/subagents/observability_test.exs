@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.AI.Workbench.{Subagents, Environment}
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
   alias Console.AI.Tools.Workbench.Observability.Metrics
   alias Console.Deployments.Workbenches
   alias Console.Schema.WorkbenchJobThought
@@ -37,7 +37,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       ]
       result_output = "Investigation complete. CPU usage is at 50%."
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "enabling tools", [
           %Tool{
             name: "enable_tools",
@@ -46,7 +46,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
           }
         ]}
       end)
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "querying metrics", [
           %Tool{
             name: metrics_tool_name,
@@ -56,7 +56,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
         ]}
       end)
       expect(Metrics, :implement, fn _input -> {:ok, "{\"metrics\":[]}"} end)
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "summarizing", [
           %Tool{
             name: "observability_result",
@@ -119,12 +119,15 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       assert metrics_thought
       assert metrics_thought.tool_id == tool.id
       assert metrics_thought.tool_args == %{"query" => "up"}
+      assert metrics_thought.tool_call.call_id == "1"
+      assert metrics_thought.tool_call.name == metrics_tool_name
+      assert metrics_thought.tool_call.arguments == %{"query" => "up"}
 
       enable_thought = Enum.find(thoughts, & &1.tool_name == "enable_tools")
       assert enable_thought
       refute enable_thought.tool_id
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "summarizing", [
           %Tool{
             name: "observability_result",
@@ -139,7 +142,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
           }
         ]}
       end)
-      expect(Provider, :completion, fn messages, _ ->
+      expect_reqllm_completion(fn messages, _ ->
         assert Enum.any?(messages, fn
                  {:tool, content, _} ->
                    content =~

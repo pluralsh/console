@@ -686,6 +686,14 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     const { email } = config?.atlassian ?? {}
     return { atlassian: { email: email ?? '' } }
   },
+  [WorkbenchToolType.Jira]: (config) => {
+    const { url, email } = config?.jira ?? {}
+    return { jira: { url: url ?? '', email: email ?? '', apiToken: '' } }
+  },
+  [WorkbenchToolType.JiraDatacenter]: (config) => {
+    const { url } = config?.jiraDatacenter ?? {}
+    return { jiraDatacenter: { url: url ?? '', apiToken: '' } }
+  },
   [WorkbenchToolType.Exa]: () => ({ exa: { apiKey: '' } }),
   [WorkbenchToolType.Github]: (config) => {
     const { url, toolset, appId, installationId } = config?.github ?? {}

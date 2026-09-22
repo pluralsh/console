@@ -3,36 +3,13 @@ defmodule Console.AI.Ollama do
   Implements our basic llm behaviour against a self-hosted ollama deployment
   """
   @behaviour Console.AI.Provider
-
-  require Logger
+  import Console.AI.Provider.Base
 
   defstruct [:url, :model, :tool_model, :authorization]
 
   def defaults(), do: %{}
 
   @type t :: %__MODULE__{}
-
-  @base_headers [{"content-type", "application/json"}]
-
-  @options [receive_timeout: :timer.minutes(5), connect_options: [timeout: :timer.minutes(5)], decode_body: false, retry: false]
-
-  defmodule Message do
-    @type t :: %__MODULE__{}
-
-    defstruct [:role, :content]
-
-    def spec(), do: %__MODULE__{}
-  end
-
-  defmodule ChatResponse do
-    alias Console.AI.Ollama
-
-    @type t :: %__MODULE__{message: Ollama.Message.t}
-
-    defstruct [:model, :message]
-
-    def spec(), do: %__MODULE__{message: Ollama.Message.spec()}
-  end
 
   def new(opts) do
     %__MODULE__{
@@ -48,18 +25,11 @@ defmodule Console.AI.Ollama do
   @doc """
   Generate a anthropic completion from
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{} = ollama, messages, _) do
-    history = Enum.map(messages, fn
-      {:tool, msg, _} -> %{role: :user, content: msg}
-      {role, msg} -> %{role: role, content: msg}
-    end)
-    case chat(ollama, history) do
-      {:ok, %ChatResponse{message: %Message{content: content}}} ->
-        {:ok, content}
-      {:ok, _} -> {:error, "could not generate an ai completion for this context"}
-      error -> error
-    end
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
+  def completion(%__MODULE__{} = ollama, messages, opts) do
+    messages
+    |> reqllm_messages()
+    |> generate_text(model(ollama, opts[:model]), nil, base_opts(request_opts(ollama), opts))
   end
 
   def context_window(_), do: 128_000 * 4
@@ -70,26 +40,23 @@ defmodule Console.AI.Ollama do
 
   def tools?(), do: false
 
-  defp chat(%__MODULE__{url: url, model: model} = ollama, history) do
-    body = Jason.encode!(%{
-      model: model,
-      messages: history,
+  defp model(%__MODULE__{url: url, model: default}, model) do
+    ReqLLM.model!(%{
+      provider: :ollama,
+      model: model || default,
+      base_url: ollama_url(url)
     })
-
-    "#{url}/api/chat"
-    |> Req.post([headers: auth(ollama, @base_headers), body: body] ++ @options)
-    |> handle_response(ChatResponse.spec())
   end
 
-  defp handle_response({:ok, %Req.Response{status: code, body: body}}, type) when code in 200..299,
-    do: Poison.decode(body, as: type)
-  defp handle_response({:ok, %Req.Response{body: body}}, _) do
-    Logger.error "ollama error: #{body}"
-    {:error, "ollama error: #{body}"}
+  defp ollama_url(url) when is_binary(url) do
+    url
+    |> String.trim_trailing("/")
+    |> String.trim_trailing("/v1")
+    |> Path.join("/v1")
   end
-  defp handle_response({:error, err}, _), do: {:error, "ollama network error: #{Jason.encode!(Map.from_struct(err))}"}
+  defp ollama_url(_), do: nil
 
-  defp auth(%__MODULE__{authorization: auth}, headers) when is_binary(auth),
-    do: [{"authorization", auth} | headers]
-  defp auth(_, headers), do: headers
+  defp request_opts(%__MODULE__{authorization: auth}) when is_binary(auth),
+    do: [req_http_options: [headers: [{"authorization", auth}]]]
+  defp request_opts(_), do: []
 end

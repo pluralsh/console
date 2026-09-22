@@ -9,6 +9,7 @@ import {
   SidePanelOpenIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import {
   bindingToBindingAttributes,
   FormBindings,
@@ -23,8 +24,10 @@ import {
 import {
   McpHeaderAttributes,
   McpServerAttributes,
+  McpServerFragment,
   McpServerProtocol,
   PolicyBindingFragment,
+  useUpdateMcpServerMutation,
   useUpsertMcpServerMutation,
   WorkbenchToolType,
 } from 'generated/graphql'
@@ -50,11 +53,38 @@ function newHeaderField(): HeaderField {
   return { id: crypto.randomUUID(), name: '', value: '' }
 }
 
-export function McpServerCreateForm() {
+function headersFromServer(server?: McpServerFragment): HeaderField[] {
+  const existing =
+    server?.authentication?.headers
+      ?.filter(
+        (header): header is { id: string; name: string; value: string } =>
+          !!header?.name
+      )
+      .map((header) => ({
+        id: header.id,
+        name: header.name,
+        value: header.value ?? '',
+      })) ?? []
+
+  return existing.length > 0 ? existing : [newHeaderField()]
+}
+
+export function McpServerCreateForm({
+  existingServer,
+  backPath,
+  onSaved,
+  showSetupGuideButton = true,
+}: {
+  existingServer?: McpServerFragment
+  backPath?: string
+  onSaved?: () => void
+  showSetupGuideButton?: boolean
+}) {
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
+  const isEditing = !!existingServer
 
   const returnParams = useMemo(
     () =>
@@ -63,14 +93,23 @@ export function McpServerCreateForm() {
       }),
     []
   )
+  const resolvedBackPath =
+    backPath ?? `${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`
 
-  const [name, setName] = useState('')
-  const [url, setUrl] = useState('')
+  const [name, setName] = useState(existingServer?.name ?? '')
+  const [url, setUrl] = useState(existingServer?.url ?? '')
   const [protocol, setProtocol] = useState<McpServerProtocol>(
-    McpServerProtocol.Sse
+    existingServer?.protocol ?? McpServerProtocol.StreamableHttp
   )
-  const [headers, setHeaders] = useState<HeaderField[]>([newHeaderField()])
-  const [readBindings, setReadBindings] = useState<PolicyBindingFragment[]>([])
+  const [headers, setHeaders] = useState<HeaderField[]>(() =>
+    headersFromServer(existingServer)
+  )
+  const [readBindings, setReadBindings] = useState<PolicyBindingFragment[]>(
+    () =>
+      (existingServer?.readBindings?.filter(
+        (binding): binding is PolicyBindingFragment => !!binding
+      ) ?? []) as PolicyBindingFragment[]
+  )
 
   const attributes = useMemo<Nullable<McpServerAttributes>>(() => {
     const trimmedName = name.trim()
@@ -78,7 +117,8 @@ export function McpServerCreateForm() {
     if (!trimmedName || !trimmedUrl) return null
 
     const configuredHeaders = headers
-      .map(({ name: headerName, value }) => ({
+      .map(({ id, name: headerName, value }) => ({
+        id,
         name: headerName.trim(),
         value: value.trim(),
       }))
@@ -96,19 +136,33 @@ export function McpServerCreateForm() {
     }
   }, [name, url, protocol, headers, readBindings])
 
-  const [upsert, { loading, error }] = useUpsertMcpServerMutation({
-    onCompleted: ({ upsertMcpServer }) => {
-      if (!upsertMcpServer) return
-      popToast({
-        content: `${upsertMcpServer.name} created`,
-        severity: 'success',
-      })
-      returnParams.set(MCP_SERVER_SELECTED_QUERY_PARAM, upsertMcpServer.id)
-      navigate(`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`)
-    },
-    refetchQueries: ['McpServers'],
-    awaitRefetchQueries: true,
-  })
+  const complete = (server: Nullable<{ id: string; name: string }>) => {
+    if (!server) return
+    popToast({
+      content: `${server.name} ${isEditing ? 'updated' : 'created'}`,
+      severity: 'success',
+    })
+    if (onSaved) {
+      onSaved()
+      return
+    }
+    returnParams.set(MCP_SERVER_SELECTED_QUERY_PARAM, server.id)
+    navigate(`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`)
+  }
+  const [upsert, { loading: upserting, error: upsertError }] =
+    useUpsertMcpServerMutation({
+      onCompleted: ({ upsertMcpServer }) => complete(upsertMcpServer),
+      refetchQueries: ['McpServers'],
+      awaitRefetchQueries: true,
+    })
+  const [update, { loading: updating, error: updateError }] =
+    useUpdateMcpServerMutation({
+      onCompleted: ({ updateMcpServer }) => complete(updateMcpServer),
+      refetchQueries: ['McpServers'],
+      awaitRefetchQueries: true,
+    })
+  const loading = upserting || updating
+  const error = upsertError || updateError
 
   useEffect(() => {
     if (!isOpen) return
@@ -133,9 +187,14 @@ export function McpServerCreateForm() {
     >
       {error && <GqlError error={error} />}
 
-      <Flex gap="medium">
+      <Flex
+        gap="medium"
+        justify={showSetupGuideButton ? undefined : 'center'}
+      >
         <FormCardSC css={{ maxWidth: 750, width: '100%' }}>
-          <OverlineH3 $color="text-xlight">New MCP server</OverlineH3>
+          <OverlineH3 $color="text-xlight">
+            {isEditing ? 'Edit MCP server' : 'New MCP server'}
+          </OverlineH3>
           <FormField
             required
             label="Name"
@@ -159,29 +218,35 @@ export function McpServerCreateForm() {
           </FormField>
           <FormField
             label="Protocol"
-            hint="Transport protocol used by the MCP server."
+            hint="Streamable HTTP is recommended. SSE is deprecated and should only be used when necessary."
           >
             <Select
               selectedKey={protocol}
               onSelectionChange={(key) =>
-                setProtocol((key as McpServerProtocol) ?? McpServerProtocol.Sse)
+                setProtocol(
+                  (key as McpServerProtocol) ?? McpServerProtocol.StreamableHttp
+                )
               }
               selectionMode="single"
               label="Protocol"
             >
               <ListBoxItem
-                key={McpServerProtocol.Sse}
-                label="SSE"
-              />
-              <ListBoxItem
                 key={McpServerProtocol.StreamableHttp}
                 label="Streamable HTTP"
+              />
+              <ListBoxItem
+                key={McpServerProtocol.Sse}
+                label="SSE (deprecated)"
               />
             </Select>
           </FormField>
           <FormField
             label="Headers"
-            hint="Optional authentication or other HTTP headers sent to the MCP server."
+            hint={
+              isEditing
+                ? 'Header values are secrets. Leave the masked value unchanged to keep the existing secret.'
+                : 'Header values are stored as secrets and are not shown after save.'
+            }
           >
             <Flex
               direction="column"
@@ -208,8 +273,9 @@ export function McpServerCreateForm() {
                         )
                       }}
                     />
-                    <Input
+                    <InputRevealer
                       placeholder="Value"
+                      defaultRevealed={false}
                       value={header.value}
                       onChange={(e) => {
                         setHeaders((prev) =>
@@ -268,15 +334,20 @@ export function McpServerCreateForm() {
             <Button
               secondary
               as={Link}
-              to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`}
+              to={resolvedBackPath}
               disabled={loading}
             >
               Back
             </Button>
             <Button
-              onClick={() =>
-                attributes && upsert({ variables: { attributes } })
-              }
+              onClick={() => {
+                if (!attributes) return
+                if (existingServer)
+                  update({
+                    variables: { id: existingServer.id, attributes },
+                  })
+                else upsert({ variables: { attributes } })
+              }}
               loading={loading}
               disabled={!canSave}
             >
@@ -284,7 +355,7 @@ export function McpServerCreateForm() {
             </Button>
           </StickyActionsFooterSC>
         </FormCardSC>
-        {!isOpen && (
+        {showSetupGuideButton && !isOpen && (
           <div css={{ width: 200 }}>
             <Button
               secondary

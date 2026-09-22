@@ -26,7 +26,7 @@ node_modules/
 go.work.sum
 .cache/
 .go/
-go/.gopath/
+.gopath/
 
 # Test binary, built with `go test -c`
 *.test

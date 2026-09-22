@@ -4,7 +4,7 @@ defmodule Console.AI.Workbench.Subagents.SkillTest do
   use Mimic
 
   alias Console.AI.Workbench.{Subagents.Skill, Environment}
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
 
   import ElasticsearchUtils
 
@@ -45,7 +45,7 @@ defmodule Console.AI.Workbench.Subagents.SkillTest do
 
       skill_name = "auth-middleware-503-pattern"
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "creating a new skill to capture this",
          [
            %Tool{
@@ -136,7 +136,7 @@ defmodule Console.AI.Workbench.Subagents.SkillTest do
 
       skill_name = "redis-pool-rollout-throttling"
 
-      expect(Provider, :completion, fn messages, opts ->
+      expect_reqllm_completion(fn messages, opts ->
         assert inspect(messages) =~ "Never exceed 12 total skills"
         assert opts[:preface] =~ "source of truth"
         assert opts[:preface] =~ "Background knowledge is often stale"

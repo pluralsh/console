@@ -51,6 +51,7 @@ defmodule Console.GraphQl.Deployments.Flow do
   end
 
   input_object :mcp_header_attributes do
+    field :id,    :id
     field :name,  non_null(:string)
     field :value, non_null(:string)
   end
@@ -185,8 +186,13 @@ defmodule Console.GraphQl.Deployments.Flow do
   end
 
   object :mcp_server_header do
+    field :id,    non_null(:id)
     field :name,  non_null(:string)
-    field :value, non_null(:string)
+    field :value, non_null(:string),
+      description: "obfuscated header value; the real secret is never returned over GraphQL",
+      resolve: fn _, _, _ ->
+        {:ok, Console.Schema.McpServer.obfuscated_header_value()}
+      end
   end
 
   object :mcp_server_audit do
@@ -344,6 +350,17 @@ defmodule Console.GraphQl.Deployments.Flow do
       arg :attributes, non_null(:mcp_server_attributes)
 
       resolve &Deployments.upsert_mcp_server/2
+    end
+
+    field :update_mcp_server, :mcp_server do
+      middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:mcp_server_attributes)
+
+      resolve &Deployments.update_mcp_server/2
     end
 
     field :delete_mcp_server, :mcp_server do

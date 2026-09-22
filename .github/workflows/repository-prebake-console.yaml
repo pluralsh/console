@@ -1,0 +1,180 @@
+name: CD / Repository prebake
+
+on:
+  # Temporary development build for the current PR branch. GitHub's
+  # pull_request.branches filter only matches the base branch, not the head.
+  push:
+    branches:
+      - image-prebake-improvements
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE_IMAGE: docker.io/pluralsh/repository-prebake
+  CONSOLE_IMAGE: docker.io/pluralsh/console-repos
+
+jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
+  base:
+    name: Build repository-prebake
+    needs: [vouch]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
+          service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          create_credentials_file: true
+
+      - uses: google-github-actions/setup-gcloud@v1.0.1
+
+      - name: Login to GCR
+        run: gcloud auth configure-docker -q
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate date tag
+        id: tags
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            gcr.io/pluralsh/repository-prebake
+            docker.io/pluralsh/repository-prebake
+            ghcr.io/pluralsh/repository-prebake
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=${{ steps.tags.outputs.date }},priority=1000,enable=${{ github.event_name != 'push' }}
+            type=raw,value=latest,priority=900,enable=${{ github.event_name != 'push' }}
+            type=sha,prefix=dev-,format=short,priority=800,enable=${{ github.event_name == 'push' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: go/repository-prebake
+          file: repository-prebake/base/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha,scope=repository-prebake-base
+          cache-to: type=gha,mode=max,scope=repository-prebake-base
+
+  console:
+    name: Build console-repos
+    needs: [vouch, base]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Use console dockerignore
+        run: cp repository-prebake/console/.dockerignore .dockerignore
+
+      # GITHUB_TOKEN cannot clone private sibling repos. Keep public extras
+      # (plural-cli, plural) and skip plrl-up-demos until PLURAL_BOT_PAT is set.
+      # Check the env var — secrets are not allowed in step if: conditionals.
+      - name: Drop private extra-context without PAT
+        env:
+          PAT: ${{ secrets.PLURAL_BOT_PAT }}
+        run: |
+          if [ -z "$PAT" ]; then
+            printf '%s\n' \
+              'repositories:' \
+              '  - url: https://github.com/pluralsh/console.git' \
+              '    path: console' \
+              '  - url: https://github.com/pluralsh/plural-cli.git' \
+              '    path: plural-cli' \
+              '  - url: https://github.com/pluralsh/plural.git' \
+              '    path: plural' \
+              > repository-prebake/console/repos.yaml
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Generate date tag
+        id: tags
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.CONSOLE_IMAGE }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=${{ steps.tags.outputs.date }},priority=1000,enable=${{ github.event_name != 'push' }}
+            type=raw,value=latest,priority=900,enable=${{ github.event_name != 'push' }}
+            type=sha,prefix=dev-,format=short,priority=800,enable=${{ github.event_name == 'push' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: repository-prebake/console/Dockerfile
+          push: true
+          pull: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          build-args: |
+            PREBAKE_IMAGE=${{ env.BASE_IMAGE }}:${{ needs.base.outputs.version }}
+          secrets: |
+            git_token=${{ secrets.PLURAL_BOT_PAT || github.token }}
+          cache-from: type=gha,scope=repository-prebake-console
+          cache-to: type=gha,mode=max,scope=repository-prebake-console

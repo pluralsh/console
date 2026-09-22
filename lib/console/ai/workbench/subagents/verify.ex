@@ -19,7 +19,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
     tools(job, environment)
     |> MemoryEngine.new(20,
       engine_opts(environment) ++ [
-        system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
+        system_prompt: String.trim(system_prompt()),
         acc: %{},
         callback: &callback(activity, environment, &1),
         pre_enable: [Result | skill_knowledge_pre_enable()],
@@ -104,5 +104,5 @@ defmodule Console.AI.Workbench.Subagents.Verify do
     do: {:tool, content, %{call_id: id, name: name, arguments: args}}
   defp tool_msg(content, _), do: {:user, content}
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "verify.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "verify.md.eex"]), [])
 end

@@ -35,7 +35,6 @@ import {
   PLRL_CHIP_TAG_NAMES,
 } from '../input/autocomplete/mentionTypes'
 import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
-import { stripEmoji } from '../../stripEmoji'
 
 const chipSanitizeSchema = {
   ...markdownSanitizeSchema,
@@ -299,7 +298,6 @@ export function SimplifiedMarkdown({
   tone?: 'major' | 'thought' | 'meta'
 }) {
   const Root = rootLayout === 'block' ? SimpleMarkdownBlockSC : SimpleMarkdownSC
-  const displayText = stripEmoji(text)
   const resolvedTone = tone ?? 'thought'
 
   return (
@@ -369,7 +367,7 @@ export function SimplifiedMarkdown({
           td: ({ children }) => <TdSC>{children}</TdSC>,
         }}
       >
-        {displayText}
+        {text}
       </ReactMarkdown>
     </Root>
   )

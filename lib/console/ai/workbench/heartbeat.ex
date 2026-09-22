@@ -31,8 +31,9 @@ defmodule Console.AI.Workbench.Heartbeat do
     {:ok, %State{job: job, booted: true, usage: preserve_usage(job.usage), reprompt: reprompt(job)}}
   end
 
-  def handle_cast({:usage, %{} = new_usage, _provider, _model, price_sheet}, %State{usage: usage} = state) do
+  def handle_cast({:usage, %{} = new_usage, provider, model, price_sheet}, %State{usage: usage} = state) do
     new_usage
+    |> normalize_usage(provider, model)
     |> ModelSelection.backfill_usage(price_sheet)
     |> merge_usage(usage)
     |> enforce_budget(state)
@@ -57,6 +58,28 @@ defmodule Console.AI.Workbench.Heartbeat do
       end
     end)
   end
+
+  # ReqLLM reports Bedrock Anthropic input and cache counters as separate
+  # dimensions while its total only includes uncached input and output. Keep
+  # the provider total when it is complete, otherwise reconstruct it before
+  # AIUsage sanitization drops cache_creation_tokens.
+  defp normalize_usage(usage, :bedrock, model) when is_binary(model) do
+    if String.contains?(model, "anthropic.") do
+      input = numeric(usage[:input_tokens])
+      output = numeric(usage[:output_tokens])
+      cached = numeric(usage[:cached_tokens])
+      cache_creation = numeric(usage[:cache_creation_tokens])
+      reported = numeric(usage[:total_tokens])
+
+      Map.put(usage, :total_tokens, max(reported, input + output + cached + cache_creation))
+    else
+      usage
+    end
+  end
+  defp normalize_usage(usage, _, _), do: usage
+
+  defp numeric(value) when is_number(value), do: value
+  defp numeric(_), do: 0
 
   def handle_info({:EXIT, _, _}, state), do: {:stop, :shutdown, state}
   def handle_info(:timeout, state), do: {:stop, :timeout, state}

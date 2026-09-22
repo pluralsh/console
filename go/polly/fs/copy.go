@@ -27,7 +27,11 @@ func CopyDir(src, dst string) error {
 		return err
 	}
 
-	return filepath.WalkDir(src, func(path string, d os.DirEntry, err error) error {
+	// Go module caches use 0555 directories. WalkDir visits a directory before
+	// its children, so mkdir with the source mode would make copyFile fail with
+	// permission denied. Create dirs writable, then restore source perms.
+	var dirPerms []copiedDir
+	if err := filepath.WalkDir(src, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -56,7 +60,11 @@ func CopyDir(src, dst string) error {
 			if err != nil {
 				return err
 			}
-			return os.MkdirAll(target, dirInfo.Mode().Perm())
+			if err := os.MkdirAll(target, 0755); err != nil {
+				return err
+			}
+			dirPerms = append(dirPerms, copiedDir{path: target, perm: dirInfo.Mode().Perm()})
+			return nil
 		case d.Type().IsRegular():
 			fileInfo, err := d.Info()
 			if err != nil {
@@ -66,7 +74,21 @@ func CopyDir(src, dst string) error {
 		default:
 			return nil
 		}
-	})
+	}); err != nil {
+		return err
+	}
+
+	for i := len(dirPerms) - 1; i >= 0; i-- {
+		if err := os.Chmod(dirPerms[i].path, dirPerms[i].perm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type copiedDir struct {
+	path string
+	perm os.FileMode
 }
 
 func copyFile(src, dst string, mode os.FileMode) error {
@@ -90,4 +112,39 @@ func copyFile(src, dst string, mode os.FileMode) error {
 		return err
 	}
 	return out.Chmod(mode)
+}
+
+// MoveDir relocates src to dst. It tries rename first (same filesystem, no extra
+// disk). If rename fails, it copies then removes src. dst must not already exist.
+func MoveDir(src, dst string) error {
+	src = filepath.Clean(src)
+	dst = filepath.Clean(dst)
+
+	info, err := os.Lstat(src)
+	if err != nil {
+		return fmt.Errorf("move: stat source: %w", err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("move: source is not a directory: %s", src)
+	}
+	if _, err := os.Lstat(dst); err == nil {
+		return fmt.Errorf("move: destination already exists: %s", dst)
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+
+	if err := CopyDir(src, dst); err != nil {
+		_ = os.RemoveAll(dst)
+		return err
+	}
+	if err := os.RemoveAll(src); err != nil {
+		return fmt.Errorf("move: copied to %s but failed to remove %s: %w", dst, src, err)
+	}
+	return nil
 }

@@ -55,4 +55,28 @@ spec:
           args:
             - --v=3
   dind: true
-  repositoryImage: ghcr.io/pluralsh/repos:latest
+  repositoryImage: docker.io/pluralsh/console-repos:latest
+  readOnlyRootFilesystem: false
+  mise:
+    config: |
+      [settings.erlang]
+      compile = false
+      precompiled_os = "ubuntu-24.04"
+
+      [tools]
+      erlang = "28.5"
+      elixir = "1.19.4"
+      rust = "stable"
+      go = "1.27.1"
+      node = "24.11.1"
+
+      [env]
+      MIX_HOME = "/plural/shared/repository/.mix"
+      MIX_ARCHIVES = "/plural/shared/repository/.mix/archives"
+      HEX_HOME = "/plural/shared/repository/.hex"
+      ELIXIR_ERL_OPTIONS = "+fnu"
+      GOPATH = "/plural/shared/repository/.gopath"
+      GOBIN = "/plural/shared/repository/.gopath/bin"
+      GOCACHE = "/plural/shared/repository/.cache/go-build"
+      GOMODCACHE = "/plural/shared/repository/.cache/pkg/mod"
+      GOWORK = "/plural/shared/repository/go/go.work"

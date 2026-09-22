@@ -36,7 +36,9 @@ defmodule Console.Schema.WorkbenchTool do
     cloud_run: 27,
     azure_function: 28,
     docker: 29,
-    victoria_logs: 30
+    victoria_logs: 30,
+    jira: 31,
+    jira_datacenter: 32
 
   defenum Category,
     metrics: 0,
@@ -126,6 +128,17 @@ defmodule Console.Schema.WorkbenchTool do
         field :service_account, EncryptedString
         field :api_token,       EncryptedString
         field :email,           :string
+      end
+
+      embeds_one :jira, JiraConnection, on_replace: :update do
+        field :url,       :string
+        field :api_token, EncryptedString
+        field :email,     :string
+      end
+
+      embeds_one :jira_datacenter, JiraDatacenterConnection, on_replace: :update do
+        field :url,       :string
+        field :api_token, EncryptedString
       end
 
       embeds_one :prometheus, PrometheusConnection, on_replace: :update do
@@ -333,7 +346,9 @@ defmodule Console.Schema.WorkbenchTool do
     |> foreign_key_constraint(:cloud_connection_id)
     |> foreign_key_constraint(:mcp_server_id)
     |> foreign_key_constraint(:scm_connection_id)
-    |> validate_format(:name, ~r/^[a-z0-9]([\._a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, .,  and underscores allowed)")
+    |> validate_format(:name, ~r/^[a-z](?:[a-z0-9._]*[a-z0-9])?$/,
+      message: "must be a valid name for OpenAI tool calling: start with a lowercase letter, end with a letter or number, and contain only lowercase letters, numbers, dots, and underscores"
+    )
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :tool])
@@ -399,6 +414,8 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:pagerduty), do: [:integration]
   defp categories(:teams), do: [:chat]
   defp categories(:atlassian), do: [:ticketing]
+  defp categories(:jira), do: [:ticketing]
+  defp categories(:jira_datacenter), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]
   defp categories(:gitlab), do: [:scm]
@@ -431,6 +448,8 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:pagerduty, with: &pagerduty_configuration_changeset/2)
     |> cast_embed(:teams, with: &teams_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
+    |> cast_embed(:jira, with: &jira_configuration_changeset/2)
+    |> cast_embed(:jira_datacenter, with: &jira_datacenter_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
     |> cast_embed(:gitlab, with: &gitlab_configuration_changeset/2)
     |> cast_embed(:bitbucket, with: &bitbucket_configuration_changeset/2)
@@ -617,6 +636,18 @@ defmodule Console.Schema.WorkbenchTool do
         _ -> validate_required(cs, [:api_token, :email])
       end
     end)
+  end
+
+  defp jira_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url api_token email)a)
+    |> validate_required([:url, :api_token, :email])
+  end
+
+  defp jira_datacenter_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url api_token)a)
+    |> validate_required([:url, :api_token])
   end
 
   defp github_configuration_changeset(model, attrs) do

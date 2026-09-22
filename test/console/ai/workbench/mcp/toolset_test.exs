@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.MCP.ToolsetTest do
   alias Console.AI.Tool
   alias Console.AI.Workbench.MCP.Toolset
   alias Console.AI.Tools.Workbench.Http
+  alias Console.AI.Tools.Workbench.Integration.Docker.SearchTags
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.Configuration
   alias Console.Schema.WorkbenchTool.Configuration.HttpConfiguration
@@ -28,6 +29,29 @@ defmodule Console.AI.Workbench.MCP.ToolsetTest do
         |> Enum.map(&Tool.name/1)
 
       assert names == ["http_integration_search.prod"]
+    end
+
+    test "classifies docker/oci tools as both infrastructure and integration" do
+      docker = %SearchTags{
+        tool: %WorkbenchTool{
+          name: "hub",
+          tool: :docker,
+          categories: [:integration]
+        }
+      }
+      other = http("other")
+
+      infra =
+        Toolset.filter([docker, other], {:categories, [:infrastructure]})
+        |> Enum.map(&Tool.name/1)
+
+      integration =
+        Toolset.filter([docker, other], {:categories, [:integration]})
+        |> Enum.map(&Tool.name/1)
+
+      assert infra == ["docker_hub_search_tags"]
+      assert "docker_hub_search_tags" in integration
+      assert "http_integration_other" in integration
     end
   end
 

@@ -185,6 +185,9 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   defp function?(%WorkbenchTool{tool: :http, configuration: %{http: %{function: true}}}), do: true
   defp function?(_), do: false
 
+  defp categories(%{tool: %WorkbenchTool{tool: :docker, categories: [_ | _] = categories}}),
+    do: Enum.uniq([:infrastructure | categories])
+  defp categories(%{tool: %WorkbenchTool{tool: :docker}}), do: [:infrastructure, :integration]
   defp categories(%{tool: %WorkbenchTool{categories: [_ | _] = categories}}), do: categories
   defp categories(%{tool: %WorkbenchTool{}}), do: [:integration]
   defp categories(%mod{}), do: builtin_categories(mod)

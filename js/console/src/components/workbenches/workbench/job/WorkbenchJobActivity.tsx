@@ -17,7 +17,6 @@ import {
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
-import { stripEmoji } from 'components/ai/stripEmoji'
 import {
   SimpleAccordion,
   SimpleToolCall,
@@ -1004,7 +1003,7 @@ function workbenchActivitySummary({
     .find(Boolean)
   if (!raw) return ''
 
-  const text = stripEmoji(prettifyPrompt(raw))
+  const text = prettifyPrompt(raw)
 
   const line =
     text
