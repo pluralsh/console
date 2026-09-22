@@ -32,7 +32,15 @@ WORKDIR /app
 COPY --from=base /app/node_modules/ ./node_modules/
 COPY --from=base /app/documentation/ ./documentation/
 
+# Next writes its runtime cache beneath the application directory.
+RUN chown -R node:node /app
+
 EXPOSE 3000
 
 WORKDIR /app/documentation
+USER node
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --quiet --spider http://127.0.0.1:3000/ || exit 1
+
 CMD ["node", "/app/node_modules/next/dist/bin/next", "start", "-p", "3000"]

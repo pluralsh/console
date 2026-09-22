@@ -2,14 +2,22 @@
 FROM alpine:3.18
 
 # Install any dependencies your shell script might need (e.g., bash, curl, etc.)
-RUN apk update && apk add --no-cache bash curl
+RUN apk add --no-cache bash curl
+
+RUN addgroup -S app && adduser -S -G app app
+
+WORKDIR /app
 
 # Copy the shell script from the host to the container
-COPY api_caller.sh ./api_caller.sh
+COPY --chown=app:app api_caller.sh ./api_caller.sh
 
 # Make sure the script is executable
 RUN chmod +x ./api_caller.sh
 
+USER app
+
+# This sidecar has no listener; it only calls endpoints in its companion container.
+HEALTHCHECK NONE
+
 # Set the default command to run the shell script with the provided arguments
 CMD ["./api_caller.sh", "-e", "localhost:8080/api", "-m", "localhost:8081/metrics", "-t", "1.34"]
-
