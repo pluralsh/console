@@ -57,7 +57,6 @@ function parseJson(input: string): unknown {
 }
 
 const COLLAPSE_AT_PX = 640
-const ROW_UNIT_PX = 48
 const CHART_HEIGHT_PX = 238
 const PIE_HEIGHT_PX = 200
 
@@ -116,7 +115,6 @@ export function WorkbenchDashboardPanels({
               key={graph.identifier}
               $x={graph.layout?.x ?? 0}
               $w={graph.layout?.w ?? columns}
-              $h={graph.layout?.h ?? 4}
             >
               <DashboardPanel
                 dashboardId={dashboardId}
@@ -310,6 +308,9 @@ function PanelContent({
           <JobActivityMetricsChart
             metrics={metrics}
             css={{ height: CHART_HEIGHT_PX }}
+            lineProps={{
+              yScale: { type: 'linear', min: 'auto', max: 'auto' },
+            }}
           />
         </Flex>
       )
@@ -410,6 +411,7 @@ const StackSC = styled.div(({ theme }) => ({
 }))
 
 const RowSC = styled.div<{ $columns: number }>(({ theme, $columns }) => ({
+  alignItems: 'start',
   containerType: 'inline-size',
   display: 'grid',
   gap: theme.spacing.medium,
@@ -420,26 +422,22 @@ const RowSC = styled.div<{ $columns: number }>(({ theme, $columns }) => ({
   },
 }))
 
-const CellSC = styled.div<{ $x: number; $w: number; $h: number }>(
-  ({ $x, $w, $h }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gridColumn: `${Math.max(1, $x + 1)} / span ${Math.max(1, $w)}`,
-    minHeight: Math.max(1, $h) * ROW_UNIT_PX,
-    minWidth: 0,
-    [`@container (max-width: ${COLLAPSE_AT_PX}px)`]: {
-      gridColumn: '1 / -1',
-    },
-  })
-)
+const CellSC = styled.div<{ $x: number; $w: number }>(({ $x, $w }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gridColumn: `${Math.max(1, $x + 1)} / span ${Math.max(1, $w)}`,
+  minWidth: 0,
+  [`@container (max-width: ${COLLAPSE_AT_PX}px)`]: {
+    gridColumn: '1 / -1',
+  },
+}))
 
 const PanelCardSC = styled(Card)(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
   display: 'flex',
-  flex: 1,
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  minHeight: 0,
+  height: 'auto',
   minWidth: 0,
   padding: theme.spacing.large,
   width: '100%',
@@ -459,9 +457,7 @@ const PanelTitleSC = styled(Body1P)({
 
 const PanelBodySC = styled.div({
   display: 'flex',
-  flex: 1,
   flexDirection: 'column',
-  minHeight: 0,
   minWidth: 0,
   width: '100%',
 })
