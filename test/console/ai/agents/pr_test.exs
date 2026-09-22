@@ -1,7 +1,6 @@
 defmodule Console.AI.Agents.PrTest do
   use Console.DataCase, async: false
   alias Console.AI.Agents.Pr
-  alias Console.AI.{Provider}
   alias Console.AI.Tool
   import ElasticsearchUtils
   use Mimic
@@ -27,15 +26,15 @@ defmodule Console.AI.Agents.PrTest do
       path = Path.join(dir, "file.yaml")
 
 
-      expect(Provider, :completion, fn _, _ -> {:ok, "Upgrade the addon", [
+      expect_reqllm_completion(fn _, _ -> {:ok, "Upgrade the addon", [
         %Tool{name: "read", arguments: %{"path" => "file.yaml"}, id: "1"}
       ]} end)
       expect(File, :read, fn ^path -> {:ok, "content"} end)
-      expect(Provider, :completion, fn _, _ -> {:ok, "Upgrade the addon", [
+      expect_reqllm_completion(fn _, _ -> {:ok, "Upgrade the addon", [
         %Tool{name: "edit", arguments: %{"path" => "file.yaml", "previous" => "content", "replacement" => "new content"}, id: "1"}
       ]} end)
       expect(File, :write, fn ^path, "new content" -> :ok end)
-      expect(Provider, :completion, fn _, _ -> {:ok, "Upgrade the addon", [
+      expect_reqllm_completion(fn _, _ -> {:ok, "Upgrade the addon", [
         %Tool{name: "commit", arguments: %{"message" => "commit message", "title" => "title"}, id: "1"}
       ]} end)
 

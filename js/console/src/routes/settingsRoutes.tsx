@@ -45,6 +45,7 @@ import {
   AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
   AI_SETTINGS_MCP_SERVERS_REL_PATH,
+  AI_SETTINGS_MCP_SERVERS_EDIT_REL_PATH,
   AI_SETTINGS_MODEL_ROUTING_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
@@ -69,6 +70,7 @@ import {
 } from './settingsRoutesConst'
 import { AISettings } from 'components/settings/ai/AISettings'
 import { McpServers } from 'components/settings/ai/mcp/McpServers'
+import { McpServerEditSettings } from 'components/settings/ai/mcp/McpServerEditSettings'
 import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
 import WebhooksSettings from '../components/settings/webhooks/WebhooksSettings'
 import ChatbotsSettings from '../components/settings/chatbots/ChatbotsSettings'
@@ -182,40 +184,46 @@ const globalSettingsRoutes = (
 )
 
 const aiSettingsRoutes = (
-  <Route
-    path={AI_SETTINGS_REL_PATH}
-    element={<AISettings />}
-  >
+  <>
     <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={AI_SETTINGS_AI_PROVIDER_REL_PATH}
-        />
-      }
-    />
+      path={AI_SETTINGS_REL_PATH}
+      element={<AISettings />}
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to={AI_SETTINGS_AI_PROVIDER_REL_PATH}
+          />
+        }
+      />
+      <Route
+        path={AI_SETTINGS_AI_PROVIDER_REL_PATH}
+        element={<AISettingsProvider />}
+      />
+      <Route
+        path={AI_SETTINGS_MODEL_ROUTING_REL_PATH}
+        element={<AISettingsModelRouting />}
+      />
+      <Route
+        path={AI_SETTINGS_AI_INSIGHTS_REL_PATH}
+        element={<AISettingsAIInsights />}
+      />
+      <Route
+        path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}
+        element={<AIAgentRuntimes />}
+      />
+      <Route
+        path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
+        element={<McpServers />}
+      />
+    </Route>
     <Route
-      path={AI_SETTINGS_AI_PROVIDER_REL_PATH}
-      element={<AISettingsProvider />}
+      path={`${AI_SETTINGS_REL_PATH}/${AI_SETTINGS_MCP_SERVERS_REL_PATH}/${AI_SETTINGS_MCP_SERVERS_EDIT_REL_PATH}`}
+      element={<McpServerEditSettings />}
     />
-    <Route
-      path={AI_SETTINGS_MODEL_ROUTING_REL_PATH}
-      element={<AISettingsModelRouting />}
-    />
-    <Route
-      path={AI_SETTINGS_AI_INSIGHTS_REL_PATH}
-      element={<AISettingsAIInsights />}
-    />
-    <Route
-      path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}
-      element={<AIAgentRuntimes />}
-    />
-    <Route
-      path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
-      element={<McpServers />}
-    />
-  </Route>
+  </>
 )
 
 const webhooksSettingsRoutes = (

@@ -37,7 +37,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
     end
   end
   defp subagent_description(%Workbench{configuration: %{infrastructure: %{} = infra}}, :infrastructure, _, _), do: infra_description(infra)
-  defp subagent_description(_, :infrastructure, _, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration.  Use this to deeply investiage kubernetes or IaaS data necessary for the job at hand."
+  defp subagent_description(_, :infrastructure, _, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration.  Use this to deeply investiage kubernetes, IaaS, or Docker/OCI registry data necessary for the job at hand."
   defp subagent_description(_, :observability, categories, _), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
   defp subagent_description(_, :monitoring, categories, _), do: "Invoke the monitoring subagent specifically to create, update, reinterpret, or delete Plural dashboards and monitors. It can inspect existing monitoring configuration and validate it with these observability capabilities: #{observability_categories(categories)}"
   defp subagent_description(_, :integration, _, _), do: "Invoke an integration subagent to interact with enterprise systems, usually not directly related to devops infrastructure. Often Task tracking tools, knowledge bases or internal compliance software that's not SRE related."

@@ -373,6 +373,15 @@ defmodule Console.Deployments.WorkbenchesTest do
           email: "jira@example.com",
           api_token: "atlassian-api-token"
         }}], [:ticketing]},
+        {:jira, [configuration: %{jira: %{
+          url: "https://example.atlassian.net",
+          email: "jira@example.com",
+          api_token: "jira-api-token"
+        }}], [:ticketing]},
+        {:jira_datacenter, [configuration: %{jira_datacenter: %{
+          url: "https://jira.example.com",
+          api_token: "jira-datacenter-token"
+        }}], [:ticketing]},
         {:exa, [configuration: %{exa: %{
           api_key: "exa-api-key"
         }}], [:search]},

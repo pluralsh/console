@@ -106,6 +106,22 @@ type AgentRuntimeSpec struct {
 	// +kubebuilder:validation:Optional
 	BootstrapScript *string `json:"bootstrapScript,omitempty"`
 
+	// ReadOnlyRootFilesystem controls the default container securityContext.
+	// When unset, the root filesystem stays writable (the current default).
+	// Set true when extending a finished image that already contains compilers.
+	// Set false (or leave unset) together with mise.config to run
+	// `mise bootstrap --yes` at boot: https://mise.jdx.dev/bootstrap.html
+	// +kubebuilder:validation:Optional
+	ReadOnlyRootFilesystem *bool `json:"readOnlyRootFilesystem,omitempty"`
+
+	// Mise supplies a mise.toml applied before the coding agent starts.
+	// When the default container root is writable, the harness runs
+	// `mise trust` and `mise bootstrap --yes`. When readOnlyRootFilesystem is true,
+	// the config is still mounted so mise exec can use [tools] and [env],
+	// but bootstrap is skipped.
+	// +kubebuilder:validation:Optional
+	Mise *MiseSpec `json:"mise,omitempty"`
+
 	// Git configure commit signing on agent run. When provided, the runtime will be configured to sign git commits using the provided key reference.
 	Git *GitSpec `json:"git,omitempty"`
 
@@ -191,6 +207,14 @@ type ExaConnection struct {
 	// ProxyURL is an HTTP proxy URL used for Exa API requests.
 	// +kubebuilder:validation:Optional
 	ProxyURL *string `json:"proxyUrl,omitempty"`
+}
+
+// MiseSpec is an inline mise.toml used for unattended bootstrap.
+// See https://mise.jdx.dev/bootstrap.html
+type MiseSpec struct {
+	// Config is the contents of a mise.toml.
+	// +kubebuilder:validation:Optional
+	Config *string `json:"config,omitempty"`
 }
 
 type GitSpec struct {

@@ -159,3 +159,10 @@ If your agent needs to build images or run containers, enable DinD in the runtim
 spec:
   dind: true
 ```
+
+## Optional: Prebake repositories and mise toolchains
+
+Point `spec.repositoryImage` at an OCI image of precloned (and optionally precompiled) git repositories so bootstrap copies locally instead of `git clone`. The published Console image is `docker.io/pluralsh/console-repos`. To build your own, extend `docker.io/pluralsh/repository-prebake` and `RUN prebake` in a normal Dockerfile.
+
+See [Prebaked repositories](/plural-features/plural-ai/ai-agent/repository-prebake) for image layout, how to extend the base image, precompile, and mise / `readOnlyRootFilesystem`.
+

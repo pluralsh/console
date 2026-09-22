@@ -39,6 +39,7 @@ defmodule Console.OpenAPI.CD.Cluster do
       node_count: integer(description: "The number of nodes in this cluster"),
       pod_count: integer(description: "The number of pods in this cluster"),
       namespace_count: integer(description: "The number of namespaces in this cluster"),
+      health_score: integer(description: "The health score of this cluster from 0 to 100"),
       cpu_total: number(description: "The total CPU capacity of the cluster in cores"),
       memory_total: number(description: "The total memory capacity of the cluster in bytes"),
       cpu_util: number(description: "The current CPU utilization of the cluster as a percentage"),

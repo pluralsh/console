@@ -1,7 +1,6 @@
 import { Code, Markdown, getLastStringChild } from '@pluralsh/design-system'
 import { ComponentProps, HTMLAttributes, ReactElement, ReactNode } from 'react'
 import styled from 'styled-components'
-import { stripEmoji } from '../stripEmoji'
 
 type ChatMarkdownProps = ComponentProps<typeof Markdown>
 
@@ -18,13 +17,11 @@ export function ChatMarkdown({
   text,
   ...props
 }: ChatMarkdownProps) {
-  const displayText = typeof text === 'string' ? stripEmoji(text) : text
-
   return (
     <ChatMarkdownSC>
       <Markdown
         {...props}
-        text={displayText}
+        text={text}
         components={{
           h1: ChatH1,
           h2: ChatH2,

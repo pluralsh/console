@@ -575,6 +575,10 @@
             "description": "A short, unique human readable name used to identify this cluster",
             "type": "string"
           },
+          "health_score": {
+            "description": "The health score of this cluster from 0 to 100",
+            "type": "integer"
+          },
           "id": {
             "description": "Unique identifier for the cluster",
             "type": "string"
@@ -4626,6 +4630,26 @@
                 "outdated"
               ],
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_health_score",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_health_score",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
             }
           },
           {

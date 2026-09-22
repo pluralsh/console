@@ -1401,6 +1401,8 @@ type RootMutationType {
 
   upsertMcpServer(attributes: McpServerAttributes!): McpServer
 
+  updateMcpServer(id: ID!, attributes: McpServerAttributes!): McpServer
+
   deleteMcpServer(id: ID!): McpServer
 
   upsertPreviewEnvironmentTemplate(attributes: PreviewEnvironmentTemplateAttributes!): PreviewEnvironmentTemplate
@@ -2954,6 +2956,8 @@ enum WorkbenchToolType {
   AZURE_FUNCTION
   DOCKER
   VICTORIA_LOGS
+  JIRA
+  JIRA_DATACENTER
 }
 
 enum WorkbenchToolCategory {
@@ -3541,6 +3545,12 @@ input WorkbenchToolConfigurationAttributes {
   "atlassian\/jira connection (ticketing)"
   atlassian: WorkbenchToolAtlassianConnectionAttributes
 
+  "jira cloud connection (ticketing)"
+  jira: WorkbenchToolJiraConnectionAttributes
+
+  "jira data center connection (ticketing)"
+  jiraDatacenter: WorkbenchToolJiraDatacenterConnectionAttributes
+
   "exa connection (search)"
   exa: WorkbenchToolExaConnectionAttributes
 
@@ -3825,6 +3835,25 @@ input WorkbenchToolAtlassianConnectionAttributes {
 
   "atlassian account email (required if not using service_account)"
   email: String
+}
+
+input WorkbenchToolJiraConnectionAttributes {
+  "jira cloud site URL (for example, https:\/\/example.atlassian.net)"
+  url: String!
+
+  "atlassian API token"
+  apiToken: String!
+
+  "atlassian account email"
+  email: String!
+}
+
+input WorkbenchToolJiraDatacenterConnectionAttributes {
+  "jira data center base URL"
+  url: String!
+
+  "jira data center personal access token"
+  apiToken: String!
 }
 
 input WorkbenchToolExaConnectionAttributes {
@@ -5086,6 +5115,9 @@ type WorkbenchUsageTimeseries {
   "number of output tokens produced during this interval"
   outputTokens: Int
 
+  "total tokens consumed during this interval"
+  totalTokens: Int
+
   "total cost for this interval, in USD"
   totalCost: Float
 }
@@ -5285,6 +5317,12 @@ type WorkbenchToolConfiguration {
 
   "atlassian connection (no secrets)"
   atlassian: WorkbenchToolAtlassianConnection
+
+  "jira cloud connection (no secrets)"
+  jira: WorkbenchToolJiraConnection
+
+  "jira data center connection (no secrets)"
+  jiraDatacenter: WorkbenchToolJiraDatacenterConnection
 
   "exa connection (no secrets)"
   exa: WorkbenchToolExaConnection
@@ -5495,6 +5533,19 @@ type WorkbenchToolAtlassianConnection {
 
   "atlassian account email for use with PAT authentication"
   email: String
+}
+
+type WorkbenchToolJiraConnection {
+  "jira cloud site URL"
+  url: String!
+
+  "atlassian account email (API token never exposed)"
+  email: String!
+}
+
+type WorkbenchToolJiraDatacenterConnection {
+  "jira data center base URL (PAT never exposed)"
+  url: String!
 }
 
 type WorkbenchToolExaConnection {
@@ -6431,6 +6482,7 @@ input McpServerAuthenticationAttributes {
 }
 
 input McpHeaderAttributes {
+  id: ID
   name: String!
   value: String!
 }
@@ -6607,7 +6659,11 @@ type McpServerAuthentication {
 }
 
 type McpServerHeader {
+  id: ID!
+
   name: String!
+
+  "obfuscated header value; the real secret is never returned over GraphQL"
   value: String!
 }
 

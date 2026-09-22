@@ -3,7 +3,6 @@ import {
   WorkbenchToolConfiguration,
   WorkbenchToolHttpHeader,
   WorkbenchToolType,
-  useWorkbenchToolQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import styled from 'styled-components'
@@ -27,6 +26,8 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Prometheus]: extractPrometheusMetadata,
   [WorkbenchToolType.Tempo]: extractTempoMetadata,
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
+  [WorkbenchToolType.Jira]: extractJiraMetadata,
+  [WorkbenchToolType.JiraDatacenter]: extractJiraDatacenterMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
   [WorkbenchToolType.Slack]: extractSlackMetadata,
   [WorkbenchToolType.Pagerduty]: extractPagerdutyMetadata,
@@ -52,24 +53,18 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
 }
 
 export function WorkbenchesConfiguredToolMetadata({
-  toolId,
   toolType,
+  configuration,
+  mcpServer,
 }: {
-  toolId: string
   toolType: WorkbenchToolType
+  configuration: WorkbenchToolConfiguration | null
+  mcpServer?: { name?: string | null; url?: string | null } | null
 }) {
-  const { data } = useWorkbenchToolQuery({
-    variables: { id: toolId },
-    fetchPolicy: 'cache-and-network',
-  })
-
   const metadata =
     toolType === WorkbenchToolType.Mcp
-      ? getMcpServerMetadataRows(data?.workbenchTool?.mcpServer)
-      : getToolMetadataRows(
-          toolType,
-          data?.workbenchTool?.configuration ?? null
-        )
+      ? getMcpServerMetadataRows(mcpServer)
+      : getToolMetadataRows(toolType, configuration)
 
   const visibleMetadata = metadata.filter(({ value }) => hasDisplayValue(value))
 
@@ -197,6 +192,21 @@ function extractAtlassianMetadata(
     { label: 'URL', value: configuration?.atlassian?.url },
     { label: 'Email', value: configuration?.atlassian?.email },
   ]
+}
+
+function extractJiraMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'URL', value: configuration?.jira?.url },
+    { label: 'Email', value: configuration?.jira?.email },
+  ]
+}
+
+function extractJiraDatacenterMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'URL', value: configuration?.jiraDatacenter?.url }]
 }
 
 function extractLinearMetadata(

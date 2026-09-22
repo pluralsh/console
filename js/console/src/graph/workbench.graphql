@@ -197,140 +197,151 @@ fragment WorkbenchTool on WorkbenchTool {
     ...PolicyBinding
   }
   configuration {
-    http {
+    ...WorkbenchToolConfigurationFields
+  }
+}
+
+fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
+  http {
+    url
+    method
+    headers {
+      name
+      value
+    }
+    body
+    inputSchema
+  }
+  datadog {
+    site
+  }
+  elastic {
+    index
+    url
+    username
+  }
+  opensearch {
+    host
+    index
+    awsAccessKeyId
+    awsRegion
+    assumeRoleArn
+    usePodIdentity
+  }
+  loki {
+    url
+    username
+    tenantId
+  }
+  victoriaLogs {
+    url
+    username
+    accountId
+    projectId
+  }
+  prometheus {
+    url
+    username
+    tenantId
+    awsSigv4
+    awsAccessKeyId
+    awsRegion
+  }
+  tempo {
+    url
+    username
+    tenantId
+  }
+  jaeger {
+    url
+    username
+  }
+  atlassian {
+    email
+    url
+  }
+  jira {
+    email
+    url
+  }
+  jiraDatacenter {
+    url
+  }
+  linear {
+    url
+  }
+  slack {
+    url
+  }
+  pagerduty {
+    url
+  }
+  teams {
+    clientId
+    tenantId
+  }
+  splunk {
+    url
+    tokenType
+    username
+  }
+  cloudwatch {
+    logGroupNames
+    region
+    roleArn
+    roleSessionName
+  }
+  azure {
+    subscriptionId
+    tenantId
+    clientId
+    prometheusUrl
+  }
+  dynatrace {
+    url
+  }
+  sentry {
+    url
+  }
+  github {
+    url
+    toolset
+    appId
+    installationId
+  }
+  gitlab {
+    url
+  }
+  bitbucket {
+    url
+  }
+  bitbucketDatacenter {
+    url
+  }
+  azureDevops {
+    url
+  }
+  lambda {
+    lambdaArn
+    description
+    inputSchema
+  }
+  cloudRun {
+    identifier
+    description
+    inputSchema
+  }
+  azureFunction {
+    identifier
+    description
+    inputSchema
+  }
+  docker {
+    url
+    provider
+    proxy {
       url
-      method
-      headers {
-        name
-        value
-      }
-      body
-      inputSchema
-    }
-    datadog {
-      site
-    }
-    elastic {
-      index
-      url
-      username
-    }
-    opensearch {
-      host
-      index
-      awsAccessKeyId
-      awsRegion
-      assumeRoleArn
-      usePodIdentity
-    }
-    loki {
-      url
-      username
-      tenantId
-    }
-    victoriaLogs {
-      url
-      username
-      accountId
-      projectId
-    }
-    prometheus {
-      url
-      username
-      tenantId
-      awsSigv4
-      awsAccessKeyId
-      awsRegion
-    }
-    tempo {
-      url
-      username
-      tenantId
-    }
-    jaeger {
-      url
-      username
-    }
-    atlassian {
-      email
-      url
-    }
-    linear {
-      url
-    }
-    slack {
-      url
-    }
-    pagerduty {
-      url
-    }
-    teams {
-      clientId
-      tenantId
-    }
-    splunk {
-      url
-      tokenType
-      username
-    }
-    cloudwatch {
-      logGroupNames
-      region
-      roleArn
-      roleSessionName
-    }
-    azure {
-      subscriptionId
-      tenantId
-      clientId
-      prometheusUrl
-    }
-    dynatrace {
-      url
-    }
-    sentry {
-      url
-    }
-    github {
-      url
-      toolset
-      appId
-      installationId
-    }
-    gitlab {
-      url
-    }
-    bitbucket {
-      url
-    }
-    bitbucketDatacenter {
-      url
-    }
-    azureDevops {
-      url
-    }
-    lambda {
-      lambdaArn
-      description
-      inputSchema
-    }
-    cloudRun {
-      identifier
-      description
-      inputSchema
-    }
-    azureFunction {
-      identifier
-      description
-      inputSchema
-    }
-    docker {
-      url
-      provider
-      proxy {
-        url
-        noproxy
-      }
+      noproxy
     }
   }
 }
@@ -689,6 +700,9 @@ fragment WorkbenchJobPullRequest on PullRequest {
 }
 
 fragment WorkbenchJobUsageTiny on WorkbenchJobUsage {
+  cachedTokens
+  inputTokens
+  outputTokens
   totalCost
   totalTokens
 }
@@ -876,6 +890,7 @@ query WorkbenchesUsage($period: EvalResultsPeriod = WEEK) {
     timestamp
     inputTokens
     outputTokens
+    totalTokens
     totalCost
     workbench {
       id
@@ -1515,6 +1530,9 @@ query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
     edges {
       node {
         ...WorkbenchToolTiny
+        configuration {
+          ...WorkbenchToolConfigurationFields
+        }
       }
     }
   }

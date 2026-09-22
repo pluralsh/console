@@ -156,11 +156,13 @@ export const promptColumn = columnHelper.accessor(
     id: 'prompt',
     meta: { gridTemplate: 'minmax(0, 1fr)' },
     cell: ({ getValue }) => (
-      <WorkbenchStoredPromptMarkdown
-        text={getValue()}
-        density="tableCell"
-        clampLines={1}
-      />
+      <div css={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
+        <WorkbenchStoredPromptMarkdown
+          text={getValue()}
+          density="tableCell"
+          clampLines={1}
+        />
+      </div>
     ),
   }
 )
@@ -367,7 +369,10 @@ function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
         fullColor
         status={job.status}
       />
-      <CaretRightIcon color="icon-xlight" />
+      <CaretRightIcon
+        color="icon-xlight"
+        size={12}
+      />
     </div>
   )
 }

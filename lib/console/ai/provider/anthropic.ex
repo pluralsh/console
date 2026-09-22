@@ -36,12 +36,11 @@ defmodule Console.AI.Anthropic do
 
   def proxy(_), do: {:error, "anthropic proxy not implemented"}
 
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = anthropic, messages, opts) do
     messages
     |> reqllm_messages()
     |> generate_text("anthropic:#{select_model(anthropic, opts[:model], opts[:client])}", anthropic.stream, base_opts(provider_options(anthropic) ++ [tools: tools(opts)], opts))
-    |> reqllm_result()
   end
 
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
