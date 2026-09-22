@@ -99,7 +99,7 @@ export function WorkbenchMonitorSettings() {
     return (
       <PageSC>
         <Title2H1 css={{ marginBottom: 16 }}>{monitor.name}</Title2H1>
-        <EmptyState message="Manual settings are only available for log monitors. Use Update via prompt to edit metrics monitors.">
+        <EmptyState message="Manual settings are only available for log monitors.">
           <Button
             as={Link}
             to={getWorkbenchMonitoringMonitorAbsPath({

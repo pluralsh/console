@@ -8,6 +8,7 @@ import {
   GearTrainIcon,
   HamburgerMenuCollapsedIcon,
   IconFrame,
+  Tooltip,
   useResizeObserver,
 } from '@pluralsh/design-system'
 import { Line } from '@nivo/line'
@@ -145,20 +146,37 @@ function MonitorDetailView({
               kind="monitor"
               pathname={pathname}
             />
-            {workbenchId && (
-              <IconFrame
-                clickable
-                size="small"
-                type="tertiary"
-                icon={<GearTrainIcon />}
-                textValue="Monitor settings"
-                as={Link}
-                to={getWorkbenchMonitoringMonitorSettingsAbsPath({
-                  workbenchId,
-                  monitorId: monitor.id,
-                })}
-              />
-            )}
+            {workbenchId &&
+              (monitor.type === MonitorType.Log ? (
+                <IconFrame
+                  clickable
+                  size="small"
+                  type="tertiary"
+                  icon={<GearTrainIcon />}
+                  textValue="Monitor settings"
+                  as={Link}
+                  to={getWorkbenchMonitoringMonitorSettingsAbsPath({
+                    workbenchId,
+                    monitorId: monitor.id,
+                  })}
+                />
+              ) : (
+                <Tooltip
+                  label="Manual settings are only available for log monitors."
+                  placement="top"
+                >
+                  <SettingsTooltipTriggerSC>
+                    <IconFrame
+                      clickable
+                      disabled
+                      size="small"
+                      type="tertiary"
+                      icon={<GearTrainIcon />}
+                      textValue="Monitor settings"
+                    />
+                  </SettingsTooltipTriggerSC>
+                </Tooltip>
+              ))}
             <IconFrame
               ref={fullscreenTriggerRef}
               clickable
@@ -829,6 +847,12 @@ const StripActionsSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
 }))
+
+const SettingsTooltipTriggerSC = styled.span({
+  cursor: 'not-allowed',
+  display: 'inline-flex',
+  '& > *': { pointerEvents: 'none' },
+})
 
 const EyebrowSC = styled.p(({ theme }) => ({
   ...theme.partials.text.overline,
