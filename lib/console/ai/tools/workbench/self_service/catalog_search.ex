@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.SelfService.CatalogSearch do
   use Console.AI.Tools.Workbench.Base
+  import Ecto.Query
   alias Console.Repo
   alias Console.AI.Tool
   alias Console.Deployments.{Git, Policies}
@@ -28,7 +29,7 @@ defmodule Console.AI.Tools.Workbench.SelfService.CatalogSearch do
 
   def implement(%__MODULE__{query: query}) do
     with {:actor, %{} = user} <- {:actor, Tool.actor()},
-         {:search, ^user, {:ok, results}} <- {:search, user, Git.catalog_search(query, user: user)} do
+         {:search, ^user, {:ok, results}} <- {:search, user, Git.catalog_search(query, user: user, count: 100)} do
       format_results(results)
     else
       {:actor, _} ->
@@ -47,12 +48,14 @@ defmodule Console.AI.Tools.Workbench.SelfService.CatalogSearch do
   defp catalog_hits(query, user) do
     Catalog.search(query)
     |> Catalog.for_user(user)
+    |> limit(100)
     |> Repo.all()
     |> Enum.map(&%{catalog: Map.take(&1, [:id, :name, :description, :category])})
   end
 
   defp automation_hits(query, user) do
     PrAutomation.search(query)
+    |> limit(100)
     |> Repo.all()
     |> Repo.preload([:catalog])
     |> Enum.filter(&readable?(&1, user))
