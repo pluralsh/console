@@ -74,5 +74,4 @@ jobs:
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
       - run: yarn --immutable
-      - run: yarn workspace @pluralsh/design-system build
       - run: yarn test
