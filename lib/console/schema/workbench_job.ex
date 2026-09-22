@@ -155,6 +155,13 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.status == ^status)
   end
 
+  def for_monitor(query \\ __MODULE__, monitor_id) do
+    from(j in query,
+      join: a in assoc(j, :alert),
+      where: a.monitor_id == ^monitor_id
+    )
+  end
+
   def for_flow(query \\ __MODULE__, flow_id) do
     from(j in query, where: j.flow_id == ^flow_id)
   end

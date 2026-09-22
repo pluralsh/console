@@ -6,7 +6,9 @@ import {
 } from '@pluralsh/design-system'
 import {
   ClusterIcon,
+  DashboardIcon,
   GitPullIcon,
+  SirenIcon,
   StackIcon,
   WarningShieldIcon,
   WorkbenchIcon,
@@ -26,6 +28,19 @@ const itemToIcon: Record<MentionKind, ReactNode> = {
   [MentionKind.Skill]: <WorkbenchIcon size={14} />,
   [MentionKind.Vulnerability]: <WarningShieldIcon size={14} />,
   [MentionKind.Repository]: <GitPullIcon size={14} />,
+  [MentionKind.Monitoring]: <DashboardIcon size={14} />,
+}
+
+function iconForItem(item: ChipAttrs): ReactNode {
+  if (item.kind === MentionKind.Repository) return repositoryIcon(item.provider)
+  if (item.kind === MentionKind.Monitoring) {
+    return item['resource-type'] === 'monitor' ? (
+      <SirenIcon size={14} />
+    ) : (
+      <DashboardIcon size={14} />
+    )
+  }
+  return itemToIcon[item.kind]
 }
 
 function repositoryIcon(provider?: string): ReactNode {
@@ -77,6 +92,8 @@ function subtitleForItem(item: ChipAttrs) {
       return item.resource ?? item['vuln-id'] ?? undefined
     case MentionKind.Repository:
       return item['repo-slug'] ? item['repo-url'] : undefined
+    case MentionKind.Monitoring:
+      return item['resource-type']
   }
 }
 
@@ -136,9 +153,7 @@ export function MentionResults({
             }}
           >
             <span css={{ color: theme.colors['icon-light'] }}>
-              {item.kind === MentionKind.Repository
-                ? repositoryIcon(item.provider)
-                : itemToIcon[item.kind]}
+              {iconForItem(item)}
             </span>
             <RowTextSC>
               <RowTitleSC>{item['item-name']}</RowTitleSC>
@@ -156,8 +171,6 @@ const ResultsListSC = styled.ul(({ theme }) => ({
   listStyle: 'none',
   padding: theme.spacing.xxsmall,
   margin: 0,
-  maxHeight: 280,
-  overflowY: 'auto',
 }))
 
 const ResultRowSC = styled.li<{ $highlighted: boolean }>(

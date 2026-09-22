@@ -52,7 +52,16 @@ jobs:
           cache: yarn
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
-      - run: yarn --immutable
+      - run: >-
+          YARN_ENABLE_IMMUTABLE_INSTALLS=true
+          yarn workspaces focus
+          console @pluralsh/design-system
+          @pluralsh/eslint-config-pluralsh @pluralsh/stylelint-config
+      - name: Restore ESLint cache
+        uses: actions/cache@v6
+        with:
+          path: js/*/.eslintcache
+          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('js/yarn.lock', 'js/.yarnrc.yml', 'js/**/eslint.config.*', 'js/**/tsconfig*.json') }}
       - run: yarn workspace @pluralsh/eslint-config-pluralsh lint
       - run: yarn workspace @pluralsh/stylelint-config lint
       - run: yarn workspace console lint
@@ -73,6 +82,29 @@ jobs:
           cache: yarn
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
-      - run: yarn --immutable
-      - run: yarn workspace @pluralsh/design-system build
+      - run: >-
+          YARN_ENABLE_IMMUTABLE_INSTALLS=true
+          yarn workspaces focus console @pluralsh/design-system
       - run: yarn test
+
+  typecheck:
+    needs: [vouch]
+    name: Typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
+      - run: >-
+          YARN_ENABLE_IMMUTABLE_INSTALLS=true
+          yarn workspaces focus console @pluralsh/design-system
+      - run: yarn workspace @pluralsh/design-system build
+      - run: yarn workspace console typecheck

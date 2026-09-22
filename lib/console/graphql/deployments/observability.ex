@@ -361,6 +361,10 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :threshold, non_null(:monitor_threshold),
       description: "Threshold configuration that determines when the monitor should fire"
 
+    field :preview, :alert_timeseries,
+      description: "Live threshold preview from evaluating this monitor's query",
+      resolve: &Deployments.monitor_preview/3
+
     field :service, :service_deployment,
       description: "The service deployment this monitor is attached to",
       resolve: dataloader(Deployments)

@@ -126,7 +126,7 @@ function ServiceMonitorCreateOrEditInner({
     useUpdateState<ServiceMonitorAttributes>(
       sanitizeInitialFormState(monitor, serviceId)
     )
-  const allowSubmit = hasUpdates && isFormValid(state)
+  const allowSubmit = hasUpdates && isMonitorFormValid(state)
   const onSuccess = (shouldNav: boolean) => {
     if (shouldNav) navigate('..', { relative: 'path' })
     popToast({
@@ -165,7 +165,7 @@ function ServiceMonitorCreateOrEditInner({
             }
             endIcon={
               visitedSteps.has(key) ? (
-                getStepIcon(key, state, mode === 'edit')
+                getMonitorFormStepIcon(key, state, mode === 'edit')
               ) : mode === 'create' ? (
                 <CircleDashIcon size={12} />
               ) : null
@@ -262,12 +262,14 @@ const WrapperSC = styled.div(({ theme }) => ({
   overflow: 'auto',
 }))
 
-const sanitizeInitialFormState = (
+export const sanitizeInitialFormState = (
   monitor: Nullable<MonitorFragment>,
   serviceId: string
 ): ServiceMonitorAttributes => {
   const {
     name = '',
+    description,
+    alertTemplate,
     evaluationCron = '',
     severity = AlertSeverity.Undefined,
     query: initialQuery,
@@ -290,6 +292,8 @@ const sanitizeInitialFormState = (
   }
   return {
     name,
+    description,
+    alertTemplate,
     evaluationCron,
     query,
     severity,
@@ -303,7 +307,7 @@ const sanitizeInitialFormState = (
 const facetArrToAttributeArr = (arr: MonitorLogQueryFragment['facets']) =>
   arr?.filter(isNonNullable)?.map(({ key, value }) => ({ key, value })) ?? []
 
-const getStepIcon = (
+export const getMonitorFormStepIcon = (
   key: ServiceMonitorStepKey,
   state: ServiceMonitorAttributes,
   onlyShowFailures: boolean = false
@@ -335,7 +339,7 @@ const getStepIcon = (
   }
 }
 
-const isFormValid = (state: ServiceMonitorAttributes) => {
+export const isMonitorFormValid = (state: ServiceMonitorAttributes) => {
   const { name, evaluationCron, threshold, query } = state
   const { value, aggregate } = threshold
   const { query: q, bucketSize, duration, operator } = query.log
