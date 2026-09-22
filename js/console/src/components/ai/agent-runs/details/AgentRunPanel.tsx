@@ -22,7 +22,6 @@ import {
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
-  AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
@@ -58,15 +57,6 @@ export enum AgentRunPanelTab {
   Diff = 'Diff',
   Analysis = 'Analysis',
   PullRequests = 'Pull requests',
-}
-
-export function shouldShowAgentRunSidePanel(
-  run: Nullable<AgentRunFragment>,
-  isLoading = false
-) {
-  if (isLoading) return true
-
-  return !!run?.id
 }
 
 type AgentRunApprovalActions = {
@@ -469,7 +459,10 @@ export function AgentRunPanelContent() {
   )
 }
 
-export function useAgentRunPanel(autoOpen?: Nullable<boolean>) {
+export function useAgentRunPanel(
+  autoOpen?: Nullable<boolean>,
+  autoOpenKey?: Nullable<string>
+) {
   const ctx = use(AgentRunPanelContext)
 
   const onAutoOpen = useEffectEvent(() => ctx.setOpen(true))
@@ -479,7 +472,7 @@ export function useAgentRunPanel(autoOpen?: Nullable<boolean>) {
     return () => {
       if (!isNil(autoOpen)) onUnmount()
     }
-  }, [autoOpen])
+  }, [autoOpen, autoOpenKey])
 
   return ctx
 }
