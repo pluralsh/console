@@ -5638,6 +5638,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.47.10000020260919-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.47.10000020260911-eksbuild.1
     compatibilities:
     - '1.35'
