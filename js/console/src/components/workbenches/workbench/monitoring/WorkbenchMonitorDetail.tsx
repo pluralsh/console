@@ -812,6 +812,8 @@ function evaluateLabel(cron: string) {
 
 const MainSC = styled.div<{ $fullscreen?: boolean }>(
   ({ theme, $fullscreen }) => ({
+    containerName: 'monitor-detail',
+    containerType: 'inline-size',
     display: 'flex',
     flex: 1,
     flexDirection: 'column',
@@ -904,12 +906,12 @@ const TitleSC = styled.h2(({ theme }) => ({
 }))
 
 const ColumnsSC = styled.div(({ theme }) => ({
-  containerType: 'inline-size',
   display: 'grid',
   gap: theme.spacing.large,
-  gridTemplateColumns: '1fr',
+  gridTemplateColumns: 'minmax(0, 1fr)',
   marginTop: theme.spacing.large,
-  [`@container (min-width: 960px)`]: {
+  minWidth: 0,
+  '@container monitor-detail (min-width: 960px)': {
     gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)',
   },
 }))
@@ -919,6 +921,7 @@ const DefinitionCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  minWidth: 0,
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
 }))
 
