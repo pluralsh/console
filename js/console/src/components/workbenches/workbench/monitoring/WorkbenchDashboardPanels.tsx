@@ -1,5 +1,6 @@
 import {
   Card,
+  DocsIcon,
   EmptyState,
   Flex,
   IconFrame,
@@ -22,7 +23,7 @@ import {
   WorkbenchJobActivityTraceFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, maxBy, sortBy } from 'lodash'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -34,6 +35,7 @@ import {
 import { getMetricSeries } from '../job/workbenchJobMetrics'
 import { TraceWaterfall } from '../job/WorkbenchJobTraces'
 import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
+import { datasourceQuery, QueryDefinitionModal } from './QueryDefinitionModal'
 
 type DashboardGraph = NonNullable<
   NonNullable<WorkbenchDashboardDetailsFragment['graphs']>[number]
@@ -49,11 +51,13 @@ export function WorkbenchDashboardPanels({
   graphs,
   variables,
   timeRange,
+  onUpdate,
 }: {
   dashboardId: string
   graphs: DashboardGraph[]
   variables: Record<string, string | string[]>
   timeRange: DashboardTimeRangeAttributes
+  onUpdate?: () => void
 }) {
   const columns = useMemo(
     () =>
@@ -104,6 +108,7 @@ export function WorkbenchDashboardPanels({
                 graph={graph}
                 variables={variables}
                 timeRange={timeRange}
+                onUpdate={onUpdate}
               />
             </CellSC>
           ))}
@@ -118,11 +123,13 @@ function DashboardPanel({
   graph,
   variables,
   timeRange,
+  onUpdate,
 }: {
   dashboardId: string
   graph: DashboardGraph
   variables: Record<string, string | string[]>
   timeRange: DashboardTimeRangeAttributes
+  onUpdate?: () => void
 }) {
   const needsFetch =
     graph.type !== DashboardGraphType.Markdown && !!graph.datasource
@@ -143,6 +150,8 @@ function DashboardPanel({
   })
   const data = currentData ?? previousData
 
+  const query = datasourceQuery(graph.datasource?.input)
+  const [queryOpen, setQueryOpen] = useState(false)
   const result = data?.workbenchDashboard?.graph
   const metrics = result?.metrics?.filter(isNonNullable) ?? []
   const logs = result?.logs?.filter(isNonNullable) ?? []
@@ -172,18 +181,29 @@ function DashboardPanel({
             </Flex>
           )}
         </Flex>
-        {graph.description && (
-          <Tooltip
-            label={graph.description}
-            placement="top"
-          >
-            <IconFrame
-              size="small"
-              type="tertiary"
-              icon={<InfoIcon />}
-              textValue={graph.description}
-            />
-          </Tooltip>
+        {query ? (
+          <IconFrame
+            clickable
+            size="small"
+            type="tertiary"
+            icon={<DocsIcon />}
+            textValue="Query"
+            onClick={() => setQueryOpen(true)}
+          />
+        ) : (
+          graph.description && (
+            <Tooltip
+              label={graph.description}
+              placement="top"
+            >
+              <IconFrame
+                size="small"
+                type="tertiary"
+                icon={<InfoIcon />}
+                textValue={graph.description}
+              />
+            </Tooltip>
+          )
         )}
       </PanelHeaderSC>
       <PanelBodySC>
@@ -212,6 +232,15 @@ function DashboardPanel({
       </PanelBodySC>
       {graph.description && (
         <CaptionP $color="text-xlight">{graph.description}</CaptionP>
+      )}
+      {query && (
+        <QueryDefinitionModal
+          open={queryOpen}
+          onClose={() => setQueryOpen(false)}
+          title={graph.title || graph.identifier}
+          query={query}
+          onUpdate={onUpdate}
+        />
       )}
     </PanelCardSC>
   )

@@ -96,6 +96,7 @@ export function WorkbenchMonitoring() {
             <DashboardDetail
               key={dashboardId}
               dashboardId={dashboardId}
+              onUpdate={() => setUpdateOpen(true)}
             />
           )
         ) : monitorId ? (

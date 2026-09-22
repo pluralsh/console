@@ -43,7 +43,13 @@ import {
 } from './WorkbenchDashboardFilters'
 import { WorkbenchDashboardPanels } from './WorkbenchDashboardPanels'
 
-export function DashboardDetail({ dashboardId }: { dashboardId: string }) {
+export function DashboardDetail({
+  dashboardId,
+  onUpdate,
+}: {
+  dashboardId: string
+  onUpdate?: () => void
+}) {
   const { data, loading, error } = useWorkbenchMonitoringDashboardQuery({
     variables: { id: dashboardId },
     fetchPolicy: 'cache-and-network',
@@ -59,13 +65,20 @@ export function DashboardDetail({ dashboardId }: { dashboardId: string }) {
       </MainSC>
     )
 
-  return <DashboardDetailView dashboard={dashboard} />
+  return (
+    <DashboardDetailView
+      dashboard={dashboard}
+      onUpdate={onUpdate}
+    />
+  )
 }
 
 function DashboardDetailView({
   dashboard,
+  onUpdate,
 }: {
   dashboard: WorkbenchDashboardDetailsFragment
+  onUpdate?: () => void
 }) {
   const { pathname, search } = useLocation()
   const graphs = useMemo(
@@ -246,6 +259,7 @@ function DashboardDetailView({
               graphs={graphs}
               variables={variables}
               timeRange={timeRange}
+              onUpdate={onUpdate}
             />
           </PanelsSC>
         </BodySC>
