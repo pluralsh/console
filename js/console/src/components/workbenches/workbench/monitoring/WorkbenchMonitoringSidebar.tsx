@@ -17,6 +17,7 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
+  AlertState,
   useDeleteMonitorMutation,
   useDeleteWorkbenchDashboardMutation,
   useWorkbenchDashboardsQuery,
@@ -420,37 +421,46 @@ function MonitorRow({
           </RowSubtitleSC>
         </RowTextSC>
       </RowLinkSC>
-      {confirming ? (
-        <InlineConfirmSC className="inline-confirm">
-          <IconFrame
-            clickable
-            size="small"
-            icon={<CheckIcon color="icon-success" />}
-            tooltip="Confirm delete"
-            aria-label={`Confirm delete ${monitor.name}`}
-            onClick={() => deleteMonitor()}
+      <RowActionsSC>
+        {monitor.state === AlertState.Firing && !confirming && (
+          <FiringDotSC
+            className="firing-dot"
+            role="img"
+            aria-label="Firing"
           />
-          <IconFrame
-            clickable
-            size="small"
-            icon={<CloseIcon />}
-            tooltip="Cancel"
-            aria-label="Cancel delete"
-            onClick={() => setConfirming(false)}
-          />
-        </InlineConfirmSC>
-      ) : (
-        <DeleteSC className="delete-action">
-          <IconFrame
-            clickable
-            size="small"
-            icon={<TrashCanIcon color="icon-danger" />}
-            tooltip="Delete monitor"
-            aria-label={`Delete ${monitor.name}`}
-            onClick={() => setConfirming(true)}
-          />
-        </DeleteSC>
-      )}
+        )}
+        {confirming ? (
+          <InlineConfirmSC className="inline-confirm">
+            <IconFrame
+              clickable
+              size="small"
+              icon={<CheckIcon color="icon-success" />}
+              tooltip="Confirm delete"
+              aria-label={`Confirm delete ${monitor.name}`}
+              onClick={() => deleteMonitor()}
+            />
+            <IconFrame
+              clickable
+              size="small"
+              icon={<CloseIcon />}
+              tooltip="Cancel"
+              aria-label="Cancel delete"
+              onClick={() => setConfirming(false)}
+            />
+          </InlineConfirmSC>
+        ) : (
+          <DeleteSC className="delete-action">
+            <IconFrame
+              clickable
+              size="small"
+              icon={<TrashCanIcon color="icon-danger" />}
+              tooltip="Delete monitor"
+              aria-label={`Delete ${monitor.name}`}
+              onClick={() => setConfirming(true)}
+            />
+          </DeleteSC>
+        )}
+      </RowActionsSC>
     </RowSC>
   )
 }
@@ -541,9 +551,14 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
   },
   '& .delete-action': {
     opacity: 0,
+    pointerEvents: 'none',
   },
   '&:hover .delete-action, &:focus-within .delete-action': {
     opacity: 1,
+    pointerEvents: 'auto',
+  },
+  '&:hover .firing-dot, &:focus-within .firing-dot': {
+    opacity: 0,
   },
 }))
 
@@ -589,6 +604,24 @@ const RowSubtitleSC = styled.span(({ theme }) => ({
   ...TRUNCATE,
   ...theme.partials.text.caption,
   color: theme.colors['text-light'],
+}))
+
+const RowActionsSC = styled.div({
+  alignItems: 'center',
+  display: 'grid',
+  flexShrink: 0,
+  justifyItems: 'end',
+  width: ROW_ACTION_WIDTH,
+  '& > *': {
+    gridArea: '1 / 1',
+  },
+})
+
+const FiringDotSC = styled.span(({ theme }) => ({
+  backgroundColor: theme.colors['icon-danger'],
+  borderRadius: 5,
+  height: 10,
+  width: 10,
 }))
 
 const DeleteSC = styled.span({

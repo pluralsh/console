@@ -95,6 +95,7 @@ export function MonitorDetail({ monitorId }: { monitorId: string }) {
   const { data, loading, error } = useWorkbenchMonitorQuery({
     variables: { id: monitorId },
     fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
   })
 
   if (loading && !data) return <MonitoringDetailSkeleton />
@@ -131,6 +132,10 @@ function MonitorDetailView({
   const definitionYaml = useMemo(
     () => monitorDefinitionYaml(monitor),
     [monitor]
+  )
+  const jobsQuery = useMonitorJobs(workbenchId, monitor.id)
+  const investigatingJob = jobsQuery.jobs.find((job) =>
+    INVESTIGATING_JOB_STATUSES.has(job.status)
   )
 
   const openFullscreen = () => {
@@ -220,6 +225,13 @@ function MonitorDetailView({
       )}
       <ScrollSC>
         <BodySC>
+          {monitor.state === AlertState.Firing && (
+            <FiringBanner
+              name={monitor.name}
+              job={investigatingJob}
+              workbenchId={workbenchId}
+            />
+          )}
           <TitleRowSC>
             <TitleBlockSC>
               <TitleSC>{monitor.name}</TitleSC>
@@ -309,12 +321,7 @@ function MonitorDetailView({
                 </ChartWrapSC>
               </SectionSC>
             </DefinitionCardSC>
-            {workbenchId && (
-              <MonitorRecentJobs
-                workbenchId={workbenchId}
-                monitorId={monitor.id}
-              />
-            )}
+            {workbenchId && <MonitorRecentJobs query={jobsQuery} />}
           </ColumnsSC>
         </BodySC>
       </ScrollSC>
@@ -668,28 +675,72 @@ function LogThresholdPreview({
   )
 }
 
-function MonitorRecentJobs({
-  workbenchId,
-  monitorId,
-}: {
-  workbenchId: string
-  monitorId: string
-}) {
-  const {
-    data: currentData,
-    previousData,
-    loading,
-    error,
-  } = useWorkbenchMonitorJobsQuery({
-    variables: { id: workbenchId, monitorId, first: RECENT_JOBS_COUNT },
+const INVESTIGATING_JOB_STATUSES = new Set<WorkbenchJobStatus>([
+  WorkbenchJobStatus.Pending,
+  WorkbenchJobStatus.Paused,
+  WorkbenchJobStatus.Running,
+])
+
+function useMonitorJobs(workbenchId: string | undefined, monitorId: string) {
+  const result = useWorkbenchMonitorJobsQuery({
+    skip: !workbenchId,
+    variables: {
+      id: workbenchId ?? '',
+      monitorId,
+      first: RECENT_JOBS_COUNT,
+    },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-  const data = currentData ?? previousData
+  const data = result.data ?? result.previousData
   const jobs = useMemo(
     () => mapExistingNodes(data?.workbench?.runs),
     [data]
   )
+
+  return { ...result, data, jobs }
+}
+
+function FiringBanner({
+  name,
+  job,
+  workbenchId,
+}: {
+  name: string
+  job?: WorkbenchJobTinyFragment
+  workbenchId?: string
+}) {
+  const jobWorkbenchId = job?.workbench?.id ?? workbenchId
+  const jobPath =
+    job && jobWorkbenchId
+      ? getWorkbenchJobAbsPath({
+          workbenchId: jobWorkbenchId,
+          jobId: job.id,
+        })
+      : null
+
+  return (
+    <FiringBannerSC>
+      <FiringBannerMessageSC>
+        <FiringDotSC aria-hidden />
+        <FiringBannerTextSC>
+          {name} is firing
+          {job ? ', a workbench job is already investigating' : ''}
+        </FiringBannerTextSC>
+      </FiringBannerMessageSC>
+      {jobPath && (
+        <OpenWorkbenchLinkSC to={jobPath}>Open workbench</OpenWorkbenchLinkSC>
+      )}
+    </FiringBannerSC>
+  )
+}
+
+function MonitorRecentJobs({
+  query,
+}: {
+  query: ReturnType<typeof useMonitorJobs>
+}) {
+  const { data, loading, error, jobs } = query
 
   return (
     <RecentSectionSC>
@@ -1053,6 +1104,51 @@ const BodySC = styled.div(({ theme }) => ({
   // padding-bottom from the scrollable overflow area.
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
   paddingBottom: theme.spacing.xlarge,
+}))
+
+const FiringBannerSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  backgroundColor: theme.colors.red[900],
+  border: `0.75px solid ${theme.colors.red[800]}`,
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  marginBottom: theme.spacing.large,
+  padding: theme.spacing.xsmall,
+}))
+
+const FiringBannerMessageSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flex: 1,
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+}))
+
+const FiringDotSC = styled.span(({ theme }) => ({
+  backgroundColor: theme.colors['icon-danger'],
+  borderRadius: 5,
+  flexShrink: 0,
+  height: 10,
+  width: 10,
+}))
+
+const FiringBannerTextSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors.text,
+  margin: 0,
+  minWidth: 0,
+}))
+
+const OpenWorkbenchLinkSC = styled(Link)(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-primary-accent'],
+  flexShrink: 0,
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+  '&:hover, &:visited': {
+    color: theme.colors['text-primary-accent'],
+  },
 }))
 
 const TitleBlockSC = styled.div(({ theme }) => ({
