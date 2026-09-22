@@ -189,7 +189,10 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
 
   describe "workbenchDashboard" do
     test "it can fetch a dashboard by id" do
-      dashboard = insert(:dashboard)
+      tool = insert(:workbench_tool, name: "prometheus", tool: :prometheus)
+      dashboard = build(:dashboard)
+      graphs = Enum.map(dashboard.graphs, &%{&1 | tool_id: tool.id})
+      dashboard = insert(:dashboard, graphs: graphs)
 
       {:ok, %{data: %{"workbenchDashboard" => found}}} =
         run_query(
@@ -200,6 +203,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
               name
               graphs {
                 identifier
+                toolId
+                workbenchTool { id name tool }
                 datasource { type tool input }
               }
             }
@@ -213,6 +218,12 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found["name"] == dashboard.name
       assert [graph] = found["graphs"]
       assert graph["datasource"]["type"] == "METRICS"
+      assert graph["toolId"] == tool.id
+      assert graph["workbenchTool"] == %{
+               "id" => tool.id,
+               "name" => tool.name,
+               "tool" => "PROMETHEUS"
+             }
     end
   end
 

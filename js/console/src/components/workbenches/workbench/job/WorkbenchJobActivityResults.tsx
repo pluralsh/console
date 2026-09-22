@@ -417,7 +417,7 @@ export function JobActivityMetrics({
       ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
-  const [timeRange, setTimeRange] = useState<MetricsTimeRange>('max')
+  const [timeRange, setTimeRange] = useState<MetricsTimeRange>('1d')
   const shouldRunQuery =
     !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(metricsQuery)
 
@@ -504,13 +504,14 @@ export function JobActivityMetrics({
   return chartBlock
 }
 
-export type MetricsTimeRange = '1d' | '1m' | '1y' | 'max'
+export type MetricsTimeRange = '1h' | '2h' | '6h' | '1d' | '7d'
 
 const METRICS_TIME_RANGES: { label: string; value: MetricsTimeRange }[] = [
+  { label: '1H', value: '1h' },
+  { label: '2H', value: '2h' },
+  { label: '6H', value: '6h' },
   { label: '1D', value: '1d' },
-  { label: '1M', value: '1m' },
-  { label: '1Y', value: '1y' },
-  { label: 'Max', value: 'max' },
+  { label: '7D', value: '7d' },
 ]
 
 export function MetricsRangeControl({
@@ -540,8 +541,6 @@ function filterMetricsByRange(
   metrics: WorkbenchJobActivityMetricFragment[],
   range: MetricsTimeRange
 ) {
-  if (range === 'max') return metrics
-
   const latest = Math.max(
     ...metrics
       .map((metric) => toDateOrUndef(metric.timestamp)?.getTime())
@@ -550,10 +549,12 @@ function filterMetricsByRange(
 
   if (!Number.isFinite(latest)) return metrics
 
-  const durationByRange: Record<Exclude<MetricsTimeRange, 'max'>, number> = {
+  const durationByRange: Record<MetricsTimeRange, number> = {
+    '1h': 60 * 60 * 1_000,
+    '2h': 2 * 60 * 60 * 1_000,
+    '6h': 6 * 60 * 60 * 1_000,
     '1d': 24 * 60 * 60 * 1_000,
-    '1m': 30 * 24 * 60 * 60 * 1_000,
-    '1y': 365 * 24 * 60 * 60 * 1_000,
+    '7d': 7 * 24 * 60 * 60 * 1_000,
   }
   const from = latest - durationByRange[range]
 
@@ -636,17 +637,24 @@ export function JobActivityTraces({
 export function WorkbenchJobMetricsLegend({
   series,
   maxHeight,
+  compact = false,
+  selectedId,
+  onSelect,
   ...props
 }: {
   series: MetricSeries[]
   maxHeight?: number
+  compact?: boolean
+  selectedId?: string | null
+  onSelect?: (id: string) => void
 } & FlexProps) {
   if (isEmpty(series)) return null
 
   return (
     <Flex
+      direction="row"
       wrap="wrap"
-      gap="small"
+      gap={compact ? 'xsmall' : 'small'}
       align="center"
       css={
         maxHeight != null
@@ -660,14 +668,26 @@ export function WorkbenchJobMetricsLegend({
       {...props}
     >
       {series.map(({ id, label }, i) => (
-        <Flex
+        <LegendItemSC
           key={id}
-          align="center"
-          gap="xsmall"
+          type="button"
+          disabled={!onSelect}
+          aria-pressed={onSelect ? selectedId === id : undefined}
+          onClick={() => onSelect?.(id)}
+          $compact={compact}
+          $interactive={!!onSelect}
+          $dimmed={!!selectedId && selectedId !== id}
         >
-          <MetricsLegendSwatchSC $color={COLORS[i % COLORS.length]} />
-          <Body2P $color="text-light">{label}</Body2P>
-        </Flex>
+          <MetricsLegendSwatchSC
+            $color={COLORS[i % COLORS.length]}
+            $compact={compact}
+          />
+          {compact ? (
+            <CompactLegendLabelSC>{label}</CompactLegendLabelSC>
+          ) : (
+            <Body2P $color="text-light">{label}</Body2P>
+          )}
+        </LegendItemSC>
       ))}
     </Flex>
   )
@@ -800,6 +820,43 @@ const MetricsRangeButtonSC = styled.button<{ $active: boolean }>(
   })
 )
 
+const LegendItemSC = styled.button<{
+  $compact: boolean
+  $interactive: boolean
+  $dimmed: boolean
+}>(({ theme, $compact, $interactive, $dimmed }) => ({
+  ...theme.partials.reset.button,
+  alignItems: 'center',
+  borderRadius: theme.borderRadiuses.medium,
+  color: theme.colors['text-light'],
+  cursor: $interactive ? 'pointer' : 'default',
+  display: 'flex',
+  flex: '0 1 auto',
+  gap: $compact ? 4 : theme.spacing.xsmall,
+  minWidth: 0,
+  opacity: $dimmed ? 0.4 : 1,
+  padding: $compact ? 2 : 0,
+  textAlign: 'left',
+  '&:hover': $interactive
+    ? {
+        backgroundColor: theme.colors['fill-one-hover'],
+      }
+    : undefined,
+  '&:focus-visible': $interactive
+    ? {
+        outline: `1px solid ${theme.colors['border-outline-focused']}`,
+        outlineOffset: 1,
+      }
+    : undefined,
+}))
+
+const CompactLegendLabelSC = styled.span(({ theme }) => ({
+  color: theme.colors['text-light'],
+  fontSize: 11,
+  lineHeight: '14px',
+  overflowWrap: 'anywhere',
+}))
+
 const CanvasLogPanelSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],
   borderRadius: theme.borderRadiuses.medium,
@@ -812,9 +869,12 @@ const CanvasLogPanelSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
-const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
-  width: 12,
-  height: 12,
+const MetricsLegendSwatchSC = styled.div<{
+  $color: string
+  $compact?: boolean
+}>(({ $color, $compact }) => ({
+  width: $compact ? 8 : 12,
+  height: $compact ? 8 : 12,
   borderRadius: 2,
   flexShrink: 0,
   background: $color,

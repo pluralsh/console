@@ -1,6 +1,7 @@
 import {
   CloudWatchIcon,
   DatadogLogoIcon,
+  DocsIcon,
   ElasticsearchLogoIcon,
   GrafanaLogoIcon,
   IconProps,
@@ -34,12 +35,14 @@ export function toolDisplayName(tool: string) {
 export function DashboardToolIcon({
   tool,
   size = 10,
+  fallback = false,
 }: {
   tool: string
   size?: number
+  fallback?: boolean
 }) {
   const match = TOOL_ICONS.find(({ match }) => match.test(tool))
-  if (!match) return null
+  if (!match) return fallback ? <DocsIcon size={size} /> : null
   const { Icon } = match
   return (
     <Icon

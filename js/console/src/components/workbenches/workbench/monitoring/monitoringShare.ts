@@ -3,7 +3,7 @@ import type { MetricsTimeRange } from '../job/WorkbenchJobActivityResults'
 export const MONITORING_SHARE_RANGE_PARAM = 'range'
 export const MONITORING_SHARE_INPUT_PREFIX = 'i.'
 
-const RANGES = new Set<MetricsTimeRange>(['1d', '1m', '1y', 'max'])
+const RANGES = new Set<MetricsTimeRange>(['1h', '2h', '6h', '1d', '7d'])
 
 export function isMetricsTimeRange(value: string): value is MetricsTimeRange {
   return RANGES.has(value as MetricsTimeRange)

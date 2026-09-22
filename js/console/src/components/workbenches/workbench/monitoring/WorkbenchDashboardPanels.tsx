@@ -1,10 +1,14 @@
 import {
   Card,
+  CaretDownIcon,
+  CloseIcon,
   DocsIcon,
   EmptyState,
+  ExpandIcon,
   Flex,
   IconFrame,
   InfoIcon,
+  ModalWrapper,
   Tooltip,
 } from '@pluralsh/design-system'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
@@ -23,7 +27,7 @@ import {
   WorkbenchJobActivityTraceFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, maxBy, sortBy } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -32,7 +36,7 @@ import {
   JobActivityMetricsChart,
   WorkbenchJobMetricsLegend,
 } from '../job/WorkbenchJobActivityResults'
-import { getMetricSeries } from '../job/workbenchJobMetrics'
+import { getMetricSeries, metricSeriesId } from '../job/workbenchJobMetrics'
 import { TraceWaterfall } from '../job/WorkbenchJobTraces'
 import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
 import { QueryDefinitionModal } from './QueryDefinitionModal'
@@ -60,19 +64,111 @@ const COLLAPSE_AT_PX = 640
 const CHART_HEIGHT_PX = 238
 const PIE_HEIGHT_PX = 200
 
-export function WorkbenchDashboardPanels({
-  dashboardId,
-  graphs,
-  variables,
-  timeRange,
-  onUpdate,
-}: {
+type DashboardPanelsProps = {
   dashboardId: string
   graphs: DashboardGraph[]
   variables: Record<string, string | string[]>
   timeRange: DashboardTimeRangeAttributes
   onUpdate?: () => void
-}) {
+}
+
+export function WorkbenchDashboardPanels(props: DashboardPanelsProps) {
+  const { graphs } = props
+  const sections = useMemo(
+    () =>
+      sortBy(
+        graphs.filter((graph) => graph.type === DashboardGraphType.Section),
+        [(graph) => graph.layout?.y ?? 0, (graph) => graph.layout?.x ?? 0]
+      ),
+    [graphs]
+  )
+  const sectionIds = useMemo(
+    () => new Set(sections.map((section) => section.identifier)),
+    [sections]
+  )
+  const unsectioned = useMemo(
+    () =>
+      graphs.filter(
+        (graph) =>
+          graph.type !== DashboardGraphType.Section &&
+          (!graph.sectionId || !sectionIds.has(graph.sectionId))
+      ),
+    [graphs, sectionIds]
+  )
+
+  if (graphs.length === 0) {
+    return (
+      <Card css={{ padding: 24 }}>
+        <EmptyState message="No panels yet." />
+      </Card>
+    )
+  }
+
+  return (
+    <StackSC>
+      {unsectioned.length > 0 && (
+        <DashboardGraphGrid
+          {...props}
+          graphs={unsectioned}
+        />
+      )}
+      {sections.map((section) => (
+        <DashboardSection
+          key={section.identifier}
+          section={section}
+          {...props}
+          graphs={graphs.filter(
+            (graph) =>
+              graph.type !== DashboardGraphType.Section &&
+              graph.sectionId === section.identifier
+          )}
+        />
+      ))}
+    </StackSC>
+  )
+}
+
+function DashboardSection({
+  section,
+  ...props
+}: DashboardPanelsProps & { section: DashboardGraph }) {
+  const [open, setOpen] = useState(() => !isDefaultCollapsed(section.options))
+
+  return (
+    <SectionSC>
+      <SectionHeaderSC
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <SectionCaretSC $open={open} />
+        <SectionTitleBlockSC>
+          <Body1P>{section.title || section.identifier}</Body1P>
+          {section.description && (
+            <CaptionP $color="text-xlight">{section.description}</CaptionP>
+          )}
+        </SectionTitleBlockSC>
+      </SectionHeaderSC>
+      {open && (
+        <SectionContentSC>
+          {props.graphs.length > 0 ? (
+            <DashboardGraphGrid {...props} />
+          ) : (
+            <EmptyState message="No panels in this section." />
+          )}
+        </SectionContentSC>
+      )}
+    </SectionSC>
+  )
+}
+
+function DashboardGraphGrid({
+  dashboardId,
+  graphs,
+  variables,
+  timeRange,
+  onUpdate,
+}: DashboardPanelsProps) {
   const columns = useMemo(
     () =>
       Math.max(
@@ -95,16 +191,8 @@ export function WorkbenchDashboardPanels({
     )
   }, [graphs])
 
-  if (graphs.length === 0) {
-    return (
-      <Card css={{ padding: 24 }}>
-        <EmptyState message="No panels yet." />
-      </Card>
-    )
-  }
-
   return (
-    <StackSC>
+    <GraphGridSC>
       {rows.map(({ y, graphs: rowGraphs }) => (
         <RowSC
           key={y}
@@ -127,7 +215,16 @@ export function WorkbenchDashboardPanels({
           ))}
         </RowSC>
       ))}
-    </StackSC>
+    </GraphGridSC>
+  )
+}
+
+function isDefaultCollapsed(options: unknown) {
+  const value = typeof options === 'string' ? parseJson(options) : options
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    (value as { collapsed?: unknown }).collapsed === true
   )
 }
 
@@ -165,14 +262,20 @@ function DashboardPanel({
 
   const query = datasourceQuery(graph.datasource?.input)
   const [queryOpen, setQueryOpen] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
+  const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
   const result = data?.workbenchDashboard?.graph
   const metrics = result?.metrics?.filter(isNonNullable) ?? []
   const logs = result?.logs?.filter(isNonNullable) ?? []
   const traces = result?.traces?.filter(isNonNullable) ?? []
   const tool = graph.datasource?.tool
+  const toolType = graph.workbenchTool?.tool ?? tool
+  const toolName =
+    graph.workbenchTool?.name ?? (tool ? toolDisplayName(tool) : null)
 
-  return (
-    <PanelCardSC>
+  const panel = (
+    <PanelCardSC $fullscreen={fullscreen}>
       <PanelHeaderSC>
         <Flex
           direction="column"
@@ -181,58 +284,78 @@ function DashboardPanel({
           flex={1}
         >
           <PanelTitleSC>{graph.title || graph.identifier}</PanelTitleSC>
-          {tool && (
-            <Flex
-              align="center"
-              gap="xxsmall"
-            >
-              <DashboardToolIcon
-                tool={tool}
-                size={10}
-              />
-              <CaptionP $color="text-xlight">{toolDisplayName(tool)}</CaptionP>
-            </Flex>
-          )}
+          {toolName && <CaptionP $color="text-xlight">{toolName}</CaptionP>}
         </Flex>
-        {query ? (
-          <IconFrame
-            clickable
-            size="small"
-            type="tertiary"
-            icon={<DocsIcon />}
-            textValue="Query"
-            onClick={() => setQueryOpen(true)}
-          />
-        ) : (
-          graph.description && (
-            <Tooltip
-              label={graph.description}
-              placement="top"
-            >
-              <IconFrame
-                size="small"
-                type="tertiary"
-                icon={<InfoIcon />}
-                textValue={graph.description}
-              />
-            </Tooltip>
-          )
-        )}
+        <PanelActionsSC>
+          {fullscreen ? (
+            <IconFrame
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<CloseIcon />}
+              textValue="Close full screen"
+              tooltip="Close full screen"
+              onClick={() => setFullscreen(false)}
+            />
+          ) : (
+            <IconFrame
+              ref={fullscreenTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon size={16} />}
+              textValue="Full screen"
+              tooltip="Full screen"
+              onClick={() => setFullscreen(true)}
+            />
+          )}
+          {query ? (
+            <IconFrame
+              clickable
+              size="small"
+              type="tertiary"
+              icon={
+                toolType ? (
+                  <DashboardToolIcon
+                    tool={toolType}
+                    size={16}
+                    fallback
+                  />
+                ) : (
+                  <DocsIcon />
+                )
+              }
+              textValue="Query"
+              onClick={() => setQueryOpen(true)}
+            />
+          ) : (
+            graph.description && (
+              <Tooltip
+                label={graph.description}
+                placement="top"
+              >
+                <IconFrame
+                  size="small"
+                  type="tertiary"
+                  icon={<InfoIcon />}
+                  textValue={graph.description}
+                />
+              </Tooltip>
+            )
+          )}
+        </PanelActionsSC>
       </PanelHeaderSC>
-      <PanelBodySC>
+      <PanelBodySC aria-busy={loading}>
         {graph.type === DashboardGraphType.Markdown ? (
           <ChatMarkdown text={graph.markdown || '_No content._'} />
         ) : !graph.datasource ? (
           <EmptyState message="This panel has no data source." />
+        ) : loading ? (
+          <DashboardPanelSkeleton fullscreen={fullscreen} />
         ) : error && !data ? (
           <GqlError
             error={error}
             css={{ wordBreak: 'break-word' }}
-          />
-        ) : loading && !data ? (
-          <RectangleSkeleton
-            $height={CHART_HEIGHT_PX}
-            $width="100%"
           />
         ) : (
           <PanelContent
@@ -240,12 +363,41 @@ function DashboardPanel({
             metrics={metrics}
             logs={logs}
             traces={traces}
+            fullscreen={fullscreen}
+            selectedSeriesId={selectedSeriesId}
+            onSelectSeries={(id) =>
+              setSelectedSeriesId((selected) => (selected === id ? null : id))
+            }
           />
         )}
       </PanelBodySC>
       {graph.description && (
         <CaptionP $color="text-xlight">{graph.description}</CaptionP>
       )}
+    </PanelCardSC>
+  )
+
+  return (
+    <>
+      {!fullscreen && panel}
+      <ModalWrapper
+        open={fullscreen}
+        onOpenChange={setFullscreen}
+        title={graph.title || graph.identifier}
+        aria-describedby={undefined}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
+        }}
+        css={{
+          height: 'min(900px, 100%)',
+          maxHeight: '100%',
+          overflow: 'hidden',
+          width: 'min(1500px, 100%)',
+        }}
+      >
+        {fullscreen && panel}
+      </ModalWrapper>
       {query && (
         <QueryDefinitionModal
           open={queryOpen}
@@ -255,7 +407,38 @@ function DashboardPanel({
           onUpdate={onUpdate}
         />
       )}
-    </PanelCardSC>
+    </>
+  )
+}
+
+function DashboardPanelSkeleton({ fullscreen }: { fullscreen: boolean }) {
+  return (
+    <SkeletonStackSC
+      role="status"
+      aria-label="Loading dashboard panel data"
+    >
+      <RectangleSkeleton
+        $height={fullscreen ? 560 : CHART_HEIGHT_PX}
+        $width="100%"
+      />
+      <Flex
+        gap="small"
+        wrap="wrap"
+      >
+        <RectangleSkeleton
+          $height={12}
+          $width={120}
+        />
+        <RectangleSkeleton
+          $height={12}
+          $width={160}
+        />
+        <RectangleSkeleton
+          $height={12}
+          $width={96}
+        />
+      </Flex>
+    </SkeletonStackSC>
   )
 }
 
@@ -264,12 +447,27 @@ function PanelContent({
   metrics,
   logs,
   traces,
+  fullscreen,
+  selectedSeriesId,
+  onSelectSeries,
 }: {
   type: DashboardGraphType
   metrics: WorkbenchJobActivityMetricFragment[]
   logs: WorkbenchJobActivityLogFragment[]
   traces: WorkbenchJobActivityTraceFragment[]
+  fullscreen: boolean
+  selectedSeriesId: string | null
+  onSelectSeries: (id: string) => void
 }) {
+  const series = getMetricSeries(metrics)
+  const selectedSeriesIndex = series.findIndex(
+    ({ id }) => id === selectedSeriesId
+  )
+  const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
+  const visibleMetrics = effectiveSelectedId
+    ? metrics.filter((metric) => metricSeriesId(metric) === effectiveSelectedId)
+    : metrics
+
   switch (type) {
     case DashboardGraphType.Logs:
       if (isEmpty(logs)) return <NoDataState />
@@ -300,17 +498,28 @@ function PanelContent({
           gap="xsmall"
           width="100%"
         >
-          <WorkbenchJobMetricsLegend
-            series={getMetricSeries(metrics)}
-            paddingLeft={0}
-            maxHeight={88}
-          />
           <JobActivityMetricsChart
-            metrics={metrics}
-            css={{ height: CHART_HEIGHT_PX }}
+            metrics={visibleMetrics}
+            css={{
+              height: fullscreen
+                ? 'min(650px, calc(100vh - 260px))'
+                : CHART_HEIGHT_PX,
+            }}
             lineProps={{
+              colors:
+                selectedSeriesIndex >= 0
+                  ? [COLORS[selectedSeriesIndex % COLORS.length]]
+                  : COLORS,
               yScale: { type: 'linear', min: 'auto', max: 'auto' },
             }}
+          />
+          <WorkbenchJobMetricsLegend
+            compact
+            series={series}
+            paddingLeft={0}
+            maxHeight={fullscreen ? 160 : 88}
+            selectedId={effectiveSelectedId}
+            onSelect={onSelectSeries}
           />
         </Flex>
       )
@@ -410,6 +619,62 @@ const StackSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
+const GraphGridSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  width: '100%',
+}))
+
+const SectionSC = styled.section(({ theme }) => ({
+  backgroundColor: theme.colors['fill-zero'],
+  border: theme.borders.default,
+  borderRadius: theme.borderRadiuses.large,
+  overflow: 'hidden',
+  width: '100%',
+}))
+
+const SectionHeaderSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  alignItems: 'center',
+  backgroundColor: theme.colors['fill-one'],
+  color: theme.colors.text,
+  cursor: 'pointer',
+  display: 'flex',
+  gap: theme.spacing.small,
+  minHeight: 44,
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  textAlign: 'left',
+  width: '100%',
+  '&:hover': {
+    backgroundColor: theme.colors['fill-one-hover'],
+  },
+  '&:focus-visible': {
+    outline: `1px solid ${theme.colors['border-outline-focused']}`,
+    outlineOffset: -1,
+  },
+}))
+
+const SectionCaretSC = styled(CaretDownIcon)<{ $open: boolean }>(
+  ({ $open }) => ({
+    flexShrink: 0,
+    transform: $open ? 'rotate(0deg)' : 'rotate(-90deg)',
+    transition: 'transform 150ms ease',
+  })
+)
+
+const SectionTitleBlockSC = styled.div(({ theme }) => ({
+  alignItems: 'baseline',
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.small,
+  minWidth: 0,
+}))
+
+const SectionContentSC = styled.div(({ theme }) => ({
+  padding: theme.spacing.medium,
+}))
+
 const RowSC = styled.div<{ $columns: number }>(({ theme, $columns }) => ({
   alignItems: 'start',
   containerType: 'inline-size',
@@ -432,16 +697,19 @@ const CellSC = styled.div<{ $x: number; $w: number }>(({ $x, $w }) => ({
   },
 }))
 
-const PanelCardSC = styled(Card)(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero'],
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  height: 'auto',
-  minWidth: 0,
-  padding: theme.spacing.large,
-  width: '100%',
-}))
+const PanelCardSC = styled(Card)<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    backgroundColor: theme.colors['fill-zero'],
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.medium,
+    height: $fullscreen ? '100%' : 'auto',
+    minWidth: 0,
+    overflow: $fullscreen ? 'auto' : undefined,
+    padding: theme.spacing.large,
+    width: '100%',
+  })
+)
 
 const PanelHeaderSC = styled.div({
   alignItems: 'flex-start',
@@ -450,6 +718,13 @@ const PanelHeaderSC = styled.div({
   width: '100%',
 })
 
+const PanelActionsSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flexShrink: 0,
+  gap: theme.spacing.xsmall,
+}))
+
 const PanelTitleSC = styled(Body1P)({
   ...TRUNCATE,
   margin: 0,
@@ -457,10 +732,18 @@ const PanelTitleSC = styled(Body1P)({
 
 const PanelBodySC = styled.div({
   display: 'flex',
+  flex: 1,
   flexDirection: 'column',
   minWidth: 0,
   width: '100%',
 })
+
+const SkeletonStackSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  width: '100%',
+}))
 
 const StatValueSC = styled.p(({ theme }) => ({
   ...theme.partials.text.title2,

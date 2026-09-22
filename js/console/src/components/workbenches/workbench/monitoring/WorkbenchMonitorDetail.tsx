@@ -33,6 +33,7 @@ import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { cronToExplanation } from 'components/workbenches/workbench/crons/utils'
 import {
   AlertState,
+  Delta,
   InputMaybe,
   LogQueryOperator,
   MonitorAggregate,
@@ -40,6 +41,7 @@ import {
   PrStatus,
   useLogAggregationBucketsQuery,
   useWorkbenchMonitorJobsQuery,
+  useWorkbenchMonitorDeltaSubscription,
   useWorkbenchMonitorPreviewQuery,
   useWorkbenchMonitorQuery,
   WorkbenchJobStatus,
@@ -104,10 +106,15 @@ export function MonitorDetail({
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+  const { data: deltaData } = useWorkbenchMonitorDeltaSubscription({
+    variables: { id: monitorId },
+  })
+  const event = deltaData?.workbenchMonitorDelta
+  const monitor =
+    event?.delta === Delta.Delete ? null : (event?.payload ?? data?.monitor)
 
-  if (loading && !data) return <MonitoringDetailSkeleton />
+  if (loading && !monitor) return <MonitoringDetailSkeleton />
   if (error) return <GqlError error={error} />
-  const monitor = data?.monitor
   if (!monitor)
     return (
       <MainSC>
@@ -117,6 +124,7 @@ export function MonitorDetail({
 
   return (
     <MonitorDetailView
+      key={monitor.updatedAt ?? monitor.id}
       monitor={monitor}
       onUpdate={onUpdate}
     />

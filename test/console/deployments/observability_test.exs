@@ -268,6 +268,7 @@ defmodule Console.Deployments.ObservabilityTest do
       assert monitor.threshold.aggregate == :max
       assert monitor.evaluation_cron == "*/5 * * * *"
       assert monitor.next_run_at
+      assert_receive {:event, %PubSub.MonitorCreated{item: ^monitor}}
     end
 
     test "user without service read access cannot create a monitor" do
@@ -316,6 +317,7 @@ defmodule Console.Deployments.ObservabilityTest do
         Observability.update_monitor(%{description: "updated"}, monitor.id, admin_user())
 
       assert updated.description == "updated"
+      assert_receive {:event, %PubSub.MonitorUpdated{item: ^updated}}
     end
 
     test "user without service read access cannot update monitor" do
@@ -347,6 +349,7 @@ defmodule Console.Deployments.ObservabilityTest do
 
       assert deleted.id == monitor.id
       refute refetch(monitor)
+      assert_receive {:event, %PubSub.MonitorDeleted{item: ^deleted}}
     end
 
     test "user without service read access cannot delete monitor" do

@@ -590,6 +590,8 @@ export type AgentRun = {
   user?: Maybe<User>;
   /** the workbench job this agent run was spawned from, if any */
   workbenchJob?: Maybe<WorkbenchJob>;
+  /** the MCP endpoint for the workbench that spawned this run, if any */
+  workbenchMcpUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type AgentRunAttributes = {
@@ -4188,8 +4190,10 @@ export type DashboardGraphAttributes = {
   layout: DashboardGraphLayoutAttributes;
   /** Markdown content for markdown graphs */
   markdown?: InputMaybe<Scalars['String']['input']>;
-  /** Visualization-specific display options */
+  /** Visualization-specific display options; sections may set collapsed */
   options?: InputMaybe<Scalars['Json']['input']>;
+  /** Identifier of the section graph containing this graph; sections cannot be nested */
+  sectionId?: InputMaybe<Scalars['String']['input']>;
   /** Graph title */
   title?: InputMaybe<Scalars['String']['input']>;
   /** Graph visualization type */
@@ -4214,6 +4218,7 @@ export enum DashboardGraphType {
   Logs = 'LOGS',
   Markdown = 'MARKDOWN',
   Pie = 'PIE',
+  Section = 'SECTION',
   Stat = 'STAT',
   Table = 'TABLE',
   Timeseries = 'TIMESERIES',
@@ -6538,6 +6543,12 @@ export type MonitorConnection = {
   __typename?: 'MonitorConnection';
   edges?: Maybe<Array<Maybe<MonitorEdge>>>;
   pageInfo: PageInfo;
+};
+
+export type MonitorDelta = {
+  __typename?: 'MonitorDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<Monitor>;
 };
 
 export type MonitorEdge = {
@@ -13580,11 +13591,13 @@ export type RootSubscriptionType = {
   runLogsDelta?: Maybe<RunLogsDelta>;
   toolThoughts?: Maybe<ToolThought>;
   workbenchCanvasStream?: Maybe<WorkbenchCanvasBlock>;
+  workbenchDashboardDelta?: Maybe<WorkbenchDashboardDelta>;
   workbenchExecStream?: Maybe<WorkbenchJobExecStream>;
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
   workbenchJobThoughtDelta?: Maybe<WorkbenchJobThoughtDelta>;
+  workbenchMonitorDelta?: Maybe<MonitorDelta>;
   workbenchTextStream?: Maybe<WorkbenchTextStream>;
 };
 
@@ -13633,6 +13646,12 @@ export type RootSubscriptionTypeWorkbenchCanvasStreamArgs = {
 };
 
 
+export type RootSubscriptionTypeWorkbenchDashboardDeltaArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootSubscriptionTypeWorkbenchExecStreamArgs = {
   activityId: Scalars['ID']['input'];
 };
@@ -13656,6 +13675,12 @@ export type RootSubscriptionTypeWorkbenchJobProgressArgs = {
 
 export type RootSubscriptionTypeWorkbenchJobThoughtDeltaArgs = {
   jobId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchMonitorDeltaArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -17065,6 +17090,12 @@ export type WorkbenchDashboardDatasource = {
   type: DashboardDatasourceType;
 };
 
+export type WorkbenchDashboardDelta = {
+  __typename?: 'WorkbenchDashboardDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<WorkbenchDashboard>;
+};
+
 export type WorkbenchDashboardEdge = {
   __typename?: 'WorkbenchDashboardEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -17083,12 +17114,18 @@ export type WorkbenchDashboardGraph = {
   layout: WorkbenchDashboardGraphLayout;
   /** Markdown content for markdown graphs */
   markdown?: Maybe<Scalars['String']['output']>;
-  /** Visualization-specific display options */
+  /** Visualization-specific display options; sections may set collapsed */
   options?: Maybe<Scalars['Json']['output']>;
+  /** Identifier of the section graph containing this graph */
+  sectionId?: Maybe<Scalars['String']['output']>;
   /** Graph title */
   title?: Maybe<Scalars['String']['output']>;
+  /** ID of the configured workbench tool backing this graph's datasource */
+  toolId?: Maybe<Scalars['ID']['output']>;
   /** Graph visualization type */
   type: DashboardGraphType;
+  /** Configured workbench tool backing this graph's datasource */
+  workbenchTool?: Maybe<WorkbenchTool>;
 };
 
 export type WorkbenchDashboardGraphLayout = {
@@ -23674,11 +23711,27 @@ export type WorkbenchDashboardSummaryFragment = { __typename?: 'WorkbenchDashboa
 
 export type WorkbenchDashboardDatasourceFragment = { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown };
 
-export type WorkbenchDashboardDetailsFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, markdown?: string | null, options?: unknown | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null };
+export type WorkbenchDashboardDetailsFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: unknown | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null };
 
 export type WorkbenchMonitorSummaryFragment = { __typename?: 'Monitor', id: string, name: string, description?: string | null, type: MonitorType, state?: AlertState | null, severity: AlertSeverity, insertedAt?: string | null, updatedAt?: string | null };
 
 export type WorkbenchMonitorDetailsFragment = { __typename?: 'Monitor', alertTemplate?: string | null, evaluationCron: string, nextRunAt?: string | null, prompt?: string | null, id: string, name: string, description?: string | null, type: MonitorType, state?: AlertState | null, severity: AlertSeverity, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', tool?: string | null, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, query: string, options?: { __typename?: 'MonitorLogOptions', azure?: { __typename?: 'MonitorLogAzureOptions', resourceId?: string | null } | null } | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } | null, metrics?: { __typename?: 'MonitorMetricsQuery', tool?: string | null, query: string, step?: string | null, duration?: string | null, options?: { __typename?: 'MonitorMetricsOptions', azure?: { __typename?: 'MonitorMetricsAzureOptions', resourceId?: string | null, metricsNamespace?: string | null, aggregation?: string | null, filter?: string | null, orderBy?: string | null, rollUpBy?: string | null, metricsEndpoint?: string | null } | null } | null } | null }, workbench?: { __typename?: 'Workbench', id: string } | null, service?: { __typename?: 'ServiceDeployment', id: string } | null };
+
+export type WorkbenchDashboardDeltaSubscriptionVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type WorkbenchDashboardDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchDashboardDelta?: { __typename?: 'WorkbenchDashboardDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: unknown | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null } | null } | null };
+
+export type WorkbenchMonitorDeltaSubscriptionVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type WorkbenchMonitorDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchMonitorDelta?: { __typename?: 'MonitorDelta', delta?: Delta | null, payload?: { __typename?: 'Monitor', alertTemplate?: string | null, evaluationCron: string, nextRunAt?: string | null, prompt?: string | null, id: string, name: string, description?: string | null, type: MonitorType, state?: AlertState | null, severity: AlertSeverity, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log?: { __typename?: 'MonitorLogQuery', tool?: string | null, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, query: string, options?: { __typename?: 'MonitorLogOptions', azure?: { __typename?: 'MonitorLogAzureOptions', resourceId?: string | null } | null } | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } | null, metrics?: { __typename?: 'MonitorMetricsQuery', tool?: string | null, query: string, step?: string | null, duration?: string | null, options?: { __typename?: 'MonitorMetricsOptions', azure?: { __typename?: 'MonitorMetricsAzureOptions', resourceId?: string | null, metricsNamespace?: string | null, aggregation?: string | null, filter?: string | null, orderBy?: string | null, rollUpBy?: string | null, metricsEndpoint?: string | null } | null } | null } | null }, workbench?: { __typename?: 'Workbench', id: string } | null, service?: { __typename?: 'ServiceDeployment', id: string } | null } | null } | null };
 
 export type WorkbenchDashboardsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23705,7 +23758,7 @@ export type WorkbenchMonitoringDashboardQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchMonitoringDashboardQuery = { __typename?: 'RootQueryType', workbenchDashboard?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, markdown?: string | null, options?: unknown | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null } | null };
+export type WorkbenchMonitoringDashboardQuery = { __typename?: 'RootQueryType', workbenchDashboard?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: unknown | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: unknown } | null } | null> | null } | null };
 
 export type WorkbenchDashboardGraphQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23749,7 +23802,7 @@ export type WorkbenchMonitorJobsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchMonitorJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, error?: string | null, insertedAt?: string | null, queuedPromptCount: number, queuedPromptSummary: { __typename?: 'QueuedPromptSummary', readyCount: number, pendingCount: number, nextAt?: string | null }, usage?: { __typename?: 'WorkbenchJobUsage', totalCost?: number | null, totalTokens?: number | null } | null, modes?: { __typename?: 'WorkbenchJobModes', budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchMonitorJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, error?: string | null, insertedAt?: string | null, queuedPromptCount: number, queuedPromptSummary: { __typename?: 'QueuedPromptSummary', readyCount: number, pendingCount: number, nextAt?: string | null }, usage?: { __typename?: 'WorkbenchJobUsage', cachedTokens?: number | null, inputTokens?: number | null, outputTokens?: number | null, totalCost?: number | null, totalTokens?: number | null } | null, modes?: { __typename?: 'WorkbenchJobModes', budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null } | null> | null } | null } | null };
 
 export type DeleteWorkbenchDashboardMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -29982,6 +30035,13 @@ export const WorkbenchDashboardDetailsFragmentDoc = gql`
     title
     description
     type
+    sectionId
+    toolId
+    workbenchTool {
+      id
+      name
+      tool
+    }
     markdown
     options
     layout {
@@ -50727,6 +50787,74 @@ export type WorkbenchLinkCardPendingAgentRunsQueryHookResult = ReturnType<typeof
 export type WorkbenchLinkCardPendingAgentRunsLazyQueryHookResult = ReturnType<typeof useWorkbenchLinkCardPendingAgentRunsLazyQuery>;
 export type WorkbenchLinkCardPendingAgentRunsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchLinkCardPendingAgentRunsSuspenseQuery>;
 export type WorkbenchLinkCardPendingAgentRunsQueryResult = Apollo.QueryResult<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>;
+export const WorkbenchDashboardDeltaDocument = gql`
+    subscription WorkbenchDashboardDelta($id: ID, $workbenchId: ID) {
+  workbenchDashboardDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...WorkbenchDashboardDetails
+    }
+  }
+}
+    ${WorkbenchDashboardDetailsFragmentDoc}`;
+
+/**
+ * __useWorkbenchDashboardDeltaSubscription__
+ *
+ * To run a query within a React component, call `useWorkbenchDashboardDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchDashboardDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchDashboardDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *      workbenchId: // value for 'workbenchId'
+ *   },
+ * });
+ */
+export function useWorkbenchDashboardDeltaSubscription(baseOptions?: Apollo.SubscriptionHookOptions<WorkbenchDashboardDeltaSubscription, WorkbenchDashboardDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WorkbenchDashboardDeltaSubscription, WorkbenchDashboardDeltaSubscriptionVariables>(WorkbenchDashboardDeltaDocument, options);
+      }
+export type WorkbenchDashboardDeltaSubscriptionHookResult = ReturnType<typeof useWorkbenchDashboardDeltaSubscription>;
+export type WorkbenchDashboardDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchDashboardDeltaSubscription>;
+export const WorkbenchMonitorDeltaDocument = gql`
+    subscription WorkbenchMonitorDelta($id: ID, $workbenchId: ID) {
+  workbenchMonitorDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...WorkbenchMonitorDetails
+    }
+  }
+}
+    ${WorkbenchMonitorDetailsFragmentDoc}`;
+
+/**
+ * __useWorkbenchMonitorDeltaSubscription__
+ *
+ * To run a query within a React component, call `useWorkbenchMonitorDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchMonitorDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchMonitorDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *      workbenchId: // value for 'workbenchId'
+ *   },
+ * });
+ */
+export function useWorkbenchMonitorDeltaSubscription(baseOptions?: Apollo.SubscriptionHookOptions<WorkbenchMonitorDeltaSubscription, WorkbenchMonitorDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WorkbenchMonitorDeltaSubscription, WorkbenchMonitorDeltaSubscriptionVariables>(WorkbenchMonitorDeltaDocument, options);
+      }
+export type WorkbenchMonitorDeltaSubscriptionHookResult = ReturnType<typeof useWorkbenchMonitorDeltaSubscription>;
+export type WorkbenchMonitorDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchMonitorDeltaSubscription>;
 export const WorkbenchDashboardsDocument = gql`
     query WorkbenchDashboards($id: ID!, $q: String, $first: Int = 100, $after: String) {
   workbench(id: $id) {
@@ -51699,7 +51827,9 @@ export const namedOperations = {
     WorkbenchJobProgress: 'WorkbenchJobProgress',
     WorkbenchTextStream: 'WorkbenchTextStream',
     WorkbenchCanvasStream: 'WorkbenchCanvasStream',
-    WorkbenchExecStream: 'WorkbenchExecStream'
+    WorkbenchExecStream: 'WorkbenchExecStream',
+    WorkbenchDashboardDelta: 'WorkbenchDashboardDelta',
+    WorkbenchMonitorDelta: 'WorkbenchMonitorDelta'
   },
   Fragment: {
     AgentRunTiny: 'AgentRunTiny',

@@ -9,8 +9,11 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
+  DashboardGraphType,
   DashboardInputType,
   DashboardTimeRangeAttributes,
+  Delta,
+  useWorkbenchDashboardDeltaSubscription,
   useWorkbenchMonitoringDashboardQuery,
   WorkbenchDashboardDetailsFragment,
   WorkbenchDashboardInput,
@@ -54,10 +57,17 @@ export function DashboardDetail({
     variables: { id: dashboardId },
     fetchPolicy: 'cache-and-network',
   })
+  const { data: deltaData } = useWorkbenchDashboardDeltaSubscription({
+    variables: { id: dashboardId },
+  })
+  const event = deltaData?.workbenchDashboardDelta
+  const dashboard =
+    event?.delta === Delta.Delete
+      ? null
+      : (event?.payload ?? data?.workbenchDashboard)
 
-  if (loading && !data) return <MonitoringDetailSkeleton />
+  if (loading && !dashboard) return <MonitoringDetailSkeleton />
   if (error) return <GqlError error={error} />
-  const dashboard = data?.workbenchDashboard
   if (!dashboard)
     return (
       <MainSC>
@@ -67,6 +77,7 @@ export function DashboardDetail({
 
   return (
     <DashboardDetailView
+      key={dashboard.updatedAt ?? dashboard.id}
       dashboard={dashboard}
       onUpdate={onUpdate}
     />
@@ -94,16 +105,16 @@ function DashboardDetailView({
     Record<string, DashboardFilterValue | undefined>
   >(() => initialDashboardFilters(inputs, shared.variables))
   const [range, setRange] = useState<MetricsTimeRange>(
-    () => shared.range ?? '1d'
+    () => shared.range ?? '1h'
   )
 
   const timeRange = useMemo<DashboardTimeRangeAttributes>(() => {
     const end = new Date()
     return {
-      start: rangeStart(range, dashboard.insertedAt, end).toISOString(),
+      start: rangeStart(range, end).toISOString(),
       end: end.toISOString(),
     }
-  }, [range, dashboard.insertedAt])
+  }, [range])
 
   const variables = useMemo(() => {
     const out: Record<string, string | string[]> = {}
@@ -122,6 +133,9 @@ function DashboardDetailView({
       ).map(toolDisplayName),
     [graphs]
   )
+  const panelCount = graphs.filter(
+    (graph) => graph.type !== DashboardGraphType.Section
+  ).length
 
   const hasFilters = inputs.length > 0
   const [definitionOpen, setDefinitionOpen] = useState(false)
@@ -238,7 +252,7 @@ function DashboardDetailView({
               />
             ) : (
               <Body2P $color="text-long-form">
-                {metaText(graphs.length, sources)}
+                {metaText(panelCount, sources)}
               </Body2P>
             )}
             <MetricsRangeControl
@@ -249,7 +263,7 @@ function DashboardDetailView({
           {hasFilters && (
             <MetaRowSC>
               <Body2P $color="text-long-form">
-                {metaText(graphs.length, sources)}
+                {metaText(panelCount, sources)}
               </Body2P>
             </MetaRowSC>
           )}
@@ -286,7 +300,7 @@ function DashboardDetailView({
   )
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000
+const HOUR_MS = 60 * 60 * 1000
 
 function initialDashboardFilters(
   inputs: WorkbenchDashboardInput[],
@@ -308,18 +322,15 @@ function initialDashboardFilters(
   )
 }
 
-function rangeStart(
-  range: MetricsTimeRange,
-  insertedAt: Nullable<string>,
-  end: Date
-) {
-  if (range === 'max') {
-    const yearAgo = new Date(end.getTime() - 365 * DAY_MS)
-    const created = insertedAt ? new Date(insertedAt) : null
-    return created && created > yearAgo ? created : yearAgo
+function rangeStart(range: MetricsTimeRange, end: Date) {
+  const durationByRange: Record<MetricsTimeRange, number> = {
+    '1h': HOUR_MS,
+    '2h': 2 * HOUR_MS,
+    '6h': 6 * HOUR_MS,
+    '1d': 24 * HOUR_MS,
+    '7d': 7 * 24 * HOUR_MS,
   }
-  const days = range === '1d' ? 1 : range === '1m' ? 30 : 365
-  return new Date(end.getTime() - days * DAY_MS)
+  return new Date(end.getTime() - durationByRange[range])
 }
 
 function metaText(panelCount: number, sources: string[]) {

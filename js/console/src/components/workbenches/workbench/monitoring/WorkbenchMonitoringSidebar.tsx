@@ -20,7 +20,9 @@ import {
   AlertState,
   useDeleteMonitorMutation,
   useDeleteWorkbenchDashboardMutation,
+  useWorkbenchDashboardDeltaSubscription,
   useWorkbenchDashboardsQuery,
+  useWorkbenchMonitorDeltaSubscription,
   useWorkbenchMonitorsQuery,
   WorkbenchDashboardSummaryFragment,
   WorkbenchMonitorSummaryFragment,
@@ -77,6 +79,20 @@ export function WorkbenchMonitoringSidebar({
     },
     { id: workbenchId, q: trimmedFilter || undefined }
   )
+  useWorkbenchDashboardDeltaSubscription({
+    variables: { workbenchId },
+    ignoreResults: true,
+    onData: () => {
+      void dashboards.refetch()
+    },
+  })
+  useWorkbenchMonitorDeltaSubscription({
+    variables: { workbenchId },
+    ignoreResults: true,
+    onData: () => {
+      void monitors.refetch()
+    },
+  })
 
   const params = useParams()
   const dashboardNodes = mapExistingNodes(

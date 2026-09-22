@@ -3441,9 +3441,11 @@ type DashboardGraphAttributes struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// Identifier of the section graph containing this graph; sections cannot be nested
+	SectionID *string `json:"sectionId,omitempty"`
 	// Markdown content for markdown graphs
 	Markdown *string `json:"markdown,omitempty"`
-	// Visualization-specific display options
+	// Visualization-specific display options; sections may set collapsed
 	Options *string `json:"options,omitempty"`
 	// Grid position and size
 	Layout DashboardGraphLayoutAttributes `json:"layout"`
@@ -5349,6 +5351,11 @@ type MonitorAttributes struct {
 type MonitorConnection struct {
 	PageInfo PageInfo       `json:"pageInfo"`
 	Edges    []*MonitorEdge `json:"edges,omitempty"`
+}
+
+type MonitorDelta struct {
+	Delta   *Delta   `json:"delta,omitempty"`
+	Payload *Monitor `json:"payload,omitempty"`
 }
 
 type MonitorEdge struct {
@@ -10916,6 +10923,11 @@ type WorkbenchDashboardDatasource struct {
 	Input string `json:"input"`
 }
 
+type WorkbenchDashboardDelta struct {
+	Delta   *Delta              `json:"delta,omitempty"`
+	Payload *WorkbenchDashboard `json:"payload,omitempty"`
+}
+
 type WorkbenchDashboardEdge struct {
 	Node   *WorkbenchDashboard `json:"node,omitempty"`
 	Cursor *string             `json:"cursor,omitempty"`
@@ -10930,9 +10942,15 @@ type WorkbenchDashboardGraph struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// ID of the configured workbench tool backing this graph's datasource
+	ToolID *string `json:"toolId,omitempty"`
+	// Configured workbench tool backing this graph's datasource
+	WorkbenchTool *WorkbenchTool `json:"workbenchTool,omitempty"`
+	// Identifier of the section graph containing this graph
+	SectionID *string `json:"sectionId,omitempty"`
 	// Markdown content for markdown graphs
 	Markdown *string `json:"markdown,omitempty"`
-	// Visualization-specific display options
+	// Visualization-specific display options; sections may set collapsed
 	Options *string `json:"options,omitempty"`
 	// Grid position and size
 	Layout WorkbenchDashboardGraphLayout `json:"layout"`
@@ -14732,6 +14750,7 @@ const (
 	DashboardGraphTypePie        DashboardGraphType = "PIE"
 	DashboardGraphTypeHeatmap    DashboardGraphType = "HEATMAP"
 	DashboardGraphTypeTraces     DashboardGraphType = "TRACES"
+	DashboardGraphTypeSection    DashboardGraphType = "SECTION"
 )
 
 var AllDashboardGraphType = []DashboardGraphType{
@@ -14745,11 +14764,12 @@ var AllDashboardGraphType = []DashboardGraphType{
 	DashboardGraphTypePie,
 	DashboardGraphTypeHeatmap,
 	DashboardGraphTypeTraces,
+	DashboardGraphTypeSection,
 }
 
 func (e DashboardGraphType) IsValid() bool {
 	switch e {
-	case DashboardGraphTypeTimeseries, DashboardGraphTypeGauge, DashboardGraphTypeLogs, DashboardGraphTypeMarkdown, DashboardGraphTypeTable, DashboardGraphTypeStat, DashboardGraphTypeBar, DashboardGraphTypePie, DashboardGraphTypeHeatmap, DashboardGraphTypeTraces:
+	case DashboardGraphTypeTimeseries, DashboardGraphTypeGauge, DashboardGraphTypeLogs, DashboardGraphTypeMarkdown, DashboardGraphTypeTable, DashboardGraphTypeStat, DashboardGraphTypeBar, DashboardGraphTypePie, DashboardGraphTypeHeatmap, DashboardGraphTypeTraces, DashboardGraphTypeSection:
 		return true
 	}
 	return false
