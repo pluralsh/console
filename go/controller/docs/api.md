@@ -2436,6 +2436,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `plural` _boolean_ | Plural enables built-in Plural JWT authentication for this MCP server.<br />When true, the server will receive a valid Plural JWT token in requests,<br />allowing it to authenticate and authorize operations within the Plural ecosystem. |  | Optional: \{\} <br /> |
+| `oauth` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | OAuth configures client credentials token exchange for requests to this server. |  | Optional: \{\} <br /> |
 | `headers` _object (keys:string, values:string)_ | Headers specify custom HTTP headers required for authentication with this MCP server.<br />This allows integration with servers that use API keys, bearer tokens, or other<br />header-based authentication schemes. Common examples include "Authorization",<br />"X-API-Key", or custom authentication headers. |  | Optional: \{\} <br /> |
 
 
@@ -2718,19 +2719,27 @@ _Appears in:_
 
 
 
-OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange for OpenAI-compatible APIs.
+OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange.
 
 
 
 _Appears in:_
+- [MCPServerAuthentication](#mcpserverauthentication)
 - [OpenAISettings](#openaisettings)
+- [WorkbenchToolSpec](#workbenchtoolspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled turns token exchange on for obtaining access tokens via the configured token endpoint. |  | Optional: \{\} <br /> |
+| `type` _[OauthTokenExchangeType](#oauthtokenexchangetype)_ | Type selects client secret or signed JWT client assertion authentication. | CLIENT_SECRET | Enum: [CLIENT_SECRET CLIENT_ASSERTION] <br />Optional: \{\} <br /> |
 | `tokenUrl` _string_ | TokenURL is the OAuth2 token endpoint URL. |  | Optional: \{\} <br /> |
 | `clientId` _string_ | ClientID is the OAuth2 client identifier. |  | Optional: \{\} <br /> |
 | `clientSecretSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ClientSecretSecretRef is a reference to a Kubernetes secret key holding the OAuth2 client secret. |  | Optional: \{\} <br /> |
+| `privateKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PrivateKeySecretRef references a PEM-encoded RSA private key used to sign client assertions. |  | Optional: \{\} <br /> |
+| `keyId` _string_ | KeyID is added to the signed JWT header as kid when configured. |  | Optional: \{\} <br /> |
+| `audience` _string_ | Audience overrides the JWT aud claim. It defaults to tokenUrl. |  | Optional: \{\} <br /> |
+| `resource` _string_ | Resource is the OAuth resource parameter requested from the token endpoint. |  | Optional: \{\} <br /> |
+| `scopes` _string array_ | Scopes are sent as a space-separated OAuth scope parameter. |  | Optional: \{\} <br /> |
 
 
 #### OIDCProvider
@@ -6163,6 +6172,7 @@ _Appears in:_
 | `pagerduty` _[WorkbenchToolPagerdutyConfig](#workbenchtoolpagerdutyconfig)_ | PagerDuty connection (integration). |  | Optional: \{\} <br /> |
 | `teams` _[WorkbenchToolTeamsConfig](#workbenchtoolteamsconfig)_ | Microsoft Teams / Graph connection (integration). |  | Optional: \{\} <br /> |
 | `atlassian` _[WorkbenchToolAtlassianConfig](#workbenchtoolatlassianconfig)_ | Atlassian/jira connection (ticketing). |  | Optional: \{\} <br /> |
+| `jiraDatacenter` _[WorkbenchToolJiraDatacenterConfig](#workbenchtooljiradatacenterconfig)_ | Jira Data Center connection (ticketing). |  | Optional: \{\} <br /> |
 | `exa` _[WorkbenchToolExaConfig](#workbenchtoolexaconfig)_ | Exa connection (search). |  | Optional: \{\} <br /> |
 | `github` _[WorkbenchToolGithubConfig](#workbenchtoolgithubconfig)_ | GitHub connection (integration). |  | Optional: \{\} <br /> |
 | `gitlab` _[WorkbenchToolGitlabConfig](#workbenchtoolgitlabconfig)_ | GitLab connection (scm). |  | Optional: \{\} <br /> |
@@ -6359,6 +6369,23 @@ _Appears in:_
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
 
 
+#### WorkbenchToolJiraDatacenterConfig
+
+
+
+WorkbenchToolJiraDatacenterConfig defines a Jira Data Center connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Jira Data Center base URL. |  | Required: \{\} <br /> |
+| `apiTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | APITokenSecretRef references a personal access token when OAuth is not used. |  | Optional: \{\} <br /> |
+
+
 #### WorkbenchToolLambdaConfig
 
 
@@ -6522,7 +6549,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | The name of the tool (a-z, 0-9, underscores). If not set, metadata.name is used. |  | Optional: \{\} <br />Pattern: `^[a-z0-9_]+$` <br />Type: string <br /> |
-| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | The type of tool. |  | Enum: [HTTP ELASTIC DATADOG PROMETHEUS LOKI TEMPO SENTRY MCP LINEAR ATLASSIAN SPLUNK DYNATRACE CLOUDWATCH AZURE CLOUD JAEGER EXA GITHUB SLACK TEAMS GITLAB BITBUCKET BITBUCKET_DATACENTER AZURE_DEVOPS PAGERDUTY OPENSEARCH LAMBDA CLOUD_RUN AZURE_FUNCTION DOCKER VICTORIA_LOGS] <br />Required: \{\} <br /> |
+| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | The type of tool. |  | Enum: [HTTP ELASTIC DATADOG PROMETHEUS LOKI TEMPO SENTRY MCP LINEAR ATLASSIAN SPLUNK DYNATRACE CLOUDWATCH AZURE CLOUD JAEGER EXA GITHUB SLACK TEAMS GITLAB BITBUCKET BITBUCKET_DATACENTER AZURE_DEVOPS PAGERDUTY OPENSEARCH LAMBDA CLOUD_RUN AZURE_FUNCTION DOCKER VICTORIA_LOGS JIRA JIRA_DATACENTER] <br />Required: \{\} <br /> |
 | `categories` _WorkbenchToolCategory array_ | Categories for the tool. |  | Optional: \{\} <br /> |
 | `approval` _boolean_ | Whether this tool requires approval before execution. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The project for this tool. |  | Optional: \{\} <br /> |
@@ -6531,6 +6558,7 @@ _Appears in:_
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The SCM connection for this tool (e.g. shared Git provider credentials). |  | Optional: \{\} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings define the read and write access policies for this tool. |  | Optional: \{\} <br /> |
 | `configuration` _[WorkbenchToolConfiguration](#workbenchtoolconfiguration)_ | Tool configuration (e.g. HTTP). |  | Optional: \{\} <br /> |
+| `oauth` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | OAuth configures client credentials token exchange for this tool. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ |  |  | Optional: \{\} <br /> |
 
 

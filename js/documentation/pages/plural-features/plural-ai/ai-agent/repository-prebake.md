@@ -29,14 +29,53 @@ Tags:
 
 Pin the date tag for reproducible runs. If the image is private, set `spec.template.spec.imagePullSecrets`.
 
+## Prewarm the image on cluster nodes
+
+Pulling a large repository image when an agent starts can still add latency. Add `spec.prewarm` to pull `repositoryImage` onto eligible nodes ahead of time:
+
+```yaml
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentRuntime
+metadata:
+  name: claude
+spec:
+  type: CLAUDE
+  targetNamespace: agents
+  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  prewarm:
+    cron: "0 * * * *"
+    selector:
+      matchLabels:
+        plural.sh/agent-pool: default
+    template:
+      spec:
+        tolerations:
+          - key: plural.sh/agent
+            operator: Exists
+        imagePullSecrets:
+          - name: repository-registry
+        containers:
+          - name: image-warmer
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+```
+
+`cron` is a standard five-field cron expression. The operator warms once when the configuration is first created, then follows the schedule. `selector` matches node labels; omit it to warm all schedulable nodes. `template` optionally overrides the generated warmer pod template. Container-specific overrides must target the `image-warmer` container by name. For a private image, repeat the required `imagePullSecrets` in this prewarm template; the agent pod template is configured separately.
+
+Under the hood, the operator creates an `ImageWarmer` resource in its own namespace and a temporary DaemonSet with `imagePullPolicy: Always`. Its generated name is recorded in `AgentRuntime.status.imageWarmerName`. After its pod is ready on every selected node, the operator removes the DaemonSet; the pulled image remains in each node's container image cache. The default pod runs as uid/gid `65532`, drops all capabilities, uses a read-only root filesystem and runtime-default seccomp, disallows privilege escalation, and does not mount a service account token. Template settings can override these defaults when required.
+
+Changing `repositoryImage` updates the generated `ImageWarmer`. Removing `prewarm` removes it. Prewarming reduces image-pull latency, but node image garbage collection may evict the cached image before the next scheduled refresh.
+
 ## How it works
 
 1. The operator starts a `repository-prebake` init container from `repositoryImage`.
-2. That container copies `/data/.` into the existing `shared-context` emptyDir at `/plural/shared/repos`.
-3. `agent-bootstrap` matches the run repository URL (https and ssh forms of the same repo are equivalent) and **moves** that tree into `/plural/shared/repository` so the working copy does not duplicate disk. If rename is not possible, it copies then deletes the source. Other prebaked repos stay under `/plural/shared/repos/<path>`.
+2. That container copies `/data` into the existing `shared-context` emptyDir at `/plural/shared/repos`. The published base image uses `fcp` to parallelize this small-file-heavy copy and falls back to `cp -a` for compatible custom images without `fcp`.
+3. `agent-bootstrap` matches the run repository URL (https and ssh forms of the same repo are equivalent) and **moves** that tree into `/plural/shared/repository` so the working copy does not duplicate disk. This is normally an instant rename because both paths use the same volume. If rename is not possible, it uses `fcp` when available, then deletes the source. Other prebaked repos stay under `/plural/shared/repos/<path>`.
 4. Fetch of the requested branch is best-effort. An airgapped or stale remote keeps the prebaked copy.
 
-No extra volume and no Kubernetes image-volume feature gate. The image must include `/bin/sh` and `cp`, with repos under `/data`, owned by uid `65532` so the non-root agent can read them.
+No extra volume and no Kubernetes image-volume feature gate. Custom images must include `/bin/sh` and either `fcp` or `cp`, with repos under `/data`, owned by uid `65532` so the non-root agent can read them.
 
 ## Image layout
 
@@ -80,7 +119,7 @@ docker rm "$cid"
 
 ## Extend the base image
 
-`docker.io/pluralsh/repository-prebake` is Debian plus `git`, `mise`, a compile toolchain, and a `prebake` binary. **Clone and write the manifest inside the image you push.** Users build with a normal `Dockerfile` and `docker/build-push-action`. The CLI is not a host-side wrapper around `docker build`.
+`ghcr.io/pluralsh/repository-prebake` uses the same DHI Debian Trixie base as agent-harness, plus `git`, `mise`, a compile toolchain, and a `prebake` binary. **Clone and write the manifest inside the image you push.** Users build with a normal `Dockerfile` and `docker/build-push-action`. The CLI is not a host-side wrapper around `docker build`.
 
 ```dockerfile
 FROM docker.io/pluralsh/repository-prebake:latest

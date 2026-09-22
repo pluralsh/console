@@ -2,6 +2,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.Client do
   @moduledoc false
 
   alias Console.AI.Tools.Workbench.Integration.{Http, Query}
+  alias Console.AI.Provider.TokenExchange
+  alias Console.Schema.DeploymentSettings.OauthToken
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.Configuration.{
     JiraConnection,
@@ -29,6 +31,24 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.Client do
 
   def build(%WorkbenchTool{
         tool: :jira_datacenter,
+        oauth: %OauthToken{enabled: enabled} = oauth,
+        configuration: %{
+          jira_datacenter: %JiraDatacenterConnection{url: url}
+        }
+      })
+      when enabled != false and is_binary(url) do
+    with {:ok, token} <- bearer_token(TokenExchange.exchange(oauth)) do
+      {:ok,
+       %{
+         base_url: api_root(url, :datacenter),
+         headers: [{"Authorization", "Bearer #{token}"}],
+         deployment: :datacenter
+       }}
+    end
+  end
+
+  def build(%WorkbenchTool{
+        tool: :jira_datacenter,
         configuration: %{
           jira_datacenter: %JiraDatacenterConnection{url: url, api_token: token}
         }
@@ -45,9 +65,15 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.Client do
   def build(%WorkbenchTool{}),
     do: {:error, "Jira connection is not configured for this workbench tool."}
 
+  defp bearer_token({:ok, %OAuth2.AccessToken{access_token: token}}) when is_binary(token),
+    do: {:ok, token}
+
+  defp bearer_token({:ok, token}) when is_binary(token), do: {:ok, token}
+  defp bearer_token(error), do: error
+
   @doc false
   def api_root(url, :cloud), do: normalize_url(url) <> "/rest/api/2"
-  def api_root(url, :datacenter), do: normalize_url(url) <> "/rest/api/latest"
+  def api_root(url, :datacenter), do: normalize_url(url) <> "/rest/api/2"
 
   @spec get(t, String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def get(client, path, query \\ %{}), do: request(client, :get, path, query: query)
@@ -105,6 +131,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.Client do
     url
     |> String.trim()
     |> String.trim_trailing("/")
+    |> String.replace(~r{/rest/api/(latest|[0-9]+)\z}i, "")
   end
 
   defp http_opts,

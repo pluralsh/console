@@ -1164,6 +1164,40 @@ spec:
                     required:
                     - url
                     type: object
+                  jiraDatacenter:
+                    description: Jira Data Center connection (ticketing).
+                    properties:
+                      apiTokenSecretRef:
+                        description: APITokenSecretRef references a personal access
+                          token when OAuth is not used.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      url:
+                        description: Jira Data Center base URL.
+                        type: string
+                    required:
+                    - url
+                    type: object
                   lambda:
                     description: AWS Lambda function configuration.
                     properties:
@@ -1851,6 +1885,97 @@ spec:
                   set, metadata.name is used.
                 pattern: ^[a-z0-9_]+$
                 type: string
+              oauth:
+                description: OAuth configures client credentials token exchange for
+                  this tool.
+                properties:
+                  audience:
+                    description: Audience overrides the JWT aud claim. It defaults
+                      to tokenUrl.
+                    type: string
+                  clientId:
+                    description: ClientID is the OAuth2 client identifier.
+                    type: string
+                  clientSecretSecretRef:
+                    description: ClientSecretSecretRef is a reference to a Kubernetes
+                      secret key holding the OAuth2 client secret.
+                    properties:
+                      key:
+                        description: The key of the secret to select from.  Must be
+                          a valid secret key.
+                        type: string
+                      name:
+                        default: ""
+                        description: |-
+                          Name of the referent.
+                          This field is effectively required, but due to backwards compatibility is
+                          allowed to be empty. Instances of this type with an empty value here are
+                          almost certainly wrong.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      optional:
+                        description: Specify whether the Secret or its key must be
+                          defined
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  enabled:
+                    description: Enabled turns token exchange on for obtaining access
+                      tokens via the configured token endpoint.
+                    type: boolean
+                  keyId:
+                    description: KeyID is added to the signed JWT header as kid when
+                      configured.
+                    type: string
+                  privateKeySecretRef:
+                    description: PrivateKeySecretRef references a PEM-encoded RSA
+                      private key used to sign client assertions.
+                    properties:
+                      key:
+                        description: The key of the secret to select from.  Must be
+                          a valid secret key.
+                        type: string
+                      name:
+                        default: ""
+                        description: |-
+                          Name of the referent.
+                          This field is effectively required, but due to backwards compatibility is
+                          allowed to be empty. Instances of this type with an empty value here are
+                          almost certainly wrong.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      optional:
+                        description: Specify whether the Secret or its key must be
+                          defined
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  resource:
+                    description: Resource is the OAuth resource parameter requested
+                      from the token endpoint.
+                    type: string
+                  scopes:
+                    description: Scopes are sent as a space-separated OAuth scope
+                      parameter.
+                    items:
+                      type: string
+                    type: array
+                  tokenUrl:
+                    description: TokenURL is the OAuth2 token endpoint URL.
+                    type: string
+                  type:
+                    default: CLIENT_SECRET
+                    description: Type selects client secret or signed JWT client assertion
+                      authentication.
+                    enum:
+                    - CLIENT_SECRET
+                    - CLIENT_ASSERTION
+                    type: string
+                type: object
               projectRef:
                 description: The project for this tool.
                 properties:
@@ -1993,6 +2118,8 @@ spec:
                 - AZURE_FUNCTION
                 - DOCKER
                 - VICTORIA_LOGS
+                - JIRA
+                - JIRA_DATACENTER
                 type: string
             required:
             - tool

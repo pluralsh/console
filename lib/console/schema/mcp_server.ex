@@ -1,6 +1,7 @@
 defmodule Console.Schema.McpServer do
   use Piazza.Ecto.Schema
   alias Console.Schema.{PolicyBinding, Project, User}
+  alias Console.Schema.DeploymentSettings.OauthToken, as: TokenExchange
   alias Console.Deployments.Policies.Rbac
 
   @obfuscated_header_value "*****"
@@ -30,6 +31,8 @@ defmodule Console.Schema.McpServer do
 
     embeds_one :authentication, Authentication, on_replace: :update do
       field :plural, :boolean
+
+      embeds_one :oauth, TokenExchange, on_replace: :update
 
       embeds_many :headers, Header, on_replace: :delete do
         field :name,  :string
@@ -91,6 +94,7 @@ defmodule Console.Schema.McpServer do
   defp auth_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(plural)a)
+    |> cast_embed(:oauth)
     |> cast_embed(:headers, with: &header_changeset/2)
   end
 

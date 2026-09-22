@@ -196,6 +196,16 @@ fragment WorkbenchTool on WorkbenchTool {
   writeBindings {
     ...PolicyBinding
   }
+  oauth {
+    enabled
+    type
+    tokenUrl
+    clientId
+    keyId
+    audience
+    resource
+    scopes
+  }
   configuration {
     ...WorkbenchToolConfigurationFields
   }

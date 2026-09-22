@@ -5,6 +5,10 @@ const (
 	AgentMCPServerAddress = ":8080"
 	AgentMCPServerURL     = "http://127.0.0.1:8080/mcp"
 
+	AgentWorkbenchMCPServerName = "workbench"
+	AgentWorkbenchMCPPath       = "/workbench/mcp"
+	AgentWorkbenchMCPURL        = "http://127.0.0.1:8080/workbench/mcp"
+
 	AgentOpenAIChatCompletionsPath = "/v1/chat/completions"
 	AgentOpenAIChatCompletionsURL  = "http://127.0.0.1:8080/v1/chat/completions"
 	AgentOpenAIResponsesPath       = "/v1/responses"

@@ -41,6 +41,7 @@ export function dashboardDefinitionYaml(
         title: graph.title,
         description: graph.description,
         type: enumValue(graph.type),
+        section_id: graph.sectionId,
         markdown: graph.markdown,
         options: sanitizeJson(graph.options),
         layout: {

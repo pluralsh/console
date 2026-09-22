@@ -28,6 +28,39 @@ func TestSecretKeySelectorSet(t *testing.T) {
 	}
 }
 
+func TestAgentRuntimeWorkbenchMCPCategories(t *testing.T) {
+	runtime := &AgentRuntime{}
+	if runtime.IsWorkbenchMCPEnabled() {
+		t.Fatal("workbench MCP should be disabled when configuration is absent")
+	}
+
+	runtime.Spec.WorkbenchMCP = &WorkbenchMCPConfig{Enabled: true}
+	got := runtime.WorkbenchMCPCategories()
+	want := []WorkbenchMCPCategory{
+		WorkbenchMCPCategoryMetrics,
+		WorkbenchMCPCategoryLogs,
+		WorkbenchMCPCategoryTraces,
+		WorkbenchMCPCategoryTicketing,
+		WorkbenchMCPCategorySearch,
+		WorkbenchMCPCategorySCM,
+		WorkbenchMCPCategoryInfrastructure,
+	}
+	if len(got) != len(want) {
+		t.Fatalf("categories = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("categories = %v, want %v", got, want)
+		}
+	}
+
+	runtime.Spec.WorkbenchMCP.Categories = []WorkbenchMCPCategory{WorkbenchMCPCategoryObservability}
+	got = runtime.WorkbenchMCPCategories()
+	if len(got) != 1 || got[0] != WorkbenchMCPCategoryObservability {
+		t.Fatalf("explicit categories = %v", got)
+	}
+}
+
 func TestCodexConfig_ToCodexConfigRawWithoutSecret(t *testing.T) {
 	method := console.OpenAiMethodChat
 	cfg := &CodexConfig{

@@ -77,33 +77,64 @@ defmodule Console.Deployments.Observability do
   def create_dashboard(attrs, %User{} = user) do
     changeset = Dashboard.changeset(%Dashboard{}, attrs)
 
-    with :ok <- validate_dashboard_tools(changeset, user),
-         {:ok, changeset} <- allow(changeset, user, :write),
-      do: Repo.insert(changeset)
+    with {:ok, changeset} <- put_dashboard_tool_ids(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write) do
+      Repo.insert(changeset)
+      |> notify(:create)
+    end
   end
 
   @spec update_dashboard(map, binary, User.t()) :: dashboard_resp
   def update_dashboard(attrs, id, %User{} = user) do
     changeset = Dashboard.changeset(get_dashboard!(id), Map.drop(attrs, [:workbench_id, "workbench_id"]))
 
-    with :ok <- validate_dashboard_tools(changeset, user),
-         {:ok, changeset} <- allow(changeset, user, :write),
-      do: Repo.update(changeset)
+    with {:ok, changeset} <- put_dashboard_tool_ids(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write) do
+      Repo.update(changeset)
+      |> notify(:update)
+    end
   end
 
-  defp validate_dashboard_tools(%Ecto.Changeset{valid?: true} = changeset, %User{} = user) do
+  defp put_dashboard_tool_ids(%Ecto.Changeset{valid?: true} = changeset, %User{} = user) do
     dashboard = Ecto.Changeset.apply_changes(changeset)
 
     case Repo.preload(dashboard, :workbench) do
       %Dashboard{workbench: %Workbench{} = workbench} = dashboard ->
-        Toolchain.validate_all(workbench, dashboard_tool_queries(dashboard), user)
+        with {:ok, graphs} <- resolve_graph_tool_ids(dashboard.graphs, workbench, user),
+             :ok <- Toolchain.validate_all(workbench, input_tool_queries(dashboard.inputs), user) do
+          {:ok, Ecto.Changeset.put_embed(changeset, :graphs, graphs)}
+        end
+
       _ -> {:error, "dashboard workbench not found"}
     end
   end
-  defp validate_dashboard_tools(_, _), do: :ok
 
-  defp dashboard_tool_queries(%Dashboard{graphs: graphs, inputs: inputs}) do
-    Enum.flat_map(graphs ++ inputs, fn
+  defp put_dashboard_tool_ids(changeset, _), do: {:ok, changeset}
+
+  defp resolve_graph_tool_ids(graphs, %Workbench{} = workbench, %User{} = user) do
+    Enum.reduce_while(graphs, {:ok, []}, fn
+      %{datasource: %{type: type, tool: tool, input: input}} = graph, {:ok, graphs}
+      when type in [:metrics, :logs, :traces, :labels] ->
+        case Toolchain.resolve_workbench_tool(workbench, type, tool, input || %{}, user) do
+          {:ok, resolved} ->
+            tool_id = if resolved, do: resolved.id
+            {:cont, {:ok, [%{graph | tool_id: tool_id} | graphs]}}
+
+          {:error, _} = error ->
+            {:halt, error}
+        end
+
+      graph, {:ok, graphs} ->
+        {:cont, {:ok, [%{graph | tool_id: nil} | graphs]}}
+    end)
+    |> case do
+      {:ok, graphs} -> {:ok, Enum.reverse(graphs)}
+      error -> error
+    end
+  end
+
+  defp input_tool_queries(inputs) do
+    Enum.flat_map(inputs, fn
       %{datasource: %{type: type, tool: tool, input: input}}
       when type in [:metrics, :logs, :traces, :labels] ->
         [{type, tool, input || %{}}]
@@ -117,6 +148,7 @@ defmodule Console.Deployments.Observability do
     get_dashboard!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+    |> notify(:delete)
   end
 
   @spec get_alert!(binary) :: Alert.t | nil
@@ -135,6 +167,7 @@ defmodule Console.Deployments.Observability do
     )
     |> allow(user, :read)
     |> when_ok(:insert)
+    |> notify(:create)
   end
 
   @doc """
@@ -146,6 +179,7 @@ defmodule Console.Deployments.Observability do
     |> Monitor.changeset(attrs)
     |> allow(user, :read)
     |> when_ok(:update)
+    |> notify(:update)
   end
 
   @doc """
@@ -156,12 +190,14 @@ defmodule Console.Deployments.Observability do
     Repo.get!(Monitor, id)
     |> allow(user, :read)
     |> when_ok(:delete)
+    |> notify(:delete)
   end
 
   @spec mark_run(Monitor.t) :: monitor_resp
   def mark_run(%Monitor{} = monitor) do
     Monitor.changeset(monitor, %{last_run_at: Timex.now()})
     |> Repo.update()
+    |> notify(:update)
   end
 
   @spec run_monitor(Monitor.t) :: alert_resp | :ignore
@@ -174,6 +210,7 @@ defmodule Console.Deployments.Observability do
       |> add_operation(:monitor, fn _ ->
         Monitor.changeset(monitor, %{state: result})
         |> Repo.update()
+        |> notify(:update)
       end)
       |> execute(extract: :update)
       |> case do
@@ -492,5 +529,17 @@ defmodule Console.Deployments.Observability do
     do: handle_notify(PubSub.ObservabilityWebhookDeleted, webhook)
   defp notify({:ok, %AlertResolution{} = res}, :create),
     do: handle_notify(PubSub.AlertResolutionCreated, res)
+  defp notify({:ok, %Dashboard{} = dashboard}, :create),
+    do: handle_notify(PubSub.DashboardCreated, dashboard)
+  defp notify({:ok, %Dashboard{} = dashboard}, :update),
+    do: handle_notify(PubSub.DashboardUpdated, dashboard)
+  defp notify({:ok, %Dashboard{} = dashboard}, :delete),
+    do: handle_notify(PubSub.DashboardDeleted, dashboard)
+  defp notify({:ok, %Monitor{} = monitor}, :create),
+    do: handle_notify(PubSub.MonitorCreated, monitor)
+  defp notify({:ok, %Monitor{} = monitor}, :update),
+    do: handle_notify(PubSub.MonitorUpdated, monitor)
+  defp notify({:ok, %Monitor{} = monitor}, :delete),
+    do: handle_notify(PubSub.MonitorDeleted, monitor)
   defp notify(pass, _), do: pass
 end

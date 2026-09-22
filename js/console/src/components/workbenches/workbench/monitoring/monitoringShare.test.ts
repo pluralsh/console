@@ -35,4 +35,9 @@ describe('monitoringShare', () => {
     expect(parsed.range).toBeUndefined()
     expect(parsed.variables).toEqual({})
   })
+
+  it('accepts dashboard ranges and ignores obsolete ranges', () => {
+    expect(parseMonitoringShareSearch('?range=7d').range).toBe('7d')
+    expect(parseMonitoringShareSearch('?range=1y').range).toBeUndefined()
+  })
 })

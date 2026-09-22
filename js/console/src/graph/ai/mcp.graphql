@@ -17,6 +17,16 @@ fragment McpServer on McpServer {
       value
     }
     plural
+    oauth {
+      enabled
+      type
+      tokenUrl
+      clientId
+      keyId
+      audience
+      resource
+      scopes
+    }
   }
 }
 

@@ -26,6 +26,8 @@ import {
   McpServerAttributes,
   McpServerFragment,
   McpServerProtocol,
+  OauthTokenExchangeAttributes,
+  OauthTokenExchangeType,
   PolicyBindingFragment,
   useUpdateMcpServerMutation,
   useUpsertMcpServerMutation,
@@ -34,6 +36,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+import { deepOmitBlank } from 'utils/graphql'
 import {
   MCP_SERVER_SELECTED_QUERY_PARAM,
   WORKBENCHES_TOOLS_CREATE_ABS_PATH,
@@ -44,6 +47,10 @@ import {
   getWorkbenchToolSetupGuideDocumentationUrl,
   getWorkbenchToolSetupGuideMarkdownPath,
 } from '../workbenchToolSetupGuides'
+import {
+  oauthTokenExchangeIsComplete,
+  OauthTokenExchangeFormFields,
+} from '../OauthTokenExchangeFormFields'
 
 const MCP_SETUP_GUIDE_MARKDOWN_PATH = '/setup-guides/tools/mcp.md'
 
@@ -67,6 +74,24 @@ function headersFromServer(server?: McpServerFragment): HeaderField[] {
       })) ?? []
 
   return existing.length > 0 ? existing : [newHeaderField()]
+}
+
+function oauthFromServer(
+  server?: McpServerFragment
+): OauthTokenExchangeAttributes | undefined {
+  const oauth = server?.authentication?.oauth
+  if (!oauth) return undefined
+
+  return {
+    enabled: oauth.enabled !== false,
+    type: oauth.type ?? OauthTokenExchangeType.ClientSecret,
+    tokenUrl: oauth.tokenUrl,
+    clientId: oauth.clientId,
+    keyId: oauth.keyId,
+    audience: oauth.audience,
+    resource: oauth.resource,
+    scopes: oauth.scopes,
+  }
 }
 
 export function McpServerCreateForm({
@@ -104,6 +129,9 @@ export function McpServerCreateForm({
   const [headers, setHeaders] = useState<HeaderField[]>(() =>
     headersFromServer(existingServer)
   )
+  const [oauth, setOauth] = useState<OauthTokenExchangeAttributes | undefined>(
+    () => oauthFromServer(existingServer)
+  )
   const [readBindings, setReadBindings] = useState<PolicyBindingFragment[]>(
     () =>
       (existingServer?.readBindings?.filter(
@@ -115,6 +143,13 @@ export function McpServerCreateForm({
     const trimmedName = name.trim()
     const trimmedUrl = url.trim()
     if (!trimmedName || !trimmedUrl) return null
+    if (
+      !oauthTokenExchangeIsComplete(
+        oauth,
+        existingServer?.authentication?.oauth?.type
+      )
+    )
+      return null
 
     const configuredHeaders = headers
       .map(({ id, name: headerName, value }) => ({
@@ -123,18 +158,21 @@ export function McpServerCreateForm({
         value: value.trim(),
       }))
       .filter(({ name: headerName, value }) => headerName && value)
+    const configuredOauth = oauth
+      ? (deepOmitBlank(oauth) as OauthTokenExchangeAttributes)
+      : undefined
 
     return {
       name: trimmedName,
       url: trimmedUrl,
       protocol,
       authentication:
-        configuredHeaders.length > 0
-          ? { headers: configuredHeaders }
+        configuredHeaders.length > 0 || configuredOauth
+          ? { headers: configuredHeaders, oauth: configuredOauth }
           : undefined,
       readBindings: readBindings.map(bindingToBindingAttributes),
     }
-  }, [name, url, protocol, headers, readBindings])
+  }, [name, url, protocol, headers, oauth, readBindings, existingServer])
 
   const complete = (server: Nullable<{ id: string; name: string }>) => {
     if (!server) return
@@ -313,6 +351,11 @@ export function McpServerCreateForm({
               </Button>
             </Flex>
           </FormField>
+          <OauthTokenExchangeFormFields
+            oauth={oauth}
+            setOauth={setOauth}
+            persistedType={existingServer?.authentication?.oauth?.type}
+          />
 
           <Flex
             direction="column"

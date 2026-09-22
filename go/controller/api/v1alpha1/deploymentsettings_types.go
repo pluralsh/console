@@ -990,12 +990,19 @@ type HTTPHeader struct {
 	Value string `json:"value"`
 }
 
-// OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange for OpenAI-compatible APIs.
+// OAuth2TokenExchange configures OAuth2 client credentials token endpoint exchange.
 type OAuth2TokenExchange struct {
 	// Enabled turns token exchange on for obtaining access tokens via the configured token endpoint.
 	//
 	// +kubebuilder:validation:Optional
 	Enabled *bool `json:"enabled,omitempty"`
+
+	// Type selects client secret or signed JWT client assertion authentication.
+	//
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=CLIENT_SECRET
+	// +kubebuilder:validation:Enum=CLIENT_SECRET;CLIENT_ASSERTION
+	Type *console.OauthTokenExchangeType `json:"type,omitempty"`
 
 	// TokenURL is the OAuth2 token endpoint URL.
 	//
@@ -1011,6 +1018,31 @@ type OAuth2TokenExchange struct {
 	//
 	// +kubebuilder:validation:Optional
 	ClientSecretSecretRef *corev1.SecretKeySelector `json:"clientSecretSecretRef,omitempty"`
+
+	// PrivateKeySecretRef references a PEM-encoded RSA private key used to sign client assertions.
+	//
+	// +kubebuilder:validation:Optional
+	PrivateKeySecretRef *corev1.SecretKeySelector `json:"privateKeySecretRef,omitempty"`
+
+	// KeyID is added to the signed JWT header as kid when configured.
+	//
+	// +kubebuilder:validation:Optional
+	KeyID *string `json:"keyId,omitempty"`
+
+	// Audience overrides the JWT aud claim. It defaults to tokenUrl.
+	//
+	// +kubebuilder:validation:Optional
+	Audience *string `json:"audience,omitempty"`
+
+	// Resource is the OAuth resource parameter requested from the token endpoint.
+	//
+	// +kubebuilder:validation:Optional
+	Resource *string `json:"resource,omitempty"`
+
+	// Scopes are sent as a space-separated OAuth scope parameter.
+	//
+	// +kubebuilder:validation:Optional
+	Scopes []string `json:"scopes,omitempty"`
 }
 
 func (in *OAuth2TokenExchange) Attributes(ctx context.Context, c client.Client, namespace string) (*console.OpenaiTokenExchangeAttributes, error) {
@@ -1019,8 +1051,13 @@ func (in *OAuth2TokenExchange) Attributes(ctx context.Context, c client.Client, 
 	}
 	attr := &console.OpenaiTokenExchangeAttributes{
 		Enabled:  in.Enabled,
+		Type:     in.Type,
 		TokenURL: in.TokenURL,
 		ClientID: in.ClientID,
+		KeyID:    in.KeyID,
+		Audience: in.Audience,
+		Resource: in.Resource,
+		Scopes:   lo.ToSlicePtr(in.Scopes),
 	}
 	if in.ClientSecretSecretRef != nil {
 		clientSecret, err := utils.GetSecretKey(ctx, c, in.ClientSecretSecretRef, namespace)
@@ -1029,6 +1066,46 @@ func (in *OAuth2TokenExchange) Attributes(ctx context.Context, c client.Client, 
 		}
 		attr.ClientSecret = lo.ToPtr(clientSecret)
 	}
+	if in.PrivateKeySecretRef != nil {
+		privateKey, err := utils.GetSecretKey(ctx, c, in.PrivateKeySecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.PrivateKey = lo.ToPtr(privateKey)
+	}
+	return attr, nil
+}
+
+func (in *OAuth2TokenExchange) TokenExchangeAttributes(ctx context.Context, c client.Client, namespace string) (*console.OauthTokenExchangeAttributes, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	attr := &console.OauthTokenExchangeAttributes{
+		Enabled:  in.Enabled,
+		Type:     in.Type,
+		TokenURL: in.TokenURL,
+		ClientID: in.ClientID,
+		KeyID:    in.KeyID,
+		Audience: in.Audience,
+		Resource: in.Resource,
+		Scopes:   lo.ToSlicePtr(in.Scopes),
+	}
+	if in.ClientSecretSecretRef != nil {
+		clientSecret, err := utils.GetSecretKey(ctx, c, in.ClientSecretSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.ClientSecret = lo.ToPtr(clientSecret)
+	}
+	if in.PrivateKeySecretRef != nil {
+		privateKey, err := utils.GetSecretKey(ctx, c, in.PrivateKeySecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.PrivateKey = lo.ToPtr(privateKey)
+	}
+
 	return attr, nil
 }
 

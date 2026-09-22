@@ -19,6 +19,8 @@ import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   HelmAuthProvider,
+  OauthTokenExchangeAttributes,
+  OauthTokenExchangeType,
   SplunkTokenType,
   WorkbenchToolHttpMethod,
   WorkbenchToolType,
@@ -37,6 +39,7 @@ import {
   ConfigurableWorkbenchToolType,
   isConfigurableWorkbenchToolType,
 } from './workbenchToolsUtils'
+import { OauthTokenExchangeFormFields } from './OauthTokenExchangeFormFields'
 
 type ToolFormFieldProps<T extends ConfigurableWorkbenchToolType> = {
   config: ConfigForToolType<T>
@@ -47,10 +50,12 @@ export function WorkbenchToolFormFields({
   type,
   state,
   update,
+  persistedOauthType,
 }: {
   type: WorkbenchToolType
   state: WorkbenchToolFormState
   update: (update: DeepPartial<WorkbenchToolFormState>) => void
+  persistedOauthType?: Nullable<OauthTokenExchangeType>
 }) {
   if (!isConfigurableWorkbenchToolType(type)) return null
 
@@ -94,8 +99,24 @@ export function WorkbenchToolFormFields({
       return render(type, AtlassianFormFields)
     case WorkbenchToolType.Jira:
       return render(type, JiraFormFields)
-    case WorkbenchToolType.JiraDatacenter:
-      return render(type, JiraDatacenterFormFields)
+    case WorkbenchToolType.JiraDatacenter: {
+      const key = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]
+      const config =
+        state.configuration?.[key] ?? INITIAL_TOOL_CONFIG_BY_TYPE[type]({})[key]
+      return (
+        <JiraDatacenterFormFields
+          config={config}
+          setConfig={(next) =>
+            update({
+              configuration: { ...state.configuration, [key]: next },
+            })
+          }
+          oauth={state.oauth}
+          setOauth={(oauth) => update({ oauth })}
+          persistedOauthType={persistedOauthType}
+        />
+      )
+    }
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
     case WorkbenchToolType.Slack:
@@ -743,23 +764,38 @@ function JiraFormFields({
 function JiraDatacenterFormFields({
   config: c,
   setConfig: set,
-}: ToolFormFieldProps<WorkbenchToolType.JiraDatacenter>) {
+  oauth,
+  setOauth,
+  persistedOauthType,
+}: ToolFormFieldProps<WorkbenchToolType.JiraDatacenter> & {
+  oauth?: Nullable<OauthTokenExchangeAttributes>
+  setOauth: (oauth: OauthTokenExchangeAttributes | undefined) => void
+  persistedOauthType?: Nullable<OauthTokenExchangeType>
+}) {
   return (
     <>
       <InputField
         label="Jira Data Center URL"
+        hint="Instance URL or REST API URL. Requests use the stable /rest/api/2 API."
         placeholder="https://jira.example.com"
         required
         value={c.url}
         onChange={(e) => set({ ...c, url: e.target.value })}
       />
-      <InputField
-        label="Personal access token"
-        hint="Leave blank when editing to keep the stored token unless you are rotating it."
-        required
-        revealer
-        value={c.apiToken}
-        onChange={(e) => set({ ...c, apiToken: e.target.value })}
+      {!oauth?.enabled && (
+        <InputField
+          label="Personal access token"
+          hint="Used to authenticate directly with Jira Data Center. Leave blank when editing to keep the stored token."
+          required
+          revealer
+          value={c.apiToken ?? ''}
+          onChange={(e) => set({ ...c, apiToken: e.target.value })}
+        />
+      )}
+      <OauthTokenExchangeFormFields
+        oauth={oauth}
+        setOauth={setOauth}
+        persistedType={persistedOauthType}
       />
     </>
   )

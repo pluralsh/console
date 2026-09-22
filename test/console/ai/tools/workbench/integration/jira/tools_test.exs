@@ -71,10 +71,10 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
              |> Ecto.Changeset.apply_action(:update)
   end
 
-  test "save_issue creates an issue with common and custom fields" do
+  test "save_issue creates a Data Center issue with the documented v2 shape" do
     expect(Req, :request, fn opts ->
       assert opts[:method] == :post
-      assert opts[:url] == "https://example.atlassian.net/rest/api/2/issue"
+      assert opts[:url] == "https://jira.example.com/rest/api/2/issue"
 
       assert Jason.decode!(opts[:body]) == %{
                "fields" => %{
@@ -90,7 +90,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
     end)
 
     assert {:ok, model} =
-             %SaveIssue{tool: workbench_tool(:jira)}
+             %SaveIssue{tool: workbench_tool(:jira_datacenter)}
              |> SaveIssue.changeset(%{
                "project" => "ENG",
                "issue_type" => "Bug",
@@ -104,11 +104,39 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
     assert %{"key" => "ENG-1"} = Jason.decode!(encoded)
   end
 
+  test "save_issue updates a Data Center issue with a fields object" do
+    expect(Req, :request, fn opts ->
+      assert opts[:method] == :put
+      assert opts[:url] == "https://jira.example.com/rest/api/2/issue/ENG-1"
+
+      assert Jason.decode!(opts[:body]) == %{
+               "fields" => %{
+                 "labels" => ["agent", "updated"],
+                 "summary" => "Updated summary"
+               }
+             }
+
+      {:ok, %Req.Response{status: 204, body: ""}}
+    end)
+
+    assert {:ok, model} =
+             %SaveIssue{tool: workbench_tool(:jira_datacenter)}
+             |> SaveIssue.changeset(%{
+               "issue_id" => "ENG-1",
+               "summary" => "Updated summary",
+               "fields" => %{"labels" => ["agent", "updated"]}
+             })
+             |> Ecto.Changeset.apply_action(:update)
+
+    assert {:ok, encoded} = SaveIssue.implement(model)
+    assert %{"issueId" => "ENG-1", "updated" => true} = Jason.decode!(encoded)
+  end
+
   test "save_comment updates an existing Data Center comment" do
     expect(Req, :request, fn opts ->
       assert opts[:method] == :put
       assert opts[:url] ==
-               "https://jira.example.com/rest/api/latest/issue/ENG-1/comment/42"
+               "https://jira.example.com/rest/api/2/issue/ENG-1/comment/42"
 
       assert Jason.decode!(opts[:body]) == %{"body" => "Updated comment"}
       {:ok, %Req.Response{status: 200, body: ~s({"id":"42"})}}

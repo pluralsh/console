@@ -66,6 +66,24 @@ defimpl Console.GraphQl.Topic, for: Console.Schema.WorkbenchJobThought do
     do: [workbench_job_thought_delta: "workbench_jobs:#{job_id}:thoughts"]
 end
 
+defimpl Console.GraphQl.Topic, for: Console.Schema.Dashboard do
+  def infer(%@for{id: id, workbench_id: workbench_id}, _),
+    do: [
+      workbench_dashboard_delta: "workbench_dashboards:#{id}",
+      workbench_dashboard_delta: "workbenches:#{workbench_id}:dashboards"
+    ]
+end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.Monitor do
+  def infer(%@for{id: id, workbench_id: workbench_id}, _) do
+    topics = [workbench_monitor_delta: "workbench_monitors:#{id}"]
+
+    if is_binary(workbench_id),
+      do: topics ++ [workbench_monitor_delta: "workbenches:#{workbench_id}:monitors"],
+      else: topics
+  end
+end
+
 defimpl Console.GraphQl.Topic, for: Console.Schema.AgentMessage.Stdout do
   def infer(%@for{agent_run_id: id}, _), do: [agent_message_output_delta: "agent_messages:#{id}:outputs"]
 end

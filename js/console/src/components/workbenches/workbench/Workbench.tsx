@@ -147,6 +147,10 @@ export function WorkbenchPageLayout({
         path: jobsTabPath,
       },
       {
+        label: 'Monitoring',
+        path: `${workbenchBasePath}/${WORKBENCHES_MONITORING_REL_PATH}`,
+      },
+      {
         label: 'Issues',
         path: `${workbenchBasePath}/${WORKBENCHES_ISSUES_REL_PATH}`,
       },
@@ -157,10 +161,6 @@ export function WorkbenchPageLayout({
       {
         label: 'Evals',
         path: `${workbenchBasePath}/${WORKBENCHES_EVALS_REL_PATH}`,
-      },
-      {
-        label: 'Monitoring',
-        path: `${workbenchBasePath}/${WORKBENCHES_MONITORING_REL_PATH}`,
       },
     ],
     [workbenchBasePath, jobsTabPath, hasInProgressJobs]

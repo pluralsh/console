@@ -28,6 +28,44 @@ defmodule Console.Schema.DashboardTest do
              ]
     end
 
+    test "accepts overlapping graph coordinates in different sections" do
+      changeset =
+        Dashboard.changeset(
+          %Dashboard{},
+          attrs([
+            section("api", 0),
+            section("database", 1),
+            graph("api-requests", 0, 0, 2, 2) |> Map.put(:section_id, "api"),
+            graph("db-queries", 0, 0, 2, 2) |> Map.put(:section_id, "database")
+          ])
+        )
+
+      assert changeset.valid?
+    end
+
+    test "rejects unknown and nested section references" do
+      unknown =
+        Dashboard.changeset(
+          %Dashboard{},
+          attrs([graph("requests", 0, 0, 2, 2) |> Map.put(:section_id, "missing")])
+        )
+
+      nested =
+        Dashboard.changeset(
+          %Dashboard{},
+          attrs([
+            section("parent", 0),
+            section("child", 1) |> Map.put(:section_id, "parent")
+          ])
+        )
+
+      refute unknown.valid?
+      assert errors_on(unknown).graphs == ["graph requests references unknown section missing"]
+
+      refute nested.valid?
+      assert errors_on(nested).graphs == ["section child cannot belong to another section"]
+    end
+
     test "returns every intersecting graph pair" do
       changeset =
         Dashboard.changeset(%Dashboard{}, attrs([
@@ -113,6 +151,15 @@ defmodule Console.Schema.DashboardTest do
       type: :timeseries,
       layout: %{x: x, y: y, w: w, h: h},
       datasource: %{type: :metrics, tool: "prometheus_query", input: %{query: "up"}}
+    }
+  end
+
+  defp section(identifier, y) do
+    %{
+      identifier: identifier,
+      title: String.capitalize(identifier),
+      type: :section,
+      layout: %{x: 0, y: y, w: 12, h: 1}
     }
   end
 end

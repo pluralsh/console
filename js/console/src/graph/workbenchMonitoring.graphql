@@ -22,6 +22,13 @@ fragment WorkbenchDashboardDetails on WorkbenchDashboard {
     title
     description
     type
+    sectionId
+    toolId
+    workbenchTool {
+      id
+      name
+      tool
+    }
     markdown
     options
     layout {
@@ -104,6 +111,24 @@ fragment WorkbenchMonitorDetails on Monitor {
   }
   service {
     id
+  }
+}
+
+subscription WorkbenchDashboardDelta($id: ID, $workbenchId: ID) {
+  workbenchDashboardDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...WorkbenchDashboardDetails
+    }
+  }
+}
+
+subscription WorkbenchMonitorDelta($id: ID, $workbenchId: ID) {
+  workbenchMonitorDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...WorkbenchMonitorDetails
+    }
   }
 }
 

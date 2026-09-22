@@ -141,6 +141,50 @@ func TestResolveMCPServers_Empty(t *testing.T) {
 	}
 }
 
+func TestWorkbenchMCPServerUsesLocalProxyAndDefaultCategories(t *testing.T) {
+	rawURL := "https://console.example/mcp/workbench/workbench-id"
+	run := &v1alpha1.AgentRun{
+		Spec: v1alpha1.AgentRunSpec{WorkbenchMCPURL: &rawURL},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		Spec: v1alpha1.AgentRuntimeSpec{
+			WorkbenchMCP: &v1alpha1.WorkbenchMCPConfig{Enabled: true},
+		},
+	}
+
+	upstream := workbenchMCPUpstreamURL(run, runtime)
+	if upstream != "https://console.example/mcp/workbench/workbench-id?categories=metrics%2Clogs%2Ctraces%2Cticketing%2Csearch%2Cscm%2Cinfrastructure" {
+		t.Fatalf("upstream = %q", upstream)
+	}
+
+	servers := withWorkbenchMCPServer(nil, run, runtime)
+	if len(servers) != 1 {
+		t.Fatalf("servers = %#v", servers)
+	}
+	if servers[0].Name != "workbench" || servers[0].URL != "http://127.0.0.1:8080/workbench/mcp" || len(servers[0].Headers) != 0 {
+		t.Fatalf("workbench server = %#v", servers[0])
+	}
+}
+
+func TestWorkbenchMCPServerRequiresOptInAndAssociatedRun(t *testing.T) {
+	rawURL := "https://console.example/mcp/workbench/workbench-id"
+	run := &v1alpha1.AgentRun{
+		Spec: v1alpha1.AgentRunSpec{WorkbenchMCPURL: &rawURL},
+	}
+	if got := withWorkbenchMCPServer(nil, run, &v1alpha1.AgentRuntime{}); got != nil {
+		t.Fatalf("disabled server = %#v", got)
+	}
+
+	runtime := &v1alpha1.AgentRuntime{
+		Spec: v1alpha1.AgentRuntimeSpec{
+			WorkbenchMCP: &v1alpha1.WorkbenchMCPConfig{Enabled: true},
+		},
+	}
+	if got := withWorkbenchMCPServer(nil, &v1alpha1.AgentRun{}, runtime); got != nil {
+		t.Fatalf("unassociated server = %#v", got)
+	}
+}
+
 func TestEnvVarValue_MissingKey(t *testing.T) {
 	fetcher := &fakeConfigurationFetcher{
 		secrets: map[string]*corev1.Secret{
