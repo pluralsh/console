@@ -47,7 +47,6 @@ PRE = --ensure
 manifests: TOOL = controller-gen
 manifests: --tool ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="$(CONTROLLER_GEN_PATHS)" output:crd:artifacts:config=config/crd/bases
-	@$(MAKE) -s codegen-rust-crds
 	@$(MAKE) -s codegen-chart-crds
 
 .PHONY: generate
@@ -59,11 +58,6 @@ generate: --tool ## Generate code containing DeepCopy, DeepCopyInto, and DeepCop
 genmock: TOOL = mockery
 genmock: --tool ## generates mocks before running tests
 	$(MOCKERY)
-
-.PHONY: codegen-rust-crds
-codegen-rust-crds: ## Generate the TunnelClient CRD from the Rust types.
-	cargo run --quiet --manifest-path ../../rust/ferrotunnel/Cargo.toml --bin crdgen > config/crd/bases/deployments.plural.sh_tunnelclients.yaml.tmp
-	mv config/crd/bases/deployments.plural.sh_tunnelclients.yaml.tmp config/crd/bases/deployments.plural.sh_tunnelclients.yaml
 
 .PHONY: codegen-chart-crds
 codegen-chart-crds: ## copy CRDs to the helm chart

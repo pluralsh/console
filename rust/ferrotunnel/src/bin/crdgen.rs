@@ -1,8 +1,7 @@
 //! Print the TunnelClient CustomResourceDefinition as YAML.
 //!
-//! `make codegen-rust-crds` in `go/deployment-operator` writes this to
-//! `config/crd/bases`. The crate itself lives at `rust/ferrotunnel` in the
-//! console repo so it is included in the main release tag.
+//! `make crds` in this directory writes the YAML to
+//! `go/deployment-operator/config/crd/bases`.
 
 use ferrotunnel_client::TunnelClient;
 use kube::CustomResourceExt;
