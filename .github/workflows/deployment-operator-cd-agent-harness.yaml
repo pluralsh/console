@@ -118,8 +118,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=agent-harness-base-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=agent-harness-base-${{ env.PLATFORM_PAIR }}
           build-args: |
             VERSION=${{ steps.meta.outputs.version }}
       - name: Export digest
@@ -247,8 +247,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=agent-harness-${{ matrix.agents.name }}
+          cache-to: type=gha,mode=max,scope=agent-harness-${{ matrix.agents.name }}
           build-args: |
             NODE_VERSION=${{ needs.output-versions.outputs.node }}
             AGENT_VERSION=${{ matrix.agents.version }}

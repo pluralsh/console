@@ -111,8 +111,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=nexus-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=nexus-${{ env.PLATFORM_PAIR }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VERSION=${{ steps.meta.outputs.version }}

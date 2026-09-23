@@ -92,8 +92,8 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         platforms: ${{ matrix.platforms.platform }}
         outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=gha,scope=sentinel-harness-base-${{ env.PLATFORM_PAIR }}
+        cache-to: type=gha,mode=max,scope=sentinel-harness-base-${{ env.PLATFORM_PAIR }}
         build-args: |
           VERSION=${{ steps.meta.outputs.version }}
     - name: Export digest
@@ -210,8 +210,8 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         platforms: linux/amd64,linux/arm64
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=gha,scope=sentinel-harness-terratest
+        cache-to: type=gha,mode=max,scope=sentinel-harness-terratest
         build-args: |
           GO_VERSION=1.27.1
           SENTINEL_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/sentinel-harness-base

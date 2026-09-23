@@ -158,8 +158,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,name=ghcr.io/${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=kubernetes-agent-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=kubernetes-agent-${{ env.PLATFORM_PAIR }}
           build-args: |
             VERSION=v0.0.0-${{ env.IMAGE_SHA }}
             GIT_COMMIT=${{ env.IMAGE_SHA }}

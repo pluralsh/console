@@ -129,8 +129,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=console
+          cache-to: type=gha,mode=max,scope=console
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}

@@ -81,8 +81,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=documentation
+          cache-to: type=gha,mode=max,scope=documentation
           build-args: |
             NEXT_PUBLIC_ROOT_URL="https://docs.plural.sh"
             NEXT_PUBLIC_GA_ID=${{ vars.NEXT_PUBLIC_GA_ID }}
