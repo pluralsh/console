@@ -37,7 +37,6 @@ spec:
   service: mgmt/console
   workbenchRef:
     name: workbench-monitoring-sample
-    namespace: default
   description: Fires when the console logs contain too many errors
   alertTemplate: "Monitor {{ monitor.name }} fired for service {{ monitor.service.name }} on cluster {{ monitor.service.cluster.handle }}"
   severity: HIGH

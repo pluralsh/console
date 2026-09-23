@@ -76,7 +76,7 @@ var _ = Describe("Dashboard Controller", Ordered, func() {
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Dashboard{
 				ObjectMeta: metav1.ObjectMeta{Name: dashboardName, Namespace: namespace},
 				Spec: v1alpha1.DashboardSpec{
-					WorkbenchRef: corev1.ObjectReference{Name: workbenchName},
+					WorkbenchRef: corev1.LocalObjectReference{Name: workbenchName},
 					Description:  lo.ToPtr("Console overview"),
 					Inputs: []v1alpha1.DashboardInput{
 						{
@@ -292,7 +292,7 @@ var _ = Describe("Dashboard Controller", Ordered, func() {
 			err := common.MaybePatchObject(k8sClient, &v1alpha1.Dashboard{
 				ObjectMeta: metav1.ObjectMeta{Name: dashboardName, Namespace: namespace},
 			}, func(p *v1alpha1.Dashboard) {
-				p.Spec.WorkbenchRef = corev1.ObjectReference{Name: "another-workbench"}
+				p.Spec.WorkbenchRef = corev1.LocalObjectReference{Name: "another-workbench"}
 			})
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("workbenchRef is immutable"))
@@ -368,7 +368,7 @@ var _ = Describe("Dashboard Controller", Ordered, func() {
 			d := &v1alpha1.Dashboard{
 				ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace},
 				Spec: v1alpha1.DashboardSpec{
-					WorkbenchRef: corev1.ObjectReference{Name: "workbench"},
+					WorkbenchRef: corev1.LocalObjectReference{Name: "workbench"},
 					Graphs: []v1alpha1.DashboardGraph{{
 						Identifier: "notes",
 						Type:       gqlclient.DashboardGraphTypeMarkdown,
@@ -387,6 +387,9 @@ var _ = Describe("Dashboard Controller", Ordered, func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring(message))
 			},
+			Entry("empty workbench reference name", "invalid-dashboard-empty-ref", func(spec *v1alpha1.DashboardSpec) {
+				spec.WorkbenchRef = corev1.LocalObjectReference{}
+			}, "name is required"),
 			Entry("markdown graph without markdown", "invalid-dashboard-markdown", func(spec *v1alpha1.DashboardSpec) {
 				spec.Graphs[0].Markdown = nil
 			}, "markdown must be set for MARKDOWN graphs"),

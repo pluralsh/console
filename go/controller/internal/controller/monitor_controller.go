@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -171,10 +172,8 @@ func (in *MonitorReconciler) addOrRemoveFinalizer(ctx context.Context, monitor *
 // or from the existing Console API service referenced by spec.service ("cluster-handle/service-name").
 func (in *MonitorReconciler) handleService(ctx context.Context, monitor *v1alpha1.Monitor) (string, *ctrl.Result, error) {
 	if monitor.Spec.ServiceRef != nil {
-		ref := monitor.Spec.ServiceRef
-		ns := lo.Ternary(ref.Namespace == "", monitor.Namespace, ref.Namespace)
 		service := &v1alpha1.ServiceDeployment{}
-		if err := in.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ns}, service); err != nil {
+		if err := in.Get(ctx, client.ObjectKey{Name: monitor.Spec.ServiceRef.Name, Namespace: monitor.Namespace}, service); err != nil {
 			if errors.IsNotFound(err) {
 				return "", lo.ToPtr(common.Wait()), fmt.Errorf("service not found: %s", err.Error())
 			}
@@ -233,7 +232,7 @@ func (in *MonitorReconciler) handleWorkbenchRef(ctx context.Context, monitor *v1
 		return nil, nil, nil
 	}
 
-	workbenchID, res, err := common.WorkbenchID(ctx, in.Client, *monitor.Spec.WorkbenchRef, monitor.Namespace)
+	workbenchID, res, err := common.WorkbenchID(ctx, in.Client, corev1.ObjectReference{Name: monitor.Spec.WorkbenchRef.Name}, monitor.Namespace)
 	if res != nil || err != nil {
 		return nil, res, err
 	}

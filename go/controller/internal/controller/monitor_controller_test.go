@@ -64,7 +64,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 				Spec: v1alpha1.MonitorSpec{
 					Name:         lo.ToPtr("console-error-logs"),
 					Service:      lo.ToPtr("mgmt/console"),
-					WorkbenchRef: &corev1.ObjectReference{Name: workbenchName, Namespace: namespace},
+					WorkbenchRef: &corev1.LocalObjectReference{Name: workbenchName},
 					Prompt:       lo.ToPtr("Investigate the errors"),
 					Modes: &v1alpha1.WorkbenchJobModes{
 						Plan:   lo.ToPtr(true),
@@ -341,7 +341,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Monitor{
 				ObjectMeta: metav1.ObjectMeta{Name: monitorName, Namespace: namespace},
 				Spec: v1alpha1.MonitorSpec{
-					ServiceRef:     &corev1.ObjectReference{Name: serviceName},
+					ServiceRef:     &corev1.LocalObjectReference{Name: serviceName},
 					Severity:       gqlclient.AlertSeverityMedium,
 					Type:           gqlclient.MonitorTypeMetrics,
 					EvaluationCron: "*/10 * * * *",
@@ -470,7 +470,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 
 			monitor := &v1alpha1.Monitor{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
-			monitor.Spec.ServiceRef = &corev1.ObjectReference{Name: otherName}
+			monitor.Spec.ServiceRef = &corev1.LocalObjectReference{Name: otherName}
 			Expect(k8sClient.Update(ctx, monitor)).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
@@ -619,8 +619,12 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 				Expect(err.Error()).To(ContainSubstring(message))
 			},
 			Entry("both service references", "invalid-monitor-both-refs", func(spec *v1alpha1.MonitorSpec) {
-				spec.ServiceRef = &corev1.ObjectReference{Name: "service"}
+				spec.ServiceRef = &corev1.LocalObjectReference{Name: "service"}
 			}, "exactly one of serviceRef or service must be set"),
+			Entry("empty service reference name", "invalid-monitor-empty-ref", func(spec *v1alpha1.MonitorSpec) {
+				spec.Service = nil
+				spec.ServiceRef = &corev1.LocalObjectReference{}
+			}, "name is required"),
 			Entry("no service reference", "invalid-monitor-no-refs", func(spec *v1alpha1.MonitorSpec) {
 				spec.Service = nil
 			}, "exactly one of serviceRef or service must be set"),

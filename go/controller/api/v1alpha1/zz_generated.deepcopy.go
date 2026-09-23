@@ -5189,7 +5189,7 @@ func (in *MonitorSpec) DeepCopyInto(out *MonitorSpec) {
 	}
 	if in.ServiceRef != nil {
 		in, out := &in.ServiceRef, &out.ServiceRef
-		*out = new(v1.ObjectReference)
+		*out = new(v1.LocalObjectReference)
 		**out = **in
 	}
 	if in.Service != nil {
@@ -5199,7 +5199,7 @@ func (in *MonitorSpec) DeepCopyInto(out *MonitorSpec) {
 	}
 	if in.WorkbenchRef != nil {
 		in, out := &in.WorkbenchRef, &out.WorkbenchRef
-		*out = new(v1.ObjectReference)
+		*out = new(v1.LocalObjectReference)
 		**out = **in
 	}
 	if in.Prompt != nil {

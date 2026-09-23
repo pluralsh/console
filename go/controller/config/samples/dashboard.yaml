@@ -35,7 +35,6 @@ metadata:
 spec:
   workbenchRef:
     name: workbench-monitoring-sample
-    namespace: default
   name: console-overview
   description: Resource usage of the console on the mgmt cluster
   inputs:

@@ -113,10 +113,12 @@ func (in *Dashboard) Attributes(workbenchID string) console.DashboardAttributes 
 type DashboardSpec struct {
 
 	// WorkbenchRef references the Workbench that owns this dashboard.
+	// The Workbench must be in the same namespace as the dashboard.
 	// It is immutable, a dashboard cannot be moved to a different workbench.
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:XValidation:rule="has(self.name) && size(self.name) > 0",message="name is required"
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="workbenchRef is immutable"
-	WorkbenchRef corev1.ObjectReference `json:"workbenchRef"`
+	WorkbenchRef corev1.LocalObjectReference `json:"workbenchRef"`
 
 	// Name is the dashboard name, unique within its workbench.
 	// If not set, metadata.name is used.

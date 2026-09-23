@@ -139,9 +139,11 @@ type MonitorSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// ServiceRef references the ServiceDeployment resource this monitor is attached to.
+	// The ServiceDeployment must be in the same namespace as the monitor.
 	// Either ServiceRef or Service must be set.
 	// +kubebuilder:validation:Optional
-	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
+	// +kubebuilder:validation:XValidation:rule="has(self.name) && size(self.name) > 0",message="name is required"
+	ServiceRef *corev1.LocalObjectReference `json:"serviceRef,omitempty"`
 
 	// Service references an existing service in the Console API this monitor is attached to,
 	// in the format "cluster-handle/service-name" (e.g. mgmt/console). Use it to attach
@@ -156,8 +158,10 @@ type MonitorSpec struct {
 	// WorkbenchRef references the Workbench this monitor is attached to.
 	// When set, the monitor can start a workbench investigation when it fires.
 	// It is required if the query uses a named workbench tool.
+	// The Workbench must be in the same namespace as the monitor.
 	// +kubebuilder:validation:Optional
-	WorkbenchRef *corev1.ObjectReference `json:"workbenchRef,omitempty"`
+	// +kubebuilder:validation:XValidation:rule="has(self.name) && size(self.name) > 0",message="name is required"
+	WorkbenchRef *corev1.LocalObjectReference `json:"workbenchRef,omitempty"`
 
 	// Prompt is used when the monitor starts a workbench investigation.
 	// +kubebuilder:validation:Optional

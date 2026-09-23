@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -94,7 +95,7 @@ func (in *DashboardReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 	}
 
 	// Get the workbench that owns this dashboard.
-	workbenchID, res, err := common.HandleWorkbenchRef(ctx, in.Client, in.Scheme, dashboard, dashboard.Spec.WorkbenchRef, dashboard.Namespace)
+	workbenchID, res, err := common.HandleWorkbenchRef(ctx, in.Client, in.Scheme, dashboard, corev1.ObjectReference{Name: dashboard.Spec.WorkbenchRef.Name}, dashboard.Namespace)
 	if res != nil || err != nil {
 		return common.HandleRequeue(res, err, dashboard.SetCondition)
 	}
