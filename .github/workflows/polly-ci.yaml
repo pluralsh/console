@@ -26,26 +26,9 @@ jobs:
     permissions:
       contents: read
 
-  build:
-    needs: [vouch]
-    name: Build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/polly
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/go.work
-          cache-dependency-path: |
-            go/go.work.sum
-            go/polly/go.sum
-      - run: PATH=$PATH:$GOPATH/bin make build
   test:
     needs: [vouch]
-    name: Unit test
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:

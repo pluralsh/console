@@ -26,27 +26,9 @@ jobs:
     permissions:
       contents: read
 
-  test:
+  build-test:
     needs: [vouch]
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version-file: go/nexus/go.mod
-          cache-dependency-path: go/nexus/go.sum
-
-      - name: Run tests
-        run: make test
-        working-directory: go/nexus
-
-  build:
-    needs: [vouch]
-    name: Build
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -62,9 +44,13 @@ jobs:
         run: make build
         working-directory: go/nexus
 
+      - name: Run tests
+        run: make test
+        working-directory: go/nexus
+
   build-image:
     name: Build image
-    needs: [ build, test ]
+    needs: [build-test]
     permissions:
       contents: 'read'
       id-token: 'write'

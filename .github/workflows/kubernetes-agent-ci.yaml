@@ -32,69 +32,9 @@ jobs:
     permissions:
       contents: read
 
-  build-api:
-    needs: [vouch]
-    name: Build API
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/kubernetes-agent
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/go.work
-          cache-dependency-path: |
-            go/go.work.sum
-            go/kubernetes-agent/**/go.sum
-      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C api build
-
-  build-kas:
-    needs: [vouch]
-    name: Build kas
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/kubernetes-agent
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/go.work
-          cache-dependency-path: |
-            go/go.work.sum
-            go/kubernetes-agent/**/go.sum
-      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-kas
-
-  build-agentk:
-    needs: [vouch]
-    name: Build agentk
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/kubernetes-agent
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/go.work
-          cache-dependency-path: |
-            go/go.work.sum
-            go/kubernetes-agent/**/go.sum
-      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-agentk
-
   test:
     needs: [vouch]
-    name: Unit test
+    name: Test
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'

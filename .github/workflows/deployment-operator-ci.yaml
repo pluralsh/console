@@ -35,27 +35,9 @@ jobs:
     permissions:
       contents: read
 
-  build:
-    needs: [vouch]
-    name: Build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/deployment-operator
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/deployment-operator/go.mod
-          cache-dependency-path: go/deployment-operator/go.sum
-          cache: true
-      - name: Download dependencies
-        run: go mod download
-      - run: make agent
   test:
     needs: [vouch]
-    name: Unit test
+    name: Test and verify CRD docs
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -71,17 +53,6 @@ jobs:
       - name: Download dependencies
         run: go mod download
       - run: make test
-  check-docs:
-    needs: [vouch]
-    name: Verify CRD docs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/deployment-operator/go.mod
-          cache-dependency-path: go/deployment-operator/go.sum
-          cache: true
       - name: Check docs
         working-directory: go/deployment-operator
         run: make crd-docs
@@ -94,7 +65,7 @@ jobs:
           }
   build-image:
     name: Build image
-    needs: [ build, test ]
+    needs: [test]
     permissions:
       contents: 'read'
       id-token: 'write'

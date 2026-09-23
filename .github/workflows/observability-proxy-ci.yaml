@@ -40,31 +40,13 @@ jobs:
           cache-dependency-path: go/observability-proxy/go.sum
 
       - name: Run tests
-        run: GOCACHE=/tmp/go-build go test ./...
-        working-directory: go/observability-proxy
-
-  build:
-    needs: [vouch]
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version-file: go/observability-proxy/go.mod
-          cache-dependency-path: go/observability-proxy/go.sum
-
-      - name: Build binary
-        run: make build
+        run: go test ./...
         working-directory: go/observability-proxy
 
   build-image:
     name: Build image
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-    needs: [build, test]
+    needs: [test]
     permissions:
       contents: read
       packages: write

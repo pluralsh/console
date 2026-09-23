@@ -28,9 +28,9 @@ jobs:
     permissions:
       contents: read
 
-  build:
+  build-test:
     needs: [vouch]
-    name: Build
+    name: Build and test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,20 +45,4 @@ jobs:
           cache: true
       - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make build
-  test:
-    needs: [vouch]
-    name: Unit test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/cloud-query
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/cloud-query/go.mod
-          cache-dependency-path: go/cloud-query/go.sum
-          cache: true
-      - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make test

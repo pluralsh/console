@@ -28,26 +28,9 @@ jobs:
     permissions:
       contents: read
 
-  build:
+  test:
     needs: [vouch]
-    name: Build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/oci-auth
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: go/oci-auth/go.mod
-          cache-dependency-path: go/oci-auth/go.sum
-          cache: true
-      - run: go mod download
-      - run: PATH=$PATH:$GOPATH/bin make build
-  unit-test:
-    needs: [vouch]
-    name: Unit tests
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
