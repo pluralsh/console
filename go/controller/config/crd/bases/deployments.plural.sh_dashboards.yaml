@@ -1,0 +1,396 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  name: dashboards.deployments.plural.sh
+spec:
+  group: deployments.plural.sh
+  names:
+    kind: Dashboard
+    listKind: DashboardList
+    plural: dashboards
+    singular: dashboard
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: ID of the Dashboard in the Console API.
+      jsonPath: .status.id
+      name: ID
+      type: string
+    - description: Whether the Dashboard is ready.
+      jsonPath: .status.conditions[?(@.type=="Ready")].status
+      name: READY
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          Dashboard represents an observability dashboard owned by a Workbench. It consists of graphs
+          arranged on a grid, each backed by an observability tool datasource, and optional user-configurable inputs.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the desired state of the Dashboard.
+            properties:
+              description:
+                description: Description is an optional dashboard description.
+                type: string
+              graphs:
+                description: Graphs arranged on the dashboard grid. Graph identifiers
+                  must be unique within the dashboard.
+                items:
+                  description: DashboardGraph is a single graph placed on the dashboard
+                    grid.
+                  properties:
+                    datasource:
+                      description: Datasource is the tool call used to fetch external
+                        data.
+                      properties:
+                        input:
+                          description: Input is passed to the observability tool.
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                        tool:
+                          description: Tool is the name of the observability tool
+                            used to fetch the data.
+                          minLength: 1
+                          type: string
+                        type:
+                          description: Type is the kind of data returned by the datasource.
+                          enum:
+                          - LOGS
+                          - METRICS
+                          - TRACES
+                          - LABELS
+                          type: string
+                      required:
+                      - input
+                      - tool
+                      - type
+                      type: object
+                    description:
+                      description: Description is an optional graph description.
+                      type: string
+                    identifier:
+                      description: Identifier is a stable identifier unique within
+                        the dashboard.
+                      minLength: 1
+                      type: string
+                    layout:
+                      description: Layout is the grid position and size of the graph.
+                      properties:
+                        h:
+                          description: H is the height in grid rows.
+                          format: int64
+                          minimum: 1
+                          type: integer
+                        w:
+                          description: W is the width in grid columns.
+                          format: int64
+                          minimum: 1
+                          type: integer
+                        x:
+                          description: X is the zero-based horizontal grid coordinate.
+                          format: int64
+                          minimum: 0
+                          type: integer
+                        "y":
+                          description: Y is the zero-based vertical grid coordinate.
+                          format: int64
+                          minimum: 0
+                          type: integer
+                      required:
+                      - h
+                      - w
+                      - x
+                      - "y"
+                      type: object
+                    markdown:
+                      description: Markdown is the content for MARKDOWN graphs.
+                      type: string
+                    options:
+                      description: Options are visualization-specific display options.
+                        Sections may set collapsed.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    sectionId:
+                      description: SectionID is the identifier of the section graph
+                        containing this graph. Sections cannot be nested.
+                      type: string
+                    title:
+                      description: Title is the graph title.
+                      type: string
+                    type:
+                      description: Type is the graph visualization type.
+                      enum:
+                      - TIMESERIES
+                      - GAUGE
+                      - LOGS
+                      - MARKDOWN
+                      - TABLE
+                      - STAT
+                      - BAR
+                      - PIE
+                      - HEATMAP
+                      - TRACES
+                      - SECTION
+                      type: string
+                  required:
+                  - identifier
+                  - layout
+                  - type
+                  type: object
+                  x-kubernetes-validations:
+                  - message: markdown must be set for MARKDOWN graphs
+                    rule: self.type != 'MARKDOWN' || has(self.markdown)
+                type: array
+                x-kubernetes-list-map-keys:
+                - identifier
+                x-kubernetes-list-type: map
+              inputs:
+                description: Inputs are user-configurable dashboard variables.
+                items:
+                  description: DashboardInput is a user-configurable dashboard variable.
+                  properties:
+                    datasource:
+                      description: Datasource is the tool query used to populate input
+                        options, such as metric label search.
+                      properties:
+                        input:
+                          description: Input is passed to the observability tool.
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                        tool:
+                          description: Tool is the name of the observability tool
+                            used to fetch the data.
+                          minLength: 1
+                          type: string
+                        type:
+                          description: Type is the kind of data returned by the datasource.
+                          enum:
+                          - LOGS
+                          - METRICS
+                          - TRACES
+                          - LABELS
+                          type: string
+                      required:
+                      - input
+                      - tool
+                      - type
+                      type: object
+                    default:
+                      description: Default is the default input value.
+                      type: string
+                    description:
+                      description: Description is an optional input description.
+                      type: string
+                    label:
+                      description: Label is a human-readable input label.
+                      type: string
+                    name:
+                      description: Name is the variable name referenced by graph datasource
+                        inputs.
+                      minLength: 1
+                      type: string
+                    options:
+                      description: Options are the allowed values for select inputs.
+                      items:
+                        type: string
+                      type: array
+                    required:
+                      description: Required defines whether a value is required when
+                        rendering.
+                      type: boolean
+                    type:
+                      description: Type is the input control type.
+                      enum:
+                      - TEXT
+                      - NUMBER
+                      - BOOLEAN
+                      - SELECT
+                      - MULTI_SELECT
+                      - TIME_RANGE
+                      type: string
+                  required:
+                  - name
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
+              name:
+                description: |-
+                  Name is the dashboard name, unique within its workbench.
+                  If not set, metadata.name is used.
+                type: string
+              reconciliation:
+                description: Reconciliation settings for this resource.
+                properties:
+                  driftDetection:
+                    default: true
+                    description: |-
+                      DriftDetection enables drift detection for this resource.
+                      It is destined to detect changes made to the related
+                      resources that are not referenced with owner ref.
+                      Use with Interval to set how often drift detection runs.
+                    example: false
+                    type: boolean
+                  interval:
+                    default: 30m
+                    description: |-
+                      Interval for the drift detection mechanism.
+                      It is subject to jitter to avoid the thundering herd problem,
+                      it is calculated as a random value between 50% and 150% of the given duration.
+                    example: 5m30s
+                    type: string
+                type: object
+              workbenchRef:
+                description: WorkbenchRef references the Workbench that owns this
+                  dashboard.
+                properties:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
+                    description: |-
+                      If referring to a piece of an object instead of an entire object, this string
+                      should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within a pod, this would take on a value like:
+                      "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]" (container with
+                      index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                      referencing a part of an object.
+                    type: string
+                  kind:
+                    description: |-
+                      Kind of the referent.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                    type: string
+                  name:
+                    description: |-
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                    type: string
+                  resourceVersion:
+                    description: |-
+                      Specific resourceVersion to which this reference is made, if any.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                    type: string
+                  uid:
+                    description: |-
+                      UID of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+            required:
+            - workbenchRef
+            type: object
+          status:
+            description: Status represents the current state of this resource.
+            properties:
+              conditions:
+                description: Represents the observations of a PrAutomation's current
+                  state.
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              id:
+                description: ID of the resource in the Console API.
+                type: string
+              readonly:
+                default: false
+                description: ReadOnly indicates whether the resource is read-only.
+                type: boolean
+              sha:
+                description: SHA of last applied configuration.
+                type: string
+            required:
+            - readonly
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
