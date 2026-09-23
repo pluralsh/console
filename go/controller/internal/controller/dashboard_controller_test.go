@@ -217,7 +217,7 @@ var _ = Describe("Dashboard Controller", Ordered, func() {
 			dashboard := &v1alpha1.Dashboard{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, dashboard)).To(Succeed())
 			Expect(dashboard.Status.SHA).NotTo(BeNil())
-			expectedStatus := monitorReadyStatus(id)
+			expectedStatus := readyStatus(id)
 			expectedStatus.SHA = dashboard.Status.SHA
 			Expect(common.SanitizeStatusConditions(dashboard.Status)).To(Equal(common.SanitizeStatusConditions(expectedStatus)))
 			Expect(dashboard.Finalizers).To(ContainElement(controller.DashboardFinalizer))
@@ -285,6 +285,20 @@ var _ = Describe("Dashboard Controller", Ordered, func() {
 			}, func(p *v1alpha1.Dashboard) {
 				p.Status.ID = lo.ToPtr(id)
 			})).To(Succeed())
+		})
+
+		It("should reject changing the workbench reference", func() {
+			err := common.MaybePatchObject(k8sClient, &v1alpha1.Dashboard{
+				ObjectMeta: metav1.ObjectMeta{Name: dashboardName, Namespace: namespace},
+			}, func(p *v1alpha1.Dashboard) {
+				p.Spec.WorkbenchRef = corev1.ObjectReference{Name: "another-workbench"}
+			})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("workbenchRef is immutable"))
+
+			dashboard := &v1alpha1.Dashboard{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, dashboard)).To(Succeed())
+			Expect(dashboard.Spec.WorkbenchRef.Name).To(Equal(workbenchName))
 		})
 
 		It("should successfully delete the dashboard", func() {

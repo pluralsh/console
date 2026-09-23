@@ -110,8 +110,16 @@ func (in *Dashboard) Attributes(workbenchID string) console.DashboardAttributes 
 
 // DashboardSpec defines the desired state of a Dashboard.
 type DashboardSpec struct {
+	// NOTE: The Console API ignores workbenchId on dashboard updates (it is dropped in
+	// Console.Deployments.Observability.update_dashboard/3), so a changed reference would be
+	// silently ignored and the dashboard would stay in the old workbench. The CEL rule below
+	// rejects such changes instead. To move a dashboard, delete and recreate it.
+	// This comment is intentionally detached from the field docs so it does not end up in the CRD.
+
 	// WorkbenchRef references the Workbench that owns this dashboard.
+	// It is immutable, a dashboard cannot be moved to a different workbench.
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="workbenchRef is immutable"
 	WorkbenchRef corev1.ObjectReference `json:"workbenchRef"`
 
 	// Name is the dashboard name, unique within its workbench.

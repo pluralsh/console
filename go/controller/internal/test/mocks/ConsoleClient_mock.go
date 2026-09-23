@@ -7317,6 +7317,65 @@ func (_c *ConsoleClientMock_GetServiceContext_Call) RunAndReturn(run func(string
 	return _c
 }
 
+// GetServiceTinyByHandle provides a mock function with given fields: clusterHandle, serviceName
+func (_m *ConsoleClientMock) GetServiceTinyByHandle(clusterHandle string, serviceName string) (*client.GetServiceDeploymentTinyByHandle_ServiceDeployment, error) {
+	ret := _m.Called(clusterHandle, serviceName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetServiceTinyByHandle")
+	}
+
+	var r0 *client.GetServiceDeploymentTinyByHandle_ServiceDeployment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*client.GetServiceDeploymentTinyByHandle_ServiceDeployment, error)); ok {
+		return rf(clusterHandle, serviceName)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *client.GetServiceDeploymentTinyByHandle_ServiceDeployment); ok {
+		r0 = rf(clusterHandle, serviceName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GetServiceDeploymentTinyByHandle_ServiceDeployment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(clusterHandle, serviceName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetServiceTinyByHandle_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetServiceTinyByHandle'
+type ConsoleClientMock_GetServiceTinyByHandle_Call struct {
+	*mock.Call
+}
+
+// GetServiceTinyByHandle is a helper method to define mock.On call
+//   - clusterHandle string
+//   - serviceName string
+func (_e *ConsoleClientMock_Expecter) GetServiceTinyByHandle(clusterHandle interface{}, serviceName interface{}) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	return &ConsoleClientMock_GetServiceTinyByHandle_Call{Call: _e.mock.On("GetServiceTinyByHandle", clusterHandle, serviceName)}
+}
+
+func (_c *ConsoleClientMock_GetServiceTinyByHandle_Call) Run(run func(clusterHandle string, serviceName string)) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceTinyByHandle_Call) Return(_a0 *client.GetServiceDeploymentTinyByHandle_ServiceDeployment, _a1 error) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceTinyByHandle_Call) RunAndReturn(run func(string, string) (*client.GetServiceDeploymentTinyByHandle_ServiceDeployment, error)) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetServices provides a mock function with no fields
 func (_m *ConsoleClientMock) GetServices() ([]*client.ServiceDeploymentBaseFragment, error) {
 	ret := _m.Called()

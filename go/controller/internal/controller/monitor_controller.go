@@ -23,7 +23,6 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -201,12 +200,12 @@ func (in *MonitorReconciler) handleService(ctx context.Context, monitor *v1alpha
 		}
 
 		clusterHandle, serviceName := split[0], split[1]
-		service, err := in.ConsoleClient.GetService(clusterHandle, serviceName)
-		if err != nil && !errors.IsNotFound(err) && !internalerror.IsNotFound(err) {
-			return "", nil, fmt.Errorf("failed to get service %s: %s", ref, err.Error())
-		}
-		if err != nil || service == nil {
+		service, err := in.ConsoleClient.GetServiceTinyByHandle(clusterHandle, serviceName)
+		if errors.IsNotFound(err) {
 			return "", lo.ToPtr(common.Wait()), fmt.Errorf("service %s not found", ref)
+		}
+		if err != nil {
+			return "", nil, fmt.Errorf("failed to get service %s: %s", ref, err.Error())
 		}
 
 		return service.ID, nil, nil

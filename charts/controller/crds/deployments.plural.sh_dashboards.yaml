@@ -264,8 +264,9 @@ spec:
                     type: string
                 type: object
               workbenchRef:
-                description: WorkbenchRef references the Workbench that owns this
-                  dashboard.
+                description: |-
+                  WorkbenchRef references the Workbench that owns this dashboard.
+                  It is immutable, a dashboard cannot be moved to a different workbench.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -307,6 +308,9 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+                x-kubernetes-validations:
+                - message: workbenchRef is immutable
+                  rule: self == oldSelf
             required:
             - workbenchRef
             type: object

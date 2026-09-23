@@ -23,7 +23,8 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
 )
 
-func monitorReadyStatus(id string) v1alpha1.Status {
+// readyStatus returns the expected status of a successfully synchronized resource with the given ID.
+func readyStatus(id string) v1alpha1.Status {
 	return v1alpha1.Status{
 		ID: lo.ToPtr(id),
 		Conditions: []metav1.Condition{
@@ -140,7 +141,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 		It("should successfully create the monitor", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetService", "mgmt", "console").Return(&gqlclient.ServiceDeploymentExtended{ID: serviceID}, nil)
+			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "console").Return(&gqlclient.GetServiceDeploymentTinyByHandle_ServiceDeployment{ID: serviceID, Name: "console"}, nil)
 			fakeConsoleClient.On("CreateMonitor", mock.Anything, mock.MatchedBy(func(attrs gqlclient.MonitorAttributes) bool {
 				return attrs.ServiceID == serviceID &&
 					lo.FromPtr(attrs.WorkbenchID) == workbenchID &&
@@ -178,7 +179,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			monitor := &v1alpha1.Monitor{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
 			Expect(monitor.Status.SHA).NotTo(BeNil())
-			expectedStatus := monitorReadyStatus(id)
+			expectedStatus := readyStatus(id)
 			expectedStatus.SHA = monitor.Status.SHA
 			Expect(common.SanitizeStatusConditions(monitor.Status)).To(Equal(common.SanitizeStatusConditions(expectedStatus)))
 			Expect(monitor.Finalizers).To(ContainElement(controller.MonitorFinalizer))
@@ -188,7 +189,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 		It("should not update the monitor when spec did not change", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetService", "mgmt", "console").Return(&gqlclient.ServiceDeploymentExtended{ID: serviceID}, nil)
+			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "console").Return(&gqlclient.GetServiceDeploymentTinyByHandle_ServiceDeployment{ID: serviceID, Name: "console"}, nil)
 			fakeConsoleClient.On("GetMonitor", mock.Anything, id).Return(&gqlclient.MonitorFragment{ID: id}, nil)
 
 			_, err := newReconciler(fakeConsoleClient).Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
@@ -211,7 +212,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetService", "mgmt", "console").Return(&gqlclient.ServiceDeploymentExtended{ID: serviceID}, nil)
+			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "console").Return(&gqlclient.GetServiceDeploymentTinyByHandle_ServiceDeployment{ID: serviceID, Name: "console"}, nil)
 			fakeConsoleClient.On("GetMonitor", mock.Anything, id).Return(&gqlclient.MonitorFragment{ID: id}, nil)
 			fakeConsoleClient.On("UpdateMonitor", mock.Anything, id, mock.MatchedBy(func(attrs gqlclient.MonitorAttributes) bool {
 				return attrs.ServiceID == serviceID &&
@@ -235,7 +236,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetService", "mgmt", "console").Return(&gqlclient.ServiceDeploymentExtended{ID: serviceID}, nil)
+			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "console").Return(&gqlclient.GetServiceDeploymentTinyByHandle_ServiceDeployment{ID: serviceID, Name: "console"}, nil)
 			fakeConsoleClient.On("GetMonitor", mock.Anything, id).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("CreateMonitor", mock.Anything, mock.Anything).Return(&gqlclient.MonitorFragment{ID: newID}, nil)
 
@@ -396,7 +397,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 
 			monitor := &v1alpha1.Monitor{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
-			expectedStatus := monitorReadyStatus(id)
+			expectedStatus := readyStatus(id)
 			expectedStatus.SHA = monitor.Status.SHA
 			Expect(common.SanitizeStatusConditions(monitor.Status)).To(Equal(common.SanitizeStatusConditions(expectedStatus)))
 
@@ -456,7 +457,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 		It("should wait until the service exists", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetService", "mgmt", "missing").Return(nil, errors.NewNotFound(schema.GroupResource{}, "missing"))
+			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "missing").Return(nil, errors.NewNotFound(schema.GroupResource{}, "missing"))
 
 			result, err := newReconciler(fakeConsoleClient).Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
 			Expect(err).NotTo(HaveOccurred())

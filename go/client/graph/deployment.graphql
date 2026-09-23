@@ -248,6 +248,13 @@ query GetServiceDeploymentByHandle($cluster: String!, $name: String!) {
     }
 }
 
+query GetServiceDeploymentTinyByHandle($cluster: String!, $name: String!) {
+    serviceDeployment(cluster: $cluster, name: $name) {
+        id
+        name
+    }
+}
+
 query GetServiceTarball($id: ID!) {
     serviceTarball(id: $id) {
         path

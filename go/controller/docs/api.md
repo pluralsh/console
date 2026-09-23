@@ -1574,7 +1574,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench that owns this dashboard. |  | Required: \{\} <br /> |
+| `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench that owns this dashboard.<br />It is immutable, a dashboard cannot be moved to a different workbench. |  | Required: \{\} <br /> |
 | `name` _string_ | Name is the dashboard name, unique within its workbench.<br />If not set, metadata.name is used. |  | Optional: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description is an optional dashboard description. |  | Optional: \{\} <br />Type: string <br /> |
 | `graphs` _[DashboardGraph](#dashboardgraph) array_ | Graphs arranged on the dashboard grid. Graph identifiers must be unique within the dashboard. |  | Optional: \{\} <br /> |

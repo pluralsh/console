@@ -110,6 +110,7 @@ type ConsoleClient interface {
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
 	GetServiceDeploymentForAgent(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentForAgent, error)
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
+	GetServiceDeploymentTinyByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTinyByHandle, error)
 	GetServiceTarball(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceTarball, error)
 	ListServiceDeployment(ctx context.Context, after *string, before *string, last *int64, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployment, error)
 	PagedClusterServices(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServices, error)
@@ -24093,6 +24094,24 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 	return t.Stack
 }
 
+type GetServiceDeploymentTinyByHandle_ServiceDeployment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetServiceDeploymentTinyByHandle_ServiceDeployment) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentTinyByHandle_ServiceDeployment{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentTinyByHandle_ServiceDeployment) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentTinyByHandle_ServiceDeployment{}
+	}
+	return t.Name
+}
+
 type GetServiceTarball_ServiceTarball struct {
 	Content string "json:\"content\" graphql:\"content\""
 	Path    string "json:\"path\" graphql:\"path\""
@@ -46427,6 +46446,17 @@ func (t *GetServiceDeploymentByHandle) GetServiceDeployment() *ServiceDeployment
 	return t.ServiceDeployment
 }
 
+type GetServiceDeploymentTinyByHandle struct {
+	ServiceDeployment *GetServiceDeploymentTinyByHandle_ServiceDeployment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentTinyByHandle) GetServiceDeployment() *GetServiceDeploymentTinyByHandle_ServiceDeployment {
+	if t == nil {
+		t = &GetServiceDeploymentTinyByHandle{}
+	}
+	return t.ServiceDeployment
+}
+
 type GetServiceTarball struct {
 	ServiceTarball []*GetServiceTarball_ServiceTarball "json:\"serviceTarball,omitempty\" graphql:\"serviceTarball\""
 }
@@ -57930,6 +57960,32 @@ func (c *Client) GetServiceDeploymentByHandle(ctx context.Context, cluster strin
 
 	var res GetServiceDeploymentByHandle
 	if err := c.Client.Post(ctx, "GetServiceDeploymentByHandle", GetServiceDeploymentByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceDeploymentTinyByHandleDocument = `query GetServiceDeploymentTinyByHandle ($cluster: String!, $name: String!) {
+	serviceDeployment(cluster: $cluster, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetServiceDeploymentTinyByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTinyByHandle, error) {
+	vars := map[string]any{
+		"cluster": cluster,
+		"name":    name,
+	}
+
+	var res GetServiceDeploymentTinyByHandle
+	if err := c.Client.Post(ctx, "GetServiceDeploymentTinyByHandle", GetServiceDeploymentTinyByHandleDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -75399,6 +75455,7 @@ var DocumentOperationNames = map[string]string{
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
 	GetServiceDeploymentForAgentDocument:              "GetServiceDeploymentForAgent",
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
+	GetServiceDeploymentTinyByHandleDocument:          "GetServiceDeploymentTinyByHandle",
 	GetServiceTarballDocument:                         "GetServiceTarball",
 	ListServiceDeploymentDocument:                     "ListServiceDeployment",
 	PagedClusterServicesDocument:                      "PagedClusterServices",
