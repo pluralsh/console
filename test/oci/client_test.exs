@@ -12,6 +12,39 @@ defmodule Console.OCI.ClientTest do
 
       {:ok, %{tags: [_ | _]}} = Client.tags(client)
     end
+
+    test "it can fetch and paginate tags from public.ecr.aws" do
+      client = Client.new("oci://public.ecr.aws/docker/library/nginx")
+
+      {:ok, %{name: "docker/library/nginx", tags: tags}} = Client.tags(client)
+
+      assert length(tags) > 1000
+      assert "latest" in tags
+    end
+  end
+
+  describe "#tags_page/2" do
+    test "it follows the registry's opaque cursor for public.ecr.aws" do
+      client = Client.new("oci://public.ecr.aws/docker/library/nginx")
+
+      {:ok, %{name: "docker/library/nginx", tags: [_, _, _] = page1, next_cursor: cursor}} =
+        Client.tags_page(client, page_size: 3)
+
+      assert is_binary(cursor)
+      refute cursor == List.last(page1)
+
+      {:ok, %{tags: [_, _, _] = page2}} = Client.tags_page(client, page_size: 3, cursor: cursor)
+      assert MapSet.disjoint?(MapSet.new(page1), MapSet.new(page2))
+    end
+
+    test "it returns a nil cursor on the last page" do
+      client = Client.new("oci://ghcr.io/pluralsh/console")
+      client = put_in(client.client, Req.merge(client.client, plug: fn conn ->
+        Req.Test.json(conn, %{"name" => "pluralsh/console", "tags" => ["0.1.0"]})
+      end))
+
+      assert {:ok, %{tags: ["0.1.0"], next_cursor: nil}} = Client.tags_page(client)
+    end
   end
 
   describe "proxy configuration" do
