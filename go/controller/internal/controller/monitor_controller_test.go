@@ -199,6 +199,43 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			Expect(meta.IsStatusConditionTrue(monitor.Status.Conditions, v1alpha1.ReadyConditionType.String())).To(BeTrue())
 		})
 
+		It("should send the full query when switching the monitor type", func() {
+			// Use a full update instead of common.MaybePatchObject. It builds a merge patch against
+			// an empty object, so it can set fields but never removes them, and removing fields is
+			// exactly what this test needs.
+			monitor := &v1alpha1.Monitor{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
+			monitor.Spec.Type = gqlclient.MonitorTypeMetrics
+			monitor.Spec.Query = v1alpha1.MonitorQuery{Metrics: &v1alpha1.MonitorMetricsQuery{Query: "up"}}
+			monitor.Spec.Description = nil
+			monitor.Spec.Modes = nil
+			Expect(k8sClient.Update(ctx, monitor)).To(Succeed())
+
+			updated := &v1alpha1.Monitor{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, updated)).To(Succeed())
+			Expect(updated.Spec.Query.Log).To(BeNil())
+			Expect(updated.Spec.Description).To(BeNil())
+			Expect(updated.Spec.Modes).To(BeNil())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "console").Return(&gqlclient.GetServiceDeploymentTinyByHandle_ServiceDeployment{ID: serviceID, Name: "console"}, nil)
+			fakeConsoleClient.On("GetMonitor", mock.Anything, id).Return(&gqlclient.MonitorFragment{ID: id}, nil)
+			fakeConsoleClient.On("UpdateMonitor", mock.Anything, id, mock.MatchedBy(func(attrs gqlclient.MonitorAttributes) bool {
+				// Removed fields have to be passed as nil so that they are cleared in the Console API.
+				return attrs.Type == gqlclient.MonitorTypeMetrics &&
+					attrs.Query.Log == nil &&
+					attrs.Query.Metrics != nil &&
+					attrs.Query.Metrics.Query == "up" &&
+					attrs.Description == nil &&
+					attrs.Modes == nil
+			})).Return(&gqlclient.MonitorFragment{ID: id}, nil)
+
+			_, err := newReconciler(fakeConsoleClient).Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			fakeConsoleClient.AssertExpectations(GinkgoT())
+		})
+
 		It("should recreate the monitor when it no longer exists in the Console API", func() {
 			const newID = "monitor-456"
 

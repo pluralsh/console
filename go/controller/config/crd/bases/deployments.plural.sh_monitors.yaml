@@ -218,7 +218,10 @@ spec:
                           type: object
                         type: array
                       operator:
-                        description: Operator to use when combining multiple log queries.
+                        default: OR
+                        description: |-
+                          Operator to use when combining multiple log queries.
+                          Defaults to OR, which is also the Console API default.
                         enum:
                         - OR
                         - AND

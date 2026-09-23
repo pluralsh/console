@@ -2758,7 +2758,7 @@ _Appears in:_
 | `query` _string_ | Query is the log query string passed through to the underlying log provider. |  | MinLength: 1 <br />Required: \{\} <br />Type: string <br /> |
 | `bucketSize` _string_ | BucketSize is the time bucket size (e.g. 5m) used when aggregating log results. |  | Pattern: `^[0-9]+[dmhs]$` <br />Required: \{\} <br />Type: string <br /> |
 | `duration` _string_ | Duration is the lookback duration for the log query (e.g. 1h, 10m, 30s). |  | Optional: \{\} <br />Pattern: `^[0-9]+[dmhs]$` <br />Type: string <br /> |
-| `operator` _[MonitorOperator](#monitoroperator)_ | Operator to use when combining multiple log queries. |  | Enum: [OR AND] <br />Optional: \{\} <br /> |
+| `operator` _[MonitorOperator](#monitoroperator)_ | Operator to use when combining multiple log queries.<br />Defaults to OR, which is also the Console API default. | OR | Enum: [OR AND] <br />Optional: \{\} <br /> |
 | `facets` _[MonitorFacet](#monitorfacet) array_ | Facets are optional key/value facets applied as additional filters on the log query. |  | Optional: \{\} <br /> |
 | `options` _[MonitorLogOptions](#monitorlogoptions)_ | Options are provider-specific log query options. |  | Optional: \{\} <br /> |
 

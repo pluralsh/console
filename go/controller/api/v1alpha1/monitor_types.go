@@ -285,8 +285,10 @@ type MonitorLogQuery struct {
 	Duration *string `json:"duration,omitempty"`
 
 	// Operator to use when combining multiple log queries.
+	// Defaults to OR, which is also the Console API default.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=OR;AND
+	// +kubebuilder:default=OR
 	Operator *console.MonitorOperator `json:"operator,omitempty"`
 
 	// Facets are optional key/value facets applied as additional filters on the log query.
