@@ -68,6 +68,35 @@ defmodule Console.Utils.HTTP do
     Keyword.merge(@client_defaults, provider_options(legacy_key, req_key))
   end
 
+  @doc """
+  Builds `Req` proxy options for a request to `url` from a proxy config shaped
+  like `%{url: proxy_url, noproxy: "host1,.domain2"}`. Returns no options when no
+  proxy is configured or the request host matches a `noproxy` entry.
+  """
+  @spec proxy_options(map | nil, binary) :: keyword
+  def proxy_options(%{url: proxy} = config, url) when is_binary(proxy) and proxy != "" do
+    case no_proxy?(config, url) do
+      true -> []
+      false -> req_options(proxy: proxy)
+    end
+  end
+  def proxy_options(_, _), do: []
+
+  defp no_proxy?(%{noproxy: noproxy}, url) when is_binary(noproxy) and is_binary(url) do
+    host = URI.parse(url).host
+    noproxy
+    |> String.split(",", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.any?(&matches_no_proxy?(host, &1))
+  end
+  defp no_proxy?(_, _), do: false
+
+  defp matches_no_proxy?(host, pattern) when is_binary(host) and pattern != "" do
+    pattern = String.trim_leading(pattern, ".")
+    host == pattern || String.ends_with?(host, ".#{pattern}")
+  end
+  defp matches_no_proxy?(_, _), do: false
+
   defp merge_connect(opts, connect) do
     Keyword.update(opts, :connect_options, connect, &Keyword.merge(&1, connect))
   end
