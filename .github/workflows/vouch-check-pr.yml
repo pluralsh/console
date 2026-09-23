@@ -22,7 +22,7 @@ jobs:
        github.event.issue.pull_request &&
        contains(github.event.comment.body, '/recheck'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 

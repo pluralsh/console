@@ -35,11 +35,11 @@ jobs:
           repository: pluralsh/test-charts
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
-    - uses: azure/setup-helm@v4
+    - uses: azure/setup-helm@v5
 
     - name: Add repos
       run: |
@@ -76,11 +76,11 @@ jobs:
           repository: pluralsh/controller-chart
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
-    - uses: azure/setup-helm@v4
+    - uses: azure/setup-helm@v5
 
     - name: Add repos
       run: |

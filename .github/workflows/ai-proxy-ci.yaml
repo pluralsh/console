@@ -32,8 +32,8 @@ jobs:
         shell: bash
         working-directory: go/ai-proxy
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-go@v6
+    - uses: actions/checkout@v7
+    - uses: actions/setup-go@v7
       with:
         go-version-file: go/ai-proxy/go.mod
         cache: true

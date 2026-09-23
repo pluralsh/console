@@ -37,8 +37,8 @@ jobs:
         shell: bash
         working-directory: go/controller
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/controller/go.mod
           cache: true
@@ -55,9 +55,9 @@ jobs:
         working-directory: go/controller
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: go/controller/go.mod
           cache: true
@@ -68,7 +68,7 @@ jobs:
     name: verify controller docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Check docs
         run: make codegen-crd-docs
         working-directory: go/controller

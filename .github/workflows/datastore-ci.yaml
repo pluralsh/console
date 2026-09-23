@@ -37,8 +37,8 @@ jobs:
         shell: bash
         working-directory: go/datastore
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/datastore/go.mod
           cache: true
@@ -55,9 +55,9 @@ jobs:
         working-directory: go/datastore
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: go/datastore/go.mod
           cache: true

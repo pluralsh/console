@@ -24,8 +24,8 @@ jobs:
           - charts/controller
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: azure/setup-helm@v4.2.0
+      - uses: azure/setup-helm@v5.0.1
       - run: helm template ${{ matrix.chart }} --set dashboard.app.security.csrfKey=dummycsrfkey

@@ -22,7 +22,7 @@ jobs:
       contents: 'read'
       pull-requests: read
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       name: checkout repo
 
     - name: "check pr body has Plural Flow: console to link with Plural"
