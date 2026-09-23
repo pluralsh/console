@@ -14,6 +14,35 @@ defmodule Console.OCI.ClientTest do
     end
   end
 
+  describe "proxy configuration" do
+    test "it configures the proxy as a req connect option" do
+      client = Client.new("oci://ghcr.io/pluralsh/console", %{url: "http://proxy.example.com:8080", noproxy: nil})
+
+      assert client.client.options.connect_options[:proxy] == {:http, "proxy.example.com", 8080, []}
+      refute Map.has_key?(client.client.options, :proxy)
+
+      client = put_in(client.client, Req.merge(client.client, plug: fn conn ->
+        Req.Test.json(conn, %{"name" => "pluralsh/console", "tags" => ["0.1.0"]})
+      end))
+
+      assert {:ok, %{tags: ["0.1.0"]}} = Client.tags(client)
+    end
+
+    test "it can add a proxy to an existing client" do
+      client =
+        Client.new("oci://ghcr.io/pluralsh/console")
+        |> Client.with_proxy(%{url: "https://proxy.example.com", noproxy: nil})
+
+      assert client.client.options.connect_options[:proxy] == {:https, "proxy.example.com", 443, []}
+    end
+
+    test "it skips the proxy for noproxy hosts" do
+      client = Client.new("oci://ghcr.io/pluralsh/console", %{url: "http://proxy.example.com:8080", noproxy: "localhost,.ghcr.io"})
+
+      refute client.client.options[:connect_options][:proxy]
+    end
+  end
+
   describe "download_blob/3" do
     test "streams unauthenticated MCR blobs to disk" do
       {:ok, tmp} = Briefly.create()

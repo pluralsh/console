@@ -1,5 +1,6 @@
 defmodule Console.OCI.Client do
   alias Console.OCI.{Tags, Manifest, Repositories}
+  alias Console.Utils.HTTP
   require Logger
 
   @manifest_types Enum.join(
@@ -28,7 +29,7 @@ defmodule Console.OCI.Client do
   def with_proxy(%__MODULE__{} = client, nil), do: client
 
   def with_proxy(%__MODULE__{client: req} = client, proxy) do
-    %{client | client: put_proxy(req, proxy), proxy: proxy}
+    %{client | client: put_proxy(req, proxy, to_string(req.options[:base_url])), proxy: proxy}
   end
 
   def with_token(%{client: req} = client, token) do
@@ -117,8 +118,9 @@ defmodule Console.OCI.Client do
   end
 
   defp dkr_client(h, repo, proxy) do
-    Req.new(base_url: "https://#{h}", retry: false, redirect: true)
-    |> put_proxy(proxy)
+    base_url = "https://#{h}"
+    Req.new(base_url: base_url, retry: false, redirect: true)
+    |> put_proxy(proxy, base_url)
     |> Req.Request.register_options([:dkr_repo])
     |> Req.Request.merge_options(dkr_repo: repo)
     |> Req.Request.append_request_steps(dkr_repo: fn %{options: %{dkr_repo: repo}} = req ->
@@ -188,33 +190,14 @@ defmodule Console.OCI.Client do
   defp auth_client(:empty, proxy, url), do: Req.new(retry: false) |> put_proxy(proxy, url)
   defp auth_client({u, p}, proxy, url), do: Req.new(auth: {:basic, "#{u}:#{p}"}, retry: false) |> put_proxy(proxy, url)
 
-  defp put_proxy(req, proxy, url \\ nil)
-  defp put_proxy(req, %{url: url} = proxy, request_url) when is_binary(url) do
-    case no_proxy?(proxy, request_url || req.url) do
-      true -> req
-      false -> Req.Request.merge_options(req, proxy: url)
+  defp put_proxy(%Req.Request{options: options} = req, proxy, url) do
+    case HTTP.proxy_options(proxy, url) do
+      [] -> req
+      [connect_options: connect] ->
+        existing = Map.get(options, :connect_options, [])
+        Req.Request.merge_options(req, connect_options: Keyword.merge(existing, connect))
     end
   end
-  defp put_proxy(req, _, _), do: req
-
-  defp no_proxy?(%{noproxy: noproxy}, url) when is_binary(noproxy) and byte_size(noproxy) > 0 do
-    host = url_host(url)
-    noproxy
-    |> String.split(",", trim: true)
-    |> Enum.map(&String.trim/1)
-    |> Enum.any?(&matches_no_proxy?(host, &1))
-  end
-  defp no_proxy?(_, _), do: false
-
-  defp url_host(%URI{host: host}), do: host
-  defp url_host(url) when is_binary(url), do: URI.parse(url).host
-  defp url_host(_), do: nil
-
-  defp matches_no_proxy?(host, pattern) when is_binary(host) and is_binary(pattern) do
-    pattern = String.trim_leading(pattern, ".")
-    host == pattern || String.ends_with?(host, ".#{pattern}")
-  end
-  defp matches_no_proxy?(_, _), do: false
 
   defp parse_uri(uri) do
     case URI.parse(uri) do
