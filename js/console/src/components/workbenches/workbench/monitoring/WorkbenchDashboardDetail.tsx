@@ -10,7 +10,6 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   DashboardGraphType,
-  DashboardInputType,
   DashboardTimeRangeAttributes,
   Delta,
   useWorkbenchDashboardDeltaSubscription,
@@ -19,7 +18,7 @@ import {
   WorkbenchDashboardInput,
 } from 'generated/graphql'
 import { uniq } from 'lodash'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
@@ -104,6 +103,7 @@ function DashboardDetailView({
   const [filters, setFilters] = useState<
     Record<string, DashboardFilterValue | undefined>
   >(() => initialDashboardFilters(inputs, shared.variables))
+  const [readyInputs, setReadyInputs] = useState<Record<string, boolean>>({})
   const [range, setRange] = useState<MetricsTimeRange>(
     () => shared.range ?? '1h'
   )
@@ -117,14 +117,20 @@ function DashboardDetailView({
   }, [range])
 
   const variables = useMemo(() => {
-    const out: Record<string, string | string[]> = {}
+    const out: Record<string, string> = {}
     for (const [name, value] of Object.entries(filters)) {
       if (value === undefined) continue
-      if (Array.isArray(value) ? value.length === 0 : value === '') continue
+      if (value === '') continue
       out[name] = value
     }
     return out
   }, [filters])
+  const onInputReadyChange = useCallback((name: string, ready: boolean) => {
+    setReadyInputs((current) =>
+      current[name] === ready ? current : { ...current, [name]: ready }
+    )
+  }, [])
+  const dashboardReady = inputs.every((input) => readyInputs[input.name])
 
   const sources = useMemo(
     () =>
@@ -249,6 +255,7 @@ function DashboardDetailView({
                     )
                   )
                 }
+                onReadyChange={onInputReadyChange}
               />
             ) : (
               <Body2P $color="text-long-form">
@@ -268,13 +275,20 @@ function DashboardDetailView({
             </MetaRowSC>
           )}
           <PanelsSC>
-            <WorkbenchDashboardPanels
-              dashboardId={dashboard.id}
-              graphs={graphs}
-              variables={variables}
-              timeRange={timeRange}
-              onUpdate={onUpdate}
-            />
+            {dashboardReady ? (
+              <WorkbenchDashboardPanels
+                dashboardId={dashboard.id}
+                graphs={graphs}
+                variables={variables}
+                timeRange={timeRange}
+                onUpdate={onUpdate}
+              />
+            ) : (
+              <RectangleSkeleton
+                $height={240}
+                $width="100%"
+              />
+            )}
           </PanelsSC>
         </BodySC>
       </ScrollSC>
@@ -311,12 +325,6 @@ function initialDashboardFilters(
       const shared = sharedVariables[input.name]
       if (shared === undefined)
         return [input.name, defaultDashboardFilter(input)]
-      if (input.type === DashboardInputType.MultiSelect) {
-        return [
-          input.name,
-          Array.isArray(shared) ? shared : shared ? [shared] : [],
-        ]
-      }
       return [input.name, Array.isArray(shared) ? (shared[0] ?? '') : shared]
     })
   )

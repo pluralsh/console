@@ -75,7 +75,7 @@
               "description": { "type": "string" },
               "type": {
                 "type": "string",
-                "enum": ["text", "number", "boolean", "select", "multi_select", "time_range"]
+                "enum": ["text", "number", "boolean", "select", "time_range"]
               },
               "default": { "type": "string" },
               "options": { "type": "array", "items": { "type": "string" } },

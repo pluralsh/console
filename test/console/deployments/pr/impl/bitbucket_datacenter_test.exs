@@ -78,6 +78,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenterTest do
                  "https://bitbucket.example.com/rest/api/1.0/projects/PROJ/repos/repo/pull-requests"
 
         assert_bearer_auth(opts)
+        assert opts[:redirect]
+        assert opts[:redirect_trusted]
 
         assert Jason.decode!(opts[:body]) == %{
                  "title" => "Agent change",

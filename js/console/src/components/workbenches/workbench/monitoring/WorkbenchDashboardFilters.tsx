@@ -12,18 +12,18 @@ import {
   useWorkbenchDashboardInputQuery,
   WorkbenchDashboardInput,
 } from 'generated/graphql'
-import { isEqual, omit } from 'lodash'
+import { omit } from 'lodash'
+import { useEffect } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 
-export type DashboardFilterValue = string | string[]
+export type DashboardFilterValue = string
+const BOOLEAN_OPTIONS = ['true', 'false']
 
 export function defaultDashboardFilter(
   input: WorkbenchDashboardInput
 ): DashboardFilterValue | undefined {
   if (input.default == null || input.default === '') return undefined
-  return input.type === DashboardInputType.MultiSelect
-    ? [input.default]
-    : input.default
+  return input.default
 }
 
 export function WorkbenchDashboardFilters({
@@ -34,19 +34,21 @@ export function WorkbenchDashboardFilters({
   timeRange,
   onChange,
   onClear,
+  onReadyChange,
 }: {
   dashboardId: string
   inputs: WorkbenchDashboardInput[]
   values: Record<string, DashboardFilterValue | undefined>
-  variables: Record<string, string | string[]>
+  variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
   onChange: (name: string, value: DashboardFilterValue | undefined) => void
   onClear: () => void
+  onReadyChange: (name: string, ready: boolean) => void
 }) {
   if (inputs.length === 0) return null
 
   const dirty = inputs.some(
-    (input) => !isEqual(values[input.name], defaultDashboardFilter(input))
+    (input) => values[input.name] !== defaultDashboardFilter(input)
   )
 
   return (
@@ -69,6 +71,7 @@ export function WorkbenchDashboardFilters({
             variables={variables}
             timeRange={timeRange}
             onChange={(value) => onChange(input.name, value)}
+            onReadyChange={onReadyChange}
           />
         ))}
         {dirty && (
@@ -92,13 +95,15 @@ function DashboardInputControl({
   variables,
   timeRange,
   onChange,
+  onReadyChange,
 }: {
   dashboardId: string
   input: WorkbenchDashboardInput
   value: DashboardFilterValue | undefined
-  variables: Record<string, string | string[]>
+  variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
   onChange: (value: DashboardFilterValue | undefined) => void
+  onReadyChange: (name: string, ready: boolean) => void
 }) {
   const hasDatasource = !!input.datasource
   const { data, loading } = useWorkbenchDashboardInputQuery({
@@ -117,32 +122,48 @@ function DashboardInputControl({
   const options =
     hasDatasource && dynamicOptions.length > 0 ? dynamicOptions : staticOptions
   const placeholder = input.label ?? input.name
-  const singleValue = typeof value === 'string' ? value : undefined
+  const optionInput =
+    input.type === DashboardInputType.Select ||
+    input.type === DashboardInputType.Boolean ||
+    (input.type === DashboardInputType.TimeRange &&
+      (hasDatasource || staticOptions.length > 0))
+  const booleanInput = input.type === DashboardInputType.Boolean
+  const hasValidValue =
+    !!value &&
+    (!optionInput ||
+      (booleanInput
+        ? BOOLEAN_OPTIONS.includes(value)
+        : options.includes(value)))
+  const firstOption = booleanInput ? BOOLEAN_OPTIONS[0] : options[0]
+  const ready =
+    (!hasDatasource || !loading) &&
+    (!optionInput || hasValidValue) &&
+    (!input.required || !!value)
+
+  useEffect(() => {
+    onReadyChange(input.name, ready)
+    return () => onReadyChange(input.name, false)
+  }, [input.name, onReadyChange, ready])
+
+  useEffect(() => {
+    if (
+      optionInput &&
+      (!hasDatasource || !loading) &&
+      !hasValidValue &&
+      firstOption
+    ) {
+      onChange(firstOption)
+    }
+  }, [
+    firstOption,
+    hasDatasource,
+    hasValidValue,
+    loading,
+    onChange,
+    optionInput,
+  ])
 
   switch (input.type) {
-    case DashboardInputType.MultiSelect:
-      return (
-        <Select
-          size="small"
-          width={240}
-          label={placeholder}
-          aria-label={placeholder}
-          selectionMode="multiple"
-          selectedKeys={new Set(Array.isArray(value) ? value : [])}
-          onSelectionChange={(keys) => {
-            const next = Array.from(keys).map((key) => String(key))
-            onChange(next.length > 0 ? next : undefined)
-          }}
-          isDisabled={loading && options.length === 0}
-        >
-          {options.map((option) => (
-            <ListBoxItem
-              key={option}
-              label={option}
-            />
-          ))}
-        </Select>
-      )
     case DashboardInputType.Text:
     case DashboardInputType.Number:
       return (
@@ -151,7 +172,7 @@ function DashboardInputControl({
           width={240}
           placeholder={placeholder}
           aria-label={placeholder}
-          value={singleValue ?? ''}
+          value={value ?? ''}
           onChange={(e) => onChange(e.currentTarget.value || undefined)}
         />
       )
@@ -162,7 +183,7 @@ function DashboardInputControl({
           width={240}
           label={placeholder}
           aria-label={placeholder}
-          selectedKey={singleValue ?? null}
+          selectedKey={value ?? null}
           onSelectionChange={(key) =>
             onChange(key == null ? undefined : String(key))
           }
@@ -187,7 +208,7 @@ function DashboardInputControl({
             width={240}
             placeholder={placeholder}
             aria-label={placeholder}
-            value={singleValue ?? ''}
+            value={value ?? ''}
             onChange={(e) => onChange(e.currentTarget.value || undefined)}
           />
         )
@@ -202,7 +223,7 @@ function DashboardInputControl({
       width={240}
       label={placeholder}
       aria-label={placeholder}
-      selectedKey={singleValue ?? null}
+      selectedKey={value ?? null}
       onSelectionChange={(key) =>
         onChange(key == null ? undefined : String(key))
       }

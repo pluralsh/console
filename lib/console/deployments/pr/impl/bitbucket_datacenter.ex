@@ -217,25 +217,38 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   defp post(conn, path, body) do
     url(conn, path)
-    |> Req.post(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
+    |> Req.post(request_options(conn, body: Jason.encode!(body)))
     |> handle_response()
   end
   defp post(conn, path, body, api_version) do
     url(conn, path, api_version)
-    |> Req.post(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
+    |> Req.post(request_options(conn, body: Jason.encode!(body)))
     |> handle_response()
   end
 
   defp put(conn, path, body) do
     url(conn, path)
-    |> Req.put(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
+    |> Req.put(request_options(conn, body: Jason.encode!(body)))
     |> handle_response()
   end
 
   defp get(conn, path) do
     url(conn, path)
-    |> Req.get(headers: Connection.headers(conn), decode_body: false, retry: false)
+    |> Req.get(request_options(conn))
     |> handle_response()
+  end
+
+  defp request_options(conn, opts \\ []) do
+    Keyword.merge(
+      [
+        headers: Connection.headers(conn),
+        decode_body: false,
+        retry: false,
+        redirect: true,
+        redirect_trusted: true
+      ],
+      opts
+    )
   end
 
   defp handle_response({:ok, %Req.Response{status: code, body: body}})

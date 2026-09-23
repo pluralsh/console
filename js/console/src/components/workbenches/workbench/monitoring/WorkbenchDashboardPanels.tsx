@@ -67,7 +67,7 @@ const PIE_HEIGHT_PX = 200
 type DashboardPanelsProps = {
   dashboardId: string
   graphs: DashboardGraph[]
-  variables: Record<string, string | string[]>
+  variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
   onUpdate?: () => void
 }
@@ -237,7 +237,7 @@ function DashboardPanel({
 }: {
   dashboardId: string
   graph: DashboardGraph
-  variables: Record<string, string | string[]>
+  variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
   onUpdate?: () => void
 }) {

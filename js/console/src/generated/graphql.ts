@@ -4246,7 +4246,6 @@ export type DashboardInputAttributes = {
 
 export enum DashboardInputType {
   Boolean = 'BOOLEAN',
-  MultiSelect = 'MULTI_SELECT',
   Number = 'NUMBER',
   Select = 'SELECT',
   Text = 'TEXT',
