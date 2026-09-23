@@ -41,6 +41,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/helm-test/go.mod
+          cache-dependency-path: go/helm-test/go.sum
           cache: true
       - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make test

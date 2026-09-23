@@ -47,7 +47,9 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/kubernetes-agent/**/go.sum
       - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C api build
 
   build-kas:
@@ -65,7 +67,9 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/kubernetes-agent/**/go.sum
       - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-kas
 
   build-agentk:
@@ -83,7 +87,9 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/kubernetes-agent/**/go.sum
       - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-agentk
 
   test:
@@ -101,7 +107,9 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/kubernetes-agent/**/go.sum
       - run: PATH=$PATH:$GOPATH/bin make test
 
   build-image:

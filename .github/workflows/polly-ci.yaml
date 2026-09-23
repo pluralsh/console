@@ -39,7 +39,9 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/polly/go.sum
       - run: PATH=$PATH:$GOPATH/bin make build
   test:
     needs: [vouch]
@@ -54,5 +56,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/polly/go.sum
       - run: PATH=$PATH:$GOPATH/bin make test

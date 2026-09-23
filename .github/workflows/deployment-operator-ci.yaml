@@ -48,6 +48,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/deployment-operator/go.mod
+          cache-dependency-path: go/deployment-operator/go.sum
           cache: true
       - name: Download dependencies
         run: go mod download
@@ -65,6 +66,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/deployment-operator/go.mod
+          cache-dependency-path: go/deployment-operator/go.sum
           cache: true
       - name: Download dependencies
         run: go mod download
@@ -78,6 +80,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/deployment-operator/go.mod
+          cache-dependency-path: go/deployment-operator/go.sum
           cache: true
       - name: Check docs
         working-directory: go/deployment-operator

@@ -45,6 +45,7 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version-file: go/datastore/go.mod
+          cache-dependency-path: go/datastore/go.sum
           cache: true
       - name: Download dependencies
         run: go mod download

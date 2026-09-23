@@ -38,6 +38,7 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version-file: go/nexus/go.mod
+          cache-dependency-path: go/nexus/go.sum
 
       - name: Run tests
         run: make test
@@ -55,6 +56,7 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version-file: go/nexus/go.mod
+          cache-dependency-path: go/nexus/go.sum
 
       - name: Build binary
         run: make build

@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version-file: go/controller/go.mod
+          cache-dependency-path: go/controller/go.sum
           cache: true
       - name: Regenerate console controller docs
         working-directory: go/controller

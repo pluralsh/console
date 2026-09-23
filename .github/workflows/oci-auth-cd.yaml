@@ -45,6 +45,7 @@ jobs:
     - uses: actions/setup-go@v7
       with:
         go-version-file: go/oci-auth/go.mod
+        cache-dependency-path: go/oci-auth/go.sum
         cache: true
     - run: go mod download
     - run: PATH=$PATH:$GOPATH/bin make test

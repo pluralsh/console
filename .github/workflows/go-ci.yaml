@@ -43,7 +43,9 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/**/go.sum
       - id: lint-packages
         run: |
           packages=$(make --no-print-directory lint-packages)
@@ -67,7 +69,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: go/tools/go.sum
       - name: Verify tools module and install goimports
         run: |
           go mod verify

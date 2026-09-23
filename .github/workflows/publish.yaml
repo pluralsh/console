@@ -199,6 +199,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "^1.21.3"
+          cache: false
       # - name: update controller crds
       #   working-directory: controller
       #   run: make chart-crds
@@ -263,6 +264,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "^1.21.3"
+          cache: false
       - name: push byok chart
         uses: pluralsh/chart-releaser@v0.1.3
         with:
