@@ -114,12 +114,8 @@ func (in *DashboardReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 	return dashboard.Spec.Reconciliation.Requeue(), nil
 }
 
-// addOrRemoveFinalizer adds the finalizer to the resource or, if the resource is being deleted,
-// removes it from the Console API and then removes the finalizer.
-// Console API errors are returned instead of scheduling a requeue with Spec.Reconciliation.Requeue(),
-// as that does not requeue at all when drift detection is disabled and the resource would stay terminating.
-// The caller passes them to common.HandleRequeue, which marks the resource as not synchronized and returns
-// the error, so that controller-runtime retries with exponential backoff.
+// addOrRemoveFinalizer adds the finalizer or, during deletion, removes the resource from Console first.
+// Console errors are returned, not requeued via Spec.Reconciliation, which never requeues without drift detection.
 func (in *DashboardReconciler) addOrRemoveFinalizer(ctx context.Context, dashboard *v1alpha1.Dashboard) (*ctrl.Result, error) {
 	if dashboard.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(dashboard, DashboardFinalizer) {
 		controllerutil.AddFinalizer(dashboard, DashboardFinalizer)

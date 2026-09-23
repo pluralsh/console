@@ -27,8 +27,7 @@ func (c *client) GetService(clusterID, serviceName string) (*console.ServiceDepl
 	return resp.ServiceDeployment, nil
 }
 
-// GetServiceTinyByHandle returns the ID and name of a service identified by its cluster handle and name.
-// It is a lightweight alternative to GetService when the full service details are not needed.
+// GetServiceTinyByHandle is a lightweight GetService that returns only the service ID and name.
 func (c *client) GetServiceTinyByHandle(clusterHandle, serviceName string) (*console.GetServiceDeploymentTinyByHandle_ServiceDeployment, error) {
 	if clusterHandle == "" || serviceName == "" {
 		return nil, errors.NewNotFound(schema.GroupResource{}, fmt.Sprintf("%s/%s", clusterHandle, serviceName))

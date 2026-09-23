@@ -7,35 +7,22 @@ import (
 	"strings"
 )
 
-// Inputs of resources that are managed declaratively (e.g. by the Kubernetes operator) have to
-// describe the full desired state on every create and update.
-//
-// Generated input structs use `omitempty` JSON tags, so nil pointers and empty lists are dropped
-// from requests. The Console API only changes fields that are present in the request, which means
-// that removing an optional field or emptying a list in the desired state would keep the previously
-// stored value. It also breaks switching a monitor type, as the query for the previous type is kept
-// and the update is rejected with "does not match monitor type".
-//
-// The MarshalJSON implementations below send every field instead, recursively:
-//   - nil pointers are sent as null, which clears scalar and embedded object values,
-//   - nil and empty lists are sent as [], which clears embedded lists (null is rejected for them).
-//
-// The clientv2 encoder uses json.Marshaler implementations, so this applies to the generated
-// CreateMonitor, UpdateMonitor, CreateDashboard and UpdateDashboard requests.
+// Generated inputs omit nil and empty fields, and Console keeps the stored value of omitted fields.
+// Monitor and dashboard inputs describe the full desired state, so they send every field instead:
+// nil pointers as null and nil lists as [] (Console rejects null for embedded lists).
 
-// MarshalJSON implements json.Marshaler and sends all fields of the monitor attributes, see above.
+// MarshalJSON sends all fields of the monitor attributes, see above.
 func (in MonitorAttributes) MarshalJSON() ([]byte, error) {
 	return marshalFullInput(reflect.ValueOf(in))
 }
 
-// MarshalJSON implements json.Marshaler and sends all fields of the dashboard attributes, see above.
+// MarshalJSON sends all fields of the dashboard attributes, see above.
 func (in DashboardAttributes) MarshalJSON() ([]byte, error) {
 	return marshalFullInput(reflect.ValueOf(in))
 }
 
-// marshalFullInput encodes a GraphQL input value without omitting any struct fields.
-// Structs are always walked field by field, so their own json.Marshaler implementations
-// are ignored, which also prevents infinite recursion for the types above.
+// marshalFullInput encodes a value without omitting fields. It walks structs directly,
+// ignoring their MarshalJSON methods, which prevents infinite recursion.
 func marshalFullInput(v reflect.Value) ([]byte, error) {
 	switch v.Kind() {
 	case reflect.Invalid:

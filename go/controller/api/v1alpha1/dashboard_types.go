@@ -109,13 +109,8 @@ func (in *Dashboard) Attributes(workbenchID string) console.DashboardAttributes 
 }
 
 // DashboardSpec defines the desired state of a Dashboard.
-// +kubebuilder:validation:XValidation:rule="!has(self.graphs) || self.graphs.all(g, !has(g.sectionId) || g.sectionId == '' || self.graphs.exists(s, s.type == 'SECTION' && s.identifier == g.sectionId))",message="sectionId must reference an existing SECTION graph"
+// +kubebuilder:validation:XValidation:rule="!has(self.graphs) || self.graphs.all(g, !has(g.sectionId) || g.sectionId == ” || self.graphs.exists(s, s.type == 'SECTION' && s.identifier == g.sectionId))",message="sectionId must reference an existing SECTION graph"
 type DashboardSpec struct {
-	// NOTE: The Console API ignores workbenchId on dashboard updates (it is dropped in
-	// Console.Deployments.Observability.update_dashboard/3), so a changed reference would be
-	// silently ignored and the dashboard would stay in the old workbench. The CEL rule below
-	// rejects such changes instead. To move a dashboard, delete and recreate it.
-	// This comment is intentionally detached from the field docs so it does not end up in the CRD.
 
 	// WorkbenchRef references the Workbench that owns this dashboard.
 	// It is immutable, a dashboard cannot be moved to a different workbench.
@@ -134,9 +129,6 @@ type DashboardSpec struct {
 	// +kubebuilder:validation:Type:=string
 	Description *string `json:"description,omitempty"`
 
-	// NOTE: MaxItems on graphs and MaxLength on graph identifier, sectionId and type bound the
-	// estimated cost of the sectionId CEL rule on DashboardSpec, which compares every graph with
-	// every other graph. Without these limits the API server can reject the CRD as too expensive.
 
 	// Graphs arranged on the dashboard grid. Graph identifiers must be unique within the dashboard.
 	// Graphs can be grouped by setting sectionId to the identifier of a SECTION graph.
@@ -160,7 +152,7 @@ type DashboardSpec struct {
 
 // DashboardGraph is a single graph placed on the dashboard grid.
 // +kubebuilder:validation:XValidation:rule="self.type != 'MARKDOWN' || has(self.markdown)",message="markdown must be set for MARKDOWN graphs"
-// +kubebuilder:validation:XValidation:rule="self.type != 'SECTION' || !has(self.sectionId) || self.sectionId == ''",message="sections cannot be nested, SECTION graphs cannot set sectionId"
+// +kubebuilder:validation:XValidation:rule="self.type != 'SECTION' || !has(self.sectionId) || self.sectionId == ”",message="sections cannot be nested, SECTION graphs cannot set sectionId"
 type DashboardGraph struct {
 	// Identifier is a stable identifier unique within the dashboard.
 	// +kubebuilder:validation:Required

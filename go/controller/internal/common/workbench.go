@@ -31,8 +31,7 @@ func HandleWorkbenchRef(ctx context.Context, c runtimeclient.Client, scheme *run
 	return workbench.Status.GetID(), nil, nil
 }
 
-// WorkbenchID resolves a WorkbenchRef to the Workbench ID and waits if the workbench is not yet ready.
-// Unlike HandleWorkbenchRef, it does not set the workbench as the owner of the referencing object.
+// WorkbenchID is HandleWorkbenchRef without setting the workbench as the owner.
 func WorkbenchID(ctx context.Context, c runtimeclient.Client, ref corev1.ObjectReference, namespace string) (string, *ctrl.Result, error) {
 	workbench, res, err := getReadyWorkbench(ctx, c, ref, namespace)
 	if res != nil || err != nil {

@@ -201,9 +201,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 		})
 
 		It("should send the full query when switching the monitor type", func() {
-			// Use a full update instead of common.MaybePatchObject. It builds a merge patch against
-			// an empty object, so it can set fields but never removes them, and removing fields is
-			// exactly what this test needs.
+			// Full update, as common.MaybePatchObject cannot remove fields.
 			monitor := &v1alpha1.Monitor{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
 			monitor.Spec.Type = gqlclient.MonitorTypeMetrics
@@ -223,7 +221,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "console").Return(&gqlclient.GetServiceDeploymentTinyByHandle_ServiceDeployment{ID: serviceID, Name: "console"}, nil)
 			fakeConsoleClient.On("GetMonitor", mock.Anything, id).Return(&gqlclient.MonitorFragment{ID: id}, nil)
 			fakeConsoleClient.On("UpdateMonitor", mock.Anything, id, mock.MatchedBy(func(attrs gqlclient.MonitorAttributes) bool {
-				// Removed fields have to be passed as nil so that they are cleared in the Console API.
+				// Removed fields must be nil so that Console clears them.
 				return attrs.Type == gqlclient.MonitorTypeMetrics &&
 					attrs.Query.Log == nil &&
 					attrs.Query.Metrics != nil &&

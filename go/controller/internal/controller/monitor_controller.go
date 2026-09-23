@@ -128,12 +128,8 @@ func (in *MonitorReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	return monitor.Spec.Reconciliation.Requeue(), nil
 }
 
-// addOrRemoveFinalizer adds the finalizer to the resource or, if the resource is being deleted,
-// removes it from the Console API and then removes the finalizer.
-// Console API errors are returned instead of scheduling a requeue with Spec.Reconciliation.Requeue(),
-// as that does not requeue at all when drift detection is disabled and the resource would stay terminating.
-// The caller passes them to common.HandleRequeue, which marks the resource as not synchronized and returns
-// the error, so that controller-runtime retries with exponential backoff.
+// addOrRemoveFinalizer adds the finalizer or, during deletion, removes the resource from Console first.
+// Console errors are returned, not requeued via Spec.Reconciliation, which never requeues without drift detection.
 func (in *MonitorReconciler) addOrRemoveFinalizer(ctx context.Context, monitor *v1alpha1.Monitor) (*ctrl.Result, error) {
 	if monitor.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(monitor, MonitorFinalizer) {
 		controllerutil.AddFinalizer(monitor, MonitorFinalizer)
@@ -189,8 +185,7 @@ func (in *MonitorReconciler) handleService(ctx context.Context, monitor *v1alpha
 			return "", lo.ToPtr(common.Wait()), fmt.Errorf("service is not ready")
 		}
 
-		// Set the service as the owner so that the monitor is removed together with the service,
-		// and drop owner references to any previously referenced service.
+		// Make the current service the only ServiceDeployment owner.
 		removeServiceOwnerReferences(monitor, service.GetUID())
 		if err := controllerutil.SetOwnerReference(service, monitor, in.Scheme); err != nil {
 			return "", nil, fmt.Errorf("failed to set owner reference: %w", err)
@@ -199,8 +194,7 @@ func (in *MonitorReconciler) handleService(ctx context.Context, monitor *v1alpha
 		return service.Status.GetID(), nil, nil
 	}
 
-	// The monitor no longer references a ServiceDeployment resource. Drop any owner reference left by
-	// a previous spec.serviceRef, otherwise deleting that service would garbage collect this monitor.
+	// Drop owners left by a previous serviceRef, so that deleting that service does not delete this monitor.
 	removeServiceOwnerReferences(monitor, "")
 
 	if monitor.Spec.Service != nil {
@@ -225,8 +219,7 @@ func (in *MonitorReconciler) handleService(ctx context.Context, monitor *v1alpha
 	return "", nil, fmt.Errorf("either spec.serviceRef or spec.service must be set")
 }
 
-// removeServiceOwnerReferences removes ServiceDeployment owner references from the monitor,
-// except for the one pointing to the service with the given UID (pass an empty UID to remove all).
+// removeServiceOwnerReferences removes ServiceDeployment owners except the one with the given UID (empty removes all).
 func removeServiceOwnerReferences(monitor *v1alpha1.Monitor, keep types.UID) {
 	serviceGroup := v1alpha1.GroupVersion.Group
 	monitor.SetOwnerReferences(lo.Reject(monitor.GetOwnerReferences(), func(ref v1.OwnerReference, _ int) bool {
