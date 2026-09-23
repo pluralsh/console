@@ -36,6 +36,12 @@ defmodule Console.OCI.ClientTest do
       assert client.client.options.connect_options[:proxy] == {:https, "proxy.example.com", 443, []}
     end
 
+    test "it supports proxy urls without a scheme" do
+      client = Client.new("oci://ghcr.io/pluralsh/console", %{url: "proxy.example.com:8080", noproxy: nil})
+
+      assert client.client.options.connect_options[:proxy] == {:http, "proxy.example.com", 8080, []}
+    end
+
     test "it skips the proxy for noproxy hosts" do
       client = Client.new("oci://ghcr.io/pluralsh/console", %{url: "http://proxy.example.com:8080", noproxy: "localhost,.ghcr.io"})
 
