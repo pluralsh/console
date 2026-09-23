@@ -20112,6 +20112,26 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 91.5.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['CI: Baseline chart installation now uses target values (test/CI
+          only; should not affect runtime installs).', Grafana image tag updated to
+          **v13.2.5** (already included in 91.4.1)., '91.5.0: Bumps kube-prometheus-stack
+          chart dependencies with **non-major** updates (exact subchart/app versions
+          not listed in provided notes).']
+      features: [No new user-facing features called out; changes are primarily dependency
+          refreshes.]
+      breaking_changes: [No breaking changes mentioned in the provided release notes.]
+    chart_version: 91.5.0
+    images: ['docker.io/grafana/grafana:13.2.2-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.94.0',
+      'quay.io/prometheus/alertmanager:v0.34.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 91.4.1
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
