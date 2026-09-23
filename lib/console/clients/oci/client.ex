@@ -45,20 +45,44 @@ defmodule Console.OCI.Client do
   end
 
   def tags(client, filter \\ fn _ -> true end, query \\ "", acc \\ %Tags{}, limit \\ nil) do
-    case authed_get(client, "/v2/:repo/tags/list?n=1000#{query}") do
-      {:ok, %Req.Response{status: status, body: body, headers: %{"link" => _}}} when status in 200..299 ->
+    case authed_get_client(client, "/v2/:repo/tags/list?n=1000#{query}") do
+      {{:ok, %Req.Response{status: status, headers: %{"link" => link}} = resp}, client} when status in 200..299 ->
+        body = json_body(resp)
         new = Tags.new(body, filter)
         merged = merge_tags(acc, new)
         cond do
           limit_reached?(merged.tags, limit) -> {:ok, trim_tags(merged, limit)}
           is_nil(last(body["tags"])) -> {:ok, merged}
-          true -> tags(client, filter, "&last=#{last(body["tags"])}", merged, limit)
+          true -> tags(client, filter, next_query(link, last(body["tags"])), merged, limit)
         end
-      {:ok, %Req.Response{status: status, body: body}} when status in 200..299 ->
-        {:ok, merge_tags(acc, Tags.new(body, filter)) |> trim_tags(limit)}
+      {{:ok, %Req.Response{status: status} = resp}, _} when status in 200..299 ->
+        {:ok, merge_tags(acc, Tags.new(json_body(resp), filter)) |> trim_tags(limit)}
+      {err, _} -> handle_error(err)
+    end
+  end
+
+  @doc """
+  Fetches a single page of tags.  `next_cursor` is an opaque registry cursor to pass back
+  as `:cursor` to fetch the following page, and is nil once the listing is exhausted.
+  """
+  @spec tags_page(%__MODULE__{}, keyword) :: {:ok, %{name: binary | nil, tags: [binary], next_cursor: binary | nil}} | {:error, term}
+  def tags_page(client, opts \\ []) do
+    page_size = Keyword.get(opts, :page_size, 100)
+    filter = Keyword.get(opts, :filter, fn _ -> true end)
+    query = cursor_query(Keyword.get(opts, :cursor))
+
+    case authed_get(client, "/v2/:repo/tags/list?n=#{page_size}#{query}") do
+      {:ok, %Req.Response{status: status} = resp} when status in 200..299 ->
+        body = json_body(resp)
+        %Tags{name: name, tags: tags} = Tags.new(body, filter)
+        {:ok, %{name: name, tags: tags, next_cursor: page_cursor(resp, body["tags"])}}
       err -> handle_error(err)
     end
   end
+
+  defp page_cursor(%Req.Response{headers: %{"link" => link}}, [_ | _] = tags),
+    do: next_cursor(link, last(tags))
+  defp page_cursor(_, _), do: nil
 
   defp merge_tags(old, new), do: put_in(new.tags, Enum.concat(new.tags, old.tags))
   defp trim_tags(tags, nil), do: tags
@@ -68,18 +92,19 @@ defmodule Console.OCI.Client do
   defp trim_tags(tags, _), do: tags
 
   def repositories(client, filter \\ fn _ -> true end, query \\ "", acc \\ %Repositories{}, limit \\ nil) do
-    case authed_get(client, "/v2/_catalog?n=1000#{query}") do
-      {:ok, %Req.Response{status: status, body: body, headers: %{"link" => _}}} when status in 200..299 ->
+    case authed_get_client(client, "/v2/_catalog?n=1000#{query}") do
+      {{:ok, %Req.Response{status: status, headers: %{"link" => link}} = resp}, client} when status in 200..299 ->
+        body = json_body(resp)
         new = Repositories.new(body, filter)
         merged = merge_repositories(acc, new)
         cond do
           limit_reached?(merged.repositories, limit) -> {:ok, trim_repositories(merged, limit)}
           is_nil(last(body["repositories"])) -> {:ok, merged}
-          true -> repositories(client, filter, "&last=#{last(body["repositories"])}", merged, limit)
+          true -> repositories(client, filter, next_query(link, last(body["repositories"])), merged, limit)
         end
-      {:ok, %Req.Response{status: status, body: body}} when status in 200..299 ->
-        {:ok, merge_repositories(acc, Repositories.new(body, filter)) |> trim_repositories(limit)}
-      err -> handle_error(err)
+      {{:ok, %Req.Response{status: status} = resp}, _} when status in 200..299 ->
+        {:ok, merge_repositories(acc, Repositories.new(json_body(resp), filter)) |> trim_repositories(limit)}
+      {err, _} -> handle_error(err)
     end
   end
 
@@ -96,6 +121,33 @@ defmodule Console.OCI.Client do
 
   defp last([_ | _] = items), do: List.last(items)
   defp last(_), do: nil
+
+  # some registries (eg public.ecr.aws) serve json with a text/plain content type, so req won't decode it
+  defp json_body(%Req.Response{body: body}) when is_binary(body) do
+    case Jason.decode(body) do
+      {:ok, %{} = decoded} -> decoded
+      _ -> %{}
+    end
+  end
+  defp json_body(%Req.Response{body: %{} = body}), do: body
+  defp json_body(_), do: %{}
+
+  defp next_query(link, fallback), do: cursor_query(next_cursor(link, fallback))
+
+  defp cursor_query(nil), do: ""
+  defp cursor_query(cursor), do: "&" <> URI.encode_query(%{"last" => cursor})
+
+  # the `last` pagination cursor is opaque for some registries (eg public.ecr.aws), so prefer the one in the link header
+  defp next_cursor(link, fallback) do
+    with [value | _] <- List.wrap(link),
+         [_, path] <- Regex.run(~r/<([^>]+)>/, value),
+         %URI{query: q} when is_binary(q) <- URI.parse(path),
+         %{"last" => last} <- URI.decode_query(q) do
+      last
+    else
+      _ -> fallback
+    end
+  end
 
   def manifest(%{client: req} = client, tag) do
     req = Req.Request.put_header(req, "accept", @manifest_types)
@@ -119,7 +171,7 @@ defmodule Console.OCI.Client do
 
   defp dkr_client(h, repo, proxy) do
     base_url = "https://#{h}"
-    Req.new(base_url: base_url, retry: false, redirect: true)
+    Req.new(base_url: base_url, retry: &retry_rate_limited/2, max_retries: 3, redirect: true)
     |> put_proxy(proxy, base_url)
     |> Req.Request.register_options([:dkr_repo])
     |> Req.Request.merge_options(dkr_repo: repo)
@@ -132,15 +184,27 @@ defmodule Console.OCI.Client do
     |> Req.Request.prepend_response_steps(dkr_repo: & &1)
   end
 
-  defp authed_get(%__MODULE__{client: req, auth_client: auth} = client, url, opts \\ []) do
+  # public.ecr.aws aggressively rate limits anonymous pulls
+  defp retry_rate_limited(_, %Req.Response{status: 429}), do: true
+  defp retry_rate_limited(_, _), do: false
+
+  defp authed_get(client, url, opts \\ []) do
+    {resp, _} = authed_get_client(client, url, opts)
+    resp
+  end
+
+  # returns the (possibly re-authenticated) client alongside the response so paginated calls can reuse the token
+  defp authed_get_client(%__MODULE__{client: req, auth_client: auth} = client, url, opts \\ []) do
     {no_recurse, opts} = Keyword.pop(opts, :no_recurse, false)
     case {Req.get(req, add_opts(req, [url: url], opts)), no_recurse} do
-      {{:ok, %Req.Response{status: status}} = resp, true} when status in 200..299 -> resp
+      {{:ok, %Req.Response{status: status}} = resp, true} when status in 200..299 -> {resp, client}
       {{:ok, %Req.Response{status: 401, headers: %{"www-authenticate" => [www_auth | _]}}}, false} ->
-        with {:ok, client} <- authenticate_challenge(client, url, www_auth, auth),
-          do: authed_get(client, url, Keyword.put(opts, :no_recurse, true))
-      {_, true} -> {:error, "could not resolve authentication for #{url}"}
-      {err, _} -> err
+        case authenticate_challenge(client, url, www_auth, auth) do
+          {:ok, client} -> authed_get_client(client, url, Keyword.put(opts, :no_recurse, true))
+          err -> {err, client}
+        end
+      {{:ok, %Req.Response{status: 401}}, true} -> {{:error, "could not resolve authentication for #{url}"}, client}
+      {res, _} -> {res, client}
     end
   end
 
