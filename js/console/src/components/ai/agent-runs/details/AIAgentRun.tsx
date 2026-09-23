@@ -46,10 +46,8 @@ import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
-import {
-  shouldShowAgentRunSidePanel,
-  useAgentRunPanel,
-} from './AgentRunPanel.tsx'
+import { useAgentRunPanel } from './AgentRunPanel.tsx'
+import { hasAgentRunPanelContent } from './agentRunPanelUtils.ts'
 
 const AGENT_RUN_POLL_INTERVAL = 5_000
 
@@ -91,8 +89,8 @@ export function AIAgentRun() {
 
   const runLoading = !data && loading
   const run = data?.agentRun
-  const showSidePanel = shouldShowAgentRunSidePanel(run, runLoading)
-  const { isOpen, setOpen, setApproval } = useAgentRunPanel(showSidePanel)
+  const showSidePanel = hasAgentRunPanelContent(run)
+  const { isOpen, setOpen, setApproval } = useAgentRunPanel(showSidePanel, id)
 
   useEffect(() => {
     if (!id) return
