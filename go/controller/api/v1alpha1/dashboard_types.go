@@ -109,7 +109,7 @@ func (in *Dashboard) Attributes(workbenchID string) console.DashboardAttributes 
 }
 
 // DashboardSpec defines the desired state of a Dashboard.
-// +kubebuilder:validation:XValidation:rule="!has(self.graphs) || self.graphs.all(g, !has(g.sectionId) || g.sectionId == '' || self.graphs.exists(s, s.type == 'SECTION' && s.identifier == g.sectionId))",message="sectionId must reference an existing SECTION graph"
+// +kubebuilder:validation:XValidation:rule="!has(self.graphs) || self.graphs.all(g, !has(g.sectionId) || g.sectionId == ” || self.graphs.exists(s, s.type == 'SECTION' && s.identifier == g.sectionId))",message="sectionId must reference an existing SECTION graph"
 type DashboardSpec struct {
 
 	// WorkbenchRef references the Workbench that owns this dashboard.
@@ -151,7 +151,7 @@ type DashboardSpec struct {
 
 // DashboardGraph is a single graph placed on the dashboard grid.
 // +kubebuilder:validation:XValidation:rule="self.type != 'MARKDOWN' || has(self.markdown)",message="markdown must be set for MARKDOWN graphs"
-// +kubebuilder:validation:XValidation:rule="self.type != 'SECTION' || !has(self.sectionId) || self.sectionId == ''",message="sections cannot be nested, SECTION graphs cannot set sectionId"
+// +kubebuilder:validation:XValidation:rule="self.type != 'SECTION' || !has(self.sectionId) || self.sectionId == ”",message="sections cannot be nested, SECTION graphs cannot set sectionId"
 type DashboardGraph struct {
 	// Identifier is a stable identifier unique within the dashboard.
 	// +kubebuilder:validation:Required
