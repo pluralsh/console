@@ -148,3 +148,13 @@ helm.sh/chart: {{ include "console.chart" . }}
 {{ include "embedding-server.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
+
+{{/*
+Local embedding server pod labels. Selector labels always take precedence over
+custom pod labels so the Deployment and Service selectors cannot be changed.
+*/}}
+{{- define "embedding-server.podLabels" -}}
+{{- $labels := deepCopy (default (dict) .Values.ai.localEmbeddings.podLabels) -}}
+{{- $selectorLabels := include "embedding-server.selectorLabels" . | fromYaml -}}
+{{- toYaml (mergeOverwrite $labels $selectorLabels) -}}
+{{- end -}}

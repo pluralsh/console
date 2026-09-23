@@ -15,10 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "embedding-server.selectorLabels" . | nindent 8 }}
-        {{- with .Values.ai.localEmbeddings.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "embedding-server.podLabels" . | nindent 8 }}
       {{- with .Values.ai.localEmbeddings.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -58,9 +55,12 @@ spec:
           value: {{ .Values.ai.localEmbeddings.service.port | quote }}
         - name: SERVED_MODEL_NAME
           value: {{ .Values.ai.localEmbeddings.servedModelName | quote }}
-        {{- with .Values.ai.localEmbeddings.extraArgs }}
+        {{- if .Values.ai.localEmbeddings.extraArgs }}
         args:
-          {{- toYaml . | nindent 10 }}
+        - --json-output
+        {{- with .Values.ai.localEmbeddings.extraArgs }}
+{{ toYaml . | indent 8 }}
+        {{- end }}
         {{- end }}
         ports:
         - name: http
