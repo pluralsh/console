@@ -285,6 +285,8 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 		const (
 			monitorName = "test-monitor-service-ref"
 			serviceName = "test-service-for-monitor"
+			otherName   = "test-other-service-for-monitor"
+			otherID     = "service-other-789"
 			clusterName = "test-cluster-for-monitor"
 			id          = "monitor-789"
 			serviceID   = "service-789"
@@ -292,6 +294,7 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 
 		typeNamespacedName := types.NamespacedName{Name: monitorName, Namespace: namespace}
 		serviceNamespacedName := types.NamespacedName{Name: serviceName, Namespace: namespace}
+		otherNamespacedName := types.NamespacedName{Name: otherName, Namespace: namespace}
 
 		BeforeAll(func() {
 			By("creating the Monitor resource before the service exists")
@@ -325,12 +328,14 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 				Expect(k8sClient.Update(ctx, monitor)).To(Succeed())
 				Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, monitor))).To(Succeed())
 			}
-			service := &v1alpha1.ServiceDeployment{}
-			if err := k8sClient.Get(ctx, serviceNamespacedName, service); err == nil {
-				By("Cleanup the ServiceDeployment resource")
-				service.Finalizers = nil
-				Expect(k8sClient.Update(ctx, service)).To(Succeed())
-				Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, service))).To(Succeed())
+			for _, name := range []types.NamespacedName{serviceNamespacedName, otherNamespacedName} {
+				service := &v1alpha1.ServiceDeployment{}
+				if err := k8sClient.Get(ctx, name, service); err == nil {
+					By("Cleanup the ServiceDeployment resource " + name.Name)
+					service.Finalizers = nil
+					Expect(k8sClient.Update(ctx, service)).To(Succeed())
+					Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, service))).To(Succeed())
+				}
 			}
 		})
 
@@ -410,6 +415,63 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			Expect(monitor.OwnerReferences).To(HaveLen(1))
 			Expect(monitor.OwnerReferences[0].Kind).To(Equal("ServiceDeployment"))
 			Expect(monitor.OwnerReferences[0].Name).To(Equal(serviceName))
+		})
+
+		It("should replace the owner reference when switching to another ServiceDeployment", func() {
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{Name: otherName, Namespace: namespace},
+				Spec: v1alpha1.ServiceSpec{
+					Version:    lo.ToPtr("1.0"),
+					ClusterRef: corev1.ObjectReference{Name: clusterName, Namespace: namespace},
+				},
+			}, func(p *v1alpha1.ServiceDeployment) {
+				p.Status.ID = lo.ToPtr(otherID)
+			})).To(Succeed())
+
+			monitor := &v1alpha1.Monitor{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
+			monitor.Spec.ServiceRef = &corev1.ObjectReference{Name: otherName}
+			Expect(k8sClient.Update(ctx, monitor)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetMonitor", mock.Anything, id).Return(&gqlclient.MonitorFragment{ID: id}, nil)
+			fakeConsoleClient.On("UpdateMonitor", mock.Anything, id, mock.MatchedBy(func(attrs gqlclient.MonitorAttributes) bool {
+				return attrs.ServiceID == otherID
+			})).Return(&gqlclient.MonitorFragment{ID: id}, nil)
+
+			_, err := newReconciler(fakeConsoleClient).Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			fakeConsoleClient.AssertExpectations(GinkgoT())
+
+			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
+			Expect(monitor.OwnerReferences).To(HaveLen(1))
+			Expect(monitor.OwnerReferences[0].Kind).To(Equal("ServiceDeployment"))
+			Expect(monitor.OwnerReferences[0].Name).To(Equal(otherName))
+		})
+
+		It("should remove the owner reference when switching to a Console service handle", func() {
+			monitor := &v1alpha1.Monitor{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
+			Expect(monitor.OwnerReferences).To(HaveLen(1))
+			monitor.Spec.ServiceRef = nil
+			monitor.Spec.Service = lo.ToPtr("mgmt/console")
+			Expect(k8sClient.Update(ctx, monitor)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetServiceTinyByHandle", "mgmt", "console").Return(&gqlclient.GetServiceDeploymentTinyByHandle_ServiceDeployment{ID: serviceID, Name: "console"}, nil)
+			fakeConsoleClient.On("GetMonitor", mock.Anything, id).Return(&gqlclient.MonitorFragment{ID: id}, nil)
+			fakeConsoleClient.On("UpdateMonitor", mock.Anything, id, mock.MatchedBy(func(attrs gqlclient.MonitorAttributes) bool {
+				return attrs.ServiceID == serviceID
+			})).Return(&gqlclient.MonitorFragment{ID: id}, nil)
+
+			_, err := newReconciler(fakeConsoleClient).Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			fakeConsoleClient.AssertExpectations(GinkgoT())
+
+			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
+			Expect(monitor.OwnerReferences).To(BeEmpty())
 		})
 
 		It("should remove the finalizer when the monitor no longer exists in the Console API", func() {

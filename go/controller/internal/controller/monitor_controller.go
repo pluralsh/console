@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -184,13 +185,19 @@ func (in *MonitorReconciler) handleService(ctx context.Context, monitor *v1alpha
 			return "", lo.ToPtr(common.Wait()), fmt.Errorf("service is not ready")
 		}
 
-		// Set the service as the owner so that the monitor is removed together with the service.
+		// Set the service as the owner so that the monitor is removed together with the service,
+		// and drop owner references to any previously referenced service.
+		removeServiceOwnerReferences(monitor, service.GetUID())
 		if err := controllerutil.SetOwnerReference(service, monitor, in.Scheme); err != nil {
 			return "", nil, fmt.Errorf("failed to set owner reference: %w", err)
 		}
 
 		return service.Status.GetID(), nil, nil
 	}
+
+	// The monitor no longer references a ServiceDeployment resource. Drop any owner reference left by
+	// a previous spec.serviceRef, otherwise deleting that service would garbage collect this monitor.
+	removeServiceOwnerReferences(monitor, "")
 
 	if monitor.Spec.Service != nil {
 		ref := lo.FromPtr(monitor.Spec.Service)
@@ -212,6 +219,16 @@ func (in *MonitorReconciler) handleService(ctx context.Context, monitor *v1alpha
 	}
 
 	return "", nil, fmt.Errorf("either spec.serviceRef or spec.service must be set")
+}
+
+// removeServiceOwnerReferences removes ServiceDeployment owner references from the monitor,
+// except for the one pointing to the service with the given UID (pass an empty UID to remove all).
+func removeServiceOwnerReferences(monitor *v1alpha1.Monitor, keep types.UID) {
+	serviceGroup := v1alpha1.GroupVersion.Group
+	monitor.SetOwnerReferences(lo.Reject(monitor.GetOwnerReferences(), func(ref v1.OwnerReference, _ int) bool {
+		group, _, _ := strings.Cut(ref.APIVersion, "/")
+		return group == serviceGroup && ref.Kind == "ServiceDeployment" && (keep == "" || ref.UID != keep)
+	}))
 }
 
 func (in *MonitorReconciler) handleWorkbenchRef(ctx context.Context, monitor *v1alpha1.Monitor) (*string, *ctrl.Result, error) {
