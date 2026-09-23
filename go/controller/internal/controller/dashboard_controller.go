@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -79,9 +78,8 @@ func (in *DashboardReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 	utils.MarkCondition(dashboard.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
-	result := in.addOrRemoveFinalizer(ctx, dashboard)
-	if result != nil {
-		return *result, nil
+	if result, err := in.addOrRemoveFinalizer(ctx, dashboard); result != nil || err != nil {
+		return common.HandleRequeue(result, err, dashboard.SetCondition)
 	}
 
 	// Mark resource as managed by this operator.
@@ -116,7 +114,13 @@ func (in *DashboardReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 	return dashboard.Spec.Reconciliation.Requeue(), nil
 }
 
-func (in *DashboardReconciler) addOrRemoveFinalizer(ctx context.Context, dashboard *v1alpha1.Dashboard) *ctrl.Result {
+// addOrRemoveFinalizer adds the finalizer to the resource or, if the resource is being deleted,
+// removes it from the Console API and then removes the finalizer.
+// Console API errors are returned instead of scheduling a requeue with Spec.Reconciliation.Requeue(),
+// as that does not requeue at all when drift detection is disabled and the resource would stay terminating.
+// The caller passes them to common.HandleRequeue, which marks the resource as not synchronized and returns
+// the error, so that controller-runtime retries with exponential backoff.
+func (in *DashboardReconciler) addOrRemoveFinalizer(ctx context.Context, dashboard *v1alpha1.Dashboard) (*ctrl.Result, error) {
 	if dashboard.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(dashboard, DashboardFinalizer) {
 		controllerutil.AddFinalizer(dashboard, DashboardFinalizer)
 	}
@@ -126,12 +130,12 @@ func (in *DashboardReconciler) addOrRemoveFinalizer(ctx context.Context, dashboa
 		// If the dashboard does not have an ID, the finalizer can be removed.
 		if !dashboard.Status.HasID() {
 			controllerutil.RemoveFinalizer(dashboard, DashboardFinalizer)
-			return &ctrl.Result{}
+			return &ctrl.Result{}, nil
 		}
 
 		exists, err := in.ConsoleClient.IsDashboardExists(ctx, dashboard.Status.GetID())
 		if err != nil {
-			return lo.ToPtr(dashboard.Spec.Reconciliation.Requeue())
+			return nil, err
 		}
 
 		// Remove the dashboard from Console API if it exists.
@@ -139,8 +143,7 @@ func (in *DashboardReconciler) addOrRemoveFinalizer(ctx context.Context, dashboa
 			if err = in.ConsoleClient.DeleteDashboard(ctx, dashboard.Status.GetID()); err != nil {
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
-				utils.MarkCondition(dashboard.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(dashboard.Spec.Reconciliation.Requeue())
+				return nil, err
 			}
 		}
 
@@ -148,10 +151,10 @@ func (in *DashboardReconciler) addOrRemoveFinalizer(ctx context.Context, dashboa
 		controllerutil.RemoveFinalizer(dashboard, DashboardFinalizer)
 
 		// Stop reconciliation as the item does no longer exist.
-		return &ctrl.Result{}
+		return &ctrl.Result{}, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (in *DashboardReconciler) sync(ctx context.Context, dashboard *v1alpha1.Dashboard, workbenchID string, changed bool) (*console.WorkbenchDashboardFragment, error) {

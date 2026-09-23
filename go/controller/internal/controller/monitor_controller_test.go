@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -259,6 +260,47 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			}, func(p *v1alpha1.Monitor) {
 				p.Status.ID = lo.ToPtr(id)
 			})).To(Succeed())
+		})
+
+		It("should return the error and keep the finalizer when the Console API fails during deletion", func() {
+			By("disabling drift detection, so that no requeue is scheduled from the reconciliation settings")
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Monitor{
+				ObjectMeta: metav1.ObjectMeta{Name: monitorName, Namespace: namespace},
+			}, func(p *v1alpha1.Monitor) {
+				p.Spec.Reconciliation = &v1alpha1.Reconciliation{DriftDetection: lo.ToPtr(false)}
+			})).To(Succeed())
+
+			resource := &v1alpha1.Monitor{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, resource)).To(Succeed())
+			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+
+			By("failing to check if the monitor exists")
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("IsMonitorExists", mock.Anything, id).Return(false, fmt.Errorf("console unavailable"))
+
+			_, err := newReconciler(fakeConsoleClient).Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).To(MatchError(ContainSubstring("console unavailable")))
+			fakeConsoleClient.AssertExpectations(GinkgoT())
+
+			By("failing to delete the monitor")
+			fakeConsoleClient = mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("IsMonitorExists", mock.Anything, id).Return(true, nil)
+			fakeConsoleClient.On("DeleteMonitor", mock.Anything, id).Return(fmt.Errorf("delete failed"))
+
+			_, err = newReconciler(fakeConsoleClient).Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).To(MatchError(ContainSubstring("delete failed")))
+			fakeConsoleClient.AssertExpectations(GinkgoT())
+
+			monitor := &v1alpha1.Monitor{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, monitor)).To(Succeed())
+			Expect(monitor.DeletionTimestamp).NotTo(BeNil())
+			Expect(monitor.Finalizers).To(ContainElement(controller.MonitorFinalizer))
+			condition := meta.FindStatusCondition(monitor.Status.Conditions, v1alpha1.SynchronizedConditionType.String())
+			Expect(condition).NotTo(BeNil())
+			Expect(condition.Status).To(Equal(metav1.ConditionFalse))
+			Expect(condition.Message).To(ContainSubstring("delete failed"))
 		})
 
 		It("should successfully delete the monitor", func() {
