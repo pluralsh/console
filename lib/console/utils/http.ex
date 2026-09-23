@@ -102,9 +102,16 @@ defmodule Console.Utils.HTTP do
   end
 
   defp parse_proxy(url) do
-    uri = URI.parse(url)
+    uri = URI.parse(with_scheme(String.trim(url)))
     scheme = if uri.scheme == "https", do: :https, else: :http
     {scheme, uri.host, uri.port || default_port(scheme), []}
+  end
+
+  defp with_scheme(url) do
+    case String.contains?(url, "://") do
+      true -> url
+      false -> "http://#{url}"
+    end
   end
 
   defp default_port(:https), do: 443

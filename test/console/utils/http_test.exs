@@ -10,6 +10,17 @@ defmodule Console.Utils.HTTPTest do
       assert opts[:connect_options][:proxy] == {:http, "proxy.example.com", 3128, []}
     end
 
+    test "defaults scheme-less proxy urls to http" do
+      assert HTTP.proxy_options(%{url: "proxy.example.com:3128"}, "https://registry.example.com")[:connect_options][:proxy] ==
+               {:http, "proxy.example.com", 3128, []}
+      assert HTTP.proxy_options(%{url: "10.0.0.1:3128"}, "https://registry.example.com")[:connect_options][:proxy] ==
+               {:http, "10.0.0.1", 3128, []}
+      assert HTTP.proxy_options(%{url: " proxy.example.com "}, "https://registry.example.com")[:connect_options][:proxy] ==
+               {:http, "proxy.example.com", 80, []}
+      assert HTTP.proxy_options(%{url: "https://proxy.example.com"}, "https://registry.example.com")[:connect_options][:proxy] ==
+               {:https, "proxy.example.com", 443, []}
+    end
+
     test "skips the proxy for exact and suffix noproxy matches" do
       proxy = %{url: "http://proxy.example.com:3128", noproxy: "localhost, .internal.example.com"}
 
