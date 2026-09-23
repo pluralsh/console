@@ -16,6 +16,10 @@ env:
   GOBIN: /home/runner/go/bin
   GOPROXY: "https://proxy.golang.org"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch

@@ -24,6 +24,10 @@ env:
   REGISTRY_IMAGE: ghcr.io/pluralsh/cloud-query
   REGISTRY_IMAGE_DB: ghcr.io/pluralsh/cloud-query-db
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch

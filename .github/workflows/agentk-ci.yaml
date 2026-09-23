@@ -21,6 +21,10 @@ env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: pluralsh/agentk
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch

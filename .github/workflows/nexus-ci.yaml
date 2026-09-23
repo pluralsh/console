@@ -15,6 +15,10 @@ env:
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: ghcr.io/pluralsh/nexus
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
