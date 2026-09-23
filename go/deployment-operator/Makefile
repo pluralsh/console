@@ -62,7 +62,7 @@ genmock: --tool ## generates mocks before running tests
 
 .PHONY: codegen-rust-crds
 codegen-rust-crds: ## Generate the TunnelClient CRD from the Rust types.
-	cargo run --quiet --manifest-path rust/ferrotunnel/Cargo.toml --bin crdgen > config/crd/bases/deployments.plural.sh_tunnelclients.yaml.tmp
+	cargo run --quiet --manifest-path ../../rust/ferrotunnel/Cargo.toml --bin crdgen > config/crd/bases/deployments.plural.sh_tunnelclients.yaml.tmp
 	mv config/crd/bases/deployments.plural.sh_tunnelclients.yaml.tmp config/crd/bases/deployments.plural.sh_tunnelclients.yaml
 
 .PHONY: codegen-chart-crds

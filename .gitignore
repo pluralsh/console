@@ -88,4 +88,4 @@ data/
 .codex/
 
 # Rust
-go/deployment-operator/rust/**/target/
+rust/**/target/
