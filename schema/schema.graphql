@@ -7952,7 +7952,6 @@ enum DashboardInputType {
   NUMBER
   BOOLEAN
   SELECT
-  MULTI_SELECT
   TIME_RANGE
 }
 

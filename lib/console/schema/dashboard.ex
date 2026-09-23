@@ -98,7 +98,6 @@ defmodule Console.Schema.Dashboard do
       number: 1,
       boolean: 2,
       select: 3,
-      multi_select: 4,
       time_range: 5
 
     embedded_schema do
