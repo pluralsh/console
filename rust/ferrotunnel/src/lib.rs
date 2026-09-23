@@ -4,6 +4,8 @@
 //! The definition below is that type, written in Rust. `crdgen` prints the YAML
 //! the API server accepts.
 
+pub mod controller;
+
 use k8s_openapi::apimachinery::pkg::apis::meta::v1::Condition;
 use kube::CustomResource;
 use schemars::JsonSchema;
