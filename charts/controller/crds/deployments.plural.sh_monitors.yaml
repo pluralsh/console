@@ -327,9 +327,19 @@ spec:
                     example: 5m30s
                     type: string
                 type: object
+              service:
+                description: |-
+                  Service references an existing service in the Console API this monitor is attached to,
+                  in the format "cluster-handle/service-name" (e.g. mgmt/console). Use it to attach
+                  a monitor to a service that is not managed by a ServiceDeployment resource.
+                  Either ServiceRef or Service must be set.
+                example: mgmt/console
+                pattern: ^[^/]+/[^/]+$
+                type: string
               serviceRef:
-                description: ServiceRef references the ServiceDeployment this monitor
-                  is attached to.
+                description: |-
+                  ServiceRef references the ServiceDeployment resource this monitor is attached to.
+                  Either ServiceRef or Service must be set.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -458,12 +468,13 @@ spec:
             required:
             - evaluationCron
             - query
-            - serviceRef
             - severity
             - threshold
             - type
             type: object
             x-kubernetes-validations:
+            - message: exactly one of serviceRef or service must be set
+              rule: has(self.serviceRef) != has(self.service)
             - message: query.log must be set when type is LOG
               rule: self.type != 'LOG' || has(self.query.log)
             - message: query.metrics must be set when type is METRICS

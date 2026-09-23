@@ -2853,7 +2853,8 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name is the short name used to identify this monitor in the Console API.<br />If not set, metadata.name is used. |  | Optional: \{\} <br />Type: string <br /> |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef references the ServiceDeployment this monitor is attached to. |  | Required: \{\} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef references the ServiceDeployment resource this monitor is attached to.<br />Either ServiceRef or Service must be set. |  | Optional: \{\} <br /> |
+| `service` _string_ | Service references an existing service in the Console API this monitor is attached to,<br />in the format "cluster-handle/service-name" (e.g. mgmt/console). Use it to attach<br />a monitor to a service that is not managed by a ServiceDeployment resource.<br />Either ServiceRef or Service must be set. |  | Optional: \{\} <br />Pattern: `^[^/]+/[^/]+$` <br />Type: string <br /> |
 | `workbenchRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | WorkbenchRef references the Workbench this monitor is attached to.<br />When set, the monitor can start a workbench investigation when it fires.<br />It is required if the query uses a named workbench tool. |  | Optional: \{\} <br /> |
 | `prompt` _string_ | Prompt is used when the monitor starts a workbench investigation. |  | MaxLength: 2048 <br />Optional: \{\} <br />Type: string <br /> |
 | `modes` _[WorkbenchJobModes](#workbenchjobmodes)_ | Modes defines mode-specific options for monitor-triggered workbench jobs. |  | Optional: \{\} <br /> |
