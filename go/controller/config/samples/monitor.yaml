@@ -66,7 +66,7 @@ spec:
     aggregate: MAX
     value: "100"
 ---
-# Metrics monitor using the native Plural metrics provider, without a workbench.
+# Metrics monitor using the native Plural metrics provider. When it fires, it starts an investigation in the workbench.
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Monitor
 metadata:
@@ -81,10 +81,13 @@ metadata:
 spec:
   name: console-cpu-usage
   service: mgmt/console
+  workbenchRef:
+    name: workbench-monitoring-sample
   description: Fires when console CPU usage is above 2 cores on average
   severity: MEDIUM
   type: METRICS
   evaluationCron: "*/10 * * * *"
+  prompt: Investigate the high console CPU usage and suggest a fix
   query:
     metrics:
       query: sum(rate(container_cpu_usage_seconds_total{namespace="plrl-console", container!=""}[5m]))
