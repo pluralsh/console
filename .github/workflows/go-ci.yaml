@@ -19,6 +19,10 @@ permissions:
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -35,11 +39,13 @@ jobs:
         shell: bash
         working-directory: go/
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/**/go.sum
       - id: lint-packages
         run: |
           packages=$(make --no-print-directory lint-packages)
@@ -59,11 +65,11 @@ jobs:
         shell: bash
         working-directory: go/tools
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: go/tools/go.sum
       - name: Verify tools module and install goimports
         run: |
           go mod verify

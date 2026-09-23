@@ -10,6 +10,10 @@ on:
       - '**/*.md'
   schedule:
     - cron: '0 0 * * 1'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -30,7 +34,7 @@ jobs:
       matrix:
         language: [ 'typescript' ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: github/codeql-action/init@v4

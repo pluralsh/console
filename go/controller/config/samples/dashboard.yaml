@@ -1,0 +1,96 @@
+# Self-contained Dashboard sample showing resource usage of the console running on the `mgmt` cluster.
+# Graphs use the native Plural metrics tools (plrl_metrics, plrl_metric_label_search) that are available
+# when the workbench has metrics observability enabled, so no additional workbench tools are needed.
+# Variables defined in inputs are referenced in datasource inputs with ${name}.
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Workbench
+metadata:
+  labels:
+    app.kubernetes.io/name: workbench
+    app.kubernetes.io/instance: workbench-monitoring-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbench-monitoring-sample
+  namespace: default
+spec:
+  name: workbench-monitoring-sample
+  description: Sample workbench used by Monitor and Dashboard samples
+  configuration:
+    observability:
+      logs: true
+      metrics: true
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Dashboard
+metadata:
+  labels:
+    app.kubernetes.io/name: dashboard
+    app.kubernetes.io/instance: dashboard-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: dashboard-sample
+  namespace: default
+spec:
+  workbenchRef:
+    name: workbench-monitoring-sample
+  name: console-overview
+  description: Resource usage of the console on the mgmt cluster
+  inputs:
+    - name: namespace
+      label: Namespace
+      description: Namespace the console is running in
+      type: TEXT
+      default: plrl-console
+      required: true
+    - name: pod
+      label: Pod
+      description: Filter graphs by console pod
+      type: SELECT
+      default: ".*"
+      required: false
+      datasource:
+        type: LABELS
+        tool: plrl_metric_label_search
+        input:
+          metric: container_cpu_usage_seconds_total
+          label: pod
+          query: console
+  graphs:
+    - identifier: overview
+      title: Overview
+      type: SECTION
+      layout: { x: 0, "y": 0, w: 12, h: 1 }
+      options:
+        collapsed: false
+    - identifier: notes
+      title: About
+      description: Dashboard description
+      type: MARKDOWN
+      sectionId: overview
+      markdown: |
+        ## Console overview
+        CPU and memory usage of the console pods in the `${namespace}` namespace.
+      layout: { x: 0, "y": 1, w: 4, h: 4 }
+    - identifier: cpu
+      title: CPU usage
+      description: CPU cores used by console pods
+      type: TIMESERIES
+      sectionId: overview
+      layout: { x: 4, "y": 1, w: 8, h: 4 }
+      datasource:
+        type: METRICS
+        tool: plrl_metrics
+        input:
+          query: sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="${namespace}", pod=~"${pod}", container!=""}[5m]))
+    - identifier: memory
+      title: Memory usage
+      description: Working set memory of console pods
+      type: TIMESERIES
+      layout: { x: 0, "y": 5, w: 12, h: 4 }
+      datasource:
+        type: METRICS
+        tool: plrl_metrics
+        input:
+          query: sum by (pod) (container_memory_working_set_bytes{namespace="${namespace}", pod=~"${pod}", container!=""})

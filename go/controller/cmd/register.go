@@ -535,4 +535,24 @@ func init() {
 			Scheme:        mgr.GetScheme(),
 		}
 	})
+
+	types.RegisterController(types.MonitorReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.MonitorReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	})
+
+	types.RegisterController(types.DashboardReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.DashboardReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}
+	})
 }
