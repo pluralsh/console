@@ -54,8 +54,10 @@ spec:
                 description: Description is an optional dashboard description.
                 type: string
               graphs:
-                description: Graphs arranged on the dashboard grid. Graph identifiers
-                  must be unique within the dashboard.
+                description: |-
+                  Graphs arranged on the dashboard grid. Graph identifiers must be unique within the dashboard.
+                  Graphs can be grouped by setting sectionId to the identifier of a SECTION graph.
+                  Note that overlapping graph layouts are only validated by the Console API.
                 items:
                   description: DashboardGraph is a single graph placed on the dashboard
                     grid.
@@ -92,6 +94,7 @@ spec:
                     identifier:
                       description: Identifier is a stable identifier unique within
                         the dashboard.
+                      maxLength: 128
                       minLength: 1
                       type: string
                     layout:
@@ -132,8 +135,9 @@ spec:
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     sectionId:
-                      description: SectionID is the identifier of the section graph
+                      description: SectionID is the identifier of the SECTION graph
                         containing this graph. Sections cannot be nested.
+                      maxLength: 128
                       type: string
                     title:
                       description: Title is the graph title.
@@ -152,6 +156,7 @@ spec:
                       - HEATMAP
                       - TRACES
                       - SECTION
+                      maxLength: 16
                       type: string
                   required:
                   - identifier
@@ -161,6 +166,11 @@ spec:
                   x-kubernetes-validations:
                   - message: markdown must be set for MARKDOWN graphs
                     rule: self.type != 'MARKDOWN' || has(self.markdown)
+                  - message: sections cannot be nested, SECTION graphs cannot set
+                      sectionId
+                    rule: self.type != 'SECTION' || !has(self.sectionId) || self.sectionId
+                      == ''
+                maxItems: 200
                 type: array
                 x-kubernetes-list-map-keys:
                 - identifier
@@ -314,6 +324,11 @@ spec:
             required:
             - workbenchRef
             type: object
+            x-kubernetes-validations:
+            - message: sectionId must reference an existing SECTION graph
+              rule: '!has(self.graphs) || self.graphs.all(g, !has(g.sectionId) ||
+                g.sectionId == '''' || self.graphs.exists(s, s.type == ''SECTION''
+                && s.identifier == g.sectionId))'
           status:
             description: Status represents the current state of this resource.
             properties:

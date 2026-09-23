@@ -109,6 +109,7 @@ func (in *Dashboard) Attributes(workbenchID string) console.DashboardAttributes 
 }
 
 // DashboardSpec defines the desired state of a Dashboard.
+// +kubebuilder:validation:XValidation:rule="!has(self.graphs) || self.graphs.all(g, !has(g.sectionId) || g.sectionId == '' || self.graphs.exists(s, s.type == 'SECTION' && s.identifier == g.sectionId))",message="sectionId must reference an existing SECTION graph"
 type DashboardSpec struct {
 	// NOTE: The Console API ignores workbenchId on dashboard updates (it is dropped in
 	// Console.Deployments.Observability.update_dashboard/3), so a changed reference would be
@@ -133,8 +134,15 @@ type DashboardSpec struct {
 	// +kubebuilder:validation:Type:=string
 	Description *string `json:"description,omitempty"`
 
+	// NOTE: MaxItems on graphs and MaxLength on graph identifier, sectionId and type bound the
+	// estimated cost of the sectionId CEL rule on DashboardSpec, which compares every graph with
+	// every other graph. Without these limits the API server can reject the CRD as too expensive.
+
 	// Graphs arranged on the dashboard grid. Graph identifiers must be unique within the dashboard.
+	// Graphs can be grouped by setting sectionId to the identifier of a SECTION graph.
+	// Note that overlapping graph layouts are only validated by the Console API.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=200
 	// +listType=map
 	// +listMapKey=identifier
 	Graphs []DashboardGraph `json:"graphs,omitempty"`
@@ -152,11 +160,13 @@ type DashboardSpec struct {
 
 // DashboardGraph is a single graph placed on the dashboard grid.
 // +kubebuilder:validation:XValidation:rule="self.type != 'MARKDOWN' || has(self.markdown)",message="markdown must be set for MARKDOWN graphs"
+// +kubebuilder:validation:XValidation:rule="self.type != 'SECTION' || !has(self.sectionId) || self.sectionId == ''",message="sections cannot be nested, SECTION graphs cannot set sectionId"
 type DashboardGraph struct {
 	// Identifier is a stable identifier unique within the dashboard.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=128
 	Identifier string `json:"identifier"`
 
 	// Title is the graph title.
@@ -172,11 +182,14 @@ type DashboardGraph struct {
 	// Type is the graph visualization type.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=TIMESERIES;GAUGE;LOGS;MARKDOWN;TABLE;STAT;BAR;PIE;HEATMAP;TRACES;SECTION
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:MaxLength=16
 	Type console.DashboardGraphType `json:"type"`
 
-	// SectionID is the identifier of the section graph containing this graph. Sections cannot be nested.
+	// SectionID is the identifier of the SECTION graph containing this graph. Sections cannot be nested.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:MaxLength=128
 	SectionID *string `json:"sectionId,omitempty"`
 
 	// Markdown is the content for MARKDOWN graphs.

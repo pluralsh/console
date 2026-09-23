@@ -23,38 +23,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
 )
 
-// readyStatus returns the expected status of a successfully synchronized resource with the given ID.
-func readyStatus(id string) v1alpha1.Status {
-	return v1alpha1.Status{
-		ID: lo.ToPtr(id),
-		Conditions: []metav1.Condition{
-			{
-				Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
-				Status:  metav1.ConditionFalse,
-				Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-				Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
-			},
-			{
-				Type:    v1alpha1.ReadonlyConditionType.String(),
-				Status:  metav1.ConditionFalse,
-				Reason:  v1alpha1.ReadonlyConditionReason.String(),
-				Message: "",
-			},
-			{
-				Type:    v1alpha1.ReadyConditionType.String(),
-				Status:  metav1.ConditionTrue,
-				Reason:  v1alpha1.ReadyConditionReason.String(),
-				Message: "",
-			},
-			{
-				Type:   v1alpha1.SynchronizedConditionType.String(),
-				Status: metav1.ConditionTrue,
-				Reason: v1alpha1.SynchronizedConditionReason.String(),
-			},
-		},
-	}
-}
-
 var _ = Describe("Monitor Controller", Ordered, func() {
 	const namespace = "default"
 	ctx := context.Background()
@@ -492,6 +460,19 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			return m
 		}
 
+		DescribeTable("should accept valid evaluation cron expressions",
+			func(name, cron string) {
+				monitor := newMonitor(name, func(spec *v1alpha1.MonitorSpec) {
+					spec.EvaluationCron = cron
+				})
+				Expect(k8sClient.Create(ctx, monitor)).To(Succeed())
+				Expect(k8sClient.Delete(ctx, monitor)).To(Succeed())
+			},
+			Entry("5 fields", "valid-monitor-cron-5", "*/5 * * * *"),
+			Entry("6 fields with year", "valid-monitor-cron-6", "0 0 1 1 * 2027"),
+			Entry("shortcut", "valid-monitor-cron-shortcut", "@hourly"),
+		)
+
 		DescribeTable("should reject invalid resources",
 			func(name string, mutate func(spec *v1alpha1.MonitorSpec), message string) {
 				err := k8sClient.Create(ctx, newMonitor(name, mutate))
@@ -525,6 +506,12 @@ var _ = Describe("Monitor Controller", Ordered, func() {
 			Entry("invalid severity", "invalid-monitor-severity", func(spec *v1alpha1.MonitorSpec) {
 				spec.Severity = "SEVERE"
 			}, "spec.severity"),
+			Entry("invalid evaluation cron", "invalid-monitor-cron", func(spec *v1alpha1.MonitorSpec) {
+				spec.EvaluationCron = "5m"
+			}, "spec.evaluationCron"),
+			Entry("evaluation cron with too few fields", "invalid-monitor-cron-fields", func(spec *v1alpha1.MonitorSpec) {
+				spec.EvaluationCron = "*/5 * * *"
+			}, "spec.evaluationCron"),
 		)
 	})
 })

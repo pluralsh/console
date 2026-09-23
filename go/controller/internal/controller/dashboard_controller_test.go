@@ -357,6 +357,32 @@ var _ = Describe("Dashboard Controller", Ordered, func() {
 			Entry("invalid graph type", "invalid-dashboard-type", func(spec *v1alpha1.DashboardSpec) {
 				spec.Graphs[0].Type = "LINE"
 			}, "spec.graphs[0].type"),
+			Entry("graph referencing unknown section", "invalid-dashboard-unknown-section", func(spec *v1alpha1.DashboardSpec) {
+				spec.Graphs[0].SectionID = lo.ToPtr("missing")
+			}, "sectionId must reference an existing SECTION graph"),
+			Entry("graph referencing a non-section graph", "invalid-dashboard-non-section", func(spec *v1alpha1.DashboardSpec) {
+				spec.Graphs = append(spec.Graphs, v1alpha1.DashboardGraph{
+					Identifier: "child",
+					Type:       gqlclient.DashboardGraphTypeStat,
+					SectionID:  lo.ToPtr("notes"),
+					Layout:     v1alpha1.DashboardGraphLayout{X: 1, Y: 0, W: 1, H: 1},
+				})
+			}, "sectionId must reference an existing SECTION graph"),
+			Entry("nested sections", "invalid-dashboard-nested-sections", func(spec *v1alpha1.DashboardSpec) {
+				spec.Graphs = append(spec.Graphs,
+					v1alpha1.DashboardGraph{
+						Identifier: "outer",
+						Type:       gqlclient.DashboardGraphTypeSection,
+						Layout:     v1alpha1.DashboardGraphLayout{X: 0, Y: 1, W: 1, H: 1},
+					},
+					v1alpha1.DashboardGraph{
+						Identifier: "inner",
+						Type:       gqlclient.DashboardGraphTypeSection,
+						SectionID:  lo.ToPtr("outer"),
+						Layout:     v1alpha1.DashboardGraphLayout{X: 0, Y: 2, W: 1, H: 1},
+					},
+				)
+			}, "sections cannot be nested"),
 		)
 	})
 })

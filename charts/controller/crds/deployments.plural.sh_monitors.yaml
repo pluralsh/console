@@ -68,9 +68,14 @@ spec:
                   this monitor is checking.
                 type: string
               evaluationCron:
-                description: EvaluationCron is the cron schedule defining when the
-                  monitor is evaluated (e.g. */5 * * * *).
+                description: |-
+                  EvaluationCron is the cron schedule defining when the monitor is evaluated (e.g. */5 * * * *).
+                  It must be a cron expression with 5 fields (or 6 with an optional year), separated by single spaces,
+                  or one of the @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @minutely,
+                  @secondly or @reboot shortcuts. Field values are validated by the Console API.
                 minLength: 1
+                pattern: ^(@(?i:yearly|annually|monthly|weekly|daily|midnight|hourly|minutely|secondly|reboot)|[^
+                  ]+( [^ ]+){4,5})$
                 type: string
               modes:
                 description: Modes defines mode-specific options for monitor-triggered

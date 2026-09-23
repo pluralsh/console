@@ -190,9 +190,13 @@ type MonitorSpec struct {
 	Type console.MonitorType `json:"type"`
 
 	// EvaluationCron is the cron schedule defining when the monitor is evaluated (e.g. */5 * * * *).
+	// It must be a cron expression with 5 fields (or 6 with an optional year), separated by single spaces,
+	// or one of the @yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly, @minutely,
+	// @secondly or @reboot shortcuts. Field values are validated by the Console API.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern=`^(@(?i:yearly|annually|monthly|weekly|daily|midnight|hourly|minutely|secondly|reboot)|[^ ]+( [^ ]+){4,5})$`
 	EvaluationCron string `json:"evaluationCron"`
 
 	// Query is the underlying query configuration used to fetch data for this monitor.
