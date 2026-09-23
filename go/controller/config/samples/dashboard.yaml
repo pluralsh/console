@@ -61,7 +61,7 @@ spec:
     - identifier: overview
       title: Overview
       type: SECTION
-      layout: { x: 0, y: 0, w: 12, h: 1 }
+      layout: { x: 0, "y": 0, w: 12, h: 1 }
       options:
         collapsed: false
     - identifier: notes
@@ -72,13 +72,13 @@ spec:
       markdown: |
         ## Console overview
         CPU and memory usage of the console pods in the `${namespace}` namespace.
-      layout: { x: 0, y: 1, w: 4, h: 4 }
+      layout: { x: 0, "y": 1, w: 4, h: 4 }
     - identifier: cpu
       title: CPU usage
       description: CPU cores used by console pods
       type: TIMESERIES
       sectionId: overview
-      layout: { x: 4, y: 1, w: 8, h: 4 }
+      layout: { x: 4, "y": 1, w: 8, h: 4 }
       datasource:
         type: METRICS
         tool: plrl_metrics
@@ -88,7 +88,7 @@ spec:
       title: Memory usage
       description: Working set memory of console pods
       type: TIMESERIES
-      layout: { x: 0, y: 5, w: 12, h: 4 }
+      layout: { x: 0, "y": 5, w: 12, h: 4 }
       datasource:
         type: METRICS
         tool: plrl_metrics
