@@ -369,6 +369,69 @@ observabilityProxy:
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: ~
 
+# ai configures optional AI-related services deployed by the chart.
+ai:
+  # localEmbeddings deploys the OpenAI-compatible embedding endpoint used by an AI proxy.
+  localEmbeddings:
+    enabled: false
+    # servedModelName is the model name accepted in OpenAI-compatible embedding requests.
+    servedModelName: nomic-ai/nomic-embed-text-v1.5
+    image:
+      # Leave empty to use global.registry, or set this for a different image registry.
+      registry: ""
+      repository: embedding-server
+      # Keep this independent from the Console chart version. Update it when the image is released.
+      tag: v0.1.0
+      pullPolicy: IfNotPresent
+    service:
+      port: 80
+    resources:
+      requests:
+        cpu: "2"
+        memory: 2Gi
+      limits:
+        cpu: "4"
+        memory: 6Gi
+    podLabels: {}
+    podAnnotations: {}
+    podSecurityContext: {}
+    containerSecurityContext:
+      capabilities:
+        drop:
+        - ALL
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      seccompProfile:
+        type: RuntimeDefault
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    extraArgs: []
+    # startupProbe gives TEI time to load the baked model before liveness checks begin.
+    startupProbe:
+      httpGet:
+        path: /health
+        port: http
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 18
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []
 

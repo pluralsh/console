@@ -1,0 +1,82 @@
+name: CI / embedding-server
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "rust/embedding-server/**"
+      - ".github/workflows/embedding-server-ci.yaml"
+      - ".github/workflows/embedding-server-cd.yaml"
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY_IMAGE: ghcr.io/pluralsh/embedding-server
+  MODEL_ID: nomic-ai/nomic-embed-text-v1.5
+  MODEL_REVISION: e9b6763023c676ca8431644204f50c2b100d9aab
+  SERVED_MODEL_NAME: nomic-ai/nomic-embed-text-v1.5
+  TEI_IMAGE: ghcr.io/huggingface/text-embeddings-inference:cpu-1.9@sha256:8419f533857b503ebf6ec292a95d4f1cf9c0464ac8b8abeef39518cf110e5726
+  TEI_VERSION: 1.9.4
+
+jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
+  build-and-smoke-test:
+    name: Build amd64 image and run smoke test
+    needs: [vouch]
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: rust/embedding-server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate shell and Makefile inputs
+        run: |
+          bash -n scripts/smoke-test.sh
+          make -n build IMAGE=embedding-server:ci \
+            MODEL_ID="$MODEL_ID" \
+            MODEL_REVISION="$MODEL_REVISION" \
+            SERVED_MODEL_NAME="$SERVED_MODEL_NAME" \
+            TEI_IMAGE="$TEI_IMAGE" \
+            TEI_VERSION="$TEI_VERSION" | grep -- '--build-arg MODEL_ID='
+
+      - name: Validate Dockerfile
+        run: |
+          docker buildx build --check \
+            --file Dockerfile \
+            --build-arg TEI_IMAGE="$TEI_IMAGE" \
+            .
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: rust/embedding-server
+          file: rust/embedding-server/Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: embedding-server:ci
+          build-args: |
+            MODEL_ID=${{ env.MODEL_ID }}
+            MODEL_REVISION=${{ env.MODEL_REVISION }}
+            SERVED_MODEL_NAME=${{ env.SERVED_MODEL_NAME }}
+            TEI_IMAGE=${{ env.TEI_IMAGE }}
+            TEI_VERSION=${{ env.TEI_VERSION }}
+            IMAGE_VERSION=ci
+            GIT_COMMIT=${{ github.sha }}
+          cache-from: type=gha,scope=embedding-server-amd64
+          cache-to: type=gha,mode=max,scope=embedding-server-amd64
+
+      - name: Run network-isolated OpenAI smoke test
+        run: IMAGE=embedding-server:ci SERVED_MODEL_NAME="$SERVED_MODEL_NAME" ./scripts/smoke-test.sh

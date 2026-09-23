@@ -131,3 +131,20 @@ annotations:
 {{ toYaml $merged | indent 2 }}
 {{- end }}
 {{- end }}
+
+{{/*
+Local embedding server selector labels.
+*/}}
+{{- define "embedding-server.selectorLabels" -}}
+app.kubernetes.io/name: embedding-server
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
+Local embedding server labels.
+*/}}
+{{- define "embedding-server.labels" -}}
+helm.sh/chart: {{ include "console.chart" . }}
+{{ include "embedding-server.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
