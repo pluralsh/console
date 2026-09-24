@@ -54,6 +54,11 @@ defmodule Console.Deployments.FerroTunnelTest do
   end
 
   describe "#configuration/1" do
+    test "it returns no configuration when deployment settings are missing" do
+      cluster = insert(:cluster)
+      assert FerroTunnel.configuration(cluster) == []
+    end
+
     test "it signs one client certificate and returns the operator configuration" do
       previous = Application.get_env(:console, :hostname)
       Application.put_env(:console, :hostname, "console.example.com")

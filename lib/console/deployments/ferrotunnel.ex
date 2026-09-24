@@ -69,8 +69,8 @@ defmodule Console.Deployments.FerroTunnel do
   is unset, so the tunnel controller stays disabled.
   """
   def configuration(%Cluster{} = cluster) do
-    with {:ok, settings} <- ensure_credentials(),
-         %DeploymentSettings.FerroTunnel{token: token} = tunnel when is_binary(token) <- settings.ferrotunnel,
+    with {:ok, %DeploymentSettings{ferrotunnel: %DeploymentSettings.FerroTunnel{token: token} = tunnel}}
+           when is_binary(token) <- ensure_credentials(),
          {:ok, cluster} <- ensure_client(cluster, tunnel),
          host when is_binary(host) and host != "" <- hostname() do
       [
