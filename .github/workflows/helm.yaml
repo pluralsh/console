@@ -33,4 +33,4 @@ jobs:
         with:
           fetch-depth: 0
       - uses: azure/setup-helm@v5.0.1
-      - run: helm template ${{ matrix.chart }} --set dashboard.app.security.csrfKey=dummycsrfkey
+      - run: helm template ${{ matrix.chart }} --set dashboard.app.security.csrfKey=dummycsrfkey ${{ matrix.chart == 'charts/ferrotunnel' && '--set server=ferrotunnel.example:7835' || '' }}
