@@ -163,7 +163,9 @@ versions:
         schema changes (rules CRD adds `profileDataRequired`) require CRDs to be updated;
         mismatched CRDs can cause reconciliation/validation issues during upgrade.]
   chart_version: 1.40.0
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.19', 'quay.io/kubescape/kubescape:v4.0.6',
+    'quay.io/kubescape/kubevuln:v0.3.136', 'quay.io/kubescape/node-agent:v0.3.111',
+    'quay.io/kubescape/operator:v0.2.141', 'quay.io/kubescape/storage:v0.0.274']
 - version: 1.30.7
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -181,7 +183,9 @@ versions:
         see PR #770 in kubescape/helm-charts).']
     breaking_changes: []
   chart_version: 1.30.7
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.19', 'quay.io/kubescape/kubescape:v3.0.48',
+    'quay.io/kubescape/kubevuln:v0.3.132', 'quay.io/kubescape/node-agent:v0.3.94',
+    'quay.io/kubescape/operator:v0.2.140', 'quay.io/kubescape/storage:v0.0.272']
 - version: 1.30.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -196,7 +200,9 @@ versions:
     features: [Adds image-based functionality (image-based scanning/mode) to the operator.]
     breaking_changes: []
   chart_version: 1.30.0
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.16', 'quay.io/kubescape/kubescape:v3.0.47',
+    'quay.io/kubescape/kubevuln:v0.3.98', 'quay.io/kubescape/node-agent:v0.3.3', 'quay.io/kubescape/operator:v0.2.119',
+    'quay.io/kubescape/storage:v0.0.233']
 - version: 1.29.12
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -214,7 +220,9 @@ versions:
         improvements and Prometheus support.']
     breaking_changes: []
   chart_version: 1.29.12
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.15', 'quay.io/kubescape/kubescape:v3.0.45',
+    'quay.io/kubescape/kubevuln:v0.3.97', 'quay.io/kubescape/node-agent:v0.2.398',
+    'quay.io/kubescape/operator:v0.2.114', 'quay.io/kubescape/storage:v0.0.224']
 - version: 1.29.1
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -234,7 +242,9 @@ versions:
         for tuning throughput/resource usage.']
     breaking_changes: []
   chart_version: 1.29.1
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.14', 'quay.io/kubescape/kubescape:v3.0.38',
+    'quay.io/kubescape/kubevuln:v0.3.84', 'quay.io/kubescape/node-agent:v0.2.377',
+    'quay.io/kubescape/operator:v0.2.99', 'quay.io/kubescape/storage:v0.0.208']
 - version: 1.29.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -249,7 +259,9 @@ versions:
         the kubelet directory, improving compatibility across node layouts/distributions.']
     breaking_changes: []
   chart_version: 1.29.0
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.12', 'quay.io/kubescape/kubescape:v3.0.37',
+    'quay.io/kubescape/kubevuln:v0.3.82', 'quay.io/kubescape/node-agent:v0.2.357',
+    'quay.io/kubescape/operator:v0.2.97', 'quay.io/kubescape/storage:v0.0.206']
 - version: 1.28.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -268,7 +280,9 @@ versions:
         directories.']
     breaking_changes: []
   chart_version: 1.28.0
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.11', 'quay.io/kubescape/kubescape:v3.0.34',
+    'quay.io/kubescape/kubevuln:v0.3.80', 'quay.io/kubescape/node-agent:v0.2.345',
+    'quay.io/kubescape/operator:v0.2.91', 'quay.io/kubescape/storage:v0.0.185']
 - version: 1.27.3
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -290,7 +304,9 @@ versions:
         AppArmor fields; clusters relying on legacy annotation-based AppArmor need
         to validate their policies/manifests still apply.]
   chart_version: 1.27.3
-  images: []
+  images: ['quay.io/kubescape/kubescape:v3.0.34', 'quay.io/kubescape/kubevuln:v0.3.72',
+    'quay.io/kubescape/node-agent:v0.2.298', 'quay.io/kubescape/operator:v0.2.84',
+    'quay.io/kubescape/storage:v0.0.172']
 - version: 1.27.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -640,4 +656,6 @@ versions:
   incompatibilities: []
   summary: null
   chart_version: 0.29.6
-  images: []
+  images: ['quay.io/kubescape/http-request:v0.2.14', 'quay.io/kubescape/kubescape:v3.0.40',
+    'quay.io/kubescape/kubevuln:v0.3.86', 'quay.io/kubescape/node-agent:test-0a5ff33',
+    'quay.io/kubescape/operator:v0.2.103', 'quay.io/kubescape/storage:v0.0.212']
