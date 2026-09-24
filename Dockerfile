@@ -78,14 +78,23 @@ RUN if [ "$OS_VARIANT" = "alpine" ]; then \
   mix local.rebar --force && \
   mix local.hex --force
 
-# This copies our app source code into the build container
-COPY . .
+# Deps are fetched and compiled in their own layer so they stay cached until mix.lock or build config changes
+COPY mix.exs mix.lock ./
+COPY config/config.exs config/${MIX_ENV}.exs config/
+RUN mix do deps.get --only ${MIX_ENV} + deps.compile
 
-# needed so that we can get the app version from the git tag
-RUN git config --global --add safe.directory '/opt/app'
-
-RUN mix do deps.get, compile
-RUN ls -al
+# Only copy what the app compile reads, so changes elsewhere in the monorepo don't bust this layer
+COPY config/ config/
+COPY src/ src/
+COPY static/ static/
+COPY priv/ priv/
+COPY rel/ rel/
+COPY lib/ lib/
+COPY AGENT_VERSION KUBE_VERSION ./
+COPY charts/controller/crds/ charts/controller/crds/
+COPY go/client/generated/persisted-queries/queries.json go/client/generated/persisted-queries/
+COPY js/console/src/generated/persisted-queries/client.json js/console/src/generated/persisted-queries/
+RUN mix compile
 
 COPY --from=node /app/console/build ./priv/static
 

@@ -38,7 +38,7 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version-file: go/nexus/go.mod
-          cache-dependency-path: go/nexus/go.sum
+          cache: false
 
       - name: Build binary
         run: make build
@@ -97,8 +97,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=nexus-${{ env.PLATFORM_PAIR }}
-          cache-to: type=gha,mode=max,scope=nexus-${{ env.PLATFORM_PAIR }}
+          # read-only: written by master builds in nexus-cd.yaml
+          cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:nexus-${{ env.PLATFORM_PAIR }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VERSION=${{ steps.meta.outputs.version }}
