@@ -1554,7 +1554,7 @@ _Appears in:_
 | `name` _string_ | Name is the variable name referenced by graph datasource inputs. |  | MinLength: 1 <br />Required: \{\} <br />Type: string <br /> |
 | `label` _string_ | Label is a human-readable input label. |  | Optional: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description is an optional input description. |  | Optional: \{\} <br />Type: string <br /> |
-| `type` _[DashboardInputType](#dashboardinputtype)_ | Type is the input control type. |  | Enum: [TEXT NUMBER BOOLEAN SELECT MULTI_SELECT TIME_RANGE] <br />Required: \{\} <br /> |
+| `type` _[DashboardInputType](#dashboardinputtype)_ | Type is the input control type. |  | Enum: [TEXT NUMBER BOOLEAN SELECT TIME_RANGE] <br />Required: \{\} <br /> |
 | `default` _string_ | Default is the default input value. |  | Optional: \{\} <br />Type: string <br /> |
 | `options` _string array_ | Options are the allowed values for select inputs. |  | Optional: \{\} <br /> |
 | `required` _boolean_ | Required defines whether a value is required when rendering. |  | Optional: \{\} <br /> |
