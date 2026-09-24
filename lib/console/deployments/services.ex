@@ -11,6 +11,7 @@ defmodule Console.Deployments.Services do
     Settings,
     Git,
     Clusters,
+    FerroTunnel,
     Deprecations.Checker,
     AddOns,
     Tar
@@ -389,13 +390,13 @@ defmodule Console.Deployments.Services do
     end
   end
 
-  defp operator_configuration(%Cluster{id: cluster_id, deploy_token: deploy_token}) do
+  defp operator_configuration(%Cluster{id: cluster_id, deploy_token: deploy_token} = cluster) do
     [
       %{name: "clusterId", value: cluster_id},
       %{name: "deployToken", value: deploy_token},
       %{name: "url", value: api_url("gql")},
       %{name: "kasAddress", value: Clusters.kas_url()}
-    ]
+    ] ++ FerroTunnel.configuration(cluster)
   end
 
   def write_authorized(%Service{} = svc, %User{} = user), do: allow(svc, user, :write)
