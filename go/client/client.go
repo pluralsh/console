@@ -3878,10 +3878,19 @@ func (t *AISettingsFragment) GetAnthropic() *AISettingsFragment_Anthropic {
 }
 
 type MonitorFragment struct {
-	ID        string                     "json:\"id\" graphql:\"id\""
-	Name      string                     "json:\"name\" graphql:\"name\""
-	Service   *MonitorFragment_Service   "json:\"service,omitempty\" graphql:\"service\""
-	Workbench *MonitorFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+	ID             string                     "json:\"id\" graphql:\"id\""
+	Name           string                     "json:\"name\" graphql:\"name\""
+	Description    *string                    "json:\"description,omitempty\" graphql:\"description\""
+	AlertTemplate  *string                    "json:\"alertTemplate,omitempty\" graphql:\"alertTemplate\""
+	Severity       AlertSeverity              "json:\"severity\" graphql:\"severity\""
+	Type           MonitorType                "json:\"type\" graphql:\"type\""
+	EvaluationCron string                     "json:\"evaluationCron\" graphql:\"evaluationCron\""
+	Prompt         *string                    "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Modes          *WorkbenchJobModesFragment "json:\"modes,omitempty\" graphql:\"modes\""
+	Query          MonitorQueryFragment       "json:\"query\" graphql:\"query\""
+	Threshold      MonitorFragment_Threshold  "json:\"threshold\" graphql:\"threshold\""
+	Service        *MonitorFragment_Service   "json:\"service,omitempty\" graphql:\"service\""
+	Workbench      *MonitorFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
 func (t *MonitorFragment) GetID() string {
@@ -3896,6 +3905,60 @@ func (t *MonitorFragment) GetName() string {
 	}
 	return t.Name
 }
+func (t *MonitorFragment) GetDescription() *string {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.Description
+}
+func (t *MonitorFragment) GetAlertTemplate() *string {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.AlertTemplate
+}
+func (t *MonitorFragment) GetSeverity() *AlertSeverity {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return &t.Severity
+}
+func (t *MonitorFragment) GetType() *MonitorType {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return &t.Type
+}
+func (t *MonitorFragment) GetEvaluationCron() string {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.EvaluationCron
+}
+func (t *MonitorFragment) GetPrompt() *string {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.Prompt
+}
+func (t *MonitorFragment) GetModes() *WorkbenchJobModesFragment {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.Modes
+}
+func (t *MonitorFragment) GetQuery() *MonitorQueryFragment {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return &t.Query
+}
+func (t *MonitorFragment) GetThreshold() *MonitorFragment_Threshold {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return &t.Threshold
+}
 func (t *MonitorFragment) GetService() *MonitorFragment_Service {
 	if t == nil {
 		t = &MonitorFragment{}
@@ -3909,10 +3972,31 @@ func (t *MonitorFragment) GetWorkbench() *MonitorFragment_Workbench {
 	return t.Workbench
 }
 
+type MonitorQueryFragment struct {
+	Log     *MonitorQueryFragment_Log     "json:\"log,omitempty\" graphql:\"log\""
+	Metrics *MonitorQueryFragment_Metrics "json:\"metrics,omitempty\" graphql:\"metrics\""
+}
+
+func (t *MonitorQueryFragment) GetLog() *MonitorQueryFragment_Log {
+	if t == nil {
+		t = &MonitorQueryFragment{}
+	}
+	return t.Log
+}
+func (t *MonitorQueryFragment) GetMetrics() *MonitorQueryFragment_Metrics {
+	if t == nil {
+		t = &MonitorQueryFragment{}
+	}
+	return t.Metrics
+}
+
 type WorkbenchDashboardFragment struct {
-	ID        string                                "json:\"id\" graphql:\"id\""
-	Name      string                                "json:\"name\" graphql:\"name\""
-	Workbench *WorkbenchDashboardFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+	ID          string                                "json:\"id\" graphql:\"id\""
+	Name        string                                "json:\"name\" graphql:\"name\""
+	Description *string                               "json:\"description,omitempty\" graphql:\"description\""
+	Graphs      []*WorkbenchDashboardGraphFragment    "json:\"graphs,omitempty\" graphql:\"graphs\""
+	Inputs      []*WorkbenchDashboardInputFragment    "json:\"inputs,omitempty\" graphql:\"inputs\""
+	Workbench   *WorkbenchDashboardFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
 func (t *WorkbenchDashboardFragment) GetID() string {
@@ -3927,11 +4011,181 @@ func (t *WorkbenchDashboardFragment) GetName() string {
 	}
 	return t.Name
 }
+func (t *WorkbenchDashboardFragment) GetDescription() *string {
+	if t == nil {
+		t = &WorkbenchDashboardFragment{}
+	}
+	return t.Description
+}
+func (t *WorkbenchDashboardFragment) GetGraphs() []*WorkbenchDashboardGraphFragment {
+	if t == nil {
+		t = &WorkbenchDashboardFragment{}
+	}
+	return t.Graphs
+}
+func (t *WorkbenchDashboardFragment) GetInputs() []*WorkbenchDashboardInputFragment {
+	if t == nil {
+		t = &WorkbenchDashboardFragment{}
+	}
+	return t.Inputs
+}
 func (t *WorkbenchDashboardFragment) GetWorkbench() *WorkbenchDashboardFragment_Workbench {
 	if t == nil {
 		t = &WorkbenchDashboardFragment{}
 	}
 	return t.Workbench
+}
+
+type WorkbenchDashboardGraphFragment struct {
+	Identifier  string                                 "json:\"identifier\" graphql:\"identifier\""
+	Title       *string                                "json:\"title,omitempty\" graphql:\"title\""
+	Description *string                                "json:\"description,omitempty\" graphql:\"description\""
+	Type        DashboardGraphType                     "json:\"type\" graphql:\"type\""
+	SectionID   *string                                "json:\"sectionId,omitempty\" graphql:\"sectionId\""
+	Markdown    *string                                "json:\"markdown,omitempty\" graphql:\"markdown\""
+	Options     *string                                "json:\"options,omitempty\" graphql:\"options\""
+	Layout      WorkbenchDashboardGraphFragment_Layout "json:\"layout\" graphql:\"layout\""
+	Datasource  *WorkbenchDashboardDatasourceFragment  "json:\"datasource,omitempty\" graphql:\"datasource\""
+}
+
+func (t *WorkbenchDashboardGraphFragment) GetIdentifier() string {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Identifier
+}
+func (t *WorkbenchDashboardGraphFragment) GetTitle() *string {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Title
+}
+func (t *WorkbenchDashboardGraphFragment) GetDescription() *string {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Description
+}
+func (t *WorkbenchDashboardGraphFragment) GetType() *DashboardGraphType {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return &t.Type
+}
+func (t *WorkbenchDashboardGraphFragment) GetSectionID() *string {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.SectionID
+}
+func (t *WorkbenchDashboardGraphFragment) GetMarkdown() *string {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Markdown
+}
+func (t *WorkbenchDashboardGraphFragment) GetOptions() *string {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Options
+}
+func (t *WorkbenchDashboardGraphFragment) GetLayout() *WorkbenchDashboardGraphFragment_Layout {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return &t.Layout
+}
+func (t *WorkbenchDashboardGraphFragment) GetDatasource() *WorkbenchDashboardDatasourceFragment {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Datasource
+}
+
+type WorkbenchDashboardInputFragment struct {
+	Name        string                                "json:\"name\" graphql:\"name\""
+	Label       *string                               "json:\"label,omitempty\" graphql:\"label\""
+	Description *string                               "json:\"description,omitempty\" graphql:\"description\""
+	Type        DashboardInputType                    "json:\"type\" graphql:\"type\""
+	Default     *string                               "json:\"default,omitempty\" graphql:\"default\""
+	Options     []*string                             "json:\"options,omitempty\" graphql:\"options\""
+	Required    *bool                                 "json:\"required,omitempty\" graphql:\"required\""
+	Datasource  *WorkbenchDashboardDatasourceFragment "json:\"datasource,omitempty\" graphql:\"datasource\""
+}
+
+func (t *WorkbenchDashboardInputFragment) GetName() string {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return t.Name
+}
+func (t *WorkbenchDashboardInputFragment) GetLabel() *string {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return t.Label
+}
+func (t *WorkbenchDashboardInputFragment) GetDescription() *string {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return t.Description
+}
+func (t *WorkbenchDashboardInputFragment) GetType() *DashboardInputType {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return &t.Type
+}
+func (t *WorkbenchDashboardInputFragment) GetDefault() *string {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return t.Default
+}
+func (t *WorkbenchDashboardInputFragment) GetOptions() []*string {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return t.Options
+}
+func (t *WorkbenchDashboardInputFragment) GetRequired() *bool {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return t.Required
+}
+func (t *WorkbenchDashboardInputFragment) GetDatasource() *WorkbenchDashboardDatasourceFragment {
+	if t == nil {
+		t = &WorkbenchDashboardInputFragment{}
+	}
+	return t.Datasource
+}
+
+type WorkbenchDashboardDatasourceFragment struct {
+	Type  DashboardDatasourceType "json:\"type\" graphql:\"type\""
+	Tool  string                  "json:\"tool\" graphql:\"tool\""
+	Input string                  "json:\"input\" graphql:\"input\""
+}
+
+func (t *WorkbenchDashboardDatasourceFragment) GetType() *DashboardDatasourceType {
+	if t == nil {
+		t = &WorkbenchDashboardDatasourceFragment{}
+	}
+	return &t.Type
+}
+func (t *WorkbenchDashboardDatasourceFragment) GetTool() string {
+	if t == nil {
+		t = &WorkbenchDashboardDatasourceFragment{}
+	}
+	return t.Tool
+}
+func (t *WorkbenchDashboardDatasourceFragment) GetInput() string {
+	if t == nil {
+		t = &WorkbenchDashboardDatasourceFragment{}
+	}
+	return t.Input
 }
 
 type ManagedNamespaceEdgeFragment struct {
@@ -7343,6 +7597,52 @@ func (t *WorkbenchToolFragment) GetUpdatedAt() *string {
 	return t.UpdatedAt
 }
 
+type WorkbenchJobModesFragment struct {
+	Plan         *bool                                 "json:\"plan,omitempty\" graphql:\"plan\""
+	Verification *bool                                 "json:\"verification,omitempty\" graphql:\"verification\""
+	Model        *WorkbenchJobModesFragment_Model      "json:\"model,omitempty\" graphql:\"model\""
+	Coding       *WorkbenchJobModesFragment_Coding     "json:\"coding,omitempty\" graphql:\"coding\""
+	Budget       *WorkbenchJobModesFragment_Budget     "json:\"budget,omitempty\" graphql:\"budget\""
+	Kubernetes   *WorkbenchJobModesFragment_Kubernetes "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+}
+
+func (t *WorkbenchJobModesFragment) GetPlan() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment{}
+	}
+	return t.Plan
+}
+func (t *WorkbenchJobModesFragment) GetVerification() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment{}
+	}
+	return t.Verification
+}
+func (t *WorkbenchJobModesFragment) GetModel() *WorkbenchJobModesFragment_Model {
+	if t == nil {
+		t = &WorkbenchJobModesFragment{}
+	}
+	return t.Model
+}
+func (t *WorkbenchJobModesFragment) GetCoding() *WorkbenchJobModesFragment_Coding {
+	if t == nil {
+		t = &WorkbenchJobModesFragment{}
+	}
+	return t.Coding
+}
+func (t *WorkbenchJobModesFragment) GetBudget() *WorkbenchJobModesFragment_Budget {
+	if t == nil {
+		t = &WorkbenchJobModesFragment{}
+	}
+	return t.Budget
+}
+func (t *WorkbenchJobModesFragment) GetKubernetes() *WorkbenchJobModesFragment_Kubernetes {
+	if t == nil {
+		t = &WorkbenchJobModesFragment{}
+	}
+	return t.Kubernetes
+}
+
 type WorkbenchCronFragment struct {
 	ID        string                           "json:\"id\" graphql:\"id\""
 	Crontab   *string                          "json:\"crontab,omitempty\" graphql:\"crontab\""
@@ -9815,6 +10115,327 @@ func (t *AISettingsFragment_Anthropic) GetModel() *string {
 	return t.Model
 }
 
+type MonitorFragment_Modes_WorkbenchJobModesFragment_Model struct {
+	Model    *string     "json:\"model,omitempty\" graphql:\"model\""
+	Provider *AiProvider "json:\"provider,omitempty\" graphql:\"provider\""
+}
+
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetModel() *string {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Model
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetProvider() *AiProvider {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Provider
+}
+
+type MonitorFragment_Modes_WorkbenchJobModesFragment_Coding struct {
+	Approval *bool "json:\"approval,omitempty\" graphql:\"approval\""
+	Babysit  *bool "json:\"babysit,omitempty\" graphql:\"babysit\""
+	Review   *bool "json:\"review,omitempty\" graphql:\"review\""
+}
+
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetApproval() *bool {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Approval
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetBabysit() *bool {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Babysit
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetReview() *bool {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Review
+}
+
+type MonitorFragment_Modes_WorkbenchJobModesFragment_Budget struct {
+	Cost   *float64 "json:\"cost,omitempty\" graphql:\"cost\""
+	Tokens *int64   "json:\"tokens,omitempty\" graphql:\"tokens\""
+}
+
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetCost() *float64 {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Cost
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetTokens() *int64 {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Tokens
+}
+
+type MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes struct {
+	Delete            *bool     "json:\"delete,omitempty\" graphql:\"delete\""
+	Drain             *bool     "json:\"drain,omitempty\" graphql:\"drain\""
+	ExcludeNamespaces []*string "json:\"excludeNamespaces,omitempty\" graphql:\"excludeNamespaces\""
+	Exec              *bool     "json:\"exec,omitempty\" graphql:\"exec\""
+	RequireNamespaces []*string "json:\"requireNamespaces,omitempty\" graphql:\"requireNamespaces\""
+	Update            *bool     "json:\"update,omitempty\" graphql:\"update\""
+}
+
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDelete() *bool {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Delete
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDrain() *bool {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Drain
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExcludeNamespaces() []*string {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.ExcludeNamespaces
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExec() *bool {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Exec
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetRequireNamespaces() []*string {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.RequireNamespaces
+}
+func (t *MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetUpdate() *bool {
+	if t == nil {
+		t = &MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Update
+}
+
+type MonitorFragment_Query_MonitorQueryFragment_Log_Facets struct {
+	Key   string "json:\"key\" graphql:\"key\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetKey() string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Key
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetValue() string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Value
+}
+
+type MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure struct {
+	ResourceID *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+}
+
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure{}
+	}
+	return t.ResourceID
+}
+
+type MonitorFragment_Query_MonitorQueryFragment_Log_Options struct {
+	Azure *MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log_Options) GetAzure() *MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log_Options{}
+	}
+	return t.Azure
+}
+
+type MonitorFragment_Query_MonitorQueryFragment_Log struct {
+	BucketSize string                                                   "json:\"bucketSize\" graphql:\"bucketSize\""
+	Duration   *string                                                  "json:\"duration,omitempty\" graphql:\"duration\""
+	Facets     []*MonitorFragment_Query_MonitorQueryFragment_Log_Facets "json:\"facets,omitempty\" graphql:\"facets\""
+	Operator   *MonitorOperator                                         "json:\"operator,omitempty\" graphql:\"operator\""
+	Options    *MonitorFragment_Query_MonitorQueryFragment_Log_Options  "json:\"options,omitempty\" graphql:\"options\""
+	Query      string                                                   "json:\"query\" graphql:\"query\""
+	Tool       *string                                                  "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log) GetBucketSize() string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.BucketSize
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log) GetDuration() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Duration
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log) GetFacets() []*MonitorFragment_Query_MonitorQueryFragment_Log_Facets {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Facets
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log) GetOperator() *MonitorOperator {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Operator
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log) GetOptions() *MonitorFragment_Query_MonitorQueryFragment_Log_Options {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Options
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log) GetQuery() string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Query
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Log) GetTool() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Tool
+}
+
+type MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure struct {
+	Aggregation      *string "json:\"aggregation,omitempty\" graphql:\"aggregation\""
+	Filter           *string "json:\"filter,omitempty\" graphql:\"filter\""
+	MetricsEndpoint  *string "json:\"metricsEndpoint,omitempty\" graphql:\"metricsEndpoint\""
+	MetricsNamespace *string "json:\"metricsNamespace,omitempty\" graphql:\"metricsNamespace\""
+	OrderBy          *string "json:\"orderBy,omitempty\" graphql:\"orderBy\""
+	ResourceID       *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+	RollUpBy         *string "json:\"rollUpBy,omitempty\" graphql:\"rollUpBy\""
+}
+
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetAggregation() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Aggregation
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetFilter() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Filter
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsEndpoint() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsEndpoint
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsNamespace() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsNamespace
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetOrderBy() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.OrderBy
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.ResourceID
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetRollUpBy() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.RollUpBy
+}
+
+type MonitorFragment_Query_MonitorQueryFragment_Metrics_Options struct {
+	Azure *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options) GetAzure() *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics_Options{}
+	}
+	return t.Azure
+}
+
+type MonitorFragment_Query_MonitorQueryFragment_Metrics struct {
+	Duration *string                                                     "json:\"duration,omitempty\" graphql:\"duration\""
+	Options  *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options "json:\"options,omitempty\" graphql:\"options\""
+	Query    string                                                      "json:\"query\" graphql:\"query\""
+	Step     *string                                                     "json:\"step,omitempty\" graphql:\"step\""
+	Tool     *string                                                     "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics) GetDuration() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Duration
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics) GetOptions() *MonitorFragment_Query_MonitorQueryFragment_Metrics_Options {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Options
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics) GetQuery() string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Query
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics) GetStep() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Step
+}
+func (t *MonitorFragment_Query_MonitorQueryFragment_Metrics) GetTool() *string {
+	if t == nil {
+		t = &MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Tool
+}
+
+type MonitorFragment_Threshold struct {
+	Aggregate MonitorAggregate "json:\"aggregate\" graphql:\"aggregate\""
+	Value     float64          "json:\"value\" graphql:\"value\""
+}
+
+func (t *MonitorFragment_Threshold) GetAggregate() *MonitorAggregate {
+	if t == nil {
+		t = &MonitorFragment_Threshold{}
+	}
+	return &t.Aggregate
+}
+func (t *MonitorFragment_Threshold) GetValue() float64 {
+	if t == nil {
+		t = &MonitorFragment_Threshold{}
+	}
+	return t.Value
+}
+
 type MonitorFragment_Service struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -9851,6 +10472,234 @@ func (t *MonitorFragment_Workbench) GetName() string {
 	return t.Name
 }
 
+type MonitorQueryFragment_Log_Facets struct {
+	Key   string "json:\"key\" graphql:\"key\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *MonitorQueryFragment_Log_Facets) GetKey() string {
+	if t == nil {
+		t = &MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Key
+}
+func (t *MonitorQueryFragment_Log_Facets) GetValue() string {
+	if t == nil {
+		t = &MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Value
+}
+
+type MonitorQueryFragment_Log_Options_Azure struct {
+	ResourceID *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+}
+
+func (t *MonitorQueryFragment_Log_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Log_Options_Azure{}
+	}
+	return t.ResourceID
+}
+
+type MonitorQueryFragment_Log_Options struct {
+	Azure *MonitorQueryFragment_Log_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *MonitorQueryFragment_Log_Options) GetAzure() *MonitorQueryFragment_Log_Options_Azure {
+	if t == nil {
+		t = &MonitorQueryFragment_Log_Options{}
+	}
+	return t.Azure
+}
+
+type MonitorQueryFragment_Log struct {
+	BucketSize string                             "json:\"bucketSize\" graphql:\"bucketSize\""
+	Duration   *string                            "json:\"duration,omitempty\" graphql:\"duration\""
+	Facets     []*MonitorQueryFragment_Log_Facets "json:\"facets,omitempty\" graphql:\"facets\""
+	Operator   *MonitorOperator                   "json:\"operator,omitempty\" graphql:\"operator\""
+	Options    *MonitorQueryFragment_Log_Options  "json:\"options,omitempty\" graphql:\"options\""
+	Query      string                             "json:\"query\" graphql:\"query\""
+	Tool       *string                            "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *MonitorQueryFragment_Log) GetBucketSize() string {
+	if t == nil {
+		t = &MonitorQueryFragment_Log{}
+	}
+	return t.BucketSize
+}
+func (t *MonitorQueryFragment_Log) GetDuration() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Log{}
+	}
+	return t.Duration
+}
+func (t *MonitorQueryFragment_Log) GetFacets() []*MonitorQueryFragment_Log_Facets {
+	if t == nil {
+		t = &MonitorQueryFragment_Log{}
+	}
+	return t.Facets
+}
+func (t *MonitorQueryFragment_Log) GetOperator() *MonitorOperator {
+	if t == nil {
+		t = &MonitorQueryFragment_Log{}
+	}
+	return t.Operator
+}
+func (t *MonitorQueryFragment_Log) GetOptions() *MonitorQueryFragment_Log_Options {
+	if t == nil {
+		t = &MonitorQueryFragment_Log{}
+	}
+	return t.Options
+}
+func (t *MonitorQueryFragment_Log) GetQuery() string {
+	if t == nil {
+		t = &MonitorQueryFragment_Log{}
+	}
+	return t.Query
+}
+func (t *MonitorQueryFragment_Log) GetTool() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Log{}
+	}
+	return t.Tool
+}
+
+type MonitorQueryFragment_Metrics_Options_Azure struct {
+	Aggregation      *string "json:\"aggregation,omitempty\" graphql:\"aggregation\""
+	Filter           *string "json:\"filter,omitempty\" graphql:\"filter\""
+	MetricsEndpoint  *string "json:\"metricsEndpoint,omitempty\" graphql:\"metricsEndpoint\""
+	MetricsNamespace *string "json:\"metricsNamespace,omitempty\" graphql:\"metricsNamespace\""
+	OrderBy          *string "json:\"orderBy,omitempty\" graphql:\"orderBy\""
+	ResourceID       *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+	RollUpBy         *string "json:\"rollUpBy,omitempty\" graphql:\"rollUpBy\""
+}
+
+func (t *MonitorQueryFragment_Metrics_Options_Azure) GetAggregation() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Aggregation
+}
+func (t *MonitorQueryFragment_Metrics_Options_Azure) GetFilter() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Filter
+}
+func (t *MonitorQueryFragment_Metrics_Options_Azure) GetMetricsEndpoint() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsEndpoint
+}
+func (t *MonitorQueryFragment_Metrics_Options_Azure) GetMetricsNamespace() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsNamespace
+}
+func (t *MonitorQueryFragment_Metrics_Options_Azure) GetOrderBy() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.OrderBy
+}
+func (t *MonitorQueryFragment_Metrics_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.ResourceID
+}
+func (t *MonitorQueryFragment_Metrics_Options_Azure) GetRollUpBy() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.RollUpBy
+}
+
+type MonitorQueryFragment_Metrics_Options struct {
+	Azure *MonitorQueryFragment_Metrics_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *MonitorQueryFragment_Metrics_Options) GetAzure() *MonitorQueryFragment_Metrics_Options_Azure {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics_Options{}
+	}
+	return t.Azure
+}
+
+type MonitorQueryFragment_Metrics struct {
+	Duration *string                               "json:\"duration,omitempty\" graphql:\"duration\""
+	Options  *MonitorQueryFragment_Metrics_Options "json:\"options,omitempty\" graphql:\"options\""
+	Query    string                                "json:\"query\" graphql:\"query\""
+	Step     *string                               "json:\"step,omitempty\" graphql:\"step\""
+	Tool     *string                               "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *MonitorQueryFragment_Metrics) GetDuration() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics{}
+	}
+	return t.Duration
+}
+func (t *MonitorQueryFragment_Metrics) GetOptions() *MonitorQueryFragment_Metrics_Options {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics{}
+	}
+	return t.Options
+}
+func (t *MonitorQueryFragment_Metrics) GetQuery() string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics{}
+	}
+	return t.Query
+}
+func (t *MonitorQueryFragment_Metrics) GetStep() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics{}
+	}
+	return t.Step
+}
+func (t *MonitorQueryFragment_Metrics) GetTool() *string {
+	if t == nil {
+		t = &MonitorQueryFragment_Metrics{}
+	}
+	return t.Tool
+}
+
+type WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout struct {
+	H int64 "json:\"h\" graphql:\"h\""
+	W int64 "json:\"w\" graphql:\"w\""
+	X int64 "json:\"x\" graphql:\"x\""
+	Y int64 "json:\"y\" graphql:\"y\""
+}
+
+func (t *WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetH() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.H
+}
+func (t *WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetW() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.W
+}
+func (t *WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetX() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.X
+}
+func (t *WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetY() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.Y
+}
+
 type WorkbenchDashboardFragment_Workbench struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -9867,6 +10716,38 @@ func (t *WorkbenchDashboardFragment_Workbench) GetName() string {
 		t = &WorkbenchDashboardFragment_Workbench{}
 	}
 	return t.Name
+}
+
+type WorkbenchDashboardGraphFragment_Layout struct {
+	H int64 "json:\"h\" graphql:\"h\""
+	W int64 "json:\"w\" graphql:\"w\""
+	X int64 "json:\"x\" graphql:\"x\""
+	Y int64 "json:\"y\" graphql:\"y\""
+}
+
+func (t *WorkbenchDashboardGraphFragment_Layout) GetH() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.H
+}
+func (t *WorkbenchDashboardGraphFragment_Layout) GetW() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.W
+}
+func (t *WorkbenchDashboardGraphFragment_Layout) GetX() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.X
+}
+func (t *WorkbenchDashboardGraphFragment_Layout) GetY() int64 {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.Y
 }
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -16771,6 +17652,113 @@ func (t *WorkbenchToolFragment_Configuration) GetVictoriaLogs() *WorkbenchToolFr
 		t = &WorkbenchToolFragment_Configuration{}
 	}
 	return t.VictoriaLogs
+}
+
+type WorkbenchJobModesFragment_Model struct {
+	Model    *string     "json:\"model,omitempty\" graphql:\"model\""
+	Provider *AiProvider "json:\"provider,omitempty\" graphql:\"provider\""
+}
+
+func (t *WorkbenchJobModesFragment_Model) GetModel() *string {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Model{}
+	}
+	return t.Model
+}
+func (t *WorkbenchJobModesFragment_Model) GetProvider() *AiProvider {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Model{}
+	}
+	return t.Provider
+}
+
+type WorkbenchJobModesFragment_Coding struct {
+	Approval *bool "json:\"approval,omitempty\" graphql:\"approval\""
+	Babysit  *bool "json:\"babysit,omitempty\" graphql:\"babysit\""
+	Review   *bool "json:\"review,omitempty\" graphql:\"review\""
+}
+
+func (t *WorkbenchJobModesFragment_Coding) GetApproval() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Approval
+}
+func (t *WorkbenchJobModesFragment_Coding) GetBabysit() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Babysit
+}
+func (t *WorkbenchJobModesFragment_Coding) GetReview() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Review
+}
+
+type WorkbenchJobModesFragment_Budget struct {
+	Cost   *float64 "json:\"cost,omitempty\" graphql:\"cost\""
+	Tokens *int64   "json:\"tokens,omitempty\" graphql:\"tokens\""
+}
+
+func (t *WorkbenchJobModesFragment_Budget) GetCost() *float64 {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Cost
+}
+func (t *WorkbenchJobModesFragment_Budget) GetTokens() *int64 {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Tokens
+}
+
+type WorkbenchJobModesFragment_Kubernetes struct {
+	Delete            *bool     "json:\"delete,omitempty\" graphql:\"delete\""
+	Drain             *bool     "json:\"drain,omitempty\" graphql:\"drain\""
+	ExcludeNamespaces []*string "json:\"excludeNamespaces,omitempty\" graphql:\"excludeNamespaces\""
+	Exec              *bool     "json:\"exec,omitempty\" graphql:\"exec\""
+	RequireNamespaces []*string "json:\"requireNamespaces,omitempty\" graphql:\"requireNamespaces\""
+	Update            *bool     "json:\"update,omitempty\" graphql:\"update\""
+}
+
+func (t *WorkbenchJobModesFragment_Kubernetes) GetDelete() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Delete
+}
+func (t *WorkbenchJobModesFragment_Kubernetes) GetDrain() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Drain
+}
+func (t *WorkbenchJobModesFragment_Kubernetes) GetExcludeNamespaces() []*string {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.ExcludeNamespaces
+}
+func (t *WorkbenchJobModesFragment_Kubernetes) GetExec() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Exec
+}
+func (t *WorkbenchJobModesFragment_Kubernetes) GetRequireNamespaces() []*string {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.RequireNamespaces
+}
+func (t *WorkbenchJobModesFragment_Kubernetes) GetUpdate() *bool {
+	if t == nil {
+		t = &WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Update
 }
 
 type WorkbenchCronFragment_Workbench struct {
@@ -25823,6 +26811,327 @@ func (t *DeleteMCPServer_DeleteMcpServer) GetID() string {
 	return t.ID
 }
 
+type GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model struct {
+	Model    *string     "json:\"model,omitempty\" graphql:\"model\""
+	Provider *AiProvider "json:\"provider,omitempty\" graphql:\"provider\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetModel() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Model
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetProvider() *AiProvider {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Provider
+}
+
+type GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding struct {
+	Approval *bool "json:\"approval,omitempty\" graphql:\"approval\""
+	Babysit  *bool "json:\"babysit,omitempty\" graphql:\"babysit\""
+	Review   *bool "json:\"review,omitempty\" graphql:\"review\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetApproval() *bool {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Approval
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetBabysit() *bool {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Babysit
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetReview() *bool {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Review
+}
+
+type GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget struct {
+	Cost   *float64 "json:\"cost,omitempty\" graphql:\"cost\""
+	Tokens *int64   "json:\"tokens,omitempty\" graphql:\"tokens\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetCost() *float64 {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Cost
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetTokens() *int64 {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Tokens
+}
+
+type GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes struct {
+	Delete            *bool     "json:\"delete,omitempty\" graphql:\"delete\""
+	Drain             *bool     "json:\"drain,omitempty\" graphql:\"drain\""
+	ExcludeNamespaces []*string "json:\"excludeNamespaces,omitempty\" graphql:\"excludeNamespaces\""
+	Exec              *bool     "json:\"exec,omitempty\" graphql:\"exec\""
+	RequireNamespaces []*string "json:\"requireNamespaces,omitempty\" graphql:\"requireNamespaces\""
+	Update            *bool     "json:\"update,omitempty\" graphql:\"update\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDelete() *bool {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Delete
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDrain() *bool {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Drain
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExcludeNamespaces() []*string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.ExcludeNamespaces
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExec() *bool {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Exec
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetRequireNamespaces() []*string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.RequireNamespaces
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetUpdate() *bool {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Update
+}
+
+type GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets struct {
+	Key   string "json:\"key\" graphql:\"key\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetKey() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Key
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetValue() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Value
+}
+
+type GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure struct {
+	ResourceID *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure{}
+	}
+	return t.ResourceID
+}
+
+type GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options struct {
+	Azure *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options) GetAzure() *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options{}
+	}
+	return t.Azure
+}
+
+type GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log struct {
+	BucketSize string                                                                      "json:\"bucketSize\" graphql:\"bucketSize\""
+	Duration   *string                                                                     "json:\"duration,omitempty\" graphql:\"duration\""
+	Facets     []*GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets "json:\"facets,omitempty\" graphql:\"facets\""
+	Operator   *MonitorOperator                                                            "json:\"operator,omitempty\" graphql:\"operator\""
+	Options    *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options  "json:\"options,omitempty\" graphql:\"options\""
+	Query      string                                                                      "json:\"query\" graphql:\"query\""
+	Tool       *string                                                                     "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetBucketSize() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.BucketSize
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetDuration() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Duration
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetFacets() []*GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Facets
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetOperator() *MonitorOperator {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Operator
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetOptions() *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Options
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetQuery() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Query
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetTool() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Tool
+}
+
+type GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure struct {
+	Aggregation      *string "json:\"aggregation,omitempty\" graphql:\"aggregation\""
+	Filter           *string "json:\"filter,omitempty\" graphql:\"filter\""
+	MetricsEndpoint  *string "json:\"metricsEndpoint,omitempty\" graphql:\"metricsEndpoint\""
+	MetricsNamespace *string "json:\"metricsNamespace,omitempty\" graphql:\"metricsNamespace\""
+	OrderBy          *string "json:\"orderBy,omitempty\" graphql:\"orderBy\""
+	ResourceID       *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+	RollUpBy         *string "json:\"rollUpBy,omitempty\" graphql:\"rollUpBy\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetAggregation() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Aggregation
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetFilter() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Filter
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsEndpoint() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsEndpoint
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsNamespace() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsNamespace
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetOrderBy() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.OrderBy
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.ResourceID
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetRollUpBy() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.RollUpBy
+}
+
+type GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options struct {
+	Azure *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options) GetAzure() *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options{}
+	}
+	return t.Azure
+}
+
+type GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics struct {
+	Duration *string                                                                        "json:\"duration,omitempty\" graphql:\"duration\""
+	Options  *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options "json:\"options,omitempty\" graphql:\"options\""
+	Query    string                                                                         "json:\"query\" graphql:\"query\""
+	Step     *string                                                                        "json:\"step,omitempty\" graphql:\"step\""
+	Tool     *string                                                                        "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetDuration() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Duration
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetOptions() *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Options
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetQuery() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Query
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetStep() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Step
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetTool() *string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Tool
+}
+
+type GetMonitor_Monitor_MonitorFragment_Threshold struct {
+	Aggregate MonitorAggregate "json:\"aggregate\" graphql:\"aggregate\""
+	Value     float64          "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Threshold) GetAggregate() *MonitorAggregate {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Threshold{}
+	}
+	return &t.Aggregate
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Threshold) GetValue() float64 {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Threshold{}
+	}
+	return t.Value
+}
+
 type GetMonitor_Monitor_MonitorFragment_Service struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -25859,6 +27168,327 @@ func (t *GetMonitor_Monitor_MonitorFragment_Workbench) GetName() string {
 	return t.Name
 }
 
+type CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model struct {
+	Model    *string     "json:\"model,omitempty\" graphql:\"model\""
+	Provider *AiProvider "json:\"provider,omitempty\" graphql:\"provider\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetModel() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Model
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetProvider() *AiProvider {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Provider
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding struct {
+	Approval *bool "json:\"approval,omitempty\" graphql:\"approval\""
+	Babysit  *bool "json:\"babysit,omitempty\" graphql:\"babysit\""
+	Review   *bool "json:\"review,omitempty\" graphql:\"review\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetApproval() *bool {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Approval
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetBabysit() *bool {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Babysit
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetReview() *bool {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Review
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget struct {
+	Cost   *float64 "json:\"cost,omitempty\" graphql:\"cost\""
+	Tokens *int64   "json:\"tokens,omitempty\" graphql:\"tokens\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetCost() *float64 {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Cost
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetTokens() *int64 {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Tokens
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes struct {
+	Delete            *bool     "json:\"delete,omitempty\" graphql:\"delete\""
+	Drain             *bool     "json:\"drain,omitempty\" graphql:\"drain\""
+	ExcludeNamespaces []*string "json:\"excludeNamespaces,omitempty\" graphql:\"excludeNamespaces\""
+	Exec              *bool     "json:\"exec,omitempty\" graphql:\"exec\""
+	RequireNamespaces []*string "json:\"requireNamespaces,omitempty\" graphql:\"requireNamespaces\""
+	Update            *bool     "json:\"update,omitempty\" graphql:\"update\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDelete() *bool {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Delete
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDrain() *bool {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Drain
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExcludeNamespaces() []*string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.ExcludeNamespaces
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExec() *bool {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Exec
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetRequireNamespaces() []*string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.RequireNamespaces
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetUpdate() *bool {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Update
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets struct {
+	Key   string "json:\"key\" graphql:\"key\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetKey() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Key
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetValue() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Value
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure struct {
+	ResourceID *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure{}
+	}
+	return t.ResourceID
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options struct {
+	Azure *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options) GetAzure() *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options{}
+	}
+	return t.Azure
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log struct {
+	BucketSize string                                                                               "json:\"bucketSize\" graphql:\"bucketSize\""
+	Duration   *string                                                                              "json:\"duration,omitempty\" graphql:\"duration\""
+	Facets     []*CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets "json:\"facets,omitempty\" graphql:\"facets\""
+	Operator   *MonitorOperator                                                                     "json:\"operator,omitempty\" graphql:\"operator\""
+	Options    *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options  "json:\"options,omitempty\" graphql:\"options\""
+	Query      string                                                                               "json:\"query\" graphql:\"query\""
+	Tool       *string                                                                              "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetBucketSize() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.BucketSize
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetDuration() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Duration
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetFacets() []*CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Facets
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetOperator() *MonitorOperator {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Operator
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetOptions() *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Options
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetQuery() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Query
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetTool() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Tool
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure struct {
+	Aggregation      *string "json:\"aggregation,omitempty\" graphql:\"aggregation\""
+	Filter           *string "json:\"filter,omitempty\" graphql:\"filter\""
+	MetricsEndpoint  *string "json:\"metricsEndpoint,omitempty\" graphql:\"metricsEndpoint\""
+	MetricsNamespace *string "json:\"metricsNamespace,omitempty\" graphql:\"metricsNamespace\""
+	OrderBy          *string "json:\"orderBy,omitempty\" graphql:\"orderBy\""
+	ResourceID       *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+	RollUpBy         *string "json:\"rollUpBy,omitempty\" graphql:\"rollUpBy\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetAggregation() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Aggregation
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetFilter() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Filter
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsEndpoint() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsEndpoint
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsNamespace() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsNamespace
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetOrderBy() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.OrderBy
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.ResourceID
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetRollUpBy() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.RollUpBy
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options struct {
+	Azure *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options) GetAzure() *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options{}
+	}
+	return t.Azure
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics struct {
+	Duration *string                                                                                 "json:\"duration,omitempty\" graphql:\"duration\""
+	Options  *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options "json:\"options,omitempty\" graphql:\"options\""
+	Query    string                                                                                  "json:\"query\" graphql:\"query\""
+	Step     *string                                                                                 "json:\"step,omitempty\" graphql:\"step\""
+	Tool     *string                                                                                 "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetDuration() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Duration
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetOptions() *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Options
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetQuery() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Query
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetStep() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Step
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetTool() *string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Tool
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Threshold struct {
+	Aggregate MonitorAggregate "json:\"aggregate\" graphql:\"aggregate\""
+	Value     float64          "json:\"value\" graphql:\"value\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Threshold) GetAggregate() *MonitorAggregate {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Threshold{}
+	}
+	return &t.Aggregate
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Threshold) GetValue() float64 {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Threshold{}
+	}
+	return t.Value
+}
+
 type CreateMonitor_CreateMonitor_MonitorFragment_Service struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -25893,6 +27523,327 @@ func (t *CreateMonitor_CreateMonitor_MonitorFragment_Workbench) GetName() string
 		t = &CreateMonitor_CreateMonitor_MonitorFragment_Workbench{}
 	}
 	return t.Name
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model struct {
+	Model    *string     "json:\"model,omitempty\" graphql:\"model\""
+	Provider *AiProvider "json:\"provider,omitempty\" graphql:\"provider\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetModel() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Model
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model) GetProvider() *AiProvider {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Model{}
+	}
+	return t.Provider
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding struct {
+	Approval *bool "json:\"approval,omitempty\" graphql:\"approval\""
+	Babysit  *bool "json:\"babysit,omitempty\" graphql:\"babysit\""
+	Review   *bool "json:\"review,omitempty\" graphql:\"review\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetApproval() *bool {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Approval
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetBabysit() *bool {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Babysit
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding) GetReview() *bool {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Coding{}
+	}
+	return t.Review
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget struct {
+	Cost   *float64 "json:\"cost,omitempty\" graphql:\"cost\""
+	Tokens *int64   "json:\"tokens,omitempty\" graphql:\"tokens\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetCost() *float64 {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Cost
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget) GetTokens() *int64 {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Budget{}
+	}
+	return t.Tokens
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes struct {
+	Delete            *bool     "json:\"delete,omitempty\" graphql:\"delete\""
+	Drain             *bool     "json:\"drain,omitempty\" graphql:\"drain\""
+	ExcludeNamespaces []*string "json:\"excludeNamespaces,omitempty\" graphql:\"excludeNamespaces\""
+	Exec              *bool     "json:\"exec,omitempty\" graphql:\"exec\""
+	RequireNamespaces []*string "json:\"requireNamespaces,omitempty\" graphql:\"requireNamespaces\""
+	Update            *bool     "json:\"update,omitempty\" graphql:\"update\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDelete() *bool {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Delete
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetDrain() *bool {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Drain
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExcludeNamespaces() []*string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.ExcludeNamespaces
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetExec() *bool {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Exec
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetRequireNamespaces() []*string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.RequireNamespaces
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes) GetUpdate() *bool {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Modes_WorkbenchJobModesFragment_Kubernetes{}
+	}
+	return t.Update
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets struct {
+	Key   string "json:\"key\" graphql:\"key\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetKey() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Key
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets) GetValue() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets{}
+	}
+	return t.Value
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure struct {
+	ResourceID *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure{}
+	}
+	return t.ResourceID
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options struct {
+	Azure *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options) GetAzure() *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options_Azure {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options{}
+	}
+	return t.Azure
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log struct {
+	BucketSize string                                                                               "json:\"bucketSize\" graphql:\"bucketSize\""
+	Duration   *string                                                                              "json:\"duration,omitempty\" graphql:\"duration\""
+	Facets     []*UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets "json:\"facets,omitempty\" graphql:\"facets\""
+	Operator   *MonitorOperator                                                                     "json:\"operator,omitempty\" graphql:\"operator\""
+	Options    *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options  "json:\"options,omitempty\" graphql:\"options\""
+	Query      string                                                                               "json:\"query\" graphql:\"query\""
+	Tool       *string                                                                              "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetBucketSize() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.BucketSize
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetDuration() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Duration
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetFacets() []*UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Facets {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Facets
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetOperator() *MonitorOperator {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Operator
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetOptions() *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log_Options {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Options
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetQuery() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Query
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log) GetTool() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Log{}
+	}
+	return t.Tool
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure struct {
+	Aggregation      *string "json:\"aggregation,omitempty\" graphql:\"aggregation\""
+	Filter           *string "json:\"filter,omitempty\" graphql:\"filter\""
+	MetricsEndpoint  *string "json:\"metricsEndpoint,omitempty\" graphql:\"metricsEndpoint\""
+	MetricsNamespace *string "json:\"metricsNamespace,omitempty\" graphql:\"metricsNamespace\""
+	OrderBy          *string "json:\"orderBy,omitempty\" graphql:\"orderBy\""
+	ResourceID       *string "json:\"resourceId,omitempty\" graphql:\"resourceId\""
+	RollUpBy         *string "json:\"rollUpBy,omitempty\" graphql:\"rollUpBy\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetAggregation() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Aggregation
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetFilter() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.Filter
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsEndpoint() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsEndpoint
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetMetricsNamespace() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.MetricsNamespace
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetOrderBy() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.OrderBy
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetResourceID() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.ResourceID
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure) GetRollUpBy() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure{}
+	}
+	return t.RollUpBy
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options struct {
+	Azure *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure "json:\"azure,omitempty\" graphql:\"azure\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options) GetAzure() *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options_Azure {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options{}
+	}
+	return t.Azure
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics struct {
+	Duration *string                                                                                 "json:\"duration,omitempty\" graphql:\"duration\""
+	Options  *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options "json:\"options,omitempty\" graphql:\"options\""
+	Query    string                                                                                  "json:\"query\" graphql:\"query\""
+	Step     *string                                                                                 "json:\"step,omitempty\" graphql:\"step\""
+	Tool     *string                                                                                 "json:\"tool,omitempty\" graphql:\"tool\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetDuration() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Duration
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetOptions() *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics_Options {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Options
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetQuery() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Query
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetStep() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Step
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics) GetTool() *string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Query_MonitorQueryFragment_Metrics{}
+	}
+	return t.Tool
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Threshold struct {
+	Aggregate MonitorAggregate "json:\"aggregate\" graphql:\"aggregate\""
+	Value     float64          "json:\"value\" graphql:\"value\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Threshold) GetAggregate() *MonitorAggregate {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Threshold{}
+	}
+	return &t.Aggregate
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Threshold) GetValue() float64 {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Threshold{}
+	}
+	return t.Value
 }
 
 type UpdateMonitor_UpdateMonitor_MonitorFragment_Service struct {
@@ -25942,6 +27893,38 @@ func (t *DeleteMonitor_DeleteMonitor) GetID() string {
 	return t.ID
 }
 
+type GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout struct {
+	H int64 "json:\"h\" graphql:\"h\""
+	W int64 "json:\"w\" graphql:\"w\""
+	X int64 "json:\"x\" graphql:\"x\""
+	Y int64 "json:\"y\" graphql:\"y\""
+}
+
+func (t *GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetH() int64 {
+	if t == nil {
+		t = &GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.H
+}
+func (t *GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetW() int64 {
+	if t == nil {
+		t = &GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.W
+}
+func (t *GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetX() int64 {
+	if t == nil {
+		t = &GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.X
+}
+func (t *GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetY() int64 {
+	if t == nil {
+		t = &GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.Y
+}
+
 type GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Workbench struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -25960,6 +27943,38 @@ func (t *GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Wor
 	return t.Name
 }
 
+type CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout struct {
+	H int64 "json:\"h\" graphql:\"h\""
+	W int64 "json:\"w\" graphql:\"w\""
+	X int64 "json:\"x\" graphql:\"x\""
+	Y int64 "json:\"y\" graphql:\"y\""
+}
+
+func (t *CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetH() int64 {
+	if t == nil {
+		t = &CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.H
+}
+func (t *CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetW() int64 {
+	if t == nil {
+		t = &CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.W
+}
+func (t *CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetX() int64 {
+	if t == nil {
+		t = &CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.X
+}
+func (t *CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetY() int64 {
+	if t == nil {
+		t = &CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.Y
+}
+
 type CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -25976,6 +27991,38 @@ func (t *CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench) G
 		t = &CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench{}
 	}
 	return t.Name
+}
+
+type UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout struct {
+	H int64 "json:\"h\" graphql:\"h\""
+	W int64 "json:\"w\" graphql:\"w\""
+	X int64 "json:\"x\" graphql:\"x\""
+	Y int64 "json:\"y\" graphql:\"y\""
+}
+
+func (t *UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetH() int64 {
+	if t == nil {
+		t = &UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.H
+}
+func (t *UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetW() int64 {
+	if t == nil {
+		t = &UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.W
+}
+func (t *UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetX() int64 {
+	if t == nil {
+		t = &UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.X
+}
+func (t *UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout) GetY() int64 {
+	if t == nil {
+		t = &UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Graphs_WorkbenchDashboardGraphFragment_Layout{}
+	}
+	return t.Y
 }
 
 type UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Workbench struct {
@@ -61689,6 +63736,22 @@ const GetMonitorDocument = `query GetMonitor ($id: ID!) {
 fragment MonitorFragment on Monitor {
 	id
 	name
+	description
+	alertTemplate
+	severity
+	type
+	evaluationCron
+	prompt
+	modes {
+		... WorkbenchJobModesFragment
+	}
+	query {
+		... MonitorQueryFragment
+	}
+	threshold {
+		aggregate
+		value
+	}
 	service {
 		id
 		name
@@ -61696,6 +63759,66 @@ fragment MonitorFragment on Monitor {
 	workbench {
 		id
 		name
+	}
+}
+fragment WorkbenchJobModesFragment on WorkbenchJobModes {
+	plan
+	verification
+	model {
+		provider
+		model
+	}
+	coding {
+		babysit
+		approval
+		review
+	}
+	budget {
+		cost
+		tokens
+	}
+	kubernetes {
+		update
+		delete
+		exec
+		drain
+		excludeNamespaces
+		requireNamespaces
+	}
+}
+fragment MonitorQueryFragment on MonitorQuery {
+	log {
+		tool
+		query
+		bucketSize
+		duration
+		operator
+		facets {
+			key
+			value
+		}
+		options {
+			azure {
+				resourceId
+			}
+		}
+	}
+	metrics {
+		tool
+		query
+		step
+		duration
+		options {
+			azure {
+				resourceId
+				metricsNamespace
+				aggregation
+				filter
+				orderBy
+				rollUpBy
+				metricsEndpoint
+			}
+		}
 	}
 }
 `
@@ -61725,6 +63848,22 @@ const CreateMonitorDocument = `mutation CreateMonitor ($attributes: MonitorAttri
 fragment MonitorFragment on Monitor {
 	id
 	name
+	description
+	alertTemplate
+	severity
+	type
+	evaluationCron
+	prompt
+	modes {
+		... WorkbenchJobModesFragment
+	}
+	query {
+		... MonitorQueryFragment
+	}
+	threshold {
+		aggregate
+		value
+	}
 	service {
 		id
 		name
@@ -61732,6 +63871,66 @@ fragment MonitorFragment on Monitor {
 	workbench {
 		id
 		name
+	}
+}
+fragment WorkbenchJobModesFragment on WorkbenchJobModes {
+	plan
+	verification
+	model {
+		provider
+		model
+	}
+	coding {
+		babysit
+		approval
+		review
+	}
+	budget {
+		cost
+		tokens
+	}
+	kubernetes {
+		update
+		delete
+		exec
+		drain
+		excludeNamespaces
+		requireNamespaces
+	}
+}
+fragment MonitorQueryFragment on MonitorQuery {
+	log {
+		tool
+		query
+		bucketSize
+		duration
+		operator
+		facets {
+			key
+			value
+		}
+		options {
+			azure {
+				resourceId
+			}
+		}
+	}
+	metrics {
+		tool
+		query
+		step
+		duration
+		options {
+			azure {
+				resourceId
+				metricsNamespace
+				aggregation
+				filter
+				orderBy
+				rollUpBy
+				metricsEndpoint
+			}
+		}
 	}
 }
 `
@@ -61761,6 +63960,22 @@ const UpdateMonitorDocument = `mutation UpdateMonitor ($id: ID!, $attributes: Mo
 fragment MonitorFragment on Monitor {
 	id
 	name
+	description
+	alertTemplate
+	severity
+	type
+	evaluationCron
+	prompt
+	modes {
+		... WorkbenchJobModesFragment
+	}
+	query {
+		... MonitorQueryFragment
+	}
+	threshold {
+		aggregate
+		value
+	}
 	service {
 		id
 		name
@@ -61768,6 +63983,66 @@ fragment MonitorFragment on Monitor {
 	workbench {
 		id
 		name
+	}
+}
+fragment WorkbenchJobModesFragment on WorkbenchJobModes {
+	plan
+	verification
+	model {
+		provider
+		model
+	}
+	coding {
+		babysit
+		approval
+		review
+	}
+	budget {
+		cost
+		tokens
+	}
+	kubernetes {
+		update
+		delete
+		exec
+		drain
+		excludeNamespaces
+		requireNamespaces
+	}
+}
+fragment MonitorQueryFragment on MonitorQuery {
+	log {
+		tool
+		query
+		bucketSize
+		duration
+		operator
+		facets {
+			key
+			value
+		}
+		options {
+			azure {
+				resourceId
+			}
+		}
+	}
+	metrics {
+		tool
+		query
+		step
+		duration
+		options {
+			azure {
+				resourceId
+				metricsNamespace
+				aggregation
+				filter
+				orderBy
+				rollUpBy
+				metricsEndpoint
+			}
+		}
 	}
 }
 `
@@ -61822,9 +64097,51 @@ const GetWorkbenchDashboardDocument = `query GetWorkbenchDashboard ($id: ID!) {
 fragment WorkbenchDashboardFragment on WorkbenchDashboard {
 	id
 	name
+	description
+	graphs {
+		... WorkbenchDashboardGraphFragment
+	}
+	inputs {
+		... WorkbenchDashboardInputFragment
+	}
 	workbench {
 		id
 		name
+	}
+}
+fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
+	identifier
+	title
+	description
+	type
+	sectionId
+	markdown
+	options
+	layout {
+		x
+		y
+		w
+		h
+	}
+	datasource {
+		... WorkbenchDashboardDatasourceFragment
+	}
+}
+fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
+	type
+	tool
+	input
+}
+fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
+	name
+	label
+	description
+	type
+	default
+	options
+	required
+	datasource {
+		... WorkbenchDashboardDatasourceFragment
 	}
 }
 `
@@ -61854,9 +64171,51 @@ const CreateDashboardDocument = `mutation CreateDashboard ($attributes: Dashboar
 fragment WorkbenchDashboardFragment on WorkbenchDashboard {
 	id
 	name
+	description
+	graphs {
+		... WorkbenchDashboardGraphFragment
+	}
+	inputs {
+		... WorkbenchDashboardInputFragment
+	}
 	workbench {
 		id
 		name
+	}
+}
+fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
+	identifier
+	title
+	description
+	type
+	sectionId
+	markdown
+	options
+	layout {
+		x
+		y
+		w
+		h
+	}
+	datasource {
+		... WorkbenchDashboardDatasourceFragment
+	}
+}
+fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
+	type
+	tool
+	input
+}
+fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
+	name
+	label
+	description
+	type
+	default
+	options
+	required
+	datasource {
+		... WorkbenchDashboardDatasourceFragment
 	}
 }
 `
@@ -61886,9 +64245,51 @@ const UpdateDashboardDocument = `mutation UpdateDashboard ($id: ID!, $attributes
 fragment WorkbenchDashboardFragment on WorkbenchDashboard {
 	id
 	name
+	description
+	graphs {
+		... WorkbenchDashboardGraphFragment
+	}
+	inputs {
+		... WorkbenchDashboardInputFragment
+	}
 	workbench {
 		id
 		name
+	}
+}
+fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
+	identifier
+	title
+	description
+	type
+	sectionId
+	markdown
+	options
+	layout {
+		x
+		y
+		w
+		h
+	}
+	datasource {
+		... WorkbenchDashboardDatasourceFragment
+	}
+}
+fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
+	type
+	tool
+	input
+}
+fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
+	name
+	label
+	description
+	type
+	default
+	options
+	required
+	datasource {
+		... WorkbenchDashboardDatasourceFragment
 	}
 }
 `
