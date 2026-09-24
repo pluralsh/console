@@ -17,7 +17,7 @@ versions:
         earlier (admission time) instead of failing later during reconciliation.]
     breaking_changes: []
   chart_version: 0.67.3
-  images: []
+  images: ['victoriametrics/operator:v0.74.1']
 - version: 0.74.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -56,7 +56,7 @@ versions:
         by default; if you relied on it to block invalid resources, you must explicitly
         enable it with `VM_PROMCR_VALIDATION_ENABLED`.']
   chart_version: 0.67.2
-  images: []
+  images: ['victoriametrics/operator:v0.74.0']
 - version: 0.73.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -88,7 +88,7 @@ versions:
         managed resource names; avoid toggling it on an existing installation unless
         you intend a migration and understand the rollout/ownership implications.]
   chart_version: 0.66.1
-  images: []
+  images: ['victoriametrics/operator:v0.73.0']
 - version: 0.72.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -128,7 +128,7 @@ versions:
         may start rejecting previously-applied Prometheus Operator CRDs that don''t
         translate/validate cleanly against VM equivalents.']
   chart_version: 0.65.1
-  images: []
+  images: ['victoriametrics/operator:v0.72.0']
 - version: 0.71.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -165,7 +165,7 @@ versions:
         CR spec unmarshalling on create may break existing manifests that contain
         unknown/typo fields; these will now be rejected or fail reconciliation.]
   chart_version: 0.64.1
-  images: []
+  images: ['victoriametrics/operator:v0.71.0']
 - version: 0.70.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -201,7 +201,7 @@ versions:
         from first_available to least_loaded, which may change traffic patterns and
         capacity distribution after upgrade.']
   chart_version: 0.63.0
-  images: []
+  images: ['victoriametrics/operator:v0.70.0']
 - version: 0.69.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -248,7 +248,7 @@ versions:
         become inaccessible or unintentionally open until CRs are updated to explicitly
         configure access.]
   chart_version: 0.62.1
-  images: []
+  images: ['victoriametrics/operator:v0.69.0']
 - version: 0.68.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -284,7 +284,7 @@ versions:
         you should migrate now to `spec.targets.kubernetes` and `spec.targets.static`
         to avoid future breakage.']
   chart_version: 0.59.0
-  images: []
+  images: ['victoriametrics/operator:v0.68.0']
 - version: 0.67.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -311,7 +311,7 @@ versions:
         \ fields: VMAgent `spec.aPIServerConfig` and VMCluster `spec.vmselect.persistentVolume`\u2014\
         manifests using them will fail validation/reconciliation."]
   chart_version: 0.58.1
-  images: []
+  images: ['victoriametrics/operator:v0.67.0']
 - version: 0.66.1
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -331,7 +331,7 @@ versions:
         removes deprecated status fields: `VMCluster.status.clusterStatus` and `VMSingle.status.singleStatus`
         (may break dashboards/scripts that read them).']
   chart_version: 0.57.1
-  images: []
+  images: ['victoriametrics/operator:v0.66.1']
 - version: 0.66.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -354,7 +354,7 @@ versions:
         status.singleStatus fields (deprecated since v0.51.0). Any tooling that reads
         these status fields must be updated to use the current status structure.]
   chart_version: 0.57.0
-  images: []
+  images: ['victoriametrics/operator:v0.66.0']
 - version: 0.65.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -370,7 +370,7 @@ versions:
         VMProbe (and related). This is a schema/type change that may require updating
         manifests/clients or re-applying CRDs if validation fails.']
   chart_version: 0.56.4
-  images: []
+  images: ['victoriametrics/operator:v0.65.0']
 - version: 0.64.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -410,7 +410,7 @@ versions:
         you must either accept the new image or set `VM_USECUSTOMCONFIGRELOADER=false`
         to keep prior behavior.']
   chart_version: 0.55.2
-  images: []
+  images: ['victoriametrics/operator:v0.64.0']
 - version: 0.63.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -435,7 +435,7 @@ versions:
         to customize the label key used in the top-route namespace matcher for VMAlertmanagerConfig.]
     breaking_changes: []
   chart_version: 0.54.1
-  images: []
+  images: ['victoriametrics/operator:v0.63.0']
 - version: 0.62.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -452,7 +452,7 @@ versions:
         `name`, `is_set`, `value` labels).']
     breaking_changes: []
   chart_version: 0.52.1
-  images: []
+  images: ['victoriametrics/operator:v0.62.0']
 - version: 0.61.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -495,7 +495,7 @@ versions:
         it, operator actions involving evictions/PDB-respecting StatefulSet updates
         may fail.']
   chart_version: 0.51.2
-  images: []
+  images: ['victoriametrics/operator:v0.61.0']
 - version: 0.60.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -517,7 +517,7 @@ versions:
         (and semantics broaden to all secret/configmap fetch failures), which can
         break dashboards/alerts.']
   chart_version: 0.52.0
-  images: []
+  images: ['victoriametrics/operator:v0.60.0']
 - version: 0.59.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -553,7 +553,7 @@ versions:
         (`app.kubernetes.io/name` and add `app.kubernetes.io/instance`); if you select
         resources by these labels in tooling/policies, update selectors accordingly.']
   chart_version: 0.49.0-rc1
-  images: []
+  images: ['victoriametrics/operator:v0.59.0']
 - version: 0.58.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -570,7 +570,7 @@ versions:
         version with a known bug (VictoriaMetrics#8941). Recommended to skip this
         release; if you must upgrade, override vmagent to `v1.117.1` via `VM_VMAGENTDEFAULT_VERSION=v1.117.1`.']
   chart_version: 0.47.0
-  images: []
+  images: ['victoriametrics/operator:v0.58.0']
 - version: 0.57.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -593,7 +593,7 @@ versions:
         and defaults to 1 month when omitted; previously accepted values may now be
         rejected by the webhook/CRD validation.]
   chart_version: 0.46.0
-  images: []
+  images: ['victoriametrics/operator:v0.57.0']
 - version: 0.56.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -619,7 +619,7 @@ versions:
         proxy-protocol on that internal endpoint, adjust your setup or remove the
         expectation.']
   chart_version: 0.45.0
-  images: []
+  images: ['victoriametrics/operator:v0.56.0']
 - version: 0.55.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -652,7 +652,7 @@ versions:
         vars are now deprecated in favor of the new global `VM_CONFIG_RELOADER_REQUEST_CPU/MEMORY`
         controls (not an immediate break, but update values/automation accordingly).']
   chart_version: 0.44.0
-  images: []
+  images: ['victoriametrics/operator:v0.55.0']
 - version: 0.54.1
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -665,7 +665,7 @@ versions:
         VLogs resources (VLogs support in VMUser).]
     breaking_changes: []
   chart_version: 0.43.1
-  images: []
+  images: ['victoriametrics/operator:v0.54.1']
 - version: 0.53.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -680,7 +680,7 @@ versions:
         \ (from v1.109.1).", Rebuilds operator with Go 1.23.5 (security patch upgrade).]
     breaking_changes: []
   chart_version: 0.42.5
-  images: []
+  images: ['victoriametrics/operator:v0.53.0']
 - version: 0.52.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -710,7 +710,7 @@ versions:
         if `controller.statusLastUpdateTimeTTL` too low for your object count; tune
         accordingly.']
   chart_version: 0.41.2
-  images: []
+  images: ['victoriametrics/operator:v0.52.0']
 - version: 0.51.1
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -762,7 +762,7 @@ versions:
         and several inlined VMAuth.spec fields are deprecated in favor of unauthorizedUserAccessSpec
         (supported until v1.0).']
   chart_version: 0.40.1
-  images: []
+  images: ['victoriametrics/operator:v0.51.1']
 - version: 0.50.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -790,7 +790,7 @@ versions:
         \ was added. Existing manifests must be updated or they will fail validation/behavior\
         \ will change."]
   chart_version: 0.39.1
-  images: []
+  images: ['victoriametrics/operator:v0.50.0']
 - version: 0.49.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -823,7 +823,7 @@ versions:
         too; clusters relying on more permissive initContainer security settings may
         see pods fail to start until securityContext/permissions are adjusted.']
   chart_version: 0.37.0
-  images: []
+  images: ['victoriametrics/operator:v0.49.0']
 - version: 0.48.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -861,7 +861,7 @@ versions:
         can change deletion/GC semantics in GitOps setups (e.g., Argo CD pruning)
         if you previously managed PVCs separately.']
   chart_version: 0.35.0
-  images: []
+  images: ['victoriametrics/operator:v0.48.0']
 - version: 0.47.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -914,7 +914,7 @@ versions:
         it to `blackhole` (previously it picked the first VMAlertmanagerConfig receiver),
         which can change alert delivery until you set an explicit receiver.']
   chart_version: 0.34.0
-  images: []
+  images: ['victoriametrics/operator:v0.47.0']
 - version: 0.46.4
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -1334,7 +1334,7 @@ versions:
   chart_version: 0.25.0
   images: ['victoriametrics/operator:v0.36.0']
 - version: 0.35.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1350,7 +1350,7 @@ versions:
   chart_version: 0.24.0
   images: ['victoriametrics/operator:v0.35.0']
 - version: 0.34.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1369,7 +1369,7 @@ versions:
   chart_version: 0.23.0
   images: ['victoriametrics/operator:v0.34.0']
 - version: 0.33.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1387,7 +1387,7 @@ versions:
   chart_version: 0.21.0
   images: ['victoriametrics/operator:v0.33.0']
 - version: 0.32.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1405,7 +1405,7 @@ versions:
   chart_version: 0.20.0
   images: ['victoriametrics/operator:v0.32.0']
 - version: 0.31.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1421,7 +1421,7 @@ versions:
   chart_version: 0.19.0
   images: ['victoriametrics/operator:v0.31.0']
 - version: 0.30.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1440,7 +1440,7 @@ versions:
   chart_version: 0.17.0
   images: ['victoriametrics/operator:v0.30.0']
 - version: 0.29.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1459,7 +1459,7 @@ versions:
   chart_version: 0.15.0
   images: ['victoriametrics/operator:v0.29.0']
 - version: 0.28.3
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1475,7 +1475,7 @@ versions:
   chart_version: 0.14.0
   images: ['victoriametrics/operator:v0.28.3']
 - version: 0.27.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1492,7 +1492,7 @@ versions:
   chart_version: 0.12.0
   images: ['victoriametrics/operator:v0.27.0']
 - version: 0.26.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1518,7 +1518,7 @@ versions:
   chart_version: 0.11.1
   images: ['victoriametrics/operator:v0.26.0']
 - version: 0.25.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1539,7 +1539,7 @@ versions:
   chart_version: 0.10.0
   images: ['victoriametrics/operator:v0.25.0']
 - version: 0.24.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1561,7 +1561,7 @@ versions:
   chart_version: 0.9.0
   images: ['victoriametrics/operator:v0.24.0']
 - version: 0.23.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1577,7 +1577,7 @@ versions:
   chart_version: 0.7.1
   images: ['victoriametrics/operator:v0.23.0']
 - version: 0.22.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1594,7 +1594,7 @@ versions:
   chart_version: 0.6.0
   images: ['victoriametrics/operator:v0.22.0']
 - version: 0.21.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1618,7 +1618,7 @@ versions:
   chart_version: 0.5.1
   images: ['victoriametrics/operator:v0.21.0']
 - version: 0.20.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1637,7 +1637,7 @@ versions:
   chart_version: 0.4.0
   images: ['victoriametrics/operator:v0.20.0']
 - version: 0.19.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1655,7 +1655,7 @@ versions:
   chart_version: 0.3.0
   images: ['victoriametrics/operator:v0.19.0']
 - version: 0.18.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1690,7 +1690,7 @@ versions:
   chart_version: 0.2.0
   images: ['victoriametrics/operator:v0.18.0']
 - version: 0.17.1
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1707,7 +1707,7 @@ versions:
   chart_version: 0.1.18
   images: ['victoriametrics/operator:v0.17.1']
 - version: 0.16.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1723,7 +1723,7 @@ versions:
   chart_version: 0.1.17
   images: ['victoriametrics/operator:v0.16.0']
 - version: 0.15.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1739,7 +1739,7 @@ versions:
   chart_version: 0.1.14
   images: ['victoriametrics/operator:v0.15.0']
 - version: 0.14.2
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1751,7 +1751,7 @@ versions:
   chart_version: 0.1.13
   images: ['victoriametrics/operator:v0.14.2']
 - version: 0.13.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1763,7 +1763,7 @@ versions:
   chart_version: 0.1.12
   images: ['victoriametrics/operator:v0.13.0']
 - version: 0.12.2
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1776,7 +1776,7 @@ versions:
   chart_version: 0.1.10
   images: ['victoriametrics/operator:v0.12.2']
 - version: 0.11.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1793,7 +1793,7 @@ versions:
   chart_version: 0.1.9
   images: ['victoriametrics/operator:v0.11.0']
 - version: 0.9.1
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1810,7 +1810,7 @@ versions:
   chart_version: 0.1.8
   images: ['victoriametrics/operator:v0.9.1']
 - version: 0.8.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1828,7 +1828,7 @@ versions:
   chart_version: 0.1.7
   images: ['victoriametrics/operator:v0.8.0']
 - version: 0.7.3
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1840,7 +1840,7 @@ versions:
   chart_version: 0.1.5
   images: ['victoriametrics/operator:v0.7.3']
 - version: 0.6.1
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1852,7 +1852,7 @@ versions:
   chart_version: 0.1.4
   images: ['victoriametrics/operator:v0.6.1']
 - version: 0.2.1
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary: null
