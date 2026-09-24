@@ -236,7 +236,6 @@ spec:
                       - NUMBER
                       - BOOLEAN
                       - SELECT
-                      - MULTI_SELECT
                       - TIME_RANGE
                       type: string
                   required:
