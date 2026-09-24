@@ -26,8 +26,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -81,7 +79,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
           cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
-          cache-to: type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache,mode=max
+          # only master writes the shared cache so unmerged branches can't seed layers for everyone else
+          cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache,mode=max' || '' }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
@@ -132,24 +131,30 @@ jobs:
       #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-      - name: Restore dependencies cache
-        uses: actions/cache@v6
+      # PRs restore the newest master entry; only master saves, keyed per commit so saves never collide
+      - name: Restore mix cache
+        id: mix-cache
+        uses: actions/cache/restore@v6
         with:
-          path: deps
-          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-deps-v2-
-      - name: Restore NIF cache
-        uses: actions/cache@v6
-        with:
-          path: priv/native
-          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
-          restore-keys: ${{ runner.os }}-nif-v2-
-      - name: Restore _build cache
-        uses: actions/cache@v6
-        with:
-          path: _build
-          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'config/**/*.exs', 'native/**') }}
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-
+            ${{ runner.os }}-mix-test-v3-
       - run: mix deps.get
+      - run: mix compile
+        env:
+          MIX_ENV: test
+      - name: Save mix cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ steps.mix-cache.outputs.cache-primary-key }}
       - run: mix test
         env:
           TEST_CHART_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN}}
@@ -183,23 +188,16 @@ jobs:
           go-version-file: go/client/go.mod
           cache-dependency-path: go/client/go.sum
           cache: true
-      - name: Restore dependencies cache
-        uses: actions/cache@v6
+      - name: Restore mix cache
+        uses: actions/cache/restore@v6
         with:
-          path: deps
-          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-deps-v2-
-      - name: Restore NIF cache
-        uses: actions/cache@v6
-        with:
-          path: priv/native
-          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
-          restore-keys: ${{ runner.os }}-nif-v2-
-      - name: Restore _build cache
-        uses: actions/cache@v6
-        with:
-          path: _build
-          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-
+            ${{ runner.os }}-mix-test-v3-
       - name: get dependencies
         run: mix deps.get
       - name: update schema

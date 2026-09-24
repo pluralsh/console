@@ -39,11 +39,11 @@ jobs:
         working-directory: go/nexus
     steps:
     - uses: actions/checkout@v7
+    # module cache is ~2.5GB and was evicting every other Actions cache in the repo
     - uses: actions/setup-go@v7
       with:
         go-version-file: go/nexus/go.mod
-        cache-dependency-path: go/nexus/go.sum
-        cache: true
+        cache: false
     - run: go mod download
     - run: PATH=$PATH:$GOPATH/bin make test
 
@@ -114,8 +114,8 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         platforms: ${{ matrix.platforms.platform }}
         outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-        cache-from: type=gha,scope=nexus-${{ env.PLATFORM_PAIR }}
-        cache-to: type=gha,mode=max,scope=nexus-${{ env.PLATFORM_PAIR }}
+        cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:nexus-${{ env.PLATFORM_PAIR }}
+        cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && format('type=registry,ref=ghcr.io/pluralsh/console-cache:nexus-{0},mode=max', env.PLATFORM_PAIR) || '' }}
         build-args: |
           GIT_COMMIT=${{ github.sha }}
           VERSION=${{ steps.meta.outputs.version }}

@@ -23,23 +23,17 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - run: make testup
-      - name: Restore dependencies cache
-        uses: actions/cache@v6
+      # Tag runs can read master's cache but anything they save is only visible to that tag
+      - name: Restore mix cache
+        uses: actions/cache/restore@v6
         with:
-          path: deps
-          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-deps-v2-
-      - name: Restore NIF cache
-        uses: actions/cache@v6
-        with:
-          path: priv/native
-          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
-          restore-keys: ${{ runner.os }}-nif-v2-
-      - name: Restore _build cache
-        uses: actions/cache@v6
-        with:
-          path: _build
-          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-
+            ${{ runner.os }}-mix-test-v3-
       # - name: download jwt verification key
       #   run: |
       #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
@@ -65,8 +59,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -127,8 +119,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha,scope=console
-          cache-to: type=gha,mode=max,scope=console
+          # read-only: the shared cache is only written by master builds in test.yaml
+          cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}

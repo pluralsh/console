@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version-file: go/observability-proxy/go.mod
-          cache-dependency-path: go/observability-proxy/go.sum
+          cache: false
 
       - name: Run tests
         run: go test ./...
@@ -97,8 +97,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=observability-proxy-${{ env.PLATFORM_PAIR }}
-          cache-to: type=gha,mode=max,scope=observability-proxy-${{ env.PLATFORM_PAIR }}
+          # read-only: written by master builds in observability-proxy-cd.yaml
+          cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:observability-proxy-${{ env.PLATFORM_PAIR }}
 
       - name: Export digest
         run: |
