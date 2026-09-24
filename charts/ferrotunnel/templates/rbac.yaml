@@ -1,0 +1,46 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "ferrotunnel.fullname" . }}
+  labels:
+    app.kubernetes.io/part-of: plural-ferrotunnel
+    {{- include "ferrotunnel.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - tunnelclients
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - tunnelclients/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - tunnelclients/finalizers
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "ferrotunnel.fullname" . }}
+  labels:
+    app.kubernetes.io/part-of: plural-ferrotunnel
+    {{- include "ferrotunnel.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "ferrotunnel.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "ferrotunnel.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}

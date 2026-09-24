@@ -1,0 +1,65 @@
+{{- if .Values.ferrotunnel.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ferrotunnel.deploymentName" . }}
+  labels:
+    {{- include "ferrotunnel.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "ferrotunnel.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ferrotunnel.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      serviceAccountName: {{ include "ferrotunnel.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.ferrotunnel.podSecurityContext | nindent 8 }}
+      containers:
+        - name: ferrotunnel
+          image: {{ .Values.ferrotunnel.image.repository }}:{{ .Values.ferrotunnel.image.tag }}
+          imagePullPolicy: {{ .Values.ferrotunnel.image.pullPolicy }}
+          args:
+            - server
+            - --bind=0.0.0.0:{{ .Values.ferrotunnel.service.controlPort }}
+            - --http-bind=0.0.0.0:{{ .Values.ferrotunnel.service.httpPort }}
+            - --token-file=/var/run/ferrotunnel/token
+            - --tls-cert=/var/run/ferrotunnel/tls.crt
+            - --tls-key=/var/run/ferrotunnel/tls.key
+            - --tls-ca=/var/run/ferrotunnel/ca.crt
+            - --tls-client-auth
+          ports:
+            - name: control
+              containerPort: {{ .Values.ferrotunnel.service.controlPort }}
+              protocol: TCP
+            - name: http
+              containerPort: {{ .Values.ferrotunnel.service.httpPort }}
+              protocol: TCP
+          volumeMounts:
+            - name: server
+              mountPath: /var/run/ferrotunnel
+              readOnly: true
+          resources:
+            {{- toYaml .Values.ferrotunnel.resources | nindent 12 }}
+      volumes:
+        - name: server
+          secret:
+            secretName: {{ .Values.ferrotunnel.existingSecret }}
+            defaultMode: 0444
+      {{- with .Values.ferrotunnel.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ferrotunnel.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ferrotunnel.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

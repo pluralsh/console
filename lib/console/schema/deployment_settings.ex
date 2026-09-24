@@ -199,6 +199,25 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
 
+  defmodule FerroTunnel do
+    use Console.Schema.Base
+    alias Piazza.Ecto.EncryptedString
+
+    embedded_schema do
+      field :token,       EncryptedString
+      field :ca_cert,     EncryptedString
+      field :ca_key,      EncryptedString
+      field :server_cert, EncryptedString
+      field :server_key,  EncryptedString
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(token ca_cert ca_key server_cert server_key)a)
+      |> validate_required(~w(token ca_cert ca_key server_cert server_key)a)
+    end
+  end
+
   schema "deployment_settings" do
     field :name,             :string
     field :enabled,          :boolean
@@ -214,6 +233,8 @@ defmodule Console.Schema.DeploymentSettings do
 
     field :agent_helm_values, EncryptedString
     field :agent_helm_values_templateable, :boolean, default: false
+
+    embeds_one :ferrotunnel, FerroTunnel, on_replace: :update
 
     field :helm_changed, :boolean, virtual: true
     field :version_changed, :boolean, virtual: true
@@ -405,6 +426,12 @@ defmodule Console.Schema.DeploymentSettings do
   def onboarded_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(onboarded)a)
+  end
+
+  def ferrotunnel_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:ferrotunnel, with: &FerroTunnel.changeset/2)
   end
 
   @valid ~w(name enabled mgmt_repo agent_version agent_helm_values agent_helm_values_templateable manage_agents self_managed artifact_repository_id deployer_repository_id)a

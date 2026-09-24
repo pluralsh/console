@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ferrotunnel.fullname" . }}
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/part-of: plural-ferrotunnel
+    {{- include "ferrotunnel.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: plural-ferrotunnel
+      {{- include "ferrotunnel.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/part-of: plural-ferrotunnel
+        {{- include "ferrotunnel.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        kubectl.kubernetes.io/default-container: controller
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "ferrotunnel.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      containers:
+      - name: controller
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s" .Chart.AppVersion) }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - --server={{ required "server is required" .Values.server }}
+        - --token-file=/var/run/ferrotunnel/token
+        volumeMounts:
+        - name: token
+          mountPath: /var/run/ferrotunnel
+          readOnly: true
+        {{- if .Values.global.additionalVolumeMounts }}
+        {{- toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+      volumes:
+      - name: token
+        secret:
+          secretName: {{ .Values.tokenSecret.name }}
+          items:
+          - key: {{ .Values.tokenSecret.key }}
+            path: token
+      {{- if .Values.global.additionalVolumes }}
+      {{- toYaml .Values.global.additionalVolumes | nindent 6 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
