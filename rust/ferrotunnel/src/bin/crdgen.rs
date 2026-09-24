@@ -7,6 +7,6 @@ use ferrotunnel_client::TunnelClient;
 use kube::CustomResourceExt;
 
 fn main() {
-    let yaml = serde_yml::to_string(&TunnelClient::crd()).expect("render TunnelClient CRD");
+    let yaml = serde_yaml_ng::to_string(&TunnelClient::crd()).expect("render TunnelClient CRD");
     print!("{yaml}");
 }
