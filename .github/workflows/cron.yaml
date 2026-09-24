@@ -21,7 +21,7 @@ jobs:
   #     id-token: 'write'
   #     pull-requests: 'write'
   #   steps:
-  #     - uses: actions/checkout@v6
+  #     - uses: actions/checkout@v7
   #     - run: make liquid-docs
   #     - id: date
   #       run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
@@ -44,15 +44,15 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v7
       with:
         python-version: '3.13'
         cache: 'pip' # caching pip dependencies
     
     - name: Install Helm
-      uses: azure/setup-helm@v3
+      uses: azure/setup-helm@v5
       with:
         version: latest
     
@@ -89,9 +89,9 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v7
       with:
         python-version: '3.13'
         cache: 'pip' # caching pip dependencies
@@ -126,15 +126,15 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v7
       with:
         python-version: '3.13'
         cache: 'pip' # caching pip dependencies
 
     - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@a159d7bb5354cf786f855f2f5d1d8d768d9a08d1
+      uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
       with:
         role-to-assume: arn:aws:iam::312272277431:role/github-actions/console-actions
         role-session-name: eks-addons

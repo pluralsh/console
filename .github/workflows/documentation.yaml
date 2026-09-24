@@ -31,6 +31,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -47,8 +51,8 @@ jobs:
         shell: bash
         working-directory: js
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.11.1
           cache: yarn
@@ -66,7 +70,7 @@ jobs:
         shell: bash
         working-directory: js/documentation
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Sync docs
         run: make sync
       - name: Verify changed files
@@ -85,10 +89,10 @@ jobs:
         shell: bash
         working-directory: js/documentation
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.11.1
           cache: yarn

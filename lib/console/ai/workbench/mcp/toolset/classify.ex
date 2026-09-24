@@ -45,6 +45,26 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Infrastructure.PodLogs
   ]
 
+  @metrics [
+    Observability.Metrics,
+    Observability.MetricsSearch,
+    Observability.MetricsLabelSearch,
+    Plrl.Metrics,
+    Plrl.MetricsSearch,
+    Plrl.MetricsLabelSearch
+  ]
+
+  @logs [
+    Observability.Logs,
+    Observability.LogAggregate,
+    Plrl.Logs,
+    Plrl.LogsAggregate,
+    Plrl.LogLabels,
+    Infrastructure.PodLogs
+  ]
+
+  @traces [Observability.Traces]
+
   @infrastructure [
     Infrastructure.ApiDiscovery,
     Infrastructure.ApiSpec,
@@ -141,4 +161,20 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
   def bucket(mod) when mod in @observability, do: :observability
   def bucket(mod) when mod in @infrastructure, do: :infrastructure
   def bucket(_), do: nil
+
+  @doc """
+  All categories used to filter a builtin tool. Observability tools retain the
+  broad bucket and also expose their granular metrics/logs/traces category.
+  """
+  @spec categories(module) :: [atom]
+  def categories(mod) do
+    [bucket(mod), observability_category(mod)]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  defp observability_category(mod) when mod in @metrics, do: :metrics
+  defp observability_category(mod) when mod in @logs, do: :logs
+  defp observability_category(mod) when mod in @traces, do: :traces
+  defp observability_category(_), do: nil
 end

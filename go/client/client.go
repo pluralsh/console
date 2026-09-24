@@ -110,6 +110,7 @@ type ConsoleClient interface {
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
 	GetServiceDeploymentForAgent(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentForAgent, error)
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
+	GetServiceDeploymentTinyByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTinyByHandle, error)
 	GetServiceTarball(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceTarball, error)
 	ListServiceDeployment(ctx context.Context, after *string, before *string, last *int64, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployment, error)
 	PagedClusterServices(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*PagedClusterServices, error)
@@ -185,6 +186,14 @@ type ConsoleClient interface {
 	GetMCPServer(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetMCPServer, error)
 	UpsertMCPServer(ctx context.Context, attributes McpServerAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertMCPServer, error)
 	DeleteMCPServer(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteMCPServer, error)
+	GetMonitor(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetMonitor, error)
+	CreateMonitor(ctx context.Context, attributes MonitorAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateMonitor, error)
+	UpdateMonitor(ctx context.Context, id string, attributes MonitorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateMonitor, error)
+	DeleteMonitor(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteMonitor, error)
+	GetWorkbenchDashboard(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchDashboard, error)
+	CreateDashboard(ctx context.Context, attributes DashboardAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateDashboard, error)
+	UpdateDashboard(ctx context.Context, id string, attributes DashboardAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDashboard, error)
+	DeleteDashboard(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteDashboard, error)
 	ListNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListNamespaces, error)
 	ListClusterNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterNamespaces, error)
 	GetNamespace(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNamespace, error)
@@ -675,6 +684,7 @@ type AgentRunFragment struct {
 	Usage           *AgentRunFragment_Usage    "json:\"usage,omitempty\" graphql:\"usage\""
 	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
 	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	WorkbenchMcpURL *string                    "json:\"workbenchMcpUrl,omitempty\" graphql:\"workbenchMcpUrl\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
 	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
@@ -801,6 +811,12 @@ func (t *AgentRunFragment) GetPluralCreds() *PluralCredsFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.PluralCreds
+}
+func (t *AgentRunFragment) GetWorkbenchMcpURL() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.WorkbenchMcpURL
 }
 func (t *AgentRunFragment) GetRuntime() *AgentRuntimeFragment {
 	if t == nil {
@@ -3859,6 +3875,63 @@ func (t *AISettingsFragment) GetAnthropic() *AISettingsFragment_Anthropic {
 		t = &AISettingsFragment{}
 	}
 	return t.Anthropic
+}
+
+type MonitorFragment struct {
+	ID        string                     "json:\"id\" graphql:\"id\""
+	Name      string                     "json:\"name\" graphql:\"name\""
+	Service   *MonitorFragment_Service   "json:\"service,omitempty\" graphql:\"service\""
+	Workbench *MonitorFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *MonitorFragment) GetID() string {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.ID
+}
+func (t *MonitorFragment) GetName() string {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.Name
+}
+func (t *MonitorFragment) GetService() *MonitorFragment_Service {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.Service
+}
+func (t *MonitorFragment) GetWorkbench() *MonitorFragment_Workbench {
+	if t == nil {
+		t = &MonitorFragment{}
+	}
+	return t.Workbench
+}
+
+type WorkbenchDashboardFragment struct {
+	ID        string                                "json:\"id\" graphql:\"id\""
+	Name      string                                "json:\"name\" graphql:\"name\""
+	Workbench *WorkbenchDashboardFragment_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *WorkbenchDashboardFragment) GetID() string {
+	if t == nil {
+		t = &WorkbenchDashboardFragment{}
+	}
+	return t.ID
+}
+func (t *WorkbenchDashboardFragment) GetName() string {
+	if t == nil {
+		t = &WorkbenchDashboardFragment{}
+	}
+	return t.Name
+}
+func (t *WorkbenchDashboardFragment) GetWorkbench() *WorkbenchDashboardFragment_Workbench {
+	if t == nil {
+		t = &WorkbenchDashboardFragment{}
+	}
+	return t.Workbench
 }
 
 type ManagedNamespaceEdgeFragment struct {
@@ -9740,6 +9813,60 @@ func (t *AISettingsFragment_Anthropic) GetModel() *string {
 		t = &AISettingsFragment_Anthropic{}
 	}
 	return t.Model
+}
+
+type MonitorFragment_Service struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *MonitorFragment_Service) GetID() string {
+	if t == nil {
+		t = &MonitorFragment_Service{}
+	}
+	return t.ID
+}
+func (t *MonitorFragment_Service) GetName() string {
+	if t == nil {
+		t = &MonitorFragment_Service{}
+	}
+	return t.Name
+}
+
+type MonitorFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *MonitorFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &MonitorFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *MonitorFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &MonitorFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type WorkbenchDashboardFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchDashboardFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *WorkbenchDashboardFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.Name
 }
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -23967,6 +24094,24 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 	return t.Stack
 }
 
+type GetServiceDeploymentTinyByHandle_ServiceDeployment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetServiceDeploymentTinyByHandle_ServiceDeployment) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentTinyByHandle_ServiceDeployment{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentTinyByHandle_ServiceDeployment) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentTinyByHandle_ServiceDeployment{}
+	}
+	return t.Name
+}
+
 type GetServiceTarball_ServiceTarball struct {
 	Content string "json:\"content\" graphql:\"content\""
 	Path    string "json:\"path\" graphql:\"path\""
@@ -25674,6 +25819,190 @@ type DeleteMCPServer_DeleteMcpServer struct {
 func (t *DeleteMCPServer_DeleteMcpServer) GetID() string {
 	if t == nil {
 		t = &DeleteMCPServer_DeleteMcpServer{}
+	}
+	return t.ID
+}
+
+type GetMonitor_Monitor_MonitorFragment_Service struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Service) GetID() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Service{}
+	}
+	return t.ID
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Service) GetName() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Service{}
+	}
+	return t.Name
+}
+
+type GetMonitor_Monitor_MonitorFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetMonitor_Monitor_MonitorFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *GetMonitor_Monitor_MonitorFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &GetMonitor_Monitor_MonitorFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Service struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Service) GetID() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Service{}
+	}
+	return t.ID
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Service) GetName() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Service{}
+	}
+	return t.Name
+}
+
+type CreateMonitor_CreateMonitor_MonitorFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CreateMonitor_CreateMonitor_MonitorFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CreateMonitor_CreateMonitor_MonitorFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Service struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Service) GetID() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Service{}
+	}
+	return t.ID
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Service) GetName() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Service{}
+	}
+	return t.Name
+}
+
+type UpdateMonitor_UpdateMonitor_MonitorFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *UpdateMonitor_UpdateMonitor_MonitorFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &UpdateMonitor_UpdateMonitor_MonitorFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type DeleteMonitor_DeleteMonitor struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteMonitor_DeleteMonitor) GetID() string {
+	if t == nil {
+		t = &DeleteMonitor_DeleteMonitor{}
+	}
+	return t.ID
+}
+
+type GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &GetWorkbenchDashboard_WorkbenchDashboard_WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CreateDashboard_CreateDashboard_WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &UpdateDashboard_UpdateDashboard_WorkbenchDashboardFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type DeleteDashboard_DeleteDashboard struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteDashboard_DeleteDashboard) GetID() string {
+	if t == nil {
+		t = &DeleteDashboard_DeleteDashboard{}
 	}
 	return t.ID
 }
@@ -46117,6 +46446,17 @@ func (t *GetServiceDeploymentByHandle) GetServiceDeployment() *ServiceDeployment
 	return t.ServiceDeployment
 }
 
+type GetServiceDeploymentTinyByHandle struct {
+	ServiceDeployment *GetServiceDeploymentTinyByHandle_ServiceDeployment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentTinyByHandle) GetServiceDeployment() *GetServiceDeploymentTinyByHandle_ServiceDeployment {
+	if t == nil {
+		t = &GetServiceDeploymentTinyByHandle{}
+	}
+	return t.ServiceDeployment
+}
+
 type GetServiceTarball struct {
 	ServiceTarball []*GetServiceTarball_ServiceTarball "json:\"serviceTarball,omitempty\" graphql:\"serviceTarball\""
 }
@@ -46940,6 +47280,94 @@ func (t *DeleteMCPServer) GetDeleteMcpServer() *DeleteMCPServer_DeleteMcpServer 
 		t = &DeleteMCPServer{}
 	}
 	return t.DeleteMcpServer
+}
+
+type GetMonitor struct {
+	Monitor *MonitorFragment "json:\"monitor,omitempty\" graphql:\"monitor\""
+}
+
+func (t *GetMonitor) GetMonitor() *MonitorFragment {
+	if t == nil {
+		t = &GetMonitor{}
+	}
+	return t.Monitor
+}
+
+type CreateMonitor struct {
+	CreateMonitor *MonitorFragment "json:\"createMonitor,omitempty\" graphql:\"createMonitor\""
+}
+
+func (t *CreateMonitor) GetCreateMonitor() *MonitorFragment {
+	if t == nil {
+		t = &CreateMonitor{}
+	}
+	return t.CreateMonitor
+}
+
+type UpdateMonitor struct {
+	UpdateMonitor *MonitorFragment "json:\"updateMonitor,omitempty\" graphql:\"updateMonitor\""
+}
+
+func (t *UpdateMonitor) GetUpdateMonitor() *MonitorFragment {
+	if t == nil {
+		t = &UpdateMonitor{}
+	}
+	return t.UpdateMonitor
+}
+
+type DeleteMonitor struct {
+	DeleteMonitor *DeleteMonitor_DeleteMonitor "json:\"deleteMonitor,omitempty\" graphql:\"deleteMonitor\""
+}
+
+func (t *DeleteMonitor) GetDeleteMonitor() *DeleteMonitor_DeleteMonitor {
+	if t == nil {
+		t = &DeleteMonitor{}
+	}
+	return t.DeleteMonitor
+}
+
+type GetWorkbenchDashboard struct {
+	WorkbenchDashboard *WorkbenchDashboardFragment "json:\"workbenchDashboard,omitempty\" graphql:\"workbenchDashboard\""
+}
+
+func (t *GetWorkbenchDashboard) GetWorkbenchDashboard() *WorkbenchDashboardFragment {
+	if t == nil {
+		t = &GetWorkbenchDashboard{}
+	}
+	return t.WorkbenchDashboard
+}
+
+type CreateDashboard struct {
+	CreateDashboard *WorkbenchDashboardFragment "json:\"createDashboard,omitempty\" graphql:\"createDashboard\""
+}
+
+func (t *CreateDashboard) GetCreateDashboard() *WorkbenchDashboardFragment {
+	if t == nil {
+		t = &CreateDashboard{}
+	}
+	return t.CreateDashboard
+}
+
+type UpdateDashboard struct {
+	UpdateDashboard *WorkbenchDashboardFragment "json:\"updateDashboard,omitempty\" graphql:\"updateDashboard\""
+}
+
+func (t *UpdateDashboard) GetUpdateDashboard() *WorkbenchDashboardFragment {
+	if t == nil {
+		t = &UpdateDashboard{}
+	}
+	return t.UpdateDashboard
+}
+
+type DeleteDashboard struct {
+	DeleteDashboard *DeleteDashboard_DeleteDashboard "json:\"deleteDashboard,omitempty\" graphql:\"deleteDashboard\""
+}
+
+func (t *DeleteDashboard) GetDeleteDashboard() *DeleteDashboard_DeleteDashboard {
+	if t == nil {
+		t = &DeleteDashboard{}
+	}
+	return t.DeleteDashboard
 }
 
 type ListNamespaces struct {
@@ -49088,6 +49516,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -49324,6 +49753,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -49583,6 +50013,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -49829,6 +50260,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -50013,6 +50445,7 @@ fragment AgentRunFragment on AgentRun {
 	pluralCreds {
 		... PluralCredsFragment
 	}
+	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
 	}
@@ -57537,6 +57970,32 @@ func (c *Client) GetServiceDeploymentByHandle(ctx context.Context, cluster strin
 	return &res, nil
 }
 
+const GetServiceDeploymentTinyByHandleDocument = `query GetServiceDeploymentTinyByHandle ($cluster: String!, $name: String!) {
+	serviceDeployment(cluster: $cluster, name: $name) {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetServiceDeploymentTinyByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTinyByHandle, error) {
+	vars := map[string]any{
+		"cluster": cluster,
+		"name":    name,
+	}
+
+	var res GetServiceDeploymentTinyByHandle
+	if err := c.Client.Post(ctx, "GetServiceDeploymentTinyByHandle", GetServiceDeploymentTinyByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetServiceTarballDocument = `query GetServiceTarball ($id: ID!) {
 	serviceTarball(id: $id) {
 		path
@@ -61212,6 +61671,260 @@ func (c *Client) DeleteMCPServer(ctx context.Context, id string, interceptors ..
 
 	var res DeleteMCPServer
 	if err := c.Client.Post(ctx, "DeleteMCPServer", DeleteMCPServerDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetMonitorDocument = `query GetMonitor ($id: ID!) {
+	monitor(id: $id) {
+		... MonitorFragment
+	}
+}
+fragment MonitorFragment on Monitor {
+	id
+	name
+	service {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetMonitor(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetMonitor, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetMonitor
+	if err := c.Client.Post(ctx, "GetMonitor", GetMonitorDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateMonitorDocument = `mutation CreateMonitor ($attributes: MonitorAttributes!) {
+	createMonitor(attributes: $attributes) {
+		... MonitorFragment
+	}
+}
+fragment MonitorFragment on Monitor {
+	id
+	name
+	service {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) CreateMonitor(ctx context.Context, attributes MonitorAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateMonitor, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateMonitor
+	if err := c.Client.Post(ctx, "CreateMonitor", CreateMonitorDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateMonitorDocument = `mutation UpdateMonitor ($id: ID!, $attributes: MonitorAttributes!) {
+	updateMonitor(id: $id, attributes: $attributes) {
+		... MonitorFragment
+	}
+}
+fragment MonitorFragment on Monitor {
+	id
+	name
+	service {
+		id
+		name
+	}
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) UpdateMonitor(ctx context.Context, id string, attributes MonitorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateMonitor, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateMonitor
+	if err := c.Client.Post(ctx, "UpdateMonitor", UpdateMonitorDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteMonitorDocument = `mutation DeleteMonitor ($id: ID!) {
+	deleteMonitor(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteMonitor(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteMonitor, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteMonitor
+	if err := c.Client.Post(ctx, "DeleteMonitor", DeleteMonitorDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetWorkbenchDashboardDocument = `query GetWorkbenchDashboard ($id: ID!) {
+	workbenchDashboard(id: $id) {
+		... WorkbenchDashboardFragment
+	}
+}
+fragment WorkbenchDashboardFragment on WorkbenchDashboard {
+	id
+	name
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) GetWorkbenchDashboard(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchDashboard, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetWorkbenchDashboard
+	if err := c.Client.Post(ctx, "GetWorkbenchDashboard", GetWorkbenchDashboardDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateDashboardDocument = `mutation CreateDashboard ($attributes: DashboardAttributes!) {
+	createDashboard(attributes: $attributes) {
+		... WorkbenchDashboardFragment
+	}
+}
+fragment WorkbenchDashboardFragment on WorkbenchDashboard {
+	id
+	name
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) CreateDashboard(ctx context.Context, attributes DashboardAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateDashboard, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateDashboard
+	if err := c.Client.Post(ctx, "CreateDashboard", CreateDashboardDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateDashboardDocument = `mutation UpdateDashboard ($id: ID!, $attributes: DashboardAttributes!) {
+	updateDashboard(id: $id, attributes: $attributes) {
+		... WorkbenchDashboardFragment
+	}
+}
+fragment WorkbenchDashboardFragment on WorkbenchDashboard {
+	id
+	name
+	workbench {
+		id
+		name
+	}
+}
+`
+
+func (c *Client) UpdateDashboard(ctx context.Context, id string, attributes DashboardAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDashboard, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateDashboard
+	if err := c.Client.Post(ctx, "UpdateDashboard", UpdateDashboardDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteDashboardDocument = `mutation DeleteDashboard ($id: ID!) {
+	deleteDashboard(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteDashboard(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteDashboard, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteDashboard
+	if err := c.Client.Post(ctx, "DeleteDashboard", DeleteDashboardDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -74742,6 +75455,7 @@ var DocumentOperationNames = map[string]string{
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
 	GetServiceDeploymentForAgentDocument:              "GetServiceDeploymentForAgent",
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
+	GetServiceDeploymentTinyByHandleDocument:          "GetServiceDeploymentTinyByHandle",
 	GetServiceTarballDocument:                         "GetServiceTarball",
 	ListServiceDeploymentDocument:                     "ListServiceDeployment",
 	PagedClusterServicesDocument:                      "PagedClusterServices",
@@ -74817,6 +75531,14 @@ var DocumentOperationNames = map[string]string{
 	GetMCPServerDocument:                              "GetMCPServer",
 	UpsertMCPServerDocument:                           "UpsertMCPServer",
 	DeleteMCPServerDocument:                           "DeleteMCPServer",
+	GetMonitorDocument:                                "GetMonitor",
+	CreateMonitorDocument:                             "CreateMonitor",
+	UpdateMonitorDocument:                             "UpdateMonitor",
+	DeleteMonitorDocument:                             "DeleteMonitor",
+	GetWorkbenchDashboardDocument:                     "GetWorkbenchDashboard",
+	CreateDashboardDocument:                           "CreateDashboard",
+	UpdateDashboardDocument:                           "UpdateDashboard",
+	DeleteDashboardDocument:                           "DeleteDashboard",
 	ListNamespacesDocument:                            "ListNamespaces",
 	ListClusterNamespacesDocument:                     "ListClusterNamespaces",
 	GetNamespaceDocument:                              "GetNamespace",

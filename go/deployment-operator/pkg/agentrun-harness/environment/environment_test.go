@@ -219,6 +219,46 @@ func TestCloneRepositoryCopiesPrebakeMatch(t *testing.T) {
 	}
 }
 
+func TestCopyPrebakedRepositoryUsesFCPWhenAvailable(t *testing.T) {
+	binDir := t.TempDir()
+	marker := filepath.Join(t.TempDir(), "fcp-args")
+	fakeFCP := filepath.Join(binDir, "fcp")
+	if err := os.WriteFile(fakeFCP, []byte(`#!/bin/sh
+printf '%s\n%s\n' "$1" "$2" > "$FCP_MARKER"
+mkdir -p "$2"
+cp -R "$1"/. "$2"/
+`), 0755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("FCP_MARKER", marker)
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	src := t.TempDir()
+	if err := os.WriteFile(filepath.Join(src, "README"), []byte("fast"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	dst := filepath.Join(t.TempDir(), "copy")
+
+	if err := copyPrebakedRepository(src, dst); err != nil {
+		t.Fatalf("copyPrebakedRepository() failed: %v", err)
+	}
+
+	args, err := os.ReadFile(marker)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(args), src+"\n"+dst+"\n"; got != want {
+		t.Fatalf("fcp args = %q, want %q", got, want)
+	}
+	body, err := os.ReadFile(filepath.Join(dst, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := string(body); got != "fast" {
+		t.Fatalf("copied README = %q, want fast", got)
+	}
+}
+
 func TestCloneRepositoryPullsPrebakeFromOrigin(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

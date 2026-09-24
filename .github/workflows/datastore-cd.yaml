@@ -19,6 +19,10 @@ env:
   GOPROXY: "https://proxy.golang.org"
   REGISTRY_IMAGE: ghcr.io/pluralsh/datastore-controller
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -36,11 +40,12 @@ jobs:
         working-directory: go/datastore
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: go/datastore/go.mod
+          cache-dependency-path: go/datastore/go.sum
           cache: true
       - name: Download dependencies
         run: go mod download
@@ -68,7 +73,7 @@ jobs:
         working-directory: go/datastore
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Prepare
@@ -77,36 +82,34 @@ jobs:
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY_IMAGE }}
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: google-github-actions/auth@v1
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
           service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
           token_format: 'access_token'
           create_credentials_file: true
-      - uses: google-github-actions/setup-gcloud@v1.0.1
+      - uses: google-github-actions/setup-gcloud@v3.0.1
       - name: Login to GCR
         run: gcloud auth configure-docker -q
       - name: Login to Docker
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "./go"
           file: "./go/datastore/Dockerfile"
@@ -114,8 +117,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=datastore-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=datastore-${{ env.PLATFORM_PAIR }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VERSION=${{ steps.meta.outputs.version }}
@@ -148,36 +151,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-*
           merge-multiple: true
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: google-github-actions/auth@v1
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
           service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
           token_format: 'access_token'
           create_credentials_file: true
-      - uses: google-github-actions/setup-gcloud@v1.0.1
+      - uses: google-github-actions/setup-gcloud@v3.0.1
       - name: Login to GCR
         run: gcloud auth configure-docker -q
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ matrix.images }}
           tags: |

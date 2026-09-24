@@ -20,6 +20,7 @@ type ConsoleClient interface {
 	GetServices() ([]*console.ServiceDeploymentBaseFragment, error)
 	GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error)
 	GetServiceById(id string) (*console.ServiceDeploymentExtended, error)
+	GetServiceTinyByHandle(clusterHandle, serviceName string) (*console.GetServiceDeploymentTinyByHandle_ServiceDeployment, error)
 	CreateRepository(url string, privateKey, passphrase, username, password *string) (*console.CreateGitRepository, error)
 	CreateGitRepository(attrs console.GitAttributes) (*console.CreateGitRepository, error)
 	ListRepositories() (*console.ListGitRepositories, error)
@@ -237,6 +238,16 @@ type ConsoleClient interface {
 	GetIssueWebhookByName(ctx context.Context, name string) (*console.IssueWebhookFragment, error)
 	GetSentinelRun(ctx context.Context, id string) (*console.SentinelRunFragment, error)
 	RunSentinel(ctx context.Context, id string, overrides *console.SentinelRunOverrides) (*string, error)
+	CreateMonitor(ctx context.Context, attributes console.MonitorAttributes) (*console.MonitorFragment, error)
+	UpdateMonitor(ctx context.Context, id string, attributes console.MonitorAttributes) (*console.MonitorFragment, error)
+	GetMonitor(ctx context.Context, id string) (*console.MonitorFragment, error)
+	DeleteMonitor(ctx context.Context, id string) error
+	IsMonitorExists(ctx context.Context, id string) (bool, error)
+	CreateDashboard(ctx context.Context, attributes console.DashboardAttributes) (*console.WorkbenchDashboardFragment, error)
+	UpdateDashboard(ctx context.Context, id string, attributes console.DashboardAttributes) (*console.WorkbenchDashboardFragment, error)
+	GetDashboard(ctx context.Context, id string) (*console.WorkbenchDashboardFragment, error)
+	DeleteDashboard(ctx context.Context, id string) error
+	IsDashboardExists(ctx context.Context, id string) (bool, error)
 }
 
 func New(url, token string, datadogEnabled, insecureSkipTLSVerify bool) ConsoleClient {

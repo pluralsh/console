@@ -131,7 +131,29 @@ func (in *DatabaseStore) init() error {
 		cancelFunc()
 	}()
 
-	return sqlitex.ExecuteScript(conn, createTables, nil)
+	if err := sqlitex.ExecuteScript(conn, createTables, nil); err != nil {
+		return err
+	}
+
+	return in.ensureLabelsColumn(conn)
+}
+
+func (in *DatabaseStore) ensureLabelsColumn(conn *sqlite.Conn) error {
+	hasLabels := false
+	err := sqlitex.ExecuteTransient(conn, `SELECT 1 FROM pragma_table_info('component') WHERE name = 'labels'`, &sqlitex.ExecOptions{
+		ResultFunc: func(_ *sqlite.Stmt) error {
+			hasLabels = true
+			return nil
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if hasLabels {
+		return nil
+	}
+
+	return sqlitex.Execute(conn, `ALTER TABLE component ADD COLUMN labels TEXT`, nil)
 }
 
 func (in *DatabaseStore) take() (*sqlite.Conn, context.CancelFunc, error) {
@@ -260,10 +282,20 @@ func (in *DatabaseStore) SaveComponent(obj unstructured.Unstructured) error {
 
 	in.maybeSaveHookComponent(conn, obj, lo.FromPtr(status), serviceID)
 
+	return in.upsertAppliedComponent(conn, obj, lo.FromPtr(ownerRef), nodeName, serviceID, serverSHA)
+}
+
+func (in *DatabaseStore) upsertAppliedComponent(conn *sqlite.Conn, obj unstructured.Unstructured, ownerRef, nodeName, serviceID, serverSHA string) error {
+	labels, err := encodeComponentLabels(obj)
+	if err != nil {
+		return err
+	}
+
+	gvk := obj.GroupVersionKind()
 	return sqlitex.ExecuteTransient(conn, setComponentWithSHA, &sqlitex.ExecOptions{
 		Args: []interface{}{
 			obj.GetUID(),
-			lo.FromPtr(ownerRef),
+			ownerRef,
 			gvk.Group,
 			gvk.Version,
 			gvk.Kind,
@@ -276,6 +308,7 @@ func (in *DatabaseStore) SaveComponent(obj unstructured.Unstructured) error {
 			smcommon.GetDeletePhase(obj),
 			serverSHA,
 			true,
+			labels,
 		},
 	})
 }
@@ -315,7 +348,8 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 		  service_id,
 		  delete_phase,
 		  server_sha,
-		  applied
+		  applied,
+		  labels
 		) VALUES `)
 
 	valueStrings := make([]string, 0, len(objects))
@@ -357,7 +391,13 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			continue
 		}
 
-		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1)",
+		labels, err := encodeComponentLabels(obj)
+		if err != nil {
+			klog.V(log.LogLevelDefault).ErrorS(err, "failed to encode resource labels", "name", obj.GetName(), "namespace", obj.GetNamespace(), "gvk", gvk.String())
+			continue
+		}
+
+		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1, '%s')",
 			obj.GetUID(),
 			lo.FromPtr(ownerRef),
 			gvk.Group,
@@ -371,6 +411,7 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			serviceID,
 			smcommon.GetDeletePhase(obj),
 			serverSHA,
+			escapeSQLString(labels),
 		))
 	}
 
@@ -388,7 +429,8 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 	  service_id = excluded.service_id,
       delete_phase = excluded.delete_phase,
 	  server_sha = excluded.server_sha,
-	  applied = excluded.applied
+	  applied = excluded.applied,
+	  labels = excluded.labels
 	`)
 
 	in.maybeSaveHookComponents(conn, objects)
@@ -698,6 +740,10 @@ func (in *DatabaseStore) GetAppliedComponent(obj unstructured.Unstructured) (res
 	err = sqlitex.ExecuteTransient(conn, getAppliedComponent, &sqlitex.ExecOptions{
 		Args: []interface{}{obj.GetName(), obj.GetNamespace(), gvk.Group, gvk.Version, gvk.Kind},
 		ResultFunc: func(stmt *sqlite.Stmt) error {
+			labels, err := decodeComponentLabels(stmt.ColumnText(14))
+			if err != nil {
+				return err
+			}
 			result = &smcommon.Component{
 				UID:                  stmt.ColumnText(0),
 				Group:                stmt.ColumnText(1),
@@ -713,6 +759,7 @@ func (in *DatabaseStore) GetAppliedComponent(obj unstructured.Unstructured) (res
 				ServerSHA:            stmt.ColumnText(11),
 				ServiceID:            stmt.ColumnText(12),
 				Manifest:             stmt.ColumnBool(13),
+				Labels:               labels,
 			}
 			return nil
 		},
@@ -827,7 +874,7 @@ func (in *DatabaseStore) GetServiceComponents(serviceID string, onlyApplied bool
 	}()
 
 	var sb strings.Builder
-	sb.WriteString(`SELECT uid, parent_uid, "group", version, kind, name, namespace, health, delete_phase, manifest, applied
+	sb.WriteString(`SELECT uid, parent_uid, "group", version, kind, name, namespace, health, delete_phase, manifest, applied, labels
 	FROM component WHERE service_id = ?`)
 	if onlyApplied {
 		sb.WriteString(" AND applied = 1")
@@ -843,6 +890,10 @@ func (in *DatabaseStore) GetServiceComponents(serviceID string, onlyApplied bool
 	err = sqlitex.ExecuteTransient(conn, sb.String(), &sqlitex.ExecOptions{
 		Args: []interface{}{serviceID},
 		ResultFunc: func(stmt *sqlite.Stmt) error {
+			labels, err := decodeComponentLabels(stmt.ColumnText(11))
+			if err != nil {
+				return err
+			}
 			result = append(result, smcommon.Component{
 				UID:         stmt.ColumnText(0),
 				ParentUID:   stmt.ColumnText(1),
@@ -855,6 +906,7 @@ func (in *DatabaseStore) GetServiceComponents(serviceID string, onlyApplied bool
 				ServiceID:   serviceID,
 				DeletePhase: stmt.ColumnText(8),
 				Manifest:    stmt.ColumnBool(9),
+				Labels:      labels,
 			})
 			return nil
 		},
@@ -1196,6 +1248,11 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 		return err
 	}
 
+	labels, err := encodeComponentLabels(obj)
+	if err != nil {
+		return err
+	}
+
 	conn, cancelFunc, err := in.take()
 	if err != nil {
 		return err
@@ -1217,7 +1274,8 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 			END,
 			transient_manifest_sha = NULL,
 			manifest = 1,
-			applied = 1
+			applied = 1,
+			labels = ?
 		WHERE "group" = ? 
 		  AND version = ? 
 		  AND kind = ? 
@@ -1225,8 +1283,9 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 		  AND name = ?
 	`, &sqlitex.ExecOptions{
 		Args: []interface{}{
-			sha,                                                                 // Apply SHA.
-			sha,                                                                 // Server SHA.
+			sha, // Apply SHA.
+			sha, // Server SHA.
+			labels,
 			gvk.Group, gvk.Version, gvk.Kind, obj.GetNamespace(), obj.GetName(), // WHERE clause parameters.
 		},
 	})

@@ -1,0 +1,69 @@
+fragment MonitorFragment on Monitor {
+    id
+    name
+    service {
+        id
+        name
+    }
+    workbench {
+        id
+        name
+    }
+}
+
+fragment WorkbenchDashboardFragment on WorkbenchDashboard {
+    id
+    name
+    workbench {
+        id
+        name
+    }
+}
+
+query GetMonitor($id: ID!) {
+    monitor(id: $id) {
+        ...MonitorFragment
+    }
+}
+
+mutation CreateMonitor($attributes: MonitorAttributes!) {
+    createMonitor(attributes: $attributes) {
+        ...MonitorFragment
+    }
+}
+
+mutation UpdateMonitor($id: ID!, $attributes: MonitorAttributes!) {
+    updateMonitor(id: $id, attributes: $attributes) {
+        ...MonitorFragment
+    }
+}
+
+mutation DeleteMonitor($id: ID!) {
+    deleteMonitor(id: $id) {
+        id
+    }
+}
+
+query GetWorkbenchDashboard($id: ID!) {
+    workbenchDashboard(id: $id) {
+        ...WorkbenchDashboardFragment
+    }
+}
+
+mutation CreateDashboard($attributes: DashboardAttributes!) {
+    createDashboard(attributes: $attributes) {
+        ...WorkbenchDashboardFragment
+    }
+}
+
+mutation UpdateDashboard($id: ID!, $attributes: DashboardAttributes!) {
+    updateDashboard(id: $id, attributes: $attributes) {
+        ...WorkbenchDashboardFragment
+    }
+}
+
+mutation DeleteDashboard($id: ID!) {
+    deleteDashboard(id: $id) {
+        id
+    }
+}

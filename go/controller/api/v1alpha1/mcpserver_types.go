@@ -53,8 +53,8 @@ func (in *MCPServer) GetServerName() string {
 	return in.Name
 }
 
-func (in *MCPServer) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(in.Spec)
+func (in *MCPServer) Diff(attrs console.McpServerAttributes, hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(attrs)
 	if err != nil {
 		return false, "", err
 	}
@@ -116,6 +116,10 @@ type MCPServerAuthentication struct {
 	// allowing it to authenticate and authorize operations within the Plural ecosystem.
 	// +kubebuilder:validation:Optional
 	Plural *bool `json:"plural,omitempty"`
+
+	// OAuth configures client credentials token exchange for requests to this server.
+	// +kubebuilder:validation:Optional
+	OAuth *OAuth2TokenExchange `json:"oauth,omitempty"`
 
 	// Headers specify custom HTTP headers required for authentication with this MCP server.
 	// This allows integration with servers that use API keys, bearer tokens, or other

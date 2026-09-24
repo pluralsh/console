@@ -5,20 +5,33 @@
       "type": "string",
       "description": "Unique dashboard name. A dashboard with this name is updated, otherwise it is created."
     },
-    "graph": {
-      "type": "object",
-      "properties": {
+    "graphs": {
+      "type": "array",
+      "minItems": 1,
+      "description": "One or more graphs to create or replace atomically by identifier. All graphs are validated together; if any graph is invalid, none of the changes are saved. Sections and their child graphs can be included in the same call.",
+      "items": {
+        "type": "object",
+        "properties": {
         "identifier": { "type": "string" },
         "title": { "type": "string" },
         "description": { "type": "string" },
         "type": {
           "type": "string",
-          "enum": ["timeseries", "gauge", "logs", "markdown", "table", "stat", "bar", "pie", "heatmap", "traces"]
+          "enum": ["timeseries", "gauge", "logs", "markdown", "table", "stat", "bar", "pie", "heatmap", "traces", "section"],
+          "description": "Visualization type. A section is a collapsible container graph and does not need a datasource."
+        },
+        "section_id": {
+          "type": "string",
+          "description": "Optional identifier of a graph whose type is section. Section graphs cannot themselves belong to another section."
         },
         "markdown": { "type": "string" },
-        "options": { "type": "object" },
+        "options": {
+          "type": "object",
+          "description": "Visualization-specific options. Section graphs may set collapsed: true to start collapsed."
+        },
         "layout": {
           "type": "object",
+          "description": "Grid position and size. Coordinates are scoped to the graph's section, so graphs in different sections may reuse coordinates.",
           "properties": {
             "x": { "type": "integer", "minimum": 0 },
             "y": { "type": "integer", "minimum": 0 },
@@ -32,12 +45,16 @@
           "properties": {
             "type": { "type": "string", "enum": ["logs", "metrics", "traces", "labels"] },
             "tool": { "type": "string" },
-            "input": { "type": "object" }
+            "input": {
+              "type": "object",
+              "description": "Arguments for the named data source. For metrics dashboards, omit step unless the user explicitly requires a fixed value; the runtime derives a provider-compatible step from the selected time range."
+            }
           },
           "required": ["type", "tool", "input"]
         }
-      },
-      "required": ["identifier", "type", "layout"]
+        },
+        "required": ["identifier", "type", "layout"]
+      }
     },
     "settings": {
       "type": "object",
@@ -58,7 +75,7 @@
               "description": { "type": "string" },
               "type": {
                 "type": "string",
-                "enum": ["text", "number", "boolean", "select", "multi_select", "time_range"]
+                "enum": ["text", "number", "boolean", "select", "time_range"]
               },
               "default": { "type": "string" },
               "options": { "type": "array", "items": { "type": "string" } },
@@ -79,5 +96,5 @@
       }
     }
   },
-  "required": ["dashboard_name", "graph"]
+  "required": ["dashboard_name", "graphs"]
 }

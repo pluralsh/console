@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardUpsert do
     field :job, :map, virtual: true
     field :user, :map, virtual: true
     field :dashboard_name, :string
-    embeds_one :graph, Console.Schema.Dashboard.Graph
+    embeds_many :graphs, Console.Schema.Dashboard.Graph
     embeds_one :settings, Settings
   end
 
@@ -36,22 +36,38 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardUpsert do
 
   def description(_),
     do:
-      "Insert or replace one graph in a dashboard, creating the dashboard when its name does not exist. Optional settings update dashboard metadata and inputs. Graph layout rectangles must not overlap."
+      "Atomically insert or replace one or more graphs in a dashboard by identifier, creating the dashboard when its name does not exist. If any graph or the resulting dashboard is invalid, no changes are saved. Optional settings update dashboard metadata and inputs. Section graphs and their children can be created together; sections are collapsible one-level containers joined by section_id. Graph layout rectangles must not overlap within the same section."
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:dashboard_name])
-    |> cast_embed(:graph, required: true)
+    |> cast_embed(:graphs, required: true)
     |> cast_embed(:settings)
     |> validate_required([:dashboard_name])
+    |> validate_length(:graphs, min: 1)
+    |> validate_unique_graph_identifiers()
   end
 
   def implement(%__MODULE__{
         job: job,
         user: user,
         dashboard_name: name,
-        graph: graph,
+        graphs: graphs,
         settings: settings
       }),
-      do: Monitoring.upsert_dashboard(job, user, name, graph, settings)
+      do: Monitoring.upsert_dashboard(job, user, name, graphs, settings)
+
+  defp validate_unique_graph_identifiers(changeset) do
+    identifiers =
+      changeset
+      |> get_field(:graphs, [])
+      |> Enum.map(& &1.identifier)
+      |> Enum.reject(&is_nil/1)
+
+    if length(identifiers) == MapSet.size(MapSet.new(identifiers)) do
+      changeset
+    else
+      add_error(changeset, :graphs, "must have unique identifiers within the batch")
+    end
+  end
 end

@@ -63,10 +63,11 @@ func run() error {
 		return fmt.Errorf("could not get credentials: %w", err)
 	}
 
+	credentials := newCredentialStore(lo.FromPtr(agentRun.PluralCreds.Token))
 	client := console.New(args.ConsoleApiURL(), *agentRun.PluralCreds.Token)
 	mcpServer := agent.NewServer(
 		client,
-		createServerOptions(client, extClient, agentRun)...,
+		createServerOptions(client, extClient, agentRun, credentials.PluralToken)...,
 	)
 
 	err = environment.New(
@@ -78,7 +79,7 @@ func run() error {
 		return fmt.Errorf("could not setup environment: %w", err)
 	}
 
-	startSCMCredentialsRefresh(ctx, extClient, args.AgentRunID(), scmCredentialsRefreshInterval)
+	startCredentialsRefresh(ctx, extClient, args.AgentRunID(), scmCredentialsRefreshInterval, credentials)
 
 	grpcServer := scm.NewServer()
 
@@ -167,7 +168,11 @@ func startMcpServer(server *agent.Server) <-chan error {
 	return errChan
 }
 
-func createServerOptions(client, runtimeClient console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
+func createServerOptions(
+	client, runtimeClient console.Client,
+	agentRun *consoleclient.AgentRunFragment,
+	pluralToken func() string,
+) []agent.Option {
 	opts := []agent.Option{
 		agent.WithTools(),
 		agent.WithVersion(Version),
@@ -175,6 +180,9 @@ func createServerOptions(client, runtimeClient console.Client, agentRun *console
 
 	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
 		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL()))
+	}
+	if upstream := helpers.GetPluralEnv(controller.EnvWorkbenchMCPURL, ""); upstream != "" {
+		opts = append(opts, agent.WithWorkbenchMCPProxy(upstream, pluralToken))
 	}
 
 	return append(opts, createServerTools(client, runtimeClient, agentRun)...)

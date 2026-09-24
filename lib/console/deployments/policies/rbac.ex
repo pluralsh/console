@@ -190,7 +190,7 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%WorkbenchChatbot{} = chatbot, user, action),
     do: recurse(chatbot, user, action, & &1.workbench)
   def evaluate(%Monitor{} = monitor, %User{} = user, action),
-    do: recurse(monitor, user, action, & &1.service)
+    do: recurse(monitor, user, action, &(&1.service || &1.workbench))
   def evaluate(%Dashboard{} = dashboard, %User{} = user, action),
     do: recurse(dashboard, user, action, & &1.workbench)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
@@ -369,7 +369,10 @@ defmodule Console.Deployments.Policies.Rbac do
         chat_connection: [:read_bindings, :write_bindings]
       ])
   def preload(%Monitor{} = monitor),
-    do: Repo.preload(monitor, [service: [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads]])
+    do: Repo.preload(monitor, [
+      service: [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads],
+      workbench: [:read_bindings, :write_bindings, project: @bindings]
+    ])
   def preload(%Dashboard{} = dashboard),
     do: Repo.preload(dashboard, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(pass), do: pass

@@ -1,6 +1,8 @@
 defmodule Console.AI.Workbench.MCP.Basic do
   @behaviour Console.AI.Workbench.MCP
+  alias Console.AI.Provider.TokenExchange
   alias Console.Jwt.MCP
+  alias Console.Schema.DeploymentSettings.OauthToken
   alias Console.Schema.{
     WorkbenchTool,
     McpServer,
@@ -14,6 +16,19 @@ defmodule Console.AI.Workbench.MCP.Basic do
   ), do: {proto || :sse, [base_url: normalize_url(url), headers: auth_headers(job.user, srv), enable_sse: true]}
 
   def normalize_url(url), do: String.trim_trailing(url, "/mcp")
+
+  defp auth_headers(
+         _,
+         %McpServer{
+           authentication: %{oauth: %OauthToken{enabled: enabled} = oauth}
+         }
+       )
+       when enabled != false do
+    case TokenExchange.authorization_header(oauth) do
+      {:ok, {name, value}} -> %{name => value}
+      {:error, error} -> raise "MCP OAuth token exchange failed: #{error}"
+    end
+  end
 
   defp auth_headers(%User{} = user, %McpServer{authentication: %{plural: true}} = srv) do
     {:ok, jwt, _} = MCP.mint(user)

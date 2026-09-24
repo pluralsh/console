@@ -473,6 +473,8 @@ type AgentRun struct {
 	Todos       []*AgentTodo `json:"todos,omitempty"`
 	ScmCreds    *ScmCreds    `json:"scmCreds,omitempty"`
 	PluralCreds *PluralCreds `json:"pluralCreds,omitempty"`
+	// the MCP endpoint for the workbench that spawned this run, if any
+	WorkbenchMcpURL *string `json:"workbenchMcpUrl,omitempty"`
 	// the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)
 	Pod *Pod `json:"pod,omitempty"`
 	// the prompts this agent run has received
@@ -3439,9 +3441,11 @@ type DashboardGraphAttributes struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// Identifier of the section graph containing this graph; sections cannot be nested
+	SectionID *string `json:"sectionId,omitempty"`
 	// Markdown content for markdown graphs
 	Markdown *string `json:"markdown,omitempty"`
-	// Visualization-specific display options
+	// Visualization-specific display options; sections may set collapsed
 	Options *string `json:"options,omitempty"`
 	// Grid position and size
 	Layout DashboardGraphLayoutAttributes `json:"layout"`
@@ -5176,14 +5180,18 @@ type McpServerAuditEdge struct {
 type McpServerAuthentication struct {
 	// built-in Plural JWT authentication
 	Plural *bool `json:"plural,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth *OauthTokenExchange `json:"oauth,omitempty"`
 	// any custom HTTP headers needed for authentication
 	Headers []*McpServerHeader `json:"headers,omitempty"`
 }
 
 type McpServerAuthenticationAttributes struct {
 	// whether to use Plural's built-in JWT authentication
-	Plural  *bool                  `json:"plural,omitempty"`
-	Headers []*McpHeaderAttributes `json:"headers,omitempty"`
+	Plural *bool `json:"plural,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth   *OauthTokenExchangeAttributes `json:"oauth,omitempty"`
+	Headers []*McpHeaderAttributes        `json:"headers,omitempty"`
 }
 
 type McpServerConnection struct {
@@ -5300,6 +5308,8 @@ type Monitor struct {
 	Query MonitorQuery `json:"query"`
 	// Threshold configuration that determines when the monitor should fire
 	Threshold MonitorThreshold `json:"threshold"`
+	// Live threshold preview from evaluating this monitor's query
+	Preview *AlertTimeseries `json:"preview,omitempty"`
 	// The service deployment this monitor is attached to
 	Service *ServiceDeployment `json:"service,omitempty"`
 	// The workbench this monitor is attached to
@@ -5341,6 +5351,11 @@ type MonitorAttributes struct {
 type MonitorConnection struct {
 	PageInfo PageInfo       `json:"pageInfo"`
 	Edges    []*MonitorEdge `json:"edges,omitempty"`
+}
+
+type MonitorDelta struct {
+	Delta   *Delta   `json:"delta,omitempty"`
+	Payload *Monitor `json:"payload,omitempty"`
 }
 
 type MonitorEdge struct {
@@ -5788,6 +5803,30 @@ type NotificationSinkEdge struct {
 
 type OauthResponse struct {
 	RedirectTo string `json:"redirectTo"`
+}
+
+type OauthTokenExchange struct {
+	Enabled  *bool                   `json:"enabled,omitempty"`
+	Type     *OauthTokenExchangeType `json:"type,omitempty"`
+	TokenURL *string                 `json:"tokenUrl,omitempty"`
+	ClientID *string                 `json:"clientId,omitempty"`
+	KeyID    *string                 `json:"keyId,omitempty"`
+	Audience *string                 `json:"audience,omitempty"`
+	Resource *string                 `json:"resource,omitempty"`
+	Scopes   []*string               `json:"scopes,omitempty"`
+}
+
+type OauthTokenExchangeAttributes struct {
+	Enabled      *bool                   `json:"enabled,omitempty"`
+	Type         *OauthTokenExchangeType `json:"type,omitempty"`
+	TokenURL     *string                 `json:"tokenUrl,omitempty"`
+	ClientID     *string                 `json:"clientId,omitempty"`
+	ClientSecret *string                 `json:"clientSecret,omitempty"`
+	PrivateKey   *string                 `json:"privateKey,omitempty"`
+	KeyID        *string                 `json:"keyId,omitempty"`
+	Audience     *string                 `json:"audience,omitempty"`
+	Resource     *string                 `json:"resource,omitempty"`
+	Scopes       []*string               `json:"scopes,omitempty"`
 }
 
 type ObjectReference struct {
@@ -6294,18 +6333,29 @@ type OpenaiSettingsAttributes struct {
 
 // OAuth2 token endpoint client credentials for OpenAI-compatible APIs
 type OpenaiTokenExchange struct {
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled *bool                   `json:"enabled,omitempty"`
+	Type    *OauthTokenExchangeType `json:"type,omitempty"`
 	// token endpoint URL
-	TokenURL *string `json:"tokenUrl,omitempty"`
-	ClientID *string `json:"clientId,omitempty"`
+	TokenURL *string   `json:"tokenUrl,omitempty"`
+	ClientID *string   `json:"clientId,omitempty"`
+	KeyID    *string   `json:"keyId,omitempty"`
+	Audience *string   `json:"audience,omitempty"`
+	Resource *string   `json:"resource,omitempty"`
+	Scopes   []*string `json:"scopes,omitempty"`
 }
 
 type OpenaiTokenExchangeAttributes struct {
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled *bool                   `json:"enabled,omitempty"`
+	Type    *OauthTokenExchangeType `json:"type,omitempty"`
 	// token endpoint URL
-	TokenURL     *string `json:"tokenUrl,omitempty"`
-	ClientID     *string `json:"clientId,omitempty"`
-	ClientSecret *string `json:"clientSecret,omitempty"`
+	TokenURL     *string   `json:"tokenUrl,omitempty"`
+	ClientID     *string   `json:"clientId,omitempty"`
+	ClientSecret *string   `json:"clientSecret,omitempty"`
+	PrivateKey   *string   `json:"privateKey,omitempty"`
+	KeyID        *string   `json:"keyId,omitempty"`
+	Audience     *string   `json:"audience,omitempty"`
+	Resource     *string   `json:"resource,omitempty"`
+	Scopes       []*string `json:"scopes,omitempty"`
 }
 
 type OpensearchConnection struct {
@@ -10580,6 +10630,7 @@ type Workbench struct {
 	WorkbenchSkills     *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
 	WorkbenchKnowledge  *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
 	WorkbenchDashboards *WorkbenchDashboardConnection `json:"workbenchDashboards,omitempty"`
+	Monitors            *MonitorConnection            `json:"monitors,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -10872,6 +10923,11 @@ type WorkbenchDashboardDatasource struct {
 	Input string `json:"input"`
 }
 
+type WorkbenchDashboardDelta struct {
+	Delta   *Delta              `json:"delta,omitempty"`
+	Payload *WorkbenchDashboard `json:"payload,omitempty"`
+}
+
 type WorkbenchDashboardEdge struct {
 	Node   *WorkbenchDashboard `json:"node,omitempty"`
 	Cursor *string             `json:"cursor,omitempty"`
@@ -10886,9 +10942,15 @@ type WorkbenchDashboardGraph struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// ID of the configured workbench tool backing this graph's datasource
+	ToolID *string `json:"toolId,omitempty"`
+	// Configured workbench tool backing this graph's datasource
+	WorkbenchTool *WorkbenchTool `json:"workbenchTool,omitempty"`
+	// Identifier of the section graph containing this graph
+	SectionID *string `json:"sectionId,omitempty"`
 	// Markdown content for markdown graphs
 	Markdown *string `json:"markdown,omitempty"`
-	// Visualization-specific display options
+	// Visualization-specific display options; sections may set collapsed
 	Options *string `json:"options,omitempty"`
 	// Grid position and size
 	Layout WorkbenchDashboardGraphLayout `json:"layout"`
@@ -11782,6 +11844,8 @@ type WorkbenchTool struct {
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
 	// whether this tool requires approval before execution
 	Approval *bool `json:"approval,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth *OauthTokenExchange `json:"oauth,omitempty"`
 	// the project of this tool
 	Project *Project `json:"project,omitempty"`
 	// read policy for this tool
@@ -11838,6 +11902,8 @@ type WorkbenchToolAttributes struct {
 	ScmConnectionID *string `json:"scmConnectionId,omitempty"`
 	// whether this tool requires approval before execution
 	Approval *bool `json:"approval,omitempty"`
+	// OAuth2 client credentials token exchange
+	Oauth *OauthTokenExchangeAttributes `json:"oauth,omitempty"`
 	// users who can read and execute this tool
 	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	// users who can modify this tool
@@ -12305,7 +12371,7 @@ type WorkbenchToolJiraDatacenterConnectionAttributes struct {
 	// jira data center base URL
 	URL string `json:"url"`
 	// jira data center personal access token
-	APIToken string `json:"apiToken"`
+	APIToken *string `json:"apiToken,omitempty"`
 }
 
 type WorkbenchToolLambdaConnection struct {
@@ -14684,6 +14750,7 @@ const (
 	DashboardGraphTypePie        DashboardGraphType = "PIE"
 	DashboardGraphTypeHeatmap    DashboardGraphType = "HEATMAP"
 	DashboardGraphTypeTraces     DashboardGraphType = "TRACES"
+	DashboardGraphTypeSection    DashboardGraphType = "SECTION"
 )
 
 var AllDashboardGraphType = []DashboardGraphType{
@@ -14697,11 +14764,12 @@ var AllDashboardGraphType = []DashboardGraphType{
 	DashboardGraphTypePie,
 	DashboardGraphTypeHeatmap,
 	DashboardGraphTypeTraces,
+	DashboardGraphTypeSection,
 }
 
 func (e DashboardGraphType) IsValid() bool {
 	switch e {
-	case DashboardGraphTypeTimeseries, DashboardGraphTypeGauge, DashboardGraphTypeLogs, DashboardGraphTypeMarkdown, DashboardGraphTypeTable, DashboardGraphTypeStat, DashboardGraphTypeBar, DashboardGraphTypePie, DashboardGraphTypeHeatmap, DashboardGraphTypeTraces:
+	case DashboardGraphTypeTimeseries, DashboardGraphTypeGauge, DashboardGraphTypeLogs, DashboardGraphTypeMarkdown, DashboardGraphTypeTable, DashboardGraphTypeStat, DashboardGraphTypeBar, DashboardGraphTypePie, DashboardGraphTypeHeatmap, DashboardGraphTypeTraces, DashboardGraphTypeSection:
 		return true
 	}
 	return false
@@ -16350,6 +16418,61 @@ func (e *NotificationStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e NotificationStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type OauthTokenExchangeType string
+
+const (
+	OauthTokenExchangeTypeClientSecret    OauthTokenExchangeType = "CLIENT_SECRET"
+	OauthTokenExchangeTypeClientAssertion OauthTokenExchangeType = "CLIENT_ASSERTION"
+)
+
+var AllOauthTokenExchangeType = []OauthTokenExchangeType{
+	OauthTokenExchangeTypeClientSecret,
+	OauthTokenExchangeTypeClientAssertion,
+}
+
+func (e OauthTokenExchangeType) IsValid() bool {
+	switch e {
+	case OauthTokenExchangeTypeClientSecret, OauthTokenExchangeTypeClientAssertion:
+		return true
+	}
+	return false
+}
+
+func (e OauthTokenExchangeType) String() string {
+	return string(e)
+}
+
+func (e *OauthTokenExchangeType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OauthTokenExchangeType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OauthTokenExchangeType", str)
+	}
+	return nil
+}
+
+func (e OauthTokenExchangeType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *OauthTokenExchangeType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e OauthTokenExchangeType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

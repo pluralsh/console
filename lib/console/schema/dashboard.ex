@@ -34,7 +34,8 @@ defmodule Console.Schema.Dashboard do
       bar: 6,
       pie: 7,
       heatmap: 8,
-      traces: 9
+      traces: 9,
+      section: 10
 
     defmodule Layout do
       use Console.Schema.Base
@@ -64,6 +65,8 @@ defmodule Console.Schema.Dashboard do
       field :type,        Type
       field :markdown,    :string
       field :options,     :map
+      field :section_id,  :string
+      field :tool_id,     :binary_id
 
       embeds_one :layout,     Layout, on_replace: :update
       embeds_one :datasource, Datasource, on_replace: :update
@@ -71,7 +74,7 @@ defmodule Console.Schema.Dashboard do
 
     def changeset(model, attrs) do
       model
-      |> cast(attrs, [:identifier, :title, :description, :type, :markdown, :options])
+      |> cast(attrs, [:identifier, :title, :description, :type, :markdown, :options, :section_id])
       |> cast_embed(:layout, required: true)
       |> cast_embed(:datasource)
       |> validate_required([:identifier, :type])
@@ -95,7 +98,6 @@ defmodule Console.Schema.Dashboard do
       number: 1,
       boolean: 2,
       select: 3,
-      multi_select: 4,
       time_range: 5
 
     embedded_schema do
@@ -153,6 +155,7 @@ defmodule Console.Schema.Dashboard do
     |> unique_constraint([:workbench_id, :name])
     |> validate_required([:name, :workbench_id])
     |> validate_unique_graph_identifiers()
+    |> validate_graph_sections()
     |> validate_graph_intersections()
   end
 
@@ -168,6 +171,37 @@ defmodule Console.Schema.Dashboard do
     else
       add_error(changeset, :graphs, "must have unique identifiers")
     end
+  end
+
+  defp validate_graph_sections(changeset) do
+    graphs = get_field(changeset, :graphs, [])
+
+    sections =
+      graphs
+      |> Enum.filter(&(&1.type == :section))
+      |> Enum.map(& &1.identifier)
+      |> MapSet.new()
+
+    Enum.reduce(graphs, changeset, fn
+      %{type: :section, section_id: section_id, identifier: identifier}, changeset
+      when is_binary(section_id) and section_id != "" ->
+        add_error(changeset, :graphs, "section #{identifier} cannot belong to another section")
+
+      %{section_id: section_id, identifier: identifier}, changeset
+      when is_binary(section_id) and section_id != "" ->
+        if MapSet.member?(sections, section_id) do
+          changeset
+        else
+          add_error(
+            changeset,
+            :graphs,
+            "graph #{identifier} references unknown section #{section_id}"
+          )
+        end
+
+      _, changeset ->
+        changeset
+    end)
   end
 
   defp validate_graph_intersections(changeset) do
@@ -187,6 +221,9 @@ defmodule Console.Schema.Dashboard do
   defp find_intersections(graphs) do
     for {left, index} <- Enum.with_index(graphs),
         right <- Enum.drop(graphs, index + 1),
+        left.type != :section,
+        right.type != :section,
+        left.section_id == right.section_id,
         rectangles_intersect?(left.layout, right.layout),
         do: {left, right}
   end

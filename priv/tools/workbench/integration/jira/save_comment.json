@@ -16,8 +16,20 @@
     },
     "visibility": {
       "type": "object",
-      "additionalProperties": true,
-      "description": "Optional Jira comment visibility object, usually with type and value."
+      "additionalProperties": false,
+      "description": "Optional Jira Data Center comment visibility restriction.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["role", "group"],
+          "description": "Restrict the comment to a project role or group."
+        },
+        "value": {
+          "type": "string",
+          "description": "The project role or group name."
+        }
+      },
+      "required": ["type", "value"]
     }
   },
   "required": ["issue_id", "body"]

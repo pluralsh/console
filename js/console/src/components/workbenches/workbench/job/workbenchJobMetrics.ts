@@ -25,7 +25,7 @@ export function getMetricSeries(
   }))
 }
 
-function metricSeriesId({
+export function metricSeriesId({
   name,
   labels,
 }: WorkbenchJobActivityMetricFragment): string {

@@ -3,7 +3,10 @@ defmodule Console.AI.Workbench.MCP.ToolsetTest do
   alias Console.AI.Tool
   alias Console.AI.Workbench.MCP.Toolset
   alias Console.AI.Tools.Workbench.Http
+  alias Console.AI.Tools.Workbench.Infrastructure.Manifests
   alias Console.AI.Tools.Workbench.Integration.Docker.SearchTags
+  alias Console.AI.Tools.Workbench.Observability
+  alias Console.AI.Tools.Workbench.Observability.Plrl
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.Configuration
   alias Console.Schema.WorkbenchTool.Configuration.HttpConfiguration
@@ -52,6 +55,22 @@ defmodule Console.AI.Workbench.MCP.ToolsetTest do
       assert infra == ["docker_hub_search_tags"]
       assert "docker_hub_search_tags" in integration
       assert "http_integration_other" in integration
+    end
+
+    test "classifies builtin observability tools into granular categories" do
+      tools = [Plrl.Metrics, Plrl.Logs, Observability.Traces]
+
+      assert Toolset.filter(tools, {:categories, [:metrics]}) == [Plrl.Metrics]
+      assert Toolset.filter(tools, {:categories, [:logs]}) == [Plrl.Logs]
+      assert Toolset.filter(tools, {:categories, [:traces]}) == [Observability.Traces]
+      assert Toolset.filter(tools, {:categories, [:observability]}) == tools
+    end
+
+    test "always denies gitops manifests from MCP export" do
+      manifests = %Manifests{}
+
+      assert Toolset.filter([manifests], :all) == []
+      assert Toolset.filter([manifests], {:names, ["gitops_manifests"]}) == []
     end
   end
 

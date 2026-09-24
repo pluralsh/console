@@ -23,7 +23,11 @@ copies `/data/.` into the existing `shared-context` emptyDir at
 Kubernetes image-volume feature gate. Use `spec.template.spec.imagePullSecrets`
 if the image is private.
 
-The image must include `/bin/sh` and `cp`, with repos under `/data`.
+The published base image includes `fcp`, which parallelizes the copy for
+small-file repository and build-artifact workloads. Custom images can include
+`fcp` for the same optimization; the init container falls back to `cp -a` when
+it is unavailable. Images must include `/bin/sh` and either `fcp` or `cp`, with
+repos under `/data`.
 
 ## Layout
 
@@ -72,15 +76,21 @@ User-facing walkthrough: [Prebaked repositories](https://docs.plural.sh/plural-f
 When `/plural/shared/repos/manifest.json` is present, agent-bootstrap matches
 the run repository URL (https and ssh forms of the same repo are equivalent)
 and moves that tree into `/plural/shared/repository` (rename on the same
-volume; copy+delete if rename is not possible). Fetch of the requested
-branch is best-effort; an airgapped or stale remote keeps the prebaked copy.
+volume; an `fcp`-accelerated copy+delete if rename is not possible). Fetch of
+the requested branch is best-effort; an airgapped or stale remote keeps the prebaked copy.
 Other prebaked repos stay at `/plural/shared/repos/<path>` and are listed in
 the agent system prompt.
 
 ## Base image
 
+<<<<<<< HEAD
 `docker.io/pluralsh/repository-prebake` is Debian plus `git`, `mise`, a compile
 toolchain, and a `prebake` binary. Extend it and run clone + manifest **inside**
+=======
+`ghcr.io/pluralsh/repository-prebake` uses the same DHI Debian Trixie base as
+agent-harness, plus `git`, `mise`, a compile toolchain, and a `prebake` binary.
+Extend it and run clone + manifest **inside**
+>>>>>>> 3b6aa9ab0 (more improvements)
 the image you push (`docker build`, `docker/build-push-action`, and so on). The
 CLI is not a host-side wrapper around `docker build`.
 
