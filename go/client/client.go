@@ -4043,7 +4043,6 @@ type WorkbenchDashboardGraphFragment struct {
 	Type        DashboardGraphType                     "json:\"type\" graphql:\"type\""
 	SectionID   *string                                "json:\"sectionId,omitempty\" graphql:\"sectionId\""
 	Markdown    *string                                "json:\"markdown,omitempty\" graphql:\"markdown\""
-	Options     *string                                "json:\"options,omitempty\" graphql:\"options\""
 	Layout      WorkbenchDashboardGraphFragment_Layout "json:\"layout\" graphql:\"layout\""
 	Datasource  *WorkbenchDashboardDatasourceFragment  "json:\"datasource,omitempty\" graphql:\"datasource\""
 }
@@ -4083,12 +4082,6 @@ func (t *WorkbenchDashboardGraphFragment) GetMarkdown() *string {
 		t = &WorkbenchDashboardGraphFragment{}
 	}
 	return t.Markdown
-}
-func (t *WorkbenchDashboardGraphFragment) GetOptions() *string {
-	if t == nil {
-		t = &WorkbenchDashboardGraphFragment{}
-	}
-	return t.Options
 }
 func (t *WorkbenchDashboardGraphFragment) GetLayout() *WorkbenchDashboardGraphFragment_Layout {
 	if t == nil {
@@ -4164,9 +4157,8 @@ func (t *WorkbenchDashboardInputFragment) GetDatasource() *WorkbenchDashboardDat
 }
 
 type WorkbenchDashboardDatasourceFragment struct {
-	Type  DashboardDatasourceType "json:\"type\" graphql:\"type\""
-	Tool  string                  "json:\"tool\" graphql:\"tool\""
-	Input string                  "json:\"input\" graphql:\"input\""
+	Type DashboardDatasourceType "json:\"type\" graphql:\"type\""
+	Tool string                  "json:\"tool\" graphql:\"tool\""
 }
 
 func (t *WorkbenchDashboardDatasourceFragment) GetType() *DashboardDatasourceType {
@@ -4180,12 +4172,6 @@ func (t *WorkbenchDashboardDatasourceFragment) GetTool() string {
 		t = &WorkbenchDashboardDatasourceFragment{}
 	}
 	return t.Tool
-}
-func (t *WorkbenchDashboardDatasourceFragment) GetInput() string {
-	if t == nil {
-		t = &WorkbenchDashboardDatasourceFragment{}
-	}
-	return t.Input
 }
 
 type ManagedNamespaceEdgeFragment struct {
@@ -64116,7 +64102,6 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	type
 	sectionId
 	markdown
-	options
 	layout {
 		x
 		y
@@ -64130,7 +64115,6 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
 	type
 	tool
-	input
 }
 fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
 	name
@@ -64190,7 +64174,6 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	type
 	sectionId
 	markdown
-	options
 	layout {
 		x
 		y
@@ -64204,7 +64187,6 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
 	type
 	tool
-	input
 }
 fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
 	name
@@ -64264,7 +64246,6 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	type
 	sectionId
 	markdown
-	options
 	layout {
 		x
 		y
@@ -64278,7 +64259,6 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
 	type
 	tool
-	input
 }
 fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
 	name
