@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from ansible.module_utils.basic import AnsibleModule
-import subprocess
+import subprocess  # nosec B404 - required to invoke the plural CLI; shell=False, list args, validated below
 import os
 import base64
 import stat
@@ -97,27 +97,35 @@ def run_module():
     module.exit_json(**result)
 
 
+def _safe_arg(module, value, param_name):
+    # Reject values that look like CLI flags to prevent argument injection
+    # into the underlying binary (CWE-78 style attacks via subprocess args).
+    if value and str(value).startswith("-"):
+        module.fail_json(msg="Invalid value for %s: must not start with '-'" % param_name)
+    return value
+
+
 def _build_bootstrap_cmd(module, binary, metadata_path=None):
     cmd = [
         binary,
         "cd", "clusters", "bootstrap",
-        "--name", module.params["cluster_name"],
+        "--name", _safe_arg(module, module.params["cluster_name"], "cluster_name"),
     ]
 
     if module.params["handle"]:
-        cmd += ["--handle", module.params["handle"]]
+        cmd += ["--handle", _safe_arg(module, module.params["handle"], "handle")]
 
     if module.params["values"]:
-        cmd += ["--values", module.params["values"]]
+        cmd += ["--values", _safe_arg(module, module.params["values"], "values")]
 
     if module.params["chart_loc"]:
-        cmd += ["--chart-loc", module.params["chart_loc"]]
+        cmd += ["--chart-loc", _safe_arg(module, module.params["chart_loc"], "chart_loc")]
 
     if module.params["project"]:
-        cmd += ["--project", module.params["project"]]
+        cmd += ["--project", _safe_arg(module, module.params["project"], "project")]
 
     for tag in (module.params["tags"] or []):
-        cmd += ["--tag", tag]
+        cmd += ["--tag", _safe_arg(module, tag, "tags")]
 
     if metadata_path:
         cmd += ["--metadata", metadata_path]
@@ -129,7 +137,7 @@ def _build_delete_cmd(module, binary):
     cmd = [
         binary,
         "cd", "clusters", "delete",
-        module.params["cluster_handle"],
+        _safe_arg(module, module.params["cluster_handle"], "cluster_handle"),
     ]
 
     if module.params["soft"]:
