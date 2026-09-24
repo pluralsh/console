@@ -167,7 +167,7 @@ export function OauthTokenExchangeFormFields({
               </FormField>
               <FormField
                 label="Key ID"
-                hint="Optional key identifier added to the signed JWT header as kid."
+                hint="Optional key identifier added to the signed JWT header as both kid and x5t. For x5t-based IdPs (e.g. ADFS), use the base64url-encoded SHA-1 thumbprint of the certificate."
               >
                 <Input
                   placeholder="Signing key ID"
