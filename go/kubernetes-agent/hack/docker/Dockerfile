@@ -66,6 +66,13 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
         -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
     -o /binaries/agentk ./cmd/agentk
 
+# Refresh tzdata from the Debian security repository because the distroless base currently carries 2026b.
+FROM debian:12-slim AS tzdata
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes tzdata=2026c-0+deb12u1 \
+    && awk 'BEGIN { RS = "" } $1 == "Package:" && $2 == "tzdata" { print }' /var/lib/dpkg/status > /tmp/tzdata.status \
+    && cp /var/lib/dpkg/info/tzdata.md5sums /tmp/tzdata.md5sums
+
 # Final stage - minimal image with all three binaries
 FROM gcr.io/distroless/static-debian12:nonroot AS final
 
@@ -92,7 +99,12 @@ LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       org.opencontainers.image.title="KAS Server" \
       org.opencontainers.image.description="KAS server image for Plural CD" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-kas"
+      org.opencontainers.image.rebuild-trigger="2026-09-24-tzdata-2026c-kas"
+
+# Override the distroless base tzdata files and package metadata with Debian security tzdata.
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=tzdata /tmp/tzdata.status /var/lib/dpkg/status.d/tzdata
+COPY --from=tzdata /tmp/tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums
 
 # Copy all binaries from builder
 COPY --from=builder /binaries/api /api

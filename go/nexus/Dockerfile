@@ -26,6 +26,13 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o nexus \
     ./cmd/main.go
 
+# Refresh tzdata from the Debian security repository because the distroless base currently carries 2026b.
+FROM debian:12-slim AS tzdata
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes tzdata=2026c-0+deb12u1 \
+    && awk 'BEGIN { RS = "" } $1 == "Package:" && $2 == "tzdata" { print }' /var/lib/dpkg/status > /tmp/tzdata.status \
+    && cp /var/lib/dpkg/info/tzdata.md5sums /tmp/tzdata.md5sums
+
 # Runtime stage
 FROM gcr.io/distroless/static-debian12:nonroot
 
@@ -46,9 +53,14 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.title="Nexus" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
+      org.opencontainers.image.rebuild-trigger="2026-09-24-tzdata-2026c-nexus"
 
 WORKDIR /app
+
+# Override the distroless base tzdata files and package metadata with Debian security tzdata.
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=tzdata /tmp/tzdata.status /var/lib/dpkg/status.d/tzdata
+COPY --from=tzdata /tmp/tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums
 
 # Copy binary from builder
 COPY --from=builder /build/nexus /app/nexus
