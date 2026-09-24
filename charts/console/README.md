@@ -53,8 +53,8 @@ OpenAI-compatible image can be selected with
 `ai.localEmbeddings.image.registry`, `ai.localEmbeddings.image.repository`,
 and `ai.localEmbeddings.image.tag`; an empty registry uses `global.registry`.
 The chart does not validate custom image behavior. The default image tag is
-independent of the Console chart version. The default 6Gi memory limit and
-approximately 180-second startup probe budget allow time for the baked model
+independent of the Console chart version. The default 8Gi memory limit and
+approximately five-minute startup probe budget allow time for the baked model
 to load on CPU nodes.
 
 ## Values
@@ -76,9 +76,9 @@ to load on CPU nodes.
 | ai.localEmbeddings.podSecurityContext | object | `{}` | Pod security context for the local embedding server. |
 | ai.localEmbeddings.readinessProbe | object | See `values.yaml` | TEI readiness probe. |
 | ai.localEmbeddings.resources.limits.cpu | string | `"4"` | CPU limit. |
-| ai.localEmbeddings.resources.limits.memory | string | `"6Gi"` | Memory limit. |
+| ai.localEmbeddings.resources.limits.memory | string | `"8Gi"` | Memory limit. |
 | ai.localEmbeddings.resources.requests.cpu | string | `"2"` | CPU request. |
-| ai.localEmbeddings.resources.requests.memory | string | `"2Gi"` | Memory request. |
+| ai.localEmbeddings.resources.requests.memory | string | `"4Gi"` | Memory request. |
 | ai.localEmbeddings.service.port | int | `80` | OpenAI-compatible service and container port. |
 | ai.localEmbeddings.servedModelName | string | `"nomic-ai/nomic-embed-text-v1.5"` | Model name accepted by the embedding endpoint. |
 | ai.localEmbeddings.startupProbe | object | See `values.yaml` | TEI startup probe used while loading the baked model. |

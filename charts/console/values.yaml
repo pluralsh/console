@@ -388,10 +388,10 @@ ai:
     resources:
       requests:
         cpu: "2"
-        memory: 2Gi
+        memory: 4Gi
       limits:
         cpu: "4"
-        memory: 6Gi
+        memory: 8Gi
     podLabels: {}
     podAnnotations: {}
     podSecurityContext: {}
@@ -414,7 +414,7 @@ ai:
         port: http
       periodSeconds: 10
       timeoutSeconds: 5
-      failureThreshold: 18
+      failureThreshold: 30
     livenessProbe:
       httpGet:
         path: /health
