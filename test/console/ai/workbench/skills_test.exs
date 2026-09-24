@@ -1,8 +1,18 @@
 defmodule Console.AI.Workbench.SkillsTest do
   use ExUnit.Case, async: true
+  use Mimic
 
-  alias Console.AI.Workbench.Skills
-  alias Console.Schema.{Workbench, WorkbenchSkill}
+  alias Console.AI.Workbench.{Skill, Skills}
+  alias Console.Deployments.Git
+  alias Console.Schema.{GitRepository, Service, Workbench, WorkbenchSkill}
+
+  @skill """
+  ---
+  name: auto
+  description: detected from SKILL.md
+  ---
+  body
+  """
 
   @example """
   ---
@@ -40,6 +50,60 @@ defmodule Console.AI.Workbench.SkillsTest do
   | Lab | `https://gitlab.example.org/cluster-gitops` |
   | Production | `https://git.example.org/cluster-gitops` |
   """
+
+  describe "skills/1" do
+    test "loads SKILL.md files when the explicit file list is missing" do
+      {wb, repo, ref} = git_workbench(nil)
+
+      expect(Git, :fetch, fn ^repo, ^ref ->
+        {:ok, [
+          {"notes.md", "ignore me"},
+          {"SKILL.md", @skill},
+          {"cluster/SKILL.md", @skill}
+        ]}
+      end)
+
+      assert {:ok, [%Skill{name: "auto"}]} = Skills.skills(wb)
+    end
+
+    test "loads SKILL.md files when the explicit file list is empty" do
+      {wb, repo, ref} = git_workbench([])
+
+      expect(Git, :fetch, fn ^repo, ^ref ->
+        {:ok, [{"notes.md", "ignore me"}, {"cluster/SKILL.md", @skill}]}
+      end)
+
+      assert {:ok, [%Skill{name: "auto"}]} = Skills.skills(wb)
+    end
+  end
+
+  describe "skill_file/2" do
+    test "resolves an auto-detected SKILL.md when the explicit file list is missing" do
+      {wb, repo, ref} = git_workbench(nil)
+
+      expect(Git, :fetch, fn ^repo, ^ref ->
+        {:ok, [{"cluster/SKILL.md", @skill}]}
+      end)
+
+      assert {:ok, {^repo, "main", "skills/cluster/SKILL.md"}} = Skills.skill_file("auto", wb)
+    end
+  end
+
+  describe "skills_changeset/2" do
+    test "accepts a git ref without a file list" do
+      changeset = Workbench.skills_changeset(%Workbench.Skills{}, %{ref: %{ref: "main", folder: "skills"}})
+
+      assert changeset.valid?
+      assert Ecto.Changeset.get_change(changeset, :files) == nil
+    end
+
+    test "accepts an empty file list" do
+      changeset = Workbench.skills_changeset(%Workbench.Skills{}, %{ref: %{ref: "main", folder: "skills"}, files: []})
+
+      assert changeset.valid?
+      assert Ecto.Changeset.get_change(changeset, :files) == []
+    end
+  end
 
   describe "plural?/2" do
     test "returns false when db-backed skills list is empty" do
@@ -138,5 +202,17 @@ defmodule Console.AI.Workbench.SkillsTest do
       assert msg =~ "could not parse skill"
       assert msg =~ "empty.md"
     end
+  end
+
+  defp git_workbench(files) do
+    repo = struct(GitRepository, %{id: Ecto.UUID.generate(), url: "https://github.com/example/skills.git"})
+    ref = struct(Service.Git, %{ref: "main", folder: "skills"})
+    wb = struct(Workbench, %{
+      repository: repo,
+      skills: struct(Workbench.Skills, %{ref: ref, files: files}),
+      workbench_skills: []
+    })
+
+    {wb, repo, ref}
   end
 end

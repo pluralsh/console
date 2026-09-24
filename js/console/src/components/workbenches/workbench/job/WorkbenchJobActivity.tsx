@@ -77,6 +77,7 @@ export function WorkbenchJobActivity({
   isOpen,
   activity,
   textStream,
+  latestThought,
   jobId,
   workbenchId,
   workbenchName,
@@ -84,6 +85,7 @@ export function WorkbenchJobActivity({
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
+  latestThought?: Nullable<WorkbenchJobThoughtFragment>
   jobId: string
   workbenchId: string
   workbenchName: string
@@ -227,6 +229,9 @@ export function WorkbenchJobActivity({
                 subagent
               </Body2P>
               {trailingIcons}
+              {isRunning && !agentRun && latestThought && (
+                <ActivityLatestTool thought={latestThought} />
+              )}
             </Flex>
             <ActivityCaretSC
               $isOpen={isOpen}
@@ -828,6 +833,54 @@ function WorkbenchToolCallSummary({
     </span>
   )
 }
+
+function ActivityLatestTool({
+  thought,
+}: {
+  thought: WorkbenchJobThoughtFragment
+}) {
+  const { toolName, tool } = thought
+  if (!toolName && !tool) return null
+
+  const title = tool
+    ? compactWorkbenchToolCallTitle(toolName, tool)
+    : humanizeToolName(toolName ?? '')
+
+  return (
+    <ActivityLatestToolSC title={title}>
+      {tool && (
+        <WorkbenchToolIcon
+          type={tool.tool}
+          provider={tool.cloudConnection?.provider}
+          size={12}
+          css={{ flexShrink: 0 }}
+        />
+      )}
+      <Body2P
+        as="span"
+        $color="text-disabled"
+        $shimmer
+        css={{
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {title}
+      </Body2P>
+    </ActivityLatestToolSC>
+  )
+}
+
+const ActivityLatestToolSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
+  maxWidth: '40ch',
+  flex: '0 1 auto',
+}))
 
 function compactWorkbenchToolCallTitle(
   toolName: Nullable<string>,
