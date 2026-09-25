@@ -90,6 +90,79 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found["threshold"]["aggregate"] == "MAX"
       assert found["threshold"]["value"] == 1.0
     end
+
+    test "it can preview live threshold timeseries for a monitor" do
+      monitor =
+        insert(:monitor,
+          threshold: %{aggregate: :max, value: 2.0},
+          query: %{log: %{query: "error", bucket_size: "5m", duration: "10m", facets: []}}
+        )
+
+      ts = DateTime.utc_now() |> DateTime.truncate(:second)
+      expect(Console.Logs.Provider, :aggregate, fn _query ->
+        {:ok, [%Console.Logs.AggregationBucket{count: 3.5, timestamp: ts}]}
+      end)
+
+      {:ok, %{data: %{"monitor" => found}}} = run_query("""
+        query Monitor($id: ID!) {
+          monitor(id: $id) {
+            id
+            preview {
+              threshold
+              metrics { timestamp value }
+            }
+          }
+        }
+      """, %{"id" => monitor.id}, %{current_user: admin_user()})
+
+      assert found["id"] == monitor.id
+      assert found["preview"]["threshold"] == 2.0
+      assert [point] = found["preview"]["metrics"]
+      # :long serializes as a string over the wire
+      assert point["timestamp"] == to_string(DateTime.to_unix(ts))
+      assert point["value"] == "3.5"
+    end
+
+    test "a workbench member can preview a service-less monitor" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      monitor =
+        insert(:monitor,
+          service: nil,
+          workbench: workbench,
+          threshold: %{aggregate: :max, value: 2.0},
+          query: %{log: %{query: "error", bucket_size: "5m", duration: "10m", facets: []}}
+        )
+
+      expect(Console.Logs.Provider, :aggregate, fn _query ->
+        {:ok, [%Console.Logs.AggregationBucket{count: 1.0, timestamp: DateTime.utc_now()}]}
+      end)
+
+      {:ok, %{data: %{"monitor" => found}}} = run_query("""
+        query Monitor($id: ID!) {
+          monitor(id: $id) {
+            id
+            preview { threshold metrics { timestamp value } }
+          }
+        }
+      """, %{"id" => monitor.id}, %{current_user: user})
+
+      assert found["id"] == monitor.id
+      assert found["preview"]["threshold"] == 2.0
+    end
+
+    test "a user without access cannot fetch or preview a monitor" do
+      monitor = insert(:monitor, service: nil, workbench: insert(:workbench))
+
+      {:ok, %{errors: [_ | _], data: %{"monitor" => nil}}} = run_query("""
+        query Monitor($id: ID!) {
+          monitor(id: $id) {
+            id
+            preview { threshold metrics { timestamp value } }
+          }
+        }
+      """, %{"id" => monitor.id}, %{current_user: insert(:user)})
+    end
   end
 
   describe "serviceDeployment monitors" do
@@ -116,7 +189,10 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
 
   describe "workbenchDashboard" do
     test "it can fetch a dashboard by id" do
-      dashboard = insert(:dashboard)
+      tool = insert(:workbench_tool, name: "prometheus", tool: :prometheus)
+      dashboard = build(:dashboard)
+      graphs = Enum.map(dashboard.graphs, &%{&1 | tool_id: tool.id})
+      dashboard = insert(:dashboard, graphs: graphs)
 
       {:ok, %{data: %{"workbenchDashboard" => found}}} =
         run_query(
@@ -127,6 +203,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
               name
               graphs {
                 identifier
+                toolId
+                workbenchTool { id name tool }
                 datasource { type tool input }
               }
             }
@@ -140,6 +218,12 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found["name"] == dashboard.name
       assert [graph] = found["graphs"]
       assert graph["datasource"]["type"] == "METRICS"
+      assert graph["toolId"] == tool.id
+      assert graph["workbenchTool"] == %{
+               "id" => tool.id,
+               "name" => tool.name,
+               "tool" => "PROMETHEUS"
+             }
     end
   end
 
@@ -167,6 +251,91 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found
              |> from_connection()
              |> ids_equal(dashboards)
+    end
+  end
+
+  describe "workbench monitoring" do
+    @monitoring_query """
+    query Monitoring($id: ID!, $q: String, $first: Int!, $after: String) {
+      workbench(id: $id) {
+        monitors(q: $q, first: $first, after: $after) {
+          pageInfo { hasNextPage endCursor }
+          edges { node { id name } }
+        }
+        workbenchDashboards(q: $q, first: $first) {
+          edges { node { id name } }
+        }
+      }
+    }
+    """
+
+    test "searches and paginates monitors within the workbench" do
+      workbench = insert(:workbench)
+      second = insert(:monitor, name: "cpu-b", service: nil, workbench: workbench)
+      first = insert(:monitor, name: "cpu-a", service: nil, workbench: workbench)
+      insert(:monitor, name: "memory", service: nil, workbench: workbench)
+      insert(:monitor, name: "cpu-other", service: nil, workbench: insert(:workbench))
+      dashboard = insert(:dashboard, name: "cpu-dashboard", workbench: workbench)
+      insert(:dashboard, name: "memory-dashboard", workbench: workbench)
+      insert(:dashboard, name: "cpu-other")
+
+      vars = %{"id" => workbench.id, "q" => "cpu", "first" => 1}
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(@monitoring_query, vars, %{current_user: admin_user()})
+
+      assert ids_equal(from_connection(found["monitors"]), [first])
+      assert ids_equal(from_connection(found["workbenchDashboards"]), [dashboard])
+      assert found["monitors"]["pageInfo"]["hasNextPage"]
+
+      vars = Map.put(vars, "after", found["monitors"]["pageInfo"]["endCursor"])
+      {:ok, %{data: %{"workbench" => next}}} =
+        run_query(@monitoring_query, vars, %{current_user: admin_user()})
+
+      assert ids_equal(from_connection(next["monitors"]), [second])
+      refute next["monitors"]["pageInfo"]["hasNextPage"]
+    end
+
+    test "does not expose monitoring for an inaccessible workbench" do
+      workbench = insert(:workbench)
+      insert(:monitor, service: nil, workbench: workbench)
+      insert(:dashboard, workbench: workbench)
+
+      {:ok, %{errors: [_ | _], data: %{"workbench" => nil}}} =
+        run_query(@monitoring_query, %{"id" => workbench.id, "first" => 10}, %{current_user: insert(:user)})
+    end
+
+    test "returns empty connections when no names match" do
+      workbench = insert(:workbench)
+      insert(:monitor, service: nil, workbench: workbench)
+      insert(:dashboard, workbench: workbench)
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(@monitoring_query, %{"id" => workbench.id, "q" => "absent", "first" => 10}, %{current_user: admin_user()})
+
+      assert from_connection(found["monitors"]) == []
+      assert from_connection(found["workbenchDashboards"]) == []
+    end
+
+    test "lists only jobs triggered by the selected monitor in this workbench" do
+      workbench = insert(:workbench)
+      monitor = insert(:monitor, service: nil, workbench: workbench)
+      alert = insert(:alert, monitor: monitor, workbench: workbench)
+      job = insert(:workbench_job, workbench: workbench, alert: alert)
+      insert(:workbench_job, alert: alert)
+      insert(:workbench_job, workbench: workbench)
+      insert(:workbench_job, workbench: workbench, alert: insert(:alert))
+
+      {:ok, %{data: %{"workbench" => %{"runs" => found}}}} = run_query("""
+        query MonitorJobs($id: ID!, $monitorId: ID!) {
+          workbench(id: $id) {
+            runs(monitorId: $monitorId, first: 10) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "monitorId" => monitor.id}, %{current_user: admin_user()})
+
+      assert ids_equal(from_connection(found), [job])
     end
   end
 
@@ -226,6 +395,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       expect(Stub, :metrics, fn :mock_conn, input, opts ->
         assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total{namespace=\"production\"}[5m]))"
+        assert input.step == "30s"
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 
@@ -288,6 +458,113 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert found["graphData"]["logs"] == nil
       assert found["graphData"]["traces"] == nil
       assert found["inputValues"] == ["production", "staging"]
+    end
+
+    test "formats computed metric steps per provider and omits them for dynatrace" do
+      workbench = insert(:workbench)
+
+      azure =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "azuremon",
+          tool: :azure,
+          categories: [:metrics],
+          configuration: %{
+            azure: %{
+              subscription_id: "sub",
+              tenant_id: "tenant",
+              client_id: "client",
+              client_secret: "secret"
+            }
+          }
+        )
+
+      dynatrace =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "dt",
+          tool: :dynatrace,
+          categories: [:metrics],
+          configuration: %{
+            dynatrace: %{url: "https://dt.example.com", platform_token: "token"}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: azure)
+      insert(:workbench_tool_association, workbench: workbench, tool: dynatrace)
+
+      dashboard =
+        insert(:dashboard,
+          workbench: workbench,
+          graphs: [
+            %Dashboard.Graph{
+              identifier: "azure_cpu",
+              type: :timeseries,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{
+                type: :metrics,
+                tool: "workbench_observability_metrics_azuremon",
+                input: %{"query" => "azure_cpu"}
+              }
+            },
+            %Dashboard.Graph{
+              identifier: "dt_cpu",
+              type: :timeseries,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 2, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{
+                type: :metrics,
+                tool: "workbench_observability_metrics_dt",
+                input: %{"query" => "dynatrace_cpu"}
+              }
+            }
+          ]
+        )
+
+      start_at = ~U[2026-09-07 21:00:00Z]
+      end_at = ~U[2026-09-07 22:00:00Z]
+
+      expect(Client, :connect, 2, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :metrics, 2, fn :mock_conn, input, _opts ->
+        case input.query do
+          "azure_cpu" ->
+            assert input.step == "PT15S"
+            refute is_nil(input.range)
+          "dynatrace_cpu" ->
+            assert is_nil(input.step)
+            assert is_nil(input.range)
+        end
+
+        {:ok, %MetricsQueryOutput{metrics: []}}
+      end)
+
+      {:ok, %{data: %{"workbenchDashboard" => found}}} =
+        run_query(
+          """
+          query Dashboard($id: ID!, $input: Json!, $timeRange: DashboardTimeRangeAttributes!) {
+            workbenchDashboard(id: $id) {
+              azure: graph(identifier: "azure_cpu", input: $input, timeRange: $timeRange) {
+                metrics { timestamp name value labels }
+              }
+              dynatrace: graph(identifier: "dt_cpu", input: $input, timeRange: $timeRange) {
+                metrics { timestamp name value labels }
+              }
+            }
+          }
+          """,
+          %{
+            "id" => dashboard.id,
+            "input" => Jason.encode!(%{}),
+            "timeRange" => %{
+              "start" => DateTime.to_iso8601(start_at),
+              "end" => DateTime.to_iso8601(end_at)
+            }
+          },
+          %{current_user: admin_user()}
+        )
+
+      assert found["azure"]["metrics"] == []
+      assert found["dynatrace"]["metrics"] == []
     end
 
     test "fetches typed log results for log graphs" do

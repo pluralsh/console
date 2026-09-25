@@ -92,7 +92,11 @@ defmodule Console.AI.Workbench.Heartbeat do
     end
   end
 
-  def terminate({:shutdown, :cancel}, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
+  def terminate({:shutdown, :cancel}, %State{job: job, usage: usage}) do
+    with {:ok, _} <- Workbenches.cancel_job_subagents(job) do
+      Workbenches.save_usage(job, usage)
+    end
+  end
   def terminate(:normal, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
   def terminate(:shutdown, %State{job: job, usage: usage}), do: Workbenches.pause_job(job, usage)
   def terminate(:timeout, %State{job: job, usage: usage}),

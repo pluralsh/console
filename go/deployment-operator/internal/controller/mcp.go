@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func mcpServersPayload(servers []mcp.Server) string {
@@ -19,6 +22,41 @@ func mcpServersPayload(servers []mcp.Server) string {
 		return ""
 	}
 	return string(data)
+}
+
+func withWorkbenchMCPServer(servers []mcp.Server, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []mcp.Server {
+	if workbenchMCPUpstreamURL(run, runtime) == "" {
+		return servers
+	}
+	return append(servers, mcp.Server{
+		Name: common.AgentWorkbenchMCPServerName,
+		URL:  common.AgentWorkbenchMCPURL,
+	})
+}
+
+func workbenchMCPUpstreamURL(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) string {
+	if run == nil || runtime == nil || !runtime.IsWorkbenchMCPEnabled() || run.Spec.WorkbenchMCPURL == nil {
+		return ""
+	}
+	raw := strings.TrimSpace(*run.Spec.WorkbenchMCPURL)
+	target, err := url.Parse(raw)
+	if err != nil || target.Scheme == "" || target.Host == "" {
+		return ""
+	}
+
+	categories := runtime.WorkbenchMCPCategories()
+	values := target.Query()
+	values.Set("categories", strings.Join(categoryStrings(categories), ","))
+	target.RawQuery = values.Encode()
+	return target.String()
+}
+
+func categoryStrings(categories []v1alpha1.WorkbenchMCPCategory) []string {
+	result := make([]string, 0, len(categories))
+	for _, category := range categories {
+		result = append(result, string(category))
+	}
+	return result
 }
 
 func (r *AgentRunReconciler) resolveMCPServers(ctx context.Context, namespace string, servers []v1alpha1.MCPServer) ([]mcp.Server, error) {

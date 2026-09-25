@@ -17,8 +17,12 @@ COPY js/documentation/package.json ./documentation/package.json
 COPY js/eslint-config/package.json ./eslint-config/package.json
 COPY js/stylelint-config/package.json ./stylelint-config/package.json
 
+# Focus skips documentation, Storybook, ESLint, and Stylelint. Vite bundles
+# the design system from source, so the image only needs those two workspaces.
+# Immutable installs match `yarn install --immutable` (CI is unset in Docker).
 RUN corepack enable \
-  && yarn install --immutable
+  && YARN_ENABLE_IMMUTABLE_INSTALLS=true \
+    yarn workspaces focus console @pluralsh/design-system
 
 COPY js/console/ ./console/
 COPY js/design-system/ ./design-system/
@@ -33,53 +37,52 @@ ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY} \
     VITE_SENTRY_DSN=${VITE_SENTRY_DSN} \
     SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
-RUN yarn workspace console build
+# Typecheck is the js-ci Typecheck job. tsconfig.app.json is noEmit and
+# the production bundle aliases @pluralsh/design-system to src.
+RUN yarn workspace console build:no-tsc
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-${OS_VARIANT}-${OS_VERSION} AS builder
 
-# The following are build arguments used to change variable parts of the image.
-# The name of your application/release (required)
 ARG APP_NAME=console
-# The environment to build with
 ARG MIX_ENV=prod
-# Set this to true if this release is not a Phoenix app
 ARG SKIP_PHOENIX=false
 ARG OS_VARIANT=alpine
 
 ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
     MIX_ENV=${MIX_ENV} \
-    OS_VARIANT=${OS_VARIANT}
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:${PATH}
-ARG RUST_TOOLCHAIN=stable
+    OS_VARIANT=${OS_VARIANT} \
+    MIX_OS_DEPS_COMPILE_PARTITION_COUNT=4
 
-# By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
-# This step installs build tools for C NIFs (e.g. argon2_elixir). Rust-based deps use
-# precompiled NIFs and do not require a Rust toolchain in the Alpine builder image.
+# hexpm/elixir-alpine has Mix and ca-certificates only. git is required for
+# mix git deps; build-base is required for argon2_elixir's C NIF. Rust NIFs
+# (mdex, mermaid_validator) ship precompiled and do not need rustc.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk update && apk upgrade --no-cache && \
-      apk add --no-cache git build-base curl ca-certificates; \
+      apk add --no-cache git build-base; \
     else \
-      apt-get update && apt-get install -y --no-install-recommends git build-essential curl ca-certificates; \
-      rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
+      apt-get update && apt-get install -y --no-install-recommends git build-essential && \
+      rm -rf /var/lib/apt/lists/*; \
     fi && \
-  if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi && \
   mix local.rebar --force && \
   mix local.hex --force
 
-# This copies our app source code into the build container
-COPY . .
+COPY mix.exs mix.lock ./
+COPY config/config.exs config/${MIX_ENV}.exs config/
+RUN mix do deps.get --only ${MIX_ENV} + deps.compile
 
-# needed so that we can get the app version from the git tag
-RUN git config --global --add safe.directory '/opt/app'
-
-RUN mix do deps.get, compile
-RUN ls -al
+COPY config/ config/
+COPY src/ src/
+COPY static/ static/
+COPY priv/ priv/
+COPY rel/ rel/
+COPY lib/ lib/
+COPY AGENT_VERSION KUBE_VERSION ./
+COPY charts/controller/crds/ charts/controller/crds/
+COPY go/client/generated/persisted-queries/queries.json go/client/generated/persisted-queries/
+COPY js/console/src/generated/persisted-queries/client.json js/console/src/generated/persisted-queries/
+RUN mix compile
 
 COPY --from=node /app/console/build ./priv/static
 

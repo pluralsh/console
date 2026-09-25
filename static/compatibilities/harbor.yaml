@@ -35,7 +35,9 @@ versions:
         need to explicitly allow the replication adapters they use; unsupported/unlisted
         adapters may no longer work until permitted.']
   chart_version: 1.18.0
-  images: []
+  images: ['goharbor/harbor-core:v2.14.0', 'goharbor/harbor-db:v2.14.0', 'goharbor/harbor-jobservice:v2.14.0',
+    'goharbor/harbor-portal:v2.14.0', 'goharbor/harbor-registryctl:v2.14.0', 'goharbor/redis-photon:v2.14.0',
+    'goharbor/registry-photon:v2.14.0', 'goharbor/trivy-adapter-photon:v2.14.0']
 - version: 2.13.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -61,11 +63,15 @@ versions:
         clients/scripts using legacy robot APIs must migrate to the newer robot account
         model.]
   chart_version: 1.17.0
-  images: []
+  images: ['goharbor/harbor-core:v2.13.0', 'goharbor/harbor-db:v2.13.0', 'goharbor/harbor-jobservice:v2.13.0',
+    'goharbor/harbor-portal:v2.13.0', 'goharbor/harbor-registryctl:v2.13.0', 'goharbor/redis-photon:v2.13.0',
+    'goharbor/registry-photon:v2.13.0', 'goharbor/trivy-adapter-photon:v2.13.0']
 - version: 2.12.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.16.0
-  images: []
+  images: ['goharbor/harbor-core:v2.12.0', 'goharbor/harbor-db:v2.12.0', 'goharbor/harbor-jobservice:v2.12.0',
+    'goharbor/harbor-portal:v2.12.0', 'goharbor/harbor-registryctl:v2.12.0', 'goharbor/redis-photon:v2.12.0',
+    'goharbor/registry-photon:v2.12.0', 'goharbor/trivy-adapter-photon:v2.12.0']

@@ -162,7 +162,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Project{id: id}), do: Alert.for_project(id)
   defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
 
-  def get_monitor(%{id: id}, _), do: {:ok, Observability.get_monitor!(id)}
+  def get_monitor(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.get_monitor!(id) |> allow(user, :read)
+
+  def monitor_preview(%Monitor{} = monitor, _, %{context: %{current_user: user}}) do
+    case allow(monitor, user, :read) do
+      {:ok, monitor} -> Observability.preview_monitor(monitor)
+      error -> error
+    end
+  end
 
   def get_dashboard(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.get_dashboard!(id) |> allow(user, :read)
@@ -183,6 +191,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def list_dashboards(%Workbench{id: workbench_id}, args, _) do
     Dashboard.for_workbench(workbench_id)
+    |> maybe_search(Dashboard, args)
     |> Dashboard.ordered()
     |> paginate(args)
   end
@@ -200,6 +209,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Monitor.for_service(id)
     |> maybe_search(Monitor, args)
     |> Monitor.ordered()
+    |> paginate(args)
+  end
+
+  def list_monitors(%Workbench{id: id}, args, _) do
+    Monitor.for_workbench(id)
+    |> maybe_search(Monitor, args)
+    |> Monitor.ordered(asc: :name, asc: :id)
     |> paginate(args)
   end
 

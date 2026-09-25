@@ -1796,6 +1796,10 @@ type RootSubscriptionType {
 
   workbenchExecStream(activityId: ID!): WorkbenchJobExecStream
 
+  workbenchDashboardDelta(id: ID, workbenchId: ID): WorkbenchDashboardDelta
+
+  workbenchMonitorDelta(id: ID, workbenchId: ID): MonitorDelta
+
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
 
@@ -2609,6 +2613,9 @@ type AgentRun {
   scmCreds: ScmCreds
 
   pluralCreds: PluralCreds
+
+  "the MCP endpoint for the workbench that spawned this run, if any"
+  workbenchMcpUrl: String
 
   "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
   pod: Pod
@@ -3482,6 +3489,9 @@ input WorkbenchToolAttributes {
   "whether this tool requires approval before execution"
   approval: Boolean
 
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchangeAttributes
+
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
 
@@ -3858,7 +3868,7 @@ input WorkbenchToolJiraDatacenterConnectionAttributes {
   url: String!
 
   "jira data center personal access token"
-  apiToken: String!
+  apiToken: String
 }
 
 input WorkbenchToolExaConnectionAttributes {
@@ -4076,6 +4086,9 @@ type Workbench {
 
     "show runs spawned from issues"
     issue: Boolean
+
+    "show runs spawned from a specific monitor"
+    monitorId: ID
   ): WorkbenchJobConnection
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
@@ -4086,7 +4099,31 @@ type Workbench {
 
   workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection
 
-  workbenchDashboards(after: String, first: Int, before: String, last: Int): WorkbenchDashboardConnection
+  workbenchDashboards(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search dashboards by name"
+    q: String
+  ): WorkbenchDashboardConnection
+
+  monitors(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search monitors by name"
+    q: String
+  ): MonitorConnection
 
   "eval configuration for this workbench (at most one; null if none configured)"
   eval: WorkbenchEval
@@ -5201,6 +5238,9 @@ type WorkbenchTool {
 
   "whether this tool requires approval before execution"
   approval: Boolean
+
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchange
 
   "the project of this tool"
   project: Project
@@ -6392,6 +6432,11 @@ enum McpServerProtocol {
   STREAMABLE_HTTP
 }
 
+enum OauthTokenExchangeType {
+  CLIENT_SECRET
+  CLIENT_ASSERTION
+}
+
 enum FlowSort {
   NAME
   SERVICE_COUNT
@@ -6446,6 +6491,19 @@ input McpServerAttributes {
   writeBindings: [PolicyBindingAttributes]
 }
 
+input OauthTokenExchangeAttributes {
+  enabled: Boolean
+  type: OauthTokenExchangeType
+  tokenUrl: String
+  clientId: String
+  clientSecret: String
+  privateKey: String
+  keyId: String
+  audience: String
+  resource: String
+  scopes: [String]
+}
+
 input McpServerAssociationAttributes {
   serverId: ID
 }
@@ -6458,6 +6516,9 @@ input FlowWorkbenchAttributes {
 input McpServerAuthenticationAttributes {
   "whether to use Plural's built-in JWT authentication"
   plural: Boolean
+
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchangeAttributes
 
   headers: [McpHeaderAttributes]
 }
@@ -6631,9 +6692,23 @@ type McpServer {
   updatedAt: DateTime
 }
 
+type OauthTokenExchange {
+  enabled: Boolean
+  type: OauthTokenExchangeType
+  tokenUrl: String
+  clientId: String
+  keyId: String
+  audience: String
+  resource: String
+  scopes: [String]
+}
+
 type McpServerAuthentication {
   "built-in Plural JWT authentication"
   plural: Boolean
+
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchange
 
   "any custom HTTP headers needed for authentication"
   headers: [McpServerHeader]
@@ -7064,12 +7139,24 @@ input OpenaiHeaderAttributes {
 input OpenaiTokenExchangeAttributes {
   enabled: Boolean
 
+  type: OauthTokenExchangeType
+
   "token endpoint URL"
   tokenUrl: String
 
   clientId: String
 
   clientSecret: String
+
+  privateKey: String
+
+  keyId: String
+
+  audience: String
+
+  resource: String
+
+  scopes: [String]
 }
 
 input AnthropicSettingsAttributes {
@@ -7535,10 +7622,20 @@ type OpenaiHeader {
 type OpenaiTokenExchange {
   enabled: Boolean
 
+  type: OauthTokenExchangeType
+
   "token endpoint URL"
   tokenUrl: String
 
   clientId: String
+
+  keyId: String
+
+  audience: String
+
+  resource: String
+
+  scopes: [String]
 }
 
 "Anthropic connection information"
@@ -7855,6 +7952,7 @@ enum DashboardGraphType {
   PIE
   HEATMAP
   TRACES
+  SECTION
 }
 
 enum DashboardInputType {
@@ -7862,7 +7960,6 @@ enum DashboardInputType {
   NUMBER
   BOOLEAN
   SELECT
-  MULTI_SELECT
   TIME_RANGE
 }
 
@@ -8087,10 +8184,13 @@ input DashboardGraphAttributes {
   "Graph visualization type"
   type: DashboardGraphType!
 
+  "Identifier of the section graph containing this graph; sections cannot be nested"
+  sectionId: String
+
   "Markdown content for markdown graphs"
   markdown: String
 
-  "Visualization-specific display options"
+  "Visualization-specific display options; sections may set collapsed"
   options: Json
 
   "Grid position and size"
@@ -8273,6 +8373,9 @@ type Monitor {
   "Threshold configuration that determines when the monitor should fire"
   threshold: MonitorThreshold!
 
+  "Live threshold preview from evaluating this monitor's query"
+  preview: AlertTimeseries
+
   "The service deployment this monitor is attached to"
   service: ServiceDeployment
 
@@ -8357,11 +8460,20 @@ type WorkbenchDashboardGraph {
   "Graph visualization type"
   type: DashboardGraphType!
 
+  "ID of the configured workbench tool backing this graph's datasource"
+  toolId: ID
+
+  "Configured workbench tool backing this graph's datasource"
+  workbenchTool: WorkbenchTool
+
+  "Identifier of the section graph containing this graph"
+  sectionId: String
+
   "Markdown content for markdown graphs"
   markdown: String
 
-  "Visualization-specific display options"
-  options: Json
+  "Visualization-specific display options; sections may set collapsed"
+  options: Map
 
   "Grid position and size"
   layout: WorkbenchDashboardGraphLayout!
@@ -8392,7 +8504,7 @@ type WorkbenchDashboardDatasource {
   tool: String!
 
   "Input passed to the observability tool"
-  input: Json!
+  input: Map!
 }
 
 type WorkbenchDashboardInput {
@@ -8670,6 +8782,16 @@ type MonitorConnection {
 type WorkbenchDashboardConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchDashboardEdge]
+}
+
+type MonitorDelta {
+  delta: Delta
+  payload: Monitor
+}
+
+type WorkbenchDashboardDelta {
+  delta: Delta
+  payload: WorkbenchDashboard
 }
 
 enum StackStatus {

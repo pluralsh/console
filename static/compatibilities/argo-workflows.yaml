@@ -18,7 +18,7 @@ versions:
     breaking_changes: [No breaking changes are enumerated in the provided notes; they
         direct readers to the upgrading guide and GitHub issues for breaking changes/known
         issues.]
-  chart_version: 2.0.7
+  chart_version: 2.0.8
   images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
     'quay.io/argoproj/workflow-controller:v4.1.4']
 - version: 4.1.0
@@ -202,7 +202,7 @@ versions:
   chart_version: 0.34.0
   images: ['quay.io/argoproj/argocli:v3.4.11', 'quay.io/argoproj/workflow-controller:v3.4.11']
 - version: 3.4.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -218,7 +218,7 @@ versions:
   chart_version: 0.20.0
   images: ['quay.io/argoproj/argocli:v3.4.0', 'quay.io/argoproj/workflow-controller:v3.4.0']
 - version: 3.3.2
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -235,7 +235,7 @@ versions:
   chart_version: 0.15.1
   images: ['quay.io/argoproj/argocli:v3.3.2', 'quay.io/argoproj/workflow-controller:v3.3.2']
 - version: 3.2.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -250,7 +250,7 @@ versions:
   chart_version: 0.8.2
   images: ['quay.io/argoproj/argocli:v3.2.0', 'quay.io/argoproj/workflow-controller:v3.2.0']
 - version: 3.1.5
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:

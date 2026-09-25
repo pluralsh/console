@@ -21,6 +21,10 @@ permissions:
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -28,39 +32,23 @@ jobs:
     permissions:
       contents: read
 
-  build:
+  test:
     needs: [vouch]
-    name: Build
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
         working-directory: go/controller
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/controller/go.mod
+          cache-dependency-path: go/controller/go.sum
           cache: true
       - name: Download dependencies
         run: go mod download
-      - run: PATH=$PATH:$GOPATH/bin make build
-  unit-test:
-    needs: [vouch]
-    name: Unit tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/controller
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go/controller/go.mod
-          cache: true
       - name: Test
         run: PATH=$PATH:$GOPATH/bin make test
   check-docs:
@@ -68,7 +56,7 @@ jobs:
     name: verify controller docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Check docs
         run: make codegen-crd-docs
         working-directory: go/controller

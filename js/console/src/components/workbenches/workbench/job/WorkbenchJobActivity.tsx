@@ -25,8 +25,10 @@ import {
 import {
   getSearchQuery,
   humanizeToolName,
+  resolveToolCallKind,
   toolCallGroupHeader,
 } from 'components/ai/chatbot/toolCallDisplay'
+import { ToolCallKindIcon } from 'components/ai/chatbot/toolCallIcons'
 import { PreviewablePanel } from 'components/ai/chatbot/ToolCallContent'
 import {
   getWorkbenchToolLabel,
@@ -77,6 +79,7 @@ export function WorkbenchJobActivity({
   isOpen,
   activity,
   textStream,
+  latestThought,
   jobId,
   workbenchId,
   workbenchName,
@@ -84,6 +87,7 @@ export function WorkbenchJobActivity({
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
+  latestThought?: Nullable<WorkbenchJobThoughtFragment>
   jobId: string
   workbenchId: string
   workbenchName: string
@@ -227,6 +231,9 @@ export function WorkbenchJobActivity({
                 subagent
               </Body2P>
               {trailingIcons}
+              {isRunning && !agentRun && latestThought && (
+                <ActivityLatestTool thought={latestThought} />
+              )}
             </Flex>
             <ActivityCaretSC
               $isOpen={isOpen}
@@ -656,13 +663,7 @@ function WorkbenchJobActivityThought({
   const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
   const query = getSearchQuery(toolArgs)
-  const toolIcon = tool ? (
-    <WorkbenchToolIcon
-      type={tool.tool}
-      provider={tool.cloudConnection?.provider}
-      size={12}
-    />
-  ) : undefined
+  const toolIcon = thoughtToolIcon({ tool, toolName, toolArgs })
   return (
     <SimpleToolCall
       content={content}
@@ -826,6 +827,72 @@ function WorkbenchToolCallSummary({
         </span>
       ))}
     </span>
+  )
+}
+
+function ActivityLatestTool({
+  thought,
+}: {
+  thought: WorkbenchJobThoughtFragment
+}) {
+  const { toolName, toolArgs, tool } = thought
+  if (!toolName && !tool) return null
+
+  const title = tool
+    ? compactWorkbenchToolCallTitle(toolName, tool)
+    : humanizeToolName(toolName ?? '')
+
+  return (
+    <ActivityLatestToolSC title={title}>
+      {thoughtToolIcon({ tool, toolName, toolArgs })}
+      <Body2P
+        as="span"
+        $color="text-disabled"
+        $shimmer
+        css={{
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {title}
+      </Body2P>
+    </ActivityLatestToolSC>
+  )
+}
+
+const ActivityLatestToolSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
+  maxWidth: '40ch',
+  flex: '0 1 auto',
+}))
+
+function thoughtToolIcon({
+  tool,
+  toolName,
+  toolArgs,
+}: {
+  tool?: Nullable<WorkbenchToolTinyFragment>
+  toolName?: Nullable<string>
+  toolArgs?: WorkbenchJobThoughtFragment['toolArgs']
+}) {
+  if (tool) {
+    return (
+      <WorkbenchToolIcon
+        type={tool.tool}
+        provider={tool.cloudConnection?.provider}
+        size={12}
+        css={{ flexShrink: 0 }}
+      />
+    )
+  }
+
+  return (
+    <ToolCallKindIcon kind={resolveToolCallKind(toolName ?? '', toolArgs)} />
   )
 }
 

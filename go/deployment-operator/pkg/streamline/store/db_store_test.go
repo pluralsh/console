@@ -86,6 +86,12 @@ func WithName(name string) CreateComponentOption {
 	}
 }
 
+func WithLabels(labels map[string]string) CreateComponentOption {
+	return func(u *unstructured.Unstructured) {
+		u.SetLabels(labels)
+	}
+}
+
 type CreateStoreKeyOption func(entry *common.Component)
 
 func WithStoreKeyName(name string) CreateStoreKeyOption {

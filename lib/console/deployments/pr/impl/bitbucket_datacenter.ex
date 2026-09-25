@@ -1,6 +1,5 @@
 defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   import Console.Deployments.Pr.Utils
-  import Console.Deployments.Pr.Git, only: [sha: 2]
   alias Console.Deployments.Pr.Review
   alias Console.Schema.{PullRequest, ScmConnection, PrAutomation}
   require Logger
@@ -8,9 +7,9 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   @behaviour Console.Deployments.Pr.Dispatcher
 
   defmodule Connection do
-    defstruct [:host, :token, :username]
+    defstruct [:host, :token]
 
-    def new(host, username, token), do: %__MODULE__{host: host, username: username, token: token}
+    def new(host, token), do: %__MODULE__{host: host, token: token}
 
     def headers(%__MODULE__{token: token}) do
       [
@@ -28,18 +27,14 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
       base_branch = pr.branch || "master"
       post(conn, "/projects/#{project}/repos/#{slug}/pull-requests", %{
         fromRef: %{
-          displayId: branch,
-          id: "refs/heads/#{branch}",
-          latestCommit: sha(pr, branch)
+          id: "refs/heads/#{branch}"
         },
         toRef: %{
-          displayId: base_branch,
-          id: "refs/heads/#{base_branch}",
-          latestCommit: sha(pr, base_branch)
+          id: "refs/heads/#{base_branch}"
         },
         title: title,
         description: body,
-      })
+      }, "1.0")
       |> case do
         {:ok, %{"id" => id} = mr} ->
           {:ok, %{
@@ -222,20 +217,38 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   defp post(conn, path, body) do
     url(conn, path)
-    |> Req.post(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
+    |> Req.post(request_options(conn, body: Jason.encode!(body)))
+    |> handle_response()
+  end
+  defp post(conn, path, body, api_version) do
+    url(conn, path, api_version)
+    |> Req.post(request_options(conn, body: Jason.encode!(body)))
     |> handle_response()
   end
 
   defp put(conn, path, body) do
     url(conn, path)
-    |> Req.put(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
+    |> Req.put(request_options(conn, body: Jason.encode!(body)))
     |> handle_response()
   end
 
   defp get(conn, path) do
     url(conn, path)
-    |> Req.get(headers: Connection.headers(conn), decode_body: false, retry: false)
+    |> Req.get(request_options(conn))
     |> handle_response()
+  end
+
+  defp request_options(conn, opts \\ []) do
+    Keyword.merge(
+      [
+        headers: Connection.headers(conn),
+        decode_body: false,
+        retry: false,
+        redirect: true,
+        redirect_trusted: true
+      ],
+      opts
+    )
   end
 
   defp handle_response({:ok, %Req.Response{status: code, body: body}})
@@ -254,17 +267,19 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   defp owner(_), do: nil
 
   defp url(%Connection{host: host}, path) when is_binary(host) do
-    host = String.trim_trailing(host, "/rest/api/latest")
-    Path.join([host, "rest/api/latest", path])
+    url(%Connection{host: host}, path, "latest")
+  end
+  defp url(%Connection{host: host}, path, api_version) when is_binary(host) do
+    Path.join([base_url(host), "rest/api/#{api_version}", path])
   end
 
   defp connection(%PrAutomation{connection: %ScmConnection{} = conn}), do: connection(conn)
-  defp connection(%ScmConnection{api_url: url, username: username, token: password})
-    when is_binary(username) and is_binary(password) and is_binary(url), do: {:ok, Connection.new(url, username, password)}
-  defp connection(%ScmConnection{base_url: url, username: username, token: password})
-    when is_binary(username) and is_binary(password) and is_binary(url), do: {:ok, Connection.new(url, username, password)}
+  defp connection(%ScmConnection{api_url: url, token: token})
+    when is_binary(token) and is_binary(url), do: {:ok, Connection.new(url, token)}
+  defp connection(%ScmConnection{base_url: url, token: token})
+    when is_binary(token) and is_binary(url), do: {:ok, Connection.new(url, token)}
   defp connection(_),
-    do: {:error, "Bitbucket datacenter connection improperly configured, must include a username and password and either a base url or api url"}
+    do: {:error, "Bitbucket datacenter connection improperly configured, must include a token and either a base url or api url"}
 
   defp parse_identifier(%PrAutomation{identifier: identifier}), do: parse_identifier(identifier)
   defp parse_identifier(identifier) when is_binary(identifier) do
@@ -293,8 +308,14 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   end
 
   defp to_url(%Connection{host: host}, project, slug, id) do
-    host = String.trim_trailing(host, "/rest/api/latest")
-    Path.join([host, "projects", project, "repos", slug, "pull-requests", "#{id}"])
+    Path.join([base_url(host), "projects", project, "repos", slug, "pull-requests", "#{id}"])
+  end
+
+  defp base_url(host) do
+    host
+    |> String.trim_trailing("/")
+    |> String.trim_trailing("/rest/api/latest")
+    |> String.trim_trailing("/rest/api/1.0")
   end
 
   defp user_slug(%ScmConnection{bitbucket_datacenter: %{user_slug: user_slug}})

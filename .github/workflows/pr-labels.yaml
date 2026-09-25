@@ -3,6 +3,10 @@ on:
   pull_request:
     branches: [ master ]
     types: [opened, labeled, unlabeled, synchronize]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -19,7 +23,7 @@ jobs:
     steps:
       - name: Classify documentation pull requests
         if: startsWith(github.event.pull_request.title, 'docs:')
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.issues.addLabels({
@@ -28,7 +32,7 @@ jobs:
               issue_number: context.issue.number,
               labels: ['documentation'],
             })
-      - uses: mheap/github-action-required-labels@v2
+      - uses: mheap/github-action-required-labels@v5
         with:
           mode: exactly
           count: 1

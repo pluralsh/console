@@ -1,0 +1,98 @@
+# Self-contained Monitor samples targeting the existing `console` service on the `mgmt` cluster.
+# Only resources defined in this file are created, the console service itself is referenced by its
+# "cluster-handle/service-name" and is not managed by the operator.
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Workbench
+metadata:
+  labels:
+    app.kubernetes.io/name: workbench
+    app.kubernetes.io/instance: workbench-monitoring-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbench-monitoring-sample
+  namespace: default
+spec:
+  name: workbench-monitoring-sample
+  description: Sample workbench used by Monitor and Dashboard samples
+  configuration:
+    observability:
+      logs: true
+      metrics: true
+---
+# Log monitor using the native Plural logs provider. When it fires, it starts an investigation in the workbench.
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Monitor
+metadata:
+  labels:
+    app.kubernetes.io/name: monitor
+    app.kubernetes.io/instance: monitor-log-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: monitor-log-sample
+  namespace: default
+spec:
+  name: console-error-logs
+  service: mgmt/console
+  workbenchRef:
+    name: workbench-monitoring-sample
+  description: Fires when the console logs contain too many errors
+  alertTemplate: "Monitor {{ monitor.name }} fired for service {{ monitor.service.name }} on cluster {{ monitor.service.cluster.handle }}"
+  severity: HIGH
+  type: LOG
+  evaluationCron: "*/5 * * * *"
+  prompt: Investigate the spike in console error logs and suggest a fix
+  modes:
+    plan: true
+    verification: false
+    budget:
+      cost: "5.0"
+      tokens: 200000
+    kubernetes:
+      update: false
+      delete: false
+      exec: false
+      drain: false
+      excludeNamespaces:
+        - kube-system
+  query:
+    log:
+      query: error
+      bucketSize: 5m
+      duration: 30m
+      operator: OR
+  threshold:
+    aggregate: MAX
+    value: "100"
+---
+# Metrics monitor using the native Plural metrics provider. When it fires, it starts an investigation in the workbench.
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Monitor
+metadata:
+  labels:
+    app.kubernetes.io/name: monitor
+    app.kubernetes.io/instance: monitor-metrics-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: monitor-metrics-sample
+  namespace: default
+spec:
+  name: console-cpu-usage
+  service: mgmt/console
+  workbenchRef:
+    name: workbench-monitoring-sample
+  description: Fires when console CPU usage is above 2 cores on average
+  severity: MEDIUM
+  type: METRICS
+  evaluationCron: "*/10 * * * *"
+  prompt: Investigate the high console CPU usage and suggest a fix
+  query:
+    metrics:
+      query: sum(rate(container_cpu_usage_seconds_total{namespace="plrl-console", container!=""}[5m]))
+      step: 1m
+      duration: 1h
+  threshold:
+    aggregate: AVG
+    value: "2"

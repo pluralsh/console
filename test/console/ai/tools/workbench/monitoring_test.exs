@@ -12,13 +12,20 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
     MonitorUpsert
   }
   alias Console.Repo
-  alias Console.Schema.WorkbenchJobAssociation
+  alias Console.PubSub
+  alias Console.Schema.{Dashboard, WorkbenchJobAssociation}
 
   test "upsert JSON schemas fully describe typed attributes" do
     dashboard = DashboardUpsert.json_schema(%DashboardUpsert{})
     monitor = MonitorUpsert.json_schema(%MonitorUpsert{})
 
     refute schema_key?(dashboard, "additionalProperties")
+    graphs = get_in(dashboard, ["properties", "graphs"])
+    assert graphs["type"] == "array"
+    assert graphs["minItems"] == 1
+    graph = graphs["items"]
+    assert "section" in get_in(graph, ["properties", "type", "enum"])
+    assert get_in(graph, ["properties", "section_id", "type"]) == "string"
 
     assert get_in(monitor, [
              "properties",
@@ -74,12 +81,39 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
              )
   end
 
+  test "rejects duplicate graph identifiers within a batch" do
+    user = insert(:user, roles: %{admin: true})
+    job = insert(:workbench_job, user: user)
+
+    assert {:error, %Ecto.Changeset{} = changeset} =
+             Tool.validate(
+               %DashboardUpsert{job: job, user: user},
+               %{
+                 "dashboard_name" => "API health",
+                 "graphs" => [
+                   %{
+                     "identifier" => "requests",
+                     "type" => "timeseries",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4}
+                   },
+                   %{
+                     "identifier" => "requests",
+                     "type" => "stat",
+                     "layout" => %{"x" => 6, "y" => 0, "w" => 6, "h" => 4}
+                   }
+                 ]
+               }
+             )
+
+    assert {"must have unique identifiers within the batch", _} = changeset.errors[:graphs]
+  end
+
   test "creates a dashboard in the current workbench and associates it to the job" do
     user = insert(:user, roles: %{admin: true})
     workbench = insert(:workbench)
     job = insert(:workbench_job, workbench: workbench, user: user)
 
-    tool =
+    workbench_tool =
       insert(:workbench_tool,
         name: "prom",
         tool: :prometheus,
@@ -89,28 +123,30 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
         }
       )
 
-    insert(:workbench_tool_association, workbench: workbench, tool: tool)
+    insert(:workbench_tool_association, workbench: workbench, tool: workbench_tool)
 
-    assert {:ok, tool} =
+    assert {:ok, upsert} =
              Tool.validate(
                %DashboardUpsert{job: job, user: user},
                %{
                  "dashboard_name" => "API health",
-                 "graph" => %{
-                   "identifier" => "requests",
-                   "type" => "timeseries",
-                   "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4},
-                   "datasource" => %{
-                     "type" => "metrics",
-                     "tool" => "workbench_observability_metrics_prom",
-                     "input" => %{"query" => "sum(rate(http_requests_total[5m]))"}
+                 "graphs" => [
+                   %{
+                     "identifier" => "requests",
+                     "type" => "timeseries",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4},
+                     "datasource" => %{
+                       "type" => "metrics",
+                       "tool" => "workbench_observability_metrics_prom",
+                       "input" => %{"query" => "sum(rate(http_requests_total[5m]))"}
+                     }
                    }
-                 }
+                 ]
                }
              )
 
-    assert %Console.Schema.Dashboard.Graph{} = tool.graph
-    assert {:ok, json} = DashboardUpsert.implement(tool)
+    assert [%Console.Schema.Dashboard.Graph{}] = upsert.graphs
+    assert {:ok, json} = DashboardUpsert.implement(upsert)
 
     assert %{
              "name" => "API health",
@@ -122,6 +158,51 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
              workbench_job_id: job.id,
              dashboard_id: dashboard_id
            )
+
+    assert [%Dashboard.Graph{tool_id: tool_id}] = Repo.get!(Dashboard, dashboard_id).graphs
+    assert tool_id == workbench_tool.id
+    assert_receive {:event, %PubSub.DashboardCreated{item: %Dashboard{id: ^dashboard_id}}}
+  end
+
+  test "creates a section graph and assigns child graphs to it" do
+    user = insert(:user, roles: %{admin: true})
+    workbench = insert(:workbench)
+    job = insert(:workbench_job, workbench: workbench, user: user)
+
+    assert {:ok, upsert} =
+             Tool.validate(
+               %DashboardUpsert{job: job, user: user},
+               %{
+                 "dashboard_name" => "GQL overview",
+                 "graphs" => [
+                   %{
+                     "identifier" => "gql",
+                     "title" => "GQL Overview",
+                     "type" => "section",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 12, "h" => 1}
+                   },
+                   %{
+                     "identifier" => "executions",
+                     "title" => "GQL executions",
+                     "type" => "stat",
+                     "section_id" => "gql",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 2}
+                   }
+                 ]
+               }
+             )
+
+    assert {:ok, json} = DashboardUpsert.implement(upsert)
+
+    assert %{
+             "id" => dashboard_id,
+             "graphs" => [
+               %{"identifier" => "gql", "type" => "section"},
+               %{"identifier" => "executions", "section_id" => "gql"}
+             ]
+           } = Jason.decode!(json)
+
+    assert_receive {:event, %PubSub.DashboardCreated{item: %Dashboard{id: ^dashboard_id}}}
   end
 
   test "creates a traces dashboard graph wired to a workbench traces tool" do
@@ -146,21 +227,22 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
                %DashboardUpsert{job: job, user: user},
                %{
                  "dashboard_name" => "Checkout traces",
-                 "graph" => %{
-                   "identifier" => "checkout",
-                   "type" => "traces",
-                   "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 4},
-                   "datasource" => %{
+                 "graphs" => [
+                   %{
+                     "identifier" => "checkout",
                      "type" => "traces",
-                     "tool" => "workbench_observability_traces_tempo",
-                     "input" => %{"query" => "{ service.name = \"checkout\" }", "limit" => 50}
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 4},
+                     "datasource" => %{
+                       "type" => "traces",
+                       "tool" => "workbench_observability_traces_tempo",
+                       "input" => %{"query" => "{ service.name = \"checkout\" }", "limit" => 50}
+                     }
                    }
-                 }
+                 ]
                }
              )
 
-    assert upsert.graph.type == :traces
-    assert upsert.graph.datasource.type == :traces
+    assert [%{type: :traces, datasource: %{type: :traces}}] = upsert.graphs
     assert {:ok, json} = DashboardUpsert.implement(upsert)
 
     assert %{
@@ -185,21 +267,73 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
                %DashboardUpsert{job: job, user: user},
                %{
                  "dashboard_name" => "API health",
-                 "graph" => %{
-                   "identifier" => "requests",
-                   "type" => "timeseries",
-                   "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4},
-                   "datasource" => %{
-                     "type" => "metrics",
-                     "tool" => "not_a_real_tool",
-                     "input" => %{"query" => "up"}
+                 "graphs" => [
+                   %{
+                     "identifier" => "requests",
+                     "type" => "timeseries",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4},
+                     "datasource" => %{
+                       "type" => "metrics",
+                       "tool" => "not_a_real_tool",
+                       "input" => %{"query" => "up"}
+                     }
                    }
-                 }
+                 ]
                }
              )
 
     assert {:error, "tool not_a_real_tool not found"} = DashboardUpsert.implement(upsert)
     refute Repo.get_by(Console.Schema.Dashboard, workbench_id: workbench.id, name: "API health")
+  end
+
+  test "rejects an invalid graph batch without applying valid graph updates" do
+    user = insert(:user, roles: %{admin: true})
+    workbench = insert(:workbench)
+    job = insert(:workbench_job, workbench: workbench, user: user)
+
+    dashboard =
+      insert(:dashboard,
+        workbench: workbench,
+        name: "API health",
+        graphs: [
+          %{
+            identifier: "requests",
+            title: "Original title",
+            type: :timeseries,
+            layout: %{x: 0, y: 0, w: 6, h: 4}
+          }
+        ]
+      )
+
+    assert {:ok, upsert} =
+             Tool.validate(
+               %DashboardUpsert{job: job, user: user},
+               %{
+                 "dashboard_name" => dashboard.name,
+                 "graphs" => [
+                   %{
+                     "identifier" => "requests",
+                     "title" => "Updated title",
+                     "type" => "timeseries",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4}
+                   },
+                   %{
+                     "identifier" => "errors",
+                     "type" => "stat",
+                     "section_id" => "missing",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 2}
+                   }
+                 ]
+               }
+             )
+
+    assert {:error, %Ecto.Changeset{} = changeset} = DashboardUpsert.implement(upsert)
+    assert {"graph errors references unknown section missing", _} = changeset.errors[:graphs]
+
+    assert [%Dashboard.Graph{identifier: "requests", title: "Original title"}] =
+             Repo.get!(Dashboard, dashboard.id).graphs
+
+    refute_receive {:event, %PubSub.DashboardUpdated{}}
   end
 
   test "upserts dashboard graphs and deletes them by dashboard name" do
@@ -226,11 +360,13 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
                %DashboardUpsert{job: job, user: user},
                %{
                  "dashboard_name" => dashboard.name,
-                 "graph" => %{
-                   "identifier" => "errors",
-                   "type" => "stat",
-                   "layout" => %{"x" => 6, "y" => 0, "w" => 6, "h" => 4}
-                 }
+                 "graphs" => [
+                   %{
+                     "identifier" => "errors",
+                     "type" => "stat",
+                     "layout" => %{"x" => 6, "y" => 0, "w" => 6, "h" => 4}
+                   }
+                 ]
                }
              )
 

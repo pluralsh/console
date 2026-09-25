@@ -100,6 +100,10 @@ func (in *WorkbenchTool) Attributes(ctx context.Context, c client.Client, projec
 	if err != nil {
 		return console.WorkbenchToolAttributes{}, err
 	}
+	oauth, err := in.Spec.OAuth.TokenExchangeAttributes(ctx, c, in.Namespace)
+	if err != nil {
+		return console.WorkbenchToolAttributes{}, err
+	}
 
 	return console.WorkbenchToolAttributes{
 		Name:              in.ConsoleName(),
@@ -113,6 +117,7 @@ func (in *WorkbenchTool) Attributes(ctx context.Context, c client.Client, projec
 		ReadBindings:      readBindings,
 		WriteBindings:     writeBindings,
 		Configuration:     configuration,
+		Oauth:             oauth,
 	}, nil
 }
 
@@ -126,7 +131,7 @@ type WorkbenchToolSpec struct {
 
 	// The type of tool.
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum:=HTTP;ELASTIC;DATADOG;PROMETHEUS;LOKI;TEMPO;SENTRY;MCP;LINEAR;ATLASSIAN;SPLUNK;DYNATRACE;CLOUDWATCH;AZURE;CLOUD;JAEGER;EXA;GITHUB;SLACK;TEAMS;GITLAB;BITBUCKET;BITBUCKET_DATACENTER;AZURE_DEVOPS;PAGERDUTY;OPENSEARCH;LAMBDA;CLOUD_RUN;AZURE_FUNCTION;DOCKER;VICTORIA_LOGS
+	// +kubebuilder:validation:Enum:=HTTP;ELASTIC;DATADOG;PROMETHEUS;LOKI;TEMPO;SENTRY;MCP;LINEAR;ATLASSIAN;SPLUNK;DYNATRACE;CLOUDWATCH;AZURE;CLOUD;JAEGER;EXA;GITHUB;SLACK;TEAMS;GITLAB;BITBUCKET;BITBUCKET_DATACENTER;AZURE_DEVOPS;PAGERDUTY;OPENSEARCH;LAMBDA;CLOUD_RUN;AZURE_FUNCTION;DOCKER;VICTORIA_LOGS;JIRA;JIRA_DATACENTER
 	Tool console.WorkbenchToolType `json:"tool"`
 
 	// Categories for the tool.
@@ -160,6 +165,10 @@ type WorkbenchToolSpec struct {
 	// Tool configuration (e.g. HTTP).
 	// +kubebuilder:validation:Optional
 	Configuration *WorkbenchToolConfiguration `json:"configuration,omitempty"`
+
+	// OAuth configures client credentials token exchange for this tool.
+	// +kubebuilder:validation:Optional
+	OAuth *OAuth2TokenExchange `json:"oauth,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
@@ -242,6 +251,10 @@ type WorkbenchToolConfiguration struct {
 	// Atlassian/jira connection (ticketing).
 	// +kubebuilder:validation:Optional
 	Atlassian *WorkbenchToolAtlassianConfig `json:"atlassian,omitempty"`
+
+	// Jira Data Center connection (ticketing).
+	// +kubebuilder:validation:Optional
+	JiraDatacenter *WorkbenchToolJiraDatacenterConfig `json:"jiraDatacenter,omitempty"`
 
 	// Exa connection (search).
 	// +kubebuilder:validation:Optional
@@ -379,6 +392,11 @@ func (c *WorkbenchToolConfiguration) Attributes(ctx context.Context, cl client.C
 		return nil, err
 	}
 
+	jiraDatacenter, err := c.JiraDatacenter.Attributes(ctx, cl, namespace)
+	if err != nil {
+		return nil, err
+	}
+
 	exa, err := c.Exa.Attributes(ctx, cl, namespace)
 	if err != nil {
 		return nil, err
@@ -429,6 +447,7 @@ func (c *WorkbenchToolConfiguration) Attributes(ctx context.Context, cl client.C
 		Pagerduty:           pagerduty,
 		Teams:               teams,
 		Atlassian:           atlassian,
+		JiraDatacenter:      jiraDatacenter,
 		Exa:                 exa,
 		Github:              github,
 		Gitlab:              gitlab,
@@ -1194,6 +1213,34 @@ func (c *WorkbenchToolAtlassianConfig) Attributes(ctx context.Context, cl client
 		attr.ServiceAccount = lo.ToPtr(serviceAccount)
 	}
 
+	if c.APITokenSecretRef != nil {
+		apiToken, err := utils.GetSecretKey(ctx, cl, c.APITokenSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.APIToken = lo.ToPtr(apiToken)
+	}
+
+	return attr, nil
+}
+
+// WorkbenchToolJiraDatacenterConfig defines a Jira Data Center connection.
+type WorkbenchToolJiraDatacenterConfig struct {
+	// Jira Data Center base URL.
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
+	// APITokenSecretRef references a personal access token when OAuth is not used.
+	// +kubebuilder:validation:Optional
+	APITokenSecretRef *corev1.SecretKeySelector `json:"apiTokenSecretRef,omitempty"`
+}
+
+func (c *WorkbenchToolJiraDatacenterConfig) Attributes(ctx context.Context, cl client.Client, namespace string) (*console.WorkbenchToolJiraDatacenterConnectionAttributes, error) {
+	if c == nil {
+		return nil, nil
+	}
+
+	attr := &console.WorkbenchToolJiraDatacenterConnectionAttributes{URL: c.URL}
 	if c.APITokenSecretRef != nil {
 		apiToken, err := utils.GetSecretKey(ctx, cl, c.APITokenSecretRef, namespace)
 		if err != nil {

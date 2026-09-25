@@ -66,7 +66,7 @@ var _ = Describe("MCP Server Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("BFOEVOAM57QIPK4WLGWP5T7DLVTLF44JFSQPHQDVC7HVJWYOPGCA===="),
+					SHA: lo.ToPtr("F6X2PATRPSSYQHAU73SSA72YR43W62JHHMHPBKFAT2E4DFYAOCIA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),

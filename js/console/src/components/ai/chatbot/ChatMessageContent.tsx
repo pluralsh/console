@@ -39,6 +39,8 @@ import { AgentRunInfoCard } from '../agent-runs/AgentRunInfoDisplays.tsx'
 import { ChatMarkdown } from './ChatMarkdown'
 import { ChatMessageActions } from './ChatMessage'
 import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
+import { resolveToolCallKind } from './toolCallDisplay'
+import { ToolCallKindIcon } from './toolCallIcons'
 import { ToolCallContent } from './ToolCallContent'
 import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
@@ -539,6 +541,7 @@ function ToolCallLabel({
       align="center"
       wrap="wrap"
     >
+      {toolName && <ToolCallKindIcon kind={resolveToolCallKind(toolName)} />}
       <Body2P
         $shimmer={isPending}
         $color="text-xlight"

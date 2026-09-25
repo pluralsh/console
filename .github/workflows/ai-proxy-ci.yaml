@@ -16,6 +16,10 @@ env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -32,10 +36,11 @@ jobs:
         shell: bash
         working-directory: go/ai-proxy
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-go@v6
+    - uses: actions/checkout@v7
+    - uses: actions/setup-go@v7
       with:
         go-version-file: go/ai-proxy/go.mod
+        cache-dependency-path: go/ai-proxy/go.sum
         cache: true
     - run: go mod download
     - run: PATH=$PATH:$GOPATH/bin make build

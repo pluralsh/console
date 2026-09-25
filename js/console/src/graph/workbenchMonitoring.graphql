@@ -1,0 +1,267 @@
+fragment WorkbenchDashboardSummary on WorkbenchDashboard {
+  id
+  name
+  description
+  insertedAt
+  updatedAt
+}
+
+fragment WorkbenchDashboardDatasource on WorkbenchDashboardDatasource {
+  type
+  tool
+  input
+}
+
+fragment WorkbenchDashboardDetails on WorkbenchDashboard {
+  ...WorkbenchDashboardSummary
+  workbench {
+    id
+  }
+  graphs {
+    identifier
+    title
+    description
+    type
+    sectionId
+    toolId
+    workbenchTool {
+      id
+      name
+      tool
+    }
+    markdown
+    options
+    layout {
+      x
+      y
+      w
+      h
+    }
+    datasource {
+      ...WorkbenchDashboardDatasource
+    }
+  }
+  inputs {
+    name
+    label
+    description
+    type
+    default
+    options
+    required
+    datasource {
+      ...WorkbenchDashboardDatasource
+    }
+  }
+}
+
+fragment WorkbenchMonitorSummary on Monitor {
+  id
+  name
+  description
+  type
+  state
+  severity
+  insertedAt
+  updatedAt
+}
+
+fragment WorkbenchMonitorDetails on Monitor {
+  ...WorkbenchMonitorSummary
+  alertTemplate
+  evaluationCron
+  nextRunAt
+  prompt
+  modes {
+    ...WorkbenchJobModesFields
+  }
+  threshold {
+    ...MonitorThreshold
+  }
+  query {
+    log {
+      ...MonitorLogQuery
+      tool
+      options {
+        azure {
+          resourceId
+        }
+      }
+    }
+    metrics {
+      tool
+      query
+      step
+      duration
+      options {
+        azure {
+          resourceId
+          metricsNamespace
+          aggregation
+          filter
+          orderBy
+          rollUpBy
+          metricsEndpoint
+        }
+      }
+    }
+  }
+  workbench {
+    id
+  }
+  service {
+    id
+  }
+}
+
+subscription WorkbenchDashboardDelta($id: ID, $workbenchId: ID) {
+  workbenchDashboardDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...WorkbenchDashboardDetails
+    }
+  }
+}
+
+subscription WorkbenchMonitorDelta($id: ID, $workbenchId: ID) {
+  workbenchMonitorDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...WorkbenchMonitorDetails
+    }
+  }
+}
+
+query WorkbenchDashboards(
+  $id: ID!
+  $q: String
+  $first: Int = 100
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    workbenchDashboards(q: $q, first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchDashboardSummary
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchMonitors(
+  $id: ID!
+  $q: String
+  $first: Int = 100
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    monitors(q: $q, first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchMonitorSummary
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchMonitoringDashboard($id: ID!) {
+  workbenchDashboard(id: $id) {
+    ...WorkbenchDashboardDetails
+  }
+}
+
+query WorkbenchDashboardGraph(
+  $id: ID!
+  $identifier: String!
+  $input: Json!
+  $timeRange: DashboardTimeRangeAttributes!
+) {
+  workbenchDashboard(id: $id) {
+    id
+    graph(identifier: $identifier, input: $input, timeRange: $timeRange) {
+      metrics {
+        ...WorkbenchJobActivityMetric
+      }
+      logs {
+        ...WorkbenchJobActivityLog
+      }
+      traces {
+        ...WorkbenchJobActivityTrace
+      }
+    }
+  }
+}
+
+query WorkbenchDashboardInput(
+  $id: ID!
+  $identifier: String!
+  $input: Json!
+  $timeRange: DashboardTimeRangeAttributes!
+) {
+  workbenchDashboard(id: $id) {
+    id
+    input(identifier: $identifier, input: $input, timeRange: $timeRange)
+  }
+}
+
+query WorkbenchMonitor($id: ID!) {
+  monitor(id: $id) {
+    ...WorkbenchMonitorDetails
+  }
+}
+
+query WorkbenchMonitorPreview($id: ID!) {
+  monitor(id: $id) {
+    id
+    preview {
+      threshold
+      metrics {
+        timestamp
+        value
+      }
+    }
+  }
+}
+
+query WorkbenchMonitorJobs(
+  $id: ID!
+  $monitorId: ID!
+  $first: Int = 20
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    runs(monitorId: $monitorId, first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
+mutation DeleteWorkbenchDashboard($id: ID!) {
+  deleteDashboard(id: $id) {
+    id
+  }
+}
+
+mutation UpdateWorkbenchMonitor($id: ID!, $attributes: MonitorAttributes!) {
+  updateMonitor(id: $id, attributes: $attributes) {
+    ...WorkbenchMonitorDetails
+  }
+}

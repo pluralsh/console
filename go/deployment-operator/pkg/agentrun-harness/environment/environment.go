@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	osexec "os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -75,7 +76,7 @@ func (in *environment) cloneRepository() error {
 		if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
 			return err
 		}
-		return in.configureRepository(repoDirPath, userName, userEmail)
+		return in.finalizeRepository(repoDirPath, userName, userEmail)
 	}
 
 	copied, err := in.cloneFromPrebake(repoDirPath)
@@ -83,7 +84,7 @@ func (in *environment) cloneRepository() error {
 		return err
 	}
 	if copied {
-		return in.configureRepository(repoDirPath, userName, userEmail)
+		return in.finalizeRepository(repoDirPath, userName, userEmail)
 	}
 
 	// Set proxy for clone via environment variable so it takes effect immediately.
@@ -109,7 +110,7 @@ func (in *environment) cloneRepository() error {
 	}
 
 	repoDirPath = path.Join(in.dir, repoDir)
-	return in.configureRepository(repoDirPath, userName, userEmail)
+	return in.finalizeRepository(repoDirPath, userName, userEmail)
 }
 
 func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
@@ -123,7 +124,11 @@ func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("placing prebaked repository", "src", match.Dir, "dst", repoDirPath, "url", in.agentRun.Repository)
-	if err := fs.MoveDir(match.Dir, repoDirPath); err != nil {
+	moveRepository := in.movePrebakedRepository
+	if moveRepository == nil {
+		moveRepository = fs.MoveDir
+	}
+	if err := moveRepository(match.Dir, repoDirPath); err != nil {
 		if _, statErr := os.Stat(filepath.Join(repoDirPath, ".git")); statErr == nil {
 			klog.ErrorS(err, "prebake source leftover after placing working copy", "src", match.Dir, "dst", repoDirPath)
 		} else {
@@ -149,6 +154,47 @@ func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
 
 	in.updateFromOrigin(repoDirPath)
 	return true, nil
+}
+
+// movePrebakedRepositoryFast keeps the normal same-volume rename path effectively
+// free, but uses fcp for the cross-filesystem fallback when agent-bootstrap
+// explicitly enables it. Other environment consumers retain polly/fs behavior.
+func movePrebakedRepositoryFast(src, dst string) error {
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+	if _, err := os.Lstat(dst); err == nil {
+		return fmt.Errorf("move prebaked repository: destination already exists: %s", dst)
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	if err := copyPrebakedRepository(src, dst); err != nil {
+		_ = os.RemoveAll(dst)
+		return err
+	}
+	if err := os.RemoveAll(src); err != nil {
+		return fmt.Errorf("move prebaked repository: copied to %s but failed to remove %s: %w", dst, src, err)
+	}
+	return nil
+}
+
+func copyPrebakedRepository(src, dst string) error {
+	binary, lookupErr := osexec.LookPath("fcp")
+	if lookupErr == nil {
+		output, copyErr := osexec.Command(binary, src, dst).CombinedOutput()
+		if copyErr == nil {
+			return nil
+		}
+		if removeErr := os.RemoveAll(dst); removeErr != nil {
+			return fmt.Errorf("fcp failed: %w; remove partial destination: %w", copyErr, removeErr)
+		}
+		klog.ErrorS(copyErr, "fcp failed, using portable repository copy", "src", src, "dst", dst, "output", strings.TrimSpace(string(output)))
+	}
+	return fs.CopyDir(src, dst)
 }
 
 // updateFromOrigin refreshes the copied prebake checkout, then applies the
@@ -256,6 +302,40 @@ func (in *environment) checkoutRequestedBranch(repoDirPath string) error {
 		exec.WithDir(repoDirPath),
 	).RunWithOutput(context.Background()); err != nil {
 		return fmt.Errorf("failed to checkout branch %s: %w: %s", branch, err, out)
+	}
+
+	return nil
+}
+
+func (in *environment) finalizeRepository(repoDirPath, userName, userEmail string) error {
+	if err := in.checkoutFollowupBranch(repoDirPath); err != nil {
+		return err
+	}
+	return in.configureRepository(repoDirPath, userName, userEmail)
+}
+
+func (in *environment) checkoutFollowupBranch(repoDirPath string) error {
+	if in.agentRun == nil || !in.agentRun.Followup {
+		return nil
+	}
+
+	headBranch := strings.TrimSpace(lo.FromPtr(in.agentRun.HeadBranch))
+	if headBranch == "" {
+		return fmt.Errorf("follow-up agent run requires a head branch to check out")
+	}
+
+	if output, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"fetch", "origin", headBranch}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		return fmt.Errorf("fetch follow-up head branch %q: %w: %s", headBranch, err, output)
+	}
+
+	if output, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"checkout", "-B", headBranch, "origin/" + headBranch}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		return fmt.Errorf("check out follow-up head branch %q: %w: %s", headBranch, err, output)
 	}
 
 	return nil
@@ -459,6 +539,9 @@ func configureCodebaseMemoryGitExclude(repoDirPath string) error {
 func (in *environment) init() types.Environment {
 	if in.agentRun == nil {
 		klog.Fatal("could not initialize environment: agentRun is nil")
+	}
+	if in.movePrebakedRepository == nil {
+		in.movePrebakedRepository = fs.MoveDir
 	}
 
 	if len(in.dir) != 0 {

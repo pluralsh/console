@@ -14,7 +14,7 @@ metadata:
 spec:
   type: CLAUDE
   targetNamespace: agents
-  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  repositoryImage: docker.io/pluralsh/console-repos:latest
 ```
 
 The operator starts a `repository-prebake` init container from that image. It
@@ -23,14 +23,18 @@ copies `/data/.` into the existing `shared-context` emptyDir at
 Kubernetes image-volume feature gate. Use `spec.template.spec.imagePullSecrets`
 if the image is private.
 
-The image must include `/bin/sh` and `cp`, with repos under `/data`.
+The published base image includes `fcp`, which parallelizes the copy for
+small-file repository and build-artifact workloads. Custom images can include
+`fcp` for the same optimization; the init container falls back to `cp -a` when
+it is unavailable. Images must include `/bin/sh` and either `fcp` or `cp`, with
+repos under `/data`.
 
 ## Layout
 
 ```
 repository-prebake/
-  base/       # ghcr.io/pluralsh/repository-prebake (CLI + git)
-  console/    # ghcr.io/pluralsh/console-repos (extends base)
+  base/       # docker.io/pluralsh/repository-prebake (CLI + git)
+  console/    # docker.io/pluralsh/console-repos (extends base)
 ```
 
 ## Image layout
@@ -72,20 +76,21 @@ User-facing walkthrough: [Prebaked repositories](https://docs.plural.sh/plural-f
 When `/plural/shared/repos/manifest.json` is present, agent-bootstrap matches
 the run repository URL (https and ssh forms of the same repo are equivalent)
 and moves that tree into `/plural/shared/repository` (rename on the same
-volume; copy+delete if rename is not possible). Fetch of the requested
-branch is best-effort; an airgapped or stale remote keeps the prebaked copy.
+volume; an `fcp`-accelerated copy+delete if rename is not possible). Fetch of
+the requested branch is best-effort; an airgapped or stale remote keeps the prebaked copy.
 Other prebaked repos stay at `/plural/shared/repos/<path>` and are listed in
 the agent system prompt.
 
 ## Base image
 
-`ghcr.io/pluralsh/repository-prebake` is Debian plus `git`, `mise`, a compile
-toolchain, and a `prebake` binary. Extend it and run clone + manifest **inside**
+`docker.io/pluralsh/repository-prebake` uses the same DHI Debian Trixie base as
+agent-harness, plus `git`, `mise`, a compile toolchain, and a `prebake` binary.
+Extend it and run clone + manifest **inside**
 the image you push (`docker build`, `docker/build-push-action`, and so on). The
 CLI is not a host-side wrapper around `docker build`.
 
 ```dockerfile
-FROM ghcr.io/pluralsh/repository-prebake:latest
+FROM docker.io/pluralsh/repository-prebake:latest
 COPY repos.yaml /config/repos.yaml
 RUN prebake --config /config/repos.yaml --chown 65532:65532
 ```
@@ -95,7 +100,7 @@ Private HTTPS remotes: keep `url:` token-free and pass the password at build tim
 `GIT_PASSWORD` is set (`GIT_USERNAME` defaults to `x-access-token`):
 
 ```dockerfile
-FROM ghcr.io/pluralsh/repository-prebake:latest
+FROM docker.io/pluralsh/repository-prebake:latest
 COPY repos.yaml /config/repos.yaml
 RUN --mount=type=secret,id=git_token \
     GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
@@ -129,21 +134,21 @@ prebake --config repos.yaml [--dest /data] [--recurse-submodules] [--lfs] [--cho
 the pod. Extra compile steps belong after `prebake` and must write under
 `/data/<path>`.
 
-CI publishes `ghcr.io/pluralsh/repository-prebake:sha-<short>` (`:latest` on
-`master`).
+CI publishes `repository-prebake:<YYYY-MM-DD>` and `:latest` to Docker Hub,
+GHCR, and GCR every day and on manual runs.
 
 From this repository:
 
 ```bash
 docker build -f repository-prebake/base/Dockerfile \
-  -t ghcr.io/pluralsh/repository-prebake:local \
+  -t docker.io/pluralsh/repository-prebake:local \
   go/repository-prebake
 ```
 
 ## Inspect
 
 ```bash
-cid="$(docker create ghcr.io/pluralsh/console-repos:latest unused)"
+cid="$(docker create docker.io/pluralsh/console-repos:latest unused)"
 docker cp "$cid:/data/manifest.json" -
 docker rm "$cid"
 ```
@@ -177,30 +182,30 @@ export GOWORK=/data/console/go/go.work
 [`console/`](console/) extends the published base image: copy this checkout to
 `/data/console`, `prebake` (Console plus `plural-cli`, `plural`, and authed
 `plrl-up-demos` extra context),
-then [`console/precompile.sh`](console/precompile.sh)
-(Elixir `MIX_ENV=test mix compile`, JS `yarn install --immutable`, Go workspace
-modules under `go/` with `go test -run='^$'`). Pass `GIT_ACCESS_TOKEN` as a
-BuildKit secret so `prebake` can clone the private repo.
+then runs the ordered scripts under [`console/precompile/`](console/precompile/)
+to prepare Console's Elixir, JavaScript, and Go trees, plural-cli's Go tree,
+and Plural's Elixir and JavaScript trees. Pass `GIT_ACCESS_TOKEN` as a BuildKit
+secret so `prebake` can clone the private repo.
 
-CI builds it on every PR and every push to `master` as
-`ghcr.io/pluralsh/console-repos:sha-<short>` (`:pr-<n>` on pull requests, `:latest`
-on master). To test a branch, set:
+CI builds it daily and on manual runs as
+`docker.io/pluralsh/console-repos:<YYYY-MM-DD>` and `:latest`. To pin a daily
+build, set:
 
 ```yaml
 spec:
-  repositoryImage: ghcr.io/pluralsh/console-repos:sha-<short>
+  repositoryImage: docker.io/pluralsh/console-repos:<YYYY-MM-DD>
 ```
 
 Locally, from the console repository root. Build the base image first:
 
 ```bash
 docker build -f repository-prebake/base/Dockerfile \
-  -t ghcr.io/pluralsh/repository-prebake:local \
+  -t docker.io/pluralsh/repository-prebake:local \
   go/repository-prebake
 cp repository-prebake/console/.dockerignore .dockerignore
 docker build -f repository-prebake/console/Dockerfile \
-  --build-arg PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:local \
+  --build-arg PREBAKE_IMAGE=docker.io/pluralsh/repository-prebake:local \
   --secret id=git_token,env=GIT_ACCESS_TOKEN \
-  -t ghcr.io/pluralsh/console-repos:local \
+  -t docker.io/pluralsh/console-repos:local \
   .
 ```

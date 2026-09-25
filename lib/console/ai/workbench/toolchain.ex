@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Toolchain do
   Allows on-the-fly querying of tools within a workbench
   """
   alias Console.Repo
-  alias Console.Schema.{Workbench, WorkbenchJob, User}
+  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchTool, User}
   alias Console.AI.Tool
   alias Console.AI.Workbench.{Environment, Subagents}
   alias Console.AI.Tools.Workbench.Observability
@@ -50,6 +50,18 @@ defmodule Console.AI.Workbench.Toolchain do
         {:error, _} = error -> {:halt, error}
       end
     end)
+  end
+
+  @doc "Validates a named observability tool call and returns its configured workbench tool, if any."
+  def resolve_workbench_tool(resource, type, name, args, %User{} = user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and
+             type in [:metrics, :logs, :log_aggregate, :traces, :labels] do
+    with {:ok, tool} <- validate_call(resource, name, args, user, allowed_tools(type)) do
+      case Map.get(tool, :tool) do
+        %WorkbenchTool{} = workbench_tool -> {:ok, workbench_tool}
+        _ -> {:ok, nil}
+      end
+    end
   end
 
   @doc "Validates the persisted observability queries attached to a subagent or workbench result."

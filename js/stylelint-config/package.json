@@ -29,7 +29,7 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . --cache",
     "fix": "eslint . --fix"
   },
   "engines": {

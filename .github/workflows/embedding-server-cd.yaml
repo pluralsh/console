@@ -1,0 +1,150 @@
+name: CD / embedding-server
+
+on:
+  push:
+    tags:
+      - "rust/embedding-server/v*.*.*"
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY_IMAGE: ghcr.io/pluralsh/embedding-server
+  MODEL_ID: nomic-ai/nomic-embed-text-v1.5
+  MODEL_REVISION: e9b6763023c676ca8431644204f50c2b100d9aab
+  SERVED_MODEL_NAME: nomic-ai/nomic-embed-text-v1.5
+  TEI_VERSION: 1.9.4
+
+jobs:
+  build-image:
+    name: Build ${{ matrix.arch }} image
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+            tei_image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.9@sha256:8419f533857b503ebf6ec292a95d4f1cf9c0464ac8b8abeef39518cf110e5726
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            tei_image: ghcr.io/huggingface/text-embeddings-inference:cpu-arm64-1.9@sha256:7a1b4aa11c491f39cea38eb0a210afe68a78dd5edee11c8f44f46c3529b27cd8
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=match,pattern=rust/embedding-server/(v.*),group=1
+            type=sha,format=short,prefix=sha-
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push platform image by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: rust/embedding-server
+          file: rust/embedding-server/Dockerfile
+          platforms: ${{ matrix.platform }}
+          tags: ${{ env.REGISTRY_IMAGE }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          provenance: mode=max
+          sbom: true
+          build-args: |
+            MODEL_ID=${{ env.MODEL_ID }}
+            MODEL_REVISION=${{ env.MODEL_REVISION }}
+            SERVED_MODEL_NAME=${{ env.SERVED_MODEL_NAME }}
+            TEI_IMAGE=${{ matrix.tei_image }}
+            TEI_VERSION=${{ env.TEI_VERSION }}
+            IMAGE_VERSION=${{ steps.meta.outputs.version }}
+            GIT_COMMIT=${{ github.sha }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=embedding-server-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=embedding-server-${{ matrix.arch }}
+
+      - name: Export image digest
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Upload image digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Pull published image for smoke test
+        run: docker pull "${REGISTRY_IMAGE}@${{ steps.build.outputs.digest }}"
+
+      - name: Run network-isolated OpenAI smoke test
+        working-directory: rust/embedding-server
+        run: IMAGE="${REGISTRY_IMAGE}@${{ steps.build.outputs.digest }}" SERVED_MODEL_NAME="$SERVED_MODEL_NAME" ./scripts/smoke-test.sh
+
+  publish-image:
+    name: Publish multi-architecture image
+    needs: [build-image]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    steps:
+      - name: Download image digests
+        uses: actions/download-artifact@v7
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=match,pattern=rust/embedding-server/(v.*),group=1
+            type=sha,format=short,prefix=sha-
+
+      - name: Create and push multi-architecture manifest
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect published version
+        run: docker buildx imagetools inspect "${REGISTRY_IMAGE}:${{ steps.meta.outputs.version }}"

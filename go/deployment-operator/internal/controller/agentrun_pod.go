@@ -55,6 +55,10 @@ const (
 	mcpServerContainerName         = "mcpserver"
 	repositoryPrebakeContainerName = "repository-prebake"
 	repositoryPrebakeImageDataDir  = "/data"
+	repositoryPrebakeCopyCommand   = "if command -v fcp >/dev/null 2>&1; then " +
+		"fcp " + repositoryPrebakeImageDataDir + " " + common.AgentRunRepositoryPrebakeDir + "; " +
+		"else mkdir -p " + common.AgentRunRepositoryPrebakeDir + " && " +
+		"cp -a " + repositoryPrebakeImageDataDir + "/. " + common.AgentRunRepositoryPrebakeDir + "/; fi"
 
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
@@ -518,6 +522,7 @@ func enableMCPServer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, pod
 	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext, false)
 	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
 	pod.Spec.InitContainers[index].Env = ensureMCPServerEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
+	pod.Spec.InitContainers[index].Env = ensureWorkbenchMCPProxyEnvVar(pod.Spec.InitContainers[index].Env, run, runtime)
 	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
 	pod.Spec.InitContainers[index].RestartPolicy = lo.ToPtr(corev1.ContainerRestartPolicyAlways)
 	if pod.Spec.InitContainers[index].StartupProbe == nil {
@@ -540,7 +545,7 @@ func getMCPServerContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntim
 		Image:           image,
 		SecurityContext: ensureDefaultContainerSecurityContext(nil, false),
 		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
-		Env:             getMCPServerEnvVars(run, runtime),
+		Env:             ensureWorkbenchMCPProxyEnvVar(getMCPServerEnvVars(run, runtime), run, runtime),
 		Command:         []string{"/agent-mcpserver"},
 		Args: []string{
 			"--address", common.AgentMCPServerAddress,
@@ -632,6 +637,14 @@ func ensureMCPServerEnvVars(existing []corev1.EnvVar, run *v1alpha1.AgentRun, ru
 	return existing
 }
 
+func ensureWorkbenchMCPProxyEnvVar(existing []corev1.EnvVar, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	upstream := workbenchMCPUpstreamURL(run, runtime)
+	if upstream == "" {
+		return existing
+	}
+	return upsertEnvVar(existing, corev1.EnvVar{Name: EnvWorkbenchMCPURL, Value: upstream})
+}
+
 func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.AgentRuntime) []corev1.VolumeMount {
 	result := append(
 		algorithms.Filter(mounts, func(v corev1.VolumeMount) bool {
@@ -672,9 +685,7 @@ func getRepositoryPrebakeContainer(image string) corev1.Container {
 		Image:           image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command:         []string{"/bin/sh", "-c"},
-		Args: []string{
-			"mkdir -p " + common.AgentRunRepositoryPrebakeDir + " && cp -a " + repositoryPrebakeImageDataDir + "/. " + common.AgentRunRepositoryPrebakeDir + "/",
-		},
+		Args:            []string{repositoryPrebakeCopyCommand},
 		SecurityContext: sc,
 		VolumeMounts: []corev1.VolumeMount{{
 			Name:      sharedContextVolumeName,

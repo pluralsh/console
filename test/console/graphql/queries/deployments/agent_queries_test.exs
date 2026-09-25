@@ -153,6 +153,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
         query AgentRun($id: ID!) {
           agentRun(id: $id) {
             id
+            workbenchMcpUrl
             workbenchJob {
               id
               workbench { id name }
@@ -165,6 +166,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       assert found["workbenchJob"]["id"] == job.id
       assert found["workbenchJob"]["workbench"]["id"] == workbench.id
       assert found["workbenchJob"]["workbench"]["name"] == "infra-debugger"
+      assert found["workbenchMcpUrl"] == Console.url("/mcp/workbench/#{workbench.id}")
     end
 
     test "it returns null workbenchJob when the run is not linked to a workbench activity" do
@@ -175,6 +177,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
         query AgentRun($id: ID!) {
           agentRun(id: $id) {
             id
+            workbenchMcpUrl
             workbenchJob { id }
           }
         }
@@ -182,6 +185,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
 
       assert found["id"] == run.id
       refute found["workbenchJob"]
+      refute found["workbenchMcpUrl"]
     end
   end
 

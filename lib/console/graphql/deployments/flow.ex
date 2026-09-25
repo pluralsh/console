@@ -4,6 +4,7 @@ defmodule Console.GraphQl.Deployments.Flow do
   alias Console.GraphQl.Resolvers.{Deployments, User, FlowSummaryLoader}
 
   ecto_enum :mcp_server_protocol, Console.Schema.McpServer.Protocol
+  ecto_enum :oauth_token_exchange_type, Console.Schema.DeploymentSettings.OauthToken.Type
 
   enum :flow_sort do
     value :name
@@ -37,6 +38,19 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :write_bindings, list_of(:policy_binding_attributes)
   end
 
+  input_object :oauth_token_exchange_attributes do
+    field :enabled,       :boolean
+    field :type,          :oauth_token_exchange_type
+    field :token_url,     :string
+    field :client_id,     :string
+    field :client_secret, :string
+    field :private_key,   :string
+    field :key_id,        :string
+    field :audience,      :string
+    field :resource,      :string
+    field :scopes,        list_of(:string)
+  end
+
   input_object :mcp_server_association_attributes do
     field :server_id, :id
   end
@@ -47,6 +61,7 @@ defmodule Console.GraphQl.Deployments.Flow do
 
   input_object :mcp_server_authentication_attributes do
     field :plural, :boolean, description: "whether to use Plural's built-in JWT authentication"
+    field :oauth, :oauth_token_exchange_attributes, description: "OAuth2 client credentials token exchange"
     field :headers, list_of(:mcp_header_attributes)
   end
 
@@ -180,8 +195,20 @@ defmodule Console.GraphQl.Deployments.Flow do
     timestamps()
   end
 
+  object :oauth_token_exchange do
+    field :enabled,   :boolean
+    field :type,      :oauth_token_exchange_type
+    field :token_url, :string
+    field :client_id, :string
+    field :key_id,    :string
+    field :audience,  :string
+    field :resource,  :string
+    field :scopes,    list_of(:string)
+  end
+
   object :mcp_server_authentication do
     field :plural,  :boolean, description: "built-in Plural JWT authentication"
+    field :oauth, :oauth_token_exchange, description: "OAuth2 client credentials token exchange"
     field :headers, list_of(:mcp_server_header), description: "any custom HTTP headers needed for authentication"
   end
 

@@ -13069,7 +13069,9 @@ addons:
           probes (helps tailoring probe config via Helm/overrides).']
       breaking_changes: []
     chart_version: 1.20.2
-    images: []
+    images: ['quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463',
+      'quay.io/cilium/cilium:v1.20.2@sha256:2939231d0d3e3ebddcd80fffa168b7ddcc78fdf0dc864d1c8c126ff523c54f01',
+      'quay.io/cilium/operator-generic:v1.20.2@sha256:64d8798350e8569b8e7622563fed6e44dce2625f311e4651b774816516c744fc']
   - version: 1.20.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -13115,7 +13117,9 @@ addons:
           from 0.3.1 to 1.0.0, which can affect clusters using custom CNI config management
           or validating CNI config schema/format.']
     chart_version: 1.20.0
-    images: []
+    images: ['quay.io/cilium/cilium-envoy:v1.37.5-1782911245-7cffc778c923f68a77954a53b1a98d6b5353f004@sha256:583057dd4f7d54cd41efff3c413aa0b148ac201f522e2c3336851fa89c78b039',
+      'quay.io/cilium/cilium:v1.20.0@sha256:383968cd5e8873f7976fa76aa6196045643558f4cc9518a207b9335cb24a0e93',
+      'quay.io/cilium/operator-generic:v1.20.0@sha256:80744a8cc7c91c2f9e6347629406844eb35d79b30a732c6d41c15b17232a74f3']
   - version: 1.19.8
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -13162,7 +13166,9 @@ addons:
           labels will cause those EndpointSlices to be ignored (service routing may
           break).']
     chart_version: 1.19.8
-    images: []
+    images: ['quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463',
+      'quay.io/cilium/cilium:v1.19.8@sha256:e9f7ee1f2f3a41e44339612e3b6b88170bdde7679c9c9461f287bb27702a8ecf',
+      'quay.io/cilium/operator-generic:v1.19.8@sha256:786ec9bb1a9344435e3e3f994bc4ed3a4a85afa6a314e98681af241f8be79833']
   - version: 1.19.4
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -13201,7 +13207,9 @@ addons:
           while `hostNetwork` was disabled, that exposure no longer happens by default
           in this chart version.']
     chart_version: 1.19.4
-    images: []
+    images: ['quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3',
+      'quay.io/cilium/cilium:v1.19.4@sha256:2eb67991eaa9368ba199c2fac2c573cb0ffdeb79184533344f42fc9a7ff6af3c',
+      'quay.io/cilium/operator-generic:v1.19.4@sha256:1aa2b62735e7d8ab49ee840ae59c346932024c88901579121395c1271b435f71']
   - version: 1.19.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -13244,7 +13252,9 @@ addons:
         Encryption strict mode (if enabled) will drop unencrypted inter-node traffic;
           ensure all nodes are correctly enrolled/compatible before turning it on.]
     chart_version: 1.19.0
-    images: []
+    images: ['quay.io/cilium/cilium-envoy:v1.35.9-1768828720-c6e4827ebca9c47af2a3a6540c563c30947bae29@sha256:696582a3391ce05a62edb4140e6a99f774351f363f5b5d7f1581f3a244430249',
+      'quay.io/cilium/cilium:v1.19.0@sha256:be9f8571c2e114b3e12e41f785f2356ade703b2eac936aa878805565f0468c60',
+      'quay.io/cilium/operator-generic:v1.19.0@sha256:5b04006015e5800307dc6314676edc4c0bb7ac2fc7848be2b94b43bb030ab648']
   - version: 1.18.14
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -14201,7 +14211,7 @@ addons:
       'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
     eolAt: '2025-02-04'
   - version: 1.14.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -14353,7 +14363,7 @@ addons:
       'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
     eolAt: '2024-07-24'
   - version: 1.13.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -14447,6 +14457,21 @@ addons:
     chart_version: 1.12.14
     images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
       'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
+  - version: 1.12.5
+    kube: ['1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Helm chart: ServiceMonitor relabelings are now configurable;
+          node label was re-introduced on cilium/hubble metrics (may affect Prometheus
+          label sets/alerts/dashboards).']
+      features: [Added a BPF backend map downgrade path (v3 -> v2) to make downgrades
+          safer/possible in more scenarios.]
+      breaking_changes: []
+    chart_version: 1.12.5
+    images: ['quay.io/cilium/cilium:v1.12.5@sha256:06ce2b0a0a472e73334a7504ee5c5d8b2e2d7b72ef728ad94e564740dd505be5',
+      'quay.io/cilium/operator-generic:v1.12.5@sha256:b296eb7f0f7656a5cc19724f40a8a7121b7fd725278b7d61dc91fe0b7ffd7c0e']
   - version: 1.12.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -14509,6 +14534,24 @@ addons:
     chart_version: 1.12.0
     images: ['quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade',
       'quay.io/cilium/operator-generic:v1.12.0@sha256:bb2a42eda766e5d4a87ee8a5433f089db81b72dd04acf6b59fcbb445a95f9410']
+  - version: 1.11.13
+    kube: ['1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Envoy was updated to v1.21.3 (in 1.11.6) to address several moderate/high/critical
+          CVEs, improving security posture during the 1.11.x line.', 'Bugtool gained
+          an option to exclude endpoint objects from its output (present by 1.11.13),
+          useful when collecting diagnostics without leaking workload details.', 'Preflight
+          validation became stricter: validate-cnp now fails if a CiliumClusterwideNetworkPolicy
+          uses an empty toEndpoints/fromEndpoints selector (present by 1.11.13), helping
+          catch unsafe/invalid policies earlier.']
+      breaking_changes: []
+    chart_version: 1.11.13
+    images: ['quay.io/cilium/cilium:v1.11.13@sha256:cc5212dd709d1fadf19ffeae602d2af54d03634791f0f1a7e3bab0bd263918a1',
+      'quay.io/cilium/operator-generic:v1.11.13@sha256:a34fc3d5007201bdfe7fc3a469351dc6b9f190720ea54622f94cdfb0b28c6726']
   - version: 1.11.6
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -14697,6 +14740,38 @@ addons:
     chart_version: 1.11.0
     images: ['quay.io/cilium/cilium:v1.11.0@sha256:ea677508010800214b0b5497055f38ed3bff57963fa2399bcb1c69cf9476453a',
       'quay.io/cilium/operator-generic:v1.11.0@sha256:b522279577d0d5f1ad7cadaacb7321d1b172d8ae8c8bc816e503c897b420cfe3']
+  - version: 1.10.19
+    kube: ['1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- No Helm chart changelog was provided in the notes you shared,\
+        \ so there are **no explicit Helm values changes** I can call out from this\
+        \ input.\n- From the v1.10.12 notes, be aware of Helm-related behavior changes\
+        \ that may affect your deployment manifests:\n  - The chart **uses ports 80/443\
+        \ by default for the Hubble peer service**.\n  - The chart **doesn\u2019t\
+        \ generate the hubble-peer Service during preflight checks**.\n  - Behavior\
+        \ around `hubble.listenAddress` changed: **an empty value should no longer\
+        \ disable the peer service**.\n\n(If you can share the Helm chart release\
+        \ notes between 1.10.12 and 1.10.19, I can extract exact `values.yaml` key\
+        \ changes.)"
+      chart_updates: [Envoy version updated to v1.21.3 in v1.10.12 to address multiple
+          CVEs., UI images updated to v0.9.0 and the Envoy proxy container is dropped
+          (per v1.10.12 notes)., 'Hubble Relay deployment fix in v1.10.19: `TerminationMessagePolicy`
+          corrected.', CNI bumped to 1.2.0 in v1.10.19., Hubble CLI image bumped to
+          v0.11.1 in v1.10.19.]
+      features: ['Improved FQDN/DNS scalability: concurrency limiting for DNS message
+          processing plus reduced lock contention under bursty DNS traffic.', 'Additional
+          FQDN observability: new/expanded metrics (identity type label; active FQDN
+          connections per endpoint; improved DNS proxy error metrics) and a tunable
+          FQDN regex LRU size.']
+      breaking_changes: ['No explicit breaking changes are called out in the release
+          notes you provided. Treat the UI change (dropping the Envoy proxy container)
+          as potentially behavior-impacting if you relied on that container being
+          present (e.g., sidecar expectations, probes, or custom manifests).']
+    chart_version: 1.10.19
+    images: ['quay.io/cilium/cilium:v1.10.19@sha256:63c76e5c2317b22f9e11c5d30f1b799cd19eb88649c03941f66dbd9b8f487f15',
+      'quay.io/cilium/operator-generic:v1.10.19@sha256:d09f5ca4738bb9190c977f4ffed77e2aec2eae50db2a75368cbcc3f8f7ab6708']
   - version: 1.10.12
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -15685,7 +15760,7 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 1.31.0
-    images: []
+    images: ['coredns/coredns:1.11.1']
   - version: 1.10.1
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27']
@@ -17562,6 +17637,28 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.11.0
+    kube: ['1.36']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- **New value:** `global.imageRegistry` added to the `external-secrets`
+        chart. Use this to prefix all images with a private registry/mirror if needed
+        (e.g., `global.imageRegistry: my-registry.example.com`).
+
+        - No other Helm values changes were called out in the provided notes.'
+      chart_updates: [Added `global.imageRegistry` support in the Helm chart., Grafana
+          dashboard ConfigMap can now be created in a specified namespace (chart-related
+          capability noted in release notes).]
+      features: [OpenStack Barbican provider now supports authentication via Application
+          Credentials., Grafana dashboard ConfigMap namespace can be specified (useful
+          when you install dashboards into a central monitoring namespace)., Webhook
+          provider now returns a clear "not supported" error for `GetAllSecrets` instead
+          of ambiguous behavior., KeeperSecurity provider improved behavior for missing
+          records and folderID handling when pushing secrets.]
+      breaking_changes: []
+    chart_version: 2.11.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.11.0']
   - version: 2.10.0
     kube: ['1.36']
     requirements: []
@@ -19084,11 +19181,26 @@ addons:
   chart_name: istiod
   eolApiSlug: istio
   versions:
-  - version: 1.31.0
+  - version: 1.31.1
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary: null
+    chart_version: 1.31.1
+    images: ['docker.io/istio/pilot:1.31.1']
+    eolAt: '2027-02-28'
+  - version: 1.31.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No actionable feature details were included in the provided release
+          notes excerpt; only metadata (tag/date/assets) was shown.]
+      breaking_changes: [No breaking changes were included in the provided release
+          notes excerpt; further details from the full Istio 1.31.0 release notes/changelog
+          are required.]
     chart_version: 1.31.0
     images: ['docker.io/istio/pilot:1.31.0']
     eolAt: '2027-02-28'
@@ -19876,6 +19988,12 @@ addons:
   helm_repository_url: https://kedacore.github.io/charts
   eolApiSlug: keda
   versions:
+  - version: 2.21.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.21.0
   - version: 2.20.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -19888,6 +20006,7 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 2.19.0
+    eolAt: '2026-09-23'
   - version: 2.18.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -20075,6 +20194,43 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 91.5.2
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['RBAC fix: allow the Prometheus Operator to adjust finalizers
+          on ConfigMaps/Secrets (PR #7295).', 'Dependency non-major updates via Renovate
+          (PR #7307).']
+      features: []
+      breaking_changes: []
+    chart_version: 91.5.2
+    images: ['docker.io/grafana/grafana:13.2.2-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.94.1',
+      'quay.io/prometheus/alertmanager:v0.34.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+  - version: 91.5.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['CI: Baseline chart installation now uses target values (test/CI
+          only; should not affect runtime installs).', Grafana image tag updated to
+          **v13.2.5** (already included in 91.4.1)., '91.5.0: Bumps kube-prometheus-stack
+          chart dependencies with **non-major** updates (exact subchart/app versions
+          not listed in provided notes).']
+      features: [No new user-facing features called out; changes are primarily dependency
+          refreshes.]
+      breaking_changes: [No breaking changes mentioned in the provided release notes.]
+    chart_version: 91.5.0
+    images: ['docker.io/grafana/grafana:13.2.2-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.94.0',
+      'quay.io/prometheus/alertmanager:v0.34.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 91.4.1
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -21714,7 +21870,11 @@ addons:
           compatibility behavior, verify CRD versions/fields against your cluster
           and Prometheus Operator expectations before upgrading.']
     chart_version: 65.8.1
-    images: []
+    images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.3.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
+      'quay.io/prometheus-operator/prometheus-operator:v0.77.2', 'quay.io/prometheus/alertmanager:v0.27.0',
+      'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v2.55.0',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
   - version: 64.0.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -24559,7 +24719,7 @@ addons:
           request/redirect behavior compared to earlier 3.7.x expectations; validate
           ingress annotations in staging.]
     chart_version: 41.6.0
-    images: []
+    images: ['docker.io/traefik:v3.7.13']
   - version: 3.7.0
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
@@ -24595,7 +24755,7 @@ addons:
           rewrite-target handling) changed/fixed and should be validated against your
           current annotations/config.']
     chart_version: 40.0.1
-    images: []
+    images: ['docker.io/traefik:v3.7.0']
   - version: 3.6.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -25834,7 +25994,7 @@ addons:
       'openpolicyagent/gatekeeper:v3.13.2']
     eolAt: '2024-02-05'
   - version: 3.13.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -25877,7 +26037,7 @@ addons:
       'openpolicyagent/gatekeeper:v3.13.0']
     eolAt: '2024-02-05'
   - version: 3.12.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -25915,7 +26075,7 @@ addons:
       'openpolicyagent/gatekeeper:v3.12.0']
     eolAt: '2023-11-01'
   - version: 3.11.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -25967,7 +26127,7 @@ addons:
       'openpolicyagent/gatekeeper:v3.11.0']
     eolAt: '2023-08-08'
   - version: 3.10.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26020,7 +26180,7 @@ addons:
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.10.0',
       'openpolicyagent/gatekeeper:v3.10.0']
   - version: 3.9.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26071,7 +26231,7 @@ addons:
     chart_version: 3.9.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.9.0', 'openpolicyagent/gatekeeper:v3.9.0']
   - version: 3.8.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26132,7 +26292,7 @@ addons:
     chart_version: 3.8.0
     images: ['openpolicyagent/gatekeeper-crds:v3.8.0', 'openpolicyagent/gatekeeper:v3.8.0']
   - version: 3.7.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26173,7 +26333,7 @@ addons:
     chart_version: 3.7.0
     images: ['openpolicyagent/gatekeeper-crds:v3.7.0', 'openpolicyagent/gatekeeper:v3.7.0']
   - version: 3.6.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26213,7 +26373,7 @@ addons:
     images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper-crds:v3.6.0',
       'openpolicyagent/gatekeeper:v3.6.0']
   - version: 3.5.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26246,7 +26406,7 @@ addons:
     chart_version: 3.5.0
     images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.5.0']
   - version: 3.4.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26283,7 +26443,7 @@ addons:
     chart_version: 3.4.0
     images: ['line/kubectl-kustomize:1.20.4-4.0.5', 'openpolicyagent/gatekeeper:v3.4.0']
   - version: 3.3.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26333,7 +26493,7 @@ addons:
     chart_version: 3.3.0
     images: ['openpolicyagent/gatekeeper:v3.3.0']
   - version: 3.2.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -26348,7 +26508,7 @@ addons:
     chart_version: 3.2.0
     images: ['openpolicyagent/gatekeeper:v3.2.0']
   - version: 3.1.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
@@ -27132,7 +27292,7 @@ addons:
       breaking_changes: [No breaking changes are enumerated in the provided notes;
           they direct readers to the upgrading guide and GitHub issues for breaking
           changes/known issues.]
-    chart_version: 2.0.7
+    chart_version: 2.0.8
     images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
       'quay.io/argoproj/workflow-controller:v4.1.4']
   - version: 4.1.0
@@ -27320,7 +27480,7 @@ addons:
     chart_version: 0.34.0
     images: ['quay.io/argoproj/argocli:v3.4.11', 'quay.io/argoproj/workflow-controller:v3.4.11']
   - version: 3.4.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27337,7 +27497,7 @@ addons:
     chart_version: 0.20.0
     images: ['quay.io/argoproj/argocli:v3.4.0', 'quay.io/argoproj/workflow-controller:v3.4.0']
   - version: 3.3.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27354,7 +27514,7 @@ addons:
     chart_version: 0.15.1
     images: ['quay.io/argoproj/argocli:v3.3.2', 'quay.io/argoproj/workflow-controller:v3.3.2']
   - version: 3.2.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27369,7 +27529,7 @@ addons:
     chart_version: 0.8.2
     images: ['quay.io/argoproj/argocli:v3.2.0', 'quay.io/argoproj/workflow-controller:v3.2.0']
   - version: 3.1.5
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27893,7 +28053,7 @@ addons:
     chart_version: 0.25.0
     images: ['timberio/vector:0.32.2-distroless-libc']
   - version: 0.32.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27907,7 +28067,7 @@ addons:
     chart_version: 0.24.0
     images: ['timberio/vector:0.32.0-distroless-libc']
   - version: 0.31.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27922,7 +28082,7 @@ addons:
     chart_version: 0.23.0
     images: ['timberio/vector:0.31.0-distroless-libc']
   - version: 0.30.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27937,7 +28097,7 @@ addons:
     chart_version: 0.22.1
     images: ['timberio/vector:0.30.0-distroless-libc']
   - version: 0.29.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27948,7 +28108,7 @@ addons:
     chart_version: 0.21.0
     images: ['timberio/vector:0.29.0-distroless-libc']
   - version: 0.28.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27962,7 +28122,7 @@ addons:
     chart_version: 0.20.0
     images: ['timberio/vector:0.28.0-distroless-libc']
   - version: 0.27.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27975,7 +28135,7 @@ addons:
     chart_version: 0.19.0
     images: ['timberio/vector:0.27.0-distroless-libc']
   - version: 0.26.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -27991,7 +28151,7 @@ addons:
     chart_version: 0.18.0
     images: ['timberio/vector:0.26.0-distroless-libc']
   - version: 0.25.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28006,7 +28166,7 @@ addons:
     chart_version: 0.17.0
     images: ['timberio/vector:0.25.1-distroless-libc']
   - version: 0.24.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28021,7 +28181,7 @@ addons:
     chart_version: 0.16.0
     images: ['timberio/vector:0.24.0-distroless-libc']
   - version: 0.23.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28037,7 +28197,7 @@ addons:
     chart_version: 0.15.0
     images: ['timberio/vector:0.23.0-distroless-libc']
   - version: 0.22.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28049,7 +28209,7 @@ addons:
     chart_version: 0.13.0
     images: ['timberio/vector:0.22.0-distroless-libc']
   - version: 0.21.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28064,7 +28224,7 @@ addons:
     chart_version: 0.10.0
     images: ['timberio/vector:0.21.0-distroless-libc']
   - version: 0.20.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28077,7 +28237,7 @@ addons:
     chart_version: 0.7.0
     images: ['timberio/vector:0.20.0-distroless-libc']
   - version: 0.19.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28094,7 +28254,7 @@ addons:
     chart_version: 0.4.0
     images: ['timberio/vector:0.19.0-distroless-libc']
   - version: 0.18.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28108,7 +28268,7 @@ addons:
     chart_version: 0.2.1
     images: ['timberio/vector:0.18.0-distroless-libc']
   - version: 0.17.3
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -28124,7 +28284,7 @@ addons:
     chart_version: 0.1.1
     images: ['timberio/vector:0.17.3-distroless-libc']
   - version: 0.16.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
@@ -28150,7 +28310,7 @@ addons:
           earlier (admission time) instead of failing later during reconciliation.]
       breaking_changes: []
     chart_version: 0.67.3
-    images: []
+    images: ['victoriametrics/operator:v0.74.1']
   - version: 0.74.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28189,7 +28349,7 @@ addons:
           by default; if you relied on it to block invalid resources, you must explicitly
           enable it with `VM_PROMCR_VALIDATION_ENABLED`.']
     chart_version: 0.67.2
-    images: []
+    images: ['victoriametrics/operator:v0.74.0']
   - version: 0.73.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28221,7 +28381,7 @@ addons:
           managed resource names; avoid toggling it on an existing installation unless
           you intend a migration and understand the rollout/ownership implications.]
     chart_version: 0.66.1
-    images: []
+    images: ['victoriametrics/operator:v0.73.0']
   - version: 0.72.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28262,7 +28422,7 @@ addons:
           may start rejecting previously-applied Prometheus Operator CRDs that don''t
           translate/validate cleanly against VM equivalents.']
     chart_version: 0.65.1
-    images: []
+    images: ['victoriametrics/operator:v0.72.0']
   - version: 0.71.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28300,7 +28460,7 @@ addons:
           CR spec unmarshalling on create may break existing manifests that contain
           unknown/typo fields; these will now be rejected or fail reconciliation.]
     chart_version: 0.64.1
-    images: []
+    images: ['victoriametrics/operator:v0.71.0']
   - version: 0.70.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28336,7 +28496,7 @@ addons:
           from first_available to least_loaded, which may change traffic patterns
           and capacity distribution after upgrade.']
     chart_version: 0.63.0
-    images: []
+    images: ['victoriametrics/operator:v0.70.0']
   - version: 0.69.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28383,7 +28543,7 @@ addons:
           become inaccessible or unintentionally open until CRs are updated to explicitly
           configure access.]
     chart_version: 0.62.1
-    images: []
+    images: ['victoriametrics/operator:v0.69.0']
   - version: 0.68.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -28419,7 +28579,7 @@ addons:
           you should migrate now to `spec.targets.kubernetes` and `spec.targets.static`
           to avoid future breakage.']
     chart_version: 0.59.0
-    images: []
+    images: ['victoriametrics/operator:v0.68.0']
   - version: 0.67.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -28446,7 +28606,7 @@ addons:
           \ fields: VMAgent `spec.aPIServerConfig` and VMCluster `spec.vmselect.persistentVolume`\u2014\
           manifests using them will fail validation/reconciliation."]
     chart_version: 0.58.1
-    images: []
+    images: ['victoriametrics/operator:v0.67.0']
   - version: 0.66.1
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -28466,7 +28626,7 @@ addons:
           removes deprecated status fields: `VMCluster.status.clusterStatus` and `VMSingle.status.singleStatus`
           (may break dashboards/scripts that read them).']
     chart_version: 0.57.1
-    images: []
+    images: ['victoriametrics/operator:v0.66.1']
   - version: 0.66.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -28491,7 +28651,7 @@ addons:
           that reads these status fields must be updated to use the current status
           structure.]
     chart_version: 0.57.0
-    images: []
+    images: ['victoriametrics/operator:v0.66.0']
   - version: 0.65.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -28507,7 +28667,7 @@ addons:
           VMProbe (and related). This is a schema/type change that may require updating
           manifests/clients or re-applying CRDs if validation fails.']
     chart_version: 0.56.4
-    images: []
+    images: ['victoriametrics/operator:v0.65.0']
   - version: 0.64.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -28547,7 +28707,7 @@ addons:
           scanning), you must either accept the new image or set `VM_USECUSTOMCONFIGRELOADER=false`
           to keep prior behavior.']
     chart_version: 0.55.2
-    images: []
+    images: ['victoriametrics/operator:v0.64.0']
   - version: 0.63.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -28572,7 +28732,7 @@ addons:
           to customize the label key used in the top-route namespace matcher for VMAlertmanagerConfig.]
       breaking_changes: []
     chart_version: 0.54.1
-    images: []
+    images: ['victoriametrics/operator:v0.63.0']
   - version: 0.62.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -28589,7 +28749,7 @@ addons:
           with `name`, `is_set`, `value` labels).']
       breaking_changes: []
     chart_version: 0.52.1
-    images: []
+    images: ['victoriametrics/operator:v0.62.0']
   - version: 0.61.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -28632,7 +28792,7 @@ addons:
           without it, operator actions involving evictions/PDB-respecting StatefulSet
           updates may fail.']
     chart_version: 0.51.2
-    images: []
+    images: ['victoriametrics/operator:v0.61.0']
   - version: 0.60.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -28654,7 +28814,7 @@ addons:
           (and semantics broaden to all secret/configmap fetch failures), which can
           break dashboards/alerts.']
     chart_version: 0.52.0
-    images: []
+    images: ['victoriametrics/operator:v0.60.0']
   - version: 0.59.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -28690,7 +28850,7 @@ addons:
           (`app.kubernetes.io/name` and add `app.kubernetes.io/instance`); if you
           select resources by these labels in tooling/policies, update selectors accordingly.']
     chart_version: 0.49.0-rc1
-    images: []
+    images: ['victoriametrics/operator:v0.59.0']
   - version: 0.58.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -28707,7 +28867,7 @@ addons:
           version with a known bug (VictoriaMetrics#8941). Recommended to skip this
           release; if you must upgrade, override vmagent to `v1.117.1` via `VM_VMAGENTDEFAULT_VERSION=v1.117.1`.']
     chart_version: 0.47.0
-    images: []
+    images: ['victoriametrics/operator:v0.58.0']
   - version: 0.57.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -28730,7 +28890,7 @@ addons:
           and defaults to 1 month when omitted; previously accepted values may now
           be rejected by the webhook/CRD validation.]
     chart_version: 0.46.0
-    images: []
+    images: ['victoriametrics/operator:v0.57.0']
   - version: 0.56.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -28756,7 +28916,7 @@ addons:
           on proxy-protocol on that internal endpoint, adjust your setup or remove
           the expectation.']
     chart_version: 0.45.0
-    images: []
+    images: ['victoriametrics/operator:v0.56.0']
   - version: 0.55.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -28789,7 +28949,7 @@ addons:
           vars are now deprecated in favor of the new global `VM_CONFIG_RELOADER_REQUEST_CPU/MEMORY`
           controls (not an immediate break, but update values/automation accordingly).']
     chart_version: 0.44.0
-    images: []
+    images: ['victoriametrics/operator:v0.55.0']
   - version: 0.54.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -28802,7 +28962,7 @@ addons:
           VLogs resources (VLogs support in VMUser).]
       breaking_changes: []
     chart_version: 0.43.1
-    images: []
+    images: ['victoriametrics/operator:v0.54.1']
   - version: 0.53.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -28817,7 +28977,7 @@ addons:
           \ (from v1.109.1).", Rebuilds operator with Go 1.23.5 (security patch upgrade).]
       breaking_changes: []
     chart_version: 0.42.5
-    images: []
+    images: ['victoriametrics/operator:v0.53.0']
   - version: 0.52.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -28848,7 +29008,7 @@ addons:
           stale if `controller.statusLastUpdateTimeTTL` too low for your object count;
           tune accordingly.']
     chart_version: 0.41.2
-    images: []
+    images: ['victoriametrics/operator:v0.52.0']
   - version: 0.51.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -28900,7 +29060,7 @@ addons:
           and several inlined VMAuth.spec fields are deprecated in favor of unauthorizedUserAccessSpec
           (supported until v1.0).']
     chart_version: 0.40.1
-    images: []
+    images: ['victoriametrics/operator:v0.51.1']
   - version: 0.50.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -28928,7 +29088,7 @@ addons:
           \ was added. Existing manifests must be updated or they will fail validation/behavior\
           \ will change."]
     chart_version: 0.39.1
-    images: []
+    images: ['victoriametrics/operator:v0.50.0']
   - version: 0.49.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -28962,7 +29122,7 @@ addons:
           security settings may see pods fail to start until securityContext/permissions
           are adjusted.']
     chart_version: 0.37.0
-    images: []
+    images: ['victoriametrics/operator:v0.49.0']
   - version: 0.48.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -29000,7 +29160,7 @@ addons:
           can change deletion/GC semantics in GitOps setups (e.g., Argo CD pruning)
           if you previously managed PVCs separately.']
     chart_version: 0.35.0
-    images: []
+    images: ['victoriametrics/operator:v0.48.0']
   - version: 0.47.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -29054,7 +29214,7 @@ addons:
           it to `blackhole` (previously it picked the first VMAlertmanagerConfig receiver),
           which can change alert delivery until you set an explicit receiver.']
     chart_version: 0.34.0
-    images: []
+    images: ['victoriametrics/operator:v0.47.0']
   - version: 0.46.4
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -29481,7 +29641,7 @@ addons:
     chart_version: 0.25.0
     images: ['victoriametrics/operator:v0.36.0']
   - version: 0.35.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29497,7 +29657,7 @@ addons:
     chart_version: 0.24.0
     images: ['victoriametrics/operator:v0.35.0']
   - version: 0.34.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29516,7 +29676,7 @@ addons:
     chart_version: 0.23.0
     images: ['victoriametrics/operator:v0.34.0']
   - version: 0.33.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29534,7 +29694,7 @@ addons:
     chart_version: 0.21.0
     images: ['victoriametrics/operator:v0.33.0']
   - version: 0.32.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29552,7 +29712,7 @@ addons:
     chart_version: 0.20.0
     images: ['victoriametrics/operator:v0.32.0']
   - version: 0.31.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29568,7 +29728,7 @@ addons:
     chart_version: 0.19.0
     images: ['victoriametrics/operator:v0.31.0']
   - version: 0.30.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29587,7 +29747,7 @@ addons:
     chart_version: 0.17.0
     images: ['victoriametrics/operator:v0.30.0']
   - version: 0.29.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29606,7 +29766,7 @@ addons:
     chart_version: 0.15.0
     images: ['victoriametrics/operator:v0.29.0']
   - version: 0.28.3
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29622,7 +29782,7 @@ addons:
     chart_version: 0.14.0
     images: ['victoriametrics/operator:v0.28.3']
   - version: 0.27.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29640,7 +29800,7 @@ addons:
     chart_version: 0.12.0
     images: ['victoriametrics/operator:v0.27.0']
   - version: 0.26.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29666,7 +29826,7 @@ addons:
     chart_version: 0.11.1
     images: ['victoriametrics/operator:v0.26.0']
   - version: 0.25.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29687,7 +29847,7 @@ addons:
     chart_version: 0.10.0
     images: ['victoriametrics/operator:v0.25.0']
   - version: 0.24.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29709,7 +29869,7 @@ addons:
     chart_version: 0.9.0
     images: ['victoriametrics/operator:v0.24.0']
   - version: 0.23.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29725,7 +29885,7 @@ addons:
     chart_version: 0.7.1
     images: ['victoriametrics/operator:v0.23.0']
   - version: 0.22.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29742,7 +29902,7 @@ addons:
     chart_version: 0.6.0
     images: ['victoriametrics/operator:v0.22.0']
   - version: 0.21.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29766,7 +29926,7 @@ addons:
     chart_version: 0.5.1
     images: ['victoriametrics/operator:v0.21.0']
   - version: 0.20.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29785,7 +29945,7 @@ addons:
     chart_version: 0.4.0
     images: ['victoriametrics/operator:v0.20.0']
   - version: 0.19.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29803,7 +29963,7 @@ addons:
     chart_version: 0.3.0
     images: ['victoriametrics/operator:v0.19.0']
   - version: 0.18.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29838,7 +29998,7 @@ addons:
     chart_version: 0.2.0
     images: ['victoriametrics/operator:v0.18.0']
   - version: 0.17.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29856,7 +30016,7 @@ addons:
     chart_version: 0.1.18
     images: ['victoriametrics/operator:v0.17.1']
   - version: 0.16.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29872,7 +30032,7 @@ addons:
     chart_version: 0.1.17
     images: ['victoriametrics/operator:v0.16.0']
   - version: 0.15.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29888,7 +30048,7 @@ addons:
     chart_version: 0.1.14
     images: ['victoriametrics/operator:v0.15.0']
   - version: 0.14.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29900,7 +30060,7 @@ addons:
     chart_version: 0.1.13
     images: ['victoriametrics/operator:v0.14.2']
   - version: 0.13.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29912,7 +30072,7 @@ addons:
     chart_version: 0.1.12
     images: ['victoriametrics/operator:v0.13.0']
   - version: 0.12.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29925,7 +30085,7 @@ addons:
     chart_version: 0.1.10
     images: ['victoriametrics/operator:v0.12.2']
   - version: 0.11.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29942,7 +30102,7 @@ addons:
     chart_version: 0.1.9
     images: ['victoriametrics/operator:v0.11.0']
   - version: 0.9.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29959,7 +30119,7 @@ addons:
     chart_version: 0.1.8
     images: ['victoriametrics/operator:v0.9.1']
   - version: 0.8.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29977,7 +30137,7 @@ addons:
     chart_version: 0.1.7
     images: ['victoriametrics/operator:v0.8.0']
   - version: 0.7.3
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29989,7 +30149,7 @@ addons:
     chart_version: 0.1.5
     images: ['victoriametrics/operator:v0.7.3']
   - version: 0.6.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -30001,7 +30161,7 @@ addons:
     chart_version: 0.1.4
     images: ['victoriametrics/operator:v0.6.1']
   - version: 0.2.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
@@ -30015,8 +30175,14 @@ addons:
   helm_values: dcgmExporter.config.name=default
   readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
   versions:
+  - version: 26.7.1
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    chart_version: 26.7.1
+    images: ['nvcr.io/nvidia/gpu-operator:v26.7.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.19.0']
+    incompatibilities: []
   - version: 26.7.0
-    kube: ['1.36', '1.35', '1.34']
+    kube: ['1.37', '1.36', '1.35']
     requirements: []
     chart_version: 26.7.0
     images: ['nvcr.io/nvidia/gpu-operator:v26.7.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.19.0']
@@ -30166,145 +30332,145 @@ addons:
     images: ['nvcr.io/nvidia/gpu-operator:v23.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
     incompatibilities: []
   - version: 23.3.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 23.3.2
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
     incompatibilities: []
   - version: 23.3.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 23.3.1
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
     incompatibilities: []
   - version: 23.3.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 23.3.0
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
     incompatibilities: []
   - version: 22.9.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 22.9.2
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.2']
     incompatibilities: []
   - version: 22.9.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 22.9.1
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.1']
     incompatibilities: []
   - version: 22.9.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 22.9.0
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.0']
     incompatibilities: []
   - version: 1.11.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.11.1
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.11.1']
     incompatibilities: []
   - version: 1.11.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.11.0
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.11.0']
     incompatibilities: []
   - version: 1.10.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.10.1
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.1']
     incompatibilities: []
   - version: 1.10.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.10.0
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.0']
     incompatibilities: []
   - version: 1.9.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.9.1
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.9.1']
     incompatibilities: []
   - version: 1.9.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.9.0
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.9.0']
     incompatibilities: []
   - version: 1.8.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.8.2
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.2']
     incompatibilities: []
   - version: 1.8.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.8.1
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.1']
     incompatibilities: []
   - version: 1.8.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.8.0
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.0']
     incompatibilities: []
   - version: 1.7.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.7.1
     images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.7.1']
     incompatibilities: []
   - version: 1.7.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.7.0
     images: ['nvcr.io/nvidia/gpu-operator:v1.7.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
   - version: 1.6.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.6.2
     images: ['nvcr.io/nvidia/gpu-operator:1.6.2', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
   - version: 1.6.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.6.1
     images: ['nvcr.io/nvidia/gpu-operator:1.6.1', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
   - version: 1.6.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.6.0
     images: ['nvcr.io/nvidia/gpu-operator:1.6.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
   - version: 1.5.2
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.5.2
     images: ['nvcr.io/nvidia/gpu-operator:1.5.2', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
   - version: 1.5.1
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.5.1
     images: ['nvcr.io/nvidia/gpu-operator:1.5.1', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
   - version: 1.5.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.5.0
     images: ['nvcr.io/nvidia/gpu-operator:1.5.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
     incompatibilities: []
   - version: 1.4.0
-    kube: ['1.26', '1.25', '1.24']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 1.4.0
     images: ['nvcr.io/nvidia/gpu-operator:1.4.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
@@ -30348,7 +30514,9 @@ addons:
           need to explicitly allow the replication adapters they use; unsupported/unlisted
           adapters may no longer work until permitted.']
     chart_version: 1.18.0
-    images: []
+    images: ['goharbor/harbor-core:v2.14.0', 'goharbor/harbor-db:v2.14.0', 'goharbor/harbor-jobservice:v2.14.0',
+      'goharbor/harbor-portal:v2.14.0', 'goharbor/harbor-registryctl:v2.14.0', 'goharbor/redis-photon:v2.14.0',
+      'goharbor/registry-photon:v2.14.0', 'goharbor/trivy-adapter-photon:v2.14.0']
   - version: 2.13.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -30375,14 +30543,18 @@ addons:
           any clients/scripts using legacy robot APIs must migrate to the newer robot
           account model.]
     chart_version: 1.17.0
-    images: []
+    images: ['goharbor/harbor-core:v2.13.0', 'goharbor/harbor-db:v2.13.0', 'goharbor/harbor-jobservice:v2.13.0',
+      'goharbor/harbor-portal:v2.13.0', 'goharbor/harbor-registryctl:v2.13.0', 'goharbor/redis-photon:v2.13.0',
+      'goharbor/registry-photon:v2.13.0', 'goharbor/trivy-adapter-photon:v2.13.0']
   - version: 2.12.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.16.0
-    images: []
+    images: ['goharbor/harbor-core:v2.12.0', 'goharbor/harbor-db:v2.12.0', 'goharbor/harbor-jobservice:v2.12.0',
+      'goharbor/harbor-portal:v2.12.0', 'goharbor/harbor-registryctl:v2.12.0', 'goharbor/redis-photon:v2.12.0',
+      'goharbor/registry-photon:v2.12.0', 'goharbor/trivy-adapter-photon:v2.12.0']
   name: harbor
 - icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/elasticsearch/plural/icons/elastic.png?raw=true
   git_url: https://github.com/elastic/elasticsearch
@@ -31650,7 +31822,9 @@ addons:
           updated; mismatched CRDs can cause reconciliation/validation issues during
           upgrade.]
     chart_version: 1.40.0
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.19', 'quay.io/kubescape/kubescape:v4.0.6',
+      'quay.io/kubescape/kubevuln:v0.3.136', 'quay.io/kubescape/node-agent:v0.3.111',
+      'quay.io/kubescape/operator:v0.2.141', 'quay.io/kubescape/storage:v0.0.274']
   - version: 1.30.7
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -31668,7 +31842,9 @@ addons:
           see PR #770 in kubescape/helm-charts).']
       breaking_changes: []
     chart_version: 1.30.7
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.19', 'quay.io/kubescape/kubescape:v3.0.48',
+      'quay.io/kubescape/kubevuln:v0.3.132', 'quay.io/kubescape/node-agent:v0.3.94',
+      'quay.io/kubescape/operator:v0.2.140', 'quay.io/kubescape/storage:v0.0.272']
   - version: 1.30.0
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -31684,7 +31860,9 @@ addons:
           operator.]
       breaking_changes: []
     chart_version: 1.30.0
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.16', 'quay.io/kubescape/kubescape:v3.0.47',
+      'quay.io/kubescape/kubevuln:v0.3.98', 'quay.io/kubescape/node-agent:v0.3.3',
+      'quay.io/kubescape/operator:v0.2.119', 'quay.io/kubescape/storage:v0.0.233']
   - version: 1.29.12
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -31702,7 +31880,9 @@ addons:
           improvements and Prometheus support.']
       breaking_changes: []
     chart_version: 1.29.12
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.15', 'quay.io/kubescape/kubescape:v3.0.45',
+      'quay.io/kubescape/kubevuln:v0.3.97', 'quay.io/kubescape/node-agent:v0.2.398',
+      'quay.io/kubescape/operator:v0.2.114', 'quay.io/kubescape/storage:v0.0.224']
   - version: 1.29.1
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -31723,7 +31903,9 @@ addons:
           worker pool behavior for tuning throughput/resource usage.']
       breaking_changes: []
     chart_version: 1.29.1
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.14', 'quay.io/kubescape/kubescape:v3.0.38',
+      'quay.io/kubescape/kubevuln:v0.3.84', 'quay.io/kubescape/node-agent:v0.2.377',
+      'quay.io/kubescape/operator:v0.2.99', 'quay.io/kubescape/storage:v0.0.208']
   - version: 1.29.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -31739,7 +31921,9 @@ addons:
           node layouts/distributions.']
       breaking_changes: []
     chart_version: 1.29.0
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.12', 'quay.io/kubescape/kubescape:v3.0.37',
+      'quay.io/kubescape/kubevuln:v0.3.82', 'quay.io/kubescape/node-agent:v0.2.357',
+      'quay.io/kubescape/operator:v0.2.97', 'quay.io/kubescape/storage:v0.0.206']
   - version: 1.28.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -31758,7 +31942,9 @@ addons:
           directories.']
       breaking_changes: []
     chart_version: 1.28.0
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.11', 'quay.io/kubescape/kubescape:v3.0.34',
+      'quay.io/kubescape/kubevuln:v0.3.80', 'quay.io/kubescape/node-agent:v0.2.345',
+      'quay.io/kubescape/operator:v0.2.91', 'quay.io/kubescape/storage:v0.0.185']
   - version: 1.27.3
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -31780,7 +31966,9 @@ addons:
           AppArmor fields; clusters relying on legacy annotation-based AppArmor need
           to validate their policies/manifests still apply.]
     chart_version: 1.27.3
-    images: []
+    images: ['quay.io/kubescape/kubescape:v3.0.34', 'quay.io/kubescape/kubevuln:v0.3.72',
+      'quay.io/kubescape/node-agent:v0.2.298', 'quay.io/kubescape/operator:v0.2.84',
+      'quay.io/kubescape/storage:v0.0.172']
   - version: 1.27.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -32136,7 +32324,9 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 0.29.6
-    images: []
+    images: ['quay.io/kubescape/http-request:v0.2.14', 'quay.io/kubescape/kubescape:v3.0.40',
+      'quay.io/kubescape/kubevuln:v0.3.86', 'quay.io/kubescape/node-agent:test-0a5ff33',
+      'quay.io/kubescape/operator:v0.2.103', 'quay.io/kubescape/storage:v0.0.212']
   name: kubescape-operator
 - icon: https://assets.dynatrace.com/global/resources/Signet_Logo_RGB_CP_512x512px.png
   git_url: https://github.com/Dynatrace/dynatrace-operator
@@ -32257,42 +32447,42 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 3.12.10-preview
-    images: []
+    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.12']
   - version: 2.12.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.12.10-preview
-    images: []
+    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.12']
   - version: 2.11.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.12.0-preview.2
-    images: []
+    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.11']
   - version: 2.10.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.11.0-preview
-    images: []
+    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.10']
   - version: 2.9.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.9.4
-    images: []
+    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.9']
   - version: 2.8.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.8.0-preview
-    images: []
+    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.8']
   - version: 2.7.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
@@ -32398,6 +32588,27 @@ addons:
   release_url: https://github.com/ray-project/kuberay/releases/tag/v{vsn}
   helm_repository_url: https://ray-project.github.io/kuberay-helm
   versions:
+  - version: 1.7.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- No Helm values changes are called out in the **v1.7.1** release\
+        \ notes.\n- If your current values were last adjusted around **v1.7.0**, make\
+        \ sure you already handled the earlier Helm breaking change from v1.7.0: `metrics.serviceMonitor.selector`\
+        \ \u2192 `metrics.serviceMonitor.additionalLabels` (and empty labels are no\
+        \ longer emitted)."
+      chart_updates: [No chart-template changes are explicitly mentioned in the v1.7.1
+          notes; this looks like a patch release primarily containing bug fixes and
+          a default-behavior change for the History Server.]
+      features: []
+      breaking_changes: ['History Server live-cluster support is now **disabled by
+          default** to avoid unintended proxying to running clusters. If you relied
+          on live-cluster proxying, you must explicitly re-enable it in your History
+          Server configuration and validate auth/proxy behavior.']
+    chart_version: 1.7.1
+    images: ['quay.io/kuberay/operator:v1.7.1']
   - version: 1.7.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23']

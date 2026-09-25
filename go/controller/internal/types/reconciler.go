@@ -71,6 +71,8 @@ const (
 	WorkbenchToolReconciler              Reconciler = "workbenchtool"
 	WorkbenchWebhookReconciler           Reconciler = "workbenchwebhook"
 	SentinelTriggerReconciler            Reconciler = "sentineltrigger"
+	MonitorReconciler                    Reconciler = "monitor"
+	DashboardReconciler                  Reconciler = "dashboard"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.

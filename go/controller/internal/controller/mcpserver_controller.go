@@ -76,18 +76,18 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, r.handleDelete(ctx, mcpServer)
 	}
 
-	changed, sha, err := mcpServer.Diff(utils.HashObject)
+	attrs, err := r.Attributes(ctx, mcpServer)
+	if err != nil {
+		return common.HandleRequeue(nil, err, mcpServer.SetCondition)
+	}
+
+	changed, sha, err := mcpServer.Diff(*attrs, utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate MCP server SHA")
 		utils.MarkCondition(mcpServer.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if changed {
-		attrs, err := r.Attributes(mcpServer)
-		if err != nil {
-			return common.HandleRequeue(nil, err, mcpServer.SetCondition)
-		}
-
 		apiMCPServer, err := r.ConsoleClient.UpsertMCPServer(ctx, *attrs)
 		if err != nil {
 			logger.Error(err, "unable to create or update MCP server")
@@ -106,7 +106,7 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return mcpServer.Spec.Reconciliation.Requeue(), nil
 }
 
-func (r *MCPServerReconciler) Attributes(mcp *v1alpha1.MCPServer) (*console.McpServerAttributes, error) {
+func (r *MCPServerReconciler) Attributes(ctx context.Context, mcp *v1alpha1.MCPServer) (*console.McpServerAttributes, error) {
 	protocol := console.McpServerProtocolStreamableHTTP
 	if mcp.Spec.Protocol != nil {
 		protocol = *mcp.Spec.Protocol
@@ -133,8 +133,14 @@ func (r *MCPServerReconciler) Attributes(mcp *v1alpha1.MCPServer) (*console.McpS
 	}
 
 	if mcp.Spec.Authentication != nil {
+		oauth, err := mcp.Spec.Authentication.OAuth.TokenExchangeAttributes(ctx, r.Client, mcp.Namespace)
+		if err != nil {
+			return nil, err
+		}
+
 		attrs.Authentication = &console.McpServerAuthenticationAttributes{
 			Plural: mcp.Spec.Authentication.Plural,
+			Oauth:  oauth,
 		}
 
 		if len(mcp.Spec.Authentication.Headers) > 0 {

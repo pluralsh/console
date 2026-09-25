@@ -12,6 +12,10 @@ permissions:
   pull-requests: write
   actions: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: Check PR author is vouched
@@ -22,7 +26,7 @@ jobs:
        github.event.issue.pull_request &&
        contains(github.event.comment.body, '/recheck'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 

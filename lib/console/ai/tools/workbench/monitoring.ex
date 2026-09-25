@@ -62,21 +62,21 @@ defmodule Console.AI.Tools.Workbench.Monitoring do
         %WorkbenchJob{} = job,
         %User{} = user,
         name,
-        %Dashboard.Graph{} = graph,
+        graphs,
         settings
-      ) do
+      ) when is_list(graphs) do
     case dashboard_by_name(job, name) do
       %Dashboard{} = dashboard ->
         dashboard
         |> dashboard_attrs()
         |> apply_dashboard_settings(settings)
-        |> Map.put(:graphs, upsert_graph(dashboard.graphs, graph))
+        |> Map.put(:graphs, upsert_graphs(dashboard.graphs, graphs))
         |> Observability.update_dashboard(dashboard.id, user)
 
       nil ->
         settings
         |> new_dashboard_attrs(name)
-        |> Map.put(:graphs, [Console.mapify(graph)])
+        |> Map.put(:graphs, Enum.map(graphs, &Console.mapify/1))
         |> Map.put(:workbench_id, job.workbench_id)
         |> Observability.create_dashboard(user)
     end
@@ -190,17 +190,21 @@ defmodule Console.AI.Tools.Workbench.Monitoring do
   defp maybe_put_inputs(attrs, []), do: attrs
   defp maybe_put_inputs(attrs, inputs), do: Map.put(attrs, :inputs, Console.mapify(inputs))
 
-  defp upsert_graph(graphs, %Dashboard.Graph{identifier: identifier} = graph) do
-    graph = Console.mapify(graph)
+  defp upsert_graphs(existing, graphs) do
+    replacements = Map.new(graphs, &{&1.identifier, Console.mapify(&1)})
+    existing_ids = MapSet.new(existing, & &1.identifier)
 
-    Enum.reduce(graphs, {[], false}, fn
-      %Dashboard.Graph{identifier: ^identifier}, {updated, _} -> {[graph | updated], true}
-      g, {updated, found} -> {[Console.mapify(g) | updated], found}
-    end)
-    |> case do
-      {updated, true} -> Enum.reverse(updated)
-      {updated, _} -> Enum.reverse([graph | updated])
-    end
+    updated =
+      Enum.map(existing, fn graph ->
+        Map.get(replacements, graph.identifier, Console.mapify(graph))
+      end)
+
+    additions =
+      graphs
+      |> Enum.reject(&MapSet.member?(existing_ids, &1.identifier))
+      |> Enum.map(&Console.mapify/1)
+
+    updated ++ additions
   end
 
   defp delete_graph(graphs, identifier) do

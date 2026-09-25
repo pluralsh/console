@@ -1,6 +1,5 @@
 defmodule Console.AI.Tools.Workbench.SelfService.CatalogSearch do
   use Console.AI.Tools.Workbench.Base
-  import Ecto.Query
   alias Console.Repo
   alias Console.AI.Tool
   alias Console.Deployments.{Git, Policies}
@@ -41,25 +40,26 @@ defmodule Console.AI.Tools.Workbench.SelfService.CatalogSearch do
 
   defp fallback_search(query, user) do
     catalog_hits(query, user)
-    |> Enum.concat(automation_hits(query, user))
+    |> Stream.concat(automation_hits(query, user))
+    |> Enum.to_list()
     |> Jason.encode()
   end
 
   defp catalog_hits(query, user) do
     Catalog.search(query)
     |> Catalog.for_user(user)
-    |> limit(100)
+    |> Catalog.with_limit(100)
     |> Repo.all()
-    |> Enum.map(&%{catalog: Map.take(&1, [:id, :name, :description, :category])})
+    |> Stream.map(&%{catalog: Map.take(&1, [:id, :name, :description, :category])})
   end
 
   defp automation_hits(query, user) do
     PrAutomation.search(query)
-    |> limit(100)
+    |> PrAutomation.with_limit(100)
     |> Repo.all()
     |> Repo.preload([:catalog])
-    |> Enum.filter(&readable?(&1, user))
-    |> Enum.map(fn pra ->
+    |> Stream.filter(&readable?(&1, user))
+    |> Stream.map(fn pra ->
       %{
         pr_automation: Map.take(pra, [:id, :name, :documentation, :title, :branch])
         |> Map.put(:description, pra.documentation)

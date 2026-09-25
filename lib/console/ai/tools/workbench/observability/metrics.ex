@@ -91,10 +91,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
 
   defp input(%__MODULE__{tool: tool, query: q, step: s, time_range: tr, options: options}) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
-      tr = TimeRange.to_proto(tr)
-      {:ok, %MetricsQueryInput{connection: connection, query: q, step: s,  range: tr, options: metrics_options(tool, options)}}
+      {:ok, %MetricsQueryInput{connection: connection, query: q, step: s, range: range(tool, tr), options: metrics_options(tool, options)}}
     end
   end
+
+  # Dynatrace carries timeframe in DQL and rejects separate range/step fields.
+  defp range(%{tool: :dynatrace}, _), do: nil
+  defp range(_, tr), do: TimeRange.to_proto(tr)
 
   defp metrics_options(%{tool: :azure} = tool, options) do
     query_azure = azure_opts(options)

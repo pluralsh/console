@@ -44,7 +44,7 @@ defmodule Console.Otel.Exporter do
           "resource" => %{
             "attributes" => [
               %{"key" => "service.name", "value" => %{"stringValue" => "plural-console"}},
-              %{"key" => "service.version", "value" => %{"stringValue" => Console.conf(:version)}}
+              %{"key" => "service.version", "value" => %{"stringValue" => Console.conf(:git_commit) || "unknown"}}
             ]
           },
           "scopeMetrics" => [

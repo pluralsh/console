@@ -33,6 +33,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
     StateSearch,
     Vulns
   }
+  alias Console.AI.Tools.Workbench.Infrastructure.Manifests
   alias Console.AI.Tools.Workbench.Observability.Plrl
   alias Console.Schema.{User, Workbench, WorkbenchTool}
 
@@ -42,6 +43,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   @invalid_chars ~r/[^a-zA-Z0-9_-]/
 
   @preloads [tools: [:mcp_server, :cloud_connection, :scm_connection]]
+  @mcp_denied [Manifests]
 
   @doc """
   Expands every tool a workbench exposes that is safe to run outside the agent loop.
@@ -71,10 +73,11 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   advertised MCP name will match.
   """
   @spec filter([term], filter) :: [term]
-  def filter(tools, :all), do: tools
+  def filter(tools, :all), do: reject_denied(tools)
   def filter(tools, {:names, names}) do
     allowed = MapSet.new(names, &mcp_name/1)
     Enum.filter(tools, & MapSet.member?(allowed, mcp_name(&1)))
+    |> reject_denied()
   end
   def filter(tools, {:categories, categories}) do
     allowed = MapSet.new(categories)
@@ -82,6 +85,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
       categories(tool)
       |> Enum.any?(& MapSet.member?(allowed, &1))
     end)
+    |> reject_denied()
   end
 
   @doc """
@@ -194,10 +198,11 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   defp categories(mod) when is_atom(mod), do: builtin_categories(mod)
   defp categories(_), do: []
 
-  defp builtin_categories(mod) do
-    case Classify.bucket(mod) do
-      nil -> []
-      bucket -> [bucket]
-    end
-  end
+  defp builtin_categories(mod), do: Classify.categories(mod)
+
+  defp reject_denied(tools), do: Enum.reject(tools, &denied?/1)
+
+  defp denied?(%mod{}) when mod in @mcp_denied, do: true
+  defp denied?(mod) when mod in @mcp_denied, do: true
+  defp denied?(_), do: false
 end

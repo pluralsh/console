@@ -17,6 +17,10 @@ permissions:
 env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   vouch:
     name: Vouch
@@ -32,20 +36,19 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Build softserve image for local test
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "./dockerfiles"
           file: "./dockerfiles/Dockerfile.softserve"
           load: true
           tags: softserve-local:test
           platforms: linux/amd64
-          cache-from: type=gha
+          cache-from: type=gha,scope=softserve
       - name: Run softserve container
         run: |
           docker run -d --name softserve-test \
@@ -79,11 +82,11 @@ jobs:
       id-token: 'write'
       packages: 'write'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - id: meta-softserve
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ghcr.io/pluralsh/git-server
@@ -95,29 +98,28 @@ jobs:
             type=ref,event=tag
             type=ref,event=pr
             type=sha
-      - uses: google-github-actions/auth@v1
+      - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
           service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
           token_format: 'access_token'
           create_credentials_file: true
-      - uses: google-github-actions/setup-gcloud@v1.0.1
+      - uses: google-github-actions/setup-gcloud@v3.0.1
       - name: Login to gcr
         run: gcloud auth configure-docker -q
       - name: Login to Docker
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Build and push softserve
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "./dockerfiles"
           file: "./dockerfiles/Dockerfile.softserve"
@@ -125,5 +127,5 @@ jobs:
           tags: ${{ steps.meta-softserve.outputs.tags }}
           labels: ${{ steps.meta-softserve.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=softserve
+          cache-to: type=gha,mode=max,scope=softserve

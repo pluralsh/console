@@ -19,6 +19,16 @@ spec:
           args:
             - --v=3
   dind: true
+  workbenchMcp:
+    enabled: true
+    categories:
+      - metrics
+      - logs
+      - traces
+      - ticketing
+      - search
+      - scm
+      - infrastructure
   mcpServers:
     - name: linear
       url: https://mcp.linear.app/mcp
@@ -55,7 +65,12 @@ spec:
           args:
             - --v=3
   dind: true
-  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  repositoryImage: docker.io/pluralsh/console-repos:latest
+  prewarm:
+    cron: "0 * * * *"
+    selector:
+      matchLabels:
+        plural.sh/agent-pool: default
   readOnlyRootFilesystem: false
   mise:
     config: |

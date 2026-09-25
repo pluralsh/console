@@ -209,8 +209,12 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :title, :string, description: "Graph title"
     field :description, :string, description: "Optional graph description"
     field :type, non_null(:dashboard_graph_type), description: "Graph visualization type"
+    field :section_id, :string,
+      description: "Identifier of the section graph containing this graph; sections cannot be nested"
+
     field :markdown, :string, description: "Markdown content for markdown graphs"
-    field :options, :json, description: "Visualization-specific display options"
+    field :options, :json,
+      description: "Visualization-specific display options; sections may set collapsed"
     field :layout, non_null(:dashboard_graph_layout_attributes), description: "Grid position and size"
     field :datasource, :dashboard_datasource_attributes, description: "Tool call used to fetch external data"
   end
@@ -361,6 +365,10 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :threshold, non_null(:monitor_threshold),
       description: "Threshold configuration that determines when the monitor should fire"
 
+    field :preview, :alert_timeseries,
+      description: "Live threshold preview from evaluating this monitor's query",
+      resolve: &Deployments.monitor_preview/3
+
     field :service, :service_deployment,
       description: "The service deployment this monitor is attached to",
       resolve: dataloader(Deployments)
@@ -420,8 +428,30 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :title, :string, description: "Graph title"
     field :description, :string, description: "Optional graph description"
     field :type, non_null(:dashboard_graph_type), description: "Graph visualization type"
+    field :tool_id, :id,
+      description: "ID of the configured workbench tool backing this graph's datasource"
+
+    field :workbench_tool, :workbench_tool,
+      description: "Configured workbench tool backing this graph's datasource",
+      resolve: fn
+        %{tool_id: tool_id}, _, %{context: %{loader: loader}} when is_binary(tool_id) ->
+          manual_dataloader(
+            loader,
+            Deployments,
+            Console.Schema.WorkbenchTool,
+            tool_id
+          )
+
+        _, _, _ ->
+          {:ok, nil}
+      end
+
+    field :section_id, :string,
+      description: "Identifier of the section graph containing this graph"
+
     field :markdown, :string, description: "Markdown content for markdown graphs"
-    field :options, :json, description: "Visualization-specific display options"
+    field :options, :map,
+      description: "Visualization-specific display options; sections may set collapsed"
     field :layout, non_null(:workbench_dashboard_graph_layout), description: "Grid position and size"
     field :datasource, :workbench_dashboard_datasource, description: "Tool call used to fetch external data"
   end
@@ -438,7 +468,7 @@ defmodule Console.GraphQl.Deployments.Observability do
       description: "Kind of data returned by the datasource"
 
     field :tool, non_null(:string), description: "Observability tool used to render the graph"
-    field :input, non_null(:json), description: "Input passed to the observability tool"
+    field :input, non_null(:map), description: "Input passed to the observability tool"
   end
 
   object :workbench_dashboard_input do
@@ -688,6 +718,9 @@ defmodule Console.GraphQl.Deployments.Observability do
   connection node_type: :monitor
   connection node_type: :workbench_dashboard
 
+  delta :monitor
+  delta :workbench_dashboard
+
   @desc "Queries for fetching observability providers and webhooks"
   object :observability_provider_queries do
     field :observability_provider, :observability_provider do
@@ -846,6 +879,44 @@ defmodule Console.GraphQl.Deployments.Observability do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_dashboard/2
+    end
+  end
+
+  object :observability_subscriptions do
+    field :workbench_dashboard_delta, :workbench_dashboard_delta do
+      arg :id,           :id
+      arg :workbench_id, :id
+
+      config fn
+        %{id: id}, ctx when is_binary(id) ->
+          with {:ok, dashboard} <- Deployments.get_dashboard(%{id: id}, ctx),
+            do: {:ok, topic: "workbench_dashboards:#{dashboard.id}"}
+
+        %{workbench_id: workbench_id}, ctx when is_binary(workbench_id) ->
+          with {:ok, _} <- Deployments.workbench(%{id: workbench_id}, ctx),
+            do: {:ok, topic: "workbenches:#{workbench_id}:dashboards"}
+
+        _, _ ->
+          {:error, "Must specify either id or workbench_id"}
+      end
+    end
+
+    field :workbench_monitor_delta, :monitor_delta do
+      arg :id,           :id
+      arg :workbench_id, :id
+
+      config fn
+        %{id: id}, ctx when is_binary(id) ->
+          with {:ok, monitor} <- Deployments.get_monitor(%{id: id}, ctx),
+            do: {:ok, topic: "workbench_monitors:#{monitor.id}"}
+
+        %{workbench_id: workbench_id}, ctx when is_binary(workbench_id) ->
+          with {:ok, _} <- Deployments.workbench(%{id: workbench_id}, ctx),
+            do: {:ok, topic: "workbenches:#{workbench_id}:monitors"}
+
+        _, _ ->
+          {:error, "Must specify either id or workbench_id"}
+      end
     end
   end
 end

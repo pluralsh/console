@@ -443,6 +443,35 @@ func TestGetMCPServerEnvVars_ModeToolExclusions(t *testing.T) {
 	}
 }
 
+func TestBuildAgentRunPod_WorkbenchMCPUpstreamIsSidecarOnly(t *testing.T) {
+	upstream := "https://console.example/mcp/workbench/workbench-id"
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef:      v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Mode:            console.AgentRunModeAnalyze,
+			WorkbenchMCPURL: &upstream,
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:         console.AgentRuntimeTypeClaude,
+			WorkbenchMCP: &v1alpha1.WorkbenchMCPConfig{Enabled: true},
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	mcp := requireContainer(t, pod.Spec.InitContainers, mcpServerContainerName)
+	assert.Contains(t, mcp.Env, corev1.EnvVar{
+		Name:  EnvWorkbenchMCPURL,
+		Value: "https://console.example/mcp/workbench/workbench-id?categories=metrics%2Clogs%2Ctraces%2Cticketing%2Csearch%2Cscm%2Cinfrastructure",
+	})
+
+	bootstrap := requireContainer(t, pod.Spec.InitContainers, agentBootstrapContainerName)
+	assert.NotContains(t, bootstrap.Env, corev1.EnvVar{Name: EnvWorkbenchMCPURL})
+	assert.NotContains(t, requireContainer(t, pod.Spec.Containers, defaultContainer).Env, corev1.EnvVar{Name: EnvWorkbenchMCPURL})
+}
+
 func TestBuildAgentRunPod_PreservesCustomAgentBootstrapSecurityContext(t *testing.T) {
 	customSC := &corev1.SecurityContext{
 		ReadOnlyRootFilesystem: lo.ToPtr(false),
@@ -520,6 +549,9 @@ func TestBuildAgentRunPod_RepositoryImage(t *testing.T) {
 	prebake := requireContainer(t, pod.Spec.InitContainers, repositoryPrebakeContainerName)
 	assert.Equal(t, image, prebake.Image)
 	assert.Equal(t, []string{"/bin/sh", "-c"}, prebake.Command)
+	assert.Equal(t, []string{repositoryPrebakeCopyCommand}, prebake.Args)
+	assert.Contains(t, prebake.Args[0], "command -v fcp")
+	assert.Contains(t, prebake.Args[0], "cp -a")
 	assert.Contains(t, prebake.VolumeMounts, corev1.VolumeMount{
 		Name:      sharedContextVolumeName,
 		MountPath: sharedContextVolumePath,

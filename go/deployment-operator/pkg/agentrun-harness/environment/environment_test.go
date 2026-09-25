@@ -219,6 +219,46 @@ func TestCloneRepositoryCopiesPrebakeMatch(t *testing.T) {
 	}
 }
 
+func TestCopyPrebakedRepositoryUsesFCPWhenAvailable(t *testing.T) {
+	binDir := t.TempDir()
+	marker := filepath.Join(t.TempDir(), "fcp-args")
+	fakeFCP := filepath.Join(binDir, "fcp")
+	if err := os.WriteFile(fakeFCP, []byte(`#!/bin/sh
+printf '%s\n%s\n' "$1" "$2" > "$FCP_MARKER"
+mkdir -p "$2"
+cp -R "$1"/. "$2"/
+`), 0755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("FCP_MARKER", marker)
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	src := t.TempDir()
+	if err := os.WriteFile(filepath.Join(src, "README"), []byte("fast"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	dst := filepath.Join(t.TempDir(), "copy")
+
+	if err := copyPrebakedRepository(src, dst); err != nil {
+		t.Fatalf("copyPrebakedRepository() failed: %v", err)
+	}
+
+	args, err := os.ReadFile(marker)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(args), src+"\n"+dst+"\n"; got != want {
+		t.Fatalf("fcp args = %q, want %q", got, want)
+	}
+	body, err := os.ReadFile(filepath.Join(dst, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := string(body); got != "fast" {
+		t.Fatalf("copied README = %q, want fast", got)
+	}
+}
+
 func TestCloneRepositoryPullsPrebakeFromOrigin(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -319,6 +359,73 @@ func TestCloneRepositoryChecksOutRunBranchFromOrigin(t *testing.T) {
 	}
 	if got := strings.TrimSpace(string(current)); got != "feature" {
 		t.Fatalf("branch = %q, want feature", got)
+	}
+}
+
+func TestCloneRepositoryChecksOutFollowupHeadBranch(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "main")
+	runGit(t, origin, "checkout", "-b", "feature")
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("feature\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "feature")
+	runGit(t, origin, "checkout", "main")
+
+	baseBranch := "main"
+	headBranch := "feature"
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: origin,
+			Branch:     &baseBranch,
+			HeadBranch: &headBranch,
+			Followup:   true,
+		},
+		dir: workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	dest := filepath.Join(workDir, "repository")
+	contents, err := os.ReadFile(filepath.Join(dest, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "feature\n" {
+		t.Fatalf("copied README = %q, want feature after checking out follow-up head branch", contents)
+	}
+	current, err := exec.Command("git", "-C", dest, "branch", "--show-current").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(current)); got != headBranch {
+		t.Fatalf("branch = %q, want %s", got, headBranch)
+	}
+}
+
+func TestCheckoutFollowupBranchRequiresHeadBranch(t *testing.T) {
+	env := &environment{agentRun: &v1.AgentRun{Followup: true}}
+
+	err := env.checkoutFollowupBranch(t.TempDir())
+
+	if err == nil || err.Error() != "follow-up agent run requires a head branch to check out" {
+		t.Fatalf("checkoutFollowupBranch() error = %v", err)
+	}
+}
+
+func TestCheckoutFollowupBranchSkipsRegularRuns(t *testing.T) {
+	env := &environment{agentRun: &v1.AgentRun{}}
+
+	if err := env.checkoutFollowupBranch(t.TempDir()); err != nil {
+		t.Fatalf("checkoutFollowupBranch() error = %v", err)
 	}
 }
 

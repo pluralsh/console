@@ -319,6 +319,65 @@ func (_c *ConsoleClientMock_CreateCustomStackRun_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// CreateDashboard provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateDashboard(ctx context.Context, attributes client.DashboardAttributes) (*client.WorkbenchDashboardFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateDashboard")
+	}
+
+	var r0 *client.WorkbenchDashboardFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.DashboardAttributes) (*client.WorkbenchDashboardFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.DashboardAttributes) *client.WorkbenchDashboardFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.WorkbenchDashboardFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.DashboardAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateDashboard_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateDashboard'
+type ConsoleClientMock_CreateDashboard_Call struct {
+	*mock.Call
+}
+
+// CreateDashboard is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.DashboardAttributes
+func (_e *ConsoleClientMock_Expecter) CreateDashboard(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateDashboard_Call {
+	return &ConsoleClientMock_CreateDashboard_Call{Call: _e.mock.On("CreateDashboard", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateDashboard_Call) Run(run func(ctx context.Context, attributes client.DashboardAttributes)) *ConsoleClientMock_CreateDashboard_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.DashboardAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateDashboard_Call) Return(_a0 *client.WorkbenchDashboardFragment, _a1 error) *ConsoleClientMock_CreateDashboard_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateDashboard_Call) RunAndReturn(run func(context.Context, client.DashboardAttributes) (*client.WorkbenchDashboardFragment, error)) *ConsoleClientMock_CreateDashboard_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateFederatedCredential provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) CreateFederatedCredential(ctx context.Context, attributes client.FederatedCredentialAttributes) (*client.FederatedCredentialFragment, error) {
 	ret := _m.Called(ctx, attributes)
@@ -608,6 +667,65 @@ func (_c *ConsoleClientMock_CreateGroup_Call) Return(_a0 *client.GroupFragment, 
 }
 
 func (_c *ConsoleClientMock_CreateGroup_Call) RunAndReturn(run func(context.Context, client.GroupAttributes) (*client.GroupFragment, error)) *ConsoleClientMock_CreateGroup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateMonitor provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateMonitor(ctx context.Context, attributes client.MonitorAttributes) (*client.MonitorFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateMonitor")
+	}
+
+	var r0 *client.MonitorFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.MonitorAttributes) (*client.MonitorFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.MonitorAttributes) *client.MonitorFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.MonitorFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.MonitorAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateMonitor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateMonitor'
+type ConsoleClientMock_CreateMonitor_Call struct {
+	*mock.Call
+}
+
+// CreateMonitor is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.MonitorAttributes
+func (_e *ConsoleClientMock_Expecter) CreateMonitor(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateMonitor_Call {
+	return &ConsoleClientMock_CreateMonitor_Call{Call: _e.mock.On("CreateMonitor", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateMonitor_Call) Run(run func(ctx context.Context, attributes client.MonitorAttributes)) *ConsoleClientMock_CreateMonitor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.MonitorAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateMonitor_Call) Return(_a0 *client.MonitorFragment, _a1 error) *ConsoleClientMock_CreateMonitor_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateMonitor_Call) RunAndReturn(run func(context.Context, client.MonitorAttributes) (*client.MonitorFragment, error)) *ConsoleClientMock_CreateMonitor_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2251,6 +2369,53 @@ func (_c *ConsoleClientMock_DeleteCustomStackRun_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// DeleteDashboard provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteDashboard(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteDashboard")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteDashboard_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteDashboard'
+type ConsoleClientMock_DeleteDashboard_Call struct {
+	*mock.Call
+}
+
+// DeleteDashboard is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteDashboard(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteDashboard_Call {
+	return &ConsoleClientMock_DeleteDashboard_Call{Call: _e.mock.On("DeleteDashboard", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteDashboard_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteDashboard_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteDashboard_Call) Return(_a0 error) *ConsoleClientMock_DeleteDashboard_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteDashboard_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteDashboard_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteFederatedCredential provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) DeleteFederatedCredential(ctx context.Context, id string) (*client.DeleteFederatedCredential_DeleteFederatedCredential, error) {
 	ret := _m.Called(ctx, id)
@@ -2493,6 +2658,53 @@ func (_c *ConsoleClientMock_DeleteMCPServer_Call) Return(_a0 error) *ConsoleClie
 }
 
 func (_c *ConsoleClientMock_DeleteMCPServer_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteMCPServer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteMonitor provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteMonitor(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteMonitor")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteMonitor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteMonitor'
+type ConsoleClientMock_DeleteMonitor_Call struct {
+	*mock.Call
+}
+
+// DeleteMonitor is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteMonitor(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteMonitor_Call {
+	return &ConsoleClientMock_DeleteMonitor_Call{Call: _e.mock.On("DeleteMonitor", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteMonitor_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteMonitor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteMonitor_Call) Return(_a0 error) *ConsoleClientMock_DeleteMonitor_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteMonitor_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteMonitor_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -4576,6 +4788,65 @@ func (_c *ConsoleClientMock_GetCustomStackRun_Call) RunAndReturn(run func(contex
 	return _c
 }
 
+// GetDashboard provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetDashboard(ctx context.Context, id string) (*client.WorkbenchDashboardFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDashboard")
+	}
+
+	var r0 *client.WorkbenchDashboardFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.WorkbenchDashboardFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.WorkbenchDashboardFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.WorkbenchDashboardFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetDashboard_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetDashboard'
+type ConsoleClientMock_GetDashboard_Call struct {
+	*mock.Call
+}
+
+// GetDashboard is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetDashboard(ctx interface{}, id interface{}) *ConsoleClientMock_GetDashboard_Call {
+	return &ConsoleClientMock_GetDashboard_Call{Call: _e.mock.On("GetDashboard", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetDashboard_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetDashboard_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetDashboard_Call) Return(_a0 *client.WorkbenchDashboardFragment, _a1 error) *ConsoleClientMock_GetDashboard_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetDashboard_Call) RunAndReturn(run func(context.Context, string) (*client.WorkbenchDashboardFragment, error)) *ConsoleClientMock_GetDashboard_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetDeploymentSettings provides a mock function with given fields: ctx
 func (_m *ConsoleClientMock) GetDeploymentSettings(ctx context.Context) (*client.DeploymentSettingsFragment, error) {
 	ret := _m.Called(ctx)
@@ -5272,6 +5543,65 @@ func (_c *ConsoleClientMock_GetMCPServer_Call) Return(_a0 *client.MCPServerFragm
 }
 
 func (_c *ConsoleClientMock_GetMCPServer_Call) RunAndReturn(run func(context.Context, string) (*client.MCPServerFragment, error)) *ConsoleClientMock_GetMCPServer_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetMonitor provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetMonitor(ctx context.Context, id string) (*client.MonitorFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMonitor")
+	}
+
+	var r0 *client.MonitorFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.MonitorFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.MonitorFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.MonitorFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetMonitor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetMonitor'
+type ConsoleClientMock_GetMonitor_Call struct {
+	*mock.Call
+}
+
+// GetMonitor is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetMonitor(ctx interface{}, id interface{}) *ConsoleClientMock_GetMonitor_Call {
+	return &ConsoleClientMock_GetMonitor_Call{Call: _e.mock.On("GetMonitor", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetMonitor_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetMonitor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetMonitor_Call) Return(_a0 *client.MonitorFragment, _a1 error) *ConsoleClientMock_GetMonitor_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetMonitor_Call) RunAndReturn(run func(context.Context, string) (*client.MonitorFragment, error)) *ConsoleClientMock_GetMonitor_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -6987,6 +7317,65 @@ func (_c *ConsoleClientMock_GetServiceContext_Call) RunAndReturn(run func(string
 	return _c
 }
 
+// GetServiceTinyByHandle provides a mock function with given fields: clusterHandle, serviceName
+func (_m *ConsoleClientMock) GetServiceTinyByHandle(clusterHandle string, serviceName string) (*client.GetServiceDeploymentTinyByHandle_ServiceDeployment, error) {
+	ret := _m.Called(clusterHandle, serviceName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetServiceTinyByHandle")
+	}
+
+	var r0 *client.GetServiceDeploymentTinyByHandle_ServiceDeployment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*client.GetServiceDeploymentTinyByHandle_ServiceDeployment, error)); ok {
+		return rf(clusterHandle, serviceName)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *client.GetServiceDeploymentTinyByHandle_ServiceDeployment); ok {
+		r0 = rf(clusterHandle, serviceName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GetServiceDeploymentTinyByHandle_ServiceDeployment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(clusterHandle, serviceName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetServiceTinyByHandle_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetServiceTinyByHandle'
+type ConsoleClientMock_GetServiceTinyByHandle_Call struct {
+	*mock.Call
+}
+
+// GetServiceTinyByHandle is a helper method to define mock.On call
+//   - clusterHandle string
+//   - serviceName string
+func (_e *ConsoleClientMock_Expecter) GetServiceTinyByHandle(clusterHandle interface{}, serviceName interface{}) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	return &ConsoleClientMock_GetServiceTinyByHandle_Call{Call: _e.mock.On("GetServiceTinyByHandle", clusterHandle, serviceName)}
+}
+
+func (_c *ConsoleClientMock_GetServiceTinyByHandle_Call) Run(run func(clusterHandle string, serviceName string)) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceTinyByHandle_Call) Return(_a0 *client.GetServiceDeploymentTinyByHandle_ServiceDeployment, _a1 error) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceTinyByHandle_Call) RunAndReturn(run func(string, string) (*client.GetServiceDeploymentTinyByHandle_ServiceDeployment, error)) *ConsoleClientMock_GetServiceTinyByHandle_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetServices provides a mock function with no fields
 func (_m *ConsoleClientMock) GetServices() ([]*client.ServiceDeploymentBaseFragment, error) {
 	ret := _m.Called()
@@ -8200,6 +8589,63 @@ func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func
 	return _c
 }
 
+// IsDashboardExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsDashboardExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsDashboardExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsDashboardExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsDashboardExists'
+type ConsoleClientMock_IsDashboardExists_Call struct {
+	*mock.Call
+}
+
+// IsDashboardExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsDashboardExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsDashboardExists_Call {
+	return &ConsoleClientMock_IsDashboardExists_Call{Call: _e.mock.On("IsDashboardExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsDashboardExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsDashboardExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsDashboardExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsDashboardExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsDashboardExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsDashboardExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsFederatedCredentialExists provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) IsFederatedCredentialExists(ctx context.Context, id string) (bool, error) {
 	ret := _m.Called(ctx, id)
@@ -8366,6 +8812,63 @@ func (_c *ConsoleClientMock_IsHelmRepositoryExists_Call) Return(_a0 bool, _a1 er
 }
 
 func (_c *ConsoleClientMock_IsHelmRepositoryExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsHelmRepositoryExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsMonitorExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsMonitorExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsMonitorExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsMonitorExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsMonitorExists'
+type ConsoleClientMock_IsMonitorExists_Call struct {
+	*mock.Call
+}
+
+// IsMonitorExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsMonitorExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsMonitorExists_Call {
+	return &ConsoleClientMock_IsMonitorExists_Call{Call: _e.mock.On("IsMonitorExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsMonitorExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsMonitorExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsMonitorExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsMonitorExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsMonitorExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsMonitorExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -10209,6 +10712,66 @@ func (_c *ConsoleClientMock_UpdateCustomStackRun_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// UpdateDashboard provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateDashboard(ctx context.Context, id string, attributes client.DashboardAttributes) (*client.WorkbenchDashboardFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateDashboard")
+	}
+
+	var r0 *client.WorkbenchDashboardFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.DashboardAttributes) (*client.WorkbenchDashboardFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.DashboardAttributes) *client.WorkbenchDashboardFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.WorkbenchDashboardFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.DashboardAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateDashboard_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateDashboard'
+type ConsoleClientMock_UpdateDashboard_Call struct {
+	*mock.Call
+}
+
+// UpdateDashboard is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes client.DashboardAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateDashboard(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateDashboard_Call {
+	return &ConsoleClientMock_UpdateDashboard_Call{Call: _e.mock.On("UpdateDashboard", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateDashboard_Call) Run(run func(ctx context.Context, id string, attributes client.DashboardAttributes)) *ConsoleClientMock_UpdateDashboard_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.DashboardAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateDashboard_Call) Return(_a0 *client.WorkbenchDashboardFragment, _a1 error) *ConsoleClientMock_UpdateDashboard_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateDashboard_Call) RunAndReturn(run func(context.Context, string, client.DashboardAttributes) (*client.WorkbenchDashboardFragment, error)) *ConsoleClientMock_UpdateDashboard_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdateDeploymentSettings provides a mock function with given fields: ctx, attr
 func (_m *ConsoleClientMock) UpdateDeploymentSettings(ctx context.Context, attr client.DeploymentSettingsAttributes) (*client.UpdateDeploymentSettings, error) {
 	ret := _m.Called(ctx, attr)
@@ -10443,6 +11006,66 @@ func (_c *ConsoleClientMock_UpdateGroup_Call) Return(_a0 *client.GroupFragment, 
 }
 
 func (_c *ConsoleClientMock_UpdateGroup_Call) RunAndReturn(run func(context.Context, string, client.GroupAttributes) (*client.GroupFragment, error)) *ConsoleClientMock_UpdateGroup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateMonitor provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateMonitor(ctx context.Context, id string, attributes client.MonitorAttributes) (*client.MonitorFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateMonitor")
+	}
+
+	var r0 *client.MonitorFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.MonitorAttributes) (*client.MonitorFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.MonitorAttributes) *client.MonitorFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.MonitorFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.MonitorAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateMonitor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateMonitor'
+type ConsoleClientMock_UpdateMonitor_Call struct {
+	*mock.Call
+}
+
+// UpdateMonitor is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes client.MonitorAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateMonitor(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateMonitor_Call {
+	return &ConsoleClientMock_UpdateMonitor_Call{Call: _e.mock.On("UpdateMonitor", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateMonitor_Call) Run(run func(ctx context.Context, id string, attributes client.MonitorAttributes)) *ConsoleClientMock_UpdateMonitor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.MonitorAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateMonitor_Call) Return(_a0 *client.MonitorFragment, _a1 error) *ConsoleClientMock_UpdateMonitor_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateMonitor_Call) RunAndReturn(run func(context.Context, string, client.MonitorAttributes) (*client.MonitorFragment, error)) *ConsoleClientMock_UpdateMonitor_Call {
 	_c.Call.Return(run)
 	return _c
 }

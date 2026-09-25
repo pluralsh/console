@@ -3,7 +3,7 @@ module github.com/pluralsh/console/go/deployment-operator
 go 1.27.1
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.7.33
+	github.com/containerd/containerd => github.com/containerd/containerd v1.7.35
 	github.com/google/go-containerregistry v0.5.1 => github.com/google/go-containerregistry v0.20.6
 	github.com/open-policy-agent/opa => github.com/open-policy-agent/opa v1.4.0
 	github.com/pluralsh/console/go/client => ../client
@@ -62,6 +62,7 @@ require (
 	github.com/pluralsh/console/go/polly v1.0.0
 	github.com/pluralsh/controller-reconcile-helper v0.1.0
 	github.com/prometheus/client_golang v1.23.2
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sahilm/fuzzy v0.1.1
 	github.com/samber/lo v1.53.0
 	github.com/sirupsen/logrus v1.9.4
@@ -166,7 +167,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.6.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
-	github.com/containerd/containerd v1.7.33 // indirect
+	github.com/containerd/containerd v1.7.35 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v1.0.0-rc.4 // indirect
@@ -338,7 +339,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.25.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
 	golang.org/x/exp/typeparams v0.0.0-20260209203927-2842357ff358 // indirect
 	golang.org/x/mod v0.40.0 // indirect

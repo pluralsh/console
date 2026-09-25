@@ -89,6 +89,7 @@ rbac:
     - compliancereportgenerators
     - customcompatibilitymatrices
     - customstackruns
+    - dashboards
     - deploymentsettings
     - federatedcredentials
     - flows
@@ -100,6 +101,7 @@ rbac:
     - infrastructurestacks
     - managednamespaces
     - mcpservers
+    - monitors
     - namespacecredentials
     - notificationrouters
     - notificationsinks

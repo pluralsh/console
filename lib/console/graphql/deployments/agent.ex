@@ -255,6 +255,9 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     field :scm_creds,    :scm_creds, resolve: &Deployments.agent_scm_credentials/3
     field :plural_creds, :plural_creds, resolve: &Deployments.agent_plural_creds/3
+    field :workbench_mcp_url, :string,
+      resolve: fn run, _, _ -> Agents.workbench_mcp_url(run) end,
+      description: "the MCP endpoint for the workbench that spawned this run, if any"
 
     @desc "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
     field :pod, :pod do

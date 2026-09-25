@@ -9,7 +9,29 @@ For field-level details, see the [AgentRuntimeSpec API reference](/api-reference
 
 ## Use a published image
 
-Plural publishes a Console checkout as `ghcr.io/pluralsh/console-repos`:
+Plural publishes a Console checkout as `docker.io/pluralsh/console-repos`:
+
+```yaml
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentRuntime
+metadata:
+  name: claude
+spec:
+  type: CLAUDE
+  targetNamespace: agents
+  repositoryImage: docker.io/pluralsh/console-repos:latest
+```
+
+Tags:
+
+- `<YYYY-MM-DD>` for each daily or manually requested build
+- `latest` for the newest build
+
+Pin the date tag for reproducible runs. If the image is private, set `spec.template.spec.imagePullSecrets`.
+
+## Prewarm the image on cluster nodes
+
+Pulling a large repository image when an agent starts can still add latency. Add `spec.prewarm` to pull `repositoryImage` onto eligible nodes ahead of time:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -20,24 +42,40 @@ spec:
   type: CLAUDE
   targetNamespace: agents
   repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  prewarm:
+    cron: "0 * * * *"
+    selector:
+      matchLabels:
+        plural.sh/agent-pool: default
+    template:
+      spec:
+        tolerations:
+          - key: plural.sh/agent
+            operator: Exists
+        imagePullSecrets:
+          - name: repository-registry
+        containers:
+          - name: image-warmer
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
 ```
 
-Tags:
+`cron` is a standard five-field cron expression. The operator warms once when the configuration is first created, then follows the schedule. `selector` matches node labels; omit it to warm all schedulable nodes. `template` optionally overrides the generated warmer pod template. Container-specific overrides must target the `image-warmer` container by name. For a private image, repeat the required `imagePullSecrets` in this prewarm template; the agent pod template is configured separately.
 
-- `sha-<short>` on every build
-- `pr-<n>` on pull requests
-- `latest` on `master`
+Under the hood, the operator creates an `ImageWarmer` resource in its own namespace and a temporary DaemonSet with `imagePullPolicy: Always`. Its generated name is recorded in `AgentRuntime.status.imageWarmerName`. After its pod is ready on every selected node, the operator removes the DaemonSet; the pulled image remains in each node's container image cache. The default pod runs as uid/gid `65532`, drops all capabilities, uses a read-only root filesystem and runtime-default seccomp, disallows privilege escalation, and does not mount a service account token. Template settings can override these defaults when required.
 
-To test a branch, use the matching `sha-<short>` tag. If the image is private, set `spec.template.spec.imagePullSecrets`.
+Changing `repositoryImage` updates the generated `ImageWarmer`. Removing `prewarm` removes it. Prewarming reduces image-pull latency, but node image garbage collection may evict the cached image before the next scheduled refresh.
 
 ## How it works
 
 1. The operator starts a `repository-prebake` init container from `repositoryImage`.
-2. That container copies `/data/.` into the existing `shared-context` emptyDir at `/plural/shared/repos`.
-3. `agent-bootstrap` matches the run repository URL (https and ssh forms of the same repo are equivalent) and **moves** that tree into `/plural/shared/repository` so the working copy does not duplicate disk. If rename is not possible, it copies then deletes the source. Other prebaked repos stay under `/plural/shared/repos/<path>`.
+2. That container copies `/data` into the existing `shared-context` emptyDir at `/plural/shared/repos`. The published base image uses `fcp` to parallelize this small-file-heavy copy and falls back to `cp -a` for compatible custom images without `fcp`.
+3. `agent-bootstrap` matches the run repository URL (https and ssh forms of the same repo are equivalent) and **moves** that tree into `/plural/shared/repository` so the working copy does not duplicate disk. This is normally an instant rename because both paths use the same volume. If rename is not possible, it uses `fcp` when available, then deletes the source. Other prebaked repos stay under `/plural/shared/repos/<path>`.
 4. Fetch of the requested branch is best-effort. An airgapped or stale remote keeps the prebaked copy.
 
-No extra volume and no Kubernetes image-volume feature gate. The image must include `/bin/sh` and `cp`, with repos under `/data`, owned by uid `65532` so the non-root agent can read them.
+No extra volume and no Kubernetes image-volume feature gate. Custom images must include `/bin/sh` and either `fcp` or `cp`, with repos under `/data`, owned by uid `65532` so the non-root agent can read them.
 
 ## Image layout
 
@@ -74,17 +112,17 @@ After the init container copies that tree, the harness sees:
 Inspect a published image:
 
 ```bash
-cid="$(docker create ghcr.io/pluralsh/console-repos:latest unused)"
+cid="$(docker create docker.io/pluralsh/console-repos:latest unused)"
 docker cp "$cid:/data/manifest.json" -
 docker rm "$cid"
 ```
 
 ## Extend the base image
 
-`ghcr.io/pluralsh/repository-prebake` is Debian plus `git`, `mise`, a compile toolchain, and a `prebake` binary. **Clone and write the manifest inside the image you push.** Users build with a normal `Dockerfile` and `docker/build-push-action`. The CLI is not a host-side wrapper around `docker build`.
+`ghcr.io/pluralsh/repository-prebake` uses the same DHI Debian Trixie base as agent-harness, plus `git`, `mise`, a compile toolchain, and a `prebake` binary. **Clone and write the manifest inside the image you push.** Users build with a normal `Dockerfile` and `docker/build-push-action`. The CLI is not a host-side wrapper around `docker build`.
 
 ```dockerfile
-FROM ghcr.io/pluralsh/repository-prebake:latest
+FROM docker.io/pluralsh/repository-prebake:latest
 
 COPY repos.yaml /config/repos.yaml
 RUN prebake --config /config/repos.yaml --chown 65532:65532
@@ -93,7 +131,7 @@ RUN prebake --config /config/repos.yaml --chown 65532:65532
 Private HTTPS remotes: leave `url:` without userinfo and pass the token at build time. When `GIT_ACCESS_TOKEN` or `GIT_PASSWORD` is set, `prebake` wires `GIT_ASKPASS` (`GIT_USERNAME` defaults to `x-access-token`):
 
 ```dockerfile
-FROM ghcr.io/pluralsh/repository-prebake:latest
+FROM docker.io/pluralsh/repository-prebake:latest
 COPY repos.yaml /config/repos.yaml
 RUN --mount=type=secret,id=git_token \
     GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
@@ -101,7 +139,7 @@ RUN --mount=type=secret,id=git_token \
 ```
 
 ```bash
-docker build --secret id=git_token,env=GIT_ACCESS_TOKEN -t ghcr.io/org/my-repos:local .
+docker build --secret id=git_token,env=GIT_ACCESS_TOKEN -t docker.io/org/my-repos:local .
 ```
 
 Do not put tokens in `repos.yaml` or a Docker `ARG`. `prebake` strips URL userinfo from `origin` and `manifest.json`.
@@ -117,7 +155,7 @@ repositories:
 
 String entries and mappings can be mixed. `repos:` is accepted as an alias for `repositories:`.
 
-CI publishes `ghcr.io/pluralsh/repository-prebake:sha-<short>` (`:latest` on `master`). Pin a SHA tag in production; `:latest` moves.
+CI publishes `repository-prebake:<YYYY-MM-DD>` and `:latest` to Docker Hub, GHCR, and GCR daily and on manual runs. Pin a date tag in production; `:latest` moves.
 
 ### `prebake` CLI
 
@@ -138,7 +176,7 @@ HTTPS auth (env, not flags): `GIT_ACCESS_TOKEN` or `GIT_PASSWORD`, optional `GIT
 If `/data/<path>` already contains a `.git` directory, `prebake` keeps that checkout instead of cloning. Use that to bake the CI checkout SHA:
 
 ```dockerfile
-FROM ghcr.io/pluralsh/repository-prebake:latest
+FROM docker.io/pluralsh/repository-prebake:latest
 COPY repos.yaml /config/repos.yaml
 COPY . /data/app
 RUN git config --global --add safe.directory /data/app \
@@ -157,7 +195,7 @@ RUN git config --global --add safe.directory /data/app \
     context: .
     file: Dockerfile
     push: true
-    tags: ghcr.io/org/my-repos:sha-${{ github.sha }}
+    tags: docker.io/org/my-repos:sha-${{ github.sha }}
     secrets: |
       git_token=${{ secrets.GIT_ACCESS_TOKEN }}
 ```
@@ -169,7 +207,7 @@ RUN git config --global --add safe.directory /data/app \
 Go caches must live **inside** the copied repository. If `GOPATH` / `GOBIN` / `GOCACHE` / `GOMODCACHE` point outside that tree, they will not survive the copy into `/plural/shared/repository`:
 
 ```dockerfile
-FROM ghcr.io/pluralsh/repository-prebake:latest
+FROM docker.io/pluralsh/repository-prebake:latest
 
 COPY repos.yaml /config/repos.yaml
 RUN prebake --config /config/repos.yaml
@@ -185,19 +223,19 @@ RUN mix deps.get && MIX_ENV=test mix compile \
 
 ## Console image
 
-The in-tree [`repository-prebake/console`](https://github.com/pluralsh/console/tree/master/repository-prebake/console) Dockerfile extends the published base: `COPY` this checkout to `/data/console`, `RUN prebake` (Console plus `plural-cli`, `plural`, and authed `plrl-up-demos` extra context), then `precompile.sh`. CI builds it as `ghcr.io/pluralsh/console-repos`. Pass `GIT_ACCESS_TOKEN` as a BuildKit secret so `prebake` can clone the private repo.
+The in-tree [`repository-prebake/console`](https://github.com/pluralsh/console/tree/master/repository-prebake/console) Dockerfile extends the published base: `COPY` this checkout to `/data/console`, `RUN prebake` (Console plus `plural-cli`, `plural`, and authed `plrl-up-demos` extra context), then runs the ordered repository/language scripts in `console/precompile/`, including Plural's Elixir and JavaScript dependency trees. CI builds it as `docker.io/pluralsh/console-repos`. Pass `GIT_ACCESS_TOKEN` as a BuildKit secret so `prebake` can clone the private repo.
 
 Locally, from the Console repository root, build the base image first:
 
 ```bash
 docker build -f repository-prebake/base/Dockerfile \
-  -t ghcr.io/pluralsh/repository-prebake:local \
+  -t docker.io/pluralsh/repository-prebake:local \
   go/repository-prebake
 cp repository-prebake/console/.dockerignore .dockerignore
 docker build -f repository-prebake/console/Dockerfile \
-  --build-arg PREBAKE_IMAGE=ghcr.io/pluralsh/repository-prebake:local \
+  --build-arg PREBAKE_IMAGE=docker.io/pluralsh/repository-prebake:local \
   --secret id=git_token,env=GIT_ACCESS_TOKEN \
-  -t ghcr.io/pluralsh/console-repos:local \
+  -t docker.io/pluralsh/console-repos:local \
   .
 ```
 
@@ -207,7 +245,7 @@ To install language tools **in the agent container** without wrapping compiles i
 
 ```yaml
 spec:
-  repositoryImage: ghcr.io/pluralsh/console-repos:latest
+  repositoryImage: docker.io/pluralsh/console-repos:latest
   readOnlyRootFilesystem: false
   mise:
     config: |

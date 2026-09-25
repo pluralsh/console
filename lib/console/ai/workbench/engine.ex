@@ -533,7 +533,8 @@ defmodule Console.AI.Workbench.Engine do
       job: job,
       engine: engine,
       actions: Environment.actions(environment),
-      review: WorkbenchJob.coding_review?(job)
+      review: WorkbenchJob.coding_review?(job),
+      self_service: :self_service in Environment.subagents(environment)
     ))
   end
 

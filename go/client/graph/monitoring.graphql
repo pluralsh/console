@@ -1,0 +1,166 @@
+fragment MonitorFragment on Monitor {
+    id
+    name
+    description
+    alertTemplate
+    severity
+    type
+    evaluationCron
+    prompt
+    modes {
+        ...WorkbenchJobModesFragment
+    }
+    query {
+        ...MonitorQueryFragment
+    }
+    threshold {
+        aggregate
+        value
+    }
+    service {
+        id
+        name
+    }
+    workbench {
+        id
+        name
+    }
+}
+
+fragment MonitorQueryFragment on MonitorQuery {
+    log {
+        tool
+        query
+        bucketSize
+        duration
+        operator
+        facets {
+            key
+            value
+        }
+        options {
+            azure {
+                resourceId
+            }
+        }
+    }
+    metrics {
+        tool
+        query
+        step
+        duration
+        options {
+            azure {
+                resourceId
+                metricsNamespace
+                aggregation
+                filter
+                orderBy
+                rollUpBy
+                metricsEndpoint
+            }
+        }
+    }
+}
+
+fragment WorkbenchDashboardFragment on WorkbenchDashboard {
+    id
+    name
+    description
+    graphs {
+        ...WorkbenchDashboardGraphFragment
+    }
+    inputs {
+        ...WorkbenchDashboardInputFragment
+    }
+    workbench {
+        id
+        name
+    }
+}
+
+fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
+    identifier
+    title
+    description
+    type
+    sectionId
+    markdown
+    options
+    layout {
+        x
+        y
+        w
+        h
+    }
+    datasource {
+        ...WorkbenchDashboardDatasourceFragment
+    }
+}
+
+fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
+    name
+    label
+    description
+    type
+    default
+    options
+    required
+    datasource {
+        ...WorkbenchDashboardDatasourceFragment
+    }
+}
+
+fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
+    type
+    tool
+    input
+}
+
+query GetMonitor($id: ID!) {
+    monitor(id: $id) {
+        ...MonitorFragment
+    }
+}
+
+mutation CreateMonitor($attributes: MonitorAttributes!) {
+    createMonitor(attributes: $attributes) {
+        ...MonitorFragment
+    }
+}
+
+mutation UpdateMonitor($id: ID!, $attributes: MonitorAttributes!) {
+    updateMonitor(id: $id, attributes: $attributes) {
+        ...MonitorFragment
+    }
+}
+
+mutation DeleteMonitor($id: ID!) {
+    deleteMonitor(id: $id) {
+        id
+    }
+}
+
+query GetWorkbenchDashboard($id: ID!) {
+    workbenchDashboard(id: $id) {
+        ...WorkbenchDashboardFragment
+    }
+}
+
+mutation CreateDashboard($attributes: DashboardAttributes!) {
+    createDashboard(attributes: $attributes) {
+        ...WorkbenchDashboardFragment
+    }
+}
+
+mutation UpdateDashboard($id: ID!, $attributes: DashboardAttributes!) {
+    updateDashboard(id: $id, attributes: $attributes) {
+        ...WorkbenchDashboardFragment
+    }
+}
+
+mutation DeleteDashboard($id: ID!) {
+    deleteDashboard(id: $id) {
+        id
+    }
+}

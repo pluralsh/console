@@ -8,6 +8,7 @@ import {
   GearTrainIcon,
   ListBoxItem,
   ReturnIcon,
+  SemanticColorKey,
   ToolsIcon,
   TrashCanIcon,
   TuningIcon,
@@ -52,6 +53,7 @@ import {
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_EVALS_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
+  WORKBENCHES_MONITORING_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
@@ -95,6 +97,9 @@ export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
   showEditWorkbenchButton?: boolean
   headerActions?: ReactNode
+  contentBackground?: SemanticColorKey
+  tabStripBackground?: SemanticColorKey
+  tabStripHeight?: number
   children?: ReactNode
 }
 
@@ -102,6 +107,9 @@ export function WorkbenchPageLayout({
   sidebar = { kind: 'default' },
   showEditWorkbenchButton = true,
   headerActions,
+  contentBackground,
+  tabStripBackground,
+  tabStripHeight,
   children,
 }: WorkbenchPageLayoutProps) {
   const theme = useTheme()
@@ -137,6 +145,10 @@ export function WorkbenchPageLayout({
           </Flex>
         ),
         path: jobsTabPath,
+      },
+      {
+        label: 'Monitoring',
+        path: `${workbenchBasePath}/${WORKBENCHES_MONITORING_REL_PATH}`,
       },
       {
         label: 'Issues',
@@ -202,12 +214,26 @@ export function WorkbenchPageLayout({
         minHeight={0}
         minWidth={0}
         overflow="auto"
+        css={
+          contentBackground
+            ? { backgroundColor: theme.colors[contentBackground] }
+            : undefined
+        }
       >
         <Flex
           align="center"
           gap="small"
           css={{
-            padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+            backgroundColor:
+              tabStripBackground && theme.colors[tabStripBackground],
+            ...(tabStripHeight
+              ? {
+                  height: tabStripHeight,
+                  padding: `0 ${theme.spacing.large}px`,
+                }
+              : {
+                  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+                }),
             position: 'relative',
             zIndex: 1,
           }}
