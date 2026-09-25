@@ -7,7 +7,7 @@ description: End-to-end guide to creating, configuring, and running your first w
 
 Before creating a workbench you need:
 
-* Any external tools (Datadog, Prometheus, GitHub, Slack, etc.) configured in **Workbenches → Integrations**. Tools can be added later, but it is easiest to have them ready before creating the workbench. See [Workbench tools](/plural-features/workbenches/tools).
+* Any external tools (Datadog, Prometheus, GitHub, Slack, etc.) configured in **Workbenches → Integrations**. Tools can be added later, but it is easiest to have them ready before creating the workbench. See [Workbench tools](/plural-features/workbenches/integrations/tools).
 * If you plan to enable the coding agent, an `AgentRuntime` resource deployed to your management cluster. See [Configure an AgentRuntime](/plural-features/plural-ai/ai-agent/configure-agent).
 
 

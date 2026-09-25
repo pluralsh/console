@@ -35,7 +35,7 @@ All native integrations respect your existing RBAC — enabling a capability her
 | Tool | What the agent can do |
 |---|---|
 | **Prometheus** | Query metrics from a Prometheus-compatible endpoint |
-| **[Datadog](/plural-features/workbenches/tools/datadog)** | Query metrics, logs, and traces from the Datadog API |
+| **[Datadog](/plural-features/workbenches/integrations/tools/datadog)** | Query metrics, logs, and traces from the Datadog API |
 | **Loki** | Query log streams from a Loki-compatible endpoint |
 | **Elastic** | Query and search indices in an Elasticsearch cluster |
 | **Tempo** | Query distributed traces from a Grafana Tempo endpoint |

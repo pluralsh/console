@@ -21,9 +21,9 @@ The parent configuration object. It defines the agent's identity (name, system p
 
 A single run of the agent against a prompt. Each job has a status (`pending`, `running`, `complete`, `failed`) and a streaming activity log you can follow in real time. See [Running workbench jobs](/plural-features/workbenches/running-jobs).
 
-### Tools
+### Integrations
 
-External integrations the agent can call during a job. Tools are managed globally under **Tools** and then attached to individual workbenches. See [Tools](/plural-features/workbenches/tools).
+Outside systems a workbench can use: tools the agent calls during a job, webhooks that deliver alerts and issue events, and chatbots that start a job from Slack or Microsoft Teams. See [Integrations](/plural-features/workbenches/integrations).
 
 ### Skills
 
@@ -46,5 +46,5 @@ Webhook, cron, and chatbot bindings are configured on the workbench. See [Automa
 
 1. Navigate to **Workbenches** in the Plural Console sidebar.
 2. Click **Create workbench** and step through the [creation wizard](/plural-features/workbenches/configuration).
-3. (Optional) Set up shared [tools](/plural-features/workbenches/tools) your workbench can call.
+3. (Optional) Set up shared [tools](/plural-features/workbenches/integrations/tools) your workbench can call.
 4. Run your first job from the workbench's **Launch** tab.

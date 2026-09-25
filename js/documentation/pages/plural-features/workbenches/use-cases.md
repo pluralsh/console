@@ -46,7 +46,7 @@ A webhook trigger fires on high-severity alerts. The agent creates a named Slack
 
 * Infrastructure: Services, Kubernetes, Pod logs
 
-**Tools:** Attach a [Slack tool](/plural-features/workbenches/tools#slack) configured with a bot token that has `channels:manage`, `channels:join`, and `chat:write` scopes.
+**Tools:** Attach a [Slack tool](/plural-features/workbenches/integrations/tools#slack) configured with a bot token that has `channels:manage`, `channels:join`, and `chat:write` scopes.
 
 **Webhook trigger:**
 
@@ -83,7 +83,7 @@ A cron schedule fires weekly (or on demand) and the agent queries cost tables, a
 
 **Tools:**
 
-* Attach a [Cloud tool](/plural-features/workbenches/tools#cloud) (AWS, GCP, or Azure) backed by an IAM role with read-only billing access. For AWS this means `ce:GetCostAndUsage` and `ce:GetCostForecast` on Cost Explorer. For GCP, the Billing Account Viewer role. For Azure, Billing Reader.
+* Attach a [Cloud tool](/plural-features/workbenches/integrations/tools#cloud) (AWS, GCP, or Azure) backed by an IAM role with read-only billing access. For AWS this means `ce:GetCostAndUsage` and `ce:GetCostForecast` on Cost Explorer. For GCP, the Billing Account Viewer role. For Azure, Billing Reader.
 * Optionally attach a Datadog or Prometheus tool to correlate cost with resource utilization metrics.
 * Optionally attach a Slack tool to deliver reports to a channel automatically.
 
@@ -118,7 +118,7 @@ An engineer creates a Jira or Linear ticket describing the infrastructure change
 
 **Tools:**
 
-* Attach a [Jira (Atlassian)](/plural-features/workbenches/tools#atlassian-jira) or [Linear](/plural-features/workbenches/tools#linear) tool so the agent can read ticket details and post comments.
+* Attach a [Jira (Atlassian)](/plural-features/workbenches/integrations/tools#atlassian-jira) or [Linear](/plural-features/workbenches/integrations/tools#linear) tool so the agent can read ticket details and post comments.
 * Optionally attach a GitHub, GitLab, or Bitbucket tool if you want the agent to directly interact with your SCM beyond what the coding agent handles.
 
 **Webhook trigger:**

@@ -219,9 +219,17 @@ export const docsStructure: DocSection[] = [
           { path: 'configuration', title: 'Setting up a workbench' },
           { path: 'coding-agent', title: 'Coding agent' },
           {
-            path: 'tools',
-            title: 'Workbench tools',
-            sections: [{ path: 'datadog', title: 'Datadog integration' }],
+            path: 'integrations',
+            title: 'Integrations',
+            sections: [
+              {
+                path: 'tools',
+                title: 'Workbench tools',
+                sections: [{ path: 'datadog', title: 'Datadog integration' }],
+              },
+              { path: 'webhooks', title: 'Webhooks' },
+              { path: 'chatbots', title: 'Chatbots' },
+            ],
           },
           { path: 'running-jobs', title: 'Running workbench jobs' },
           { path: 'automation', title: 'Automating workbench jobs' },
@@ -660,6 +668,16 @@ export const redirects = [
   {
     source: '/agent-api-reference',
     destination: '/api-reference/kubernetes/agent-api-reference',
+    permanent: true,
+  },
+  {
+    source: '/plural-features/workbenches/tools',
+    destination: '/plural-features/workbenches/integrations/tools',
+    permanent: true,
+  },
+  {
+    source: '/plural-features/workbenches/tools/datadog',
+    destination: '/plural-features/workbenches/integrations/tools/datadog',
     permanent: true,
   },
 ]
