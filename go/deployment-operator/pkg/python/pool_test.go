@@ -50,6 +50,36 @@ valuesFiles.append("first.yaml")
 	}
 }
 
+func TestRunReturnsWarnings(t *testing.T) {
+	p := testPool(t, Config{WorkerCount: 1, QueueSize: 1})
+
+	result, err := p.Run(context.Background(), "warn(\"careful\")\nwarnings.append(\"listed\")", nil)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(result.Warnings) != 2 || result.Warnings[0] != "careful" || result.Warnings[1] != "listed" {
+		t.Fatalf("unexpected warnings: %#v", result.Warnings)
+	}
+
+	_, err = p.Run(context.Background(), `warn(1)`, nil)
+	if err == nil || !strings.Contains(err.Error(), "TypeError") {
+		t.Fatalf("expected TypeError for non-string warn() argument, got %v", err)
+	}
+
+	result, err = p.Run(context.Background(), `values["a"] = 1`, nil)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(result.Warnings) != 0 {
+		t.Fatalf("expected no warnings, got %#v", result.Warnings)
+	}
+
+	_, err = p.Run(context.Background(), `warnings = [1]`, nil)
+	if err == nil || !strings.Contains(err.Error(), "warnings") {
+		t.Fatalf("expected strict warnings error, got %v", err)
+	}
+}
+
 func TestRunUsesFreshState(t *testing.T) {
 	p := testPool(t, Config{WorkerCount: 1, QueueSize: 2})
 

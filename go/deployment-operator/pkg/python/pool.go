@@ -41,6 +41,8 @@ type Config struct {
 type Result struct {
 	Values      map[string]any
 	ValuesFiles []string
+	// Warnings are non-fatal messages reported back to the service as warnings.
+	Warnings []string
 }
 
 // Pool owns a fixed set of workers and a bounded queue. It is safe for
@@ -291,7 +293,12 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		"imports = __helm_bindings.get('imports')\n" +
 		"service = __helm_bindings.get('service')\n" +
 		"values = {}\n" +
-		"valuesFiles = []\n"
+		"valuesFiles = []\n" +
+		"warnings = []\n" +
+		"def warn(message):\n" +
+		"    if not isinstance(message, str):\n" +
+		"        raise TypeError('warn() argument must be a string')\n" +
+		"    warnings.append(message)\n"
 	if _, err := repl.FeedRun(ctx, initialization, p.feedOptions()); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
@@ -299,7 +306,7 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
 
-	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles})", p.feedOptions())
+	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles, 'warnings': warnings})", p.feedOptions())
 	if err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
@@ -322,7 +329,12 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		return Result{}, errors.New("python valuesFiles must be a list of strings")
 	}
 
-	return Result{Values: values, ValuesFiles: valuesFiles}, nil
+	var warnings []string
+	if err := json.Unmarshal(decoded["warnings"], &warnings); err != nil || warnings == nil {
+		return Result{}, errors.New("python warnings must be a list of strings")
+	}
+
+	return Result{Values: values, ValuesFiles: valuesFiles, Warnings: warnings}, nil
 }
 
 func (p *Pool) limits() *monty.ResourceLimits {
