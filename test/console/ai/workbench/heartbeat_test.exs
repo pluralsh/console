@@ -48,6 +48,96 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert usage.total_tokens == 687_824
     end
 
+    test "normalizes ReqLLM canonical Bedrock cache counters" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "anthropic.claude-sonnet-4-6",
+        nil,
+        %{
+          input_tokens: 824,
+          output_tokens: 19_000,
+          total_tokens: 19_824,
+          cache_read_tokens: 667_000,
+          cache_write_tokens: 1_000
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.input_tokens == 824
+      assert usage.output_tokens == 19_000
+      assert usage.cached_tokens == 667_000
+      assert usage.total_tokens == 687_824
+    end
+
+    test "normalizes separate cache counters for non-Anthropic Bedrock Converse models" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "amazon.nova-pro-v1:0",
+        nil,
+        %{
+          input_tokens: 100,
+          output_tokens: 50,
+          total_tokens: 150,
+          cache_read_tokens: 600,
+          cache_write_tokens: 25,
+          input_includes_cached: false
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.cached_tokens == 600
+      assert usage.total_tokens == 775
+    end
+
+    test "does not add cache counters when Bedrock input already includes them" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "openai.gpt-oss-120b-1:0",
+        nil,
+        %{
+          input_tokens: 100,
+          output_tokens: 50,
+          total_tokens: 150,
+          cached_tokens: 60,
+          input_includes_cached: true
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.cached_tokens == 60
+      assert usage.total_tokens == 150
+    end
+
     test "preserves a larger provider total for Bedrock Anthropic usage" do
       job = insert(:workbench_job, status: :running)
       {:ok, pid} = Heartbeat.start_link(job)

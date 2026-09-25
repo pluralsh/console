@@ -2,6 +2,8 @@ defmodule Console.AI.Tools.Workbench.SubagentsTest do
   use Console.DataCase, async: true
 
   alias Console.AI.Tool
+  alias Console.AI.Workbench.Environment
+  alias Console.AI.Workbench.Subagents, as: RuntimeSubagents
   alias Console.AI.Tools.Workbench.{
     ObservabilityResult,
     Result,
@@ -48,6 +50,51 @@ defmodule Console.AI.Tools.Workbench.SubagentsTest do
   end
 
   describe "implement/1" do
+    test "lists the cached applicable tool names in each subagent description" do
+      environment = %Environment{
+        job: %WorkbenchJob{workbench: %Workbench{}},
+        tools: %{},
+        skills: %{},
+        activities: []
+      }
+
+      tool_names = RuntimeSubagents.tool_names([:memory], environment)
+
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: environment.job,
+          subagents: [:memory],
+          categories: [],
+          tool_names: tool_names
+        })
+
+      assert [%{"name" => "memory", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "Available tools: #{Enum.join(tool_names.memory, ", ")}."
+      assert "agent_scratchpad" in tool_names.memory
+      assert "subagent_result" in tool_names.memory
+      assert "workbench_activity_search" in tool_names.memory
+    end
+
+    test "limits displayed tool names to 15" do
+      names = Enum.map(1..16, &"tool_#{String.pad_leading("#{&1}", 2, "0")}")
+
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:memory],
+          categories: [],
+          tool_names: %{memory: names}
+        })
+
+      assert [%{"description" => description}] = Jason.decode!(encoded)
+      assert description =~ "tool_15, and 1 more."
+      refute description =~ "tool_16"
+    end
+
     test "describes infrastructure as covering kubernetes, IaaS, and Docker/OCI" do
       {:ok, encoded} =
         Subagents.implement(%Subagents{

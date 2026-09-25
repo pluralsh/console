@@ -51,6 +51,9 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
+  def tools(%WorkbenchJob{} = job, %Environment{} = environment),
+    do: tools(job, environment, FileCache.new())
+
   defp reducer(messages, _) do
     case Enum.find(messages, &match?(%Result{}, &1)) do
       %Result{output: output} -> {:halt, %{
@@ -61,7 +64,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
-  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
+  def tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
     skills = Environment.subagent_skills(skills, :infrastructure)
 
     core_tools(job, environment)

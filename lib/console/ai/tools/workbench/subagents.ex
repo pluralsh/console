@@ -7,10 +7,12 @@ defmodule Console.AI.Tools.Workbench.Subagents do
     field :job, :map, virtual: true
     field :subagents, {:array, Console.AI.Tools.Workbench.Subagent.Subagent}, virtual: true
     field :categories, {:array, Console.Schema.WorkbenchTool.Category}, virtual: true
+    field :tool_names, :map, virtual: true
   end
 
   @json_schema Console.priv_file!("tools/empty.json")
                |> Jason.decode!()
+  @max_tool_names 15
 
   def name(_), do: "workbench_subagents"
   def json_schema(_), do: @json_schema
@@ -18,10 +20,19 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   def changeset(model, attrs), do: cast(model, attrs, [])
 
-  def implement(%__MODULE__{bench: bench, job: job, subagents: subagents, categories: categories}) do
+  def implement(%__MODULE__{
+        bench: bench,
+        job: job,
+        subagents: subagents,
+        categories: categories,
+        tool_names: tool_names
+      }) do
     Enum.map(subagents, fn subagent -> %{
       name: subagent,
-      description: subagent_description(bench, subagent, categories, job)
+      description:
+        bench
+        |> subagent_description(subagent, categories, job)
+        |> with_tool_names(Map.get(tool_names || %{}, subagent, []))
     } end)
     |> Jason.encode()
   end
@@ -65,4 +76,13 @@ defmodule Console.AI.Tools.Workbench.Subagents do
     |> Enum.join(", ")
   end
   defp observability_categories(_), do: "not specified but likely supports metrics, logs, traces or error tracking"
+
+  defp with_tool_names(description, []), do: "#{description} Available tools: none."
+  defp with_tool_names(description, names) when length(names) > @max_tool_names do
+    {shown, hidden} = Enum.split(names, @max_tool_names)
+
+    "#{description} Available tools: #{Enum.join(shown, ", ")}, and #{length(hidden)} more."
+  end
+  defp with_tool_names(description, names) when is_list(names),
+    do: "#{description} Available tools: #{Enum.join(names, ", ")}."
 end

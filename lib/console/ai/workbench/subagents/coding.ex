@@ -97,7 +97,9 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     do: {:tool, content, %{call_id: id, name: name, arguments: args}}
   defp tool_msg(content, _), do: {:user, content}
 
-  defp tools(activity, %Environment{skills: skills, tools: workbench_tools, job: job, activities: activities}) do
+  def tools(%Environment{} = environment), do: tools(nil, environment)
+
+  def tools(activity, %Environment{skills: skills, tools: workbench_tools, job: job, activities: activities}) do
     skills = Environment.subagent_skills(skills, :coding)
     [
       %CodingAgent{activity: activity, workbench: job.workbench, job: job, skills: skills},

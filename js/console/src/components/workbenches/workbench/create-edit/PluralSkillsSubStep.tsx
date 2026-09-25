@@ -21,6 +21,9 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
+  useCreateWorkbenchSkillMutation,
+  useDeleteWorkbenchSkillMutation,
+  useUpdateWorkbenchSkillMutation,
   WorkbenchSkillAttributes,
   WorkbenchSkillSubagent,
 } from 'generated/graphql'
@@ -30,6 +33,8 @@ import { createFormUpdater, WorkbenchFormStepProps } from './WorkbenchFormSteps'
 import {
   useWorkbenchFormCardRightContent,
   useWorkbenchFormFooterActions,
+  useWorkbenchFormPersistence,
+  WorkbenchFormSkill,
 } from './WorkbenchCreateOrEdit'
 
 export const CREATE_MODE_NAME = ''
@@ -52,6 +57,9 @@ const subagentLabel = (subagent: WorkbenchSkillSubagent) =>
 
 const normalizeSkillName = (name: Nullable<string>) =>
   (name ?? '').trim().toLowerCase()
+
+const toErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error)
 
 const validateSkillName = ({
   draftName,
@@ -83,9 +91,18 @@ export function PluralSkillsSubStep({
 }: WorkbenchFormStepProps) {
   const theme = useTheme()
   const update = createFormUpdater(setFormState)
-  const skills: WorkbenchSkillAttributes[] = (
-    formState.workbenchSkills ?? []
-  ).filter(isNonNullable)
+  const { isCreateMode, workbenchId } = useWorkbenchFormPersistence()
+  const skills: WorkbenchFormSkill[] = (formState.workbenchSkills ?? []).filter(
+    isNonNullable
+  )
+  const [createSkill, { loading: createLoading }] =
+    useCreateWorkbenchSkillMutation()
+  const [updateSkill, { loading: updateLoading }] =
+    useUpdateWorkbenchSkillMutation()
+  const [deleteSkill, { loading: deleteLoading }] =
+    useDeleteWorkbenchSkillMutation()
+  const [mutationError, setMutationError] = useState<Nullable<string>>(null)
+  const mutationLoading = createLoading || updateLoading || deleteLoading
   const existingSkillNames = useMemo(
     () => skills.map((skill) => skill.name),
     [skills]
@@ -104,16 +121,31 @@ export function PluralSkillsSubStep({
 
   const handleEdit = (name: string) => setEditingName(name)
 
-  const handleDelete = (name: string) =>
+  const removeSkill = (name: string) =>
     update((d) => {
-      const next: WorkbenchSkillAttributes[] = (d.workbenchSkills ?? [])
-        .filter(isNonNullable)
-        .filter((s) => s.name !== name)
-      d.workbenchSkills =
-        next as WorkbenchFormStepProps['formState']['workbenchSkills']
+      d.workbenchSkills = (d.workbenchSkills ?? []).filter(
+        (skill) => skill?.name !== name
+      )
     })
 
-  const handleSave = (draft: WorkbenchSkillAttributes): Nullable<string> => {
+  const handleDelete = async (skill: WorkbenchFormSkill) => {
+    setMutationError(null)
+    if (isCreateMode || !skill.id) {
+      removeSkill(skill.name)
+      return
+    }
+
+    try {
+      await deleteSkill({ variables: { id: skill.id } })
+      removeSkill(skill.name)
+    } catch (error) {
+      setMutationError(toErrorMessage(error))
+    }
+  }
+
+  const handleSave = async (
+    draft: WorkbenchSkillAttributes
+  ): Promise<Nullable<string>> => {
     const canSave = !!draft.contents.trim() && !!draft.name.trim()
     if (!canSave) return 'Skill name and contents are required.'
 
@@ -132,18 +164,43 @@ export function PluralSkillsSubStep({
         (draft.subagents?.filter(isNonNullable) as WorkbenchSkillSubagent[]) ??
         [],
     }
-    update((d) => {
-      const list: WorkbenchSkillAttributes[] = (d.workbenchSkills ?? []).filter(
-        isNonNullable
-      )
-      const idx = editingName
-        ? list.findIndex((s) => s.name === editingName)
-        : -1
-      if (idx >= 0) list[idx] = normalizedDraft
-      else list.push(normalizedDraft)
-      d.workbenchSkills =
-        list as WorkbenchFormStepProps['formState']['workbenchSkills']
-    })
+    const saveToForm = (saved: WorkbenchFormSkill) =>
+      update((d) => {
+        const list: WorkbenchFormSkill[] = (d.workbenchSkills ?? []).filter(
+          isNonNullable
+        )
+        const idx = editingName
+          ? list.findIndex((s) => s.name === editingName)
+          : -1
+        if (idx >= 0) list[idx] = saved
+        else list.push(saved)
+        d.workbenchSkills = list
+      })
+
+    if (isCreateMode || !workbenchId) {
+      saveToForm(normalizedDraft)
+      setEditingName(null)
+      return null
+    }
+
+    try {
+      const existingId = editingSkill?.id
+      if (existingId) {
+        await updateSkill({
+          variables: { id: existingId, attributes: normalizedDraft },
+        })
+        saveToForm({ ...normalizedDraft, id: existingId })
+      } else {
+        const result = await createSkill({
+          variables: { workbenchId, attributes: normalizedDraft },
+        })
+        const id = result.data?.createWorkbenchSkill?.id
+        if (!id) return 'The skill was not created.'
+        saveToForm({ ...normalizedDraft, id })
+      }
+    } catch (error) {
+      return toErrorMessage(error)
+    }
     setEditingName(null)
     return null
   }
@@ -158,6 +215,7 @@ export function PluralSkillsSubStep({
         isNew={editingName === CREATE_MODE_NAME}
         onSave={handleSave}
         onCancel={handleCancel}
+        loading={mutationLoading}
       />
     )
   }
@@ -217,10 +275,13 @@ export function PluralSkillsSubStep({
               skill={skill}
               isLast={idx === skills.length - 1}
               onEdit={() => handleEdit(skill.name)}
-              onDelete={() => handleDelete(skill.name)}
+              onDelete={() => void handleDelete(skill)}
             />
           ))}
         </Card>
+      )}
+      {!!mutationError && (
+        <CaptionP $color="text-danger">{mutationError}</CaptionP>
       )}
     </FormField>
   )
@@ -286,12 +347,14 @@ function PluralSkillForm({
   isNew,
   onSave,
   onCancel,
+  loading,
 }: {
   initialSkill: Nullable<WorkbenchSkillAttributes>
   existingSkillNames: Nullable<string>[]
   isNew: boolean
-  onSave: (skill: WorkbenchSkillAttributes) => Nullable<string>
+  onSave: (skill: WorkbenchSkillAttributes) => Promise<Nullable<string>>
   onCancel: () => void
+  loading: boolean
 }) {
   const [draft, setDraft] = useState<WorkbenchSkillAttributes>(
     () =>
@@ -356,11 +419,12 @@ function PluralSkillForm({
           </Button>
         ) : (
           <Button
-            onClick={() => {
-              const saveError = onSaveRef.current(draftRef.current)
-              setSaveError(saveError)
+            onClick={async () => {
+              const nextError = await onSaveRef.current(draftRef.current)
+              setSaveError(nextError)
             }}
             disabled={!canSave}
+            loading={loading}
           >
             {isNew ? 'Create new skill' : 'Save skill'}
           </Button>
@@ -369,7 +433,7 @@ function PluralSkillForm({
     )
 
     return () => setFooterActions(null)
-  }, [canContinue, canSave, currentStep, isNew, setFooterActions])
+  }, [canContinue, canSave, currentStep, isNew, loading, setFooterActions])
 
   useEffect(() => {
     setRightContent(

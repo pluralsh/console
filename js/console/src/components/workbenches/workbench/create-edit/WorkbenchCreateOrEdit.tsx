@@ -16,13 +16,10 @@ import { getWorkbenchesBreadcrumbs } from 'components/workbenches/Workbenches'
 import {
   PolicyBindingFragment,
   useCreateWorkbenchMutation,
-  useDeleteWorkbenchKnowledgeMutation,
-  useUpdateWorkbenchKnowledgeMutation,
   useUpdateWorkbenchMutation,
   useWorkbenchQuery,
   WorkbenchAttributes,
   WorkbenchFragment,
-  WorkbenchKnowledgeAttributes,
   WorkbenchSkillAttributes,
   WorkbenchSkillSubagent,
 } from 'generated/graphql'
@@ -50,6 +47,8 @@ type WorkbenchFormContextValue = {
   setTabs: (tabs: ReactNode | null) => void
   setFooterActions: (actions: ReactNode | null) => void
   setRightContent: (content: ReactNode | null) => void
+  workbenchId: Nullable<string>
+  isCreateMode: boolean
 }
 const WorkbenchFormContext = createContext<WorkbenchFormContextValue | null>(
   null
@@ -82,8 +81,24 @@ export function useWorkbenchFormCardRightContent() {
   return { setRightContent: ctx.setRightContent }
 }
 
+export function useWorkbenchFormPersistence() {
+  const ctx = useContext(WorkbenchFormContext)
+  if (!ctx)
+    throw new Error(
+      'useWorkbenchFormPersistence must be used inside a WorkbenchForm'
+    )
+  return {
+    workbenchId: ctx.workbenchId,
+    isCreateMode: ctx.isCreateMode,
+  }
+}
+
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
 // use FormBinding[] so BindingInput can show chips (user email / group name).
+export type WorkbenchFormSkill = WorkbenchSkillAttributes & {
+  id?: string
+}
+
 export type WorkbenchFormKnowledge = {
   id: string
   name: string
@@ -96,11 +111,15 @@ export type WorkbenchFormKnowledge = {
 
 export type WorkbenchFormState = Omit<
   Required<WorkbenchAttributes>,
-  'readBindings' | 'writeBindings' | 'projectId' | 'systemPrompt'
+  | 'readBindings'
+  | 'writeBindings'
+  | 'projectId'
+  | 'systemPrompt'
+  | 'workbenchSkills'
 > & {
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
-  workbenchSkills: WorkbenchSkillAttributes[]
+  workbenchSkills: WorkbenchFormSkill[]
   workbenchKnowledge: WorkbenchFormKnowledge[]
 }
 
@@ -196,8 +215,14 @@ function WorkbenchForm({
   const [footerActions, setFooterActions] = useState<ReactNode | null>(null)
   const [rightContent, setRightContent] = useState<ReactNode | null>(null)
   const formContextValue = useMemo<WorkbenchFormContextValue>(
-    () => ({ setTabs: setCardTabs, setFooterActions, setRightContent }),
-    []
+    () => ({
+      setTabs: setCardTabs,
+      setFooterActions,
+      setRightContent,
+      workbenchId,
+      isCreateMode,
+    }),
+    [isCreateMode, workbenchId]
   )
   const [stepStatuses, setStepStatuses] = useState<
     Record<WorkbenchStepLabel, StepStatus>
@@ -239,61 +264,13 @@ function WorkbenchForm({
       refetchQueries: ['Workbenches'],
       awaitRefetchQueries: true,
     })
-  const [updateKnowledge, { loading: updateKnowledgeLoading }] =
-    useUpdateWorkbenchKnowledgeMutation()
-  const [deleteKnowledge, { loading: deleteKnowledgeLoading }] =
-    useDeleteWorkbenchKnowledgeMutation()
-  const [knowledgeError, setKnowledgeError] = useState<Error | null>(null)
-  const mutationLoading =
-    createLoading ||
-    updateLoading ||
-    updateKnowledgeLoading ||
-    deleteKnowledgeLoading
-  const mutationError = createError || updateError || knowledgeError
+  const mutationLoading = createLoading || updateLoading
+  const mutationError = createError || updateError
 
-  const persistKnowledgeChanges = async () => {
-    const initialById = new Map(
-      initialFormState.workbenchKnowledge.map((entry) => [entry.id, entry])
-    )
-    const currentIds = new Set(
-      formState.workbenchKnowledge.map((entry) => entry.id)
-    )
-    const deletions = [...initialById.keys()].filter(
-      (id) => !currentIds.has(id)
-    )
-    const updates = formState.workbenchKnowledge.filter((entry) => {
-      const initial = initialById.get(entry.id)
-      return (
-        !!initial && knowledgeSignature(entry) !== knowledgeSignature(initial)
-      )
-    })
-
-    await Promise.all([
-      ...deletions.map((id) => deleteKnowledge({ variables: { id } })),
-      ...updates.map((entry) =>
-        updateKnowledge({
-          variables: {
-            id: entry.id,
-            attributes: knowledgeToAttributes(entry),
-          },
-        })
-      ),
-    ])
-  }
-
-  const onSave = async () => {
-    const attributes = formStateToAttributes(formState)
+  const onSave = () => {
+    const attributes = formStateToAttributes(formState, isCreateMode)
     if (isCreateMode) {
       createWorkbench({ variables: { attributes } })
-      return
-    }
-    try {
-      setKnowledgeError(null)
-      await persistKnowledgeChanges()
-    } catch (error) {
-      setKnowledgeError(
-        error instanceof Error ? error : new Error(String(error))
-      )
       return
     }
     updateWorkbench({
@@ -506,22 +483,10 @@ const validateForm = (formState: WorkbenchFormState) =>
     validateStep(label as WorkbenchStepLabel, formState)
   )
 
-function knowledgeToAttributes(
-  entry: WorkbenchFormKnowledge
-): WorkbenchKnowledgeAttributes {
-  return {
-    name: entry.name,
-    description: entry.description ?? null,
-    knowledge: entry.knowledge,
-    labels: entry.labels,
-  }
-}
-
-function knowledgeSignature(entry: WorkbenchFormKnowledge) {
-  return JSON.stringify(knowledgeToAttributes(entry))
-}
-
-function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
+function formStateToAttributes(
+  state: WorkbenchFormState,
+  includeWorkbenchSkills: boolean
+): WorkbenchAttributes {
   const {
     name,
     readBindings,
@@ -535,8 +500,11 @@ function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
   return {
     ...deepOmitFalsy(rest),
     name: name ?? '',
-    // Keep explicit empty list so "delete all skills" is persisted.
-    workbenchSkills: (workbenchSkills ?? []).filter(isNonNullable),
+    ...(includeWorkbenchSkills && {
+      workbenchSkills: (workbenchSkills ?? [])
+        .filter(isNonNullable)
+        .map(({ id: _id, ...skill }) => skill),
+    }),
     // Keep explicit mode values so disabling an existing default persists.
     ...(modes ? { modes: modesToAttributes(modes) } : {}),
     ...(readBindings?.length && {
@@ -601,6 +569,7 @@ function sanitizeInitialForm({
     .map((edge) => edge?.node)
     .filter(isNonNullable)
     .map((skill) => ({
+      id: skill.id,
       name: skill.name ?? '',
       description: skill.description ?? null,
       contents: skill.contents ?? '',

@@ -23404,6 +23404,29 @@ export type UpdateWorkbenchMutationVariables = Exact<{
 
 export type UpdateWorkbenchMutation = { __typename?: 'RootMutationType', updateWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', selfService?: boolean | null, infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
+export type CreateWorkbenchSkillMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  attributes: WorkbenchSkillAttributes;
+}>;
+
+
+export type CreateWorkbenchSkillMutation = { __typename?: 'RootMutationType', createWorkbenchSkill?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null };
+
+export type UpdateWorkbenchSkillMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: WorkbenchSkillAttributes;
+}>;
+
+
+export type UpdateWorkbenchSkillMutation = { __typename?: 'RootMutationType', updateWorkbenchSkill?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null };
+
+export type DeleteWorkbenchSkillMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteWorkbenchSkillMutation = { __typename?: 'RootMutationType', deleteWorkbenchSkill?: { __typename?: 'WorkbenchSkill', id: string } | null };
+
 export type UpdateWorkbenchKnowledgeMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   attributes: WorkbenchKnowledgeAttributes;
@@ -49370,6 +49393,115 @@ export function useUpdateWorkbenchMutation(baseOptions?: Apollo.MutationHookOpti
 export type UpdateWorkbenchMutationHookResult = ReturnType<typeof useUpdateWorkbenchMutation>;
 export type UpdateWorkbenchMutationResult = Apollo.MutationResult<UpdateWorkbenchMutation>;
 export type UpdateWorkbenchMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchMutation, UpdateWorkbenchMutationVariables>;
+export const CreateWorkbenchSkillDocument = gql`
+    mutation CreateWorkbenchSkill($workbenchId: ID!, $attributes: WorkbenchSkillAttributes!) {
+  createWorkbenchSkill(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+    `;
+export type CreateWorkbenchSkillMutationFn = Apollo.MutationFunction<CreateWorkbenchSkillMutation, CreateWorkbenchSkillMutationVariables>;
+
+/**
+ * __useCreateWorkbenchSkillMutation__
+ *
+ * To run a mutation, you first call `useCreateWorkbenchSkillMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWorkbenchSkillMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWorkbenchSkillMutation, { data, loading, error }] = useCreateWorkbenchSkillMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWorkbenchSkillMutation(baseOptions?: Apollo.MutationHookOptions<CreateWorkbenchSkillMutation, CreateWorkbenchSkillMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWorkbenchSkillMutation, CreateWorkbenchSkillMutationVariables>(CreateWorkbenchSkillDocument, options);
+      }
+export type CreateWorkbenchSkillMutationHookResult = ReturnType<typeof useCreateWorkbenchSkillMutation>;
+export type CreateWorkbenchSkillMutationResult = Apollo.MutationResult<CreateWorkbenchSkillMutation>;
+export type CreateWorkbenchSkillMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchSkillMutation, CreateWorkbenchSkillMutationVariables>;
+export const UpdateWorkbenchSkillDocument = gql`
+    mutation UpdateWorkbenchSkill($id: ID!, $attributes: WorkbenchSkillAttributes!) {
+  updateWorkbenchSkill(id: $id, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+    `;
+export type UpdateWorkbenchSkillMutationFn = Apollo.MutationFunction<UpdateWorkbenchSkillMutation, UpdateWorkbenchSkillMutationVariables>;
+
+/**
+ * __useUpdateWorkbenchSkillMutation__
+ *
+ * To run a mutation, you first call `useUpdateWorkbenchSkillMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWorkbenchSkillMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWorkbenchSkillMutation, { data, loading, error }] = useUpdateWorkbenchSkillMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateWorkbenchSkillMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWorkbenchSkillMutation, UpdateWorkbenchSkillMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWorkbenchSkillMutation, UpdateWorkbenchSkillMutationVariables>(UpdateWorkbenchSkillDocument, options);
+      }
+export type UpdateWorkbenchSkillMutationHookResult = ReturnType<typeof useUpdateWorkbenchSkillMutation>;
+export type UpdateWorkbenchSkillMutationResult = Apollo.MutationResult<UpdateWorkbenchSkillMutation>;
+export type UpdateWorkbenchSkillMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchSkillMutation, UpdateWorkbenchSkillMutationVariables>;
+export const DeleteWorkbenchSkillDocument = gql`
+    mutation DeleteWorkbenchSkill($id: ID!) {
+  deleteWorkbenchSkill(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteWorkbenchSkillMutationFn = Apollo.MutationFunction<DeleteWorkbenchSkillMutation, DeleteWorkbenchSkillMutationVariables>;
+
+/**
+ * __useDeleteWorkbenchSkillMutation__
+ *
+ * To run a mutation, you first call `useDeleteWorkbenchSkillMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteWorkbenchSkillMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteWorkbenchSkillMutation, { data, loading, error }] = useDeleteWorkbenchSkillMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteWorkbenchSkillMutation(baseOptions?: Apollo.MutationHookOptions<DeleteWorkbenchSkillMutation, DeleteWorkbenchSkillMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteWorkbenchSkillMutation, DeleteWorkbenchSkillMutationVariables>(DeleteWorkbenchSkillDocument, options);
+      }
+export type DeleteWorkbenchSkillMutationHookResult = ReturnType<typeof useDeleteWorkbenchSkillMutation>;
+export type DeleteWorkbenchSkillMutationResult = Apollo.MutationResult<DeleteWorkbenchSkillMutation>;
+export type DeleteWorkbenchSkillMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchSkillMutation, DeleteWorkbenchSkillMutationVariables>;
 export const UpdateWorkbenchKnowledgeDocument = gql`
     mutation UpdateWorkbenchKnowledge($id: ID!, $attributes: WorkbenchKnowledgeAttributes!) {
   updateWorkbenchKnowledge(id: $id, attributes: $attributes) {
@@ -51786,6 +51918,9 @@ export const namedOperations = {
     RejectWorkbenchJobActivity: 'RejectWorkbenchJobActivity',
     CreateWorkbench: 'CreateWorkbench',
     UpdateWorkbench: 'UpdateWorkbench',
+    CreateWorkbenchSkill: 'CreateWorkbenchSkill',
+    UpdateWorkbenchSkill: 'UpdateWorkbenchSkill',
+    DeleteWorkbenchSkill: 'DeleteWorkbenchSkill',
     UpdateWorkbenchKnowledge: 'UpdateWorkbenchKnowledge',
     DeleteWorkbenchKnowledge: 'DeleteWorkbenchKnowledge',
     CreateWorkbenchEval: 'CreateWorkbenchEval',
