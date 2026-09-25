@@ -25,8 +25,10 @@ import {
 import {
   getSearchQuery,
   humanizeToolName,
+  resolveToolCallKind,
   toolCallGroupHeader,
 } from 'components/ai/chatbot/toolCallDisplay'
+import { ToolCallKindIcon } from 'components/ai/chatbot/toolCallIcons'
 import { PreviewablePanel } from 'components/ai/chatbot/ToolCallContent'
 import {
   getWorkbenchToolLabel,
@@ -661,13 +663,7 @@ function WorkbenchJobActivityThought({
   const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
   const query = getSearchQuery(toolArgs)
-  const toolIcon = tool ? (
-    <WorkbenchToolIcon
-      type={tool.tool}
-      provider={tool.cloudConnection?.provider}
-      size={12}
-    />
-  ) : undefined
+  const toolIcon = thoughtToolIcon({ tool, toolName, toolArgs })
   return (
     <SimpleToolCall
       content={content}
@@ -839,7 +835,7 @@ function ActivityLatestTool({
 }: {
   thought: WorkbenchJobThoughtFragment
 }) {
-  const { toolName, tool } = thought
+  const { toolName, toolArgs, tool } = thought
   if (!toolName && !tool) return null
 
   const title = tool
@@ -848,14 +844,7 @@ function ActivityLatestTool({
 
   return (
     <ActivityLatestToolSC title={title}>
-      {tool && (
-        <WorkbenchToolIcon
-          type={tool.tool}
-          provider={tool.cloudConnection?.provider}
-          size={12}
-          css={{ flexShrink: 0 }}
-        />
-      )}
+      {thoughtToolIcon({ tool, toolName, toolArgs })}
       <Body2P
         as="span"
         $color="text-disabled"
@@ -881,6 +870,31 @@ const ActivityLatestToolSC = styled.span(({ theme }) => ({
   maxWidth: '40ch',
   flex: '0 1 auto',
 }))
+
+function thoughtToolIcon({
+  tool,
+  toolName,
+  toolArgs,
+}: {
+  tool?: Nullable<WorkbenchToolTinyFragment>
+  toolName?: Nullable<string>
+  toolArgs?: WorkbenchJobThoughtFragment['toolArgs']
+}) {
+  if (tool) {
+    return (
+      <WorkbenchToolIcon
+        type={tool.tool}
+        provider={tool.cloudConnection?.provider}
+        size={12}
+        css={{ flexShrink: 0 }}
+      />
+    )
+  }
+
+  return (
+    <ToolCallKindIcon kind={resolveToolCallKind(toolName ?? '', toolArgs)} />
+  )
+}
 
 function compactWorkbenchToolCallTitle(
   toolName: Nullable<string>,

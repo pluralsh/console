@@ -29,6 +29,7 @@ import {
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
 } from '../toolCallDisplay'
+import { ToolCallKindIcon } from '../toolCallIcons'
 
 import {
   CHIP_ATTRIBUTE_SCHEMA,
@@ -107,21 +108,23 @@ export function SimpleToolCall({
   const title =
     customTitle ?? toolCallDisplayTitle(kind, toolName, args, isPending)
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
+  const resolvedLeadingIcon =
+    leadingIcon ??
+    (isPending && kind === 'subagent' ? (
+      <AgentLoadingIcon
+        size={12}
+        variant="cursorEq"
+      />
+    ) : (
+      <ToolCallKindIcon kind={kind} />
+    ))
   const label = customLabel ?? (
     <ToolCallLineLabel
       title={title}
       subtitle={subtitle}
       runtime={toolRuntime}
       isPending={isPending}
-      leadingIcon={
-        leadingIcon ??
-        (isPending && kind === 'subagent' ? (
-          <AgentLoadingIcon
-            size={12}
-            variant="cursorEq"
-          />
-        ) : undefined)
-      }
+      leadingIcon={resolvedLeadingIcon}
     />
   )
   const accordionProps = {
@@ -141,6 +144,7 @@ export function SimpleToolCall({
           subtitle={description ? undefined : subtitle}
           runtime={toolRuntime}
           isPending={isPending}
+          leadingIcon={resolvedLeadingIcon}
         />
       )
       return (

@@ -7,13 +7,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+      MIX_OS_DEPS_COMPILE_PARTITION_COUNT: '4'
+      HEX_HTTP_CONCURRENCY: '10'
     steps:
       - uses: actions/checkout@v7
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
           version-type: strict
-      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v5
         with:
           version: latest
@@ -23,23 +26,15 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - run: make testup
-      # Tag runs can read master's cache but anything they save is only visible to that tag
-      - name: Restore mix cache
-        uses: actions/cache/restore@v6
+      - uses: actions/cache@v6
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-${{ github.sha }}
+          key: ${{ runner.os }}-mix-test-v4-${{ hashFiles('.tool-versions', 'mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-
-            ${{ runner.os }}-mix-test-v3-
-      # - name: download jwt verification key
-      #   run: |
-      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
-      #   env:
-      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-      - run: mix deps.get
+            ${{ runner.os }}-mix-test-v4-
+      - run: mix deps.get --check-locked
       - run: mix test
       - uses: 8398a7/action-slack@v3
         with:

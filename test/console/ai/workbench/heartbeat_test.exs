@@ -1,6 +1,7 @@
 defmodule Console.AI.Workbench.HeartbeatTest do
   use Console.DataCase, async: false
   alias Console.AI.{ModelSelection, Workbench.Heartbeat}
+  alias Console.Deployments.Workbenches
   alias Console.Schema.{Workbench, WorkbenchJob}
   alias Console.Schema.Workbench.Budget
 
@@ -232,6 +233,15 @@ defmodule Console.AI.Workbench.HeartbeatTest do
         )
 
       job = insert(:workbench_job, status: :running, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, status: :running)
+      running = insert(:agent_run, status: :running)
+      pending_approval = insert(:agent_run, status: :pending_approval)
+      babysitting = insert(:agent_run, status: :babysitting)
+
+      for run <- [running, pending_approval, babysitting] do
+        {:ok, _} = Workbenches.associate_agent_run(activity, run.id)
+      end
+
       {:ok, pid} = Heartbeat.start_link(job)
       Process.unlink(pid)
       ref = Process.monitor(pid)
@@ -256,6 +266,10 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert_in_delta persisted_job.usage.output_cost, @usage.output_cost, 0.000_001
       assert_in_delta persisted_job.usage.total_cost, @usage.total_cost, 0.000_001
       assert Console.Repo.get!(Workbench, workbench.id).budget.last == 875
+      assert refetch(activity).status == :cancelled
+      assert refetch(running).status == :cancelled
+      assert refetch(pending_approval).status == :pending_approval
+      assert refetch(babysitting).status == :babysitting
     end
 
     test "terminates the linked engine process when cancelled" do

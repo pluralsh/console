@@ -55,7 +55,8 @@ ARG OS_VARIANT=alpine
 ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
     MIX_ENV=${MIX_ENV} \
-    OS_VARIANT=${OS_VARIANT}
+    OS_VARIANT=${OS_VARIANT} \
+    MIX_OS_DEPS_COMPILE_PARTITION_COUNT=4
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:${PATH}
@@ -64,10 +65,10 @@ ARG RUST_TOOLCHAIN=stable
 # By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
-# This step installs build tools for C NIFs (e.g. argon2_elixir). Rust-based deps use
-# precompiled NIFs and do not require a Rust toolchain in the Alpine builder image.
+# Install build tools only. Do not `apk upgrade` here: floating package
+# versions change the layer digest and force a full Mix deps recompile.
+# Rust-based deps use precompiled NIFs and do not need a toolchain on Alpine.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk update && apk upgrade --no-cache && \
       apk add --no-cache git build-base curl ca-certificates; \
     else \
       apt-get update && apt-get install -y --no-install-recommends git build-essential curl ca-certificates; \

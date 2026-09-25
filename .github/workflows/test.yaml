@@ -2,6 +2,9 @@ name: CI / Console
 
 env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  MIX_ENV: test
+  MIX_OS_DEPS_COMPILE_PARTITION_COUNT: '4'
+  HEX_HTTP_CONCURRENCY: '10'
 
 on:
   push:
@@ -78,9 +81,12 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
-          # only master writes the shared cache so unmerged branches can't seed layers for everyone else
-          cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache,mode=max' || '' }}
+          cache-from: |
+            type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
+            type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache-pr-${{ github.event.pull_request.number }}
+          # master writes the shared cache; PRs write a per-PR tag so later
+          # pushes reuse Mix layers without seeding unmerged work for everyone
+          cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache,mode=max' || format('type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache-pr-{0},mode=max', github.event.pull_request.number) }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
@@ -116,7 +122,6 @@ jobs:
         with:
           version-file: .tool-versions
           version-type: strict
-      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v5
         with:
           version: latest
@@ -126,35 +131,16 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - run: make testup
-      # - name: download jwt verification key
-      #   run: |
-      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
-      #   env:
-      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-      # PRs restore the newest master entry; only master saves, keyed per commit so saves never collide
-      - name: Restore mix cache
-        id: mix-cache
-        uses: actions/cache/restore@v6
+      - uses: actions/cache@v6
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-${{ github.sha }}
+          key: ${{ runner.os }}-mix-test-v4-${{ hashFiles('.tool-versions', 'mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-
-            ${{ runner.os }}-mix-test-v3-
-      - run: mix deps.get
+            ${{ runner.os }}-mix-test-v4-
+      - run: mix deps.get --check-locked
       - run: mix compile
-        env:
-          MIX_ENV: test
-      - name: Save mix cache
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: actions/cache/save@v6
-        with:
-          path: |
-            deps
-            _build
-          key: ${{ steps.mix-cache.outputs.cache-primary-key }}
       - run: mix test
         env:
           TEST_CHART_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN}}
@@ -175,35 +161,33 @@ jobs:
     needs: [vouch]
     name: Check that Schema is up to date
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
           version-type: strict
-      - uses: dtolnay/rust-toolchain@stable
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
           go-version-file: go/client/go.mod
           cache-dependency-path: go/client/go.sum
           cache: true
-      - name: Restore mix cache
-        uses: actions/cache/restore@v6
+      - uses: actions/cache@v6
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-${{ github.sha }}
+          key: ${{ runner.os }}-mix-test-v4-${{ hashFiles('.tool-versions', 'mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-test-v3-${{ hashFiles('.tool-versions', 'mix.lock') }}-
-            ${{ runner.os }}-mix-test-v3-
-      - name: get dependencies
-        run: mix deps.get
+            ${{ runner.os }}-mix-test-v4-
+      - run: mix deps.get --check-locked
       - name: update schema
-        run: MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
+        run: mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
       - name: update openapi schema
-        run: MIX_ENV=test mix openapi.dump Console.OpenAPI --pretty -o schema/openapi.json
+        run: mix openapi.dump Console.OpenAPI --pretty -o schema/openapi.json
       - name: Verify Changed files
         run: |
           git diff --exit-code -- schema || {
