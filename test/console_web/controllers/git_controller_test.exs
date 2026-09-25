@@ -1,5 +1,7 @@
 defmodule ConsoleWeb.GitControllerTest do
   use ConsoleWeb.ConnCase, async: false
+  use Mimic
+  alias Console.Deployments.Git.Discovery
 
   describe "agent_chart/2" do
     test "it can download the current valid agent chart", %{conn: conn} do
@@ -102,6 +104,24 @@ defmodule ConsoleWeb.GitControllerTest do
       assert error.message == "could not resolve ref doesnt-exist"
     end
 
+    test "if the agent is bootstrapping it persists a warning", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      %{id: id} = svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      expect(Discovery, :digest, fn _, _ -> {:error, :agent_bootstrapping} end)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/v1/git/tarballs", %{id: id})
+      |> response(425)
+
+      %{errors: [error]} = svc = refetch(svc) |> Console.Repo.preload([:errors])
+      assert svc.status == :stale
+      assert error.source == "git"
+      assert error.message == "Git or Helm agent is bootstrapping"
+      assert error.warning
+    end
+
     test "if fetching and dependencies are not satisfied, it will 402 and persist an error", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
@@ -173,6 +193,24 @@ defmodule ConsoleWeb.GitControllerTest do
       %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
       assert error.source == "git"
       assert error.message == "could not resolve ref doesnt-exist"
+    end
+
+    test "if the agent is bootstrapping it persists a warning", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      %{id: id} = svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      expect(Discovery, :digest, fn _, _ -> {:error, :agent_bootstrapping} end)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/ext/v1/digests", %{id: id})
+      |> response(425)
+
+      %{errors: [error]} = svc = refetch(svc) |> Console.Repo.preload([:errors])
+      assert svc.status == :stale
+      assert error.source == "git"
+      assert error.message == "Git or Helm agent is bootstrapping"
+      assert error.warning
     end
 
     @tag :skip

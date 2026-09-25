@@ -43,12 +43,8 @@ RUN yarn workspace console build:no-tsc
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-${OS_VARIANT}-${OS_VERSION} AS builder
 
-# The following are build arguments used to change variable parts of the image.
-# The name of your application/release (required)
 ARG APP_NAME=console
-# The environment to build with
 ARG MIX_ENV=prod
-# Set this to true if this release is not a Phoenix app
 ARG SKIP_PHOENIX=false
 ARG OS_VARIANT=alpine
 
@@ -57,34 +53,25 @@ ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     MIX_ENV=${MIX_ENV} \
     OS_VARIANT=${OS_VARIANT} \
     MIX_OS_DEPS_COMPILE_PARTITION_COUNT=4
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:${PATH}
-ARG RUST_TOOLCHAIN=stable
 
-# By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
-# Install build tools only. Do not `apk upgrade` here: floating package
-# versions change the layer digest and force a full Mix deps recompile.
-# Rust-based deps use precompiled NIFs and do not need a toolchain on Alpine.
+# hexpm/elixir-alpine has Mix and ca-certificates only. git is required for
+# mix git deps; build-base is required for argon2_elixir's C NIF. Rust NIFs
+# (mdex, mermaid_validator) ship precompiled and do not need rustc.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
-      apk add --no-cache git build-base curl ca-certificates; \
+      apk add --no-cache git build-base; \
     else \
-      apt-get update && apt-get install -y --no-install-recommends git build-essential curl ca-certificates; \
-      rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
+      apt-get update && apt-get install -y --no-install-recommends git build-essential && \
+      rm -rf /var/lib/apt/lists/*; \
     fi && \
-  if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi && \
   mix local.rebar --force && \
   mix local.hex --force
 
-# Deps are fetched and compiled in their own layer so they stay cached until mix.lock or build config changes
 COPY mix.exs mix.lock ./
 COPY config/config.exs config/${MIX_ENV}.exs config/
 RUN mix do deps.get --only ${MIX_ENV} + deps.compile
 
-# Only copy what the app compile reads, so changes elsewhere in the monorepo don't bust this layer
 COPY config/ config/
 COPY src/ src/
 COPY static/ static/

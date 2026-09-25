@@ -26,6 +26,9 @@ jobs:
     needs: [vouch]
     name: Test Build Docker image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -67,25 +70,20 @@ jobs:
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-      # - name: download jwt verification key
-      #   run: |
-      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
-      #   env:
-      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Test Build console image
         uses: docker/build-push-action@v7
         with:
           context: "."
           file: "./Dockerfile"
           push: true
+          provenance: false
+          sbom: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
           cache-from: |
             type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
             type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache-pr-${{ github.event.pull_request.number }}
-          # master writes the shared cache; PRs write a per-PR tag so later
-          # pushes reuse Mix layers without seeding unmerged work for everyone
           cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache,mode=max' || format('type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache-pr-{0},mode=max', github.event.pull_request.number) }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
