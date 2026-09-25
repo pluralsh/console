@@ -8465,7 +8465,7 @@ type WorkbenchDashboardGraph {
   markdown: String
 
   "Visualization-specific display options; sections may set collapsed"
-  options: Json
+  options: Map
 
   "Grid position and size"
   layout: WorkbenchDashboardGraphLayout!
@@ -8496,7 +8496,7 @@ type WorkbenchDashboardDatasource {
   tool: String!
 
   "Input passed to the observability tool"
-  input: Json!
+  input: Map!
 }
 
 type WorkbenchDashboardInput {
