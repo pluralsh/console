@@ -1,7 +1,11 @@
 package service_test
 
 import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
 	"context"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -71,6 +75,7 @@ var _ = Describe("Reconciler", Ordered, func() {
 		}
 		ctx := context.Background()
 		tarPath := filepath.Join("..", "..", "..", "test", "tarball", "test.tar.gz")
+		helmChartPath := filepath.Join("..", "..", "..", "test", "helm", "lua-warnings")
 
 		r := gin.Default()
 		r.GET("/ext/v1/digests", func(c *gin.Context) {
@@ -78,14 +83,21 @@ var _ = Describe("Reconciler", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			c.String(http.StatusOK, string(res))
 		})
+		r.GET("/ext/v1/helm-tarball", func(c *gin.Context) {
+			res, err := tarGz(helmChartPath)
+			Expect(err).NotTo(HaveOccurred())
+			c.Data(http.StatusOK, "application/gzip", res)
+		})
 
-		srv := &http.Server{
-			Addr:    ":8081",
-			Handler: r,
-		}
+		var srv *http.Server
 		dir := ""
 		BeforeEach(func() {
 			var err error
+			// A new server is needed for each spec, since a server cannot be restarted after shutdown.
+			srv = &http.Server{
+				Addr:    ":8081",
+				Handler: r,
+			}
 			dir, err = os.MkdirTemp("", "test")
 			cache.InitComponentShaCache(args.ComponentShaCacheTTL())
 			Expect(err).NotTo(HaveOccurred())
@@ -151,6 +163,63 @@ var _ = Describe("Reconciler", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(kClient.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: namespace}, &v1.Pod{})).NotTo(HaveOccurred())
+		})
+
+		It("should report Lua templating warnings as service errors", func() {
+			helmService := &console.ServiceDeploymentForAgent{
+				ID:        "helm-warnings",
+				Name:      "helm-warnings",
+				Namespace: namespace,
+				Tarball:   lo.ToPtr("http://localhost:8081/ext/v1/helm-tarball"),
+				Cluster:   consoleService.Cluster,
+				Revision:  &console.ServiceDeploymentForAgent_Revision{ID: "helm-warnings"},
+				Helm: &console.ServiceDeploymentForAgent_Helm{
+					LuaScript: lo.ToPtr(`
+values["region"] = "us-east-1"
+warn("region is not configured, defaulting to us-east-1")
+`),
+				},
+			}
+
+			var reportedErrs []*console.ServiceErrorAttributes
+			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetCredentials").Return("", "")
+			fakeConsoleClient.On("GetService", mock.Anything).Return(helmService, nil)
+			fakeConsoleClient.On("UpdateComponents", helmService.ID, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+				Run(func(args mock.Arguments) {
+					reportedErrs = args.Get(4).([]*console.ServiceErrorAttributes)
+				}).Return(nil)
+			fakeConsoleClient.On("UpdateServiceErrors", mock.Anything, mock.Anything).Return(nil)
+
+			storeInstance, err := store.NewDatabaseStore(context.Background())
+			Expect(err).NotTo(HaveOccurred())
+			defer func(storeInstance store.Store) {
+				err := storeInstance.Shutdown()
+				if err != nil {
+					log.Printf("unable to shutdown database store: %v", err)
+				}
+			}(storeInstance)
+			streamline.InitGlobalStore(storeInstance)
+			discoverycache.InitGlobalDiscoveryCache(discoveryClient, mapper)
+			svcCache := pollycache.NewCache[console.ServiceDeploymentForAgent](time.Minute, func(id string) (*console.ServiceDeploymentForAgent, error) { return fakeConsoleClient.GetService(id) })
+
+			reconciler, err := service.NewServiceReconciler(fakeConsoleClient, kClient, mapper, clientSet, dynamicClient, discoverycache.GlobalCache(), streamline.NewNamespaceCache(clientSet), svcCache, storeInstance, service.WithRestoreNamespace(namespace), service.WithConsoleURL("http://localhost:8081"))
+			Expect(err).NotTo(HaveOccurred())
+			_, err = reconciler.Reconcile(ctx, helmService.ID)
+			Expect(err).NotTo(HaveOccurred())
+
+			configMap := &v1.ConfigMap{}
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: helmService.Name, Namespace: namespace}, configMap)).To(Succeed())
+			Expect(configMap.Data).To(HaveKeyWithValue("region", "us-east-1"))
+
+			fakeConsoleClient.AssertCalled(mocks.TestingT, "UpdateComponents", helmService.ID, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+			Expect(reportedErrs).To(ContainElement(&console.ServiceErrorAttributes{
+				Source:  "lua",
+				Message: "region is not configured, defaulting to us-east-1",
+				Warning: lo.ToPtr(true),
+			}))
+
+			Expect(kClient.Delete(ctx, configMap)).To(Succeed())
 		})
 
 		It("should extract images from raw manifests using ExtractImagesMetadata", func() {
@@ -226,3 +295,39 @@ var _ = Describe("Reconciler", Ordered, func() {
 
 	})
 })
+
+// tarGz packs the given directory into a gzipped tarball, as served by the Console for service manifests.
+func tarGz(dir string) ([]byte, error) {
+	var buf bytes.Buffer
+	gzw := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gzw)
+
+	if err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		rel, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if err := tw.WriteHeader(&tar.Header{Name: filepath.ToSlash(rel), Mode: 0o644, Size: int64(len(data))}); err != nil {
+			return err
+		}
+		_, err = tw.Write(data)
+		return err
+	}); err != nil {
+		return nil, err
+	}
+
+	if err := tw.Close(); err != nil {
+		return nil, err
+	}
+	if err := gzw.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}

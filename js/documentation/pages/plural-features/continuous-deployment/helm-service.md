@@ -114,6 +114,10 @@ Keep in mind that:
 
 See [Service Warnings](lua.md#service-warnings) for the Lua reference.
 
+In addition to warnings reported by scripts, the deployment agent reports warnings with the `helm` source when:
+- A values file added to `valuesFiles` by a Lua or Python script does not exist. The file is skipped. Missing files listed in the service's own `valuesFiles` are treated as optional and are skipped without a warning.
+- The `values.yaml.static` file cannot be loaded, e.g. because it is not valid YAML. Its overrides are skipped and the rest of the values are applied as usual.
+
 ## Multi-Source Helm
 
 Say you want to source the helm templates from an upstream helm repository, but the values files from a Git repository.  In that case, you can define a multi-sourced service, which has both a git and helm repository defined.  It would look like so:
