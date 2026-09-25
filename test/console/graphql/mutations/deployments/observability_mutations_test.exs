@@ -352,6 +352,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
               graphs {
                 identifier
                 type
+                options
                 layout { x y w h }
                 datasource { type tool input }
               }
@@ -371,6 +372,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
                 %{
                   "identifier" => "requests",
                   "type" => "TIMESERIES",
+                  "options" => Jason.encode!(%{"stacked" => true}),
                   "layout" => %{"x" => 0, "y" => 0, "w" => 2, "h" => 2},
                   "datasource" => %{
                     "type" => "METRICS",
@@ -397,10 +399,12 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
 
       assert dashboard["name"] == "Operations"
       assert [graph] = dashboard["graphs"]
+      assert graph["options"] == %{"stacked" => true}
       assert graph["datasource"]["type"] == "METRICS"
       assert graph["datasource"]["input"] == %{"query" => "up"}
       assert [input] = dashboard["inputs"]
       assert input["datasource"]["type"] == "LABELS"
+      assert input["datasource"]["input"] == %{"metric" => "kube_pod_info", "label" => "namespace"}
     end
 
     test "it can create a dashboard with a traces graph" do
