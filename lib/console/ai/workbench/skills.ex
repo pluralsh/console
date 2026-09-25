@@ -65,9 +65,9 @@ defmodule Console.AI.Workbench.Skills do
     end
   end
 
-  def skill_file(name, %Workbench{repository: %GitRepository{} = r, skills: %Workbench.Skills{ref: ref, files: [_ | _] = files}}) do
+  def skill_file(name, %Workbench{repository: %GitRepository{} = r, skills: %Workbench.Skills{ref: ref, files: files}}) do
     with {:ok, contents} <- Git.fetch(r, ref) do
-      Enum.filter(contents, fn {k, _} -> k in files end)
+      Enum.filter(contents, &skill_file?(&1, files))
       |> Enum.find(fn {file, skill} ->
         case parse_skill(file, skill) do
           {:ok, %Skill{name: ^name}} -> true

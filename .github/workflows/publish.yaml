@@ -7,13 +7,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+      MIX_OS_DEPS_COMPILE_PARTITION_COUNT: '4'
+      HEX_HTTP_CONCURRENCY: '10'
     steps:
       - uses: actions/checkout@v7
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
           version-type: strict
-      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v5
         with:
           version: latest
@@ -23,29 +26,15 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - run: make testup
-      - name: Restore dependencies cache
-        uses: actions/cache@v6
+      - uses: actions/cache@v6
         with:
-          path: deps
-          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-deps-v2-
-      - name: Restore NIF cache
-        uses: actions/cache@v6
-        with:
-          path: priv/native
-          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
-          restore-keys: ${{ runner.os }}-nif-v2-
-      - name: Restore _build cache
-        uses: actions/cache@v6
-        with:
-          path: _build
-          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
-      # - name: download jwt verification key
-      #   run: |
-      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
-      #   env:
-      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-      - run: mix deps.get
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-test-v4-${{ hashFiles('.tool-versions', 'mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-test-v4-
+      - run: mix deps.get --check-locked
       - run: mix test
       - uses: 8398a7/action-slack@v3
         with:
@@ -65,8 +54,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -127,8 +114,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha,scope=console
-          cache-to: type=gha,mode=max,scope=console
+          # read-only: the shared cache is only written by master builds in test.yaml
+          cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}

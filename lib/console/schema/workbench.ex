@@ -248,7 +248,7 @@ defmodule Console.Schema.Workbench do
     model
     |> cast(attrs, ~w(files)a)
     |> cast_embed(:ref)
-    |> validate_required([:ref, :files])
+    |> validate_required([:ref])
   end
 
   def configuration_changeset(model, attrs \\ %{}) do

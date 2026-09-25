@@ -28,6 +28,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchPolicy,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
+    AgentRun,
     Monitor,
     PullRequest,
     FlowWorkbench,
@@ -945,6 +946,7 @@ defmodule Console.Deployments.Workbenches do
       |> allow(user, :edit)
       |> when_ok(:update)
     end)
+    |> add_operation(:subagents, fn %{job: job} -> cancel_job_subagents(job.id) end)
     |> add_operation(:heartbeat, fn %{job: job} ->
       Console.AI.Workbench.Router.stop(job)
       {:ok, job}
@@ -1004,13 +1006,32 @@ defmodule Console.Deployments.Workbenches do
       |> Repo.update()
     end)
     |> add_operation(:activities, fn _ ->
-      WorkbenchJobActivity.for_workbench_job(job.id)
+      cancel_job_subagents(job.id)
+    end)
+    |> execute(extract: :job)
+    |> notify(:update)
+  end
+
+  @doc """
+  Cancels active subagent activities and their running agent runs.
+  """
+  @spec cancel_job_subagents(WorkbenchJob.t() | binary) :: {:ok, map} | {:error, any}
+  def cancel_job_subagents(%WorkbenchJob{id: id}), do: cancel_job_subagents(id)
+  def cancel_job_subagents(id) when is_binary(id) do
+    start_transaction()
+    |> add_operation(:activities, fn _ ->
+      WorkbenchJobActivity.for_workbench_job(id)
       |> WorkbenchJobActivity.for_status(:running)
       |> Repo.update_all(set: [status: :cancelled])
       |> ok()
     end)
-    |> execute(extract: :job)
-    |> notify(:update)
+    |> add_operation(:agent_runs, fn _ ->
+      AgentRun.for_workbench_job(id)
+      |> AgentRun.for_status(:running)
+      |> Repo.update_all(set: [status: :cancelled])
+      |> ok()
+    end)
+    |> execute()
   end
 
   @doc """
@@ -1593,6 +1614,7 @@ defmodule Console.Deployments.Workbenches do
       })
       |> Repo.update()
     end)
+    |> add_operation(:subagents, fn _ -> cancel_job_subagents(job.id) end)
     |> add_operation(:budget, fn _ -> update_budget(job.workbench_id, usage) end)
     |> execute(extract: :job)
     |> notify(:update)
