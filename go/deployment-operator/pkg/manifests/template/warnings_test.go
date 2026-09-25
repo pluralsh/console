@@ -10,7 +10,7 @@ import (
 	"github.com/samber/lo"
 )
 
-func TestHelmValuesWarnsOnMissingValuesFile(t *testing.T) {
+func TestHelmValuesWarnsOnMissingScriptValuesFile(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "present.yaml"), []byte("key: value\n"), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
@@ -31,14 +31,13 @@ func TestHelmValuesWarnsOnMissingValuesFile(t *testing.T) {
 		t.Fatalf("unexpected values: %#v", values)
 	}
 
+	// Only the file requested by the script is reported, missing files from the service spec stay optional.
 	warnings := h.Warnings()
-	if len(warnings) != 2 {
+	if len(warnings) != 1 {
 		t.Fatalf("unexpected warnings: %#v", warnings)
 	}
-	for i, file := range []string{"missing.yaml", "generated.yaml"} {
-		if warnings[i].Source != helmWarningSource || !strings.Contains(warnings[i].Message, file) || !lo.FromPtr(warnings[i].Warning) {
-			t.Fatalf("unexpected warning %d: %#v", i, warnings[i])
-		}
+	if warnings[0].Source != helmWarningSource || !strings.Contains(warnings[0].Message, "generated.yaml") || !lo.FromPtr(warnings[0].Warning) {
+		t.Fatalf("unexpected warning: %#v", warnings[0])
 	}
 }
 

@@ -437,13 +437,15 @@ func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues [
 	}
 	if svc.Helm != nil {
 		allValues := slices.Concat(svc.Helm.ValuesFiles, additionalValues)
-		for _, f := range allValues {
+		for i, f := range allValues {
 			nextMap, found, err := h.valuesFile(svc, lo.FromPtr(f))
 			if err != nil {
 				return currentMap, err
 			}
-			if !found {
-				h.addWarning(helmWarningSource, fmt.Sprintf("values file %s not found, skipping it", lo.FromPtr(f)))
+			// Missing files from the service spec are allowed to be optional, but files requested
+			// by Lua or Python scripts are expected to exist, so a missing one is likely a mistake.
+			if !found && i >= len(svc.Helm.ValuesFiles) {
+				h.addWarning(helmWarningSource, fmt.Sprintf("values file %s requested by the templating script not found, skipping it", lo.FromPtr(f)))
 			}
 			currentMap = algorithms.Merge(currentMap, nextMap)
 		}
