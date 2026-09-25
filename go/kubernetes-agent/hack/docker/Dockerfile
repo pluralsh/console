@@ -2,6 +2,18 @@
 # Builds: api, kas, and agentk binaries in a single image
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
+# Install the fixed Debian tzdata release independently of the distroless base image.
+FROM debian:bookworm-slim AS tzdata
+
+ARG TZDATA_VERSION=2026c-0+deb12u1
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes "tzdata=${TZDATA_VERSION}" \
+    && awk 'BEGIN { RS = "" } /^Package: tzdata/ { print }' /var/lib/dpkg/status > /tmp/tzdata-status \
+    && rm -rf /var/lib/apt/lists/*
+
 # Builder stage for all binaries
 FROM golang:1.27.1-alpine AS builder
 
@@ -68,6 +80,11 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
 
 # Final stage - minimal image with all three binaries
 FROM gcr.io/distroless/static-debian12:nonroot AS final
+# Replace the base image tzdata payload and package metadata with the pinned release.
+COPY --from=tzdata /usr/share/doc/tzdata /usr/share/doc/tzdata
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=tzdata /tmp/tzdata-status /var/lib/dpkg/status.d/tzdata
+COPY --from=tzdata /var/lib/dpkg/info/tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
