@@ -67,6 +67,8 @@ For more information, see [Dynamic Helm Configuration with Lua Scripts](lua.md).
 
 The same `values` / `valuesFiles` overlay is available from a sandboxed Python script. The sandbox does not expose OS, filesystem, or network access. The only host callback is `k8s_object_meta`, which reads cached Kubernetes object metadata (uid, name, namespace, and labels) from the agent. Cluster-scoped objects use an empty namespace. A cache miss returns `None`.
 
+Scripts can also call `warn(message)` to report non-fatal problems back to the service. See [Reporting Warnings](#reporting-warnings).
+
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
 kind: ServiceDeployment
@@ -86,9 +88,31 @@ spec:
       if ns:
           values["observeClusterId"] = ns["uid"]
           values["label"] = ns["labels"]["kubernetes.io/metadata.name"]
+      else:
+          warn("kube-system namespace not found in the agent cache, observeClusterId will not be set")
 ```
 
 The Lua equivalent of `k8s_object_meta` is documented in [Dynamic Helm Configuration with Lua Scripts](lua.md#kubernetes-object-metadata).
+
+## Reporting Warnings
+
+Both Lua and Python scripts can call `warn(message)` to report non-fatal problems, such as a missing optional input that makes the script fall back to a default. Warnings are shown in the service errors in the Plural Console, but unlike errors they do not fail the deployment.
+
+```python
+region = configuration.get("region")
+if not region:
+    region = "us-east-1"
+    warn("region configuration is not set, defaulting to us-east-1")
+values["region"] = region
+```
+
+Keep in mind that:
+- `warn` accepts a single string argument. Anything else raises an error (a `TypeError` in Python).
+- A service with warnings is marked as `stale` instead of `healthy` until the script stops reporting them.
+- Warnings are collected on every render, so keep messages deterministic, e.g. do not include timestamps.
+- Empty and duplicate messages are dropped, and up to 20 warnings of at most 1 KB each are reported per render.
+
+See [Service Warnings](lua.md#service-warnings) for the Lua reference.
 
 ## Multi-Source Helm
 
