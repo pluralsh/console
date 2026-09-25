@@ -332,3 +332,102 @@ func TestHasReplaceSyncOption(t *testing.T) {
 		})
 	}
 }
+
+func TestHasPruneSyncOption(t *testing.T) {
+	tests := []struct {
+		name string
+		obj  unstructured.Unstructured
+		want bool
+	}{
+		{
+			name: "no annotations",
+			obj:  unstructured.Unstructured{},
+			want: false,
+		},
+		{
+			name: "plural annotation enabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation: "Prune=False",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "plural annotation disabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation: "Prune=True",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "argo annotation enabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							ArgoSyncOptionsAnnotation: "Prune=False",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "argo annotation disabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							ArgoSyncOptionsAnnotation: "Prune=True",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "multiple options",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation: "Validate=False, Prune=False",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "plural annotation takes precedence",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation:     "Prune=True",
+							ArgoSyncOptionsAnnotation: "Prune=False",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, HasPruneSyncOption(tt.obj))
+		})
+	}
+}
