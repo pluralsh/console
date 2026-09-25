@@ -80,6 +80,34 @@ defmodule Console.AI.Tools.Workbench.SubagentsTest do
       assert description =~ "metrics, logs"
     end
 
+    test "describes self_service as catalog and PR automation workflows" do
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:self_service],
+          categories: []
+        })
+
+      assert [%{"name" => "self_service", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "catalog"
+      assert description =~ "PR automation"
+      assert description =~ "coding"
+    end
+
+    test "accepts the self_service subagent" do
+      assert {:ok, %Subagent{subagent: :self_service}} =
+               Tool.validate(
+                 %Subagent{subagents: [:self_service]},
+                 %{
+                   "subagent" => "self_service",
+                   "prompt" => "Provision a postgres cluster via catalog automation"
+                 }
+               )
+    end
+
     test "mentions review mode on the coding subagent only when enabled" do
       {:ok, encoded} =
         Subagents.implement(%Subagents{

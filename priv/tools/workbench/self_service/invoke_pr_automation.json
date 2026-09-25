@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "pr_automation_id": {
+      "type": "string",
+      "description": "The id of the PR automation to invoke."
+    },
+    "context": {
+      "type": "string",
+      "description": "A JSON-encoded string-valued map filling the PR automation configuration fields. Keys are configuration field names and values are the chosen inputs."
+    },
+    "branch": {
+      "type": "string",
+      "description": "The source branch name for the generated pull request. Use a concise, descriptive name and avoid existing branches."
+    },
+    "identifier": {
+      "type": "string",
+      "description": "Optional repository identifier override (for example owner/repo). Leave unset to use the automation default."
+    }
+  },
+  "required": ["pr_automation_id", "branch"]
+}

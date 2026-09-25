@@ -11,7 +11,8 @@ defmodule Console.AI.Tools.Workbench.Subagent do
     history: 5,
     search: 6,
     verify: 7,
-    monitoring: 8
+    monitoring: 8,
+    self_service: 9
 
   embedded_schema do
     field :subagents, {:array, Subagent}, virtual: true
