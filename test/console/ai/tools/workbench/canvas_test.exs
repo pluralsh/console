@@ -6,7 +6,7 @@ defmodule Console.AI.Tools.Workbench.CanvasTest do
 
   describe "implement/1" do
     test "returns the parsed struct unchanged so the engine can dispatch it" do
-      model = %Canvas{id: %Tool{id: "call_1", name: "build_dashboard", arguments: %{}}, prompt: "go"}
+      model = %Canvas{id: %Tool{id: "call_1", name: "canvas_subagent", arguments: %{}}, prompt: "go"}
 
       assert {:ok, ^model} = Canvas.implement(model)
     end
