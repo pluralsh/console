@@ -34,7 +34,7 @@ export function ToolCallKindIcon({
     <Icon
       color="icon-xlight"
       size={size}
-      css={{ flexShrink: 0 }}
+      style={{ flexShrink: 0 }}
       {...props}
     />
   )
