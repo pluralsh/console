@@ -55,8 +55,9 @@ RUN apk update --no-cache
 # Upgrade OpenSSL packages to fix CVE-2025-1670 (NULL pointer dereference in CMS EnvelopedData processing)
 # and QUIC PATH_CHALLENGE DoS vulnerability
 RUN apk add --no-cache "libssl3>=3.5.7-r0" "libcrypto3>=3.5.7-r0"
-# Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
-RUN apk upgrade --no-cache libexpat musl musl-utils zlib
+# Pin libexpat to the CVE-2026-93990 fixed release.
+RUN apk add --no-cache "libexpat=2.8.5-r0"
+RUN apk upgrade --no-cache musl musl-utils zlib
 RUN apk add --no-cache git
 
 COPY --from=builder /usr/bin/soft /usr/bin/
