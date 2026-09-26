@@ -1,5 +1,6 @@
 names:
 - kubevirt
+- tyk-operator
 - argo-rollouts
 - aws-ebs-csi-driver
 - aws-efs-csi-driver
