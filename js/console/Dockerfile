@@ -16,5 +16,12 @@ RUN corepack enable \
 COPY js/console/ ./console/
 COPY js/design-system/ ./design-system/
 
+RUN chown -R node:node /app
+
 WORKDIR /app/console
+USER node
+
+# This image only runs a finite asset build and exposes no service to probe.
+HEALTHCHECK NONE
+
 CMD ["yarn", "build"]

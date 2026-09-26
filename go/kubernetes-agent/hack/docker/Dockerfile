@@ -99,6 +99,8 @@ COPY --from=builder /binaries/api /api
 COPY --from=builder /binaries/kas /kas
 COPY --from=builder /binaries/agentk /agentk
 
+USER nonroot:nonroot
+
 # Create a simple entrypoint script (shell script won't work in distroless)
 # Instead, we'll use kas as the default entrypoint
 # Users can override with: docker run image /api or /agentk
@@ -117,3 +119,6 @@ ENTRYPOINT ["/kas"]
 # 8154 - Kubernetes API
 # 8155 - Internal API
 EXPOSE 8000 8001 8150 8151 8153 8154 8155
+
+# The distroless runtime has no shell or HTTP client for an in-image probe.
+HEALTHCHECK NONE
