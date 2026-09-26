@@ -7,10 +7,12 @@ defmodule Console.AI.Tools.Workbench.Subagents do
     field :job, :map, virtual: true
     field :subagents, {:array, Console.AI.Tools.Workbench.Subagent.Subagent}, virtual: true
     field :categories, {:array, Console.Schema.WorkbenchTool.Category}, virtual: true
+    field :tool_names, :map, virtual: true
   end
 
   @json_schema Console.priv_file!("tools/empty.json")
                |> Jason.decode!()
+  @max_tool_names 15
 
   def name(_), do: "workbench_subagents"
   def json_schema(_), do: @json_schema
@@ -18,10 +20,19 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   def changeset(model, attrs), do: cast(model, attrs, [])
 
-  def implement(%__MODULE__{bench: bench, job: job, subagents: subagents, categories: categories}) do
+  def implement(%__MODULE__{
+        bench: bench,
+        job: job,
+        subagents: subagents,
+        categories: categories,
+        tool_names: tool_names
+      }) do
     Enum.map(subagents, fn subagent -> %{
       name: subagent,
-      description: subagent_description(bench, subagent, categories, job)
+      description:
+        bench
+        |> subagent_description(subagent, categories, job)
+        |> with_tool_names(Map.get(tool_names || %{}, subagent, []))
     } end)
     |> Jason.encode()
   end
@@ -39,7 +50,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   defp subagent_description(%Workbench{configuration: %{infrastructure: %{} = infra}}, :infrastructure, _, _), do: infra_description(infra)
   defp subagent_description(_, :infrastructure, _, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration.  Use this to deeply investiage kubernetes, IaaS, or Docker/OCI registry data necessary for the job at hand."
   defp subagent_description(_, :observability, categories, _), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
-  defp subagent_description(_, :monitoring, categories, _), do: "Invoke the monitoring subagent specifically to create, update, reinterpret, or delete Plural dashboards and monitors. It can inspect existing monitoring configuration and validate it with these observability capabilities: #{observability_categories(categories)}"
+  defp subagent_description(_, :monitoring, categories, _), do: "Invoke the monitoring subagent specifically to create, update, reinterpret, or delete Plural dashboards and monitors, which are durable dashboards for repeatable monitoring and investigation. It can inspect existing monitoring configuration and validate it with these observability capabilities: #{observability_categories(categories)}"
   defp subagent_description(_, :integration, _, _), do: "Invoke an integration subagent to interact with enterprise systems, usually not directly related to devops infrastructure. Often Task tracking tools, knowledge bases or internal compliance software that's not SRE related."
   defp subagent_description(_, :memory, _, _), do: "Invoke a memory subagent to search past workbench activities.  Useful to remember what has been done so far, with regex support for finding past work."
   defp subagent_description(_, :skill, _, _), do: "Invoke a skill subagent to update the skills for the current workbench.  This subagent will use the skills API to update the skills for the current workbench."
@@ -65,4 +76,13 @@ defmodule Console.AI.Tools.Workbench.Subagents do
     |> Enum.join(", ")
   end
   defp observability_categories(_), do: "not specified but likely supports metrics, logs, traces or error tracking"
+
+  defp with_tool_names(description, []), do: "#{description} Available tools: none."
+  defp with_tool_names(description, names) when length(names) > @max_tool_names do
+    {shown, hidden} = Enum.split(names, @max_tool_names)
+
+    "#{description} Available tools: #{Enum.join(shown, ", ")}, and #{length(hidden)} more."
+  end
+  defp with_tool_names(description, names) when is_list(names),
+    do: "#{description} Available tools: #{Enum.join(names, ", ")}."
 end

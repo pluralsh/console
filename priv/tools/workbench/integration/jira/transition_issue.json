@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "issue_id": {
+      "type": "string",
+      "description": "Jira issue key or numeric ID, for example ENG-123."
+    },
+    "transition_id": {
+      "type": "string",
+      "description": "ID of an available transition returned by list_transitions."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Values for fields required by the transition screen."
+    },
+    "update": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Jira field update operations to apply with the transition."
+    }
+  },
+  "required": ["issue_id", "transition_id"]
+}

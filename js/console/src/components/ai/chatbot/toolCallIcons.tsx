@@ -1,5 +1,11 @@
-import { IconProps, PythonLogoIcon, ToolIcon } from '@pluralsh/design-system'
-import { ToolCallKind } from './toolCallDisplay'
+import {
+  IconProps,
+  McpLogoIcon,
+  PythonLogoIcon,
+  TerminalIcon,
+  ToolIcon,
+} from '@pluralsh/design-system'
+import { isCmdToolKind, ToolCallKind } from './toolCallDisplay'
 
 /** Icon next to a tool name when it is not a configured workbench tool. */
 export function ToolCallKindIcon({
@@ -18,11 +24,17 @@ export function ToolCallKindIcon({
     )
   }
 
+  const Icon = isCmdToolKind(kind)
+    ? TerminalIcon
+    : kind === 'mcp_tool_call'
+      ? McpLogoIcon
+      : ToolIcon
+
   return (
-    <ToolIcon
+    <Icon
       color="icon-xlight"
       size={size}
-      css={{ flexShrink: 0 }}
+      style={{ flexShrink: 0 }}
       {...props}
     />
   )

@@ -387,6 +387,29 @@ func TestRouteToMantle(t *testing.T) {
 	}
 }
 
+func TestRouteToMantleRoutesPrefixedGPT6ModelWithoutRewritingIt(t *testing.T) {
+	requestBody := `{"model":"openai.gpt-6-terra","input":"test"}`
+	request := &http.Request{
+		Body: io.NopCloser(bytes.NewBufferString(requestBody)),
+	}
+	proxyRequest := &httputil.ProxyRequest{
+		In:  request,
+		Out: request.Clone(request.Context()),
+	}
+
+	if !routeToMantle(proxyRequest, []string{"gpt-5.6", "gpt-6"}) {
+		t.Fatal("expected GPT-6 request to route to Mantle")
+	}
+
+	body, err := io.ReadAll(proxyRequest.Out.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := string(body); got != requestBody {
+		t.Errorf("body: got %q, want %q", got, requestBody)
+	}
+}
+
 func TestRouteToMantleLeavesOtherModelsUnchanged(t *testing.T) {
 	request := &http.Request{
 		Body: io.NopCloser(bytes.NewBufferString(`{"model":"gpt-4.1","input":"test"}`)),

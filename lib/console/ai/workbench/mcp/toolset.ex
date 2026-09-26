@@ -17,7 +17,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
   alias Console.AI.Workbench.Tools
   alias Console.AI.Workbench.MCP.Toolset.Classify
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
-  alias Console.AI.Tools.Workbench.SummarizeComponent
+  alias Console.AI.Tools.Workbench.DescribeComponent
   alias Console.AI.Tools.Workbench.Infrastructure.{
     ApiDiscovery,
     ApiSpec,
@@ -149,7 +149,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
 
   defp k8s_tools(%Workbench{configuration: %{infrastructure: %{kubernetes: true}}}, %User{} = user) do
     [
-      SummarizeComponent,
+      DescribeComponent,
       %ApiDiscovery{user: user},
       %ApiSpec{user: user},
       %RawKubeGet{user: user},

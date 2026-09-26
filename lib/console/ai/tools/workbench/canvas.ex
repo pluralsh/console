@@ -8,8 +8,8 @@ defmodule Console.AI.Tools.Workbench.Canvas do
   @json_schema Console.priv_file!("tools/workbench/canvas.json") |> Jason.decode!()
 
   def json_schema(), do: @json_schema
-  def name(), do: "build_dashboard"
-  def description(), do: "runs a subagent to build a dashboard to explain the system in question. Be sure to provide a detailed prompt, including the exact metrics, logs, and traces query JSON details from prior activities that will be needed in the dashboard. When trace data is available, the dashboard should use the native traces visualization block rather than markdown or ASCII output."
+  def name(), do: "canvas_subagent"
+  def description(), do: "runs a canvas subagent to build a dashboard to explain this specific job vs providing a persistent dashboard. Be sure to provide a detailed prompt, including the exact metrics, logs, and traces query JSON details from prior activities that will be needed in the dashboard. When trace data is available, the dashboard should use the native traces visualization block rather than markdown or ASCII output."
 
   def changeset(model, attrs) do
     model

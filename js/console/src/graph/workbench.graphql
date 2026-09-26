@@ -1567,6 +1567,38 @@ mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
   }
 }
 
+mutation CreateWorkbenchSkill(
+  $workbenchId: ID!
+  $attributes: WorkbenchSkillAttributes!
+) {
+  createWorkbenchSkill(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+
+mutation UpdateWorkbenchSkill(
+  $id: ID!
+  $attributes: WorkbenchSkillAttributes!
+) {
+  updateWorkbenchSkill(id: $id, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+
+mutation DeleteWorkbenchSkill($id: ID!) {
+  deleteWorkbenchSkill(id: $id) {
+    id
+  }
+}
+
 mutation UpdateWorkbenchKnowledge(
   $id: ID!
   $attributes: WorkbenchKnowledgeAttributes!

@@ -45,7 +45,7 @@ defmodule Console.AI.Workbench.Subagents.SelfService do
     end
   end
 
-  defp tools(%Environment{skills: skills, job: job, activities: activities}) do
+  def tools(%Environment{skills: skills, job: job, activities: activities}) do
     skills = Environment.subagent_skills(skills, :self_service)
 
     [

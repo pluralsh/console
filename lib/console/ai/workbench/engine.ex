@@ -488,11 +488,18 @@ defmodule Console.AI.Workbench.Engine do
 
     categories = Environment.categories(job)
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
+    tool_names = SA.tool_names(subagents, env)
 
     skill_knowledge_tools(job, skills) ++ [
       %KnowledgeUpsert{job: job},
       %KnowledgeDelete{job: job},
-      %Subagents{bench: job.workbench, job: job, subagents: subagents, categories: categories},
+      %Subagents{
+        bench: job.workbench,
+        job: job,
+        subagents: subagents,
+        categories: categories,
+        tool_names: tool_names
+      },
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       %Codemode{tools: []},

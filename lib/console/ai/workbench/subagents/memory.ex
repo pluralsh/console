@@ -34,7 +34,7 @@ defmodule Console.AI.Workbench.Subagents.Memory do
     end
   end
 
-  defp tools(%Environment{skills: skills, activities: activities, job: job}) do
+  def tools(%Environment{skills: skills, activities: activities, job: job}) do
     skill_knowledge_tools(job, Environment.subagent_skills(skills, :memory)) ++ [
       Scratchpad,
       %Search{activities: activities},
