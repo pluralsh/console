@@ -9,7 +9,21 @@ import (
 func registerLuaFunctions(l *lua.LState) {
 	l.SetFuncs(l.G.Global, map[string]lua.LGFunction{
 		"k8s_object_meta": luaK8sObjectMeta,
+		"warn":            luaWarn,
 	})
+}
+
+// luaWarn appends a message to the global warnings table, which is reported as service warnings.
+func luaWarn(l *lua.LState) int {
+	message := l.CheckString(1)
+
+	warnings, ok := l.GetGlobal("warnings").(*lua.LTable)
+	if !ok {
+		warnings = l.NewTable()
+		l.SetGlobal("warnings", warnings)
+	}
+	warnings.Append(lua.LString(message))
+	return 0
 }
 
 func luaK8sObjectMeta(l *lua.LState) int {

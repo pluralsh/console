@@ -79,9 +79,35 @@ func debug(format string, v ...any) {
 	}
 }
 
+const (
+	helmWarningSource   = "helm"
+	luaWarningSource    = "lua"
+	pythonWarningSource = "python"
+)
+
 type helm struct {
 	dir        string
 	pythonPool *pythonruntime.Pool
+	warnings   []console.ServiceErrorAttributes
+}
+
+// Warnings returns warnings reported by Lua and Python templating scripts during the last render.
+func (h *helm) Warnings() []console.ServiceErrorAttributes {
+	return h.warnings
+}
+
+func (h *helm) addWarning(source, message string) {
+	h.addWarnings(source, []string{message})
+}
+
+func (h *helm) addWarnings(source string, messages []string) {
+	for _, message := range messages {
+		h.warnings = append(h.warnings, console.ServiceErrorAttributes{
+			Source:  source,
+			Message: message,
+			Warning: lo.ToPtr(true),
+		})
+	}
 }
 
 func (h *helm) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
@@ -156,6 +182,8 @@ func (h *helm) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMa
 }
 
 func (h *helm) templateValues(svc *console.ServiceDeploymentForAgent) (map[string]any, error) {
+	h.warnings = nil
+
 	luaValues, luaValuesFiles, err := h.luaValues(svc)
 	if err != nil {
 		var apiErr *lua.ApiError
@@ -237,6 +265,9 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any
 	valuesFilesTable := L.NewTable()
 	L.SetGlobal("valuesFiles", valuesFilesTable)
 
+	warningsTable := L.NewTable()
+	L.SetGlobal("warnings", warningsTable)
+
 	for name, binding := range bindings(svc) {
 		L.SetGlobal(name, luautils.GoValueToLuaValue(L, binding))
 	}
@@ -278,6 +309,14 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any
 	if err := luautils.MapLua(L.GetGlobal("valuesFiles").(*lua.LTable), &valuesFiles); err != nil {
 		return nil, valuesFiles, err
 	}
+
+	var warnings []string
+	if warningsTable, ok := L.GetGlobal("warnings").(*lua.LTable); ok {
+		if err := luautils.MapLua(warningsTable, &warnings); err != nil {
+			return nil, valuesFiles, fmt.Errorf("lua warnings must be a list of strings: %w", err)
+		}
+	}
+	h.addWarnings(luaWarningSource, warnings)
 
 	finalValues := make(map[string]any, len(newValues))
 	for k, v := range newValues {
@@ -344,6 +383,7 @@ func (h *helm) pythonValues(ctx context.Context, svc *console.ServiceDeploymentF
 	if err != nil {
 		return nil, valuesFiles, err
 	}
+	h.addWarnings(pythonWarningSource, result.Warnings)
 
 	return result.Values, result.ValuesFiles, nil
 }
@@ -391,16 +431,21 @@ func (h *helm) pythonFolder(folder string) (string, error) {
 }
 
 func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues []*string) (map[string]any, error) {
-	currentMap, err := h.valuesFile(svc, "values.yaml.liquid")
+	currentMap, _, err := h.valuesFile(svc, "values.yaml.liquid")
 	if err != nil {
 		return currentMap, err
 	}
 	if svc.Helm != nil {
 		allValues := slices.Concat(svc.Helm.ValuesFiles, additionalValues)
-		for _, f := range allValues {
-			nextMap, err := h.valuesFile(svc, lo.FromPtr(f))
+		for i, f := range allValues {
+			nextMap, found, err := h.valuesFile(svc, lo.FromPtr(f))
 			if err != nil {
 				return currentMap, err
+			}
+			// Missing files from the service spec are allowed to be optional, but files requested
+			// by Lua or Python scripts are expected to exist, so a missing one is likely a mistake.
+			if !found && i >= len(svc.Helm.ValuesFiles) {
+				h.addWarning(helmWarningSource, fmt.Sprintf("values file %s requested by the templating script not found, skipping it", lo.FromPtr(f)))
 			}
 			currentMap = algorithms.Merge(currentMap, nextMap)
 		}
@@ -414,8 +459,10 @@ func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues [
 		}
 	}
 
-	overrides, err := h.valuesFile(svc, "values.yaml.static")
+	overrides, _, err := h.valuesFile(svc, "values.yaml.static")
 	if err != nil {
+		// Static overrides are optional, so do not fail the render, but let the user know they were not applied.
+		h.addWarning(helmWarningSource, fmt.Sprintf("ignoring values.yaml.static overrides: %s", err.Error()))
 		return currentMap, nil
 	}
 
@@ -459,39 +506,40 @@ func (h *helm) luaFolder(svc *console.ServiceDeploymentForAgent, folder string) 
 	return strings.Join(luaFileContents, "\n\n"), nil
 }
 
-func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]any, error) {
+// valuesFile reads and renders the values file at the given path relative to the chart directory.
+// The returned bool reports whether the file exists. A missing file yields empty values and no error.
+func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]any, bool, error) {
 	currentMap := map[string]any{}
 	if !filepath.IsLocal(filename) {
-		return nil, fmt.Errorf("helm values file path %q is outside the manifest directory", filename)
+		return nil, false, fmt.Errorf("helm values file path %q is outside the manifest directory", filename)
 	}
-	filename = filepath.Join(h.dir, filename)
-	data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(filepath.Join(h.dir, filename))
 	if os.IsNotExist(err) {
-		return currentMap, nil
+		return currentMap, false, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to read Helm values file %s: %w", filename, err)
+		return nil, true, fmt.Errorf("failed to read Helm values file %s: %w", filename, err)
 	}
 
 	if strings.HasSuffix(filename, ".liquid") {
 		data, err = renderLiquid(data, svc)
 		if err != nil {
-			return nil, err
+			return nil, true, err
 		}
 	}
 
 	if strings.HasSuffix(filename, ".tpl") {
 		data, err = renderTpl(data, svc)
 		if err != nil {
-			return nil, err
+			return nil, true, err
 		}
 	}
 
 	if err := yaml.Unmarshal(data, &currentMap); err != nil {
-		return nil, errors.Wrapf(err, "failed to parse %s", filename)
+		return nil, true, errors.Wrapf(err, "failed to parse %s", filename)
 	}
 
-	return currentMap, nil
+	return currentMap, true, nil
 }
 
 func (h *helm) templateHelm(conf *action.Configuration, release, namespace string, values map[string]any, includeCRDs bool) (*release.Release, error) {

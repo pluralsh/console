@@ -501,7 +501,7 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 		return
 	}
 
-	manifests, err := template.Render(dir, svc, s.mapper)
+	manifests, warnings, err := template.RenderWithWarnings(dir, svc, s.mapper)
 	if err != nil {
 		logger.Error(err, "failed to render manifests", "service", svc.Name)
 		return
@@ -578,6 +578,9 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 
 	// Extract images metadata from the applied resources
 	metadata := s.ExtractMetadata(manifests)
+
+	// Prepend templating warnings (i.e. from Lua or Python scripts) so they are reported alongside apply errors.
+	errs = append(warnings, errs...)
 
 	if err = s.UpdateStatus(ctx, svc.ID, svc.Revision.ID, svc.Sha, svc.Status, lo.ToSlicePtr(components), lo.ToSlicePtr(errs), metadata); err != nil {
 		logger.Error(err, "Failed to update service status, ignoring for now")

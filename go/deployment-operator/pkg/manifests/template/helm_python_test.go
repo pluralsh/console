@@ -341,3 +341,36 @@ func writePythonFile(t *testing.T, dir, name, contents string) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 }
+
+func TestPythonValuesWarnings(t *testing.T) {
+	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+	if err != nil {
+		t.Fatalf("NewPoolWithConfig: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	svc := &console.ServiceDeploymentForAgent{
+		Helm: &console.ServiceDeploymentForAgent_Helm{
+			PythonScript: lo.ToPtr(`
+values["key"] = "value"
+warn("first warning")
+warnings.append("second warning")
+`),
+		},
+	}
+
+	h := &helm{dir: t.TempDir(), pythonPool: p}
+	if _, _, err := h.pythonValues(context.Background(), svc); err != nil {
+		t.Fatalf("pythonValues: %v", err)
+	}
+
+	warnings := h.Warnings()
+	if len(warnings) != 2 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	for i, message := range []string{"first warning", "second warning"} {
+		if warnings[i].Source != pythonWarningSource || warnings[i].Message != message || !lo.FromPtr(warnings[i].Warning) {
+			t.Fatalf("unexpected warning %d: %#v", i, warnings[i])
+		}
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
@@ -21,17 +22,44 @@ const (
 	RendererKustomize Renderer = "kustomize"
 
 	ChartFileName = "Chart.yaml"
+
+	// maxWarnings and maxWarningLength bound the warnings reported per render,
+	// so that scripts cannot flood the service errors.
+	maxWarnings      = 20
+	maxWarningLength = 1024
 )
 
 type Template interface {
 	Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error)
 }
 
+// Warner is implemented by templates that can report non-fatal warnings raised while rendering,
+// i.e. warnings emitted by Helm Lua and Python templating scripts.
+type Warner interface {
+	Warnings() []console.ServiceErrorAttributes
+}
+
 func Render(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
+	manifests, _, err := RenderWithWarnings(dir, svc, mapper)
+	return manifests, err
+}
+
+// RenderWithWarnings renders the service manifests and additionally returns all non-fatal
+// warnings reported by the templates, ready to be sent as service errors.
+func RenderWithWarnings(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, []console.ServiceErrorAttributes, error) {
+	var warnings []console.ServiceErrorAttributes
+	render := func(t Template, svc *console.ServiceDeploymentForAgent) ([]unstructured.Unstructured, error) {
+		manifests, err := t.Render(svc, mapper)
+		if w, ok := t.(Warner); ok {
+			warnings = append(warnings, w.Warnings()...)
+		}
+		return manifests, err
+	}
+
 	var allManifests []unstructured.Unstructured
-	defaultManifests, err := renderDefault(dir, svc, mapper)
+	defaultManifests, err := render(defaultTemplate(dir, svc), svc)
 	if err != nil {
-		return nil, err
+		return nil, warnings, err
 	}
 	allManifests = append(allManifests, defaultManifests...)
 
@@ -41,9 +69,9 @@ func Render(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.REST
 		rendererPath := filepath.Join(dir, renderer.Path)
 		switch renderer.Type {
 		case console.RendererTypeAuto:
-			manifests, err = renderDefault(rendererPath, svc, mapper)
+			manifests, err = render(defaultTemplate(rendererPath, svc), svc)
 		case console.RendererTypeRaw:
-			manifests, err = NewRaw(rendererPath).Render(svc, mapper)
+			manifests, err = render(NewRaw(rendererPath), svc)
 		case console.RendererTypeHelm:
 			svcCopy := *svc
 			if renderer.Helm != nil {
@@ -54,15 +82,15 @@ func Render(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.REST
 					IgnoreHooks: renderer.Helm.IgnoreHooks,
 				}
 			}
-			manifests, err = NewHelm(rendererPath).Render(&svcCopy, mapper)
+			manifests, err = render(NewHelm(rendererPath), &svcCopy)
 		case console.RendererTypeKustomize:
-			manifests, err = NewKustomize(rendererPath).Render(svc, mapper)
+			manifests, err = render(NewKustomize(rendererPath), svc)
 		default:
-			return nil, fmt.Errorf("unknown renderer type: %s", renderer.Type)
+			return nil, warnings, fmt.Errorf("unknown renderer type: %s", renderer.Type)
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf("error rendering path %s with type %s: %w", renderer.Path, renderer.Type, err)
+			return nil, warnings, fmt.Errorf("error rendering path %s with type %s: %w", renderer.Path, renderer.Type, err)
 		}
 
 		allManifests = append(allManifests, manifests...)
@@ -76,10 +104,38 @@ func Render(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.REST
 		slices.Reverse(allManifests)
 	}
 
-	return allManifests, nil
+	return allManifests, normalizeWarnings(warnings), nil
 }
 
-func renderDefault(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
+// normalizeWarnings trims messages, drops empty and duplicate warnings, and caps the count and message length.
+// Order is preserved, so the result is deterministic for a given render.
+func normalizeWarnings(warnings []console.ServiceErrorAttributes) []console.ServiceErrorAttributes {
+	result := make([]console.ServiceErrorAttributes, 0, len(warnings))
+	seen := make(map[console.ServiceErrorAttributes]struct{}, len(warnings))
+	for _, warning := range warnings {
+		warning.Message = strings.TrimSpace(warning.Message)
+		if warning.Message == "" {
+			continue
+		}
+		if len(warning.Message) > maxWarningLength {
+			warning.Message = strings.ToValidUTF8(warning.Message[:maxWarningLength], "") + "..."
+		}
+
+		key := console.ServiceErrorAttributes{Source: warning.Source, Message: warning.Message}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+
+		result = append(result, warning)
+		if len(result) == maxWarnings {
+			break
+		}
+	}
+	return result
+}
+
+func defaultTemplate(dir string, svc *console.ServiceDeploymentForAgent) Template {
 	renderer := RendererRaw
 
 	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -103,12 +159,12 @@ func renderDefault(dir string, svc *console.ServiceDeploymentForAgent, mapper me
 	})
 
 	if svc.Kustomize != nil || renderer == RendererKustomize {
-		return NewKustomize(dir).Render(svc, mapper)
+		return NewKustomize(dir)
 	}
 
 	if renderer == RendererHelm {
-		return NewHelm(dir).Render(svc, mapper)
+		return NewHelm(dir)
 	}
 
-	return NewRaw(dir).Render(svc, mapper)
+	return NewRaw(dir)
 }
