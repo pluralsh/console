@@ -312,7 +312,8 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		return
 	}
 
-	if live.GetAnnotations() != nil && live.GetAnnotations()[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion {
+	annotations := live.GetAnnotations()
+	if (annotations != nil && annotations[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion) || smcommon.HasPruneSyncOption(*live) {
 		if err := streamline.GetGlobalStore().DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 			klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component", "resource", live.GetUID())
 		}

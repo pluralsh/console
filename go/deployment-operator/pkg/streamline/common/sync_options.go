@@ -23,6 +23,9 @@ const (
 	// With force=true, a failed replace escalates to delete and recreate.
 	SyncOptionReplace = "replace=true"
 
+	// SyncOptionPrune skips deletion of resources removed from the desired state.
+	SyncOptionPrune = "prune=false"
+
 	// ResyncInProgressAnnotation contains an annotation for a resource that was deleted forcefully
 	// and will be recreated in the next reconciling.
 	ResyncInProgressAnnotation = "deployment.plural.sh/resync"
@@ -72,6 +75,11 @@ func HasForceSyncOption(u unstructured.Unstructured) bool {
 
 func HasReplaceSyncOption(u unstructured.Unstructured) bool {
 	return HasSyncOption(u, SyncOptionReplace)
+}
+
+// HasPruneSyncOption reports whether a resource should be kept when it is removed from the desired state.
+func HasPruneSyncOption(u unstructured.Unstructured) bool {
+	return HasSyncOption(u, SyncOptionPrune)
 }
 
 func HasResyncInProgressAnnotation(u *unstructured.Unstructured) bool {

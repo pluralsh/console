@@ -8,11 +8,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/dynamic/fake"
+
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 )
 
 type fakeResourceInterface struct {
@@ -134,6 +142,72 @@ func makeResource(syncOptions string) unstructured.Unstructured {
 			"annotations": annotations,
 		},
 	}}
+}
+
+func TestOnDeleteResourceAnnotations(t *testing.T) {
+	streamline.ResetGlobalStore()
+	storeInstance, err := store.NewDatabaseStore(context.Background())
+	require.NoError(t, err)
+	streamline.InitGlobalStore(storeInstance)
+	t.Cleanup(func() {
+		streamline.ResetGlobalStore()
+		require.NoError(t, storeInstance.Shutdown())
+	})
+
+	tests := []struct {
+		name            string
+		annotation      string
+		annotationValue string
+		expectDelete    bool
+	}{
+		{
+			name:            "plural prune option",
+			annotation:      smcommon.SyncOptionsAnnotation,
+			annotationValue: "Prune=False",
+		},
+		{
+			name:            "argo prune option",
+			annotation:      smcommon.ArgoSyncOptionsAnnotation,
+			annotationValue: "Prune=False",
+		},
+		{
+			name:            "lifecycle detach annotation",
+			annotation:      smcommon.LifecycleDeleteAnnotation,
+			annotationValue: smcommon.PreventDeletion,
+		},
+		{
+			name:         "without a retention annotation",
+			expectDelete: true,
+		},
+	}
+
+	mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{{Version: "v1"}})
+	mapper.Add(schema.GroupVersionKind{Version: "v1", Kind: "ConfigMap"}, meta.RESTScopeNamespace)
+	discoveryCache := discoverycache.NewCache(nil, mapper)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resource := makeResource("")
+			if tt.annotation != "" {
+				resource.SetAnnotations(map[string]string{tt.annotation: tt.annotationValue})
+			}
+
+			client := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
+			processor := &WaveProcessor{client: client, discoveryCache: discoveryCache}
+			processor.onDelete(context.Background(), resource)
+
+			deleteCalled := false
+			for _, action := range client.Actions() {
+				if action.GetVerb() == "delete" {
+					deleteCalled = true
+					break
+				}
+			}
+
+			assert.Equal(t, tt.expectDelete, deleteCalled)
+			assert.Equal(t, 1, processor.waveStatistics.deleted)
+		})
+	}
 }
 
 func TestDoReplaceCreatesWhenMissing(t *testing.T) {
