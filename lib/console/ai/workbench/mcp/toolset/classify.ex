@@ -119,6 +119,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Jira.GetIssue,
     Jira.ListComments,
     Jira.ListIssues,
+    Jira.ListTransitions,
     Pagerduty.GetIncident,
     Pagerduty.ListIncidentLogEntries,
     Pagerduty.ListIncidentNotes,

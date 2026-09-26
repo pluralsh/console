@@ -9,9 +9,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
     GetIssue,
     ListComments,
     ListIssues,
+    ListTransitions,
     SaveComment,
     SaveIssue,
-    Tools
+    Tools,
+    TransitionIssue
   }
 
   alias Console.Schema.WorkbenchTool
@@ -29,8 +31,10 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
                  "jira_#{type}_get_issue",
                  "jira_#{type}_list_comments",
                  "jira_#{type}_list_issues",
+                 "jira_#{type}_list_transitions",
                  "jira_#{type}_save_comment",
-                 "jira_#{type}_save_issue"
+                 "jira_#{type}_save_issue",
+                 "jira_#{type}_transition_issue"
                ])
 
       refute Enum.any?(names, &String.contains?(&1, "delete"))
@@ -38,7 +42,15 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
   end
 
   test "registers with integration tools and classifies only reads as read-only" do
-    [list_issues, get_issue, save_issue, list_comments, save_comment] =
+    [
+      list_issues,
+      get_issue,
+      save_issue,
+      list_comments,
+      save_comment,
+      list_transitions,
+      transition_issue
+    ] =
       WorkbenchTools.integration_tools([workbench_tool(:jira)])
 
     assert %ListIssues{} = list_issues
@@ -46,12 +58,16 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
     assert %SaveIssue{} = save_issue
     assert %ListComments{} = list_comments
     assert %SaveComment{} = save_comment
+    assert %ListTransitions{} = list_transitions
+    assert %TransitionIssue{} = transition_issue
 
     assert Classify.readonly?(list_issues)
     assert Classify.readonly?(get_issue)
     assert Classify.readonly?(list_comments)
+    assert Classify.readonly?(list_transitions)
     refute Classify.readonly?(save_issue)
     refute Classify.readonly?(save_comment)
+    refute Classify.readonly?(transition_issue)
   end
 
   test "save_issue requires create fields but permits partial updates" do
@@ -153,6 +169,77 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.ToolsTest do
 
     assert {:ok, encoded} = SaveComment.implement(model)
     assert %{"id" => "42"} = Jason.decode!(encoded)
+  end
+
+  test "list_transitions gets available Cloud transitions with filters" do
+    expect(Req, :request, fn opts ->
+      assert opts[:method] == :get
+
+      assert opts[:url] ==
+               "https://example.atlassian.net/rest/api/2/issue/ENG-1/transitions" <>
+                 "?expand=transitions.fields&transitionId=21"
+
+      {:ok,
+       %Req.Response{
+         status: 200,
+         body: ~s({"transitions":[{"id":"21","name":"In Progress"}]})
+       }}
+    end)
+
+    assert {:ok, model} =
+             %ListTransitions{tool: workbench_tool(:jira)}
+             |> ListTransitions.changeset(%{
+               "issue_id" => "ENG-1",
+               "transition_id" => "21",
+               "expand" => ["transitions.fields"]
+             })
+             |> Ecto.Changeset.apply_action(:update)
+
+    assert {:ok, encoded} = ListTransitions.implement(model)
+    assert %{"transitions" => [%{"id" => "21"}]} = Jason.decode!(encoded)
+  end
+
+  test "transition_issue posts a Data Center transition with fields and updates" do
+    expect(Req, :request, fn opts ->
+      assert opts[:method] == :post
+      assert opts[:url] == "https://jira.example.com/rest/api/2/issue/ENG-1/transitions"
+
+      assert Jason.decode!(opts[:body]) == %{
+               "transition" => %{"id" => "21"},
+               "fields" => %{"resolution" => %{"name" => "Done"}},
+               "update" => %{"comment" => [%{"add" => %{"body" => "Completed"}}]}
+             }
+
+      {:ok, %Req.Response{status: 204, body: ""}}
+    end)
+
+    assert {:ok, model} =
+             %TransitionIssue{tool: workbench_tool(:jira_datacenter)}
+             |> TransitionIssue.changeset(%{
+               "issue_id" => "ENG-1",
+               "transition_id" => "21",
+               "fields" => %{"resolution" => %{"name" => "Done"}},
+               "update" => %{"comment" => [%{"add" => %{"body" => "Completed"}}]}
+             })
+             |> Ecto.Changeset.apply_action(:update)
+
+    assert {:ok, encoded} = TransitionIssue.implement(model)
+
+    assert %{
+             "issueId" => "ENG-1",
+             "transitionId" => "21",
+             "transitioned" => true
+           } = Jason.decode!(encoded)
+  end
+
+  test "transition_issue requires an issue and transition ID" do
+    assert {:error, changeset} =
+             %TransitionIssue{tool: workbench_tool(:jira)}
+             |> TransitionIssue.changeset(%{})
+             |> Ecto.Changeset.apply_action(:update)
+
+    assert %{issue_id: ["can't be blank"], transition_id: ["can't be blank"]} =
+             errors_on(changeset)
   end
 
   defp workbench_tool(:jira) do
