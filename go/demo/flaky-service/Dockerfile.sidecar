@@ -15,4 +15,3 @@ CMD ["./api_caller.sh", "-e", "localhost:8080/api", "-m", "localhost:8081/metric
 
 RUN adduser -D -u 65532 sidecar && chown sidecar:sidecar /api_caller.sh
 USER sidecar
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/bin/sh", "-c", "test -x /api_caller.sh"]

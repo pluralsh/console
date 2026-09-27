@@ -26,4 +26,3 @@ RUN if [ "$OS_VARIANT" = "alpine" ]; then \
   mix local.hex --force
 RUN if [ "$OS_VARIANT" = "alpine" ]; then addgroup -S app && adduser -S -G app app; else groupadd --system app && useradd --system --gid app app; fi && mkdir -p /usr/local/cargo /usr/local/rustup && chown -R app:app /app /usr/local/cargo /usr/local/rustup
 USER app
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["mix", "--version"]
