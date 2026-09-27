@@ -24,5 +24,3 @@ RUN if [ "$OS_VARIANT" = "alpine" ]; then \
   if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi && \
   mix local.rebar --force && \
   mix local.hex --force
-RUN if [ "$OS_VARIANT" = "alpine" ]; then addgroup -S app && adduser -S -G app app; else groupadd --system app && useradd --system --gid app app; fi && mkdir -p /usr/local/cargo /usr/local/rustup && chown -R app:app /app /usr/local/cargo /usr/local/rustup
-USER app
