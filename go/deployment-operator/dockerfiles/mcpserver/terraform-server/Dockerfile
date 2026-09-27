@@ -26,7 +26,7 @@ FROM alpine:3.22.1
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
-RUN adduser -D -u 65532 mcp WORKDIR /root/WORKDIR /root/ chown mcp:mcp /app
+RUN adduser -D -u 65532 mcp && chown mcp:mcp /app
 
 # Copy the binary from the builder stage
 COPY --from=builder /workspace/deployment-operator/terraform-mcpserver .

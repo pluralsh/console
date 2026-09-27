@@ -9,9 +9,10 @@
 #     --secret id=git_token,env=GIT_ACCESS_TOKEN \
 #     -t docker.io/pluralsh/console-repos:local .
 
-ARG PREBAKE_IMAGE=docker.io/pluralsh/repository-prebake:v0.1.0
+ARG PREBAKE_IMAGE=docker.io/pluralsh/repository-prebake:2026-09-27
 
 FROM ${PREBAKE_IMAGE}
+USER root
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
