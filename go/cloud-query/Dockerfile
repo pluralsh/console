@@ -16,7 +16,7 @@ COPY internal/ internal/
 # Build the cloud-query binary
 RUN CGO_ENABLED=0 go build -o bin/cloud-query cmd/*.go
 
-FROM cgr.dev/chainguard/wolfi-base AS final
+FROM cgr.dev/chainguard/wolfi-base:latest AS final
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -42,4 +42,5 @@ COPY --from=builder /workspace/bin/cloud-query /usr/local/bin/cloud-query
 
 USER nonroot
 
-CMD ["/usr/local/bin/cloud-query"]
+CMD ["/usr/local/bin/cloud-query"]EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["/usr/local/bin/cloud-query", "--help"]

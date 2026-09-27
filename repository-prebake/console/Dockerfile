@@ -9,7 +9,7 @@
 #     --secret id=git_token,env=GIT_ACCESS_TOKEN \
 #     -t docker.io/pluralsh/console-repos:local .
 
-ARG PREBAKE_IMAGE=docker.io/pluralsh/repository-prebake:latest
+ARG PREBAKE_IMAGE=docker.io/pluralsh/repository-prebake:v0.1.0
 
 FROM ${PREBAKE_IMAGE}
 
@@ -31,3 +31,4 @@ RUN --mount=type=secret,id=git_token,required=false \
  && chown -R 65532:65532 /data
 
 USER 65532
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/usr/local/bin/prebake", "--help"]

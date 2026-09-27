@@ -39,3 +39,4 @@ COPY --from=builder /workspace/controller/manager .
 USER 65532:65532
 
 ENTRYPOINT ["/manager"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/manager", "--help"]

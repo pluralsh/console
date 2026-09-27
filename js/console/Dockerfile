@@ -18,3 +18,6 @@ COPY js/design-system/ ./design-system/
 
 WORKDIR /app/console
 CMD ["yarn", "build"]
+RUN chown -R node:node /app
+USER node
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["node", "-e", "process.exit(0)"]
