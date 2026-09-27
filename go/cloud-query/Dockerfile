@@ -40,9 +40,10 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
 # Copy cloud-query and steampipe extensions
 COPY --from=builder /workspace/bin/cloud-query /usr/local/bin/cloud-query
 
-USER nonroot
+USER root
 
 EXPOSE 8080
 RUN apk add --no-cache curl
+USER nonroot
 CMD ["/usr/local/bin/cloud-query"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["curl", "--fail", "--silent", "http://127.0.0.1:8080/healthz"]
