@@ -63,7 +63,7 @@ defmodule Console.MixProject do
        github: "elixir-grpc/grpc",
        sparse: "grpc",
        ref: "b0d999892cb76e1d7b9bcabb02d22a4e9410fefc"},
-      {:gun, "~> 2.6"},
+      {:gun, "~> 2.4"},
       {:grpc_server, "~> 1.0"},
       {:recon, "~> 2.5"},
       {:phoenix, "~> 1.5"},
