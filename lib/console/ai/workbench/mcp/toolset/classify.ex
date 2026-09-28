@@ -8,7 +8,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
   workbench MCP server without someone deciding that it should.
   """
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
-  alias Console.AI.Tools.Workbench.{Http, Infrastructure, Observability, SummarizeComponent}
+  alias Console.AI.Tools.Workbench.{DescribeComponent, Http, Infrastructure, Observability}
   alias Console.AI.Tools.Workbench.Observability.Plrl
   alias Console.AI.Tools.Workbench.Integration.{
     AzureDevops,
@@ -81,7 +81,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Infrastructure.CloudSchemas,
     Infrastructure.CloudTables,
     Infrastructure.RawCloudQuery,
-    SummarizeComponent,
+    DescribeComponent,
     ServiceComponent,
     Stack
   ]
@@ -119,6 +119,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Jira.GetIssue,
     Jira.ListComments,
     Jira.ListIssues,
+    Jira.ListTransitions,
     Pagerduty.GetIncident,
     Pagerduty.ListIncidentLogEntries,
     Pagerduty.ListIncidentNotes,

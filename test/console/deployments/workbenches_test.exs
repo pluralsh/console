@@ -930,6 +930,13 @@ defmodule Console.Deployments.WorkbenchesTest do
     test "marks the job paused, cancels running activities, and notifies subscribers" do
       job = insert(:workbench_job, status: :running)
       activity = insert(:workbench_job_activity, workbench_job: job, status: :running)
+      running = insert(:agent_run, status: :running)
+      pending_approval = insert(:agent_run, status: :pending_approval)
+      babysitting = insert(:agent_run, status: :babysitting)
+
+      for run <- [running, pending_approval, babysitting] do
+        {:ok, _} = Workbenches.associate_agent_run(activity, run.id)
+      end
 
       {:ok, paused} = Workbenches.pause_job(job)
 
@@ -937,6 +944,9 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert paused.status == :paused
       assert refetch(job).status == :paused
       assert refetch(activity).status == :cancelled
+      assert refetch(running).status == :cancelled
+      assert refetch(pending_approval).status == :pending_approval
+      assert refetch(babysitting).status == :babysitting
       assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
     end
 
@@ -2365,6 +2375,14 @@ defmodule Console.Deployments.WorkbenchesTest do
   describe "fail_job/2" do
     test "sets job status to failed, completed_at, and error message" do
       job = insert(:workbench_job, status: :running)
+      activity = insert(:workbench_job_activity, workbench_job: job, status: :running)
+      running = insert(:agent_run, status: :running)
+      pending_approval = insert(:agent_run, status: :pending_approval)
+      babysitting = insert(:agent_run, status: :babysitting)
+
+      for run <- [running, pending_approval, babysitting] do
+        {:ok, _} = Workbenches.associate_agent_run(activity, run.id)
+      end
 
       {:ok, failed} = Workbenches.fail_job("Something went wrong.", job)
 
@@ -2372,6 +2390,10 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert failed.status == :failed
       assert failed.completed_at
       assert failed.error == "Something went wrong."
+      assert refetch(activity).status == :cancelled
+      assert refetch(running).status == :cancelled
+      assert refetch(pending_approval).status == :pending_approval
+      assert refetch(babysitting).status == :babysitting
     end
 
     test "persists usage when provided" do

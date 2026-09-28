@@ -86,8 +86,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
     type
     sectionId
     markdown
-    # options is omitted: it uses the Json scalar, generated as a Go string, but Console returns a JSON object,
-    # which breaks decoding of the whole response. Select it again once the output field uses the Map scalar.
+    options
     layout {
         x
         y
@@ -115,8 +114,7 @@ fragment WorkbenchDashboardInputFragment on WorkbenchDashboardInput {
 fragment WorkbenchDashboardDatasourceFragment on WorkbenchDashboardDatasource {
     type
     tool
-    # input is omitted for the same reason as WorkbenchDashboardGraphFragment.options: it uses the Json scalar,
-    # but Console returns a JSON object. Select it again once the output field uses the Map scalar.
+    input
 }
 
 query GetMonitor($id: ID!) {

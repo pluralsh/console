@@ -104,9 +104,6 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 	if err := environment.ConfigurePrebakeGitSafeDirectories(); err != nil {
 		return fmt.Errorf("configure prebake git safe directories: %w", err)
 	}
-	if err := in.checkoutFollowupBranch(ctx, repositoryDir); err != nil {
-		return err
-	}
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
 		RepositoryDir: repositoryDir,
@@ -119,36 +116,6 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 	}
 
 	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token)
-}
-
-func (in *agentRunController) checkoutFollowupBranch(ctx context.Context, repositoryDir string) error {
-	if in.agentRun == nil || !in.agentRun.Followup {
-		return nil
-	}
-
-	headBranch := ""
-	if in.agentRun.HeadBranch != nil {
-		headBranch = strings.TrimSpace(*in.agentRun.HeadBranch)
-	}
-	if headBranch == "" {
-		return fmt.Errorf("follow-up agent run requires a head branch to check out")
-	}
-
-	if output, err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"fetch", "origin", headBranch}),
-		exec.WithDir(repositoryDir),
-	).RunWithOutput(ctx); err != nil {
-		return fmt.Errorf("fetch follow-up head branch %q: %w: %s", headBranch, err, output)
-	}
-
-	if output, err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"checkout", "-B", headBranch, "origin/" + headBranch}),
-		exec.WithDir(repositoryDir),
-	).RunWithOutput(ctx); err != nil {
-		return fmt.Errorf("check out follow-up head branch %q: %w: %s", headBranch, err, output)
-	}
-
-	return nil
 }
 
 // completeAgentRun updates the agent run status in the Console API

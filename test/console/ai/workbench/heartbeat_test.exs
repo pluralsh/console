@@ -1,6 +1,7 @@
 defmodule Console.AI.Workbench.HeartbeatTest do
   use Console.DataCase, async: false
   alias Console.AI.{ModelSelection, Workbench.Heartbeat}
+  alias Console.Deployments.Workbenches
   alias Console.Schema.{Workbench, WorkbenchJob}
   alias Console.Schema.Workbench.Budget
 
@@ -45,6 +46,96 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert usage.output_tokens == 19_000
       assert usage.cached_tokens == 667_000
       assert usage.total_tokens == 687_824
+    end
+
+    test "normalizes ReqLLM canonical Bedrock cache counters" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "anthropic.claude-sonnet-4-6",
+        nil,
+        %{
+          input_tokens: 824,
+          output_tokens: 19_000,
+          total_tokens: 19_824,
+          cache_read_tokens: 667_000,
+          cache_write_tokens: 1_000
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.input_tokens == 824
+      assert usage.output_tokens == 19_000
+      assert usage.cached_tokens == 667_000
+      assert usage.total_tokens == 687_824
+    end
+
+    test "normalizes separate cache counters for non-Anthropic Bedrock Converse models" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "amazon.nova-pro-v1:0",
+        nil,
+        %{
+          input_tokens: 100,
+          output_tokens: 50,
+          total_tokens: 150,
+          cache_read_tokens: 600,
+          cache_write_tokens: 25,
+          input_includes_cached: false
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.cached_tokens == 600
+      assert usage.total_tokens == 775
+    end
+
+    test "does not add cache counters when Bedrock input already includes them" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :bedrock,
+        "openai.gpt-oss-120b-1:0",
+        nil,
+        %{
+          input_tokens: 100,
+          output_tokens: 50,
+          total_tokens: 150,
+          cached_tokens: 60,
+          input_includes_cached: true
+        }
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.cached_tokens == 60
+      assert usage.total_tokens == 150
     end
 
     test "preserves a larger provider total for Bedrock Anthropic usage" do
@@ -232,6 +323,15 @@ defmodule Console.AI.Workbench.HeartbeatTest do
         )
 
       job = insert(:workbench_job, status: :running, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, status: :running)
+      running = insert(:agent_run, status: :running)
+      pending_approval = insert(:agent_run, status: :pending_approval)
+      babysitting = insert(:agent_run, status: :babysitting)
+
+      for run <- [running, pending_approval, babysitting] do
+        {:ok, _} = Workbenches.associate_agent_run(activity, run.id)
+      end
+
       {:ok, pid} = Heartbeat.start_link(job)
       Process.unlink(pid)
       ref = Process.monitor(pid)
@@ -256,6 +356,10 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert_in_delta persisted_job.usage.output_cost, @usage.output_cost, 0.000_001
       assert_in_delta persisted_job.usage.total_cost, @usage.total_cost, 0.000_001
       assert Console.Repo.get!(Workbench, workbench.id).budget.last == 875
+      assert refetch(activity).status == :cancelled
+      assert refetch(running).status == :cancelled
+      assert refetch(pending_approval).status == :pending_approval
+      assert refetch(babysitting).status == :babysitting
     end
 
     test "terminates the linked engine process when cancelled" do

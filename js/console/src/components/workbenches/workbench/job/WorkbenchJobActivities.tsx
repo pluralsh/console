@@ -60,10 +60,8 @@ export function WorkbenchJobActivities({
 
   const [openIds, setOpenIds] = useState<string[]>([])
 
-  const { textStreamMap, jobLevelThinking } = useWorkbenchJobStreams(
-    jobId,
-    !!data
-  )
+  const { textStreamMap, latestThoughtMap, jobLevelThinking } =
+    useWorkbenchJobStreams(jobId, !!data)
 
   const userPromptIndices = useMemo(() => {
     const indices = [0] // 0 is initial user prompt in topContent
@@ -166,6 +164,7 @@ export function WorkbenchJobActivities({
                   workbenchId={workbenchId}
                   workbenchName={workbenchName}
                   textStream={textStreamMap[activity.id] ?? ''}
+                  latestThought={latestThoughtMap[activity.id]}
                 />
               )
             }}

@@ -30,11 +30,14 @@ import { produce } from 'immer'
 // keyed by activity id, 'none' value puts it at the top level of the job
 type WorkbenchJobTextStreamMap = Record<string, string>
 
+// keyed by activity id
+type WorkbenchJobLatestThoughtMap = Record<string, WorkbenchJobThoughtFragment>
+
 export type WorkbenchJobLevelThinkingItem = WorkbenchJobProgressFragment & {
   localKey: number
 }
 
-// only returns a map of the ephemeral text streams, others subs are added to Apollo cache
+// only returns maps of the ephemeral streams, others subs are added to Apollo cache
 export function useWorkbenchJobStreams(
   jobId: Nullable<string>,
   activityQueryLoaded: boolean
@@ -43,6 +46,8 @@ export function useWorkbenchJobStreams(
   const [textStreamMap, setTextStreamMap] = useState<WorkbenchJobTextStreamMap>(
     {}
   )
+  const [latestThoughtMap, setLatestThoughtMap] =
+    useState<WorkbenchJobLatestThoughtMap>({})
   const [jobLevelThinking, setJobLevelThinking] = useState<
     WorkbenchJobLevelThinkingItem[]
   >([])
@@ -91,8 +96,10 @@ export function useWorkbenchJobStreams(
     ignoreResults: true,
     onData: ({ data: { data } }) => {
       const thought = data?.workbenchJobThoughtDelta?.payload
-      if (!thought?.activity?.id) return
+      const activityId = thought?.activity?.id
+      if (!thought || !activityId) return
       appendThoughtToActivityCache(client.cache, thought)
+      setLatestThoughtMap((prev) => ({ ...prev, [activityId]: thought }))
     },
   })
   useWorkbenchJobActivityDeltaSubscription({
@@ -122,7 +129,7 @@ export function useWorkbenchJobStreams(
     },
   })
 
-  return { textStreamMap, jobLevelThinking }
+  return { textStreamMap, latestThoughtMap, jobLevelThinking }
 }
 
 export const appendActivityToCache = (

@@ -11,7 +11,8 @@ defmodule Console.Schema.AgentRun do
     AgentSession,
     AgentRunUpload,
     AIUsage,
-    WorkbenchJobActivityAgentRun
+    WorkbenchJobActivityAgentRun,
+    WorkbenchJobActivity
   }
 
   @expiry 14
@@ -99,6 +100,16 @@ defmodule Console.Schema.AgentRun do
 
   def for_status(query \\ __MODULE__, status) do
     from(ar in query, where: ar.status == ^status)
+  end
+
+  def for_workbench_job(query \\ __MODULE__, job_id) do
+    from(ar in query,
+      join: association in WorkbenchJobActivityAgentRun,
+      on: association.agent_run_id == ar.id,
+      join: activity in WorkbenchJobActivity,
+      on: activity.id == association.workbench_job_activity_id,
+      where: activity.workbench_job_id == ^job_id
+    )
   end
 
   def expired(query \\ __MODULE__) do

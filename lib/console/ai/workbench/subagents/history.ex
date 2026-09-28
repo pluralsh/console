@@ -34,7 +34,7 @@ defmodule Console.AI.Workbench.Subagents.History do
     end
   end
 
-  defp tools(%Environment{skills: skills}, job) do
+  def tools(%Environment{skills: skills}, job) do
     job = Repo.preload(job, [referenced_job: [activities: :thoughts]])
     skills = Environment.subagent_skills(skills, :memory)
     skill_knowledge_tools(job, skills) ++ [

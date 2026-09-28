@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "component_id": {
+            "type": "string",
+            "description": "The Plural service component ID whose child Kubernetes resources should be returned"
+        }
+    },
+    "required": ["component_id"]
+}
