@@ -177,11 +177,11 @@ func tunnelControllerDeployment(tunnelController *v1alpha1.TunnelController, con
 		"app.kubernetes.io/component":      "tunnel-controller",
 	}
 	args := []string{
-		"--server=" + config.Server,
-		"--token-file=" + tunnelTokenMountPath + "/token",
-		"--tls-ca=" + tunnelTLSMountPath + "/ca.crt",
-		"--tls-cert=" + tunnelTLSMountPath + "/tls.crt",
-		"--tls-key=" + tunnelTLSMountPath + "/tls.key",
+		"--server", config.Server,
+		"--token-file", tunnelTokenMountPath + "/token",
+		"--tls-ca", tunnelTLSMountPath + "/ca.crt",
+		"--tls-cert", tunnelTLSMountPath + "/tls.crt",
+		"--tls-key", tunnelTLSMountPath + "/tls.key",
 	}
 	volumeMounts := []corev1.VolumeMount{
 		{Name: "token", MountPath: tunnelTokenMountPath, ReadOnly: true},

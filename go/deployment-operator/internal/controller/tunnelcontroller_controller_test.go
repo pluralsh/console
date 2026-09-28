@@ -59,8 +59,13 @@ func TestTunnelControllerReconcileCreatesSecretAndDeployment(t *testing.T) {
 	g.Expect(deployment.Spec.Template.Spec.ServiceAccountName).To(Equal("deployment-operator"))
 	container := deployment.Spec.Template.Spec.Containers[0]
 	g.Expect(container.Image).To(Equal("ghcr.io/pluralsh/ferrotunnel-client:master"))
-	g.Expect(container.Args).To(ContainElement("--server=console.example.com:7835"))
-	g.Expect(container.Args).To(ContainElement("--tls-key=/var/run/ferrotunnel/tls/tls.key"))
+	g.Expect(container.Args).To(Equal([]string{
+		"--server", "console.example.com:7835",
+		"--token-file", "/var/run/ferrotunnel/token",
+		"--tls-ca", "/var/run/ferrotunnel/tls/ca.crt",
+		"--tls-cert", "/var/run/ferrotunnel/tls/tls.crt",
+		"--tls-key", "/var/run/ferrotunnel/tls/tls.key",
+	}))
 }
 
 func TestTunnelControllerReconcileDefaultsImage(t *testing.T) {
