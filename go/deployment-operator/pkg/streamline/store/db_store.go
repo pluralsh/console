@@ -520,7 +520,11 @@ func (in *DatabaseStore) SaveUnsyncedComponents(objects []unstructured.Unstructu
 	  parent_uid = excluded.parent_uid,
 	  node = excluded.node,
 	  service_id = excluded.service_id,
-      delete_phase = excluded.delete_phase
+	  delete_phase = excluded.delete_phase
+	WHERE component.applied = 0
+	   OR component.service_id IS NULL
+	   OR component.service_id = ''
+	   OR component.service_id = excluded.service_id
 	`)
 
 	return sqlitex.Execute(conn, sb.String(), nil)
