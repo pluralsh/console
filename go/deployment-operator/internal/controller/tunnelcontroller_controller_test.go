@@ -106,6 +106,100 @@ func TestTunnelControllerReconcileDefaultsImage(t *testing.T) {
 	g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(Equal(v1alpha1.DefaultTunnelControllerImage))
 }
 
+func TestTunnelControllerReconcileRecordsPodError(t *testing.T) {
+	g := NewWithT(t)
+	scheme := runtime.NewScheme()
+	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+	g.Expect(appsv1.AddToScheme(scheme)).To(Succeed())
+	g.Expect(corev1.AddToScheme(scheme)).To(Succeed())
+
+	tunnelController := &v1alpha1.TunnelController{
+		ObjectMeta: metav1.ObjectMeta{Name: "ferrotunnel", Namespace: "plrl-deploy-operator"},
+		Spec:       v1alpha1.TunnelControllerSpec{Image: "ghcr.io/pluralsh/ferrotunnel-client:master"},
+	}
+	k8sClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithStatusSubresource(&v1alpha1.TunnelController{}).
+		WithObjects(tunnelController).
+		Build()
+	reconciler := &TunnelControllerReconciler{
+		Client: k8sClient,
+		Scheme: scheme,
+		Config: FerroTunnelConfig{
+			Server:             "console.example.com:7835",
+			ServiceAccountName: "deployment-operator",
+			Token:              "tunnel-secret",
+			CACert:             "ca",
+			Cert:               "client-cert",
+			Key:                "client-key",
+		},
+	}
+	request := ctrl.Request{NamespacedName: types.NamespacedName{Name: tunnelController.Name, Namespace: tunnelController.Namespace}}
+	_, err := reconciler.Reconcile(context.Background(), request)
+	g.Expect(err).NotTo(HaveOccurred())
+
+	deployment := &appsv1.Deployment{}
+	g.Expect(k8sClient.Get(context.Background(), request.NamespacedName, deployment)).To(Succeed())
+	pod := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ferrotunnel-pod",
+			Namespace: tunnelController.Namespace,
+			Labels:    deployment.Spec.Selector.MatchLabels,
+		},
+		Spec: corev1.PodSpec{RestartPolicy: corev1.RestartPolicyAlways},
+		Status: corev1.PodStatus{
+			Phase: corev1.PodRunning,
+			ContainerStatuses: []corev1.ContainerStatus{{
+				Name: tunnelControllerContainerName,
+				State: corev1.ContainerState{Waiting: &corev1.ContainerStateWaiting{
+					Reason:  "CrashLoopBackOff",
+					Message: "back-off restarting failed container",
+				}},
+			}},
+		},
+	}
+	g.Expect(k8sClient.Create(context.Background(), pod)).To(Succeed())
+
+	_, err = reconciler.Reconcile(context.Background(), request)
+	g.Expect(err).NotTo(HaveOccurred())
+
+	updated := &v1alpha1.TunnelController{}
+	g.Expect(k8sClient.Get(context.Background(), request.NamespacedName, updated)).To(Succeed())
+	condition := updated.Status.Conditions[0]
+	g.Expect(condition.Type).To(Equal(v1alpha1.ReadyConditionType.String()))
+	g.Expect(condition.Status).To(Equal(metav1.ConditionFalse))
+	g.Expect(condition.Reason).To(Equal(v1alpha1.ReadyConditionReasonError.String()))
+	g.Expect(condition.Message).To(Equal("back-off restarting failed container"))
+}
+
+func TestTunnelControllerReconcileRecordsConfigError(t *testing.T) {
+	g := NewWithT(t)
+	scheme := runtime.NewScheme()
+	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+	g.Expect(appsv1.AddToScheme(scheme)).To(Succeed())
+
+	tunnelController := &v1alpha1.TunnelController{
+		ObjectMeta: metav1.ObjectMeta{Name: "ferrotunnel", Namespace: "plrl-deploy-operator"},
+	}
+	k8sClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithStatusSubresource(&v1alpha1.TunnelController{}).
+		WithObjects(tunnelController).
+		Build()
+	reconciler := &TunnelControllerReconciler{Client: k8sClient, Scheme: scheme}
+
+	request := ctrl.Request{NamespacedName: types.NamespacedName{Name: tunnelController.Name, Namespace: tunnelController.Namespace}}
+	_, err := reconciler.Reconcile(context.Background(), request)
+	g.Expect(err).To(HaveOccurred())
+
+	updated := &v1alpha1.TunnelController{}
+	g.Expect(k8sClient.Get(context.Background(), request.NamespacedName, updated)).To(Succeed())
+	condition := updated.Status.Conditions[0]
+	g.Expect(condition.Status).To(Equal(metav1.ConditionFalse))
+	g.Expect(condition.Reason).To(Equal(v1alpha1.ReadyConditionReasonError.String()))
+	g.Expect(condition.Message).To(ContainSubstring("ferrotunnel operator configuration is missing"))
+}
+
 func TestTunnelControllerReconcileIgnoresDeletion(t *testing.T) {
 	g := NewWithT(t)
 	scheme := runtime.NewScheme()

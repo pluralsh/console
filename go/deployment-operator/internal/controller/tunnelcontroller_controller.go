@@ -5,9 +5,11 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -26,6 +28,8 @@ const (
 	tunnelControllerSpecAnnotation = "deployments.plural.sh/tunnel-controller-spec-sha"
 	tunnelTokenMountPath           = "/var/run/ferrotunnel"
 	tunnelTLSMountPath             = "/var/run/ferrotunnel/tls"
+	tunnelControllerRequeue        = 15 * time.Second
+	tunnelControllerWaitingMessage = "waiting for the tunnel controller Deployment"
 )
 
 // FerroTunnelConfig is the deployment operator configuration for every TunnelController.
@@ -75,6 +79,7 @@ type TunnelControllerReconciler struct {
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=tunnelcontrollers/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch
 
 func (r *TunnelControllerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, retErr error) {
 	tunnelController := &v1alpha1.TunnelController{}
@@ -100,40 +105,38 @@ func (r *TunnelControllerReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		tunnelController.Spec.Image = v1alpha1.DefaultTunnelControllerImage
 	}
 	if err := r.Config.validate(); err != nil {
-		utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return r.fail(tunnelController, err)
 	}
 	secret := operatorTunnelSecret(tunnelController, r.Config)
 	if err := controllerutil.SetControllerReference(tunnelController, secret, r.Scheme); err != nil {
-		return ctrl.Result{}, fmt.Errorf("failed to set tunnel controller Secret owner: %w", err)
+		return r.fail(tunnelController, fmt.Errorf("failed to set tunnel controller Secret owner: %w", err))
 	}
 	if err := r.ensureSecret(ctx, secret); err != nil {
-		return ctrl.Result{}, err
+		return r.fail(tunnelController, err)
 	}
 
 	desired, err := tunnelControllerDeployment(tunnelController, r.Config, secret)
 	if err != nil {
-		utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return r.fail(tunnelController, err)
 	}
 	if err := controllerutil.SetControllerReference(tunnelController, desired, r.Scheme); err != nil {
-		return ctrl.Result{}, fmt.Errorf("failed to set tunnel controller Deployment owner: %w", err)
+		return r.fail(tunnelController, fmt.Errorf("failed to set tunnel controller Deployment owner: %w", err))
 	}
 
 	existing := &appsv1.Deployment{}
 	err = r.Get(ctx, client.ObjectKeyFromObject(desired), existing)
 	if errors.IsNotFound(err) {
 		if err := r.Create(ctx, desired); err != nil {
-			return ctrl.Result{}, fmt.Errorf("failed to create tunnel controller Deployment: %w", err)
+			return r.fail(tunnelController, fmt.Errorf("failed to create tunnel controller Deployment: %w", err))
 		}
-		utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "waiting for the tunnel controller Deployment")
-		return ctrl.Result{}, nil
+		utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, tunnelControllerWaitingMessage)
+		return ctrl.Result{RequeueAfter: tunnelControllerRequeue}, nil
 	}
 	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("failed to get tunnel controller Deployment: %w", err)
+		return r.fail(tunnelController, fmt.Errorf("failed to get tunnel controller Deployment: %w", err))
 	}
 	if !metav1.IsControlledBy(existing, tunnelController) {
-		return ctrl.Result{}, fmt.Errorf("Deployment %s/%s is not controlled by TunnelController", existing.Namespace, existing.Name)
+		return r.fail(tunnelController, fmt.Errorf("Deployment %s/%s is not controlled by TunnelController", existing.Namespace, existing.Name))
 	}
 
 	if existing.Annotations[tunnelControllerSpecAnnotation] != desired.Annotations[tunnelControllerSpecAnnotation] {
@@ -141,16 +144,77 @@ func (r *TunnelControllerReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		existing.Labels = desired.Labels
 		existing.Spec = desired.Spec
 		if err := r.Update(ctx, existing); err != nil {
-			return ctrl.Result{}, fmt.Errorf("failed to update tunnel controller Deployment: %w", err)
+			return r.fail(tunnelController, fmt.Errorf("failed to update tunnel controller Deployment: %w", err))
 		}
 	}
 
-	if existing.Status.AvailableReplicas > 0 {
+	health, err := r.tunnelControllerHealth(ctx, existing)
+	if err != nil {
+		return r.fail(tunnelController, err)
+	}
+	switch health.Status {
+	case common.HealthStatusHealthy:
 		utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 		return ctrl.Result{}, nil
+	case common.HealthStatusDegraded:
+		utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReasonError, health.Message)
+		return ctrl.Result{RequeueAfter: tunnelControllerRequeue}, nil
+	default:
+		message := health.Message
+		if message == "" {
+			message = tunnelControllerWaitingMessage
+		}
+		utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, message)
+		return ctrl.Result{RequeueAfter: tunnelControllerRequeue}, nil
 	}
-	utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "waiting for the tunnel controller Deployment")
-	return ctrl.Result{}, nil
+}
+
+func (r *TunnelControllerReconciler) fail(tunnelController *v1alpha1.TunnelController, err error) (ctrl.Result, error) {
+	utils.MarkCondition(tunnelController.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReasonError, err.Error())
+	return ctrl.Result{}, err
+}
+
+func (r *TunnelControllerReconciler) tunnelControllerHealth(ctx context.Context, deployment *appsv1.Deployment) (*common.HealthStatus, error) {
+	health, err := resourceHealth(deployment)
+	if err != nil || health.Status == common.HealthStatusDegraded {
+		return health, err
+	}
+
+	pods := &corev1.PodList{}
+	if err := r.List(ctx, pods, client.InNamespace(deployment.Namespace), client.MatchingLabels(deployment.Spec.Selector.MatchLabels)); err != nil {
+		return nil, fmt.Errorf("failed to list tunnel controller Pods: %w", err)
+	}
+	for i := range pods.Items {
+		podHealth, err := resourceHealth(&pods.Items[i])
+		if err != nil {
+			return nil, err
+		}
+		if podHealth.Status == common.HealthStatusDegraded {
+			return podHealth, nil
+		}
+	}
+	return health, nil
+}
+
+func resourceHealth(obj client.Object) (*common.HealthStatus, error) {
+	switch obj.(type) {
+	case *appsv1.Deployment:
+		obj.GetObjectKind().SetGroupVersionKind(appsv1.SchemeGroupVersion.WithKind("Deployment"))
+	case *corev1.Pod:
+		obj.GetObjectKind().SetGroupVersionKind(corev1.SchemeGroupVersion.WithKind("Pod"))
+	}
+	unstructuredObj, err := common.ToUnstructured(obj)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert %s to unstructured: %w", obj.GetObjectKind().GroupVersionKind().Kind, err)
+	}
+	health, err := common.GetResourceHealth(unstructuredObj)
+	if err != nil {
+		return nil, err
+	}
+	if health == nil {
+		return &common.HealthStatus{Status: common.HealthStatusUnknown}, nil
+	}
+	return health, nil
 }
 
 func (r *TunnelControllerReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -163,11 +227,19 @@ func (r *TunnelControllerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func tunnelControllerDeployment(tunnelController *v1alpha1.TunnelController, config FerroTunnelConfig, secret *corev1.Secret) (*appsv1.Deployment, error) {
+	args := []string{
+		"--server", config.Server,
+		"--token-file", tunnelTokenMountPath + "/token",
+		"--tls-ca", tunnelTLSMountPath + "/ca.crt",
+		"--tls-cert", tunnelTLSMountPath + "/tls.crt",
+		"--tls-key", tunnelTLSMountPath + "/tls.key",
+	}
 	sha, err := utils.HashObject(struct {
 		Image  string            `json:"image"`
 		Server string            `json:"server"`
+		Args   []string          `json:"args"`
 		Secret map[string][]byte `json:"secret"`
-	}{Image: tunnelController.Spec.Image, Server: config.Server, Secret: secret.Data})
+	}{Image: tunnelController.Spec.Image, Server: config.Server, Args: args, Secret: secret.Data})
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash TunnelController spec: %w", err)
 	}
@@ -175,13 +247,6 @@ func tunnelControllerDeployment(tunnelController *v1alpha1.TunnelController, con
 	labels := map[string]string{
 		v1alpha1.TunnelControllerNameLabel: tunnelController.Name,
 		"app.kubernetes.io/component":      "tunnel-controller",
-	}
-	args := []string{
-		"--server", config.Server,
-		"--token-file", tunnelTokenMountPath + "/token",
-		"--tls-ca", tunnelTLSMountPath + "/ca.crt",
-		"--tls-cert", tunnelTLSMountPath + "/tls.crt",
-		"--tls-key", tunnelTLSMountPath + "/tls.key",
 	}
 	volumeMounts := []corev1.VolumeMount{
 		{Name: "token", MountPath: tunnelTokenMountPath, ReadOnly: true},
