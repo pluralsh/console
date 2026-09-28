@@ -1364,7 +1364,8 @@ kas:
       additionalAnnotations: { }
 
 # ferrotunnel is the reverse-tunnel server. It has its own internet-facing load balancer.
-# Port 7835 is the TLS control plane. Port 8080 is the HTTP ingress. The API writes Secret existingSecret.
+# Port 7835 is the TLS control plane. Port 80 is the HTTP ingress and forwards to the process on 8080.
+# The API writes Secret existingSecret.
 # host empty becomes ferrotunnel.<ingress.console_dns>, which is also the server certificate name.
 ferrotunnel:
   enabled: true
@@ -1378,7 +1379,8 @@ ferrotunnel:
   service:
     type: LoadBalancer
     controlPort: 7835
-    httpPort: 8080
+    httpPort: 80
+    containerHttpPort: 8080
     annotations: {}
   serviceAccount:
     create: true

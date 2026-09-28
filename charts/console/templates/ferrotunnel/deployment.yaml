@@ -26,7 +26,7 @@ spec:
           args:
             - server
             - --bind=0.0.0.0:{{ .Values.ferrotunnel.service.controlPort }}
-            - --http-bind=0.0.0.0:{{ .Values.ferrotunnel.service.httpPort }}
+            - --http-bind=0.0.0.0:{{ .Values.ferrotunnel.service.containerHttpPort }}
             - --token-file=/var/run/ferrotunnel/token
             - --tls-cert=/var/run/ferrotunnel/tls.crt
             - --tls-key=/var/run/ferrotunnel/tls.key
@@ -37,7 +37,7 @@ spec:
               containerPort: {{ .Values.ferrotunnel.service.controlPort }}
               protocol: TCP
             - name: http
-              containerPort: {{ .Values.ferrotunnel.service.httpPort }}
+              containerPort: {{ .Values.ferrotunnel.service.containerHttpPort }}
               protocol: TCP
           volumeMounts:
             - name: server
