@@ -230,6 +230,7 @@ export function Logs({
             <LogsTableWrapSC>
               <LogsTable
                 logs={logs}
+                query={throttledQ}
                 loading={loading}
                 initialLoading={initialLoading}
                 fetchMore={fetchMore}

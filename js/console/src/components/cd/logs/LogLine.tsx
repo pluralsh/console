@@ -1,10 +1,11 @@
-import { RefObject } from 'react'
+import { ReactNode, RefObject } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
 import { SemanticColorKey } from '@pluralsh/design-system'
 import { LogLineFragment } from 'generated/graphql'
 import { formatDateTime } from 'utils/datetime'
+import { getLogSearchMatchRanges } from './logSearch'
 
 export enum LogLevel {
   SUCCESS = 'Success',
@@ -39,12 +40,14 @@ export function LogLine({
   line: { timestamp, log },
   inferLevel = true,
   highlighted = false,
+  searchQuery,
   onClick,
 }: {
   ref?: RefObject<HTMLDivElement | null>
   line: LogLineFragment
   inferLevel?: boolean
   highlighted?: boolean
+  searchQuery?: string
   onClick?: () => void
 }) {
   const { colors } = useTheme()
@@ -58,11 +61,34 @@ export function LogLine({
     >
       {formatDateTime(timestamp, 'MM/DD/YYYY-HH:mm:ss[[UTC]]', true, true)}
       {(log || '').split('\n').map((line, index) => (
-        <span key={index}>{line}</span>
+        <span key={index}>{highlightMatches(line, searchQuery)}</span>
       ))}
     </LogLineWrapper>
   )
 }
+
+function highlightMatches(line: string, searchQuery?: string) {
+  const ranges = getLogSearchMatchRanges(line, searchQuery)
+  if (!ranges.length) return line
+
+  const parts: ReactNode[] = []
+  let cursor = 0
+
+  ranges.forEach(({ start, end }, i) => {
+    if (start > cursor) parts.push(line.slice(cursor, start))
+    parts.push(
+      <LogMatchMarkSC key={`${start}-${end}-${i}`}>
+        {line.slice(start, end)}
+      </LogMatchMarkSC>
+    )
+    cursor = end
+  })
+
+  if (cursor < line.length) parts.push(line.slice(cursor))
+
+  return parts
+}
+
 const LogLineWrapper = styled.div<{
   $borderColor?: string
   $highlighted?: boolean
@@ -81,4 +107,11 @@ const LogLineWrapper = styled.div<{
     backgroundColor: theme.colors['fill-two'],
     borderColor: theme.colors['border-info'],
   },
+}))
+
+const LogMatchMarkSC = styled.mark(({ theme }) => ({
+  backgroundColor: 'rgba(255, 202, 40, 0.32)',
+  borderRadius: 2,
+  color: theme.colors.text,
+  padding: '0 1px',
 }))

@@ -17,40 +17,46 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, %Kube.Dashboard.List{items: [dashboard()]}} end)
 
-      {:ok, %{data: %{"dashboards" => [found]}}} = run_query("""
-        query Dashboards($repo: String!) {
-          dashboards(repo: $repo) {
-            id
-            spec {
-              name
-              description
-              timeslices
-              graphs {
-                queries {
-                  query
-                  legend
+      {:ok, %{data: %{"dashboards" => [found]}}} =
+        run_query(
+          """
+            query Dashboards($repo: String!) {
+              dashboards(repo: $repo) {
+                id
+                spec {
+                  name
+                  description
+                  timeslices
+                  graphs {
+                    queries {
+                      query
+                      legend
+                    }
+                    name
+                  }
                 }
-                name
               }
             }
-          }
-        }
-      """, %{"repo" => "repo"}, %{current_user: user})
+          """,
+          %{"repo" => "repo"},
+          %{current_user: user}
+        )
 
       assert found["id"] == "dashboard"
       assert found["spec"]["name"] == "dashboard"
       assert found["spec"]["timeslices"] == ["10m"]
       assert found["spec"]["description"] == "description"
+
       assert found["spec"]["graphs"] == [
-        %{
-          "name" => "queries",
-          "queries" => [%{"query" => "some-query", "legend" => "legend"}]
-        },
-        %{
-          "name" => "formatted",
-          "queries" => [%{"query" => "formatted-query", "legend" => nil}]
-        }
-      ]
+               %{
+                 "name" => "queries",
+                 "queries" => [%{"query" => "some-query", "legend" => "legend"}]
+               },
+               %{
+                 "name" => "formatted",
+                 "queries" => [%{"query" => "formatted-query", "legend" => nil}]
+               }
+             ]
     end
   end
 
@@ -60,97 +66,154 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       role = insert(:role, repositories: ["*"], permissions: %{read: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, dashboard()} end)
+
       expect(Req, :post, 3, fn _, opts ->
         case opts[:form] do
           [{"query", "label-q"}, _, _, _] ->
-            {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})}}
+            {:ok,
+             %Req.Response{
+               status: 200,
+               body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})
+             }}
+
           [{"query", "some-query"}, _, _, _] ->
-            {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
-              %{values: [[1, "1"]]}
-            ]}})}}
+            {:ok,
+             %Req.Response{
+               status: 200,
+               body:
+                 Poison.encode!(%{
+                   data: %{
+                     result: [
+                       %{values: [[1, "1"]]}
+                     ]
+                   }
+                 })
+             }}
+
           [{"query", "formatted-query"}, _, _, _] ->
-            {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
-              %{metric: %{"var" => "val"}, values: [[1, "1"]]},
-              %{metric: %{"var" => "val2"}, values: [[1, "1"]]}
-            ]}})}}
+            {:ok,
+             %Req.Response{
+               status: 200,
+               body:
+                 Poison.encode!(%{
+                   data: %{
+                     result: [
+                       %{metric: %{"var" => "val"}, values: [[1, "1"]]},
+                       %{metric: %{"var" => "val2"}, values: [[1, "1"]]}
+                     ]
+                   }
+                 })
+             }}
         end
       end)
 
-      {:ok, %{data: %{"dashboard" => found}}} = run_query("""
-        query Dashboards($repo: String!, $name: String!) {
-          dashboard(repo: $repo, name: $name) {
-            id
-            spec {
-              name
-              description
-              timeslices
-              labels {
-                name
-                values
-              }
-              graphs {
-                queries {
-                  query
-                  legend
-                  results {
-                    timestamp
-                    value
+      {:ok, %{data: %{"dashboard" => found}}} =
+        run_query(
+          """
+            query Dashboards($repo: String!, $name: String!) {
+              dashboard(repo: $repo, name: $name) {
+                id
+                spec {
+                  name
+                  description
+                  timeslices
+                  labels {
+                    name
+                    values
+                  }
+                  graphs {
+                    queries {
+                      query
+                      legend
+                      results {
+                        timestamp
+                        value
+                      }
+                    }
+                    name
                   }
                 }
-                name
               }
             }
-          }
-        }
-      """, %{"repo" => "repo", "name" => "name"}, %{current_user: user})
+          """,
+          %{"repo" => "repo", "name" => "name"},
+          %{current_user: user}
+        )
 
       assert found["id"] == "dashboard"
       assert found["spec"]["name"] == "dashboard"
       assert found["spec"]["timeslices"] == ["10m"]
       assert found["spec"]["description"] == "description"
+
       assert found["spec"]["labels"] == [
-        %{"name" => "label", "values" => ["value"]},
-        %{"name" => "other", "values" => ["l"]}
-      ]
+               %{"name" => "label", "values" => ["value"]},
+               %{"name" => "other", "values" => ["l"]}
+             ]
+
       assert found["spec"]["graphs"] == [
-        %{
-          "name" => "queries",
-          "queries" => [
-            %{"query" => "some-query", "legend" => "legend", "results" => [%{"timestamp" => "1", "value" => "1"}]}
-          ]
-        },
-        %{
-          "name" => "formatted",
-          "queries" => [
-            %{"query" => "formatted-query", "legend" => "legend-val", "results" => [%{"timestamp" => "1", "value" => "1"}]},
-            %{"query" => "formatted-query", "legend" => "legend-val2", "results" => [%{"timestamp" => "1", "value" => "1"}]}
-          ]
-        }
-      ]
+               %{
+                 "name" => "queries",
+                 "queries" => [
+                   %{
+                     "query" => "some-query",
+                     "legend" => "legend",
+                     "results" => [%{"timestamp" => "1", "value" => "1"}]
+                   }
+                 ]
+               },
+               %{
+                 "name" => "formatted",
+                 "queries" => [
+                   %{
+                     "query" => "formatted-query",
+                     "legend" => "legend-val",
+                     "results" => [%{"timestamp" => "1", "value" => "1"}]
+                   },
+                   %{
+                     "query" => "formatted-query",
+                     "legend" => "legend-val2",
+                     "results" => [%{"timestamp" => "1", "value" => "1"}]
+                   }
+                 ]
+               }
+             ]
     end
   end
 
   describe "logs" do
     test "it can fetch logs for a loki query" do
       expect(Req, :get, fn _, _ ->
-        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
-            %{stream: %{"var" => "val"}, values: [["1", "hello"]]},
-            %{stream: %{"var" => "val2"}, values: [["1", "world"]]}
-          ]}}
-        )}}
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body:
+             Poison.encode!(%{
+               data: %{
+                 result: [
+                   %{stream: %{"var" => "val"}, values: [["1", "hello"]]},
+                   %{stream: %{"var" => "val2"}, values: [["1", "world"]]}
+                 ]
+               }
+             })
+         }}
       end)
 
-      {:ok, %{data: %{"logs" => [first, second]}}} = run_query("""
-        query Logs($query: String!, $limit: Int!) {
-          logs(query: $query, limit: $limit) {
-            stream
-            values {
-              timestamp
-              value
+      {:ok, %{data: %{"logs" => [first, second]}}} =
+        run_query(
+          """
+            query Logs($query: String!, $limit: Int!) {
+              logs(query: $query, limit: $limit) {
+                stream
+                values {
+                  timestamp
+                  value
+                }
+              }
             }
-          }
-        }
-      """, %{"query" => ~s({namespace="console"}), "limit" => 100}, %{current_user: insert(:user)})
+          """,
+          %{"query" => ~s({namespace="console"}), "limit" => 100},
+          %{current_user: insert(:user)}
+        )
 
       assert first["stream"]["var"] == "val"
       assert first["values"] == [%{"timestamp" => "1", "value" => "hello"}]
@@ -163,21 +226,35 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
   describe "metric" do
     test "it can fetch metrics from prometheus" do
       expect(Req, :post, fn _, _ ->
-        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
-          %{values: [[1, "1"]]}
-        ]}})}}
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body:
+             Poison.encode!(%{
+               data: %{
+                 result: [
+                   %{values: [[1, "1"]]}
+                 ]
+               }
+             })
+         }}
       end)
 
-      {:ok, %{data: %{"metric" => [metric]}}} = run_query("""
-        query Metric($q: String!) {
-          metric(query: $q) {
-            values {
-              timestamp
-              value
+      {:ok, %{data: %{"metric" => [metric]}}} =
+        run_query(
+          """
+            query Metric($q: String!) {
+              metric(query: $q) {
+                values {
+                  timestamp
+                  value
+                }
+              }
             }
-          }
-        }
-      """, %{"q" => "something"}, %{current_user: insert(:user)})
+          """,
+          %{"q" => "something"},
+          %{current_user: insert(:user)}
+        )
 
       assert metric["values"] == [%{"timestamp" => "1", "value" => "1"}]
     end
@@ -189,11 +266,16 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       svc = insert(:service, read_bindings: [%{user_id: user.id}])
       expect(Console.Logs.Provider, :query, fn _ -> {:ok, [log_line("a log")]} end)
 
-      {:ok, %{data: %{"logAggregation" => [line]}}} = run_query("""
-        query Logs($serviceId: ID!) {
-          logAggregation(serviceId: $serviceId) { timestamp log }
-        }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
+      {:ok, %{data: %{"logAggregation" => [line]}}} =
+        run_query(
+          """
+            query Logs($serviceId: ID!) {
+              logAggregation(serviceId: $serviceId) { timestamp log }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
 
       assert line["log"] == "a log"
     end
@@ -208,21 +290,64 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       refresh()
 
       # Instead of using expect to mock the logs provider, we use the elasticsearch index
-      deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
-        host: @host,
-        index: @index
-      }})
-
-
-      {:ok, %{data: %{"logAggregation" => [first_line, second_line]}}} = run_query("""
-        query Logs($serviceId: ID!) {
-          logAggregation(serviceId: $serviceId) { timestamp log }
+      deployment_settings(
+        logging: %{
+          enabled: true,
+          driver: :elastic,
+          elastic: %{
+            host: @host,
+            index: @index
+          }
         }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
+      )
+
+      {:ok, %{data: %{"logAggregation" => [first_line, second_line]}}} =
+        run_query(
+          """
+            query Logs($serviceId: ID!) {
+              logAggregation(serviceId: $serviceId) { timestamp log }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
 
       # reverse chronological order
       assert first_line["log"] == "another valid log message"
       assert second_line["log"] == "valid log message"
+    end
+
+    test "punctuated log searches do not broaden into token OR matches" do
+      user = insert(:user)
+      svc = insert(:service, read_bindings: [%{user_id: user.id}])
+
+      log_document(svc, "matching line Project--123") |> index_doc()
+      log_document(svc, "noisy line Project--456") |> index_doc()
+      refresh()
+
+      deployment_settings(
+        logging: %{
+          enabled: true,
+          driver: :elastic,
+          elastic: %{
+            host: @host,
+            index: @index
+          }
+        }
+      )
+
+      {:ok, %{data: %{"logAggregation" => [line]}}} =
+        run_query(
+          """
+            query Logs($serviceId: ID!, $query: String!) {
+              logAggregation(serviceId: $serviceId, query: $query) { timestamp log }
+            }
+          """,
+          %{"serviceId" => svc.id, "query" => "Project--123"},
+          %{current_user: user}
+        )
+
+      assert line["log"] == "matching line Project--123"
     end
 
     test "it can fetch log aggregations with time buckets from elasticsearch" do
@@ -234,7 +359,9 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
 
       # Create logs at different times to test time bucketing
       Enum.each(1..6, fn i ->
-        timestamp = Timex.shift(base_time, minutes: -i * 2) # 2 minute intervals
+        # 2 minute intervals
+        timestamp = Timex.shift(base_time, minutes: -i * 2)
+
         doc = %{
           "@timestamp" => timestamp,
           "message" => "log message #{i}",
@@ -245,30 +372,43 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
             "handle" => svc.cluster.handle
           }
         }
+
         index_doc(doc)
       end)
+
       refresh()
 
-      deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
-        host: @host,
-        index: @index
-      }})
-
-      # Test the new aggregation functionality
-      {:ok, %{data: %{"logAggregationBuckets" => buckets}}} = run_query("""
-        query LogAggregationBuckets($serviceId: ID!, $bucketSize: String) {
-          logAggregationBuckets(
-            serviceId: $serviceId,
-            aggregation: { bucketSize: $bucketSize }
-          ) {
-            timestamp
-            count
+      deployment_settings(
+        logging: %{
+          enabled: true,
+          driver: :elastic,
+          elastic: %{
+            host: @host,
+            index: @index
           }
         }
-      """, %{
-        "serviceId" => svc.id,
-        "bucketSize" => "5m"
-      }, %{current_user: user})
+      )
+
+      # Test the new aggregation functionality
+      {:ok, %{data: %{"logAggregationBuckets" => buckets}}} =
+        run_query(
+          """
+            query LogAggregationBuckets($serviceId: ID!, $bucketSize: String) {
+              logAggregationBuckets(
+                serviceId: $serviceId,
+                aggregation: { bucketSize: $bucketSize }
+              ) {
+                timestamp
+                count
+              }
+            }
+          """,
+          %{
+            "serviceId" => svc.id,
+            "bucketSize" => "5m"
+          },
+          %{current_user: user}
+        )
 
       # Verify we got aggregation buckets
       assert is_list(buckets)
@@ -283,9 +423,11 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       end)
 
       # Verify total count matches our indexed documents
-      total_count = Enum.reduce(buckets, 0, fn bucket, acc ->
-        acc + bucket["count"]
-      end)
+      total_count =
+        Enum.reduce(buckets, 0, fn bucket, acc ->
+          acc + bucket["count"]
+        end)
+
       assert total_count == 6
     end
 
@@ -293,11 +435,16 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       user = insert(:user)
       svc = insert(:service)
 
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query Logs($serviceId: ID!) {
-          logAggregation(serviceId: $serviceId) { timestamp log }
-        }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
+      {:ok, %{errors: [_ | _]}} =
+        run_query(
+          """
+            query Logs($serviceId: ID!) {
+              logAggregation(serviceId: $serviceId) { timestamp log }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
     end
   end
 
@@ -306,14 +453,19 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       user = insert(:user)
       expect(Kazan, :run, fn _ -> {:ok, vertical_pod_autoscaler("name")} end)
 
-      {:ok, %{data: %{"scalingRecommendation" => found}}} = run_query("""
-        query {
-          scalingRecommendation(kind: STATEFULSET, name: "name", namespace: "namespace") {
-            metadata { name namespace }
-            spec { updatePolicy { updateMode } }
-          }
-        }
-      """, %{}, %{current_user: user})
+      {:ok, %{data: %{"scalingRecommendation" => found}}} =
+        run_query(
+          """
+            query {
+              scalingRecommendation(kind: STATEFULSET, name: "name", namespace: "namespace") {
+                metadata { name namespace }
+                spec { updatePolicy { updateMode } }
+              }
+            }
+          """,
+          %{},
+          %{current_user: user}
+        )
 
       assert found["metadata"]["name"] == "name"
       assert found["spec"]["updatePolicy"]["updateMode"] == "Off"
@@ -331,19 +483,30 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       refresh()
 
       # Instead of using expect to mock the logs provider, we use the elasticsearch index
-      deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
-        host: @host,
-        index: @index
-      }})
-
-      {:ok, %{data: %{"logLabels" => [%{"label" => "test", "count" => 2}]}}} = run_query("""
-        query LogLabels($serviceId: ID!, $field: String!) {
-          logLabels(serviceId: $serviceId, field: $field) { label count }
+      deployment_settings(
+        logging: %{
+          enabled: true,
+          driver: :elastic,
+          elastic: %{
+            host: @host,
+            index: @index
+          }
         }
-      """, %{
-        "serviceId" => svc.id,
-        "field" => "kubernetes.namespace"
-      }, %{current_user: user})
+      )
+
+      {:ok, %{data: %{"logLabels" => [%{"label" => "test", "count" => 2}]}}} =
+        run_query(
+          """
+            query LogLabels($serviceId: ID!, $field: String!) {
+              logLabels(serviceId: $serviceId, field: $field) { label count }
+            }
+          """,
+          %{
+            "serviceId" => svc.id,
+            "field" => "kubernetes.namespace"
+          },
+          %{current_user: user}
+        )
     end
   end
 
