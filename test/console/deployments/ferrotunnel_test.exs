@@ -24,7 +24,7 @@ defmodule Console.Deployments.FerroTunnelTest do
       cert = X509.Certificate.from_pem!(tunnel.server_cert)
       {:Extension, _, _, names} = X509.Certificate.extension(cert, :subject_alt_name)
       assert Enum.any?(names, fn
-        {:dNSName, name} -> to_string(name) == "console.example.com"
+        {:dNSName, name} -> to_string(name) == "ferrotunnel.console.example.com"
         _ -> false
       end)
 
@@ -71,7 +71,7 @@ defmodule Console.Deployments.FerroTunnelTest do
 
       config = Map.new(FerroTunnel.configuration(cluster), fn %{name: name, value: value} -> {name, value} end)
 
-      assert config["tunnelServer"] == "console.example.com:7835"
+      assert config["tunnelServer"] == "ferrotunnel.console.example.com:7835"
       assert String.starts_with?(config["tunnelToken"], "tunnel-")
 
       cert = config["tunnelCert"] |> Base.decode64!() |> X509.Certificate.from_pem!()

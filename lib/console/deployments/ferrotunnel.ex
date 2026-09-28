@@ -133,7 +133,12 @@ defmodule Console.Deployments.FerroTunnel do
     }
   end
 
-  defp hostname(), do: Console.conf(:hostname)
+  defp hostname() do
+    case Console.conf(:hostname) do
+      host when is_binary(host) and host != "" -> "ferrotunnel." <> host
+      _ -> nil
+    end
+  end
 
   defp namespace(), do: System.get_env("NAMESPACE") || "console"
 end

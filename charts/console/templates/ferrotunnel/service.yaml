@@ -1,15 +1,22 @@
 {{- if .Values.ferrotunnel.enabled }}
-{{- $host := .Values.ferrotunnel.host | default .Values.ingress.console_dns }}
+{{- $host := .Values.ferrotunnel.host }}
+{{- if not $host }}
+{{- $host = printf "ferrotunnel.%s" (.Values.ingress.console_dns | default "") }}
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "ferrotunnel.controlServiceName" . }}
   labels:
     {{- include "ferrotunnel.labels" . | nindent 4 }}
-  {{- with $host }}
   annotations:
+    {{- with .Values.ferrotunnel.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with $host }}
     plural.sh/ferrotunnel-host: {{ . | quote }}
-  {{- end }}
+    external-dns.alpha.kubernetes.io/hostname: {{ . | quote }}
+    {{- end }}
 spec:
   type: {{ .Values.ferrotunnel.service.type }}
   ports:
@@ -17,18 +24,6 @@ spec:
       port: {{ .Values.ferrotunnel.service.controlPort }}
       targetPort: control
       protocol: TCP
-  selector:
-    {{- include "ferrotunnel.selectorLabels" . | nindent 4 }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "ferrotunnel.httpServiceName" . }}
-  labels:
-    {{- include "ferrotunnel.labels" . | nindent 4 }}
-spec:
-  type: ClusterIP
-  ports:
     - name: http
       port: {{ .Values.ferrotunnel.service.httpPort }}
       targetPort: http

@@ -44,10 +44,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- printf "%s-control" (include "ferrotunnel.fullname" .) }}
 {{- end }}
 
-{{- define "ferrotunnel.httpServiceName" -}}
-{{- printf "%s-http" (include "ferrotunnel.fullname" .) }}
-{{- end }}
-
 {{- define "ferrotunnel.serviceAccountName" -}}
 {{- if .Values.ferrotunnel.serviceAccount.create }}
 {{- default (include "ferrotunnel.fullname" .) .Values.ferrotunnel.serviceAccount.name }}
