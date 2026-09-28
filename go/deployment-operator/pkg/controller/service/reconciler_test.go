@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"io/fs"
 	"log"
 	"net/http"
@@ -165,7 +166,7 @@ var _ = Describe("Reconciler", Ordered, func() {
 			Expect(kClient.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: namespace}, &v1.Pod{})).NotTo(HaveOccurred())
 		})
 
-		It("should report Lua templating warnings as service errors", func() {
+		It("should report Lua templating warnings as service errors and clear them once resolved", func() {
 			helmService := &console.ServiceDeploymentForAgent{
 				ID:        "helm-warnings",
 				Name:      "helm-warnings",
@@ -218,6 +219,20 @@ warn("region is not configured, defaulting to us-east-1")
 				Message: "region is not configured, defaulting to us-east-1",
 				Warning: lo.ToPtr(true),
 			}))
+
+			// Once the script stops warning, an empty list must be sent, since the Console
+			// keeps the stored errors (and the stale status) when it receives null instead.
+			helmService.Helm.LuaScript = lo.ToPtr(`values["region"] = "eu-west-1"`)
+			reportedErrs = nil
+			_, err = reconciler.Reconcile(ctx, helmService.ID)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: helmService.Name, Namespace: namespace}, configMap)).To(Succeed())
+			Expect(configMap.Data).To(HaveKeyWithValue("region", "eu-west-1"))
+
+			Expect(reportedErrs).NotTo(BeNil())
+			Expect(reportedErrs).To(BeEmpty())
+			Expect(json.Marshal(reportedErrs)).To(MatchJSON(`[]`))
 
 			Expect(kClient.Delete(ctx, configMap)).To(Succeed())
 		})
