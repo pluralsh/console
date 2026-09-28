@@ -9,8 +9,8 @@ This is separate from the Slack and Microsoft Teams entries under [Messaging](/p
 
 ## Capabilities
 
-* **Slack** — receive @mentions and channel messages over Socket Mode, then reply in the bound channel.
-* **Microsoft Teams** — receive @mentions through a Bot Framework messaging endpoint, then reply in the bound channel.
+* **[Slack](/plural-features/workbenches/integrations/chatbots/slack)** — receive @mentions and channel messages over Socket Mode, then reply in the bound channel.
+* **[Microsoft Teams](/plural-features/workbenches/integrations/chatbots/teams)** — receive @mentions through a Bot Framework messaging endpoint, then reply in the bound channel.
 
 ## Setup
 

@@ -1,5 +1,5 @@
 ---
-title: Datadog integration
+title: Datadog
 description: Connect Datadog to a workbench and query metrics, logs, and traces
 ---
 

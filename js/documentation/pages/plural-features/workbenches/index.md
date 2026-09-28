@@ -38,7 +38,7 @@ Jobs can be started on demand or automatically:
 * **Automatically** — Jobs can also fire without a manual prompt:
   * [Webhook triggers](/plural-features/workbenches/automation#webhook-triggers) — observability alerts and issue tracker events
   * [Cron schedules](/plural-features/workbenches/automation#cron-schedules) — recurring prompts on a crontab
-  * Slack chatbot — @mention the workbench bot in a Slack channel to start a job
+  * [Chatbots](/plural-features/workbenches/integrations/chatbots) — @mention the workbench bot in Slack or Microsoft Teams to start a job
 
 Webhook, cron, and chatbot bindings are configured on the workbench. See [Automating workbench jobs](/plural-features/workbenches/automation) for webhook and cron setup.
 

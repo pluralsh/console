@@ -76,7 +76,7 @@ Skill files are fetched from Git at job start, so they stay current as your runb
 
 This step configures optional code-reading and code-writing capabilities. Skip it (leave the runtime unset) if your workbench is purely operational and does not need to touch source code.
 
-For detailed guidance on setting up and using the coding agent, see [Coding agent](/plural-features/workbenches/webhooks/coding-agent).
+For detailed guidance on setting up and using the coding agent, see [Coding agent](/plural-features/workbenches/coding-agent).
 
 
 ## Step 4: Access policy

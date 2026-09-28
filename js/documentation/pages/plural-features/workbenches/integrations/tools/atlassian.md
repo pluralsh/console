@@ -1,0 +1,19 @@
+---
+title: Atlassian
+description: Call Jira and Confluence Cloud from a workbench
+---
+
+The Atlassian tool lets a workbench agent call Jira and Confluence Cloud with an API token or a service account. Configure the connection once, then attach it to the workbenches that should use it.
+
+## Capabilities
+
+* Placeholder: name each operation the agent can call, from `lib/console/ai/tools/workbench/` (and `go/cloud-query/internal/tools/` when the tool is query-backed).
+* Placeholder: mention permissions only when the implementation or the setup guide states them.
+
+## Setup
+
+Create the tool under **Workbenches → Integrations** and follow the inline setup guide for credentials and Console fields. That guide is maintained at `js/console/public/setup-guides/tools/atlassian.md`.
+
+## Related
+
+* [Workbench tools](/plural-features/workbenches/integrations/tools)
