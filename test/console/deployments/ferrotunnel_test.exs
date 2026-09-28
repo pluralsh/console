@@ -33,6 +33,31 @@ defmodule Console.Deployments.FerroTunnelTest do
       assert again.ferrotunnel.server_cert == tunnel.server_cert
     end
 
+    test "a hostname change reissues the server certificate and keeps the token" do
+      previous = Application.get_env(:console, :hostname)
+      Application.put_env(:console, :hostname, "console.example.com")
+      on_exit(fn ->
+        if previous, do: Application.put_env(:console, :hostname, previous), else: Application.delete_env(:console, :hostname)
+      end)
+
+      insert(:deployment_settings)
+      {:ok, settings} = FerroTunnel.ensure_credentials()
+
+      Application.put_env(:console, :hostname, "console.other.example.com")
+      {:ok, again} = FerroTunnel.ensure_credentials()
+
+      assert again.ferrotunnel.token == settings.ferrotunnel.token
+      assert again.ferrotunnel.ca_cert == settings.ferrotunnel.ca_cert
+      refute again.ferrotunnel.server_cert == settings.ferrotunnel.server_cert
+
+      cert = X509.Certificate.from_pem!(again.ferrotunnel.server_cert)
+      {:Extension, _, _, names} = X509.Certificate.extension(cert, :subject_alt_name)
+      assert Enum.any?(names, fn
+        {:dNSName, name} -> to_string(name) == "ferrotunnel.console.other.example.com"
+        _ -> false
+      end)
+    end
+
     test "a regular settings update leaves the tunnel material in place" do
       previous = Application.get_env(:console, :hostname)
       Application.put_env(:console, :hostname, "console.example.com")

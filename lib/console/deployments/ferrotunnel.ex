@@ -15,20 +15,24 @@ defmodule Console.Deployments.FerroTunnel do
   Creates the tunnel material when it is missing, then refreshes the server Secret.
   """
   def ensure() do
+    prior = current_server_cert()
+
     with {:ok, settings} <- ensure_credentials(),
          :ok <- publish_secret(settings),
+         :ok <- refresh_operators(prior, settings),
       do: {:ok, settings}
   end
 
   @doc """
   Persists the CA, server certificate, and token on deployment settings.
-  A second call keeps the existing token.
+  A second call keeps the existing token. A hostname change reissues the
+  server certificate with the same CA and token.
   """
   def ensure_credentials() do
     case Settings.fetch_consistent() do
-      %DeploymentSettings{ferrotunnel: %DeploymentSettings.FerroTunnel{token: token}} = settings
+      %DeploymentSettings{ferrotunnel: %DeploymentSettings.FerroTunnel{token: token} = tunnel} = settings
           when is_binary(token) ->
-        {:ok, settings}
+        refresh_server(settings, tunnel, hostname())
       %DeploymentSettings{} = settings ->
         case hostname() do
           host when is_binary(host) and host != "" ->
@@ -93,9 +97,71 @@ defmodule Console.Deployments.FerroTunnel do
     |> Console.Repo.update()
   end
 
+  defp refresh_server(settings, %DeploymentSettings.FerroTunnel{} = tunnel, host)
+       when is_binary(host) and host != "" do
+    case cert_matches?(tunnel.server_cert, host) do
+      true -> {:ok, settings}
+      false ->
+        Logger.info("reissuing ferrotunnel server certificate for #{host}")
+        Settings.put_ferrotunnel(settings, reissued_material(tunnel, host))
+    end
+  end
+  defp refresh_server(settings, _, _), do: {:ok, settings}
+
+  defp refresh_operators(prior, %DeploymentSettings{ferrotunnel: %DeploymentSettings.FerroTunnel{server_cert: cert}})
+       when is_binary(cert) and prior != cert do
+    user = %{Console.Services.Users.get_bot!("console") | roles: %{admin: true}}
+
+    Cluster.ordered()
+    |> Console.Repo.all()
+    |> Enum.each(fn %Cluster{} = cluster ->
+      case Console.Deployments.Services.update_operator_service(cluster, user) do
+        {:ok, _} -> :ok
+        {:error, err} ->
+          Logger.warning("ferrotunnel operator configuration was not updated for #{cluster.id}: #{inspect(err)}")
+      end
+    end)
+  end
+  defp refresh_operators(_, _), do: :ok
+
+  defp current_server_cert() do
+    case Settings.fetch_consistent() do
+      %DeploymentSettings{ferrotunnel: %DeploymentSettings.FerroTunnel{server_cert: cert}} when is_binary(cert) ->
+        cert
+      _ ->
+        nil
+    end
+  end
+
   defp material(host) do
     ca_key = X509.PrivateKey.new_ec(:secp256r1)
     ca = X509.Certificate.self_signed(ca_key, "/CN=Plural FerroTunnel CA", template: :root_ca)
+    {server_cert, server_key} = server_pair(host, ca, ca_key)
+
+    %{
+      token: "tunnel-" <> Console.rand_alphanum(48),
+      ca_cert: X509.Certificate.to_pem(ca),
+      ca_key: X509.PrivateKey.to_pem(ca_key),
+      server_cert: server_cert,
+      server_key: server_key
+    }
+  end
+
+  defp reissued_material(%DeploymentSettings.FerroTunnel{} = tunnel, host) do
+    ca = X509.Certificate.from_pem!(tunnel.ca_cert)
+    ca_key = X509.PrivateKey.from_pem!(tunnel.ca_key)
+    {server_cert, server_key} = server_pair(host, ca, ca_key)
+
+    %{
+      token: tunnel.token,
+      ca_cert: tunnel.ca_cert,
+      ca_key: tunnel.ca_key,
+      server_cert: server_cert,
+      server_key: server_key
+    }
+  end
+
+  defp server_pair(host, ca, ca_key) do
     server_key = X509.PrivateKey.new_ec(:secp256r1)
     server = X509.PublicKey.derive(server_key)
              |> X509.Certificate.new("/CN=#{host}", ca, ca_key,
@@ -106,14 +172,23 @@ defmodule Console.Deployments.FerroTunnel do
                ]
              )
 
-    %{
-      token: "tunnel-" <> Console.rand_alphanum(48),
-      ca_cert: X509.Certificate.to_pem(ca),
-      ca_key: X509.PrivateKey.to_pem(ca_key),
-      server_cert: X509.Certificate.to_pem(server),
-      server_key: X509.PrivateKey.to_pem(server_key)
-    }
+    {X509.Certificate.to_pem(server), X509.PrivateKey.to_pem(server_key)}
   end
+
+  defp cert_matches?(pem, host) when is_binary(pem) and is_binary(host) do
+    cert = X509.Certificate.from_pem!(pem)
+
+    case X509.Certificate.extension(cert, :subject_alt_name) do
+      {:Extension, _, _, names} ->
+        Enum.any?(names, fn
+          {:dNSName, name} -> to_string(name) == host
+          _ -> false
+        end)
+      _ ->
+        false
+    end
+  end
+  defp cert_matches?(_, _), do: false
 
   defp client_material(%Cluster{id: id}, %DeploymentSettings.FerroTunnel{} = tunnel) do
     ca = X509.Certificate.from_pem!(tunnel.ca_cert)
