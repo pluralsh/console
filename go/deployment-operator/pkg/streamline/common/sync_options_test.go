@@ -333,7 +333,7 @@ func TestHasReplaceSyncOption(t *testing.T) {
 	}
 }
 
-func TestHasPruneSyncOption(t *testing.T) {
+func TestHasPruneDisabledSyncOption(t *testing.T) {
 	tests := []struct {
 		name string
 		obj  unstructured.Unstructured
@@ -427,12 +427,12 @@ func TestHasPruneSyncOption(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, HasPruneSyncOption(tt.obj))
+			assert.Equal(t, tt.want, HasPruneDisabledSyncOption(tt.obj))
 		})
 	}
 }
 
-func TestHasDeleteSyncOption(t *testing.T) {
+func TestHasDeleteDisabledSyncOption(t *testing.T) {
 	tests := []struct {
 		name        string
 		annotations map[string]string
@@ -489,12 +489,12 @@ func TestHasDeleteSyncOption(t *testing.T) {
 			obj := unstructured.Unstructured{}
 			obj.SetAnnotations(tt.annotations)
 
-			assert.Equal(t, tt.want, HasDeleteSyncOption(obj))
+			assert.Equal(t, tt.want, HasDeleteDisabledSyncOption(obj))
 		})
 	}
 }
 
-func TestHasDetachSyncOption(t *testing.T) {
+func TestHasDetachOption(t *testing.T) {
 	tests := []struct {
 		name        string
 		annotations map[string]string
@@ -518,6 +518,19 @@ func TestHasDetachSyncOption(t *testing.T) {
 			want: true,
 		},
 		{
+			name: "legacy lifecycle detach",
+			annotations: map[string]string{
+				LifecycleDeleteAnnotation: PreventDeletion,
+			},
+			want: true,
+		},
+		{
+			name: "legacy lifecycle deletion without detach",
+			annotations: map[string]string{
+				LifecycleDeleteAnnotation: "delete",
+			},
+		},
+		{
 			name: "argo detach is not a Plural detach option",
 			annotations: map[string]string{
 				ArgoSyncOptionsAnnotation: "detach",
@@ -537,7 +550,7 @@ func TestHasDetachSyncOption(t *testing.T) {
 			obj := unstructured.Unstructured{}
 			obj.SetAnnotations(tt.annotations)
 
-			assert.Equal(t, tt.want, HasDetachSyncOption(obj))
+			assert.Equal(t, tt.want, HasDetachOption(obj))
 		})
 	}
 }

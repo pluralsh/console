@@ -178,8 +178,7 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 			return nil, err
 		}
 
-		if annotations := live.GetAnnotations(); annotations != nil && (annotations[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion ||
-			smcommon.HasDeleteSyncOption(*live) || smcommon.HasDetachSyncOption(*live)) {
+		if smcommon.HasDeleteDisabledSyncOption(*live) || smcommon.HasDetachOption(*live) {
 			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 				klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component from store", "resource", live.GetUID())
 			}

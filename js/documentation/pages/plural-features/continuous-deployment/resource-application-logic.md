@@ -22,9 +22,9 @@ We also support the Argo CD `argocd.argoproj.io/sync-options` annotation for com
 Supported options:
 - `Replace=True` - Use replace semantics (`GET` and `PUT`) instead of Server-Side Apply. This lets you remove fields from the live resource if they are absent from your desired manifest.
 - `Force=True` - If apply/replace fails (for example due to immutable field changes), the operator will delete and recreate the resource.
-- `Prune=False` - Keep the live resource when it is removed from the service's desired manifests.
+- `Prune=False` - Keep the live resource when it is removed from the service's desired manifests. With the default `Delete=True`, it remains in the service inventory so service deletion can still act on it; with `Delete=False`, it is detached from the inventory.
 - `Delete=False` - Keep the live resource when the entire service is deleted.
-- `detach` - Keep the live resource in both cases. This option is available through `deployment.plural.sh/sync-options`.
+- `detach` - Keep the live resource and detach it from the service inventory when it is removed from the desired manifests. This option is available through `deployment.plural.sh/sync-options`. It is an equivalent of `Delete=False, Prune=False`.
 
 The existing `client.lifecycle.config.k8s.io/deletion: detach` annotation is an alias for both `Prune=False` and `Delete=False`.
 
@@ -62,7 +62,7 @@ then the default ordering will be used.
 
 Default wave ordering is:
 - 0 - Non-namespaced resources (namespaces, CRDs, persistent volumes, cluster roles, etc.).
-- 1 - Core namespaced configuration resources (config maps, secrets, roles etc.). 
+- 1 - Core namespaced configuration resources (config maps, secrets, roles etc.).
 - 2 - Core namespaced workload resources (deployments, daemon sets, jobs, pods, etc.).
 - 3 - Core namespaced networking resources (services, ingresses, etc.).
 - 4 - All other resources.
@@ -91,7 +91,7 @@ metadata:
 
 ## Sync hooks (phases)
 
-Hook resources are created and monitored at specific phases of a sync. 
+Hook resources are created and monitored at specific phases of a sync.
 
 Use the `deployment.plural.sh/sync-hook` annotation to designate a manifest as a hook. Alternatively,
 you can use Helm `helm.sh/hook` for compatibility. Commonly, jobs are used for hooks.
@@ -138,7 +138,7 @@ spec:
 
 ## Hook delete policies (cleanup)
 
-By default, hook resources are left in the cluster after they run. You can opt into automatic cleanup with 
+By default, hook resources are left in the cluster after they run. You can opt into automatic cleanup with
 the `deployment.plural.sh/sync-hook-delete-policy` annotation. You can also use the Helm `helm.sh/hook-delete-policy`
 annotation. Multiple policies can be comma-separated.
 

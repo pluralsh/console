@@ -12,6 +12,8 @@ import (
 	"k8s.io/client-go/dynamic/fake"
 	ktesting "k8s.io/client-go/testing"
 
+	client "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 )
@@ -128,4 +130,52 @@ func TestDestroyDeletionOptions(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPruneFalseRetainsInventoryUntilDestroy(t *testing.T) {
+	const serviceID = "service-id"
+
+	ctx := context.Background()
+	storeInstance, err := store.NewDatabaseStore(ctx)
+	require.NoError(t, err)
+	streamline.ResetGlobalStore()
+	streamline.InitGlobalStore(storeInstance)
+	t.Cleanup(func() {
+		streamline.ResetGlobalStore()
+		require.NoError(t, storeInstance.Shutdown())
+	})
+
+	resource := makeResource("Prune=False")
+	resource.SetUID(types.UID("example-uid"))
+	annotations := resource.GetAnnotations()
+	annotations[smcommon.OwningInventoryKey] = serviceID
+	annotations[smcommon.TrackingIdentifierKey] = smcommon.NewKeyFromUnstructured(resource).String()
+	resource.SetAnnotations(annotations)
+	require.NoError(t, storeInstance.SaveComponent(resource))
+
+	dynamicClient := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
+	applier := NewApplier(dynamicClient, nil, storeInstance)
+	_, _, err = applier.Apply(ctx, client.ServiceDeploymentForAgent{ID: serviceID, Name: "example"}, nil)
+	require.NoError(t, err)
+
+	removalActions := dynamicClient.Actions()
+	require.Len(t, removalActions, 1)
+	assert.Equal(t, "get", removalActions[0].GetVerb())
+
+	components, err := storeInstance.GetServiceComponents(serviceID, true)
+	require.NoError(t, err)
+	require.Len(t, components, 1)
+	assert.Equal(t, resource.GetName(), components[0].Name)
+
+	_, err = applier.Destroy(ctx, serviceID)
+	require.NoError(t, err)
+
+	var deleteAction ktesting.DeleteAction
+	for _, action := range dynamicClient.Actions() {
+		if action.GetVerb() == "delete" {
+			deleteAction, _ = action.(ktesting.DeleteAction)
+		}
+	}
+	require.NotNil(t, deleteAction)
+	assert.Equal(t, resource.GetName(), deleteAction.GetName())
 }

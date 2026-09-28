@@ -155,33 +155,46 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 	})
 
 	tests := []struct {
-		name         string
-		annotations  map[string]string
-		expectDelete bool
+		name              string
+		annotations       map[string]string
+		expectDelete      bool
+		wantStoreRetained bool
+		wantStoreRemoved  bool
 	}{
 		{
 			name: "plural prune option",
 			annotations: map[string]string{
 				smcommon.SyncOptionsAnnotation: "Prune=False",
 			},
+			wantStoreRetained: true,
 		},
 		{
 			name: "argo prune option",
 			annotations: map[string]string{
 				smcommon.ArgoSyncOptionsAnnotation: "Prune=False",
 			},
+			wantStoreRetained: true,
+		},
+		{
+			name: "prune false with delete false detaches during prune",
+			annotations: map[string]string{
+				smcommon.SyncOptionsAnnotation: "Prune=False, Delete=False",
+			},
+			wantStoreRemoved: true,
 		},
 		{
 			name: "plural detach option",
 			annotations: map[string]string{
 				smcommon.SyncOptionsAnnotation: smcommon.SyncOptionDetach,
 			},
+			wantStoreRemoved: true,
 		},
 		{
 			name: "lifecycle detach annotation",
 			annotations: map[string]string{
 				smcommon.LifecycleDeleteAnnotation: smcommon.PreventDeletion,
 			},
+			wantStoreRemoved: true,
 		},
 		{
 			name: "plural delete option only applies to service destruction",
@@ -210,7 +223,16 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			resource := makeResource("")
-			resource.SetAnnotations(tt.annotations)
+			resource.SetUID(types.UID("example-uid"))
+			annotations := map[string]string{
+				smcommon.OwningInventoryKey:    "test-service",
+				smcommon.TrackingIdentifierKey: smcommon.NewKeyFromUnstructured(resource).String(),
+			}
+			for key, value := range tt.annotations {
+				annotations[key] = value
+			}
+			resource.SetAnnotations(annotations)
+			require.NoError(t, storeInstance.SaveComponent(resource))
 
 			client := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
 			processor := &WaveProcessor{client: client, discoveryCache: discoveryCache}
@@ -228,6 +250,16 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 				wantMutatingActions = []string{"delete"}
 			}
 			assert.Equal(t, wantMutatingActions, mutatingActions)
+
+			components, err := storeInstance.GetServiceComponents("test-service", true)
+			require.NoError(t, err)
+			if tt.wantStoreRetained {
+				require.Len(t, components, 1)
+			}
+			if tt.wantStoreRemoved {
+				require.Empty(t, components)
+			}
+
 			assert.Equal(t, 1, processor.waveStatistics.deleted)
 		})
 	}

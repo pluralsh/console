@@ -6,17 +6,6 @@ import (
 	"sync"
 	"time"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/deployment-operator/internal/errors"
-	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
-	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
-	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/manifests/template"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
-	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/console/go/polly/cache"
 	"github.com/samber/lo"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -28,6 +17,18 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/internal/errors"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/manifests/template"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/polly/cache"
 )
 
 type WaveType string
@@ -312,15 +313,20 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		return
 	}
 
-	annotations := live.GetAnnotations()
-	if (annotations != nil && annotations[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion) ||
-		smcommon.HasPruneSyncOption(*live) || smcommon.HasDetachSyncOption(*live) {
+	pruneDisabled := smcommon.HasPruneDisabledSyncOption(*live)
+	deleteDisabled := smcommon.HasDeleteDisabledSyncOption(*live)
+	detached := smcommon.HasDetachOption(*live)
+
+	// Delete component from store when detached (prune: false + delete: false is the same as detach).
+	if detached || (pruneDisabled && deleteDisabled) {
 		if err := streamline.GetGlobalStore().DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 			klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component", "resource", live.GetUID())
 		}
+	}
 
-		// Skip Kubernetes deletion when the resource is retained.
-		in.waveStatistics.deleted++ // In statistics, count as deleted
+	// Skip Kubernetes deletion when resource is detached or prune is disabled.
+	if detached || pruneDisabled {
+		in.waveStatistics.deleted++ // Count retained resources as handled by the delete wave.
 		return
 	}
 
