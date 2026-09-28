@@ -305,7 +305,7 @@ type DashboardInput struct {
 
 	// Type is the input control type.
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=TEXT;NUMBER;BOOLEAN;SELECT;MULTI_SELECT;TIME_RANGE
+	// +kubebuilder:validation:Enum=TEXT;NUMBER;BOOLEAN;SELECT;TIME_RANGE
 	Type console.DashboardInputType `json:"type"`
 
 	// Default is the default input value.

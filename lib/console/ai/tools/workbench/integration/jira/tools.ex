@@ -8,7 +8,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Jira.Tools do
     Console.AI.Tools.Workbench.Integration.Jira.GetIssue,
     Console.AI.Tools.Workbench.Integration.Jira.SaveIssue,
     Console.AI.Tools.Workbench.Integration.Jira.ListComments,
-    Console.AI.Tools.Workbench.Integration.Jira.SaveComment
+    Console.AI.Tools.Workbench.Integration.Jira.SaveComment,
+    Console.AI.Tools.Workbench.Integration.Jira.ListTransitions,
+    Console.AI.Tools.Workbench.Integration.Jira.TransitionIssue
   ]
 
   @spec expand(WorkbenchTool.t()) :: [struct()]

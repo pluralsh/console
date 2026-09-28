@@ -10920,7 +10920,7 @@ type WorkbenchDashboardDatasource struct {
 	// Observability tool used to render the graph
 	Tool string `json:"tool"`
 	// Input passed to the observability tool
-	Input string `json:"input"`
+	Input map[string]any `json:"input"`
 }
 
 type WorkbenchDashboardDelta struct {
@@ -10951,7 +10951,7 @@ type WorkbenchDashboardGraph struct {
 	// Markdown content for markdown graphs
 	Markdown *string `json:"markdown,omitempty"`
 	// Visualization-specific display options; sections may set collapsed
-	Options *string `json:"options,omitempty"`
+	Options map[string]any `json:"options,omitempty"`
 	// Grid position and size
 	Layout WorkbenchDashboardGraphLayout `json:"layout"`
 	// Tool call used to fetch external data
@@ -14813,12 +14813,11 @@ func (e DashboardGraphType) MarshalJSON() ([]byte, error) {
 type DashboardInputType string
 
 const (
-	DashboardInputTypeText        DashboardInputType = "TEXT"
-	DashboardInputTypeNumber      DashboardInputType = "NUMBER"
-	DashboardInputTypeBoolean     DashboardInputType = "BOOLEAN"
-	DashboardInputTypeSelect      DashboardInputType = "SELECT"
-	DashboardInputTypeMultiSelect DashboardInputType = "MULTI_SELECT"
-	DashboardInputTypeTimeRange   DashboardInputType = "TIME_RANGE"
+	DashboardInputTypeText      DashboardInputType = "TEXT"
+	DashboardInputTypeNumber    DashboardInputType = "NUMBER"
+	DashboardInputTypeBoolean   DashboardInputType = "BOOLEAN"
+	DashboardInputTypeSelect    DashboardInputType = "SELECT"
+	DashboardInputTypeTimeRange DashboardInputType = "TIME_RANGE"
 )
 
 var AllDashboardInputType = []DashboardInputType{
@@ -14826,13 +14825,12 @@ var AllDashboardInputType = []DashboardInputType{
 	DashboardInputTypeNumber,
 	DashboardInputTypeBoolean,
 	DashboardInputTypeSelect,
-	DashboardInputTypeMultiSelect,
 	DashboardInputTypeTimeRange,
 }
 
 func (e DashboardInputType) IsValid() bool {
 	switch e {
-	case DashboardInputTypeText, DashboardInputTypeNumber, DashboardInputTypeBoolean, DashboardInputTypeSelect, DashboardInputTypeMultiSelect, DashboardInputTypeTimeRange:
+	case DashboardInputTypeText, DashboardInputTypeNumber, DashboardInputTypeBoolean, DashboardInputTypeSelect, DashboardInputTypeTimeRange:
 		return true
 	}
 	return false

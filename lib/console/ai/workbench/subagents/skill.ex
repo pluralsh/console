@@ -71,7 +71,10 @@ defmodule Console.AI.Workbench.Subagents.Skill do
     """}
   end
 
-  defp tools(target_job, %Environment{skills: skills}) do
+  def tools(%Environment{job: job, activities: activities} = environment),
+    do: tools(target_job(%{job | activities: activities}), environment)
+
+  def tools(target_job, %Environment{skills: skills}) do
     skill_knowledge_tools(target_job, skills) ++ [
       Scratchpad,
       %SkillUpdate{skills: skills, job: target_job},

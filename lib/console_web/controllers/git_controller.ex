@@ -74,7 +74,9 @@ defmodule ConsoleWeb.GitController do
       send_resp(conn, 200, sha)
     else
       {{:error, :agent_bootstrapping}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: "Git or Helm agent is bootstrapping"}])
+        Services.add_errors(svc, [
+          %{source: "git", message: "Git or Helm agent is bootstrapping", warning: true}
+        ])
         agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
@@ -96,7 +98,9 @@ defmodule ConsoleWeb.GitController do
       |> chunk_send_tar(path)
     else
       {{:error, :agent_bootstrapping}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: "Git or Helm agent is bootstrapping"}])
+        Services.add_errors(svc, [
+          %{source: "git", message: "Git or Helm agent is bootstrapping", warning: true}
+        ])
         agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])

@@ -128,6 +128,7 @@ export function WorkbenchSetupStep({
 }: WorkbenchFormStepProps) {
   const theme = useTheme()
   const update = createFormUpdater(setFormState)
+  const selfService = formState.configuration?.selfService
   const infra = formState.configuration?.infrastructure
   const observability = formState.configuration?.observability
   const capabilityCheckboxGridCss = {
@@ -172,6 +173,31 @@ export function WorkbenchSetupStep({
         direction="column"
         gap="large"
       >
+        <FormField label="Enable Self-Service">
+          <Flex
+            direction="column"
+            gap="small"
+          >
+            <CaptionP $color="text-light">
+              Enable Plural catalog and PR automation workflows for repeatable
+              GitOps provisioning. Prefer this for clear golden paths; undefined
+              or custom code changes still go through the coding agent.
+            </CaptionP>
+            <Flex css={capabilityCheckboxGridCss}>
+              <CapabilityCheckbox
+                label="Self-Service"
+                checked={selfService ?? false}
+                tooltip="Expose a self-service subagent that can list catalogs, search and inspect PR automations, and invoke them while associating generated PRs with this workbench job."
+                onCheckedChange={(checked) =>
+                  update((d) => {
+                    d.configuration ??= {}
+                    d.configuration.selfService = checked
+                  })
+                }
+              />
+            </Flex>
+          </Flex>
+        </FormField>
         <FormField label="Enable Infrastructure">
           <Flex
             direction="column"

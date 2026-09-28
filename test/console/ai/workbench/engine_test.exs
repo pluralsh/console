@@ -513,7 +513,7 @@ defmodule Console.AI.Workbench.EngineTest do
       assert result.status == :successful
     end
 
-    test "dispatches build_dashboard tool calls, persists the canvas activity, and completes the job" do
+    test "dispatches canvas_subagent tool calls, persists the canvas activity, and completes the job" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
         ai: %{
@@ -532,7 +532,7 @@ defmodule Console.AI.Workbench.EngineTest do
         {:ok, "build a dashboard", [
           %Tool{
             id: "1",
-            name: "build_dashboard",
+            name: "canvas_subagent",
             arguments: %{"prompt" => "build a dashboard summarizing /ping 500s"}
           }
         ]}
@@ -565,7 +565,7 @@ defmodule Console.AI.Workbench.EngineTest do
       assert canvas, "expected a canvas activity to be created"
       assert canvas.status == :successful, "canvas activity should be marked :successful, not left :pending"
       assert canvas.prompt == "build a dashboard summarizing /ping 500s"
-      assert canvas.tool_call.name == "build_dashboard"
+      assert canvas.tool_call.name == "canvas_subagent"
       assert canvas.result.output == "canvas subagent result"
     end
 
@@ -586,7 +586,7 @@ defmodule Console.AI.Workbench.EngineTest do
 
       expect_reqllm_completion(fn _, _ ->
         {:ok, "build a dashboard", [
-          %Tool{id: "1", name: "build_dashboard", arguments: %{"prompt" => "go"}}
+          %Tool{id: "1", name: "canvas_subagent", arguments: %{"prompt" => "go"}}
         ]}
       end)
 

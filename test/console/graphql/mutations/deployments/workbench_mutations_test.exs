@@ -43,6 +43,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         "name" => "configured-workbench",
         "projectId" => project.id,
         "configuration" => %{
+          "selfService" => true,
           "infrastructure" => %{"services" => true, "stacks" => true, "kubernetes" => false},
           "coding" => %{"mode" => "ANALYZE", "repositories" => ["repo1", "repo2"]}
         }
@@ -54,6 +55,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             id
             name
             configuration {
+              selfService
               infrastructure { services stacks kubernetes }
               coding { mode repositories }
             }
@@ -62,6 +64,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"attributes" => attrs}, %{current_user: admin_user()})
 
       assert workbench["name"] == "configured-workbench"
+      assert workbench["configuration"]["selfService"] == true
       assert workbench["configuration"]["infrastructure"]["services"] == true
       assert workbench["configuration"]["infrastructure"]["stacks"] == true
       assert workbench["configuration"]["infrastructure"]["kubernetes"] == false
@@ -182,6 +185,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       attrs = %{
         "name" => workbench.name,
         "configuration" => %{
+          "selfService" => true,
           "infrastructure" => %{"services" => false, "stacks" => true, "kubernetes" => true},
           "coding" => %{"mode" => "WRITE", "repositories" => ["single-repo"]}
         }
@@ -192,6 +196,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
           updateWorkbench(id: $id, attributes: $attributes) {
             id
             configuration {
+              selfService
               infrastructure { services stacks kubernetes }
               coding { mode repositories }
             }
@@ -200,6 +205,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"id" => workbench.id, "attributes" => attrs}, %{current_user: admin_user()})
 
       assert updated["id"] == workbench.id
+      assert updated["configuration"]["selfService"] == true
       assert updated["configuration"]["infrastructure"]["services"] == false
       assert updated["configuration"]["infrastructure"]["stacks"] == true
       assert updated["configuration"]["infrastructure"]["kubernetes"] == true

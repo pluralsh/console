@@ -450,7 +450,7 @@ defmodule Console.GraphQl.Deployments.Observability do
       description: "Identifier of the section graph containing this graph"
 
     field :markdown, :string, description: "Markdown content for markdown graphs"
-    field :options, :json,
+    field :options, :map,
       description: "Visualization-specific display options; sections may set collapsed"
     field :layout, non_null(:workbench_dashboard_graph_layout), description: "Grid position and size"
     field :datasource, :workbench_dashboard_datasource, description: "Tool call used to fetch external data"
@@ -468,7 +468,7 @@ defmodule Console.GraphQl.Deployments.Observability do
       description: "Kind of data returned by the datasource"
 
     field :tool, non_null(:string), description: "Observability tool used to render the graph"
-    field :input, non_null(:json), description: "Input passed to the observability tool"
+    field :input, non_null(:map), description: "Input passed to the observability tool"
   end
 
   object :workbench_dashboard_input do

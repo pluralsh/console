@@ -26,6 +26,7 @@ config:
   # OpenAI model prefixes routed to Bedrock Mantle when authentication is configured.
   bedrockMantleModelPrefixes:
     - gpt-5.6
+    - gpt-6
 
 secrets:
   token: ~

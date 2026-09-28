@@ -308,6 +308,32 @@ query GetWorkbenchToolTiny($id: ID, $name: String) {
     }
 }
 
+fragment WorkbenchJobModesFragment on WorkbenchJobModes {
+    plan
+    verification
+    model {
+        provider
+        model
+    }
+    coding {
+        babysit
+        approval
+        review
+    }
+    budget {
+        cost
+        tokens
+    }
+    kubernetes {
+        update
+        delete
+        exec
+        drain
+        excludeNamespaces
+        requireNamespaces
+    }
+}
+
 fragment WorkbenchCronFragment on WorkbenchCron {
     id
     crontab

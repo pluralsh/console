@@ -47,7 +47,7 @@
             "tool": { "type": "string" },
             "input": {
               "type": "object",
-              "description": "Arguments for the named data source. For metrics dashboards, omit step unless the user explicitly requires a fixed value; the runtime derives a provider-compatible step from the selected time range."
+              "description": "Arguments for the named data source. Reference dashboard inputs only with braced placeholders such as ${cluster} or ${namespace}; bare forms such as $cluster are not substituted. For metrics dashboards, omit step unless the user explicitly requires a fixed value; the runtime derives a provider-compatible step from the selected time range."
             }
           },
           "required": ["type", "tool", "input"]
@@ -70,7 +70,10 @@
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string" },
+              "name": {
+                "type": "string",
+                "description": "Variable name referenced from datasource inputs using the exact braced form ${name}."
+              },
               "label": { "type": "string" },
               "description": { "type": "string" },
               "type": {
@@ -85,7 +88,10 @@
                 "properties": {
                   "type": { "type": "string", "enum": ["logs", "metrics", "traces", "labels"] },
                   "tool": { "type": "string" },
-                  "input": { "type": "object" }
+                  "input": {
+                    "type": "object",
+                    "description": "Arguments for populating this input. References to other dashboard inputs must use braced placeholders such as ${cluster}; bare forms such as $cluster are not substituted."
+                  }
                 },
                 "required": ["type", "tool", "input"]
               }

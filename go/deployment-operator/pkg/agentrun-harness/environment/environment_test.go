@@ -362,6 +362,73 @@ func TestCloneRepositoryChecksOutRunBranchFromOrigin(t *testing.T) {
 	}
 }
 
+func TestCloneRepositoryChecksOutFollowupHeadBranch(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "main")
+	runGit(t, origin, "checkout", "-b", "feature")
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("feature\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "feature")
+	runGit(t, origin, "checkout", "main")
+
+	baseBranch := "main"
+	headBranch := "feature"
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: origin,
+			Branch:     &baseBranch,
+			HeadBranch: &headBranch,
+			Followup:   true,
+		},
+		dir: workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	dest := filepath.Join(workDir, "repository")
+	contents, err := os.ReadFile(filepath.Join(dest, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "feature\n" {
+		t.Fatalf("copied README = %q, want feature after checking out follow-up head branch", contents)
+	}
+	current, err := exec.Command("git", "-C", dest, "branch", "--show-current").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(current)); got != headBranch {
+		t.Fatalf("branch = %q, want %s", got, headBranch)
+	}
+}
+
+func TestCheckoutFollowupBranchRequiresHeadBranch(t *testing.T) {
+	env := &environment{agentRun: &v1.AgentRun{Followup: true}}
+
+	err := env.checkoutFollowupBranch(t.TempDir())
+
+	if err == nil || err.Error() != "follow-up agent run requires a head branch to check out" {
+		t.Fatalf("checkoutFollowupBranch() error = %v", err)
+	}
+}
+
+func TestCheckoutFollowupBranchSkipsRegularRuns(t *testing.T) {
+	env := &environment{agentRun: &v1.AgentRun{}}
+
+	if err := env.checkoutFollowupBranch(t.TempDir()); err != nil {
+		t.Fatalf("checkoutFollowupBranch() error = %v", err)
+	}
+}
+
 func TestCloneRepositoryFallsBackToGitClone(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
