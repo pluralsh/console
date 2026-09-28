@@ -22,6 +22,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [PluralCAPICluster](#pluralcapicluster)
 - [SentinelRunJob](#sentinelrunjob)
 - [StackRunJob](#stackrunjob)
+- [TunnelController](#tunnelcontroller)
 - [UpgradeInsights](#upgradeinsights)
 - [VirtualCluster](#virtualcluster)
 
@@ -1311,6 +1312,43 @@ _Appears in:_
 | `id` _string_ | ID of the resource in the Console API. |  | Optional: \{\} <br />Type: string <br /> |
 | `sha` _string_ | SHA of last applied configuration. |  | Optional: \{\} <br />Type: string <br /> |
 | `conditions` _[Condition](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#condition-v1-meta) array_ | Represents the observations of a PrAutomation's current state. |  |  |
+
+
+#### TunnelController
+
+
+
+TunnelController runs one FerroTunnel client Deployment for this cluster.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `TunnelController` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[TunnelControllerSpec](#tunnelcontrollerspec)_ |  |  |  |
+
+
+#### TunnelControllerSpec
+
+
+
+TunnelControllerSpec is the client image for this cluster.
+The controller creates the Secret and Deployment from the operator configuration.
+
+
+
+_Appears in:_
+- [TunnelController](#tunnelcontroller)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `image` _string_ | Image is the ferrotunnel-client image, including the tag.<br />Empty defaults to ghcr.io/pluralsh/ferrotunnel-client:master. |  | Optional: \{\} <br /> |
+
+
 
 
 #### UpgradeInsights
