@@ -27,30 +27,26 @@ const (
 	// so that scripts cannot flood the service errors.
 	maxWarnings      = 20
 	maxWarningLength = 1024
+	warningEllipsis  = "..."
 )
 
 type Template interface {
 	Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error)
 }
 
-// Warner is implemented by templates that can report non-fatal warnings raised while rendering,
+// warner is implemented by templates that can report non-fatal warnings raised while rendering,
 // e.g. warnings emitted by Helm Lua and Python templating scripts.
-type Warner interface {
+type warner interface {
 	Warnings() []console.ServiceErrorAttributes
 }
 
-func Render(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
-	manifests, _, err := RenderWithWarnings(dir, svc, mapper)
-	return manifests, err
-}
-
-// RenderWithWarnings renders the service manifests and additionally returns all non-fatal
+// Render renders the service manifests and additionally returns all non-fatal
 // warnings reported by the templates, ready to be sent as service errors.
-func RenderWithWarnings(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, []console.ServiceErrorAttributes, error) {
+func Render(dir string, svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, []console.ServiceErrorAttributes, error) {
 	var warnings []console.ServiceErrorAttributes
 	render := func(t Template, svc *console.ServiceDeploymentForAgent) ([]unstructured.Unstructured, error) {
 		manifests, err := t.Render(svc, mapper)
-		if w, ok := t.(Warner); ok {
+		if w, ok := t.(warner); ok {
 			warnings = append(warnings, w.Warnings()...)
 		}
 		return manifests, err
@@ -113,12 +109,12 @@ func normalizeWarnings(warnings []console.ServiceErrorAttributes) []console.Serv
 	warnings = lo.FilterMap(warnings, func(warning console.ServiceErrorAttributes, _ int) (console.ServiceErrorAttributes, bool) {
 		warning.Message = strings.TrimSpace(warning.Message)
 		if len(warning.Message) > maxWarningLength {
-			warning.Message = strings.ToValidUTF8(warning.Message[:maxWarningLength], "") + "..."
+			warning.Message = strings.ToValidUTF8(warning.Message[:maxWarningLength-len(warningEllipsis)], "") + warningEllipsis
 		}
 		return warning, warning.Message != ""
 	})
-	warnings = lo.UniqBy(warnings, func(warning console.ServiceErrorAttributes) string {
-		return warning.Source + "/" + warning.Message
+	warnings = lo.UniqBy(warnings, func(warning console.ServiceErrorAttributes) [2]string {
+		return [2]string{warning.Source, warning.Message}
 	})
 	return lo.Slice(warnings, 0, maxWarnings)
 }

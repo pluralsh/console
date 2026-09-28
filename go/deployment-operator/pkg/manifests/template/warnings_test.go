@@ -45,7 +45,7 @@ func TestNormalizeWarnings(t *testing.T) {
 		if len(result) != maxWarnings {
 			t.Fatalf("expected %d warnings, got %d", maxWarnings, len(result))
 		}
-		if len(result[0].Message) != maxWarningLength+len("...") {
+		if len(result[0].Message) != maxWarningLength || !strings.HasSuffix(result[0].Message, warningEllipsis) {
 			t.Fatalf("expected truncated message, got length %d", len(result[0].Message))
 		}
 	})

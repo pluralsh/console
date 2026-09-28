@@ -502,7 +502,7 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 		return
 	}
 
-	manifests, warnings, err := template.RenderWithWarnings(dir, svc, s.mapper)
+	manifests, warnings, err := template.Render(dir, svc, s.mapper)
 	if err != nil {
 		logger.Error(err, "failed to render manifests", "service", svc.Name)
 		return
