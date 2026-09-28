@@ -80,7 +80,6 @@ func debug(format string, v ...any) {
 }
 
 const (
-	helmWarningSource   = "helm"
 	luaWarningSource    = "lua"
 	pythonWarningSource = "python"
 )
@@ -94,10 +93,6 @@ type helm struct {
 // Warnings returns warnings reported by Lua and Python templating scripts during the last render.
 func (h *helm) Warnings() []console.ServiceErrorAttributes {
 	return h.warnings
-}
-
-func (h *helm) addWarning(source, message string) {
-	h.addWarnings(source, []string{message})
 }
 
 func (h *helm) addWarnings(source string, messages []string) {
@@ -431,21 +426,16 @@ func (h *helm) pythonFolder(folder string) (string, error) {
 }
 
 func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues []*string) (map[string]any, error) {
-	currentMap, _, err := h.valuesFile(svc, "values.yaml.liquid")
+	currentMap, err := h.valuesFile(svc, "values.yaml.liquid")
 	if err != nil {
 		return currentMap, err
 	}
 	if svc.Helm != nil {
 		allValues := slices.Concat(svc.Helm.ValuesFiles, additionalValues)
-		for i, f := range allValues {
-			nextMap, found, err := h.valuesFile(svc, lo.FromPtr(f))
+		for _, f := range allValues {
+			nextMap, err := h.valuesFile(svc, lo.FromPtr(f))
 			if err != nil {
 				return currentMap, err
-			}
-			// Missing files from the service spec are allowed to be optional, but files requested
-			// by Lua or Python scripts are expected to exist, so a missing one is likely a mistake.
-			if !found && i >= len(svc.Helm.ValuesFiles) {
-				h.addWarning(helmWarningSource, fmt.Sprintf("values file %s requested by the templating script not found, skipping it", lo.FromPtr(f)))
 			}
 			currentMap = algorithms.Merge(currentMap, nextMap)
 		}
@@ -459,10 +449,8 @@ func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues [
 		}
 	}
 
-	overrides, _, err := h.valuesFile(svc, "values.yaml.static")
+	overrides, err := h.valuesFile(svc, "values.yaml.static")
 	if err != nil {
-		// Static overrides are optional, so do not fail the render, but let the user know they were not applied.
-		h.addWarning(helmWarningSource, fmt.Sprintf("ignoring values.yaml.static overrides: %s", err.Error()))
 		return currentMap, nil
 	}
 
@@ -506,40 +494,39 @@ func (h *helm) luaFolder(svc *console.ServiceDeploymentForAgent, folder string) 
 	return strings.Join(luaFileContents, "\n\n"), nil
 }
 
-// valuesFile reads and renders the values file at the given path relative to the chart directory.
-// The returned bool reports whether the file exists. A missing file yields empty values and no error.
-func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]any, bool, error) {
+func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]any, error) {
 	currentMap := map[string]any{}
 	if !filepath.IsLocal(filename) {
-		return nil, false, fmt.Errorf("helm values file path %q is outside the manifest directory", filename)
+		return nil, fmt.Errorf("helm values file path %q is outside the manifest directory", filename)
 	}
-	data, err := os.ReadFile(filepath.Join(h.dir, filename))
+	filename = filepath.Join(h.dir, filename)
+	data, err := os.ReadFile(filename)
 	if os.IsNotExist(err) {
-		return currentMap, false, nil
+		return currentMap, nil
 	}
 	if err != nil {
-		return nil, true, fmt.Errorf("failed to read Helm values file %s: %w", filename, err)
+		return nil, fmt.Errorf("failed to read Helm values file %s: %w", filename, err)
 	}
 
 	if strings.HasSuffix(filename, ".liquid") {
 		data, err = renderLiquid(data, svc)
 		if err != nil {
-			return nil, true, err
+			return nil, err
 		}
 	}
 
 	if strings.HasSuffix(filename, ".tpl") {
 		data, err = renderTpl(data, svc)
 		if err != nil {
-			return nil, true, err
+			return nil, err
 		}
 	}
 
 	if err := yaml.Unmarshal(data, &currentMap); err != nil {
-		return nil, true, errors.Wrapf(err, "failed to parse %s", filename)
+		return nil, errors.Wrapf(err, "failed to parse %s", filename)
 	}
 
-	return currentMap, true, nil
+	return currentMap, nil
 }
 
 func (h *helm) templateHelm(conf *action.Configuration, release, namespace string, values map[string]any, includeCRDs bool) (*release.Release, error) {

@@ -1,82 +1,12 @@
 package template
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 )
-
-func TestHelmValuesWarnsOnMissingScriptValuesFile(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "present.yaml"), []byte("key: value\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile: %v", err)
-	}
-
-	svc := &console.ServiceDeploymentForAgent{
-		Helm: &console.ServiceDeploymentForAgent_Helm{
-			ValuesFiles: []*string{lo.ToPtr("present.yaml"), lo.ToPtr("missing.yaml")},
-		},
-	}
-
-	h := &helm{dir: dir}
-	values, err := h.values(svc, []*string{lo.ToPtr("generated.yaml")})
-	if err != nil {
-		t.Fatalf("values: %v", err)
-	}
-	if values["key"] != "value" {
-		t.Fatalf("unexpected values: %#v", values)
-	}
-
-	// Only the file requested by the script is reported, missing files from the service spec stay optional.
-	warnings := h.Warnings()
-	if len(warnings) != 1 {
-		t.Fatalf("unexpected warnings: %#v", warnings)
-	}
-	if warnings[0].Source != helmWarningSource || !strings.Contains(warnings[0].Message, "generated.yaml") || !lo.FromPtr(warnings[0].Warning) {
-		t.Fatalf("unexpected warning: %#v", warnings[0])
-	}
-}
-
-func TestHelmValuesDoesNotWarnOnMissingImplicitFiles(t *testing.T) {
-	h := &helm{dir: t.TempDir()}
-	if _, err := h.values(&console.ServiceDeploymentForAgent{Helm: &console.ServiceDeploymentForAgent_Helm{}}, nil); err != nil {
-		t.Fatalf("values: %v", err)
-	}
-	if len(h.Warnings()) != 0 {
-		t.Fatalf("expected no warnings, got %#v", h.Warnings())
-	}
-}
-
-func TestHelmValuesWarnsOnInvalidStaticValues(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "values.yaml.static"), []byte("key: [unclosed\n"), 0o644); err != nil {
-		t.Fatalf("WriteFile: %v", err)
-	}
-
-	h := &helm{dir: dir}
-	svc := &console.ServiceDeploymentForAgent{
-		Helm: &console.ServiceDeploymentForAgent_Helm{Values: lo.ToPtr("key: value\n")},
-	}
-	values, err := h.values(svc, nil)
-	if err != nil {
-		t.Fatalf("values: %v", err)
-	}
-	if values["key"] != "value" {
-		t.Fatalf("unexpected values: %#v", values)
-	}
-
-	warnings := h.Warnings()
-	if len(warnings) != 1 || warnings[0].Source != helmWarningSource || !strings.Contains(warnings[0].Message, "values.yaml.static") {
-		t.Fatalf("unexpected warnings: %#v", warnings)
-	}
-	if strings.Contains(warnings[0].Message, dir) {
-		t.Fatalf("warning should not contain the temporary manifest directory: %q", warnings[0].Message)
-	}
-}
 
 func TestNormalizeWarnings(t *testing.T) {
 	warning := func(source, message string) console.ServiceErrorAttributes {
