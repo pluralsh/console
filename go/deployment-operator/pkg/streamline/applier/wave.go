@@ -313,12 +313,13 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 	}
 
 	annotations := live.GetAnnotations()
-	if (annotations != nil && annotations[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion) || smcommon.HasPruneSyncOption(*live) {
+	if (annotations != nil && annotations[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion) ||
+		smcommon.HasPruneSyncOption(*live) || smcommon.HasDetachSyncOption(*live) {
 		if err := streamline.GetGlobalStore().DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 			klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component", "resource", live.GetUID())
 		}
 
-		// skip deletion when prevented by annotation
+		// Skip Kubernetes deletion when the resource is retained.
 		in.waveStatistics.deleted++ // In statistics, count as deleted
 		return
 	}

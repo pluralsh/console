@@ -178,7 +178,8 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 			return nil, err
 		}
 
-		if live.GetAnnotations() != nil && live.GetAnnotations()[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion {
+		if annotations := live.GetAnnotations(); annotations != nil && (annotations[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion ||
+			smcommon.HasDeleteSyncOption(*live) || smcommon.HasDetachSyncOption(*live)) {
 			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 				klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component from store", "resource", live.GetUID())
 			}
@@ -188,7 +189,7 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 			delete(annotations, smcommon.OwningInventoryKey)
 			live.SetAnnotations(annotations)
 			if _, err := in.client.Resource(helpers.GVRFromGVK(live.GroupVersionKind())).
-				Update(ctx, live, metav1.UpdateOptions{}); err != nil {
+				Namespace(live.GetNamespace()).Update(ctx, live, metav1.UpdateOptions{}); err != nil {
 				return nil, err
 			}
 

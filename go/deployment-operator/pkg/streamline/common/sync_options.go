@@ -26,6 +26,12 @@ const (
 	// SyncOptionPrune skips deletion of resources removed from the desired state.
 	SyncOptionPrune = "prune=false"
 
+	// SyncOptionDelete skips deletion of resources when a service is destroyed.
+	SyncOptionDelete = "delete=false"
+
+	// SyncOptionDetach retains a resource while removing its association with the service.
+	SyncOptionDetach = "detach"
+
 	// ResyncInProgressAnnotation contains an annotation for a resource that was deleted forcefully
 	// and will be recreated in the next reconciling.
 	ResyncInProgressAnnotation = "deployment.plural.sh/resync"
@@ -80,6 +86,26 @@ func HasReplaceSyncOption(u unstructured.Unstructured) bool {
 // HasPruneSyncOption reports whether a resource should be kept when it is removed from the desired state.
 func HasPruneSyncOption(u unstructured.Unstructured) bool {
 	return HasSyncOption(u, SyncOptionPrune)
+}
+
+// HasDeleteSyncOption reports whether a resource should be kept when its service is destroyed.
+func HasDeleteSyncOption(u unstructured.Unstructured) bool {
+	return HasSyncOption(u, SyncOptionDelete)
+}
+
+// HasDetachSyncOption reports whether Plural's sync-options annotation requests detaching a resource.
+func HasDetachSyncOption(u unstructured.Unstructured) bool {
+	annotations := u.GetAnnotations()
+	if annotations == nil {
+		return false
+	}
+
+	annotation, ok := annotations[SyncOptionsAnnotation]
+	if !ok {
+		return false
+	}
+
+	return parseSyncOptions(annotation).Has(SyncOptionDetach)
 }
 
 func HasResyncInProgressAnnotation(u *unstructured.Unstructured) bool {

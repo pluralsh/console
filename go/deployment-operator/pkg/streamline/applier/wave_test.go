@@ -155,25 +155,47 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 	})
 
 	tests := []struct {
-		name            string
-		annotation      string
-		annotationValue string
-		expectDelete    bool
+		name         string
+		annotations  map[string]string
+		expectDelete bool
 	}{
 		{
-			name:            "plural prune option",
-			annotation:      smcommon.SyncOptionsAnnotation,
-			annotationValue: "Prune=False",
+			name: "plural prune option",
+			annotations: map[string]string{
+				smcommon.SyncOptionsAnnotation: "Prune=False",
+			},
 		},
 		{
-			name:            "argo prune option",
-			annotation:      smcommon.ArgoSyncOptionsAnnotation,
-			annotationValue: "Prune=False",
+			name: "argo prune option",
+			annotations: map[string]string{
+				smcommon.ArgoSyncOptionsAnnotation: "Prune=False",
+			},
 		},
 		{
-			name:            "lifecycle detach annotation",
-			annotation:      smcommon.LifecycleDeleteAnnotation,
-			annotationValue: smcommon.PreventDeletion,
+			name: "plural detach option",
+			annotations: map[string]string{
+				smcommon.SyncOptionsAnnotation: smcommon.SyncOptionDetach,
+			},
+		},
+		{
+			name: "lifecycle detach annotation",
+			annotations: map[string]string{
+				smcommon.LifecycleDeleteAnnotation: smcommon.PreventDeletion,
+			},
+		},
+		{
+			name: "plural delete option only applies to service destruction",
+			annotations: map[string]string{
+				smcommon.SyncOptionsAnnotation: "Delete=False",
+			},
+			expectDelete: true,
+		},
+		{
+			name: "argo delete option only applies to service destruction",
+			annotations: map[string]string{
+				smcommon.ArgoSyncOptionsAnnotation: "Delete=False",
+			},
+			expectDelete: true,
 		},
 		{
 			name:         "without a retention annotation",
@@ -188,23 +210,24 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			resource := makeResource("")
-			if tt.annotation != "" {
-				resource.SetAnnotations(map[string]string{tt.annotation: tt.annotationValue})
-			}
+			resource.SetAnnotations(tt.annotations)
 
 			client := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
 			processor := &WaveProcessor{client: client, discoveryCache: discoveryCache}
 			processor.onDelete(context.Background(), resource)
 
-			deleteCalled := false
+			mutatingActions := make([]string, 0, 1)
 			for _, action := range client.Actions() {
-				if action.GetVerb() == "delete" {
-					deleteCalled = true
-					break
+				if action.GetVerb() != "get" {
+					mutatingActions = append(mutatingActions, action.GetVerb())
 				}
 			}
 
-			assert.Equal(t, tt.expectDelete, deleteCalled)
+			wantMutatingActions := []string{}
+			if tt.expectDelete {
+				wantMutatingActions = []string{"delete"}
+			}
+			assert.Equal(t, wantMutatingActions, mutatingActions)
 			assert.Equal(t, 1, processor.waveStatistics.deleted)
 		})
 	}

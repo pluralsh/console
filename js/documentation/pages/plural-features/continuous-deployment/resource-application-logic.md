@@ -23,8 +23,10 @@ Supported options:
 - `Replace=True` - Use replace semantics (`GET` and `PUT`) instead of Server-Side Apply. This lets you remove fields from the live resource if they are absent from your desired manifest.
 - `Force=True` - If apply/replace fails (for example due to immutable field changes), the operator will delete and recreate the resource.
 - `Prune=False` - Keep the live resource when it is removed from the service's desired manifests.
+- `Delete=False` - Keep the live resource when the entire service is deleted.
+- `detach` - Keep the live resource in both cases. This option is available through `deployment.plural.sh/sync-options`.
 
-The existing `client.lifecycle.config.k8s.io/deletion: detach` annotation also keeps a resource when it is removed from the service's desired manifests. Unlike `Prune=False`, the lifecycle annotation also keeps the resource when the entire service is deleted.
+The existing `client.lifecycle.config.k8s.io/deletion: detach` annotation is an alias for both `Prune=False` and `Delete=False`.
 
 Options are comma-separated, case-insensitive key-value pairs. All whitespace is ignored.
 Both annotation namespaces are supported and values are normalized, so variants like `Replace=True`, `replace=true`, and `REPLACE=true` are accepted.
