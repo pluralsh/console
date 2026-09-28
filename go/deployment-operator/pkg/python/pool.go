@@ -294,11 +294,11 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		"service = __helm_bindings.get('service')\n" +
 		"values = {}\n" +
 		"valuesFiles = []\n" +
-		"warnings = []\n" +
+		"__helm_warnings = []\n" +
 		"def warn(message):\n" +
 		"    if not isinstance(message, str):\n" +
 		"        raise TypeError('warn() argument must be a string')\n" +
-		"    warnings.append(message)\n"
+		"    __helm_warnings.append(message)\n"
 	if _, err := repl.FeedRun(ctx, initialization, p.feedOptions()); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
@@ -306,7 +306,7 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
 
-	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles, 'warnings': warnings})", p.feedOptions())
+	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles, 'warnings': __helm_warnings})", p.feedOptions())
 	if err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}

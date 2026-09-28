@@ -34,7 +34,7 @@ type Template interface {
 }
 
 // Warner is implemented by templates that can report non-fatal warnings raised while rendering,
-// i.e. warnings emitted by Helm Lua and Python templating scripts.
+// e.g. warnings emitted by Helm Lua and Python templating scripts.
 type Warner interface {
 	Warnings() []console.ServiceErrorAttributes
 }
@@ -59,7 +59,7 @@ func RenderWithWarnings(dir string, svc *console.ServiceDeploymentForAgent, mapp
 	var allManifests []unstructured.Unstructured
 	defaultManifests, err := render(defaultTemplate(dir, svc), svc)
 	if err != nil {
-		return nil, warnings, err
+		return nil, nil, err
 	}
 	allManifests = append(allManifests, defaultManifests...)
 
@@ -86,11 +86,11 @@ func RenderWithWarnings(dir string, svc *console.ServiceDeploymentForAgent, mapp
 		case console.RendererTypeKustomize:
 			manifests, err = render(NewKustomize(rendererPath), svc)
 		default:
-			return nil, warnings, fmt.Errorf("unknown renderer type: %s", renderer.Type)
+			return nil, nil, fmt.Errorf("unknown renderer type: %s", renderer.Type)
 		}
 
 		if err != nil {
-			return nil, warnings, fmt.Errorf("error rendering path %s with type %s: %w", renderer.Path, renderer.Type, err)
+			return nil, nil, fmt.Errorf("error rendering path %s with type %s: %w", renderer.Path, renderer.Type, err)
 		}
 
 		allManifests = append(allManifests, manifests...)
@@ -110,29 +110,17 @@ func RenderWithWarnings(dir string, svc *console.ServiceDeploymentForAgent, mapp
 // normalizeWarnings trims messages, drops empty and duplicate warnings, and caps the count and message length.
 // Order is preserved, so the result is deterministic for a given render.
 func normalizeWarnings(warnings []console.ServiceErrorAttributes) []console.ServiceErrorAttributes {
-	result := make([]console.ServiceErrorAttributes, 0, len(warnings))
-	seen := make(map[console.ServiceErrorAttributes]struct{}, len(warnings))
-	for _, warning := range warnings {
+	warnings = lo.FilterMap(warnings, func(warning console.ServiceErrorAttributes, _ int) (console.ServiceErrorAttributes, bool) {
 		warning.Message = strings.TrimSpace(warning.Message)
-		if warning.Message == "" {
-			continue
-		}
 		if len(warning.Message) > maxWarningLength {
 			warning.Message = strings.ToValidUTF8(warning.Message[:maxWarningLength], "") + "..."
 		}
-
-		key := console.ServiceErrorAttributes{Source: warning.Source, Message: warning.Message}
-		if _, ok := seen[key]; ok {
-			continue
-		}
-		seen[key] = struct{}{}
-
-		result = append(result, warning)
-		if len(result) == maxWarnings {
-			break
-		}
-	}
-	return result
+		return warning, warning.Message != ""
+	})
+	warnings = lo.UniqBy(warnings, func(warning console.ServiceErrorAttributes) string {
+		return warning.Source + "/" + warning.Message
+	})
+	return lo.Slice(warnings, 0, maxWarnings)
 }
 
 func defaultTemplate(dir string, svc *console.ServiceDeploymentForAgent) Template {

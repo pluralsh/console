@@ -100,7 +100,7 @@ func TestLuaValuesWarnings(t *testing.T) {
 			LuaScript: lo.ToPtr(`
 values["key"] = "value"
 warn("first warning")
-table.insert(warnings, "second warning")
+warn("second warning")
 `),
 		},
 	}
@@ -122,25 +122,15 @@ table.insert(warnings, "second warning")
 }
 
 func TestLuaWarnRequiresString(t *testing.T) {
-	svc := &console.ServiceDeploymentForAgent{
-		Helm: &console.ServiceDeploymentForAgent_Helm{
-			LuaScript: lo.ToPtr(`warn({})`),
-		},
-	}
+	for _, script := range []string{`warn({})`, `warn(1)`, `warn()`} {
+		svc := &console.ServiceDeploymentForAgent{
+			Helm: &console.ServiceDeploymentForAgent_Helm{
+				LuaScript: lo.ToPtr(script),
+			},
+		}
 
-	if _, _, err := (&helm{dir: t.TempDir()}).luaValues(svc); err == nil {
-		t.Fatal("expected error for non-string warn() argument")
-	}
-}
-
-func TestLuaValuesWarningsMustBeStrings(t *testing.T) {
-	svc := &console.ServiceDeploymentForAgent{
-		Helm: &console.ServiceDeploymentForAgent_Helm{
-			LuaScript: lo.ToPtr(`warnings = { { nested = true } }`),
-		},
-	}
-
-	if _, _, err := (&helm{dir: t.TempDir()}).luaValues(svc); err == nil {
-		t.Fatal("expected error for non-string warnings")
+		if _, _, err := (&helm{dir: t.TempDir()}).luaValues(svc); err == nil {
+			t.Fatalf("expected error for %s", script)
+		}
 	}
 }

@@ -96,13 +96,9 @@ func (h *helm) Warnings() []console.ServiceErrorAttributes {
 }
 
 func (h *helm) addWarnings(source string, messages []string) {
-	for _, message := range messages {
-		h.warnings = append(h.warnings, console.ServiceErrorAttributes{
-			Source:  source,
-			Message: message,
-			Warning: lo.ToPtr(true),
-		})
-	}
+	h.warnings = append(h.warnings, lo.Map(messages, func(message string, _ int) console.ServiceErrorAttributes {
+		return console.ServiceErrorAttributes{Source: source, Message: message, Warning: lo.ToPtr(true)}
+	})...)
 }
 
 func (h *helm) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
@@ -252,6 +248,7 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any
 	defer L.Close()
 
 	registerLuaFunctions(L)
+	L.SetGlobal("warn", L.NewFunction(h.luaWarn))
 
 	// Register global values and valuesFiles in Lua
 	valuesTable := L.NewTable()
@@ -259,9 +256,6 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any
 
 	valuesFilesTable := L.NewTable()
 	L.SetGlobal("valuesFiles", valuesFilesTable)
-
-	warningsTable := L.NewTable()
-	L.SetGlobal("warnings", warningsTable)
 
 	for name, binding := range bindings(svc) {
 		L.SetGlobal(name, luautils.GoValueToLuaValue(L, binding))
@@ -304,14 +298,6 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any
 	if err := luautils.MapLua(L.GetGlobal("valuesFiles").(*lua.LTable), &valuesFiles); err != nil {
 		return nil, valuesFiles, err
 	}
-
-	var warnings []string
-	if warningsTable, ok := L.GetGlobal("warnings").(*lua.LTable); ok {
-		if err := luautils.MapLua(warningsTable, &warnings); err != nil {
-			return nil, valuesFiles, fmt.Errorf("lua warnings must be a list of strings: %w", err)
-		}
-	}
-	h.addWarnings(luaWarningSource, warnings)
 
 	finalValues := make(map[string]any, len(newValues))
 	for k, v := range newValues {

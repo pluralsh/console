@@ -354,7 +354,7 @@ func TestPythonValuesWarnings(t *testing.T) {
 			PythonScript: lo.ToPtr(`
 values["key"] = "value"
 warn("first warning")
-warnings.append("second warning")
+warn("second warning")
 `),
 		},
 	}
