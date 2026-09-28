@@ -43,24 +43,21 @@ extraSecretEnv:
 kas:
   enabled: true
   consoleUrl: {{ configuration.consoleDns }}
-
-ferrotunnel:
-  enabled: true
-  host: {{ configuration.consoleDns }}
-
   secrets:
     api: {{ configuration.kasApi }}
     privateapi: {{ configuration.kasPrivateApi }}
     redis: {{ configuration.kasRedis }}
-
   ingress:
     kas_dns: {{ configuration.kasDns }}
     {% if configuration.clusterIssuer %}
     annotations:
       cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
     {% endif %}
-
   redis:
     auth:
       password: {{ configuration.kasRedis }}
+
+ferrotunnel:
+  enabled: true
+  host: {{ configuration.consoleDns }}
 
