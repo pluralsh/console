@@ -10826,6 +10826,8 @@ type WorkbenchCodingAttributes struct {
 }
 
 type WorkbenchConfiguration struct {
+	// self-service subagent capability enabled
+	SelfService *bool `json:"selfService,omitempty"`
 	// infrastructure capabilities
 	Infrastructure *WorkbenchInfrastructure `json:"infrastructure,omitempty"`
 	// coding capabilities
@@ -10835,6 +10837,8 @@ type WorkbenchConfiguration struct {
 }
 
 type WorkbenchConfigurationAttributes struct {
+	// enable the self-service subagent for catalog and PR automation workflows
+	SelfService *bool `json:"selfService,omitempty"`
 	// infrastructure capabilities (services, stacks, kubernetes)
 	Infrastructure *WorkbenchInfrastructureAttributes `json:"infrastructure,omitempty"`
 	// coding capabilities (mode, repositories, babysitting)
@@ -19760,6 +19764,7 @@ const (
 	WorkbenchJobActivityTypeVerify         WorkbenchJobActivityType = "VERIFY"
 	WorkbenchJobActivityTypeExec           WorkbenchJobActivityType = "EXEC"
 	WorkbenchJobActivityTypeMonitoring     WorkbenchJobActivityType = "MONITORING"
+	WorkbenchJobActivityTypeSelfService    WorkbenchJobActivityType = "SELF_SERVICE"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -19782,11 +19787,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeVerify,
 	WorkbenchJobActivityTypeExec,
 	WorkbenchJobActivityTypeMonitoring,
+	WorkbenchJobActivityTypeSelfService,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify, WorkbenchJobActivityTypeExec, WorkbenchJobActivityTypeMonitoring:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify, WorkbenchJobActivityTypeExec, WorkbenchJobActivityTypeMonitoring, WorkbenchJobActivityTypeSelfService:
 		return true
 	}
 	return false
@@ -19903,6 +19909,7 @@ const (
 	WorkbenchSkillSubagentHistory        WorkbenchSkillSubagent = "HISTORY"
 	WorkbenchSkillSubagentSearch         WorkbenchSkillSubagent = "SEARCH"
 	WorkbenchSkillSubagentMonitoring     WorkbenchSkillSubagent = "MONITORING"
+	WorkbenchSkillSubagentSelfService    WorkbenchSkillSubagent = "SELF_SERVICE"
 )
 
 var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
@@ -19916,11 +19923,12 @@ var AllWorkbenchSkillSubagent = []WorkbenchSkillSubagent{
 	WorkbenchSkillSubagentHistory,
 	WorkbenchSkillSubagentSearch,
 	WorkbenchSkillSubagentMonitoring,
+	WorkbenchSkillSubagentSelfService,
 }
 
 func (e WorkbenchSkillSubagent) IsValid() bool {
 	switch e {
-	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator, WorkbenchSkillSubagentMemory, WorkbenchSkillSubagentSkill, WorkbenchSkillSubagentHistory, WorkbenchSkillSubagentSearch, WorkbenchSkillSubagentMonitoring:
+	case WorkbenchSkillSubagentCoding, WorkbenchSkillSubagentInfrastructure, WorkbenchSkillSubagentObservability, WorkbenchSkillSubagentIntegration, WorkbenchSkillSubagentOrchestrator, WorkbenchSkillSubagentMemory, WorkbenchSkillSubagentSkill, WorkbenchSkillSubagentHistory, WorkbenchSkillSubagentSearch, WorkbenchSkillSubagentMonitoring, WorkbenchSkillSubagentSelfService:
 		return true
 	}
 	return false
