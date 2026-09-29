@@ -267,6 +267,62 @@ func TestComponentCache_SyncServiceComponents(t *testing.T) {
 	})
 }
 
+func TestComponentCache_DeleteServiceComponent(t *testing.T) {
+	newStore := func(t *testing.T) store.Store {
+		storeInstance, err := store.NewDatabaseStore(context.Background())
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+		})
+		return storeInstance
+	}
+
+	t.Run("deletes component owned by the service", func(t *testing.T) {
+		storeInstance := newStore(t)
+		component := createComponent("uid", WithName("owned"), WithService("service-a"))
+		require.NoError(t, storeInstance.SaveComponent(component))
+
+		require.NoError(t, storeInstance.DeleteServiceComponent("service-a", common.NewStoreKeyFromUnstructured(component)))
+
+		got, err := storeInstance.GetAppliedComponent(component)
+		require.NoError(t, err)
+		assert.Nil(t, got)
+	})
+
+	t.Run("keeps component claimed by another service", func(t *testing.T) {
+		storeInstance := newStore(t)
+		component := createComponent("uid", WithName("claimed"), WithService("service-b"))
+		require.NoError(t, storeInstance.SaveComponent(component))
+
+		require.NoError(t, storeInstance.DeleteServiceComponent("service-a", common.NewStoreKeyFromUnstructured(component)))
+
+		got, err := storeInstance.GetAppliedComponent(component)
+		require.NoError(t, err)
+		require.NotNil(t, got)
+		assert.Equal(t, "service-b", got.ServiceID)
+	})
+}
+
+func TestComponentCache_SyncAppliedResourceTakesOverService(t *testing.T) {
+	storeInstance, err := store.NewDatabaseStore(context.Background())
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+	}()
+
+	componentA := createComponent("uid", WithName("shared"), WithService("service-a"))
+	require.NoError(t, storeInstance.SaveComponent(componentA))
+
+	componentB := createComponent("uid", WithName("shared"), WithService("service-b"))
+	require.NoError(t, storeInstance.SyncServiceComponents("service-b", []unstructured.Unstructured{componentB}))
+	require.NoError(t, storeInstance.SyncAppliedResource(componentB))
+
+	got, err := storeInstance.GetAppliedComponent(componentB)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, "service-b", got.ServiceID)
+}
+
 func TestComponentCache_DeleteUnsyncedComponentsByKeys(t *testing.T) {
 	t.Run("should delete multiple components by keys", func(t *testing.T) {
 		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))

@@ -182,6 +182,7 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 
 		if smcommon.HasDeleteDisabledSyncOption(*live) || smcommon.HasDetachOption(*live) {
 			// Delete service ID annotation so it will not be synced to store.
+			owner := smcommon.GetOwningInventory(*live)
 			annotations := live.GetAnnotations()
 			delete(annotations, smcommon.OwningInventoryKey)
 			live.SetAnnotations(annotations)
@@ -189,7 +190,8 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 				Namespace(live.GetNamespace()).Update(ctx, live, metav1.UpdateOptions{}); err != nil {
 				return nil, err
 			}
-			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
+			// Only remove the row if it still belongs to the detaching service, another service may have claimed it.
+			if err := in.store.DeleteServiceComponent(owner, smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 				klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component from store", "resource", live.GetUID())
 			}
 
