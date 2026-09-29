@@ -1346,7 +1346,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template optionally overrides the secure default client pod template.<br />Set the ferrotunnel-client image on the tunnel-controller container.<br />Tolerations, node selectors, affinity, resources, and security context can be set here. The controller still fills args and TLS mounts. |  | Optional: \{\} <br /> |
+| `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template optionally overrides the secure default client pod template.<br />Set the ferrotunnel-client image on the tunnel-controller container.<br />Tolerations, node selectors, affinity, resources, and security context<br />can be set here. The controller still fills args and TLS mounts. |  | Optional: \{\} <br /> |
 
 
 
