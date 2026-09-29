@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -8,22 +9,20 @@ import (
 const (
 	TunnelControllerNameLabel = "deployments.plural.sh/tunnel-controller-name"
 
-	// DefaultTunnelControllerImage is used when spec.image is empty.
+	// DefaultTunnelControllerImage is used when the tunnel-controller container image is empty.
 	DefaultTunnelControllerImage = "ghcr.io/pluralsh/ferrotunnel-client:master"
 )
 
-// +kubebuilder:object:generate=false
-
-// TunnelControllerSpec is the client image for this cluster.
+// TunnelControllerSpec is the optional pod template for this cluster.
 // The controller creates the Secret and Deployment from the operator configuration.
 type TunnelControllerSpec struct {
-	// Image is the ferrotunnel-client image, including the tag.
-	// Empty defaults to ghcr.io/pluralsh/ferrotunnel-client:master.
+	// Template optionally overrides the secure default client pod template.
+	// Set the ferrotunnel-client image on the tunnel-controller container.
+	// Tolerations, node selectors, affinity, resources, and security context
+	// can be set here. The controller still fills args and TLS mounts.
 	// +kubebuilder:validation:Optional
-	Image string `json:"image,omitempty"`
+	Template *corev1.PodTemplateSpec `json:"template,omitempty"`
 }
-
-// +kubebuilder:object:generate=false
 
 // TunnelControllerStatus defines the observed state of TunnelController.
 type TunnelControllerStatus struct {
@@ -39,9 +38,8 @@ func (in *TunnelController) SetCondition(condition metav1.Condition) {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:object:generate=false
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Image",type="string",JSONPath=".spec.image"
+// +kubebuilder:printcolumn:name="Image",type="string",JSONPath=".spec.template.spec.containers[0].image"
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status"
 
 // TunnelController runs one FerroTunnel client Deployment for this cluster.
@@ -54,7 +52,6 @@ type TunnelController struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:object:generate=false
 
 // TunnelControllerList contains a list of TunnelController.
 type TunnelControllerList struct {

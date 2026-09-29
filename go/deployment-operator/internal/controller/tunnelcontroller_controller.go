@@ -101,9 +101,6 @@ func (r *TunnelControllerReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, nil
 	}
 
-	if tunnelController.Spec.Image == "" {
-		tunnelController.Spec.Image = v1alpha1.DefaultTunnelControllerImage
-	}
 	if err := r.Config.validate(); err != nil {
 		return r.fail(tunnelController, err)
 	}
@@ -235,11 +232,11 @@ func tunnelControllerDeployment(tunnelController *v1alpha1.TunnelController, con
 		"--tls-key", tunnelTLSMountPath + "/tls.key",
 	}
 	sha, err := utils.HashObject(struct {
-		Image  string            `json:"image"`
-		Server string            `json:"server"`
-		Args   []string          `json:"args"`
-		Secret map[string][]byte `json:"secret"`
-	}{Image: tunnelController.Spec.Image, Server: config.Server, Args: args, Secret: secret.Data})
+		Spec   v1alpha1.TunnelControllerSpec `json:"spec"`
+		Server string                        `json:"server"`
+		Args   []string                      `json:"args"`
+		Secret map[string][]byte             `json:"secret"`
+	}{Spec: tunnelController.Spec, Server: config.Server, Args: args, Secret: secret.Data})
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash TunnelController spec: %w", err)
 	}
@@ -277,6 +274,57 @@ func tunnelControllerDeployment(tunnelController *v1alpha1.TunnelController, con
 		},
 	}
 
+	runAsNonRoot := true
+	runAsUser := int64(65532)
+	runAsGroup := int64(65532)
+	fsGroup := int64(65532)
+	allowPrivilegeEscalation := false
+	readOnlyRootFilesystem := true
+	defaultTemplate := corev1.PodTemplateSpec{
+		ObjectMeta: metav1.ObjectMeta{Labels: labels},
+		Spec: corev1.PodSpec{
+			ServiceAccountName: config.ServiceAccountName,
+			SecurityContext: &corev1.PodSecurityContext{
+				RunAsNonRoot: &runAsNonRoot,
+				RunAsUser:    &runAsUser,
+				RunAsGroup:   &runAsGroup,
+				FSGroup:      &fsGroup,
+				SeccompProfile: &corev1.SeccompProfile{
+					Type: corev1.SeccompProfileTypeRuntimeDefault,
+				},
+			},
+			Containers: []corev1.Container{{
+				Name:            tunnelControllerContainerName,
+				Image:           v1alpha1.DefaultTunnelControllerImage,
+				ImagePullPolicy: corev1.PullIfNotPresent,
+				Args:            args,
+				VolumeMounts:    volumeMounts,
+				SecurityContext: &corev1.SecurityContext{
+					AllowPrivilegeEscalation: &allowPrivilegeEscalation,
+					ReadOnlyRootFilesystem:   &readOnlyRootFilesystem,
+					RunAsNonRoot:             &runAsNonRoot,
+					RunAsUser:                &runAsUser,
+					RunAsGroup:               &runAsGroup,
+					Capabilities: &corev1.Capabilities{
+						Drop: []corev1.Capability{"ALL"},
+					},
+				},
+			}},
+			Volumes: volumes,
+		},
+	}
+
+	template, err := mergePodTemplate(defaultTemplate, tunnelController.Spec.Template)
+	if err != nil {
+		return nil, err
+	}
+	if template.Labels == nil {
+		template.Labels = map[string]string{}
+	}
+	template.Labels[v1alpha1.TunnelControllerNameLabel] = tunnelController.Name
+	template.Labels["app.kubernetes.io/component"] = "tunnel-controller"
+	applyTunnelControllerContainer(&template.Spec, args, volumeMounts, volumes, config.ServiceAccountName)
+
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      tunnelController.Name,
@@ -289,22 +337,114 @@ func tunnelControllerDeployment(tunnelController *v1alpha1.TunnelController, con
 		Spec: appsv1.DeploymentSpec{
 			Replicas: int32Ptr(1),
 			Selector: &metav1.LabelSelector{MatchLabels: labels},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Labels: labels},
-				Spec: corev1.PodSpec{
-					ServiceAccountName: config.ServiceAccountName,
-					Containers: []corev1.Container{{
-						Name:            tunnelControllerContainerName,
-						Image:           tunnelController.Spec.Image,
-						ImagePullPolicy: corev1.PullIfNotPresent,
-						Args:            args,
-						VolumeMounts:    volumeMounts,
-					}},
-					Volumes: volumes,
-				},
-			},
+			Template: template,
 		},
 	}, nil
+}
+
+func applyTunnelControllerContainer(spec *corev1.PodSpec, args []string, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume, serviceAccountName string) {
+	if spec.ServiceAccountName == "" {
+		spec.ServiceAccountName = serviceAccountName
+	}
+	spec.Volumes = ensureNamedVolumes(spec.Volumes, volumes)
+
+	index := -1
+	for i := range spec.Containers {
+		if spec.Containers[i].Name == tunnelControllerContainerName {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		spec.Containers = append(spec.Containers, corev1.Container{Name: tunnelControllerContainerName})
+		index = len(spec.Containers) - 1
+	}
+
+	container := &spec.Containers[index]
+	if container.Image == "" {
+		container.Image = v1alpha1.DefaultTunnelControllerImage
+	}
+	container.Args = args
+	if container.ImagePullPolicy == "" {
+		container.ImagePullPolicy = corev1.PullIfNotPresent
+	}
+	container.VolumeMounts = ensureNamedVolumeMounts(container.VolumeMounts, volumeMounts)
+	container.SecurityContext = ensureTunnelControllerContainerSecurityContext(container.SecurityContext)
+	spec.SecurityContext = ensureTunnelControllerPodSecurityContext(spec.SecurityContext)
+}
+
+func ensureNamedVolumes(existing, required []corev1.Volume) []corev1.Volume {
+	for _, want := range required {
+		found := false
+		for i := range existing {
+			if existing[i].Name == want.Name {
+				existing[i] = want
+				found = true
+				break
+			}
+		}
+		if !found {
+			existing = append(existing, want)
+		}
+	}
+	return existing
+}
+
+func ensureNamedVolumeMounts(existing, required []corev1.VolumeMount) []corev1.VolumeMount {
+	for _, want := range required {
+		found := false
+		for i := range existing {
+			if existing[i].Name == want.Name {
+				existing[i] = want
+				found = true
+				break
+			}
+		}
+		if !found {
+			existing = append(existing, want)
+		}
+	}
+	return existing
+}
+
+func ensureTunnelControllerPodSecurityContext(psc *corev1.PodSecurityContext) *corev1.PodSecurityContext {
+	if psc != nil {
+		return psc
+	}
+	runAsNonRoot := true
+	runAsUser := int64(65532)
+	runAsGroup := int64(65532)
+	fsGroup := int64(65532)
+	return &corev1.PodSecurityContext{
+		RunAsNonRoot: &runAsNonRoot,
+		RunAsUser:    &runAsUser,
+		RunAsGroup:   &runAsGroup,
+		FSGroup:      &fsGroup,
+		SeccompProfile: &corev1.SeccompProfile{
+			Type: corev1.SeccompProfileTypeRuntimeDefault,
+		},
+	}
+}
+
+func ensureTunnelControllerContainerSecurityContext(sc *corev1.SecurityContext) *corev1.SecurityContext {
+	if sc != nil {
+		return sc
+	}
+	runAsNonRoot := true
+	runAsUser := int64(65532)
+	runAsGroup := int64(65532)
+	allowPrivilegeEscalation := false
+	readOnlyRootFilesystem := true
+	return &corev1.SecurityContext{
+		AllowPrivilegeEscalation: &allowPrivilegeEscalation,
+		ReadOnlyRootFilesystem:   &readOnlyRootFilesystem,
+		RunAsNonRoot:             &runAsNonRoot,
+		RunAsUser:                &runAsUser,
+		RunAsGroup:               &runAsGroup,
+		Capabilities: &corev1.Capabilities{
+			Drop: []corev1.Capability{"ALL"},
+		},
+	}
 }
 
 func operatorTunnelSecretName(tunnelController *v1alpha1.TunnelController) string {

@@ -1336,7 +1336,7 @@ TunnelController runs one FerroTunnel client Deployment for this cluster.
 
 
 
-TunnelControllerSpec is the client image for this cluster.
+TunnelControllerSpec is the optional pod template for this cluster.
 The controller creates the Secret and Deployment from the operator configuration.
 
 
@@ -1346,7 +1346,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `image` _string_ | Image is the ferrotunnel-client image, including the tag.<br />Empty defaults to ghcr.io/pluralsh/ferrotunnel-client:master. |  | Optional: \{\} <br /> |
+| `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template optionally overrides the secure default client pod template.<br />Set the ferrotunnel-client image on the tunnel-controller container.<br />Tolerations, node selectors, affinity, resources, and security context can be set here. The controller still fills args and TLS mounts. |  | Optional: \{\} <br /> |
 
 
 

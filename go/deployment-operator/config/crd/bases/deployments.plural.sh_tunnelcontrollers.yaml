@@ -12,7 +12,7 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.image
+    - jsonPath: .spec.template.spec.containers[0].image
       name: Image
       type: string
     - jsonPath: '.status.conditions[?(@.type=="Ready")].status'
@@ -24,11 +24,12 @@ spec:
         description: TunnelController runs one FerroTunnel client Deployment for this cluster.
         properties:
           spec:
-            description: Client image. The controller creates the Secret and Deployment.
+            description: Optional pod template. The controller creates the Secret and Deployment.
             properties:
-              image:
-                description: ferrotunnel-client image, including the tag. Empty defaults to ghcr.io/pluralsh/ferrotunnel-client:master.
-                type: string
+              template:
+                description: Optional override for the secure default client pod template. Set the ferrotunnel-client image on the tunnel-controller container.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
             type: object
           status:
             description: Observed state of TunnelController.
