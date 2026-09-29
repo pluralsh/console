@@ -133,7 +133,7 @@ func (r *TunnelControllerReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.fail(tunnelController, fmt.Errorf("failed to get tunnel controller Deployment: %w", err))
 	}
 	if !metav1.IsControlledBy(existing, tunnelController) {
-		return r.fail(tunnelController, fmt.Errorf("Deployment %s/%s is not controlled by TunnelController", existing.Namespace, existing.Name))
+		return r.fail(tunnelController, fmt.Errorf("deployment %s/%s is not controlled by TunnelController", existing.Namespace, existing.Name))
 	}
 
 	if existing.Annotations[tunnelControllerSpecAnnotation] != desired.Annotations[tunnelControllerSpecAnnotation] {
