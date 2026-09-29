@@ -1,9 +1,9 @@
 ---
 title: Bitbucket Data Center
-description: Receive Bitbucket Data Center issue and pull request events in Plural
+description: Receive Bitbucket Data Center pull request events in Plural
 ---
 
-A Bitbucket Data Center webhook delivers issue and pull-request events from Bitbucket Data Center into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+A Bitbucket Data Center webhook delivers pull-request events from Bitbucket Data Center into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 

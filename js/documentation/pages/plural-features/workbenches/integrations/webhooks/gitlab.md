@@ -3,7 +3,7 @@ title: GitLab
 description: Receive GitLab issue and merge request events in Plural
 ---
 
-A GitLab webhook delivers issue and pull-request events from GitLab into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+A GitLab webhook delivers issue and merge request events from GitLab into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 

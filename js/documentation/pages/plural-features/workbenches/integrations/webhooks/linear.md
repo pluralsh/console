@@ -3,7 +3,7 @@ title: Linear
 description: Receive Linear issue events in Plural
 ---
 
-A Linear webhook delivers issue and pull-request events from Linear into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+A Linear webhook delivers issue events from Linear into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 

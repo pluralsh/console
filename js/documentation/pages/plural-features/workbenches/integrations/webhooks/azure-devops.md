@@ -1,9 +1,9 @@
 ---
 title: Azure DevOps
-description: Receive Azure DevOps issue events in Plural
+description: Receive Azure DevOps work item events in Plural
 ---
 
-An Azure DevOps webhook delivers issue and pull-request events from Azure DevOps into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+An Azure DevOps webhook delivers work item events from Azure DevOps into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 

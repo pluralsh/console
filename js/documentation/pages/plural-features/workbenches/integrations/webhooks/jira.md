@@ -3,7 +3,7 @@ title: Jira
 description: Receive Jira issue events in Plural
 ---
 
-A Jira webhook delivers issue and pull-request events from Jira into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+A Jira webhook delivers issue events from Jira into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 
