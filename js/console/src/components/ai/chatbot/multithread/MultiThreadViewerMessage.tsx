@@ -314,13 +314,7 @@ export function SimplifiedMarkdown({
         rehypePlugins={REHYPE_PLUGINS}
         components={{
           ...plrlChipComponents,
-          // Headers are bold
-          h1: ({ children }) => <HeadingSC>{children}</HeadingSC>,
-          h2: ({ children }) => <HeadingSC>{children}</HeadingSC>,
-          h3: ({ children }) => <HeadingSC>{children}</HeadingSC>,
-          h4: ({ children }) => <HeadingSC>{children}</HeadingSC>,
-          h5: ({ children }) => <HeadingSC>{children}</HeadingSC>,
-          h6: ({ children }) => <HeadingSC>{children}</HeadingSC>,
+          ...simpleHeadingComponents,
           // Fenced code — inline, no language chrome (header was redundant).
           pre: ({ children }) => {
             // Extract language from the code element inside pre
@@ -624,12 +618,47 @@ const ParagraphSC = styled.p(() => ({
   margin: 0,
 }))
 
-/** Extra space above so a heading groups with the content below it. */
-const HeadingSC = styled.strong(({ theme }) => ({
-  display: 'block',
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
+
+/**
+ * h1/h2 step up in size; h3+ stay at body size and are bold only, so streamed
+ * output keeps its compact scale. Extra space above groups a heading with the
+ * content below it.
+ */
+const HeadingSC = styled.h1<{ $level: HeadingLevel }>(({ theme, $level }) => ({
+  margin: 0,
+  font: 'inherit',
   fontWeight: 600,
-  '&:not(:first-child)': { paddingTop: theme.spacing.xsmall },
+  ...($level === 1 && { fontSize: 18, lineHeight: '24px' }),
+  ...($level === 2 && {
+    fontSize: theme.partials.text.body1.fontSize,
+    lineHeight: theme.partials.text.body1.lineHeight,
+  }),
+  '&:not(:first-child)': {
+    paddingTop: $level <= 2 ? theme.spacing.small : theme.spacing.xsmall,
+  },
 }))
+
+const simpleHeading = (level: HeadingLevel) =>
+  function SimpleHeading({ children }: { children?: ReactNode }) {
+    return (
+      <HeadingSC
+        as={`h${level}`}
+        $level={level}
+      >
+        {children}
+      </HeadingSC>
+    )
+  }
+
+const simpleHeadingComponents = {
+  h1: simpleHeading(1),
+  h2: simpleHeading(2),
+  h3: simpleHeading(3),
+  h4: simpleHeading(4),
+  h5: simpleHeading(5),
+  h6: simpleHeading(6),
+}
 
 const InlineCodeSC = styled.code(({ theme }) => ({
   fontFamily: theme.fontFamilies.mono,
