@@ -335,6 +335,7 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  "delete",
 			Message: fmt.Sprintf("failed to build client for resource %s/%s: %s", live.GetNamespace(), live.GetName(), err.Error()),
+			Warning: new(false),
 		}
 		return
 	}
@@ -346,6 +347,7 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  "delete",
 			Message: fmt.Sprintf("failed to delete %s/%s: %s", live.GetNamespace(), live.GetName(), err.Error()),
+			Warning: new(false),
 		}
 		return
 	}
@@ -367,7 +369,7 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 		warning := fmt.Sprintf("resource %s/%s is already managed by another service %s", resource.GetKind(), resource.GetName(), entry.ServiceID)
 		klog.V(log.LogLevelDebug).Info(warning)
 		if !template.IsCRD(&resource) {
-			in.errorsChan <- console.ServiceErrorAttributes{Source: "apply", Message: warning, Warning: lo.ToPtr(true)}
+			in.errorsChan <- console.ServiceErrorAttributes{Source: "apply", Message: warning, Warning: new(true)}
 		}
 
 		resource.SetUID(types.UID(entry.UID))
@@ -380,6 +382,7 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  in.phase.String(),
 			Message: fmt.Sprintf("failed to build client for resource %s/%s: %s", resource.GetNamespace(), resource.GetName(), err.Error()),
+			Warning: new(false),
 		}
 		return
 	}
@@ -393,6 +396,7 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  in.phase.String(),
 			Message: fmt.Sprintf("failed to apply %s/%s: %s", resource.GetNamespace(), resource.GetName(), err.Error()),
+			Warning: new(false),
 		}
 
 		return
