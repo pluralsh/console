@@ -16,7 +16,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic/fake"
+	ktesting "k8s.io/client-go/testing"
 
+	console "github.com/pluralsh/console/go/client"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
@@ -158,6 +160,7 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 		name              string
 		annotations       map[string]string
 		expectDelete      bool
+		expectUpdate      bool
 		wantStoreRetained bool
 		wantStoreRemoved  bool
 	}{
@@ -181,6 +184,7 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 				smcommon.SyncOptionsAnnotation: "Prune=False, Delete=False",
 			},
 			wantStoreRemoved: true,
+			expectUpdate:     true,
 		},
 		{
 			name: "plural detach option",
@@ -188,6 +192,7 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 				smcommon.SyncOptionsAnnotation: smcommon.SyncOptionDetach,
 			},
 			wantStoreRemoved: true,
+			expectUpdate:     true,
 		},
 		{
 			name: "lifecycle detach annotation",
@@ -195,6 +200,7 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 				smcommon.LifecycleDeleteAnnotation: smcommon.PreventDeletion,
 			},
 			wantStoreRemoved: true,
+			expectUpdate:     true,
 		},
 		{
 			name: "plural delete option only applies to service destruction",
@@ -249,6 +255,9 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 			if tt.expectDelete {
 				wantMutatingActions = []string{"delete"}
 			}
+			if tt.expectUpdate {
+				wantMutatingActions = []string{"update"}
+			}
 			assert.Equal(t, wantMutatingActions, mutatingActions)
 
 			components, err := storeInstance.GetServiceComponents("test-service", true)
@@ -262,6 +271,151 @@ func TestOnDeleteResourceAnnotations(t *testing.T) {
 
 			assert.Equal(t, 1, processor.waveStatistics.deleted)
 		})
+	}
+}
+
+func TestOnDeleteDetachedResourceStaysDetachedAfterWatchUpdate(t *testing.T) {
+	const serviceID = "test-service"
+
+	tests := []struct {
+		name        string
+		annotations map[string]string
+	}{
+		{
+			name: "plural detach option",
+			annotations: map[string]string{
+				smcommon.SyncOptionsAnnotation: smcommon.SyncOptionDetach,
+			},
+		},
+		{
+			name: "lifecycle detach annotation",
+			annotations: map[string]string{
+				smcommon.LifecycleDeleteAnnotation: smcommon.PreventDeletion,
+			},
+		},
+		{
+			name: "plural prune and delete disabled",
+			annotations: map[string]string{
+				smcommon.SyncOptionsAnnotation: "Prune=False,Delete=False",
+			},
+		},
+		{
+			name: "argo prune and delete disabled",
+			annotations: map[string]string{
+				smcommon.ArgoSyncOptionsAnnotation: "Prune=False,Delete=False",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			storeInstance, err := store.NewDatabaseStore(ctx)
+			require.NoError(t, err)
+			streamline.ResetGlobalStore()
+			streamline.InitGlobalStore(storeInstance)
+			t.Cleanup(func() {
+				streamline.ResetGlobalStore()
+				require.NoError(t, storeInstance.Shutdown())
+			})
+
+			resource := makeResource("")
+			resource.SetUID("example-uid")
+			annotations := resource.GetAnnotations()
+			for key, value := range tt.annotations {
+				annotations[key] = value
+			}
+			annotations[smcommon.OwningInventoryKey] = serviceID
+			annotations[smcommon.TrackingIdentifierKey] = smcommon.NewKeyFromUnstructured(resource).String()
+			resource.SetAnnotations(annotations)
+			require.NoError(t, storeInstance.SaveComponent(resource))
+
+			client := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
+			processor := &WaveProcessor{client: client}
+			processor.onDelete(ctx, resource)
+
+			components, err := storeInstance.GetServiceComponents(serviceID, true)
+			require.NoError(t, err)
+			require.Empty(t, components, "prune should remove the resource from service inventory")
+
+			live, err := client.Resource(schema.GroupVersionResource{Version: "v1", Resource: "configmaps"}).
+				Namespace(resource.GetNamespace()).Get(ctx, resource.GetName(), metav1.GetOptions{})
+			require.NoError(t, err, "detached resource should remain live")
+			require.NoError(t, storeInstance.SaveComponent(*live)) // Simulate a Modified watch event.
+
+			components, err = storeInstance.GetServiceComponents(serviceID, true)
+			require.NoError(t, err)
+			require.Empty(t, components, "watch updates must not restore a detached resource to service inventory")
+		})
+	}
+}
+
+func TestOnDeleteDetachUpdateFailureKeepsInventory(t *testing.T) {
+	const serviceID = "test-service"
+
+	ctx := context.Background()
+	storeInstance, err := store.NewDatabaseStore(ctx)
+	require.NoError(t, err)
+	streamline.ResetGlobalStore()
+	streamline.InitGlobalStore(storeInstance)
+	t.Cleanup(func() {
+		streamline.ResetGlobalStore()
+		require.NoError(t, storeInstance.Shutdown())
+	})
+
+	resource := makeResource(smcommon.SyncOptionDetach)
+	resource.SetUID("example-uid")
+	annotations := resource.GetAnnotations()
+	annotations[smcommon.OwningInventoryKey] = serviceID
+	annotations[smcommon.TrackingIdentifierKey] = smcommon.NewKeyFromUnstructured(resource).String()
+	resource.SetAnnotations(annotations)
+	require.NoError(t, storeInstance.SaveComponent(resource))
+
+	client := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
+	client.PrependReactor("update", "configmaps", func(ktesting.Action) (bool, runtime.Object, error) {
+		return true, nil, errors.New("update failed")
+	})
+	processor := &WaveProcessor{client: client, errorsChan: make(chan console.ServiceErrorAttributes, 1)}
+	processor.onDelete(ctx, resource)
+
+	components, err := storeInstance.GetServiceComponents(serviceID, true)
+	require.NoError(t, err)
+	require.Len(t, components, 1, "failed live update must not remove inventory")
+	assert.Equal(t, 0, processor.waveStatistics.deleted)
+	require.Len(t, processor.errorsChan, 1)
+	assert.Equal(t, "delete", (<-processor.errorsChan).Source)
+}
+
+func TestOnDeleteDetachDryRunDoesNotMutate(t *testing.T) {
+	const serviceID = "test-service"
+
+	ctx := context.Background()
+	storeInstance, err := store.NewDatabaseStore(ctx)
+	require.NoError(t, err)
+	streamline.ResetGlobalStore()
+	streamline.InitGlobalStore(storeInstance)
+	t.Cleanup(func() {
+		streamline.ResetGlobalStore()
+		require.NoError(t, storeInstance.Shutdown())
+	})
+
+	resource := makeResource(smcommon.SyncOptionDetach)
+	resource.SetUID("example-uid")
+	annotations := resource.GetAnnotations()
+	annotations[smcommon.OwningInventoryKey] = serviceID
+	annotations[smcommon.TrackingIdentifierKey] = smcommon.NewKeyFromUnstructured(resource).String()
+	resource.SetAnnotations(annotations)
+	require.NoError(t, storeInstance.SaveComponent(resource))
+
+	client := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
+	processor := &WaveProcessor{client: client, dryRun: true}
+	processor.onDelete(ctx, resource)
+
+	components, err := storeInstance.GetServiceComponents(serviceID, true)
+	require.NoError(t, err)
+	require.Len(t, components, 1, "dry-run must not remove inventory")
+	for _, action := range client.Actions() {
+		assert.Equal(t, "get", action.GetVerb(), "dry-run must not update the live object")
 	}
 }
 

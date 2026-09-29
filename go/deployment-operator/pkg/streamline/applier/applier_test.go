@@ -2,6 +2,7 @@ package applier
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -130,6 +131,38 @@ func TestDestroyDeletionOptions(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDestroyRetainedResourceUpdateFailureKeepsInventory(t *testing.T) {
+	const serviceID = "service-id"
+
+	ctx := context.Background()
+	storeInstance, err := store.NewDatabaseStore(ctx)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, storeInstance.Shutdown())
+	})
+
+	resource := makeResource("Delete=False")
+	resource.SetUID("example-uid")
+	annotations := resource.GetAnnotations()
+	annotations[smcommon.OwningInventoryKey] = serviceID
+	annotations[smcommon.TrackingIdentifierKey] = smcommon.NewKeyFromUnstructured(resource).String()
+	resource.SetAnnotations(annotations)
+	require.NoError(t, storeInstance.SaveComponent(resource))
+
+	client := fake.NewSimpleDynamicClient(runtime.NewScheme(), &resource)
+	updateErr := errors.New("update failed")
+	client.PrependReactor("update", "configmaps", func(ktesting.Action) (bool, runtime.Object, error) {
+		return true, nil, updateErr
+	})
+	applier := NewApplier(client, nil, storeInstance)
+	_, err = applier.Destroy(ctx, serviceID)
+	require.ErrorIs(t, err, updateErr)
+
+	components, err := storeInstance.GetServiceComponents(serviceID, true)
+	require.NoError(t, err)
+	require.Len(t, components, 1, "failed live update must not remove inventory")
 }
 
 func TestPruneFalseRetainsInventoryUntilDestroy(t *testing.T) {

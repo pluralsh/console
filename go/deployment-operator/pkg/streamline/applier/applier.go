@@ -181,10 +181,6 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 		}
 
 		if smcommon.HasDeleteDisabledSyncOption(*live) || smcommon.HasDetachOption(*live) {
-			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
-				klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component from store", "resource", live.GetUID())
-			}
-
 			// Delete service ID annotation so it will not be synced to store.
 			annotations := live.GetAnnotations()
 			delete(annotations, smcommon.OwningInventoryKey)
@@ -192,6 +188,9 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 			if _, err := in.client.Resource(helpers.GVRFromGVK(live.GroupVersionKind())).
 				Namespace(live.GetNamespace()).Update(ctx, live, metav1.UpdateOptions{}); err != nil {
 				return nil, err
+			}
+			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
+				klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component from store", "resource", live.GetUID())
 			}
 
 			continue

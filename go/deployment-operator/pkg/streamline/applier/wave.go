@@ -319,6 +319,25 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 
 	// Delete component from store when detached (prune: false + delete: false is the same as detach).
 	if detached || (pruneDisabled && deleteDisabled) {
+		if in.dryRun {
+			in.waveStatistics.deleted++
+			return
+		}
+
+		// Clear live ownership before removing the store record so watch updates cannot restore it.
+		annotations := live.GetAnnotations()
+		delete(annotations, smcommon.OwningInventoryKey)
+		live.SetAnnotations(annotations)
+		if _, err := in.client.Resource(helpers.GVRFromGVK(live.GroupVersionKind())).
+			Namespace(live.GetNamespace()).Update(ctx, live, metav1.UpdateOptions{}); err != nil {
+			in.errorsChan <- console.ServiceErrorAttributes{
+				Source:  "delete",
+				Message: fmt.Sprintf("failed to detach %s/%s: %s", live.GetNamespace(), live.GetName(), err.Error()),
+				Warning: new(false),
+			}
+			return
+		}
+
 		if err := streamline.GetGlobalStore().DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 			klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component", "resource", live.GetUID())
 		}
