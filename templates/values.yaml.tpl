@@ -61,3 +61,16 @@ kas:
     auth:
       password: {{ .Values.kasRedis }}
 
+ferrotunnel:
+  enabled: true
+  host: ferrotunnel.{{ .Values.consoleDns }}
+  {{ if eq .Values.provider "aws" }}
+  # Internet-facing NLB for agent control (7835) and HTTP ingress (80).
+  # Do not set aws-load-balancer-proxy-protocol; it breaks the TLS handshake on 7835.
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: external
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+  {{ end }}
+
