@@ -1,5 +1,5 @@
 ---
-title: Workbench tools
+title: Tools
 description: Configure external integrations for your workbench agents to call
 ---
 

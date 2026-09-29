@@ -224,7 +224,7 @@ export const docsStructure: DocSection[] = [
             sections: [
               {
                 path: 'tools',
-                title: 'Workbench tools',
+                title: 'Tools',
                 sections: [
                   { path: 'datadog', title: 'Datadog' },
                   { path: 'prometheus', title: 'Prometheus' },
