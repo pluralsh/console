@@ -247,6 +247,21 @@ defmodule Console.AI.Provider.TokenExchangeTest do
       assert audience == @token_url <> "/"
       assert is_binary(jti)
       assert exp - iat == 300
+
+      assert {:ok, %{"alg" => "RS256", "kid" => "signing-key", "x5t" => "signing-key"}} =
+               Joken.peek_header(assertion)
+    end
+
+    test "omits kid and x5t headers without a key id" do
+      {:ok, private_key} = ExPublicKey.generate_key()
+      {:ok, private_key} = ExPublicKey.pem_encode(private_key)
+
+      assert {:ok, assertion} =
+               TokenExchange.Assertion.mint(@client_id, @token_url, private_key, nil)
+
+      assert {:ok, header} = Joken.peek_header(assertion)
+      refute Map.has_key?(header, "kid")
+      refute Map.has_key?(header, "x5t")
     end
 
     test "exchanges a signed assertion with resource and caches the token" do

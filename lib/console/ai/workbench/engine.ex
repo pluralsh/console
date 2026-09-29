@@ -292,7 +292,7 @@ defmodule Console.AI.Workbench.Engine do
   defp action_call_id(%{id: %Console.AI.Tool{id: id}}), do: id
   defp action_call_id(_), do: nil
 
-  @supported_subagents ~w(infrastructure integration coding observability monitoring memory skill history search verify)a
+  @supported_subagents ~w(infrastructure integration coding observability monitoring memory skill history search verify self_service)a
 
   defp spawn_activity(action, %__MODULE__{job: job} = engine) do
     Tracking.with_activity(action, job, fn ->
@@ -453,6 +453,7 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:skill), do: SA.Skill
   defp subagent_module(:search), do: SA.Search
   defp subagent_module(:verify), do: SA.Verify
+  defp subagent_module(:self_service), do: SA.SelfService
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}
@@ -487,11 +488,18 @@ defmodule Console.AI.Workbench.Engine do
 
     categories = Environment.categories(job)
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
+    tool_names = SA.tool_names(subagents, env)
 
     skill_knowledge_tools(job, skills) ++ [
       %KnowledgeUpsert{job: job},
       %KnowledgeDelete{job: job},
-      %Subagents{bench: job.workbench, job: job, subagents: subagents, categories: categories},
+      %Subagents{
+        bench: job.workbench,
+        job: job,
+        subagents: subagents,
+        categories: categories,
+        tool_names: tool_names
+      },
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       %Codemode{tools: []},
@@ -532,7 +540,8 @@ defmodule Console.AI.Workbench.Engine do
       job: job,
       engine: engine,
       actions: Environment.actions(environment),
-      review: WorkbenchJob.coding_review?(job)
+      review: WorkbenchJob.coding_review?(job),
+      self_service: :self_service in Environment.subagents(environment)
     ))
   end
 

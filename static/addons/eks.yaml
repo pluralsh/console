@@ -1203,6 +1203,15 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.2.0-eksbuild.3
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.0-eksbuild.2
     compatibilities:
     - '1.36'
@@ -4578,6 +4587,13 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.21.2-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.21.2-eksbuild.1
     compatibilities:
     - '1.36'
@@ -5067,6 +5083,14 @@
   publisher: eks
 - name: chainguard_aws-ebs-csi-driver-fips
   versions:
+  - version: v2.66.10000020260925-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.66.10000020260921-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5203,6 +5227,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v2.0.10000020260927-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.0.10000020260918-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5246,6 +5278,22 @@
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
+  - version: v4.5.10000020260927-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.5.10000020260924-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.5.10000020260920-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5465,6 +5513,24 @@
   publisher: Chainguard
 - name: chainguard_aws-vpc-cni-fips
   versions:
+  - version: v1.22.10004020260927-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+  - version: v1.22.10004020260925-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.22.10004020260923-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5684,6 +5750,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.47.10001020260925-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.47.10001020260918-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5883,6 +5954,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.10009020260423-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10000020260924-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -12616,6 +12692,15 @@
   publisher: Splunk
 - name: sriov-network-metrics-exporter
   versions:
+  - version: v1.2.0-eksbuild.13
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.0-eksbuild.12
     compatibilities:
     - '1.36'

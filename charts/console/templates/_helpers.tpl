@@ -131,3 +131,30 @@ annotations:
 {{ toYaml $merged | indent 2 }}
 {{- end }}
 {{- end }}
+
+{{/*
+Local embedding server selector labels.
+*/}}
+{{- define "embedding-server.selectorLabels" -}}
+app.kubernetes.io/name: embedding-server
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
+Local embedding server labels.
+*/}}
+{{- define "embedding-server.labels" -}}
+helm.sh/chart: {{ include "console.chart" . }}
+{{ include "embedding-server.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
+Local embedding server pod labels. Selector labels always take precedence over
+custom pod labels so the Deployment and Service selectors cannot be changed.
+*/}}
+{{- define "embedding-server.podLabels" -}}
+{{- $labels := deepCopy (default (dict) .Values.ai.localEmbeddings.podLabels) -}}
+{{- $selectorLabels := include "embedding-server.selectorLabels" . | fromYaml -}}
+{{- toYaml (mergeOverwrite $labels $selectorLabels) -}}
+{{- end -}}

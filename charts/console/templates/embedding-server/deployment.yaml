@@ -1,0 +1,83 @@
+{{- if .Values.ai.localEmbeddings.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: console-embedding-server
+  annotations:
+{{ include "console.annotations" . | nindent 4 }}
+  labels:
+{{ include "embedding-server.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "embedding-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "embedding-server.podLabels" . | nindent 8 }}
+      {{- with .Values.ai.localEmbeddings.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ai.localEmbeddings.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ai.localEmbeddings.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ai.localEmbeddings.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ai.localEmbeddings.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: embedding-server
+        {{- with .Values.ai.localEmbeddings.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        image: "{{ .Values.ai.localEmbeddings.image.registry | default .Values.global.registry }}/{{ .Values.ai.localEmbeddings.image.repository }}:{{ .Values.ai.localEmbeddings.image.tag }}"
+        imagePullPolicy: {{ .Values.ai.localEmbeddings.image.pullPolicy }}
+        env:
+        - name: PORT
+          value: {{ .Values.ai.localEmbeddings.service.port | quote }}
+        - name: SERVED_MODEL_NAME
+          value: {{ .Values.ai.localEmbeddings.servedModelName | quote }}
+        {{- if .Values.ai.localEmbeddings.extraArgs }}
+        args:
+        - --json-output
+        {{- with .Values.ai.localEmbeddings.extraArgs }}
+{{ toYaml . | indent 8 }}
+        {{- end }}
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.ai.localEmbeddings.service.port }}
+          protocol: TCP
+        startupProbe:
+          {{- toYaml .Values.ai.localEmbeddings.startupProbe | nindent 10 }}
+        livenessProbe:
+          {{- toYaml .Values.ai.localEmbeddings.livenessProbe | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.ai.localEmbeddings.readinessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.ai.localEmbeddings.resources | nindent 10 }}
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+{{- end }}

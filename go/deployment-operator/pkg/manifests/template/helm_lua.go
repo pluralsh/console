@@ -12,6 +12,14 @@ func registerLuaFunctions(l *lua.LState) {
 	})
 }
 
+// luaWarn reports a message as a service warning.
+// Only strings are accepted, as CheckString would silently convert numbers.
+func (h *helm) luaWarn(l *lua.LState) int {
+	l.CheckType(1, lua.LTString)
+	h.addWarnings(luaWarningSource, []string{l.ToString(1)})
+	return 0
+}
+
 func luaK8sObjectMeta(l *lua.LState) int {
 	group := l.CheckString(1)
 	version := l.CheckString(2)

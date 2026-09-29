@@ -2,6 +2,9 @@ name: CI / Console
 
 env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  MIX_ENV: test
+  MIX_OS_DEPS_COMPILE_PARTITION_COUNT: '4'
+  HEX_HTTP_CONCURRENCY: '10'
 
 on:
   push:
@@ -23,11 +26,12 @@ jobs:
     needs: [vouch]
     name: Test Build Docker image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -66,22 +70,21 @@ jobs:
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-      # - name: download jwt verification key
-      #   run: |
-      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
-      #   env:
-      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Test Build console image
         uses: docker/build-push-action@v7
         with:
           context: "."
           file: "./Dockerfile"
           push: true
+          provenance: false
+          sbom: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
-          cache-to: type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache,mode=max
+          cache-from: |
+            type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache
+            type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache-pr-${{ github.event.pull_request.number }}
+          cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache,mode=max' || format('type=registry,ref=ghcr.io/pluralsh/console-cache:buildcache-pr-{0},mode=max', github.event.pull_request.number) }}
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
@@ -117,7 +120,6 @@ jobs:
         with:
           version-file: .tool-versions
           version-type: strict
-      - uses: dtolnay/rust-toolchain@stable
       - uses: azure/setup-helm@v5
         with:
           version: latest
@@ -127,29 +129,16 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - run: make testup
-      # - name: download jwt verification key
-      #   run: |
-      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
-      #   env:
-      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-      - name: Restore dependencies cache
-        uses: actions/cache@v6
+      - uses: actions/cache@v6
         with:
-          path: deps
-          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-deps-v2-
-      - name: Restore NIF cache
-        uses: actions/cache@v6
-        with:
-          path: priv/native
-          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
-          restore-keys: ${{ runner.os }}-nif-v2-
-      - name: Restore _build cache
-        uses: actions/cache@v6
-        with:
-          path: _build
-          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'config/**/*.exs', 'native/**') }}
-      - run: mix deps.get
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-test-v4-${{ hashFiles('.tool-versions', 'mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-test-v4-
+      - run: mix deps.get --check-locked
+      - run: mix compile
       - run: mix test
         env:
           TEST_CHART_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN}}
@@ -170,42 +159,33 @@ jobs:
     needs: [vouch]
     name: Check that Schema is up to date
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
           version-type: strict
-      - uses: dtolnay/rust-toolchain@stable
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
           go-version-file: go/client/go.mod
           cache-dependency-path: go/client/go.sum
           cache: true
-      - name: Restore dependencies cache
-        uses: actions/cache@v6
+      - uses: actions/cache@v6
         with:
-          path: deps
-          key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-deps-v2-
-      - name: Restore NIF cache
-        uses: actions/cache@v6
-        with:
-          path: priv/native
-          key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
-          restore-keys: ${{ runner.os }}-nif-v2-
-      - name: Restore _build cache
-        uses: actions/cache@v6
-        with:
-          path: _build
-          key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
-      - name: get dependencies
-        run: mix deps.get
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-test-v4-${{ hashFiles('.tool-versions', 'mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-test-v4-
+      - run: mix deps.get --check-locked
       - name: update schema
-        run: MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
+        run: mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
       - name: update openapi schema
-        run: MIX_ENV=test mix openapi.dump Console.OpenAPI --pretty -o schema/openapi.json
+        run: mix openapi.dump Console.OpenAPI --pretty -o schema/openapi.json
       - name: Verify Changed files
         run: |
           git diff --exit-code -- schema || {

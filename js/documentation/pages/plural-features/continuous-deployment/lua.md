@@ -299,6 +299,31 @@ if ns then
 end
 ```
 
+## Service Warnings
+
+Helm Lua scripts can report non-fatal problems back to the service with `warn`. Warnings are shown in the service errors in the Plural Console, but unlike errors they do not fail the deployment.
+
+### `warn(message)`
+
+**Parameters:**
+- `message` (string): Warning message to report
+
+Calling `warn` with anything other than a string raises a Lua error.
+
+Keep in mind that:
+- A service with warnings is marked as `stale` instead of `healthy` until the script stops reporting them.
+- Warnings are collected on every render, so keep messages deterministic, e.g. do not include timestamps.
+- Empty and duplicate messages are dropped, and up to 20 warnings of at most 1 KB each are reported per render.
+
+```lua
+local ns = k8s_object_meta("", "v1", "Namespace", "", "kube-system")
+if ns then
+    values["observeClusterId"] = ns.uid
+else
+    warn("kube-system namespace not found in the agent cache, observeClusterId will not be set")
+end
+```
+
 ## Error Handling
 
 All functions return errors in a consistent format:

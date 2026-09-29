@@ -16,6 +16,11 @@ import { useTheme } from 'styled-components'
 
 import { StackedText } from 'components/utils/table/StackedText'
 import { CaptionP } from 'components/utils/typography/Text'
+import {
+  useDeleteWorkbenchKnowledgeMutation,
+  useUpdateWorkbenchKnowledgeMutation,
+  WorkbenchKnowledgeAttributes,
+} from 'generated/graphql'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -36,6 +41,18 @@ const DUPLICATE_KNOWLEDGE_NAME_ERROR =
 
 const normalizeKnowledgeName = (name: Nullable<string>) =>
   (name ?? '').trim().toLowerCase()
+
+const toErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error)
+
+const knowledgeToAttributes = (
+  entry: WorkbenchFormKnowledge
+): WorkbenchKnowledgeAttributes => ({
+  name: entry.name,
+  description: entry.description ?? null,
+  knowledge: entry.knowledge,
+  labels: entry.labels,
+})
 
 const validateKnowledgeName = ({
   draftName,
@@ -79,6 +96,10 @@ export function KnowledgeSubStep({
   const theme = useTheme()
   const update = createFormUpdater(setFormState)
   const entries = formState.workbenchKnowledge
+  const [updateKnowledge, { loading: updateLoading }] =
+    useUpdateWorkbenchKnowledgeMutation()
+  const [deleteKnowledge] = useDeleteWorkbenchKnowledgeMutation()
+  const [mutationError, setMutationError] = useState<Nullable<string>>(null)
   const existingNames = useMemo(
     () => entries.map((entry) => entry.name),
     [entries]
@@ -95,14 +116,23 @@ export function KnowledgeSubStep({
 
   const handleEdit = (id: string) => setEditingId(id)
 
-  const handleDelete = (id: string) =>
-    update((d) => {
-      d.workbenchKnowledge = (d.workbenchKnowledge ?? []).filter(
-        (entry) => entry.id !== id
-      )
-    })
+  const handleDelete = async (id: string) => {
+    setMutationError(null)
+    try {
+      await deleteKnowledge({ variables: { id } })
+      update((d) => {
+        d.workbenchKnowledge = (d.workbenchKnowledge ?? []).filter(
+          (entry) => entry.id !== id
+        )
+      })
+    } catch (error) {
+      setMutationError(toErrorMessage(error))
+    }
+  }
 
-  const handleSave = (draft: WorkbenchFormKnowledge): Nullable<string> => {
+  const handleSave = async (
+    draft: WorkbenchFormKnowledge
+  ): Promise<Nullable<string>> => {
     const canSave = !!draft.knowledge.trim() && !!draft.name.trim()
     if (!canSave) return 'Knowledge name and contents are required.'
 
@@ -123,12 +153,22 @@ export function KnowledgeSubStep({
         .map((label) => label.trim())
         .filter(Boolean),
     }
-    update((d) => {
-      const list = [...(d.workbenchKnowledge ?? [])]
-      const idx = list.findIndex((entry) => entry.id === draft.id)
-      if (idx >= 0) list[idx] = normalizedDraft
-      d.workbenchKnowledge = list
-    })
+    try {
+      await updateKnowledge({
+        variables: {
+          id: normalizedDraft.id,
+          attributes: knowledgeToAttributes(normalizedDraft),
+        },
+      })
+      update((d) => {
+        const list = [...(d.workbenchKnowledge ?? [])]
+        const idx = list.findIndex((entry) => entry.id === draft.id)
+        if (idx >= 0) list[idx] = normalizedDraft
+        d.workbenchKnowledge = list
+      })
+    } catch (error) {
+      return toErrorMessage(error)
+    }
     setEditingId(null)
     return null
   }
@@ -142,6 +182,7 @@ export function KnowledgeSubStep({
         existingNames={existingNames}
         onSave={handleSave}
         onCancel={handleCancel}
+        loading={updateLoading}
       />
     )
   }
@@ -181,10 +222,13 @@ export function KnowledgeSubStep({
                 entry={entry}
                 isLast={idx === entries.length - 1}
                 onEdit={() => handleEdit(entry.id)}
-                onDelete={() => handleDelete(entry.id)}
+                onDelete={() => void handleDelete(entry.id)}
               />
             ))}
           </Card>
+        )}
+        {!!mutationError && (
+          <CaptionP $color="text-danger">{mutationError}</CaptionP>
         )}
       </FormField>
     </Flex>
@@ -250,11 +294,13 @@ function KnowledgeForm({
   existingNames,
   onSave,
   onCancel,
+  loading,
 }: {
   initialEntry: WorkbenchFormKnowledge
   existingNames: Nullable<string>[]
-  onSave: (entry: WorkbenchFormKnowledge) => Nullable<string>
+  onSave: (entry: WorkbenchFormKnowledge) => Promise<Nullable<string>>
   onCancel: () => void
+  loading: boolean
 }) {
   const [draft, setDraft] = useState<WorkbenchFormKnowledge>(initialEntry)
   const [labelDraft, setLabelDraft] = useState('')
@@ -305,11 +351,12 @@ function KnowledgeForm({
           </Button>
         ) : (
           <Button
-            onClick={() => {
-              const nextError = onSaveRef.current(draftRef.current)
+            onClick={async () => {
+              const nextError = await onSaveRef.current(draftRef.current)
               setSaveError(nextError)
             }}
             disabled={!canSave}
+            loading={loading}
           >
             Save knowledge
           </Button>
@@ -318,7 +365,7 @@ function KnowledgeForm({
     )
 
     return () => setFooterActions(null)
-  }, [canContinue, canSave, currentStep, setFooterActions])
+  }, [canContinue, canSave, currentStep, loading, setFooterActions])
 
   useEffect(() => {
     setRightContent(

@@ -7521,6 +7521,7 @@ type WorkbenchToolFragment struct {
 	Name            string                               "json:\"name\" graphql:\"name\""
 	Tool            WorkbenchToolType                    "json:\"tool\" graphql:\"tool\""
 	Categories      []*WorkbenchToolCategory             "json:\"categories,omitempty\" graphql:\"categories\""
+	Approval        *bool                                "json:\"approval,omitempty\" graphql:\"approval\""
 	Project         *TinyProjectFragment                 "json:\"project,omitempty\" graphql:\"project\""
 	McpServer       *MCPServerFragment                   "json:\"mcpServer,omitempty\" graphql:\"mcpServer\""
 	CloudConnection *CloudConnectionFragment             "json:\"cloudConnection,omitempty\" graphql:\"cloudConnection\""
@@ -7553,6 +7554,12 @@ func (t *WorkbenchToolFragment) GetCategories() []*WorkbenchToolCategory {
 		t = &WorkbenchToolFragment{}
 	}
 	return t.Categories
+}
+func (t *WorkbenchToolFragment) GetApproval() *bool {
+	if t == nil {
+		t = &WorkbenchToolFragment{}
+	}
+	return t.Approval
 }
 func (t *WorkbenchToolFragment) GetProject() *TinyProjectFragment {
 	if t == nil {
@@ -74560,6 +74567,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -74860,6 +74868,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -75161,6 +75170,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -75416,6 +75426,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -75648,6 +75659,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -75881,6 +75893,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -76193,6 +76206,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -76501,6 +76515,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -76762,6 +76777,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}
@@ -77002,6 +77018,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 	name
 	tool
 	categories
+	approval
 	project {
 		... TinyProjectFragment
 	}

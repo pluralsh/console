@@ -34,7 +34,7 @@ defmodule Console.AI.Workbench.Subagents.Search do
     end
   end
 
-  defp tools(%Environment{skills: skills, tools: tools, job: job}) do
+  def tools(%Environment{skills: skills, tools: tools, job: job}) do
     skills = Environment.subagent_skills(skills, :search)
 
     MCP.expand_tools(Environment.subagent_tools(tools, :search), job)

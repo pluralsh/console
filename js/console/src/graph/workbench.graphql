@@ -90,6 +90,7 @@ fragment Workbench on Workbench {
     id
   }
   configuration {
+    selfService
     infrastructure {
       services
       stacks
@@ -1563,6 +1564,38 @@ mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
 mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
   updateWorkbench(id: $id, attributes: $attributes) {
     ...Workbench
+  }
+}
+
+mutation CreateWorkbenchSkill(
+  $workbenchId: ID!
+  $attributes: WorkbenchSkillAttributes!
+) {
+  createWorkbenchSkill(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+
+mutation UpdateWorkbenchSkill(
+  $id: ID!
+  $attributes: WorkbenchSkillAttributes!
+) {
+  updateWorkbenchSkill(id: $id, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+
+mutation DeleteWorkbenchSkill($id: ID!) {
+  deleteWorkbenchSkill(id: $id) {
+    id
   }
 }
 

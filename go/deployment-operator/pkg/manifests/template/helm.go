@@ -79,9 +79,26 @@ func debug(format string, v ...any) {
 	}
 }
 
+const (
+	luaWarningSource    = "lua"
+	pythonWarningSource = "python"
+)
+
 type helm struct {
 	dir        string
 	pythonPool *pythonruntime.Pool
+	warnings   []console.ServiceErrorAttributes
+}
+
+// Warnings returns warnings reported by Lua and Python templating scripts during the last render.
+func (h *helm) Warnings() []console.ServiceErrorAttributes {
+	return h.warnings
+}
+
+func (h *helm) addWarnings(source string, messages []string) {
+	h.warnings = append(h.warnings, lo.Map(messages, func(message string, _ int) console.ServiceErrorAttributes {
+		return console.ServiceErrorAttributes{Source: source, Message: message, Warning: lo.ToPtr(true)}
+	})...)
 }
 
 func (h *helm) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
@@ -156,6 +173,8 @@ func (h *helm) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMa
 }
 
 func (h *helm) templateValues(svc *console.ServiceDeploymentForAgent) (map[string]any, error) {
+	h.warnings = nil
+
 	luaValues, luaValuesFiles, err := h.luaValues(svc)
 	if err != nil {
 		var apiErr *lua.ApiError
@@ -229,6 +248,7 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any
 	defer L.Close()
 
 	registerLuaFunctions(L)
+	L.SetGlobal("warn", L.NewFunction(h.luaWarn))
 
 	// Register global values and valuesFiles in Lua
 	valuesTable := L.NewTable()
@@ -344,6 +364,7 @@ func (h *helm) pythonValues(ctx context.Context, svc *console.ServiceDeploymentF
 	if err != nil {
 		return nil, valuesFiles, err
 	}
+	h.addWarnings(pythonWarningSource, result.Warnings)
 
 	return result.Values, result.ValuesFiles, nil
 }

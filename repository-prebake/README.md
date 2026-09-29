@@ -83,14 +83,9 @@ the agent system prompt.
 
 ## Base image
 
-<<<<<<< HEAD
-`docker.io/pluralsh/repository-prebake` is Debian plus `git`, `mise`, a compile
-toolchain, and a `prebake` binary. Extend it and run clone + manifest **inside**
-=======
-`ghcr.io/pluralsh/repository-prebake` uses the same DHI Debian Trixie base as
+`docker.io/pluralsh/repository-prebake` uses the same DHI Debian Trixie base as
 agent-harness, plus `git`, `mise`, a compile toolchain, and a `prebake` binary.
 Extend it and run clone + manifest **inside**
->>>>>>> 3b6aa9ab0 (more improvements)
 the image you push (`docker build`, `docker/build-push-action`, and so on). The
 CLI is not a host-side wrapper around `docker build`.
 

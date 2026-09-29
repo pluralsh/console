@@ -48,7 +48,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
   defp stop_msg(%Result{}), do: true
   defp stop_msg(_), do: false
 
-  defp tools(%WorkbenchJob{} = job, %Environment{skills: skills} = environment) do
+  def tools(%WorkbenchJob{} = job, %Environment{skills: skills} = environment) do
     skills = Environment.subagent_skills(skills, :verify)
 
     Observability.core_tools(job, environment)
