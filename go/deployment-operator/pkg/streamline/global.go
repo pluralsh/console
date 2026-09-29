@@ -110,10 +110,6 @@ func (in *GlobalStore) DeleteComponent(key smcommon.StoreKey) error {
 	return in.store.DeleteComponent(key)
 }
 
-func (in *GlobalStore) DeleteServiceComponent(serviceID string, key smcommon.StoreKey) error {
-	return in.store.DeleteServiceComponent(serviceID, key)
-}
-
 func (in *GlobalStore) GetResourceHealth(resources []unstructured.Unstructured) (hasPendingResources, hasFailedResources bool, err error) {
 	return in.store.GetResourceHealth(resources)
 }

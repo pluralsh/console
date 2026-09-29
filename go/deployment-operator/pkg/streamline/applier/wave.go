@@ -325,7 +325,6 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		}
 
 		// Clear live ownership before removing the store record so watch updates cannot restore it.
-		owner := smcommon.GetOwningInventory(*live)
 		annotations := live.GetAnnotations()
 		delete(annotations, smcommon.OwningInventoryKey)
 		live.SetAnnotations(annotations)
@@ -339,8 +338,7 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 			return
 		}
 
-		// Only remove the row if it still belongs to the detaching service, another service may have claimed it.
-		if err := streamline.GetGlobalStore().DeleteServiceComponent(owner, smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
+		if err := streamline.GetGlobalStore().DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 			klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component", "resource", live.GetUID())
 		}
 	}

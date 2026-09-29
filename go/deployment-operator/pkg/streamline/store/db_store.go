@@ -852,20 +852,6 @@ func (in *DatabaseStore) deleteComponent(conn *sqlite.Conn, key smcommon.StoreKe
 		&sqlitex.ExecOptions{Args: []any{key.GVK.Group, key.GVK.Version, key.GVK.Kind, key.Namespace, key.Name}})
 }
 
-func (in *DatabaseStore) DeleteServiceComponent(serviceID string, key smcommon.StoreKey) error {
-	conn, cancelFunc, err := in.take()
-	if err != nil {
-		return err
-	}
-	defer func() {
-		in.pool.Put(conn)
-		cancelFunc()
-	}()
-
-	return sqlitex.ExecuteTransient(conn, `DELETE FROM component WHERE "group" = ? AND version = ? AND kind = ? AND namespace = ? AND name = ? AND COALESCE(service_id, '') = ?`,
-		&sqlitex.ExecOptions{Args: []any{key.GVK.Group, key.GVK.Version, key.GVK.Kind, key.Namespace, key.Name, serviceID}})
-}
-
 func (in *DatabaseStore) DeleteComponents(group, version, kind string) error {
 	conn, cancelFunc, err := in.take()
 	if err != nil {

@@ -127,13 +127,6 @@ func (p *ProfiledStore) GetAppliedComponentsByGVK(gvk schema.GroupVersionKind) (
 	return res, err
 }
 
-// DeleteServiceComponent wraps Store.DeleteServiceComponent with tracing.
-func (p *ProfiledStore) DeleteServiceComponent(serviceID string, key smcommon.StoreKey) error {
-	return trace(context.Background(), "DeleteServiceComponent", func() error {
-		return p.inner.DeleteServiceComponent(serviceID, key)
-	})
-}
-
 // DeleteComponent wraps Store.DeleteComponent with tracing.
 func (p *ProfiledStore) DeleteComponent(key smcommon.StoreKey) error {
 	return trace(context.Background(), "DeleteComponent", func() error {

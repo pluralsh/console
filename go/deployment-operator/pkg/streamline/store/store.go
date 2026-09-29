@@ -45,10 +45,6 @@ type Store interface {
 	// It returns an error if any issue occurs during the deletion process.
 	DeleteComponent(key smcommon.StoreKey) error
 
-	// DeleteServiceComponent removes a component from the store only if it is still owned by the given service.
-	// It is a no-op when another service has claimed the component in the meantime.
-	DeleteServiceComponent(serviceID string, key smcommon.StoreKey) error
-
 	// DeleteComponents removes components from the store based on GVK.
 	// It returns an error if any issue occurs during the deletion process.
 	DeleteComponents(group, version, kind string) error
