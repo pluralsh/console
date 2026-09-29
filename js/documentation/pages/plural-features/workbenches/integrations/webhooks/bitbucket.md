@@ -3,7 +3,7 @@ title: Bitbucket Cloud
 description: Receive Bitbucket Cloud issue and pull request events in Plural
 ---
 
-A Bitbucket Cloud webhook delivers issue and pull-request events from Bitbucket Cloud into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+A Bitbucket Cloud webhook delivers issue and pull-request events from Bitbucket Cloud into Plural. Create the secret in Plural, then enter the same value as the Bitbucket Cloud webhook secret. Plural verifies `X-Hub-Signature`. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 
@@ -12,7 +12,7 @@ A Bitbucket Cloud webhook delivers issue and pull-request events from Bitbucket 
 
 ## Setup
 
-Create the webhook source in Console and follow the inline setup guide for the URL, signing secret, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/bitbucket.md`.
+Create the webhook source in Console and follow the inline setup guide for the URL, authentication, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/bitbucket.md`.
 
 ## Related
 

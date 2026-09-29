@@ -3,7 +3,7 @@ title: Asana
 description: Receive Asana issue events in Plural
 ---
 
-An Asana webhook delivers issue events from Asana into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+An Asana webhook delivers issue events from Asana into Plural. Asana completes setup by sending an `X-Hook-Secret` handshake, which Plural must echo. The signing secret stored in Plural identifies the source there. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 
@@ -12,7 +12,7 @@ An Asana webhook delivers issue events from Asana into Plural. Creating the sour
 
 ## Setup
 
-Create the webhook source in Console and follow the inline setup guide for the URL, signing secret, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/asana.md`.
+Create the webhook source in Console and follow the inline setup guide for the URL, authentication, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/asana.md`.
 
 ## Related
 

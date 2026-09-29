@@ -3,7 +3,7 @@ title: Plural
 description: Receive observability events from another Plural environment
 ---
 
-A Plural observability webhook delivers alert payloads from one Plural environment into another. Creating the source registers a webhook URL and signing secret in the sending environment. It does not start a job until a workbench trigger matches the payload.
+A Plural observability webhook delivers alert payloads from one Plural environment into another. Create the signing secret on the receiving webhook, then set it as the HTTP Basic auth password on the sending Plural environment. Use any non-empty username. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 
@@ -12,7 +12,7 @@ A Plural observability webhook delivers alert payloads from one Plural environme
 
 ## Setup
 
-Create the webhook source in Console and follow the inline setup guide for the URL, signing secret, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/plural.md`.
+Create the webhook source in Console and follow the inline setup guide for the URL, authentication, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/plural.md`.
 
 ## Related
 

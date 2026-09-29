@@ -3,7 +3,7 @@ title: AlertOps
 description: Receive AlertOps alert payloads in Plural
 ---
 
-An AlertOps webhook delivers alert payloads from AlertOps into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+An AlertOps webhook delivers alert payloads from AlertOps into Plural. Create the signing secret in Plural, then set it as the Basic auth password on the AlertOps outbound integration. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 
@@ -12,7 +12,7 @@ An AlertOps webhook delivers alert payloads from AlertOps into Plural. Creating 
 
 ## Setup
 
-Create the webhook source in Console and follow the inline setup guide for the URL, signing secret, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/alertops.md`.
+Create the webhook source in Console and follow the inline setup guide for the URL, authentication, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/alertops.md`.
 
 ## Related
 

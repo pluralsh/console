@@ -3,7 +3,7 @@ title: Linear
 description: Receive Linear issue events in Plural
 ---
 
-A Linear webhook delivers issue events from Linear into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+A Linear webhook delivers issue events from Linear into Plural. Linear generates the signing secret. Paste that secret into Plural, then set the Linear webhook URL to the Plural URL. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 
@@ -12,7 +12,7 @@ A Linear webhook delivers issue events from Linear into Plural. Creating the sou
 
 ## Setup
 
-Create the webhook source in Console and follow the inline setup guide for the URL, signing secret, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/linear.md`.
+Create the webhook source in Console and follow the inline setup guide for the URL, authentication, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/linear.md`.
 
 ## Related
 

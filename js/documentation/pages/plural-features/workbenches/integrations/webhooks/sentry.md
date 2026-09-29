@@ -3,7 +3,7 @@ title: Sentry
 description: Receive Sentry alert payloads in Plural
 ---
 
-A Sentry webhook delivers alert payloads from Sentry into Plural. Creating the source registers a webhook URL and signing secret. It does not start a job until a workbench trigger matches the payload.
+A Sentry webhook delivers alert payloads from Sentry into Plural. Create the signing secret in Plural. When Sentry can send custom auth headers, use HTTP Basic auth with that secret as the password. It does not start a job until a workbench trigger matches the payload.
 
 ## Capabilities
 
@@ -12,7 +12,7 @@ A Sentry webhook delivers alert payloads from Sentry into Plural. Creating the s
 
 ## Setup
 
-Create the webhook source in Console and follow the inline setup guide for the URL, signing secret, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/sentry.md`.
+Create the webhook source in Console and follow the inline setup guide for the URL, authentication, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/sentry.md`.
 
 ## Related
 
