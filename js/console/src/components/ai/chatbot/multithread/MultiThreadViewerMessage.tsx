@@ -315,12 +315,12 @@ export function SimplifiedMarkdown({
         components={{
           ...plrlChipComponents,
           // Headers are bold
-          h1: ({ children }) => <strong>{children}</strong>,
-          h2: ({ children }) => <strong>{children}</strong>,
-          h3: ({ children }) => <strong>{children}</strong>,
-          h4: ({ children }) => <strong>{children}</strong>,
-          h5: ({ children }) => <strong>{children}</strong>,
-          h6: ({ children }) => <strong>{children}</strong>,
+          h1: ({ children }) => <HeadingSC>{children}</HeadingSC>,
+          h2: ({ children }) => <HeadingSC>{children}</HeadingSC>,
+          h3: ({ children }) => <HeadingSC>{children}</HeadingSC>,
+          h4: ({ children }) => <HeadingSC>{children}</HeadingSC>,
+          h5: ({ children }) => <HeadingSC>{children}</HeadingSC>,
+          h6: ({ children }) => <HeadingSC>{children}</HeadingSC>,
           // Fenced code — inline, no language chrome (header was redundant).
           pre: ({ children }) => {
             // Extract language from the code element inside pre
@@ -579,9 +579,7 @@ const SimpleMarkdownSC = styled.div<{
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
-    : $tone === 'major'
-      ? theme.partials.text.body2LooseLineHeight
-      : theme.partials.text.body2),
+    : theme.partials.text.body2LooseLineHeight),
   color:
     theme.colors[
       $tone === 'major'
@@ -594,7 +592,7 @@ const SimpleMarkdownSC = styled.div<{
     ],
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
+  gap: $tone === 'major' ? theme.spacing.small : theme.spacing.xsmall,
 }))
 
 /** Normal block flow so inline chips stay in the same `<p>`; typography comes from size/tone props. */
@@ -604,9 +602,7 @@ const SimpleMarkdownBlockSC = styled.div<{
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
-    : $tone === 'major'
-      ? theme.partials.text.body2LooseLineHeight
-      : theme.partials.text.body2),
+    : theme.partials.text.body2LooseLineHeight),
   color:
     theme.colors[
       $tone === 'major'
@@ -619,12 +615,20 @@ const SimpleMarkdownBlockSC = styled.div<{
     ],
   display: 'block',
   '& > *:not(:last-child)': {
-    marginBottom: theme.spacing.xsmall,
+    marginBottom:
+      $tone === 'major' ? theme.spacing.small : theme.spacing.xsmall,
   },
 }))
 
 const ParagraphSC = styled.p(() => ({
   margin: 0,
+}))
+
+/** Extra space above so a heading groups with the content below it. */
+const HeadingSC = styled.strong(({ theme }) => ({
+  display: 'block',
+  fontWeight: 600,
+  '&:not(:first-child)': { paddingTop: theme.spacing.xsmall },
 }))
 
 const InlineCodeSC = styled.code(({ theme }) => ({
@@ -639,6 +643,11 @@ const InlineCodeSC = styled.code(({ theme }) => ({
 const ListSC = styled.ul(({ theme }) => ({
   margin: 0,
   paddingLeft: theme.spacing.large,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+  'li > &': { paddingTop: theme.spacing.xxsmall },
+  '& > li::marker': { color: theme.colors['text-xlight'] },
 }))
 
 const HrSC = styled.hr(({ theme }) => ({
