@@ -214,7 +214,7 @@ export function WorkbenchJobActivity({
               gap="xsmall"
               alignItems="center"
               minWidth={0}
-              css={{ flex: '1 1 auto', maxWidth: '100%' }}
+              css={{ flex: '0 1 auto', maxWidth: '100%' }}
             >
               <Body2BoldP
                 as="span"
