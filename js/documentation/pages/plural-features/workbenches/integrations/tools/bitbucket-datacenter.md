@@ -7,8 +7,8 @@ The Bitbucket Data Center tool lets a workbench agent call a self-hosted Bitbuck
 
 ## Capabilities
 
-* Placeholder: name each operation the agent can call, from `lib/console/ai/tools/workbench/` (and `go/cloud-query/internal/tools/` when the tool is query-backed).
-* Placeholder: mention permissions only when the implementation or the setup guide states them.
+* $DOCSTUB: name each operation the agent can call, from `lib/console/ai/tools/workbench/` (and `go/cloud-query/internal/tools/` when the tool is query-backed).
+* $DOCSTUB: mention permissions only when the implementation or the setup guide states them.
 
 ## Setup
 

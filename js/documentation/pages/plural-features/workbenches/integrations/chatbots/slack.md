@@ -7,7 +7,7 @@ The Slack chatbot starts a workbench job when someone @mentions the bot in a cha
 
 ## Capabilities
 
-* Placeholder: describe how the bot receives a mention and replies, from the chatbot implementation and the setup guide in Setup.
+* $DOCSTUB: describe how the bot receives a mention and replies, from the chatbot implementation and the setup guide in Setup.
 
 ## Setup
 

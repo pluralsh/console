@@ -7,8 +7,8 @@ An AlertOps webhook delivers alert payloads from AlertOps into Plural. Create th
 
 ## Capabilities
 
-* Placeholder: describe the events this source delivers, from the webhook implementation and the setup guide in Setup.
-* Placeholder: leave agent-callable operations off this page. Those belong on the matching tool page when one exists.
+* $DOCSTUB: describe the events this source delivers, from the webhook implementation and the setup guide in Setup.
+* $DOCSTUB: leave agent-callable operations off this page. Those belong on the matching tool page when one exists.
 
 ## Setup
 

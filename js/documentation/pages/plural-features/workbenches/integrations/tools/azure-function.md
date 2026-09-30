@@ -7,8 +7,8 @@ The Azure Function tool lets a workbench agent invoke an Azure Function through 
 
 ## Capabilities
 
-* Placeholder: name the invoke operation in `lib/console/ai/tools/workbench/infrastructure/cloud_lambda.ex`.
-* Placeholder: mention permissions only when the implementation states them.
+* $DOCSTUB: name the invoke operation in `lib/console/ai/tools/workbench/infrastructure/cloud_lambda.ex`.
+* $DOCSTUB: mention permissions only when the implementation states them.
 
 ## Setup
 

@@ -8,9 +8,9 @@ Each run turns workbench integration stubs into public docs and opens **one pull
 
 Published pages live under `js/documentation/pages/plural-features/workbenches/integrations/`.
 
-A stub still contains a `Placeholder:` bullet. Finished pages do not. [Datadog](../pages/plural-features/workbenches/integrations/tools/datadog.md) is finished. Leave it as the style target. Do not rewrite it.
+A stub still contains a `$DOCSTUB:` bullet. Finished pages do not. [Datadog](../pages/plural-features/workbenches/integrations/tools/datadog.md) is finished. Leave it as the style target. Do not rewrite it.
 
-In one run, replace the `Placeholder:` bullets on the stubs you can verify from the sources below. Prefer a reviewable set: one subsection (tools, webhooks, or chatbots) or a related group of integrations. Leave the remaining stubs for the next run.
+In one run, replace the `$DOCSTUB:` bullets on the stubs you can verify from the sources below. Prefer a reviewable set: one subsection (tools, webhooks, or chatbots) or a related group of integrations. Leave the remaining stubs for the next run.
 
 Do not add a vendor page that is not already stubbed. Plural-native workbench capabilities stay on the tools overview. They are not per-vendor pages. That includes Kubernetes, stacks, services, pod logs, vulnerabilities, built-in metrics, and built-in log aggregation, documented under [Plural native integrations](../pages/plural-features/workbenches/integrations/tools.md#plural-native-integrations).
 
@@ -34,7 +34,7 @@ A webhook page uses the same standard for an inbound source: which events arrive
 
 A chatbot page uses the same standard for a conversation that starts a job: how a mention is received, how the bot replies, app credentials, and channel binding. Keep it separate from the tool the agent calls during a job. The Slack chatbot page and the Slack tool page are different integrations. Link back to [Chatbots](/plural-features/workbenches/integrations/chatbots).
 
-Do not copy a setup guide verbatim. Rewrite it as public documentation in the second person. Leave no repository paths or `Placeholder:` text in the page.
+Do not copy a setup guide verbatim. Rewrite it as public documentation in the second person. Leave no repository paths or `$DOCSTUB:` text in the page.
 
 Do not invent permissions, API methods, Console fields, screenshots, or image paths.
 

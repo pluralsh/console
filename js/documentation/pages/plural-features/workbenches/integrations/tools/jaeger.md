@@ -7,8 +7,8 @@ The Jaeger tool lets a workbench agent query distributed traces from a Jaeger ba
 
 ## Capabilities
 
-* Placeholder: name each operation the agent can call, from `lib/console/ai/tools/workbench/` (and `go/cloud-query/internal/tools/` when the tool is query-backed).
-* Placeholder: mention permissions only when the implementation or the setup guide states them.
+* $DOCSTUB: name each operation the agent can call, from `lib/console/ai/tools/workbench/` (and `go/cloud-query/internal/tools/` when the tool is query-backed).
+* $DOCSTUB: mention permissions only when the implementation or the setup guide states them.
 
 ## Setup
 
