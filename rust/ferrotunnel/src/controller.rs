@@ -26,8 +26,19 @@ use crate::{TunnelClient, TunnelClientStatus};
 const READY: &str = "Ready";
 const TUNNEL_NOT_STARTED: &str = "TunnelNotStarted";
 const TUNNEL_ID_IN_USE: &str = "TunnelIdInUse";
+const TUNNEL_ID_TAKEN: &str = "TunnelIdTaken";
 const CONNECTED: &str = "Connected";
 const FINALIZER: &str = "deployments.plural.sh/tunnel-client";
+
+/// How often to re-check a connected tunnel. The client owns reconnect; the
+/// library's auto_reconnect is off so a dead session is picked up here.
+const HEALTH_REQUEUE: Duration = Duration::from_secs(30);
+/// Match ferrotunnel-core's default session heartbeat timeout. After a dirty
+/// disconnect the server keeps the tunnel id until this window elapses.
+const TUNNEL_ID_TAKEN_REQUEUE: Duration = Duration::from_secs(90);
+/// Pause after a graceful shutdown so the server can drop the session before
+/// we open a replacement connection for the same tunnel id.
+const SHUTDOWN_SETTLE: Duration = Duration::from_secs(2);
 
 /// PEM files for mutual TLS. All three are present, or TLS is left off.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -188,12 +199,13 @@ async fn apply(tunnel_client: Arc<TunnelClient>, ctx: Arc<Context>) -> Result<Ac
     if let Some(running) = take_stale(&ctx, &key, &endpoint) {
         info!(namespace, name, "tunnel spec changed, replacing connection");
         shutdown(running).await?;
+        tokio::time::sleep(SHUTDOWN_SETTLE).await;
         publish(&ctx, &namespace, &name, &tunnel_client, false).await?;
     }
 
     if tunnel_matches(&ctx, &key, &endpoint) {
         publish(&ctx, &namespace, &name, &tunnel_client, true).await?;
-        return Ok(Action::await_change());
+        return Ok(Action::requeue(HEALTH_REQUEUE));
     }
 
     if let Err(owner) = try_claim(&ctx, &key, &endpoint.tunnel_id) {
@@ -209,7 +221,18 @@ async fn apply(tunnel_client: Arc<TunnelClient>, ctx: Arc<Context>) -> Result<Ac
                 RunningTunnel { endpoint, client },
             );
             publish(&ctx, &namespace, &name, &tunnel_client, true).await?;
-            Ok(Action::await_change())
+            Ok(Action::requeue(HEALTH_REQUEUE))
+        }
+        Err(err) if is_tunnel_id_taken(&err) => {
+            release_claim(&ctx, &key, &endpoint.tunnel_id);
+            info!(
+                namespace,
+                name,
+                tunnel_id = endpoint.tunnel_id,
+                "server still holds tunnel id, waiting for session expiry"
+            );
+            publish_tunnel_id_taken(&ctx, &namespace, &name, &tunnel_client).await?;
+            Ok(Action::requeue(TUNNEL_ID_TAKEN_REQUEUE))
         }
         Err(err) => {
             release_claim(&ctx, &key, &endpoint.tunnel_id);
@@ -281,12 +304,15 @@ async fn shutdown(mut running: RunningTunnel) -> Result<(), ReconcileError> {
 
 async fn start_tunnel(ctx: &Context, tunnel_client: &TunnelClient) -> Result<Tunnel, ReconcileError> {
     let upstream = &tunnel_client.spec.upstream;
+    // Keep library reconnect off. Overlapping reconnects race the server's
+    // exclusive tunnel-id registration and leave zombies on abrupt abort.
+    // The reconcile loop reconnects after HEALTH_REQUEUE / TUNNEL_ID_TAKEN_REQUEUE.
     let mut builder = Tunnel::builder()
         .server_addr(&ctx.server)
         .token(&ctx.token)
         .local_addr(format!("{}:{}", upstream.host, upstream.port))
         .tunnel_id(&tunnel_client.spec.tunnel_id)
-        .auto_reconnect(true)
+        .auto_reconnect(false)
         .startup_timeout(Some(Duration::from_secs(15)));
     if let Some(tls) = &ctx.tls {
         builder = builder.tls(&TlsConfig {
@@ -302,6 +328,24 @@ async fn start_tunnel(ctx: &Context, tunnel_client: &TunnelClient) -> Result<Tun
     let mut tunnel = builder.build().map_err(ReconcileError::Tunnel)?;
     tunnel.start().await.map_err(ReconcileError::Tunnel)?;
     Ok(tunnel)
+}
+
+fn is_tunnel_id_taken(err: &ReconcileError) -> bool {
+    match err {
+        ReconcileError::Tunnel(ferrotunnel::TunnelError::Authentication(message)) => {
+            message.contains("TunnelIdTaken")
+        }
+        _ => false,
+    }
+}
+
+fn error_is_tunnel_id_taken(err: &Error) -> bool {
+    match err {
+        Error::Finalizer(kube::runtime::finalizer::Error::ApplyFailed(inner)) => {
+            is_tunnel_id_taken(inner)
+        }
+        _ => false,
+    }
 }
 
 async fn publish(
@@ -361,8 +405,37 @@ async fn publish_in_use(
     Ok(())
 }
 
+async fn publish_tunnel_id_taken(
+    ctx: &Context,
+    namespace: &str,
+    name: &str,
+    tunnel_client: &TunnelClient,
+) -> Result<(), ReconcileError> {
+    let message = tunnel_id_taken_message(tunnel_client);
+    if reports(tunnel_client, "False", TUNNEL_ID_TAKEN, &message) {
+        return Ok(());
+    }
+    let status = condition_status(tunnel_client, "False", TUNNEL_ID_TAKEN, message);
+    let api = Api::<TunnelClient>::namespaced(ctx.client.clone(), namespace);
+    api.patch_status(
+        name,
+        &PatchParams::default(),
+        &Patch::Merge(&serde_json::json!({ "status": status })),
+    )
+    .await
+    .map_err(ReconcileError::Status)?;
+    Ok(())
+}
+
 fn in_use_message(tunnel_client: &TunnelClient, owner: &str) -> String {
     format!("tunnel {} is already registered by {owner}", tunnel_client.spec.tunnel_id)
+}
+
+fn tunnel_id_taken_message(tunnel_client: &TunnelClient) -> String {
+    format!(
+        "tunnel {} is still held by a previous server session; retrying after expiry",
+        tunnel_client.spec.tunnel_id
+    )
 }
 
 fn reports(tunnel_client: &TunnelClient, status: &str, reason: &str, message: &str) -> bool {
@@ -421,7 +494,11 @@ pub fn error_policy(tunnel_client: Arc<TunnelClient>, err: &Error, _ctx: Arc<Con
         error = %err,
         "reconcile failed"
     );
-    Action::requeue(Duration::from_secs(30))
+    if error_is_tunnel_id_taken(err) {
+        Action::requeue(TUNNEL_ID_TAKEN_REQUEUE)
+    } else {
+        Action::requeue(Duration::from_secs(30))
+    }
 }
 
 #[cfg(test)]
@@ -430,8 +507,9 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        conflicting_owner, connected_message, connected_status, in_use_message, not_started_message, not_started_status,
-        parse_flags, reports_connected, reports_not_started, server_name, Endpoint,
+        conflicting_owner, connected_message, connected_status, in_use_message, is_tunnel_id_taken,
+        not_started_message, not_started_status, parse_flags, reports_connected, reports_not_started,
+        server_name, tunnel_id_taken_message, Endpoint, ReconcileError,
     };
     use crate::{TunnelClient, TunnelClientSpec, Upstream};
 
@@ -533,6 +611,27 @@ mod tests {
         assert_eq!(
             partial.unwrap_err(),
             "--tls-ca, --tls-cert, and --tls-key must be set together"
+        );
+    }
+
+    #[test]
+    fn tunnel_id_taken_matches_handshake_rejection() {
+        let taken = ReconcileError::Tunnel(ferrotunnel::TunnelError::Authentication(
+            "Handshake rejected: TunnelIdTaken".into(),
+        ));
+        let other = ReconcileError::Tunnel(ferrotunnel::TunnelError::Authentication(
+            "Handshake rejected: InvalidToken".into(),
+        ));
+        let timeout = ReconcileError::Tunnel(ferrotunnel::TunnelError::Timeout(
+            "timed out waiting for initial connection".into(),
+        ));
+
+        assert!(is_tunnel_id_taken(&taken));
+        assert!(!is_tunnel_id_taken(&other));
+        assert!(!is_tunnel_id_taken(&timeout));
+        assert_eq!(
+            tunnel_id_taken_message(&example()),
+            "tunnel prometheus is still held by a previous server session; retrying after expiry"
         );
     }
 }
