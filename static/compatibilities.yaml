@@ -14169,57 +14169,65 @@ addons:
     images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
       'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
     eolAt: '2025-02-04'
-  - version: 1.14.2
+  - version: 1.14.3
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: '## Helm / values changes to review
-
-        The app release notes include a few Helm-relevant behavior and value changes
-        (some are from 1.14.0; 1.14.2 itself has only a small Helm fix):
-
-
-        ### Values/behavior changes introduced in 1.14.0 (affecting upgrades from
-        1.14.0)
-
-        - **`authentication.mutual.spire.install.enabled` default changed to `true`.**
-        If you were not using SPIRE/mTLS, explicitly set this to `false` to avoid
-        installing extra components.
-
-        - **CNI config file management changed.** Cilium now manages the CNI config
-        file; setting **`cni.exclusive=false` disables overwriting** (useful for chaining
-        other CNIs such as Istio).
-
-        - **CNI chaining supported via `cni.chainingTarget`.** If you previously used
-        custom chaining approaches, confirm your intended chaining target.
-
-        - **Helm chart can configure `kvstoremesh`.** If you use clustermesh at scale,
-        review/enable the new `kvstoremesh` settings.
-
-        - **Helm chart changes around clustermesh CA/TLS configuration.** Notes mention
-        deprecating clustermesh CA config in favor of global CA config and simplifying
-        TLS configuration; review your `clustermesh.*` / global CA values.
-
-        - **`enableEndpointCRD` Helm option type changed from string to boolean.**
-        If you had `'
-      chart_updates: ['1.14.2 is a patch release focused on stability: multiple IPsec
-          fixes, Gateway API fixes, NodePort datapath fixes, and smaller operational
-          improvements.', 'Minor Helm chart change in 1.14.2: fixes Envoy DaemonSet
-          log level handling when multiple verbose debug groups are configured.']
-      features: ['Gateway API: support for additional/extended Gateway API features
-          (more complete feature coverage) compared to earlier 1.14.x.', 'Operational
-          visibility: `cilium status` now shows SPIRE connection information (helps
-          validate mutual-auth/SPIRE deployments).']
-      breaking_changes: ["1.14.0 had a strong warning: do not upgrade to 1.14.0 if\
-          \ you are using IPsec. For a 1.14.0 \u2192 1.14.2 target, treat IPsec as\
-          \ a key risk area and ensure you land on 1.14.2 quickly (or upgrade directly\
-          \ to 1.14.2).", 'Helm value type change: `enableEndpointCRD` changed from
-          string to boolean in 1.14.0; existing values files may fail template rendering
-          or silently misconfigure if not updated.']
-    chart_version: 1.14.2
-    images: ['quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35',
-      'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
+      helm_changes: "## Helm / values changes to be aware of (1.14.0 \u2192 1.14.3)\n\
+        \nEven though 1.14.3 is a patch release, you\u2019re upgrading **from 1.14.0**,\
+        \ so you must account for 1.14.0\u2019s chart/values behavior changes.\n\n\
+        - **IPsec upgrade warning (1.14.0):** *Do not upgrade to 1.14.0 if using IPsec.*\
+        \ Since you\u2019re already on 1.14.0, the practical takeaway is: **treat\
+        \ 1.14.3 as an IPsec stability/security patch** and validate IPsec carefully\
+        \ during rollout.\n\n- **CNI config file management changed (1.14.0):**\n\
+        \  - Cilium now **manages the CNI configuration file** and by default **overwrites\
+        \ changes**.\n  - Set **`cni.exclusive=false`** if you need Cilium **not**\
+        \ to overwrite the CNI conf (for CNI chaining scenarios / other plugins modifying\
+        \ the conf).\n  - If you want to chain Cilium with another CNI, use **`cni.chainingTarget`**.\n\
+        \n- **kube-proxy replacement value format change (1.14.x):**\n  - There were\
+        \ changes around `kubeProxyReplacement`/`--kube-proxy-replacement` being represented/handled\
+        \ as **string/boolean** in chart logic. Re-check your current values and ensure\
+        \ you\u2019re using the supported format for your chart version (typically\
+        \ `\"strict\"|\"partial\"|\"disabled\"` historically, moving toward boolean\
+        \ in some paths).\n\n- **SPIRE mutual auth default changed (1.14.x):**\n \
+        \ - Default Helm value **`authentication.mutual.spire.install.enabled`** changed\
+        \ to **`true`**.\n  - If you do *not* want SPIRE installed/managed by the\
+        \ chart, explicitly set it to `false`.\n\n- **Tunnel / routing mode Helm rendering\
+        \ fix (1.14.3):**\n  - 1.14.3 includes a fix: **chart now derives `routing-mode`\
+        \ and `tunnel-protocol` based on `.Values.tunnel` and `.Values.routingMode`**.\n\
+        \  - Action: **review your `tunnel`, `routingMode`, and `tunnelProtocol` values**\
+        \ for consistency; after upgrade the rendered agent flags may change if you\
+        \ were relying on older/incorrect rendering.\n\n- **New/adjustable option\
+        \ (daemon value) mentioned in 1.14.3 notes:**\n  - `conntrackGCMaxInterval`\
+        \ introduced to cap conntrack GC interval (helps ToFQDN CIDR identity cleanup\
+        \ latency). Decide if you need to set this explicitly.\n"
+      chart_updates: ['Chart behavior around CNI config management and chaining is
+          significant in the 1.14 line: Cilium overwrites the CNI conf by default
+          unless `cni.exclusive=false`, and chaining is configured via `cni.chainingTarget`.',
+        1.14.3 includes a Helm-related fix that changes how `routing-mode` and `tunnel-protocol`
+          are computed from `tunnel` and `routingMode` values; verify rendered manifests/agent
+          flags match your intended datapath mode., 'Defaults changed in the 1.14
+          line for SPIRE installation: `authentication.mutual.spire.install.enabled`
+          now defaults to true; explicitly opt out if undesired.']
+      features: [Security hardening in 1.14.3 includes dependency bumps to address
+          HTTP/2 Stream Cancellation/rapid reset class issues (CVE-2023-44487 via
+          Envoy advisory) and Go/grpc vulnerabilities., 'Large policy-scale improvements
+          in 1.14.3 reduce Cilium initialization time dramatically in clusters with
+          many NetworkPolicies/CiliumNetworkPolicies, and reduce overhead by making
+          full policy map sync periodic.', 'Operational tunable added: `conntrackGCMaxInterval`
+          lets you cap conntrack GC interval to avoid very long delays in releasing
+          ToFQDN-derived CIDR identities.']
+      breaking_changes: ['Potential behavior change from Helm rendering fix in 1.14.3:
+          if your deployment had inconsistent `tunnel`/`routingMode`/`tunnelProtocol`
+          values, the upgraded chart may now render different `--routing-mode` / `--tunnel-protocol`
+          flags than before.', '1.14 line change: Cilium manages and overwrites the
+          CNI config by default; if you rely on other tooling/plugins to modify the
+          CNI config, you must set `cni.exclusive=false` and/or configure `cni.chainingTarget`
+          to avoid disruption.']
+    chart_version: 1.14.3
+    images: ['quay.io/cilium/cilium:v1.14.3@sha256:e5ca22526e01469f8d10c14e2339a82a13ad70d9a359b879024715540eef4ace',
+      'quay.io/cilium/operator-generic:v1.14.3@sha256:c9613277b72103ed36e9c0d16b9a17cafd507461d59340e432e3e9c23468b5e2']
     eolAt: '2025-02-04'
   - version: 1.14.0
     kube: ['1.27', '1.26', '1.25']
@@ -14349,29 +14357,22 @@ addons:
     images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
       'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
     eolAt: '2024-07-24'
-  - version: 1.13.7
+  - version: 1.13.8
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- **1.13.2 note:** the release explicitly warns: *\u201CWhen\
-        \ updating to this release, make sure that you are using new helm chart version.\u201D\
-        * Ensure you also bump the **Cilium Helm chart** along with the app version.\n\
-        - **cert-manager users:** Helm now **mandates issuer configuration** when\
-        \ using cert-manager to generate certificates (1.13.2 bugfix note). Verify\
-        \ your values include the required issuer settings if you rely on cert-manager.\n"
-      chart_updates: [No explicit Helm chart template/structure changes were included
-          in the provided notes beyond the cert-manager issuer requirement and the
-          general reminder to use the matching chart version.]
-      features: ['Better observability for NAT map allocation drops: Cilium now reports
-          the kernel error code when drops occur due to failures creating NAT map
-          entries (1.13.7).', 'BGP operations visibility: `cilium bgp peers` now shows
-          operational state of BGP peers (1.13.2).', 'Host routing/fast-forward support
-          expanded: fast-forward (BPF host routing) can work on L2-less devices (1.13.2).']
+      helm_changes: ''
+      chart_updates: []
+      features: [1.13.8 is a security-focused bugfix release that addresses the HTTP/2
+          Rapid Reset / Stream Cancellation attack (CVE-2023-44487) via updated Envoy
+          and Go/x/net dependencies., Security and dependency updates include bumping
+          gRPC to 1.56.3 and updating Azure SDK components used by the vendor/azure
+          integration.]
       breaking_changes: []
-    chart_version: 1.13.7
-    images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
-      'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
+    chart_version: 1.13.8
+    images: ['quay.io/cilium/cilium:v1.13.8@sha256:774f0f11e171a96b59158884e0151eb522a2cf3fe23a7af7a140ae31ac30271b',
+      'quay.io/cilium/operator-generic:v1.13.8@sha256:324d17fa59f9a5fa5f957f088567cb66f15d8771880f6ced755e79e8e4b085fd']
     eolAt: '2024-07-24'
   - version: 1.13.0
     kube: ['1.27', '1.26', '1.25']
@@ -14451,23 +14452,22 @@ addons:
     chart_version: 1.12.18
     images: ['quay.io/cilium/cilium:v1.12.18@sha256:71218d52b2b9a63525e31e9be716810605696cbc02008e658953212f638d6b6b',
       'quay.io/cilium/operator-generic:v1.12.18@sha256:ac9b8a95d6faddacc1bca4145562c5143543dfbbc41b244383b52b8be83238ab']
-  - version: 1.12.14
+  - version: 1.12.15
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ["No Helm chart changelog was provided in the notes you pasted,\
-          \ so I can\u2019t list exact chart/values changes for 1.12.9\u21921.12.14\
-          \ from source material here.", 'From the v1.12.9 release notes: when updating
-          to 1.12.9 you must also use the corresponding new Helm chart version (implies
-          chart/version coupling; verify chart version for 1.12.14 in the Cilium Helm
-          chart release notes).']
-      features: []
+      chart_updates: []
+      features: ['Security hardening update: includes fixes for the HTTP/2 Stream
+          Cancellation Attack (CVE-2023-44487) via updated Envoy and Go/x-net/grpc
+          dependencies.', 'Improved observability/troubleshooting: adds additional
+          datapath drop notifications and fixes trace notification identity reporting
+          for certain hairpinned reply traffic.']
       breaking_changes: []
-    chart_version: 1.12.14
-    images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
-      'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
+    chart_version: 1.12.15
+    images: ['quay.io/cilium/cilium:v1.12.15@sha256:24c4c9d756b2467ec20475309b68d640cdf91aa0008e136a826197590f028cca',
+      'quay.io/cilium/operator-generic:v1.12.15@sha256:ef8acf5b11f033032b55e2ece07179d925bfcb6f0cb501a898fdc031bad900ea']
   - version: 1.12.5
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -19756,7 +19756,7 @@ addons:
           \ behavior changes\u2014confirm by reviewing intermediate versions\u2019\
           \ upgrade guides and CRD diffs before applying in production."]
     chart_version: 1.13.0
-    images: ['public.ecr.aws/karpenter/controller:1.13.0@sha256:ea731b0cd813add8b2947a76bfe861c38069d85922b01d0c1647d1466279b7fe']
+    images: []
   - version: 1.9.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -19780,7 +19780,7 @@ addons:
           applied/reconciled. Treat this as an upgrade prerequisite and verify permissions
           before rolling out.]
     chart_version: 1.9.0
-    images: ['public.ecr.aws/karpenter/controller:1.9.0@sha256:30a506c64fbb1d8026cbfd9a1d662be3ab6e33a7999290a104085d78b49a69d7']
+    images: []
   - version: 1.8.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
     requirements: []
@@ -19840,7 +19840,7 @@ addons:
         Helm chart now **requires `settings.clusterName`**; upgrades/installs will
           fail if it is not provided.]
     chart_version: 1.6.0
-    images: ['public.ecr.aws/karpenter/controller:1.6.0@sha256:37c761a3a0b485fd34db1390317ef6149141f532c5a699c528b98fb8f9cc722a']
+    images: []
   - version: 1.5.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -19873,7 +19873,7 @@ addons:
           can fail if `settings.clusterName` is not set; this is an intentional enforcement
           change.]
     chart_version: 1.5.0
-    images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
+    images: []
   - version: 1.2.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -19887,7 +19887,7 @@ addons:
           health/repair related integrations).]
       breaking_changes: []
     chart_version: 1.2.0
-    images: ['public.ecr.aws/karpenter/controller:1.2.0@sha256:24b8fe57f02b70fc4ab3cd6d5aa0d73a6f3d0c62ca5d23d7ffc8853eac01e324']
+    images: []
   - version: 1.0.5
     kube: ['1.31', '1.30']
     requirements: []
@@ -19904,7 +19904,7 @@ addons:
       breaking_changes: ['v0.37.0: EC2NodeClass gains a readiness condition, which
           requires upgrading CRDs as part of the upgrade.']
     chart_version: 1.0.5
-    images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
+    images: []
   - version: 0.37.0
     kube: ['1.30']
     requirements: []
@@ -19951,7 +19951,7 @@ addons:
           NodeClass/NodePool lifecycle in a staging cluster and watch logs/events
           after upgrade).']
     chart_version: 0.37.0
-    images: ['public.ecr.aws/karpenter/controller:0.37.0@sha256:157f478f5db1fe999f5e2d27badcc742bf51cc470508b3cebe78224d0947674f']
+    images: []
   - version: 0.34.0
     kube: ['1.29']
     requirements: []
@@ -20205,27 +20205,21 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 91.8.1
+  - version: 91.8.2
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- **Behavior change:** `prometheusScrape` is now **disabled by\
-        \ default** (previously enabled).\n  - If you relied on auto-scraping targets\
-        \ via `prometheusScrape`, explicitly re-enable it in your values (e.g., set\
-        \ the relevant `*.prometheusScrape.enabled: true` where applicable for your\
-        \ setup).\n  - Validate after upgrade that expected targets still appear in\
-        \ Prometheus (`/targets`) and that Grafana dashboards still populate."
-      chart_updates: [Disable `prometheusScrape` by default (chart behavior change).,
-        Update `prometheus-node-exporter` Docker image tag to **v4.59.0**.]
-      features: [Disables `prometheusScrape` by default to reduce unexpected/implicit
-          scraping and align with more explicit ServiceMonitor/PodMonitor-based configurations.]
-      breaking_changes: ['`prometheusScrape` no longer defaults to enabled; clusters
-          depending on it may lose metrics until it is explicitly turned back on or
-          equivalent ServiceMonitor/PodMonitor resources are configured.']
-    chart_version: 91.8.1
-    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.2-distroless',
+      helm_changes: ''
+      chart_updates: [Bumped `prometheus-node-exporter` container image tag to **v4.59.0**
+          (in 91.8.0)., Bumped `grafana` container image tag to **v13.2.7** (in 91.8.2).]
+      features: [No new user-facing features were called out; this is primarily dependency/image
+          tag refreshes (node-exporter and Grafana).]
+      breaking_changes: [No breaking changes were mentioned in the provided release
+          notes; expect a low-risk patch/minor chart update focused on image bumps.]
+    chart_version: 91.8.2
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
       'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.11.2',
       'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
       'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
@@ -22867,56 +22861,69 @@ addons:
   release_url: https://github.com/longhorn/longhorn/releases/tag/v{vsn}
   helm_repository_url: https://charts.longhorn.io
   versions:
-  - version: 1.12.1
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
-      '1.27', '1.26', '1.25']
+  - version: 1.13.0
+    kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "## Helm values / chart behavior to review\n\n- **NetworkPolicies\
-        \ enabled by default (security change):** v1.12.1 turns on ingress `NetworkPolicy`\
-        \ resources for internal Longhorn endpoints/RPCs by default (effective only\
-        \ if your cluster enforces NetworkPolicies). Verify your CNI supports NetworkPolicy\
-        \ and confirm any cross-namespace Prometheus scraping still works (may need\
-        \ an additional allow policy).\n- **Instance-manager gRPC mTLS expanded:**\
-        \ If you use the `longhorn-grpc-tls` secret, v1.12.1 now requires valid client\
-        \ certs for *all* instance-manager gRPC services (disk/SPDK services included).\
-        \ Validate any external tooling that talks to IM gRPC.\n- **New V2 CPU allocation\
-        \ setting:** `data-engine-number-of-cpu-cores` can request exclusive cores\
-        \ via Kubernetes CPU Manager (kubelet policy must be `static`). When set,\
-        \ it overrides `data-engine-cpu-mask`.\n- **New V2 SPDK iobuf tuning settings:**\
-        \ `data-engine-iobuf-large-pool-size` and `data-engine-iobuf-small-pool-size`\
-        \ available. Changing them may recreate V2 instance-manager pods with no running\
-        \ instances.\n- **CPU isolation behavior change:** `data-engine-cpu-isolation-enabled`\
-        \ now also adjusts host RPS steering (network RX softirq) away from SPDK reactor\
-        \ cores; verify this doesn\u2019t conflict with your node-level CPU/network\
-        \ tuning.\n- **Helm bugfix note:** `csi.*ReplicaCount` Helm values previously\
-        \ only applied on initial creation; v1.12.1 fixes this, so upgrades may now\
-        \ actually reconcile those counts.\n- **Chart/CNI edge cases fixed:** fixes\
-        \ for RKE2 `rke2-traefik` ingress controller NetworkPolicy matching and ArgoCD\
-        \ OutOfSync when using Gateway API."
-      chart_updates: ['V2 feature additions: fast cloning (new linked-clone architecture)
-          and experimental sharding (erasure coding).', 'Security hardening: internal
-          NetworkPolicies installed/enabled by default (when enforced).', mTLS coverage
-          expanded for instance-manager gRPC services when TLS secret is configured.,
-        'Operational knobs added for V2 SPDK: CPU allocation via CPU Manager and iobuf
-          pool sizing.', 'Multiple bugfixes around V2 encryption sizing, storage network
-          attach, expansion/resize, backup/restore edge cases, and upgrade resilience.']
-      features: [V2 fast volume cloning (linked-clone) with parallel replica creation
-          and support for most normal volume operations (snapshots/expansion/rebuild/nested
-          clones)., Experimental V2 storage sharding using erasure coding to distribute
-          data/parity chunks across nodes for better space efficiency and scaling
-          beyond a single disk/node., Optional exclusive CPU core allocation for SPDK
-          target daemon via Kubernetes CPU Manager (`data-engine-number-of-cpu-cores`).]
-      breaking_changes: [Legacy V2 linked-clone volumes created on v1.12.0 or earlier
-          become effectively read-only from an operations standpoint after upgrading
-          to v1.12.1 (only detachment and deletion allowed); you must recreate clones
-          using the new linked-clone mechanism., 'If `longhorn-grpc-tls` is configured,
-          instance-manager gRPC endpoints now enforce mTLS on additional services;
-          any clients relying on plaintext access will fail until updated.']
-    chart_version: 1.12.1
-    images: ['docker.io/longhornio/longhorn-manager:v1.12.1', 'docker.io/longhornio/longhorn-share-manager:v1.12.1',
-      'docker.io/longhornio/longhorn-ui:v1.12.1']
+      helm_changes: "## Helm / values changes to review\n\n- **Kubernetes minimum\
+        \ version jumps to v1.34** for install/upgrade to Longhorn **v1.13.0** (CSI\
+        \ external-provisioner v6.3.0). This is an upgrade prerequisite, not just\
+        \ a Helm change.\n- **New NetworkPolicy-related Helm values** (introduced\
+        \ across v1.12.1\u2013v1.12.2 and relevant when landing on v1.13.0):\n  -\
+        \ `networkPolicies.v1DataEngineInitiatorSourceCIDRs`\n  - `networkPolicies.recoveryBackendAdditionalIngressPorts`\n\
+        \  - `networkPolicies.metricsScrapeSources` (to allow Prometheus/metrics scrapers\
+        \ to reach `longhorn-manager` on **:9500**)\n- **CSI service account change**:\
+        \ CSI controller sidecars move to a dedicated SA `longhorn-csi-service-account`.\n\
+        \  - Optional hardening: `csi.allowControllerSecretAccess` can be set to **false**\
+        \ *after* removing StorageClass `csi.storage.k8s.io/provisioner-secret-*`\
+        \ parameters; default still allows Secret `get` for compatibility.\n- **New/updated\
+        \ StorageClass parameters** that may be set via chart-managed StorageClasses:\n\
+        \  - `volumeTopology: any|zonal|regional`\n  - `strictTopology` and `csi-allowed-topology-keys`\
+        \ (added in v1.12.0, but you may start using them during this upgrade)\n-\
+        \ V2 tuning/settings you may choose to set (not required):\n  - `data-engine-interrupt-mode-enabled`\
+        \ (set to `{\"v2\":\"true\"}`; only when **no V2 volumes are attached**)\n\
+        \  - `data-engine-cpu-isolation-enabled` (defaults to `{\"v2\":\"true\"}`\
+        \ for **new installs** in v1.13.0; upgrades keep existing value)\n  - `data-engine-iobuf-large-pool-size`\
+        \ / `data-engine-iobuf-small-pool-size` (changing recreates idle V2 instance-manager\
+        \ pods)\n"
+      chart_updates: [Introduces a new `longhorn-global-manager` **Deployment** (defaults
+          to 3 replicas) that hosts cluster-wide controllers previously running in
+          the `longhorn-manager` DaemonSet; ensure at least one pod can schedule before/during
+          upgrade., Internal NetworkPolicies are created by default (since v1.12.1)
+          with follow-up compatibility fixes and new allow-list values in v1.12.2;
+          review if you rely on Prometheus scraping or host-originated traffic to
+          Longhorn components., CSI controller sidecars run under a dedicated `longhorn-csi-service-account`
+          (instead of the shared `longhorn-service-account`).]
+      features: ['V2 Data Engine **live upgrade**: V2 volumes can remain attached
+          during the Longhorn upgrade if prerequisites are met (supported live-upgrade
+          path to v1.13.0 is from v1.12.2).', V2 Data Engine **full interrupt mode**
+          (event-driven) to reduce idle/low-I/O CPU usage; polling remains default
+          and interrupt mode can slightly increase latency under sustained throughput.,
+        V2 **CPU isolation** enabled by default for new installs to keep kernel work
+          off SPDK reactor cores (polling mode only)., '**VolumeGroupSnapshot** support
+          (UI/kubectl/CSI VolumeGroupSnapshot objects); CSI group snapshot/backup
+          path exists but is disabled by default; snapshots are per-volume (not point-in-time
+          consistent across the group).', Recurring jobs gain **age-based retention**
+          (keep items newer than a duration like `720h`) in addition to count-based
+          retention., 'New scheduling capabilities: `volumeTopology` (any/zonal/regional)
+          to constrain replica placement to the provisioned zone/region, plus an optional
+          **scheduler extender** to improve pod placement using real Longhorn disk
+          capacity and locality.', 'Operational scaling: new **longhorn-global-manager**
+          reduces apiserver load and per-node manager memory in large clusters.',
+        'Security hardening: broader **instance-manager gRPC mTLS coverage** (when
+          `longhorn-grpc-tls` secret configured) and default internal NetworkPolicies
+          with better configurability.']
+      breaking_changes: ['**Kubernetes minimum version is now v1.34** for Longhorn
+          v1.13.0; you must upgrade Kubernetes before upgrading Longhorn.', '**V2
+          live upgrade is only supported when upgrading to v1.13.0 from v1.12.2**.
+          If you are on v1.12.0 or v1.12.1, you must detach all V2 volumes (and ensure
+          replicas are stopped) before upgrading.', '**Legacy V2 linked-clone volumes
+          created in v1.12.0 or earlier** can only be detached or deleted; to replace
+          them, create a new linked clone from the same source (no data copy).']
+    chart_version: 1.13.0
+    images: ['docker.io/longhornio/longhorn-manager:v1.13.0', 'docker.io/longhornio/longhorn-share-manager:v1.13.0',
+      'docker.io/longhornio/longhorn-ui:v1.13.0']
   - version: 1.12.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -26759,7 +26766,7 @@ addons:
       chart_updates: []
       features: []
       breaking_changes: []
-    chart_version: 10.9.2
+    chart_version: 10.9.4
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.3']
   - version: 3.5.1
@@ -27506,22 +27513,6 @@ addons:
           upgrading.']
     chart_version: 0.37.1
     images: ['quay.io/argoproj/argocli:v3.5.0', 'quay.io/argoproj/workflow-controller:v3.5.0']
-  - version: 3.4.11
-    kube: ['1.28', '1.27', '1.26']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [Patch-level update within the v3.4.x line; release notes provided
-          here do not enumerate specific feature changes between v3.4.0 and v3.4.11.,
-        Update includes newer controller/server images and a newer CLI binary matching
-          v3.4.11.]
-      breaking_changes: [No breaking changes are listed in the provided notes; you
-          should still review the official Argo Workflows upgrading guide for any
-          v3.4.x-specific caveats.]
-    chart_version: 0.34.0
-    images: ['quay.io/argoproj/argocli:v3.4.11', 'quay.io/argoproj/workflow-controller:v3.4.11']
   - version: 3.4.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -29683,7 +29674,7 @@ addons:
     chart_version: 0.27.1
     images: ['victoriametrics/operator:v0.38.0']
   - version: 0.37.0
-    kube: ['1.28', '1.27', '1.26']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -29703,7 +29694,7 @@ addons:
     chart_version: 0.26.0
     images: ['victoriametrics/operator:v0.37.0']
   - version: 0.36.0
-    kube: ['1.28', '1.27', '1.26']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -30414,7 +30405,7 @@ addons:
     images: ['nvcr.io/nvidia/gpu-operator:v23.6.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
     incompatibilities: []
   - version: 23.6.0
-    kube: ['1.28', '1.27', '1.26']
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     chart_version: 23.6.0
     images: ['nvcr.io/nvidia/gpu-operator:v23.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
@@ -32391,8 +32382,15 @@ addons:
       breaking_changes: []
     chart_version: 1.16.0
     images: []
-  - version: 1.15.0
+  - version: 1.15.3
     kube: ['1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.15.3
+    images: []
+  - version: 1.15.0
+    kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:

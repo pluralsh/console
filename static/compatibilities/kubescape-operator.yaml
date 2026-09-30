@@ -635,8 +635,15 @@ versions:
     breaking_changes: []
   chart_version: 1.16.0
   images: []
-- version: 1.15.0
+- version: 1.15.3
   kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.15.3
+  images: []
+- version: 1.15.0
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
