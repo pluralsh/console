@@ -117,6 +117,21 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
       assert updated["type"] == "STACK"
       assert updated["matches"]["stack"]["type"] == "RUN"
 
+      {:ok, %{data: %{"updateBindingPolicy" => reset}}} = run_query("""
+        mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
+          updateBindingPolicy(id: $id, attributes: $attributes) { id type matches { workbench { regexes } stack { type } } }
+        }
+      """, %{
+        "id" => binding["id"],
+        "attributes" => %{
+          "type" => "STACK",
+          "matches" => %{}
+        }
+      }, %{current_user: user})
+
+      assert reset["type"] == "STACK"
+      refute reset["matches"]["stack"]
+
       {:ok, %{data: %{"deleteBindingPolicy" => deleted}}} = run_query("""
         mutation DeleteBindingPolicy($id: ID!) {
           deleteBindingPolicy(id: $id) { id }

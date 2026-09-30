@@ -1586,6 +1586,42 @@ defmodule Console.Deployments.StacksTest do
         %{cmd: "terraform", args: ["import", "some.resource", ^long_arg]}
       ] = run.steps
     end
+
+    test "does not create a custom run when a run-stage policy denies" do
+      user = insert(:user)
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], sha: "test-sha")
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+
+      assert {:error, "denied by stack policy: frozen"} =
+               Stacks.create_custom_run(stack.id, [%{cmd: "echo", args: ["hello world!"]}], user)
+      assert [] == StackRun.for_stack(stack.id) |> Console.Repo.all()
+    end
+
+    test "still creates a custom run when only an approval-stage policy is attached" do
+      user = insert(:user)
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], sha: "test-sha")
+      insert(:stack_policy, stack: stack, policy: policy, type: :approval)
+
+      {:ok, run} = Stacks.create_custom_run(stack.id, [%{cmd: "echo", args: ["hello"]}], user)
+
+      assert run.stack_id == stack.id
+    end
   end
 
   describe "#create_custom_stack_run/2" do

@@ -138,7 +138,19 @@ defmodule Console.Deployments.PolicyTest do
       assert updated.type == :stack
       assert updated.matches.workbench.regexes == ["^terraform\\."]
 
-      {:ok, deleted} = Policy.delete_binding_policy(updated.id, user)
+      {:ok, cleared} =
+        Policy.update_binding_policy(
+          %{type: :stack, matches: %{stack: %{type: :run}}},
+          updated.id,
+          user
+        )
+
+      assert cleared.matches.stack.type == :run
+
+      {:ok, reset} = Policy.update_binding_policy(%{type: :stack, matches: %{}}, cleared.id, user)
+      refute reset.matches.stack
+
+      {:ok, deleted} = Policy.delete_binding_policy(reset.id, user)
       assert deleted.id == updated.id
       refute refetch(updated)
     end
@@ -311,6 +323,62 @@ defmodule Console.Deployments.PolicyTest do
       [association] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
       assert association.binding_policy_id == binding.id
       assert association.type == :run
+    end
+
+    test "replaces the previous stage when a stack binding changes type" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      binding = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(binding)
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+
+      :ok = Policy.reconcile(%{binding | matches: %{stack: %{type: :approval}}})
+
+      [approval] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert approval.type == :approval
+      assert approval.binding_policy_id == binding.id
+    end
+
+    test "detaches a stack policy owned by the binding even after its stage changes" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      binding = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(binding)
+      assert 1 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+
+      {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+      :ok = Policy.reconcile(%{binding | bind_policy: bind_policy, matches: %{stack: %{type: :approval}}})
+
+      assert 0 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
     end
 
     test "attaches the same policy at both stages without detaching the other" do

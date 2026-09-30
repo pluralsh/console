@@ -907,6 +907,7 @@ defmodule Console.Deployments.Stacks do
     steps =
       Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: infer_stage(&1), status: :pending, name: "cmd #{&2}"}))
       |> template_cmds(ctx)
+    stack = Repo.preload(stack, @run_preloads)
 
     %StackRun{stack_id: id, status: :queued}
     |> StackRun.changeset(
@@ -915,7 +916,9 @@ defmodule Console.Deployments.Stacks do
       |> Map.put(:steps, steps)
     )
     |> allow(user, :write)
-    |> when_ok(:insert)
+    |> when_ok(fn cs ->
+      after_run_policy(stack, sha, custom_run_policy_attrs(user, name), fn -> Repo.insert(cs) end)
+    end)
     |> notify(:create)
   end
   def create_custom_run(stack_id, commands, name, ctx, user) when is_binary(stack_id) do
@@ -970,16 +973,21 @@ defmodule Console.Deployments.Stacks do
   @spec create_run(Stack.t, binary) :: run_resp
   def create_run(%Stack{} = stack, sha, attrs \\ %{}) do
     stack = Repo.preload(stack, @run_preloads)
-    create_run_after_policy(maybe_policy_run(stack, sha, attrs), stack, sha, attrs)
+    after_run_policy(stack, sha, attrs, fn -> insert_run(stack, sha, attrs) end)
   end
 
-  defp create_run_after_policy(:continue, stack, sha, attrs),
-    do: insert_run(stack, sha, attrs)
-  defp create_run_after_policy({:deny, reason}, _, _, _),
+  defp after_run_policy(stack, sha, attrs, fun) do
+    stack
+    |> maybe_policy_run(sha, attrs)
+    |> after_run_policy_result(stack, fun)
+  end
+
+  defp after_run_policy_result(:continue, _, fun), do: fun.()
+  defp after_run_policy_result({:deny, reason}, _, _),
     do: {:error, "#{@run_policy_denied_prefix}#{reason}"}
-  defp create_run_after_policy({:error, err}, stack, sha, attrs) do
+  defp after_run_policy_result({:error, err}, stack, fun) do
     Logger.error("Failed to evaluate stack run policies for stack #{stack.id}: #{inspect(err)}")
-    insert_run(stack, sha, attrs)
+    fun.()
   end
 
   defp insert_run(%Stack{} = stack, sha, attrs) do
@@ -1086,6 +1094,10 @@ defmodule Console.Deployments.Stacks do
 
   defp manual_run_attrs(%User{} = user, message) do
     %{message: message, trigger: %{source: :manual}, policy_actor: user}
+  end
+
+  defp custom_run_policy_attrs(%User{} = user, name) do
+    %{message: name || @default_run_name, trigger: %{source: :custom}, policy_actor: user}
   end
 
   defp ignore_run_policy_deny({:error, @run_policy_denied_prefix <> _}), do: {:ok, nil}

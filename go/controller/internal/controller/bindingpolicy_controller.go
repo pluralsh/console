@@ -179,18 +179,13 @@ func (in *BindingPolicyReconciler) attributes(bindingPolicy *v1alpha1.BindingPol
 }
 
 func (in *BindingPolicyReconciler) updateAttributes(bindingPolicy *v1alpha1.BindingPolicy, policyID, bindPolicyID string) console.BindingPolicyUpdateAttributes {
-	attrs := console.BindingPolicyUpdateAttributes{
+	return console.BindingPolicyUpdateAttributes{
 		PolicyID:     lo.ToPtr(policyID),
 		BindPolicyID: lo.ToPtr(bindPolicyID),
 		Type:         bindingPolicy.Spec.Type,
 		Interval:     bindingPolicy.Spec.Interval,
+		Matches:      updateMatchesAttrs(bindingPolicy.Spec.Matches),
 	}
-
-	if bindingPolicy.Spec.Matches != nil {
-		attrs.Matches = matchesAttrs(bindingPolicy.Spec.Matches)
-	}
-
-	return attrs
 }
 
 func matchesAttrs(matches *v1alpha1.BindingPolicyMatches) *console.BindingPolicyMatchesAttributes {
@@ -214,6 +209,14 @@ func matchesAttrs(matches *v1alpha1.BindingPolicyMatches) *console.BindingPolicy
 	}
 
 	return attrs
+}
+
+func updateMatchesAttrs(matches *v1alpha1.BindingPolicyMatches) *console.BindingPolicyMatchesAttributes {
+	if attrs := matchesAttrs(matches); attrs != nil {
+		return attrs
+	}
+
+	return &console.BindingPolicyMatchesAttributes{}
 }
 
 func (in *BindingPolicyReconciler) sync(ctx context.Context, bindingPolicy *v1alpha1.BindingPolicy, policyID, bindPolicyID string, changed bool) (*console.BindingPolicyFragment, error) {

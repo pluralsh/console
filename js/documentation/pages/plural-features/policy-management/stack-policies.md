@@ -28,7 +28,7 @@ If policy compilation or evaluation fails, run creation continues. Treat that as
 |---|---|
 | `input.stage` | Always `run` |
 | `input.now` | Current time as an RFC 3339 timestamp, for freeze windows |
-| `input.trigger.source` | Why the run was requested: `git`, `pr`, `cron`, `manual`, `restart`, or `destroy` |
+| `input.trigger.source` | Why the run was requested: `git`, `pr`, `cron`, `manual`, `restart`, `destroy`, or `custom` |
 | `input.actor` | The initiating user, including identity, service-account status, roles, and groups |
 | `input.stack` | Stack metadata, including its name, project, Git configuration, and variables |
 | `input.commit` | Commit SHA, message, and committer for the proposed run |

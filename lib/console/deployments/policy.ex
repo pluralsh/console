@@ -292,6 +292,8 @@ defmodule Console.Deployments.Policy do
     end
   end
 
+  defp attach_binding(%BindingPolicy{type: :stack} = binding, %Stack{} = stack, user),
+    do: sync_stack_binding(binding, stack, user, :attach)
   defp attach_binding(%BindingPolicy{} = binding, target, user) do
     case fetch_attachment(binding, target) do
       %{} -> :ok
@@ -299,6 +301,8 @@ defmodule Console.Deployments.Policy do
     end
   end
 
+  defp detach_binding(%BindingPolicy{type: :stack} = binding, %Stack{} = stack, user),
+    do: sync_stack_binding(binding, stack, user, :detach)
   defp detach_binding(%BindingPolicy{id: id} = binding, target, user) do
     case fetch_attachment(binding, target) do
       %{binding_policy_id: ^id} -> reconcile_target(:detach, binding, target, user)
@@ -308,8 +312,49 @@ defmodule Console.Deployments.Policy do
 
   defp fetch_attachment(%BindingPolicy{policy_id: id}, %Workbench{id: wid}),
     do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
-  defp fetch_attachment(%BindingPolicy{policy_id: id} = binding, %Stack{id: sid}),
-    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid, type: stack_policy_type(binding))
+
+  defp sync_stack_binding(binding, stack, user, :detach) do
+    Enum.each(owned_stack_attachments(binding, stack), &Stacks.delete_stack_policy(&1.id, user))
+  end
+  defp sync_stack_binding(binding, stack, user, :attach) do
+    desired = stack_policy_type(binding)
+    owned = owned_stack_attachments(binding, stack)
+
+    ensure_stack_attachment(binding, stack, user, desired, owned)
+    Enum.each(owned, &drop_stale_stack_attachment(&1, desired, user))
+  end
+
+  defp ensure_stack_attachment(binding, stack, user, desired, owned) do
+    owned
+    |> Enum.find(& &1.type == desired)
+    |> create_missing_stack_attachment(binding, stack, user, desired)
+  end
+
+  defp create_missing_stack_attachment(%StackPolicy{}, _, _, _, _), do: :ok
+  defp create_missing_stack_attachment(_, binding, stack, user, desired) do
+    attach_stack_unless_present(binding, stack, user, stack_type_attached?(binding, stack, desired))
+  end
+
+  defp attach_stack_unless_present(_, _, _, true), do: :ok
+  defp attach_stack_unless_present(binding, stack, user, false),
+    do: reconcile_target(:attach, binding, stack, user)
+
+  defp drop_stale_stack_attachment(%{type: type} = attachment, desired, user) when type != desired,
+    do: Stacks.delete_stack_policy(attachment.id, user)
+  defp drop_stale_stack_attachment(_, _, _), do: :ok
+
+  defp owned_stack_attachments(%BindingPolicy{id: id}, %Stack{id: sid}) do
+    StackPolicy.for_stack(sid)
+    |> StackPolicy.for_binding(id)
+    |> Repo.all()
+  end
+
+  defp stack_type_attached?(%BindingPolicy{policy_id: policy_id}, %Stack{id: stack_id}, type) do
+    StackPolicy.for_stack(stack_id)
+    |> StackPolicy.for_policy(policy_id)
+    |> StackPolicy.for_type(type)
+    |> Repo.exists?()
+  end
 
   defp reconcile_target(:attach, %BindingPolicy{id: binding_id, policy_id: id} = binding, %Workbench{} = wb, user),
     do: Workbenches.create_workbench_policy(%{
@@ -321,8 +366,6 @@ defmodule Console.Deployments.Policy do
     do: Stacks.create_stack_policy(stack_policy_attrs(binding), stack.id, user)
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Workbench{} = wb, user),
     do: Workbenches.delete_workbench_policy(id, wb.id, user)
-  defp reconcile_target(:detach, %BindingPolicy{policy_id: id} = binding, %Stack{} = stack, user),
-    do: Stacks.delete_stack_policy(id, stack.id, stack_policy_type(binding), user)
 
   defp authorize_project_change(%Ecto.Changeset{} = cs, user),
     do: authorize_project_change(Ecto.Changeset.get_change(cs, :project_id), cs, user)
