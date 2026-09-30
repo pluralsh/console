@@ -4,14 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/polly/containers"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/polly/containers"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
@@ -134,7 +135,7 @@ func (in *Applier) Apply(ctx context.Context,
 			serviceErrorList = append(serviceErrorList, client.ServiceErrorAttributes{
 				Source:  string(phase.Name()),
 				Message: "waiting for resources to be ready",
-				Warning: lo.ToPtr(true),
+				Warning: new(true),
 			})
 			klog.V(log.LogLevelTrace).InfoS("waiting for resources to be ready", "phase", phase.Name())
 			break
@@ -146,6 +147,7 @@ func (in *Applier) Apply(ctx context.Context,
 			serviceErrorList = append(serviceErrorList, client.ServiceErrorAttributes{
 				Source:  string(phase.Name()),
 				Message: "could not complete phase, check errors and failing resources",
+				Warning: new(false),
 			})
 			if !hasOnFailPhase {
 				klog.V(log.LogLevelTrace).InfoS("failed to apply phase", "phase", phase.Name())
@@ -178,18 +180,17 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 			return nil, err
 		}
 
-		if live.GetAnnotations() != nil && live.GetAnnotations()[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion {
-			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
-				klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component from store", "resource", live.GetUID())
-			}
-
+		if smcommon.HasDeleteDisabledSyncOption(*live) || smcommon.HasDetachOption(*live) {
 			// Delete service ID annotation so it will not be synced to store.
 			annotations := live.GetAnnotations()
 			delete(annotations, smcommon.OwningInventoryKey)
 			live.SetAnnotations(annotations)
 			if _, err := in.client.Resource(helpers.GVRFromGVK(live.GroupVersionKind())).
-				Update(ctx, live, metav1.UpdateOptions{}); err != nil {
+				Namespace(live.GetNamespace()).Update(ctx, live, metav1.UpdateOptions{}); err != nil {
 				return nil, err
+			}
+			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
+				klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component from store", "resource", live.GetUID())
 			}
 
 			continue
