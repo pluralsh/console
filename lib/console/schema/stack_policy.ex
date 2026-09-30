@@ -42,7 +42,7 @@ defmodule Console.Schema.StackPolicy do
     |> foreign_key_constraint(:policy_id)
     |> foreign_key_constraint(:stack_id)
     |> foreign_key_constraint(:binding_policy_id)
-    |> unique_constraint([:policy_id, :stack_id])
+    |> unique_constraint([:policy_id, :stack_id, :type])
     |> validate_required(@required)
   end
 end

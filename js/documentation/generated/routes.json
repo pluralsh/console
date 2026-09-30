@@ -109,7 +109,7 @@
   },
   "/api-reference/kubernetes/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-09-16T01:37:41.000Z"
+    "lastmod": "2026-09-30T06:10:24.000Z"
   },
   "/api-reference/kubernetes/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
@@ -313,11 +313,11 @@
   },
   "/plural-features/policy-management": {
     "relPath": "/plural-features/policy-management/index.md",
-    "lastmod": "2026-09-16T01:37:41.000Z"
+    "lastmod": "2026-09-30T05:23:39.000Z"
   },
   "/plural-features/policy-management/stack-policies": {
     "relPath": "/plural-features/policy-management/stack-policies.md",
-    "lastmod": "2026-09-11T21:28:47.000Z"
+    "lastmod": "2026-09-30T05:23:34.000Z"
   },
   "/plural-features/policy-management/workbench-policies": {
     "relPath": "/plural-features/policy-management/workbench-policies.md",
@@ -325,11 +325,11 @@
   },
   "/plural-features/policy-management/simulating-policies": {
     "relPath": "/plural-features/policy-management/simulating-policies.md",
-    "lastmod": "2026-09-16T01:37:41.000Z"
+    "lastmod": "2026-09-30T05:23:46.000Z"
   },
   "/plural-features/policy-management/common-use-cases": {
     "relPath": "/plural-features/policy-management/common-use-cases.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-30T05:23:44.000Z"
   },
   "/plural-features/kubernetes-dashboard": {
     "relPath": "/plural-features/kubernetes-dashboard/index.md",
@@ -725,7 +725,7 @@
   },
   "/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-09-16T01:37:41.000Z"
+    "lastmod": "2026-09-30T06:10:24.000Z"
   },
   "/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",

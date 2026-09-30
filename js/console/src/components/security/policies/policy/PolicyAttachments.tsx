@@ -122,6 +122,7 @@ function toWorkbenchRow(attachment: {
 
 function toStackRow(attachment: {
   id: string
+  type?: string | null
   stack?: {
     id?: string | null
     name?: string | null
@@ -136,7 +137,9 @@ function toStackRow(attachment: {
     description: attachment.stack?.type
       ? startCase(attachment.stack.type.toLowerCase())
       : 'Stack',
-    matchingArgs: [],
+    matchingArgs: attachment.type
+      ? [startCase(attachment.type.toLowerCase())]
+      : [],
     updatedAt: attachment.updatedAt,
     href: attachment.stack?.id
       ? getStacksAbsPath(attachment.stack.id)

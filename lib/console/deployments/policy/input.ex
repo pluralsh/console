@@ -3,6 +3,8 @@ defmodule Console.Deployments.Policy.Input do
     GitRepository,
     Project,
     Stack,
+    StackEnvironment,
+    StackFile,
     StackInfracostResource,
     StackPolicyViolation,
     StackRun,
@@ -44,7 +46,8 @@ defmodule Console.Deployments.Policy.Input do
     %{
       "name" => name,
       "project" => stack_project(stack.project),
-      "git" => stack_git(stack)
+      "git" => stack_git(stack),
+      "variables" => variables(stack)
     }
   end
 
@@ -59,7 +62,31 @@ defmodule Console.Deployments.Policy.Input do
     }
   end
 
+  def commit(%{sha: sha} = commit) do
+    %{
+      "sha" => sha,
+      "message" => Map.get(commit, :message),
+      "committer" => Map.get(commit, :committer)
+    }
+  end
+
   def commit(_), do: %{}
+
+  @doc "Returns stack or run variables, or an empty map when none are set."
+  def variables(%{variables: vars}) when is_map(vars), do: vars
+  def variables(_), do: %{}
+
+  @doc "Builds environment variables for policy input. Secret values are omitted."
+  def environment(vars) when is_list(vars), do: Enum.map(vars, &env_var/1)
+  def environment(_), do: []
+
+  @doc "Builds stack files for policy input. File contents are omitted."
+  def files(files) when is_list(files), do: Enum.map(files, &file/1)
+  def files(_), do: []
+
+  @doc "Builds the changed-file list for policy input."
+  def changes(files) when is_list(files), do: files
+  def changes(_), do: []
 
   @doc "Builds the cost payload used as policy input."
   def costs(resources) when is_list(resources), do: Enum.map(resources, &cost/1)
@@ -120,6 +147,15 @@ defmodule Console.Deployments.Policy.Input do
   end
 
   defp violation_lines(_), do: []
+
+  defp env_var(%StackEnvironment{secret: true, name: name}),
+    do: %{"name" => name, "secret" => true}
+  defp env_var(%StackEnvironment{name: name, value: value, secret: secret}),
+    do: %{"name" => name, "value" => value, "secret" => secret == true}
+  defp env_var(_), do: %{}
+
+  defp file(%StackFile{path: path}), do: %{"path" => path}
+  defp file(_), do: %{}
 
   defp decimal_float(%Decimal{} = value), do: Decimal.to_float(value)
   defp decimal_float(_), do: nil

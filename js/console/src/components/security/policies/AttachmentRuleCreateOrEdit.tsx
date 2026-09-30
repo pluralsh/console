@@ -32,6 +32,7 @@ import {
   BindingPolicyUpdateAttributes,
   PolicyTinyFragment,
   PolicyType,
+  StackPolicyType,
   useBindingPolicyQuery,
   useCreateBindingPolicyMutation,
   useDeleteBindingPolicyMutation,
@@ -62,7 +63,26 @@ type AttachmentRuleFormState = {
   bindPolicyId: string
   type: BindingPolicyType | ''
   regexes: string[]
+  stackPolicyType: StackPolicyType
 }
+
+const STACK_POLICY_STAGE_OPTIONS: {
+  value: StackPolicyType
+  label: string
+  description: string
+}[] = [
+  {
+    value: StackPolicyType.Approval,
+    label: 'Approval',
+    description:
+      'Evaluate after the plan, when the run is waiting for approval.',
+  },
+  {
+    value: StackPolicyType.Run,
+    label: 'Run',
+    description: 'Evaluate before a run is created. A denial blocks the run.',
+  },
+]
 
 export function AttachmentRuleCreateOrEdit({
   mode,
@@ -168,6 +188,7 @@ function AttachmentRuleForm({
     PolicyTinyFragment | undefined
   >(rule?.bindPolicy ?? undefined)
   const showToolMatches = form.type === BindingPolicyType.Workbench
+  const showStackStage = form.type === BindingPolicyType.Stack
 
   const [createBindingPolicy, { loading: createLoading, error: createError }] =
     useCreateBindingPolicyMutation({
@@ -347,6 +368,39 @@ function AttachmentRuleForm({
                 </Flex>
               )}
             </Flex>
+          </FormField>
+        </FormCardSC>
+      )}
+      {showStackStage && (
+        <FormCardSC>
+          <FormField label="Evaluation stage">
+            <SelectWrapSC>
+              <Select
+                selectedKey={form.stackPolicyType}
+                onSelectionChange={(key) => {
+                  const next = STACK_POLICY_STAGE_OPTIONS.find(
+                    (option) => option.value === key
+                  )
+
+                  if (!next) return
+                  setForm((prev) => ({ ...prev, stackPolicyType: next.value }))
+                }}
+              >
+                {STACK_POLICY_STAGE_OPTIONS.map((option) => (
+                  <ListBoxItem
+                    key={option.value}
+                    textValue={option.label}
+                    label={
+                      <StackedText
+                        first={option.label}
+                        second={option.description}
+                        firstColor="text"
+                      />
+                    }
+                  />
+                ))}
+              </Select>
+            </SelectWrapSC>
           </FormField>
         </FormCardSC>
       )}
@@ -562,6 +616,7 @@ function sanitizeForm(
     regexes: (rule?.matches?.workbench?.regexes ?? []).filter(
       (regex): regex is string => !!regex
     ),
+    stackPolicyType: rule?.matches?.stack?.type ?? StackPolicyType.Approval,
   }
 }
 
@@ -573,9 +628,7 @@ function formToCreateAttributes(
     bindPolicyId: form.bindPolicyId,
     type: form.type as BindingPolicyType,
     interval: DEFAULT_INTERVAL,
-    ...(form.type === BindingPolicyType.Workbench
-      ? { matches: { workbench: { regexes: form.regexes } } }
-      : {}),
+    matches: formMatches(form),
   }
 }
 
@@ -586,12 +639,20 @@ function formToUpdateAttributes(
     policyId: form.policyId,
     bindPolicyId: form.bindPolicyId,
     type: form.type as BindingPolicyType,
-    matches: {
-      workbench: {
-        regexes: form.type === BindingPolicyType.Workbench ? form.regexes : [],
-      },
-    },
+    matches: formMatches(form),
   }
+}
+
+function formMatches(form: AttachmentRuleFormState) {
+  if (form.type === BindingPolicyType.Workbench) {
+    return { workbench: { regexes: form.regexes } }
+  }
+
+  if (form.type === BindingPolicyType.Stack) {
+    return { stack: { type: form.stackPolicyType } }
+  }
+
+  return undefined
 }
 
 function policyTypeToBindingType(

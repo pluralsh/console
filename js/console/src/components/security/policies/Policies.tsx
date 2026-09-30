@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { getPoliciesBreadcrumbs } from './policiesBreadcrumbs'
 
 export const POLICIES_DESCRIPTION =
-  'OPA/Rego documents that govern tool execution. Attach them to workbenches and stacks. If any matching policy denies, the tool call is rejected.'
+  'OPA/Rego documents that govern workbench tools and stack runs. Attach them to workbenches and stacks. If any matching policy denies, the action is rejected.'
 
 const directory = [
   { label: 'Policies', path: '' },

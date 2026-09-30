@@ -211,6 +211,31 @@ defmodule Console.Deployments.StacksTest do
       assert created.git.folder == stack.git.folder
     end
 
+    test "still updates the stack when a run-stage policy blocks the spawned run" do
+      user = insert(:user)
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], status: :successful)
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      insert(:stack_run, stack: stack, git: %{ref: "new-sha"}, dry_run: false)
+
+      {:ok, updated} = Stacks.update_stack(%{
+        name: "my-stack",
+        type: :terraform,
+        approval: true,
+        git: %{ref: "main", folder: "new-folder"},
+      }, stack.id, user)
+
+      assert updated.git.folder == "new-folder"
+      assert Stacks.latest_run(updated.id).git.ref == "new-sha"
+    end
+
     test "you can update bindings" do
       user = admin_user()
       stack = insert(:stack)
@@ -422,6 +447,27 @@ defmodule Console.Deployments.StacksTest do
       cron = refetch(cron)
       assert cron.last_run_at
       assert Timex.after?(cron.next_run_at, cron.last_run_at)
+    end
+
+    test "skips the run and still stamps last_run_at when a run-stage policy denies" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack,
+        git: %{ref: "main", folder: "terraform"},
+        sha: "old-sha"
+      )
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      cron = insert(:stack_cron, stack: stack)
+
+      assert {:error, "denied by stack policy: frozen"} = Stacks.spawn_cron(cron)
+      assert [] == StackRun.for_stack(stack.id) |> Console.Repo.all()
+      assert refetch(cron).last_run_at
     end
   end
 
@@ -776,6 +822,110 @@ defmodule Console.Deployments.StacksTest do
 
       {:error, _} = Stacks.poll(stack)
     end
+
+    test "does not create a run or consume the sha when a run-stage policy denies" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, sha: "old-sha")
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
+
+      assert {:error, "denied by stack policy: frozen"} = Stacks.poll(stack)
+
+      stack = refetch(stack)
+      assert stack.sha == "old-sha"
+      refute stack.polled_sha == "new-sha"
+      assert [] == StackRun.for_stack(stack.id) |> Console.Repo.all()
+    end
+
+    test "retries a previously denied poll after the run-stage policy is removed" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, sha: "old-sha")
+      association = insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
+
+      assert {:error, "denied by stack policy: frozen"} = Stacks.poll(stack)
+      Console.Repo.delete!(association)
+
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
+
+      {:ok, run} = Stacks.poll(refetch(stack))
+      assert run.git.ref == "new-sha"
+      assert refetch(stack).sha == "new-sha"
+    end
+
+    test "approval-stage policies do not block run creation" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "always"}] if true
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"})
+      insert(:stack_policy, stack: stack, policy: policy, type: :approval)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
+
+      {:ok, run} = Stacks.poll(stack)
+      assert run.git.ref == "new-sha"
+    end
+
+    test "does not create a pr dry run or advance the pr sha when a run-stage policy denies" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, sha: "old-sha")
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      pr = insert(:pull_request, stack: stack)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
+
+      assert {:error, "denied by stack policy: frozen"} = Stacks.poll(pr)
+      refute refetch(pr).sha == "new-sha"
+      assert [] == StackRun.for_stack(stack.id) |> Console.Repo.all()
+    end
+
+    test "allows pr dry runs when the policy exempts them" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+          not input.run.dry_run
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, sha: "old-sha")
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      pr = insert(:pull_request, stack: stack)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
+
+      {:ok, run} = Stacks.poll(pr)
+      assert run.dry_run
+      assert run.pull_request_id == pr.id
+    end
   end
 
   describe "#post_comment/1" do
@@ -876,6 +1026,23 @@ defmodule Console.Deployments.StacksTest do
 
       {:error, _} = Stacks.restart_run(run.id, insert(:user))
     end
+
+    test "does not restart when a run-stage policy denies" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, sha: "some-sha")
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      run = insert(:stack_run, git: %{ref: "some-sha"}, stack: stack)
+
+      assert {:error, "denied by stack policy: frozen"} = Stacks.restart_run(run.id, admin_user())
+      assert 1 == StackRun.for_stack(stack.id) |> Console.Repo.aggregate(:count)
+    end
   end
 
   describe "#trigger_run/2" do
@@ -893,6 +1060,109 @@ defmodule Console.Deployments.StacksTest do
       insert(:stack_run, stack: stack, git: %{ref: "some-sha"})
 
       {:error, _} = Stacks.trigger_run(stack.id, insert(:user))
+    end
+
+    test "returns the deny reason when a run-stage policy blocks creation" do
+      user = admin_user()
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"})
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      insert(:stack_run, stack: stack, git: %{ref: "some-sha"})
+
+      assert {:error, "denied by stack policy: frozen"} = Stacks.trigger_run(stack.id, user)
+    end
+  end
+
+  describe "#create_run/3" do
+    test "blocks run creation when a run-stage policy denies" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "blocked committer"}] if {
+          input.stage == "run"
+          input.commit.committer == "bad@example.com"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, sha: "old-sha")
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+
+      assert {:error, "denied by stack policy: blocked committer"} =
+               Stacks.create_run(stack, "new-sha", %{
+                 message: "msg",
+                 committer: "bad@example.com",
+                 trigger: %{source: :git}
+               })
+      assert refetch(stack).sha == "old-sha"
+      assert [] == StackRun.for_stack(stack.id) |> Console.Repo.all()
+    end
+
+    test "creates a run when the run-stage policy does not deny" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "blocked committer"}] if {
+          input.stage == "run"
+          input.commit.committer == "bad@example.com"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"})
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+
+      {:ok, run} = Stacks.create_run(stack, "new-sha", %{
+        message: "msg",
+        committer: "alice@example.com",
+        trigger: %{source: :git}
+      })
+      assert run.git.ref == "new-sha"
+      assert run.committer == "alice@example.com"
+    end
+
+    test "allows destroy runs when the policy exempts them" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "frozen"}] if {
+          input.stage == "run"
+          not input.run.destroy
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, deleted_at: Timex.now())
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+
+      {:ok, run} = Stacks.create_run(stack, stack.sha || "sha", %{
+        message: "destroying stack",
+        trigger: %{source: :destroy}
+      })
+      assert run.destroy
+    end
+
+    test "denies runs with malformed variables" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "TF_VAR_environment must be staging or production"}] if {
+          input.stage == "run"
+          env := object.get(input.variables, "environment", "")
+          env != "staging"
+          env != "production"
+        }
+        """)
+      )
+      stack = insert(:stack, git: %{ref: "main", folder: "terraform"}, variables: %{"environment" => "dev"})
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+
+      assert {:error, "denied by stack policy: TF_VAR_environment must be staging or production"} =
+               Stacks.create_run(stack, "new-sha", %{trigger: %{source: :git}})
     end
   end
 
@@ -1508,6 +1778,16 @@ defmodule Console.Deployments.StacksTest do
       {:error, _} = Stacks.stack_files(stack.id, insert(:user))
     end
   end
+
+  defp stack_rego(body) do
+    """
+    package plrl.stack
+
+    sample := 0
+
+    #{body}
+    """
+  end
 end
 
 defmodule Console.Deployments.StacksSyncTest do
@@ -1628,6 +1908,20 @@ defmodule Console.Deployments.StacksSyncTest do
       assert {:error, _} = Stacks.create_stack_policy(%{policy_id: policy.id}, stack.id, user)
       assert {:error, _} = Stacks.update_stack_policy(%{policy_id: policy.id}, association.id, user)
       assert {:error, _} = Stacks.delete_stack_policy(association.id, user)
+    end
+
+    test "allows attaching the same policy as run and approval" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project, type: :stack)
+
+      {:ok, approval} = Stacks.create_stack_policy(%{policy_id: policy.id, type: :approval}, stack.id, user)
+      {:ok, run} = Stacks.create_stack_policy(%{policy_id: policy.id, type: :run}, stack.id, user)
+
+      assert approval.type == :approval
+      assert run.type == :run
+      assert {:error, _} = Stacks.create_stack_policy(%{policy_id: policy.id, type: :run}, stack.id, user)
     end
   end
 
@@ -1939,6 +2233,22 @@ defmodule Console.Deployments.StacksSyncTest do
       run = insert(:stack_run, stack: stack, status: :pending)
 
       assert :ok = Stacks.stack_run_approval(run)
+    end
+
+    test "ignores run-stage policies during approval" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"msg": "blocked"}] if true
+        """)
+      )
+      stack = insert(:stack)
+      insert(:stack_policy, stack: stack, policy: policy, type: :run)
+      run = insert(:stack_run, stack: stack, status: :pending_approval)
+      insert(:stack_state, run: run, plan: "terraform plan", plan_json: terraform_plan(resource_changes: []))
+
+      assert :ok = Stacks.stack_run_approval(run)
+      assert refetch(run).status == :pending_approval
     end
   end
 

@@ -308,8 +308,8 @@ defmodule Console.Deployments.Policy do
 
   defp fetch_attachment(%BindingPolicy{policy_id: id}, %Workbench{id: wid}),
     do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
-  defp fetch_attachment(%BindingPolicy{policy_id: id}, %Stack{id: sid}),
-    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid)
+  defp fetch_attachment(%BindingPolicy{policy_id: id} = binding, %Stack{id: sid}),
+    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid, type: stack_policy_type(binding))
 
   defp reconcile_target(:attach, %BindingPolicy{id: binding_id, policy_id: id} = binding, %Workbench{} = wb, user),
     do: Workbenches.create_workbench_policy(%{
@@ -321,8 +321,8 @@ defmodule Console.Deployments.Policy do
     do: Stacks.create_stack_policy(stack_policy_attrs(binding), stack.id, user)
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Workbench{} = wb, user),
     do: Workbenches.delete_workbench_policy(id, wb.id, user)
-  defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
-    do: Stacks.delete_stack_policy(id, stack.id, user)
+  defp reconcile_target(:detach, %BindingPolicy{policy_id: id} = binding, %Stack{} = stack, user),
+    do: Stacks.delete_stack_policy(id, stack.id, stack_policy_type(binding), user)
 
   defp authorize_project_change(%Ecto.Changeset{} = cs, user),
     do: authorize_project_change(Ecto.Changeset.get_change(cs, :project_id), cs, user)
@@ -336,10 +336,11 @@ defmodule Console.Deployments.Policy do
 
   defp bot(), do: Users.admin_bot()
 
-  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id, matches: %{stack: %{type: t}}})
-    when not is_nil(t), do: %{policy_id: id, binding_policy_id: binding_id, type: t}
-  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id}),
-    do: %{policy_id: id, binding_policy_id: binding_id, type: :approval}
+  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id} = binding),
+    do: %{policy_id: id, binding_policy_id: binding_id, type: stack_policy_type(binding)}
+
+  defp stack_policy_type(%BindingPolicy{matches: %{stack: %{type: t}}}) when not is_nil(t), do: t
+  defp stack_policy_type(_), do: :approval
 
   defp maybe_sample({:ok, %{"sample" => s}} = res, input, ids) when is_list(ids) do
     if :rand.uniform() <= Console.clamp(s, 0, 0.5) && !Enum.empty?(ids) do
