@@ -111,13 +111,11 @@ const chatList = (theme: DefaultTheme) =>
   ({
     ...blockSpacing(theme),
     paddingLeft: theme.spacing.large,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.xsmall,
-    'li > &': {
-      paddingTop: theme.spacing.xxsmall,
-      gap: theme.spacing.xxsmall,
-    },
+    // Margin, not flex: Chrome crashes (error code 5) when a list is a flex
+    // container and its ::marker is styled.
+    '& > li + li': { marginTop: theme.spacing.xsmall },
+    'li > &': { paddingTop: theme.spacing.xxsmall },
+    'li > & > li + li': { marginTop: theme.spacing.xxsmall },
   }) as const
 
 const ChatUl = styled.ul(({ theme }) => chatList(theme))

@@ -10,7 +10,6 @@ import {
   hoverCaretAccordionCss,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
-import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
@@ -72,6 +71,48 @@ export function WorkbenchJobActivities({
     return indices
   }, [activityGroups])
 
+  const noneStream = textStreamMap['none'] ?? ''
+  const showBottomLoader =
+    isJobRunning(job?.status) &&
+    activities.every(({ status }) => isActivityTerminal(status)) &&
+    jobLevelThinking.length === 0
+  // Keep this element stable. A new one on each render re-pins the list to
+  // the end, so an accordion opened at the bottom jumps upward.
+  const bottomStatus =
+    jobLevelThinking.length > 0
+      ? 'thinking'
+      : showBottomLoader
+        ? 'planning'
+        : null
+  const bottomContent = useMemo(
+    () => (
+      <>
+        {bottomStatus && (
+          <WorkbenchJobJobLevelThinking
+            items={jobLevelThinking}
+            jobRunning={isJobRunning(job?.status)}
+            planning={bottomStatus === 'planning'}
+            jobId={jobId}
+          />
+        )}
+        {noneStream && (
+          <SimplifiedMarkdown
+            text={noneStream}
+            tone="thought"
+          />
+        )}
+        <ChatEndSpaceSC />
+      </>
+    ),
+    [
+      bottomStatus,
+      job?.status,
+      jobId,
+      jobLevelThinking,
+      noneStream,
+    ]
+  )
+
   if (!data && loading)
     return (
       <RectangleSkeleton
@@ -99,7 +140,9 @@ export function WorkbenchJobActivities({
             data={activityGroups}
             itemGap={ACTIVITY_GAP}
             style={{
-              padding: `${spacing.large}px ${spacing.large}px ${spacing.medium}px`,
+              padding: `${spacing.large}px ${spacing.large}px 0`,
+              // Keep the clicked row from being pinned when it grows at the bottom.
+              overflowAnchor: 'none',
             }}
             keepMounted={userPromptIndices}
             topContent={
@@ -118,32 +161,7 @@ export function WorkbenchJobActivities({
                 />
               )
             }
-            bottomContent={
-              <>
-                {jobLevelThinking.length > 0 && (
-                  <WorkbenchJobJobLevelThinking
-                    items={jobLevelThinking}
-                    jobRunning={isJobRunning(job?.status)}
-                  />
-                )}
-                {textStreamMap['none'] && (
-                  <SimplifiedMarkdown
-                    text={textStreamMap['none']}
-                    tone="thought"
-                  />
-                )}
-                {isJobRunning(job?.status) &&
-                  activities.every(({ status }) =>
-                    isActivityTerminal(status)
-                  ) &&
-                  jobLevelThinking.length === 0 && (
-                    <AILoadingText
-                      jobId={jobId}
-                      marginTop={textStreamMap['none'] ? spacing.small : 0}
-                    />
-                  )}
-              </>
-            }
+            bottomContent={bottomContent}
             renderer={({ rowData }) => {
               const [activity] = rowData.activities
 
@@ -208,6 +226,12 @@ const ActivitiesAccordionSC = styled(Accordion)({
   height: '100%',
   ...hoverCaretAccordionCss,
 })
+
+/** Room under the last message so an accordion at the end opens downward. */
+const ChatEndSpaceSC = styled.div(({ theme }) => ({
+  height: theme.spacing.xxxxlarge,
+  flexShrink: 0,
+}))
 
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',

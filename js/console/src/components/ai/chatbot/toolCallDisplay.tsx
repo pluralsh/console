@@ -203,12 +203,23 @@ export function toolCallGroupHeader(
     .join(', ')
 }
 
-export function toolCallDisplayTitle(
-  kind: ToolCallKind,
-  toolName: string,
-  args?: ToolArguments,
-  isPending?: boolean
-): string {
+/** Lowercase, verb-first label for a tool call. */
+export function toolCallTitle({
+  name = '',
+  kind,
+  args,
+  pending = false,
+  hiddenWords,
+}: {
+  name?: string | null
+  kind?: ToolCallKind
+  args?: ToolArguments
+  pending?: boolean
+  /** Connection and product words to drop, such as "prometheus". */
+  hiddenWords?: Iterable<string | null | undefined>
+} = {}): string {
+  const toolName = name ?? ''
+
   switch (kind) {
     case 'command_execution':
     case 'bash':
@@ -227,13 +238,13 @@ export function toolCallDisplayTitle(
     case 'grep':
       return 'grep'
     case 'subagent':
-      return isPending ? formatSubagentTitle(args) : 'subagent'
+      return pending ? formatSubagentTitle(args) : 'subagent'
     case 'subagent_result':
       return 'result'
     case 'enable_tools':
       return 'enable tools'
     default:
-      return humanizeToolName(toolName)
+      return styleToolName(toolName, hiddenWords)
   }
 }
 
@@ -293,7 +304,51 @@ export function toolCallDisplayDescription(args?: ToolArguments): string {
   return ''
 }
 
-export function humanizeToolName(toolName: string): string {
+/**
+ * Trailing words that are the action in a tool name. "run" is left in place
+ * because a sentinel run is a noun.
+ */
+const TRAILING_VERBS = new Set([
+  'add',
+  'aggregate',
+  'close',
+  'create',
+  'delete',
+  'describe',
+  'drain',
+  'enable',
+  'exec',
+  'fetch',
+  'get',
+  'inspect',
+  'invoke',
+  'list',
+  'post',
+  'query',
+  'react',
+  'read',
+  'remove',
+  'reply',
+  'save',
+  'search',
+  'transition',
+  'update',
+  'upsert',
+])
+
+const FETCH_NOUNS = new Set([
+  'log',
+  'logs',
+  'metric',
+  'metrics',
+  'trace',
+  'traces',
+])
+
+function styleToolName(
+  toolName: string,
+  hiddenWords: Iterable<string | null | undefined> = []
+): string {
   const lower = toolName.toLowerCase().trim()
   if (!lower) return 'tool'
   if (TITLE_OVERRIDES[lower]) return TITLE_OVERRIDES[lower]
@@ -306,8 +361,37 @@ export function humanizeToolName(toolName: string): string {
     }
   }
 
-  const humanized = startCase(rest.replace(/[_-]+/g, ' ').trim()).toLowerCase()
-  return humanized || 'tool'
+  const hidden = new Set(
+    [...hiddenWords].flatMap((value) =>
+      (value ?? '')
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean)
+    )
+  )
+  const words = (startCase(rest.replace(/[_-]+/g, ' ').trim()).toLowerCase() ||
+    'tool')
+    .split(/\s+/)
+    .filter((word) => word && !hidden.has(word))
+  const titled = prefixFetch(leadWithVerb(words))
+
+  return titled.join(' ') || 'tool'
+}
+
+function leadWithVerb(words: string[]): string[] {
+  if (words.length < 2) return words
+  const verb = words[words.length - 1]
+  if (!TRAILING_VERBS.has(verb)) return words
+
+  return [verb, ...words.slice(0, -1)]
+}
+
+function prefixFetch(words: string[]): string[] {
+  if (words.length === 1 && FETCH_NOUNS.has(words[0])) {
+    return ['fetch', words[0]]
+  }
+
+  return words
 }
 
 export function getSubagentRole(args?: ToolArguments): string {
@@ -320,7 +404,7 @@ export function getSubagentPrompt(args?: ToolArguments): string {
   return typeof args.prompt === 'string' ? args.prompt : ''
 }
 
-export function formatSubagentTitle(args?: ToolArguments): string {
+function formatSubagentTitle(args?: ToolArguments): string {
   const role = startCase(getSubagentRole(args).replace(/[_-]+/g, ' '))
   return role ? `${role} subagent` : 'Subagent'
 }

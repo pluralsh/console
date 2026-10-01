@@ -9,7 +9,11 @@ import {
   Modal,
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, InlineA } from 'components/utils/typography/Text'
+import {
+  Body2P,
+  InlineA,
+  shimmerWithinCss,
+} from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
@@ -18,7 +22,7 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
-import { ToolCallContent } from '../ToolCallContent'
+import { ToolCallContent, useQuietToolCodeCss } from '../ToolCallContent'
 import {
   getCommand,
   getPython,
@@ -27,7 +31,7 @@ import {
   shouldUnfurlCmdTool,
   toolCallDisplayDescription,
   toolCallDisplaySubtitle,
-  toolCallDisplayTitle,
+  toolCallTitle,
 } from '../toolCallDisplay'
 import { ToolCallKindIcon } from '../toolCallIcons'
 
@@ -82,6 +86,7 @@ export function SimpleToolCall({
   customLabel,
   customTitle,
   leadingIcon,
+  shimmer = false,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
@@ -91,9 +96,17 @@ export function SimpleToolCall({
   customLabel?: ReactNode
   customTitle?: string
   leadingIcon?: ReactNode
+  /** Sweep loading text inside code and log boxes without treating the call as pending. */
+  shimmer?: boolean
 }) {
   const theme = useTheme()
   const { spacing } = theme
+  const quietCodeCss = useQuietToolCodeCss()
+  const showShimmer = isPending || shimmer
+  const codeCss = {
+    ...quietCodeCss,
+    ...(showShimmer && shimmerWithinCss(theme)),
+  }
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
@@ -106,7 +119,8 @@ export function SimpleToolCall({
   }
 
   const title =
-    customTitle ?? toolCallDisplayTitle(kind, toolName, args, isPending)
+    customTitle ??
+    toolCallTitle({ name: toolName, kind, args, pending: isPending })
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
   const resolvedLeadingIcon =
     leadingIcon ??
@@ -123,7 +137,7 @@ export function SimpleToolCall({
       title={title}
       subtitle={subtitle}
       runtime={toolRuntime}
-      isPending={isPending}
+      isPending={showShimmer}
       leadingIcon={resolvedLeadingIcon}
     />
   )
@@ -143,7 +157,7 @@ export function SimpleToolCall({
           title={customTitle ?? (description || title)}
           subtitle={description ? undefined : subtitle}
           runtime={toolRuntime}
-          isPending={isPending}
+          isPending={showShimmer}
           leadingIcon={resolvedLeadingIcon}
         />
       )
@@ -176,7 +190,9 @@ export function SimpleToolCall({
             <Code
               language="bash"
               showHeader={false}
+              fillLevel={0}
               css={{
+                ...codeCss,
                 backgroundColor: 'transparent',
                 borderBottomLeftRadius: 0,
                 borderBottomRightRadius: 0,
@@ -191,6 +207,7 @@ export function SimpleToolCall({
               hideArguments
               flushTop
               isPending={isPending}
+              shimmer={showShimmer}
               transparent
               maxOutputHeight={240}
               ansiOutput
@@ -213,6 +230,8 @@ export function SimpleToolCall({
             <Code
               language="python"
               showHeader={false}
+              fillLevel={0}
+              css={codeCss}
             >
               {python}
             </Code>
@@ -223,6 +242,7 @@ export function SimpleToolCall({
               hideArguments
               flushTop
               isPending={isPending}
+              shimmer={showShimmer}
             />
           </Flex>
         </SimpleAccordion>
@@ -236,6 +256,7 @@ export function SimpleToolCall({
             attributes={attributes}
             customResultBody={customResultBody}
             isPending={isPending}
+            shimmer={showShimmer}
           />
         </SimpleAccordion>
       )
@@ -672,9 +693,9 @@ const InlineCodeSC = styled.code(({ theme }) => ({
 const ListSC = styled.ul(({ theme }) => ({
   margin: 0,
   paddingLeft: theme.spacing.large,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
+  // Margin, not flex: Chrome crashes (error code 5) when a list is a flex
+  // container and its ::marker is styled.
+  '& > li + li': { marginTop: theme.spacing.xxsmall },
   'li > &': { paddingTop: theme.spacing.xxsmall },
   '& > li::marker': { color: theme.colors['text-xlight'] },
 }))

@@ -50,7 +50,7 @@ export function ChatToolCallGroup({
       >
         <Flex
           direction="column"
-          gap="xsmall"
+          gap="small"
           marginTop={spacing.xsmall}
         >
           {messages.map(renderMessage)}
