@@ -51,5 +51,6 @@ const CrontabSC = styled.span(({ theme }) => ({
   color: theme.colors['text-light'],
   flex: 1,
   fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
   minWidth: 0,
 }))

@@ -595,6 +595,7 @@ const RowAvatarSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
   fontSize: 18,
   height: 40,
   justifyContent: 'center',

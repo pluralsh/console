@@ -71,19 +71,19 @@
   font-display: swap;
   font-family: 'JetBrains Mono';
   font-weight: 400;
-  src: url("/fonts/JetBrainsMonoNL-Regular.woff2") format("woff2");
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
 }
 
 @font-face {
   font-display: swap;
   font-family: 'JetBrains Mono';
   font-weight: 500;
-  src: url("/fonts/JetBrainsMonoNL-Medium.woff2") format("woff2");
+  src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2");
 }
 
 @font-face {
   font-display: swap;
   font-family: 'JetBrains Mono';
   font-weight: 600;
-  src: url("/fonts/JetBrainsMonoNL-SemiBold.woff2") format("woff2");
+  src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
 }

@@ -52,7 +52,7 @@ export default function CommandLog({ text, follow }) {
   return (
     <Flex
       direction="column"
-      css={{ fontFamily: fontFamilies.mono }}
+      css={{ fontFamily: fontFamilies.mono, fontVariantLigatures: 'none' }}
       paddingTop={spacing.small}
       paddingBottom={spacing.small}
       overflowY="auto"

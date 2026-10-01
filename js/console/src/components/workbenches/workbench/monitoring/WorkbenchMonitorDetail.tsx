@@ -1196,6 +1196,7 @@ const TitleRowSC = styled.div(({ theme }) => ({
 const TitleSC = styled.h2(({ theme }) => ({
   color: theme.colors.text,
   fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
   fontSize: 18,
   fontWeight: 400,
   lineHeight: '24px',
@@ -1307,6 +1308,7 @@ const RecentSectionSC = styled.div(({ theme }) => ({
 const SectionTitleSC = styled.h3(({ theme }) => ({
   color: theme.colors.text,
   fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
   fontSize: 18,
   fontWeight: 400,
   lineHeight: '24px',

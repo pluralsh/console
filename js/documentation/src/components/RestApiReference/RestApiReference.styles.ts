@@ -54,6 +54,7 @@ export const EndpointPath = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['text-light'],
   fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
 }))
 
 export const PageDescription = styled.p(({ theme }) => ({

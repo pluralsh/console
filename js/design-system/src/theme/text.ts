@@ -177,12 +177,14 @@ const textPartials = {
   },
   code: {
     fontFamily: fontFamilies.mono,
+    fontVariantLigatures: 'none',
     fontSize: 14,
     lineHeight: '22px',
     letterSpacing: '.25px',
   },
   inlineCode: {
     fontFamily: fontFamilies.mono,
+    fontVariantLigatures: 'none',
     fontSize: `calc(max(${INLINE_CODE_MIN_PX}px, ${INLINE_CODE_EMS}em))`,
     letterSpacing: '.25px',
   },

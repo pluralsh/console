@@ -34,6 +34,7 @@ body {
 
 code {
   font-family: 'JetBrains Mono', monospace;
+  font-variant-ligatures: none;
 }
 
 body h1,

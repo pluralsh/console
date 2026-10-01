@@ -162,6 +162,7 @@ function TokenBreakdown({
                   $color="text-light"
                   css={{
                     fontFamily: theme.fontFamilies.mono,
+                    fontVariantLigatures: 'none',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
@@ -173,6 +174,7 @@ function TokenBreakdown({
                     $color="text-input-disabled"
                     css={{
                       fontFamily: theme.fontFamilies.mono,
+                      fontVariantLigatures: 'none',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                     }}
@@ -185,6 +187,7 @@ function TokenBreakdown({
                 $color="text"
                 css={{
                   fontFamily: theme.fontFamilies.mono,
+                  fontVariantLigatures: 'none',
                 }}
               >
                 {formatTokenCount(row.value)}

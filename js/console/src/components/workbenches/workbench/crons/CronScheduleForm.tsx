@@ -349,6 +349,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                           css={{
                             color: theme.colors['code-block-purple'],
                             fontFamily: theme.fontFamilies.mono,
+                            fontVariantLigatures: 'none',
                             '&:focus-within': {
                               border: theme.borders['outline-focused'],
                               borderColor: hasCronError
@@ -360,6 +361,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                               paddingLeft: 16,
                               paddingRight: 16,
                               fontFamily: theme.fontFamilies.mono,
+                              fontVariantLigatures: 'none',
                             },
                           }}
                         />

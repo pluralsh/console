@@ -429,6 +429,7 @@ const AnsiOutputSC = styled.pre(({ theme }) => ({
   margin: 0,
   color: theme.colors['text-light'],
   fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
 }))
