@@ -68,19 +68,22 @@
 }
 
 @font-face {
-  font-family: 'Monument Mono';
+  font-display: swap;
+  font-family: 'JetBrains Mono';
   font-weight: 400;
-  src: url("/fonts/ABCMonumentGroteskMono-Regular.woff") format("woff");
+  src: url("/fonts/JetBrainsMonoNL-Regular.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: 'Monument Mono';
+  font-display: swap;
+  font-family: 'JetBrains Mono';
   font-weight: 500;
-  src: url("/fonts/ABCMonumentGroteskMono-Medium.woff") format("woff");
+  src: url("/fonts/JetBrainsMonoNL-Medium.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: 'Monument Mono';
+  font-display: swap;
+  font-family: 'JetBrains Mono';
   font-weight: 600;
-  src: url("/fonts/ABCMonumentGroteskMono-Heavy.woff") format("woff");
+  src: url("/fonts/JetBrainsMonoNL-SemiBold.woff2") format("woff2");
 }

@@ -53,7 +53,7 @@ export const PathGroup = styled.div(({ theme }) => ({
 export const EndpointPath = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['text-light'],
-  fontFamily: 'Monument Semi-Mono, monospace',
+  fontFamily: theme.fontFamilies.mono,
 }))
 
 export const PageDescription = styled.p(({ theme }) => ({
