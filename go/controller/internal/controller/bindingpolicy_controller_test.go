@@ -234,11 +234,10 @@ var _ = Describe("BindingPolicy Controller", Ordered, func() {
 		})
 
 		It("should clear matches on update when spec.matches is removed", func() {
-			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.BindingPolicy{
-				ObjectMeta: metav1.ObjectMeta{Name: bindingPolicyName, Namespace: namespace},
-			}, func(p *v1alpha1.BindingPolicy) {
-				p.Spec.Matches = nil
-			})).To(Succeed())
+			bindingPolicy := &v1alpha1.BindingPolicy{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, bindingPolicy)).To(Succeed())
+			bindingPolicy.Spec.Matches = nil
+			Expect(k8sClient.Update(ctx, bindingPolicy)).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("IsBindingPolicyExists", mock.Anything, id).Return(true, nil)
