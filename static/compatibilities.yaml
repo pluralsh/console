@@ -11378,7 +11378,7 @@ addons:
   release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
   helm_repository_url: https://aws.github.io/eks-charts
   versions:
-  - version: 1.23.1
+  - version: 1.23.2
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
@@ -11422,8 +11422,18 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Network Policy agent adds a new **strict mode** for network policy
+          enforcement (requires nodeagent to receive pod name/namespace; introduces
+          a gRPC call path between components)., 'Continues maintenance updates (dependency
+          bumps, build tooling updates) that should be transparent to most clusters.']
+      breaking_changes: ['None explicitly called out in the provided notes; however,
+          enabling Network Policy strict mode may change enforcement behavior and
+          should be treated as a behavioral change if you turn it on.']
     chart_version: 1.17.1
+    images: []
   - version: 1.16.2
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -17131,6 +17141,30 @@ addons:
   release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/external-dns
   versions:
+  - version: 0.23.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [CRD registry can now store `DNSRecord` objects independently of the
+          source namespace; a new `--crd-registry-namespace` flag controls where those
+          objects live., Cloudflare provider adds support for TLSA records., FIPS
+          140-3 compliant container image build target/documentation is available.,
+        Gateway sources were migrated to indexer-based filtering for consistency and
+          performance.]
+      breaking_changes: ['CRD registry behavior changed: `DNSRecord` objects are no
+          longer stored per source namespace; you must set `--crd-registry-namespace`
+          correctly when upgrading from v0.22.0 to avoid looking in/creating records
+          in the wrong namespace.', In-tree Gandi provider was removed; deployments
+          using `--provider=gandi` must stay on an older version or switch to a webhook
+          provider before upgrading., Webhook provider now caps request/response bodies
+          at 32 MiB (configurable via `--webhook-provider-max-body-size`); large payload
+          integrations may fail unless adjusted.]
+    chart_version: 1.23.0
+    images: []
   - version: 0.22.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -19756,7 +19790,7 @@ addons:
           \ behavior changes\u2014confirm by reviewing intermediate versions\u2019\
           \ upgrade guides and CRD diffs before applying in production."]
     chart_version: 1.13.0
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.13.0@sha256:ea731b0cd813add8b2947a76bfe861c38069d85922b01d0c1647d1466279b7fe']
   - version: 1.9.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -19780,7 +19814,7 @@ addons:
           applied/reconciled. Treat this as an upgrade prerequisite and verify permissions
           before rolling out.]
     chart_version: 1.9.0
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.9.0@sha256:30a506c64fbb1d8026cbfd9a1d662be3ab6e33a7999290a104085d78b49a69d7']
   - version: 1.8.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
     requirements: []
@@ -19840,7 +19874,7 @@ addons:
         Helm chart now **requires `settings.clusterName`**; upgrades/installs will
           fail if it is not provided.]
     chart_version: 1.6.0
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.6.0@sha256:37c761a3a0b485fd34db1390317ef6149141f532c5a699c528b98fb8f9cc722a']
   - version: 1.5.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -19873,7 +19907,7 @@ addons:
           can fail if `settings.clusterName` is not set; this is an intentional enforcement
           change.]
     chart_version: 1.5.0
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
   - version: 1.2.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -19887,7 +19921,7 @@ addons:
           health/repair related integrations).]
       breaking_changes: []
     chart_version: 1.2.0
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.2.0@sha256:24b8fe57f02b70fc4ab3cd6d5aa0d73a6f3d0c62ca5d23d7ffc8853eac01e324']
   - version: 1.0.5
     kube: ['1.31', '1.30']
     requirements: []
@@ -19904,7 +19938,7 @@ addons:
       breaking_changes: ['v0.37.0: EC2NodeClass gains a readiness condition, which
           requires upgrading CRDs as part of the upgrade.']
     chart_version: 1.0.5
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
   - version: 0.37.0
     kube: ['1.30']
     requirements: []
@@ -19951,7 +19985,7 @@ addons:
           NodeClass/NodePool lifecycle in a staging cluster and watch logs/events
           after upgrade).']
     chart_version: 0.37.0
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:0.37.0@sha256:157f478f5db1fe999f5e2d27badcc742bf51cc470508b3cebe78224d0947674f']
   - version: 0.34.0
     kube: ['1.29']
     requirements: []
@@ -24768,7 +24802,7 @@ addons:
           and behavior fixes (notably SSL redirect/rewrite-target handling) may change
           request/redirect behavior compared to earlier 3.7.x expectations; validate
           ingress annotations in staging.]
-    chart_version: 41.6.0
+    chart_version: 41.6.1
     images: ['docker.io/traefik:v3.7.13']
   - version: 3.7.0
     kube: ['1.36', '1.35', '1.34', '1.33']
@@ -26766,7 +26800,7 @@ addons:
       chart_updates: []
       features: []
       breaking_changes: []
-    chart_version: 10.9.4
+    chart_version: 10.9.5
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.3']
   - version: 3.5.1
@@ -30270,7 +30304,7 @@ addons:
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     chart_version: 26.3.3
-    images: ['nvcr.io/nvidia/gpu-operator:v26.3.3', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.3']
+    images: []
     incompatibilities: []
   - version: 26.3.2
     kube: ['1.36', '1.35', '1.34']
@@ -32386,7 +32420,17 @@ addons:
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['No detailed changelog content was provided beyond release metadata
+          (tags, dates, assets). There are no documented chart template changes, dependency
+          bumps, or value schema changes in the provided notes.']
+      features: [No feature notes were included in the provided release metadata;
+          assume no user-visible feature changes are documented between 1.15.0 and
+          1.15.3 in the notes you shared.]
+      breaking_changes: [No breaking changes were mentioned in the provided notes;
+          still validate by diffing chart values/schema and rendering manifests before
+          upgrading.]
     chart_version: 1.15.3
     images: []
   - version: 1.15.0
@@ -32427,12 +32471,43 @@ addons:
     summary: null
     chart_version: 1.10.2
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.10.2']
+  - version: 1.10.1
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["v1.10.1 fixes the v1.10.0 bug that broke the operator\u2019s auto-update\
+          \ functionality, so auto-update should work again after upgrading."]
+      breaking_changes: []
+    chart_version: 1.10.1
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.10.1']
   - version: 1.10.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- **Recommendation:** Do **not** upgrade to `1.10.0` if you rely
+        on operator auto-update; this release has a known bug that breaks auto-update.
+        Prefer waiting for `v1.10.1`.
+
+        - Helm upgrade command format is unchanged; only the chart `--version` changes
+        (from `1.9.0` to `1.10.0`).
+
+        - No new/changed Helm values were mentioned in the provided notes.
+
+        '
+      chart_updates: ['Release `v1.10.0` is marked **prerelease** and has a **known
+          issue**: auto-update is broken.', 'Published new chart package `dynatrace-operator-1.10.0.tgz`
+          and updated manifests/CRDs for `v1.10.0` (kubernetes/openshift, with and
+          without CSI).']
+      features: []
+      breaking_changes: ['**Auto-update is broken in v1.10.0** due to a bug; treat
+          this as a functional breaking change if you depend on auto-update. Dynatrace
+          recommends skipping `v1.10.0` and upgrading to `v1.10.1` instead.']
     chart_version: 1.10.0
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.10.0']
   - version: 1.9.0
@@ -32440,49 +32515,134 @@ addons:
       '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes for v1.9.0 point to external Dynatrace documentation
+          for details; the provided notes mainly include updated install/upgrade commands
+          and asset links., 'Helm install/upgrade remains the recommended method,
+          using the OCI chart at version 1.9.0.']
+      breaking_changes: [No breaking changes are called out in the provided v1.9.0
+          vs v1.8.0 release text; detailed changes must be checked in the linked official
+          Dynatrace Operator release notes.]
     chart_version: 1.9.0
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.9.0']
   - version: 1.8.0
     kube: ['1.35']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release artifact/version bump from dynatrace-operator chart/app 1.7.0
+          to 1.8.0., 'Updated published Kubernetes/OpenShift manifests and CRD bundle
+          (notable size increase, suggesting new/updated CRDs or fields).']
+      breaking_changes: ['No breaking changes are described in the provided GitHub
+          release notes; detailed changes are only referenced via external Dynatrace
+          documentation, so treat this upgrade as potentially including CRD/schema
+          changes and validate in a staging cluster first.']
     chart_version: 1.8.0
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.8.0']
   - version: 1.7.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release v1.7.0 published; release notes content deferred to official
+          documentation (no concrete feature list provided in the supplied notes).]
+      breaking_changes: []
     chart_version: 1.7.0
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.7.0']
   - version: 1.4.0
     kube: ['1.25']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- Upgrade command changes only in examples: **v1.4.0** explicitly
+        calls out namespace creation for `kubectl/oc` paths; Helm command remains
+        the same aside from `--version`.
+
+        - No Helm values changes were provided in the notes you shared (release notes
+        defer to external documentation).'
+      chart_updates: [Documentation/example install commands updated for Kubernetes/OpenShift
+          manifests (explicit `create namespace dynatrace` and clearer CSI vs non-CSI
+          sections)., No chart template/resource changes were listed in the provided
+          notes; full details appear to be in external Dynatrace documentation.]
+      features: [No new features were enumerated in the provided GitHub release snippets;
+          they point to official documentation for details.]
+      breaking_changes: [No breaking changes were stated in the provided GitHub release
+          snippets; verify in the official Dynatrace documentation for v1.4.0 before
+          upgrading.]
     chart_version: 1.4.0
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.4.0']
   - version: 1.3.0
     kube: ['1.24']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v1.3.0 release notes provided here only include updated install commands
+          (Helm version bump to 1.3.0; kubernetes/openshift manifests include separate
+          *-csi.yaml applies)., No specific feature list is included in the provided
+          notes; they point to official documentation for full release notes.]
+      breaking_changes: [No breaking changes are stated in the provided release notes
+          excerpts; consult the official Dynatrace documentation/release notes between
+          v1.0.0 and v1.3.0 for any required manual steps or value changes.]
     chart_version: 1.3.0
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.3.0']
   - version: 1.0.0
     kube: ['1.23', '1.22']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- The Helm chart distribution location changed between these\
+        \ releases:\n  - **0.12.0:** `dynatrace/dynatrace-operator` (Helm repo)\n\
+        \  - **1.0.0:** `oci://public.ecr.aws/dynatrace/dynatrace-operator` (OCI registry)\n\
+        \n  Update your upgrade command accordingly, e.g.:\n  ```sh\n  helm upgrade\
+        \ dynatrace-operator oci://public.ecr.aws/dynatrace/dynatrace-operator \\\n\
+        \    --version 1.0.0 \\\n    --namespace dynatrace \\\n    --install \\\n\
+        \    --atomic\n  ```\n- No explicit `values.yaml` key changes are mentioned\
+        \ in the notes you provided; plan to diff `values.yaml` against the 1.0.0\
+        \ chart defaults to confirm compatibility."
+      chart_updates: [Chart version bumped to **1.0.0** (major release)., 'Packaging/installation
+          assets updated for 1.0.0 (new `.tgz` artifact, CRD YAML, platform manifests).',
+        Helm install/upgrade documentation now points to an **OCI** chart reference
+          instead of a classic Helm repo.]
+      features: [Release notes in the GitHub entry defer to Dynatrace official documentation;
+          no specific new features are listed in the text you provided.]
+      breaking_changes: ["Potential breaking change: **chart delivery mechanism changed**\
+          \ (Helm repo \u2192 OCI registry), which may require updates to CI/CD, helm\
+          \ registry auth/mirroring, and internal chart proxying.", 'Because 1.0.0
+          is a **major version**, expect possible CRD/operator behavior changes; the
+          GitHub note does not enumerate them and instead points to official documentation,
+          so you should review those docs before upgrading.']
     chart_version: 1.0.0
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.0.0']
   - version: 0.12.0
     kube: ['1.21']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- **Upgrade command changed vs 0.6.0:** the 0.12.0 notes show\
+        \ `helm upgrade ... -f <values.yaml> --atomic --version=\"0.12.0\"` and *do\
+        \ not* mention `--reuse-values`.\n- **CRD handling note:** in 0.6.0 Helm upgrade\
+        \ instructions explicitly applied the CRD manifest first (`kubectl apply -f\
+        \ .../dynatrace.com_dynakubes.yaml`) before running `helm upgrade`. The 0.12.0\
+        \ release notes don\u2019t mention this step; verify whether CRDs are now\
+        \ bundled/managed differently in the chart or still need a separate apply\
+        \ in your environment.\n"
+      chart_updates: []
+      features: [Operator 0.12.0 release is available with updated Kubernetes/OpenShift
+          manifests and a Helm chart package (`dynatrace-operator-0.12.0.tgz`).]
+      breaking_changes: ['**Known critical limitation:** v0.12.0 does **not** properly
+          support tenant aliases in `apiUrl` and should not be used if your Dynatrace
+          URL uses a tenant alias; use v0.12.1 instead.', '**Support policy change
+          (introduced in 0.6.0):** only the latest n-2 versions (or 9 months, whichever
+          is longer) are supported, and Helm support is tied to deploying supported
+          operator/component versions.']
     chart_version: 0.12.0
     images: ['docker.io/dynatrace/dynatrace-operator:v0.12.0']
   - version: 0.6.0
