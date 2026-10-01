@@ -38,6 +38,10 @@ defmodule Console.Schema.BindingPolicy do
     from(p in query, where: p.type == ^type)
   end
 
+  def excluding(query \\ __MODULE__, id) do
+    from(p in query, where: p.id != ^id)
+  end
+
   def match_counts_for_bind_policies([]), do: %{}
   def match_counts_for_bind_policies(policy_ids) do
     workbench_counts = attachment_match_counts(WorkbenchPolicy, :workbench_id, policy_ids)

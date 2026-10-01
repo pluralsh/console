@@ -417,6 +417,91 @@ defmodule Console.Deployments.PolicyTest do
       assert remaining.type == :approval
     end
 
+    test "keeps a shared run attachment when another matching binding still wants that stage" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      first = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+      second = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(first)
+      :ok = Policy.reconcile(second)
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+      assert run.binding_policy_id == first.id
+
+      :ok = Policy.reconcile(%{first | matches: %{stack: %{type: :approval}}})
+
+      attachments = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      types = attachments |> Enum.map(& &1.type) |> Enum.sort()
+      assert types == [:approval, :run]
+
+      run = Enum.find(attachments, & &1.type == :run)
+      approval = Enum.find(attachments, & &1.type == :approval)
+      assert run.binding_policy_id == second.id
+      assert approval.binding_policy_id == first.id
+    end
+
+    test "keeps a shared run attachment when the owning binding unbinds" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      first_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      second_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      first = insert(:binding_policy,
+        policy: policy,
+        bind_policy: first_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+      second = insert(:binding_policy,
+        policy: policy,
+        bind_policy: second_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(first)
+      :ok = Policy.reconcile(second)
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.binding_policy_id == first.id
+
+      {:ok, first_bind} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, first_bind.id, admin_user())
+      :ok = Policy.reconcile(%{first | bind_policy: first_bind})
+
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+      assert run.binding_policy_id == second.id
+    end
+
     test "does not detach manual attachments when the bind policy stops matching" do
       insert(:user, bot_name: "console")
       project = insert(:project)
