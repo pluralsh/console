@@ -592,7 +592,7 @@ const DiffFileIconSC = styled.div({
 })
 
 const DiffFileNameSC = styled.div(({ theme }) => ({
-  fontFamily: '"Roboto Mono", monospace',
+  fontFamily: theme.fontFamilies.mono,
   fontSize: 14,
   lineHeight: '16px',
   color: theme.colors['text-light'],

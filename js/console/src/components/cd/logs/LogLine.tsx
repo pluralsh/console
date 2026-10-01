@@ -72,7 +72,7 @@ const LogLineWrapper = styled.div<{
   borderLeft: `4px solid ${$borderColor}`,
   color: $highlighted ? theme.colors.text : theme.colors['text-light'],
   wordBreak: 'break-word',
-  fontFamily: 'Monument Mono',
+  fontFamily: theme.fontFamilies.mono,
   fontSize: '12px',
   lineHeight: '20px',
   letterSpacing: '0.25px',
