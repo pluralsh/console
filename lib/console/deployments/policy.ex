@@ -365,14 +365,18 @@ defmodule Console.Deployments.Policy do
     do: stack_bound?(binding, stack)
   defp keeps_stack_attachment?(_, _, _, _), do: false
 
-  defp stack_bound?(%{bind_policy: policy, bind_policy_id: id}, stack) do
+  defp stack_bound?(%{bind_policy: policy, bind_policy_id: id} = binding, stack) do
     policy
     |> evaluate_policy(Input.binding(stack), [id])
-    |> bound?()
+    |> shared_binding_match?(binding)
   end
 
-  defp bound?({:ok, %{"bind" => true}}), do: true
-  defp bound?(_), do: false
+  defp shared_binding_match?({:ok, %{"bind" => true}}, _), do: true
+  defp shared_binding_match?({:ok, %{"bind" => false}}, _), do: false
+  defp shared_binding_match?(error, %{id: id}) do
+    Logger.error("Failed to evaluate binding policy #{id}: #{inspect(error)}")
+    true
+  end
 
   defp transfer_or_delete_stack_attachment([%{id: id} | _], attachment, user),
     do: Stacks.update_stack_policy(%{binding_policy_id: id}, attachment.id, user)

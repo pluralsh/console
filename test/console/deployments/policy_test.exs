@@ -502,6 +502,52 @@ defmodule Console.Deployments.PolicyTest do
       assert run.binding_policy_id == second.id
     end
 
+    @tag :capture_log
+    test "keeps a shared run attachment when another binding fails to evaluate" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      first_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      second_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      first = insert(:binding_policy,
+        policy: policy,
+        bind_policy: first_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+      second = insert(:binding_policy,
+        policy: policy,
+        bind_policy: second_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(first)
+      :ok = Policy.reconcile(second)
+
+      second_bind
+      |> Ecto.Changeset.change(%{policy: "package plrl.binding\n{"})
+      |> Repo.update!()
+
+      {:ok, first_bind} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, first_bind.id, admin_user())
+      :ok = Policy.reconcile(%{first | bind_policy: first_bind})
+
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+      assert run.binding_policy_id == second.id
+    end
+
     test "does not detach manual attachments when the bind policy stops matching" do
       insert(:user, bot_name: "console")
       project = insert(:project)
