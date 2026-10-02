@@ -648,7 +648,7 @@ function WorkbenchJobActivityThoughts({
         <Flex
           direction="column"
           gap="small"
-          marginTop={spacing.small}
+          marginTop={spacing.medium}
         >
           {thoughts.map((thought, i) => (
             <WorkbenchJobActivityThought
