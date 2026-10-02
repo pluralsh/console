@@ -87,3 +87,6 @@ data/
 
 # Agents
 .codex/
+
+# Rust
+rust/**/target/

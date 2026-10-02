@@ -1,0 +1,13 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: TunnelClient
+metadata:
+  name: guestbook-ui
+  namespace: default
+  labels:
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+spec:
+  tunnelId: guestbook-ui
+  upstream:
+    host: guestbook-ui.default.svc
+    port: 80

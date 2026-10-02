@@ -1363,6 +1363,44 @@ kas:
       annotationKey: external-dns.alpha.kubernetes.io/
       additionalAnnotations: { }
 
+# ferrotunnel is the reverse-tunnel server. It has its own internet-facing load balancer.
+# Port 7835 is the TLS control plane. Port 80 is the HTTP ingress and forwards to the process on 8080.
+# The API writes Secret existingSecret.
+# host empty becomes ferrotunnel.<ingress.console_dns>, which is also the server certificate name.
+ferrotunnel:
+  enabled: true
+  host: ""
+  existingSecret: ferrotunnel-server
+  fullnameOverride: ""
+  image:
+    repository: ghcr.io/ferro-labs/ferrotunnel
+    tag: v1.5.2
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    controlPort: 7835
+    httpPort: 80
+    containerHttpPort: 8080
+    annotations: {}
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  podSecurityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
 # networkPolicy configures network policies for console pods.
 networkPolicy:
   # enabled controls creation of the console internal ports NetworkPolicy.

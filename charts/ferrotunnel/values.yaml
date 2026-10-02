@@ -1,0 +1,51 @@
+global:
+  additionalVolumes: ~
+  additionalVolumeMounts: ~
+
+# Address of the FerroTunnel server control plane, host:port.
+server: ""
+
+tokenSecret:
+  name: ferrotunnel-token
+  key: token
+
+fullnameOverride: ferrotunnel
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/pluralsh/ferrotunnel-client
+  tag: ~
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  annotations: {}
+
+podLabels: {}
+podAnnotations: {}
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+securityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+    - ALL
+
+nodeSelector: {}
+affinity: {}
+tolerations: []
