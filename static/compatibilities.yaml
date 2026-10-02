@@ -1853,6 +1853,124 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.34.0
+    kube: ['1.36']
+    requirements:
+    - name: Alloy
+      version: 4.3.2-bb.0
+    - name: Anchore Enterprise
+      version: 4.1.2-bb.2
+    - name: Argocd
+      version: 10.2.1-bb.2
+    - name: Authservice
+      version: 1.1.8-bb.3
+    - name: Cert Manager
+      version: v1.20.3-bb.2
+    - name: Eck Operator
+      version: 3.5.0-bb.1
+    - name: Elasticsearch Kibana
+      version: 1.44.0-bb.0
+    - name: External Secrets Operator
+      version: 2.11.0-bb.0
+    - name: Fluentbit
+      version: 0.58.2-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.6
+    - name: Gatekeeper
+      version: 3.23.1-bb.0
+    - name: Gateway Api
+      version: 1.6.2-bb.0
+    - name: Gitlab
+      version: 10.4.1-bb.0
+    - name: Gitlab Runner
+      version: 0.91.2-bb.2
+    - name: Grafana
+      version: 13.2.4-bb.0
+    - name: Harbor
+      version: 1.19.2-bb.2
+    - name: Headlamp
+      version: 0.45.0-bb.0
+    - name: Istio Cni
+      version: 1.30.4-bb.1
+    - name: Istio Crds
+      version: 1.30.4-bb.1
+    - name: Istio Egress Gateway
+      version: 0.1.3
+    - name: Istio Gateway
+      version: 1.30.4-bb.1
+    - name: Istiod
+      version: 1.30.4-bb.1
+    - name: Keycloak
+      version: 7.3.0-bb.2
+    - name: Kiali
+      version: 2.32.0-bb.0
+    - name: Kyverno
+      version: 3.9.1-bb.0
+    - name: Kyverno Policies
+      version: 3.3.4-bb.87
+    - name: Kyverno Reporter
+      version: 3.10.0-bb.2
+    - name: Loki
+      version: 6.55.0-bb.8
+    - name: Mattermost
+      version: 11.11.0-bb.0
+    - name: Mattermost Operator
+      version: 1.25.9-bb.1
+    - name: Metrics Server
+      version: 3.14.0-bb.0
+    - name: Mimir
+      version: 6.1.0-bb.2
+    - name: Minio
+      version: 7.1.1-bb.24
+    - name: Minio Operator
+      version: 7.1.1-bb.11
+    - name: Monitoring
+      version: 91.4.1-bb.1
+    - name: Neuvector
+      version: 2.11.2-bb.0
+    - name: Prometheus Operator Crds
+      version: 31.0.1-bb.0
+    - name: Renovate
+      version: 46.316.0-bb.0
+    - name: Sonarqube
+      version: 2026.4.1-bb.4
+    - name: Tempo
+      version: 2.1.0-bb.3
+    - name: Thanos
+      version: 17.6.0-bb.3
+    - name: Twistlock
+      version: 0.30.0-bb.3
+    - name: Vault
+      version: 0.34.1-bb.2
+    - name: Velero
+      version: 12.1.0-bb.5
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.4-bb.1
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Big Bang umbrella chart bumped from 3.33.0 to 3.34.0 with a
+          broad set of subchart version bumps across security, observability, GitLab,
+          and service mesh components.', 'New optional/added subchart: Istio Egress
+          Gateway (0.1.3).']
+      features: [Adds support for deploying an Istio Egress Gateway as a managed Big
+          Bang component (new subchart at 0.1.3)., 'Updates the observability stack
+          (Monitoring chart, Grafana, Loki, Mimir, Tempo, Thanos) to newer releases,
+          likely bringing dashboard, alerting, and performance improvements.', 'Updates
+          GitLab chart from 10.3.2-bb.1 to 10.4.1-bb.0, which may include upstream
+          GitLab feature/security fixes.', 'Updates External Secrets Operator to 2.11.0,
+          which may include provider/CRD enhancements and fixes.']
+      breaking_changes: ["Potential breaking changes may come from Grafana major version\
+          \ bump (12.x \u2192 13.x); verify plugins, dashboards, and authentication\
+          \ settings for compatibility.", "Monitoring chart bump (88.x \u2192 91.x)\
+          \ may include Prometheus Operator/CRD or alerting rule changes; confirm\
+          \ CRDs and any deprecated values.", 'Introduction of a new Istio component
+          (Egress Gateway) can affect mesh egress behavior if enabled; ensure NetworkPolicies,
+          routing, and policy expectations are updated accordingly.']
+    chart_version: 3.34.0
+    images: []
   - version: 3.33.0
     kube: ['1.36']
     requirements:
@@ -11582,18 +11700,13 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.32.2
+  - version: 3.33.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ['Release artifacts updated to v3.32.2 (container images/binaries/manifests,
-          Windows bundle, tigera-operator Helm chart, and CRD charts).']
-      breaking_changes: []
-    chart_version: 3.32.2
-    images: ['quay.io/tigera/operator:v1.42.6']
+    summary: null
+    chart_version: 3.33.0
+    images: ['quay.io/tigera/operator:v1.44.0']
   - version: 3.32.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -18543,7 +18656,7 @@ addons:
   eolApiSlug: flux
   versions:
   - version: 2.9.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
+    kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
@@ -26606,18 +26719,13 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.32.2
+  - version: 3.33.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [No feature details provided in the supplied notes; both releases
-          reference external GitHub release-notes files for specifics.]
-      breaking_changes: []
-    chart_version: 3.32.2
-    images: ['quay.io/tigera/operator:v1.42.6']
+    summary: null
+    chart_version: 3.33.0
+    images: ['quay.io/tigera/operator:v1.44.0']
   - version: 3.32.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -26800,7 +26908,7 @@ addons:
       chart_updates: []
       features: []
       breaking_changes: []
-    chart_version: 10.9.5
+    chart_version: 10.9.6
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.3']
   - version: 3.5.1
@@ -27376,7 +27484,7 @@ addons:
       breaking_changes: [No breaking changes are enumerated in the provided notes;
           they direct readers to the upgrading guide and GitHub issues for breaking
           changes/known issues.]
-    chart_version: 2.0.8
+    chart_version: 2.0.9
     images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
       'quay.io/argoproj/workflow-controller:v4.1.4']
   - version: 4.1.0
@@ -28408,7 +28516,7 @@ addons:
           it is now `operational` unless the operator cannot parse the object (then
           `failed`). The former `ignored` value is removed; per-application state
           is now in `status.conditions`.']
-    chart_version: 0.68.0
+    chart_version: 0.68.1
     images: ['victoriametrics/operator:v0.75.0']
   - version: 0.74.1
     kube: ['1.37', '1.36', '1.35']
@@ -30304,7 +30412,7 @@ addons:
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     chart_version: 26.3.3
-    images: []
+    images: ['nvcr.io/nvidia/gpu-operator:v26.3.3', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.3']
     incompatibilities: []
   - version: 26.3.2
     kube: ['1.36', '1.35', '1.34']
@@ -32463,12 +32571,32 @@ addons:
   release_url: https://github.com/Dynatrace/dynatrace-operator/releases/tag/v{vsn}
   helm_repository_url: https://raw.githubusercontent.com/Dynatrace/dynatrace-operator/main/config/helm/repos/stable
   versions:
+  - version: 1.11.0
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.11.0
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.11.0']
   - version: 1.10.2
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- No Helm values changes are called out in the provided release
+        notes for **1.10.2** vs **1.10.1**.
+
+        - Upgrade command only changes the chart `--version` from `1.10.1` to `1.10.2`.
+
+        '
+      chart_updates: [Release notes are effectively identical between 1.10.1 and 1.10.2
+          aside from versioned asset names/URLs., 'Manifests/CRDs are still published
+          as separate assets (`dynatrace-operator-crd.yaml`, `kubernetes*.yaml`, `openshift*.yaml`)
+          with the 1.10.2 tag paths.']
+      features: []
+      breaking_changes: []
     chart_version: 1.10.2
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.10.2']
   - version: 1.10.1
