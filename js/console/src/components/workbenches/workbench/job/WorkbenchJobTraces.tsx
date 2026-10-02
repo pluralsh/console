@@ -622,7 +622,6 @@ const TraceSummarySC = styled.div<{ $fullscreen: boolean }>(
 
 const TraceIdChipSC = styled.span(({ theme }) => ({
   ...theme.partials.text.code,
-  ...theme.partials.text.mono,
   flex: 1,
   minWidth: 100,
   overflow: 'hidden',
