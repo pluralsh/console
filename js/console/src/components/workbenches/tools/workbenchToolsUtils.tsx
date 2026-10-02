@@ -29,7 +29,7 @@ import {
   SlackLogoIcon,
   SplunkLogoIcon,
   TempoLogoIcon,
-  ToolsIcon,
+  ToolsFilledIcon,
   VictoriaLogsLogoIcon,
   VSphereLogoIcon,
 } from '@pluralsh/design-system'
@@ -461,7 +461,7 @@ export function WorkbenchToolIcon({
         ? McpLogoIcon
         : isConfigurableWorkbenchToolType(type)
           ? toolToIcon[type]
-          : ToolsIcon
+          : ToolsFilledIcon
 
   return (
     <Icon
@@ -533,7 +533,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.VictoriaLogs]: VictoriaLogsLogoIcon,
   [WorkbenchToolType.Prometheus]: PrometheusLogoIcon,
   [WorkbenchToolType.Tempo]: TempoLogoIcon,
-  [WorkbenchToolType.Http]: ToolsIcon,
+  [WorkbenchToolType.Http]: ToolsFilledIcon,
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Jira]: JiraLogoIcon,
   [WorkbenchToolType.JiraDatacenter]: JiraLogoIcon,
@@ -551,7 +551,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
   [WorkbenchToolType.Cloudwatch]: CloudWatchIcon,
   [WorkbenchToolType.Azure]: AzureLogoIcon,
-  [WorkbenchToolType.Jaeger]: ToolsIcon,
+  [WorkbenchToolType.Jaeger]: ToolsFilledIcon,
   [WorkbenchToolType.Sentry]: SentryLogoIcon,
   [WorkbenchToolType.Docker]: DockerLogoIcon,
   [WorkbenchToolType.Lambda]: LambdaIcon,

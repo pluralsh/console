@@ -56,7 +56,9 @@ export function LogLine({
       $highlighted={highlighted}
       onClick={onClick}
     >
-      {formatDateTime(timestamp, 'MM/DD/YYYY-HH:mm:ss[[UTC]]', true, true)}
+      <span>
+        {formatDateTime(timestamp, 'MM/DD/YYYY-HH:mm:ss[[UTC]]', true, true)}
+      </span>
       {(log || '').split('\n').map((line, index) => (
         <span key={index}>{line}</span>
       ))}

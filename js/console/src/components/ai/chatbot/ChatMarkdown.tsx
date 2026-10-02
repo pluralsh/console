@@ -1,12 +1,12 @@
 import { Code, Markdown, getLastStringChild } from '@pluralsh/design-system'
 import { ComponentProps, HTMLAttributes, ReactElement, ReactNode } from 'react'
-import styled from 'styled-components'
+import styled, { type DefaultTheme } from 'styled-components'
 
 type ChatMarkdownProps = ComponentProps<typeof Markdown>
 
 /**
  * Conversational markdown for chat / workbench.
- * Caps agent `#` headings to body scale and quiets inline code chips.
+ * Keeps agent `#` headings one step above body scale and quiets inline code chips.
  * body2 size; emphasis via `text` fill + emoji stripped.
  *
  * Overrides are passed as ReactMarkdown `components` (merged after DS defaults)
@@ -30,7 +30,11 @@ export function ChatMarkdown({
           h5: ChatH4,
           h6: ChatH4,
           p: ChatP,
+          ul: ChatUl,
+          ol: ChatOl,
           li: ChatLi,
+          blockquote: ChatBlockquote,
+          hr: ChatHr,
           code: ChatInlineCode,
           pre: ChatPre,
           table: ChatTable,
@@ -47,6 +51,27 @@ const ChatMarkdownSC = styled.div({
   width: '100%',
 })
 
+/**
+ * Vertical rhythm: sections (24) > blocks (12) > list items (8), and content
+ * sits closer to its own heading (8) than to the previous block.
+ */
+const blockSpacing = (theme: DefaultTheme) =>
+  ({
+    margin: 0,
+    paddingTop: theme.spacing.small,
+    '&:first-child': { paddingTop: 0 },
+    'h1 + &, h2 + &, h3 + &, h4 + &, h5 + &, h6 + &': {
+      paddingTop: theme.spacing.xsmall,
+    },
+  }) as const
+
+/** Heading type scale shared by the chat markdown renderers. */
+export const chatHeadingText = (theme: DefaultTheme, level: number) =>
+  ({
+    1: theme.partials.text.subtitle2,
+    2: theme.partials.text.body1Bold,
+  })[level] ?? theme.partials.text.body2Bold
+
 const headingReset = {
   margin: 0,
   padding: 0,
@@ -55,53 +80,88 @@ const headingReset = {
 
 const ChatH1 = styled.h1(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.body2Bold,
+  ...chatHeadingText(theme, 1),
   color: theme.colors.text,
-  paddingTop: theme.spacing.small,
+  paddingTop: theme.spacing.large,
 }))
 
 const ChatH2 = styled.h2(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.body2Bold,
-  color: theme.colors['text-light'],
-  paddingTop: theme.spacing.xsmall,
+  ...chatHeadingText(theme, 2),
+  color: theme.colors.text,
+  paddingTop: theme.spacing.large,
 }))
 
 const ChatH3 = styled.h3(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.body2Bold,
-  color: theme.colors['text-light'],
-  paddingTop: theme.spacing.xsmall,
+  ...chatHeadingText(theme, 3),
+  color: theme.colors.text,
+  paddingTop: theme.spacing.medium,
 }))
 
 const ChatH4 = styled.h4(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.body2Bold,
+  ...chatHeadingText(theme, 4),
   color: theme.colors['text-light'],
-  paddingTop: theme.spacing.xsmall,
+  paddingTop: theme.spacing.small,
 }))
 
 /** Major prose: body2 loose line-height for readable findings. */
 const ChatP = styled.p(({ theme }) => ({
-  margin: 0,
-  padding: 0,
-  paddingTop: theme.spacing.xsmall,
-  marginBottom: 0,
+  ...blockSpacing(theme),
   ...theme.partials.text.body2LooseLineHeight,
   color: theme.colors.text,
-  '&:first-child': { paddingTop: 0 },
-  'h1 + &, h2 + &, h3 + &, h4 + &, h5 + &, h6 + &': {
-    paddingTop: theme.spacing.xxsmall,
-  },
 }))
+
+/** List layout shared by the chat markdown renderers. */
+export const chatListCss = (theme: DefaultTheme, itemGap: number) =>
+  ({
+    paddingLeft: theme.spacing.large,
+    // Margin, not flex: Chrome crashes (error code 5) when a list is a flex
+    // container and its ::marker is styled.
+    '& > li + li': { marginTop: itemGap },
+    '& > li::marker': { color: theme.colors['text-xlight'] },
+    'li > &': { paddingTop: theme.spacing.xxsmall },
+  }) as const
+
+const chatList = (theme: DefaultTheme) =>
+  ({
+    ...blockSpacing(theme),
+    ...chatListCss(theme, theme.spacing.xsmall),
+    'li > & > li + li': { marginTop: theme.spacing.xxsmall },
+  }) as const
+
+const ChatUl = styled.ul(({ theme }) => chatList(theme))
+
+const ChatOl = styled.ol(({ theme }) => chatList(theme))
 
 const ChatLi = styled.li(({ theme }) => ({
   margin: 0,
-  marginBottom: theme.spacing.xxsmall,
   padding: 0,
   ...theme.partials.text.body2LooseLineHeight,
   color: theme.colors.text,
-  '&:last-child': { marginBottom: 0 },
+}))
+
+const ChatBlockquote = styled.blockquote(({ theme }) => ({
+  ...blockSpacing(theme),
+  '& > *': {
+    borderLeft: `2px solid ${theme.colors.border}`,
+    paddingLeft: theme.spacing.small,
+    color: theme.colors['text-light'],
+  },
+}))
+
+const ChatHr = styled.hr(({ theme }) => ({
+  height: 1,
+  border: 0,
+  backgroundColor: theme.colors.border,
+  margin: `${theme.spacing.medium}px 0 ${theme.spacing.xxsmall}px`,
+  '&:first-child': { marginTop: 0 },
+}))
+
+const ChatPreSC = styled.div(({ theme }) => ({
+  ...blockSpacing(theme),
+  minWidth: 0,
 }))
 
 function ChatInlineCode({
@@ -130,12 +190,14 @@ function ChatPre({ children }: { children?: ReactNode }) {
   const content = getLastStringChild(children) || ''
 
   return (
-    <Code
-      language={language}
-      showHeader={false}
-    >
-      {content}
-    </Code>
+    <ChatPreSC>
+      <Code
+        language={language}
+        showHeader={false}
+      >
+        {content}
+      </Code>
+    </ChatPreSC>
   )
 }
 
@@ -163,7 +225,7 @@ const QuietInlineCodeSC = styled.code(({ theme }) => ({
 }))
 
 const ChatTableWrapperSC = styled.div(({ theme }) => ({
-  paddingTop: theme.spacing.xsmall,
+  ...blockSpacing(theme),
   maxWidth: '100%',
   width: '100%',
   minWidth: 0,

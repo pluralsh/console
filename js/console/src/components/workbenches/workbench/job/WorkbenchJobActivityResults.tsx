@@ -7,6 +7,7 @@ import {
   CopyIcon,
   DiffMethod,
   DiffViewer,
+  ExpandIcon,
   Flex,
   FlexProps,
   IconFrame,
@@ -21,6 +22,7 @@ import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThrea
 import {
   PreviewablePanel,
   ShowMoreSC,
+  toolSurfaceCss,
 } from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
@@ -53,7 +55,11 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
-import { getMetricSeries, type MetricSeries } from './workbenchJobMetrics'
+import {
+  getMetricSeries,
+  metricSeriesId,
+  type MetricSeries,
+} from './workbenchJobMetrics'
 import { TraceWaterfall } from './WorkbenchJobTraces'
 
 export function MemoActivityIcon({
@@ -129,6 +135,7 @@ export function ExpandableUserPrompt({
       onMouseLeave={() => setShowActions(false)}
     >
       <PromptCardSC
+        cornerSize="large"
         $fullWidth={fullWidth}
         $isExpanded={isExpandable && isExpanded}
       >
@@ -178,30 +185,28 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      <div>
-        {timestamp && (
-          <CaptionP $color="text-long-form">
-            {formatDateTime(timestamp, 'h:mmA')}
-          </CaptionP>
-        )}
-        <IconFrame
-          clickable
-          as="div"
-          tooltip="Copy to clipboard"
-          type="tertiary"
-          onClick={(e) => {
-            e.stopPropagation()
-            handleCopy()
-          }}
-          icon={
-            copied ? (
-              <CheckIcon color="icon-success" />
-            ) : (
-              <CopyIcon color="icon-xlight" />
-            )
-          }
-        />
-      </div>
+      {timestamp && (
+        <CaptionP $color="text-long-form">
+          {formatDateTime(timestamp, 'h:mmA')}
+        </CaptionP>
+      )}
+      <IconFrame
+        clickable
+        as="div"
+        tooltip="Copy to clipboard"
+        type="tertiary"
+        onClick={(e) => {
+          e.stopPropagation()
+          handleCopy()
+        }}
+        icon={
+          copied ? (
+            <CheckIcon color="icon-success" />
+          ) : (
+            <CopyIcon color="icon-xlight" />
+          )
+        }
+      />
     </PromptActionsSC>
   )
 }
@@ -384,6 +389,112 @@ export function JobActivityMetricsChart({
           />
         ))}
     </MetricsChartSC>
+  )
+}
+
+/** Inline metrics chart that opens in the same modal as activity metrics. */
+export function ExpandableJobActivityMetrics({
+  metrics,
+}: {
+  metrics: WorkbenchJobActivityMetricFragment[]
+}) {
+  const [open, setOpen] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
+  const expandTriggerRef = useRef<HTMLDivElement>(null)
+  const series = useMemo(() => getMetricSeries(metrics), [metrics])
+  const selectedSeriesIndex = series.findIndex(
+    ({ id }) => id === selectedSeriesId
+  )
+  const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
+  const visibleMetrics = effectiveSelectedId
+    ? metrics.filter((metric) => metricSeriesId(metric) === effectiveSelectedId)
+    : metrics
+
+  const close = () => {
+    setOpen(false)
+    setFinishedAnimating(false)
+  }
+
+  return (
+    <>
+      <MetricsPanelSC>
+        <Flex
+          direction="column"
+          gap="xsmall"
+          width="100%"
+        >
+          <Flex justify="flex-end">
+            <IconFrame
+              ref={expandTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon size={16} />}
+              textValue="Full screen"
+              tooltip="Full screen"
+              onClick={(event) => {
+                event.stopPropagation()
+                setOpen(true)
+              }}
+            />
+          </Flex>
+          <JobActivityMetricsChart metrics={metrics} />
+        </Flex>
+      </MetricsPanelSC>
+      <Modal
+        header="Metrics"
+        size="large"
+        open={open}
+        onClose={close}
+        scrollable={false}
+        onAnimationEnd={() => setFinishedAnimating(true)}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          requestAnimationFrame(() => expandTriggerRef.current?.focus())
+        }}
+        actions={
+          <Button
+            secondary
+            onClick={close}
+          >
+            Close
+          </Button>
+        }
+      >
+        {finishedAnimating ? (
+          <Flex
+            direction="column"
+            gap="small"
+          >
+            <JobActivityMetricsChart
+              metrics={visibleMetrics}
+              css={{ height: 240 }}
+              lineProps={{
+                margin: { top: 10, right: 25, bottom: 30, left: 30 },
+                colors:
+                  selectedSeriesIndex >= 0
+                    ? [COLORS[selectedSeriesIndex % COLORS.length]]
+                    : COLORS,
+              }}
+            />
+            <WorkbenchJobMetricsLegend
+              series={series}
+              selectedId={effectiveSelectedId}
+              maxHeight={160}
+              onSelect={(id) =>
+                setSelectedSeriesId((selected) => (selected === id ? null : id))
+              }
+            />
+          </Flex>
+        ) : (
+          <RectangleSkeleton
+            $height={240}
+            $width="100%"
+          />
+        )}
+      </Modal>
+    </>
   )
 }
 
@@ -693,13 +804,20 @@ export function WorkbenchJobMetricsLegend({
   )
 }
 
-export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
+export function JobActivityPrompt({
+  prompt,
+  shimmer = false,
+}: {
+  prompt: Nullable<string>
+  shimmer?: boolean
+}) {
   if (!prompt) return null
   return (
     <PreviewablePanel
       contentKey={`prompt:${prompt.length}`}
       subtle
       collapsedLines={2}
+      shimmer={shimmer}
     >
       <SimplifiedMarkdown
         text={prompt}
@@ -776,6 +894,15 @@ export function ActivityModalIcon({
     </>
   )
 }
+
+const MetricsPanelSC = styled.div(({ theme }) => ({
+  ...toolSurfaceCss(theme),
+  borderRadius: theme.borderRadiuses.large,
+  minWidth: 0,
+  overflow: 'hidden',
+  padding: 8,
+  width: '100%',
+}))
 
 const MetricsChartSC = styled.div(() => ({
   height: 160,
@@ -887,27 +1014,21 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
     marginTop: theme.spacing.small,
-    marginBottom: theme.spacing.xsmall,
   })
 )
 
+// Always takes its height so hovering doesn't shift the transcript. The row is
+// the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
+// below the card.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'grid',
-  gridTemplateRows: $show ? '1fr' : '0fr',
-  justifyItems: 'end',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.xxsmall,
   width: '100%',
   opacity: $show ? 1 : 0,
-  transition: 'grid-template-rows 0.25s ease, opacity 0.25s ease',
+  transition: 'opacity 0.15s ease',
   pointerEvents: $show ? 'auto' : 'none',
-  '> div': {
-    overflow: 'hidden',
-    minHeight: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: theme.spacing.xxsmall,
-    paddingTop: 6,
-  },
 }))
 
 const PromptCardSC = styled(Card)<{
