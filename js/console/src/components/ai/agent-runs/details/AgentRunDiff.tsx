@@ -592,8 +592,7 @@ const DiffFileIconSC = styled.div({
 })
 
 const DiffFileNameSC = styled.div(({ theme }) => ({
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   fontSize: 14,
   lineHeight: '16px',
   color: theme.colors['text-light'],

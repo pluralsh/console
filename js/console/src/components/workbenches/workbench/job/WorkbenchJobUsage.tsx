@@ -161,8 +161,7 @@ function TokenBreakdown({
                 <CaptionP
                   $color="text-light"
                   css={{
-                    fontFamily: theme.fontFamilies.mono,
-                    fontVariantLigatures: 'none',
+                    ...theme.partials.text.mono,
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
@@ -173,8 +172,7 @@ function TokenBreakdown({
                   <CaptionP
                     $color="text-input-disabled"
                     css={{
-                      fontFamily: theme.fontFamilies.mono,
-                      fontVariantLigatures: 'none',
+                      ...theme.partials.text.mono,
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                     }}
@@ -186,8 +184,7 @@ function TokenBreakdown({
               <CaptionP
                 $color="text"
                 css={{
-                  fontFamily: theme.fontFamilies.mono,
-                  fontVariantLigatures: 'none',
+                  ...theme.partials.text.mono,
                 }}
               >
                 {formatTokenCount(row.value)}

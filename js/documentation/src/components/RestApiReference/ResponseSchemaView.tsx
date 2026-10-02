@@ -47,14 +47,12 @@ const ContentTypeBadge = styled.span(({ theme }) => ({
   background: theme.colors['fill-one'],
   padding: '2px 8px',
   borderRadius: theme.borderRadiuses.medium,
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
 }))
 
 const EnumBadge = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   color: theme.colors['text-light'],
   background: theme.colors['fill-two'],
   padding: '1px 6px',

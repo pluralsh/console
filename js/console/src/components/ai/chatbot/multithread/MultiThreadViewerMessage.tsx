@@ -628,8 +628,7 @@ const ParagraphSC = styled.p(() => ({
 }))
 
 const InlineCodeSC = styled.code(({ theme }) => ({
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   fontSize: '0.9em',
   backgroundColor: theme.colors['fill-two'],
   padding: `0 ${theme.spacing.xxsmall}px`,

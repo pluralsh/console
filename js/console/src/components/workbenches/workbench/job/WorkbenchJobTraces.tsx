@@ -622,8 +622,7 @@ const TraceSummarySC = styled.div<{ $fullscreen: boolean }>(
 
 const TraceIdChipSC = styled.span(({ theme }) => ({
   ...theme.partials.text.code,
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   flex: 1,
   minWidth: 100,
   overflow: 'hidden',
@@ -862,8 +861,7 @@ const TraceNameSC = styled.span(({ theme }) => ({
 
 const TraceDurationSC = styled.span(({ theme }) => ({
   color: theme.colors['text-xlight'],
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   fontSize: 12,
   marginLeft: 'auto',
   paddingLeft: theme.spacing.xsmall,

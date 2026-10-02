@@ -131,8 +131,7 @@ const PatchEmptySC = styled.div(({ theme }) => ({
 const PatchRawSC = styled.pre(({ theme }) => ({
   margin: 0,
   padding: theme.spacing.medium,
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   fontSize: 14,
   lineHeight: '22px',
   color: theme.colors['text-light'],

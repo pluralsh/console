@@ -74,8 +74,7 @@ export function WorkbenchesEvalsAvgGraph() {
                   css={{
                     ...TRUNCATE,
                     ...theme.partials.text.caption,
-                    fontFamily: theme.fontFamilies.mono,
-                    fontVariantLigatures: 'none',
+                    ...theme.partials.text.mono,
                     color: theme.colors['text-input-disabled'],
                   }}
                 >
@@ -93,8 +92,7 @@ export function WorkbenchesEvalsAvgGraph() {
                   css={{
                     ...TRUNCATE,
                     ...theme.partials.text.caption,
-                    fontFamily: theme.fontFamilies.mono,
-                    fontVariantLigatures: 'none',
+                    ...theme.partials.text.mono,
                     color,
                   }}
                 >

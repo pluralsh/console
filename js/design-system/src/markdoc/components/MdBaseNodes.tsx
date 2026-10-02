@@ -49,8 +49,7 @@ export const MdSpan = styled.span.withConfig(commonCfg)((_p) => ({
   verticalAlign: 'bottom',
 }))
 export const MdCode = styled.code.withConfig(commonCfg)(({ theme }) => ({
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   display: 'inline',
   verticalAlign: 'baseline',
   padding: '0.1em 0.4em',

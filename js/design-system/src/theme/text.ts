@@ -40,6 +40,13 @@ const body2LooseLineHeight = {
   lineHeight: '22px',
 } as const satisfies CSSObject
 
+// The mono font ships with ligatures; code must render as typed.
+// Spread this instead of setting fontFamilies.mono directly.
+const mono = {
+  fontFamily: fontFamilies.mono,
+  fontVariantLigatures: 'none',
+} as const satisfies CSSObject
+
 const textPartials = {
   h1: {
     fontFamily: fontFamilies.semi,
@@ -175,16 +182,15 @@ const textPartials = {
       },
     },
   },
+  mono,
   code: {
-    fontFamily: fontFamilies.mono,
-    fontVariantLigatures: 'none',
+    ...mono,
     fontSize: 14,
     lineHeight: '22px',
     letterSpacing: '.25px',
   },
   inlineCode: {
-    fontFamily: fontFamilies.mono,
-    fontVariantLigatures: 'none',
+    ...mono,
     fontSize: `calc(max(${INLINE_CODE_MIN_PX}px, ${INLINE_CODE_EMS}em))`,
     letterSpacing: '.25px',
   },

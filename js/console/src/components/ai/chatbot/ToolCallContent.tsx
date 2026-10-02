@@ -428,8 +428,7 @@ const EmptyOutputSC = styled.div(({ theme }) => ({
 const AnsiOutputSC = styled.pre(({ theme }) => ({
   margin: 0,
   color: theme.colors['text-light'],
-  fontFamily: theme.fontFamilies.mono,
-  fontVariantLigatures: 'none',
+  ...theme.partials.text.mono,
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
 }))
