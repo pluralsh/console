@@ -1,3 +1,11 @@
+# Use Debian 12.15 security repositories to supply the scanner-fixed tzdata package.
+# The exact version prevents unrelated OS package upgrades and fails the build if unavailable.
+FROM debian:12.15 AS tzdata
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends tzdata=2026c-0+deb12u1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Build stage
 FROM golang:1.27.1-alpine AS builder
 
@@ -47,6 +55,12 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
+
+# Replace the mutable distroless base's tzdata with the exact fixed Debian 12.15 package.
+COPY --from=tzdata /usr/share/zoneinfo/ /usr/share/zoneinfo/
+COPY --from=tzdata /usr/share/doc/tzdata/ /usr/share/doc/tzdata/
+COPY --from=tzdata /usr/share/lintian/overrides/tzdata /usr/share/lintian/overrides/tzdata
+COPY --from=tzdata /var/lib/dpkg/status.d/tzdata /var/lib/dpkg/status.d/tzdata
 
 WORKDIR /app
 
