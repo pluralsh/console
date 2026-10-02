@@ -22,6 +22,7 @@ import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThrea
 import {
   PreviewablePanel,
   ShowMoreSC,
+  toolSurfaceCss,
 } from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
@@ -895,8 +896,7 @@ export function ActivityModalIcon({
 }
 
 const MetricsPanelSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-accent'],
-  border: theme.borders['fill-one'],
+  ...toolSurfaceCss(theme),
   borderRadius: theme.borderRadiuses.large,
   minWidth: 0,
   overflow: 'hidden',

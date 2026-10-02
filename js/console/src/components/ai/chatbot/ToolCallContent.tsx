@@ -20,7 +20,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
 import { shimmerWithinCss } from 'components/utils/typography/Text'
 import { prettifyToolJson } from './toolCallDisplay'
 
@@ -29,23 +29,26 @@ enum ToolCallTab {
   Output = 'output',
 }
 
+/** Darker surface behind tool output, so it sinks below the chat. */
+export const toolSurfaceCss = (theme: DefaultTheme) => ({
+  backgroundColor: theme.colors['fill-accent'],
+  border: theme.borders['fill-one'],
+})
+
+export const toolOutputTextCss = (theme: DefaultTheme) => ({
+  ...theme.partials.text.mono,
+  fontSize: 13,
+  lineHeight: '18px',
+  fontWeight: 200,
+})
+
 /** Sink tool code into the accent fill. Syntax colors stay on the design-system theme. */
 export function useQuietToolCodeCss() {
-  const { colors } = useTheme()
+  const theme = useTheme()
 
   return {
-    '&&': {
-      backgroundColor: colors['fill-accent'],
-      borderColor: colors['border-fill-one'],
-    },
-    '& pre': {
-      fontFamily: '"JetBrains Mono", monospace',
-      fontSize: 13,
-      lineHeight: '18px',
-      fontWeight: 200,
-      fontVariantLigatures: 'none',
-      fontFeatureSettings: '"calt" 0, "liga" 0',
-    },
+    '&&': toolSurfaceCss(theme),
+    '& pre': toolOutputTextCss(theme),
   } as const
 }
 
@@ -453,16 +456,19 @@ const PreviewBoxSC = styled.div<{
   minHeight: 0,
   flexShrink: $unclamped ? 0 : undefined,
   overflow: $unclamped ? 'visible' : 'hidden',
-  border: $subtle ? theme.borders['fill-one'] : theme.borders['fill-two'],
+  ...($subtle
+    ? toolSurfaceCss(theme)
+    : {
+        border: theme.borders['fill-two'],
+        backgroundColor: theme.colors['fill-two'],
+      }),
   borderRadius: theme.borderRadiuses.large,
   ...($transparent && {
     borderTop: 'none',
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
+    backgroundColor: 'transparent',
   }),
-  backgroundColor: $transparent
-    ? 'transparent'
-    : theme.colors[$subtle ? 'fill-accent' : 'fill-two'],
 }))
 
 const EmptyOutputSC = styled.div(({ theme }) => ({
@@ -473,10 +479,7 @@ const EmptyOutputSC = styled.div(({ theme }) => ({
 const AnsiOutputSC = styled.pre(({ theme }) => ({
   margin: 0,
   color: theme.colors['text-light'],
-  ...theme.partials.text.mono,
-  fontSize: 13,
-  lineHeight: '18px',
-  fontWeight: 200,
+  ...toolOutputTextCss(theme),
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
 }))
