@@ -109,7 +109,6 @@ const ChatH4 = styled.h4(({ theme }) => ({
 /** Major prose: body2 loose line-height for readable findings. */
 const ChatP = styled.p(({ theme }) => ({
   ...blockSpacing(theme),
-  padding: 0,
   ...theme.partials.text.body2LooseLineHeight,
   color: theme.colors.text,
 }))
