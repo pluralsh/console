@@ -56,3 +56,4 @@ USER 65532:65532
 ENV GOMONTY_FFI_CACHE_DIR=/tmp/gomonty
 
 ENTRYPOINT ["/workspace/deployment-agent"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/workspace/deployment-agent", "--help"]
