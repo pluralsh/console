@@ -254,7 +254,7 @@ export function WorkbenchJobActivity({
     >
       <Flex
         direction="column"
-        gap="medium"
+        gap="large"
       >
         {prompt && (
           <JobActivityPrompt
@@ -648,7 +648,7 @@ function WorkbenchJobActivityThoughts({
         <Flex
           direction="column"
           gap="small"
-          marginTop={spacing.xsmall}
+          marginTop={spacing.small}
         >
           {thoughts.map((thought, i) => (
             <WorkbenchJobActivityThought
