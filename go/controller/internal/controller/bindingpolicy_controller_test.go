@@ -233,6 +233,29 @@ var _ = Describe("BindingPolicy Controller", Ordered, func() {
 			fakeConsoleClient.AssertCalled(mocks.TestingT, "UpdateBindingPolicy", mock.Anything, id, mock.Anything)
 		})
 
+		It("should clear matches on update when spec.matches is removed", func() {
+			bindingPolicy := &v1alpha1.BindingPolicy{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, bindingPolicy)).To(Succeed())
+			bindingPolicy.Spec.Matches = nil
+			Expect(k8sClient.Update(ctx, bindingPolicy)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("IsBindingPolicyExists", mock.Anything, id).Return(true, nil)
+			fakeConsoleClient.On("UpdateBindingPolicy", mock.Anything, id, mock.MatchedBy(func(attrs gqlclient.BindingPolicyUpdateAttributes) bool {
+				return attrs.Matches != nil && attrs.Matches.Workbench == nil && attrs.Matches.Stack == nil
+			})).Return(bindingPolicyFragment, nil)
+
+			reconciler := &controller.BindingPolicyReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			fakeConsoleClient.AssertCalled(mocks.TestingT, "UpdateBindingPolicy", mock.Anything, id, mock.Anything)
+		})
+
 		It("should recreate the resource when it is missing from the API", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("IsBindingPolicyExists", mock.Anything, id).Return(false, nil)

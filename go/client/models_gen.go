@@ -1548,10 +1548,12 @@ type BindingPolicyEdge struct {
 
 type BindingPolicyMatches struct {
 	Workbench *WorkbenchPolicyMatches `json:"workbench,omitempty"`
+	Stack     *StackPolicyMatches     `json:"stack,omitempty"`
 }
 
 type BindingPolicyMatchesAttributes struct {
 	Workbench *WorkbenchPolicyMatchesAttributes `json:"workbench,omitempty"`
+	Stack     *StackPolicyMatchesAttributes     `json:"stack,omitempty"`
 }
 
 type BindingPolicyUpdateAttributes struct {
@@ -9606,7 +9608,9 @@ type StackOverridesAttributes struct {
 }
 
 type StackPolicy struct {
-	ID         string               `json:"id"`
+	ID string `json:"id"`
+	// when this policy is evaluated: approval (after plan) or run (before a run is created)
+	Type       StackPolicyType      `json:"type"`
 	Policy     *Policy              `json:"policy,omitempty"`
 	Stack      *InfrastructureStack `json:"stack,omitempty"`
 	InsertedAt *string              `json:"insertedAt,omitempty"`
@@ -9616,6 +9620,8 @@ type StackPolicy struct {
 type StackPolicyAttributes struct {
 	// the policy to associate with this stack
 	PolicyID string `json:"policyId"`
+	// when this policy is evaluated: approval (after plan) or run (before a run is created). Defaults to APPROVAL
+	Type *StackPolicyType `json:"type,omitempty"`
 }
 
 type StackPolicyConnection struct {
@@ -9626,6 +9632,16 @@ type StackPolicyConnection struct {
 type StackPolicyEdge struct {
 	Node   *StackPolicy `json:"node,omitempty"`
 	Cursor *string      `json:"cursor,omitempty"`
+}
+
+type StackPolicyMatches struct {
+	// stack policy evaluation stage attached by this binding
+	Type *StackPolicyType `json:"type,omitempty"`
+}
+
+type StackPolicyMatchesAttributes struct {
+	// stack policy evaluation stage to attach: approval (after plan) or run (before a run is created). Defaults to APPROVAL
+	Type *StackPolicyType `json:"type,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -18732,6 +18748,61 @@ func (e *SplunkTokenType) UnmarshalJSON(b []byte) error {
 }
 
 func (e SplunkTokenType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type StackPolicyType string
+
+const (
+	StackPolicyTypeApproval StackPolicyType = "APPROVAL"
+	StackPolicyTypeRun      StackPolicyType = "RUN"
+)
+
+var AllStackPolicyType = []StackPolicyType{
+	StackPolicyTypeApproval,
+	StackPolicyTypeRun,
+}
+
+func (e StackPolicyType) IsValid() bool {
+	switch e {
+	case StackPolicyTypeApproval, StackPolicyTypeRun:
+		return true
+	}
+	return false
+}
+
+func (e StackPolicyType) String() string {
+	return string(e)
+}
+
+func (e *StackPolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StackPolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StackPolicyType", str)
+	}
+	return nil
+}
+
+func (e StackPolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *StackPolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e StackPolicyType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

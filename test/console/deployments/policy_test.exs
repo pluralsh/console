@@ -138,7 +138,19 @@ defmodule Console.Deployments.PolicyTest do
       assert updated.type == :stack
       assert updated.matches.workbench.regexes == ["^terraform\\."]
 
-      {:ok, deleted} = Policy.delete_binding_policy(updated.id, user)
+      {:ok, cleared} =
+        Policy.update_binding_policy(
+          %{type: :stack, matches: %{stack: %{type: :run}}},
+          updated.id,
+          user
+        )
+
+      assert cleared.matches.stack.type == :run
+
+      {:ok, reset} = Policy.update_binding_policy(%{type: :stack, matches: %{}}, cleared.id, user)
+      refute reset.matches.stack
+
+      {:ok, deleted} = Policy.delete_binding_policy(reset.id, user)
       assert deleted.id == updated.id
       refute refetch(updated)
     end
@@ -287,6 +299,254 @@ defmodule Console.Deployments.PolicyTest do
       :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
 
       assert 0 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+    end
+
+    test "attaches stack policies with the configured run type" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      binding = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(binding)
+      [association] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
+      assert association.type == :run
+    end
+
+    test "replaces the previous stage when a stack binding changes type" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      binding = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(binding)
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+
+      :ok = Policy.reconcile(%{binding | matches: %{stack: %{type: :approval}}})
+
+      [approval] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert approval.type == :approval
+      assert approval.binding_policy_id == binding.id
+    end
+
+    test "detaches a stack policy owned by the binding even after its stage changes" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      binding = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(binding)
+      assert 1 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+
+      {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+      :ok = Policy.reconcile(%{binding | bind_policy: bind_policy, matches: %{stack: %{type: :approval}}})
+
+      assert 0 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+    end
+
+    test "attaches the same policy at both stages without detaching the other" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      approval_binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
+      run_binding = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(approval_binding)
+      :ok = Policy.reconcile(run_binding)
+
+      types =
+        Console.Schema.StackPolicy.for_stack(stack.id)
+        |> Repo.all()
+        |> Enum.map(& &1.type)
+        |> Enum.sort()
+      assert types == [:approval, :run]
+
+      {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+      :ok = Policy.reconcile(%{run_binding | bind_policy: bind_policy})
+
+      [remaining] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert remaining.type == :approval
+    end
+
+    test "keeps a shared run attachment when another matching binding still wants that stage" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      first = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+      second = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(first)
+      :ok = Policy.reconcile(second)
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+      assert run.binding_policy_id == first.id
+
+      :ok = Policy.reconcile(%{first | matches: %{stack: %{type: :approval}}})
+
+      attachments = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      types = attachments |> Enum.map(& &1.type) |> Enum.sort()
+      assert types == [:approval, :run]
+
+      run = Enum.find(attachments, & &1.type == :run)
+      approval = Enum.find(attachments, & &1.type == :approval)
+      assert run.binding_policy_id == second.id
+      assert approval.binding_policy_id == first.id
+    end
+
+    test "keeps a shared run attachment when the owning binding unbinds" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      first_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      second_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      first = insert(:binding_policy,
+        policy: policy,
+        bind_policy: first_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+      second = insert(:binding_policy,
+        policy: policy,
+        bind_policy: second_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(first)
+      :ok = Policy.reconcile(second)
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.binding_policy_id == first.id
+
+      {:ok, first_bind} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, first_bind.id, admin_user())
+      :ok = Policy.reconcile(%{first | bind_policy: first_bind})
+
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+      assert run.binding_policy_id == second.id
+    end
+
+    @tag :capture_log
+    test "keeps a shared run attachment when another binding fails to evaluate" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      first_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      second_bind =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      first = insert(:binding_policy,
+        policy: policy,
+        bind_policy: first_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+      second = insert(:binding_policy,
+        policy: policy,
+        bind_policy: second_bind,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(first)
+      :ok = Policy.reconcile(second)
+
+      second_bind
+      |> Ecto.Changeset.change(%{policy: "package plrl.binding\n{"})
+      |> Repo.update!()
+
+      {:ok, first_bind} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, first_bind.id, admin_user())
+      :ok = Policy.reconcile(%{first | bind_policy: first_bind})
+
+      [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert run.type == :run
+      assert run.binding_policy_id == first.id
+      refute run.binding_policy_id == second.id
     end
 
     test "does not detach manual attachments when the bind policy stops matching" do
@@ -481,7 +741,8 @@ defmodule Console.Deployments.PolicyTest do
           "folder" => "terraform",
           "sha" => "abc123",
           "url" => "https://github.com/acme/infra.git"
-        }
+        },
+        "variables" => %{}
       }
     end
 
@@ -507,6 +768,52 @@ defmodule Console.Deployments.PolicyTest do
 
     test "returns an empty map when no run is present" do
       assert Input.commit(nil) == %{}
+    end
+
+    test "builds a commit payload from a pre-run map" do
+      assert Input.commit(%{sha: "abc123", message: "freeze", committer: "alice@example.com"}) == %{
+        "sha" => "abc123",
+        "message" => "freeze",
+        "committer" => "alice@example.com"
+      }
+    end
+  end
+
+  describe "environment/1" do
+    test "omits values for secret environment variables" do
+      public = insert(:stack_environment, name: "TF_VAR_region", value: "us-east-1", secret: false)
+      secret = insert(:stack_environment, name: "DATABASE_URL", value: "postgres://secret", secret: true)
+
+      assert Input.environment([public, secret]) == [
+        %{"name" => "TF_VAR_region", "value" => "us-east-1", "secret" => false},
+        %{"name" => "DATABASE_URL", "secret" => true}
+      ]
+    end
+  end
+
+  describe "files/1" do
+    test "includes paths and omits file contents" do
+      file = insert(:stack_file, path: "backend.tfvars", content: "super-secret")
+
+      assert Input.files([file]) == [%{"path" => "backend.tfvars"}]
+    end
+  end
+
+  describe "variables/1" do
+    test "returns the variables map or an empty map" do
+      stack = insert(:stack, variables: %{"environment" => "production"})
+
+      assert Input.variables(stack) == %{"environment" => "production"}
+      assert Input.variables(%{variables: nil}) == %{}
+      assert Input.variables(nil) == %{}
+    end
+  end
+
+  describe "changes/1" do
+    test "returns a list of changed files" do
+      assert Input.changes(["terraform/main.tf", "terraform/vars.tf"]) ==
+               ["terraform/main.tf", "terraform/vars.tf"]
+      assert Input.changes(nil) == []
     end
   end
 

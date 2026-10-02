@@ -102,6 +102,16 @@ spec:
                 description: Matches defines criteria that determine when this binding
                   policy applies.
                 properties:
+                  stack:
+                    description: Stack defines match criteria for stack-type binding
+                      policies, including the evaluation stage.
+                    properties:
+                      type:
+                        description: |-
+                          Type is the stack policy evaluation stage. Valid values: APPROVAL, RUN.
+                          APPROVAL evaluates after the plan. RUN evaluates before a run is created.
+                        type: string
+                    type: object
                   workbench:
                     description: Workbench defines match criteria for workbench-type
                       binding policies.

@@ -88,7 +88,7 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
 
       {:ok, %{data: %{"createBindingPolicy" => binding}}} = run_query("""
         mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
-          createBindingPolicy(attributes: $attributes) { id type matches { workbench { regexes } } policy { id } bindPolicy { id } }
+          createBindingPolicy(attributes: $attributes) { id type matches { workbench { regexes } stack { type } } policy { id } bindPolicy { id } }
         }
       """, %{"attributes" => %{
         "policyId" => policy.id,
@@ -104,18 +104,33 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
 
       {:ok, %{data: %{"updateBindingPolicy" => updated}}} = run_query("""
         mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
-          updateBindingPolicy(id: $id, attributes: $attributes) { id type matches { workbench { regexes } } }
+          updateBindingPolicy(id: $id, attributes: $attributes) { id type matches { workbench { regexes } stack { type } } }
         }
       """, %{
         "id" => binding["id"],
         "attributes" => %{
           "type" => "STACK",
-          "matches" => %{"workbench" => %{"regexes" => ["^terraform\\."]}}
+          "matches" => %{"stack" => %{"type" => "RUN"}}
         }
       }, %{current_user: user})
 
       assert updated["type"] == "STACK"
-      assert updated["matches"]["workbench"]["regexes"] == ["^terraform\\."]
+      assert updated["matches"]["stack"]["type"] == "RUN"
+
+      {:ok, %{data: %{"updateBindingPolicy" => reset}}} = run_query("""
+        mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
+          updateBindingPolicy(id: $id, attributes: $attributes) { id type matches { workbench { regexes } stack { type } } }
+        }
+      """, %{
+        "id" => binding["id"],
+        "attributes" => %{
+          "type" => "STACK",
+          "matches" => %{}
+        }
+      }, %{current_user: user})
+
+      assert reset["type"] == "STACK"
+      refute reset["matches"]["stack"]
 
       {:ok, %{data: %{"deleteBindingPolicy" => deleted}}} = run_query("""
         mutation DeleteBindingPolicy($id: ID!) {

@@ -32,10 +32,10 @@ The output depends on the policy type:
 | Type | Relevant output |
 |---|---|
 | Workbench | `deny` and `approve` decision arrays |
-| Stack | `deny`, `approve`, and `defer` |
+| Stack | `deny` at run stage; `deny`, `approve`, and `defer` at approval |
 | Binding | Boolean `bind` decision |
 
-For stack policies, inspect the raw output when testing automatic approval. An output without a denial is allowed by the simulator, while an `approve` entry is what causes the stack runtime to automatically approve a run.
+Run-stage stack policies are deny-only. An output without a denial means the run would be created. At approval, inspect the raw output when testing automatic approval: an output without a denial is allowed by the simulator, while an `approve` entry is what causes the stack runtime to automatically approve a run.
 
 ## Test Rego in a repository
 
