@@ -48,15 +48,25 @@ export function DiffViewer({
         },
         line: { ...theme.partials.text.code },
         gutter: {
-          '&& pre': { opacity: 1, color: theme.colors['text-xlight'] },
+          '&& pre': {
+            opacity: 1,
+            color: theme.colors['text-xlight'],
+            fontFamily: theme.fontFamilies.mono,
+          },
           minWidth: 'fit-content',
           paddingLeft: theme.spacing.medium,
           paddingRight: theme.spacing.large,
           wordBreak: 'normal',
         },
+        marker: { '& pre': { fontFamily: theme.fontFamilies.mono } },
         codeFold: { '& a': { color: theme.colors['text-xlight'] } },
         codeFoldContent: { color: theme.colors['text-xlight'] },
-        contentText: { paddingRight: theme.spacing.medium, lineBreak: 'auto' },
+        contentText: {
+          paddingRight: theme.spacing.medium,
+          lineBreak: 'auto',
+          fontFamily: theme.fontFamilies.mono,
+          fontVariantLigatures: 'none',
+        },
         emptyLine: { backgroundColor: 'transparent' },
         diffContainer: { wordBreak: 'break-word', tabSize: 2, minWidth: 0 },
         variables: {
