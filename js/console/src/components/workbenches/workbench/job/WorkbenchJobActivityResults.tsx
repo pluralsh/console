@@ -405,8 +405,7 @@ export function ExpandableJobActivityMetrics({
   const selectedSeriesIndex = series.findIndex(
     ({ id }) => id === selectedSeriesId
   )
-  const effectiveSelectedId =
-    selectedSeriesIndex >= 0 ? selectedSeriesId : null
+  const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
   const visibleMetrics = effectiveSelectedId
     ? metrics.filter((metric) => metricSeriesId(metric) === effectiveSelectedId)
     : metrics
@@ -483,9 +482,7 @@ export function ExpandableJobActivityMetrics({
               selectedId={effectiveSelectedId}
               maxHeight={160}
               onSelect={(id) =>
-                setSelectedSeriesId((selected) =>
-                  selected === id ? null : id
-                )
+                setSelectedSeriesId((selected) => (selected === id ? null : id))
               }
             />
           </Flex>
