@@ -1014,17 +1014,18 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
     marginTop: theme.spacing.small,
-    marginBottom: theme.spacing.xsmall,
   })
 )
 
+// Always takes its height so hovering doesn't shift the transcript. The row is
+// the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
+// below the card.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
   gap: theme.spacing.xxsmall,
   width: '100%',
-  paddingTop: 6,
   opacity: $show ? 1 : 0,
   transition: 'opacity 0.15s ease',
   pointerEvents: $show ? 'auto' : 'none',
