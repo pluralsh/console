@@ -22,6 +22,7 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
+import { chatHeadingText, chatListCss } from '../ChatMarkdown'
 import { ToolCallContent, useQuietToolCodeCss } from '../ToolCallContent'
 import {
   getCommand,
@@ -642,19 +643,12 @@ const ParagraphSC = styled.p(() => ({
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 
 /**
- * h1/h2 step up in size; h3+ stay at body size and are bold only, so streamed
- * output keeps its compact scale. Extra space above groups a heading with the
- * content below it.
+ * Same type scale as ChatMarkdown, but color follows the tone and spacing
+ * stays compact for streamed output.
  */
 const HeadingSC = styled.h1<{ $level: HeadingLevel }>(({ theme, $level }) => ({
   margin: 0,
-  font: 'inherit',
-  fontWeight: 600,
-  ...($level === 1 && { fontSize: 18, lineHeight: '24px' }),
-  ...($level === 2 && {
-    fontSize: theme.partials.text.body1.fontSize,
-    lineHeight: theme.partials.text.body1.lineHeight,
-  }),
+  ...chatHeadingText(theme, $level),
   '&:not(:first-child)': {
     paddingTop: $level <= 2 ? theme.spacing.small : theme.spacing.xsmall,
   },
@@ -692,12 +686,7 @@ const InlineCodeSC = styled.code(({ theme }) => ({
 
 const ListSC = styled.ul(({ theme }) => ({
   margin: 0,
-  paddingLeft: theme.spacing.large,
-  // Margin, not flex: Chrome crashes (error code 5) when a list is a flex
-  // container and its ::marker is styled.
-  '& > li + li': { marginTop: theme.spacing.xxsmall },
-  'li > &': { paddingTop: theme.spacing.xxsmall },
-  '& > li::marker': { color: theme.colors['text-xlight'] },
+  ...chatListCss(theme, theme.spacing.xxsmall),
 }))
 
 const HrSC = styled.hr(({ theme }) => ({

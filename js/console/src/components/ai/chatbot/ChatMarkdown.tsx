@@ -65,6 +65,13 @@ const blockSpacing = (theme: DefaultTheme) =>
     },
   }) as const
 
+/** Heading type scale shared by the chat markdown renderers. */
+export const chatHeadingText = (theme: DefaultTheme, level: number) =>
+  ({
+    1: theme.partials.text.subtitle2,
+    2: theme.partials.text.body1Bold,
+  })[level] ?? theme.partials.text.body2Bold
+
 const headingReset = {
   margin: 0,
   padding: 0,
@@ -73,28 +80,28 @@ const headingReset = {
 
 const ChatH1 = styled.h1(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.subtitle2,
+  ...chatHeadingText(theme, 1),
   color: theme.colors.text,
   paddingTop: theme.spacing.large,
 }))
 
 const ChatH2 = styled.h2(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.body1Bold,
+  ...chatHeadingText(theme, 2),
   color: theme.colors.text,
   paddingTop: theme.spacing.large,
 }))
 
 const ChatH3 = styled.h3(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.body2Bold,
+  ...chatHeadingText(theme, 3),
   color: theme.colors.text,
   paddingTop: theme.spacing.medium,
 }))
 
 const ChatH4 = styled.h4(({ theme }) => ({
   ...headingReset,
-  ...theme.partials.text.body2Bold,
+  ...chatHeadingText(theme, 4),
   color: theme.colors['text-light'],
   paddingTop: theme.spacing.small,
 }))
@@ -107,14 +114,21 @@ const ChatP = styled.p(({ theme }) => ({
   color: theme.colors.text,
 }))
 
-const chatList = (theme: DefaultTheme) =>
+/** List layout shared by the chat markdown renderers. */
+export const chatListCss = (theme: DefaultTheme, itemGap: number) =>
   ({
-    ...blockSpacing(theme),
     paddingLeft: theme.spacing.large,
     // Margin, not flex: Chrome crashes (error code 5) when a list is a flex
     // container and its ::marker is styled.
-    '& > li + li': { marginTop: theme.spacing.xsmall },
+    '& > li + li': { marginTop: itemGap },
+    '& > li::marker': { color: theme.colors['text-xlight'] },
     'li > &': { paddingTop: theme.spacing.xxsmall },
+  }) as const
+
+const chatList = (theme: DefaultTheme) =>
+  ({
+    ...blockSpacing(theme),
+    ...chatListCss(theme, theme.spacing.xsmall),
     'li > & > li + li': { marginTop: theme.spacing.xxsmall },
   }) as const
 
@@ -127,7 +141,6 @@ const ChatLi = styled.li(({ theme }) => ({
   padding: 0,
   ...theme.partials.text.body2LooseLineHeight,
   color: theme.colors.text,
-  '&::marker': { color: theme.colors['text-xlight'] },
 }))
 
 const ChatBlockquote = styled.blockquote(({ theme }) => ({
