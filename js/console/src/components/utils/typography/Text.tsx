@@ -129,7 +129,6 @@ export function shimmerWithinCss(theme: DefaultTheme) {
     '& :is(p, span, li, pre, code, h1, h2, h3, h4, td, th)': {
       ...text,
       color: 'transparent !important',
-      WebkitTextFillColor: 'transparent',
     },
   }
 }
