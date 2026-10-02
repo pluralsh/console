@@ -686,11 +686,13 @@ function WorkbenchJobActivityThought({
   const title =
     toolName || tool ? workbenchToolCallTitle(toolName, tool) : undefined
   const blankResult = isBlankToolPayload(content)
-  const isMetricsFetch = !isEmpty(metrics) || title === 'fetch metrics'
+  const isMetricsFetch =
+    !isEmpty(metrics) || isObservabilityFetch(toolName, 'metrics')
   const metricSeriesCount = isMetricsFetch
     ? getMetricSeries(metrics).length
     : undefined
-  const noLogs = title === 'fetch logs' && isEmpty(logs) && blankResult
+  const noLogs =
+    isObservabilityFetch(toolName, 'logs') && isEmpty(logs) && blankResult
   return (
     <SimpleToolCall
       content={content}
@@ -761,6 +763,17 @@ function EmptyToolResult({ message }: { message: string }) {
         {message}
       </Body2P>
     </PreviewablePanel>
+  )
+}
+
+// Matches the tool names the API gives the native and per-connection fetch tools.
+function isObservabilityFetch(
+  toolName: Nullable<string>,
+  kind: 'logs' | 'metrics'
+) {
+  return (
+    toolName === `plrl_${kind}` ||
+    !!toolName?.startsWith(`workbench_observability_${kind}_`)
   )
 }
 
