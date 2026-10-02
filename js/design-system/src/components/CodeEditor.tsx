@@ -5,6 +5,7 @@ import styled, { useTheme } from 'styled-components'
 import Editor, { useMonaco, type EditorProps } from '@monaco-editor/react'
 import { merge } from 'lodash'
 
+import { fontFamilies } from '../theme/fonts'
 import { editorThemeDark } from '../theme/editorThemeDark'
 import { editorThemeLight } from '../theme/editorThemeLight'
 
@@ -26,7 +27,7 @@ type CodeEditorProps = Omit<CardProps, 'children' | 'onChange'> & {
 }
 
 const defaultOptions: EditorProps['options'] = {
-  fontFamily: 'ui-monospace, monospace',
+  fontFamily: fontFamilies.mono,
   fontSize: 14,
   padding: { bottom: 16, top: 16 },
   scrollbar: { useShadows: false, verticalScrollbarSize: 5 },

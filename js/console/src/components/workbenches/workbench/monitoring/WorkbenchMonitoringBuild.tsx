@@ -150,7 +150,7 @@ const SubtitleSC = styled.div(({ theme }) => ({
   '& h1': {
     ...theme.partials.text.title2,
     color: theme.colors.text,
-    fontFamily: theme.fontFamilies.mono,
+    ...theme.partials.text.mono,
     margin: 0,
   },
 }))

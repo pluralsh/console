@@ -748,7 +748,7 @@ const SkeletonStackSC = styled.div(({ theme }) => ({
 const StatValueSC = styled.p(({ theme }) => ({
   ...theme.partials.text.title2,
   color: theme.colors.text,
-  fontFamily: theme.fontFamilies.mono,
+  ...theme.partials.text.mono,
   margin: 0,
 }))
 
