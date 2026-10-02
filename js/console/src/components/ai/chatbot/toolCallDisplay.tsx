@@ -363,14 +363,12 @@ function styleToolName(
 
   const hidden = new Set(
     [...hiddenWords].flatMap((value) =>
-      (value ?? '')
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean)
+      (value ?? '').toLowerCase().split(/\s+/).filter(Boolean)
     )
   )
-  const words = (startCase(rest.replace(/[_-]+/g, ' ').trim()).toLowerCase() ||
-    'tool')
+  const words = (
+    startCase(rest.replace(/[_-]+/g, ' ').trim()).toLowerCase() || 'tool'
+  )
     .split(/\s+/)
     .filter((word) => word && !hidden.has(word))
   const titled = prefixFetch(leadWithVerb(words))

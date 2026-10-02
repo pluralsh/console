@@ -104,13 +104,7 @@ export function WorkbenchJobActivities({
         <ChatEndSpaceSC />
       </>
     ),
-    [
-      bottomStatus,
-      job?.status,
-      jobId,
-      jobLevelThinking,
-      noneStream,
-    ]
+    [bottomStatus, job?.status, jobId, jobLevelThinking, noneStream]
   )
 
   if (!data && loading)

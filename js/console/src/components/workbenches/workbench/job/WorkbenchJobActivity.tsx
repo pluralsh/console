@@ -708,9 +708,7 @@ function WorkbenchJobActivityThought({
           />
         ),
         ...(metricSeriesCount > 0 && {
-          customResultBody: (
-            <ExpandableJobActivityMetrics metrics={metrics} />
-          ),
+          customResultBody: <ExpandableJobActivityMetrics metrics={metrics} />,
         }),
       })}
       {...(noLogs
