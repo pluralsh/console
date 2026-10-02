@@ -345,25 +345,25 @@ defmodule Console.Deployments.Policy do
 
   defp release_stack_attachment(attachment, binding, stack, user) do
     binding
-    |> matching_stack_bindings(stack, attachment.type)
+    |> sibling_stack_bindings()
+    |> Enum.map(&stack_attachment_claim(&1, stack, attachment.type))
     |> transfer_or_delete_stack_attachment(attachment, user)
   end
 
-  defp matching_stack_bindings(%BindingPolicy{id: id, policy_id: policy_id}, stack, type) do
+  defp sibling_stack_bindings(%BindingPolicy{id: id, policy_id: policy_id}) do
     BindingPolicy.for_policy(policy_id)
     |> BindingPolicy.for_type(:stack)
     |> BindingPolicy.excluding(id)
     |> Repo.all()
     |> Repo.preload(:bind_policy)
-    |> Enum.filter(&keeps_stack_attachment?(&1, stack, type))
   end
 
-  defp keeps_stack_attachment?(%BindingPolicy{} = binding, stack, type) do
-    keeps_stack_attachment?(stack_policy_type(binding), type, binding, stack)
+  defp stack_attachment_claim(%BindingPolicy{} = binding, stack, type) do
+    stack_attachment_claim(stack_policy_type(binding), type, binding, stack)
   end
-  defp keeps_stack_attachment?(type, type, binding, stack),
-    do: stack_bound?(binding, stack)
-  defp keeps_stack_attachment?(_, _, _, _), do: false
+  defp stack_attachment_claim(type, type, binding, stack),
+    do: {binding, stack_bound?(binding, stack)}
+  defp stack_attachment_claim(_, _, _, _), do: {nil, :unbound}
 
   defp stack_bound?(%{bind_policy: policy, bind_policy_id: id} = binding, stack) do
     policy
@@ -371,16 +371,31 @@ defmodule Console.Deployments.Policy do
     |> shared_binding_match?(binding)
   end
 
-  defp shared_binding_match?({:ok, %{"bind" => true}}, _), do: true
-  defp shared_binding_match?({:ok, %{"bind" => false}}, _), do: false
+  defp shared_binding_match?({:ok, %{"bind" => true}}, _), do: :bound
+  defp shared_binding_match?({:ok, %{"bind" => false}}, _), do: :unbound
   defp shared_binding_match?(error, %{id: id}) do
     Logger.error("Failed to evaluate binding policy #{id}: #{inspect(error)}")
-    true
+    :unknown
   end
 
-  defp transfer_or_delete_stack_attachment([%{id: id} | _], attachment, user),
+  defp transfer_or_delete_stack_attachment(claims, attachment, user) do
+    claims
+    |> bound_binding()
+    |> keep_or_release_stack_attachment(unknown_claim?(claims), attachment, user)
+  end
+
+  defp bound_binding([{binding, :bound} | _]), do: binding
+  defp bound_binding([_ | rest]), do: bound_binding(rest)
+  defp bound_binding([]), do: nil
+
+  defp unknown_claim?([{_, :unknown} | _]), do: true
+  defp unknown_claim?([_ | rest]), do: unknown_claim?(rest)
+  defp unknown_claim?([]), do: false
+
+  defp keep_or_release_stack_attachment(%{id: id}, _, attachment, user),
     do: Stacks.update_stack_policy(%{binding_policy_id: id}, attachment.id, user)
-  defp transfer_or_delete_stack_attachment([], attachment, user),
+  defp keep_or_release_stack_attachment(_, true, _, _), do: :ok
+  defp keep_or_release_stack_attachment(_, false, attachment, user),
     do: Stacks.delete_stack_policy(attachment.id, user)
 
   defp owned_stack_attachments(%BindingPolicy{id: id}, %Stack{id: sid}) do

@@ -545,7 +545,8 @@ defmodule Console.Deployments.PolicyTest do
 
       [run] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
       assert run.type == :run
-      assert run.binding_policy_id == second.id
+      assert run.binding_policy_id == first.id
+      refute run.binding_policy_id == second.id
     end
 
     test "does not detach manual attachments when the bind policy stops matching" do
