@@ -52,9 +52,7 @@ export function useQuietToolCodeCss() {
   } as const
 }
 
-export function useSlimToolCodeCss({
-  showLanguageIcon = false,
-}: { showLanguageIcon?: boolean } = {}) {
+export function useSlimToolCodeCss() {
   const { colors } = useTheme()
   const quietCodeCss = useQuietToolCodeCss()
 
@@ -67,13 +65,6 @@ export function useSlimToolCodeCss({
       padding: 8,
       color: colors['text-light'],
     },
-    ...(!showLanguageIcon && {
-      // Header language mark only. Tool snippets have no header, so a broader
-      // `svg` rule also hides the Copy button icon in the code body.
-      '& > div > div:first-child > div:first-child > span > svg': {
-        display: 'none',
-      },
-    }),
   } as const
 }
 
