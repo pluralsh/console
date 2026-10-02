@@ -635,8 +635,24 @@ versions:
     breaking_changes: []
   chart_version: 1.16.0
   images: []
-- version: 1.15.0
+- version: 1.15.3
   kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['No detailed changelog content was provided beyond release metadata
+        (tags, dates, assets). There are no documented chart template changes, dependency
+        bumps, or value schema changes in the provided notes.']
+    features: [No feature notes were included in the provided release metadata; assume
+        no user-visible feature changes are documented between 1.15.0 and 1.15.3 in
+        the notes you shared.]
+    breaking_changes: [No breaking changes were mentioned in the provided notes; still
+        validate by diffing chart values/schema and rendering manifests before upgrading.]
+  chart_version: 1.15.3
+  images: []
+- version: 1.15.0
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:

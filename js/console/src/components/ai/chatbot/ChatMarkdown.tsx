@@ -198,7 +198,7 @@ function ChatTable(props: HTMLAttributes<HTMLTableElement>) {
 }
 
 const QuietInlineCodeSC = styled.code(({ theme }) => ({
-  fontFamily: theme.fontFamilies.mono,
+  ...theme.partials.text.mono,
   fontSize: '0.9em',
   lineHeight: 'inherit',
   color: theme.colors['text-light'],

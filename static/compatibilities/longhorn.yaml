@@ -3,55 +3,67 @@ git_url: https://github.com/longhorn/longhorn
 release_url: https://github.com/longhorn/longhorn/releases/tag/v{vsn}
 helm_repository_url: https://charts.longhorn.io
 versions:
-- version: 1.12.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+- version: 1.13.0
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "## Helm values / chart behavior to review\n\n- **NetworkPolicies\
-      \ enabled by default (security change):** v1.12.1 turns on ingress `NetworkPolicy`\
-      \ resources for internal Longhorn endpoints/RPCs by default (effective only\
-      \ if your cluster enforces NetworkPolicies). Verify your CNI supports NetworkPolicy\
-      \ and confirm any cross-namespace Prometheus scraping still works (may need\
-      \ an additional allow policy).\n- **Instance-manager gRPC mTLS expanded:** If\
-      \ you use the `longhorn-grpc-tls` secret, v1.12.1 now requires valid client\
-      \ certs for *all* instance-manager gRPC services (disk/SPDK services included).\
-      \ Validate any external tooling that talks to IM gRPC.\n- **New V2 CPU allocation\
-      \ setting:** `data-engine-number-of-cpu-cores` can request exclusive cores via\
-      \ Kubernetes CPU Manager (kubelet policy must be `static`). When set, it overrides\
-      \ `data-engine-cpu-mask`.\n- **New V2 SPDK iobuf tuning settings:** `data-engine-iobuf-large-pool-size`\
-      \ and `data-engine-iobuf-small-pool-size` available. Changing them may recreate\
-      \ V2 instance-manager pods with no running instances.\n- **CPU isolation behavior\
-      \ change:** `data-engine-cpu-isolation-enabled` now also adjusts host RPS steering\
-      \ (network RX softirq) away from SPDK reactor cores; verify this doesn\u2019\
-      t conflict with your node-level CPU/network tuning.\n- **Helm bugfix note:**\
-      \ `csi.*ReplicaCount` Helm values previously only applied on initial creation;\
-      \ v1.12.1 fixes this, so upgrades may now actually reconcile those counts.\n\
-      - **Chart/CNI edge cases fixed:** fixes for RKE2 `rke2-traefik` ingress controller\
-      \ NetworkPolicy matching and ArgoCD OutOfSync when using Gateway API."
-    chart_updates: ['V2 feature additions: fast cloning (new linked-clone architecture)
-        and experimental sharding (erasure coding).', 'Security hardening: internal
-        NetworkPolicies installed/enabled by default (when enforced).', mTLS coverage
-        expanded for instance-manager gRPC services when TLS secret is configured.,
-      'Operational knobs added for V2 SPDK: CPU allocation via CPU Manager and iobuf
-        pool sizing.', 'Multiple bugfixes around V2 encryption sizing, storage network
-        attach, expansion/resize, backup/restore edge cases, and upgrade resilience.']
-    features: [V2 fast volume cloning (linked-clone) with parallel replica creation
-        and support for most normal volume operations (snapshots/expansion/rebuild/nested
-        clones)., Experimental V2 storage sharding using erasure coding to distribute
-        data/parity chunks across nodes for better space efficiency and scaling beyond
-        a single disk/node., Optional exclusive CPU core allocation for SPDK target
-        daemon via Kubernetes CPU Manager (`data-engine-number-of-cpu-cores`).]
-    breaking_changes: [Legacy V2 linked-clone volumes created on v1.12.0 or earlier
-        become effectively read-only from an operations standpoint after upgrading
-        to v1.12.1 (only detachment and deletion allowed); you must recreate clones
-        using the new linked-clone mechanism., 'If `longhorn-grpc-tls` is configured,
-        instance-manager gRPC endpoints now enforce mTLS on additional services; any
-        clients relying on plaintext access will fail until updated.']
-  chart_version: 1.12.1
-  images: ['docker.io/longhornio/longhorn-manager:v1.12.1', 'docker.io/longhornio/longhorn-share-manager:v1.12.1',
-    'docker.io/longhornio/longhorn-ui:v1.12.1']
+    helm_changes: "## Helm / values changes to review\n\n- **Kubernetes minimum version\
+      \ jumps to v1.34** for install/upgrade to Longhorn **v1.13.0** (CSI external-provisioner\
+      \ v6.3.0). This is an upgrade prerequisite, not just a Helm change.\n- **New\
+      \ NetworkPolicy-related Helm values** (introduced across v1.12.1\u2013v1.12.2\
+      \ and relevant when landing on v1.13.0):\n  - `networkPolicies.v1DataEngineInitiatorSourceCIDRs`\n\
+      \  - `networkPolicies.recoveryBackendAdditionalIngressPorts`\n  - `networkPolicies.metricsScrapeSources`\
+      \ (to allow Prometheus/metrics scrapers to reach `longhorn-manager` on **:9500**)\n\
+      - **CSI service account change**: CSI controller sidecars move to a dedicated\
+      \ SA `longhorn-csi-service-account`.\n  - Optional hardening: `csi.allowControllerSecretAccess`\
+      \ can be set to **false** *after* removing StorageClass `csi.storage.k8s.io/provisioner-secret-*`\
+      \ parameters; default still allows Secret `get` for compatibility.\n- **New/updated\
+      \ StorageClass parameters** that may be set via chart-managed StorageClasses:\n\
+      \  - `volumeTopology: any|zonal|regional`\n  - `strictTopology` and `csi-allowed-topology-keys`\
+      \ (added in v1.12.0, but you may start using them during this upgrade)\n- V2\
+      \ tuning/settings you may choose to set (not required):\n  - `data-engine-interrupt-mode-enabled`\
+      \ (set to `{\"v2\":\"true\"}`; only when **no V2 volumes are attached**)\n \
+      \ - `data-engine-cpu-isolation-enabled` (defaults to `{\"v2\":\"true\"}` for\
+      \ **new installs** in v1.13.0; upgrades keep existing value)\n  - `data-engine-iobuf-large-pool-size`\
+      \ / `data-engine-iobuf-small-pool-size` (changing recreates idle V2 instance-manager\
+      \ pods)\n"
+    chart_updates: [Introduces a new `longhorn-global-manager` **Deployment** (defaults
+        to 3 replicas) that hosts cluster-wide controllers previously running in the
+        `longhorn-manager` DaemonSet; ensure at least one pod can schedule before/during
+        upgrade., Internal NetworkPolicies are created by default (since v1.12.1)
+        with follow-up compatibility fixes and new allow-list values in v1.12.2; review
+        if you rely on Prometheus scraping or host-originated traffic to Longhorn
+        components., CSI controller sidecars run under a dedicated `longhorn-csi-service-account`
+        (instead of the shared `longhorn-service-account`).]
+    features: ['V2 Data Engine **live upgrade**: V2 volumes can remain attached during
+        the Longhorn upgrade if prerequisites are met (supported live-upgrade path
+        to v1.13.0 is from v1.12.2).', V2 Data Engine **full interrupt mode** (event-driven)
+        to reduce idle/low-I/O CPU usage; polling remains default and interrupt mode
+        can slightly increase latency under sustained throughput., V2 **CPU isolation**
+        enabled by default for new installs to keep kernel work off SPDK reactor cores
+        (polling mode only)., '**VolumeGroupSnapshot** support (UI/kubectl/CSI VolumeGroupSnapshot
+        objects); CSI group snapshot/backup path exists but is disabled by default;
+        snapshots are per-volume (not point-in-time consistent across the group).',
+      Recurring jobs gain **age-based retention** (keep items newer than a duration
+        like `720h`) in addition to count-based retention., 'New scheduling capabilities:
+        `volumeTopology` (any/zonal/regional) to constrain replica placement to the
+        provisioned zone/region, plus an optional **scheduler extender** to improve
+        pod placement using real Longhorn disk capacity and locality.', 'Operational
+        scaling: new **longhorn-global-manager** reduces apiserver load and per-node
+        manager memory in large clusters.', 'Security hardening: broader **instance-manager
+        gRPC mTLS coverage** (when `longhorn-grpc-tls` secret configured) and default
+        internal NetworkPolicies with better configurability.']
+    breaking_changes: ['**Kubernetes minimum version is now v1.34** for Longhorn v1.13.0;
+        you must upgrade Kubernetes before upgrading Longhorn.', '**V2 live upgrade
+        is only supported when upgrading to v1.13.0 from v1.12.2**. If you are on
+        v1.12.0 or v1.12.1, you must detach all V2 volumes (and ensure replicas are
+        stopped) before upgrading.', '**Legacy V2 linked-clone volumes created in
+        v1.12.0 or earlier** can only be detached or deleted; to replace them, create
+        a new linked clone from the same source (no data copy).']
+  chart_version: 1.13.0
+  images: ['docker.io/longhornio/longhorn-manager:v1.13.0', 'docker.io/longhornio/longhorn-share-manager:v1.13.0',
+    'docker.io/longhornio/longhorn-ui:v1.13.0']
 - version: 1.12.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25']

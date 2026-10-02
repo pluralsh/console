@@ -4,8 +4,52 @@ helm_repository_url: https://victoriametrics.github.io/helm-charts
 readme_url: https://github.com/VictoriaMetrics/operator/blob/master/README.md
 icon: https://dashboard.snapcraft.io/site_media/appmedia/2020/11/output-onlinepngtools.png
 versions:
+- version: 0.75.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Introduces new `VTAgent` CRD to manage vtagent instances that receive
+        OTLP trace spans over HTTP and gRPC and replicate them to VictoriaTraces;
+        VT components also gain `grpcSpec` (and optional TLS) to expose a gRPC listen
+        port., 'Adds operator metrics improvements: `vm_app_version` now includes
+        a `k8s_version` label, and a new `operator_controller_errors_total{controller,namespace,name,reason}`
+        metric is added (older reconcile-error metrics are deprecated for future removal).',
+      'vmanomaly CRD gains new bounded/typed controls: bounded `spec.reader.workers`,
+        query-level business policies, `settings.native_threads_per_worker`, plus
+        typed writer batch/limits fields (`batchMaxSeries`, `batchMaxBytes`, `metricPrefixCacheMaxEntries`).',
+      'TLS options expanded for syslog TCP listeners in VL components: `tlsConfig`
+        adds `minVersion` and `cipherSuites`.', 'Data retention behavior change option:
+        `VLSingle` and `VTSingle` add `removePvcAfterDelete` (default disabled) to
+        preserve PVCs on CR deletion unless explicitly enabled.', 'Service behavior
+        enhancement: `VMCluster.vmselect.serviceSpec` and `VMAlertmanager.serviceSpec`
+        can now replace the default headless Service with a regular one by specifying
+        `spec.type` when `useAsDefault: true` (but see update note 3 about potential
+        clusterIP changes).']
+    breaking_changes: ['RBAC/CRD requirement: `VTAgent` controller is enabled by default
+        and watches cluster-scoped `VTAgent` objects; you must install the `VTAgent`
+        CRD and update the operator `ClusterRole` with full verbs on `vtagents` (plus
+        status/finalizers) or the operator can fail cache sync and shut down. If you
+        cannot grant permissions, disable with `-controller.disableReconcileFor=VTAgent`.',
+      'VMCluster validation: `spec.vmstorage.serviceSpec` with `useAsDefault: true`
+        can no longer make the default `vmstorage` Service non-headless (e.g., `spec.type`
+        != `ClusterIP` or `clusterIP/clusterIPs` not `None`); reconciliation will
+        fail until fixed or until `useAsDefault` is removed (making it an additional
+        Service).', 'Service recreation / clusterIP change risk: for `VMCluster.spec.vmselect.serviceSpec`
+        and `VMAlertmanager.spec.serviceSpec` with `useAsDefault: true` and explicit
+        `spec.type` but no `spec.clusterIP`, the operator will create a regular Service
+        with a virtual IP (not headless) and will recreate it during upgrade, resulting
+        in a new `clusterIP` unless you pin `clusterIP: None` or remove `spec.type`.',
+      'Status semantics change for config-only CRDs: `status.updateStatus` no longer
+        indicates whether selected applications accepted the content; it is now `operational`
+        unless the operator cannot parse the object (then `failed`). The former `ignored`
+        value is removed; per-application state is now in `status.conditions`.']
+  chart_version: 0.68.0
+  images: ['victoriametrics/operator:v0.75.0']
 - version: 0.74.1
-  kube: ['1.36', '1.35', '1.34']
+  kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
@@ -1289,7 +1333,7 @@ versions:
   chart_version: 0.27.1
   images: ['victoriametrics/operator:v0.38.0']
 - version: 0.37.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1309,7 +1353,7 @@ versions:
   chart_version: 0.26.0
   images: ['victoriametrics/operator:v0.37.0']
 - version: 0.36.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:

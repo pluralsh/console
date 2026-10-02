@@ -53,6 +53,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
     name
     tool
     categories
+    approval
     project {
         ...TinyProjectFragment
     }

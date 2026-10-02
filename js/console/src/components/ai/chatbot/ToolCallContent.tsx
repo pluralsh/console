@@ -473,12 +473,10 @@ const EmptyOutputSC = styled.div(({ theme }) => ({
 const AnsiOutputSC = styled.pre(({ theme }) => ({
   margin: 0,
   color: theme.colors['text-light'],
-  fontFamily: '"JetBrains Mono", monospace',
+  ...theme.partials.text.mono,
   fontSize: 13,
   lineHeight: '18px',
   fontWeight: 200,
-  fontVariantLigatures: 'none',
-  fontFeatureSettings: '"calt" 0, "liga" 0',
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
 }))
