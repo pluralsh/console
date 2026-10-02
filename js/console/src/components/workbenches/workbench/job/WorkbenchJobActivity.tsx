@@ -686,8 +686,10 @@ function WorkbenchJobActivityThought({
   const title =
     toolName || tool ? workbenchToolCallTitle(toolName, tool) : undefined
   const blankResult = isBlankToolPayload(content)
-  const metricSeriesCount =
-    title === 'fetch metrics' ? getMetricSeries(metrics).length : undefined
+  const isMetricsFetch = !isEmpty(metrics) || title === 'fetch metrics'
+  const metricSeriesCount = isMetricsFetch
+    ? getMetricSeries(metrics).length
+    : undefined
   const noLogs = title === 'fetch logs' && isEmpty(logs) && blankResult
   return (
     <SimpleToolCall
@@ -766,7 +768,7 @@ function EmptyToolResult({ message }: { message: string }) {
 
 function isBlankToolPayload(content?: string | null) {
   const text = content?.trim() ?? ''
-  if (!text || text === '{}' || text === '[]' || text === 'null') return true
+  if (!text) return true
 
   try {
     return isBlankValue(JSON.parse(text))
