@@ -7,17 +7,15 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
-  DashboardGraphType,
   DashboardTimeRangeAttributes,
   Delta,
   useWorkbenchDashboardDeltaSubscription,
-  useWorkbenchMonitoringDashboardQuery,
   WorkbenchDashboardDetailsFragment,
   WorkbenchDashboardInput,
+  WorkbenchMonitoringDashboardQueryResult,
 } from 'generated/graphql'
-import { uniq } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
@@ -28,7 +26,6 @@ import {
   MetricsRangeControl,
   type MetricsTimeRange,
 } from '../job/WorkbenchJobActivityResults'
-import { toolDisplayName } from './dashboardToolIcon'
 import { dashboardDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
 import { parseMonitoringShareSearch } from './monitoringShare'
@@ -47,15 +44,14 @@ import { WorkbenchDashboardPanels } from './WorkbenchDashboardPanels'
 
 export function DashboardDetail({
   dashboardId,
+  query,
   onUpdate,
 }: {
   dashboardId: string
+  query: WorkbenchMonitoringDashboardQueryResult
   onUpdate?: () => void
 }) {
-  const { data, loading, error } = useWorkbenchMonitoringDashboardQuery({
-    variables: { id: dashboardId },
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, error } = query
   const { data: deltaData } = useWorkbenchDashboardDeltaSubscription({
     variables: { id: dashboardId },
   })
@@ -76,7 +72,6 @@ export function DashboardDetail({
 
   return (
     <DashboardDetailView
-      key={dashboard.updatedAt ?? dashboard.id}
       dashboard={dashboard}
       onUpdate={onUpdate}
     />
@@ -100,21 +95,33 @@ function DashboardDetailView({
     [dashboard.inputs]
   )
   const shared = useMemo(() => parseMonitoringShareSearch(search), [search])
+  const inputSignature = inputs
+    .map((input) => `${input.name}:${input.type}:${!!input.datasource}`)
+    .join('|')
   const [filters, setFilters] = useState<
     Record<string, DashboardFilterValue | undefined>
   >(() => initialDashboardFilters(inputs, shared.variables))
   const [readyInputs, setReadyInputs] = useState<Record<string, boolean>>({})
+  const [trackedInputSignature, setTrackedInputSignature] =
+    useState(inputSignature)
+  const [initializedInputSignature, setInitializedInputSignature] = useState<
+    string | null
+  >(null)
   const [range, setRange] = useState<MetricsTimeRange>(
     () => shared.range ?? '1h'
   )
+  const [rangeEnd, setRangeEnd] = useState(startOfCurrentMinute)
 
   const timeRange = useMemo<DashboardTimeRangeAttributes>(() => {
-    const end = new Date()
     return {
-      start: rangeStart(range, end).toISOString(),
-      end: end.toISOString(),
+      start: rangeStart(range, rangeEnd).toISOString(),
+      end: rangeEnd.toISOString(),
     }
-  }, [range])
+  }, [range, rangeEnd])
+  const onRangeChange = useCallback((nextRange: MetricsTimeRange) => {
+    setRange(nextRange)
+    setRangeEnd(startOfCurrentMinute())
+  }, [])
 
   const variables = useMemo(() => {
     const out: Record<string, string> = {}
@@ -130,18 +137,28 @@ function DashboardDetailView({
       current[name] === ready ? current : { ...current, [name]: ready }
     )
   }, [])
-  const dashboardReady = inputs.every((input) => readyInputs[input.name])
-
-  const sources = useMemo(
-    () =>
-      uniq(
-        graphs.map((graph) => graph.datasource?.tool).filter(isNonNullable)
-      ).map(toolDisplayName),
-    [graphs]
-  )
-  const panelCount = graphs.filter(
-    (graph) => graph.type !== DashboardGraphType.Section
-  ).length
+  const inputDefinitionChanged = trackedInputSignature !== inputSignature
+  if (inputDefinitionChanged) {
+    setTrackedInputSignature(inputSignature)
+    setFilters((current) =>
+      reconcileDashboardFilters(inputs, shared.variables, current)
+    )
+    setReadyInputs({})
+    setInitializedInputSignature(null)
+  }
+  const inputsReady =
+    !inputDefinitionChanged && inputs.every((input) => readyInputs[input.name])
+  if (
+    inputs.length > 0 &&
+    inputsReady &&
+    initializedInputSignature !== inputSignature
+  ) {
+    setInitializedInputSignature(inputSignature)
+  }
+  const dashboardReady =
+    inputs.length === 0 ||
+    (!inputDefinitionChanged &&
+      (inputsReady || initializedInputSignature === inputSignature))
 
   const hasFilters = inputs.length > 0
   const [definitionOpen, setDefinitionOpen] = useState(false)
@@ -215,12 +232,12 @@ function DashboardDetailView({
             <TitleBlockSC>
               <TitleSC>{dashboard.name}</TitleSC>
               {dashboard.description && (
-                <Body1P
-                  $color="text-long-form"
+                <Body2P
+                  $color="text-xlight"
                   css={{ letterSpacing: '0.25px' }}
                 >
                   {dashboard.description}
-                </Body1P>
+                </Body2P>
               )}
               {fullscreen && (
                 <CaptionP $color="text-xlight">
@@ -235,7 +252,7 @@ function DashboardDetailView({
             )}
           </TitleRowSC>
           <ToolbarSC $hasFilters={hasFilters}>
-            {hasFilters ? (
+            {hasFilters && (
               <WorkbenchDashboardFilters
                 dashboardId={dashboard.id}
                 inputs={inputs}
@@ -257,38 +274,21 @@ function DashboardDetailView({
                 }
                 onReadyChange={onInputReadyChange}
               />
-            ) : (
-              <Body2P $color="text-long-form">
-                {metaText(panelCount, sources)}
-              </Body2P>
             )}
             <MetricsRangeControl
               value={range}
-              onChange={setRange}
+              onChange={onRangeChange}
             />
           </ToolbarSC>
-          {hasFilters && (
-            <MetaRowSC>
-              <Body2P $color="text-long-form">
-                {metaText(panelCount, sources)}
-              </Body2P>
-            </MetaRowSC>
-          )}
           <PanelsSC>
-            {dashboardReady ? (
-              <WorkbenchDashboardPanels
-                dashboardId={dashboard.id}
-                graphs={graphs}
-                variables={variables}
-                timeRange={timeRange}
-                onUpdate={onUpdate}
-              />
-            ) : (
-              <RectangleSkeleton
-                $height={240}
-                $width="100%"
-              />
-            )}
+            <WorkbenchDashboardPanels
+              dashboardId={dashboard.id}
+              graphs={graphs}
+              variables={variables}
+              timeRange={timeRange}
+              queriesEnabled={dashboardReady}
+              onUpdate={onUpdate}
+            />
           </PanelsSC>
         </BodySC>
       </ScrollSC>
@@ -321,13 +321,39 @@ function initialDashboardFilters(
   sharedVariables: Record<string, string | string[]>
 ) {
   return Object.fromEntries(
-    inputs.map((input) => {
-      const shared = sharedVariables[input.name]
-      if (shared === undefined)
-        return [input.name, defaultDashboardFilter(input)]
-      return [input.name, Array.isArray(shared) ? (shared[0] ?? '') : shared]
-    })
+    inputs.map((input) => [
+      input.name,
+      initialDashboardFilter(input, sharedVariables),
+    ])
   )
+}
+
+function initialDashboardFilter(
+  input: WorkbenchDashboardInput,
+  sharedVariables: Record<string, string | string[]>
+) {
+  const shared = sharedVariables[input.name]
+  if (shared === undefined) return defaultDashboardFilter(input)
+  return Array.isArray(shared) ? (shared[0] ?? '') : shared
+}
+
+function reconcileDashboardFilters(
+  inputs: WorkbenchDashboardInput[],
+  sharedVariables: Record<string, string | string[]>,
+  current: Record<string, DashboardFilterValue | undefined>
+) {
+  const next = Object.fromEntries(
+    inputs.map((input) => [
+      input.name,
+      Object.hasOwn(current, input.name)
+        ? current[input.name]
+        : initialDashboardFilter(input, sharedVariables),
+    ])
+  )
+  const unchanged =
+    Object.keys(current).length === Object.keys(next).length &&
+    Object.entries(next).every(([name, value]) => current[name] === value)
+  return unchanged ? current : next
 }
 
 function rangeStart(range: MetricsTimeRange, end: Date) {
@@ -341,15 +367,10 @@ function rangeStart(range: MetricsTimeRange, end: Date) {
   return new Date(end.getTime() - durationByRange[range])
 }
 
-function metaText(panelCount: number, sources: string[]) {
-  if (panelCount === 0) return 'No panels yet'
-  const panels = `${panelCount} ${panelCount === 1 ? 'panel' : 'panels'}`
-  if (sources.length === 0) return panels
-  const joined =
-    sources.length === 1
-      ? sources[0]
-      : `${sources.slice(0, -1).join(', ')} and ${sources[sources.length - 1]}`
-  return `${panels}, queried live from ${joined}`
+function startOfCurrentMinute() {
+  const now = new Date()
+  now.setSeconds(0, 0)
+  return now
 }
 
 export function MonitoringDetailSkeleton() {
@@ -490,10 +511,6 @@ const ToolbarSC = styled.div<{ $hasFilters: boolean }>(
     marginTop: theme.spacing.large,
   })
 )
-
-const MetaRowSC = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.medium,
-}))
 
 const PanelsSC = styled.div(({ theme }) => ({
   marginTop: theme.spacing.medium,

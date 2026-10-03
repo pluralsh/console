@@ -69,6 +69,7 @@ type DashboardPanelsProps = {
   graphs: DashboardGraph[]
   variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
+  queriesEnabled: boolean
   onUpdate?: () => void
 }
 
@@ -167,6 +168,7 @@ function DashboardGraphGrid({
   graphs,
   variables,
   timeRange,
+  queriesEnabled,
   onUpdate,
 }: DashboardPanelsProps) {
   const columns = useMemo(
@@ -209,6 +211,7 @@ function DashboardGraphGrid({
                 graph={graph}
                 variables={variables}
                 timeRange={timeRange}
+                queriesEnabled={queriesEnabled}
                 onUpdate={onUpdate}
               />
             </CellSC>
@@ -228,21 +231,42 @@ function isDefaultCollapsed(options: unknown) {
   )
 }
 
-function DashboardPanel({
-  dashboardId,
-  graph,
-  variables,
-  timeRange,
-  onUpdate,
-}: {
+type DashboardPanelProps = {
   dashboardId: string
   graph: DashboardGraph
   variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
+  queriesEnabled: boolean
   onUpdate?: () => void
-}) {
-  const needsFetch =
-    graph.type !== DashboardGraphType.Markdown && !!graph.datasource
+}
+
+function DashboardPanel(props: DashboardPanelProps) {
+  if (props.graph.type === DashboardGraphType.Markdown) {
+    return (
+      <PanelCardSC $fullscreen={false}>
+        <PanelBodySC>
+          <ChatMarkdown text={props.graph.markdown || '_No content._'} />
+        </PanelBodySC>
+      </PanelCardSC>
+    )
+  }
+
+  return <DataDashboardPanel {...props} />
+}
+
+function DataDashboardPanel({
+  dashboardId,
+  graph,
+  variables,
+  timeRange,
+  queriesEnabled,
+  onUpdate,
+}: DashboardPanelProps) {
+  const needsFetch = dashboardGraphNeedsFetch(
+    graph.type,
+    !!graph.datasource,
+    queriesEnabled
+  )
   const {
     data: currentData,
     previousData,
@@ -346,11 +370,13 @@ function DashboardPanel({
         </PanelActionsSC>
       </PanelHeaderSC>
       <PanelBodySC aria-busy={loading}>
-        {graph.type === DashboardGraphType.Markdown ? (
-          <ChatMarkdown text={graph.markdown || '_No content._'} />
-        ) : !graph.datasource ? (
+        {!graph.datasource ? (
           <EmptyState message="This panel has no data source." />
-        ) : loading ? (
+        ) : dashboardPanelIsWaitingForData({
+            queriesEnabled,
+            loading,
+            hasData: !!data,
+          }) ? (
           <DashboardPanelSkeleton fullscreen={fullscreen} />
         ) : error && !data ? (
           <GqlError
@@ -409,6 +435,26 @@ function DashboardPanel({
       )}
     </>
   )
+}
+
+export function dashboardGraphNeedsFetch(
+  type: DashboardGraphType,
+  hasDatasource: boolean,
+  queriesEnabled: boolean
+) {
+  return queriesEnabled && type !== DashboardGraphType.Markdown && hasDatasource
+}
+
+export function dashboardPanelIsWaitingForData({
+  queriesEnabled,
+  loading,
+  hasData,
+}: {
+  queriesEnabled: boolean
+  loading: boolean
+  hasData: boolean
+}) {
+  return !queriesEnabled || (loading && !hasData)
 }
 
 function DashboardPanelSkeleton({ fullscreen }: { fullscreen: boolean }) {
