@@ -11704,7 +11704,23 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "_No Helm-specific changelog/values changes were included in the\
+        \ provided notes._\n\n- The Calico Helm chart you\u2019ll upgrade is packaged\
+        \ as `tigera-operator-v3.33.0.tgz` (also available at `oci://quay.io/calico/charts/tigera-operator`).\n\
+        - If you currently manage CRDs via Helm, note that CRDs are also shipped as\
+        \ separate charts:\n  - `crd.projectcalico.org.v1-v3.33.0.tgz`\n  - `projectcalico.org.v3-v3.33.0.tgz`\
+        \ (tech-preview)\n\n_Action_: before upgrading, review the `tigera-operator`\
+        \ chart\u2019s own CHANGELOG/values schema for 3.33.0 (not provided here)\
+        \ and run a `helm diff upgrade` against your existing values."
+      chart_updates: ['The release bundles for both versions include: container images/binaries/manifests
+          (`release-vX.Y.Z.tgz`), Windows bundle (`calico-windows-vX.Y.Z.zip`), the
+          Helm chart (`tigera-operator-vX.Y.Z.tgz`), and CRD charts (`crd.projectcalico.org.v1`
+          and `projectcalico.org.v3` tech-preview).', 'For v3.33.0 specifically, the
+          `tigera-operator` chart is also published as an OCI artifact at `oci://quay.io/calico/charts/tigera-operator`
+          (explicitly called out in the notes).']
+      features: []
+      breaking_changes: []
     chart_version: 3.33.0
     images: ['quay.io/tigera/operator:v1.44.0']
   - version: 3.32.0
@@ -20352,20 +20368,21 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 91.8.2
+  - version: 91.9.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Bumped `prometheus-node-exporter` container image tag to **v4.59.0**
-          (in 91.8.0)., Bumped `grafana` container image tag to **v13.2.7** (in 91.8.2).]
-      features: [No new user-facing features were called out; this is primarily dependency/image
-          tag refreshes (node-exporter and Grafana).]
-      breaking_changes: [No breaking changes were mentioned in the provided release
-          notes; expect a low-risk patch/minor chart update focused on image bumps.]
-    chart_version: 91.8.2
+      chart_updates: ['CI: Bump `helm-unittest/helm-unittest` dependency to v1.2.0
+          (test tooling only).', Update kube-prometheus-stack chart dependencies with
+          non-major version bumps (pulled in via Renovate)., Prior version (91.8.0)
+          updated `prometheus-node-exporter` image tag to v4.59.0.]
+      features: ['Non-major dependency refresh for kube-prometheus-stack, which may
+          include small fixes in subcharts without changing major behavior.']
+      breaking_changes: []
+    chart_version: 91.9.0
     images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
       'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.11.2',
       'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
@@ -33313,6 +33330,17 @@ addons:
   release_url: https://github.com/mongodb/mongodb-kubernetes/releases/tag/{vsn}
   helm_repository_url: https://mongodb.github.io/helm-charts
   versions:
+  - version: 1.13.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Adds support for Ops Manager 9.0 in the `MongoDBOpsManager` resource.]
+      breaking_changes: []
+    chart_version: 1.13.0
+    images: ['quay.io/mongodb/mongodb-kubernetes:1.13.0']
   - version: 1.12.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
