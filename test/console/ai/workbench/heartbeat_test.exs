@@ -309,6 +309,34 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       GenServer.stop(pid, :normal)
     end
 
+    test "ignores missing counters instead of erasing accumulated usage" do
+      job = insert(:workbench_job, status: :running, usage: @usage)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Heartbeat.usage_callback(job, %{
+        input_tokens: 5,
+        output_tokens: 4,
+        total_tokens: 9,
+        reasoning_tokens: nil,
+        input_cost: nil,
+        output_cost: nil,
+        total_cost: nil
+      })
+      Heartbeat.usage_callback(job, nil)
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.input_tokens == 105
+      assert usage.total_tokens == 134
+      assert usage.reasoning_tokens == 5
+      assert_in_delta usage.total_cost, 0.03, 0.000_001
+    end
+
     test "persists accumulated usage when the job is cancelled" do
       workbench =
         insert(:workbench,

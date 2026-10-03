@@ -21,10 +21,20 @@ func (s agentRunFetcherStub) GetAgentRun(context.Context, string) (*consoleclien
 
 func TestRefreshCredentials(t *testing.T) {
 	t.Setenv(environment.EnvGitAccessToken, "old-token")
+	t.Setenv("HTTP_PROXY", "http://container-proxy.example.com:8080")
+	t.Setenv("HTTPS_PROXY", "http://container-proxy.example.com:8080")
 	pluralToken := "new-plural-token"
+	noProxy := "github.internal"
 	client := agentRunFetcherStub{
 		agentRun: &consoleclient.AgentRunFragment{
-			ScmCreds:    &consoleclient.ScmCredentialFragment{Token: "new-token"},
+			ScmCreds: &consoleclient.ScmCredentialFragment{
+				Token: "new-token",
+				Proxy: &consoleclient.ScmCredentialFragment_Proxy{
+					Enabled: true,
+					URL:     "http://proxy.example.com:8080",
+					Noproxy: &noProxy,
+				},
+			},
 			PluralCreds: &consoleclient.PluralCredsFragment{Token: &pluralToken},
 		},
 	}
@@ -38,6 +48,19 @@ func TestRefreshCredentials(t *testing.T) {
 	}
 	if token := credentials.PluralToken(); token != pluralToken {
 		t.Fatalf("PluralToken() = %q, want %q", token, pluralToken)
+	}
+	if proxy := os.Getenv("HTTP_PROXY"); proxy != "http://container-proxy.example.com:8080" {
+		t.Fatalf("HTTP_PROXY = %q, want process environment unchanged", proxy)
+	}
+	if proxy := os.Getenv("HTTPS_PROXY"); proxy != "http://container-proxy.example.com:8080" {
+		t.Fatalf("HTTPS_PROXY = %q, want process environment unchanged", proxy)
+	}
+	scmCredential, _ := credentials.scmCredential.Load().(scmCredential)
+	if scmCredential.proxyURL != "http://proxy.example.com:8080" {
+		t.Fatalf("proxy URL = %q, want configured proxy", scmCredential.proxyURL)
+	}
+	if scmCredential.noProxy != "github.internal" {
+		t.Fatalf("no proxy = %q, want %q", scmCredential.noProxy, "github.internal")
 	}
 }
 

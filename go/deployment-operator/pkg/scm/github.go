@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,9 +17,9 @@ type gitHubClient struct {
 	gh *gogithub.Client
 }
 
-func newGitHubClient(token, host string) *gitHubClient {
+func newGitHubClient(token, host string, client *http.Client) *gitHubClient {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
-	tc := oauth2.NewClient(context.Background(), ts)
+	tc := &http.Client{Transport: &oauth2.Transport{Source: ts, Base: client.Transport}}
 	gh := gogithub.NewClient(tc)
 
 	// GitHub Enterprise: upload/download URLs differ from api.github.com

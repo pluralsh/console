@@ -750,6 +750,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Anthropic.ToolModel,
 			EmbeddingModel: in.Anthropic.EmbeddingModel,
 			ProxyModels:    lo.ToSlicePtr(in.Anthropic.ProxyModels),
+			Proxy:          in.Anthropic.Proxy.Attributes(),
 		}
 	}
 
@@ -778,6 +779,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken:    token,
 			Deployments:    deployments,
 			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
+			Proxy:          in.Azure.Proxy.Attributes(),
 		}
 	}
 
@@ -800,6 +802,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			EmbeddingModel:     in.Vertex.EmbeddingModel,
 			ToolModel:          in.Vertex.ToolModel,
 			ProxyModels:        lo.ToSlicePtr(in.Vertex.ProxyModels),
+			Proxy:              in.Vertex.Proxy.Attributes(),
 		}
 	}
 
@@ -847,6 +850,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
 			Deployments:        deployments,
 			ModelSettings:      modelSettings,
+			Proxy:              in.Bedrock.Proxy.Attributes(),
 		}
 	}
 
@@ -861,6 +865,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:         in.Ollama.Model,
 			ToolModel:     in.Ollama.ToolModel,
 			Authorization: auth,
+			Proxy:         in.Ollama.Proxy.Attributes(),
 		}
 	}
 
@@ -951,6 +956,11 @@ func (in *AISettings) checkProvider(provider *console.AiProvider, ptype string) 
 }
 
 type AIProviderSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Model is the LLM model name to use.
 	//
 	// +kubebuilder:validation:Optional
@@ -985,6 +995,11 @@ type AIProviderSettings struct {
 }
 
 type OpenAISettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Model is the LLM model name to use.
 	//
 	// +kubebuilder:validation:Optional
@@ -1166,6 +1181,11 @@ func (in *OAuth2TokenExchange) TokenExchangeAttributes(ctx context.Context, c cl
 
 // OllamaSettings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama
 type OllamaSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// URL is the url this model is queryable on
 	//
 	// +kubebuilder:validation:Required
@@ -1189,6 +1209,11 @@ type OllamaSettings struct {
 }
 
 type AzureOpenAISettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Endpoint is your Azure OpenAI endpoint,
 	// should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}"
 	//
@@ -1246,6 +1271,11 @@ type BedrockModelSettings struct {
 }
 
 type BedrockSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// ModelID is the primary AWS Bedrock model or inference profile identifier.
 	// Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,
 	// global.anthropic.claude-haiku-4-5-20251001-v1:0).
@@ -1315,6 +1345,11 @@ type BedrockSettings struct {
 }
 
 type VertexSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex
 	//
 	// +kubebuilder:validation:Optional
@@ -1453,6 +1488,7 @@ func (in *OpenAISettings) Attributes(ctx context.Context, c client.Client, names
 		Method:         in.Method,
 		ProxyModels:    lo.ToSlicePtr(in.ProxyModels),
 		Headers:        httpHeaderAttributes(in.Headers),
+		Proxy:          in.Proxy.Attributes(),
 	}
 	if in.TokenExchange != nil {
 		tokenExchange, err := in.TokenExchange.Attributes(ctx, c, namespace)

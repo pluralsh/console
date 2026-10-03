@@ -295,6 +295,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :base_url, :string, description: "the base url of the scm connection"
     field :username, non_null(:string)
     field :token,    non_null(:string)
+    field :proxy,    :http_proxy_configuration, description: "the proxy to use for git and SCM API requests"
 
     field :exa_key, :string, description: "the exa key for the agent", resolve: fn
       _, _, _ -> {:ok, Console.conf(:exa_api_key)}

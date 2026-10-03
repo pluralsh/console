@@ -37,6 +37,36 @@ defmodule Console.GRPC.ServerTest do
       assert config.openai.proxyModels == Provider.defaults(:openai)[:proxy_models]
     end
 
+    test "forwards provider-scoped HTTP proxy configuration to Nexus" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          openai: %{
+            access_token: "openai-token",
+            proxy: %{
+              url: "http://proxy.example.com:8080",
+              noproxy: "models.internal"
+            }
+          },
+          anthropic: %{
+            access_token: "anthropic-token",
+            proxy: %{
+              enabled: false,
+              url: "http://disabled-proxy.example.com:8080"
+            }
+          }
+        }
+      )
+
+      config = Server.get_ai_config(%Plrl.AiConfigRequest{}, nil)
+
+      assert config.openai.proxy.url == "http://proxy.example.com:8080"
+      assert config.openai.proxy.noProxy == "models.internal"
+      assert config.openai.proxy.enabled
+      refute config.anthropic.proxy.enabled
+      assert config.anthropic.proxy.url == "http://disabled-proxy.example.com:8080"
+    end
+
     test "preserves configured OpenAI-compatible api keys" do
       deployment_settings(
         ai: %{

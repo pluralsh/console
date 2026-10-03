@@ -113,6 +113,26 @@ spec:
                       model:
                         description: Model is the LLM model name to use.
                         type: string
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       proxyModels:
                         description: ProxyModels are additional models to support
                           within our integrated ai proxy.
@@ -179,6 +199,26 @@ spec:
                         description: Model - the OpenAi model you wish to use. If
                           not specified, Plural will provide a default.
                         type: string
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       proxyModels:
                         description: ProxyModels are additional models to support
                           within the integrated ai proxy.
@@ -298,6 +338,26 @@ spec:
                           - modelId
                           type: object
                         type: array
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       proxyModels:
                         description: |-
                           ProxyModels lists additional Bedrock model or inference profile IDs exposed through the Nexus
@@ -474,6 +534,26 @@ spec:
                         description: Model is the Ollama model to use when querying
                           the /chat api
                         type: string
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       tokenSecretRef:
                         description: |-
                           AuthorizationSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
@@ -551,6 +631,26 @@ spec:
                       model:
                         description: Model is the LLM model name to use.
                         type: string
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       proxyModels:
                         description: ProxyModels are additional models to support
                           within our integrated ai proxy.
@@ -723,6 +823,26 @@ spec:
                       model:
                         description: Model is the LLM model name to use.
                         type: string
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       proxyModels:
                         description: ProxyModels are additional models to support
                           within our integrated ai proxy.
@@ -1072,6 +1192,26 @@ spec:
                       project:
                         description: Project is the GCP project you'll be using
                         type: string
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       proxyModels:
                         description: ProxyModels are additional models to support
                           within the integrated ai proxy.
@@ -1155,6 +1295,26 @@ spec:
                       model:
                         description: Model is the LLM model name to use.
                         type: string
+                      proxy:
+                        description: Proxy configures an HTTP proxy for this provider's
+                          API calls.
+                        properties:
+                          enabled:
+                            default: true
+                            description: Enabled controls whether this proxy is used.
+                              It defaults to true.
+                            type: boolean
+                          noproxy:
+                            description: The comma-separated list of hosts that should
+                              not be proxied, will behave equivalently to a NOPROXY
+                              env var.
+                            type: string
+                          url:
+                            description: The url of your HTTP proxy.
+                            type: string
+                        required:
+                        - url
+                        type: object
                       proxyModels:
                         description: ProxyModels are additional models to support
                           within our integrated ai proxy.

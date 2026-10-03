@@ -78,6 +78,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
@@ -364,6 +365,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is your Azure OpenAI endpoint,<br />should be formatted like: https://\{endpoint\}/openai/deployments/\{deployment-id\}" |  | Required: \{\} <br /> |
 | `apiVersion` _string_ | The azure openai Data plane - inference api version to use,<br />defaults to 2024-10-01-preview or the latest available |  | Optional: \{\} <br /> |
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
@@ -404,6 +406,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `modelId` _string_ | ModelID is the primary AWS Bedrock model or inference profile identifier.<br />Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,<br />global.anthropic.claude-haiku-4-5-20251001-v1:0). |  | Optional: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId is the Bedrock model or inference profile for tool calling. Same ID formats as modelId. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel is the Bedrock model or inference profile for embeddings. Same ID formats as modelId. |  | Optional: \{\} <br /> |
@@ -2407,12 +2410,19 @@ _Appears in:_
 
 
 _Appears in:_
+- [AIProviderSettings](#aiprovidersettings)
+- [AzureOpenAISettings](#azureopenaisettings)
+- [BedrockSettings](#bedrocksettings)
 - [HelmRepositoryAuth](#helmrepositoryauth)
+- [OllamaSettings](#ollamasettings)
+- [OpenAISettings](#openaisettings)
 - [PrAutomationSpec](#prautomationspec)
 - [ScmConnectionSpec](#scmconnectionspec)
+- [VertexSettings](#vertexsettings)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled controls whether this proxy is used. It defaults to true. | true | Optional: \{\} <br /> |
 | `url` _string_ | The url of your HTTP proxy. |  | Required: \{\} <br /> |
 | `noproxy` _string_ | The comma-separated list of hosts that should not be proxied, will behave equivalently to a NOPROXY env var. |  | Optional: \{\} <br /> |
 
@@ -3583,6 +3593,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `url` _string_ | URL is the url this model is queryable on |  | Required: \{\} <br /> |
 | `model` _string_ | Model is the Ollama model to use when querying the /chat api |  | Required: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
@@ -3602,6 +3613,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
@@ -6068,6 +6080,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings.<br />This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.<br />Default is gemini-embedding-001. |  | Optional: \{\} <br /> |

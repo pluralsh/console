@@ -138,7 +138,8 @@ defmodule Console.Schema.PrAutomation do
     timestamps()
   end
 
-  def proxy_env(%__MODULE__{proxy: %ScmConnection.Proxy{url: url} = proxy}) when is_binary(url) do
+  def proxy_env(%__MODULE__{proxy: %ScmConnection.Proxy{enabled: enabled, url: url} = proxy})
+    when enabled != false and is_binary(url) do
     Enum.concat([
       {"HTTP_PROXY", url},
       {"HTTPS_PROXY", url}

@@ -1122,6 +1122,8 @@ type AnsibleConfigurationAttributes struct {
 type AnthropicSettings struct {
 	// the anthropic model version to use
 	Model *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
@@ -1131,6 +1133,8 @@ type AnthropicSettings struct {
 type AnthropicSettingsAttributes struct {
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -1387,6 +1391,8 @@ type AzureOpenaiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// mapping from model id to azure openai deployment name
 	Deployments *string `json:"deployments,omitempty"`
 	// addditional models to support within the integrated ai proxy
@@ -1398,6 +1404,8 @@ type AzureOpenaiSettings struct {
 	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
 	Endpoint string  `json:"endpoint"`
 	Model    *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
@@ -1454,6 +1462,8 @@ type BedrockAiAttributes struct {
 	AccessToken *string `json:"accessToken,omitempty"`
 	// the aws region the model is hosted in
 	Region *string `json:"region,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the aws access key id to use (DEPRECATED)
 	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
 	// the aws secret access key to use (DEPRECATED)
@@ -1474,6 +1484,8 @@ type BedrockAiAttributes struct {
 type BedrockAiSettings struct {
 	// AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults.
 	ModelID *string `json:"modelId,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// Bedrock model or inference profile for tool calls. Same ID formats as modelId.
 	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the openai bedrock aws access key id to use (DEPRECATED)
@@ -4434,12 +4446,16 @@ type HTTPIngressRule struct {
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyAttributes struct {
+	// whether this proxy is enabled (defaults to true)
+	Enabled *bool   `json:"enabled,omitempty"`
 	URL     string  `json:"url"`
 	Noproxy *string `json:"noproxy,omitempty"`
 }
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyConfiguration struct {
+	// whether this proxy is enabled
+	Enabled bool    `json:"enabled"`
 	URL     string  `json:"url"`
 	Noproxy *string `json:"noproxy,omitempty"`
 }
@@ -6288,6 +6304,8 @@ type OidcStepResponse struct {
 
 type OllamaAttributes struct {
 	Model string `json:"model"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -6302,6 +6320,8 @@ type OllamaAttributes struct {
 // Settings for a self-hosted ollama-based LLM deployment
 type OllamaSettings struct {
 	Model string `json:"model"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the url your ollama deployment is hosted on
@@ -6324,6 +6344,8 @@ type OpenaiSettings struct {
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// the openai model version to use
 	Model *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -6342,6 +6364,8 @@ type OpenaiSettingsAttributes struct {
 	BaseURL     *string `json:"baseUrl,omitempty"`
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -8323,6 +8347,8 @@ type ScmCreds struct {
 	BaseURL  *string `json:"baseUrl,omitempty"`
 	Username string  `json:"username"`
 	Token    string  `json:"token"`
+	// the proxy to use for git and SCM API requests
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the exa key for the agent
 	ExaKey *string `json:"exaKey,omitempty"`
 }
@@ -10355,6 +10381,8 @@ type VersionReference struct {
 type VertexAiAttributes struct {
 	// the vertex model id to use
 	Model *string `json:"model,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -10375,6 +10403,8 @@ type VertexAiAttributes struct {
 type VertexAiSettings struct {
 	// the vertex ai model to use
 	Model *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning

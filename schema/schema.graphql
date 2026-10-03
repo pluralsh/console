@@ -2672,6 +2672,9 @@ type ScmCreds {
 
   token: String!
 
+  "the proxy to use for git and SCM API requests"
+  proxy: HttpProxyConfiguration
+
   "the exa key for the agent"
   exaKey: String
 }
@@ -7130,6 +7133,9 @@ input OpenaiSettingsAttributes {
 
   model: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7182,6 +7188,9 @@ input AnthropicSettingsAttributes {
 
   model: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7194,6 +7203,9 @@ input AnthropicSettingsAttributes {
 
 input OllamaAttributes {
   model: String!
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7229,6 +7241,9 @@ input AzureOpenaiAttributes {
   "the azure openai access token to use"
   accessToken: String!
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "mapping from model id to azure openai deployment name"
   deployments: Json
 
@@ -7248,6 +7263,9 @@ input BedrockAiAttributes {
 
   "the aws region the model is hosted in"
   region: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the aws access key id to use (DEPRECATED)"
   awsAccessKeyId: String
@@ -7282,6 +7300,9 @@ input BedrockModelSettingsAttributes {
 input VertexAiAttributes {
   "the vertex model id to use"
   model: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7612,6 +7633,9 @@ type OpenaiSettings {
   "the openai model version to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7661,6 +7685,9 @@ type AnthropicSettings {
   "the anthropic model version to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7671,6 +7698,9 @@ type AnthropicSettings {
 "Settings for a self-hosted ollama-based LLM deployment"
 type OllamaSettings {
   model: String!
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7685,6 +7715,9 @@ type AzureOpenaiSettings {
   endpoint: String!
 
   model: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -7706,6 +7739,9 @@ type AzureOpenaiSettings {
 type BedrockAiSettings {
   "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults."
   modelId: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
   toolModelId: String
@@ -7741,6 +7777,9 @@ type BedrockModelSettings {
 type VertexAiSettings {
   "the vertex ai model to use"
   model: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -14895,7 +14934,11 @@ input ScmConnectionAttributes {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 input HttpProxyAttributes {
+  "whether this proxy is enabled (defaults to true)"
+  enabled: Boolean
+
   url: String!
+
   noproxy: String
 }
 
@@ -16097,7 +16140,11 @@ type ObserverAgentAction {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 type HttpProxyConfiguration {
+  "whether this proxy is enabled"
+  enabled: Boolean!
+
   url: String!
+
   noproxy: String
 }
 

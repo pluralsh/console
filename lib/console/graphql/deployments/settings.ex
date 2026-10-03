@@ -197,6 +197,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :base_url, :string
     field :access_token, :string
     field :model, :string
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -239,6 +240,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :anthropic_settings_attributes do
     field :access_token, :string
     field :model, :string
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -252,6 +254,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   input_object :ollama_attributes do
     field :model, non_null(:string)
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -281,6 +284,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :access_token, non_null(:string), description: "the azure openai access token to use"
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :deployments, :json,
       description: "mapping from model id to azure openai deployment name"
@@ -298,6 +302,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :access_token, :string, description: "the openai bedrock access token to use"
     field :region, :string, description: "the aws region the model is hosted in"
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
     field :aws_access_key_id, :string, description: "the aws access key id to use (DEPRECATED)"
 
     field :aws_secret_access_key, :string,
@@ -324,6 +329,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   input_object :vertex_ai_attributes do
     field :model, :string, description: "the vertex model id to use"
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -620,6 +626,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
 
     field :model, :string, description: "the openai model version to use"
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -661,6 +668,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Anthropic connection information"
   object :anthropic_settings do
     field :model, :string, description: "the anthropic model version to use"
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -673,6 +681,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Settings for a self-hosted ollama-based LLM deployment"
   object :ollama_settings do
     field :model, non_null(:string)
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -688,6 +697,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
 
     field :model, :string
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
 
     field :tool_model, :string,
@@ -706,6 +716,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Settings for usage of AWS Bedrock for LLMs"
   object :bedrock_ai_settings do
     field :model_id, :string, description: @bedrock_model_id_doc <> " Omit for Plural defaults."
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model_id, :string,
       description:
@@ -736,6 +747,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Settings for usage of GCP VertexAI for LLMs"
   object :vertex_ai_settings do
     field :model, :string, description: "the vertex ai model to use"
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
 
     field :tool_model, :string,
