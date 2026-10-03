@@ -1,6 +1,5 @@
 import {
   AddIcon,
-  BellIcon,
   CheckIcon,
   CloseIcon,
   DashboardIcon,
@@ -9,6 +8,7 @@ import {
   IconFrame,
   Input,
   SearchIcon,
+  SirenIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -431,7 +431,7 @@ function MonitorRow({
           aria-hidden="true"
           size="large"
           type="secondary"
-          icon={<BellIcon />}
+          icon={<SirenIcon />}
         />
         <RowTextSC>
           <RowTitleSC>{monitor.name}</RowTitleSC>

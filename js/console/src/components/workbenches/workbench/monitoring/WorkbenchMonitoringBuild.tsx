@@ -1,9 +1,9 @@
 import {
   ArrowUpIcon,
-  BellIcon,
   Button,
   ChartIcon,
   Flex,
+  SirenIcon,
 } from '@pluralsh/design-system'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
@@ -82,7 +82,7 @@ export function WorkbenchMonitoringBuild({
         {kind === 'dashboard' ? (
           <ChartIcon size={20} />
         ) : (
-          <BellIcon size={20} />
+          <SirenIcon size={20} />
         )}
         <h1>{copy.title}</h1>
       </SubtitleSC>
