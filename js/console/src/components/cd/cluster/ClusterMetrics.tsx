@@ -27,6 +27,12 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
+import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
+import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
+import {
+  useRangeQueryData,
+  useTimeRange,
+} from 'components/utils/timerange/useTimeRange'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
@@ -64,16 +70,24 @@ export function ClusterMetrics() {
   })
   const loading = utilLoading || deploymentSettingsLoading
 
+  const timeRange = useTimeRange()
   const {
-    data: metricsData,
+    data: currentMetricsData,
+    previousData: previousMetricsData,
     loading: metricsQueryLoading,
     error: metricsError,
   } = useClusterMetricsQuery({
-    variables: { clusterId: clusterId ?? '' },
+    variables: {
+      clusterId: clusterId ?? '',
+      ...metricsQueryWindow(timeRange.timeWindow),
+    },
     skip: !metricsEnabled,
     fetchPolicy: 'cache-and-network',
-    pollInterval: 60_000,
   })
+  const metricsData = useRangeQueryData(
+    { data: currentMetricsData, previousData: previousMetricsData },
+    timeRange.revision
+  )
   const metricsLoading = metricsQueryLoading || deploymentSettingsLoading
 
   const { cpuMetrics, memMetrics, podsMetrics } = useMemo(
@@ -96,7 +110,13 @@ export function ClusterMetrics() {
         direction="column"
         gap="small"
       >
-        <Subtitle2H1>Metrics</Subtitle2H1>
+        <Flex
+          align="center"
+          justifyContent="space-between"
+        >
+          <Subtitle2H1>Metrics</Subtitle2H1>
+          <MetricsTimeRangeControl timeRange={timeRange} />
+        </Flex>
         <Card style={{ padding: hasMetrics ? spacing.xlarge : 0 }}>
           {!hasMetrics ? (
             metricsError ? (
@@ -124,6 +144,8 @@ export function ClusterMetrics() {
                 cpuTotal={cpuMetrics.total}
                 memUsage={memMetrics.usage}
                 memTotal={memMetrics.total}
+                timeWindow={timeRange.timeWindow}
+                onRangeSelect={timeRange.selectWindow}
               />
             </Flex>
           )}

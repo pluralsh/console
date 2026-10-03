@@ -4,13 +4,16 @@ defmodule Console.Deployments.Observability.Metrics do
   """
   import Console.Deployments.Observability.Utils
 
+  @component_selector ~s|cluster="$cluster",namespace="$namespace",pod=~"$name$regex"|
+  @service_selector ~s|cluster="$cluster",namespace="$namespace"|
+
   @cluster post_process([
     cpu: ~s|1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="$cluster"}[$rate]))|,
     memory: ~s|(sum(node_memory_MemTotal_bytes{cluster="$cluster"}) - sum(node_memory_MemAvailable_bytes{cluster="$cluster"})) / sum(node_memory_MemTotal_bytes{cluster="$cluster"})|,
-    cpu_requests: ~s|sum(kube_pod_container_resource_requests{unit="core",cluster="$cluster"})|,
-    memory_requests: ~s|sum(kube_pod_container_resource_requests{unit="byte",cluster="$cluster"})|,
-    cpu_limits: ~s|sum(kube_pod_container_resource_limits{unit="core",cluster="$cluster"})|,
-    memory_limits: ~s|sum(kube_pod_container_resource_limits{unit="byte",cluster="$cluster"})|,
+    cpu_requests: reservation(:requests, "core", ~s|cluster="$cluster"|),
+    memory_requests: reservation(:requests, "byte", ~s|cluster="$cluster"|),
+    cpu_limits: reservation(:limits, "core", ~s|cluster="$cluster"|),
+    memory_limits: reservation(:limits, "byte", ~s|cluster="$cluster"|),
     pods: ~s|count(kube_pod_info{cluster="$cluster"})|,
     cpu_usage: ~s|sum(rate (container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[$rate]))|,
     memory_usage: ~s|sum(container_memory_working_set_bytes{image!="",cluster="$cluster",container!=""})|
@@ -28,14 +31,14 @@ defmodule Console.Deployments.Observability.Metrics do
     mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",pod=~"$name$regex",image!="",container!=""})|,
     pod_cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}[$rate])) by (pod)|,
     pod_mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",pod=~"$name$regex",image!="",container!=""}) by (pod)|,
-    cpu_requests: ~s|sum(kube_pod_container_resource_requests{unit="core",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"})|,
-    mem_requests: ~s|sum(kube_pod_container_resource_requests{unit="byte",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"})|,
-    cpu_limits: ~s|sum(kube_pod_container_resource_limits{unit="core",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"})|,
-    mem_limits: ~s|sum(kube_pod_container_resource_limits{unit="byte",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"})|,
-    pod_cpu_requests: ~s|sum(kube_pod_container_resource_requests{unit="core",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}) by (pod)|,
-    pod_mem_requests: ~s|sum(kube_pod_container_resource_requests{unit="byte",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}) by (pod)|,
-    pod_cpu_limits: ~s|sum(kube_pod_container_resource_limits{unit="core",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}) by (pod)|,
-    pod_mem_limits: ~s|sum(kube_pod_container_resource_limits{unit="byte",cluster="$cluster",namespace="$namespace",pod=~"$name$regex"}) by (pod)|
+    cpu_requests: reservation(:requests, "core", @component_selector),
+    mem_requests: reservation(:requests, "byte", @component_selector),
+    cpu_limits: reservation(:limits, "core", @component_selector),
+    mem_limits: reservation(:limits, "byte", @component_selector),
+    pod_cpu_requests: reservation(:requests, "core", @component_selector, "pod"),
+    pod_mem_requests: reservation(:requests, "byte", @component_selector, "pod"),
+    pod_cpu_limits: reservation(:limits, "core", @component_selector, "pod"),
+    pod_mem_limits: reservation(:limits, "byte", @component_selector, "pod")
   ])
 
   @service post_process([
@@ -43,14 +46,14 @@ defmodule Console.Deployments.Observability.Metrics do
     mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",image!="",container!=""})|,
     pod_cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster",namespace="$namespace"}[$rate])) by (pod)|,
     pod_mem: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",namespace="$namespace",image!="",container!=""}) by (pod)|,
-    cpu_requests: ~s|sum(kube_pod_container_resource_requests{unit="core",cluster="$cluster",namespace="$namespace"})|,
-    mem_requests: ~s|sum(kube_pod_container_resource_requests{unit="byte",cluster="$cluster",namespace="$namespace"})|,
-    cpu_limits: ~s|sum(kube_pod_container_resource_limits{unit="core",cluster="$cluster",namespace="$namespace"})|,
-    mem_limits: ~s|sum(kube_pod_container_resource_limits{unit="byte",cluster="$cluster",namespace="$namespace"})|,
-    pod_cpu_requests: ~s|sum(kube_pod_container_resource_requests{unit="core",cluster="$cluster",namespace="$namespace"}) by (pod)|,
-    pod_mem_requests: ~s|sum(kube_pod_container_resource_requests{unit="byte",cluster="$cluster",namespace="$namespace"}) by (pod)|,
-    pod_cpu_limits: ~s|sum(kube_pod_container_resource_limits{unit="core",cluster="$cluster",namespace="$namespace"}) by (pod)|,
-    pod_mem_limits: ~s|sum(kube_pod_container_resource_limits{unit="byte",cluster="$cluster",namespace="$namespace"}) by (pod)|
+    cpu_requests: reservation(:requests, "core", @service_selector),
+    mem_requests: reservation(:requests, "byte", @service_selector),
+    cpu_limits: reservation(:limits, "core", @service_selector),
+    mem_limits: reservation(:limits, "byte", @service_selector),
+    pod_cpu_requests: reservation(:requests, "core", @service_selector, "pod"),
+    pod_mem_requests: reservation(:requests, "byte", @service_selector, "pod"),
+    pod_cpu_limits: reservation(:limits, "core", @service_selector, "pod"),
+    pod_mem_limits: reservation(:limits, "byte", @service_selector, "pod")
   ])
 
   @heat post_process([
@@ -69,7 +72,7 @@ defmodule Console.Deployments.Observability.Metrics do
   ])
 
   @noisy post_process([
-    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[$rate])) / sum(kube_pod_container_resource_requests_cpu_cores{cluster="$cluster") by (pod)|,
+    cpu: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",cluster="$cluster"}[$rate])) / sum(kube_pod_container_resource_requests_cpu_cores{cluster="$cluster"}) by (pod)|,
     memory: ~s|sum(container_memory_working_set_bytes{cluster="$cluster",image!="",container!=""}) / sum(kube_pod_container_resource_requests_memory_bytes{cluster="$cluster"}) by (pod)|
   ])
 

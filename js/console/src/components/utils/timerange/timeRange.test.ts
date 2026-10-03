@@ -4,9 +4,10 @@ import {
   formatDurationLong,
   formatDurationShort,
   formatRangeText,
+  metricsQueryWindow,
   parseRangeText,
   rangeWindow,
-} from './dashboardTimeRange'
+} from './timeRange'
 
 const MINUTE = 60 * 1000
 const HOUR = 60 * MINUTE
@@ -152,5 +153,18 @@ describe('window helpers', () => {
       start: new Date(1000),
       end: new Date(1000 + MINUTE),
     })
+  })
+
+  it('builds prometheus range arguments for a window', () => {
+    const start = new Date(NOW.getTime() - HOUR)
+    expect(metricsQueryWindow({ start, end: NOW })).toEqual({
+      start: start.toISOString(),
+      stop: NOW.toISOString(),
+      step: '15s',
+    })
+    expect(
+      metricsQueryWindow({ start: new Date(NOW.getTime() - 7 * DAY), end: NOW })
+        .step
+    ).toBe('30m')
   })
 })

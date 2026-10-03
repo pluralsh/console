@@ -12,7 +12,12 @@ import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
-import RangePicker from 'components/utils/RangePicker'
+import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
+import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
+import {
+  useRangeQueryData,
+  useTimeRange,
+} from 'components/utils/timerange/useTimeRange'
 import {
   HeatMapFlavor,
   useServiceHeatMapQuery,
@@ -29,9 +34,7 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
 import {
   ResourceMetricsGraphs,
   hasResourceMetrics,
@@ -212,22 +215,24 @@ function ServiceMetricsHeatmap() {
 function ServiceMetricsTimeseries() {
   const theme = useTheme()
   const { serviceId } = useParams()
-  const [duration, setDuration] = useState<any>(DURATIONS[0])
-  const start = useMetricsQueryStart(duration.offset)
+  const timeRange = useTimeRange()
   const {
-    data,
+    data: currentData,
+    previousData,
     loading,
     error: metricsError,
   } = useServiceMetricsQuery({
     variables: {
       id: serviceId ?? '',
-      step: getMetricQueryStep(duration.offset),
-      start,
+      ...metricsQueryWindow(timeRange.timeWindow),
     },
     skip: !serviceId,
-    pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
   })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
 
   const {
     cpu,
@@ -306,6 +311,8 @@ function ServiceMetricsTimeseries() {
         podMemRequests={podMemRequests}
         podCpuLimits={podCpuLimits}
         podMemLimits={podMemLimits}
+        timeWindow={timeRange.timeWindow}
+        onRangeSelect={timeRange.selectWindow}
       />
     )
   }
@@ -318,12 +325,7 @@ function ServiceMetricsTimeseries() {
       width="100%"
       overflow="auto"
     >
-      <RangePicker
-        duration={duration}
-        setDuration={setDuration}
-        position="sticky"
-        top={0}
-      />
+      <MetricsTimeRangeControl timeRange={timeRange} />
       {!data && loading ? (
         <RectangleSkeleton
           $height="100%"

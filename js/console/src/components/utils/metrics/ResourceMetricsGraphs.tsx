@@ -6,6 +6,7 @@ import { MetricResponseFragment, MetricResult } from 'generated/graphql'
 import { Prometheus } from 'utils/prometheus.ts'
 import { Graph } from 'components/utils/Graph'
 import GraphHeader from 'components/utils/GraphHeader'
+import type { TimeWindow } from 'components/utils/timerange/timeRange'
 import {
   PodResourceReservation,
   addPodResourceReservationSeries,
@@ -37,13 +38,20 @@ function getMetricPod(metric: MetricResponseFragment['metric']): string {
   return typeof metric?.pod === 'string' ? metric.pod : ''
 }
 
+type RangeProps = {
+  timeWindow?: TimeWindow
+  onRangeSelect?: (start: Date, end: Date) => void
+}
+
 function MetricsRow({
   graphs,
   wrapLegend,
+  timeWindow,
+  onRangeSelect,
 }: {
   graphs: MetricGraph[]
   wrapLegend?: boolean
-}) {
+} & RangeProps) {
   const theme = useTheme()
   const visibleGraphs = graphs.filter(({ data }) => !isEmpty(data))
 
@@ -74,6 +82,8 @@ function MetricsRow({
             yFormat={(v) => Prometheus.format(v, format)}
             tickRotation={undefined}
             wrapLegend={wrapLegend}
+            timeWindow={timeWindow}
+            onRangeSelect={onRangeSelect}
           />
         </div>
       ))}
@@ -140,13 +150,16 @@ export function ResourceMetricsGraphs({
   podCpuLimits,
   podMemLimits,
   podReservations,
-}: ResourceMetricsInput & {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-  podCpu: MetricResponseFragment[]
-  podMem: MetricResponseFragment[]
-  podReservations?: PodResourceReservation[]
-}) {
+  timeWindow,
+  onRangeSelect,
+}: ResourceMetricsInput &
+  RangeProps & {
+    cpu: MetricResponseFragment[]
+    mem: MetricResponseFragment[]
+    podCpu: MetricResponseFragment[]
+    podMem: MetricResponseFragment[]
+    podReservations?: PodResourceReservation[]
+  }) {
   const overallGraphs = useMemo(() => {
     const toOverallSeries = (
       usage: MetricResponseFragment[],
@@ -237,10 +250,16 @@ export function ResourceMetricsGraphs({
 
   return (
     <>
-      <MetricsRow graphs={overallGraphs} />
+      <MetricsRow
+        graphs={overallGraphs}
+        timeWindow={timeWindow}
+        onRangeSelect={onRangeSelect}
+      />
       <MetricsRow
         graphs={podGraphs}
         wrapLegend
+        timeWindow={timeWindow}
+        onRangeSelect={onRangeSelect}
       />
     </>
   )

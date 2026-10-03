@@ -24,17 +24,14 @@ import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { DashboardTimeRangeControl } from './DashboardTimeRangeControl'
-import { DashboardTitleMenu } from './DashboardTitleMenu'
+import { TimeRangeControl } from 'components/utils/timerange/TimeRangeControl'
 import {
-  absoluteRange,
-  type DashboardRange,
-  DEFAULT_DASHBOARD_RANGE,
+  DEFAULT_TIME_RANGE,
   encodeDuration,
   rangeDurationMs,
-  rangeWindow,
-  startOfCurrentMinute,
-} from './dashboardTimeRange'
+} from 'components/utils/timerange/timeRange'
+import { useTimeRange } from 'components/utils/timerange/useTimeRange'
+import { DashboardTitleMenu } from './DashboardTitleMenu'
 import { dashboardDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
 import { parseMonitoringShareSearch } from './monitoringShare'
@@ -124,29 +121,21 @@ function DashboardDetailView({
   const [initializedInputSignature, setInitializedInputSignature] = useState<
     string | null
   >(null)
-  const [range, setRange] = useState<DashboardRange>(
-    () => shared.range ?? DEFAULT_DASHBOARD_RANGE
-  )
-  const [now, setNow] = useLiveMinute(range.live)
-  // Bumped only on user-initiated range changes, so live ticks keep showing
-  // the previous data while refetching instead of flashing skeletons.
-  const [rangeRevision, setRangeRevision] = useState(0)
+  const {
+    range,
+    now,
+    timeWindow,
+    revision: rangeRevision,
+    setRange: onRangeChange,
+    selectWindow: onRangeSelect,
+  } = useTimeRange(() => shared.range ?? DEFAULT_TIME_RANGE)
 
-  const timeRange = useMemo<DashboardTimeRangeAttributes>(() => {
-    const { start, end } = rangeWindow(range, now)
-    return { start: start.toISOString(), end: end.toISOString() }
-  }, [range, now])
-  const onRangeChange = useCallback(
-    (nextRange: DashboardRange) => {
-      setRange(nextRange)
-      setNow(startOfCurrentMinute())
-      setRangeRevision((revision) => revision + 1)
-    },
-    [setNow]
-  )
-  const onRangeSelect = useCallback(
-    (start: Date, end: Date) => onRangeChange(absoluteRange(start, end)),
-    [onRangeChange]
+  const timeRange = useMemo<DashboardTimeRangeAttributes>(
+    () => ({
+      start: timeWindow.start.toISOString(),
+      end: timeWindow.end.toISOString(),
+    }),
+    [timeWindow]
   )
 
   const rangeDuration = encodeDuration(rangeDurationMs(range))
@@ -298,7 +287,8 @@ function DashboardDetailView({
                 onReadyChange={onInputReadyChange}
               />
             )}
-            <DashboardTimeRangeControl
+            <TimeRangeControl
+              css={{ marginLeft: 'auto' }}
               value={range}
               now={now}
               onChange={onRangeChange}
@@ -387,32 +377,6 @@ function reconcileDashboardFilters(
     Object.keys(current).length === Object.keys(next).length &&
     Object.entries(next).every(([name, value]) => current[name] === value)
   return unchanged ? current : next
-}
-
-const MINUTE_MS = 60 * 1000
-
-/** Current minute; advances on each minute boundary while `live`. */
-function useLiveMinute(live: boolean) {
-  const state = useState(startOfCurrentMinute)
-  const setNow = state[1]
-
-  useEffect(() => {
-    if (!live) return
-    let timeout: ReturnType<typeof setTimeout>
-    const schedule = () => {
-      timeout = setTimeout(
-        () => {
-          setNow(startOfCurrentMinute())
-          schedule()
-        },
-        MINUTE_MS - (Date.now() % MINUTE_MS) + 50
-      )
-    }
-    schedule()
-    return () => clearTimeout(timeout)
-  }, [live, setNow])
-
-  return state
 }
 
 export function MonitoringDetailSkeleton() {

@@ -1,9 +1,9 @@
-import { dayjsExtended as dayjs } from 'utils/datetime'
+import { dayjsExtended as dayjs, getMetricQueryStep } from 'utils/datetime'
 
-export type DashboardRange =
+export type TimeRange =
   { live: true; durationMs: number } | { live: false; start: Date; end: Date }
 
-export type DashboardWindow = { start: Date; end: Date }
+export type TimeWindow = { start: Date; end: Date }
 
 const MINUTE_MS = 60 * 1000
 const HOUR_MS = 60 * MINUTE_MS
@@ -13,20 +13,21 @@ const MONTH_MS = 30 * DAY_MS
 
 export const MIN_RANGE_MS = MINUTE_MS
 
-export const DASHBOARD_RANGE_PRESETS: { durationMs: number; label: string }[] =
-  [
-    { durationMs: 15 * MINUTE_MS, label: 'Past 15 minutes' },
-    { durationMs: HOUR_MS, label: 'Past 1 hour' },
-    { durationMs: 4 * HOUR_MS, label: 'Past 4 hours' },
-    { durationMs: DAY_MS, label: 'Past 1 day' },
-    { durationMs: 2 * DAY_MS, label: 'Past 2 days' },
-    { durationMs: 3 * DAY_MS, label: 'Past 3 days' },
-    { durationMs: WEEK_MS, label: 'Past 7 days' },
-    { durationMs: 15 * DAY_MS, label: 'Past 15 days' },
-    { durationMs: MONTH_MS, label: 'Past 1 month' },
-  ]
+export type TimeRangePreset = { durationMs: number; label: string }
 
-export const DEFAULT_DASHBOARD_RANGE: DashboardRange = {
+export const TIME_RANGE_PRESETS: TimeRangePreset[] = [
+  { durationMs: 15 * MINUTE_MS, label: 'Past 15 minutes' },
+  { durationMs: HOUR_MS, label: 'Past 1 hour' },
+  { durationMs: 4 * HOUR_MS, label: 'Past 4 hours' },
+  { durationMs: DAY_MS, label: 'Past 1 day' },
+  { durationMs: 2 * DAY_MS, label: 'Past 2 days' },
+  { durationMs: 3 * DAY_MS, label: 'Past 3 days' },
+  { durationMs: WEEK_MS, label: 'Past 7 days' },
+  { durationMs: 15 * DAY_MS, label: 'Past 15 days' },
+  { durationMs: MONTH_MS, label: 'Past 1 month' },
+]
+
+export const DEFAULT_TIME_RANGE: TimeRange = {
   live: true,
   durationMs: HOUR_MS,
 }
@@ -106,7 +107,7 @@ export function formatDurationShort(ms: number) {
 }
 
 export function formatDurationLong(ms: number) {
-  const preset = DASHBOARD_RANGE_PRESETS.find((p) => p.durationMs === ms)
+  const preset = TIME_RANGE_PRESETS.find((p) => p.durationMs === ms)
   if (preset) return preset.label
   if (ms % MONTH_MS === 0) return pluralize('Past', ms / MONTH_MS, 'month')
   const unit = UNITS.find((u) => ms % u.ms === 0)
@@ -118,18 +119,27 @@ function pluralize(prefix: string, count: number, unit: string) {
   return `${prefix} ${count} ${unit}${count === 1 ? '' : 's'}`
 }
 
-export function rangeWindow(range: DashboardRange, now: Date): DashboardWindow {
+export function rangeWindow(range: TimeRange, now: Date): TimeWindow {
   if (!range.live) return { start: range.start, end: range.end }
   return { start: new Date(now.getTime() - range.durationMs), end: now }
 }
 
-export function rangeDurationMs(range: DashboardRange) {
+/** Prometheus range-query arguments covering `window`. */
+export function metricsQueryWindow({ start, end }: TimeWindow) {
+  return {
+    start: start.toISOString(),
+    stop: end.toISOString(),
+    step: getMetricQueryStep((end.getTime() - start.getTime()) / 1000),
+  }
+}
+
+export function rangeDurationMs(range: TimeRange) {
   return range.live
     ? range.durationMs
     : range.end.getTime() - range.start.getTime()
 }
 
-export function absoluteRange(start: Date, end: Date): DashboardRange {
+export function absoluteRange(start: Date, end: Date): TimeRange {
   const [from, to] = start <= end ? [start, end] : [end, start]
   const minEnd = from.getTime() + MIN_RANGE_MS
   return {
@@ -229,7 +239,7 @@ function parsePoint(text: string, now: Date): ParsedPoint | null {
  * `past 3 days`) as live ranges and `<start> – <end>` as absolute ranges.
  * A side without a date borrows the other side's date (or today).
  */
-export function parseRangeText(text: string, now: Date): DashboardRange | null {
+export function parseRangeText(text: string, now: Date): TimeRange | null {
   const trimmed = text.trim()
   if (!trimmed) return null
 
@@ -269,7 +279,7 @@ export function parseRangeText(text: string, now: Date): DashboardRange | null {
   }
 }
 
-export function formatRangeText(range: DashboardRange, now: Date) {
+export function formatRangeText(range: TimeRange, now: Date) {
   if (range.live) return formatDurationLong(range.durationMs)
   const start = dayjs(range.start)
   const end = dayjs(range.end)

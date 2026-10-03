@@ -2,26 +2,37 @@ import { CaretDownIcon, PauseIcon, PlayIcon } from '@pluralsh/design-system'
 import { useRef, useState, type KeyboardEvent } from 'react'
 import styled from 'styled-components'
 import {
-  DASHBOARD_RANGE_PRESETS,
-  type DashboardRange,
+  TIME_RANGE_PRESETS,
+  type TimeRange,
+  type TimeRangePreset,
   formatDurationShort,
   formatRangeText,
   parseRangeText,
   rangeDurationMs,
   rangeWindow,
   startOfCurrentMinute,
-} from './dashboardTimeRange'
+} from './timeRange'
 
 type EditState = { draft: string; initial: string; highlighted: number }
 
-export function DashboardTimeRangeControl({
+/**
+ * Editable time range field (type `4h` or an explicit `start – end`) with a
+ * preset menu and a live/paused toggle.
+ */
+export function TimeRangeControl({
   value,
   now,
   onChange,
+  presets = TIME_RANGE_PRESETS,
+  width = 340,
+  className,
 }: {
-  value: DashboardRange
+  value: TimeRange
   now: Date
-  onChange: (range: DashboardRange) => void
+  onChange: (range: TimeRange) => void
+  presets?: TimeRangePreset[]
+  width?: number | string
+  className?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const closingRef = useRef(false)
@@ -48,7 +59,7 @@ export function DashboardTimeRangeControl({
     closingRef.current = false
   }
 
-  const apply = (next: DashboardRange) => {
+  const apply = (next: TimeRange) => {
     onChange(next)
     stopEditing()
   }
@@ -64,7 +75,7 @@ export function DashboardTimeRangeControl({
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (!edit) return
-    const count = DASHBOARD_RANGE_PRESETS.length
+    const count = presets.length
     switch (e.key) {
       case 'Escape':
         e.preventDefault()
@@ -80,7 +91,7 @@ export function DashboardTimeRangeControl({
       }
       case 'Enter': {
         e.preventDefault()
-        const preset = DASHBOARD_RANGE_PRESETS[edit.highlighted]
+        const preset = presets[edit.highlighted]
         if (preset) apply({ live: true, durationMs: preset.durationMs })
         else commitDraft(false)
         break
@@ -94,10 +105,11 @@ export function DashboardTimeRangeControl({
   }
 
   return (
-    <ControlSC>
+    <ControlSC className={className}>
       <FieldSC
         $editing={editing}
         $error={error}
+        style={{ width }}
         onMouseDown={(e) => {
           if (e.target === inputRef.current) return
           e.preventDefault()
@@ -107,7 +119,7 @@ export function DashboardTimeRangeControl({
         <DurationChipSC>{formatDurationShort(durationMs)}</DurationChipSC>
         <InputSC
           ref={inputRef}
-          aria-label="Dashboard time range"
+          aria-label="Time range"
           aria-invalid={error}
           spellCheck={false}
           value={edit ? edit.draft : formatRangeText(value, now)}
@@ -137,7 +149,7 @@ export function DashboardTimeRangeControl({
                 ? 'Couldn’t parse that range. Try “4h” or “Oct 3, 9:00 am – 1:00 pm”.'
                 : 'Type a duration like “4h” or edit the range above'}
             </MenuHintSC>
-            {DASHBOARD_RANGE_PRESETS.map((preset, i) => (
+            {presets.map((preset, i) => (
               <MenuItemSC
                 key={preset.durationMs}
                 role="option"
@@ -182,7 +194,7 @@ const ControlSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   gap: theme.spacing.xsmall,
-  marginLeft: 'auto',
+  minWidth: 0,
 }))
 
 const FieldSC = styled.div<{ $editing: boolean; $error: boolean }>(
@@ -201,9 +213,9 @@ const FieldSC = styled.div<{ $editing: boolean; $error: boolean }>(
     display: 'flex',
     gap: theme.spacing.xsmall,
     height: 32,
+    minWidth: 0,
     padding: `0 ${theme.spacing.small}px 0 ${theme.spacing.xsmall}px`,
     position: 'relative',
-    width: 340,
   })
 )
 
@@ -237,6 +249,7 @@ const MenuSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   left: -1,
+  minWidth: 280,
   padding: `${theme.spacing.xsmall}px 0`,
   position: 'absolute',
   right: -1,
@@ -278,6 +291,7 @@ const LiveButtonSC = styled.button<{ $live: boolean }>(({ theme, $live }) => ({
   color: $live ? theme.colors['text-success'] : theme.colors['text-light'],
   cursor: 'pointer',
   display: 'flex',
+  flexShrink: 0,
   gap: theme.spacing.xsmall,
   height: 32,
   padding: `0 ${theme.spacing.small}px`,

@@ -1,16 +1,20 @@
 import { Card, EmptyState } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import RangePicker from 'components/utils/RangePicker'
+import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
+import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
+import {
+  type TimeRangeState,
+  useRangeQueryData,
+  useTimeRange,
+} from 'components/utils/timerange/useTimeRange'
 
 import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
 
-import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
-import { type CSSProperties, useMemo, useState } from 'react'
+import { type CSSProperties, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
 
 import { ComponentDetailsContext } from './ComponentDetails'
 import {
@@ -23,36 +27,38 @@ import {
 } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { ComponentDetailsWithPodsT } from './useFetchComponentDetails.tsx'
 
-type Duration = (typeof DURATIONS)[number]
-
 function Metric({
   serviceId,
   componentId,
   podReservations,
-  duration: { offset },
+  timeRange,
   ...props
 }: {
   serviceId?: string
   componentId?: string
   podReservations?: PodResourceReservation[]
-  duration: Duration
+  timeRange: TimeRangeState
   maxHeight?: CSSProperties['maxHeight']
   overflowY?: CSSProperties['overflowY']
 }) {
   const theme = useTheme()
-  const start = useMetricsQueryStart(offset)
-  const step = getMetricQueryStep(offset)
-  const { data, loading } = useServiceDeploymentComponentMetricsQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+  } = useServiceDeploymentComponentMetricsQuery({
     variables: {
       id: serviceId,
       componentId: componentId ?? '',
-      step,
-      start,
+      ...metricsQueryWindow(timeRange.timeWindow),
     },
     skip: !serviceId || !componentId,
-    pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
   })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
 
   const {
     cpu,
@@ -132,6 +138,8 @@ function Metric({
         podCpuLimits={podCpuLimits}
         podMemLimits={podMemLimits}
         podReservations={podReservations}
+        timeWindow={timeRange.timeWindow}
+        onRangeSelect={timeRange.selectWindow}
       />
     )
   }
@@ -154,7 +162,7 @@ function Metric({
 
 export default function ComponentMetrics() {
   const theme = useTheme()
-  const [duration, setDuration] = useState<Duration>(DURATIONS[0])
+  const timeRange = useTimeRange()
   const { component, componentDetails, serviceId } =
     useOutletContext<ComponentDetailsContext>()
 
@@ -176,17 +184,12 @@ export default function ComponentMetrics() {
         overflow: 'hidden',
       }}
     >
-      <RangePicker
-        duration={duration}
-        setDuration={setDuration}
-        position="sticky"
-        top={0}
-      />
+      <MetricsTimeRangeControl timeRange={timeRange} />
       <Metric
         serviceId={serviceId}
         componentId={component?.id}
         podReservations={podReservations}
-        duration={duration}
+        timeRange={timeRange}
         maxHeight="100%"
         overflowY="auto"
       />

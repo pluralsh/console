@@ -238,6 +238,8 @@ function ServiceDetailsBase() {
     )?.params ?? {}
 
   const personaType = useServicePersonaType()
+  // Logs trade the sidecar for horizontal room for log lines and the histogram.
+  const fullWidth = tab === 'logs'
 
   const [isRefetching, setIsRefetching] = useState(false)
 
@@ -333,8 +335,11 @@ function ServiceDetailsBase() {
           </div>
         </div>
       </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer role="main">
+      {!fullWidth && <ResponsiveLayoutSpacer />}
+      <ResponsiveLayoutContentContainer
+        role="main"
+        css={fullWidth ? { width: 'auto', maxWidth: 'none' } : undefined}
+      >
         {!serviceDeployment && error ? (
           <GqlError error={error} />
         ) : (
@@ -354,14 +359,18 @@ function ServiceDetailsBase() {
           />
         )}
       </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer>
-        {isLoading ? (
-          <SidecarSkeleton />
-        ) : (
-          <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
-        )}
-      </ResponsiveLayoutSidecarContainer>
-      <ResponsiveLayoutSpacer />
+      {!fullWidth && (
+        <>
+          <ResponsiveLayoutSidecarContainer>
+            {isLoading ? (
+              <SidecarSkeleton />
+            ) : (
+              <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
+            )}
+          </ResponsiveLayoutSidecarContainer>
+          <ResponsiveLayoutSpacer />
+        </>
+      )}
     </ResponsiveLayoutPage>
   )
 }

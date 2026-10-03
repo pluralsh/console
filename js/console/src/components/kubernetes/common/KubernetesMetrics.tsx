@@ -1,11 +1,16 @@
 import { Card, EmptyState } from '@pluralsh/design-system'
 
-import RangePicker from 'components/utils/RangePicker'
+import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
+import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
+import {
+  type TimeRangeState,
+  useRangeQueryData,
+  useTimeRange,
+} from 'components/utils/timerange/useTimeRange'
 
 import { useClusterKubernetesMetricsQuery } from 'generated/graphql'
 
-import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
@@ -27,7 +32,7 @@ function Metric({
   name,
   namespace,
   podReservations,
-  duration: { step, offset },
+  timeRange,
   ...props
 }: {
   clusterId: string
@@ -37,14 +42,15 @@ function Metric({
   name: string
   namespace: string
   podReservations?: PodResourceReservation[]
-  duration: { step: string; offset: number }
+  timeRange: TimeRangeState
 }) {
   const theme = useTheme()
-  const start = useMemo(
-    () => dayjs().subtract(offset, 'second').toISOString(),
-    [offset]
-  )
-  const { data, loading, error } = useClusterKubernetesMetricsQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useClusterKubernetesMetricsQuery({
     variables: {
       clusterId,
       group,
@@ -52,13 +58,15 @@ function Metric({
       kind,
       name,
       namespace,
-      step,
-      start,
+      ...metricsQueryWindow(timeRange.timeWindow),
     },
     skip: !clusterId || !name || !namespace,
-    pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
   })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
 
   const {
     cpu,
@@ -142,6 +150,8 @@ function Metric({
         podCpuLimits={podCpuLimits}
         podMemLimits={podMemLimits}
         podReservations={podReservations}
+        timeWindow={timeRange.timeWindow}
+        onRangeSelect={timeRange.selectWindow}
       />
     )
   }
@@ -184,7 +194,7 @@ export default function KubernetesMetrics({
   namespace: string
 }) {
   const theme = useTheme()
-  const [duration, setDuration] = useState<any>(DURATIONS[0])
+  const timeRange = useTimeRange()
   const metricsEnabled = useMetricsEnabled()
   const podReservations = useKubernetesPodResourceReservations({
     clusterId,
@@ -206,10 +216,7 @@ export default function KubernetesMetrics({
         overflow: 'hidden',
       }}
     >
-      <RangePicker
-        duration={duration}
-        setDuration={setDuration}
-      />
+      <MetricsTimeRangeControl timeRange={timeRange} />
       <Metric
         clusterId={clusterId}
         group={group}
@@ -218,7 +225,7 @@ export default function KubernetesMetrics({
         name={name}
         namespace={namespace}
         podReservations={podReservations}
-        duration={duration}
+        timeRange={timeRange}
       />
     </div>
   )

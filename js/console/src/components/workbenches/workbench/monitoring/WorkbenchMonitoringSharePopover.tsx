@@ -11,7 +11,7 @@ import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
-import type { DashboardRange } from './dashboardTimeRange'
+import type { TimeRange } from 'components/utils/timerange/timeRange'
 import { buildMonitoringShareUrl } from './monitoringShare'
 
 export function WorkbenchMonitoringSharePopover({
@@ -22,7 +22,7 @@ export function WorkbenchMonitoringSharePopover({
 }: {
   kind: 'dashboard' | 'monitor'
   pathname: string
-  range?: DashboardRange
+  range?: TimeRange
   variables?: Record<string, string | string[]>
 }) {
   const [open, setOpen] = useState(false)

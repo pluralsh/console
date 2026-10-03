@@ -22049,6 +22049,7 @@ export type ServiceMetricsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   step?: InputMaybe<Scalars['String']['input']>;
   start?: InputMaybe<Scalars['DateTime']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
 }>;
 
 
@@ -42636,10 +42637,10 @@ export type ServiceHeatMapLazyQueryHookResult = ReturnType<typeof useServiceHeat
 export type ServiceHeatMapSuspenseQueryHookResult = ReturnType<typeof useServiceHeatMapSuspenseQuery>;
 export type ServiceHeatMapQueryResult = Apollo.QueryResult<ServiceHeatMapQuery, ServiceHeatMapQueryVariables>;
 export const ServiceMetricsDocument = gql`
-    query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {
+    query ServiceMetrics($id: ID!, $step: String, $start: DateTime, $stop: DateTime) {
   serviceDeployment(id: $id) {
     id
-    serviceMetrics(step: $step, start: $start) {
+    serviceMetrics(step: $step, start: $start, stop: $stop) {
       cpu {
         ...MetricResponse
       }
@@ -42696,6 +42697,7 @@ export const ServiceMetricsDocument = gql`
  *      id: // value for 'id'
  *      step: // value for 'step'
  *      start: // value for 'start'
+ *      stop: // value for 'stop'
  *   },
  * });
  */

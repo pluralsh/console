@@ -6,6 +6,8 @@ import { Key, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { SliceTooltip } from './ChartTooltip'
+import { ChartRangeSelect, timeAxisFormat } from './timerange/ChartRangeSelect'
+import type { TimeWindow } from './timerange/timeRange'
 import { CaptionP } from './typography/Text'
 
 type GraphSeries = {
@@ -87,16 +89,24 @@ export function useGraphTheme(): NivoThemeType {
   }
 }
 
+const GRAPH_MARGIN = { top: 20, right: 20, bottom: 100, left: 50 } as const
+
 export function Graph({
   data,
   yFormat,
   tickRotation,
   wrapLegend,
+  timeWindow,
+  onRangeSelect,
 }: {
   data: GraphSeries[]
   yFormat: any
   tickRotation?: number
   wrapLegend?: boolean
+  /** Pins the x axis to this window instead of the data's extent. */
+  timeWindow?: TimeWindow
+  /** Enables drag-to-select on the plot; requires `timeWindow`. */
+  onRangeSelect?: (start: Date, end: Date) => void
 }) {
   const graphTheme = useGraphTheme()
   const { colors } = useTheme()
@@ -120,22 +130,22 @@ export function Graph({
     : null
   const toggleSelected = (id: Key) => setSelected(selected ? null : id)
   const hasDashedSeries = graph.some(({ dashed }) => dashed)
-  const line = (
+  const xFormat = timeWindow ? timeAxisFormat(timeWindow).format : '%H:%M'
+  const chart = (
     <ResponsiveLine
       data={graph}
-      margin={{
-        top: 20,
-        right: 20,
-        bottom: 100,
-        left: 50,
-      }}
+      margin={GRAPH_MARGIN}
       lineWidth={1}
       enablePoints={false}
       enableArea
       areaOpacity={0.05}
       useMesh
-      animate
-      xScale={{ type: 'time', format: 'native' }}
+      animate={!timeWindow}
+      xScale={{
+        type: 'time',
+        format: 'native',
+        ...(timeWindow && { min: timeWindow.start, max: timeWindow.end }),
+      }}
       yScale={{
         type: 'linear',
         min: 0,
@@ -172,7 +182,7 @@ export function Graph({
         legendPosition: 'start',
       }}
       axisBottom={{
-        format: '%H:%M',
+        format: xFormat,
         tickPadding: 10,
         tickRotation: tickRotation || 45,
         tickSize: 0,
@@ -214,6 +224,19 @@ export function Graph({
       theme={graphTheme}
     />
   )
+  const line =
+    timeWindow && onRangeSelect ? (
+      <ChartRangeSelect
+        timeWindow={timeWindow}
+        margin={GRAPH_MARGIN}
+        onRangeSelect={onRangeSelect}
+        style={{ height: '100%' }}
+      >
+        {chart}
+      </ChartRangeSelect>
+    ) : (
+      chart
+    )
 
   if (!wrapLegend) return line
 

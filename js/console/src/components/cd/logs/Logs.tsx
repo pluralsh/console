@@ -1,9 +1,9 @@
 import {
   Card,
   ChartIcon,
-  Flex,
   Input,
   SearchIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -11,23 +11,24 @@ import { POLL_INTERVAL } from 'components/cluster/constants'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { LogFacetInput, useLogAggregationQuery } from 'generated/graphql'
-import styled from 'styled-components'
-import { toISOStringOrUndef } from 'utils/datetime'
-import { isNonNullable } from 'utils/isNonNullable'
+import { TimeRangeControl } from 'components/utils/timerange/TimeRangeControl'
 import {
-  DEFAULT_LOG_FILTERS,
-  LogsDateDropdown,
-  LogsFiltersT,
-  LogsLabelsPicker,
-  LogsQueryOperatorSelect,
-  LogsSinceSecondsSelect,
-} from './LogsFilters'
+  rangeDurationMs,
+  TIME_RANGE_PRESETS,
+  type TimeRange,
+} from 'components/utils/timerange/timeRange'
+import { useTimeRange } from 'components/utils/timerange/useTimeRange'
+import {
+  LogFacetInput,
+  LogQueryOperator,
+  LogTimeRange,
+  useLogAggregationQuery,
+} from 'generated/graphql'
+import styled from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
+import { LogsLabelsPicker, LogsQueryOperatorSelect } from './LogsFilters'
 import { LogsLabels } from './LogsLabels'
 import { LogsMetricsChart } from './LogsMetricsChart'
-import { LogsRangeBanner } from './LogsRangeBanner'
-import { LogsStreamingStatus } from './LogsStreamingStatus'
 import { LogsTable } from './LogsTable'
 
 export type LogsTimeRange = {
@@ -35,7 +36,13 @@ export type LogsTimeRange = {
   end: Date
 }
 
-export const DEFAULT_LOG_QUERY_LENGTH = 250
+const LOG_PAGE_SIZE = 100
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+const LOG_RANGE_PRESETS = TIME_RANGE_PRESETS.filter(
+  ({ durationMs }) => durationMs <= WEEK_MS
+)
+const DEFAULT_LOG_RANGE: TimeRange = { live: true, durationMs: 15 * 60 * 1000 }
 
 export function Logs({
   serviceId,
@@ -49,62 +56,56 @@ export function Logs({
   const [labels, setLabels] = useState<LogFacetInput[]>([])
   const [q, setQ] = useState('')
   const throttledQ = useThrottle(q, 1000)
-  const [filters, setFilters] = useState<LogsFiltersT>(DEFAULT_LOG_FILTERS)
-  const [rangeFilter, setRangeFilter] = useState<LogsTimeRange | null>(null)
-  const [chartHasBuckets, setChartHasBuckets] = useState(false)
+  const [queryOperator, setQueryOperator] = useState(LogQueryOperator.Or)
   const [showMetricsChart, setShowMetricsChart] = useState(true)
+  const { range, now, revision, setRange, selectWindow } =
+    useTimeRange(DEFAULT_LOG_RANGE)
+  // Scrolling away from the newest logs pauses polling without changing the
+  // range, so the table keeps its place until the user scrolls back up.
+  const [following, setFollowing] = useState(true)
+  const polling = range.live && following
+  const durationSeconds = Math.round(rangeDurationMs(range) / 1000)
 
-  const [live, setLiveState] = useState(true)
-  const setLive = useCallback((live: boolean) => {
-    setLiveState(live)
-    if (live) {
-      setFilters((prev) => ({ ...prev, date: null }))
-      setRangeFilter(null)
-    }
-  }, [])
-
-  const clearRangeFilter = useCallback(() => setRangeFilter(null), [])
-
-  const handleRangeSelect = useCallback((range: LogsTimeRange) => {
-    setLiveState(false)
-    setRangeFilter(range)
-  }, [])
-
-  const chartTime = useMemo(
-    () => ({
-      before: live ? undefined : toISOStringOrUndef(filters.date, true),
-      duration: secondsToDuration(filters.sinceSeconds),
-      reverse: false,
-    }),
-    [live, filters.date, filters.sinceSeconds]
+  const time = useMemo<LogTimeRange>(
+    () =>
+      range.live
+        ? { duration: secondsToDuration(durationSeconds), reverse: false }
+        : {
+            after: range.start.toISOString(),
+            before: range.end.toISOString(),
+            reverse: false,
+          },
+    [range, durationSeconds]
   )
 
-  const time = useMemo(() => {
-    if (rangeFilter) {
-      return {
-        after: toISOStringOrUndef(rangeFilter.start),
-        before: toISOStringOrUndef(rangeFilter.end),
-        reverse: false,
-      }
-    }
-    return chartTime
-  }, [rangeFilter, chartTime])
-
-  const timeFiltersDisabled = live || !!rangeFilter
+  const onRangeChange = useCallback(
+    (next: TimeRange) => {
+      setFollowing(true)
+      setRange(next)
+    },
+    [setRange]
+  )
+  const onRangeSelect = useCallback(
+    (start: Date, end: Date) => {
+      setFollowing(true)
+      selectWindow(start, end)
+    },
+    [selectWindow]
+  )
 
   const { data, loading, error, fetchMore } = useLogAggregationQuery({
     variables: {
       clusterId,
       serviceId,
       query: throttledQ,
-      limit: filters.queryLength || DEFAULT_LOG_QUERY_LENGTH,
+      limit: LOG_PAGE_SIZE,
       time,
       facets: labels,
-      operator: filters.queryOperator,
+      operator: queryOperator,
     },
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
-    pollInterval: live ? POLL_INTERVAL : 0,
+    pollInterval: polling ? POLL_INTERVAL : 0,
     skip: !(clusterId || serviceId),
   })
   const initialLoading = !data && loading
@@ -133,21 +134,23 @@ export function Logs({
 
   return (
     <MainContentWrapperSC>
-      <Flex gap="small">
+      <ToolbarSC>
         <LogsQueryOperatorSelect
-          operator={filters.queryOperator}
-          setOperator={(queryOperator) =>
-            setFilters({ ...filters, queryOperator })
-          }
+          size="small"
+          operator={queryOperator}
+          setOperator={setQueryOperator}
+          shrink={0}
         />
         <Input
+          small
           placeholder="Filter logs"
           startIcon={<SearchIcon size={14} />}
           value={q}
           onChange={({ target: { value } }) => setQ(value)}
-          css={{ flexGrow: 1 }}
+          css={{ flex: '1 1 200px', minWidth: 120, maxWidth: 420 }}
         />
         <LogsLabelsPicker
+          size="small"
           logs={logs}
           clusterId={clusterId}
           serviceId={serviceId}
@@ -155,8 +158,34 @@ export function Logs({
           time={time}
           addLabel={addLabel}
           selectedLabels={labels}
+          shrink={1}
+          minWidth={0}
         />
-      </Flex>
+        <ToolbarEndSC>
+          <TimeRangeControl
+            value={range}
+            now={now}
+            onChange={onRangeChange}
+            presets={LOG_RANGE_PRESETS}
+            width={300}
+          />
+          <Tooltip
+            label={showMetricsChart ? 'Hide histogram' : 'Show histogram'}
+            placement="top"
+          >
+            <ChartToggleSC
+              type="button"
+              aria-pressed={showMetricsChart}
+              aria-label={
+                showMetricsChart ? 'Hide histogram' : 'Show histogram'
+              }
+              onClick={() => setShowMetricsChart((show) => !show)}
+            >
+              <ChartIcon size={14} />
+            </ChartToggleSC>
+          </Tooltip>
+        </ToolbarEndSC>
+      </ToolbarSC>
       <LogsLabels
         labels={labels}
         removeLabel={removeLabel}
@@ -167,80 +196,37 @@ export function Logs({
         <Card
           height="100%"
           overflow="hidden"
-          header={{
-            size: 'large',
-            headerProps: {
-              style: { textTransform: 'none', overflow: 'visible' },
-            },
-            content: (
-              <StretchedFlex>
-                <Flex gap="small">
-                  <LogsSinceSecondsSelect
-                    sinceSeconds={filters.sinceSeconds}
-                    setSinceSeconds={(sinceSeconds) =>
-                      setFilters({ ...filters, sinceSeconds })
-                    }
-                    disabled={timeFiltersDisabled}
-                  />
-                  <LogsDateDropdown
-                    initialDate={filters.date}
-                    setDate={(date) => setFilters({ ...filters, date })}
-                    setLive={setLive}
-                    disabled={timeFiltersDisabled}
-                  />
-                </Flex>
-                <Flex gap="small">
-                  <MetricsChartToggleSC
-                    type="button"
-                    onClick={() => setShowMetricsChart((show) => !show)}
-                  >
-                    <ChartIcon size={14} />
-                    {showMetricsChart ? 'Hide' : 'Show'}
-                  </MetricsChartToggleSC>
-                  <LogsStreamingStatus
-                    live={live}
-                    setLive={setLive}
-                  />
-                </Flex>
-              </StretchedFlex>
-            ),
-          }}
         >
           <LogsBodySC>
-            <LogsRangeBanner
-              rangeFilter={rangeFilter}
-              onClear={clearRangeFilter}
-              hasBuckets={chartHasBuckets}
-            />
             {showMetricsChart && (
               <LogsMetricsChart
                 clusterId={clusterId}
                 serviceId={serviceId}
                 query={throttledQ}
-                time={chartTime}
-                operator={filters.queryOperator}
+                time={time}
+                operator={queryOperator}
                 facets={labels}
-                sinceSeconds={filters.sinceSeconds}
-                rangeFilter={rangeFilter}
-                onRangeSelect={handleRangeSelect}
-                onHasBucketsChange={setChartHasBuckets}
-                pollInterval={live ? POLL_INTERVAL : 0}
+                windowSeconds={durationSeconds}
+                onRangeSelect={onRangeSelect}
+                pollInterval={polling ? POLL_INTERVAL : 0}
               />
             )}
             <LogsTableWrapSC>
               <LogsTable
+                key={revision}
                 logs={logs}
                 loading={loading}
                 initialLoading={initialLoading}
                 fetchMore={fetchMore}
-                filters={filters}
-                live={live}
-                setLive={setLive}
+                queryLength={LOG_PAGE_SIZE}
+                queryOperator={queryOperator}
+                duration={secondsToDuration(durationSeconds)}
+                rangeStart={range.live ? undefined : range.start}
+                setFollowing={range.live ? setFollowing : undefined}
                 addLabel={addLabel}
                 labels={labels}
                 clusterId={clusterId}
                 serviceId={serviceId}
-                rangeFilter={rangeFilter}
               />
             </LogsTableWrapSC>
           </LogsBodySC>
@@ -258,9 +244,24 @@ export const secondsToDuration = (seconds: number) => {
 const MainContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
+  gap: theme.spacing.small,
   height: '100%',
   width: '100%',
+}))
+
+const ToolbarSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.small,
+  minWidth: 0,
+}))
+
+const ToolbarEndSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flexShrink: 0,
+  gap: theme.spacing.xsmall,
+  marginLeft: 'auto',
 }))
 
 const LogsBodySC = styled.div({
@@ -281,17 +282,25 @@ const LogsTableWrapSC = styled.div({
   zIndex: 0,
 })
 
-const MetricsChartToggleSC = styled.button(({ theme }) => ({
+const ChartToggleSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,
-  ...theme.partials.text.body2Bold,
-  display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.small,
-  minHeight: 32,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
-  borderRadius: theme.borderRadiuses.medium,
-  border: theme.borders.input,
   backgroundColor: theme.colors['fill-one'],
-  color: theme.colors['text-xlight'],
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+  color: theme.colors['icon-xlight'],
   cursor: 'pointer',
+  display: 'flex',
+  height: 32,
+  justifyContent: 'center',
+  width: 32,
+  '&[aria-pressed="true"]': {
+    color: theme.colors['icon-light'],
+  },
+  '&:hover': {
+    backgroundColor: theme.colors['fill-one-hover'],
+  },
+  '&:focus-visible': {
+    outline: `1px solid ${theme.colors['border-outline-focused']}`,
+  },
 }))

@@ -1,8 +1,8 @@
 import {
-  type DashboardRange,
+  type TimeRange,
   encodeDuration,
   parseDuration,
-} from './dashboardTimeRange'
+} from 'components/utils/timerange/timeRange'
 
 export const MONITORING_SHARE_RANGE_PARAM = 'range'
 export const MONITORING_SHARE_FROM_PARAM = 'from'
@@ -16,7 +16,7 @@ export function buildMonitoringShareUrl({
   includeFiltersAndRange,
 }: {
   pathname: string
-  range?: DashboardRange
+  range?: TimeRange
   variables?: Record<string, string | string[]>
   includeFiltersAndRange: boolean
 }) {
@@ -48,7 +48,7 @@ export function buildMonitoringShareUrl({
 }
 
 export function parseMonitoringShareSearch(search: string): {
-  range?: DashboardRange
+  range?: TimeRange
   variables: Record<string, string | string[]>
 } {
   const params = new URLSearchParams(
@@ -67,7 +67,7 @@ export function parseMonitoringShareSearch(search: string): {
   return { range: parseShareRange(params), variables }
 }
 
-function parseShareRange(params: URLSearchParams): DashboardRange | undefined {
+function parseShareRange(params: URLSearchParams): TimeRange | undefined {
   const from = parseShareDate(params.get(MONITORING_SHARE_FROM_PARAM))
   const to = parseShareDate(params.get(MONITORING_SHARE_TO_PARAM))
   if (from && to && from < to) return { live: false, start: from, end: to }
