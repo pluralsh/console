@@ -88,6 +88,7 @@ export function SimpleToolCall({
   customTitle,
   leadingIcon,
   shimmer = false,
+  standaloneCommand = false,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
@@ -99,6 +100,8 @@ export function SimpleToolCall({
   leadingIcon?: ReactNode
   /** Sweep loading text inside code and log boxes without treating the call as pending. */
   shimmer?: boolean
+  /** Render shell commands without the surrounding tool label/accordion. */
+  standaloneCommand?: boolean
 }) {
   const theme = useTheme()
   const { spacing } = theme
@@ -162,6 +165,41 @@ export function SimpleToolCall({
           leadingIcon={resolvedLeadingIcon}
         />
       )
+      const commandBody = (
+        <ShellCommandBodySC $hasHeader={standaloneCommand || !!description}>
+          <Code
+            language="bash"
+            showHeader={false}
+            fillLevel={0}
+            css={{
+              ...codeCss,
+              backgroundColor: 'transparent',
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+            }}
+          >
+            {`$ ${command}`}
+          </Code>
+          <ToolCallContent
+            content={content ?? ''}
+            attributes={attributes}
+            customResultBody={customResultBody}
+            hideArguments
+            flushTop
+            isPending={isPending}
+            shimmer={showShimmer}
+            transparent
+            maxOutputHeight={standaloneCommand && !isPending ? undefined : 240}
+            collapsedOutputLines={
+              standaloneCommand && !isPending ? 1 : undefined
+            }
+            ansiOutput
+          />
+        </ShellCommandBodySC>
+      )
+
+      if (standaloneCommand) return commandBody
+
       return (
         <SimpleAccordion
           {...accordionProps}
@@ -187,33 +225,7 @@ export function SimpleToolCall({
               : undefined
           }
         >
-          <ShellCommandBodySC $hasHeader={!!description}>
-            <Code
-              language="bash"
-              showHeader={false}
-              fillLevel={0}
-              css={{
-                ...codeCss,
-                backgroundColor: 'transparent',
-                borderBottomLeftRadius: 0,
-                borderBottomRightRadius: 0,
-              }}
-            >
-              {`$ ${command}`}
-            </Code>
-            <ToolCallContent
-              content={content ?? ''}
-              attributes={attributes}
-              customResultBody={customResultBody}
-              hideArguments
-              flushTop
-              isPending={isPending}
-              shimmer={showShimmer}
-              transparent
-              maxOutputHeight={240}
-              ansiOutput
-            />
-          </ShellCommandBodySC>
+          {commandBody}
         </SimpleAccordion>
       )
     }
