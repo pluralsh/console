@@ -72,6 +72,7 @@ import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
 import { monitorDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
 import { QueryDefinitionModal } from './QueryDefinitionModal'
+import { thresholdYScale } from './thresholdScale'
 import {
   DefinitionPanelShell,
   useDefinitionPanelContainer,
@@ -81,6 +82,30 @@ import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopov
 
 const CHART_HEIGHT_PX = 280
 const RECENT_JOBS_COUNT = 6
+
+function useThresholdLayer(value: number) {
+  const { colors } = useTheme()
+  return useCallback(
+    ({
+      yScale,
+      innerWidth,
+    }: {
+      yScale: (v: number) => number
+      innerWidth: number
+    }) => (
+      <text
+        x={innerWidth}
+        y={yScale(value)}
+        dy="-0.5em"
+        textAnchor="end"
+        css={{ fill: colors['border-danger'], fontSize: 11 }}
+      >
+        Threshold {value}
+      </text>
+    ),
+    [colors, value]
+  )
+}
 
 function recentJobTime(date: string) {
   const elapsedMs = Date.now() - new Date(date).getTime()
@@ -467,26 +492,7 @@ function MetricsThresholdPreview({
     ]
   }, [data])
 
-  const thresholdLayer = useCallback(
-    ({ yScale }: { yScale: (v: number) => number }) => {
-      const y = yScale(threshold.value)
-      return (
-        <text
-          y={y}
-          textAnchor="end"
-          css={{ fill: colors['border-danger'], fontSize: 11 }}
-        >
-          <tspan
-            x={-8}
-            dy="-0.5em"
-          >
-            Threshold {threshold.value}
-          </tspan>
-        </text>
-      )
-    },
-    [colors, threshold.value]
-  )
+  const thresholdLayer = useThresholdLayer(threshold.value)
 
   const chartRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -538,7 +544,10 @@ function MetricsThresholdPreview({
           ]}
           margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
           xScale={{ type: 'time', format: 'native' }}
-          yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+          yScale={thresholdYScale(
+            graphData[0].data.map((point) => point.y),
+            threshold.value
+          )}
           xFormat={dateFormat}
           lineWidth={1}
           enablePoints={false}
@@ -617,26 +626,7 @@ function LogThresholdPreview({
     [buckets]
   )
 
-  const thresholdLayer = useCallback(
-    ({ yScale }: { yScale: (v: number) => number }) => {
-      const y = yScale(threshold.value)
-      return (
-        <text
-          y={y}
-          textAnchor="end"
-          css={{ fill: colors['border-danger'], fontSize: 11 }}
-        >
-          <tspan
-            x={-8}
-            dy="-0.5em"
-          >
-            Threshold {threshold.value}
-          </tspan>
-        </text>
-      )
-    },
-    [colors, threshold.value]
-  )
+  const thresholdLayer = useThresholdLayer(threshold.value)
 
   const chartRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -683,7 +673,11 @@ function LogThresholdPreview({
           ]}
           margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
           xScale={{ type: 'time', format: 'native' }}
-          yScale={{ type: 'linear', min: 0, max: 'auto' }}
+          yScale={thresholdYScale(
+            graphData[0].data.map((point) => point.y),
+            threshold.value,
+            0
+          )}
           xFormat={dateFormat}
           lineWidth={1}
           enablePoints={false}

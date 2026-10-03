@@ -7,7 +7,7 @@ defmodule Console.AI.Vertex do
   alias Console.AI.{Utils, Stream}
   alias Console.AI.GothManager
 
-  defstruct [:service_account_json, :model, :tool_model, :embedding_model, :project, :location, :endpoint, :stream]
+  defstruct [:service_account_json, :model, :tool_model, :embedding_model, :project, :location, :endpoint, :stream, :proxy]
 
   @type t :: %__MODULE__{}
 
@@ -23,6 +23,7 @@ defmodule Console.AI.Vertex do
       project: opts.project,
       location: opts.location,
       endpoint: opts.endpoint,
+      proxy: Map.get(opts, :proxy),
       stream: Stream.stream(),
     }
   end
@@ -81,7 +82,7 @@ defmodule Console.AI.Vertex do
 
   defp provider_options(%__MODULE__{project: p, location: l} = vertex) do
     with {:ok, %{token: token}} <- client(vertex) do
-      {:ok, [project_id: p, region: l, access_token: token]}
+      {:ok, [project_id: p, region: l, access_token: token] ++ http_options(vertex)}
     end
   end
 

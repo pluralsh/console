@@ -145,18 +145,12 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		Metrics:  settings.Spec.Metrics.Attributes(),
 	}
 
-	if settings.Spec.AgentHelmValues != nil {
-		var obj runtime.Object
-		if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(settings.Spec.AgentHelmValues, &obj, nil); err != nil {
-			return nil, err
-		}
-		rawHelmValues, err := yaml.Marshal(obj)
-		if err != nil {
-			return nil, err
-		}
-		attr.AgentHelmValues = lo.ToPtr(string(rawHelmValues))
+	helmValues, templateable, err := agentHelmValuesAttributes(settings.Spec)
+	if err != nil {
+		return nil, err
 	}
-	attr.AgentHelmValuesTemplateable = settings.Spec.AgentHelmValuesTemplateable
+	attr.AgentHelmValues = helmValues
+	attr.AgentHelmValuesTemplateable = templateable
 	if settings.Spec.PrometheusConnection != nil {
 		pc, err := settings.Spec.PrometheusConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {
@@ -248,6 +242,27 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	}
 
 	return attr, nil
+}
+
+// agentHelmValuesAttributes resolves the agent helm values sent to the Console API.
+// A non-empty AgentHelmValuesTemplate is sent verbatim as a template and replaces AgentHelmValues.
+func agentHelmValuesAttributes(spec v1alpha1.DeploymentSettingsSpec) (values *string, templateable *bool, err error) {
+	if template := lo.FromPtr(spec.AgentHelmValuesTemplate); template != "" {
+		return lo.ToPtr(template), lo.ToPtr(true), nil
+	}
+
+	if spec.AgentHelmValues != nil {
+		var obj runtime.Object
+		if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(spec.AgentHelmValues, &obj, nil); err != nil {
+			return nil, nil, err
+		}
+		rawHelmValues, err := yaml.Marshal(obj)
+		if err != nil {
+			return nil, nil, err
+		}
+		values = lo.ToPtr(string(rawHelmValues))
+	}
+	return values, spec.AgentHelmValuesTemplateable, nil
 }
 
 func getGitRepoID(ctx context.Context, c client.Client, namespacedName v1alpha1.NamespacedName) (*string, error) {

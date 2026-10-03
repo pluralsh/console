@@ -2,8 +2,9 @@
 // templating.
 //
 // Scripts run in a fresh Gomonty REPL for every job. The sandbox does not
-// expose OS, filesystem, network, or environment access. The only host
-// callback is the read-only k8s_object_meta lookup against the agent cache.
+// expose OS, filesystem, network, or environment access. Host callbacks are
+// limited to the read-only k8s_object_meta lookup against the agent cache and
+// the pure yaml_encode, yaml_decode, and merge helpers.
 package python
 
 import (

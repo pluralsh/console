@@ -5,6 +5,7 @@ const (
 	EnvGitAccessToken = "GIT_ACCESS_TOKEN"
 	EnvGitUsername    = "GIT_USERNAME"
 	EnvGitAskpass     = "GIT_ASKPASS"
+	EnvNoProxy        = "NO_PROXY"
 
 	// defaultGitUsername matches Console scm_creds, which fall back to "apikey"
 	// when the SCM connection has no username. GitHub/GitLab accept that as

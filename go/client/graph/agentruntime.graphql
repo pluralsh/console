@@ -219,6 +219,11 @@ fragment ScmCredentialFragment on ScmCreds {
     token
     username
     exaKey
+    proxy {
+        enabled
+        url
+        noproxy
+    }
 }
 
 fragment PluralCredsFragment on PluralCreds {

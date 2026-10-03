@@ -256,7 +256,6 @@ defmodule Console.GraphQl.Deployments.Policy do
     @desc "Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints"
     field :object, :kubernetes_unstructured do
       resolve &Deployments.fetch_constraint/3
-      middleware ErrorHandler
     end
 
     field :ref, :constraint_ref, description: "pointer to the kubernetes resource itself"

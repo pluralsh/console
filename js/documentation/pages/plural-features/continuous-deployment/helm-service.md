@@ -65,7 +65,7 @@ For more information, see [Dynamic Helm Configuration with Lua Scripts](lua.md).
 
 ## Dynamic Helm Configuration via pythonScript
 
-The same `values` / `valuesFiles` overlay is available from a sandboxed Python script. The sandbox does not expose OS, filesystem, or network access. The only host callback is `k8s_object_meta`, which reads cached Kubernetes object metadata (uid, name, namespace, and labels) from the agent. Cluster-scoped objects use an empty namespace. A cache miss returns `None`.
+The same `values` / `valuesFiles` overlay is available from a sandboxed Python script. The sandbox does not expose OS, filesystem, or network access. Scripts can call `k8s_object_meta`, which reads cached Kubernetes object metadata (uid, name, namespace, and labels) from the agent. Cluster-scoped objects use an empty namespace, and a cache miss returns `None`. The `yaml_encode`, `yaml_decode`, and `merge` helpers mirror Lua's `encoding` and `utils.merge`.
 
 Scripts can also call `warn(message)` to report non-fatal problems back to the service. See [Reporting Warnings](#reporting-warnings).
 
@@ -91,6 +91,8 @@ spec:
       else:
           warn("kube-system namespace not found in the agent cache, observeClusterId will not be set")
 ```
+
+Python can also be loaded from a file with `pythonFile`, or from a folder of helper modules with `pythonFolder`. For the supported language subset, available modules, script concatenation order, and how Python values merge with Lua and other value sources, see [Dynamic Helm Configuration with Python Scripts](python.md).
 
 The Lua equivalent of `k8s_object_meta` is documented in [Dynamic Helm Configuration with Lua Scripts](lua.md#kubernetes-object-metadata).
 

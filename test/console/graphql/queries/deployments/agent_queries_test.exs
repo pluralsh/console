@@ -1,6 +1,7 @@
 defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Workbenches
+  alias Console.Schema.ScmConnection
 
   describe "agentRuntimes" do
     test "it can list runtimes a user can access" do
@@ -83,7 +84,10 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       cluster = insert(:cluster)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
-      conn = insert(:scm_connection, default: true)
+      conn = insert(:scm_connection,
+        default: true,
+        proxy: %ScmConnection.Proxy{url: "http://proxy.example.com:8080", noproxy: "github.internal"}
+      )
 
       {:ok, %{data: %{"agentRun" => found}}} = run_query("""
         query AgentRun($id: ID!) {
@@ -92,6 +96,11 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
             scmCreds {
               username
               token
+              proxy {
+                enabled
+                url
+                noproxy
+              }
             }
             pluralCreds {
               token
@@ -104,6 +113,11 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       assert found["id"] == run.id
       assert found["scmCreds"]["username"] == "apikey"
       assert found["scmCreds"]["token"] == conn.token
+      assert found["scmCreds"]["proxy"] == %{
+        "enabled" => true,
+        "url" => "http://proxy.example.com:8080",
+        "noproxy" => "github.internal"
+      }
       assert found["pluralCreds"]["token"]
       assert found["pluralCreds"]["url"]
     end

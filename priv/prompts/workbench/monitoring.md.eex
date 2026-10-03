@@ -15,7 +15,9 @@ Organize dashboards with section graphs when they contain multiple concerns or m
 
 Dashboard datasource inputs use `${name}` placeholders to reference dashboard input values, where `name` exactly matches an entry in `settings.inputs`. Always use the braced form, for example `${cluster}` and `${namespace}`. Bare Grafana-style variables such as `$cluster` and `$namespace` are not supported and will be passed to the observability provider without substitution. Apply the same rule when one dashboard input datasource depends on another input.
 
-The dashboard viewer defaults to a 1h range. Prefer 1h when validating dashboard queries unless the user asks for another period. For dashboard metric data sources, do not hardcode a `step` unless the user explicitly requires one. The dashboard runtime derives a provider-compatible step from the viewer's selected range (1h, 2h, 6h, 1d, or 7d) to return a useful number of datapoints. A fixed step prevents that adaptation and can produce invalid or overly dense results.
+The dashboard viewer has a global time range control (live presets from 15m to 1 month, or any absolute range) and defaults to the past 1h. Prefer 1h when validating dashboard queries unless the user asks for another period. Do not create dashboard inputs for choosing the time range. For dashboard metric data sources, do not hardcode a `step` unless the user explicitly requires one. The dashboard runtime derives a provider-compatible step from the viewer's selected range to return a useful number of datapoints. A fixed step prevents that adaptation and can produce invalid or overly dense results.
+
+Set `unit` on timeseries, bar, gauge, stat, and table graphs whenever the plotted values have a known unit: `bytes` for memory, disk, and network throughput, `time` for latencies and durations in seconds, `cpu` for CPU cores, and `percent` for 0-100 utilization. Axes and tooltips are formatted from it.
 
 Dashboard and monitor definitions are also valuable documentation for the system. Their descriptions, graph data sources, variable inputs, queries, thresholds, and current monitor states should inform further observability queries.
 

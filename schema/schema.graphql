@@ -2672,6 +2672,9 @@ type ScmCreds {
 
   token: String!
 
+  "the proxy to use for git and SCM API requests"
+  proxy: HttpProxyConfiguration
+
   "the exa key for the agent"
   exaKey: String
 }
@@ -6889,6 +6892,7 @@ enum LogDriver {
   VICTORIA
   ELASTIC
   OPENSEARCH
+  LOKI
 }
 
 enum VectorStore {
@@ -7012,6 +7016,23 @@ input LoggingSettingsAttributes {
   victoria: HttpConnectionAttributes
   elastic: ElasticsearchConnectionAttributes
   opensearch: OpensearchConnectionAttributes
+  loki: LokiLoggingConnectionAttributes
+}
+
+input LokiLoggingConnectionAttributes {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+
+  "the stream label identifying the cluster a log came from, defaults to cluster"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from, defaults to namespace"
+  namespaceLabel: String
 }
 
 input ElasticsearchConnectionAttributes {
@@ -7112,6 +7133,9 @@ input OpenaiSettingsAttributes {
 
   model: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7164,6 +7188,9 @@ input AnthropicSettingsAttributes {
 
   model: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7176,6 +7203,9 @@ input AnthropicSettingsAttributes {
 
 input OllamaAttributes {
   model: String!
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7211,6 +7241,9 @@ input AzureOpenaiAttributes {
   "the azure openai access token to use"
   accessToken: String!
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "mapping from model id to azure openai deployment name"
   deployments: Json
 
@@ -7230,6 +7263,9 @@ input BedrockAiAttributes {
 
   "the aws region the model is hosted in"
   region: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the aws access key id to use (DEPRECATED)"
   awsAccessKeyId: String
@@ -7264,6 +7300,9 @@ input BedrockModelSettingsAttributes {
 input VertexAiAttributes {
   "the vertex model id to use"
   model: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7594,6 +7633,9 @@ type OpenaiSettings {
   "the openai model version to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7643,6 +7685,9 @@ type AnthropicSettings {
   "the anthropic model version to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7653,6 +7698,9 @@ type AnthropicSettings {
 "Settings for a self-hosted ollama-based LLM deployment"
 type OllamaSettings {
   model: String!
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7667,6 +7715,9 @@ type AzureOpenaiSettings {
   endpoint: String!
 
   model: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -7688,6 +7739,9 @@ type AzureOpenaiSettings {
 type BedrockAiSettings {
   "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults."
   modelId: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
   toolModelId: String
@@ -7724,6 +7778,9 @@ type VertexAiSettings {
   "the vertex ai model to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for vector embeddings"
   embeddingModel: String
 
@@ -7758,6 +7815,22 @@ type LoggingSettings {
 
   "configures a connection to aws opensearch for logging"
   opensearch: OpensearchConnection
+
+  "configures a connection to grafana loki for logging"
+  loki: LokiLoggingConnection
+}
+
+type LokiLoggingConnection {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "the stream label identifying the cluster a log came from"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from"
+  namespaceLabel: String
 }
 
 type ElasticsearchConnection {
@@ -7953,6 +8026,14 @@ enum DashboardGraphType {
   HEATMAP
   TRACES
   SECTION
+}
+
+enum DashboardGraphUnit {
+  NONE
+  BYTES
+  TIME
+  CPU
+  PERCENT
 }
 
 enum DashboardInputType {
@@ -8183,6 +8264,9 @@ input DashboardGraphAttributes {
 
   "Graph visualization type"
   type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
 
   "Identifier of the section graph containing this graph; sections cannot be nested"
   sectionId: String
@@ -8459,6 +8543,9 @@ type WorkbenchDashboardGraph {
 
   "Graph visualization type"
   type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
 
   "ID of the configured workbench tool backing this graph's datasource"
   toolId: ID
@@ -14861,7 +14948,11 @@ input ScmConnectionAttributes {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 input HttpProxyAttributes {
+  "whether this proxy is enabled (defaults to true)"
+  enabled: Boolean
+
   url: String!
+
   noproxy: String
 }
 
@@ -16063,7 +16154,11 @@ type ObserverAgentAction {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 type HttpProxyConfiguration {
+  "whether this proxy is enabled"
+  enabled: Boolean!
+
   url: String!
+
   noproxy: String
 }
 

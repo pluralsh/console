@@ -55,6 +55,7 @@ export function ChatMessage({
   userMsgWrapperStyle,
   isPending,
   toolRuntime,
+  standaloneCommand,
   ...props
 }: {
   id?: string
@@ -79,6 +80,7 @@ export function ChatMessage({
   userMsgWrapperStyle?: StyledObject
   isPending?: boolean
   toolRuntime?: string
+  standaloneCommand?: boolean
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
   const actionsTimeoutRef = useRef<NodeJS.Timeout>(undefined)
@@ -126,6 +128,7 @@ export function ChatMessage({
         userMsgWrapperStyle={userMsgWrapperStyle}
         isPending={isPending}
         toolRuntime={toolRuntime}
+        standaloneCommand={standaloneCommand}
       />
       {type !== ChatType.File && disableActions !== 'no-spacing' && (
         <ChatMessageActions

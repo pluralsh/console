@@ -120,6 +120,7 @@ export function ToolCallContent({
   transparent = false,
   maxOutputHeight,
   ansiOutput = false,
+  collapsedOutputLines,
 }: {
   content: string
   attributes: Nullable<ChatTypeAttributes>
@@ -132,6 +133,7 @@ export function ToolCallContent({
   transparent?: boolean
   maxOutputHeight?: number | string
   ansiOutput?: boolean
+  collapsedOutputLines?: number
 }) {
   const theme = useTheme()
   const { spacing } = theme
@@ -236,6 +238,7 @@ export function ToolCallContent({
               subtle
               transparent={transparent}
               unclamped={!!maxOutputHeight}
+              collapsedLines={collapsedOutputLines}
             >
               {plainResponse}
             </PreviewablePanel>
@@ -276,6 +279,7 @@ export function ToolCallContent({
               subtle
               transparent={transparent}
               unclamped={!!maxOutputHeight}
+              collapsedLines={collapsedOutputLines}
             >
               {plainResponse}
             </PreviewablePanel>

@@ -30,10 +30,12 @@ export function WorkbenchMonitoring() {
   const isMonitorCreate = monitorId === WORKBENCHES_CREATE_REL_PATH
   const [updateOpen, setUpdateOpen] = useState(false)
 
-  const { data: dashboardData } = useWorkbenchMonitoringDashboardQuery({
+  const dashboardQuery = useWorkbenchMonitoringDashboardQuery({
     variables: { id: dashboardId ?? '' },
     skip: !dashboardId || isDashboardCreate,
+    fetchPolicy: 'cache-and-network',
   })
+  const { data: dashboardData } = dashboardQuery
   const { data: monitorData } = useWorkbenchMonitorQuery({
     variables: { id: monitorId ?? '' },
     skip: !monitorId || isMonitorCreate,
@@ -96,6 +98,7 @@ export function WorkbenchMonitoring() {
             <DashboardDetail
               key={dashboardId}
               dashboardId={dashboardId}
+              query={dashboardQuery}
               onUpdate={() => setUpdateOpen(true)}
             />
           )

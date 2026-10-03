@@ -100,7 +100,8 @@ defmodule Console.Deployments.Pr.Git do
   end
   def backfill_token(%ScmConnection{} = conn), do: {:ok, conn}
 
-  def request_options(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}}) when is_binary(url),
+  def request_options(%ScmConnection{proxy: %ScmConnection.Proxy{enabled: enabled, url: url}})
+    when enabled != false and is_binary(url),
     do: [proxy: url]
   def request_options(_), do: []
 
@@ -147,7 +148,8 @@ defmodule Console.Deployments.Pr.Git do
 
   defp opts(%ScmConnection{dir: dir} = conn), do: [env: env(conn), cd: dir, stderr_to_stdout: true]
 
-  defp env(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}} = conn) when is_binary(url),
+  defp env(%ScmConnection{proxy: %ScmConnection.Proxy{enabled: enabled, url: url}} = conn)
+    when enabled != false and is_binary(url),
     do: [{"HTTP_PROXY", url}, {"HTTPS_PROXY", url} | env(%{conn | proxy: nil})]
   defp env(%ScmConnection{token: password}) when is_binary(password),
     do: [{"GIT_ACCESS_TOKEN", password}, {"GIT_ASKPASS", git_askpass()}]

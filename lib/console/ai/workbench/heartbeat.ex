@@ -48,14 +48,17 @@ defmodule Console.AI.Workbench.Heartbeat do
     do: {:stop, {:shutdown, :cancel}, %{state | job: job, booted: booted}}
   def handle_cast(_, state), do: {:noreply, state}
 
+  # a single call with a missing counter (eg no cost because the model couldn't be priced)
+  # must not erase what has already been accumulated for the job
   defp merge_usage(new_usage, usage) do
-    Enum.reduce(new_usage, usage, fn {k, v}, acc ->
-      case Map.get(acc, k) do
-        old when (is_integer(old) or is_float(old)) and (is_integer(v) or is_float(v)) ->
-          Map.put(acc, k, old + v)
+    Enum.reduce(new_usage, usage, fn
+      {k, v}, acc when is_number(v) ->
+        case Map.get(acc, k) do
+          old when is_number(old) -> Map.put(acc, k, old + v)
+          _ -> Map.put(acc, k, v)
+        end
 
-        _ -> Map.put(acc, k, v)
-      end
+      _, acc -> acc
     end)
   end
 

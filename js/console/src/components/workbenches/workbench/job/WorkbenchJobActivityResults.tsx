@@ -55,6 +55,7 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
+import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
 import {
   getMetricSeries,
   metricSeriesId,
@@ -185,28 +186,30 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      {timestamp && (
-        <CaptionP $color="text-long-form">
-          {formatDateTime(timestamp, 'h:mmA')}
-        </CaptionP>
-      )}
-      <IconFrame
-        clickable
-        as="div"
-        tooltip="Copy to clipboard"
-        type="tertiary"
-        onClick={(e) => {
-          e.stopPropagation()
-          handleCopy()
-        }}
-        icon={
-          copied ? (
-            <CheckIcon color="icon-success" />
-          ) : (
-            <CopyIcon color="icon-xlight" />
-          )
-        }
-      />
+      <div>
+        {timestamp && (
+          <CaptionP $color="text-long-form">
+            {formatDateTime(timestamp, 'h:mmA')}
+          </CaptionP>
+        )}
+        <IconFrame
+          clickable
+          as="div"
+          tooltip="Copy to clipboard"
+          type="tertiary"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleCopy()
+          }}
+          icon={
+            copied ? (
+              <CheckIcon color="icon-success" />
+            ) : (
+              <CopyIcon color="icon-xlight" />
+            )
+          }
+        />
+      </div>
     </PromptActionsSC>
   )
 }
@@ -320,6 +323,13 @@ export function JobActivityLogsFromTool({
 }
 
 /** Renders pre-fetched metric points (e.g. thought tool attributes). */
+export const METRICS_CHART_MARGIN = {
+  top: 10,
+  right: 25,
+  bottom: 30,
+  left: 30,
+} as const
+
 export function JobActivityMetricsChart({
   metrics,
   lineProps,
@@ -346,6 +356,16 @@ export function JobActivityMetricsChart({
   const graphData = useMemo(() => {
     return getMetricSeries(metrics)
   }, [metrics])
+  const leftMargin = useMemo(() => {
+    let min = Infinity
+    let max = -Infinity
+    for (const { value } of metrics) {
+      if (typeof value !== 'number') continue
+      if (value < min) min = value
+      if (value > max) max = value
+    }
+    return yAxisWidth(min, max, null)
+  }, [metrics])
 
   if (isEmpty(metrics)) return null
 
@@ -353,13 +373,16 @@ export function JobActivityMetricsChart({
     theme: graphTheme,
     data: graphData,
     colors: COLORS,
-    margin: { top: 10, right: 25, bottom: 30, left: 30 } as const,
+    margin: { ...METRICS_CHART_MARGIN, left: leftMargin, right: 32 },
     xScale: { type: 'time' as const, format: 'native' as const },
     yScale: { type: 'linear' as const },
     xFormat: dateFormat,
     lineWidth: 1,
     enablePoints: false,
-    axisLeft: { tickValues: 5 },
+    axisLeft: {
+      tickValues: 5,
+      format: (value: number) => formatUnitValue(value, null),
+    },
     axisBottom: { format: '%H:%M:%S', tickValues: 5 },
     tooltip: SliceTooltip,
   }
@@ -778,10 +801,11 @@ export function WorkbenchJobMetricsLegend({
       }
       {...props}
     >
-      {series.map(({ id, label }, i) => (
+      {series.map(({ id, label, shortLabel }, i) => (
         <LegendItemSC
           key={id}
           type="button"
+          title={label}
           disabled={!onSelect}
           aria-pressed={onSelect ? selectedId === id : undefined}
           onClick={() => onSelect?.(id)}
@@ -794,9 +818,9 @@ export function WorkbenchJobMetricsLegend({
             $compact={compact}
           />
           {compact ? (
-            <CompactLegendLabelSC>{label}</CompactLegendLabelSC>
+            <CompactLegendLabelSC>{shortLabel}</CompactLegendLabelSC>
           ) : (
-            <Body2P $color="text-light">{label}</Body2P>
+            <Body2P $color="text-light">{shortLabel}</Body2P>
           )}
         </LegendItemSC>
       ))}
@@ -1014,21 +1038,27 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
     marginTop: theme.spacing.small,
+    marginBottom: theme.spacing.xsmall,
   })
 )
 
-// Always takes its height so hovering doesn't shift the transcript. The row is
-// the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
-// below the card.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: theme.spacing.xxsmall,
+  display: 'grid',
+  gridTemplateRows: $show ? '1fr' : '0fr',
+  justifyItems: 'end',
   width: '100%',
   opacity: $show ? 1 : 0,
-  transition: 'opacity 0.15s ease',
+  transition: 'grid-template-rows 0.25s ease, opacity 0.25s ease',
   pointerEvents: $show ? 'auto' : 'none',
+  '> div': {
+    overflow: 'hidden',
+    minHeight: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: theme.spacing.xxsmall,
+    paddingTop: 6,
+  },
 }))
 
 const PromptCardSC = styled(Card)<{
