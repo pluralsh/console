@@ -59,8 +59,10 @@ const SUPPORTED_TYPES = [
 
 export function ChatbotConnectionForm({
   existingConnection,
+  onTypeChange,
 }: {
   existingConnection?: Nullable<ChatProviderConnectionFragment>
+  onTypeChange?: (type: ChatProviderConnectionType) => void
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -142,12 +144,12 @@ export function ChatbotConnectionForm({
             <Select
               selectedKey={formState.type}
               isDisabled={mode === 'edit'}
-              onSelectionChange={(key) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  type: key as ChatProviderConnectionType,
-                }))
-              }
+              onSelectionChange={(key) => {
+                const type = key as ChatProviderConnectionType
+
+                setFormState((prev) => ({ ...prev, type }))
+                onTypeChange?.(type)
+              }}
               leftContent={chatProviderConnectionIcon(formState.type)}
             >
               {SUPPORTED_TYPES.map((type) => (

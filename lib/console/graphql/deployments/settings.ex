@@ -107,6 +107,17 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :victoria, :http_connection_attributes
     field :elastic, :elasticsearch_connection_attributes
     field :opensearch, :opensearch_connection_attributes
+    field :loki, :loki_logging_connection_attributes
+  end
+
+  input_object :loki_logging_connection_attributes do
+    field :host,     non_null(:string)
+    field :user,     :string, description: "user to connect w/ for basic auth"
+    field :password, :string, description: "password to connect w/ for basic auth"
+    field :cluster_label, :string,
+      description: "the stream label identifying the cluster a log came from, defaults to cluster"
+    field :namespace_label, :string,
+      description: "the stream label identifying the namespace a log came from, defaults to namespace"
   end
 
   input_object :elasticsearch_connection_attributes do
@@ -755,6 +766,16 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :opensearch, :opensearch_connection,
       description: "configures a connection to aws opensearch for logging"
+
+    field :loki, :loki_logging_connection,
+      description: "configures a connection to grafana loki for logging"
+  end
+
+  object :loki_logging_connection do
+    field :host, non_null(:string)
+    field :user, :string, description: "user to connect w/ for basic auth"
+    field :cluster_label, :string, description: "the stream label identifying the cluster a log came from"
+    field :namespace_label, :string, description: "the stream label identifying the namespace a log came from"
   end
 
   object :elasticsearch_connection do

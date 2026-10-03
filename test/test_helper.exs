@@ -75,7 +75,9 @@ Mimic.copy(ReqLLM)
 Mimic.copy(Console.ClusterRing)
 Mimic.copy(Console.Uploads)
 
-ExUnit.start()
+# :external tests depend on live third-party services or continuously updated remote data and
+# flake on rate limits/timeouts; run them explicitly with `mix test --include external`
+ExUnit.start(exclude: [:external])
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)
 
 {:ok, _} = Application.ensure_all_started(:ex_machina)

@@ -262,7 +262,6 @@ defmodule Console.GraphQl.Deployments.Agent do
     @desc "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
     field :pod, :pod do
       resolve fn run, _, _ -> Agents.run_pod(run) end
-      middleware ErrorHandler
     end
 
     field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"

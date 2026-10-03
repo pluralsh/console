@@ -1421,6 +1421,7 @@ spec:
                     - VICTORIA
                     - ELASTIC
                     - OPENSEARCH
+                    - LOKI
                     type: string
                   elastic:
                     description: Elastic configures a connection to elasticsearch
@@ -1466,6 +1467,56 @@ spec:
                     description: Enabled defines whether to enable the logging integration
                       or not.
                     type: boolean
+                  loki:
+                    description: Loki configures a connection to grafana loki
+                    properties:
+                      clusterLabel:
+                        description: ClusterLabel is the stream label identifying
+                          the cluster a log came from. Defaults to "cluster".
+                        pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+                        type: string
+                      host:
+                        description: Host is the host to connect to.
+                        type: string
+                      namespaceLabel:
+                        description: NamespaceLabel is the stream label identifying
+                          the namespace a log came from. Defaults to "namespace".
+                        pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+                        type: string
+                      password:
+                        description: Password to connect w/ for basic auth.
+                        type: string
+                      passwordSecretRef:
+                        description: PasswordSecretRef is a reference to a secret
+                          containing the password to connect with basic auth.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      user:
+                        description: User to connect with basic auth.
+                        type: string
+                    required:
+                    - host
+                    type: object
                   opensearch:
                     description: Opensearch configures a connection to opensearch
                     properties:

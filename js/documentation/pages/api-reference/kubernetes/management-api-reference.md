@@ -2183,6 +2183,7 @@ _Appears in:_
 _Appears in:_
 - [DeploymentSettingsSpec](#deploymentsettingsspec)
 - [LoggingSettings](#loggingsettings)
+- [LokiConnection](#lokiconnection)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -2521,10 +2522,32 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled defines whether to enable the logging integration or not. |  | Optional: \{\} <br /> |
-| `driver` _[LogDriver](#logdriver)_ | Driver is the type of log aggregation solution you wish to use. | VICTORIA | Enum: [VICTORIA ELASTIC OPENSEARCH] <br />Optional: \{\} <br /> |
+| `driver` _[LogDriver](#logdriver)_ | Driver is the type of log aggregation solution you wish to use. | VICTORIA | Enum: [VICTORIA ELASTIC OPENSEARCH LOKI] <br />Optional: \{\} <br /> |
 | `victoria` _[HTTPConnection](#httpconnection)_ | Victoria configures a connection to VictoriaMetrics |  | Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnection](#elasticsearchconnection)_ | Elastic configures a connection to elasticsearch |  | Optional: \{\} <br /> |
 | `opensearch` _[OpensearchConnection](#opensearchconnection)_ | Opensearch configures a connection to opensearch |  | Optional: \{\} <br /> |
+| `loki` _[LokiConnection](#lokiconnection)_ | Loki configures a connection to grafana loki |  | Optional: \{\} <br /> |
+
+
+#### LokiConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [LoggingSettings](#loggingsettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | Host is the host to connect to. |  | Required: \{\} <br /> |
+| `user` _string_ | User to connect with basic auth. |  | Optional: \{\} <br /> |
+| `password` _string_ | Password to connect w/ for basic auth. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef is a reference to a secret containing the password to connect with basic auth. |  | Optional: \{\} <br /> |
+| `clusterLabel` _string_ | ClusterLabel is the stream label identifying the cluster a log came from. Defaults to "cluster". |  | Optional: \{\} <br />Pattern: `^[a-zA-Z_][a-zA-Z0-9_]*$` <br /> |
+| `namespaceLabel` _string_ | NamespaceLabel is the stream label identifying the namespace a log came from. Defaults to "namespace". |  | Optional: \{\} <br />Pattern: `^[a-zA-Z_][a-zA-Z0-9_]*$` <br /> |
 
 
 #### MCPServer

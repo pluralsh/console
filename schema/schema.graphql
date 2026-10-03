@@ -6889,6 +6889,7 @@ enum LogDriver {
   VICTORIA
   ELASTIC
   OPENSEARCH
+  LOKI
 }
 
 enum VectorStore {
@@ -7012,6 +7013,23 @@ input LoggingSettingsAttributes {
   victoria: HttpConnectionAttributes
   elastic: ElasticsearchConnectionAttributes
   opensearch: OpensearchConnectionAttributes
+  loki: LokiLoggingConnectionAttributes
+}
+
+input LokiLoggingConnectionAttributes {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+
+  "the stream label identifying the cluster a log came from, defaults to cluster"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from, defaults to namespace"
+  namespaceLabel: String
 }
 
 input ElasticsearchConnectionAttributes {
@@ -7758,6 +7776,22 @@ type LoggingSettings {
 
   "configures a connection to aws opensearch for logging"
   opensearch: OpensearchConnection
+
+  "configures a connection to grafana loki for logging"
+  loki: LokiLoggingConnection
+}
+
+type LokiLoggingConnection {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "the stream label identifying the cluster a log came from"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from"
+  namespaceLabel: String
 }
 
 type ElasticsearchConnection {

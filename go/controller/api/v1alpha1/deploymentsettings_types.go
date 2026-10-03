@@ -214,7 +214,7 @@ type LoggingSettings struct {
 
 	// Driver is the type of log aggregation solution you wish to use.
 	//
-	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC;OPENSEARCH
+	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC;OPENSEARCH;LOKI
 	// +kubebuilder:default=VICTORIA
 	// +kubebuilder:validation:Optional
 	Driver *console.LogDriver `json:"driver,omitempty"`
@@ -233,6 +233,11 @@ type LoggingSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Opensearch *OpensearchConnection `json:"opensearch,omitempty"`
+
+	// Loki configures a connection to grafana loki
+	//
+	// +kubebuilder:validation:Optional
+	Loki *LokiConnection `json:"loki,omitempty"`
 }
 
 type ElasticsearchConnection struct {
@@ -360,6 +365,37 @@ func (r *HTTPConnection) Attributes(ctx context.Context, c client.Client, namesp
 		attr.Password = lo.ToPtr(password)
 	}
 	return attr, nil
+}
+
+type LokiConnection struct {
+	HTTPConnection `json:",inline"`
+
+	// ClusterLabel is the stream label identifying the cluster a log came from. Defaults to "cluster".
+	//
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern=`^[a-zA-Z_][a-zA-Z0-9_]*$`
+	ClusterLabel *string `json:"clusterLabel,omitempty"`
+
+	// NamespaceLabel is the stream label identifying the namespace a log came from. Defaults to "namespace".
+	//
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern=`^[a-zA-Z_][a-zA-Z0-9_]*$`
+	NamespaceLabel *string `json:"namespaceLabel,omitempty"`
+}
+
+func (r *LokiConnection) Attributes(ctx context.Context, c client.Client, namespace string) (*console.LokiLoggingConnectionAttributes, error) {
+	conn, err := r.HTTPConnection.Attributes(ctx, c, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return &console.LokiLoggingConnectionAttributes{
+		Host:           conn.Host,
+		User:           conn.User,
+		Password:       conn.Password,
+		ClusterLabel:   r.ClusterLabel,
+		NamespaceLabel: r.NamespaceLabel,
+	}, nil
 }
 
 type DeploymentSettingsBindings struct {
@@ -614,6 +650,14 @@ func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, name
 			return nil, err
 		}
 		attr.Opensearch = connection
+	}
+
+	if in.Loki != nil {
+		connection, err := in.Loki.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Loki = connection
 	}
 	return attr, nil
 }

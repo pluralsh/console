@@ -4993,6 +4993,8 @@ type LoggingSettings struct {
 	Elastic *ElasticsearchConnection `json:"elastic,omitempty"`
 	// configures a connection to aws opensearch for logging
 	Opensearch *OpensearchConnection `json:"opensearch,omitempty"`
+	// configures a connection to grafana loki for logging
+	Loki *LokiLoggingConnection `json:"loki,omitempty"`
 }
 
 type LoggingSettingsAttributes struct {
@@ -5001,6 +5003,7 @@ type LoggingSettingsAttributes struct {
 	Victoria   *HTTPConnectionAttributes          `json:"victoria,omitempty"`
 	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
+	Loki       *LokiLoggingConnectionAttributes   `json:"loki,omitempty"`
 }
 
 type LoginInfo struct {
@@ -5033,6 +5036,28 @@ type LokiLineFilter struct {
 	Text *string `json:"text,omitempty"`
 	// whether to treat this string as a regex match
 	Regex *bool `json:"regex,omitempty"`
+}
+
+type LokiLoggingConnection struct {
+	Host string `json:"host"`
+	// user to connect w/ for basic auth
+	User *string `json:"user,omitempty"`
+	// the stream label identifying the cluster a log came from
+	ClusterLabel *string `json:"clusterLabel,omitempty"`
+	// the stream label identifying the namespace a log came from
+	NamespaceLabel *string `json:"namespaceLabel,omitempty"`
+}
+
+type LokiLoggingConnectionAttributes struct {
+	Host string `json:"host"`
+	// user to connect w/ for basic auth
+	User *string `json:"user,omitempty"`
+	// password to connect w/ for basic auth
+	Password *string `json:"password,omitempty"`
+	// the stream label identifying the cluster a log came from, defaults to cluster
+	ClusterLabel *string `json:"clusterLabel,omitempty"`
+	// the stream label identifying the namespace a log came from, defaults to namespace
+	NamespaceLabel *string `json:"namespaceLabel,omitempty"`
 }
 
 type LokiQuery struct {
@@ -15871,17 +15896,19 @@ const (
 	LogDriverVictoria   LogDriver = "VICTORIA"
 	LogDriverElastic    LogDriver = "ELASTIC"
 	LogDriverOpensearch LogDriver = "OPENSEARCH"
+	LogDriverLoki       LogDriver = "LOKI"
 )
 
 var AllLogDriver = []LogDriver{
 	LogDriverVictoria,
 	LogDriverElastic,
 	LogDriverOpensearch,
+	LogDriverLoki,
 }
 
 func (e LogDriver) IsValid() bool {
 	switch e {
-	case LogDriverVictoria, LogDriverElastic, LogDriverOpensearch:
+	case LogDriverVictoria, LogDriverElastic, LogDriverOpensearch, LogDriverLoki:
 		return true
 	}
 	return false

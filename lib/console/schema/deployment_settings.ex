@@ -4,7 +4,7 @@ defmodule Console.Schema.DeploymentSettings do
   alias Piazza.Ecto.EncryptedString
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5, openai_compatible: 6, xai: 7
-  defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2
+  defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2, loki: 3
   defenum VectorStore, elastic: 0, opensearch: 1, postgres: 2
   defenum OpenAIMethod, chat: 0, responses: 1, auto: 2
   defenum BedrockEndpoint, runtime: 0, mantle: 1
@@ -96,6 +96,43 @@ defmodule Console.Schema.DeploymentSettings do
     def url(%__MODULE__{host: host}, path) when is_binary(host) do
       Path.join(host, path)
     end
+  end
+
+  defmodule Loki do
+    use Piazza.Ecto.Schema
+
+    embedded_schema do
+      field :host,            :string
+      field :user,            :string
+      field :password,        EncryptedString
+      field :cluster_label,   :string, default: "cluster"
+      field :namespace_label, :string, default: "namespace"
+    end
+
+    @label_format ~r/^[a-zA-Z_][a-zA-Z0-9_]*$/
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(host user password cluster_label namespace_label)a)
+      |> validate_required([:host])
+      |> validate_format(:cluster_label, @label_format, message: "must be a valid loki label name")
+      |> validate_format(:namespace_label, @label_format, message: "must be a valid loki label name")
+    end
+
+    def headers(%__MODULE__{user: u, password: p}, headers) when is_binary(u) and is_binary(p) do
+      [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | headers]
+    end
+    def headers(_, headers), do: headers
+
+    def url(%__MODULE__{host: host}, path) when is_binary(host) do
+      Path.join(host, path)
+    end
+
+    def cluster_label(%__MODULE__{cluster_label: l}) when is_binary(l) and byte_size(l) > 0, do: l
+    def cluster_label(_), do: "cluster"
+
+    def namespace_label(%__MODULE__{namespace_label: l}) when is_binary(l) and byte_size(l) > 0, do: l
+    def namespace_label(_), do: "namespace"
   end
 
   defmodule Opensearch do
@@ -242,6 +279,7 @@ defmodule Console.Schema.DeploymentSettings do
       embeds_one :victoria, Connection, on_replace: :update
       embeds_one :elastic,  Elastic, on_replace: :update
       embeds_one :opensearch, Opensearch, on_replace: :update
+      embeds_one :loki,       Loki, on_replace: :update
     end
 
     embeds_one :cost, Cost, on_replace: :update do
@@ -588,6 +626,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:victoria)
     |> cast_embed(:elastic)
     |> cast_embed(:opensearch)
+    |> cast_embed(:loki)
   end
 
   defp price_sheet_changeset(model, attrs) do

@@ -93,6 +93,55 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   end
 
   describe "deployment" do
+    @tag :capture_log
+    test "it surfaces failed kas requests in nested fields as graphql errors" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "namespace",
+        name: "name"
+      )
+
+      expect(Kazan, :run, 3, fn %Kazan.Request{path: path}, _ ->
+        cond do
+          String.ends_with?(path, "/events") -> {:error, %HTTPoison.Error{reason: :timeout}}
+          String.ends_with?(path, "/pods") ->
+            raise Kazan.RemoteError, reason: {:http_error, 503, %{"message" => "kas unavailable"}}
+          true -> {:ok, deployment("namespace", "name")}
+        end
+      end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"deployment" => deployment}, errors: errors}} =
+        run_query(
+          """
+            query deployment($serviceId: ID!) {
+              deployment(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                metadata { name }
+                raw
+                events { message }
+                pods { metadata { name } }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      assert deployment["metadata"]["name"] == "name"
+      assert deployment["raw"]
+      assert is_nil(deployment["events"])
+      assert is_nil(deployment["pods"])
+
+      messages = Enum.map(errors, & &1.message) |> Enum.sort()
+      assert messages == ["kas unavailable", "upstream request failed: :timeout"]
+    end
+
     test "it can fetch deployments by namespace/name" do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])

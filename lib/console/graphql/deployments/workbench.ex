@@ -703,7 +703,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the metrics tool"
 
       resolve &Deployments.metrics_tool/3
-      middleware ErrorHandler
     end
 
     field :logs_tool, list_of(:workbench_job_activity_log) do
@@ -711,7 +710,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the logs tool"
 
       resolve &Deployments.logs_tool/3
-      middleware ErrorHandler
     end
 
     field :traces_tool, list_of(:workbench_job_activity_trace) do
@@ -719,7 +717,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the traces tool"
 
       resolve &Deployments.traces_tool/3
-      middleware ErrorHandler
     end
 
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
