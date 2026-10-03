@@ -62,12 +62,21 @@ defmodule Prometheus.Client do
     end
   end
 
+  @variable ~r/\$\{([^}]+)\}|\$(\w+)/
+
+  @doc """
+  Interpolates `${var}` (or bare `$var`, for grafana-style dashboard queries) in a single pass,
+  matching whole variable names so the result doesn't depend on variable order.  Unknown
+  variables are left untouched and substituted values are never re-scanned.
+  """
   def variable_subst(value, variables) do
-    Enum.reduce(variables, value, fn
-      %{name: key, value: value}, str ->
-        String.replace(str, "$#{key}", value)
-      {key, value}, str -> String.replace(str, "$#{key}", value)
-      _, str -> str
+    vars = Map.new(variables || [], &subst_pair/1)
+    Regex.replace(@variable, value, fn whole, braced, bare ->
+      Map.get(vars, if(braced == "", do: bare, else: braced), whole)
     end)
   end
+
+  defp subst_pair(%{name: key, value: value}), do: {to_string(key), to_string(value)}
+  defp subst_pair({key, value}), do: {to_string(key), to_string(value)}
+  defp subst_pair(_), do: {nil, nil}
 end

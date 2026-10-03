@@ -627,7 +627,6 @@ function PanelContent({
                 selectedSeriesIndex >= 0
                   ? [COLORS[selectedSeriesIndex % COLORS.length]]
                   : COLORS,
-              yScale: { type: 'linear', min: 'auto', max: 'auto' },
             }}
           />
           <WorkbenchJobMetricsLegend

@@ -45,12 +45,10 @@ type RangeProps = {
 
 function MetricsRow({
   graphs,
-  wrapLegend,
   timeWindow,
   onRangeSelect,
 }: {
   graphs: MetricGraph[]
-  wrapLegend?: boolean
 } & RangeProps) {
   const theme = useTheme()
   const visibleGraphs = graphs.filter(({ data }) => !isEmpty(data))
@@ -74,14 +72,15 @@ function MetricsRow({
             display: 'flex',
             flexDirection: 'column',
             flexGrow: 1,
+            flexBasis: 0,
+            minWidth: 0,
           }}
         >
           <GraphHeader title={title} />
           <Graph
             data={data}
             yFormat={(v) => Prometheus.format(v, format)}
-            tickRotation={undefined}
-            wrapLegend={wrapLegend}
+            yTickBase={format === 'memory' ? 'binary' : 'decimal'}
             timeWindow={timeWindow}
             onRangeSelect={onRangeSelect}
           />
@@ -257,7 +256,6 @@ export function ResourceMetricsGraphs({
       />
       <MetricsRow
         graphs={podGraphs}
-        wrapLegend
         timeWindow={timeWindow}
         onRangeSelect={onRangeSelect}
       />

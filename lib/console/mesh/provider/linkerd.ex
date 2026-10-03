@@ -17,12 +17,12 @@ defmodule Console.Mesh.Provider.Linkerd do
 
   # Reference: https://linkerd.io/2.12/reference/proxy-metrics/
   @queries [
-    bytes: ~s/rate(tcp_write_bytes_total{direction="inbound",cluster="$cluster"$additional}[5m])/,
-    connections: ~s/rate(tcp_open_total{direction="inbound",cluster="$cluster"$additional}[5m])/,
-    http200: ~s/rate(response_total{classification="success",direction="inbound",cluster="$cluster"$additional}[5m])/,
-    http400: ~s/rate(response_total{status_code=~"4..",direction="inbound",cluster="$cluster"$additional}[5m])/,
-    http500: ~s/rate(response_total{status_code=~"5..",direction="inbound",cluster="$cluster"$additional}[5m])/,
-    http_client_latency: ~s/histogram_quantile(0.95, sum(rate(response_latency_ms_bucket{direction="inbound",cluster="$cluster"$additional}[5m])) by (le, dst_deployment, dst_namespace))/,
+    bytes: ~s/rate(tcp_write_bytes_total{direction="inbound",cluster="${cluster}"${additional}}[5m])/,
+    connections: ~s/rate(tcp_open_total{direction="inbound",cluster="${cluster}"${additional}}[5m])/,
+    http200: ~s/rate(response_total{classification="success",direction="inbound",cluster="${cluster}"${additional}}[5m])/,
+    http400: ~s/rate(response_total{status_code=~"4..",direction="inbound",cluster="${cluster}"${additional}}[5m])/,
+    http500: ~s/rate(response_total{status_code=~"5..",direction="inbound",cluster="${cluster}"${additional}}[5m])/,
+    http_client_latency: ~s/histogram_quantile(0.95, sum(rate(response_latency_ms_bucket{direction="inbound",cluster="${cluster}"${additional}}[5m])) by (le, dst_deployment, dst_namespace))/,
   ]
 
   def new(prom, cluster) do

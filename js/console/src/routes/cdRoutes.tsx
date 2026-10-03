@@ -102,6 +102,7 @@ import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
 import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
 import { PodEvents } from '../components/cd/cluster/pod/PodEvents.tsx'
 import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
+import { PodMetricsTab } from '../components/cd/cluster/pod/PodMetrics.tsx'
 import { AI_AGENT_RUNS_PARAM_RUN_ID } from './aiRoutesConsts.tsx'
 import {
   ALERT_INSIGHT_REL_PATH,
@@ -476,6 +477,12 @@ export const getPodDetailsRoutes = (
       index
       element={<PodInfo />}
     />
+    {type !== 'agent-run' && (
+      <Route
+        path="metrics"
+        element={<PodMetricsTab />}
+      />
+    )}
     <Route
       path="events"
       element={<PodEvents />}

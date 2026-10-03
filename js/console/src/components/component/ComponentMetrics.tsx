@@ -1,4 +1,5 @@
-import { Card, EmptyState } from '@pluralsh/design-system'
+import { EmptyState } from '@pluralsh/design-system'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
@@ -147,7 +148,7 @@ function Metric({
   if (loading && !data) return <LoadingIndicator />
 
   return (
-    <Card
+    <MetricsCard
       css={{
         padding: theme.spacing.medium,
         overflow: 'auto',
@@ -156,7 +157,7 @@ function Metric({
       {...props}
     >
       {content}
-    </Card>
+    </MetricsCard>
   )
 }
 

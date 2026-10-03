@@ -1,12 +1,12 @@
 import {
   ArrowTopRightIcon,
   Button,
-  Card,
   EmptyState,
   Flex,
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
 import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
@@ -117,7 +117,7 @@ export function ClusterMetrics() {
           <Subtitle2H1>Metrics</Subtitle2H1>
           <MetricsTimeRangeControl timeRange={timeRange} />
         </Flex>
-        <Card style={{ padding: hasMetrics ? spacing.xlarge : 0 }}>
+        <MetricsCard style={{ padding: hasMetrics ? spacing.xlarge : 0 }}>
           {!hasMetrics ? (
             metricsError ? (
               <GqlError error={metricsError} />
@@ -149,7 +149,7 @@ export function ClusterMetrics() {
               />
             </Flex>
           )}
-        </Card>
+        </MetricsCard>
       </Flex>
       <Flex
         flex={1}
@@ -181,7 +181,7 @@ export function ClusterMetrics() {
           </Flex>
         </Flex>
         {!(hasHeatmapData || loading) ? (
-          <Card css={{ padding: spacing.xlarge, flex: 1 }}>
+          <MetricsCard css={{ padding: spacing.xlarge, flex: 1 }}>
             {error ? (
               <GqlError
                 css={{ width: '100%' }}
@@ -190,10 +190,10 @@ export function ClusterMetrics() {
             ) : (
               <EmptyState message="Utilization heatmaps not available." />
             )}
-          </Card>
+          </MetricsCard>
         ) : (
           <Flex gap="large">
-            <Card
+            <MetricsCard
               header={{
                 content: `memory utilization by ${heatMapFlavor}`,
                 outerProps: { style: { paddingBottom: spacing.large } },
@@ -207,8 +207,8 @@ export function ClusterMetrics() {
                 flavor={heatMapFlavor}
                 utilizationType="memory"
               />
-            </Card>
-            <Card
+            </MetricsCard>
+            <MetricsCard
               header={{
                 content: `cpu utilization by ${heatMapFlavor}`,
                 outerProps: { style: { paddingBottom: spacing.large } },
@@ -222,7 +222,7 @@ export function ClusterMetrics() {
                 flavor={heatMapFlavor}
                 utilizationType="cpu"
               />
-            </Card>
+            </MetricsCard>
           </Flex>
         )}
       </Flex>

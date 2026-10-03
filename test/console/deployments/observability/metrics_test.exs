@@ -1,15 +1,18 @@
 defmodule Console.Deployments.Observability.MetricsTest do
   use ExUnit.Case, async: true
   alias Console.Deployments.Observability.Metrics
+  alias Prometheus.Client
 
   describe "request/limit queries" do
     test "they dedupe kube-state-metrics series per container before summing" do
-      for scope <- [:cluster, :component, :service],
+      for scope <- [:cluster, :component, :service, :pod],
           {key, query} <- Metrics.queries(scope),
           String.contains?(query, "kube_pod_container_resource_") do
         assert query =~ "max by (namespace, pod, container) (kube_pod_container_resource_",
                "#{scope}.#{key} doesn't dedupe: #{query}"
         assert query =~ ~s|container!=""|
+        assert query =~ ~r/resource="(cpu|memory|ephemeral_storage)"/,
+               "#{scope}.#{key} doesn't filter by resource: #{query}"
       end
     end
 
@@ -17,10 +20,64 @@ defmodule Console.Deployments.Observability.MetricsTest do
       service = Map.new(Metrics.queries(:service))
 
       assert service[:pod_cpu_requests] ==
-        ~s|sum by (pod) (max by (namespace, pod, container) (kube_pod_container_resource_requests{unit="core",container!="",cluster="$cluster",namespace="$namespace"}))|
+        ~s|sum by (pod) (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource="cpu",unit="core",container!="",cluster="${cluster}",namespace="${namespace}"}))|
 
       assert service[:mem_limits] ==
-        ~s|sum(max by (namespace, pod, container) (kube_pod_container_resource_limits{unit="byte",container!="",cluster="$cluster",namespace="$namespace"}))|
+        ~s|sum(max by (namespace, pod, container) (kube_pod_container_resource_limits{resource="memory",unit="byte",container!="",cluster="${cluster}",namespace="${namespace}"}))|
+    end
+  end
+
+  describe "pod queries" do
+    test "they're scoped to a single pod and broken out by container where possible" do
+      pod = Map.new(Metrics.queries(:pod))
+
+      for {key, query} <- pod do
+        assert query =~ ~s|cluster="${cluster}",namespace="${namespace}",pod="${name}"|,
+               "pod.#{key} isn't scoped to the pod: #{query}"
+      end
+
+      for key <- ~w(cpu cpu_requests cpu_limits cpu_throttling memory memory_requests memory_limits
+                    ephemeral_storage ephemeral_storage_requests ephemeral_storage_limits fs_reads fs_writes restarts)a do
+        assert pod[key] =~ "by (container)", "pod.#{key} isn't broken out by container"
+      end
+
+      assert pod[:ephemeral_storage_limits] =~ ~s|resource="ephemeral_storage",unit="byte"|
+      assert pod[:memory_limits] =~ ~s|resource="memory",unit="byte"|
+      refute pod[:network_receive] =~ "container!="
+      refute pod[:network_receive] =~ "by (container)"
+    end
+
+    test "every templated query is fully substituted regardless of variable order" do
+      vars = [cluster: "c", namespace: "ns", name: "pod-1", regex: "-[0-9]+", rate: "5m", instance: "n", filter: ""]
+
+      for scope <- [:cluster, :node, :component, :service, :pod, :noisy],
+          order <- [vars, Enum.reverse(vars)],
+          {key, query} <- Metrics.queries(scope) do
+        result = Client.variable_subst(query, order)
+        refute result =~ "$", "#{scope}.#{key} left a variable unsubstituted: #{result}"
+      end
+
+      result = Client.variable_subst(Map.new(Metrics.queries(:pod))[:memory], Enum.reverse(vars))
+      assert result =~ ~s|cluster="c",namespace="ns",pod="pod-1"|
+    end
+  end
+
+  describe "Prometheus.Client.variable_subst/2" do
+    test "it matches whole variable names in a single pass" do
+      assert Client.variable_subst(~s|a="${name}",b="${namespace}"|, name: "x", namespace: "y") ==
+        ~s|a="x",b="y"|
+      assert Client.variable_subst(~s|a="${name}${regex}"|, regex: ".*", name: "x") == ~s|a="x.*"|
+    end
+
+    test "it supports bare grafana-style variables from dashboards" do
+      vars = [%{name: "env", value: "prod"}, %{name: "environment", value: "staging"}]
+      assert Client.variable_subst(~s|up{env="$env",e="$environment"}|, vars) ==
+        ~s|up{env="prod",e="staging"}|
+    end
+
+    test "it leaves unknown variables alone and never re-scans substituted values" do
+      assert Client.variable_subst(~s|x="${missing}",y="$other",z="${a}"|, a: "${missing}") ==
+        ~s|x="${missing}",y="$other",z="${missing}"|
     end
   end
 end

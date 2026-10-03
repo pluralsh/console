@@ -8430,6 +8430,8 @@ export type Pod = {
   events?: Maybe<Array<Maybe<Event>>>;
   logs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   metadata: Metadata;
+  /** prometheus timeseries for this pod, only available when the pod is queried with a cluster or service id */
+  metrics?: Maybe<PodMetrics>;
   raw: Scalars['String']['output'];
   spec: PodSpec;
   status: PodStatus;
@@ -8439,6 +8441,13 @@ export type Pod = {
 export type PodLogsArgs = {
   container: Scalars['String']['input'];
   sinceSeconds: Scalars['Int']['input'];
+};
+
+
+export type PodMetricsArgs = {
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 export type PodCondition = {
@@ -8467,6 +8476,45 @@ export type PodEdge = {
   __typename?: 'PodEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Pod>;
+};
+
+/** Pod-level prometheus timeseries; container-scoped series carry a `container` label */
+export type PodMetrics = {
+  __typename?: 'PodMetrics';
+  /** cpu usage in cores, by container */
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** cpu limits in cores, by container */
+  cpuLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** cpu requests in cores, by container */
+  cpuRequests?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** fraction (0-1) of CFS periods throttled, by container */
+  cpuThrottling?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** container filesystem usage in bytes, by container */
+  ephemeralStorage?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** ephemeral storage limits in bytes, by container */
+  ephemeralStorageLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** ephemeral storage requests in bytes, by container */
+  ephemeralStorageRequests?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** filesystem read throughput in bytes/s, by container */
+  fsReads?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** filesystem write throughput in bytes/s, by container */
+  fsWrites?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** working set memory in bytes, by container */
+  memory?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** memory limits in bytes, by container */
+  memoryLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** memory requests in bytes, by container */
+  memoryRequests?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** pod network receive throughput in bytes/s */
+  networkReceive?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** pod received packets dropped per second */
+  networkReceiveDropped?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** pod network transmit throughput in bytes/s */
+  networkTransmit?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** pod transmitted packets dropped per second */
+  networkTransmitDropped?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** cumulative restart count, by container */
+  restarts?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
 export type PodSpec = {
@@ -21844,6 +21892,21 @@ export type PodLogsQueryVariables = Exact<{
 
 export type PodLogsQuery = { __typename?: 'RootQueryType', pod?: { __typename?: 'Pod', logs?: Array<string | null> | null } | null };
 
+export type PodMetricsFragment = { __typename?: 'PodMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuThrottling?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorageRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorageLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsReads?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsWrites?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceiveDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmitDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
+
+export type PodMetricsQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PodMetricsQuery = { __typename?: 'RootQueryType', pod?: { __typename?: 'Pod', metrics?: { __typename?: 'PodMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuThrottling?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorageRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorageLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsReads?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsWrites?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceiveDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmitDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+
 export type DeletePodMutationVariables = Exact<{
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -28157,6 +28220,61 @@ export const PodWithEventsFragmentDoc = gql`
 }
     ${PodFragmentDoc}
 ${EventFragmentDoc}`;
+export const PodMetricsFragmentDoc = gql`
+    fragment PodMetrics on PodMetrics {
+  cpu {
+    ...MetricResponse
+  }
+  cpuRequests {
+    ...MetricResponse
+  }
+  cpuLimits {
+    ...MetricResponse
+  }
+  cpuThrottling {
+    ...MetricResponse
+  }
+  memory {
+    ...MetricResponse
+  }
+  memoryRequests {
+    ...MetricResponse
+  }
+  memoryLimits {
+    ...MetricResponse
+  }
+  ephemeralStorage {
+    ...MetricResponse
+  }
+  ephemeralStorageRequests {
+    ...MetricResponse
+  }
+  ephemeralStorageLimits {
+    ...MetricResponse
+  }
+  fsReads {
+    ...MetricResponse
+  }
+  fsWrites {
+    ...MetricResponse
+  }
+  networkReceive {
+    ...MetricResponse
+  }
+  networkTransmit {
+    ...MetricResponse
+  }
+  networkReceiveDropped {
+    ...MetricResponse
+  }
+  networkTransmitDropped {
+    ...MetricResponse
+  }
+  restarts {
+    ...MetricResponse
+  }
+}
+    ${MetricResponseFragmentDoc}`;
 export const ServiceFragmentDoc = gql`
     fragment Service on Service {
   metadata {
@@ -41624,6 +41742,62 @@ export type PodLogsQueryHookResult = ReturnType<typeof usePodLogsQuery>;
 export type PodLogsLazyQueryHookResult = ReturnType<typeof usePodLogsLazyQuery>;
 export type PodLogsSuspenseQueryHookResult = ReturnType<typeof usePodLogsSuspenseQuery>;
 export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVariables>;
+export const PodMetricsDocument = gql`
+    query PodMetrics($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID, $start: DateTime, $stop: DateTime, $step: String) {
+  pod(
+    name: $name
+    namespace: $namespace
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
+    metrics(start: $start, stop: $stop, step: $step) {
+      ...PodMetrics
+    }
+  }
+}
+    ${PodMetricsFragmentDoc}`;
+
+/**
+ * __usePodMetricsQuery__
+ *
+ * To run a query within a React component, call `usePodMetricsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodMetricsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodMetricsQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      clusterId: // value for 'clusterId'
+ *      serviceId: // value for 'serviceId'
+ *      start: // value for 'start'
+ *      stop: // value for 'stop'
+ *      step: // value for 'step'
+ *   },
+ * });
+ */
+export function usePodMetricsQuery(baseOptions: Apollo.QueryHookOptions<PodMetricsQuery, PodMetricsQueryVariables> & ({ variables: PodMetricsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodMetricsQuery, PodMetricsQueryVariables>(PodMetricsDocument, options);
+      }
+export function usePodMetricsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodMetricsQuery, PodMetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodMetricsQuery, PodMetricsQueryVariables>(PodMetricsDocument, options);
+        }
+// @ts-ignore
+export function usePodMetricsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodMetricsQuery, PodMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<PodMetricsQuery, PodMetricsQueryVariables>;
+export function usePodMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PodMetricsQuery, PodMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<PodMetricsQuery | undefined, PodMetricsQueryVariables>;
+export function usePodMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PodMetricsQuery, PodMetricsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodMetricsQuery, PodMetricsQueryVariables>(PodMetricsDocument, options);
+        }
+export type PodMetricsQueryHookResult = ReturnType<typeof usePodMetricsQuery>;
+export type PodMetricsLazyQueryHookResult = ReturnType<typeof usePodMetricsLazyQuery>;
+export type PodMetricsSuspenseQueryHookResult = ReturnType<typeof usePodMetricsSuspenseQuery>;
+export type PodMetricsQueryResult = Apollo.QueryResult<PodMetricsQuery, PodMetricsQueryVariables>;
 export const DeletePodDocument = gql`
     mutation DeletePod($name: String!, $namespace: String!, $serviceId: ID) {
   deletePod(name: $name, namespace: $namespace, serviceId: $serviceId) {
@@ -51743,6 +51917,7 @@ export const namedOperations = {
     PluralServiceDeployment: 'PluralServiceDeployment',
     Pod: 'Pod',
     PodLogs: 'PodLogs',
+    PodMetrics: 'PodMetrics',
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
@@ -52308,6 +52483,7 @@ export const namedOperations = {
     PluralObjectStatus: 'PluralObjectStatus',
     PluralServiceDeployment: 'PluralServiceDeployment',
     PodWithEvents: 'PodWithEvents',
+    PodMetrics: 'PodMetrics',
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',

@@ -1,4 +1,5 @@
-import { Card, EmptyState } from '@pluralsh/design-system'
+import { EmptyState } from '@pluralsh/design-system'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
 
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
@@ -165,7 +166,7 @@ function Metric({
     )
 
   return (
-    <Card
+    <MetricsCard
       css={{
         padding: theme.spacing.medium,
         overflow: 'auto',
@@ -174,7 +175,7 @@ function Metric({
       {...props}
     >
       {content}
-    </Card>
+    </MetricsCard>
   )
 }
 

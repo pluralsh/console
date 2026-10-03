@@ -119,6 +119,7 @@ import {
   PodExec,
   PodInfo,
   PodLogs,
+  PodMetricsView,
 } from '../components/kubernetes/workloads/Pod'
 import Pods from '../components/kubernetes/workloads/Pods'
 import ReplicaSet, {
@@ -412,6 +413,10 @@ export const kubernetesRoutes = (
         index
         path=""
         element={<PodInfo />}
+      />
+      <Route
+        path="metrics"
+        element={<PodMetricsView />}
       />
       <Route
         path="containers"

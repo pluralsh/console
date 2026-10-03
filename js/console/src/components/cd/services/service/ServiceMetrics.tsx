@@ -1,5 +1,4 @@
 import {
-  Card,
   EmptyState,
   Flex,
   HeatMapIcon,
@@ -7,6 +6,7 @@ import {
   Select,
   TimeSeriesIcon,
 } from '@pluralsh/design-system'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   useLoadingDeploymentSettings,
@@ -152,7 +152,7 @@ function ServiceMetricsHeatmap() {
         </Flex>
       </Flex>
       {!(heatMapData || isLoading) ? (
-        <Card css={{ padding: spacing.xlarge, flex: 1 }}>
+        <MetricsCard css={{ padding: spacing.xlarge, flex: 1 }}>
           {heatMapError ? (
             <GqlError
               css={{ width: '100%' }}
@@ -161,10 +161,10 @@ function ServiceMetricsHeatmap() {
           ) : (
             <EmptyState message="Utilization heatmaps not available." />
           )}
-        </Card>
+        </MetricsCard>
       ) : (
         <>
-          <Card
+          <MetricsCard
             header={{
               content: `memory utilization by ${heatMapFlavor}`,
               outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
@@ -184,8 +184,8 @@ function ServiceMetricsHeatmap() {
                 utilizationType="memory"
               />
             )}
-          </Card>
-          <Card
+          </MetricsCard>
+          <MetricsCard
             header={{
               content: `cpu utilization by ${heatMapFlavor}`,
               outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
@@ -205,7 +205,7 @@ function ServiceMetricsHeatmap() {
                 utilizationType="cpu"
               />
             )}
-          </Card>
+          </MetricsCard>
         </>
       )}
     </Flex>
@@ -334,7 +334,9 @@ function ServiceMetricsTimeseries() {
       ) : metricsError ? (
         <GqlError error={metricsError} />
       ) : (
-        <Card css={{ padding: theme.spacing.medium }}>{content}</Card>
+        <MetricsCard css={{ padding: theme.spacing.medium }}>
+          {content}
+        </MetricsCard>
       )}
     </Flex>
   )

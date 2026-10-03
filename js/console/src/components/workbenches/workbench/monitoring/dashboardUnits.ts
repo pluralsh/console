@@ -1,3 +1,4 @@
+import type { TickBase } from 'components/utils/axisTicks'
 import { DashboardGraphUnit } from 'generated/graphql'
 
 const SI_SUFFIXES = ['', 'k', 'M', 'G', 'T', 'P']
@@ -79,6 +80,24 @@ function trim(value: number) {
 const AXIS_CHAR_PX = 7
 const AXIS_TICK_PX = 14
 
+export function tickBaseForUnit(unit: Nullable<DashboardGraphUnit>): TickBase {
+  switch (unit) {
+    case DashboardGraphUnit.Bytes:
+      return 'binary'
+    case DashboardGraphUnit.Time:
+      return 'duration'
+    default:
+      return 'decimal'
+  }
+}
+
+/** Left margin wide enough for the longest of the given y tick labels. */
+export function yAxisLabelsWidth(labels: string[]) {
+  if (labels.length === 0) return 40
+  const chars = Math.max(...labels.map((label) => label.length))
+  return Math.min(Math.max(chars * AXIS_CHAR_PX + AXIS_TICK_PX, 32), 96)
+}
+
 /** Left margin wide enough for the longest y tick label in `[min, max]`. */
 export function yAxisWidth(
   min: number,
@@ -87,10 +106,7 @@ export function yAxisWidth(
 ) {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return 40
   const samples = [min, max, (min + max) / 2, 0]
-  const chars = Math.max(
-    ...samples.map((value) => formatUnitValue(value, unit).length)
-  )
-  return Math.min(Math.max(chars * AXIS_CHAR_PX + AXIS_TICK_PX, 32), 96)
+  return yAxisLabelsWidth(samples.map((value) => formatUnitValue(value, unit)))
 }
 
 /** Right margin so the last x tick label (centered on the edge) isn't clipped. */

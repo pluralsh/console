@@ -387,21 +387,21 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
               "cpu"
             String.contains?(query, "container_memory_working_set_bytes") ->
               "mem"
-            String.contains?(query, "resource_requests{unit=\"core\"") and String.contains?(query, "by (pod)") ->
+            String.contains?(query, "resource_requests{resource=\"cpu\"") and String.contains?(query, "by (pod)") ->
               "pod-cpu-requests"
-            String.contains?(query, "resource_requests{unit=\"byte\"") and String.contains?(query, "by (pod)") ->
+            String.contains?(query, "resource_requests{resource=\"memory\"") and String.contains?(query, "by (pod)") ->
               "pod-mem-requests"
-            String.contains?(query, "resource_limits{unit=\"core\"") and String.contains?(query, "by (pod)") ->
+            String.contains?(query, "resource_limits{resource=\"cpu\"") and String.contains?(query, "by (pod)") ->
               "pod-cpu-limits"
-            String.contains?(query, "resource_limits{unit=\"byte\"") and String.contains?(query, "by (pod)") ->
+            String.contains?(query, "resource_limits{resource=\"memory\"") and String.contains?(query, "by (pod)") ->
               "pod-mem-limits"
-            String.contains?(query, "resource_requests{unit=\"core\"") ->
+            String.contains?(query, "resource_requests{resource=\"cpu\"") ->
               "cpu-requests"
-            String.contains?(query, "resource_requests{unit=\"byte\"") ->
+            String.contains?(query, "resource_requests{resource=\"memory\"") ->
               "mem-requests"
-            String.contains?(query, "resource_limits{unit=\"core\"") ->
+            String.contains?(query, "resource_limits{resource=\"cpu\"") ->
               "cpu-limits"
-            String.contains?(query, "resource_limits{unit=\"byte\"") ->
+            String.contains?(query, "resource_limits{resource=\"memory\"") ->
               "mem-limits"
             true ->
               "unknown"

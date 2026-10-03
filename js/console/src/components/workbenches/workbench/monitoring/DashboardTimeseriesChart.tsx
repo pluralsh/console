@@ -1,3 +1,4 @@
+import { niceAxis, seriesExtent } from 'components/utils/axisTicks'
 import {
   ChartRangeSelect,
   timeAxisFormat,
@@ -12,7 +13,12 @@ import {
   JobActivityMetricsChart,
   METRICS_CHART_MARGIN,
 } from '../job/WorkbenchJobActivityResults'
-import { formatUnitValue, xAxisOverhang, yAxisWidth } from './dashboardUnits'
+import {
+  formatUnitValue,
+  tickBaseForUnit,
+  xAxisOverhang,
+  yAxisLabelsWidth,
+} from './dashboardUnits'
 
 /** Metrics chart pinned to the dashboard window, with drag-to-zoom. */
 export function DashboardTimeseriesChart({
@@ -29,20 +35,20 @@ export function DashboardTimeseriesChart({
   onRangeSelect?: (start: Date, end: Date) => void
 } & ComponentProps<typeof JobActivityMetricsChart>) {
   const xFormat = timeAxisFormat(timeWindow)
-  const margin = useMemo(() => {
-    let min = Infinity
-    let max = -Infinity
-    for (const { value } of metrics) {
-      if (typeof value !== 'number') continue
-      if (value < min) min = value
-      if (value > max) max = value
-    }
-    return {
+  const yAxis = useMemo(() => {
+    const { min, max } = seriesExtent(metrics.map(({ value }) => value))
+    return niceAxis(min, max, { base: tickBaseForUnit(unit) })
+  }, [metrics, unit])
+  const margin = useMemo(
+    () => ({
       ...METRICS_CHART_MARGIN,
-      left: yAxisWidth(min, max, unit),
+      left: yAxisLabelsWidth(
+        yAxis.ticks.map((tick) => formatUnitValue(tick, unit))
+      ),
       right: xAxisOverhang(xFormat.labelChars),
-    }
-  }, [metrics, unit, xFormat.labelChars])
+    }),
+    [yAxis, unit, xFormat.labelChars]
+  )
 
   return (
     <ChartRangeSelect
@@ -59,9 +65,11 @@ export function DashboardTimeseriesChart({
             min: timeWindow.start,
             max: timeWindow.end,
           },
+          yScale: { type: 'linear', min: yAxis.min, max: yAxis.max },
+          gridYValues: yAxis.ticks,
           axisBottom: { format: xFormat.format, tickValues: 5 },
           axisLeft: {
-            tickValues: 5,
+            tickValues: yAxis.ticks,
             format: (value: number) => formatUnitValue(value, unit),
           },
           yFormat: (value) => formatUnitValue(Number(value), unit),

@@ -27,6 +27,7 @@ import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { niceTimeTicks } from 'components/utils/timeTicks'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
@@ -81,6 +82,26 @@ import {
 import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopover'
 
 const CHART_HEIGHT_PX = 280
+const THRESHOLD_CHART_MARGIN = { top: 20, right: 20, bottom: 32, left: 48 }
+
+function thresholdTimeAxis(points: { x: Date }[], width: number) {
+  if (isEmpty(points)) return { axisBottom: { tickRotation: 0 } }
+  const { ticks, format } = niceTimeTicks(
+    points[0].x,
+    points[points.length - 1].x,
+    width - THRESHOLD_CHART_MARGIN.left - THRESHOLD_CHART_MARGIN.right,
+    {
+      overhangPx: {
+        left: THRESHOLD_CHART_MARGIN.left,
+        right: THRESHOLD_CHART_MARGIN.right,
+      },
+    }
+  )
+  return {
+    gridXValues: ticks,
+    axisBottom: { format, tickValues: ticks, tickRotation: 0, tickPadding: 8 },
+  }
+}
 const RECENT_JOBS_COUNT = 6
 
 function useThresholdLayer(value: number) {
@@ -542,7 +563,7 @@ function MetricsThresholdPreview({
             'slices',
             'mesh',
           ]}
-          margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
+          margin={THRESHOLD_CHART_MARGIN}
           xScale={{ type: 'time', format: 'native' }}
           yScale={thresholdYScale(
             graphData[0].data.map((point) => point.y),
@@ -552,7 +573,7 @@ function MetricsThresholdPreview({
           lineWidth={1}
           enablePoints={false}
           useMesh
-          axisBottom={{ format: '%H:%M', tickRotation: 20 }}
+          {...thresholdTimeAxis(graphData[0].data, size.width)}
           markers={[
             {
               axis: 'y',
@@ -671,7 +692,7 @@ function LogThresholdPreview({
             'slices',
             'mesh',
           ]}
-          margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
+          margin={THRESHOLD_CHART_MARGIN}
           xScale={{ type: 'time', format: 'native' }}
           yScale={thresholdYScale(
             graphData[0].data.map((point) => point.y),
@@ -682,7 +703,7 @@ function LogThresholdPreview({
           lineWidth={1}
           enablePoints={false}
           useMesh
-          axisBottom={{ format: '%H:%M', tickRotation: 20 }}
+          {...thresholdTimeAxis(graphData[0].data, size.width)}
           markers={[
             {
               axis: 'y',

@@ -17613,11 +17613,73 @@ type ReplicaSetStatus {
 
 type Pod {
   status: PodStatus!
+
   spec: PodSpec!
+
   metadata: Metadata!
+
   raw: String!
+
   logs(container: String!, sinceSeconds: Int!): [String]
+
   events: [Event]
+
+  "prometheus timeseries for this pod, only available when the pod is queried with a cluster or service id"
+  metrics(start: DateTime, stop: DateTime, step: String): PodMetrics
+}
+
+"Pod-level prometheus timeseries; container-scoped series carry a `container` label"
+type PodMetrics {
+  "cpu usage in cores, by container"
+  cpu: [MetricResponse]
+
+  "cpu requests in cores, by container"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits in cores, by container"
+  cpuLimits: [MetricResponse]
+
+  "fraction (0-1) of CFS periods throttled, by container"
+  cpuThrottling: [MetricResponse]
+
+  "working set memory in bytes, by container"
+  memory: [MetricResponse]
+
+  "memory requests in bytes, by container"
+  memoryRequests: [MetricResponse]
+
+  "memory limits in bytes, by container"
+  memoryLimits: [MetricResponse]
+
+  "container filesystem usage in bytes, by container"
+  ephemeralStorage: [MetricResponse]
+
+  "ephemeral storage requests in bytes, by container"
+  ephemeralStorageRequests: [MetricResponse]
+
+  "ephemeral storage limits in bytes, by container"
+  ephemeralStorageLimits: [MetricResponse]
+
+  "filesystem read throughput in bytes\/s, by container"
+  fsReads: [MetricResponse]
+
+  "filesystem write throughput in bytes\/s, by container"
+  fsWrites: [MetricResponse]
+
+  "pod network receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "pod network transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "pod received packets dropped per second"
+  networkReceiveDropped: [MetricResponse]
+
+  "pod transmitted packets dropped per second"
+  networkTransmitDropped: [MetricResponse]
+
+  "cumulative restart count, by container"
+  restarts: [MetricResponse]
 }
 
 type PodStatus {

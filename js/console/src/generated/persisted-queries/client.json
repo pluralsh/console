@@ -1312,6 +1312,11 @@
          "name": "PodLogs",
          "body": "query PodLogs($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID, $container: String!, $sinceSeconds: Int!) {\n  pod(\n    name: $name\n    namespace: $namespace\n    clusterId: $clusterId\n    serviceId: $serviceId\n  ) {\n    logs(container: $container, sinceSeconds: $sinceSeconds)\n    __typename\n  }\n}"
       },
+      "sha256:243c1f3d19e0dc6a381adc29bd1f38cb8d390805e44134180dd99eddf64757e4": {
+         "type": "query",
+         "name": "PodMetrics",
+         "body": "query PodMetrics($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID, $start: DateTime, $stop: DateTime, $step: String) {\n  pod(\n    name: $name\n    namespace: $namespace\n    clusterId: $clusterId\n    serviceId: $serviceId\n  ) {\n    metrics(start: $start, stop: $stop, step: $step) {\n      ...PodMetrics\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PodMetrics on PodMetrics {\n  cpu {\n    ...MetricResponse\n    __typename\n  }\n  cpuRequests {\n    ...MetricResponse\n    __typename\n  }\n  cpuLimits {\n    ...MetricResponse\n    __typename\n  }\n  cpuThrottling {\n    ...MetricResponse\n    __typename\n  }\n  memory {\n    ...MetricResponse\n    __typename\n  }\n  memoryRequests {\n    ...MetricResponse\n    __typename\n  }\n  memoryLimits {\n    ...MetricResponse\n    __typename\n  }\n  ephemeralStorage {\n    ...MetricResponse\n    __typename\n  }\n  ephemeralStorageRequests {\n    ...MetricResponse\n    __typename\n  }\n  ephemeralStorageLimits {\n    ...MetricResponse\n    __typename\n  }\n  fsReads {\n    ...MetricResponse\n    __typename\n  }\n  fsWrites {\n    ...MetricResponse\n    __typename\n  }\n  networkReceive {\n    ...MetricResponse\n    __typename\n  }\n  networkTransmit {\n    ...MetricResponse\n    __typename\n  }\n  networkReceiveDropped {\n    ...MetricResponse\n    __typename\n  }\n  networkTransmitDropped {\n    ...MetricResponse\n    __typename\n  }\n  restarts {\n    ...MetricResponse\n    __typename\n  }\n  __typename\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:6a62cb5133eeaf65a2d999cd2055c68c2faa0d6a62b3e42cbadf2250b673f01c": {
          "type": "mutation",
          "name": "DeletePod",
