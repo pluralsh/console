@@ -4048,6 +4048,7 @@ type WorkbenchDashboardGraphFragment struct {
 	Title       *string                                "json:\"title,omitempty\" graphql:\"title\""
 	Description *string                                "json:\"description,omitempty\" graphql:\"description\""
 	Type        DashboardGraphType                     "json:\"type\" graphql:\"type\""
+	Unit        *DashboardGraphUnit                    "json:\"unit,omitempty\" graphql:\"unit\""
 	SectionID   *string                                "json:\"sectionId,omitempty\" graphql:\"sectionId\""
 	Markdown    *string                                "json:\"markdown,omitempty\" graphql:\"markdown\""
 	Options     map[string]any                         "json:\"options,omitempty\" graphql:\"options\""
@@ -4078,6 +4079,12 @@ func (t *WorkbenchDashboardGraphFragment) GetType() *DashboardGraphType {
 		t = &WorkbenchDashboardGraphFragment{}
 	}
 	return &t.Type
+}
+func (t *WorkbenchDashboardGraphFragment) GetUnit() *DashboardGraphUnit {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Unit
 }
 func (t *WorkbenchDashboardGraphFragment) GetSectionID() *string {
 	if t == nil {
@@ -64328,6 +64335,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	title
 	description
 	type
+	unit
 	sectionId
 	markdown
 	options
@@ -64402,6 +64410,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	title
 	description
 	type
+	unit
 	sectionId
 	markdown
 	options
@@ -64476,6 +64485,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	title
 	description
 	type
+	unit
 	sectionId
 	markdown
 	options

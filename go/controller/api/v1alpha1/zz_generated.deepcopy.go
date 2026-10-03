@@ -2607,6 +2607,11 @@ func (in *DashboardGraph) DeepCopyInto(out *DashboardGraph) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Unit != nil {
+		in, out := &in.Unit, &out.Unit
+		*out = new(client.DashboardGraphUnit)
+		**out = **in
+	}
 	if in.SectionID != nil {
 		in, out := &in.SectionID, &out.SectionID
 		*out = new(string)

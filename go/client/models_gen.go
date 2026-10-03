@@ -3453,6 +3453,8 @@ type DashboardGraphAttributes struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// Unit of the plotted values, used to format axes and tooltips
+	Unit *DashboardGraphUnit `json:"unit,omitempty"`
 	// Identifier of the section graph containing this graph; sections cannot be nested
 	SectionID *string `json:"sectionId,omitempty"`
 	// Markdown content for markdown graphs
@@ -11001,6 +11003,8 @@ type WorkbenchDashboardGraph struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// Unit of the plotted values, used to format axes and tooltips
+	Unit *DashboardGraphUnit `json:"unit,omitempty"`
 	// ID of the configured workbench tool backing this graph's datasource
 	ToolID *string `json:"toolId,omitempty"`
 	// Configured workbench tool backing this graph's datasource
@@ -14864,6 +14868,67 @@ func (e *DashboardGraphType) UnmarshalJSON(b []byte) error {
 }
 
 func (e DashboardGraphType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DashboardGraphUnit string
+
+const (
+	DashboardGraphUnitNone    DashboardGraphUnit = "NONE"
+	DashboardGraphUnitBytes   DashboardGraphUnit = "BYTES"
+	DashboardGraphUnitTime    DashboardGraphUnit = "TIME"
+	DashboardGraphUnitCPU     DashboardGraphUnit = "CPU"
+	DashboardGraphUnitPercent DashboardGraphUnit = "PERCENT"
+)
+
+var AllDashboardGraphUnit = []DashboardGraphUnit{
+	DashboardGraphUnitNone,
+	DashboardGraphUnitBytes,
+	DashboardGraphUnitTime,
+	DashboardGraphUnitCPU,
+	DashboardGraphUnitPercent,
+}
+
+func (e DashboardGraphUnit) IsValid() bool {
+	switch e {
+	case DashboardGraphUnitNone, DashboardGraphUnitBytes, DashboardGraphUnitTime, DashboardGraphUnitCPU, DashboardGraphUnitPercent:
+		return true
+	}
+	return false
+}
+
+func (e DashboardGraphUnit) String() string {
+	return string(e)
+}
+
+func (e *DashboardGraphUnit) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DashboardGraphUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DashboardGraphUnit", str)
+	}
+	return nil
+}
+
+func (e DashboardGraphUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DashboardGraphUnit) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DashboardGraphUnit) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

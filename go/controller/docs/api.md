@@ -1515,6 +1515,7 @@ _Appears in:_
 | `title` _string_ | Title is the graph title. |  | Optional: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description is an optional graph description. |  | Optional: \{\} <br />Type: string <br /> |
 | `type` _[DashboardGraphType](#dashboardgraphtype)_ | Type is the graph visualization type. |  | Enum: [TIMESERIES GAUGE LOGS MARKDOWN TABLE STAT BAR PIE HEATMAP TRACES SECTION] <br />MaxLength: 16 <br />Required: \{\} <br />Type: string <br /> |
+| `unit` _[DashboardGraphUnit](#dashboardgraphunit)_ | Unit of the plotted values, used to format axes and tooltips. TIME is in seconds,<br />CPU is in cores, and PERCENT is on a 0-100 scale. |  | Enum: [NONE BYTES TIME CPU PERCENT] <br />Optional: \{\} <br />Type: string <br /> |
 | `sectionId` _string_ | SectionID is the identifier of the SECTION graph containing this graph. Sections cannot be nested. |  | MaxLength: 128 <br />Optional: \{\} <br />Type: string <br /> |
 | `markdown` _string_ | Markdown is the content for MARKDOWN graphs. |  | Optional: \{\} <br />Type: string <br /> |
 | `options` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Options are visualization-specific display options. Sections may set collapsed. |  | Optional: \{\} <br /> |

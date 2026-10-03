@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   dashboardGraphNeedsFetch,
   dashboardPanelIsWaitingForData,
+  dashboardPanelVisibleData,
 } from './WorkbenchDashboardPanels'
 
 describe('dashboard panel loading', () => {
@@ -33,5 +34,35 @@ describe('dashboard panel loading', () => {
         hasData: true,
       })
     ).toBe(false)
+  })
+
+  it('keeps previous data across live ticks', () => {
+    expect(
+      dashboardPanelVisibleData({
+        currentData: undefined,
+        previousData: 'old',
+        rangeRevision: 1,
+        dataRevision: 1,
+      })
+    ).toBe('old')
+  })
+
+  it('drops previous data after a manual range change until new data lands', () => {
+    expect(
+      dashboardPanelVisibleData({
+        currentData: undefined,
+        previousData: 'old',
+        rangeRevision: 2,
+        dataRevision: 1,
+      })
+    ).toBeUndefined()
+    expect(
+      dashboardPanelVisibleData({
+        currentData: 'new',
+        previousData: 'old',
+        rangeRevision: 2,
+        dataRevision: 1,
+      })
+    ).toBe('new')
   })
 })

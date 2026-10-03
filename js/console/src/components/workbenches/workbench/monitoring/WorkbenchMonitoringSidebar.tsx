@@ -498,9 +498,9 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   overflow: 'hidden',
-  width: 350,
-  maxWidth: 350,
-  minWidth: 350,
+  width: 280,
+  maxWidth: 280,
+  minWidth: 280,
 }))
 
 const FilterSC = styled.div(({ theme }) => ({

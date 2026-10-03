@@ -8028,6 +8028,14 @@ enum DashboardGraphType {
   SECTION
 }
 
+enum DashboardGraphUnit {
+  NONE
+  BYTES
+  TIME
+  CPU
+  PERCENT
+}
+
 enum DashboardInputType {
   TEXT
   NUMBER
@@ -8256,6 +8264,9 @@ input DashboardGraphAttributes {
 
   "Graph visualization type"
   type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
 
   "Identifier of the section graph containing this graph; sections cannot be nested"
   sectionId: String
@@ -8532,6 +8543,9 @@ type WorkbenchDashboardGraph {
 
   "Graph visualization type"
   type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
 
   "ID of the configured workbench tool backing this graph's datasource"
   toolId: ID

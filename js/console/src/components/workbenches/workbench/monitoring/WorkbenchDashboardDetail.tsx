@@ -7,8 +7,9 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
 import {
+  DashboardInputType,
   DashboardTimeRangeAttributes,
   Delta,
   useWorkbenchDashboardDeltaSubscription,
@@ -16,16 +17,24 @@ import {
   WorkbenchDashboardInput,
   WorkbenchMonitoringDashboardQueryResult,
 } from 'generated/graphql'
+import { omit } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
+import { DashboardTimeRangeControl } from './DashboardTimeRangeControl'
+import { DashboardTitleMenu } from './DashboardTitleMenu'
 import {
-  MetricsRangeControl,
-  type MetricsTimeRange,
-} from '../job/WorkbenchJobActivityResults'
+  absoluteRange,
+  type DashboardRange,
+  DEFAULT_DASHBOARD_RANGE,
+  encodeDuration,
+  rangeDurationMs,
+  rangeWindow,
+  startOfCurrentMinute,
+} from './dashboardTimeRange'
 import { dashboardDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
 import { parseMonitoringShareSearch } from './monitoringShare'
@@ -90,9 +99,17 @@ function DashboardDetailView({
     () => dashboard.graphs?.filter(isNonNullable) ?? [],
     [dashboard.graphs]
   )
-  const inputs = useMemo(
+  const allInputs = useMemo(
     () => dashboard.inputs?.filter(isNonNullable) ?? [],
     [dashboard.inputs]
+  )
+  const inputs = useMemo(
+    () => allInputs.filter((input) => !isTimeRangeInput(input)),
+    [allInputs]
+  )
+  const rangeInputs = useMemo(
+    () => allInputs.filter(isTimeRangeInput),
+    [allInputs]
   )
   const shared = useMemo(() => parseMonitoringShareSearch(search), [search])
   const inputSignature = inputs
@@ -107,22 +124,32 @@ function DashboardDetailView({
   const [initializedInputSignature, setInitializedInputSignature] = useState<
     string | null
   >(null)
-  const [range, setRange] = useState<MetricsTimeRange>(
-    () => shared.range ?? '1h'
+  const [range, setRange] = useState<DashboardRange>(
+    () => shared.range ?? DEFAULT_DASHBOARD_RANGE
   )
-  const [rangeEnd, setRangeEnd] = useState(startOfCurrentMinute)
+  const [now, setNow] = useLiveMinute(range.live)
+  // Bumped only on user-initiated range changes, so live ticks keep showing
+  // the previous data while refetching instead of flashing skeletons.
+  const [rangeRevision, setRangeRevision] = useState(0)
 
   const timeRange = useMemo<DashboardTimeRangeAttributes>(() => {
-    return {
-      start: rangeStart(range, rangeEnd).toISOString(),
-      end: rangeEnd.toISOString(),
-    }
-  }, [range, rangeEnd])
-  const onRangeChange = useCallback((nextRange: MetricsTimeRange) => {
-    setRange(nextRange)
-    setRangeEnd(startOfCurrentMinute())
-  }, [])
+    const { start, end } = rangeWindow(range, now)
+    return { start: start.toISOString(), end: end.toISOString() }
+  }, [range, now])
+  const onRangeChange = useCallback(
+    (nextRange: DashboardRange) => {
+      setRange(nextRange)
+      setNow(startOfCurrentMinute())
+      setRangeRevision((revision) => revision + 1)
+    },
+    [setNow]
+  )
+  const onRangeSelect = useCallback(
+    (start: Date, end: Date) => onRangeChange(absoluteRange(start, end)),
+    [onRangeChange]
+  )
 
+  const rangeDuration = encodeDuration(rangeDurationMs(range))
   const variables = useMemo(() => {
     const out: Record<string, string> = {}
     for (const [name, value] of Object.entries(filters)) {
@@ -130,8 +157,17 @@ function DashboardDetailView({
       if (value === '') continue
       out[name] = value
     }
+    for (const input of rangeInputs) out[input.name] = rangeDuration
     return out
-  }, [filters])
+  }, [filters, rangeInputs, rangeDuration])
+  const shareVariables = useMemo(
+    () =>
+      omit(
+        variables,
+        rangeInputs.map((input) => input.name)
+      ),
+    [variables, rangeInputs]
+  )
   const onInputReadyChange = useCallback((name: string, ready: boolean) => {
     setReadyInputs((current) =>
       current[name] === ready ? current : { ...current, [name]: ready }
@@ -204,7 +240,7 @@ function DashboardDetailView({
               kind="dashboard"
               pathname={pathname}
               range={range}
-              variables={variables}
+              variables={shareVariables}
             />
             <IconFrame
               ref={fullscreenTriggerRef}
@@ -229,24 +265,11 @@ function DashboardDetailView({
       <ScrollSC>
         <BodySC>
           <TitleRowSC>
-            <TitleBlockSC>
-              <TitleSC>{dashboard.name}</TitleSC>
-              {dashboard.description && (
-                <Body2P
-                  $color="text-xlight"
-                  css={{ letterSpacing: '0.25px' }}
-                >
-                  {dashboard.description}
-                </Body2P>
-              )}
-              {fullscreen && (
-                <CaptionP $color="text-xlight">
-                  {dashboard.updatedAt
-                    ? `updated ${fromNow(dashboard.updatedAt)}`
-                    : 'Never updated'}
-                </CaptionP>
-              )}
-            </TitleBlockSC>
+            <DashboardTitleMenu
+              name={dashboard.name}
+              description={dashboard.description}
+              updatedAt={dashboard.updatedAt}
+            />
             {fullscreen && (
               <ExitFullscreenButton onClick={() => setFullscreen(false)} />
             )}
@@ -275,8 +298,9 @@ function DashboardDetailView({
                 onReadyChange={onInputReadyChange}
               />
             )}
-            <MetricsRangeControl
+            <DashboardTimeRangeControl
               value={range}
+              now={now}
               onChange={onRangeChange}
             />
           </ToolbarSC>
@@ -286,7 +310,9 @@ function DashboardDetailView({
               graphs={graphs}
               variables={variables}
               timeRange={timeRange}
+              rangeRevision={rangeRevision}
               queriesEnabled={dashboardReady}
+              onRangeSelect={onRangeSelect}
               onUpdate={onUpdate}
             />
           </PanelsSC>
@@ -314,7 +340,14 @@ function DashboardDetailView({
   )
 }
 
-const HOUR_MS = 60 * 60 * 1000
+/**
+ * Time-range inputs duplicate the global range control, so they're hidden and
+ * receive the selected window's duration (e.g. `1h`) for any query that still
+ * references them.
+ */
+function isTimeRangeInput(input: WorkbenchDashboardInput) {
+  return input.type === DashboardInputType.TimeRange
+}
 
 function initialDashboardFilters(
   inputs: WorkbenchDashboardInput[],
@@ -356,21 +389,30 @@ function reconcileDashboardFilters(
   return unchanged ? current : next
 }
 
-function rangeStart(range: MetricsTimeRange, end: Date) {
-  const durationByRange: Record<MetricsTimeRange, number> = {
-    '1h': HOUR_MS,
-    '2h': 2 * HOUR_MS,
-    '6h': 6 * HOUR_MS,
-    '1d': 24 * HOUR_MS,
-    '7d': 7 * 24 * HOUR_MS,
-  }
-  return new Date(end.getTime() - durationByRange[range])
-}
+const MINUTE_MS = 60 * 1000
 
-function startOfCurrentMinute() {
-  const now = new Date()
-  now.setSeconds(0, 0)
-  return now
+/** Current minute; advances on each minute boundary while `live`. */
+function useLiveMinute(live: boolean) {
+  const state = useState(startOfCurrentMinute)
+  const setNow = state[1]
+
+  useEffect(() => {
+    if (!live) return
+    let timeout: ReturnType<typeof setTimeout>
+    const schedule = () => {
+      timeout = setTimeout(
+        () => {
+          setNow(startOfCurrentMinute())
+          schedule()
+        },
+        MINUTE_MS - (Date.now() % MINUTE_MS) + 50
+      )
+    }
+    schedule()
+    return () => clearTimeout(timeout)
+  }, [live, setNow])
+
+  return state
 }
 
 export function MonitoringDetailSkeleton() {
@@ -477,28 +519,11 @@ const BodySC = styled.div(({ theme }) => ({
   paddingBottom: theme.spacing.large,
 }))
 
-const TitleBlockSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flex: 1,
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  minWidth: 0,
-}))
-
 const TitleRowSC = styled.div(({ theme }) => ({
-  alignItems: 'flex-start',
+  alignItems: 'center',
   display: 'flex',
   gap: theme.spacing.medium,
   justifyContent: 'space-between',
-}))
-
-const TitleSC = styled.h2(({ theme }) => ({
-  color: theme.colors.text,
-  ...theme.partials.text.mono,
-  fontSize: 18,
-  fontWeight: 400,
-  lineHeight: '24px',
-  margin: 0,
 }))
 
 const ToolbarSC = styled.div<{ $hasFilters: boolean }>(
@@ -508,7 +533,7 @@ const ToolbarSC = styled.div<{ $hasFilters: boolean }>(
     flexWrap: 'wrap',
     gap: theme.spacing.small,
     justifyContent: 'space-between',
-    marginTop: theme.spacing.large,
+    marginTop: theme.spacing.small,
   })
 )
 

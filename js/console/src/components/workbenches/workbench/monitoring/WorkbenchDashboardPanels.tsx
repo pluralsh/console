@@ -19,6 +19,7 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   DashboardGraphType,
+  DashboardGraphUnit,
   DashboardTimeRangeAttributes,
   useWorkbenchDashboardGraphQuery,
   WorkbenchDashboardDetailsFragment,
@@ -33,12 +34,13 @@ import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   JobActivityLogs,
-  JobActivityMetricsChart,
   WorkbenchJobMetricsLegend,
 } from '../job/WorkbenchJobActivityResults'
 import { getMetricSeries, metricSeriesId } from '../job/workbenchJobMetrics'
 import { TraceWaterfall } from '../job/WorkbenchJobTraces'
+import { DashboardTimeseriesChart } from './DashboardTimeseriesChart'
 import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
+import { formatUnitValue } from './dashboardUnits'
 import { QueryDefinitionModal } from './QueryDefinitionModal'
 
 type DashboardGraph = NonNullable<
@@ -69,7 +71,9 @@ type DashboardPanelsProps = {
   graphs: DashboardGraph[]
   variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
+  rangeRevision: number
   queriesEnabled: boolean
+  onRangeSelect?: (start: Date, end: Date) => void
   onUpdate?: () => void
 }
 
@@ -168,7 +172,9 @@ function DashboardGraphGrid({
   graphs,
   variables,
   timeRange,
+  rangeRevision,
   queriesEnabled,
+  onRangeSelect,
   onUpdate,
 }: DashboardPanelsProps) {
   const columns = useMemo(
@@ -211,7 +217,9 @@ function DashboardGraphGrid({
                 graph={graph}
                 variables={variables}
                 timeRange={timeRange}
+                rangeRevision={rangeRevision}
                 queriesEnabled={queriesEnabled}
+                onRangeSelect={onRangeSelect}
                 onUpdate={onUpdate}
               />
             </CellSC>
@@ -236,7 +244,9 @@ type DashboardPanelProps = {
   graph: DashboardGraph
   variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
+  rangeRevision: number
   queriesEnabled: boolean
+  onRangeSelect?: (start: Date, end: Date) => void
   onUpdate?: () => void
 }
 
@@ -259,7 +269,9 @@ function DataDashboardPanel({
   graph,
   variables,
   timeRange,
+  rangeRevision,
   queriesEnabled,
+  onRangeSelect,
   onUpdate,
 }: DashboardPanelProps) {
   const needsFetch = dashboardGraphNeedsFetch(
@@ -282,7 +294,15 @@ function DataDashboardPanel({
     skip: !needsFetch,
     fetchPolicy: 'cache-and-network',
   })
-  const data = currentData ?? previousData
+  const [dataRevision, setDataRevision] = useState(rangeRevision)
+  if (currentData && dataRevision !== rangeRevision)
+    setDataRevision(rangeRevision)
+  const data = dashboardPanelVisibleData({
+    currentData,
+    previousData,
+    rangeRevision,
+    dataRevision,
+  })
 
   const query = datasourceQuery(graph.datasource?.input)
   const [queryOpen, setQueryOpen] = useState(false)
@@ -386,10 +406,19 @@ function DataDashboardPanel({
         ) : (
           <PanelContent
             type={graph.type}
+            unit={graph.unit}
             metrics={metrics}
             logs={logs}
             traces={traces}
             fullscreen={fullscreen}
+            timeRange={timeRange}
+            onRangeSelect={
+              onRangeSelect &&
+              ((start, end) => {
+                setFullscreen(false)
+                onRangeSelect(start, end)
+              })
+            }
             selectedSeriesId={selectedSeriesId}
             onSelectSeries={(id) =>
               setSelectedSeriesId((selected) => (selected === id ? null : id))
@@ -445,6 +474,26 @@ export function dashboardGraphNeedsFetch(
   return queriesEnabled && type !== DashboardGraphType.Markdown && hasDatasource
 }
 
+/**
+ * Live ticks and filter changes keep showing the previous result while
+ * refetching; a user-initiated range change drops it so the panel goes back
+ * to its skeleton rather than animating stale series into the new axis.
+ */
+export function dashboardPanelVisibleData<T>({
+  currentData,
+  previousData,
+  rangeRevision,
+  dataRevision,
+}: {
+  currentData: T | undefined
+  previousData: T | undefined
+  rangeRevision: number
+  dataRevision: number
+}) {
+  if (currentData) return currentData
+  return dataRevision === rangeRevision ? previousData : undefined
+}
+
 export function dashboardPanelIsWaitingForData({
   queriesEnabled,
   loading,
@@ -490,18 +539,24 @@ function DashboardPanelSkeleton({ fullscreen }: { fullscreen: boolean }) {
 
 function PanelContent({
   type,
+  unit,
   metrics,
   logs,
   traces,
   fullscreen,
+  timeRange,
+  onRangeSelect,
   selectedSeriesId,
   onSelectSeries,
 }: {
   type: DashboardGraphType
+  unit: Nullable<DashboardGraphUnit>
   metrics: WorkbenchJobActivityMetricFragment[]
   logs: WorkbenchJobActivityLogFragment[]
   traces: WorkbenchJobActivityTraceFragment[]
   fullscreen: boolean
+  timeRange: DashboardTimeRangeAttributes
+  onRangeSelect?: (start: Date, end: Date) => void
   selectedSeriesId: string | null
   onSelectSeries: (id: string) => void
 }) {
@@ -527,11 +582,21 @@ function PanelContent({
       if (isEmpty(traces)) return <NoDataState />
       return <TraceWaterfall traces={traces} />
     case DashboardGraphType.Stat:
-      return <StatContent metrics={metrics} />
+      return (
+        <StatContent
+          metrics={metrics}
+          unit={unit}
+        />
+      )
     case DashboardGraphType.Pie:
       return <PieContent metrics={metrics} />
     case DashboardGraphType.Table:
-      return <TableContent metrics={metrics} />
+      return (
+        <TableContent
+          metrics={metrics}
+          unit={unit}
+        />
+      )
     case DashboardGraphType.Bar:
     case DashboardGraphType.Gauge:
     case DashboardGraphType.Heatmap:
@@ -544,8 +609,14 @@ function PanelContent({
           gap="xsmall"
           width="100%"
         >
-          <JobActivityMetricsChart
+          <DashboardTimeseriesChart
             metrics={visibleMetrics}
+            timeWindow={{
+              start: new Date(timeRange.start),
+              end: new Date(timeRange.end),
+            }}
+            unit={unit}
+            onRangeSelect={onRangeSelect}
             css={{
               height: fullscreen
                 ? 'min(650px, calc(100vh - 260px))'
@@ -574,8 +645,10 @@ function PanelContent({
 
 function StatContent({
   metrics,
+  unit,
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
+  unit: Nullable<DashboardGraphUnit>
 }) {
   if (isEmpty(metrics)) return <NoDataState />
   const latest = maxBy(metrics, (metric) => metric.timestamp ?? '')
@@ -587,7 +660,7 @@ function StatContent({
       gap="xsmall"
     >
       <StatValueSC>
-        {latest?.value != null ? formatStat(latest.value) : '—'}
+        {latest?.value != null ? formatStat(latest.value, unit) : '—'}
       </StatValueSC>
       {series[0] && (
         <Body2P
@@ -627,8 +700,10 @@ function PieContent({
 
 function TableContent({
   metrics,
+  unit,
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
+  unit: Nullable<DashboardGraphUnit>
 }) {
   if (isEmpty(metrics)) return <NoDataState />
   const series = getMetricSeries(metrics)
@@ -646,7 +721,7 @@ function TableContent({
         {series.map((s) => (
           <tr key={s.id}>
             <td title={s.label}>{s.shortLabel}</td>
-            <td>{s.data.at(-1)?.y ?? '—'}</td>
+            <td>{formatLatest(s.data.at(-1)?.y, unit)}</td>
             <td>{s.data.length}</td>
           </tr>
         ))}
@@ -659,10 +734,20 @@ function NoDataState() {
   return <EmptyState message="No data for this filter and range." />
 }
 
-function formatStat(value: number) {
+function hasUnit(unit: Nullable<DashboardGraphUnit>) {
+  return !!unit && unit !== DashboardGraphUnit.None
+}
+
+function formatStat(value: number, unit: Nullable<DashboardGraphUnit>) {
   if (!Number.isFinite(value)) return '—'
+  if (hasUnit(unit)) return formatUnitValue(value, unit)
   if (Math.abs(value) >= 1000) return value.toLocaleString()
   return String(Number(value.toPrecision(6)))
+}
+
+function formatLatest(value: unknown, unit: Nullable<DashboardGraphUnit>) {
+  if (typeof value !== 'number') return value == null ? '—' : String(value)
+  return hasUnit(unit) ? formatUnitValue(value, unit) : String(value)
 }
 
 const StackSC = styled.div(({ theme }) => ({

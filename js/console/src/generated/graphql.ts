@@ -4210,6 +4210,8 @@ export type DashboardGraphAttributes = {
   title?: InputMaybe<Scalars['String']['input']>;
   /** Graph visualization type */
   type: DashboardGraphType;
+  /** Unit of the plotted values, used to format axes and tooltips */
+  unit?: InputMaybe<DashboardGraphUnit>;
 };
 
 export type DashboardGraphLayoutAttributes = {
@@ -4235,6 +4237,14 @@ export enum DashboardGraphType {
   Table = 'TABLE',
   Timeseries = 'TIMESERIES',
   Traces = 'TRACES'
+}
+
+export enum DashboardGraphUnit {
+  Bytes = 'BYTES',
+  Cpu = 'CPU',
+  None = 'NONE',
+  Percent = 'PERCENT',
+  Time = 'TIME'
 }
 
 export type DashboardInputAttributes = {
@@ -17184,6 +17194,8 @@ export type WorkbenchDashboardGraph = {
   toolId?: Maybe<Scalars['ID']['output']>;
   /** Graph visualization type */
   type: DashboardGraphType;
+  /** Unit of the plotted values, used to format axes and tooltips */
+  unit?: Maybe<DashboardGraphUnit>;
   /** Configured workbench tool backing this graph's datasource */
   workbenchTool?: Maybe<WorkbenchTool>;
 };
@@ -23796,7 +23808,7 @@ export type WorkbenchDashboardSummaryFragment = { __typename?: 'WorkbenchDashboa
 
 export type WorkbenchDashboardDatasourceFragment = { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> };
 
-export type WorkbenchDashboardDetailsFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null };
+export type WorkbenchDashboardDetailsFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null };
 
 export type WorkbenchMonitorSummaryFragment = { __typename?: 'Monitor', id: string, name: string, description?: string | null, type: MonitorType, state?: AlertState | null, severity: AlertSeverity, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -23808,7 +23820,7 @@ export type WorkbenchDashboardDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type WorkbenchDashboardDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchDashboardDelta?: { __typename?: 'WorkbenchDashboardDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null } | null };
+export type WorkbenchDashboardDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchDashboardDelta?: { __typename?: 'WorkbenchDashboardDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null } | null };
 
 export type WorkbenchMonitorDeltaSubscriptionVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -23843,7 +23855,7 @@ export type WorkbenchMonitoringDashboardQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchMonitoringDashboardQuery = { __typename?: 'RootQueryType', workbenchDashboard?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null };
+export type WorkbenchMonitoringDashboardQuery = { __typename?: 'RootQueryType', workbenchDashboard?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null };
 
 export type WorkbenchDashboardGraphQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -30162,6 +30174,7 @@ export const WorkbenchDashboardDetailsFragmentDoc = gql`
     title
     description
     type
+    unit
     sectionId
     toolId
     workbenchTool {

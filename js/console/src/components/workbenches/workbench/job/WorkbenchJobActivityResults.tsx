@@ -55,6 +55,7 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
+import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
 import {
   getMetricSeries,
   metricSeriesId,
@@ -322,6 +323,13 @@ export function JobActivityLogsFromTool({
 }
 
 /** Renders pre-fetched metric points (e.g. thought tool attributes). */
+export const METRICS_CHART_MARGIN = {
+  top: 10,
+  right: 25,
+  bottom: 30,
+  left: 30,
+} as const
+
 export function JobActivityMetricsChart({
   metrics,
   lineProps,
@@ -348,6 +356,16 @@ export function JobActivityMetricsChart({
   const graphData = useMemo(() => {
     return getMetricSeries(metrics)
   }, [metrics])
+  const leftMargin = useMemo(() => {
+    let min = Infinity
+    let max = -Infinity
+    for (const { value } of metrics) {
+      if (typeof value !== 'number') continue
+      if (value < min) min = value
+      if (value > max) max = value
+    }
+    return yAxisWidth(min, max, null)
+  }, [metrics])
 
   if (isEmpty(metrics)) return null
 
@@ -355,13 +373,16 @@ export function JobActivityMetricsChart({
     theme: graphTheme,
     data: graphData,
     colors: COLORS,
-    margin: { top: 10, right: 25, bottom: 30, left: 30 } as const,
+    margin: { ...METRICS_CHART_MARGIN, left: leftMargin, right: 32 },
     xScale: { type: 'time' as const, format: 'native' as const },
     yScale: { type: 'linear' as const },
     xFormat: dateFormat,
     lineWidth: 1,
     enablePoints: false,
-    axisLeft: { tickValues: 5 },
+    axisLeft: {
+      tickValues: 5,
+      format: (value: number) => formatUnitValue(value, null),
+    },
     axisBottom: { format: '%H:%M:%S', tickValues: 5 },
     tooltip: SliceTooltip,
   }
