@@ -543,7 +543,14 @@ function StatContent({
       <StatValueSC>
         {latest?.value != null ? formatStat(latest.value) : '—'}
       </StatValueSC>
-      {series[0] && <Body2P $color="text-light">{series[0].label}</Body2P>}
+      {series[0] && (
+        <Body2P
+          $color="text-light"
+          title={series[0].label}
+        >
+          {series[0].shortLabel}
+        </Body2P>
+      )}
     </Flex>
   )
 }
@@ -592,7 +599,7 @@ function TableContent({
       <tbody>
         {series.map((s) => (
           <tr key={s.id}>
-            <td>{s.label}</td>
+            <td title={s.label}>{s.shortLabel}</td>
             <td>{s.data.at(-1)?.y ?? '—'}</td>
             <td>{s.data.length}</td>
           </tr>

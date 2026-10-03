@@ -12,8 +12,18 @@ describe('WorkbenchJobMetricsLegend', () => {
       <ThemeProvider theme={styledThemeDark}>
         <WorkbenchJobMetricsLegend
           series={[
-            { id: 'success', label: 'status=success', data: [] },
-            { id: 'error', label: 'status=error', data: [] },
+            {
+              id: 'success',
+              label: 'status=success',
+              shortLabel: 'status=success',
+              data: [],
+            },
+            {
+              id: 'error',
+              label: 'status=error',
+              shortLabel: 'status=error',
+              data: [],
+            },
           ]}
           selectedId="success"
           onSelect={onSelect}
@@ -29,5 +39,26 @@ describe('WorkbenchJobMetricsLegend', () => {
 
     fireEvent.click(other)
     expect(onSelect).toHaveBeenCalledWith('error')
+  })
+
+  it('renders the short label and exposes the full label on hover', () => {
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <WorkbenchJobMetricsLegend
+          compact
+          series={[
+            {
+              id: 'a',
+              label: 'job=api, pod=api-1, status=error',
+              shortLabel: 'pod=api-1',
+              data: [],
+            },
+          ]}
+        />
+      </ThemeProvider>
+    )
+
+    const item = screen.getByRole('button', { name: 'pod=api-1' })
+    expect(item.getAttribute('title')).toBe('job=api, pod=api-1, status=error')
   })
 })

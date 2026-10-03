@@ -132,6 +132,17 @@ type DeploymentSettingsSpec struct {
 	// +kubebuilder:validation:Optional
 	AgentHelmValuesTemplateable *bool `json:"agentHelmValuesTemplateable,omitempty"`
 
+	// AgentHelmValuesTemplate is a raw string template of custom helm values to
+	// apply to all agents. Unlike AgentHelmValues it is not parsed as YAML by the
+	// operator, so it may contain template expressions that would not be valid YAML
+	// on their own (for example, unquoted Liquid tags).
+	//
+	// When set to a non-empty string, it takes precedence over AgentHelmValues,
+	// which is ignored, and AgentHelmValuesTemplateable is always treated as true.
+	//
+	// +kubebuilder:validation:Optional
+	AgentHelmValuesTemplate *string `json:"agentHelmValuesTemplate,omitempty"`
+
 	// ManagementRepo is the root repo for setting up
 	// your infrastructure with Plural. Usually this
 	// will be your `plural up repo`

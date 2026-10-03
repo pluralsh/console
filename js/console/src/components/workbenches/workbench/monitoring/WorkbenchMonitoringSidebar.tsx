@@ -1,7 +1,9 @@
 import {
   AddIcon,
+  BellIcon,
   CheckIcon,
   CloseIcon,
+  DashboardIcon,
   EmptyState,
   Flex,
   IconFrame,
@@ -45,13 +47,6 @@ import { mapExistingNodes } from 'utils/graphql'
 
 function isNearBottom(el: HTMLElement) {
   return el.scrollHeight - el.scrollTop - el.clientHeight < 200
-}
-
-function initials(name: string) {
-  const words = name.split(/[^A-Za-z0-9]+/).filter(Boolean)
-  if (words.length === 0) return '?'
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
-  return `${words[0][0]}${words[1][0]}`.toUpperCase()
 }
 
 export function WorkbenchMonitoringSidebar({
@@ -294,7 +289,7 @@ function MonitoringListSkeleton({ count }: { count: number }) {
           <RectangleSkeleton
             $height={40}
             $width={40}
-            css={{ flexShrink: 0, '&::after': { borderRadius: '50%' } }}
+            css={{ flexShrink: 0 }}
           />
           <Flex
             direction="column"
@@ -349,7 +344,12 @@ function DashboardRow({
         })}
         aria-label={`Dashboard ${dashboard.name}`}
       >
-        <RowAvatarSC aria-hidden="true">{initials(dashboard.name)}</RowAvatarSC>
+        <RowIconSC
+          aria-hidden="true"
+          size="large"
+          type="secondary"
+          icon={<DashboardIcon />}
+        />
         <RowTextSC>
           <RowTitleSC>{dashboard.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -427,7 +427,12 @@ function MonitorRow({
         })}
         aria-label={`Monitor ${monitor.name}`}
       >
-        <RowAvatarSC aria-hidden="true">{initials(monitor.name)}</RowAvatarSC>
+        <RowIconSC
+          aria-hidden="true"
+          size="large"
+          type="secondary"
+          icon={<BellIcon />}
+        />
         <RowTextSC>
           <RowTitleSC>{monitor.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -587,19 +592,9 @@ const RowLinkSC = styled(Link)({
   textDecoration: 'none',
 })
 
-const RowAvatarSC = styled.div(({ theme }) => ({
-  alignItems: 'center',
-  border: theme.borders.default,
-  borderRadius: '50%',
-  color: theme.colors.text,
-  display: 'flex',
+const RowIconSC = styled(IconFrame)({
   flexShrink: 0,
-  ...theme.partials.text.mono,
-  fontSize: 18,
-  height: 40,
-  justifyContent: 'center',
-  width: 40,
-}))
+})
 
 const RowTextSC = styled.div({
   display: 'flex',

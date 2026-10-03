@@ -2877,6 +2877,11 @@ func (in *DeploymentSettingsSpec) DeepCopyInto(out *DeploymentSettingsSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.AgentHelmValuesTemplate != nil {
+		in, out := &in.AgentHelmValuesTemplate, &out.AgentHelmValuesTemplate
+		*out = new(string)
+		**out = **in
+	}
 	if in.ManagementRepo != nil {
 		in, out := &in.ManagementRepo, &out.ManagementRepo
 		*out = new(string)

@@ -158,6 +158,10 @@ export const docsStructure: DocSection[] = [
             ],
           },
           { path: 'lua', title: 'Dynamic Helm Configuration with Lua Scripts' },
+          {
+            path: 'python',
+            title: 'Dynamic Helm Configuration with Python Scripts',
+          },
           { path: 'global-service', title: 'Global services' },
           {
             path: 'observer',

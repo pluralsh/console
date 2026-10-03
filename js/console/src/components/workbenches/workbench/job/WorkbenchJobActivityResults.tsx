@@ -778,10 +778,11 @@ export function WorkbenchJobMetricsLegend({
       }
       {...props}
     >
-      {series.map(({ id, label }, i) => (
+      {series.map(({ id, label, shortLabel }, i) => (
         <LegendItemSC
           key={id}
           type="button"
+          title={label}
           disabled={!onSelect}
           aria-pressed={onSelect ? selectedId === id : undefined}
           onClick={() => onSelect?.(id)}
@@ -794,9 +795,9 @@ export function WorkbenchJobMetricsLegend({
             $compact={compact}
           />
           {compact ? (
-            <CompactLegendLabelSC>{label}</CompactLegendLabelSC>
+            <CompactLegendLabelSC>{shortLabel}</CompactLegendLabelSC>
           ) : (
-            <Body2P $color="text-light">{label}</Body2P>
+            <Body2P $color="text-light">{shortLabel}</Body2P>
           )}
         </LegendItemSC>
       ))}

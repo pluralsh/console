@@ -65,6 +65,16 @@ spec:
                   customary annotations/labels)
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
+              agentHelmValuesTemplate:
+                description: |-
+                  AgentHelmValuesTemplate is a raw string template of custom helm values to
+                  apply to all agents. Unlike AgentHelmValues it is not parsed as YAML by the
+                  operator, so it may contain template expressions that would not be valid YAML
+                  on their own (for example, unquoted Liquid tags).
+
+                  When set to a non-empty string, it takes precedence over AgentHelmValues,
+                  which is ignored, and AgentHelmValuesTemplateable is always treated as true.
+                type: string
               agentHelmValuesTemplateable:
                 description: |-
                   AgentHelmValuesTemplateable indicates whether to render
