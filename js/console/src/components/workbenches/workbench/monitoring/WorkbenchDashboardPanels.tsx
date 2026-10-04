@@ -1,6 +1,5 @@
 import {
   Card,
-  CaretDownIcon,
   CloseIcon,
   DocsIcon,
   EmptyState,
@@ -13,6 +12,7 @@ import {
 } from '@pluralsh/design-system'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
 import { GqlError } from 'components/utils/Alert'
+import { MetricsSection } from 'components/utils/metrics/MetricsSection'
 import { PieChart } from 'components/utils/PieChart'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -137,33 +137,18 @@ function DashboardSection({
   section,
   ...props
 }: DashboardPanelsProps & { section: DashboardGraph }) {
-  const [open, setOpen] = useState(() => !isDefaultCollapsed(section.options))
-
   return (
-    <SectionSC>
-      <SectionHeaderSC
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <SectionCaretSC $open={open} />
-        <SectionTitleBlockSC>
-          <Body1P>{section.title || section.identifier}</Body1P>
-          {section.description && (
-            <CaptionP $color="text-xlight">{section.description}</CaptionP>
-          )}
-        </SectionTitleBlockSC>
-      </SectionHeaderSC>
-      {open && (
-        <SectionContentSC>
-          {props.graphs.length > 0 ? (
-            <DashboardGraphGrid {...props} />
-          ) : (
-            <EmptyState message="No panels in this section." />
-          )}
-        </SectionContentSC>
+    <MetricsSection
+      title={section.title || section.identifier}
+      description={section.description}
+      defaultOpen={!isDefaultCollapsed(section.options)}
+    >
+      {props.graphs.length > 0 ? (
+        <DashboardGraphGrid {...props} />
+      ) : (
+        <EmptyState message="No panels in this section." />
       )}
-    </SectionSC>
+    </MetricsSection>
   )
 }
 
@@ -759,55 +744,6 @@ const GraphGridSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   width: '100%',
-}))
-
-const SectionSC = styled.section(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero'],
-  border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.large,
-  overflow: 'hidden',
-  width: '100%',
-}))
-
-const SectionHeaderSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  alignItems: 'center',
-  backgroundColor: theme.colors['fill-one'],
-  color: theme.colors.text,
-  cursor: 'pointer',
-  display: 'flex',
-  gap: theme.spacing.small,
-  minHeight: 44,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  textAlign: 'left',
-  width: '100%',
-  '&:hover': {
-    backgroundColor: theme.colors['fill-one-hover'],
-  },
-  '&:focus-visible': {
-    outline: `1px solid ${theme.colors['border-outline-focused']}`,
-    outlineOffset: -1,
-  },
-}))
-
-const SectionCaretSC = styled(CaretDownIcon)<{ $open: boolean }>(
-  ({ $open }) => ({
-    flexShrink: 0,
-    transform: $open ? 'rotate(0deg)' : 'rotate(-90deg)',
-    transition: 'transform 150ms ease',
-  })
-)
-
-const SectionTitleBlockSC = styled.div(({ theme }) => ({
-  alignItems: 'baseline',
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: theme.spacing.small,
-  minWidth: 0,
-}))
-
-const SectionContentSC = styled.div(({ theme }) => ({
-  padding: theme.spacing.medium,
 }))
 
 const RowSC = styled.div<{ $columns: number }>(({ theme, $columns }) => ({

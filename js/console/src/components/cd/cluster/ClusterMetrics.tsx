@@ -4,12 +4,17 @@ import {
   EmptyState,
   Flex,
   HeatMapIcon,
+  KubernetesIcon,
   ListBoxItem,
+  NamespaceIcon,
   Select,
+  SmallNodeIcon,
+  SmallPodIcon,
   TimeSeriesIcon,
 } from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import { MetricsSection } from 'components/utils/metrics/MetricsSection'
 import {
   MetricsGraphCard,
   MetricsGraphGrid,
@@ -49,8 +54,14 @@ import {
   useRangeQueryData,
   useTimeRange,
 } from 'components/utils/timerange/useTimeRange'
-import { useMemo, useState } from 'react'
-import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
+import { type ReactNode, useMemo, useState } from 'react'
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -73,13 +84,42 @@ const METRICS_DIRECTORY = [
   { path: 'heatmap', icon: <HeatMapIcon />, tooltip: 'Heat map' },
 ]
 const GROUPINGS = [
-  { key: ClusterMetricsGrouping.Cluster, label: 'Cluster' },
-  { key: ClusterMetricsGrouping.Namespace, label: 'Namespace' },
-  { key: ClusterMetricsGrouping.Node, label: 'Node' },
+  {
+    key: ClusterMetricsGrouping.Cluster,
+    label: 'Cluster',
+    icon: <KubernetesIcon size={16} />,
+  },
+  {
+    key: ClusterMetricsGrouping.Namespace,
+    label: 'Namespace',
+    icon: <NamespaceIcon size={16} />,
+  },
+  {
+    key: ClusterMetricsGrouping.Node,
+    label: 'Node',
+    icon: <SmallNodeIcon size={16} />,
+  },
 ]
+const HEAT_MAP_FLAVOR_ICONS: Record<HeatMapFlavor, ReactNode> = {
+  [HeatMapFlavor.Pod]: <SmallPodIcon size={16} />,
+  [HeatMapFlavor.Namespace]: <NamespaceIcon size={16} />,
+  [HeatMapFlavor.Node]: <SmallNodeIcon size={16} />,
+}
 
-export function ClusterMetrics() {
+type ClusterMetricsOutletContext = { viewToggle?: ReactNode }
+
+export function ClusterMetrics({
+  basePath,
+  inlineToggle = false,
+}: {
+  /** absolute path of this metrics route, defaults to the CD cluster page */
+  basePath?: string
+  /** render the timeseries/heatmap toggle in each view's controls row rather than the page header */
+  inlineToggle?: boolean
+}) {
   const { clusterId } = useParams()
+  const metricsPath =
+    basePath ?? `${getClusterDetailsPath({ clusterId })}/metrics`
   const { pathname } = useLocation()
   const metricsEnabled = useMetricsEnabled()
   const deploymentSettingsLoading = useLoadingDeploymentSettings()
@@ -88,32 +128,58 @@ export function ClusterMetrics() {
     METRICS_DIRECTORY.find(({ path }) => pathname.endsWith(path))?.path ??
     'timeseries'
 
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <ButtonGroup
-          directory={METRICS_DIRECTORY}
-          tab={currentTab}
-          toPath={(path) =>
-            `${getClusterDetailsPath({ clusterId })}/metrics/${path}`
-          }
-        />
-      ),
-      [clusterId, currentTab]
-    )
+  const viewToggle = useMemo(
+    () => (
+      <ButtonGroup
+        directory={METRICS_DIRECTORY}
+        tab={currentTab}
+        toPath={(path) => `${metricsPath}/${path}`}
+      />
+    ),
+    [metricsPath, currentTab]
   )
+
+  useSetPageHeaderContent(inlineToggle ? undefined : viewToggle)
 
   if (!(metricsEnabled || deploymentSettingsLoading))
     return <MetricsEmptyState />
 
-  return <Outlet />
+  return (
+    <Outlet
+      context={
+        {
+          viewToggle: inlineToggle ? (
+            <InlineToggleSC>{viewToggle}</InlineToggleSC>
+          ) : undefined,
+        } satisfies ClusterMetricsOutletContext
+      }
+    />
+  )
 }
+
+function useViewToggle() {
+  return useOutletContext<ClusterMetricsOutletContext | undefined>()?.viewToggle
+}
+
+// matches the 32px time range control
+const InlineToggleSC = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  height: 32,
+  width: 'fit-content',
+  '& > *': { boxSizing: 'border-box', height: '100%' },
+  '& a > *': {
+    alignItems: 'center',
+    boxSizing: 'border-box',
+    padding: `0 ${theme.spacing.small}px`,
+  },
+}))
 
 export function ClusterMetricsTimeseries() {
   const { clusterId } = useParams()
   const timeRange = useTimeRange()
   const [grouping, setGrouping] = useState(ClusterMetricsGrouping.Cluster)
   const sections = useMemo(() => clusterMetricSections(grouping), [grouping])
+  const viewToggle = useViewToggle()
 
   return (
     <WrapperSC>
@@ -129,25 +195,37 @@ export function ClusterMetricsTimeseries() {
         >
           <CaptionP $color="text-xlight">Group by</CaptionP>
           <Select
-            width={160}
+            size="small"
+            width={140}
             selectedKey={grouping}
+            leftContent={GROUPINGS.find(({ key }) => key === grouping)?.icon}
             onSelectionChange={(key) =>
               setGrouping(key as ClusterMetricsGrouping)
             }
           >
-            {GROUPINGS.map(({ key, label }) => (
+            {GROUPINGS.map(({ key, label, icon }) => (
               <ListBoxItem
                 key={key}
                 label={label}
+                leftContent={icon}
               />
             ))}
           </Select>
         </Flex>
-        <MetricsTimeRangeControl timeRange={timeRange} />
+        <Flex
+          gap="small"
+          align="center"
+        >
+          <MetricsTimeRangeControl timeRange={timeRange} />
+          {viewToggle}
+        </Flex>
       </Flex>
-      {sections.map(({ key, title, graphs }) => (
-        <SectionSC key={key}>
-          <Subtitle2H1>{title}</Subtitle2H1>
+      {sections.map(({ key, title, description, graphs }) => (
+        <MetricsSection
+          key={key}
+          title={title}
+          description={description}
+        >
           <MetricsGraphGrid>
             {graphs.map((graph) => (
               <ClusterMetricGraphCard
@@ -159,7 +237,7 @@ export function ClusterMetricsTimeseries() {
               />
             ))}
           </MetricsGraphGrid>
-        </SectionSC>
+        </MetricsSection>
       ))}
     </WrapperSC>
   )
@@ -275,9 +353,11 @@ export function ClusterMetricsHeatmap() {
     !isNull(memMetrics.total) &&
     (cpuMetrics.usage?.length ?? 0) > 0
   const hasHeatmapData = !isEmpty(utilCpuHeatMap) || !isEmpty(utilMemoryHeatMap)
+  const viewToggle = useViewToggle()
 
   return (
     <WrapperSC>
+      {viewToggle && <Flex justifyContent="flex-end">{viewToggle}</Flex>}
       <MetricsCard
         css={{
           display: 'flex',
@@ -315,14 +395,17 @@ export function ClusterMetricsHeatmap() {
         >
           <CaptionP $color="text-xlight">Group by</CaptionP>
           <Select
-            width={160}
+            size="small"
+            width={140}
             selectedKey={heatMapFlavor}
+            leftContent={HEAT_MAP_FLAVOR_ICONS[heatMapFlavor]}
             onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
           >
             {Object.values(HeatMapFlavor).map((flavor) => (
               <ListBoxItem
                 key={flavor}
                 label={capitalize(flavor)}
+                leftContent={HEAT_MAP_FLAVOR_ICONS[flavor]}
               />
             ))}
           </Select>
@@ -380,14 +463,8 @@ export function ClusterMetricsHeatmap() {
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
   paddingBottom: theme.spacing.large,
-}))
-
-const SectionSC = styled.section(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
 }))
 
 export function useClusterHeatmapData({

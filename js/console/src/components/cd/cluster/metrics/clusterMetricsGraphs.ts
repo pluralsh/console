@@ -28,6 +28,7 @@ export type ClusterMetricGraph = {
 export type ClusterMetricSection = {
   key: string
   title: string
+  description?: string
   graphs: ClusterMetricGraph[]
 }
 
@@ -549,7 +550,20 @@ export function clusterMetricSections(
   grouping: ClusterMetricsGrouping,
   { limit = DEFAULT_TOP_GROUPS } = {}
 ): ClusterMetricSection[] {
-  return grouping === ClusterMetricsGrouping.Cluster
-    ? CLUSTER_SECTIONS
-    : groupedSections(grouping, limit)
+  const sections =
+    grouping === ClusterMetricsGrouping.Cluster
+      ? CLUSTER_SECTIONS
+      : groupedSections(grouping, limit)
+  return sections.map((section) => ({
+    ...section,
+    description: SECTION_DESCRIPTIONS[section.key],
+  }))
+}
+
+const SECTION_DESCRIPTIONS: Record<string, string> = {
+  cpu: 'Usage, reservations, and throttling',
+  memory: 'Working set, reservations, and OOM kills',
+  network: 'Pod throughput and dropped packets',
+  storage: 'Persistent volumes, ephemeral storage, and filesystem I/O',
+  workloads: 'Pod scheduling and container restarts',
 }

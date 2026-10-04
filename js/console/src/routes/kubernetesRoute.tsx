@@ -143,6 +143,14 @@ import StatefulSet, {
 import StatefulSets from '../components/kubernetes/workloads/StatefulSets'
 import Workloads from '../components/kubernetes/workloads/Workloads'
 import PodDisruptionBudgets from '../components/kubernetes/cluster/PodDisruptionBudgets.tsx'
+import {
+  ClusterLogs,
+  ClusterMetrics,
+} from '../components/kubernetes/observability/ClusterObservability'
+import {
+  ClusterMetricsHeatmap,
+  ClusterMetricsTimeseries,
+} from '../components/cd/cluster/ClusterMetrics'
 
 import {
   AUDIT_REL_PATH,
@@ -161,6 +169,8 @@ import {
   INGRESSES_REL_PATH,
   JOBS_REL_PATH,
   KUBERNETES_ABS_PATH,
+  LOGS_REL_PATH,
+  METRICS_REL_PATH,
   NAMESPACED_RESOURCE_DETAILS_REL_PATH,
   NAMESPACES_REL_PATH,
   NETWORK_POLICIES_REL_PATH,
@@ -399,6 +409,32 @@ export const kubernetesRoutes = (
       <Route
         path={CUSTOM_RESOURCES_REL_PATH}
         element={<CustomResourceDefinitions />}
+      />
+      <Route
+        path={METRICS_REL_PATH}
+        element={<ClusterMetrics />}
+      >
+        <Route
+          index
+          element={
+            <Navigate
+              replace
+              to="timeseries"
+            />
+          }
+        />
+        <Route
+          path="timeseries"
+          element={<ClusterMetricsTimeseries />}
+        />
+        <Route
+          path="heatmap"
+          element={<ClusterMetricsHeatmap />}
+        />
+      </Route>
+      <Route
+        path={LOGS_REL_PATH}
+        element={<ClusterLogs />}
       />
       <Route
         path={AUDIT_REL_PATH}
