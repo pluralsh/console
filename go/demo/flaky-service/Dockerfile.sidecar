@@ -15,3 +15,6 @@ CMD ["./api_caller.sh", "-e", "localhost:8080/api", "-m", "localhost:8081/metric
 
 RUN adduser -D -u 65532 sidecar && chown sidecar:sidecar /api_caller.sh
 USER sidecar
+
+# This sidecar calls companion endpoints but does not run a listener.
+HEALTHCHECK NONE

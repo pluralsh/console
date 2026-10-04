@@ -20,3 +20,6 @@ WORKDIR /app/console
 CMD ["yarn", "build"]
 RUN chown -R node:node /app
 USER node
+
+# This image performs a finite asset build and runs no listener to probe.
+HEALTHCHECK NONE

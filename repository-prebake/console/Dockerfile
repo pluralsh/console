@@ -32,3 +32,6 @@ RUN --mount=type=secret,id=git_token,required=false \
  && chown -R 65532:65532 /data
 
 USER 65532
+
+# This image contains prebaked repositories and runs no listener to probe.
+HEALTHCHECK NONE

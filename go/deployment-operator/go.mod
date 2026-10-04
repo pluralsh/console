@@ -3,7 +3,7 @@ module github.com/pluralsh/console/go/deployment-operator
 go 1.27.1
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.7.35
+	github.com/containerd/containerd => github.com/containerd/containerd v1.7.36
 	github.com/google/go-containerregistry v0.5.1 => github.com/google/go-containerregistry v0.20.6
 	github.com/open-policy-agent/opa => github.com/open-policy-agent/opa v1.4.0
 	github.com/pluralsh/console/go/client => ../client
@@ -167,7 +167,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.6.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
-	github.com/containerd/containerd v1.7.35 // indirect
+	github.com/containerd/containerd v1.7.36 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v1.0.0-rc.4 // indirect

@@ -24,3 +24,6 @@ RUN if [ "$OS_VARIANT" = "alpine" ]; then \
   if [ "$OS_VARIANT" != "alpine" ]; then rustc --version && cargo --version; fi && \
   mix local.rebar --force && \
   mix local.hex --force
+
+# This test image is a listener-less toolchain image. Keep its default root user: docker-compose.test.yml bind-mounts /app and tests write there.
+HEALTHCHECK NONE

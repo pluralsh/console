@@ -16,7 +16,7 @@ COPY internal/ internal/
 # Build the cloud-query binary
 RUN CGO_ENABLED=0 go build -o bin/cloud-query cmd/*.go
 
-FROM cgr.dev/chainguard/wolfi-base:latest AS final
+FROM cgr.dev/chainguard/wolfi-base@sha256:1d95114038f76513a9ace6fca107d5582b08c65981f81f61cb56bf7fd2ef216d AS final
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
