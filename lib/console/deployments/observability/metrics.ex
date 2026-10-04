@@ -142,6 +142,7 @@ defmodule Console.Deployments.Observability.Metrics do
       fs_writes: sum_by(by, ~s|rate(container_fs_writes_bytes_total{container!="",#{sel}}[${rate}])|),
       volume_usage: sum_by(by, ~s|kubelet_volume_stats_used_bytes{#{sel}}|),
       volume_capacity: sum_by(by, ~s|kubelet_volume_stats_capacity_bytes{#{sel}}|),
+      volume_fullness: ~s|max by (#{by}) (kubelet_volume_stats_used_bytes{#{sel}} / kubelet_volume_stats_capacity_bytes{#{sel}})|,
       pods_running: pod_scoped(by, ~s|max by (namespace, pod) (kube_pod_status_phase{phase="Running",#{sel}})|),
       pods_pending: pod_scoped(by, ~s|max by (namespace, pod) (kube_pod_status_phase{phase="Pending",#{sel}})|),
       restarts: pod_scoped(by, ~s|max by (namespace, pod, container) (increase(kube_pod_container_status_restarts_total{#{sel}}[${rate}]))|)

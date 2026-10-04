@@ -13499,6 +13499,9 @@ type ClusterUsageMetrics {
   "persistent volume capacity in bytes"
   volumeCapacity: [MetricResponse]
 
+  "fraction (0-1) of capacity used by the fullest persistent volume"
+  volumeFullness: [MetricResponse]
+
   "running pod count"
   podsRunning: [MetricResponse]
 

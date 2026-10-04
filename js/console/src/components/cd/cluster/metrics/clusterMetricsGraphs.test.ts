@@ -88,10 +88,11 @@ describe('clusterMetricSections', () => {
     ).toEqual([3, 4])
   })
 
-  it('only offers per-group utilization for nodes', () => {
+  it('measures nodes against allocatable and namespaces against requests', () => {
     const metrics = {
-      cpu: [series({ node: 'n1' }, 1)],
+      cpu: [series({ node: 'n1', namespace: 'a' }, 1)],
       cpuAllocatable: [series({ node: 'n1' }, 4)],
+      cpuRequests: [series({ namespace: 'a' }, 2)],
     }
 
     expect(
@@ -100,6 +101,42 @@ describe('clusterMetricSections', () => {
     expect(
       graphOf(ClusterMetricsGrouping.Namespace, 'cpu-utilization')
     ).toBeUndefined()
+    expect(
+      seriesOf(ClusterMetricsGrouping.Namespace, 'cpu-efficiency', metrics)[0]
+    ).toMatchObject({ id: 'a', data: [{ y: 0.5 }] })
+    expect(
+      graphOf(ClusterMetricsGrouping.Namespace, 'cpu-efficiency')?.fields
+    ).toEqual(['cpu', 'cpuRequests'])
+  })
+
+  it('derives request efficiency when ungrouped', () => {
+    expect(
+      seriesOf(ClusterMetricsGrouping.Cluster, 'memory-efficiency', {
+        memory: [series({}, 1, 3)],
+        memoryRequests: [series({}, 4, 4)],
+      })[0].data.map(({ y }) => y)
+    ).toEqual([0.25, 0.75])
+  })
+
+  it('lays cpu, memory, and storage out as 2x2 grids in every grouping', () => {
+    for (const grouping of Object.values(ClusterMetricsGrouping)) {
+      const sizes = Object.fromEntries(
+        clusterMetricSections(grouping).map(({ key, graphs }) => [
+          key,
+          graphs.length,
+        ])
+      )
+      expect(sizes).toMatchObject({ cpu: 4, memory: 4, storage: 4 })
+    }
+  })
+
+  it('combines reads and writes into one grouped filesystem graph', () => {
+    expect(
+      seriesOf(ClusterMetricsGrouping.Namespace, 'fs-io', {
+        fsReads: [series({ namespace: 'a' }, 1, 2)],
+        fsWrites: [series({ namespace: 'a' }, 3, 4)],
+      })[0].data.map(({ y }) => y)
+    ).toEqual([4, 6])
   })
 
   it('returns no series for missing data', () => {

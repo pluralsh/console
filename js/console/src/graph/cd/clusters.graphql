@@ -753,6 +753,9 @@ fragment ClusterUsageMetrics on ClusterUsageMetrics {
   volumeCapacity @include(if: $volumeCapacity) {
     ...MetricResponse
   }
+  volumeFullness @include(if: $volumeFullness) {
+    ...MetricResponse
+  }
   podsRunning @include(if: $podsRunning) {
     ...MetricResponse
   }
@@ -789,6 +792,7 @@ query ClusterUsageMetrics(
   $fsWrites: Boolean! = false
   $volumeUsage: Boolean! = false
   $volumeCapacity: Boolean! = false
+  $volumeFullness: Boolean! = false
   $podsRunning: Boolean! = false
   $podsPending: Boolean! = false
   $restarts: Boolean! = false

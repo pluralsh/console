@@ -490,6 +490,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :fs_writes,                list_of(:metric_response), description: "container filesystem write throughput in bytes/s"
     field :volume_usage,             list_of(:metric_response), description: "persistent volume usage in bytes"
     field :volume_capacity,          list_of(:metric_response), description: "persistent volume capacity in bytes"
+    field :volume_fullness,          list_of(:metric_response), description: "fraction (0-1) of capacity used by the fullest persistent volume"
     field :pods_running,             list_of(:metric_response), description: "running pod count"
     field :pods_pending,             list_of(:metric_response), description: "pending pod count"
     field :restarts,                 list_of(:metric_response), description: "container restarts within each rate window"

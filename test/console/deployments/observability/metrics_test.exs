@@ -70,7 +70,7 @@ defmodule Console.Deployments.Observability.MetricsTest do
 
       for {grouping, by} <- @groupings, {key, query} <- Metrics.queries(:cluster_usage, grouping) do
         assert query =~ ~s|cluster="${cluster}"|, "#{grouping}.#{key} isn't cluster scoped: #{query}"
-        assert String.starts_with?(query, "sum #{by} ("), "#{grouping}.#{key} isn't grouped #{by}: #{query}"
+        assert String.starts_with?(query, ["sum #{by} (", "max #{by} ("]), "#{grouping}.#{key} isn't grouped #{by}: #{query}"
         refute Client.variable_subst(query, vars) =~ "$", "#{grouping}.#{key} left a variable unsubstituted"
       end
     end
@@ -93,6 +93,13 @@ defmodule Console.Deployments.Observability.MetricsTest do
         assert node[key] =~ "group_left (node) max by (namespace, pod, node) (kube_pod_info{", "node.#{key} isn't joined"
         refute ns[key] =~ "kube_pod_info", "namespace.#{key} shouldn't need a join"
       end
+    end
+
+    test "volume fullness reports the fullest volume rather than an aggregate ratio" do
+      ns = Map.new(Metrics.queries(:cluster_usage, :namespace))
+
+      assert ns[:volume_fullness] ==
+        ~s|max by (namespace) (kubelet_volume_stats_used_bytes{cluster="${cluster}"} / kubelet_volume_stats_capacity_bytes{cluster="${cluster}"})|
     end
 
     test "allocatable capacity is only offered where it's meaningful" do

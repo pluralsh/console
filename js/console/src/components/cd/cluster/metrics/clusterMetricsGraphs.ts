@@ -186,6 +186,16 @@ const CLUSTER_SECTIONS: ClusterMetricSection[] = [
         ],
       },
       {
+        key: 'cpu-efficiency',
+        title: 'CPU request efficiency',
+        tooltip:
+          'CPU usage as a share of requested cpu. Well below 100% means cpu is reserved but idle; above 100% means pods are bursting past their requests.',
+        format: 'percent',
+        fields: ['cpu', 'cpuRequests'],
+        series: (m) =>
+          solid('usage', divide(first(m.cpu), first(m.cpuRequests))),
+      },
+      {
         key: 'cpu-throttling',
         title: 'CPU throttling',
         tooltip:
@@ -238,6 +248,19 @@ const CLUSTER_SECTIONS: ClusterMetricSection[] = [
         ],
       },
       {
+        key: 'memory-efficiency',
+        title: 'Memory request efficiency',
+        tooltip:
+          'Memory working set as a share of requested memory. Well below 100% means memory is reserved but unused; above 100% risks eviction under node pressure.',
+        format: 'percent',
+        fields: ['memory', 'memoryRequests'],
+        series: (m) =>
+          solid(
+            'working set',
+            divide(first(m.memory), first(m.memoryRequests))
+          ),
+      },
+      {
         key: 'oom-kills',
         title: 'OOM kills',
         tooltip:
@@ -282,6 +305,15 @@ const CLUSTER_SECTIONS: ClusterMetricSection[] = [
     key: 'storage',
     title: 'Storage',
     graphs: [
+      {
+        key: 'volume-fullness',
+        title: 'Fullest persistent volume',
+        tooltip:
+          'Used bytes as a share of capacity for the fullest mounted persistent volume. Aggregate usage can look healthy while a single volume is about to fill up.',
+        format: 'percent',
+        fields: ['volumeFullness'],
+        series: (m) => solid('fullest volume', first(m.volumeFullness)),
+      },
       {
         key: 'volumes',
         title: 'Persistent volumes (bytes)',
@@ -368,6 +400,30 @@ function groupedSections(
     series: (m) => top(groupsOf(m[field], grouping).filter(filter), additive),
   })
 
+  // allocatable only exists per node, so namespaces measure against requests instead
+  const ratioGraph = (
+    resource: 'cpu' | 'memory',
+    name: string,
+    usage: string
+  ): ClusterMetricGraph => {
+    const denominator: UsageField = isNode
+      ? `${resource}Allocatable`
+      : `${resource}Requests`
+    return {
+      key: `${resource}-${isNode ? 'utilization' : 'efficiency'}`,
+      title: isNode
+        ? `${name} utilization by node`
+        : `${name} request efficiency by ${label}`,
+      tooltip: isNode
+        ? `${usage} as a share of each node’s allocatable ${resource}`
+        : `${usage} as a share of requested ${resource} per ${label}; well below 100% means over-provisioned requests`,
+      format: 'percent',
+      fields: [resource, denominator],
+      series: (m) =>
+        top(ratioByGroup(m[resource], m[denominator], grouping), false),
+    }
+  }
+
   return [
     {
       key: 'cpu',
@@ -379,19 +435,7 @@ function groupedSections(
           tooltip: `container_cpu_usage_seconds_total rate summed per ${label}`,
           format: 'cpu',
         }),
-        ...(isNode
-          ? [
-              {
-                key: 'cpu-utilization',
-                title: 'CPU utilization by node',
-                tooltip: 'CPU usage as a share of each node’s allocatable cpu',
-                format: 'percent' as const,
-                fields: ['cpu', 'cpuAllocatable'] as UsageField[],
-                series: (m: ClusterUsageMetricsFragment) =>
-                  top(ratioByGroup(m.cpu, m.cpuAllocatable, grouping), false),
-              },
-            ]
-          : []),
+        ratioGraph('cpu', 'CPU', 'CPU usage'),
         perGroup('cpuRequests', {
           key: 'cpu-requests',
           title: `CPU requests by ${label} (cores)`,
@@ -420,23 +464,7 @@ function groupedSections(
           tooltip: `container_memory_working_set_bytes summed per ${label}`,
           format: 'memory',
         }),
-        ...(isNode
-          ? [
-              {
-                key: 'memory-utilization',
-                title: 'Memory utilization by node',
-                tooltip:
-                  'Memory working set as a share of each node’s allocatable memory',
-                format: 'percent' as const,
-                fields: ['memory', 'memoryAllocatable'] as UsageField[],
-                series: (m: ClusterUsageMetricsFragment) =>
-                  top(
-                    ratioByGroup(m.memory, m.memoryAllocatable, grouping),
-                    false
-                  ),
-              },
-            ]
-          : []),
+        ratioGraph('memory', 'Memory', 'Memory working set'),
         perGroup('memoryRequests', {
           key: 'memory-requests',
           title: `Memory requests by ${label} (bytes)`,
@@ -488,6 +516,16 @@ function groupedSections(
       key: 'storage',
       title: 'Storage',
       graphs: [
+        perGroup(
+          'volumeFullness',
+          {
+            key: 'volume-fullness',
+            title: `Fullest persistent volume by ${label}`,
+            tooltip: `Used share of capacity for the fullest persistent volume in each ${label}`,
+            format: 'percent',
+          },
+          { additive: false }
+        ),
         perGroup('volumeUsage', {
           key: 'volumes',
           title: `Persistent volume usage by ${label} (bytes)`,
@@ -500,18 +538,14 @@ function groupedSections(
           tooltip: `container_fs_usage_bytes summed per ${label}`,
           format: 'memory',
         }),
-        perGroup('fsReads', {
-          key: 'fs-reads',
-          title: `Filesystem reads by ${label}`,
-          tooltip: `container_fs_reads_bytes_total rate per ${label}`,
+        {
+          key: 'fs-io',
+          title: `Filesystem I/O by ${label}`,
+          tooltip: `container_fs_reads_bytes_total and container_fs_writes_bytes_total rates combined per ${label}`,
           format: 'bytesRate',
-        }),
-        perGroup('fsWrites', {
-          key: 'fs-writes',
-          title: `Filesystem writes by ${label}`,
-          tooltip: `container_fs_writes_bytes_total rate per ${label}`,
-          format: 'bytesRate',
-        }),
+          fields: ['fsReads', 'fsWrites'],
+          series: (m) => top(sumByGroup(grouping, m.fsReads, m.fsWrites)),
+        },
       ],
     },
     {
@@ -561,9 +595,10 @@ export function clusterMetricSections(
 }
 
 const SECTION_DESCRIPTIONS: Record<string, string> = {
-  cpu: 'Usage, reservations, and throttling',
-  memory: 'Working set, reservations, and OOM kills',
+  cpu: 'Usage, reservations, efficiency, and throttling',
+  memory: 'Working set, reservations, efficiency, and OOM kills',
   network: 'Pod throughput and dropped packets',
-  storage: 'Persistent volumes, ephemeral storage, and filesystem I/O',
+  storage:
+    'Volume fullness, persistent and ephemeral usage, and filesystem I/O',
   workloads: 'Pod scheduling and container restarts',
 }
