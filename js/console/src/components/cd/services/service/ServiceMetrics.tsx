@@ -1,5 +1,4 @@
 import {
-  Card,
   EmptyState,
   Flex,
   HeatMapIcon,
@@ -7,12 +6,19 @@ import {
   Select,
   TimeSeriesIcon,
 } from '@pluralsh/design-system'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
-import RangePicker from 'components/utils/RangePicker'
+import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
+import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
+import {
+  useRangeQueryData,
+  useTimeRange,
+} from 'components/utils/timerange/useTimeRange'
 import {
   HeatMapFlavor,
   useServiceHeatMapQuery,
@@ -29,9 +35,7 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
 import {
   ResourceMetricsGraphs,
   hasResourceMetrics,
@@ -149,7 +153,7 @@ function ServiceMetricsHeatmap() {
         </Flex>
       </Flex>
       {!(heatMapData || isLoading) ? (
-        <Card css={{ padding: spacing.xlarge, flex: 1 }}>
+        <MetricsCard css={{ padding: spacing.xlarge, flex: 1 }}>
           {heatMapError ? (
             <GqlError
               css={{ width: '100%' }}
@@ -158,10 +162,10 @@ function ServiceMetricsHeatmap() {
           ) : (
             <EmptyState message="Utilization heatmaps not available." />
           )}
-        </Card>
+        </MetricsCard>
       ) : (
         <>
-          <Card
+          <MetricsCard
             header={{
               content: `memory utilization by ${heatMapFlavor}`,
               outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
@@ -181,8 +185,8 @@ function ServiceMetricsHeatmap() {
                 utilizationType="memory"
               />
             )}
-          </Card>
-          <Card
+          </MetricsCard>
+          <MetricsCard
             header={{
               content: `cpu utilization by ${heatMapFlavor}`,
               outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
@@ -202,7 +206,7 @@ function ServiceMetricsHeatmap() {
                 utilizationType="cpu"
               />
             )}
-          </Card>
+          </MetricsCard>
         </>
       )}
     </Flex>
@@ -212,22 +216,24 @@ function ServiceMetricsHeatmap() {
 function ServiceMetricsTimeseries() {
   const theme = useTheme()
   const { serviceId } = useParams()
-  const [duration, setDuration] = useState<any>(DURATIONS[0])
-  const start = useMetricsQueryStart(duration.offset)
+  const timeRange = useTimeRange()
   const {
-    data,
+    data: currentData,
+    previousData,
     loading,
     error: metricsError,
   } = useServiceMetricsQuery({
     variables: {
       id: serviceId ?? '',
-      step: getMetricQueryStep(duration.offset),
-      start,
+      ...metricsQueryWindow(timeRange.timeWindow),
     },
     skip: !serviceId,
-    pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
   })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
 
   const {
     cpu,
@@ -274,7 +280,11 @@ function ServiceMetricsTimeseries() {
     }
   }, [data])
 
-  let content = <EmptyState message="No metrics available" />
+  let content = (
+    <MetricsCard css={{ padding: theme.spacing.medium }}>
+      <EmptyState message="No metrics available" />
+    </MetricsCard>
+  )
 
   if (
     hasResourceMetrics({
@@ -306,6 +316,8 @@ function ServiceMetricsTimeseries() {
         podMemRequests={podMemRequests}
         podCpuLimits={podCpuLimits}
         podMemLimits={podMemLimits}
+        timeWindow={timeRange.timeWindow}
+        onRangeSelect={timeRange.selectWindow}
       />
     )
   }
@@ -313,27 +325,24 @@ function ServiceMetricsTimeseries() {
   return (
     <Flex
       direction="column"
-      gap="small"
+      gap="medium"
       height="100%"
       width="100%"
-      overflow="auto"
+      minHeight={0}
     >
-      <RangePicker
-        duration={duration}
-        setDuration={setDuration}
-        position="sticky"
-        top={0}
-      />
-      {!data && loading ? (
-        <RectangleSkeleton
-          $height="100%"
-          $width="100%"
-        />
-      ) : metricsError ? (
-        <GqlError error={metricsError} />
-      ) : (
-        <Card css={{ padding: theme.spacing.medium }}>{content}</Card>
-      )}
+      <MetricsTimeRangeControl timeRange={timeRange} />
+      <MetricsScrollSC>
+        {!data && loading ? (
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
+        ) : metricsError ? (
+          <GqlError error={metricsError} />
+        ) : (
+          content
+        )}
+      </MetricsScrollSC>
     </Flex>
   )
 }

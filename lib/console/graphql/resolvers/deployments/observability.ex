@@ -89,6 +89,19 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     end
   end
 
+  def pod_metrics(%{metadata: %{namespace: ns, name: name}}, args, %{context: %{cluster: %Cluster{} = cluster}}) do
+    {start, stop, step} = prom_args(args)
+    Observability.query({:pod, cluster, ns, name}, start, stop, step)
+  end
+  def pod_metrics(_, _, _), do: {:error, "pod metrics require a cluster or service scoped pod query"}
+
+  # each metric is its own prometheus range query, so only run the ones actually selected
+  def cluster_usage_metrics(%Cluster{} = cluster, args, info) do
+    {start, stop, step} = prom_args(args)
+    keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
+    Observability.query({:usage, cluster, args[:group_by] || :cluster, keys}, start, stop, step)
+  end
+
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
     Observability.query({cluster, node}, start, stop, step)

@@ -1,8 +1,6 @@
-import { ResponsiveLine } from '@nivo/line'
 import { EmptyState } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { SliceTooltip } from 'components/utils/ChartTooltip'
-import { dateFormat, useGraphTheme } from 'components/utils/Graph'
+import { Graph } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   InputMaybe,
@@ -10,10 +8,9 @@ import {
   useLogAggregationBucketsQuery,
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useDebounce } from '@react-hooks-library/core'
-import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import type { ServiceMonitorAttributes } from './ServiceMonitorCreateOrEdit'
@@ -28,7 +25,6 @@ export function ServiceMonitorPreview({
   const {
     log: { query, bucketSize, duration, facets, operator },
   } = debouncedQ
-  const graphTheme = useGraphTheme()
   const { colors } = useTheme()
 
   const { data, loading, error } = useLogAggregationBucketsQuery({
@@ -63,31 +59,20 @@ export function ServiceMonitorPreview({
     [buckets]
   )
 
-  const thresholdLayer = useCallback(
-    ({ yScale }: { yScale: (v: number) => number }) => {
-      const y = yScale(threshold.value)
-      const x = -40
-      return (
-        <text
-          y={y}
-          textAnchor="end"
-          css={{ fill: colors['border-danger'], fontSize: 11 }}
-        >
-          <tspan
-            x={x}
-            dy="-0.5em"
-          >
-            Threshold
-          </tspan>
-          <tspan
-            x={x}
-            dy="1em"
-          >
-            ({threshold.aggregate} = {threshold.value})
-          </tspan>
-        </text>
-      )
-    },
+  const markers = useMemo(
+    () => [
+      {
+        axis: 'y' as const,
+        value: threshold.value,
+        legend: `threshold (${threshold.aggregate} = ${threshold.value})`,
+        legendPosition: 'top-left' as const,
+        lineStyle: {
+          stroke: colors['border-danger'],
+          strokeDasharray: '6 4',
+        },
+        textStyle: { fill: colors['border-danger'], fontSize: 11 },
+      },
+    ],
     [colors, threshold.aggregate, threshold.value]
   )
 
@@ -110,43 +95,11 @@ export function ServiceMonitorPreview({
 
   return (
     <GraphWrapperSC>
-      <ResponsiveLine
-        theme={graphTheme}
+      <Graph
         data={graphData}
-        tooltip={SliceTooltip}
-        colors={COLORS}
-        layers={[
-          'grid',
-          'axes',
-          'areas',
-          'crosshair',
-          'lines',
-          'markers',
-          thresholdLayer,
-          'points',
-          'slices',
-          'mesh',
-          'legends',
-        ]}
-        margin={{ top: 20, right: 20, bottom: 60, left: 120 }}
-        xScale={{ type: 'time', format: 'native' }}
-        yScale={{ type: 'linear', min: 0, max: 'auto' }}
-        xFormat={dateFormat}
-        lineWidth={1}
-        enablePoints={false}
-        useMesh
-        axisBottom={{ format: '%m/%d %H:%M', tickRotation: 20 }}
-        axisLeft={{ legend: 'log count', legendOffset: -42 }}
-        markers={[
-          {
-            axis: 'y',
-            value: threshold.value,
-            lineStyle: {
-              stroke: colors['border-danger'],
-              strokeDasharray: '6 4',
-            },
-          },
-        ]}
+        yFormat={(v: number) => v.toLocaleString()}
+        yTickBase="integer"
+        markers={markers}
       />
     </GraphWrapperSC>
   )

@@ -659,7 +659,8 @@ defmodule Console.Deployments.Agents do
         type: provider,
         base_url: conn.base_url,
         username: username || "apikey",
-        token: conn.token
+        token: conn.token,
+        proxy: conn.proxy
       })
     else
       nil -> {:error, "no scm connection found"}

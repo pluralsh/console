@@ -15,6 +15,11 @@ fragment AiSettings on AiSettings {
   anthropic {
     model
     toolModel
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   openai {
     baseUrl
@@ -22,6 +27,11 @@ fragment AiSettings on AiSettings {
     toolModel
     embeddingModel
     method
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   openaiCompatible {
     baseUrl
@@ -29,6 +39,11 @@ fragment AiSettings on AiSettings {
     toolModel
     embeddingModel
     method
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   xai {
     baseUrl
@@ -36,6 +51,11 @@ fragment AiSettings on AiSettings {
     toolModel
     embeddingModel
     method
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   azure {
     apiVersion
@@ -43,11 +63,21 @@ fragment AiSettings on AiSettings {
     model
     embeddingModel
     toolModel
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   ollama {
     model
     toolModel
     url
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   vertex {
     model
@@ -56,6 +86,11 @@ fragment AiSettings on AiSettings {
     project
     location
     endpoint
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   bedrock {
     modelId
@@ -68,6 +103,11 @@ fragment AiSettings on AiSettings {
     endpoint
     accessKeyId
     region
+    proxy {
+      enabled
+      url
+      noproxy
+    }
   }
   enabled
   toolsEnabled

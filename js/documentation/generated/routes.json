@@ -109,11 +109,11 @@
   },
   "/api-reference/kubernetes/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-09-16T01:37:41.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/api-reference/kubernetes/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-09-16T14:43:14.000Z"
+    "lastmod": "2026-09-22T21:32:31.000Z"
   },
   "/api-reference/graphql": {
     "relPath": "/api-reference/graphql.md",
@@ -165,7 +165,7 @@
   },
   "/plural-features/continuous-deployment/helm-service": {
     "relPath": "/plural-features/continuous-deployment/helm-service.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/plural-features/continuous-deployment/multi-source-services": {
     "relPath": "/plural-features/continuous-deployment/multi-source-services.md",
@@ -173,19 +173,23 @@
   },
   "/plural-features/continuous-deployment/resource-application-logic": {
     "relPath": "/plural-features/continuous-deployment/resource-application-logic.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-30T06:46:41.000Z"
   },
   "/plural-features/continuous-deployment/service-templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-09-21T14:40:59.656Z"
+    "lastmod": "2026-10-03T00:06:53.849Z"
   },
   "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters": {
     "relPath": "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters.md",
-    "lastmod": "2026-09-21T14:40:59.681Z"
+    "lastmod": "2026-10-03T00:06:53.876Z"
   },
   "/plural-features/continuous-deployment/lua": {
     "relPath": "/plural-features/continuous-deployment/lua.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
+  },
+  "/plural-features/continuous-deployment/python": {
+    "relPath": "/plural-features/continuous-deployment/python.md",
+    "lastmod": "2026-10-03T00:06:53.914Z"
   },
   "/plural-features/continuous-deployment/global-service": {
     "relPath": "/plural-features/continuous-deployment/global-service.md",
@@ -341,15 +345,15 @@
   },
   "/plural-features/plural-ai/ai-agent": {
     "relPath": "/plural-features/plural-ai/ai-agent/index.md",
-    "lastmod": "2026-09-16T14:09:30.000Z"
+    "lastmod": "2026-09-21T17:36:49.000Z"
   },
   "/plural-features/plural-ai/ai-agent/configure-agent": {
     "relPath": "/plural-features/plural-ai/ai-agent/configure-agent.md",
-    "lastmod": "2026-09-16T14:09:30.000Z"
+    "lastmod": "2026-09-22T02:47:25.000Z"
   },
   "/plural-features/plural-ai/ai-agent/repository-prebake": {
     "relPath": "/plural-features/plural-ai/ai-agent/repository-prebake.md",
-    "lastmod": "2026-09-18T13:20:37.000Z"
+    "lastmod": "2026-09-22T21:32:31.000Z"
   },
   "/plural-features/plural-ai/ai-agent/remote-browser": {
     "relPath": "/plural-features/plural-ai/ai-agent/remote-browser.md",
@@ -593,7 +597,7 @@
   },
   "/deployments/operator/helm-service": {
     "relPath": "/plural-features/continuous-deployment/helm-service.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/deployments/operator/global-service": {
     "relPath": "/plural-features/continuous-deployment/global-service.md",
@@ -725,10 +729,10 @@
   },
   "/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-09-16T01:37:41.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-09-16T14:43:14.000Z"
+    "lastmod": "2026-09-22T21:32:31.000Z"
   }
 }

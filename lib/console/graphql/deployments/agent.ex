@@ -262,7 +262,6 @@ defmodule Console.GraphQl.Deployments.Agent do
     @desc "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
     field :pod, :pod do
       resolve fn run, _, _ -> Agents.run_pod(run) end
-      middleware ErrorHandler
     end
 
     field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
@@ -296,6 +295,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :base_url, :string, description: "the base url of the scm connection"
     field :username, non_null(:string)
     field :token,    non_null(:string)
+    field :proxy,    :http_proxy_configuration, description: "the proxy to use for git and SCM API requests"
 
     field :exa_key, :string, description: "the exa key for the agent", resolve: fn
       _, _, _ -> {:ok, Console.conf(:exa_api_key)}

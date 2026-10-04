@@ -179,6 +179,13 @@ type DashboardGraph struct {
 	// +kubebuilder:validation:MaxLength=16
 	Type console.DashboardGraphType `json:"type"`
 
+	// Unit of the plotted values, used to format axes and tooltips. TIME is in seconds,
+	// CPU is in cores, and PERCENT is on a 0-100 scale.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=NONE;BYTES;TIME;CPU;PERCENT
+	// +kubebuilder:validation:Type:=string
+	Unit *console.DashboardGraphUnit `json:"unit,omitempty"`
+
 	// SectionID is the identifier of the SECTION graph containing this graph. Sections cannot be nested.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
@@ -214,6 +221,7 @@ func (in *DashboardGraph) Attributes() *console.DashboardGraphAttributes {
 		Title:       in.Title,
 		Description: in.Description,
 		Type:        in.Type,
+		Unit:        in.Unit,
 		SectionID:   in.SectionID,
 		Markdown:    in.Markdown,
 		Options:     options,

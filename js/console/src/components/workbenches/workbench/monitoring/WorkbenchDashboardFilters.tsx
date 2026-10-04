@@ -106,7 +106,11 @@ function DashboardInputControl({
   onReadyChange: (name: string, ready: boolean) => void
 }) {
   const hasDatasource = !!input.datasource
-  const { data, loading } = useWorkbenchDashboardInputQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+  } = useWorkbenchDashboardInputQuery({
     variables: {
       id: dashboardId,
       identifier: input.name,
@@ -116,6 +120,7 @@ function DashboardInputControl({
     skip: !hasDatasource,
     fetchPolicy: 'cache-and-network',
   })
+  const data = currentData ?? previousData
   const dynamicOptions =
     data?.workbenchDashboard?.input?.filter(isNonNullable) ?? []
   const staticOptions = input.options?.filter(isNonNullable) ?? []
@@ -135,14 +140,18 @@ function DashboardInputControl({
         ? BOOLEAN_OPTIONS.includes(value)
         : options.includes(value)))
   const firstOption = booleanInput ? BOOLEAN_OPTIONS[0] : options[0]
-  const ready =
-    (!hasDatasource || !loading) &&
-    (!optionInput || hasValidValue) &&
-    (!input.required || !!value)
+  const ready = dashboardInputIsReady({
+    hasDatasource,
+    hasData: !!data,
+    loading,
+    optionInput,
+    hasValidValue,
+    required: !!input.required,
+    hasValue: !!value,
+  })
 
   useEffect(() => {
     onReadyChange(input.name, ready)
-    return () => onReadyChange(input.name, false)
   }, [input.name, onReadyChange, ready])
 
   useEffect(() => {
@@ -236,5 +245,29 @@ function DashboardInputControl({
         />
       ))}
     </Select>
+  )
+}
+
+export function dashboardInputIsReady({
+  hasDatasource,
+  hasData,
+  loading,
+  optionInput,
+  hasValidValue,
+  required,
+  hasValue,
+}: {
+  hasDatasource: boolean
+  hasData: boolean
+  loading: boolean
+  optionInput: boolean
+  hasValidValue: boolean
+  required: boolean
+  hasValue: boolean
+}) {
+  return (
+    (!hasDatasource || hasData || !loading) &&
+    (!optionInput || hasValidValue) &&
+    (!required || hasValue)
   )
 }

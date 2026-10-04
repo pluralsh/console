@@ -130,6 +130,8 @@ export function buildClient(
     cache: new InMemoryCache({
       possibleTypes: fragments.possibleTypes,
       typePolicies: {
+        // un-normalized and fetched piecemeal by each cluster metrics graph
+        ClusterUsageMetrics: { merge: true },
         Command: {
           fields: {
             exitCode: {

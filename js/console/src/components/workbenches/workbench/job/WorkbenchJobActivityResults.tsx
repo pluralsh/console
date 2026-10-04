@@ -9,7 +9,6 @@ import {
   DiffViewer,
   ExpandIcon,
   Flex,
-  FlexProps,
   IconFrame,
   IconProps,
   Modal,
@@ -28,6 +27,7 @@ import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
+import { GraphLegend } from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
@@ -55,6 +55,7 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
+import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
 import {
   getMetricSeries,
   metricSeriesId,
@@ -185,28 +186,30 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      {timestamp && (
-        <CaptionP $color="text-long-form">
-          {formatDateTime(timestamp, 'h:mmA')}
-        </CaptionP>
-      )}
-      <IconFrame
-        clickable
-        as="div"
-        tooltip="Copy to clipboard"
-        type="tertiary"
-        onClick={(e) => {
-          e.stopPropagation()
-          handleCopy()
-        }}
-        icon={
-          copied ? (
-            <CheckIcon color="icon-success" />
-          ) : (
-            <CopyIcon color="icon-xlight" />
-          )
-        }
-      />
+      <div>
+        {timestamp && (
+          <CaptionP $color="text-long-form">
+            {formatDateTime(timestamp, 'h:mmA')}
+          </CaptionP>
+        )}
+        <IconFrame
+          clickable
+          as="div"
+          tooltip="Copy to clipboard"
+          type="tertiary"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleCopy()
+          }}
+          icon={
+            copied ? (
+              <CheckIcon color="icon-success" />
+            ) : (
+              <CopyIcon color="icon-xlight" />
+            )
+          }
+        />
+      </div>
     </PromptActionsSC>
   )
 }
@@ -320,6 +323,13 @@ export function JobActivityLogsFromTool({
 }
 
 /** Renders pre-fetched metric points (e.g. thought tool attributes). */
+export const METRICS_CHART_MARGIN = {
+  top: 10,
+  right: 25,
+  bottom: 30,
+  left: 30,
+} as const
+
 export function JobActivityMetricsChart({
   metrics,
   lineProps,
@@ -346,6 +356,16 @@ export function JobActivityMetricsChart({
   const graphData = useMemo(() => {
     return getMetricSeries(metrics)
   }, [metrics])
+  const leftMargin = useMemo(() => {
+    let min = Infinity
+    let max = -Infinity
+    for (const { value } of metrics) {
+      if (typeof value !== 'number') continue
+      if (value < min) min = value
+      if (value > max) max = value
+    }
+    return yAxisWidth(min, max, null)
+  }, [metrics])
 
   if (isEmpty(metrics)) return null
 
@@ -353,13 +373,16 @@ export function JobActivityMetricsChart({
     theme: graphTheme,
     data: graphData,
     colors: COLORS,
-    margin: { top: 10, right: 25, bottom: 30, left: 30 } as const,
+    margin: { ...METRICS_CHART_MARGIN, left: leftMargin, right: 32 },
     xScale: { type: 'time' as const, format: 'native' as const },
     yScale: { type: 'linear' as const },
     xFormat: dateFormat,
     lineWidth: 1,
     enablePoints: false,
-    axisLeft: { tickValues: 5 },
+    axisLeft: {
+      tickValues: 5,
+      format: (value: number) => formatUnitValue(value, null),
+    },
     axisBottom: { format: '%H:%M:%S', tickValues: 5 },
     tooltip: SliceTooltip,
   }
@@ -748,59 +771,29 @@ export function JobActivityTraces({
 export function WorkbenchJobMetricsLegend({
   series,
   maxHeight,
-  compact = false,
   selectedId,
   onSelect,
-  ...props
+  paddingLeft,
 }: {
   series: MetricSeries[]
   maxHeight?: number
-  compact?: boolean
   selectedId?: string | null
   onSelect?: (id: string) => void
-} & FlexProps) {
-  if (isEmpty(series)) return null
-
+  paddingLeft?: number
+}) {
   return (
-    <Flex
-      direction="row"
-      wrap="wrap"
-      gap={compact ? 'xsmall' : 'small'}
-      align="center"
-      css={
-        maxHeight != null
-          ? {
-              alignContent: 'flex-start',
-              maxHeight,
-              overflowY: 'auto',
-            }
-          : undefined
-      }
-      {...props}
-    >
-      {series.map(({ id, label }, i) => (
-        <LegendItemSC
-          key={id}
-          type="button"
-          disabled={!onSelect}
-          aria-pressed={onSelect ? selectedId === id : undefined}
-          onClick={() => onSelect?.(id)}
-          $compact={compact}
-          $interactive={!!onSelect}
-          $dimmed={!!selectedId && selectedId !== id}
-        >
-          <MetricsLegendSwatchSC
-            $color={COLORS[i % COLORS.length]}
-            $compact={compact}
-          />
-          {compact ? (
-            <CompactLegendLabelSC>{label}</CompactLegendLabelSC>
-          ) : (
-            <Body2P $color="text-light">{label}</Body2P>
-          )}
-        </LegendItemSC>
-      ))}
-    </Flex>
+    <GraphLegend
+      items={series.map(({ id, label, shortLabel }, i) => ({
+        id,
+        label: shortLabel,
+        title: label,
+        color: COLORS[i % COLORS.length],
+      }))}
+      selectedId={selectedId}
+      onSelect={onSelect}
+      maxHeight={maxHeight}
+      style={{ paddingLeft }}
+    />
   )
 }
 
@@ -947,43 +940,6 @@ const MetricsRangeButtonSC = styled.button<{ $active: boolean }>(
   })
 )
 
-const LegendItemSC = styled.button<{
-  $compact: boolean
-  $interactive: boolean
-  $dimmed: boolean
-}>(({ theme, $compact, $interactive, $dimmed }) => ({
-  ...theme.partials.reset.button,
-  alignItems: 'center',
-  borderRadius: theme.borderRadiuses.medium,
-  color: theme.colors['text-light'],
-  cursor: $interactive ? 'pointer' : 'default',
-  display: 'flex',
-  flex: '0 1 auto',
-  gap: $compact ? 4 : theme.spacing.xsmall,
-  minWidth: 0,
-  opacity: $dimmed ? 0.4 : 1,
-  padding: $compact ? 2 : 0,
-  textAlign: 'left',
-  '&:hover': $interactive
-    ? {
-        backgroundColor: theme.colors['fill-one-hover'],
-      }
-    : undefined,
-  '&:focus-visible': $interactive
-    ? {
-        outline: `1px solid ${theme.colors['border-outline-focused']}`,
-        outlineOffset: 1,
-      }
-    : undefined,
-}))
-
-const CompactLegendLabelSC = styled.span(({ theme }) => ({
-  color: theme.colors['text-light'],
-  fontSize: 11,
-  lineHeight: '14px',
-  overflowWrap: 'anywhere',
-}))
-
 const CanvasLogPanelSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],
   borderRadius: theme.borderRadiuses.medium,
@@ -996,17 +952,6 @@ const CanvasLogPanelSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
-const MetricsLegendSwatchSC = styled.div<{
-  $color: string
-  $compact?: boolean
-}>(({ $color, $compact }) => ({
-  width: $compact ? 8 : 12,
-  height: $compact ? 8 : 12,
-  borderRadius: 2,
-  flexShrink: 0,
-  background: $color,
-}))
-
 const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
   ({ theme, $fullWidth }) => ({
     display: 'flex',
@@ -1014,21 +959,27 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
     marginTop: theme.spacing.small,
+    marginBottom: theme.spacing.xsmall,
   })
 )
 
-// Always takes its height so hovering doesn't shift the transcript. The row is
-// the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
-// below the card.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: theme.spacing.xxsmall,
+  display: 'grid',
+  gridTemplateRows: $show ? '1fr' : '0fr',
+  justifyItems: 'end',
   width: '100%',
   opacity: $show ? 1 : 0,
-  transition: 'opacity 0.15s ease',
+  transition: 'grid-template-rows 0.25s ease, opacity 0.25s ease',
   pointerEvents: $show ? 'auto' : 'none',
+  '> div': {
+    overflow: 'hidden',
+    minHeight: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: theme.spacing.xxsmall,
+    paddingTop: 6,
+  },
 }))
 
 const PromptCardSC = styled(Card)<{

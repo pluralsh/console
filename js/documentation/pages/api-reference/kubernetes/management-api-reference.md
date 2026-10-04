@@ -78,6 +78,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
@@ -364,6 +365,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is your Azure OpenAI endpoint,<br />should be formatted like: https://\{endpoint\}/openai/deployments/\{deployment-id\}" |  | Required: \{\} <br /> |
 | `apiVersion` _string_ | The azure openai Data plane - inference api version to use,<br />defaults to 2024-10-01-preview or the latest available |  | Optional: \{\} <br /> |
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
@@ -404,6 +406,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `modelId` _string_ | ModelID is the primary AWS Bedrock model or inference profile identifier.<br />Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,<br />global.anthropic.claude-haiku-4-5-20251001-v1:0). |  | Optional: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId is the Bedrock model or inference profile for tool calling. Same ID formats as modelId. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel is the Bedrock model or inference profile for embeddings. Same ID formats as modelId. |  | Optional: \{\} <br /> |
@@ -1512,6 +1515,7 @@ _Appears in:_
 | `title` _string_ | Title is the graph title. |  | Optional: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description is an optional graph description. |  | Optional: \{\} <br />Type: string <br /> |
 | `type` _[DashboardGraphType](#dashboardgraphtype)_ | Type is the graph visualization type. |  | Enum: [TIMESERIES GAUGE LOGS MARKDOWN TABLE STAT BAR PIE HEATMAP TRACES SECTION] <br />MaxLength: 16 <br />Required: \{\} <br />Type: string <br /> |
+| `unit` _[DashboardGraphUnit](#dashboardgraphunit)_ | Unit of the plotted values, used to format axes and tooltips. TIME is in seconds,<br />CPU is in cores, and PERCENT is on a 0-100 scale. |  | Enum: [NONE BYTES TIME CPU PERCENT] <br />Optional: \{\} <br />Type: string <br /> |
 | `sectionId` _string_ | SectionID is the identifier of the SECTION graph containing this graph. Sections cannot be nested. |  | MaxLength: 128 <br />Optional: \{\} <br />Type: string <br /> |
 | `markdown` _string_ | Markdown is the content for MARKDOWN graphs. |  | Optional: \{\} <br />Type: string <br /> |
 | `options` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Options are visualization-specific display options. Sections may set collapsed. |  | Optional: \{\} <br /> |
@@ -1687,6 +1691,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `agentHelmValues` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | AgentHelmValues custom helm values to apply<br />to all agents (useful for things like adding<br />customary annotations/labels) |  | Optional: \{\} <br /> |
 | `agentHelmValuesTemplateable` _boolean_ | AgentHelmValuesTemplateable indicates whether to render<br />agent helm values as a template. |  | Optional: \{\} <br /> |
+| `agentHelmValuesTemplate` _string_ | AgentHelmValuesTemplate is a raw string template of custom helm values to<br />apply to all agents. Unlike AgentHelmValues it is not parsed as YAML by the<br />operator, so it may contain template expressions that would not be valid YAML<br />on their own (for example, unquoted Liquid tags).<br />When set to a non-empty string, it takes precedence over AgentHelmValues,<br />which is ignored, and AgentHelmValuesTemplateable is always treated as true. |  | Optional: \{\} <br /> |
 | `managementRepo` _string_ | ManagementRepo is the root repo for setting up<br />your infrastructure with Plural. Usually this<br />will be your `plural up repo` |  | Optional: \{\} <br /> |
 | `stacks` _[StackSettings](#stacksettings)_ | Stacks global configuration for stack execution. |  | Optional: \{\} <br /> |
 | `bindings` _[DeploymentSettingsBindings](#deploymentsettingsbindings)_ | Bindings global configuration for access control. |  | Optional: \{\} <br /> |
@@ -2182,6 +2187,7 @@ _Appears in:_
 _Appears in:_
 - [DeploymentSettingsSpec](#deploymentsettingsspec)
 - [LoggingSettings](#loggingsettings)
+- [LokiConnection](#lokiconnection)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -2405,12 +2411,19 @@ _Appears in:_
 
 
 _Appears in:_
+- [AIProviderSettings](#aiprovidersettings)
+- [AzureOpenAISettings](#azureopenaisettings)
+- [BedrockSettings](#bedrocksettings)
 - [HelmRepositoryAuth](#helmrepositoryauth)
+- [OllamaSettings](#ollamasettings)
+- [OpenAISettings](#openaisettings)
 - [PrAutomationSpec](#prautomationspec)
 - [ScmConnectionSpec](#scmconnectionspec)
+- [VertexSettings](#vertexsettings)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled controls whether this proxy is used. It defaults to true. | true | Optional: \{\} <br /> |
 | `url` _string_ | The url of your HTTP proxy. |  | Required: \{\} <br /> |
 | `noproxy` _string_ | The comma-separated list of hosts that should not be proxied, will behave equivalently to a NOPROXY env var. |  | Optional: \{\} <br /> |
 
@@ -2520,10 +2533,32 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled defines whether to enable the logging integration or not. |  | Optional: \{\} <br /> |
-| `driver` _[LogDriver](#logdriver)_ | Driver is the type of log aggregation solution you wish to use. | VICTORIA | Enum: [VICTORIA ELASTIC OPENSEARCH] <br />Optional: \{\} <br /> |
+| `driver` _[LogDriver](#logdriver)_ | Driver is the type of log aggregation solution you wish to use. | VICTORIA | Enum: [VICTORIA ELASTIC OPENSEARCH LOKI] <br />Optional: \{\} <br /> |
 | `victoria` _[HTTPConnection](#httpconnection)_ | Victoria configures a connection to VictoriaMetrics |  | Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnection](#elasticsearchconnection)_ | Elastic configures a connection to elasticsearch |  | Optional: \{\} <br /> |
 | `opensearch` _[OpensearchConnection](#opensearchconnection)_ | Opensearch configures a connection to opensearch |  | Optional: \{\} <br /> |
+| `loki` _[LokiConnection](#lokiconnection)_ | Loki configures a connection to grafana loki |  | Optional: \{\} <br /> |
+
+
+#### LokiConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [LoggingSettings](#loggingsettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | Host is the host to connect to. |  | Required: \{\} <br /> |
+| `user` _string_ | User to connect with basic auth. |  | Optional: \{\} <br /> |
+| `password` _string_ | Password to connect w/ for basic auth. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef is a reference to a secret containing the password to connect with basic auth. |  | Optional: \{\} <br /> |
+| `clusterLabel` _string_ | ClusterLabel is the stream label identifying the cluster a log came from. Defaults to "cluster". |  | Optional: \{\} <br />Pattern: `^[a-zA-Z_][a-zA-Z0-9_]*$` <br /> |
+| `namespaceLabel` _string_ | NamespaceLabel is the stream label identifying the namespace a log came from. Defaults to "namespace". |  | Optional: \{\} <br />Pattern: `^[a-zA-Z_][a-zA-Z0-9_]*$` <br /> |
 
 
 #### MCPServer
@@ -3559,6 +3594,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `url` _string_ | URL is the url this model is queryable on |  | Required: \{\} <br /> |
 | `model` _string_ | Model is the Ollama model to use when querying the /chat api |  | Required: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
@@ -3578,6 +3614,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
@@ -6044,6 +6081,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for this provider's API calls. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings.<br />This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.<br />Default is gemini-embedding-001. |  | Optional: \{\} <br /> |

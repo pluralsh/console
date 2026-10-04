@@ -119,6 +119,7 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for http proxy usage in connections to Git or SCM providers"
   input_object :http_proxy_attributes do
+    field :enabled, :boolean, description: "whether this proxy is enabled (defaults to true)"
     field :url,     non_null(:string)
     field :noproxy, :string
   end
@@ -955,6 +956,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for http proxy usage in connections to Git or SCM providers"
   object :http_proxy_configuration do
+    field :enabled, non_null(:boolean),
+      description: "whether this proxy is enabled",
+      resolve: fn proxy, _, _ -> {:ok, Map.get(proxy, :enabled) != false} end
     field :url,     non_null(:string)
     field :noproxy, :string
   end

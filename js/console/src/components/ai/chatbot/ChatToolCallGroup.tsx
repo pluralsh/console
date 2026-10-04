@@ -66,11 +66,12 @@ export function ChatToolCallGroup({
 }
 
 export function groupConsecutiveToolMessages(
-  messages: ChatFragment[]
+  messages: ChatFragment[],
+  isStandaloneTool: (message: ChatFragment) => boolean = () => false
 ): ChatDisplayItem[] {
   const result: ChatDisplayItem[] = []
   messages.forEach((msg) => {
-    if (msg.type !== ChatType.Tool) {
+    if (msg.type !== ChatType.Tool || isStandaloneTool(msg)) {
       result.push(msg)
       return
     }
