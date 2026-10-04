@@ -93,7 +93,13 @@ defmodule Console.MixProject do
       {:opentelemetry_phoenix, "~> 2.0"},
       {:opentelemetry_ecto, "~> 1.2"},
       {:opentelemetry_absinthe, "~> 2.4"},
-      {:opentelemetry_process_propagator, "~> 0.3"},
+      # hex 0.3.0 raises badarg on remote pids in $callers (fixed upstream in
+      # open-telemetry/opentelemetry-erlang-contrib#480, unreleased); swap back to hex once > 0.3.0 ships
+      {:opentelemetry_process_propagator,
+        github: "open-telemetry/opentelemetry-erlang-contrib",
+        sparse: "propagators/opentelemetry_process_propagator",
+        ref: "0dfdfa512b60e5a4569d90e263ba4f62fbaab9a0",
+        override: true},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
       {:anubis_mcp, "~> 1.14"},
@@ -170,7 +176,7 @@ defmodule Console.MixProject do
       {:scribe, "~> 0.11"},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.25"},
+      {:req_llm, "~> 1.26"},
       {:sweet_xml, ">= 0.0.0"},
       {:jaqex, "~> 0.1.3"},
       {:waffle, "~> 1.1", git: "https://github.com/jopedroliveira/waffle.git", tag: "v1.1.9-azure.3", override: true},

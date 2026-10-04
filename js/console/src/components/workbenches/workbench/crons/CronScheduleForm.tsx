@@ -348,7 +348,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                           placeholder={CRON_PLACEHOLDER}
                           css={{
                             color: theme.colors['code-block-purple'],
-                            fontFamily: theme.fontFamilies.mono,
+                            ...theme.partials.text.mono,
                             '&:focus-within': {
                               border: theme.borders['outline-focused'],
                               borderColor: hasCronError
@@ -359,7 +359,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                               minHeight: 54,
                               paddingLeft: 16,
                               paddingRight: 16,
-                              fontFamily: theme.fontFamilies.mono,
+                              ...theme.partials.text.mono,
                             },
                           }}
                         />

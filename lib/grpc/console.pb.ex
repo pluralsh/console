@@ -50,6 +50,19 @@ defmodule Plrl.AiConfig do
   field :xai, 8, type: Plrl.OpenAiConfig
 end
 
+defmodule Plrl.HttpProxyConfig do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "plrl.HttpProxyConfig",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :url, 1, type: :string
+  field :noProxy, 2, proto3_optional: true, type: :string
+  field :enabled, 3, proto3_optional: true, type: :bool
+end
+
 defmodule Plrl.OpenAiTokenExchange do
   @moduledoc false
 
@@ -80,6 +93,7 @@ defmodule Plrl.OpenAiConfig do
   field :proxyModels, 6, repeated: true, type: :string
   field :tokenExchange, 7, proto3_optional: true, type: Plrl.OpenAiTokenExchange
   field :method, 8, proto3_optional: true, type: Plrl.OpenAiMethod, enum: true
+  field :proxy, 9, proto3_optional: true, type: Plrl.HttpProxyConfig
 end
 
 defmodule Plrl.AnthropicConfig do
@@ -96,6 +110,7 @@ defmodule Plrl.AnthropicConfig do
   field :embeddingModel, 4, proto3_optional: true, type: :string
   field :toolModel, 5, proto3_optional: true, type: :string
   field :proxyModels, 6, repeated: true, type: :string
+  field :proxy, 7, proto3_optional: true, type: Plrl.HttpProxyConfig
 end
 
 defmodule Plrl.VertexAiConfig do
@@ -115,6 +130,7 @@ defmodule Plrl.VertexAiConfig do
   field :project, 7, proto3_optional: true, type: :string
   field :location, 8, proto3_optional: true, type: :string
   field :proxyModels, 9, repeated: true, type: :string
+  field :proxy, 10, proto3_optional: true, type: Plrl.HttpProxyConfig
 end
 
 defmodule Plrl.BedrockModelSettings do
@@ -161,6 +177,7 @@ defmodule Plrl.BedrockConfig do
   field :deployments, 9, repeated: true, type: Plrl.BedrockConfig.DeploymentsEntry, map: true
   field :endpoint, 10, proto3_optional: true, type: Plrl.BedrockEndpoint, enum: true
   field :modelSettings, 11, repeated: true, type: Plrl.BedrockModelSettings
+  field :proxy, 12, proto3_optional: true, type: Plrl.HttpProxyConfig
 end
 
 defmodule Plrl.AzureOpenAiConfig.DeploymentsEntry do
@@ -192,6 +209,7 @@ defmodule Plrl.AzureOpenAiConfig do
   field :accessToken, 7, proto3_optional: true, type: :string
   field :proxyModels, 8, repeated: true, type: :string
   field :deployments, 9, repeated: true, type: Plrl.AzureOpenAiConfig.DeploymentsEntry, map: true
+  field :proxy, 10, proto3_optional: true, type: Plrl.HttpProxyConfig
 end
 
 defmodule Plrl.ProxyAuthenticationRequest do

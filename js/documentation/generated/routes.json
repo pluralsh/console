@@ -109,7 +109,7 @@
   },
   "/api-reference/kubernetes/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-09-24T09:02:22.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/api-reference/kubernetes/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
@@ -165,7 +165,7 @@
   },
   "/plural-features/continuous-deployment/helm-service": {
     "relPath": "/plural-features/continuous-deployment/helm-service.md",
-    "lastmod": "2026-09-22T14:32:01.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/plural-features/continuous-deployment/multi-source-services": {
     "relPath": "/plural-features/continuous-deployment/multi-source-services.md",
@@ -173,19 +173,23 @@
   },
   "/plural-features/continuous-deployment/resource-application-logic": {
     "relPath": "/plural-features/continuous-deployment/resource-application-logic.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-30T06:46:41.000Z"
   },
   "/plural-features/continuous-deployment/service-templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-09-25T14:50:30.095Z"
+    "lastmod": "2026-10-03T00:06:53.849Z"
   },
   "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters": {
     "relPath": "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters.md",
-    "lastmod": "2026-09-25T14:50:30.132Z"
+    "lastmod": "2026-10-03T00:06:53.876Z"
   },
   "/plural-features/continuous-deployment/lua": {
     "relPath": "/plural-features/continuous-deployment/lua.md",
-    "lastmod": "2026-09-22T14:32:01.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
+  },
+  "/plural-features/continuous-deployment/python": {
+    "relPath": "/plural-features/continuous-deployment/python.md",
+    "lastmod": "2026-10-03T00:06:53.914Z"
   },
   "/plural-features/continuous-deployment/global-service": {
     "relPath": "/plural-features/continuous-deployment/global-service.md",
@@ -797,7 +801,7 @@
   },
   "/deployments/operator/helm-service": {
     "relPath": "/plural-features/continuous-deployment/helm-service.md",
-    "lastmod": "2026-09-22T14:32:01.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/deployments/operator/global-service": {
     "relPath": "/plural-features/continuous-deployment/global-service.md",
@@ -929,7 +933,7 @@
   },
   "/management-api-reference": {
     "relPath": "/api-reference/kubernetes/management-api-reference.md",
-    "lastmod": "2026-09-24T09:02:22.000Z"
+    "lastmod": "2026-09-28T14:41:55.000Z"
   },
   "/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",

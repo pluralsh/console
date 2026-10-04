@@ -694,6 +694,165 @@ query ClusterMetrics(
   }
 }
 
+# every field is a separate prometheus range query, so callers opt into only what they render
+fragment ClusterUsageMetrics on ClusterUsageMetrics {
+  cpu @include(if: $cpu) {
+    ...MetricResponse
+  }
+  cpuRequests @include(if: $cpuRequests) {
+    ...MetricResponse
+  }
+  cpuLimits @include(if: $cpuLimits) {
+    ...MetricResponse
+  }
+  cpuAllocatable @include(if: $cpuAllocatable) {
+    ...MetricResponse
+  }
+  cpuThrottling @include(if: $cpuThrottling) {
+    ...MetricResponse
+  }
+  memory @include(if: $memory) {
+    ...MetricResponse
+  }
+  memoryRequests @include(if: $memoryRequests) {
+    ...MetricResponse
+  }
+  memoryLimits @include(if: $memoryLimits) {
+    ...MetricResponse
+  }
+  memoryAllocatable @include(if: $memoryAllocatable) {
+    ...MetricResponse
+  }
+  oomKills @include(if: $oomKills) {
+    ...MetricResponse
+  }
+  networkReceive @include(if: $networkReceive) {
+    ...MetricResponse
+  }
+  networkTransmit @include(if: $networkTransmit) {
+    ...MetricResponse
+  }
+  networkReceiveDropped @include(if: $networkReceiveDropped) {
+    ...MetricResponse
+  }
+  networkTransmitDropped @include(if: $networkTransmitDropped) {
+    ...MetricResponse
+  }
+  ephemeralStorage @include(if: $ephemeralStorage) {
+    ...MetricResponse
+  }
+  fsReads @include(if: $fsReads) {
+    ...MetricResponse
+  }
+  fsWrites @include(if: $fsWrites) {
+    ...MetricResponse
+  }
+  volumeUsage @include(if: $volumeUsage) {
+    ...MetricResponse
+  }
+  volumeCapacity @include(if: $volumeCapacity) {
+    ...MetricResponse
+  }
+  volumeFullness @include(if: $volumeFullness) {
+    ...MetricResponse
+  }
+  podsRunning @include(if: $podsRunning) {
+    ...MetricResponse
+  }
+  podsPending @include(if: $podsPending) {
+    ...MetricResponse
+  }
+  restarts @include(if: $restarts) {
+    ...MetricResponse
+  }
+}
+
+query ClusterUsageMetrics(
+  $clusterId: ID!
+  $groupBy: ClusterMetricsGrouping
+  $start: DateTime
+  $stop: DateTime
+  $step: String
+  $cpu: Boolean! = false
+  $cpuRequests: Boolean! = false
+  $cpuLimits: Boolean! = false
+  $cpuAllocatable: Boolean! = false
+  $cpuThrottling: Boolean! = false
+  $memory: Boolean! = false
+  $memoryRequests: Boolean! = false
+  $memoryLimits: Boolean! = false
+  $memoryAllocatable: Boolean! = false
+  $oomKills: Boolean! = false
+  $networkReceive: Boolean! = false
+  $networkTransmit: Boolean! = false
+  $networkReceiveDropped: Boolean! = false
+  $networkTransmitDropped: Boolean! = false
+  $ephemeralStorage: Boolean! = false
+  $fsReads: Boolean! = false
+  $fsWrites: Boolean! = false
+  $volumeUsage: Boolean! = false
+  $volumeCapacity: Boolean! = false
+  $volumeFullness: Boolean! = false
+  $podsRunning: Boolean! = false
+  $podsPending: Boolean! = false
+  $restarts: Boolean! = false
+) {
+  cluster(id: $clusterId) {
+    id
+    clusterUsageMetrics(
+      groupBy: $groupBy
+      start: $start
+      stop: $stop
+      step: $step
+    ) {
+      ...ClusterUsageMetrics
+    }
+  }
+}
+
+query ServiceUsageMetrics(
+  $serviceId: ID!
+  $groupBy: ServiceMetricsGrouping
+  $start: DateTime
+  $stop: DateTime
+  $step: String
+  $cpu: Boolean! = false
+  $cpuRequests: Boolean! = false
+  $cpuLimits: Boolean! = false
+  $cpuAllocatable: Boolean! = false
+  $cpuThrottling: Boolean! = false
+  $memory: Boolean! = false
+  $memoryRequests: Boolean! = false
+  $memoryLimits: Boolean! = false
+  $memoryAllocatable: Boolean! = false
+  $oomKills: Boolean! = false
+  $networkReceive: Boolean! = false
+  $networkTransmit: Boolean! = false
+  $networkReceiveDropped: Boolean! = false
+  $networkTransmitDropped: Boolean! = false
+  $ephemeralStorage: Boolean! = false
+  $fsReads: Boolean! = false
+  $fsWrites: Boolean! = false
+  $volumeUsage: Boolean! = false
+  $volumeCapacity: Boolean! = false
+  $volumeFullness: Boolean! = false
+  $podsRunning: Boolean! = false
+  $podsPending: Boolean! = false
+  $restarts: Boolean! = false
+) {
+  serviceDeployment(id: $serviceId) {
+    id
+    serviceUsageMetrics(
+      groupBy: $groupBy
+      start: $start
+      stop: $stop
+      step: $step
+    ) {
+      ...ClusterUsageMetrics
+    }
+  }
+}
+
 query ClusterNodeMetrics(
   $clusterId: ID!
   $node: String!

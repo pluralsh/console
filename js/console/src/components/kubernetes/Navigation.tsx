@@ -8,6 +8,8 @@ import {
   CONFIGURATION_REL_PATH,
   CUSTOM_RESOURCES_REL_PATH,
   getKubernetesAbsPath,
+  LOGS_REL_PATH,
+  METRICS_REL_PATH,
   NETWORK_REL_PATH,
   RBAC_REL_PATH,
   replaceKubernetesClusterId,
@@ -15,6 +17,10 @@ import {
   WORKLOADS_REL_PATH,
 } from '../../routes/kubernetesRoutesConsts'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
+import {
+  useLogsEnabled,
+  useMetricsEnabled,
+} from '../contexts/DeploymentSettingsContext'
 import ClusterSelector from '../cd/utils/ClusterSelector'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
@@ -27,25 +33,35 @@ export const NAMESPACE_PARAM = 'namespace'
 export const FILTER_PARAM = 'filter'
 export { LAST_SELECTED_CLUSTER_KEY } from './clusterSelection'
 
-const directory: Directory = [
-  { path: WORKLOADS_REL_PATH, label: 'Workloads' },
-  { path: NETWORK_REL_PATH, label: 'Network' },
-  { path: STORAGE_REL_PATH, label: 'Storage' },
-  { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
-  { path: RBAC_REL_PATH, label: 'RBAC' },
-  { path: CLUSTER_REL_PATH, label: 'Cluster' },
-  { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
-  { path: AUDIT_REL_PATH, label: 'Audit logs' },
-] as const
-
 export default function Navigation() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId = '' } = useParams()
+  const metricsEnabled = useMetricsEnabled()
+  const logsEnabled = useLogsEnabled()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [headerAction, setHeaderAction] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
+  const isObservabilityPath = [METRICS_REL_PATH, LOGS_REL_PATH].some((path) =>
+    pathname.startsWith(`${pathPrefix}/${path}`)
+  )
+
+  const directory: Directory = useMemo(
+    () => [
+      { path: WORKLOADS_REL_PATH, label: 'Workloads' },
+      { path: NETWORK_REL_PATH, label: 'Network' },
+      { path: STORAGE_REL_PATH, label: 'Storage' },
+      { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
+      { path: RBAC_REL_PATH, label: 'RBAC' },
+      { path: CLUSTER_REL_PATH, label: 'Cluster' },
+      { path: METRICS_REL_PATH, label: 'Metrics', enabled: metricsEnabled },
+      { path: LOGS_REL_PATH, label: 'Logs', enabled: logsEnabled },
+      { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
+      { path: AUDIT_REL_PATH, label: 'Audit logs' },
+    ],
+    [logsEnabled, metricsEnabled]
+  )
 
   const pageHeaderContext = useMemo(
     () => ({ setHeaderContent, setHeaderAction }),
@@ -97,7 +113,7 @@ export default function Navigation() {
           >
             <div css={{ flex: 1, overflow: 'hidden' }}>{headerContent}</div>
             <div>{headerAction}</div>
-            <DataSelectInputs />
+            {!isObservabilityPath && <DataSelectInputs />}
           </Flex>
         )}
         <PageHeaderContext.Provider value={pageHeaderContext}>

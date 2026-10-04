@@ -121,7 +121,9 @@ export function VirtualList<T, M>({
     internalRef.current?.scrollToIndex(isReversed ? Infinity : 0)
   }, [isReversed])
 
-  // stick to bottom if user scrolls there and bottomContent or num items is changing (only applies to reversed lists)
+  // Stick to the bottom while the user is there and items or bottom content change.
+  // bottomContent must stay referentially stable across unrelated parent renders,
+  // or opening a row at the end re-pins the list and scrolls it upward.
   useLayoutEffect(() => {
     if (isReversed && shouldStickToBottom.current)
       internalRef.current?.scrollToIndex(Infinity, { align: 'end' })

@@ -15,7 +15,8 @@ defmodule Console.AI.XAI do
     :stream,
     :method,
     :token_exchange,
-    :headers
+    :headers,
+    :proxy
   ]
 
   @type t :: %__MODULE__{}
@@ -33,6 +34,7 @@ defmodule Console.AI.XAI do
       method: Map.get(opts, :method) || :auto,
       token_exchange: Map.get(opts, :token_exchange),
       headers: Map.get(opts, :headers),
+      proxy: Map.get(opts, :proxy),
       stream: Stream.stream()
     }
   end

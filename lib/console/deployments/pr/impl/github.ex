@@ -253,7 +253,8 @@ defmodule Console.Deployments.Pr.Impl.Github do
   defp add_opts(pass, _), do: pass
 
   defp request_options(%PrAutomation{connection: %ScmConnection{} = conn}), do: request_options(conn)
-  defp request_options(%ScmConnection{proxy: %ScmConnection.Proxy{url: url}}) when is_binary(url),
+  defp request_options(%ScmConnection{proxy: %ScmConnection.Proxy{enabled: enabled, url: url}})
+    when enabled != false and is_binary(url),
     do: [proxy: url]
   defp request_options(_), do: []
 

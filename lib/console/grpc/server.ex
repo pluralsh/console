@@ -95,7 +95,8 @@ defmodule Console.GRPC.Server do
       baseUrl: Map.get(openai, :base_url),
       proxyModels: proxy_models(openai, defaults),
       tokenExchange: to_openai_token_exchange_pb(Map.get(openai, :token_exchange)),
-      method: openai_method_to_pb(Map.get(openai, :method))
+      method: openai_method_to_pb(Map.get(openai, :method)),
+      proxy: to_proxy_pb(Map.get(openai, :proxy))
     }
   end
   defp to_openai_pb(_, _), do: nil
@@ -127,7 +128,8 @@ defmodule Console.GRPC.Server do
       model: Map.get(anthropic, :model) || defaults[:model],
       toolModel: Map.get(anthropic, :tool_model) || defaults[:tool_model],
       baseUrl: Map.get(anthropic, :base_url),
-      proxyModels: proxy_models(anthropic, defaults)
+      proxyModels: proxy_models(anthropic, defaults),
+      proxy: to_proxy_pb(Map.get(anthropic, :proxy))
     }
   end
   defp to_anthropic_pb(_), do: nil
@@ -143,7 +145,8 @@ defmodule Console.GRPC.Server do
       embeddingModel: Map.get(vertex_ai, :embedding_model) || defaults[:embedding_model],
       project: Map.get(vertex_ai, :project),
       location: Map.get(vertex_ai, :location),
-      proxyModels: proxy_models(vertex_ai, defaults)
+      proxyModels: proxy_models(vertex_ai, defaults),
+      proxy: to_proxy_pb(Map.get(vertex_ai, :proxy))
     }
   end
   defp to_vertex_pb(_), do: nil
@@ -162,7 +165,8 @@ defmodule Console.GRPC.Server do
       proxyModels: proxy_models(bedrock, defaults),
       deployments: to_string_map(Map.get(bedrock, :deployments)),
       endpoint: bedrock_endpoint_to_pb(Map.get(bedrock, :endpoint)),
-      modelSettings: bedrock_model_settings(Map.get(bedrock, :model_settings))
+      modelSettings: bedrock_model_settings(Map.get(bedrock, :model_settings)),
+      proxy: to_proxy_pb(Map.get(bedrock, :proxy))
     }
   end
   defp to_bedrock_pb(_), do: nil
@@ -177,7 +181,8 @@ defmodule Console.GRPC.Server do
       toolModel: Map.get(azure, :tool_model) || defaults[:tool_model],
       accessToken: Map.get(azure, :access_token),
       deployments: to_string_map(Map.get(azure, :deployments)),
-      proxyModels: proxy_models(azure, defaults)
+      proxyModels: proxy_models(azure, defaults),
+      proxy: to_proxy_pb(Map.get(azure, :proxy))
     }
   end
   defp to_azure_pb(_), do: nil
@@ -195,6 +200,15 @@ defmodule Console.GRPC.Server do
   defp proxy_models(%{proxy_models: [_ | _] = models}, _), do: models
   defp proxy_models(_, %{proxy_models: models}) when is_list(models), do: models
   defp proxy_models(_, _), do: []
+
+  defp to_proxy_pb(%{url: url} = proxy) when is_binary(url) do
+    %Plrl.HttpProxyConfig{
+      url: url,
+      noProxy: Map.get(proxy, :noproxy),
+      enabled: Map.get(proxy, :enabled, true)
+    }
+  end
+  defp to_proxy_pb(_), do: nil
 
   defp to_string_map(%{} = map) do
     Enum.filter(map, fn {k, v} -> is_binary(k) and is_binary(v) end)

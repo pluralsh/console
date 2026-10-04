@@ -3,6 +3,8 @@ package router
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/console"
@@ -196,7 +198,60 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 		// Azure uses endpoint + token in keys; no base URL override required.
 	}
 
+	// Bifrost calls GetConfigForProvider when it initializes each provider.
+	// Its provider constructors consume ProxyConfig to install the proxy dialer
+	// on the model API client, so this is the Nexus-to-Bifrost wiring point.
+	if proxy := proxyForProvider(aiConfig, provider); proxy != nil &&
+		proxy.GetUrl() != "" &&
+		proxyEnabled(proxy) &&
+		!proxyBypassed(config.NetworkConfig.BaseURL, proxy.GetNoProxy()) {
+		config.ProxyConfig = &schemas.ProxyConfig{
+			Type: schemas.HTTPProxy,
+			URL:  schemas.NewSecretVar(proxy.GetUrl()),
+		}
+	}
+
 	return config, nil
+}
+
+func proxyForProvider(aiConfig *pb.AiConfig, provider schemas.ModelProvider) *pb.HttpProxyConfig {
+	switch provider {
+	case schemas.OpenAI:
+		return aiConfig.GetOpenai().GetProxy()
+	case openAICompatibleProvider:
+		return aiConfig.GetOpenaiCompatible().GetProxy()
+	case schemas.XAI:
+		return aiConfig.GetXai().GetProxy()
+	case schemas.Anthropic:
+		return aiConfig.GetAnthropic().GetProxy()
+	case schemas.Vertex:
+		return aiConfig.GetVertexAi().GetProxy()
+	case schemas.Bedrock, schemas.BedrockMantle:
+		return aiConfig.GetBedrock().GetProxy()
+	case schemas.Azure:
+		return aiConfig.GetAzure().GetProxy()
+	default:
+		return nil
+	}
+}
+
+func proxyEnabled(proxy *pb.HttpProxyConfig) bool {
+	return proxy != nil && (proxy.Enabled == nil || proxy.GetEnabled())
+}
+
+func proxyBypassed(target, noProxy string) bool {
+	parsed, err := url.Parse(target)
+	if err != nil || parsed.Hostname() == "" {
+		return false
+	}
+	host := strings.ToLower(parsed.Hostname())
+	for entry := range strings.SplitSeq(noProxy, ",") {
+		entry = strings.TrimPrefix(strings.ToLower(strings.TrimSpace(entry)), ".")
+		if entry != "" && (host == entry || strings.HasSuffix(host, "."+entry)) {
+			return true
+		}
+	}
+	return false
 }
 
 func bedrockProvider(config *pb.BedrockConfig) schemas.ModelProvider {

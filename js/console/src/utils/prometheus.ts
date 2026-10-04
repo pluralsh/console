@@ -99,8 +99,15 @@ function formatCPU(value: number): string {
     divider *= coreBase
     power += 1
   }
-  const decimals = value / divider < 1 ? 3 : 0
-  return `${Number((value / divider).toFixed(decimals))}${corePowerSuffixes[power]}`
+  return `${compact(value / divider)}${corePowerSuffixes[power]}`
+}
+
+// keeps ~3 significant digits so neighbouring axis ticks stay distinct
+function compact(value: number): string {
+  const abs = Math.abs(value)
+  const decimals =
+    abs === 0 ? 0 : abs < 1 ? 3 : abs < 10 ? 2 : abs < 100 ? 1 : 0
+  return String(Number(value.toFixed(decimals)))
 }
 
 function formatMemory(value: number): string {
@@ -114,14 +121,14 @@ function formatMemory(value: number): string {
   let power = 0
 
   while (
-    value / divider > memoryBase &&
+    value / divider >= memoryBase &&
     power < memoryPowerSuffixes.length - 1
   ) {
     divider *= memoryBase
     power += 1
   }
 
-  return `${Number((value / divider).toFixed(0))}${memoryPowerSuffixes[power]}`
+  return `${compact(value / divider)}${memoryPowerSuffixes[power]}`
 }
 
 export const Prometheus = {

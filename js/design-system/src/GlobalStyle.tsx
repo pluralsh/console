@@ -159,6 +159,10 @@ const GlobalStyleSheet = createGlobalStyle`
       margin: 0,
       color: 'inherit',
     },
+    // The mono font ships with ligatures; code must render as typed.
+    'code, pre, kbd, samp': {
+      fontVariantLigatures: 'none',
+    },
     'a, a:visited, a:hover, a:active': {
       color: 'inherit',
       textDecoration: 'inherit',

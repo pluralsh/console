@@ -332,3 +332,225 @@ func TestHasReplaceSyncOption(t *testing.T) {
 		})
 	}
 }
+
+func TestHasPruneDisabledSyncOption(t *testing.T) {
+	tests := []struct {
+		name string
+		obj  unstructured.Unstructured
+		want bool
+	}{
+		{
+			name: "no annotations",
+			obj:  unstructured.Unstructured{},
+			want: false,
+		},
+		{
+			name: "plural annotation enabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation: "Prune=False",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "plural annotation disabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation: "Prune=True",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "argo annotation enabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							ArgoSyncOptionsAnnotation: "Prune=False",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "argo annotation disabled",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							ArgoSyncOptionsAnnotation: "Prune=True",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "multiple options",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation: "Validate=False, Prune=False",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "plural annotation takes precedence",
+			obj: unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"metadata": map[string]interface{}{
+						"annotations": map[string]interface{}{
+							SyncOptionsAnnotation:     "Prune=True",
+							ArgoSyncOptionsAnnotation: "Prune=False",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, HasPruneDisabledSyncOption(tt.obj))
+		})
+	}
+}
+
+func TestHasDeleteDisabledSyncOption(t *testing.T) {
+	tests := []struct {
+		name        string
+		annotations map[string]string
+		want        bool
+	}{
+		{
+			name: "no annotations",
+		},
+		{
+			name: "plural delete false",
+			annotations: map[string]string{
+				SyncOptionsAnnotation: "Delete=False",
+			},
+			want: true,
+		},
+		{
+			name: "argo delete false",
+			annotations: map[string]string{
+				ArgoSyncOptionsAnnotation: "Delete=False",
+			},
+			want: true,
+		},
+		{
+			name: "delete true",
+			annotations: map[string]string{
+				SyncOptionsAnnotation: "Delete=True",
+			},
+		},
+		{
+			name: "plural annotation takes precedence",
+			annotations: map[string]string{
+				SyncOptionsAnnotation:     "Delete=True",
+				ArgoSyncOptionsAnnotation: "Delete=False",
+			},
+		},
+		{
+			name: "plural annotation prevents argo fallback",
+			annotations: map[string]string{
+				SyncOptionsAnnotation:     "Force=True",
+				ArgoSyncOptionsAnnotation: "Delete=False",
+			},
+		},
+		{
+			name: "delete false among multiple options",
+			annotations: map[string]string{
+				SyncOptionsAnnotation: "Replace=True, Delete=False",
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			obj := unstructured.Unstructured{}
+			obj.SetAnnotations(tt.annotations)
+
+			assert.Equal(t, tt.want, HasDeleteDisabledSyncOption(obj))
+		})
+	}
+}
+
+func TestHasDetachOption(t *testing.T) {
+	tests := []struct {
+		name        string
+		annotations map[string]string
+		want        bool
+	}{
+		{
+			name: "no annotations",
+		},
+		{
+			name: "plural detach",
+			annotations: map[string]string{
+				SyncOptionsAnnotation: "Detach",
+			},
+			want: true,
+		},
+		{
+			name: "detach among multiple plural options",
+			annotations: map[string]string{
+				SyncOptionsAnnotation: "Replace=True, detach",
+			},
+			want: true,
+		},
+		{
+			name: "legacy lifecycle detach",
+			annotations: map[string]string{
+				LifecycleDeleteAnnotation: PreventDeletion,
+			},
+			want: true,
+		},
+		{
+			name: "legacy lifecycle deletion without detach",
+			annotations: map[string]string{
+				LifecycleDeleteAnnotation: "delete",
+			},
+		},
+		{
+			name: "argo detach is not a Plural detach option",
+			annotations: map[string]string{
+				ArgoSyncOptionsAnnotation: "detach",
+			},
+		},
+		{
+			name: "plural annotation takes precedence over argo detach",
+			annotations: map[string]string{
+				SyncOptionsAnnotation:     "Delete=False",
+				ArgoSyncOptionsAnnotation: "detach",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			obj := unstructured.Unstructured{}
+			obj.SetAnnotations(tt.annotations)
+
+			assert.Equal(t, tt.want, HasDetachOption(obj))
+		})
+	}
+}

@@ -1094,56 +1094,64 @@ versions:
   images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
     'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
   eolAt: '2025-02-04'
-- version: 1.14.2
+- version: 1.14.3
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: '## Helm / values changes to review
-
-      The app release notes include a few Helm-relevant behavior and value changes
-      (some are from 1.14.0; 1.14.2 itself has only a small Helm fix):
-
-
-      ### Values/behavior changes introduced in 1.14.0 (affecting upgrades from 1.14.0)
-
-      - **`authentication.mutual.spire.install.enabled` default changed to `true`.**
-      If you were not using SPIRE/mTLS, explicitly set this to `false` to avoid installing
-      extra components.
-
-      - **CNI config file management changed.** Cilium now manages the CNI config
-      file; setting **`cni.exclusive=false` disables overwriting** (useful for chaining
-      other CNIs such as Istio).
-
-      - **CNI chaining supported via `cni.chainingTarget`.** If you previously used
-      custom chaining approaches, confirm your intended chaining target.
-
-      - **Helm chart can configure `kvstoremesh`.** If you use clustermesh at scale,
-      review/enable the new `kvstoremesh` settings.
-
-      - **Helm chart changes around clustermesh CA/TLS configuration.** Notes mention
-      deprecating clustermesh CA config in favor of global CA config and simplifying
-      TLS configuration; review your `clustermesh.*` / global CA values.
-
-      - **`enableEndpointCRD` Helm option type changed from string to boolean.** If
-      you had `'
-    chart_updates: ['1.14.2 is a patch release focused on stability: multiple IPsec
-        fixes, Gateway API fixes, NodePort datapath fixes, and smaller operational
-        improvements.', 'Minor Helm chart change in 1.14.2: fixes Envoy DaemonSet
-        log level handling when multiple verbose debug groups are configured.']
-    features: ['Gateway API: support for additional/extended Gateway API features
-        (more complete feature coverage) compared to earlier 1.14.x.', 'Operational
-        visibility: `cilium status` now shows SPIRE connection information (helps
-        validate mutual-auth/SPIRE deployments).']
-    breaking_changes: ["1.14.0 had a strong warning: do not upgrade to 1.14.0 if you\
-        \ are using IPsec. For a 1.14.0 \u2192 1.14.2 target, treat IPsec as a key\
-        \ risk area and ensure you land on 1.14.2 quickly (or upgrade directly to\
-        \ 1.14.2).", 'Helm value type change: `enableEndpointCRD` changed from string
-        to boolean in 1.14.0; existing values files may fail template rendering or
-        silently misconfigure if not updated.']
-  chart_version: 1.14.2
-  images: ['quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35',
-    'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
+    helm_changes: "## Helm / values changes to be aware of (1.14.0 \u2192 1.14.3)\n\
+      \nEven though 1.14.3 is a patch release, you\u2019re upgrading **from 1.14.0**,\
+      \ so you must account for 1.14.0\u2019s chart/values behavior changes.\n\n-\
+      \ **IPsec upgrade warning (1.14.0):** *Do not upgrade to 1.14.0 if using IPsec.*\
+      \ Since you\u2019re already on 1.14.0, the practical takeaway is: **treat 1.14.3\
+      \ as an IPsec stability/security patch** and validate IPsec carefully during\
+      \ rollout.\n\n- **CNI config file management changed (1.14.0):**\n  - Cilium\
+      \ now **manages the CNI configuration file** and by default **overwrites changes**.\n\
+      \  - Set **`cni.exclusive=false`** if you need Cilium **not** to overwrite the\
+      \ CNI conf (for CNI chaining scenarios / other plugins modifying the conf).\n\
+      \  - If you want to chain Cilium with another CNI, use **`cni.chainingTarget`**.\n\
+      \n- **kube-proxy replacement value format change (1.14.x):**\n  - There were\
+      \ changes around `kubeProxyReplacement`/`--kube-proxy-replacement` being represented/handled\
+      \ as **string/boolean** in chart logic. Re-check your current values and ensure\
+      \ you\u2019re using the supported format for your chart version (typically `\"\
+      strict\"|\"partial\"|\"disabled\"` historically, moving toward boolean in some\
+      \ paths).\n\n- **SPIRE mutual auth default changed (1.14.x):**\n  - Default\
+      \ Helm value **`authentication.mutual.spire.install.enabled`** changed to **`true`**.\n\
+      \  - If you do *not* want SPIRE installed/managed by the chart, explicitly set\
+      \ it to `false`.\n\n- **Tunnel / routing mode Helm rendering fix (1.14.3):**\n\
+      \  - 1.14.3 includes a fix: **chart now derives `routing-mode` and `tunnel-protocol`\
+      \ based on `.Values.tunnel` and `.Values.routingMode`**.\n  - Action: **review\
+      \ your `tunnel`, `routingMode`, and `tunnelProtocol` values** for consistency;\
+      \ after upgrade the rendered agent flags may change if you were relying on older/incorrect\
+      \ rendering.\n\n- **New/adjustable option (daemon value) mentioned in 1.14.3\
+      \ notes:**\n  - `conntrackGCMaxInterval` introduced to cap conntrack GC interval\
+      \ (helps ToFQDN CIDR identity cleanup latency). Decide if you need to set this\
+      \ explicitly.\n"
+    chart_updates: ['Chart behavior around CNI config management and chaining is significant
+        in the 1.14 line: Cilium overwrites the CNI conf by default unless `cni.exclusive=false`,
+        and chaining is configured via `cni.chainingTarget`.', 1.14.3 includes a Helm-related
+        fix that changes how `routing-mode` and `tunnel-protocol` are computed from
+        `tunnel` and `routingMode` values; verify rendered manifests/agent flags match
+        your intended datapath mode., 'Defaults changed in the 1.14 line for SPIRE
+        installation: `authentication.mutual.spire.install.enabled` now defaults to
+        true; explicitly opt out if undesired.']
+    features: [Security hardening in 1.14.3 includes dependency bumps to address HTTP/2
+        Stream Cancellation/rapid reset class issues (CVE-2023-44487 via Envoy advisory)
+        and Go/grpc vulnerabilities., 'Large policy-scale improvements in 1.14.3 reduce
+        Cilium initialization time dramatically in clusters with many NetworkPolicies/CiliumNetworkPolicies,
+        and reduce overhead by making full policy map sync periodic.', 'Operational
+        tunable added: `conntrackGCMaxInterval` lets you cap conntrack GC interval
+        to avoid very long delays in releasing ToFQDN-derived CIDR identities.']
+    breaking_changes: ['Potential behavior change from Helm rendering fix in 1.14.3:
+        if your deployment had inconsistent `tunnel`/`routingMode`/`tunnelProtocol`
+        values, the upgraded chart may now render different `--routing-mode` / `--tunnel-protocol`
+        flags than before.', '1.14 line change: Cilium manages and overwrites the
+        CNI config by default; if you rely on other tooling/plugins to modify the
+        CNI config, you must set `cni.exclusive=false` and/or configure `cni.chainingTarget`
+        to avoid disruption.']
+  chart_version: 1.14.3
+  images: ['quay.io/cilium/cilium:v1.14.3@sha256:e5ca22526e01469f8d10c14e2339a82a13ad70d9a359b879024715540eef4ace',
+    'quay.io/cilium/operator-generic:v1.14.3@sha256:c9613277b72103ed36e9c0d16b9a17cafd507461d59340e432e3e9c23468b5e2']
   eolAt: '2025-02-04'
 - version: 1.14.0
   kube: ['1.27', '1.26', '1.25']
@@ -1271,29 +1279,22 @@ versions:
   images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
     'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
   eolAt: '2024-07-24'
-- version: 1.13.7
+- version: 1.13.8
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **1.13.2 note:** the release explicitly warns: *\u201CWhen updating\
-      \ to this release, make sure that you are using new helm chart version.\u201D\
-      * Ensure you also bump the **Cilium Helm chart** along with the app version.\n\
-      - **cert-manager users:** Helm now **mandates issuer configuration** when using\
-      \ cert-manager to generate certificates (1.13.2 bugfix note). Verify your values\
-      \ include the required issuer settings if you rely on cert-manager.\n"
-    chart_updates: [No explicit Helm chart template/structure changes were included
-        in the provided notes beyond the cert-manager issuer requirement and the general
-        reminder to use the matching chart version.]
-    features: ['Better observability for NAT map allocation drops: Cilium now reports
-        the kernel error code when drops occur due to failures creating NAT map entries
-        (1.13.7).', 'BGP operations visibility: `cilium bgp peers` now shows operational
-        state of BGP peers (1.13.2).', 'Host routing/fast-forward support expanded:
-        fast-forward (BPF host routing) can work on L2-less devices (1.13.2).']
+    helm_changes: ''
+    chart_updates: []
+    features: [1.13.8 is a security-focused bugfix release that addresses the HTTP/2
+        Rapid Reset / Stream Cancellation attack (CVE-2023-44487) via updated Envoy
+        and Go/x/net dependencies., Security and dependency updates include bumping
+        gRPC to 1.56.3 and updating Azure SDK components used by the vendor/azure
+        integration.]
     breaking_changes: []
-  chart_version: 1.13.7
-  images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
-    'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
+  chart_version: 1.13.8
+  images: ['quay.io/cilium/cilium:v1.13.8@sha256:774f0f11e171a96b59158884e0151eb522a2cf3fe23a7af7a140ae31ac30271b',
+    'quay.io/cilium/operator-generic:v1.13.8@sha256:324d17fa59f9a5fa5f957f088567cb66f15d8771880f6ced755e79e8e4b085fd']
   eolAt: '2024-07-24'
 - version: 1.13.0
   kube: ['1.27', '1.26', '1.25']
@@ -1372,23 +1373,22 @@ versions:
   chart_version: 1.12.18
   images: ['quay.io/cilium/cilium:v1.12.18@sha256:71218d52b2b9a63525e31e9be716810605696cbc02008e658953212f638d6b6b',
     'quay.io/cilium/operator-generic:v1.12.18@sha256:ac9b8a95d6faddacc1bca4145562c5143543dfbbc41b244383b52b8be83238ab']
-- version: 1.12.14
+- version: 1.12.15
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ["No Helm chart changelog was provided in the notes you pasted,\
-        \ so I can\u2019t list exact chart/values changes for 1.12.9\u21921.12.14\
-        \ from source material here.", 'From the v1.12.9 release notes: when updating
-        to 1.12.9 you must also use the corresponding new Helm chart version (implies
-        chart/version coupling; verify chart version for 1.12.14 in the Cilium Helm
-        chart release notes).']
-    features: []
+    chart_updates: []
+    features: ['Security hardening update: includes fixes for the HTTP/2 Stream Cancellation
+        Attack (CVE-2023-44487) via updated Envoy and Go/x-net/grpc dependencies.',
+      'Improved observability/troubleshooting: adds additional datapath drop notifications
+        and fixes trace notification identity reporting for certain hairpinned reply
+        traffic.']
     breaking_changes: []
-  chart_version: 1.12.14
-  images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
-    'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
+  chart_version: 1.12.15
+  images: ['quay.io/cilium/cilium:v1.12.15@sha256:24c4c9d756b2467ec20475309b68d640cdf91aa0008e136a826197590f028cca',
+    'quay.io/cilium/operator-generic:v1.12.15@sha256:ef8acf5b11f033032b55e2ece07179d925bfcb6f0cb501a898fdc031bad900ea']
 - version: 1.12.5
   kube: ['1.27', '1.26', '1.25']
   requirements: []

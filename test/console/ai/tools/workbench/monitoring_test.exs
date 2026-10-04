@@ -27,6 +27,16 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
     assert "section" in get_in(graph, ["properties", "type", "enum"])
     assert get_in(graph, ["properties", "section_id", "type"]) == "string"
 
+    assert Enum.sort(get_in(graph, ["properties", "unit", "enum"])) ==
+             Dashboard.Graph.Unit.__valid_values__()
+             |> Enum.filter(&is_binary/1)
+             |> Enum.sort()
+
+    input_types =
+      get_in(dashboard, ["properties", "settings", "properties", "inputs", "items", "properties", "type", "enum"])
+
+    refute "time_range" in input_types
+
     assert get_in(monitor, [
              "properties",
              "attributes",
@@ -185,6 +195,7 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
                      "identifier" => "executions",
                      "title" => "GQL executions",
                      "type" => "stat",
+                     "unit" => "time",
                      "section_id" => "gql",
                      "layout" => %{"x" => 0, "y" => 0, "w" => 3, "h" => 2}
                    }
@@ -201,6 +212,8 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
                %{"identifier" => "executions", "section_id" => "gql"}
              ]
            } = Jason.decode!(json)
+
+    assert [_, %Dashboard.Graph{unit: :time}] = Repo.get!(Dashboard, dashboard_id).graphs
 
     assert_receive {:event, %PubSub.DashboardCreated{item: %Dashboard{id: ^dashboard_id}}}
   end

@@ -18,3 +18,5 @@ COPY js/design-system/ ./design-system/
 
 WORKDIR /app/console
 CMD ["yarn", "build"]
+RUN chown -R node:node /app
+USER node

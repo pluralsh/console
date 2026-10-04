@@ -68,19 +68,29 @@
 }
 
 @font-face {
-  font-family: 'Monument Mono';
+  font-display: swap;
+  font-family: 'JetBrains Mono';
+  font-weight: 200;
+  src: url("/fonts/JetBrainsMono-ExtraLight.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'JetBrains Mono';
   font-weight: 400;
-  src: url("/fonts/ABCMonumentGroteskMono-Regular.woff") format("woff");
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: 'Monument Mono';
+  font-display: swap;
+  font-family: 'JetBrains Mono';
   font-weight: 500;
-  src: url("/fonts/ABCMonumentGroteskMono-Medium.woff") format("woff");
+  src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: 'Monument Mono';
+  font-display: swap;
+  font-family: 'JetBrains Mono';
   font-weight: 600;
-  src: url("/fonts/ABCMonumentGroteskMono-Heavy.woff") format("woff");
+  src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
 }

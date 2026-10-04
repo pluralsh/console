@@ -2672,6 +2672,9 @@ type ScmCreds {
 
   token: String!
 
+  "the proxy to use for git and SCM API requests"
+  proxy: HttpProxyConfiguration
+
   "the exa key for the agent"
   exaKey: String
 }
@@ -6889,6 +6892,7 @@ enum LogDriver {
   VICTORIA
   ELASTIC
   OPENSEARCH
+  LOKI
 }
 
 enum VectorStore {
@@ -7012,6 +7016,23 @@ input LoggingSettingsAttributes {
   victoria: HttpConnectionAttributes
   elastic: ElasticsearchConnectionAttributes
   opensearch: OpensearchConnectionAttributes
+  loki: LokiLoggingConnectionAttributes
+}
+
+input LokiLoggingConnectionAttributes {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+
+  "the stream label identifying the cluster a log came from, defaults to cluster"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from, defaults to namespace"
+  namespaceLabel: String
 }
 
 input ElasticsearchConnectionAttributes {
@@ -7112,6 +7133,9 @@ input OpenaiSettingsAttributes {
 
   model: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7164,6 +7188,9 @@ input AnthropicSettingsAttributes {
 
   model: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7176,6 +7203,9 @@ input AnthropicSettingsAttributes {
 
 input OllamaAttributes {
   model: String!
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7211,6 +7241,9 @@ input AzureOpenaiAttributes {
   "the azure openai access token to use"
   accessToken: String!
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "mapping from model id to azure openai deployment name"
   deployments: Json
 
@@ -7230,6 +7263,9 @@ input BedrockAiAttributes {
 
   "the aws region the model is hosted in"
   region: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the aws access key id to use (DEPRECATED)"
   awsAccessKeyId: String
@@ -7264,6 +7300,9 @@ input BedrockModelSettingsAttributes {
 input VertexAiAttributes {
   "the vertex model id to use"
   model: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7594,6 +7633,9 @@ type OpenaiSettings {
   "the openai model version to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7643,6 +7685,9 @@ type AnthropicSettings {
   "the anthropic model version to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7653,6 +7698,9 @@ type AnthropicSettings {
 "Settings for a self-hosted ollama-based LLM deployment"
 type OllamaSettings {
   model: String!
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7667,6 +7715,9 @@ type AzureOpenaiSettings {
   endpoint: String!
 
   model: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -7688,6 +7739,9 @@ type AzureOpenaiSettings {
 type BedrockAiSettings {
   "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults."
   modelId: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
   toolModelId: String
@@ -7724,6 +7778,9 @@ type VertexAiSettings {
   "the vertex ai model to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for vector embeddings"
   embeddingModel: String
 
@@ -7758,6 +7815,22 @@ type LoggingSettings {
 
   "configures a connection to aws opensearch for logging"
   opensearch: OpensearchConnection
+
+  "configures a connection to grafana loki for logging"
+  loki: LokiLoggingConnection
+}
+
+type LokiLoggingConnection {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "the stream label identifying the cluster a log came from"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from"
+  namespaceLabel: String
 }
 
 type ElasticsearchConnection {
@@ -7953,6 +8026,15 @@ enum DashboardGraphType {
   HEATMAP
   TRACES
   SECTION
+}
+
+enum DashboardGraphUnit {
+  NONE
+  BYTES
+  TIME
+  CPU
+  PERCENT
+  MILLISECONDS
 }
 
 enum DashboardInputType {
@@ -8183,6 +8265,9 @@ input DashboardGraphAttributes {
 
   "Graph visualization type"
   type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
 
   "Identifier of the section graph containing this graph; sections cannot be nested"
   sectionId: String
@@ -8459,6 +8544,9 @@ type WorkbenchDashboardGraph {
 
   "Graph visualization type"
   type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
 
   "ID of the configured workbench tool backing this graph's datasource"
   toolId: ID
@@ -11715,6 +11803,14 @@ enum RendererType {
   KUSTOMIZE
 }
 
+enum ServiceMetricsGrouping {
+  "a single series totaled across the service's namespace"
+  SERVICE
+
+  "one series per pod (persistent volumes are broken out by claim instead)"
+  POD
+}
+
 input ServiceDeploymentAttributes {
   name: String!
 
@@ -12188,6 +12284,9 @@ type ServiceDeployment {
   scalingRecommendations: [ClusterScalingRecommendation]
 
   serviceMetrics(start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
+
+  "the cluster usage metric set scoped to this service's namespace; only selected fields are queried"
+  serviceUsageMetrics(groupBy: ServiceMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
 
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
@@ -12707,6 +12806,15 @@ enum TagType {
 enum HeatMapFlavor {
   POD
   NAMESPACE
+  NODE
+}
+
+enum ClusterMetricsGrouping {
+  "a single cluster-wide series"
+  CLUSTER
+
+  NAMESPACE
+
   NODE
 }
 
@@ -13344,6 +13452,78 @@ type ClusterMetrics {
   memoryUsage: [MetricResponse]
 }
 
+"Cluster or service usage timeseries; when grouped, each series carries the grouping's label (`namespace`, `node` or `pod`)"
+type ClusterUsageMetrics {
+  "cpu usage in cores"
+  cpu: [MetricResponse]
+
+  "cpu requests in cores"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits in cores"
+  cpuLimits: [MetricResponse]
+
+  "allocatable node cpu in cores, absent when grouped by namespace"
+  cpuAllocatable: [MetricResponse]
+
+  "fraction (0-1) of CFS periods throttled"
+  cpuThrottling: [MetricResponse]
+
+  "working set memory in bytes"
+  memory: [MetricResponse]
+
+  "memory requests in bytes"
+  memoryRequests: [MetricResponse]
+
+  "memory limits in bytes"
+  memoryLimits: [MetricResponse]
+
+  "allocatable node memory in bytes, absent when grouped by namespace"
+  memoryAllocatable: [MetricResponse]
+
+  "container OOM kills within each rate window"
+  oomKills: [MetricResponse]
+
+  "pod network receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "pod network transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "pod received packets dropped per second"
+  networkReceiveDropped: [MetricResponse]
+
+  "pod transmitted packets dropped per second"
+  networkTransmitDropped: [MetricResponse]
+
+  "container filesystem usage in bytes"
+  ephemeralStorage: [MetricResponse]
+
+  "container filesystem read throughput in bytes\/s"
+  fsReads: [MetricResponse]
+
+  "container filesystem write throughput in bytes\/s"
+  fsWrites: [MetricResponse]
+
+  "persistent volume usage in bytes"
+  volumeUsage: [MetricResponse]
+
+  "persistent volume capacity in bytes"
+  volumeCapacity: [MetricResponse]
+
+  "fraction (0-1) of capacity used by the fullest persistent volume"
+  volumeFullness: [MetricResponse]
+
+  "running pod count"
+  podsRunning: [MetricResponse]
+
+  "pending pod count"
+  podsPending: [MetricResponse]
+
+  "container restarts within each rate window"
+  restarts: [MetricResponse]
+}
+
 type ClusterNodeMetrics {
   cpu: [MetricResponse]
   memory: [MetricResponse]
@@ -13595,6 +13775,9 @@ type Cluster {
   logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
   clusterMetrics(start: DateTime, stop: DateTime, step: String): ClusterMetrics
+
+  "cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node"
+  clusterUsageMetrics(groupBy: ClusterMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
 
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 
@@ -14861,7 +15044,11 @@ input ScmConnectionAttributes {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 input HttpProxyAttributes {
+  "whether this proxy is enabled (defaults to true)"
+  enabled: Boolean
+
   url: String!
+
   noproxy: String
 }
 
@@ -16063,7 +16250,11 @@ type ObserverAgentAction {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 type HttpProxyConfiguration {
+  "whether this proxy is enabled"
+  enabled: Boolean!
+
   url: String!
+
   noproxy: String
 }
 
@@ -17518,11 +17709,73 @@ type ReplicaSetStatus {
 
 type Pod {
   status: PodStatus!
+
   spec: PodSpec!
+
   metadata: Metadata!
+
   raw: String!
+
   logs(container: String!, sinceSeconds: Int!): [String]
+
   events: [Event]
+
+  "prometheus timeseries for this pod, only available when the pod is queried with a cluster or service id"
+  metrics(start: DateTime, stop: DateTime, step: String): PodMetrics
+}
+
+"Pod-level prometheus timeseries; container-scoped series carry a `container` label"
+type PodMetrics {
+  "cpu usage in cores, by container"
+  cpu: [MetricResponse]
+
+  "cpu requests in cores, by container"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits in cores, by container"
+  cpuLimits: [MetricResponse]
+
+  "fraction (0-1) of CFS periods throttled, by container"
+  cpuThrottling: [MetricResponse]
+
+  "working set memory in bytes, by container"
+  memory: [MetricResponse]
+
+  "memory requests in bytes, by container"
+  memoryRequests: [MetricResponse]
+
+  "memory limits in bytes, by container"
+  memoryLimits: [MetricResponse]
+
+  "container filesystem usage in bytes, by container"
+  ephemeralStorage: [MetricResponse]
+
+  "ephemeral storage requests in bytes, by container"
+  ephemeralStorageRequests: [MetricResponse]
+
+  "ephemeral storage limits in bytes, by container"
+  ephemeralStorageLimits: [MetricResponse]
+
+  "filesystem read throughput in bytes\/s, by container"
+  fsReads: [MetricResponse]
+
+  "filesystem write throughput in bytes\/s, by container"
+  fsWrites: [MetricResponse]
+
+  "pod network receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "pod network transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "pod received packets dropped per second"
+  networkReceiveDropped: [MetricResponse]
+
+  "pod transmitted packets dropped per second"
+  networkTransmitDropped: [MetricResponse]
+
+  "cumulative restart count, by container"
+  restarts: [MetricResponse]
 }
 
 type PodStatus {

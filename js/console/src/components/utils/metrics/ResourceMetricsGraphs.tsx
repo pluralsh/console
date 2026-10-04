@@ -1,11 +1,14 @@
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
 import { MetricResponseFragment, MetricResult } from 'generated/graphql'
 import { Prometheus } from 'utils/prometheus.ts'
 import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
+import {
+  MetricsGraphCard,
+  MetricsGraphGrid,
+} from 'components/utils/metrics/MetricsGraphCard'
+import type { TimeWindow } from 'components/utils/timerange/timeRange'
 import {
   PodResourceReservation,
   addPodResourceReservationSeries,
@@ -37,47 +40,39 @@ function getMetricPod(metric: MetricResponseFragment['metric']): string {
   return typeof metric?.pod === 'string' ? metric.pod : ''
 }
 
-function MetricsRow({
+type RangeProps = {
+  timeWindow?: TimeWindow
+  onRangeSelect?: (start: Date, end: Date) => void
+}
+
+function MetricsGraphs({
   graphs,
-  wrapLegend,
+  timeWindow,
+  onRangeSelect,
 }: {
   graphs: MetricGraph[]
-  wrapLegend?: boolean
-}) {
-  const theme = useTheme()
+} & RangeProps) {
   const visibleGraphs = graphs.filter(({ data }) => !isEmpty(data))
 
   if (isEmpty(visibleGraphs)) return null
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
-    >
+    <MetricsGraphGrid>
       {visibleGraphs.map(({ data, format, title }) => (
-        <div
+        <MetricsGraphCard
           key={title}
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
+          title={title}
         >
-          <GraphHeader title={title} />
           <Graph
             data={data}
             yFormat={(v) => Prometheus.format(v, format)}
-            tickRotation={undefined}
-            wrapLegend={wrapLegend}
+            yTickBase={format === 'memory' ? 'binary' : 'decimal'}
+            timeWindow={timeWindow}
+            onRangeSelect={onRangeSelect}
           />
-        </div>
+        </MetricsGraphCard>
       ))}
-    </div>
+    </MetricsGraphGrid>
   )
 }
 
@@ -140,13 +135,16 @@ export function ResourceMetricsGraphs({
   podCpuLimits,
   podMemLimits,
   podReservations,
-}: ResourceMetricsInput & {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-  podCpu: MetricResponseFragment[]
-  podMem: MetricResponseFragment[]
-  podReservations?: PodResourceReservation[]
-}) {
+  timeWindow,
+  onRangeSelect,
+}: ResourceMetricsInput &
+  RangeProps & {
+    cpu: MetricResponseFragment[]
+    mem: MetricResponseFragment[]
+    podCpu: MetricResponseFragment[]
+    podMem: MetricResponseFragment[]
+    podReservations?: PodResourceReservation[]
+  }) {
   const overallGraphs = useMemo(() => {
     const toOverallSeries = (
       usage: MetricResponseFragment[],
@@ -236,12 +234,10 @@ export function ResourceMetricsGraphs({
   ])
 
   return (
-    <>
-      <MetricsRow graphs={overallGraphs} />
-      <MetricsRow
-        graphs={podGraphs}
-        wrapLegend
-      />
-    </>
+    <MetricsGraphs
+      graphs={[...overallGraphs, ...podGraphs]}
+      timeWindow={timeWindow}
+      onRangeSelect={onRangeSelect}
+    />
   )
 }

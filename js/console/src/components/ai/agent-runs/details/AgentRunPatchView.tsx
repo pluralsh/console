@@ -131,7 +131,7 @@ const PatchEmptySC = styled.div(({ theme }) => ({
 const PatchRawSC = styled.pre(({ theme }) => ({
   margin: 0,
   padding: theme.spacing.medium,
-  fontFamily: '"Roboto Mono", monospace',
+  ...theme.partials.text.mono,
   fontSize: 14,
   lineHeight: '22px',
   color: theme.colors['text-light'],
@@ -149,7 +149,8 @@ const PatchViewSC = styled.div<{
   return {
     '--diff-background-color': theme.colors['fill-accent'],
     '--diff-text-color': theme.colors['text-light'],
-    '--diff-font-family': '"Roboto Mono", monospace',
+    '--diff-font-family': theme.fontFamilies.mono,
+    fontVariantLigatures: 'none',
     '--diff-gutter-insert-background-color': insertBackground,
     '--diff-gutter-insert-text-color': theme.colors['text-light'],
     '--diff-gutter-delete-background-color': deleteBackground,

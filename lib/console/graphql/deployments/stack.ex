@@ -482,7 +482,6 @@ defmodule Console.GraphQl.Deployments.Stack do
     @desc "the kubernetes job for this run (useful for debugging if issues arise)"
     field :job, :job do
       resolve fn run, _, _ -> Console.Deployments.Stacks.run_job(run) end
-      middleware ErrorHandler
     end
 
     field :plural_creds, :plural_creds, resolve: &Deployments.plural_creds/3, description: "temporary plural creds usable for terraform authentication"

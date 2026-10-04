@@ -204,7 +204,7 @@ const ColumnSC = styled.div({
 })
 
 const ColumnTitleSC = styled.h2(({ theme }) => ({
-  fontFamily: theme.fontFamilies.mono,
+  ...theme.partials.text.mono,
   fontSize: 18,
   fontWeight: 400,
   lineHeight: '24px',

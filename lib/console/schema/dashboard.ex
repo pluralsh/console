@@ -37,6 +37,8 @@ defmodule Console.Schema.Dashboard do
       traces: 9,
       section: 10
 
+    defenum Unit, none: 0, bytes: 1, time: 2, cpu: 3, percent: 4, milliseconds: 5
+
     defmodule Layout do
       use Console.Schema.Base
 
@@ -63,6 +65,7 @@ defmodule Console.Schema.Dashboard do
       field :title,       :string
       field :description, :string
       field :type,        Type
+      field :unit,        Unit
       field :markdown,    :string
       field :options,     :map
       field :section_id,  :string
@@ -74,7 +77,7 @@ defmodule Console.Schema.Dashboard do
 
     def changeset(model, attrs) do
       model
-      |> cast(attrs, [:identifier, :title, :description, :type, :markdown, :options, :section_id])
+      |> cast(attrs, [:identifier, :title, :description, :type, :unit, :markdown, :options, :section_id])
       |> cast_embed(:layout, required: true)
       |> cast_embed(:datasource)
       |> validate_required([:identifier, :type])

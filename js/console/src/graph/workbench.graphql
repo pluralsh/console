@@ -351,6 +351,7 @@ fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
     url
     provider
     proxy {
+      enabled
       url
       noproxy
     }

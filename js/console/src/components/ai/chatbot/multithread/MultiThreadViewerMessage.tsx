@@ -9,7 +9,11 @@ import {
   Modal,
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, InlineA } from 'components/utils/typography/Text'
+import {
+  Body2P,
+  InlineA,
+  shimmerWithinCss,
+} from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
@@ -18,7 +22,8 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
-import { ToolCallContent } from '../ToolCallContent'
+import { chatHeadingText, chatListCss } from '../ChatMarkdown'
+import { ToolCallContent, useQuietToolCodeCss } from '../ToolCallContent'
 import {
   getCommand,
   getPython,
@@ -27,7 +32,7 @@ import {
   shouldUnfurlCmdTool,
   toolCallDisplayDescription,
   toolCallDisplaySubtitle,
-  toolCallDisplayTitle,
+  toolCallTitle,
 } from '../toolCallDisplay'
 import { ToolCallKindIcon } from '../toolCallIcons'
 
@@ -82,6 +87,8 @@ export function SimpleToolCall({
   customLabel,
   customTitle,
   leadingIcon,
+  shimmer = false,
+  standaloneCommand = false,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
@@ -91,9 +98,19 @@ export function SimpleToolCall({
   customLabel?: ReactNode
   customTitle?: string
   leadingIcon?: ReactNode
+  /** Sweep loading text inside code and log boxes without treating the call as pending. */
+  shimmer?: boolean
+  /** Render shell commands without the surrounding tool label/accordion. */
+  standaloneCommand?: boolean
 }) {
   const theme = useTheme()
   const { spacing } = theme
+  const quietCodeCss = useQuietToolCodeCss()
+  const showShimmer = isPending || shimmer
+  const codeCss = {
+    ...quietCodeCss,
+    ...(showShimmer && shimmerWithinCss(theme)),
+  }
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
@@ -106,7 +123,8 @@ export function SimpleToolCall({
   }
 
   const title =
-    customTitle ?? toolCallDisplayTitle(kind, toolName, args, isPending)
+    customTitle ??
+    toolCallTitle({ name: toolName, kind, args, pending: isPending })
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
   const resolvedLeadingIcon =
     leadingIcon ??
@@ -123,7 +141,7 @@ export function SimpleToolCall({
       title={title}
       subtitle={subtitle}
       runtime={toolRuntime}
-      isPending={isPending}
+      isPending={showShimmer}
       leadingIcon={resolvedLeadingIcon}
     />
   )
@@ -143,10 +161,45 @@ export function SimpleToolCall({
           title={customTitle ?? (description || title)}
           subtitle={description ? undefined : subtitle}
           runtime={toolRuntime}
-          isPending={isPending}
+          isPending={showShimmer}
           leadingIcon={resolvedLeadingIcon}
         />
       )
+      const commandBody = (
+        <ShellCommandBodySC $hasHeader={standaloneCommand || !!description}>
+          <Code
+            language="bash"
+            showHeader={false}
+            fillLevel={0}
+            css={{
+              ...codeCss,
+              backgroundColor: 'transparent',
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+            }}
+          >
+            {`$ ${command}`}
+          </Code>
+          <ToolCallContent
+            content={content ?? ''}
+            attributes={attributes}
+            customResultBody={customResultBody}
+            hideArguments
+            flushTop
+            isPending={isPending}
+            shimmer={showShimmer}
+            transparent
+            maxOutputHeight={standaloneCommand && !isPending ? undefined : 240}
+            collapsedOutputLines={
+              standaloneCommand && !isPending ? 1 : undefined
+            }
+            ansiOutput
+          />
+        </ShellCommandBodySC>
+      )
+
+      if (standaloneCommand) return commandBody
+
       return (
         <SimpleAccordion
           {...accordionProps}
@@ -172,30 +225,7 @@ export function SimpleToolCall({
               : undefined
           }
         >
-          <ShellCommandBodySC $hasHeader={!!description}>
-            <Code
-              language="bash"
-              showHeader={false}
-              css={{
-                backgroundColor: 'transparent',
-                borderBottomLeftRadius: 0,
-                borderBottomRightRadius: 0,
-              }}
-            >
-              {`$ ${command}`}
-            </Code>
-            <ToolCallContent
-              content={content ?? ''}
-              attributes={attributes}
-              customResultBody={customResultBody}
-              hideArguments
-              flushTop
-              isPending={isPending}
-              transparent
-              maxOutputHeight={240}
-              ansiOutput
-            />
-          </ShellCommandBodySC>
+          {commandBody}
         </SimpleAccordion>
       )
     }
@@ -213,6 +243,8 @@ export function SimpleToolCall({
             <Code
               language="python"
               showHeader={false}
+              fillLevel={0}
+              css={codeCss}
             >
               {python}
             </Code>
@@ -223,6 +255,7 @@ export function SimpleToolCall({
               hideArguments
               flushTop
               isPending={isPending}
+              shimmer={showShimmer}
             />
           </Flex>
         </SimpleAccordion>
@@ -236,6 +269,7 @@ export function SimpleToolCall({
             attributes={attributes}
             customResultBody={customResultBody}
             isPending={isPending}
+            shimmer={showShimmer}
           />
         </SimpleAccordion>
       )
@@ -314,13 +348,7 @@ export function SimplifiedMarkdown({
         rehypePlugins={REHYPE_PLUGINS}
         components={{
           ...plrlChipComponents,
-          // Headers are bold
-          h1: ({ children }) => <strong>{children}</strong>,
-          h2: ({ children }) => <strong>{children}</strong>,
-          h3: ({ children }) => <strong>{children}</strong>,
-          h4: ({ children }) => <strong>{children}</strong>,
-          h5: ({ children }) => <strong>{children}</strong>,
-          h6: ({ children }) => <strong>{children}</strong>,
+          ...simpleHeadingComponents,
           // Fenced code — inline, no language chrome (header was redundant).
           pre: ({ children }) => {
             // Extract language from the code element inside pre
@@ -579,9 +607,7 @@ const SimpleMarkdownSC = styled.div<{
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
-    : $tone === 'major'
-      ? theme.partials.text.body2LooseLineHeight
-      : theme.partials.text.body2),
+    : theme.partials.text.body2LooseLineHeight),
   color:
     theme.colors[
       $tone === 'major'
@@ -594,7 +620,7 @@ const SimpleMarkdownSC = styled.div<{
     ],
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
+  gap: $tone === 'major' ? theme.spacing.small : theme.spacing.xsmall,
 }))
 
 /** Normal block flow so inline chips stay in the same `<p>`; typography comes from size/tone props. */
@@ -604,9 +630,7 @@ const SimpleMarkdownBlockSC = styled.div<{
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
-    : $tone === 'major'
-      ? theme.partials.text.body2LooseLineHeight
-      : theme.partials.text.body2),
+    : theme.partials.text.body2LooseLineHeight),
   color:
     theme.colors[
       $tone === 'major'
@@ -619,7 +643,8 @@ const SimpleMarkdownBlockSC = styled.div<{
     ],
   display: 'block',
   '& > *:not(:last-child)': {
-    marginBottom: theme.spacing.xsmall,
+    marginBottom:
+      $tone === 'major' ? theme.spacing.small : theme.spacing.xsmall,
   },
 }))
 
@@ -627,8 +652,43 @@ const ParagraphSC = styled.p(() => ({
   margin: 0,
 }))
 
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
+
+/**
+ * Same type scale as ChatMarkdown, but color follows the tone and spacing
+ * stays compact for streamed output.
+ */
+const HeadingSC = styled.h1<{ $level: HeadingLevel }>(({ theme, $level }) => ({
+  margin: 0,
+  ...chatHeadingText(theme, $level),
+  '&:not(:first-child)': {
+    paddingTop: $level <= 2 ? theme.spacing.small : theme.spacing.xsmall,
+  },
+}))
+
+const simpleHeading = (level: HeadingLevel) =>
+  function SimpleHeading({ children }: { children?: ReactNode }) {
+    return (
+      <HeadingSC
+        as={`h${level}`}
+        $level={level}
+      >
+        {children}
+      </HeadingSC>
+    )
+  }
+
+const simpleHeadingComponents = {
+  h1: simpleHeading(1),
+  h2: simpleHeading(2),
+  h3: simpleHeading(3),
+  h4: simpleHeading(4),
+  h5: simpleHeading(5),
+  h6: simpleHeading(6),
+}
+
 const InlineCodeSC = styled.code(({ theme }) => ({
-  fontFamily: theme.fontFamilies.mono,
+  ...theme.partials.text.mono,
   fontSize: '0.9em',
   backgroundColor: theme.colors['fill-two'],
   padding: `0 ${theme.spacing.xxsmall}px`,
@@ -638,7 +698,7 @@ const InlineCodeSC = styled.code(({ theme }) => ({
 
 const ListSC = styled.ul(({ theme }) => ({
   margin: 0,
-  paddingLeft: theme.spacing.large,
+  ...chatListCss(theme, theme.spacing.xxsmall),
 }))
 
 const HrSC = styled.hr(({ theme }) => ({

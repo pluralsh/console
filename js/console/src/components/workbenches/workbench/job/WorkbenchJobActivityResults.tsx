@@ -7,8 +7,8 @@ import {
   CopyIcon,
   DiffMethod,
   DiffViewer,
+  ExpandIcon,
   Flex,
-  FlexProps,
   IconFrame,
   IconProps,
   Modal,
@@ -21,11 +21,13 @@ import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThrea
 import {
   PreviewablePanel,
   ShowMoreSC,
+  toolSurfaceCss,
 } from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
+import { GraphLegend } from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
@@ -53,7 +55,12 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
-import { getMetricSeries, type MetricSeries } from './workbenchJobMetrics'
+import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
+import {
+  getMetricSeries,
+  metricSeriesId,
+  type MetricSeries,
+} from './workbenchJobMetrics'
 import { TraceWaterfall } from './WorkbenchJobTraces'
 
 export function MemoActivityIcon({
@@ -129,6 +136,7 @@ export function ExpandableUserPrompt({
       onMouseLeave={() => setShowActions(false)}
     >
       <PromptCardSC
+        cornerSize="large"
         $fullWidth={fullWidth}
         $isExpanded={isExpandable && isExpanded}
       >
@@ -315,6 +323,13 @@ export function JobActivityLogsFromTool({
 }
 
 /** Renders pre-fetched metric points (e.g. thought tool attributes). */
+export const METRICS_CHART_MARGIN = {
+  top: 10,
+  right: 25,
+  bottom: 30,
+  left: 30,
+} as const
+
 export function JobActivityMetricsChart({
   metrics,
   lineProps,
@@ -341,6 +356,16 @@ export function JobActivityMetricsChart({
   const graphData = useMemo(() => {
     return getMetricSeries(metrics)
   }, [metrics])
+  const leftMargin = useMemo(() => {
+    let min = Infinity
+    let max = -Infinity
+    for (const { value } of metrics) {
+      if (typeof value !== 'number') continue
+      if (value < min) min = value
+      if (value > max) max = value
+    }
+    return yAxisWidth(min, max, null)
+  }, [metrics])
 
   if (isEmpty(metrics)) return null
 
@@ -348,13 +373,16 @@ export function JobActivityMetricsChart({
     theme: graphTheme,
     data: graphData,
     colors: COLORS,
-    margin: { top: 10, right: 25, bottom: 30, left: 30 } as const,
+    margin: { ...METRICS_CHART_MARGIN, left: leftMargin, right: 32 },
     xScale: { type: 'time' as const, format: 'native' as const },
     yScale: { type: 'linear' as const },
     xFormat: dateFormat,
     lineWidth: 1,
     enablePoints: false,
-    axisLeft: { tickValues: 5 },
+    axisLeft: {
+      tickValues: 5,
+      format: (value: number) => formatUnitValue(value, null),
+    },
     axisBottom: { format: '%H:%M:%S', tickValues: 5 },
     tooltip: SliceTooltip,
   }
@@ -384,6 +412,112 @@ export function JobActivityMetricsChart({
           />
         ))}
     </MetricsChartSC>
+  )
+}
+
+/** Inline metrics chart that opens in the same modal as activity metrics. */
+export function ExpandableJobActivityMetrics({
+  metrics,
+}: {
+  metrics: WorkbenchJobActivityMetricFragment[]
+}) {
+  const [open, setOpen] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
+  const expandTriggerRef = useRef<HTMLDivElement>(null)
+  const series = useMemo(() => getMetricSeries(metrics), [metrics])
+  const selectedSeriesIndex = series.findIndex(
+    ({ id }) => id === selectedSeriesId
+  )
+  const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
+  const visibleMetrics = effectiveSelectedId
+    ? metrics.filter((metric) => metricSeriesId(metric) === effectiveSelectedId)
+    : metrics
+
+  const close = () => {
+    setOpen(false)
+    setFinishedAnimating(false)
+  }
+
+  return (
+    <>
+      <MetricsPanelSC>
+        <Flex
+          direction="column"
+          gap="xsmall"
+          width="100%"
+        >
+          <Flex justify="flex-end">
+            <IconFrame
+              ref={expandTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon size={16} />}
+              textValue="Full screen"
+              tooltip="Full screen"
+              onClick={(event) => {
+                event.stopPropagation()
+                setOpen(true)
+              }}
+            />
+          </Flex>
+          <JobActivityMetricsChart metrics={metrics} />
+        </Flex>
+      </MetricsPanelSC>
+      <Modal
+        header="Metrics"
+        size="large"
+        open={open}
+        onClose={close}
+        scrollable={false}
+        onAnimationEnd={() => setFinishedAnimating(true)}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          requestAnimationFrame(() => expandTriggerRef.current?.focus())
+        }}
+        actions={
+          <Button
+            secondary
+            onClick={close}
+          >
+            Close
+          </Button>
+        }
+      >
+        {finishedAnimating ? (
+          <Flex
+            direction="column"
+            gap="small"
+          >
+            <JobActivityMetricsChart
+              metrics={visibleMetrics}
+              css={{ height: 240 }}
+              lineProps={{
+                margin: { top: 10, right: 25, bottom: 30, left: 30 },
+                colors:
+                  selectedSeriesIndex >= 0
+                    ? [COLORS[selectedSeriesIndex % COLORS.length]]
+                    : COLORS,
+              }}
+            />
+            <WorkbenchJobMetricsLegend
+              series={series}
+              selectedId={effectiveSelectedId}
+              maxHeight={160}
+              onSelect={(id) =>
+                setSelectedSeriesId((selected) => (selected === id ? null : id))
+              }
+            />
+          </Flex>
+        ) : (
+          <RectangleSkeleton
+            $height={240}
+            $width="100%"
+          />
+        )}
+      </Modal>
+    </>
   )
 }
 
@@ -637,69 +771,46 @@ export function JobActivityTraces({
 export function WorkbenchJobMetricsLegend({
   series,
   maxHeight,
-  compact = false,
   selectedId,
   onSelect,
-  ...props
+  paddingLeft,
 }: {
   series: MetricSeries[]
   maxHeight?: number
-  compact?: boolean
   selectedId?: string | null
   onSelect?: (id: string) => void
-} & FlexProps) {
-  if (isEmpty(series)) return null
-
+  paddingLeft?: number
+}) {
   return (
-    <Flex
-      direction="row"
-      wrap="wrap"
-      gap={compact ? 'xsmall' : 'small'}
-      align="center"
-      css={
-        maxHeight != null
-          ? {
-              alignContent: 'flex-start',
-              maxHeight,
-              overflowY: 'auto',
-            }
-          : undefined
-      }
-      {...props}
-    >
-      {series.map(({ id, label }, i) => (
-        <LegendItemSC
-          key={id}
-          type="button"
-          disabled={!onSelect}
-          aria-pressed={onSelect ? selectedId === id : undefined}
-          onClick={() => onSelect?.(id)}
-          $compact={compact}
-          $interactive={!!onSelect}
-          $dimmed={!!selectedId && selectedId !== id}
-        >
-          <MetricsLegendSwatchSC
-            $color={COLORS[i % COLORS.length]}
-            $compact={compact}
-          />
-          {compact ? (
-            <CompactLegendLabelSC>{label}</CompactLegendLabelSC>
-          ) : (
-            <Body2P $color="text-light">{label}</Body2P>
-          )}
-        </LegendItemSC>
-      ))}
-    </Flex>
+    <GraphLegend
+      items={series.map(({ id, label, shortLabel }, i) => ({
+        id,
+        label: shortLabel,
+        title: label,
+        color: COLORS[i % COLORS.length],
+      }))}
+      selectedId={selectedId}
+      onSelect={onSelect}
+      maxHeight={maxHeight}
+      style={{ paddingLeft }}
+    />
   )
 }
 
-export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
+export function JobActivityPrompt({
+  prompt,
+  shimmer = false,
+}: {
+  prompt: Nullable<string>
+  shimmer?: boolean
+}) {
   if (!prompt) return null
   return (
     <PreviewablePanel
       contentKey={`prompt:${prompt.length}`}
       subtle
       collapsedLines={2}
+      shimmer={shimmer}
     >
       <SimplifiedMarkdown
         text={prompt}
@@ -777,6 +888,15 @@ export function ActivityModalIcon({
   )
 }
 
+const MetricsPanelSC = styled.div(({ theme }) => ({
+  ...toolSurfaceCss(theme),
+  borderRadius: theme.borderRadiuses.large,
+  minWidth: 0,
+  overflow: 'hidden',
+  padding: 8,
+  width: '100%',
+}))
+
 const MetricsChartSC = styled.div(() => ({
   height: 160,
   width: '100%',
@@ -820,43 +940,6 @@ const MetricsRangeButtonSC = styled.button<{ $active: boolean }>(
   })
 )
 
-const LegendItemSC = styled.button<{
-  $compact: boolean
-  $interactive: boolean
-  $dimmed: boolean
-}>(({ theme, $compact, $interactive, $dimmed }) => ({
-  ...theme.partials.reset.button,
-  alignItems: 'center',
-  borderRadius: theme.borderRadiuses.medium,
-  color: theme.colors['text-light'],
-  cursor: $interactive ? 'pointer' : 'default',
-  display: 'flex',
-  flex: '0 1 auto',
-  gap: $compact ? 4 : theme.spacing.xsmall,
-  minWidth: 0,
-  opacity: $dimmed ? 0.4 : 1,
-  padding: $compact ? 2 : 0,
-  textAlign: 'left',
-  '&:hover': $interactive
-    ? {
-        backgroundColor: theme.colors['fill-one-hover'],
-      }
-    : undefined,
-  '&:focus-visible': $interactive
-    ? {
-        outline: `1px solid ${theme.colors['border-outline-focused']}`,
-        outlineOffset: 1,
-      }
-    : undefined,
-}))
-
-const CompactLegendLabelSC = styled.span(({ theme }) => ({
-  color: theme.colors['text-light'],
-  fontSize: 11,
-  lineHeight: '14px',
-  overflowWrap: 'anywhere',
-}))
-
 const CanvasLogPanelSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],
   borderRadius: theme.borderRadiuses.medium,
@@ -867,17 +950,6 @@ const CanvasLogPanelSC = styled.div(({ theme }) => ({
   overflowY: 'auto',
   padding: `${theme.spacing.medium}px 0`,
   width: '100%',
-}))
-
-const MetricsLegendSwatchSC = styled.div<{
-  $color: string
-  $compact?: boolean
-}>(({ $color, $compact }) => ({
-  width: $compact ? 8 : 12,
-  height: $compact ? 8 : 12,
-  borderRadius: 2,
-  flexShrink: 0,
-  background: $color,
 }))
 
 const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(

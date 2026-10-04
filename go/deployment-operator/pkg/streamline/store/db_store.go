@@ -520,7 +520,11 @@ func (in *DatabaseStore) SaveUnsyncedComponents(objects []unstructured.Unstructu
 	  parent_uid = excluded.parent_uid,
 	  node = excluded.node,
 	  service_id = excluded.service_id,
-      delete_phase = excluded.delete_phase
+	  delete_phase = excluded.delete_phase
+	WHERE component.applied = 0
+	   OR component.service_id IS NULL
+	   OR component.service_id = ''
+	   OR component.service_id = excluded.service_id
 	`)
 
 	return sqlitex.Execute(conn, sb.String(), nil)
@@ -1242,6 +1246,7 @@ func (in *DatabaseStore) CommitTransientSHA(obj unstructured.Unstructured) error
 
 func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) error {
 	gvk := obj.GroupVersionKind()
+	serviceID := smcommon.GetOwningInventory(obj)
 
 	sha, err := utils.HashResource(obj)
 	if err != nil {
@@ -1275,6 +1280,7 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 			transient_manifest_sha = NULL,
 			manifest = 1,
 			applied = 1,
+			service_id = CASE WHEN ? = '' THEN service_id ELSE ? END,
 			labels = ?
 		WHERE "group" = ? 
 		  AND version = ? 
@@ -1283,8 +1289,10 @@ func (in *DatabaseStore) SyncAppliedResource(obj unstructured.Unstructured) erro
 		  AND name = ?
 	`, &sqlitex.ExecOptions{
 		Args: []interface{}{
-			sha, // Apply SHA.
-			sha, // Server SHA.
+			sha,       // Apply SHA.
+			sha,       // Server SHA.
+			serviceID, // Owning service, empty keeps the current one.
+			serviceID,
 			labels,
 			gvk.Group, gvk.Version, gvk.Kind, obj.GetNamespace(), obj.GetName(), // WHERE clause parameters.
 		},
