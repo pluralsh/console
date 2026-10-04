@@ -36,16 +36,28 @@ export function ServiceObservability() {
         {headerContent}
       </StretchedFlex>
       <PageHeaderContext value={pageHeaderCtx}>
-        <Outlet context={ctx} />
+        <ContentSC>
+          <Outlet context={ctx} />
+        </ContentSC>
       </PageHeaderContext>
     </WrapperSC>
   )
 }
+
+// bounded below the tab bar so each subtab scrolls on its own (or fills it, eg the alerts table)
+const ContentSC = styled.div({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+  overflowY: 'auto',
+})
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
   height: '100%',
+  minWidth: 0,
   paddingBottom: theme.spacing.medium,
 }))

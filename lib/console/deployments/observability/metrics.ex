@@ -115,23 +115,35 @@ defmodule Console.Deployments.Observability.Metrics do
   def queries(:cluster_usage, grouping) when grouping in [:cluster, :namespace, :node],
     do: cluster_usage(grouping)
 
+  def queries(:service_usage, grouping) when grouping in [:service, :pod],
+    do: service_usage(grouping)
+
   @cluster_selector ~s|cluster="${cluster}"|
 
   # cluster-wide timeseries, each broken out by `grouping` (`:cluster` is a single total series)
   defp cluster_usage(grouping) do
     by = group_label(grouping)
-    sel = @cluster_selector
 
+    usage(@cluster_selector, by, by)
+    |> Keyword.merge(cpu_allocatable: allocatable(grouping, :cpu), memory_allocatable: allocatable(grouping, :memory))
+    |> Enum.reject(fn {_, query} -> is_nil(query) end)
+    |> post_process()
+  end
+
+  # the same timeseries scoped to a service's namespace; kubelet volume stats carry no pod
+  # label, so per-pod views break volumes out by claim instead
+  defp service_usage(:service), do: post_process(usage(@service_selector, "", ""))
+  defp service_usage(:pod), do: post_process(usage(@service_selector, "pod", "persistentvolumeclaim"))
+
+  defp usage(sel, by, volume_by) do
     [
       cpu: sum_by(by, ~s|rate(container_cpu_usage_seconds_total{container!="",#{sel}}[${rate}])|),
       cpu_requests: reservation(:requests, :cpu, sel, by),
       cpu_limits: reservation(:limits, :cpu, sel, by),
-      cpu_allocatable: allocatable(grouping, :cpu),
       cpu_throttling: ~s|#{sum_by(by, ~s|rate(container_cpu_cfs_throttled_periods_total{container!="",#{sel}}[${rate}])|)} / #{sum_by(by, ~s|rate(container_cpu_cfs_periods_total{container!="",#{sel}}[${rate}])|)}|,
       memory: sum_by(by, ~s|container_memory_working_set_bytes{image!="",container!="",#{sel}}|),
       memory_requests: reservation(:requests, :memory, sel, by),
       memory_limits: reservation(:limits, :memory, sel, by),
-      memory_allocatable: allocatable(grouping, :memory),
       oom_kills: sum_by(by, ~s|increase(container_oom_events_total{container!="",#{sel}}[${rate}])|),
       network_receive: sum_by(by, ~s|rate(container_network_receive_bytes_total{namespace!="",#{sel}}[${rate}])|),
       network_transmit: sum_by(by, ~s|rate(container_network_transmit_bytes_total{namespace!="",#{sel}}[${rate}])|),
@@ -140,14 +152,13 @@ defmodule Console.Deployments.Observability.Metrics do
       ephemeral_storage: sum_by(by, ~s|container_fs_usage_bytes{container!="",#{sel}}|),
       fs_reads: sum_by(by, ~s|rate(container_fs_reads_bytes_total{container!="",#{sel}}[${rate}])|),
       fs_writes: sum_by(by, ~s|rate(container_fs_writes_bytes_total{container!="",#{sel}}[${rate}])|),
-      volume_usage: sum_by(by, ~s|kubelet_volume_stats_used_bytes{#{sel}}|),
-      volume_capacity: sum_by(by, ~s|kubelet_volume_stats_capacity_bytes{#{sel}}|),
+      volume_usage: sum_by(volume_by, ~s|kubelet_volume_stats_used_bytes{#{sel}}|),
+      volume_capacity: sum_by(volume_by, ~s|kubelet_volume_stats_capacity_bytes{#{sel}}|),
+      volume_fullness: ~s|max by (#{volume_by}) (kubelet_volume_stats_used_bytes{#{sel}} / kubelet_volume_stats_capacity_bytes{#{sel}})|,
       pods_running: pod_scoped(by, ~s|max by (namespace, pod) (kube_pod_status_phase{phase="Running",#{sel}})|),
       pods_pending: pod_scoped(by, ~s|max by (namespace, pod) (kube_pod_status_phase{phase="Pending",#{sel}})|),
       restarts: pod_scoped(by, ~s|max by (namespace, pod, container) (increase(kube_pod_container_status_restarts_total{#{sel}}[${rate}]))|)
     ]
-    |> Enum.reject(fn {_, query} -> is_nil(query) end)
-    |> post_process()
   end
 
   defp group_label(:cluster), do: ""

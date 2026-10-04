@@ -4,7 +4,17 @@ defmodule Prometheus.Client do
   require Logger
 
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
-  @timeouts [connect_options: [timeout: :timer.seconds(30)], receive_timeout: :timer.seconds(30), decode_body: false, retry: false]
+  @query_timeout :timer.seconds(30)
+  # range queries over grouped/joined usage metrics can run long; matches prometheus' default 2m -query.timeout
+  @range_query_timeout :timer.minutes(2)
+  @timeouts [connect_options: [timeout: :timer.seconds(30)], receive_timeout: @query_timeout, decode_body: false, retry: false]
+  @range_timeouts Keyword.put(@timeouts, :receive_timeout, @range_query_timeout)
+
+  @doc "upper bound on a single instant query, for callers awaiting it in a task"
+  def query_timeout(), do: @query_timeout
+
+  @doc "upper bound on a single range query, for callers awaiting it in a task"
+  def range_query_timeout(), do: @range_query_timeout
 
   defstruct [:host, :user, :password]
 
@@ -40,7 +50,7 @@ defmodule Prometheus.Client do
         {"start", DateTime.to_iso8601(start)},
         {"step", step}
       ],
-      headers: @headers ++ auth(client)] ++ @timeouts
+      headers: @headers ++ auth(client)] ++ @range_timeouts
     )
     |> case do
       {:ok, %{body: body, status: 200}} -> Poison.decode(body, as: Response.spec())

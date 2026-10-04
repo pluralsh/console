@@ -19,6 +19,7 @@ import fragments from '../generated/fragments.json'
 import { fetchToken } from './auth'
 
 import { onErrorHandler } from './refreshToken'
+import { shouldRetryRequest } from './retryPolicy'
 
 import customFetch from './uploadLink'
 
@@ -74,11 +75,11 @@ export function buildClient(
 
   const retryLink = new RetryLink({
     delay: { initial: 200, max: 5000 },
-    attempts: {
-      max: Infinity,
-      retryIf: (error, operation) =>
-        !!error && !!fetchToken() && !operation.getContext().noRetry,
-    },
+    attempts: (attempt, operation, error) =>
+      shouldRetryRequest(attempt, error, {
+        authenticated: !!fetchToken(),
+        noRetry: operation.getContext().noRetry,
+      }),
   })
 
   const socket = new PhoenixSocket(wsUrl, {

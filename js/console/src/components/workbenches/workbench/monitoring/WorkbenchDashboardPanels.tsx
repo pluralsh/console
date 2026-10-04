@@ -39,7 +39,7 @@ import {
 import { getMetricSeries, metricSeriesId } from '../job/workbenchJobMetrics'
 import { TraceWaterfall } from '../job/WorkbenchJobTraces'
 import { DashboardTimeseriesChart } from './DashboardTimeseriesChart'
-import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
+import { DashboardToolIcon } from './dashboardToolIcon'
 import { formatUnitValue } from './dashboardUnits'
 import { QueryDefinitionModal } from './QueryDefinitionModal'
 
@@ -206,6 +206,9 @@ function DashboardGraphGrid({
                 queriesEnabled={queriesEnabled}
                 onRangeSelect={onRangeSelect}
                 onUpdate={onUpdate}
+                reserveDescription={rowGraphs.some(
+                  ({ description }) => !!description
+                )}
               />
             </CellSC>
           ))}
@@ -233,6 +236,8 @@ type DashboardPanelProps = {
   queriesEnabled: boolean
   onRangeSelect?: (start: Date, end: Date) => void
   onUpdate?: () => void
+  /** another panel in the row has a description, so keep headers the same height */
+  reserveDescription?: boolean
 }
 
 function DashboardPanel(props: DashboardPanelProps) {
@@ -258,6 +263,7 @@ function DataDashboardPanel({
   queriesEnabled,
   onRangeSelect,
   onUpdate,
+  reserveDescription = false,
 }: DashboardPanelProps) {
   const needsFetch = dashboardGraphNeedsFetch(
     graph.type,
@@ -300,8 +306,6 @@ function DataDashboardPanel({
   const traces = result?.traces?.filter(isNonNullable) ?? []
   const tool = graph.datasource?.tool
   const toolType = graph.workbenchTool?.tool ?? tool
-  const toolName =
-    graph.workbenchTool?.name ?? (tool ? toolDisplayName(tool) : null)
 
   const panel = (
     <PanelCardSC $fullscreen={fullscreen}>
@@ -313,7 +317,17 @@ function DataDashboardPanel({
           flex={1}
         >
           <PanelTitleSC>{graph.title || graph.identifier}</PanelTitleSC>
-          {toolName && <CaptionP $color="text-xlight">{toolName}</CaptionP>}
+          {(graph.description || reserveDescription) && !fullscreen && (
+            <PanelDescriptionSC
+              $color="text-xlight"
+              title={graph.description ?? undefined}
+            >
+              {graph.description}
+            </PanelDescriptionSC>
+          )}
+          {graph.description && fullscreen && (
+            <CaptionP $color="text-xlight">{graph.description}</CaptionP>
+          )}
         </Flex>
         <PanelActionsSC>
           {fullscreen ? (
@@ -411,9 +425,6 @@ function DataDashboardPanel({
           />
         )}
       </PanelBodySC>
-      {graph.description && (
-        <CaptionP $color="text-xlight">{graph.description}</CaptionP>
-      )}
     </PanelCardSC>
   )
 
@@ -747,7 +758,7 @@ const GraphGridSC = styled.div(({ theme }) => ({
 }))
 
 const RowSC = styled.div<{ $columns: number }>(({ theme, $columns }) => ({
-  alignItems: 'start',
+  alignItems: 'stretch',
   containerType: 'inline-size',
   display: 'grid',
   gap: theme.spacing.medium,
@@ -773,6 +784,7 @@ const PanelCardSC = styled(Card)<{ $fullscreen: boolean }>(
     backgroundColor: theme.colors['fill-zero'],
     display: 'flex',
     flexDirection: 'column',
+    flex: $fullscreen ? undefined : 1,
     gap: theme.spacing.medium,
     height: $fullscreen ? '100%' : 'auto',
     minWidth: 0,
@@ -807,6 +819,15 @@ const PanelBodySC = styled.div({
   flexDirection: 'column',
   minWidth: 0,
   width: '100%',
+})
+
+// a fixed two lines, so charts stay level across a row whatever the description length
+const PanelDescriptionSC = styled(CaptionP)({
+  display: '-webkit-box',
+  height: '2lh',
+  overflow: 'hidden',
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 2,
 })
 
 const SkeletonStackSC = styled.div(({ theme }) => ({

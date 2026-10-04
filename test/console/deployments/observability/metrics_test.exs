@@ -70,7 +70,7 @@ defmodule Console.Deployments.Observability.MetricsTest do
 
       for {grouping, by} <- @groupings, {key, query} <- Metrics.queries(:cluster_usage, grouping) do
         assert query =~ ~s|cluster="${cluster}"|, "#{grouping}.#{key} isn't cluster scoped: #{query}"
-        assert String.starts_with?(query, "sum #{by} ("), "#{grouping}.#{key} isn't grouped #{by}: #{query}"
+        assert String.starts_with?(query, ["sum #{by} (", "max #{by} ("]), "#{grouping}.#{key} isn't grouped #{by}: #{query}"
         refute Client.variable_subst(query, vars) =~ "$", "#{grouping}.#{key} left a variable unsubstituted"
       end
     end
@@ -95,10 +95,43 @@ defmodule Console.Deployments.Observability.MetricsTest do
       end
     end
 
+    test "volume fullness reports the fullest volume rather than an aggregate ratio" do
+      ns = Map.new(Metrics.queries(:cluster_usage, :namespace))
+
+      assert ns[:volume_fullness] ==
+        ~s|max by (namespace) (kubelet_volume_stats_used_bytes{cluster="${cluster}"} / kubelet_volume_stats_capacity_bytes{cluster="${cluster}"})|
+    end
+
     test "allocatable capacity is only offered where it's meaningful" do
       refute Keyword.has_key?(Metrics.queries(:cluster_usage, :namespace), :cpu_allocatable)
       assert Keyword.has_key?(Metrics.queries(:cluster_usage, :node), :memory_allocatable)
       assert Keyword.has_key?(Metrics.queries(:cluster_usage, :cluster), :cpu_allocatable)
+    end
+  end
+
+  describe "service usage queries" do
+    test "every query is namespace scoped, grouped, and fully substituted" do
+      vars = [cluster: "c", namespace: "ns", rate: "5m"]
+
+      for grouping <- [:service, :pod], {key, query} <- Metrics.queries(:service_usage, grouping) do
+        by =
+          case {grouping, key} do
+            {:service, _} -> "by ()"
+            {:pod, k} when k in ~w(volume_usage volume_capacity volume_fullness)a -> "by (persistentvolumeclaim)"
+            {:pod, _} -> "by (pod)"
+          end
+
+        assert query =~ ~s|cluster="${cluster}",namespace="${namespace}"|, "#{grouping}.#{key} isn't namespace scoped: #{query}"
+        assert String.starts_with?(query, ["sum #{by} (", "max #{by} ("]), "#{grouping}.#{key} isn't grouped #{by}: #{query}"
+        refute Client.variable_subst(query, vars) =~ "$", "#{grouping}.#{key} left a variable unsubstituted"
+      end
+    end
+
+    test "services offer no node allocatable capacity" do
+      for grouping <- [:service, :pod] do
+        refute Keyword.has_key?(Metrics.queries(:service_usage, grouping), :cpu_allocatable)
+        refute Keyword.has_key?(Metrics.queries(:service_usage, grouping), :memory_allocatable)
+      end
     end
   end
 

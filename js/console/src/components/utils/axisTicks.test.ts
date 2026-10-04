@@ -32,11 +32,17 @@ describe('niceAxis', () => {
     )
   })
 
-  it('aligns durations to clock steps', () => {
-    expect(niceAxis(0, 400, { base: 'duration' }).ticks).toEqual([
-      0, 120, 240, 360, 480,
-    ])
-    expect(niceAxis(0, 0.35, { base: 'duration' }).step).toBe(0.1)
+  it('aligns millisecond durations to clock steps', () => {
+    expect(niceAxis(0, 400_000, { base: 'duration' }).ticks).toEqual(
+      [0, 120, 240, 360, 480].map((s) => s * 1000)
+    )
+    expect(niceAxis(0, 350, { base: 'duration' }).step).toBe(100)
+  })
+
+  it('aligns durations in other units via msPerUnit', () => {
+    const seconds = { base: 'duration', msPerUnit: 1000 } as const
+    expect(niceAxis(0, 400, seconds).ticks).toEqual([0, 120, 240, 360, 480])
+    expect(niceAxis(0, 0.35, seconds).step).toBe(0.1)
   })
 
   it('keeps count axes on whole numbers', () => {

@@ -57,7 +57,7 @@ jobs:
       - name: Helm Login
         id: helm_login
         run: |
-          gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://us-docker.pkg.dev
+          gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin us-docker.pkg.dev
           echo "token=$(gcloud auth application-default print-access-token)" >> $GITHUB_OUTPUT
       - name: Chart | Check
         id: chart_exists

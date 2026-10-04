@@ -1,4 +1,4 @@
-import { niceAxis, seriesExtent } from 'components/utils/axisTicks'
+import { seriesExtent } from 'components/utils/axisTicks'
 import {
   ChartRangeSelect,
   timeAxisFormat,
@@ -15,7 +15,7 @@ import {
 } from '../job/WorkbenchJobActivityResults'
 import {
   formatUnitValue,
-  tickBaseForUnit,
+  unitAxis,
   xAxisOverhang,
   yAxisLabelsWidth,
 } from './dashboardUnits'
@@ -37,7 +37,7 @@ export function DashboardTimeseriesChart({
   const xFormat = timeAxisFormat(timeWindow)
   const yAxis = useMemo(() => {
     const { min, max } = seriesExtent(metrics.map(({ value }) => value))
-    return niceAxis(min, max, { base: tickBaseForUnit(unit) })
+    return unitAxis(min, max, unit)
   }, [metrics, unit])
   const margin = useMemo(
     () => ({

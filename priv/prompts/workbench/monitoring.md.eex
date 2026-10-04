@@ -17,7 +17,7 @@ Dashboard datasource inputs use `${name}` placeholders to reference dashboard in
 
 The dashboard viewer has a global time range control (live presets from 15m to 1 month, or any absolute range) and defaults to the past 1h. Prefer 1h when validating dashboard queries unless the user asks for another period. Do not create dashboard inputs for choosing the time range. For dashboard metric data sources, do not hardcode a `step` unless the user explicitly requires one. The dashboard runtime derives a provider-compatible step from the viewer's selected range to return a useful number of datapoints. A fixed step prevents that adaptation and can produce invalid or overly dense results.
 
-Set `unit` on timeseries, bar, gauge, stat, and table graphs whenever the plotted values have a known unit: `bytes` for memory, disk, and network throughput, `time` for latencies and durations in seconds, `cpu` for CPU cores, and `percent` for 0-100 utilization. Axes and tooltips are formatted from it.
+Set `unit` on timeseries, bar, gauge, stat, and table graphs whenever the plotted values have a known unit: `bytes` for memory, disk, and network throughput, `time` for latencies and durations in seconds, `milliseconds` for latencies and durations in milliseconds (check the metric name or unit suffix, eg `_milliseconds`/`_ms`, since many exporters such as PromEx don't use seconds), `cpu` for CPU cores, and `percent` for 0-100 utilization. Axes and tooltips are formatted from it.
 
 Dashboard and monitor definitions are also valuable documentation for the system. Their descriptions, graph data sources, variable inputs, queries, thresholds, and current monitor states should inform further observability queries.
 

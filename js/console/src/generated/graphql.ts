@@ -3531,7 +3531,7 @@ export type ClusterUsageHistoryEdge = {
   node?: Maybe<ClusterUsageHistory>;
 };
 
-/** Cluster usage timeseries; when grouped, each series carries a `namespace` or `node` label */
+/** Cluster or service usage timeseries; when grouped, each series carries the grouping's label (`namespace`, `node` or `pod`) */
 export type ClusterUsageMetrics = {
   __typename?: 'ClusterUsageMetrics';
   /** cpu usage in cores */
@@ -3576,6 +3576,8 @@ export type ClusterUsageMetrics = {
   restarts?: Maybe<Array<Maybe<MetricResponse>>>;
   /** persistent volume capacity in bytes */
   volumeCapacity?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** fraction (0-1) of capacity used by the fullest persistent volume */
+  volumeFullness?: Maybe<Array<Maybe<MetricResponse>>>;
   /** persistent volume usage in bytes */
   volumeUsage?: Maybe<Array<Maybe<MetricResponse>>>;
 };
@@ -4309,6 +4311,7 @@ export enum DashboardGraphType {
 export enum DashboardGraphUnit {
   Bytes = 'BYTES',
   Cpu = 'CPU',
+  Milliseconds = 'MILLISECONDS',
   None = 'NONE',
   Percent = 'PERCENT',
   Time = 'TIME'
@@ -14911,6 +14914,8 @@ export type ServiceDeployment = {
   revisions?: Maybe<RevisionConnection>;
   scalingRecommendations?: Maybe<Array<Maybe<ClusterScalingRecommendation>>>;
   serviceMetrics?: Maybe<ServiceComponentMetrics>;
+  /** the cluster usage metric set scoped to this service's namespace; only selected fields are queried */
+  serviceUsageMetrics?: Maybe<ClusterUsageMetrics>;
   /** latest git sha we pulled from */
   sha?: Maybe<Scalars['String']['output']>;
   /** the sources of this service */
@@ -15000,6 +15005,15 @@ export type ServiceDeploymentRevisionsArgs = {
 
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeploymentServiceMetricsArgs = {
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentServiceUsageMetricsArgs = {
+  groupBy?: InputMaybe<ServiceMetricsGrouping>;
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
@@ -15114,6 +15128,13 @@ export type ServiceMetadataAttributes = {
   /** a list of images to deployed in this service */
   images?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
+export enum ServiceMetricsGrouping {
+  /** one series per pod (persistent volumes are broken out by claim instead) */
+  Pod = 'POD',
+  /** a single series totaled across the service's namespace */
+  Service = 'SERVICE'
+}
 
 export type ServicePort = {
   __typename?: 'ServicePort';
@@ -20592,7 +20613,7 @@ export type ClusterMetricsQueryVariables = Exact<{
 
 export type ClusterMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, clusterMetrics?: { __typename?: 'ClusterMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, pods?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null };
 
-export type ClusterUsageMetricsFragment = { __typename?: 'ClusterUsageMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuThrottling?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, oomKills?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceiveDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmitDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsReads?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsWrites?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeCapacity?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsRunning?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsPending?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
+export type ClusterUsageMetricsFragment = { __typename?: 'ClusterUsageMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuThrottling?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, oomKills?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceiveDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmitDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsReads?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsWrites?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeCapacity?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeFullness?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsRunning?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsPending?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
 
 export type ClusterUsageMetricsQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -20619,13 +20640,48 @@ export type ClusterUsageMetricsQueryVariables = Exact<{
   fsWrites?: Scalars['Boolean']['input'];
   volumeUsage?: Scalars['Boolean']['input'];
   volumeCapacity?: Scalars['Boolean']['input'];
+  volumeFullness?: Scalars['Boolean']['input'];
   podsRunning?: Scalars['Boolean']['input'];
   podsPending?: Scalars['Boolean']['input'];
   restarts?: Scalars['Boolean']['input'];
 }>;
 
 
-export type ClusterUsageMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, clusterUsageMetrics?: { __typename?: 'ClusterUsageMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuThrottling?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, oomKills?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceiveDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmitDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsReads?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsWrites?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeCapacity?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsRunning?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsPending?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+export type ClusterUsageMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, clusterUsageMetrics?: { __typename?: 'ClusterUsageMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuThrottling?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, oomKills?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceiveDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmitDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsReads?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsWrites?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeCapacity?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeFullness?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsRunning?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsPending?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+
+export type ServiceUsageMetricsQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+  groupBy?: InputMaybe<ServiceMetricsGrouping>;
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  cpu?: Scalars['Boolean']['input'];
+  cpuRequests?: Scalars['Boolean']['input'];
+  cpuLimits?: Scalars['Boolean']['input'];
+  cpuAllocatable?: Scalars['Boolean']['input'];
+  cpuThrottling?: Scalars['Boolean']['input'];
+  memory?: Scalars['Boolean']['input'];
+  memoryRequests?: Scalars['Boolean']['input'];
+  memoryLimits?: Scalars['Boolean']['input'];
+  memoryAllocatable?: Scalars['Boolean']['input'];
+  oomKills?: Scalars['Boolean']['input'];
+  networkReceive?: Scalars['Boolean']['input'];
+  networkTransmit?: Scalars['Boolean']['input'];
+  networkReceiveDropped?: Scalars['Boolean']['input'];
+  networkTransmitDropped?: Scalars['Boolean']['input'];
+  ephemeralStorage?: Scalars['Boolean']['input'];
+  fsReads?: Scalars['Boolean']['input'];
+  fsWrites?: Scalars['Boolean']['input'];
+  volumeUsage?: Scalars['Boolean']['input'];
+  volumeCapacity?: Scalars['Boolean']['input'];
+  volumeFullness?: Scalars['Boolean']['input'];
+  podsRunning?: Scalars['Boolean']['input'];
+  podsPending?: Scalars['Boolean']['input'];
+  restarts?: Scalars['Boolean']['input'];
+}>;
+
+
+export type ServiceUsageMetricsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, serviceUsageMetrics?: { __typename?: 'ClusterUsageMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuThrottling?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, oomKills?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceiveDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmitDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, ephemeralStorage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsReads?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, fsWrites?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeUsage?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeCapacity?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, volumeFullness?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsRunning?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsPending?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
 
 export type ClusterNodeMetricsQueryVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -25973,6 +26029,9 @@ export const ClusterUsageMetricsFragmentDoc = gql`
     ...MetricResponse
   }
   volumeCapacity @include(if: $volumeCapacity) {
+    ...MetricResponse
+  }
+  volumeFullness @include(if: $volumeFullness) {
     ...MetricResponse
   }
   podsRunning @include(if: $podsRunning) {
@@ -36015,7 +36074,7 @@ export type ClusterMetricsLazyQueryHookResult = ReturnType<typeof useClusterMetr
 export type ClusterMetricsSuspenseQueryHookResult = ReturnType<typeof useClusterMetricsSuspenseQuery>;
 export type ClusterMetricsQueryResult = Apollo.QueryResult<ClusterMetricsQuery, ClusterMetricsQueryVariables>;
 export const ClusterUsageMetricsDocument = gql`
-    query ClusterUsageMetrics($clusterId: ID!, $groupBy: ClusterMetricsGrouping, $start: DateTime, $stop: DateTime, $step: String, $cpu: Boolean! = false, $cpuRequests: Boolean! = false, $cpuLimits: Boolean! = false, $cpuAllocatable: Boolean! = false, $cpuThrottling: Boolean! = false, $memory: Boolean! = false, $memoryRequests: Boolean! = false, $memoryLimits: Boolean! = false, $memoryAllocatable: Boolean! = false, $oomKills: Boolean! = false, $networkReceive: Boolean! = false, $networkTransmit: Boolean! = false, $networkReceiveDropped: Boolean! = false, $networkTransmitDropped: Boolean! = false, $ephemeralStorage: Boolean! = false, $fsReads: Boolean! = false, $fsWrites: Boolean! = false, $volumeUsage: Boolean! = false, $volumeCapacity: Boolean! = false, $podsRunning: Boolean! = false, $podsPending: Boolean! = false, $restarts: Boolean! = false) {
+    query ClusterUsageMetrics($clusterId: ID!, $groupBy: ClusterMetricsGrouping, $start: DateTime, $stop: DateTime, $step: String, $cpu: Boolean! = false, $cpuRequests: Boolean! = false, $cpuLimits: Boolean! = false, $cpuAllocatable: Boolean! = false, $cpuThrottling: Boolean! = false, $memory: Boolean! = false, $memoryRequests: Boolean! = false, $memoryLimits: Boolean! = false, $memoryAllocatable: Boolean! = false, $oomKills: Boolean! = false, $networkReceive: Boolean! = false, $networkTransmit: Boolean! = false, $networkReceiveDropped: Boolean! = false, $networkTransmitDropped: Boolean! = false, $ephemeralStorage: Boolean! = false, $fsReads: Boolean! = false, $fsWrites: Boolean! = false, $volumeUsage: Boolean! = false, $volumeCapacity: Boolean! = false, $volumeFullness: Boolean! = false, $podsRunning: Boolean! = false, $podsPending: Boolean! = false, $restarts: Boolean! = false) {
   cluster(id: $clusterId) {
     id
     clusterUsageMetrics(groupBy: $groupBy, start: $start, stop: $stop, step: $step) {
@@ -36061,6 +36120,7 @@ export const ClusterUsageMetricsDocument = gql`
  *      fsWrites: // value for 'fsWrites'
  *      volumeUsage: // value for 'volumeUsage'
  *      volumeCapacity: // value for 'volumeCapacity'
+ *      volumeFullness: // value for 'volumeFullness'
  *      podsRunning: // value for 'podsRunning'
  *      podsPending: // value for 'podsPending'
  *      restarts: // value for 'restarts'
@@ -36086,6 +36146,79 @@ export type ClusterUsageMetricsQueryHookResult = ReturnType<typeof useClusterUsa
 export type ClusterUsageMetricsLazyQueryHookResult = ReturnType<typeof useClusterUsageMetricsLazyQuery>;
 export type ClusterUsageMetricsSuspenseQueryHookResult = ReturnType<typeof useClusterUsageMetricsSuspenseQuery>;
 export type ClusterUsageMetricsQueryResult = Apollo.QueryResult<ClusterUsageMetricsQuery, ClusterUsageMetricsQueryVariables>;
+export const ServiceUsageMetricsDocument = gql`
+    query ServiceUsageMetrics($serviceId: ID!, $groupBy: ServiceMetricsGrouping, $start: DateTime, $stop: DateTime, $step: String, $cpu: Boolean! = false, $cpuRequests: Boolean! = false, $cpuLimits: Boolean! = false, $cpuAllocatable: Boolean! = false, $cpuThrottling: Boolean! = false, $memory: Boolean! = false, $memoryRequests: Boolean! = false, $memoryLimits: Boolean! = false, $memoryAllocatable: Boolean! = false, $oomKills: Boolean! = false, $networkReceive: Boolean! = false, $networkTransmit: Boolean! = false, $networkReceiveDropped: Boolean! = false, $networkTransmitDropped: Boolean! = false, $ephemeralStorage: Boolean! = false, $fsReads: Boolean! = false, $fsWrites: Boolean! = false, $volumeUsage: Boolean! = false, $volumeCapacity: Boolean! = false, $volumeFullness: Boolean! = false, $podsRunning: Boolean! = false, $podsPending: Boolean! = false, $restarts: Boolean! = false) {
+  serviceDeployment(id: $serviceId) {
+    id
+    serviceUsageMetrics(groupBy: $groupBy, start: $start, stop: $stop, step: $step) {
+      ...ClusterUsageMetrics
+    }
+  }
+}
+    ${ClusterUsageMetricsFragmentDoc}`;
+
+/**
+ * __useServiceUsageMetricsQuery__
+ *
+ * To run a query within a React component, call `useServiceUsageMetricsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceUsageMetricsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceUsageMetricsQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      groupBy: // value for 'groupBy'
+ *      start: // value for 'start'
+ *      stop: // value for 'stop'
+ *      step: // value for 'step'
+ *      cpu: // value for 'cpu'
+ *      cpuRequests: // value for 'cpuRequests'
+ *      cpuLimits: // value for 'cpuLimits'
+ *      cpuAllocatable: // value for 'cpuAllocatable'
+ *      cpuThrottling: // value for 'cpuThrottling'
+ *      memory: // value for 'memory'
+ *      memoryRequests: // value for 'memoryRequests'
+ *      memoryLimits: // value for 'memoryLimits'
+ *      memoryAllocatable: // value for 'memoryAllocatable'
+ *      oomKills: // value for 'oomKills'
+ *      networkReceive: // value for 'networkReceive'
+ *      networkTransmit: // value for 'networkTransmit'
+ *      networkReceiveDropped: // value for 'networkReceiveDropped'
+ *      networkTransmitDropped: // value for 'networkTransmitDropped'
+ *      ephemeralStorage: // value for 'ephemeralStorage'
+ *      fsReads: // value for 'fsReads'
+ *      fsWrites: // value for 'fsWrites'
+ *      volumeUsage: // value for 'volumeUsage'
+ *      volumeCapacity: // value for 'volumeCapacity'
+ *      volumeFullness: // value for 'volumeFullness'
+ *      podsRunning: // value for 'podsRunning'
+ *      podsPending: // value for 'podsPending'
+ *      restarts: // value for 'restarts'
+ *   },
+ * });
+ */
+export function useServiceUsageMetricsQuery(baseOptions: Apollo.QueryHookOptions<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables> & ({ variables: ServiceUsageMetricsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>(ServiceUsageMetricsDocument, options);
+      }
+export function useServiceUsageMetricsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>(ServiceUsageMetricsDocument, options);
+        }
+// @ts-ignore
+export function useServiceUsageMetricsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>;
+export function useServiceUsageMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceUsageMetricsQuery | undefined, ServiceUsageMetricsQueryVariables>;
+export function useServiceUsageMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>(ServiceUsageMetricsDocument, options);
+        }
+export type ServiceUsageMetricsQueryHookResult = ReturnType<typeof useServiceUsageMetricsQuery>;
+export type ServiceUsageMetricsLazyQueryHookResult = ReturnType<typeof useServiceUsageMetricsLazyQuery>;
+export type ServiceUsageMetricsSuspenseQueryHookResult = ReturnType<typeof useServiceUsageMetricsSuspenseQuery>;
+export type ServiceUsageMetricsQueryResult = Apollo.QueryResult<ServiceUsageMetricsQuery, ServiceUsageMetricsQueryVariables>;
 export const ClusterNodeMetricsDocument = gql`
     query ClusterNodeMetrics($clusterId: ID!, $node: String!, $start: DateTime, $stop: DateTime, $step: String) {
   cluster(id: $clusterId) {
@@ -52077,6 +52210,7 @@ export const namedOperations = {
     TagPairs: 'TagPairs',
     ClusterMetrics: 'ClusterMetrics',
     ClusterUsageMetrics: 'ClusterUsageMetrics',
+    ServiceUsageMetrics: 'ServiceUsageMetrics',
     ClusterNodeMetrics: 'ClusterNodeMetrics',
     ClusterNetworkGraph: 'ClusterNetworkGraph',
     ClusterKubernetesMetrics: 'ClusterKubernetesMetrics',

@@ -235,7 +235,8 @@ export const ColAlertTitle = columnHelper.accessor((alert) => alert.title, {
 export const ColAlertUrl = columnHelper.accessor((alert) => alert, {
   id: 'url',
   header: 'URL',
-  meta: { gridTemplate: 'minmax(280px, 2fr)', truncate: true },
+  // truncates, so it can give up width before the table outgrows narrow containers
+  meta: { gridTemplate: 'minmax(120px, 2fr)', truncate: true },
   cell: UrlCell,
 })
 

@@ -37,7 +37,7 @@ defmodule Console.Schema.Dashboard do
       traces: 9,
       section: 10
 
-    defenum Unit, none: 0, bytes: 1, time: 2, cpu: 3, percent: 4
+    defenum Unit, none: 0, bytes: 1, time: 2, cpu: 3, percent: 4, milliseconds: 5
 
     defmodule Layout do
       use Console.Schema.Base

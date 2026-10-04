@@ -7,7 +7,6 @@ import {
   KubernetesIcon,
   ListBoxItem,
   NamespaceIcon,
-  Select,
   SmallNodeIcon,
   SmallPodIcon,
   TimeSeriesIcon,
@@ -15,14 +14,7 @@ import {
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { MetricsCard } from 'components/utils/metrics/MetricsCard'
 import { MetricsSection } from 'components/utils/metrics/MetricsSection'
-import {
-  MetricsGraphCard,
-  MetricsGraphGrid,
-} from 'components/utils/metrics/MetricsGraphCard'
-import {
-  METRIC_FORMATTERS,
-  METRIC_TICK_BASES,
-} from 'components/utils/metrics/metricFormats'
+import { MetricsGraphGrid } from 'components/utils/metrics/MetricsGraphCard'
 import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
@@ -43,7 +35,7 @@ import { Prometheus } from '../../../utils/prometheus'
 
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
-import { Graph } from 'components/utils/Graph'
+import { CompactSelect } from 'components/utils/CompactSelect'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
@@ -76,6 +68,7 @@ import {
   clusterMetricSections,
   usageFieldVariables,
 } from './metrics/clusterMetricsGraphs'
+import { UsageMetricGraphCard } from './metrics/UsageMetricGraphCard'
 
 const { capacity, CapacityType, toValues } = Prometheus
 const HEATMAP_HEIGHT = 350
@@ -194,7 +187,7 @@ export function ClusterMetricsTimeseries() {
           align="center"
         >
           <CaptionP $color="text-xlight">Group by</CaptionP>
-          <Select
+          <CompactSelect
             size="small"
             width={140}
             selectedKey={grouping}
@@ -210,7 +203,7 @@ export function ClusterMetricsTimeseries() {
                 leftContent={icon}
               />
             ))}
-          </Select>
+          </CompactSelect>
         </Flex>
         <Flex
           gap="small"
@@ -246,7 +239,7 @@ export function ClusterMetricsTimeseries() {
 function ClusterMetricGraphCard({
   clusterId,
   grouping,
-  graph: { title, tooltip, format, fields, series },
+  graph,
   timeRange,
 }: {
   clusterId?: string
@@ -265,7 +258,7 @@ function ClusterMetricGraphCard({
       clusterId: clusterId ?? '',
       groupBy: grouping,
       ...metricsQueryWindow(timeRange.timeWindow),
-      ...usageFieldVariables(fields),
+      ...usageFieldVariables(graph.fields),
     },
     skip: !metricsEnabled || !clusterId,
     fetchPolicy: 'cache-and-network',
@@ -274,39 +267,15 @@ function ClusterMetricGraphCard({
     { data: currentData, previousData },
     timeRange.revision
   )
-  const metrics = data?.cluster?.clusterUsageMetrics
-  const graphData = useMemo(
-    () => (metrics ? series(metrics) : []),
-    [metrics, series]
-  )
 
   return (
-    <MetricsGraphCard
-      title={title}
-      tooltip={tooltip}
-    >
-      {error ? (
-        <GqlError error={error} />
-      ) : !data && loading ? (
-        <RectangleSkeleton
-          $height="100%"
-          $width="100%"
-        />
-      ) : isEmpty(graphData) ? (
-        <EmptyState
-          message="No data"
-          description="Prometheus returned no series in the selected time range."
-        />
-      ) : (
-        <Graph
-          data={graphData}
-          yFormat={METRIC_FORMATTERS[format]}
-          yTickBase={METRIC_TICK_BASES[format]}
-          timeWindow={timeRange.timeWindow}
-          onRangeSelect={timeRange.selectWindow}
-        />
-      )}
-    </MetricsGraphCard>
+    <UsageMetricGraphCard
+      graph={graph}
+      metrics={data?.cluster?.clusterUsageMetrics}
+      loading={loading}
+      error={error}
+      timeRange={timeRange}
+    />
   )
 }
 
@@ -394,7 +363,7 @@ export function ClusterMetricsHeatmap() {
           align="center"
         >
           <CaptionP $color="text-xlight">Group by</CaptionP>
-          <Select
+          <CompactSelect
             size="small"
             width={140}
             selectedKey={heatMapFlavor}
@@ -408,7 +377,7 @@ export function ClusterMetricsHeatmap() {
                 leftContent={HEAT_MAP_FLAVOR_ICONS[flavor]}
               />
             ))}
-          </Select>
+          </CompactSelect>
         </Flex>
       </Flex>
       {!(hasHeatmapData || loading) ? (

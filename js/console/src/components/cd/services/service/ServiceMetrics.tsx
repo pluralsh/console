@@ -1,13 +1,25 @@
 import {
+  DeploymentIcon,
   EmptyState,
   Flex,
   HeatMapIcon,
   ListBoxItem,
-  Select,
+  SmallPodIcon,
   TimeSeriesIcon,
 } from '@pluralsh/design-system'
+import { CompactSelect } from 'components/utils/CompactSelect'
 import { MetricsCard } from 'components/utils/metrics/MetricsCard'
-import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
+import {
+  MetricsGraphGrid,
+  MetricsScrollSC,
+} from 'components/utils/metrics/MetricsGraphCard'
+import { MetricsSection } from 'components/utils/metrics/MetricsSection'
+import {
+  type ClusterMetricGraph,
+  usageFieldVariables,
+} from 'components/cd/cluster/metrics/clusterMetricsGraphs'
+import { UsageMetricGraphCard } from 'components/cd/cluster/metrics/UsageMetricGraphCard'
+import { serviceMetricSections } from './metrics/serviceMetricsGraphs'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   useLoadingDeploymentSettings,
@@ -16,13 +28,15 @@ import {
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
 import {
+  type TimeRangeState,
   useRangeQueryData,
   useTimeRange,
 } from 'components/utils/timerange/useTimeRange'
 import {
   HeatMapFlavor,
+  ServiceMetricsGrouping,
   useServiceHeatMapQuery,
-  useServiceMetricsQuery,
+  useServiceUsageMetricsQuery,
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { useTheme } from 'styled-components'
@@ -36,10 +50,6 @@ import {
   useParams,
 } from 'react-router-dom'
 import { isNonNullable } from 'utils/isNonNullable'
-import {
-  ResourceMetricsGraphs,
-  hasResourceMetrics,
-} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
@@ -136,8 +146,9 @@ function ServiceMetricsHeatmap() {
           align="center"
         >
           <CaptionP $color="text-xlight">Group by</CaptionP>
-          <Select
-            width={160}
+          <CompactSelect
+            size="small"
+            width={140}
             selectedKey={heatMapFlavor}
             onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
           >
@@ -149,7 +160,7 @@ function ServiceMetricsHeatmap() {
                   label={capitalize(flavor)}
                 />
               ))}
-          </Select>
+          </CompactSelect>
         </Flex>
       </Flex>
       {!(heatMapData || isLoading) ? (
@@ -213,114 +224,24 @@ function ServiceMetricsHeatmap() {
   )
 }
 
+const GROUPINGS = [
+  {
+    key: ServiceMetricsGrouping.Service,
+    label: 'Service',
+    icon: <DeploymentIcon size={16} />,
+  },
+  {
+    key: ServiceMetricsGrouping.Pod,
+    label: 'Pod',
+    icon: <SmallPodIcon size={16} />,
+  },
+]
+
 function ServiceMetricsTimeseries() {
-  const theme = useTheme()
   const { serviceId } = useParams()
   const timeRange = useTimeRange()
-  const {
-    data: currentData,
-    previousData,
-    loading,
-    error: metricsError,
-  } = useServiceMetricsQuery({
-    variables: {
-      id: serviceId ?? '',
-      ...metricsQueryWindow(timeRange.timeWindow),
-    },
-    skip: !serviceId,
-    fetchPolicy: 'cache-and-network',
-  })
-  const data = useRangeQueryData(
-    { data: currentData, previousData },
-    timeRange.revision
-  )
-
-  const {
-    cpu,
-    mem,
-    podCpu,
-    podMem,
-    cpuRequests,
-    memRequests,
-    cpuLimits,
-    memLimits,
-    podCpuRequests,
-    podMemRequests,
-    podCpuLimits,
-    podMemLimits,
-  } = useMemo(() => {
-    const {
-      cpu,
-      mem,
-      podCpu,
-      podMem,
-      cpuRequests,
-      memRequests,
-      cpuLimits,
-      memLimits,
-      podCpuRequests,
-      podMemRequests,
-      podCpuLimits,
-      podMemLimits,
-    } = data?.serviceDeployment?.serviceMetrics || {}
-
-    return {
-      cpu: (cpu || []).filter(isNonNullable),
-      mem: (mem || []).filter(isNonNullable),
-      podCpu: (podCpu || []).filter(isNonNullable),
-      podMem: (podMem || []).filter(isNonNullable),
-      cpuRequests: (cpuRequests || []).filter(isNonNullable),
-      memRequests: (memRequests || []).filter(isNonNullable),
-      cpuLimits: (cpuLimits || []).filter(isNonNullable),
-      memLimits: (memLimits || []).filter(isNonNullable),
-      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
-      podMemRequests: (podMemRequests || []).filter(isNonNullable),
-      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
-      podMemLimits: (podMemLimits || []).filter(isNonNullable),
-    }
-  }, [data])
-
-  let content = (
-    <MetricsCard css={{ padding: theme.spacing.medium }}>
-      <EmptyState message="No metrics available" />
-    </MetricsCard>
-  )
-
-  if (
-    hasResourceMetrics({
-      cpu,
-      mem,
-      podCpu,
-      podMem,
-      cpuRequests,
-      memRequests,
-      cpuLimits,
-      memLimits,
-      podCpuRequests,
-      podMemRequests,
-      podCpuLimits,
-      podMemLimits,
-    })
-  ) {
-    content = (
-      <ResourceMetricsGraphs
-        cpu={cpu}
-        mem={mem}
-        podCpu={podCpu}
-        podMem={podMem}
-        cpuRequests={cpuRequests}
-        memRequests={memRequests}
-        cpuLimits={cpuLimits}
-        memLimits={memLimits}
-        podCpuRequests={podCpuRequests}
-        podMemRequests={podMemRequests}
-        podCpuLimits={podCpuLimits}
-        podMemLimits={podMemLimits}
-        timeWindow={timeRange.timeWindow}
-        onRangeSelect={timeRange.selectWindow}
-      />
-    )
-  }
+  const [grouping, setGrouping] = useState(ServiceMetricsGrouping.Service)
+  const sections = useMemo(() => serviceMetricSections(grouping), [grouping])
 
   return (
     <Flex
@@ -330,20 +251,101 @@ function ServiceMetricsTimeseries() {
       width="100%"
       minHeight={0}
     >
-      <MetricsTimeRangeControl timeRange={timeRange} />
+      <Flex
+        align="center"
+        justifyContent="space-between"
+        gap="medium"
+        wrap="wrap"
+      >
+        <Flex
+          gap="small"
+          align="center"
+        >
+          <CaptionP $color="text-xlight">Group by</CaptionP>
+          <CompactSelect
+            size="small"
+            width={140}
+            selectedKey={grouping}
+            leftContent={GROUPINGS.find(({ key }) => key === grouping)?.icon}
+            onSelectionChange={(key) =>
+              setGrouping(key as ServiceMetricsGrouping)
+            }
+          >
+            {GROUPINGS.map(({ key, label, icon }) => (
+              <ListBoxItem
+                key={key}
+                label={label}
+                leftContent={icon}
+              />
+            ))}
+          </CompactSelect>
+        </Flex>
+        <MetricsTimeRangeControl timeRange={timeRange} />
+      </Flex>
       <MetricsScrollSC>
-        {!data && loading ? (
-          <RectangleSkeleton
-            $height="100%"
-            $width="100%"
-          />
-        ) : metricsError ? (
-          <GqlError error={metricsError} />
-        ) : (
-          content
-        )}
+        {sections.map(({ key, title, description, graphs }) => (
+          <MetricsSection
+            key={key}
+            title={title}
+            description={description}
+          >
+            <MetricsGraphGrid>
+              {graphs.map((graph) => (
+                <ServiceMetricGraphCard
+                  key={`${grouping}-${graph.key}`}
+                  serviceId={serviceId}
+                  grouping={grouping}
+                  graph={graph}
+                  timeRange={timeRange}
+                />
+              ))}
+            </MetricsGraphGrid>
+          </MetricsSection>
+        ))}
       </MetricsScrollSC>
     </Flex>
+  )
+}
+
+function ServiceMetricGraphCard({
+  serviceId,
+  grouping,
+  graph,
+  timeRange,
+}: {
+  serviceId?: string
+  grouping: ServiceMetricsGrouping
+  graph: ClusterMetricGraph
+  timeRange: TimeRangeState
+}) {
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useServiceUsageMetricsQuery({
+    variables: {
+      serviceId: serviceId ?? '',
+      groupBy: grouping,
+      ...metricsQueryWindow(timeRange.timeWindow),
+      ...usageFieldVariables(graph.fields),
+    },
+    skip: !serviceId,
+    fetchPolicy: 'cache-and-network',
+  })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
+
+  return (
+    <UsageMetricGraphCard
+      graph={graph}
+      metrics={data?.serviceDeployment?.serviceUsageMetrics}
+      loading={loading}
+      error={error}
+      timeRange={timeRange}
+    />
   )
 }
 

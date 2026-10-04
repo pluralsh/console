@@ -24,7 +24,11 @@ export function MetricsSection({
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        <SectionCaretSC $open={open} />
+        <SectionCaretSC
+          $open={open}
+          size={12}
+          color="icon-xlight"
+        />
         <SectionTitleBlockSC>
           <Body1P>{title}</Body1P>
           {description && (
@@ -41,6 +45,9 @@ const SectionSC = styled.section(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
+  // overflow:hidden zeroes the flex min-height, so without this sections get
+  // squashed (and clipped) inside height-bounded scroll containers
+  flexShrink: 0,
   overflow: 'hidden',
   width: '100%',
 }))
