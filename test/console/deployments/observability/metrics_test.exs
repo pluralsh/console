@@ -62,6 +62,46 @@ defmodule Console.Deployments.Observability.MetricsTest do
     end
   end
 
+  describe "cluster usage queries" do
+    @groupings [cluster: "by ()", namespace: "by (namespace)", node: "by (node)"]
+
+    test "every query is broken out by the grouping and fully substituted" do
+      vars = [cluster: "c", rate: "5m"]
+
+      for {grouping, by} <- @groupings, {key, query} <- Metrics.queries(:cluster_usage, grouping) do
+        assert query =~ ~s|cluster="${cluster}"|, "#{grouping}.#{key} isn't cluster scoped: #{query}"
+        assert String.starts_with?(query, "sum #{by} ("), "#{grouping}.#{key} isn't grouped #{by}: #{query}"
+        refute Client.variable_subst(query, vars) =~ "$", "#{grouping}.#{key} left a variable unsubstituted"
+      end
+    end
+
+    test "reservations keep the grouping label through the kube-state-metrics dedupe" do
+      node = Map.new(Metrics.queries(:cluster_usage, :node))
+      ns   = Map.new(Metrics.queries(:cluster_usage, :namespace))
+
+      assert node[:cpu_requests] ==
+        ~s|sum by (node) (max by (namespace, pod, container, node) (kube_pod_container_resource_requests{resource="cpu",unit="core",container!="",cluster="${cluster}"}))|
+      assert ns[:memory_limits] ==
+        ~s|sum by (namespace) (max by (namespace, pod, container) (kube_pod_container_resource_limits{resource="memory",unit="byte",container!="",cluster="${cluster}"}))|
+    end
+
+    test "node-less kube-state-metrics series borrow node from kube_pod_info" do
+      node = Map.new(Metrics.queries(:cluster_usage, :node))
+      ns   = Map.new(Metrics.queries(:cluster_usage, :namespace))
+
+      for key <- ~w(pods_running pods_pending restarts)a do
+        assert node[key] =~ "group_left (node) max by (namespace, pod, node) (kube_pod_info{", "node.#{key} isn't joined"
+        refute ns[key] =~ "kube_pod_info", "namespace.#{key} shouldn't need a join"
+      end
+    end
+
+    test "allocatable capacity is only offered where it's meaningful" do
+      refute Keyword.has_key?(Metrics.queries(:cluster_usage, :namespace), :cpu_allocatable)
+      assert Keyword.has_key?(Metrics.queries(:cluster_usage, :node), :memory_allocatable)
+      assert Keyword.has_key?(Metrics.queries(:cluster_usage, :cluster), :cpu_allocatable)
+    end
+  end
+
   describe "Prometheus.Client.variable_subst/2" do
     test "it matches whole variable names in a single pass" do
       assert Client.variable_subst(~s|a="${name}",b="${namespace}"|, name: "x", namespace: "y") ==

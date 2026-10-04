@@ -12797,6 +12797,15 @@ enum HeatMapFlavor {
   NODE
 }
 
+enum ClusterMetricsGrouping {
+  "a single cluster-wide series"
+  CLUSTER
+
+  NAMESPACE
+
+  NODE
+}
+
 enum VersionCompliance {
   LATEST
   COMPLIANT
@@ -13431,6 +13440,75 @@ type ClusterMetrics {
   memoryUsage: [MetricResponse]
 }
 
+"Cluster usage timeseries; when grouped, each series carries a `namespace` or `node` label"
+type ClusterUsageMetrics {
+  "cpu usage in cores"
+  cpu: [MetricResponse]
+
+  "cpu requests in cores"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits in cores"
+  cpuLimits: [MetricResponse]
+
+  "allocatable node cpu in cores, absent when grouped by namespace"
+  cpuAllocatable: [MetricResponse]
+
+  "fraction (0-1) of CFS periods throttled"
+  cpuThrottling: [MetricResponse]
+
+  "working set memory in bytes"
+  memory: [MetricResponse]
+
+  "memory requests in bytes"
+  memoryRequests: [MetricResponse]
+
+  "memory limits in bytes"
+  memoryLimits: [MetricResponse]
+
+  "allocatable node memory in bytes, absent when grouped by namespace"
+  memoryAllocatable: [MetricResponse]
+
+  "container OOM kills within each rate window"
+  oomKills: [MetricResponse]
+
+  "pod network receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "pod network transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "pod received packets dropped per second"
+  networkReceiveDropped: [MetricResponse]
+
+  "pod transmitted packets dropped per second"
+  networkTransmitDropped: [MetricResponse]
+
+  "container filesystem usage in bytes"
+  ephemeralStorage: [MetricResponse]
+
+  "container filesystem read throughput in bytes\/s"
+  fsReads: [MetricResponse]
+
+  "container filesystem write throughput in bytes\/s"
+  fsWrites: [MetricResponse]
+
+  "persistent volume usage in bytes"
+  volumeUsage: [MetricResponse]
+
+  "persistent volume capacity in bytes"
+  volumeCapacity: [MetricResponse]
+
+  "running pod count"
+  podsRunning: [MetricResponse]
+
+  "pending pod count"
+  podsPending: [MetricResponse]
+
+  "container restarts within each rate window"
+  restarts: [MetricResponse]
+}
+
 type ClusterNodeMetrics {
   cpu: [MetricResponse]
   memory: [MetricResponse]
@@ -13682,6 +13760,9 @@ type Cluster {
   logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
   clusterMetrics(start: DateTime, stop: DateTime, step: String): ClusterMetrics
+
+  "cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node"
+  clusterUsageMetrics(groupBy: ClusterMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
 
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 

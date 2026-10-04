@@ -1,5 +1,6 @@
 import { EmptyState } from '@pluralsh/design-system'
 import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
@@ -12,7 +13,7 @@ import {
 
 import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
 
-import { type CSSProperties, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -33,14 +34,11 @@ function Metric({
   componentId,
   podReservations,
   timeRange,
-  ...props
 }: {
   serviceId?: string
   componentId?: string
   podReservations?: PodResourceReservation[]
   timeRange: TimeRangeState
-  maxHeight?: CSSProperties['maxHeight']
-  overflowY?: CSSProperties['overflowY']
 }) {
   const theme = useTheme()
   const {
@@ -106,10 +104,10 @@ function Metric({
     }
   }, [data])
 
-  let content = <EmptyState message="No metrics available" />
+  if (loading && !data) return <LoadingIndicator />
 
   if (
-    hasResourceMetrics({
+    !hasResourceMetrics({
       cpu,
       mem,
       podCpu,
@@ -123,41 +121,31 @@ function Metric({
       podCpuLimits,
       podMemLimits,
     })
-  ) {
-    content = (
-      <ResourceMetricsGraphs
-        cpu={cpu}
-        mem={mem}
-        podCpu={podCpu}
-        podMem={podMem}
-        cpuRequests={cpuRequests}
-        memRequests={memRequests}
-        cpuLimits={cpuLimits}
-        memLimits={memLimits}
-        podCpuRequests={podCpuRequests}
-        podMemRequests={podMemRequests}
-        podCpuLimits={podCpuLimits}
-        podMemLimits={podMemLimits}
-        podReservations={podReservations}
-        timeWindow={timeRange.timeWindow}
-        onRangeSelect={timeRange.selectWindow}
-      />
+  )
+    return (
+      <MetricsCard css={{ padding: theme.spacing.medium }}>
+        <EmptyState message="No metrics available" />
+      </MetricsCard>
     )
-  }
-
-  if (loading && !data) return <LoadingIndicator />
 
   return (
-    <MetricsCard
-      css={{
-        padding: theme.spacing.medium,
-        overflow: 'auto',
-        gap: theme.spacing.small,
-      }}
-      {...props}
-    >
-      {content}
-    </MetricsCard>
+    <ResourceMetricsGraphs
+      cpu={cpu}
+      mem={mem}
+      podCpu={podCpu}
+      podMem={podMem}
+      cpuRequests={cpuRequests}
+      memRequests={memRequests}
+      cpuLimits={cpuLimits}
+      memLimits={memLimits}
+      podCpuRequests={podCpuRequests}
+      podMemRequests={podMemRequests}
+      podCpuLimits={podCpuLimits}
+      podMemLimits={podMemLimits}
+      podReservations={podReservations}
+      timeWindow={timeRange.timeWindow}
+      onRangeSelect={timeRange.selectWindow}
+    />
   )
 }
 
@@ -186,14 +174,14 @@ export default function ComponentMetrics() {
       }}
     >
       <MetricsTimeRangeControl timeRange={timeRange} />
-      <Metric
-        serviceId={serviceId}
-        componentId={component?.id}
-        podReservations={podReservations}
-        timeRange={timeRange}
-        maxHeight="100%"
-        overflowY="auto"
-      />
+      <MetricsScrollSC>
+        <Metric
+          serviceId={serviceId}
+          componentId={component?.id}
+          podReservations={podReservations}
+          timeRange={timeRange}
+        />
+      </MetricsScrollSC>
     </div>
   )
 }

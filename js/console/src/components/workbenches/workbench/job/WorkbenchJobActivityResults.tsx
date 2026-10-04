@@ -9,7 +9,6 @@ import {
   DiffViewer,
   ExpandIcon,
   Flex,
-  FlexProps,
   IconFrame,
   IconProps,
   Modal,
@@ -28,6 +27,7 @@ import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
+import { GraphLegend } from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
@@ -771,60 +771,29 @@ export function JobActivityTraces({
 export function WorkbenchJobMetricsLegend({
   series,
   maxHeight,
-  compact = false,
   selectedId,
   onSelect,
-  ...props
+  paddingLeft,
 }: {
   series: MetricSeries[]
   maxHeight?: number
-  compact?: boolean
   selectedId?: string | null
   onSelect?: (id: string) => void
-} & FlexProps) {
-  if (isEmpty(series)) return null
-
+  paddingLeft?: number
+}) {
   return (
-    <Flex
-      direction="row"
-      wrap="wrap"
-      gap={compact ? 'xsmall' : 'small'}
-      align="center"
-      css={
-        maxHeight != null
-          ? {
-              alignContent: 'flex-start',
-              maxHeight,
-              overflowY: 'auto',
-            }
-          : undefined
-      }
-      {...props}
-    >
-      {series.map(({ id, label, shortLabel }, i) => (
-        <LegendItemSC
-          key={id}
-          type="button"
-          title={label}
-          disabled={!onSelect}
-          aria-pressed={onSelect ? selectedId === id : undefined}
-          onClick={() => onSelect?.(id)}
-          $compact={compact}
-          $interactive={!!onSelect}
-          $dimmed={!!selectedId && selectedId !== id}
-        >
-          <MetricsLegendSwatchSC
-            $color={COLORS[i % COLORS.length]}
-            $compact={compact}
-          />
-          {compact ? (
-            <CompactLegendLabelSC>{shortLabel}</CompactLegendLabelSC>
-          ) : (
-            <Body2P $color="text-light">{shortLabel}</Body2P>
-          )}
-        </LegendItemSC>
-      ))}
-    </Flex>
+    <GraphLegend
+      items={series.map(({ id, label, shortLabel }, i) => ({
+        id,
+        label: shortLabel,
+        title: label,
+        color: COLORS[i % COLORS.length],
+      }))}
+      selectedId={selectedId}
+      onSelect={onSelect}
+      maxHeight={maxHeight}
+      style={{ paddingLeft }}
+    />
   )
 }
 
@@ -971,43 +940,6 @@ const MetricsRangeButtonSC = styled.button<{ $active: boolean }>(
   })
 )
 
-const LegendItemSC = styled.button<{
-  $compact: boolean
-  $interactive: boolean
-  $dimmed: boolean
-}>(({ theme, $compact, $interactive, $dimmed }) => ({
-  ...theme.partials.reset.button,
-  alignItems: 'center',
-  borderRadius: theme.borderRadiuses.medium,
-  color: theme.colors['text-light'],
-  cursor: $interactive ? 'pointer' : 'default',
-  display: 'flex',
-  flex: '0 1 auto',
-  gap: $compact ? 4 : theme.spacing.xsmall,
-  minWidth: 0,
-  opacity: $dimmed ? 0.4 : 1,
-  padding: $compact ? 2 : 0,
-  textAlign: 'left',
-  '&:hover': $interactive
-    ? {
-        backgroundColor: theme.colors['fill-one-hover'],
-      }
-    : undefined,
-  '&:focus-visible': $interactive
-    ? {
-        outline: `1px solid ${theme.colors['border-outline-focused']}`,
-        outlineOffset: 1,
-      }
-    : undefined,
-}))
-
-const CompactLegendLabelSC = styled.span(({ theme }) => ({
-  color: theme.colors['text-light'],
-  fontSize: 11,
-  lineHeight: '14px',
-  overflowWrap: 'anywhere',
-}))
-
 const CanvasLogPanelSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],
   borderRadius: theme.borderRadiuses.medium,
@@ -1018,17 +950,6 @@ const CanvasLogPanelSC = styled.div(({ theme }) => ({
   overflowY: 'auto',
   padding: `${theme.spacing.medium}px 0`,
   width: '100%',
-}))
-
-const MetricsLegendSwatchSC = styled.div<{
-  $color: string
-  $compact?: boolean
-}>(({ $color, $compact }) => ({
-  width: $compact ? 8 : 12,
-  height: $compact ? 8 : 12,
-  borderRadius: 2,
-  flexShrink: 0,
-  background: $color,
 }))
 
 const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(

@@ -5,7 +5,7 @@ import {
 } from '@nivo/line'
 import { type PartialTheme as NivoThemeType } from '@nivo/theming'
 import dayjs from 'dayjs'
-import { Key, useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { niceAxis, seriesExtent, type TickBase } from './axisTicks'
@@ -14,6 +14,7 @@ import { ChartRangeSelect } from './timerange/ChartRangeSelect'
 import type { TimeWindow } from './timerange/timeRange'
 import { niceTimeTicks } from './timeTicks'
 import { CaptionP } from './typography/Text'
+import { GraphLegend } from './GraphLegend'
 
 export type GraphSeries = {
   id: string
@@ -149,8 +150,7 @@ export function Graph({
   markers?: GraphMarkers
 }) {
   const graphTheme = useGraphTheme()
-  const { colors } = useTheme()
-  const [selected, setSelected] = useState<Key | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
   const graph = useMemo(() => {
     if (data.find(({ id }) => id === selected)) {
       return data.filter(({ id }) => id === selected)
@@ -179,7 +179,7 @@ export function Graph({
 
   if (graph.length === 0) return <CaptionP>no data</CaptionP>
 
-  const toggleSelected = (id: Key) => setSelected(selected ? null : id)
+  const toggleSelected = (id: string) => setSelected(selected ? null : id)
   const hasDashedSeries = graph.some(({ dashed }) => dashed)
   const chart = (
     <ResponsiveLine
@@ -283,70 +283,21 @@ export function Graph({
           )}
         </div>
       </div>
-      <div
-        css={{
-          display: 'flex',
-          flexShrink: 0,
-          flexWrap: 'wrap',
-          gap: '4px 10px',
-          justifyContent: 'flex-start',
-          maxHeight: 42,
-          overflowY: 'auto',
+      <GraphLegend
+        items={data.map(({ dashed, id }, index) => ({
+          id,
+          label: id,
+          dashed,
+          color: selected === id ? COLORS[0] : COLORS[index % COLORS.length],
+        }))}
+        selectedId={selected}
+        onSelect={toggleSelected}
+        maxHeight={42}
+        style={{
           paddingLeft: GRAPH_MARGIN.left,
           paddingRight: GRAPH_MARGIN.right,
         }}
-      >
-        {data.map(({ dashed, id }, index) => {
-          const isSelected = selected === id
-
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => toggleSelected(id)}
-              css={{
-                all: 'unset',
-                alignItems: 'center',
-                borderRadius: 4,
-                color: colors['text-xlight'],
-                cursor: 'pointer',
-                display: 'flex',
-                fontSize: 12,
-                gap: 6,
-                lineHeight: '16px',
-                maxWidth: '100%',
-                minWidth: 0,
-                opacity: selected && !isSelected ? 0.45 : 1,
-                padding: '2px 4px',
-                '&:hover': {
-                  background: 'rgba(0, 0, 0, .03)',
-                  color: colors['text-light'],
-                },
-              }}
-            >
-              <svg
-                aria-hidden
-                height={12}
-                width={12}
-                css={{ flex: '0 0 12px' }}
-              >
-                <line
-                  x1={0}
-                  x2={12}
-                  y1={6}
-                  y2={6}
-                  stroke={
-                    isSelected ? COLORS[0] : COLORS[index % COLORS.length]
-                  }
-                  strokeDasharray={dashed ? '4 3' : undefined}
-                  strokeWidth={2}
-                />
-              </svg>
-              <span css={{ minWidth: 0, overflowWrap: 'anywhere' }}>{id}</span>
-            </button>
-          )
-        })}
-      </div>
+      />
     </div>
   )
 }

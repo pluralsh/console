@@ -3,20 +3,33 @@ import {
   Button,
   EmptyState,
   Flex,
+  HeatMapIcon,
   ListBoxItem,
   Select,
+  TimeSeriesIcon,
 } from '@pluralsh/design-system'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import {
+  MetricsGraphCard,
+  MetricsGraphGrid,
+} from 'components/utils/metrics/MetricsGraphCard'
+import {
+  METRIC_FORMATTERS,
+  METRIC_TICK_BASES,
+} from 'components/utils/metrics/metricFormats'
 import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
 import {
+  ClusterMetricsGrouping,
   ClusterWithMetricsFragment,
   HeatMapFlavor,
   useClusterHeatMapQuery,
   useClusterMetricsQuery,
   useClusterNoisyNeighborsQuery,
+  useClusterUsageMetricsQuery,
 } from 'generated/graphql'
 import { capitalize, isEmpty, isNull } from 'lodash'
 import styled, { useTheme } from 'styled-components'
@@ -24,17 +37,21 @@ import styled, { useTheme } from 'styled-components'
 import { Prometheus } from '../../../utils/prometheus'
 
 import { GqlError } from 'components/utils/Alert'
+import { ButtonGroup } from 'components/utils/ButtonGroup'
+import { Graph } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
 import {
+  type TimeRangeState,
   useRangeQueryData,
   useTimeRange,
 } from 'components/utils/timerange/useTimeRange'
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
+import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
@@ -43,12 +60,179 @@ import {
   MemoryClusterMetrics,
   PodsClusterMetrics,
 } from '../../cluster/nodes/ClusterGauges'
-import { SaturationGraphs } from '../../cluster/nodes/SaturationGraphs'
+import {
+  type ClusterMetricGraph,
+  clusterMetricSections,
+  usageFieldVariables,
+} from './metrics/clusterMetricsGraphs'
 
 const { capacity, CapacityType, toValues } = Prometheus
 const HEATMAP_HEIGHT = 350
+const METRICS_DIRECTORY = [
+  { path: 'timeseries', icon: <TimeSeriesIcon />, tooltip: 'Timeseries' },
+  { path: 'heatmap', icon: <HeatMapIcon />, tooltip: 'Heat map' },
+]
+const GROUPINGS = [
+  { key: ClusterMetricsGrouping.Cluster, label: 'Cluster' },
+  { key: ClusterMetricsGrouping.Namespace, label: 'Namespace' },
+  { key: ClusterMetricsGrouping.Node, label: 'Node' },
+]
 
 export function ClusterMetrics() {
+  const { clusterId } = useParams()
+  const { pathname } = useLocation()
+  const metricsEnabled = useMetricsEnabled()
+  const deploymentSettingsLoading = useLoadingDeploymentSettings()
+
+  const currentTab =
+    METRICS_DIRECTORY.find(({ path }) => pathname.endsWith(path))?.path ??
+    'timeseries'
+
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <ButtonGroup
+          directory={METRICS_DIRECTORY}
+          tab={currentTab}
+          toPath={(path) =>
+            `${getClusterDetailsPath({ clusterId })}/metrics/${path}`
+          }
+        />
+      ),
+      [clusterId, currentTab]
+    )
+  )
+
+  if (!(metricsEnabled || deploymentSettingsLoading))
+    return <MetricsEmptyState />
+
+  return <Outlet />
+}
+
+export function ClusterMetricsTimeseries() {
+  const { clusterId } = useParams()
+  const timeRange = useTimeRange()
+  const [grouping, setGrouping] = useState(ClusterMetricsGrouping.Cluster)
+  const sections = useMemo(() => clusterMetricSections(grouping), [grouping])
+
+  return (
+    <WrapperSC>
+      <Flex
+        align="center"
+        justifyContent="space-between"
+        gap="medium"
+        wrap="wrap"
+      >
+        <Flex
+          gap="small"
+          align="center"
+        >
+          <CaptionP $color="text-xlight">Group by</CaptionP>
+          <Select
+            width={160}
+            selectedKey={grouping}
+            onSelectionChange={(key) =>
+              setGrouping(key as ClusterMetricsGrouping)
+            }
+          >
+            {GROUPINGS.map(({ key, label }) => (
+              <ListBoxItem
+                key={key}
+                label={label}
+              />
+            ))}
+          </Select>
+        </Flex>
+        <MetricsTimeRangeControl timeRange={timeRange} />
+      </Flex>
+      {sections.map(({ key, title, graphs }) => (
+        <SectionSC key={key}>
+          <Subtitle2H1>{title}</Subtitle2H1>
+          <MetricsGraphGrid>
+            {graphs.map((graph) => (
+              <ClusterMetricGraphCard
+                key={`${grouping}-${graph.key}`}
+                clusterId={clusterId}
+                grouping={grouping}
+                graph={graph}
+                timeRange={timeRange}
+              />
+            ))}
+          </MetricsGraphGrid>
+        </SectionSC>
+      ))}
+    </WrapperSC>
+  )
+}
+
+function ClusterMetricGraphCard({
+  clusterId,
+  grouping,
+  graph: { title, tooltip, format, fields, series },
+  timeRange,
+}: {
+  clusterId?: string
+  grouping: ClusterMetricsGrouping
+  graph: ClusterMetricGraph
+  timeRange: TimeRangeState
+}) {
+  const metricsEnabled = useMetricsEnabled()
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useClusterUsageMetricsQuery({
+    variables: {
+      clusterId: clusterId ?? '',
+      groupBy: grouping,
+      ...metricsQueryWindow(timeRange.timeWindow),
+      ...usageFieldVariables(fields),
+    },
+    skip: !metricsEnabled || !clusterId,
+    fetchPolicy: 'cache-and-network',
+  })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
+  const metrics = data?.cluster?.clusterUsageMetrics
+  const graphData = useMemo(
+    () => (metrics ? series(metrics) : []),
+    [metrics, series]
+  )
+
+  return (
+    <MetricsGraphCard
+      title={title}
+      tooltip={tooltip}
+    >
+      {error ? (
+        <GqlError error={error} />
+      ) : !data && loading ? (
+        <RectangleSkeleton
+          $height="100%"
+          $width="100%"
+        />
+      ) : isEmpty(graphData) ? (
+        <EmptyState
+          message="No data"
+          description="Prometheus returned no series in the selected time range."
+        />
+      ) : (
+        <Graph
+          data={graphData}
+          yFormat={METRIC_FORMATTERS[format]}
+          yTickBase={METRIC_TICK_BASES[format]}
+          timeWindow={timeRange.timeWindow}
+          onRangeSelect={timeRange.selectWindow}
+        />
+      )}
+    </MetricsGraphCard>
+  )
+}
+
+export function ClusterMetricsHeatmap() {
   const { spacing } = useTheme()
   const { clusterId } = useParams()
   const metricsEnabled = useMetricsEnabled()
@@ -70,33 +254,21 @@ export function ClusterMetrics() {
   })
   const loading = utilLoading || deploymentSettingsLoading
 
-  const timeRange = useTimeRange()
   const {
-    data: currentMetricsData,
-    previousData: previousMetricsData,
+    data: metricsData,
     loading: metricsQueryLoading,
     error: metricsError,
   } = useClusterMetricsQuery({
-    variables: {
-      clusterId: clusterId ?? '',
-      ...metricsQueryWindow(timeRange.timeWindow),
-    },
+    variables: { clusterId: clusterId ?? '' },
     skip: !metricsEnabled,
     fetchPolicy: 'cache-and-network',
   })
-  const metricsData = useRangeQueryData(
-    { data: currentMetricsData, previousData: previousMetricsData },
-    timeRange.revision
-  )
   const metricsLoading = metricsQueryLoading || deploymentSettingsLoading
 
   const { cpuMetrics, memMetrics, podsMetrics } = useMemo(
     () => processClusterMetrics(metricsData?.cluster),
     [metricsData?.cluster]
   )
-
-  if (!(metricsEnabled || deploymentSettingsLoading))
-    return <MetricsEmptyState />
 
   const hasMetrics =
     !isNull(cpuMetrics.total) &&
@@ -106,126 +278,101 @@ export function ClusterMetrics() {
 
   return (
     <WrapperSC>
-      <Flex
-        direction="column"
-        gap="small"
+      <MetricsCard
+        css={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: spacing.large,
+          padding: spacing.xlarge,
+        }}
       >
+        {metricsError ? (
+          <GqlError error={metricsError} />
+        ) : !metricsData && metricsLoading ? (
+          <RectangleSkeleton
+            $height={240}
+            $width="100%"
+          />
+        ) : hasMetrics ? (
+          <ClusterGauges
+            cpu={cpuMetrics}
+            memory={memMetrics}
+            pods={podsMetrics}
+          />
+        ) : (
+          <EmptyState message="No metrics available." />
+        )}
+      </MetricsCard>
+      <Flex
+        width="100%"
+        align="center"
+        justifyContent="space-between"
+      >
+        <Subtitle2H1>Memory & CPU utilization</Subtitle2H1>
         <Flex
+          gap="small"
           align="center"
-          justifyContent="space-between"
         >
-          <Subtitle2H1>Metrics</Subtitle2H1>
-          <MetricsTimeRangeControl timeRange={timeRange} />
+          <CaptionP $color="text-xlight">Group by</CaptionP>
+          <Select
+            width={160}
+            selectedKey={heatMapFlavor}
+            onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
+          >
+            {Object.values(HeatMapFlavor).map((flavor) => (
+              <ListBoxItem
+                key={flavor}
+                label={capitalize(flavor)}
+              />
+            ))}
+          </Select>
         </Flex>
-        <MetricsCard style={{ padding: hasMetrics ? spacing.xlarge : 0 }}>
-          {!hasMetrics ? (
-            metricsError ? (
-              <GqlError error={metricsError} />
-            ) : metricsLoading ? (
-              <RectangleSkeleton
-                $height={306}
-                $width="100%"
-              />
-            ) : (
-              <EmptyState message="No metrics available." />
-            )
+      </Flex>
+      {!(hasHeatmapData || loading) ? (
+        <MetricsCard css={{ padding: spacing.xlarge }}>
+          {error ? (
+            <GqlError
+              css={{ width: '100%' }}
+              error={error}
+            />
           ) : (
-            <Flex
-              width="100%"
-              gap="xsmall"
-            >
-              <ClusterGauges
-                cpu={cpuMetrics}
-                memory={memMetrics}
-                pods={podsMetrics}
-              />
-              <SaturationGraphs
-                cpuUsage={cpuMetrics.usage}
-                cpuTotal={cpuMetrics.total}
-                memUsage={memMetrics.usage}
-                memTotal={memMetrics.total}
-                timeWindow={timeRange.timeWindow}
-                onRangeSelect={timeRange.selectWindow}
-              />
-            </Flex>
+            <EmptyState message="Utilization heatmaps not available." />
           )}
         </MetricsCard>
-      </Flex>
-      <Flex
-        flex={1}
-        gap="medium"
-        direction="column"
-      >
-        <Flex
-          width="100%"
-          justifyContent="space-between"
-        >
-          <Subtitle2H1>Memory & CPU utliization</Subtitle2H1>
-          <Flex
-            gap="small"
-            align="center"
+      ) : (
+        <MetricsGraphGrid>
+          <MetricsCard
+            header={{
+              content: `memory utilization by ${heatMapFlavor}`,
+              outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
+            }}
+            css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
           >
-            <CaptionP $color="text-xlight">Group by</CaptionP>
-            <Select
-              width={160}
-              selectedKey={heatMapFlavor}
-              onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
-            >
-              {Object.values(HeatMapFlavor).map((flavor) => (
-                <ListBoxItem
-                  key={flavor}
-                  label={capitalize(flavor)}
-                />
-              ))}
-            </Select>
-          </Flex>
-        </Flex>
-        {!(hasHeatmapData || loading) ? (
-          <MetricsCard css={{ padding: spacing.xlarge, flex: 1 }}>
-            {error ? (
-              <GqlError
-                css={{ width: '100%' }}
-                error={error}
-              />
-            ) : (
-              <EmptyState message="Utilization heatmaps not available." />
-            )}
+            <UtilizationHeatmap
+              colorScheme="blue"
+              data={utilMemoryHeatMap}
+              loading={loading}
+              flavor={heatMapFlavor}
+              utilizationType="memory"
+            />
           </MetricsCard>
-        ) : (
-          <Flex gap="large">
-            <MetricsCard
-              header={{
-                content: `memory utilization by ${heatMapFlavor}`,
-                outerProps: { style: { paddingBottom: spacing.large } },
-              }}
-              css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
-            >
-              <UtilizationHeatmap
-                colorScheme="blue"
-                data={utilMemoryHeatMap}
-                loading={loading}
-                flavor={heatMapFlavor}
-                utilizationType="memory"
-              />
-            </MetricsCard>
-            <MetricsCard
-              header={{
-                content: `cpu utilization by ${heatMapFlavor}`,
-                outerProps: { style: { paddingBottom: spacing.large } },
-              }}
-              css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
-            >
-              <UtilizationHeatmap
-                colorScheme="purple"
-                data={utilCpuHeatMap}
-                loading={loading}
-                flavor={heatMapFlavor}
-                utilizationType="cpu"
-              />
-            </MetricsCard>
-          </Flex>
-        )}
-      </Flex>
+          <MetricsCard
+            header={{
+              content: `cpu utilization by ${heatMapFlavor}`,
+              outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
+            }}
+            css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
+          >
+            <UtilizationHeatmap
+              colorScheme="purple"
+              data={utilCpuHeatMap}
+              loading={loading}
+              flavor={heatMapFlavor}
+              utilizationType="cpu"
+            />
+          </MetricsCard>
+        </MetricsGraphGrid>
+      )}
     </WrapperSC>
   )
 }
@@ -234,7 +381,13 @@ const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  height: '100%',
+  paddingBottom: theme.spacing.large,
+}))
+
+const SectionSC = styled.section(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
 }))
 
 export function useClusterHeatmapData({

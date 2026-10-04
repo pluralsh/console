@@ -45,7 +45,6 @@ describe('WorkbenchJobMetricsLegend', () => {
     render(
       <ThemeProvider theme={styledThemeDark}>
         <WorkbenchJobMetricsLegend
-          compact
           series={[
             {
               id: 'a',

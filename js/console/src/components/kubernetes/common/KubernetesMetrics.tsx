@@ -1,5 +1,6 @@
 import { EmptyState } from '@pluralsh/design-system'
 import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
 
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
@@ -34,7 +35,6 @@ function Metric({
   namespace,
   podReservations,
   timeRange,
-  ...props
 }: {
   clusterId: string
   group: string
@@ -114,14 +114,20 @@ function Metric({
     }
   }, [data])
 
-  let content = <EmptyState message="No metrics available" />
-
   if (error) {
     return <GqlError error={error} />
   }
 
+  if (loading && !data)
+    return (
+      <RectangleSkeleton
+        $height="100%"
+        $width="100%"
+      />
+    )
+
   if (
-    hasResourceMetrics({
+    !hasResourceMetrics({
       cpu,
       mem,
       podCpu,
@@ -135,47 +141,31 @@ function Metric({
       podCpuLimits,
       podMemLimits,
     })
-  ) {
-    content = (
-      <ResourceMetricsGraphs
-        cpu={cpu}
-        mem={mem}
-        podCpu={podCpu}
-        podMem={podMem}
-        cpuRequests={cpuRequests}
-        memRequests={memRequests}
-        cpuLimits={cpuLimits}
-        memLimits={memLimits}
-        podCpuRequests={podCpuRequests}
-        podMemRequests={podMemRequests}
-        podCpuLimits={podCpuLimits}
-        podMemLimits={podMemLimits}
-        podReservations={podReservations}
-        timeWindow={timeRange.timeWindow}
-        onRangeSelect={timeRange.selectWindow}
-      />
-    )
-  }
-
-  if (loading && !data)
+  )
     return (
-      <RectangleSkeleton
-        $height="100%"
-        $width="100%"
-      />
+      <MetricsCard css={{ padding: theme.spacing.medium }}>
+        <EmptyState message="No metrics available" />
+      </MetricsCard>
     )
 
   return (
-    <MetricsCard
-      css={{
-        padding: theme.spacing.medium,
-        overflow: 'auto',
-        gap: theme.spacing.small,
-      }}
-      {...props}
-    >
-      {content}
-    </MetricsCard>
+    <ResourceMetricsGraphs
+      cpu={cpu}
+      mem={mem}
+      podCpu={podCpu}
+      podMem={podMem}
+      cpuRequests={cpuRequests}
+      memRequests={memRequests}
+      cpuLimits={cpuLimits}
+      memLimits={memLimits}
+      podCpuRequests={podCpuRequests}
+      podMemRequests={podMemRequests}
+      podCpuLimits={podCpuLimits}
+      podMemLimits={podMemLimits}
+      podReservations={podReservations}
+      timeWindow={timeRange.timeWindow}
+      onRangeSelect={timeRange.selectWindow}
+    />
   )
 }
 
@@ -218,16 +208,18 @@ export default function KubernetesMetrics({
       }}
     >
       <MetricsTimeRangeControl timeRange={timeRange} />
-      <Metric
-        clusterId={clusterId}
-        group={group}
-        version={version}
-        kind={kind}
-        name={name}
-        namespace={namespace}
-        podReservations={podReservations}
-        timeRange={timeRange}
-      />
+      <MetricsScrollSC>
+        <Metric
+          clusterId={clusterId}
+          group={group}
+          version={version}
+          kind={kind}
+          name={name}
+          namespace={namespace}
+          podReservations={podReservations}
+          timeRange={timeRange}
+        />
+      </MetricsScrollSC>
     </div>
   )
 }

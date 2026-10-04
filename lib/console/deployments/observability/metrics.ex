@@ -111,4 +111,59 @@ defmodule Console.Deployments.Observability.Metrics do
   def queries(:heat, :pod), do: @heat
   def queries(:heat, :namespace), do: @heat_ns
   def queries(:heat, :node), do: @heat_node
+
+  def queries(:cluster_usage, grouping) when grouping in [:cluster, :namespace, :node],
+    do: cluster_usage(grouping)
+
+  @cluster_selector ~s|cluster="${cluster}"|
+
+  # cluster-wide timeseries, each broken out by `grouping` (`:cluster` is a single total series)
+  defp cluster_usage(grouping) do
+    by = group_label(grouping)
+    sel = @cluster_selector
+
+    [
+      cpu: sum_by(by, ~s|rate(container_cpu_usage_seconds_total{container!="",#{sel}}[${rate}])|),
+      cpu_requests: reservation(:requests, :cpu, sel, by),
+      cpu_limits: reservation(:limits, :cpu, sel, by),
+      cpu_allocatable: allocatable(grouping, :cpu),
+      cpu_throttling: ~s|#{sum_by(by, ~s|rate(container_cpu_cfs_throttled_periods_total{container!="",#{sel}}[${rate}])|)} / #{sum_by(by, ~s|rate(container_cpu_cfs_periods_total{container!="",#{sel}}[${rate}])|)}|,
+      memory: sum_by(by, ~s|container_memory_working_set_bytes{image!="",container!="",#{sel}}|),
+      memory_requests: reservation(:requests, :memory, sel, by),
+      memory_limits: reservation(:limits, :memory, sel, by),
+      memory_allocatable: allocatable(grouping, :memory),
+      oom_kills: sum_by(by, ~s|increase(container_oom_events_total{container!="",#{sel}}[${rate}])|),
+      network_receive: sum_by(by, ~s|rate(container_network_receive_bytes_total{namespace!="",#{sel}}[${rate}])|),
+      network_transmit: sum_by(by, ~s|rate(container_network_transmit_bytes_total{namespace!="",#{sel}}[${rate}])|),
+      network_receive_dropped: sum_by(by, ~s|rate(container_network_receive_packets_dropped_total{namespace!="",#{sel}}[${rate}])|),
+      network_transmit_dropped: sum_by(by, ~s|rate(container_network_transmit_packets_dropped_total{namespace!="",#{sel}}[${rate}])|),
+      ephemeral_storage: sum_by(by, ~s|container_fs_usage_bytes{container!="",#{sel}}|),
+      fs_reads: sum_by(by, ~s|rate(container_fs_reads_bytes_total{container!="",#{sel}}[${rate}])|),
+      fs_writes: sum_by(by, ~s|rate(container_fs_writes_bytes_total{container!="",#{sel}}[${rate}])|),
+      volume_usage: sum_by(by, ~s|kubelet_volume_stats_used_bytes{#{sel}}|),
+      volume_capacity: sum_by(by, ~s|kubelet_volume_stats_capacity_bytes{#{sel}}|),
+      pods_running: pod_scoped(by, ~s|max by (namespace, pod) (kube_pod_status_phase{phase="Running",#{sel}})|),
+      pods_pending: pod_scoped(by, ~s|max by (namespace, pod) (kube_pod_status_phase{phase="Pending",#{sel}})|),
+      restarts: pod_scoped(by, ~s|max by (namespace, pod, container) (increase(kube_pod_container_status_restarts_total{#{sel}}[${rate}]))|)
+    ]
+    |> Enum.reject(fn {_, query} -> is_nil(query) end)
+    |> post_process()
+  end
+
+  defp group_label(:cluster), do: ""
+  defp group_label(grouping), do: Atom.to_string(grouping)
+
+  defp sum_by(by, expr), do: "sum by (#{by}) (#{expr})"
+
+  # kube-state-metrics pod series carry no node label, so borrow it from kube_pod_info
+  defp pod_scoped("node", expr),
+    do: ~s|sum by (node) (#{expr} * on (namespace, pod) group_left (node) max by (namespace, pod, node) (kube_pod_info{#{@cluster_selector}}))|
+  defp pod_scoped(by, expr), do: sum_by(by, expr)
+
+  # node allocatable has no namespace dimension
+  defp allocatable(:namespace, _), do: nil
+  defp allocatable(grouping, resource) do
+    unit = if resource == :cpu, do: "core", else: "byte"
+    sum_by(group_label(grouping), ~s|max by (node) (kube_node_status_allocatable{resource="#{resource}",unit="#{unit}",#{@cluster_selector}})|)
+  end
 end

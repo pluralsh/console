@@ -630,9 +630,7 @@ function PanelContent({
             }}
           />
           <WorkbenchJobMetricsLegend
-            compact
             series={series}
-            paddingLeft={0}
             maxHeight={fullscreen ? 160 : 88}
             selectedId={effectiveSelectedId}
             onSelect={onSelectSeries}

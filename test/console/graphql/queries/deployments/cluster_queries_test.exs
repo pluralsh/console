@@ -397,6 +397,46 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       refute Enum.empty?(found["clusterMetrics"]["cpu"])
     end
 
+    test "it can fetch cluster usage metrics grouped by node" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(Req, :post, 6, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        assert query =~ "sum by (node) ("
+        assert query =~ ~s|cluster="#{cluster.handle}"|
+
+        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
+          %{metric: %{node: "node-1"}, values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            clusterUsageMetrics(groupBy: NODE) {
+              __typename
+              cpu { metric values { timestamp value } }
+              memoryAllocatable { metric values { timestamp value } }
+              networkReceive { metric values { timestamp value } }
+              volumeUsage { metric values { timestamp value } }
+              podsRunning { metric values { timestamp value } }
+              restarts { metric values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      metrics = found["clusterUsageMetrics"]
+
+      for key <- ~w(cpu memoryAllocatable networkReceive volumeUsage podsRunning restarts) do
+        assert hd(metrics[key])["metric"]["node"] == "node-1"
+      end
+    end
+
     test "it can fetch cluster component metrics" do
       user = admin_user()
       cluster = insert(:cluster)

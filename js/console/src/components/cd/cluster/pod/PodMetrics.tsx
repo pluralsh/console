@@ -7,9 +7,12 @@ import styled from 'styled-components'
 import { MetricsEmptyState } from 'components/cd/cluster/ClusterMetrics'
 import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { GqlError } from 'components/utils/Alert'
-import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import {
+  MetricsGraphCard,
+  MetricsGraphGrid,
+  MetricsScrollSC,
+} from 'components/utils/metrics/MetricsGraphCard'
 import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
@@ -20,10 +23,10 @@ import {
 import { usePodMetricsQuery } from 'generated/graphql'
 
 import {
-  POD_METRIC_FORMATTERS,
-  POD_METRIC_TICK_BASES,
-  buildPodMetricGraphs,
-} from './podMetricsGraphs'
+  METRIC_FORMATTERS,
+  METRIC_TICK_BASES,
+} from 'components/utils/metrics/metricFormats'
+import { buildPodMetricGraphs } from './podMetricsGraphs'
 
 export function PodMetrics({
   clusterId,
@@ -86,31 +89,29 @@ export function PodMetrics({
     )
   else if (!isEmpty(graphs))
     content = (
-      <GridSC>
+      <MetricsGraphGrid>
         {graphs.map(({ key, title, tooltip, format, data }) => (
-          <GraphCardSC key={key}>
-            <GraphHeader
-              title={title}
-              tooltip={tooltip}
+          <MetricsGraphCard
+            key={key}
+            title={title}
+            tooltip={tooltip}
+          >
+            <Graph
+              data={data}
+              yFormat={METRIC_FORMATTERS[format]}
+              yTickBase={METRIC_TICK_BASES[format]}
+              timeWindow={timeRange.timeWindow}
+              onRangeSelect={timeRange.selectWindow}
             />
-            <div css={{ flex: 1, minHeight: 0 }}>
-              <Graph
-                data={data}
-                yFormat={POD_METRIC_FORMATTERS[format]}
-                yTickBase={POD_METRIC_TICK_BASES[format]}
-                timeWindow={timeRange.timeWindow}
-                onRangeSelect={timeRange.selectWindow}
-              />
-            </div>
-          </GraphCardSC>
+          </MetricsGraphCard>
         ))}
-      </GridSC>
+      </MetricsGraphGrid>
     )
 
   return (
     <WrapperSC>
       <MetricsTimeRangeControl timeRange={timeRange} />
-      {content}
+      <MetricsScrollSC>{content}</MetricsScrollSC>
     </WrapperSC>
   )
 }
@@ -136,19 +137,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  paddingBottom: theme.spacing.large,
-}))
-
-const GraphCardSC = styled(MetricsCard)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  height: 340,
-  padding: theme.spacing.medium,
-}))
-
-const GridSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gap: theme.spacing.medium,
-  gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))',
+  height: '100%',
+  minHeight: 0,
 }))

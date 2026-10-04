@@ -7,6 +7,7 @@ import {
   TimeSeriesIcon,
 } from '@pluralsh/design-system'
 import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   useLoadingDeploymentSettings,
@@ -279,7 +280,11 @@ function ServiceMetricsTimeseries() {
     }
   }, [data])
 
-  let content = <EmptyState message="No metrics available" />
+  let content = (
+    <MetricsCard css={{ padding: theme.spacing.medium }}>
+      <EmptyState message="No metrics available" />
+    </MetricsCard>
+  )
 
   if (
     hasResourceMetrics({
@@ -320,24 +325,24 @@ function ServiceMetricsTimeseries() {
   return (
     <Flex
       direction="column"
-      gap="small"
+      gap="medium"
       height="100%"
       width="100%"
-      overflow="auto"
+      minHeight={0}
     >
       <MetricsTimeRangeControl timeRange={timeRange} />
-      {!data && loading ? (
-        <RectangleSkeleton
-          $height="100%"
-          $width="100%"
-        />
-      ) : metricsError ? (
-        <GqlError error={metricsError} />
-      ) : (
-        <MetricsCard css={{ padding: theme.spacing.medium }}>
-          {content}
-        </MetricsCard>
-      )}
+      <MetricsScrollSC>
+        {!data && loading ? (
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
+        ) : metricsError ? (
+          <GqlError error={metricsError} />
+        ) : (
+          content
+        )}
+      </MetricsScrollSC>
     </Flex>
   )
 }

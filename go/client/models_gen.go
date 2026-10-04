@@ -2194,10 +2194,12 @@ type Cluster struct {
 	// list all alerts discovered for this cluster
 	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// Queries logs for a cluster out of loki
-	Logs               []*LogStream        `json:"logs,omitempty"`
-	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
-	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
-	NetworkGraph       []*NetworkMeshEdge  `json:"networkGraph,omitempty"`
+	Logs           []*LogStream    `json:"logs,omitempty"`
+	ClusterMetrics *ClusterMetrics `json:"clusterMetrics,omitempty"`
+	// cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node
+	ClusterUsageMetrics *ClusterUsageMetrics `json:"clusterUsageMetrics,omitempty"`
+	ClusterNodeMetrics  *ClusterNodeMetrics  `json:"clusterNodeMetrics,omitempty"`
+	NetworkGraph        []*NetworkMeshEdge   `json:"networkGraph,omitempty"`
 	// a list of node healthstatistics for this cluster
 	NodeStatistics []*NodeStatistic `json:"nodeStatistics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
@@ -2873,6 +2875,54 @@ type ClusterUsageHistoryConnection struct {
 type ClusterUsageHistoryEdge struct {
 	Node   *ClusterUsageHistory `json:"node,omitempty"`
 	Cursor *string              `json:"cursor,omitempty"`
+}
+
+// Cluster usage timeseries; when grouped, each series carries a `namespace` or `node` label
+type ClusterUsageMetrics struct {
+	// cpu usage in cores
+	CPU []*MetricResponse `json:"cpu,omitempty"`
+	// cpu requests in cores
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// cpu limits in cores
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// allocatable node cpu in cores, absent when grouped by namespace
+	CPUAllocatable []*MetricResponse `json:"cpuAllocatable,omitempty"`
+	// fraction (0-1) of CFS periods throttled
+	CPUThrottling []*MetricResponse `json:"cpuThrottling,omitempty"`
+	// working set memory in bytes
+	Memory []*MetricResponse `json:"memory,omitempty"`
+	// memory requests in bytes
+	MemoryRequests []*MetricResponse `json:"memoryRequests,omitempty"`
+	// memory limits in bytes
+	MemoryLimits []*MetricResponse `json:"memoryLimits,omitempty"`
+	// allocatable node memory in bytes, absent when grouped by namespace
+	MemoryAllocatable []*MetricResponse `json:"memoryAllocatable,omitempty"`
+	// container OOM kills within each rate window
+	OomKills []*MetricResponse `json:"oomKills,omitempty"`
+	// pod network receive throughput in bytes/s
+	NetworkReceive []*MetricResponse `json:"networkReceive,omitempty"`
+	// pod network transmit throughput in bytes/s
+	NetworkTransmit []*MetricResponse `json:"networkTransmit,omitempty"`
+	// pod received packets dropped per second
+	NetworkReceiveDropped []*MetricResponse `json:"networkReceiveDropped,omitempty"`
+	// pod transmitted packets dropped per second
+	NetworkTransmitDropped []*MetricResponse `json:"networkTransmitDropped,omitempty"`
+	// container filesystem usage in bytes
+	EphemeralStorage []*MetricResponse `json:"ephemeralStorage,omitempty"`
+	// container filesystem read throughput in bytes/s
+	FsReads []*MetricResponse `json:"fsReads,omitempty"`
+	// container filesystem write throughput in bytes/s
+	FsWrites []*MetricResponse `json:"fsWrites,omitempty"`
+	// persistent volume usage in bytes
+	VolumeUsage []*MetricResponse `json:"volumeUsage,omitempty"`
+	// persistent volume capacity in bytes
+	VolumeCapacity []*MetricResponse `json:"volumeCapacity,omitempty"`
+	// running pod count
+	PodsRunning []*MetricResponse `json:"podsRunning,omitempty"`
+	// pending pod count
+	PodsPending []*MetricResponse `json:"podsPending,omitempty"`
+	// container restarts within each rate window
+	Restarts []*MetricResponse `json:"restarts,omitempty"`
 }
 
 type ClusterVulnAggregate struct {
@@ -6973,6 +7023,8 @@ type Pod struct {
 	Raw      string    `json:"raw"`
 	Logs     []*string `json:"logs,omitempty"`
 	Events   []*Event  `json:"events,omitempty"`
+	// prometheus timeseries for this pod, only available when the pod is queried with a cluster or service id
+	Metrics *PodMetrics `json:"metrics,omitempty"`
 }
 
 type PodCondition struct {
@@ -6997,6 +7049,44 @@ type PodDelta struct {
 type PodEdge struct {
 	Node   *Pod    `json:"node,omitempty"`
 	Cursor *string `json:"cursor,omitempty"`
+}
+
+// Pod-level prometheus timeseries; container-scoped series carry a `container` label
+type PodMetrics struct {
+	// cpu usage in cores, by container
+	CPU []*MetricResponse `json:"cpu,omitempty"`
+	// cpu requests in cores, by container
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// cpu limits in cores, by container
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// fraction (0-1) of CFS periods throttled, by container
+	CPUThrottling []*MetricResponse `json:"cpuThrottling,omitempty"`
+	// working set memory in bytes, by container
+	Memory []*MetricResponse `json:"memory,omitempty"`
+	// memory requests in bytes, by container
+	MemoryRequests []*MetricResponse `json:"memoryRequests,omitempty"`
+	// memory limits in bytes, by container
+	MemoryLimits []*MetricResponse `json:"memoryLimits,omitempty"`
+	// container filesystem usage in bytes, by container
+	EphemeralStorage []*MetricResponse `json:"ephemeralStorage,omitempty"`
+	// ephemeral storage requests in bytes, by container
+	EphemeralStorageRequests []*MetricResponse `json:"ephemeralStorageRequests,omitempty"`
+	// ephemeral storage limits in bytes, by container
+	EphemeralStorageLimits []*MetricResponse `json:"ephemeralStorageLimits,omitempty"`
+	// filesystem read throughput in bytes/s, by container
+	FsReads []*MetricResponse `json:"fsReads,omitempty"`
+	// filesystem write throughput in bytes/s, by container
+	FsWrites []*MetricResponse `json:"fsWrites,omitempty"`
+	// pod network receive throughput in bytes/s
+	NetworkReceive []*MetricResponse `json:"networkReceive,omitempty"`
+	// pod network transmit throughput in bytes/s
+	NetworkTransmit []*MetricResponse `json:"networkTransmit,omitempty"`
+	// pod received packets dropped per second
+	NetworkReceiveDropped []*MetricResponse `json:"networkReceiveDropped,omitempty"`
+	// pod transmitted packets dropped per second
+	NetworkTransmitDropped []*MetricResponse `json:"networkTransmitDropped,omitempty"`
+	// cumulative restart count, by container
+	Restarts []*MetricResponse `json:"restarts,omitempty"`
 }
 
 type PodSpec struct {
@@ -14202,6 +14292,64 @@ func (e *ClusterDistro) UnmarshalJSON(b []byte) error {
 }
 
 func (e ClusterDistro) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ClusterMetricsGrouping string
+
+const (
+	// a single cluster-wide series
+	ClusterMetricsGroupingCluster   ClusterMetricsGrouping = "CLUSTER"
+	ClusterMetricsGroupingNamespace ClusterMetricsGrouping = "NAMESPACE"
+	ClusterMetricsGroupingNode      ClusterMetricsGrouping = "NODE"
+)
+
+var AllClusterMetricsGrouping = []ClusterMetricsGrouping{
+	ClusterMetricsGroupingCluster,
+	ClusterMetricsGroupingNamespace,
+	ClusterMetricsGroupingNode,
+}
+
+func (e ClusterMetricsGrouping) IsValid() bool {
+	switch e {
+	case ClusterMetricsGroupingCluster, ClusterMetricsGroupingNamespace, ClusterMetricsGroupingNode:
+		return true
+	}
+	return false
+}
+
+func (e ClusterMetricsGrouping) String() string {
+	return string(e)
+}
+
+func (e *ClusterMetricsGrouping) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ClusterMetricsGrouping(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ClusterMetricsGrouping", str)
+	}
+	return nil
+}
+
+func (e ClusterMetricsGrouping) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ClusterMetricsGrouping) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ClusterMetricsGrouping) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

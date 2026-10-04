@@ -75,7 +75,11 @@ import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 
 import { AIAgentRunPodLogs } from 'components/ai/agent-runs/details/AIAgentRunPodLogs.tsx'
 import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
-import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
+import {
+  ClusterMetrics,
+  ClusterMetricsHeatmap,
+  ClusterMetricsTimeseries,
+} from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 import { ClusterUpgradePlan } from 'components/cd/cluster/upgrade-plan/ClusterUpgradePlan.tsx'
 import { ServiceMonitorCreateOrEdit } from 'components/cd/services/service/monitors/create-edit/ServiceMonitorCreateOrEdit.tsx'
@@ -318,7 +322,25 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_METRICS_PATH}
       element={<ClusterMetrics />}
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="timeseries"
+          />
+        }
+      />
+      <Route
+        path="timeseries"
+        element={<ClusterMetricsTimeseries />}
+      />
+      <Route
+        path="heatmap"
+        element={<ClusterMetricsHeatmap />}
+      />
+    </Route>
     <Route
       path={CLUSTER_DETAILS_PATH}
       element={<ClusterDetails />}

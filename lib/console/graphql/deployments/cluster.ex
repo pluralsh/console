@@ -29,6 +29,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     value :node
   end
 
+  enum :cluster_metrics_grouping do
+    value :cluster, description: "a single cluster-wide series"
+    value :namespace
+    value :node
+  end
+
   enum :version_compliance do
     value :latest
     value :compliant
@@ -463,6 +469,32 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_usage, list_of(:metric_response)
   end
 
+  @desc "Cluster usage timeseries; when grouped, each series carries a `namespace` or `node` label"
+  object :cluster_usage_metrics do
+    field :cpu,                      list_of(:metric_response), description: "cpu usage in cores"
+    field :cpu_requests,             list_of(:metric_response), description: "cpu requests in cores"
+    field :cpu_limits,               list_of(:metric_response), description: "cpu limits in cores"
+    field :cpu_allocatable,          list_of(:metric_response), description: "allocatable node cpu in cores, absent when grouped by namespace"
+    field :cpu_throttling,           list_of(:metric_response), description: "fraction (0-1) of CFS periods throttled"
+    field :memory,                   list_of(:metric_response), description: "working set memory in bytes"
+    field :memory_requests,          list_of(:metric_response), description: "memory requests in bytes"
+    field :memory_limits,            list_of(:metric_response), description: "memory limits in bytes"
+    field :memory_allocatable,       list_of(:metric_response), description: "allocatable node memory in bytes, absent when grouped by namespace"
+    field :oom_kills,                list_of(:metric_response), description: "container OOM kills within each rate window"
+    field :network_receive,          list_of(:metric_response), description: "pod network receive throughput in bytes/s"
+    field :network_transmit,         list_of(:metric_response), description: "pod network transmit throughput in bytes/s"
+    field :network_receive_dropped,  list_of(:metric_response), description: "pod received packets dropped per second"
+    field :network_transmit_dropped, list_of(:metric_response), description: "pod transmitted packets dropped per second"
+    field :ephemeral_storage,        list_of(:metric_response), description: "container filesystem usage in bytes"
+    field :fs_reads,                 list_of(:metric_response), description: "container filesystem read throughput in bytes/s"
+    field :fs_writes,                list_of(:metric_response), description: "container filesystem write throughput in bytes/s"
+    field :volume_usage,             list_of(:metric_response), description: "persistent volume usage in bytes"
+    field :volume_capacity,          list_of(:metric_response), description: "persistent volume capacity in bytes"
+    field :pods_running,             list_of(:metric_response), description: "running pod count"
+    field :pods_pending,             list_of(:metric_response), description: "pending pod count"
+    field :restarts,                 list_of(:metric_response), description: "container restarts within each rate window"
+  end
+
   object :cluster_node_metrics do
     field :cpu, list_of(:metric_response)
     field :memory, list_of(:metric_response)
@@ -633,6 +665,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :step,         :string
 
       resolve &Deployments.metrics/3
+    end
+
+    @desc "cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node"
+    field :cluster_usage_metrics, :cluster_usage_metrics do
+      arg :group_by, :cluster_metrics_grouping, default_value: :cluster
+      arg :start,    :datetime
+      arg :stop,     :datetime
+      arg :step,     :string
+
+      resolve &Deployments.cluster_usage_metrics/3
     end
 
     field :cluster_node_metrics, :cluster_node_metrics do

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { PodMetricsFragment } from 'generated/graphql'
-import { POD_METRIC_FORMATTERS, buildPodMetricGraphs } from './podMetricsGraphs'
+import { METRIC_FORMATTERS } from 'components/utils/metrics/metricFormats'
+import { buildPodMetricGraphs } from './podMetricsGraphs'
 
 const series = (container: string | null, value = '1') => ({
   metric: container ? { container } : {},
@@ -64,9 +65,9 @@ describe('buildPodMetricGraphs', () => {
   })
 
   it('formats each unit', () => {
-    expect(POD_METRIC_FORMATTERS.bytesRate(1536)).toBe('1.5 KiB/s')
-    expect(POD_METRIC_FORMATTERS.percent(0.125)).toBe('12.5%')
-    expect(POD_METRIC_FORMATTERS.count(3)).toBe('3')
-    expect(POD_METRIC_FORMATTERS.cpu(0.0015)).toBe('1.5m')
+    expect(METRIC_FORMATTERS.bytesRate(1536)).toBe('1.5 KiB/s')
+    expect(METRIC_FORMATTERS.percent(0.125)).toBe('12.5%')
+    expect(METRIC_FORMATTERS.count(3)).toBe('3')
+    expect(METRIC_FORMATTERS.cpu(0.0015)).toBe('1.5m')
   })
 })

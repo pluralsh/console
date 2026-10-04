@@ -1,11 +1,13 @@
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
 import { MetricResponseFragment, MetricResult } from 'generated/graphql'
 import { Prometheus } from 'utils/prometheus.ts'
 import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
+import {
+  MetricsGraphCard,
+  MetricsGraphGrid,
+} from 'components/utils/metrics/MetricsGraphCard'
 import type { TimeWindow } from 'components/utils/timerange/timeRange'
 import {
   PodResourceReservation,
@@ -43,40 +45,24 @@ type RangeProps = {
   onRangeSelect?: (start: Date, end: Date) => void
 }
 
-function MetricsRow({
+function MetricsGraphs({
   graphs,
   timeWindow,
   onRangeSelect,
 }: {
   graphs: MetricGraph[]
 } & RangeProps) {
-  const theme = useTheme()
   const visibleGraphs = graphs.filter(({ data }) => !isEmpty(data))
 
   if (isEmpty(visibleGraphs)) return null
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
-    >
+    <MetricsGraphGrid>
       {visibleGraphs.map(({ data, format, title }) => (
-        <div
+        <MetricsGraphCard
           key={title}
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-            flexBasis: 0,
-            minWidth: 0,
-          }}
+          title={title}
         >
-          <GraphHeader title={title} />
           <Graph
             data={data}
             yFormat={(v) => Prometheus.format(v, format)}
@@ -84,9 +70,9 @@ function MetricsRow({
             timeWindow={timeWindow}
             onRangeSelect={onRangeSelect}
           />
-        </div>
+        </MetricsGraphCard>
       ))}
-    </div>
+    </MetricsGraphGrid>
   )
 }
 
@@ -248,17 +234,10 @@ export function ResourceMetricsGraphs({
   ])
 
   return (
-    <>
-      <MetricsRow
-        graphs={overallGraphs}
-        timeWindow={timeWindow}
-        onRangeSelect={onRangeSelect}
-      />
-      <MetricsRow
-        graphs={podGraphs}
-        timeWindow={timeWindow}
-        onRangeSelect={onRangeSelect}
-      />
-    </>
+    <MetricsGraphs
+      graphs={[...overallGraphs, ...podGraphs]}
+      timeWindow={timeWindow}
+      onRangeSelect={onRangeSelect}
+    />
   )
 }

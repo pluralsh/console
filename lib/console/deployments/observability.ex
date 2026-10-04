@@ -413,9 +413,19 @@ defmodule Console.Deployments.Observability do
   @doc """
   Queries opinionated metrics for a set of different, relevant scopes
   """
-  @spec query(Cluster.t | {Cluster.t, binary} | {:pod, Cluster.t, binary, binary} | Service.t | ServiceComponent.t, binary, binary, binary) :: {:ok, map} | error
+  @spec query(
+    Cluster.t | {Cluster.t, binary} | {:usage, Cluster.t, :cluster | :namespace | :node, [atom]} |
+      {:pod, Cluster.t, binary, binary} | Service.t | ServiceComponent.t,
+    binary, binary, binary
+  ) :: {:ok, map} | error
   def query(%Cluster{handle: cluster}, start, stop, step) do
     queries(:cluster)
+    |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
+  end
+
+  def query({:usage, %Cluster{handle: cluster}, grouping, keys}, start, stop, step) do
+    queries(:cluster_usage, grouping)
+    |> Keyword.take(keys)
     |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
   end
 
