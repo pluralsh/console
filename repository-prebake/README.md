@@ -89,10 +89,15 @@ Extend it and run clone + manifest **inside**
 the image you push (`docker build`, `docker/build-push-action`, and so on). The
 CLI is not a host-side wrapper around `docker build`.
 
+The base image intentionally retains its root default so derivatives can run build-time
+`chown`, `chmod`, and package-install steps. Set `USER 65532:65532` as the final
+instruction in a derivative that does not need root at runtime.
+
 ```dockerfile
 FROM docker.io/pluralsh/repository-prebake:latest
 COPY repos.yaml /config/repos.yaml
 RUN prebake --config /config/repos.yaml --chown 65532:65532
+USER 65532:65532
 ```
 
 Private HTTPS remotes: keep `url:` token-free and pass the password at build time.
@@ -105,6 +110,7 @@ COPY repos.yaml /config/repos.yaml
 RUN --mount=type=secret,id=git_token \
     GIT_ACCESS_TOKEN="$(cat /run/secrets/git_token)" \
     prebake --config /config/repos.yaml --chown 65532:65532
+USER 65532:65532
 ```
 
 ```bash
