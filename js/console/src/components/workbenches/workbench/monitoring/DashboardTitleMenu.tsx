@@ -9,10 +9,12 @@ export function DashboardTitleMenu({
   name,
   description,
   updatedAt,
+  bare = false,
 }: {
   name: string
   description?: string | null
   updatedAt?: string | null
+  bare?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -27,6 +29,13 @@ export function DashboardTitleMenu({
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [open])
+
+  if (bare)
+    return (
+      <WrapSC>
+        <TitleSC>{name}</TitleSC>
+      </WrapSC>
+    )
 
   return (
     <WrapSC ref={wrapRef}>

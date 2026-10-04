@@ -32,9 +32,9 @@ export type ClusterMetricSection = {
   graphs: ClusterMetricGraph[]
 }
 
-type Metrics = Nullable<Nullable<MetricResponseFragment>[]>
+export type Metrics = Nullable<Nullable<MetricResponseFragment>[]>
 type Point = GraphSeries['data'][number]
-type Group = { group: string; data: Point[] }
+export type Group = { group: string; data: Point[] }
 
 export const DEFAULT_TOP_GROUPS = 10
 
@@ -51,27 +51,26 @@ export function usageFieldVariables(fields: UsageField[]) {
   >
 }
 
-function groupsOf(metrics: Metrics, grouping: ClusterMetricsGrouping) {
-  const label = GROUP_LABELS[grouping]
+/** Splits series on a prometheus `label`; a null label means a single ungrouped total. */
+export function groupsOf(metrics: Metrics, label: string | null) {
   return (metrics ?? [])
     .filter(isNonNullable)
     .map(({ metric, values }): Group => {
-      const value = metric?.[label]
+      const value = label ? metric?.[label] : undefined
       return {
-        group:
-          grouping === ClusterMetricsGrouping.Cluster
-            ? 'cluster'
-            : typeof value === 'string' && value
-              ? value
-              : `(no ${label})`,
+        group: !label
+          ? 'total'
+          : typeof value === 'string' && value
+            ? value
+            : `(no ${label})`,
         data: toPoints(values),
       }
     })
     .filter(({ data }) => data.length > 0)
 }
 
-function first(metrics: Metrics) {
-  return groupsOf(metrics, ClusterMetricsGrouping.Cluster)[0]?.data ?? []
+export function first(metrics: Metrics) {
+  return groupsOf(metrics, null)[0]?.data ?? []
 }
 
 const timeKey = (p: Point) => p.x.getTime()
@@ -86,7 +85,7 @@ function sumPoints(series: Point[][]): Point[] {
     .map(([t, y]) => ({ x: new Date(t), y }))
 }
 
-function divide(numerator: Point[], denominator: Point[]): Point[] {
+export function divide(numerator: Point[], denominator: Point[]): Point[] {
   const byTime = new Map(denominator.map((p) => [timeKey(p), p.y]))
   return numerator.flatMap((p) => {
     const d = byTime.get(timeKey(p))
@@ -120,25 +119,25 @@ export function topGroups(
   ]
 }
 
-function ratioByGroup(
+export function ratioByGroup(
   numerator: Metrics,
   denominator: Metrics,
-  grouping: ClusterMetricsGrouping
+  label: string | null
 ): Group[] {
   const denominators = new Map(
-    groupsOf(denominator, grouping).map(({ group, data }) => [group, data])
+    groupsOf(denominator, label).map(({ group, data }) => [group, data])
   )
-  return groupsOf(numerator, grouping).flatMap(({ group, data }) => {
+  return groupsOf(numerator, label).flatMap(({ group, data }) => {
     const d = denominators.get(group)
     const ratio = d ? divide(data, d) : []
     return ratio.length > 0 ? [{ group, data: ratio }] : []
   })
 }
 
-function sumByGroup(grouping: ClusterMetricsGrouping, ...metrics: Metrics[]) {
+export function sumByGroup(label: string | null, ...metrics: Metrics[]) {
   const byGroup = new Map<string, Point[][]>()
   for (const m of metrics)
-    for (const { group, data } of groupsOf(m, grouping))
+    for (const { group, data } of groupsOf(m, label))
       byGroup.set(group, [...(byGroup.get(group) ?? []), data])
   return [...byGroup.entries()].map(([group, series]) => ({
     group,
@@ -146,9 +145,9 @@ function sumByGroup(grouping: ClusterMetricsGrouping, ...metrics: Metrics[]) {
   }))
 }
 
-const solid = (id: string, data: Point[]): GraphSeries[] =>
+export const solid = (id: string, data: Point[]): GraphSeries[] =>
   data.length > 0 ? [{ id, data }] : []
-const dashed = (id: string, data: Point[]): GraphSeries[] =>
+export const dashed = (id: string, data: Point[]): GraphSeries[] =>
   data.length > 0 ? [{ id, data, dashed: true }] : []
 
 const CLUSTER_SECTIONS: ClusterMetricSection[] = [
@@ -397,7 +396,7 @@ function groupedSections(
   ): ClusterMetricGraph => ({
     ...graph,
     fields: [field],
-    series: (m) => top(groupsOf(m[field], grouping).filter(filter), additive),
+    series: (m) => top(groupsOf(m[field], label).filter(filter), additive),
   })
 
   // allocatable only exists per node, so namespaces measure against requests instead
@@ -420,7 +419,7 @@ function groupedSections(
       format: 'percent',
       fields: [resource, denominator],
       series: (m) =>
-        top(ratioByGroup(m[resource], m[denominator], grouping), false),
+        top(ratioByGroup(m[resource], m[denominator], label), false),
     }
   }
 
@@ -504,7 +503,7 @@ function groupedSections(
           series: (m) =>
             top(
               sumByGroup(
-                grouping,
+                label,
                 m.networkReceiveDropped,
                 m.networkTransmitDropped
               )
@@ -544,7 +543,7 @@ function groupedSections(
           tooltip: `container_fs_reads_bytes_total and container_fs_writes_bytes_total rates combined per ${label}`,
           format: 'bytesRate',
           fields: ['fsReads', 'fsWrites'],
-          series: (m) => top(sumByGroup(grouping, m.fsReads, m.fsWrites)),
+          series: (m) => top(sumByGroup(label, m.fsReads, m.fsWrites)),
         },
       ],
     },

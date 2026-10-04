@@ -2877,7 +2877,7 @@ type ClusterUsageHistoryEdge struct {
 	Cursor *string              `json:"cursor,omitempty"`
 }
 
-// Cluster usage timeseries; when grouped, each series carries a `namespace` or `node` label
+// Cluster or service usage timeseries; when grouped, each series carries the grouping's label (`namespace`, `node` or `pod`)
 type ClusterUsageMetrics struct {
 	// cpu usage in cores
 	CPU []*MetricResponse `json:"cpu,omitempty"`
@@ -2917,6 +2917,8 @@ type ClusterUsageMetrics struct {
 	VolumeUsage []*MetricResponse `json:"volumeUsage,omitempty"`
 	// persistent volume capacity in bytes
 	VolumeCapacity []*MetricResponse `json:"volumeCapacity,omitempty"`
+	// fraction (0-1) of capacity used by the fullest persistent volume
+	VolumeFullness []*MetricResponse `json:"volumeFullness,omitempty"`
 	// running pod count
 	PodsRunning []*MetricResponse `json:"podsRunning,omitempty"`
 	// pending pod count
@@ -9203,7 +9205,9 @@ type ServiceDeployment struct {
 	Monitors               *MonitorConnection              `json:"monitors,omitempty"`
 	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
 	ServiceMetrics         *ServiceComponentMetrics        `json:"serviceMetrics,omitempty"`
-	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
+	// the cluster usage metric set scoped to this service's namespace; only selected fields are queried
+	ServiceUsageMetrics *ClusterUsageMetrics     `json:"serviceUsageMetrics,omitempty"`
+	ComponentMetrics    *ServiceComponentMetrics `json:"componentMetrics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
 	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// whether this service is editable
@@ -15024,11 +15028,12 @@ func (e DashboardGraphType) MarshalJSON() ([]byte, error) {
 type DashboardGraphUnit string
 
 const (
-	DashboardGraphUnitNone    DashboardGraphUnit = "NONE"
-	DashboardGraphUnitBytes   DashboardGraphUnit = "BYTES"
-	DashboardGraphUnitTime    DashboardGraphUnit = "TIME"
-	DashboardGraphUnitCPU     DashboardGraphUnit = "CPU"
-	DashboardGraphUnitPercent DashboardGraphUnit = "PERCENT"
+	DashboardGraphUnitNone         DashboardGraphUnit = "NONE"
+	DashboardGraphUnitBytes        DashboardGraphUnit = "BYTES"
+	DashboardGraphUnitTime         DashboardGraphUnit = "TIME"
+	DashboardGraphUnitCPU          DashboardGraphUnit = "CPU"
+	DashboardGraphUnitPercent      DashboardGraphUnit = "PERCENT"
+	DashboardGraphUnitMilliseconds DashboardGraphUnit = "MILLISECONDS"
 )
 
 var AllDashboardGraphUnit = []DashboardGraphUnit{
@@ -15037,11 +15042,12 @@ var AllDashboardGraphUnit = []DashboardGraphUnit{
 	DashboardGraphUnitTime,
 	DashboardGraphUnitCPU,
 	DashboardGraphUnitPercent,
+	DashboardGraphUnitMilliseconds,
 }
 
 func (e DashboardGraphUnit) IsValid() bool {
 	switch e {
-	case DashboardGraphUnitNone, DashboardGraphUnitBytes, DashboardGraphUnitTime, DashboardGraphUnitCPU, DashboardGraphUnitPercent:
+	case DashboardGraphUnitNone, DashboardGraphUnitBytes, DashboardGraphUnitTime, DashboardGraphUnitCPU, DashboardGraphUnitPercent, DashboardGraphUnitMilliseconds:
 		return true
 	}
 	return false
@@ -18717,6 +18723,63 @@ func (e *ServiceMesh) UnmarshalJSON(b []byte) error {
 }
 
 func (e ServiceMesh) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ServiceMetricsGrouping string
+
+const (
+	// a single series totaled across the service's namespace
+	ServiceMetricsGroupingService ServiceMetricsGrouping = "SERVICE"
+	// one series per pod (persistent volumes are broken out by claim instead)
+	ServiceMetricsGroupingPod ServiceMetricsGrouping = "POD"
+)
+
+var AllServiceMetricsGrouping = []ServiceMetricsGrouping{
+	ServiceMetricsGroupingService,
+	ServiceMetricsGroupingPod,
+}
+
+func (e ServiceMetricsGrouping) IsValid() bool {
+	switch e {
+	case ServiceMetricsGroupingService, ServiceMetricsGroupingPod:
+		return true
+	}
+	return false
+}
+
+func (e ServiceMetricsGrouping) String() string {
+	return string(e)
+}
+
+func (e *ServiceMetricsGrouping) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ServiceMetricsGrouping(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ServiceMetricsGrouping", str)
+	}
+	return nil
+}
+
+func (e ServiceMetricsGrouping) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ServiceMetricsGrouping) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ServiceMetricsGrouping) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -1,10 +1,5 @@
-import {
-  Button,
-  Flex,
-  Input,
-  ListBoxItem,
-  Select,
-} from '@pluralsh/design-system'
+import { Button, Flex, Input, ListBoxItem } from '@pluralsh/design-system'
+import { CompactSelect } from 'components/utils/CompactSelect'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   DashboardInputType,
@@ -187,7 +182,7 @@ function DashboardInputControl({
       )
     case DashboardInputType.Boolean:
       return (
-        <Select
+        <CompactSelect
           size="small"
           width={240}
           label={placeholder}
@@ -205,7 +200,7 @@ function DashboardInputControl({
             key="false"
             label="False"
           />
-        </Select>
+        </CompactSelect>
       )
     case DashboardInputType.TimeRange:
       // The global range control owns the query time range; a time-range
@@ -227,7 +222,7 @@ function DashboardInputControl({
   }
 
   return (
-    <Select
+    <CompactSelect
       size="small"
       width={240}
       label={placeholder}
@@ -244,7 +239,7 @@ function DashboardInputControl({
           label={option}
         />
       ))}
-    </Select>
+    </CompactSelect>
   )
 }
 

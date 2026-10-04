@@ -262,29 +262,34 @@ export function WorkbenchJobActivity({
             shimmer={isRunning}
           />
         )}
-        <WorkbenchJobActivityThoughts
-          activityId={id}
-          skip={!isOpen}
-        />
-        {textStream && (
-          <Flex
-            direction="column"
-            maxHeight={120}
-            overflow="auto"
-            css={isRunning ? shimmerWithinCss(theme) : undefined}
-          >
-            <SimplifiedMarkdown
-              text={textStream}
-              tone="thought"
-            />
-          </Flex>
-        )}
+        <CollapseWhenEmptySC
+          direction="column"
+          gap="small"
+        >
+          <WorkbenchJobActivityThoughts
+            activityId={id}
+            skip={!isOpen}
+          />
+          {textStream && (
+            <Flex
+              direction="column"
+              maxHeight={120}
+              overflow="auto"
+              css={isRunning ? shimmerWithinCss(theme) : undefined}
+            >
+              <SimplifiedMarkdown
+                text={textStream}
+                tone="thought"
+              />
+            </Flex>
+          )}
+          {isRunning && <AILoadingText activityId={id} />}
+        </CollapseWhenEmptySC>
         <WorkbenchJobActivityResult
           activity={activity}
           jobId={jobId}
           metricsFetchEnabled={isOpen}
         />
-        {isRunning && <AILoadingText activityId={id} />}
       </Flex>
     </AccordionItem>
   )
@@ -465,7 +470,7 @@ function WorkbenchJobActivityResult({
   )
   const hasCanvasBlocks = !isEmpty((result?.canvas ?? []).filter(isNonNullable))
   return (
-    <Flex
+    <CollapseWhenEmptySC
       direction="column"
       gap="small"
     >
@@ -475,7 +480,7 @@ function WorkbenchJobActivityResult({
           css={{ wordBreak: 'break-word' }}
         />
       )}
-      {!hasCanvasBlocks && (
+      {!hasCanvasBlocks && result?.output && (
         <div>
           {markdownType === 'simplified' ? (
             <SimplifiedMarkdown
@@ -526,9 +531,14 @@ function WorkbenchJobActivityResult({
         fillLevel={1}
         agentRun={agentRun}
       />
-    </Flex>
+    </CollapseWhenEmptySC>
   )
 }
+
+// children that render null leave an empty box that still takes a gap slot in the parent
+const CollapseWhenEmptySC = styled(Flex)({
+  '&:empty': { display: 'none' },
+})
 
 const MemoGroupSC = styled.div(({ theme }) => ({
   width: '100%',
@@ -637,7 +647,10 @@ function WorkbenchJobActivityThoughts({
     )
 
   return (
-    <>
+    <Flex
+      direction="column"
+      gap="small"
+    >
       <SimpleAccordion
         label={header}
         loading={isLoading}
@@ -667,7 +680,7 @@ function WorkbenchJobActivityThoughts({
           />
         </EaseIn>
       )}
-    </>
+    </Flex>
   )
 }
 

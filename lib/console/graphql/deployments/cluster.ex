@@ -469,7 +469,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_usage, list_of(:metric_response)
   end
 
-  @desc "Cluster usage timeseries; when grouped, each series carries a `namespace` or `node` label"
+  @desc "Cluster or service usage timeseries; when grouped, each series carries the grouping's label (`namespace`, `node` or `pod`)"
   object :cluster_usage_metrics do
     field :cpu,                      list_of(:metric_response), description: "cpu usage in cores"
     field :cpu_requests,             list_of(:metric_response), description: "cpu requests in cores"

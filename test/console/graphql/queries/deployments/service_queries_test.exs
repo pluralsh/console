@@ -451,6 +451,41 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       assert hd(hd(metrics["podMemLimits"])["values"])["value"] == "pod-mem-limits"
     end
 
+    test "it only runs the selected service usage queries, grouped by pod" do
+      user = admin_user()
+      service = insert(:service, namespace: "ns")
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(Req, :post, 3, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        assert query =~ ~s|cluster="#{service.cluster.handle}",namespace="ns"|
+        label = if query =~ "kubelet_volume_stats", do: "persistentvolumeclaim", else: "pod"
+        assert query =~ "by (#{label}) ("
+
+        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
+          %{metric: %{label => "x"}, values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!) {
+          serviceDeployment(id: $id) {
+            serviceUsageMetrics(groupBy: POD) {
+              __typename
+              cpuThrottling { metric values { timestamp value } }
+              networkReceive { metric values { timestamp value } }
+              volumeFullness { metric values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      metrics = found["serviceUsageMetrics"]
+      assert hd(metrics["cpuThrottling"])["metric"]["pod"] == "x"
+      assert hd(metrics["networkReceive"])["metric"]["pod"] == "x"
+      assert hd(metrics["volumeFullness"])["metric"]["persistentvolumeclaim"] == "x"
+    end
+
     test "it can fetch a service heat map" do
       user = admin_user()
       service = insert(:service)

@@ -102,6 +102,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Observability.query({:usage, cluster, args[:group_by] || :cluster, keys}, start, stop, step)
   end
 
+  def service_usage_metrics(%Service{} = service, args, info) do
+    {start, stop, step} = prom_args(args)
+    keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
+    Observability.query({:usage, service, args[:group_by] || :service, keys}, start, stop, step)
+  end
+
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
     Observability.query({cluster, node}, start, stop, step)

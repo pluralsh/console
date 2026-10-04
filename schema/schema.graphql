@@ -8034,6 +8034,7 @@ enum DashboardGraphUnit {
   TIME
   CPU
   PERCENT
+  MILLISECONDS
 }
 
 enum DashboardInputType {
@@ -11802,6 +11803,14 @@ enum RendererType {
   KUSTOMIZE
 }
 
+enum ServiceMetricsGrouping {
+  "a single series totaled across the service's namespace"
+  SERVICE
+
+  "one series per pod (persistent volumes are broken out by claim instead)"
+  POD
+}
+
 input ServiceDeploymentAttributes {
   name: String!
 
@@ -12275,6 +12284,9 @@ type ServiceDeployment {
   scalingRecommendations: [ClusterScalingRecommendation]
 
   serviceMetrics(start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
+
+  "the cluster usage metric set scoped to this service's namespace; only selected fields are queried"
+  serviceUsageMetrics(groupBy: ServiceMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
 
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
@@ -13440,7 +13452,7 @@ type ClusterMetrics {
   memoryUsage: [MetricResponse]
 }
 
-"Cluster usage timeseries; when grouped, each series carries a `namespace` or `node` label"
+"Cluster or service usage timeseries; when grouped, each series carries the grouping's label (`namespace`, `node` or `pod`)"
 type ClusterUsageMetrics {
   "cpu usage in cores"
   cpu: [MetricResponse]

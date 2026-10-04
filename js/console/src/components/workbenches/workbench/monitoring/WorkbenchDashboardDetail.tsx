@@ -258,12 +258,18 @@ function DashboardDetailView({
               name={dashboard.name}
               description={dashboard.description}
               updatedAt={dashboard.updatedAt}
+              bare={!hasFilters}
             />
             {fullscreen && (
               <ExitFullscreenButton onClick={() => setFullscreen(false)} />
             )}
           </TitleRowSC>
           <ToolbarSC $hasFilters={hasFilters}>
+            {!hasFilters && dashboard.description && (
+              <DescriptionSC title={dashboard.description}>
+                {dashboard.description}
+              </DescriptionSC>
+            )}
             {hasFilters && (
               <WorkbenchDashboardFilters
                 dashboardId={dashboard.id}
@@ -500,6 +506,17 @@ const ToolbarSC = styled.div<{ $hasFilters: boolean }>(
     marginTop: theme.spacing.small,
   })
 )
+
+const DescriptionSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-light'],
+  flex: '1 1 240px',
+  margin: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}))
 
 const PanelsSC = styled.div(({ theme }) => ({
   marginTop: theme.spacing.medium,

@@ -1,4 +1,8 @@
-import type { TickBase } from 'components/utils/axisTicks'
+import {
+  niceAxis,
+  type NiceAxis,
+  type TickBase,
+} from 'components/utils/axisTicks'
 import { DashboardGraphUnit } from 'generated/graphql'
 
 const SI_SUFFIXES = ['', 'k', 'M', 'G', 'T', 'P']
@@ -16,8 +20,8 @@ const DURATION_STEPS: { seconds: number; suffix: string }[] = [
 
 /**
  * Formats a value compactly for axes and tooltips, e.g. `1.2k`, `512 MB`,
- * `340ms`, `250m` (millicores). TIME is in seconds, CPU in cores, and
- * PERCENT on a 0-100 scale.
+ * `340ms`, `250m` (millicores). TIME is in seconds, MILLISECONDS in ms, CPU
+ * in cores, and PERCENT on a 0-100 scale.
  */
 export function formatUnitValue(
   value: number,
@@ -29,6 +33,8 @@ export function formatUnitValue(
       return scaled(value, 1024, BYTE_SUFFIXES, ' ')
     case DashboardGraphUnit.Time:
       return duration(value)
+    case DashboardGraphUnit.Milliseconds:
+      return duration(value / 1000)
     case DashboardGraphUnit.Cpu:
       return cores(value)
     case DashboardGraphUnit.Percent:
@@ -80,15 +86,27 @@ function trim(value: number) {
 const AXIS_CHAR_PX = 7
 const AXIS_TICK_PX = 14
 
-export function tickBaseForUnit(unit: Nullable<DashboardGraphUnit>): TickBase {
+function tickBaseForUnit(unit: Nullable<DashboardGraphUnit>): TickBase {
   switch (unit) {
     case DashboardGraphUnit.Bytes:
       return 'binary'
     case DashboardGraphUnit.Time:
+    case DashboardGraphUnit.Milliseconds:
       return 'duration'
     default:
       return 'decimal'
   }
+}
+
+export function unitAxis(
+  min: number,
+  max: number,
+  unit: Nullable<DashboardGraphUnit>
+): NiceAxis {
+  return niceAxis(min, max, {
+    base: tickBaseForUnit(unit),
+    msPerUnit: unit === DashboardGraphUnit.Time ? 1000 : 1,
+  })
 }
 
 /** Left margin wide enough for the longest of the given y tick labels. */

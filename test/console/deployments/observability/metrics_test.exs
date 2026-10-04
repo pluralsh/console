@@ -109,6 +109,32 @@ defmodule Console.Deployments.Observability.MetricsTest do
     end
   end
 
+  describe "service usage queries" do
+    test "every query is namespace scoped, grouped, and fully substituted" do
+      vars = [cluster: "c", namespace: "ns", rate: "5m"]
+
+      for grouping <- [:service, :pod], {key, query} <- Metrics.queries(:service_usage, grouping) do
+        by =
+          case {grouping, key} do
+            {:service, _} -> "by ()"
+            {:pod, k} when k in ~w(volume_usage volume_capacity volume_fullness)a -> "by (persistentvolumeclaim)"
+            {:pod, _} -> "by (pod)"
+          end
+
+        assert query =~ ~s|cluster="${cluster}",namespace="${namespace}"|, "#{grouping}.#{key} isn't namespace scoped: #{query}"
+        assert String.starts_with?(query, ["sum #{by} (", "max #{by} ("]), "#{grouping}.#{key} isn't grouped #{by}: #{query}"
+        refute Client.variable_subst(query, vars) =~ "$", "#{grouping}.#{key} left a variable unsubstituted"
+      end
+    end
+
+    test "services offer no node allocatable capacity" do
+      for grouping <- [:service, :pod] do
+        refute Keyword.has_key?(Metrics.queries(:service_usage, grouping), :cpu_allocatable)
+        refute Keyword.has_key?(Metrics.queries(:service_usage, grouping), :memory_allocatable)
+      end
+    end
+  end
+
   describe "Prometheus.Client.variable_subst/2" do
     test "it matches whole variable names in a single pass" do
       assert Client.variable_subst(~s|a="${name}",b="${namespace}"|, name: "x", namespace: "y") ==
