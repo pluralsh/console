@@ -13,6 +13,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/samber/lo"
+	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools"
@@ -124,6 +125,10 @@ func (p *AzureProvider) resolveInvokeURL(ctx context.Context, webAppsClient *arm
 	if functionKey == "" {
 		functionKey = p.tryHostKeys(ctx, webAppsClient, ref)
 	}
+	if functionKey == "" {
+		klog.Warningf("no key found for Azure function %s/%s/%s; invoking without one (list function secrets: %v)",
+			ref.resourceGroup, ref.siteName, ref.functionName, secretsErr)
+	}
 
 	if invokeURL == "" {
 		var err error
@@ -156,6 +161,7 @@ func (p *AzureProvider) tryFunctionSecrets(ctx context.Context, webAppsClient *a
 func (p *AzureProvider) tryFunctionKeys(ctx context.Context, webAppsClient *armappservice.WebAppsClient, ref azureFunctionRef) string {
 	keysResp, err := webAppsClient.ListFunctionKeys(ctx, ref.resourceGroup, ref.siteName, ref.functionName, nil)
 	if err != nil {
+		klog.Errorf("error listing keys of Azure function %s/%s/%s: %v", ref.resourceGroup, ref.siteName, ref.functionName, err)
 		return ""
 	}
 
@@ -165,6 +171,7 @@ func (p *AzureProvider) tryFunctionKeys(ctx context.Context, webAppsClient *arma
 func (p *AzureProvider) tryHostKeys(ctx context.Context, webAppsClient *armappservice.WebAppsClient, ref azureFunctionRef) string {
 	keysResp, err := webAppsClient.ListHostKeys(ctx, ref.resourceGroup, ref.siteName, nil)
 	if err != nil {
+		klog.Errorf("error listing host keys of Azure function app %s/%s: %v", ref.resourceGroup, ref.siteName, err)
 		return ""
 	}
 
