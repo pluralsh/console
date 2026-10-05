@@ -117,6 +117,10 @@ func (p *AzureProvider) newWebAppsClient(subscriptionID string, azureConn *cloud
 
 func (p *AzureProvider) resolveInvokeURL(ctx context.Context, webAppsClient *armappservice.WebAppsClient, ref azureFunctionRef) (string, error) {
 	invokeURL, functionKey, secretsErr := p.tryFunctionSecrets(ctx, webAppsClient, ref)
+	// Flex Consumption apps don't serve function secrets, but do list the function's keys.
+	if functionKey == "" {
+		functionKey = p.tryFunctionKeys(ctx, webAppsClient, ref)
+	}
 	if functionKey == "" {
 		functionKey = p.tryHostKeys(ctx, webAppsClient, ref)
 	}
@@ -147,6 +151,15 @@ func (p *AzureProvider) tryFunctionSecrets(ctx context.Context, webAppsClient *a
 	}
 
 	return strings.TrimSpace(lo.FromPtr(secrets.TriggerURL)), strings.TrimSpace(lo.FromPtr(secrets.Key)), nil
+}
+
+func (p *AzureProvider) tryFunctionKeys(ctx context.Context, webAppsClient *armappservice.WebAppsClient, ref azureFunctionRef) string {
+	keysResp, err := webAppsClient.ListFunctionKeys(ctx, ref.resourceGroup, ref.siteName, ref.functionName, nil)
+	if err != nil {
+		return ""
+	}
+
+	return p.selectFunctionKey(keysResp.Properties)
 }
 
 func (p *AzureProvider) tryHostKeys(ctx context.Context, webAppsClient *armappservice.WebAppsClient, ref azureFunctionRef) string {
@@ -251,18 +264,23 @@ func (p *AzureProvider) withFunctionCode(invokeURL, code string) string {
 	return parsed.String()
 }
 
+// selectFunctionKey returns the "default" key, or else any non-empty one.
+func (p *AzureProvider) selectFunctionKey(keys map[string]*string) string {
+	if key := strings.TrimSpace(lo.FromPtr(keys["default"])); key != "" {
+		return key
+	}
+	for _, v := range keys {
+		if key := strings.TrimSpace(lo.FromPtr(v)); key != "" {
+			return key
+		}
+	}
+
+	return ""
+}
+
 func (p *AzureProvider) selectHostKey(functionKeys map[string]*string, masterKey *string, systemKeys map[string]*string) string {
-	if len(functionKeys) > 0 {
-		if def, ok := functionKeys["default"]; ok {
-			if key := strings.TrimSpace(lo.FromPtr(def)); key != "" {
-				return key
-			}
-		}
-		for _, v := range functionKeys {
-			if key := strings.TrimSpace(lo.FromPtr(v)); key != "" {
-				return key
-			}
-		}
+	if key := p.selectFunctionKey(functionKeys); key != "" {
+		return key
 	}
 
 	if masterKey != nil {

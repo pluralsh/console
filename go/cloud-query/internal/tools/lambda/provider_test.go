@@ -71,6 +71,38 @@ func TestWithFunctionCode(t *testing.T) {
 	})
 }
 
+func TestSelectFunctionKey(t *testing.T) {
+	t.Parallel()
+	provider := &AzureProvider{}
+
+	t.Run("returns default key when present", func(t *testing.T) {
+		t.Parallel()
+		other := "other-key"
+		def := "default-key"
+		got := provider.selectFunctionKey(map[string]*string{"abc": &other, "default": &def})
+		if got != "default-key" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("skips an empty default key", func(t *testing.T) {
+		t.Parallel()
+		empty := ""
+		val := "abc"
+		got := provider.selectFunctionKey(map[string]*string{"default": &empty, "k": &val})
+		if got != "abc" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("returns empty when no keys", func(t *testing.T) {
+		t.Parallel()
+		if got := provider.selectFunctionKey(nil); got != "" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+}
+
 func TestSelectHostKey(t *testing.T) {
 	t.Parallel()
 	provider := &AzureProvider{}
