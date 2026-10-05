@@ -1,11 +1,11 @@
 ---
-title: Datadog integration
+title: Datadog
 description: Connect Datadog to a workbench and query metrics, logs, and traces
 ---
 
 Use the Datadog integration to give a workbench read-only access to the metrics, logs, and traces already stored in your Datadog account. After you configure the connection once, you can attach it to one or more workbenches and investigate Datadog data with natural-language prompts.
 
-This guide uses the Plural Console UI. For the complete list of integrations and general tool behavior, see [Workbench tools](/plural-features/workbenches/tools).
+This guide uses the Plural Console UI. For the complete list of integrations and general tool behavior, see [Workbench tools](/plural-features/workbenches/integrations/tools).
 
 ## Prerequisites
 

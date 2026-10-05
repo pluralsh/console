@@ -281,23 +281,227 @@
   },
   "/plural-features/workbenches": {
     "relPath": "/plural-features/workbenches/index.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-25T14:41:03.000Z"
   },
   "/plural-features/workbenches/configuration": {
     "relPath": "/plural-features/workbenches/configuration.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-25T14:41:03.000Z"
   },
   "/plural-features/workbenches/coding-agent": {
     "relPath": "/plural-features/workbenches/coding-agent.md",
     "lastmod": "2026-09-02T10:37:22.000Z"
   },
-  "/plural-features/workbenches/tools": {
-    "relPath": "/plural-features/workbenches/tools.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+  "/plural-features/workbenches/integrations": {
+    "relPath": "/plural-features/workbenches/integrations.md",
+    "lastmod": "2026-09-25T14:41:03.000Z"
   },
-  "/plural-features/workbenches/tools/datadog": {
-    "relPath": "/plural-features/workbenches/tools/datadog.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+  "/plural-features/workbenches/integrations/tools": {
+    "relPath": "/plural-features/workbenches/integrations/tools.md",
+    "lastmod": "2026-09-25T14:41:03.000Z"
+  },
+  "/plural-features/workbenches/integrations/tools/datadog": {
+    "relPath": "/plural-features/workbenches/integrations/tools/datadog.md",
+    "lastmod": "2026-09-25T14:41:03.000Z"
+  },
+  "/plural-features/workbenches/integrations/tools/prometheus": {
+    "relPath": "/plural-features/workbenches/integrations/tools/prometheus.md",
+    "lastmod": "2026-09-25T14:50:30.760Z"
+  },
+  "/plural-features/workbenches/integrations/tools/loki": {
+    "relPath": "/plural-features/workbenches/integrations/tools/loki.md",
+    "lastmod": "2026-09-25T14:50:30.793Z"
+  },
+  "/plural-features/workbenches/integrations/tools/elastic": {
+    "relPath": "/plural-features/workbenches/integrations/tools/elastic.md",
+    "lastmod": "2026-09-25T14:50:30.824Z"
+  },
+  "/plural-features/workbenches/integrations/tools/tempo": {
+    "relPath": "/plural-features/workbenches/integrations/tools/tempo.md",
+    "lastmod": "2026-09-25T14:50:30.855Z"
+  },
+  "/plural-features/workbenches/integrations/tools/jaeger": {
+    "relPath": "/plural-features/workbenches/integrations/tools/jaeger.md",
+    "lastmod": "2026-09-25T14:50:30.889Z"
+  },
+  "/plural-features/workbenches/integrations/tools/cloudwatch": {
+    "relPath": "/plural-features/workbenches/integrations/tools/cloudwatch.md",
+    "lastmod": "2026-09-25T14:50:30.921Z"
+  },
+  "/plural-features/workbenches/integrations/tools/dynatrace": {
+    "relPath": "/plural-features/workbenches/integrations/tools/dynatrace.md",
+    "lastmod": "2026-09-25T14:50:30.955Z"
+  },
+  "/plural-features/workbenches/integrations/tools/sentry": {
+    "relPath": "/plural-features/workbenches/integrations/tools/sentry.md",
+    "lastmod": "2026-09-25T14:50:30.994Z"
+  },
+  "/plural-features/workbenches/integrations/tools/splunk": {
+    "relPath": "/plural-features/workbenches/integrations/tools/splunk.md",
+    "lastmod": "2026-09-25T14:50:31.028Z"
+  },
+  "/plural-features/workbenches/integrations/tools/victoria-logs": {
+    "relPath": "/plural-features/workbenches/integrations/tools/victoria-logs.md",
+    "lastmod": "2026-09-25T14:50:31.064Z"
+  },
+  "/plural-features/workbenches/integrations/tools/opensearch": {
+    "relPath": "/plural-features/workbenches/integrations/tools/opensearch.md",
+    "lastmod": "2026-09-25T14:50:31.096Z"
+  },
+  "/plural-features/workbenches/integrations/tools/azure": {
+    "relPath": "/plural-features/workbenches/integrations/tools/azure.md",
+    "lastmod": "2026-09-25T14:50:31.129Z"
+  },
+  "/plural-features/workbenches/integrations/tools/pagerduty": {
+    "relPath": "/plural-features/workbenches/integrations/tools/pagerduty.md",
+    "lastmod": "2026-09-25T14:50:31.163Z"
+  },
+  "/plural-features/workbenches/integrations/tools/github": {
+    "relPath": "/plural-features/workbenches/integrations/tools/github.md",
+    "lastmod": "2026-09-25T14:50:31.198Z"
+  },
+  "/plural-features/workbenches/integrations/tools/gitlab": {
+    "relPath": "/plural-features/workbenches/integrations/tools/gitlab.md",
+    "lastmod": "2026-09-25T14:50:31.230Z"
+  },
+  "/plural-features/workbenches/integrations/tools/bitbucket": {
+    "relPath": "/plural-features/workbenches/integrations/tools/bitbucket.md",
+    "lastmod": "2026-09-25T14:50:31.263Z"
+  },
+  "/plural-features/workbenches/integrations/tools/bitbucket-datacenter": {
+    "relPath": "/plural-features/workbenches/integrations/tools/bitbucket-datacenter.md",
+    "lastmod": "2026-09-25T14:50:31.298Z"
+  },
+  "/plural-features/workbenches/integrations/tools/slack": {
+    "relPath": "/plural-features/workbenches/integrations/tools/slack.md",
+    "lastmod": "2026-09-25T14:50:31.331Z"
+  },
+  "/plural-features/workbenches/integrations/tools/atlassian": {
+    "relPath": "/plural-features/workbenches/integrations/tools/atlassian.md",
+    "lastmod": "2026-09-25T14:50:31.363Z"
+  },
+  "/plural-features/workbenches/integrations/tools/jira": {
+    "relPath": "/plural-features/workbenches/integrations/tools/jira.md",
+    "lastmod": "2026-09-25T14:50:31.396Z"
+  },
+  "/plural-features/workbenches/integrations/tools/jira-datacenter": {
+    "relPath": "/plural-features/workbenches/integrations/tools/jira-datacenter.md",
+    "lastmod": "2026-09-25T14:50:31.427Z"
+  },
+  "/plural-features/workbenches/integrations/tools/linear": {
+    "relPath": "/plural-features/workbenches/integrations/tools/linear.md",
+    "lastmod": "2026-09-25T14:50:31.467Z"
+  },
+  "/plural-features/workbenches/integrations/tools/azure-devops": {
+    "relPath": "/plural-features/workbenches/integrations/tools/azure-devops.md",
+    "lastmod": "2026-09-25T14:50:31.531Z"
+  },
+  "/plural-features/workbenches/integrations/tools/http": {
+    "relPath": "/plural-features/workbenches/integrations/tools/http.md",
+    "lastmod": "2026-09-25T14:50:31.569Z"
+  },
+  "/plural-features/workbenches/integrations/tools/mcp": {
+    "relPath": "/plural-features/workbenches/integrations/tools/mcp.md",
+    "lastmod": "2026-09-25T14:50:31.601Z"
+  },
+  "/plural-features/workbenches/integrations/tools/docker": {
+    "relPath": "/plural-features/workbenches/integrations/tools/docker.md",
+    "lastmod": "2026-09-25T14:50:31.633Z"
+  },
+  "/plural-features/workbenches/integrations/tools/exa": {
+    "relPath": "/plural-features/workbenches/integrations/tools/exa.md",
+    "lastmod": "2026-09-25T14:50:31.664Z"
+  },
+  "/plural-features/workbenches/integrations/tools/cloud": {
+    "relPath": "/plural-features/workbenches/integrations/tools/cloud.md",
+    "lastmod": "2026-09-25T14:50:31.698Z"
+  },
+  "/plural-features/workbenches/integrations/tools/lambda": {
+    "relPath": "/plural-features/workbenches/integrations/tools/lambda.md",
+    "lastmod": "2026-09-25T14:50:31.730Z"
+  },
+  "/plural-features/workbenches/integrations/tools/cloud-run": {
+    "relPath": "/plural-features/workbenches/integrations/tools/cloud-run.md",
+    "lastmod": "2026-09-25T14:50:31.762Z"
+  },
+  "/plural-features/workbenches/integrations/tools/azure-function": {
+    "relPath": "/plural-features/workbenches/integrations/tools/azure-function.md",
+    "lastmod": "2026-09-25T14:50:31.793Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks.md",
+    "lastmod": "2026-09-25T14:41:03.000Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/alertops": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/alertops.md",
+    "lastmod": "2026-09-25T14:50:31.842Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/datadog": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/datadog.md",
+    "lastmod": "2026-09-25T14:50:31.877Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/grafana": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/grafana.md",
+    "lastmod": "2026-09-25T14:50:31.909Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/new-relic": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/new-relic.md",
+    "lastmod": "2026-09-25T14:50:31.941Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/pagerduty": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/pagerduty.md",
+    "lastmod": "2026-09-25T14:50:31.972Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/plural": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/plural.md",
+    "lastmod": "2026-09-25T14:50:32.003Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/sentry": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/sentry.md",
+    "lastmod": "2026-09-25T14:50:32.033Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/asana": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/asana.md",
+    "lastmod": "2026-09-25T14:50:32.064Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/azure-devops": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/azure-devops.md",
+    "lastmod": "2026-09-25T14:50:32.095Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/bitbucket": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/bitbucket.md",
+    "lastmod": "2026-09-25T14:50:32.126Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/bitbucket-datacenter": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/bitbucket-datacenter.md",
+    "lastmod": "2026-09-25T14:50:32.159Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/github": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/github.md",
+    "lastmod": "2026-09-25T14:50:32.191Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/gitlab": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/gitlab.md",
+    "lastmod": "2026-09-25T14:50:32.223Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/jira": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/jira.md",
+    "lastmod": "2026-09-25T14:50:32.254Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/linear": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/linear.md",
+    "lastmod": "2026-09-25T14:50:32.287Z"
+  },
+  "/plural-features/workbenches/integrations/chatbots": {
+    "relPath": "/plural-features/workbenches/integrations/chatbots.md",
+    "lastmod": "2026-09-25T14:41:03.000Z"
+  },
+  "/plural-features/workbenches/integrations/chatbots/slack": {
+    "relPath": "/plural-features/workbenches/integrations/chatbots/slack.md",
+    "lastmod": "2026-09-25T14:50:32.336Z"
+  },
+  "/plural-features/workbenches/integrations/chatbots/teams": {
+    "relPath": "/plural-features/workbenches/integrations/chatbots/teams.md",
+    "lastmod": "2026-09-25T14:50:32.366Z"
   },
   "/plural-features/workbenches/running-jobs": {
     "relPath": "/plural-features/workbenches/running-jobs.md",
@@ -313,7 +517,7 @@
   },
   "/plural-features/workbenches/use-cases": {
     "relPath": "/plural-features/workbenches/use-cases.md",
-    "lastmod": "2026-09-02T10:37:22.000Z"
+    "lastmod": "2026-09-25T14:41:03.000Z"
   },
   "/plural-features/policy-management": {
     "relPath": "/plural-features/policy-management/index.md",
@@ -734,5 +938,13 @@
   "/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
     "lastmod": "2026-09-22T21:32:31.000Z"
+  },
+  "/plural-features/workbenches/tools": {
+    "relPath": "/plural-features/workbenches/integrations/tools.md",
+    "lastmod": "2026-09-25T14:41:03.000Z"
+  },
+  "/plural-features/workbenches/tools/datadog": {
+    "relPath": "/plural-features/workbenches/integrations/tools/datadog.md",
+    "lastmod": "2026-09-25T14:41:03.000Z"
   }
 }

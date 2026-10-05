@@ -1,5 +1,5 @@
 ---
-title: Workbench tools
+title: Tools
 description: Configure external integrations for your workbench agents to call
 ---
 
@@ -34,39 +34,39 @@ All native integrations respect your existing RBAC — enabling a capability her
 
 | Tool | What the agent can do |
 |---|---|
-| **Prometheus** | Query metrics from a Prometheus-compatible endpoint |
-| **[Datadog](/plural-features/workbenches/tools/datadog)** | Query metrics, logs, and traces from the Datadog API |
-| **Loki** | Query log streams from a Loki-compatible endpoint |
-| **Elastic** | Query and search indices in an Elasticsearch cluster |
-| **Tempo** | Query distributed traces from a Grafana Tempo endpoint |
-| **Jaeger** | Query distributed traces from a Jaeger backend |
+| **[Prometheus](/plural-features/workbenches/integrations/tools/prometheus)** | Query metrics from a Prometheus-compatible endpoint |
+| **[Datadog](/plural-features/workbenches/integrations/tools/datadog)** | Query metrics, logs, and traces from the Datadog API |
+| **[Loki](/plural-features/workbenches/integrations/tools/loki)** | Query log streams from a Loki-compatible endpoint |
+| **[Elastic](/plural-features/workbenches/integrations/tools/elastic)** | Query and search indices in an Elasticsearch cluster |
+| **[Tempo](/plural-features/workbenches/integrations/tools/tempo)** | Query distributed traces from a Grafana Tempo endpoint |
+| **[Jaeger](/plural-features/workbenches/integrations/tools/jaeger)** | Query distributed traces from a Jaeger backend |
 
 ### Source control
 
 | Tool | What the agent can do |
 |---|---|
-| **GitHub** | Read repositories, list PRs, and (in Write mode) open pull requests |
-| **GitLab** | Same as GitHub for GitLab projects |
-| **Bitbucket Cloud** | Same as GitHub for Bitbucket Cloud |
-| **Bitbucket Data Center** | Same as GitHub for self-hosted Bitbucket Data Center |
+| **[GitHub](/plural-features/workbenches/integrations/tools/github)** | Read repositories, list PRs, and (in Write mode) open pull requests |
+| **[GitLab](/plural-features/workbenches/integrations/tools/gitlab)** | Same as GitHub for GitLab projects |
+| **[Bitbucket Cloud](/plural-features/workbenches/integrations/tools/bitbucket)** | Same as GitHub for Bitbucket Cloud |
+| **[Bitbucket Data Center](/plural-features/workbenches/integrations/tools/bitbucket-datacenter)** | Same as GitHub for self-hosted Bitbucket Data Center |
 
 ### Messaging
 
 | Tool | What the agent can do |
 |---|---|
-| **Slack** | Post messages and read channel history |
+| **[Slack](/plural-features/workbenches/integrations/tools/slack)** | Post messages and read channel history |
 | **Microsoft Teams** | Post messages to Teams channels |
 
 ### Issue tracking
 
 | Tool | What the agent can do |
 |---|---|
-| **Atlassian (Jira)** | Create, read, and update Jira issues |
-| **Linear** | Create and update Linear issues |
+| **[Atlassian (Jira)](/plural-features/workbenches/integrations/tools/atlassian)** | Create, read, and update Jira issues |
+| **[Linear](/plural-features/workbenches/integrations/tools/linear)** | Create and update Linear issues |
 
 ### Cloud
 
-Cloud tools are backed by a **cloud connection** (an IAM role or credential set stored in Plural) and give the agent SQL-queryable access to cloud-provider data via Plural's Steampipe-based cloud query service.
+[Cloud tools](/plural-features/workbenches/integrations/tools/cloud) are backed by a **cloud connection** (an IAM role or credential set stored in Plural) and give the agent SQL-queryable access to cloud-provider data via Plural's Steampipe-based cloud query service.
 
 Rather than asking the LLM to reason about cloud state from natural language descriptions, the agent uses three dedicated tools to work with cloud data precisely:
 
@@ -88,8 +88,8 @@ The agent is also always equipped with a **calculator tool** that evaluates arit
 
 | Tool | Description |
 |---|---|
-| **HTTP** | A custom REST endpoint. You define the request shape (URL, method, headers, body, JSON schema) and the agent can call it as a named tool |
-| **MCP** | Any [Model Context Protocol](https://modelcontextprotocol.io) server. Plural handles authentication and audit-logs every call |
+| **[HTTP](/plural-features/workbenches/integrations/tools/http)** | A custom REST endpoint. You define the request shape (URL, method, headers, body, JSON schema) and the agent can call it as a named tool |
+| **[MCP](/plural-features/workbenches/integrations/tools/mcp)** | Any [Model Context Protocol](https://modelcontextprotocol.io) server. Plural handles authentication and audit-logs every call |
 
 
 ## Creating a tool

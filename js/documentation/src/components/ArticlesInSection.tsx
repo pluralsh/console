@@ -81,6 +81,7 @@ function ArticlesInSection({
             <li key={article.href}>
               <Button
                 floating
+                small
                 startIcon={article.icon || <DocumentIcon />}
                 as="a"
                 href={article.href}
