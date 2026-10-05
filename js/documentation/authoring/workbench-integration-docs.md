@@ -34,7 +34,11 @@ A webhook page uses the same standard for an inbound source: which events arrive
 
 A chatbot page uses the same standard for a conversation that starts a job: how a mention is received, how the bot replies, app credentials, and channel binding. Keep it separate from the tool the agent calls during a job. The Slack chatbot page and the Slack tool page are different integrations. Link back to [Chatbots](/plural-features/workbenches/integrations/chatbots).
 
+Finished pages must be self-contained. Do not send the reader to the inline Console setup guide for required steps. When the sources support them, include prerequisites, credential or app creation, Console fields, channel binding, usage, and troubleshooting. You may mention that Console also shows an inline guide, but that guide is not a substitute for public instructions.
+
 Do not copy a setup guide verbatim. Rewrite it as public documentation in the second person. Leave no repository paths or `$DOCSTUB:` text in the page.
+
+The files under `js/console/public/setup-guides/` are embedded Console assets, not pages on the documentation site. Do not turn their repository paths into `/setup-guides/...` links. Link only to an existing published documentation route or an authoritative external page.
 
 Do not invent permissions, API methods, Console fields, screenshots, or image paths.
 
@@ -42,7 +46,9 @@ Name operations the way the code names them, without the configured-tool suffix.
 
 ## Sources
 
-Read these before writing. If they disagree, follow the implementation for what the agent can call, and the setup guide for credentials and Console fields. If neither source states a permission or behavior, omit it.
+Read these before writing. Trace executable behavior through the complete call path instead of relying only on module documentation, comments, or tool descriptions. For behavioral claims, request construction and tests take precedence over module documentation, comments, tool descriptions, and setup guides. Do not infer user-visible behavior such as threading from an identifier or method name alone.
+
+If sources disagree, follow the implementation for runtime behavior and the setup guide and Console form implementation for credentials and fields. If none of the allowed sources establishes a permission or behavior, omit it.
 
 1. The matching setup guide under `js/console/public/setup-guides/{tools,webhooks,chatbots}/`. Doc slugs use hyphens. Some guide filenames use underscores or a shorter name:
 
@@ -58,9 +64,13 @@ Read these before writing. If they disagree, follow the implementation for what 
 
    Cloud, Lambda, Cloud Run, and Azure Function have no tool setup guide. Use the cloud connection guides instead: `js/console/public/setup-guides/cloud-connections/aws.md` for Lambda, `gcp.md` for Cloud Run, `azure.md` for Azure Function, and all three for Cloud.
 
-2. Agent-callable tools in `lib/console/ai/tools/workbench/`. Integration modules live in `integration/<vendor>/`. Each operation module defines `name/1` and `description/1`. The vendor’s `tools.ex` lists the modules that are actually registered.
+2. For chatbots, trace the provider implementation under `lib/console/chat/impl/`, shared behavior in `lib/console/chat/utils.ex`, the inbound webhook controller, and the provider's connector or reply tool. Read relevant tests where they exist. Verify both the inbound event handling and the exact outbound request payload.
 
-3. Query-backed observability tools in `go/cloud-query/internal/tools/` (`provider_*.go` and `lambda/`). The Elixir wrappers that expose them are under `lib/console/ai/tools/workbench/observability/external/`. Cloud SQL tools are `cloud_tables`, `cloud_schema`, and `cloud_query`, described on the tools overview and implemented beside the cloud connection query service.
+3. Agent-callable tools in `lib/console/ai/tools/workbench/`. Integration modules live in `integration/<vendor>/`. Each operation module defines `name/1` and `description/1`. The vendor’s `tools.ex` lists the modules that are actually registered. Treat descriptions as summaries and confirm their claims against the implementation.
+
+4. Query-backed observability tools in `go/cloud-query/internal/tools/` (`provider_*.go` and `lambda/`). The Elixir wrappers that expose them are under `lib/console/ai/tools/workbench/observability/external/`. Cloud SQL tools are `cloud_tables`, `cloud_schema`, and `cloud_query`, described on the tools overview and implemented beside the cloud connection query service.
+
+5. Official vendor API documentation, only when needed to verify permissions or API semantics used by the implementation. Do not use blogs or search-result summaries as sources. Trace every API call used during connection setup, discovery, binding, and normal operation to its required permission. If this reveals that an inline setup guide omits a required permission or step, update both the setup guide and the public page in the same pull request.
 
 ## Section indexes
 
@@ -73,6 +83,16 @@ When a stub becomes a real page, update the summary that links to it so the inde
 Do not move native capabilities off the tools overview into a vendor page.
 
 If you add or move a page, regenerate the route index from `js/documentation` with `yarn generate:route-index`. Editing an existing stub does not require a new route.
+
+## Validation
+
+Before opening the pull request:
+
+- Re-read each behavioral claim against the executable call path and request payload. Pay special attention to reply placement, threading, pagination, defaults, and limits.
+- Verify that every internal link resolves to an existing published page and anchor. Do not assume a source file or Console asset has a documentation route.
+- Confirm the changed public pages contain no `$DOCSTUB:` markers, repository paths, or `/setup-guides/` links.
+- Check that required permissions are consistent between the public page, the inline setup guide, and the API calls the implementation makes.
+- Run the relevant documentation formatting and validation commands. If a preview is available, open each changed page and test its links.
 
 ## Pull request
 
