@@ -13,7 +13,7 @@ The Microsoft Teams chatbot connects via an **inbound Bot Framework webhook**. U
 
 - **Receiving mentions** — Teams sends `message` activities to Plural's webhook endpoint (`https://<console-domain>/ext/v1/webhooks/teams/<connection-id>`). Each activity includes an `entities` array. The bot checks whether any entity has `type: "mention"` and the `mentioned.id` matches the bot's application ID. If so, it creates a workbench job for the bound workbench. The mention text is cleaned (stripping `<at>` tags) and used as the prompt.
 - **Replying** — The spawned job automatically receives a Teams reply tool (the same connection used for the chatbot, backfilled on job start). Reply coordinates—the Bot Framework `serviceUrl` and `conversationId` from the original activity—are stored with the job so the agent can reply without needing channel or message IDs. The agent calls `teams_reply` with just the response text, and Plural posts it as a threaded reply to the original mention via the Bot Framework connector.
-- **Threading** — Teams activities include both a stable channel ID (the join key for workbench chatbot bindings) and a conversation ID that carries thread context. Replies are posted to the same conversation so they appear threaded under the original mention.
+- **Threading** — Teams activities include both a stable channel ID, used to match workbench chatbot bindings, and a conversation ID that identifies the channel's reply chain. Plural posts responses to that same conversation ID, so they appear in the originating thread.
 
 **Authentication and permissions:**
 
