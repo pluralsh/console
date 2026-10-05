@@ -3,21 +3,23 @@
   "properties": {
     "monitor_id": {
       "type": "string",
+      "format": "uuid",
       "description": "Existing monitor ID to update; omit to create"
     },
     "attributes": {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "description": { "type": "string" },
+        "name": { "type": "string", "maxLength": 255 },
+        "description": { "type": "string", "maxLength": 10000 },
         "alert_template": { "type": "string" },
         "severity": { "type": "string", "enum": ["low", "medium", "high", "critical", "undefined"] },
         "type": { "type": "string", "enum": ["log", "metrics"] },
         "evaluation_cron": {
           "type": "string",
+          "maxLength": 255,
           "description": "Cron expression controlling monitor evaluation"
         },
-        "service_id": { "type": "string" },
+        "service_id": { "type": "string", "format": "uuid" },
         "prompt": { "type": "string", "maxLength": 2048 },
         "modes": {
           "type": "object",

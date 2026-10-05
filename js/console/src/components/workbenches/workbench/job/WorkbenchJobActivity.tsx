@@ -595,7 +595,6 @@ function WorkbenchJobActivityThoughts({
   })
   const isLoading = !data && loading
   const activity = data?.workbenchJobActivity
-  const shimmer = isJobRunning(activity?.status)
 
   const { thoughts, lastThought, header } = useMemo(() => {
     const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
@@ -641,20 +640,18 @@ function WorkbenchJobActivityThoughts({
           <WorkbenchToolCallSummary
             toolCounts={toolCounts}
             textParts={textParts}
-            shimmer={shimmer}
           />
         ) : (
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
           >
             {textParts.join(', ') ||
               `${thoughts.length} tool ${pluralize('call', thoughts.length)}`}
           </Body2P>
         ),
     }
-  }, [activity?.thoughts, shimmer])
+  }, [activity?.thoughts])
 
   if (isEmpty(thoughts) && !isLoading) return null
   if (error)
@@ -688,17 +685,13 @@ function WorkbenchJobActivityThoughts({
             <WorkbenchJobActivityThought
               key={i}
               thought={thought}
-              shimmer={shimmer}
             />
           ))}
         </Flex>
       </SimpleAccordion>
       {!isExpanded && lastThought && isJobRunning(activity?.status) && (
         <EaseIn currentKey={lastThought.id}>
-          <WorkbenchJobActivityThought
-            thought={lastThought}
-            shimmer={shimmer}
-          />
+          <WorkbenchJobActivityThought thought={lastThought} />
         </EaseIn>
       )}
     </Flex>
@@ -707,10 +700,8 @@ function WorkbenchJobActivityThoughts({
 
 function WorkbenchJobActivityThought({
   thought,
-  shimmer = false,
 }: {
   thought: WorkbenchJobThoughtFragment
-  shimmer?: boolean
 }) {
   const { id, content, toolName, toolArgs, attributes, tool } = thought
   const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
@@ -733,14 +724,12 @@ function WorkbenchJobActivityThought({
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
       customTitle={title}
       leadingIcon={toolIcon}
-      shimmer={shimmer}
       {...(metricSeriesCount != null && {
         customLabel: (
           <WorkbenchObservabilityToolLabel
             icon={toolIcon}
             title={`fetch metrics (${metricSeriesCount})`}
             query={query}
-            shimmer={shimmer}
           />
         ),
         ...(metricSeriesCount > 0 && {
@@ -754,7 +743,6 @@ function WorkbenchJobActivityThought({
                 icon={toolIcon}
                 title="no logs"
                 query={query}
-                shimmer={shimmer}
               />
             ),
             customResultBody: <EmptyToolResult message="No logs" />,
@@ -765,14 +753,12 @@ function WorkbenchJobActivityThought({
                 icon={toolIcon}
                 title={title ?? 'fetch logs'}
                 query={query}
-                shimmer={shimmer}
               />
             ),
             customResultBody: (
               <PreviewablePanel
                 contentKey={`logs:${id}:${logs.length}`}
                 subtle
-                shimmer={shimmer}
               >
                 <JobActivityLogs logs={logs} />
               </PreviewablePanel>
@@ -836,12 +822,10 @@ function WorkbenchObservabilityToolLabel({
   icon,
   title,
   query,
-  shimmer = false,
 }: {
   icon?: ReactNode
   title: string
   query: string
-  shimmer?: boolean
 }) {
   return (
     <Flex
@@ -854,7 +838,6 @@ function WorkbenchObservabilityToolLabel({
       <Body2P
         as="span"
         $color="text-xlight"
-        $shimmer={shimmer}
         css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
       >
         {title}
@@ -863,7 +846,6 @@ function WorkbenchObservabilityToolLabel({
         <Body2P
           as="span"
           $color="text-disabled"
-          $shimmer={shimmer}
           css={{
             minWidth: 0,
             overflow: 'hidden',
@@ -881,11 +863,9 @@ function WorkbenchObservabilityToolLabel({
 function WorkbenchToolCallSummary({
   toolCounts,
   textParts,
-  shimmer = false,
 }: {
   toolCounts: Array<{ count: number; tool: WorkbenchToolTinyFragment }>
   textParts: string[]
-  shimmer?: boolean
 }) {
   const { spacing } = useTheme()
 
@@ -902,7 +882,6 @@ function WorkbenchToolCallSummary({
           key={part}
           as="span"
           $color="text-xlight"
-          $shimmer={shimmer}
           css={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -938,7 +917,6 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
             css={{ marginRight: spacing.xxsmall }}
           >
             {count}
@@ -946,7 +924,6 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
           >
             {getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)}
           </Body2P>
@@ -978,7 +955,6 @@ function ActivityLatestTool({
       <Body2P
         as="span"
         $color="text-disabled"
-        $shimmer
         css={{
           minWidth: 0,
           overflow: 'hidden',

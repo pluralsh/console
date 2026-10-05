@@ -7,6 +7,11 @@ defmodule Console.Schema.Monitor do
   defenum Operator, or: 0, and: 1
   defenum Aggregate, max: 0, min: 1, avg: 2
 
+  @name_max 255
+  @description_max 10_000
+  @prompt_max 2_048
+  @evaluation_cron_max 255
+
   schema "monitors" do
     field :name,            :string
     field :description,     :string
@@ -119,7 +124,10 @@ defmodule Console.Schema.Monitor do
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
-    |> validate_length(:prompt, max: 2048)
+    |> validate_length(:name, max: @name_max)
+    |> validate_length(:description, max: @description_max)
+    |> validate_length(:prompt, max: @prompt_max)
+    |> validate_length(:evaluation_cron, max: @evaluation_cron_max)
     |> validate_change(:evaluation_cron, &validate_crontab/2)
     |> determine_next_run(:evaluation_cron)
     |> validate_required(~w(name severity type query threshold evaluation_cron service_id)a)
@@ -130,7 +138,7 @@ defmodule Console.Schema.Monitor do
     |> cast(attrs, [])
     |> cast_embed(:log, with: &log_changeset/2)
     |> cast_embed(:metrics, with: &metrics_changeset/2)
-    |> validate_required([type])
+    |> validate_selected_query(type)
     |> validate_query_type(type)
   end
 
@@ -170,6 +178,11 @@ defmodule Console.Schema.Monitor do
   defp metrics_azure_options_changeset(model, attrs) do
     cast(model, attrs, ~w(resource_id metrics_namespace aggregation filter order_by roll_up_by metrics_endpoint)a)
   end
+
+  defp validate_selected_query(changeset, type) when type in [:log, :metrics],
+    do: validate_required(changeset, [type])
+
+  defp validate_selected_query(changeset, _), do: changeset
 
   defp validate_query_type(changeset, type) when type in [:log, :metrics] do
     other = if type == :log, do: :metrics, else: :log

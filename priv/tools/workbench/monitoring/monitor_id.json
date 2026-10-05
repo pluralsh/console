@@ -3,6 +3,7 @@
   "properties": {
     "monitor_id": {
       "type": "string",
+      "format": "uuid",
       "description": "ID of a monitor belonging to this workbench"
     }
   },

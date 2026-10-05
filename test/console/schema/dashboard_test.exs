@@ -135,6 +135,20 @@ defmodule Console.Schema.DashboardTest do
       assert [%{type: :traces, datasource: %{type: :traces}}] =
                Ecto.Changeset.apply_changes(changeset).graphs
     end
+
+    test "validates database-backed string lengths" do
+      changeset =
+        Dashboard.changeset(
+          %Dashboard{},
+          attrs([])
+          |> Map.put(:name, String.duplicate("n", 256))
+          |> Map.put(:description, String.duplicate("d", 10_001))
+        )
+
+      refute changeset.valid?
+      assert "should be at most 255 character(s)" in errors_on(changeset).name
+      assert "should be at most 10000 character(s)" in errors_on(changeset).description
+    end
   end
 
   defp attrs(graphs) do
