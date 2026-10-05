@@ -17,7 +17,7 @@ The Microsoft Teams chatbot connects via an **inbound Bot Framework webhook**. U
 
 **Authentication and permissions:**
 
-The [setup guide](/setup-guides/chatbots/teams.md) covers creating an Azure Bot, registering a Microsoft App, and wiring the messaging endpoint to Plural. You need three secrets from the app registration:
+The [setup guide](js/console/public/setup-guides/chatbots/teams.md) covers creating an Azure Bot, registering a Microsoft App, and wiring the messaging endpoint to Plural. You need three secrets from the app registration:
 
 - **Application (client) ID** — Validates the JWT on every inbound activity and identifies the bot in Bot Framework connector requests.
 - **Client secret** — Mints access tokens for the Bot Framework connector (to send replies) and Microsoft Graph (to list teams and channels for the binding UI).
@@ -31,7 +31,7 @@ Microsoft Teams does not support bots setting emoji reactions on messages. The T
 
 ## Setup
 
-Create the chatbot connection in Console and follow the inline setup guide for app credentials and channel binding. That guide is maintained at [the setup guide](/setup-guides/chatbots/teams.md).
+Create the chatbot connection in Console and follow the inline setup guide for app credentials and channel binding. That guide is maintained at `js/console/public/setup-guides/chatbots/teams.md`.
 
 ## Related
 
