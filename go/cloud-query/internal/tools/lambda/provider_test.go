@@ -103,6 +103,34 @@ func TestSelectFunctionKey(t *testing.T) {
 	})
 }
 
+func TestParseFunctionKeys(t *testing.T) {
+	t.Parallel()
+	provider := &AzureProvider{}
+
+	t.Run("reads keys at the top level", func(t *testing.T) {
+		t.Parallel()
+		keys := parseFunctionKeys([]byte(`{"default":"abc","other":"def"}`))
+		if got := provider.selectFunctionKey(keys); got != "abc" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("skips values that aren't keys", func(t *testing.T) {
+		t.Parallel()
+		keys := parseFunctionKeys([]byte(`{"properties":{"default":"abc"}}`))
+		if got := provider.selectFunctionKey(keys); got != "" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("returns nothing for invalid JSON", func(t *testing.T) {
+		t.Parallel()
+		if keys := parseFunctionKeys([]byte(`not json`)); keys != nil {
+			t.Fatalf("unexpected keys: %v", keys)
+		}
+	})
+}
+
 func TestSelectHostKey(t *testing.T) {
 	t.Parallel()
 	provider := &AzureProvider{}

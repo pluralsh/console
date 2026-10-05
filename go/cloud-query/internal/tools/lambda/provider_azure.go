@@ -3,6 +3,7 @@ package lambda
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/samber/lo"
@@ -159,13 +162,44 @@ func (p *AzureProvider) tryFunctionSecrets(ctx context.Context, webAppsClient *a
 }
 
 func (p *AzureProvider) tryFunctionKeys(ctx context.Context, webAppsClient *armappservice.WebAppsClient, ref azureFunctionRef) string {
-	keysResp, err := webAppsClient.ListFunctionKeys(ctx, ref.resourceGroup, ref.siteName, ref.functionName, nil)
+	var raw *http.Response
+	keysResp, err := webAppsClient.ListFunctionKeys(policy.WithCaptureResponse(ctx, &raw), ref.resourceGroup, ref.siteName, ref.functionName, nil)
 	if err != nil {
 		klog.Errorf("error listing keys of Azure function %s/%s/%s: %v", ref.resourceGroup, ref.siteName, ref.functionName, err)
 		return ""
 	}
+	if key := p.selectFunctionKey(keysResp.Properties); key != "" {
+		return key
+	}
+	if raw == nil {
+		return ""
+	}
 
-	return p.selectFunctionKey(keysResp.Properties)
+	// ARM answers with the keys at the top level, not under "properties" as the SDK expects.
+	body, err := runtime.Payload(raw)
+	if err != nil {
+		klog.Errorf("error reading keys of Azure function %s/%s/%s: %v", ref.resourceGroup, ref.siteName, ref.functionName, err)
+		return ""
+	}
+
+	return p.selectFunctionKey(parseFunctionKeys(body))
+}
+
+// parseFunctionKeys reads a listkeys response that maps key names to keys.
+func parseFunctionKeys(body []byte) map[string]*string {
+	var keys map[string]any
+	if err := json.Unmarshal(body, &keys); err != nil {
+		return nil
+	}
+
+	result := map[string]*string{}
+	for name, value := range keys {
+		if key, ok := value.(string); ok {
+			result[name] = lo.ToPtr(key)
+		}
+	}
+
+	return result
 }
 
 func (p *AzureProvider) tryHostKeys(ctx context.Context, webAppsClient *armappservice.WebAppsClient, ref azureFunctionRef) string {
