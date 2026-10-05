@@ -682,6 +682,26 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       assert ctx["name"] == "my-context"
       assert ctx["configuration"]["some"] == "config"
     end
+
+    test "bootstrap tokens can save contexts" do
+      user = bootstrap_user()
+
+      {:ok, %{data: %{"saveServiceContext" => ctx}}} = run_query("""
+        mutation Save($name: String!, $attributes: ServiceContextAttributes!) {
+          saveServiceContext(name: $name, attributes: $attributes) {
+            name
+            configuration
+            project { id }
+          }
+        }
+      """, %{"name" => "my-context", "attributes" => %{
+        "configuration" => Jason.encode!(%{"some" => "config"})
+      }}, %{current_user: user})
+
+      assert ctx["name"] == "my-context"
+      assert ctx["configuration"]["some"] == "config"
+      assert ctx["project"]["id"] == user.bootstrap.project_id
+    end
   end
 
   describe "deleteServiceContext" do

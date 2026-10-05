@@ -18,6 +18,11 @@ defmodule Console.Deployments.BootstrapPoliciesTest do
       refute BootstrapPolicies.can?(user, insert(:cluster, project: token.project), :write) == :pass
     end
 
+    test "a bootstrap token can write service contexts in its project", %{token: token, user: user} do
+      assert BootstrapPolicies.can?(user, insert(:service_context, project: token.project), :write) == :pass
+      refute BootstrapPolicies.can?(user, insert(:service_context), :write) == :pass
+    end
+
     test "a bootstrap token cannot create services in its project", %{token: token, user: user} do
       cluster = insert(:cluster, project: token.project)
       refute BootstrapPolicies.can?(user, insert(:service, cluster: cluster), :create) == :pass

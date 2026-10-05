@@ -1236,6 +1236,23 @@ defmodule Console.Deployments.ServicesTest do
       assert ctx.configuration["some"] == "config"
     end
 
+    test "bootstrap tokens can save contexts in their project" do
+      user = bootstrap_user()
+
+      {:ok, ctx} = Services.save_context(%{configuration: %{"some" => "config"}}, "my-context", user)
+
+      assert ctx.name == "my-context"
+      assert ctx.configuration["some"] == "config"
+      assert ctx.project_id == user.bootstrap.project_id
+    end
+
+    test "bootstrap tokens cannot overwrite contexts in other projects" do
+      user = bootstrap_user()
+      ctx = insert(:service_context)
+
+      {:error, _} = Services.save_context(%{configuration: %{"some" => "config"}}, ctx.name, user)
+    end
+
     test "nonadmins cannot save contexts" do
       {:error, _} = Services.save_context(%{configuration: %{"some" => "config"}}, "my-context", insert(:user))
     end
