@@ -29,6 +29,7 @@ import { StackedText } from '../table/StackedText'
 import { VirtualSlice } from '../table/useFetchPaginatedData'
 import { InlineA } from '../typography/Text'
 import { AlertResolutionModal } from './AlertResolutionModal'
+import { AlertSourceLink } from './AlertSourceLink'
 import { AlertsTableExpander } from './AlertsTableExpander'
 import { AlertStateChip } from './AlertStateChip'
 import { TRUNCATE } from '../truncate'
@@ -238,6 +239,32 @@ export const ColAlertUrl = columnHelper.accessor((alert) => alert, {
   // truncates, so it can give up width before the table outgrows narrow containers
   meta: { gridTemplate: 'minmax(120px, 2fr)', truncate: true },
   cell: UrlCell,
+})
+
+// Source icon + alert name linking to the alert source, instead of the raw URL.
+export const ColAlertSourceLink = columnHelper.accessor((alert) => alert, {
+  id: 'sourceLink',
+  header: 'Source',
+  meta: { gridTemplate: 'minmax(120px, 1.5fr)', truncate: true },
+  cell: function Cell({ getValue }) {
+    const alert = getValue()
+
+    return (
+      <Flex
+        gap="small"
+        align="center"
+        justify="space-between"
+        width="100%"
+        minWidth={0}
+      >
+        <AlertSourceLink alert={alert} />
+        <AiInsightSummaryIcon
+          insight={alert.insight}
+          navPath={`insight/${alert.insight?.id}`}
+        />
+      </Flex>
+    )
+  },
 })
 
 export const ColAlertState = columnHelper.accessor((alert) => alert.state, {

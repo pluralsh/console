@@ -22,7 +22,7 @@ export function AlertStateChip({
         align="center"
       >
         {firing && <ErrorIcon size={12} />}
-        {firing ? 'Firing' : 'Non-firing'}
+        {firing ? 'Firing' : 'Resolved'}
       </Flex>
     </Chip>
   )
