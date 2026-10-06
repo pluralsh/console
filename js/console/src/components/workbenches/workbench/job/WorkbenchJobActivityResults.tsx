@@ -2,7 +2,9 @@ import { Line, LineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
+  CheckIcon,
   Code,
+  CopyIcon,
   DiffMethod,
   DiffViewer,
   ExpandIcon,
@@ -189,16 +191,23 @@ function UserPromptActions({
           {formatDateTime(timestamp, 'h:mmA')}
         </CaptionP>
       )}
-      <Button
-        small
-        floating
+      <IconFrame
+        clickable
+        as="div"
+        tooltip={copied ? 'Copied' : 'Copy to clipboard'}
+        type="tertiary"
         onClick={(e) => {
           e.stopPropagation()
           handleCopy()
         }}
-      >
-        {copied ? 'Copied' : 'Copy'}
-      </Button>
+        icon={
+          copied ? (
+            <CheckIcon color="icon-success" />
+          ) : (
+            <CopyIcon color="icon-xlight" />
+          )
+        }
+      />
     </PromptActionsSC>
   )
 }
