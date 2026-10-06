@@ -186,30 +186,28 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      <div>
-        {timestamp && (
-          <CaptionP $color="text-long-form">
-            {formatDateTime(timestamp, 'h:mmA')}
-          </CaptionP>
-        )}
-        <IconFrame
-          clickable
-          as="div"
-          tooltip="Copy to clipboard"
-          type="tertiary"
-          onClick={(e) => {
-            e.stopPropagation()
-            handleCopy()
-          }}
-          icon={
-            copied ? (
-              <CheckIcon color="icon-success" />
-            ) : (
-              <CopyIcon color="icon-xlight" />
-            )
-          }
-        />
-      </div>
+      {timestamp && (
+        <CaptionP $color="text-long-form">
+          {formatDateTime(timestamp, 'h:mmA')}
+        </CaptionP>
+      )}
+      <IconFrame
+        clickable
+        as="div"
+        tooltip="Copy to clipboard"
+        type="tertiary"
+        onClick={(e) => {
+          e.stopPropagation()
+          handleCopy()
+        }}
+        icon={
+          copied ? (
+            <CheckIcon color="icon-success" />
+          ) : (
+            <CopyIcon color="icon-xlight" />
+          )
+        }
+      />
     </PromptActionsSC>
   )
 }
@@ -958,31 +956,22 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     flexDirection: 'column',
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
-    marginTop: $fullWidth ? 0 : theme.spacing.small,
-    // The activity list already adds its own gap under this row.
-    marginBottom: -theme.spacing.small,
+    marginTop: theme.spacing.small,
   })
 )
 
-// Same timestamp and copy icon as before. The row stays at full height so
-// hover only fades it in and the thread does not jump.
+// Always takes its height so hovering doesn't shift the transcript. The row is
+// the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
+// below the card.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'grid',
-  gridTemplateRows: '1fr',
-  justifyItems: 'end',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.xxsmall,
   width: '100%',
   opacity: $show ? 1 : 0,
-  transition: 'opacity 0.25s ease',
+  transition: 'opacity 0.15s ease',
   pointerEvents: $show ? 'auto' : 'none',
-  '> div': {
-    overflow: 'hidden',
-    minHeight: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: theme.spacing.xxsmall,
-    paddingTop: 6,
-  },
 }))
 
 const PromptCardSC = styled(Card)<{
