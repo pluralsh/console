@@ -186,30 +186,30 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      <div>
-        {timestamp && (
-          <CaptionP $color="text-long-form">
-            {formatDateTime(timestamp, 'h:mmA')}
-          </CaptionP>
-        )}
-        <IconFrame
-          clickable
-          as="div"
-          tooltip="Copy to clipboard"
-          type="tertiary"
-          onClick={(e) => {
-            e.stopPropagation()
-            handleCopy()
-          }}
-          icon={
-            copied ? (
-              <CheckIcon color="icon-success" />
-            ) : (
-              <CopyIcon color="icon-xlight" />
-            )
-          }
-        />
-      </div>
+      {timestamp && (
+        <CaptionP $color="text-long-form">
+          {formatDateTime(timestamp, 'h:mmA')}
+        </CaptionP>
+      )}
+      <IconFrame
+        clickable
+        as="div"
+        size="small"
+        tooltip="Copy to clipboard"
+        type="tertiary"
+        style={{ width: 16, height: 16 }}
+        onClick={(e) => {
+          e.stopPropagation()
+          handleCopy()
+        }}
+        icon={
+          copied ? (
+            <CheckIcon color="icon-success" />
+          ) : (
+            <CopyIcon color="icon-xlight" />
+          )
+        }
+      />
     </PromptActionsSC>
   )
 }
@@ -957,29 +957,35 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     display: 'flex',
     flexDirection: 'column',
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
+    position: 'relative',
     width: '100%',
-    marginTop: theme.spacing.small,
-    marginBottom: theme.spacing.xsmall,
+    marginTop: $fullWidth ? 0 : theme.spacing.small,
+    // Hover target for the copy row. The negative margin eats this padding
+    // back out so it doesn't stack on the list's activity gap.
+    paddingBottom: theme.spacing.small,
+    marginBottom: -theme.spacing.small,
   })
 )
 
+// Sits in the activity gap (spacing.small) under the card. Hover only fades
+// the controls in, so the thread doesn't jump and the prompt isn't a taller
+// hole than the messages under it. Anything taller hangs into the card
+// padding instead of the next row.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'grid',
-  gridTemplateRows: $show ? '1fr' : '0fr',
-  justifyItems: 'end',
-  width: '100%',
+  position: 'absolute',
+  right: 0,
+  bottom: 0,
+  left: 0,
+  zIndex: 1,
+  display: 'flex',
+  alignItems: 'flex-end',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.xxsmall,
+  height: theme.spacing.small,
   opacity: $show ? 1 : 0,
-  transition: 'grid-template-rows 0.25s ease, opacity 0.25s ease',
-  pointerEvents: $show ? 'auto' : 'none',
-  '> div': {
-    overflow: 'hidden',
-    minHeight: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: theme.spacing.xxsmall,
-    paddingTop: 6,
-  },
+  transition: 'opacity 0.15s ease',
+  pointerEvents: 'none',
+  '& > *': { pointerEvents: $show ? 'auto' : 'none' },
 }))
 
 const PromptCardSC = styled(Card)<{
