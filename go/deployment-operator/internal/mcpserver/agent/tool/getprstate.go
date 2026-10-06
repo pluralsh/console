@@ -3,7 +3,6 @@ package tool
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -12,13 +11,14 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 )
 
-const envGitAccessToken = "GIT_ACCESS_TOKEN"
+type SCMClientProvider func() scm.Client
 
 // GetPRState is an MCP tool that fetches live PR state (comments + CI checks)
 // directly from the SCM provider using the GIT_ACCESS_TOKEN available to the harness.
 type GetPRState struct {
 	id          ID
 	description string
+	client      SCMClientProvider
 }
 
 func (in *GetPRState) ID() ID { return in.id }
@@ -46,12 +46,7 @@ func (in *GetPRState) handler(ctx context.Context, request mcp.CallToolRequest) 
 		return mcp.NewToolResultError(fmt.Sprintf("missing prUrl: %v", err)), nil
 	}
 
-	token := os.Getenv(envGitAccessToken)
-	if token == "" {
-		return mcp.NewToolResultError("GIT_ACCESS_TOKEN is not set; cannot authenticate with SCM provider"), nil
-	}
-
-	client := scm.NewClient(token)
+	client := in.client()
 	sideload := request.GetBool("sideload", true)
 	details, err := prDetails(ctx, client, prURL, sideload)
 	if err != nil {
@@ -107,9 +102,10 @@ func prDetails(ctx context.Context, client scm.Client, prURL string, sideload bo
 	return client.GetPRSummary(ctx, prURL)
 }
 
-func NewGetPRState() Tool {
+func NewGetPRState(client SCMClientProvider) Tool {
 	return &GetPRState{
 		id:          GetPRStateTool,
 		description: "Fetches live pull request state from the SCM provider. By default sideloads all reviewer comments and CI check statuses; set sideload=false when you only need basic PR metadata.",
+		client:      client,
 	}
 }

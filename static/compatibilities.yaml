@@ -53,7 +53,7 @@ addons:
           performance improvements (less pod listing) and safer handling to prevent
           panics.']
       breaking_changes: []
-    chart_version: 2.43.2
+    chart_version: 2.43.5
     images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
   - version: 1.9.1
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -1266,6 +1266,32 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
+  - version: 3.6.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['**CRDs must be updated before/with the controller upgrade.**
+          Even though Gateway API CRD version stays at v1.6.0, v3.6.0 recommends re-applying
+          the latest AWS-vended CRDs as a safety measure.', 'Gateway API ReferenceGrant
+          now uses `gateway.networking.k8s.io/v1` (not a values change, but it affects
+          manifests/cluster CRDs).']
+      features: ["Cross-account TargetGroupBinding IP targets can optionally be registered\
+          \ with the pod\u2019s actual Availability Zone to improve zonal routing\
+          \ (opt-in; default behavior preserved).", 'New Ingress annotation `frontend-nlb-status-only`
+          allows Ingress status hostname to expose only the frontend NLB, improving
+          ExternalDNS behavior when an NLB fronts an ALB Ingress.', 'Downstream/automode
+          importers embedding the controller can customize Gateway names, finalizers,
+          and controller wiring; ReferenceGrant moved to `v1`.']
+      breaking_changes: ['No explicit breaking changes called out for v3.6.0, but
+          you must apply the latest AWS-vended CRDs before upgrading to avoid CRD/schema
+          drift issues.', Gateway API users should ensure ReferenceGrant `apiVersion`
+          is `gateway.networking.k8s.io/v1` where applicable (controller-side change;
+          manifests may need updating if pinned).]
+    chart_version: 3.6.0
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.0']
   - version: 3.5.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -1853,6 +1879,124 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.34.0
+    kube: ['1.36']
+    requirements:
+    - name: Alloy
+      version: 4.3.2-bb.0
+    - name: Anchore Enterprise
+      version: 4.1.2-bb.2
+    - name: Argocd
+      version: 10.2.1-bb.2
+    - name: Authservice
+      version: 1.1.8-bb.3
+    - name: Cert Manager
+      version: v1.20.3-bb.2
+    - name: Eck Operator
+      version: 3.5.0-bb.1
+    - name: Elasticsearch Kibana
+      version: 1.44.0-bb.0
+    - name: External Secrets Operator
+      version: 2.11.0-bb.0
+    - name: Fluentbit
+      version: 0.58.2-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.6
+    - name: Gatekeeper
+      version: 3.23.1-bb.0
+    - name: Gateway Api
+      version: 1.6.2-bb.0
+    - name: Gitlab
+      version: 10.4.1-bb.0
+    - name: Gitlab Runner
+      version: 0.91.2-bb.2
+    - name: Grafana
+      version: 13.2.4-bb.0
+    - name: Harbor
+      version: 1.19.2-bb.2
+    - name: Headlamp
+      version: 0.45.0-bb.0
+    - name: Istio Cni
+      version: 1.30.4-bb.1
+    - name: Istio Crds
+      version: 1.30.4-bb.1
+    - name: Istio Egress Gateway
+      version: 0.1.3
+    - name: Istio Gateway
+      version: 1.30.4-bb.1
+    - name: Istiod
+      version: 1.30.4-bb.1
+    - name: Keycloak
+      version: 7.3.0-bb.2
+    - name: Kiali
+      version: 2.32.0-bb.0
+    - name: Kyverno
+      version: 3.9.1-bb.0
+    - name: Kyverno Policies
+      version: 3.3.4-bb.87
+    - name: Kyverno Reporter
+      version: 3.10.0-bb.2
+    - name: Loki
+      version: 6.55.0-bb.8
+    - name: Mattermost
+      version: 11.11.0-bb.0
+    - name: Mattermost Operator
+      version: 1.25.9-bb.1
+    - name: Metrics Server
+      version: 3.14.0-bb.0
+    - name: Mimir
+      version: 6.1.0-bb.2
+    - name: Minio
+      version: 7.1.1-bb.24
+    - name: Minio Operator
+      version: 7.1.1-bb.11
+    - name: Monitoring
+      version: 91.4.1-bb.1
+    - name: Neuvector
+      version: 2.11.2-bb.0
+    - name: Prometheus Operator Crds
+      version: 31.0.1-bb.0
+    - name: Renovate
+      version: 46.316.0-bb.0
+    - name: Sonarqube
+      version: 2026.4.1-bb.4
+    - name: Tempo
+      version: 2.1.0-bb.3
+    - name: Thanos
+      version: 17.6.0-bb.3
+    - name: Twistlock
+      version: 0.30.0-bb.3
+    - name: Vault
+      version: 0.34.1-bb.2
+    - name: Velero
+      version: 12.1.0-bb.5
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.4-bb.1
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Big Bang umbrella chart bumped from 3.33.0 to 3.34.0 with a
+          broad set of subchart version bumps across security, observability, GitLab,
+          and service mesh components.', 'New optional/added subchart: Istio Egress
+          Gateway (0.1.3).']
+      features: [Adds support for deploying an Istio Egress Gateway as a managed Big
+          Bang component (new subchart at 0.1.3)., 'Updates the observability stack
+          (Monitoring chart, Grafana, Loki, Mimir, Tempo, Thanos) to newer releases,
+          likely bringing dashboard, alerting, and performance improvements.', 'Updates
+          GitLab chart from 10.3.2-bb.1 to 10.4.1-bb.0, which may include upstream
+          GitLab feature/security fixes.', 'Updates External Secrets Operator to 2.11.0,
+          which may include provider/CRD enhancements and fixes.']
+      breaking_changes: ["Potential breaking changes may come from Grafana major version\
+          \ bump (12.x \u2192 13.x); verify plugins, dashboards, and authentication\
+          \ settings for compatibility.", "Monitoring chart bump (88.x \u2192 91.x)\
+          \ may include Prometheus Operator/CRD or alerting rule changes; confirm\
+          \ CRDs and any deprecated values.", 'Introduction of a new Istio component
+          (Egress Gateway) can affect mesh egress behavior if enabled; ensure NetworkPolicies,
+          routing, and policy expectations are updated accordingly.']
+    chart_version: 3.34.0
+    images: []
   - version: 3.33.0
     kube: ['1.36']
     requirements:
@@ -11383,6 +11527,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+    chart_version: 1.23.2
   - version: 1.23.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -11582,18 +11727,29 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.32.2
+  - version: 3.33.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ['Release artifacts updated to v3.32.2 (container images/binaries/manifests,
-          Windows bundle, tigera-operator Helm chart, and CRD charts).']
+      helm_changes: "_No Helm-specific changelog/values changes were included in the\
+        \ provided notes._\n\n- The Calico Helm chart you\u2019ll upgrade is packaged\
+        \ as `tigera-operator-v3.33.0.tgz` (also available at `oci://quay.io/calico/charts/tigera-operator`).\n\
+        - If you currently manage CRDs via Helm, note that CRDs are also shipped as\
+        \ separate charts:\n  - `crd.projectcalico.org.v1-v3.33.0.tgz`\n  - `projectcalico.org.v3-v3.33.0.tgz`\
+        \ (tech-preview)\n\n_Action_: before upgrading, review the `tigera-operator`\
+        \ chart\u2019s own CHANGELOG/values schema for 3.33.0 (not provided here)\
+        \ and run a `helm diff upgrade` against your existing values."
+      chart_updates: ['The release bundles for both versions include: container images/binaries/manifests
+          (`release-vX.Y.Z.tgz`), Windows bundle (`calico-windows-vX.Y.Z.zip`), the
+          Helm chart (`tigera-operator-vX.Y.Z.tgz`), and CRD charts (`crd.projectcalico.org.v1`
+          and `projectcalico.org.v3` tech-preview).', 'For v3.33.0 specifically, the
+          `tigera-operator` chart is also published as an OCI artifact at `oci://quay.io/calico/charts/tigera-operator`
+          (explicitly called out in the notes).']
+      features: []
       breaking_changes: []
-    chart_version: 3.32.2
-    images: ['quay.io/tigera/operator:v1.42.6']
+    chart_version: 3.33.0
+    images: ['quay.io/tigera/operator:v1.44.0']
   - version: 3.32.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11624,6 +11780,7 @@ addons:
       breaking_changes: []
     chart_version: 3.31.0
     images: ['quay.io/tigera/operator:v1.40.0']
+    eolAt: '2026-10-01'
   - version: 3.30.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -16586,6 +16743,42 @@ addons:
   helm_repository_url: https://kubernetes-sigs.github.io/descheduler
   chart_name: descheduler
   versions:
+  - version: 0.37.0
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / chart behavior changes (0.36.0 \u2192 0.37.0)\n\
+        - **New (opt-in) PodDisruptionBudget support** in the Helm chart. Expect new\
+        \ values to enable/configure a PDB (e.g., `pdb.enabled` plus min/max availability\
+        \ settings). If you already manage a PDB externally, ensure you don\u2019\
+        t create a duplicate.\n- **New (opt-in) `schedulerName` and `runtimeClassName`**\
+        \ for the descheduler Pod via Helm values. Only set these if you need non-default\
+        \ scheduling/runtime behavior.\n- **New (opt-in) `hostUsers`** setting for\
+        \ the Pod spec via Helm values (relevant for user namespaces / host user mappings).\
+        \ Leave unset unless you know you need it.\n- **New `revisionHistoryLimit`\
+        \ value** to control Deployment revision retention.\n\n(From 0.36.0 release\
+        \ notes, already in your starting version but relevant if you didn\u2019t\
+        \ enable it yet)\n- **Init containers support** added to the Helm chart.\n\
+        - **ServiceMonitor `apiVersion` override** became configurable.\n"
+      chart_updates: ['Helm chart updated for v0.37.0 with several new optional Pod/Deployment
+          knobs (PDB, schedulerName, runtimeClassName, hostUsers, revisionHistoryLimit).',
+        'RBAC tightened: ClusterRole no longer includes an unnecessary `pods/delete`
+          permission (may affect environments relying on that permission indirectly).']
+      features: ['Helm chart: opt-in PodDisruptionBudget support to protect descheduler
+          availability during voluntary disruptions.', 'Helm chart: optional `schedulerName`
+          and `runtimeClassName` fields for the descheduler Pod.', 'Helm chart: optional
+          `hostUsers` support and configurable `revisionHistoryLimit` for the Deployment.',
+        'Eviction observability improvements: metrics emitted for background evictions
+          that never get deleted.']
+      breaking_changes: ["RBAC change: removal of `pods/delete` from the ClusterRole\
+          \ could break setups that (incorrectly) depended on descheduler having direct\
+          \ Pod delete permissions; verify your policies/automation don\u2019t rely\
+          \ on that capability.", "Internal cleanup: `EvictionRequests` removed (may\
+          \ impact anyone depending on that internal type/behavior in forks or integrations,\
+          \ though typical users shouldn\u2019t be affected)."]
+    chart_version: 0.37.0
+    images: ['registry.k8s.io/descheduler/descheduler:v0.37.0']
   - version: 0.36.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -18543,7 +18736,7 @@ addons:
   eolApiSlug: flux
   versions:
   - version: 2.9.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
+    kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
@@ -20239,20 +20432,21 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 91.8.2
+  - version: 91.9.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Bumped `prometheus-node-exporter` container image tag to **v4.59.0**
-          (in 91.8.0)., Bumped `grafana` container image tag to **v13.2.7** (in 91.8.2).]
-      features: [No new user-facing features were called out; this is primarily dependency/image
-          tag refreshes (node-exporter and Grafana).]
-      breaking_changes: [No breaking changes were mentioned in the provided release
-          notes; expect a low-risk patch/minor chart update focused on image bumps.]
-    chart_version: 91.8.2
+      chart_updates: ['CI: Bump `helm-unittest/helm-unittest` dependency to v1.2.0
+          (test tooling only).', Update kube-prometheus-stack chart dependencies with
+          non-major version bumps (pulled in via Renovate)., Prior version (91.8.0)
+          updated `prometheus-node-exporter` image tag to v4.59.0.]
+      features: ['Non-major dependency refresh for kube-prometheus-stack, which may
+          include small fixes in subcharts without changing major behavior.']
+      breaking_changes: []
+    chart_version: 91.9.0
     images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
       'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.11.2',
       'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
@@ -22190,6 +22384,175 @@ addons:
   helm_repository_url: https://kyverno.github.io/kyverno/
   eolApiSlug: kyverno
   versions:
+  - version: 1.19.0
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / chart configuration changes to review\n\n- **CRDs\
+        \ migration job now supports `extraArgs`**: if you rely on the chart\u2019\
+        s CRD upgrade/migration job, you can now pass additional CLI args to it. Review\
+        \ your values and decide whether you need to set these (PR #16132).\n- **Optional\
+        \ `PrometheusRule` template**: chart can optionally create a `PrometheusRule`\
+        \ resource for Kyverno metrics (PR #16155). If your cluster uses the Prometheus\
+        \ Operator, decide whether to enable it and confirm labels/namespace/selector\
+        \ expectations.\n- **Expose `maxGlobalContextEntries` via chart values**:\
+        \ new chart value to bound/limit GlobalContextEntries cache usage (PR #16749).\
+        \ Consider setting this in constrained clusters or with heavy GlobalContextEntry\
+        \ usage.\n- **Hybrid/mixed-OS cluster settings moved to global values**: if\
+        \ you were using controller-specific `nodeSelector`/scheduling values for\
+        \ Windows/Linux split clusters, re-check values since scheduling knobs were\
+        \ consolidated (PR #15873).\n- **Lifecycle hooks configurable for all controllers**:\
+        \ chart adds values to configure container lifecycle hooks (e.g., `preStop`)\
+        \ across Kyverno components (PR #17011). If you previously patched hooks via\
+        \ overlays, prefer values.\n- **`reportsServer.enabled=true` image tag handling\
+        \ fixed**: prior value formats that resulted in \u201CImage tags must be strings\u201D\
+        \ are corrected (PR #16167) and `_image.tpl` now handles null tags more safely\
+        \ (PR #16063). Re-test any custom image overrides.\n- **Cert management behavior\
+        \ change**: chart will **disable the in-process cert controller when cert-manager\
+        \ delegation is enabled** (PR #16804). If you use cert-manager for Kyverno\
+        \ webhook certs, verify which path you\u2019re on and ensure only one cert\
+        \ controller is active.\n- **Chart wiring fix for cleanup controller extra\
+        \ resources**: cleanup controller \u201Ccore extra resources\u201D wiring\
+        \ fixed (PR #16165). If you set extra RBAC/resources for cleanup controller\
+        \ previously, validate they now apply as expected.\n- **PSS-related chart\
+        \ tweak**: allow `image` volume type in PSS Helm configuration (PR #15906).\
+        \ If you enforce Pod Security Standards, revalidate against your cluster policy\
+        \ baseline.\n"
+      chart_updates: [Added support for passing `extraArgs` to the CRDs migration
+          job (#16132)., Added optional `PrometheusRule` template to the Kyverno Helm
+          chart (#16155)., Exposed `--maxGlobalContextEntries` as a Helm value in
+          the Kyverno chart (#16749)., Fixed chart wiring for cleanup controller extra
+          resources (#16165)., 'Fixed reports-server image tag rendering when `reportsServer.enabled=true`
+          and improved null-tag handling in `_image.tpl` (#16167, #16063).', Moved
+          mixed-OS (hybrid) cluster scheduling configuration from controller-specific
+          settings into global Helm values (#15873)., Added configurable lifecycle
+          hooks to all controllers via Helm values (#17011)., Disabled in-process
+          certificate controller automatically when cert-manager delegation is enabled
+          (#16804).]
+      features: ['CLI: richer offline and cross-resource testing (multiple payloads,
+          admission operation simulation, HTTP mock support, better CRD-path handling).',
+        'Policies/controllers: expanded CEL-based policy support and reliability fixes
+          across MutatingPolicy/GeneratingPolicy/DeletingPolicy and background scanning.',
+        'Helm: optional PrometheusRule, configurable lifecycle hooks, and tunable
+          GlobalContextEntries cache limit via `maxGlobalContextEntries`.', 'Image
+          verification: improved parity, cache reuse for ImageValidatingPolicy, better
+          handling for air-gapped / keyless verification scenarios, and more debug/verbosity
+          options.']
+      breaking_changes: [Legacy `kyverno-json` support removed from API/test tooling
+          and related commands (you may need to update any scripts/workflows that
+          depended on kyverno-json)., 'HTTP allow/block list behavior for **cluster-scoped**
+          HTTP policies was adjusted/reverted and blocklist updated to allow in-cluster
+          calls; if you relied on the previous 1.18 behavior, re-validate external
+          HTTP context loading rules and ConfigMap settings.', "If using cert-manager\
+          \ delegation for webhook certs, the chart now disables Kyverno\u2019s in-process\
+          \ cert controller\u2014ensure you weren\u2019t depending on both being active\
+          \ (avoid misconfiguration during upgrade)."]
+    chart_version: 3.9.0
+    images: ['ghcr.io/kyverno/readiness-checker:latest', 'ghcr.io/kyverno/readiness-checker:v1.19.0',
+      'reg.kyverno.io/kyverno/background-controller:v1.19.0', 'reg.kyverno.io/kyverno/cleanup-controller:v1.19.0',
+      'reg.kyverno.io/kyverno/kyverno-cli:v1.19.0', 'reg.kyverno.io/kyverno/kyverno:v1.19.0',
+      'reg.kyverno.io/kyverno/kyvernopre:v1.19.0', 'reg.kyverno.io/kyverno/reports-controller:v1.19.0']
+  - version: 1.18.0
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / configuration changes to consider\n\n- **Projected\
+        \ service account token support (new/updated Helm options)**: Chart adds support\
+        \ for using a *projected* service account token volume instead of legacy tokens.\
+        \ Review your values if you customize `serviceAccount`, `automountServiceAccountToken`,\
+        \ or token mounts.\n- **New `successEventActions` ConfigMap parameter**: If\
+        \ you manage Kyverno configuration via chart values/ConfigMap, consider setting\
+        \ `successEventActions` to reduce/noise-control success events.\n- **Admission\
+        \ controller HPA can scale on memory**: Chart now supports autoscaling admission-controller\
+        \ based on memory utilization. If you use HPA, check new values under autoscaling\
+        \ for memory metrics.\n- **`/metrics` endpoint can be TLS-encrypted**: If\
+        \ you scrape metrics (Prometheus), review chart values related to metrics\
+        \ and TLS; you may need to update ServiceMonitor/Prometheus scrape config\
+        \ to use HTTPS and trust the cert.\n- **`imageRegistryCredentials` expanded**:\
+        \ Values/policies can now reference **namespaced secrets** and **pod-level\
+        \ `imagePullSecrets`** for image verification. If you previously relied on\
+        \ cluster-wide secrets only, you can simplify/align to namespace ownership.\n\
+        - **New Helm knobs**:\n  - `extraVolumes` / `extraVolumeMounts` to attach\
+        \ custom volumes.\n  - `Global.PriorityClassName` (with templating) to set\
+        \ pod priority class.\n  - Controller deployment labels added (if you select\
+        \ pods by labels, validate selectors).\n\n*No explicit breaking Helm value\
+        \ removals were identified in the provided notes, but verify chart defaults\
+        \ changed for security hardening/PSS compliance.*"
+      chart_updates: ['Helm chart: adds projected service account token support.',
+        'Helm chart: admission-controller autoscaling can use memory utilization.',
+        'Helm chart: supports TLS on /metrics endpoint.', 'Helm chart: adds controller
+          deployment labels and ensures `app.kubernetes.io/name` on pods.', 'Helm
+          chart: adds `extraVolumes` and `extraVolumeMounts` options.', 'Helm chart:
+          adds `Global.PriorityClassName` value with pod templating.', 'Helm chart:
+          security hardening and PSS compliance updates; restricts ConfigMap access
+          for namespaced policies.', 'Helm chart: removes finalizers/workarounds around
+          uninstall.']
+      features: ['HTTP context loading is more secure: outbound HTTP calls can be
+          controlled via an allow/blocklist and use scoped tokens for authorization.',
+        'Image verification can use registry credentials from namespaced secrets and
+          pod `imagePullSecrets`, reducing the need for cluster-scoped secrets.',
+        'CLI (`kyverno apply`/`kyverno test`) supports more policy types including
+          cleanup policies, HTTP/Envoy authz policies, and mutateExisting MutatingPolicies.',
+        Success event filtering via `successEventActions` helps reduce event noise
+          without disabling events entirely., 'Metrics endpoint can be served over
+          TLS, and exemplar collection can be tuned via `--exemplarFilter`.', 'Admission
+          controller can autoscale based on memory utilization (in addition to CPU,
+          if previously configured).']
+      breaking_changes: ['No formal breaking changes were called out for 1.18.0. The
+          removal of `kubectl` from the webhook cleanup image should be transparent
+          operationally, but validate any custom scripts that exec into that container
+          expecting kubectl.', 'If you enable TLS for `/metrics`, existing Prometheus
+          scrapes over HTTP will fail until updated to HTTPS and configured for certificate
+          trust.']
+    chart_version: 3.8.0
+    images: ['ghcr.io/kyverno/readiness-checker:latest', 'ghcr.io/kyverno/readiness-checker:v1.18.0',
+      'reg.kyverno.io/kyverno/background-controller:v1.18.0', 'reg.kyverno.io/kyverno/cleanup-controller:v1.18.0',
+      'reg.kyverno.io/kyverno/kyverno-cli:v1.18.0', 'reg.kyverno.io/kyverno/kyverno:v1.18.0',
+      'reg.kyverno.io/kyverno/kyvernopre:v1.18.0', 'reg.kyverno.io/kyverno/reports-controller:v1.18.0']
+  - version: 1.17.0
+    kube: ['1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- **Helm chart now supports cert-manager-issued certificates**\
+        \ (PR #14605). If you previously relied on Kyverno\u2019s self-signed cert\
+        \ generation, review the chart values for webhook/TLS configuration and decide\
+        \ whether to switch to cert-manager.\n- There was a **fix for a missing resource\
+        \ migration in the Helm chart** (PR #14999). If you are upgrading from older\
+        \ releases, ensure you **do not disable the migration job** and that it can\
+        \ run with sufficient RBAC.\n\n*(No explicit values key renames/removals were\
+        \ listed in the provided notes; verify against the chart\u2019s `values.yaml`\
+        \ for 1.17.0 before upgrade.)*\n"
+      chart_updates: [Added cert-manager certificate support in the Helm chart (#14605).,
+        Fixed a missing resource migration in the Helm chart (#14999)., (General)
+          Helm release/lint/test workflow changes; no functional runtime chart behavior
+          called out beyond the above items.]
+      features: ['Introduces namespaced CEL policy types, including NamespacedValidatingPolicy,
+          NamespacedMutatingPolicy, NamespacedGeneratingPolicy, NamespacedDeletingPolicy,
+          and NamespacedImageValidatingPolicy (various PRs).', Adds a new kyverno.io/v2
+          GlobalContextEntry API (v2) for global context management., 'Adds multiple
+          CEL libraries/functions (JSON, YAML, math/round, random, time.now/truncate,
+          x509 decode, hash, transform) enabling richer CEL expressions.', 'Adds reports-server
+          integration support, including connectivity checks and related workflow
+          improvements.', "Adds Pod Security Standards updates including CEL-based\
+          \ ValidatingPolicy support and continued support for Kubernetes v1.30\u2013\
+          v1.32 PSS mappings."]
+      breaking_changes: ['VAP/MAP reporting becomes **opt-in** rather than opt-out
+          (PR #14353). If you relied on admission policy reporting by default, you
+          may need to enable it explicitly after upgrade.', 'Policy and exception
+          API versioning changes: Policies API version bump and `v1beta1.PolicyException`
+          becomes the new default (PRs #14536, #14543). Existing manifests may need
+          apiVersion updates or conversion, and automation expecting older defaults
+          may break.', 'Namespaced CEL policy types restrict resource access compared
+          to prior behavior (PR #14217); policies may fail or behave differently if
+          they previously assumed broader cross-namespace access.']
+    chart_version: 3.7.0
+    images: ['ghcr.io/kyverno/readiness-checker:v0.1.0', 'reg.kyverno.io/kyverno/background-controller:v1.17.0',
+      'reg.kyverno.io/kyverno/cleanup-controller:v1.17.0', 'reg.kyverno.io/kyverno/kyverno-cli:v1.17.0',
+      'reg.kyverno.io/kyverno/kyverno:v1.17.0', 'reg.kyverno.io/kyverno/kyvernopre:v1.17.0',
+      'reg.kyverno.io/kyverno/reports-controller:v1.17.0', 'registry.k8s.io/kubectl:v1.34.3']
   - version: 1.16.0
     kube: ['1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -22298,7 +22661,10 @@ addons:
           expressions in `validate` rules; policies that depended on context + CEL
           together may behave differently.]
     chart_version: 3.5.0
-    images: []
+    images: ['bitnami/kubectl:1.32.3', 'busybox:1.35', 'reg.kyverno.io/kyverno/background-controller:v1.15.0',
+      'reg.kyverno.io/kyverno/cleanup-controller:v1.15.0', 'reg.kyverno.io/kyverno/kyverno-cli:v1.15.0',
+      'reg.kyverno.io/kyverno/kyverno:v1.15.0', 'reg.kyverno.io/kyverno/kyvernopre:v1.15.0',
+      'reg.kyverno.io/kyverno/reports-controller:v1.15.0']
     eolAt: '2026-04-29'
   - version: 1.14.0
     kube: ['1.32', '1.31', '1.30', '1.29']
@@ -26606,18 +26972,13 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.32.2
+  - version: 3.33.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [No feature details provided in the supplied notes; both releases
-          reference external GitHub release-notes files for specifics.]
-      breaking_changes: []
-    chart_version: 3.32.2
-    images: ['quay.io/tigera/operator:v1.42.6']
+    summary: null
+    chart_version: 3.33.0
+    images: ['quay.io/tigera/operator:v1.44.0']
   - version: 3.32.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -26649,6 +27010,7 @@ addons:
       breaking_changes: []
     chart_version: 3.31.0
     images: ['quay.io/tigera/operator:v1.40.0']
+    eolAt: '2026-10-01'
   - version: 3.30.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -26800,7 +27162,7 @@ addons:
       chart_updates: []
       features: []
       breaking_changes: []
-    chart_version: 10.9.5
+    chart_version: 10.9.6
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.3']
   - version: 3.5.1
@@ -27376,7 +27738,7 @@ addons:
       breaking_changes: [No breaking changes are enumerated in the provided notes;
           they direct readers to the upgrading guide and GitHub issues for breaking
           changes/known issues.]
-    chart_version: 2.0.8
+    chart_version: 2.0.11
     images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
       'quay.io/argoproj/workflow-controller:v4.1.4']
   - version: 4.1.0
@@ -28408,7 +28770,7 @@ addons:
           it is now `operational` unless the operator cannot parse the object (then
           `failed`). The former `ignored` value is removed; per-application state
           is now in `status.conditions`.']
-    chart_version: 0.68.0
+    chart_version: 0.68.1
     images: ['victoriametrics/operator:v0.75.0']
   - version: 0.74.1
     kube: ['1.37', '1.36', '1.35']
@@ -30304,7 +30666,7 @@ addons:
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     chart_version: 26.3.3
-    images: []
+    images: ['nvcr.io/nvidia/gpu-operator:v26.3.3', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.3']
     incompatibilities: []
   - version: 26.3.2
     kube: ['1.36', '1.35', '1.34']
@@ -32463,12 +32825,32 @@ addons:
   release_url: https://github.com/Dynatrace/dynatrace-operator/releases/tag/v{vsn}
   helm_repository_url: https://raw.githubusercontent.com/Dynatrace/dynatrace-operator/main/config/helm/repos/stable
   versions:
+  - version: 1.11.0
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.11.0
+    images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.11.0']
   - version: 1.10.2
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- No Helm values changes are called out in the provided release
+        notes for **1.10.2** vs **1.10.1**.
+
+        - Upgrade command only changes the chart `--version` from `1.10.1` to `1.10.2`.
+
+        '
+      chart_updates: [Release notes are effectively identical between 1.10.1 and 1.10.2
+          aside from versioned asset names/URLs., 'Manifests/CRDs are still published
+          as separate assets (`dynatrace-operator-crd.yaml`, `kubernetes*.yaml`, `openshift*.yaml`)
+          with the 1.10.2 tag paths.']
+      features: []
+      breaking_changes: []
     chart_version: 1.10.2
     images: ['public.ecr.aws/dynatrace/dynatrace-operator:v1.10.2']
   - version: 1.10.1
@@ -33185,6 +33567,17 @@ addons:
   release_url: https://github.com/mongodb/mongodb-kubernetes/releases/tag/{vsn}
   helm_repository_url: https://mongodb.github.io/helm-charts
   versions:
+  - version: 1.13.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Adds support for Ops Manager 9.0 in the `MongoDBOpsManager` resource.]
+      breaking_changes: []
+    chart_version: 1.13.0
+    images: ['quay.io/mongodb/mongodb-kubernetes:1.13.0']
   - version: 1.12.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []

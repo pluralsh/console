@@ -312,7 +312,6 @@ defmodule Console.GraphQl.AI do
     @desc "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
     field :resource, :kubernetes_unstructured do
       resolve &AI.raw_resource/3
-      middleware ErrorHandler
     end
   end
 

@@ -37,11 +37,15 @@ import { getAgentRunBreadcrumbs } from 'components/ai/agent-runs/details/AIAgent
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
   { path: 'logs', label: 'Logs' },
   { path: 'shell', label: 'Shell' },
 ]
+
+// agent run pods are fetched without a cluster/service scope, which metrics need
+const AGENT_RUN_DIRECTORY = DIRECTORY.filter(({ path }) => path !== 'metrics')
 
 export default function Pod() {
   const theme = useTheme()
@@ -66,7 +70,8 @@ export default function Pod() {
     useMatch(
       `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowIdOrName, agentRunId: runId, name, namespace })}/:tab`
     )?.params?.tab || ''
-  const currentTab = DIRECTORY.find(({ path }) => path === tab)
+  const directory = type === 'agent-run' ? AGENT_RUN_DIRECTORY : DIRECTORY
+  const currentTab = directory.find(({ path }) => path === tab)
 
   const { data: serviceData } = useServiceDeploymentTinyQuery({
     variables: { id: serviceId ?? '' },
@@ -176,7 +181,7 @@ export default function Pod() {
             selectedKey: currentTab?.path,
           }}
         >
-          {DIRECTORY.map(({ label, path }) => (
+          {directory.map(({ label, path }) => (
             <LinkTabWrap
               key={path}
               textValue={label}

@@ -43,3 +43,70 @@ describe('getMetricSeries', () => {
     })
   })
 })
+
+describe('getMetricSeries short labels', () => {
+  const shortLabels = (metrics: WorkbenchJobActivityMetricFragment[]) =>
+    getMetricSeries(metrics).map(({ shortLabel }) => shortLabel)
+
+  it('drops tags shared by every series', () => {
+    expect(
+      shortLabels([
+        metric({ labels: { job: 'api', namespace: 'prod', status: '200' } }),
+        metric({ labels: { job: 'api', namespace: 'prod', status: '500' } }),
+      ])
+    ).toEqual(['status=200', 'status=500'])
+  })
+
+  it('keeps the three most distinguishing tags and marks the rest as truncated', () => {
+    const labels = (i: number) => ({
+      cluster: 'east',
+      code: String(200 + (i % 2)),
+      method: ['GET', 'PUT', 'POST'][i % 3],
+      pod: `api-${i}`,
+      route: `/r${i % 4}`,
+      zone: `z${i}`,
+    })
+
+    expect(
+      shortLabels([0, 1, 2, 3, 4, 5].map((i) => metric({ labels: labels(i) })))
+    ).toEqual([
+      'pod=api-0, zone=z0, route=/r0, …',
+      'pod=api-1, zone=z1, route=/r1, …',
+      'pod=api-2, zone=z2, route=/r2, …',
+      'pod=api-3, zone=z3, route=/r3, …',
+      'pod=api-4, zone=z4, route=/r0, …',
+      'pod=api-5, zone=z5, route=/r1, …',
+    ])
+  })
+
+  it('treats a missing tag as a distinguishing value', () => {
+    expect(
+      shortLabels([
+        metric({ labels: { job: 'api', canary: 'true' } }),
+        metric({ labels: { job: 'api' } }),
+      ])
+    ).toEqual(['canary=true', 'job=api'])
+  })
+
+  it('falls back to the first tags of a single series', () => {
+    expect(
+      shortLabels([metric({ labels: { a: '1', b: '2', c: '3', d: '4' } })])
+    ).toEqual(['a=1, b=2, c=3, …'])
+  })
+
+  it('prefixes the metric name when series come from different metrics', () => {
+    expect(
+      shortLabels([
+        metric({ name: 'cpu', labels: { pod: 'a' } }),
+        metric({ name: 'memory', labels: { pod: 'a' } }),
+        metric({ name: 'cpu', labels: { pod: 'b' } }),
+      ])
+    ).toEqual(['cpu, pod=a', 'memory, pod=a', 'cpu, pod=b'])
+  })
+
+  it('truncates very long tag values', () => {
+    const [label] = shortLabels([metric({ labels: { pod: 'x'.repeat(60) } })])
+
+    expect(label).toBe(`pod=${'x'.repeat(31)}…`)
+  })
+})

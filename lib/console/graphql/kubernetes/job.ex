@@ -14,7 +14,6 @@ defmodule Console.GraphQl.Kubernetes.Job do
       resolve fn %{metadata: metadata, spec: %{selector: selector}}, _, _ ->
         Kubernetes.list_pods(metadata, selector)
       end
-      middleware ErrorHandler
     end
 
     field :logs, list_of(:string) do
@@ -22,7 +21,6 @@ defmodule Console.GraphQl.Kubernetes.Job do
       arg :since_seconds, non_null(:integer)
 
       resolve &Kubernetes.read_job_logs/3
-      middleware ErrorHandler
     end
   end
 

@@ -83,6 +83,33 @@ spec:
 
 See the [sandboxing guide](/getting-started/advanced-config/sandboxing) for a full enterprise registry walkthrough.
 
+#### Templating agent values
+
+Set `agentHelmValuesTemplateable: true` to render the values as a [Liquid](https://shopify.github.io/liquid/) template for each cluster before they are applied to that cluster's agent. The template receives a `cluster` variable with fields such as `cluster.handle`, `cluster.name`, `cluster.distro`, `cluster.version`, and `cluster.metadata`. If the template fails to parse or render, the values are applied untemplated.
+
+Because `agentHelmValues` is a YAML block, any template expressions inside it must still be valid YAML (for example, quoted scalars like `"{{ cluster.handle }}"`). Liquid control flow such as `{% if %}` blocks can't be expressed there.
+
+### `agentHelmValuesTemplate`
+
+A raw string alternative to `agentHelmValues` for values that need full Liquid templating. The operator passes the string to Console verbatim instead of parsing it as YAML, so it can contain tags that wouldn't be valid YAML on their own. The rendered output must still be valid Helm values YAML.
+
+```yaml {% process=false %}
+spec:
+  agentHelmValuesTemplate: |
+    podAnnotations:
+      plural.sh/cluster: {{ cluster.handle }}
+    {% if cluster.metadata.region %}
+    nodeSelector:
+      topology.kubernetes.io/region: {{ cluster.metadata.region }}
+    {% endif %}
+```
+
+`agentHelmValuesTemplate` is treated as the more deliberate setting:
+
+- When it is set to a non-empty string, it **overrides** `agentHelmValues`, which is ignored entirely. The two are never merged.
+- Setting it **always enables templating**. `agentHelmValuesTemplateable` is sent as `true` regardless of its value in the spec.
+- An empty string is treated as unset, and `agentHelmValues` and `agentHelmValuesTemplateable` apply as normal.
+
 ### `bindings`
 
 Global RBAC bindings for Console CD resources. Each binding list accepts the standard Plural `Binding` shape (users, groups, service accounts).

@@ -413,10 +413,29 @@ defmodule Console.Deployments.Observability do
   @doc """
   Queries opinionated metrics for a set of different, relevant scopes
   """
-  @spec query(Cluster.t | {Cluster.t, binary} | ServiceComponent.t, binary, binary, binary) :: {:ok, map} | error
+  @spec query(
+    Cluster.t | {Cluster.t, binary} | {:usage, Cluster.t, :cluster | :namespace | :node, [atom]} |
+      {:usage, Service.t, :service | :pod, [atom]} |
+      {:pod, Cluster.t, binary, binary} | Service.t | ServiceComponent.t,
+    binary, binary, binary
+  ) :: {:ok, map} | error
   def query(%Cluster{handle: cluster}, start, stop, step) do
     queries(:cluster)
     |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
+  end
+
+  def query({:usage, %Cluster{handle: cluster}, grouping, keys}, start, stop, step) do
+    queries(:cluster_usage, grouping)
+    |> Keyword.take(keys)
+    |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
+  end
+
+  def query({:usage, %Service{namespace: ns} = service, grouping, keys}, start, stop, step) do
+    %{cluster: %Cluster{handle: cluster}} = Repo.preload(service, [:cluster])
+
+    queries(:service_usage, grouping)
+    |> Keyword.take(keys)
+    |> bulk_range_query(%{cluster: cluster, namespace: ns, rate: rate_window(step)}, start, stop, step)
   end
 
   def query({%Cluster{handle: cluster}, node}, start, stop, step) do
@@ -429,6 +448,16 @@ defmodule Console.Deployments.Observability do
     bulk_range_query(
       queries(:service),
       [cluster: service.cluster.handle, namespace: ns, rate: rate_window(step)],
+      start,
+      stop,
+      step
+    )
+  end
+
+  def query({:pod, %Cluster{handle: cluster}, namespace, name}, start, stop, step) do
+    queries(:pod)
+    |> bulk_range_query(
+      [cluster: cluster, namespace: namespace, name: name, rate: rate_window(step)],
       start,
       stop,
       step
@@ -477,7 +506,7 @@ defmodule Console.Deployments.Observability do
             Logger.error "prometheus query #{query} failed: #{inspect(err)}"
             {name, []}
         end
-      end, max_concurrency: 5)
+      end, max_concurrency: 5, timeout: task_timeout(PrometheusClient.query_timeout()), on_timeout: :kill_task)
       |> Enum.filter(fn
         {:ok, _} -> true
         _ -> false
@@ -496,7 +525,7 @@ defmodule Console.Deployments.Observability do
             Logger.error "prometheus query #{query} failed: #{inspect(err)}"
             {name, []}
         end
-      end, max_concurrency: 5)
+      end, max_concurrency: 5, timeout: task_timeout(PrometheusClient.range_query_timeout()), on_timeout: :kill_task)
       |> Enum.filter(fn
         {:ok, _} -> true
         _ -> false
@@ -505,6 +534,11 @@ defmodule Console.Deployments.Observability do
       |> ok()
     end
   end
+
+  # leaves room for the client's 30s connect timeout on top of the receive timeout, so the
+  # http request normally fails first; a killed task drops just that metric rather than
+  # crashing the whole resolver
+  defp task_timeout(request_timeout), do: request_timeout + :timer.seconds(45)
 
   defp get_connection(scope) do
     with %DeploymentSettings{} = settings <- Settings.fetch(),

@@ -1,18 +1,28 @@
-import { ResponsiveLine, type LineCustomSvgLayerProps } from '@nivo/line'
+import {
+  ResponsiveLine,
+  type LineCustomSvgLayerProps,
+  type LineSvgProps,
+} from '@nivo/line'
 import { type PartialTheme as NivoThemeType } from '@nivo/theming'
 import dayjs from 'dayjs'
-import { last } from 'lodash'
-import { Key, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
+import { niceAxis, seriesExtent, type TickBase } from './axisTicks'
 import { SliceTooltip } from './ChartTooltip'
+import { ChartRangeSelect } from './timerange/ChartRangeSelect'
+import type { TimeWindow } from './timerange/timeRange'
+import { niceTimeTicks } from './timeTicks'
 import { CaptionP } from './typography/Text'
+import { GraphLegend } from './GraphLegend'
 
-type GraphSeries = {
+export type GraphSeries = {
   id: string
   data: { x: Date; y: number }[]
   dashed?: boolean
 }
+
+type GraphMarkers = LineSvgProps<GraphSeries>['markers']
 
 function AreasWithoutDashedSeries({
   areaBlendMode,
@@ -87,20 +97,60 @@ export function useGraphTheme(): NivoThemeType {
   }
 }
 
+const GRAPH_MARGIN = { top: 20, right: 20, bottom: 30, left: 50 } as const
+
+function useElementWidth<T extends HTMLElement>() {
+  const [el, setEl] = useState<T | null>(null)
+  const [width, setWidth] = useState(0)
+
+  useLayoutEffect(() => {
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) =>
+      setWidth(entry.contentRect.width)
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [el])
+
+  return [setEl, width] as const
+}
+
+function dataWindow(series: GraphSeries[]): TimeWindow | null {
+  let start = Infinity
+  let end = -Infinity
+  for (const { data } of series) {
+    for (const { x } of data) {
+      const t = x.getTime()
+      if (t < start) start = t
+      if (t > end) end = t
+    }
+  }
+  return Number.isFinite(start)
+    ? { start: new Date(start), end: new Date(end) }
+    : null
+}
+
 export function Graph({
   data,
   yFormat,
-  tickRotation,
-  wrapLegend,
+  timeWindow,
+  onRangeSelect,
+  markers,
+  yTickBase = 'decimal',
 }: {
   data: GraphSeries[]
   yFormat: any
-  tickRotation?: number
-  wrapLegend?: boolean
+  /** Aligns y ticks to binary (bytes) or clock (seconds) steps. */
+  yTickBase?: TickBase
+  /** Pins the x axis to this window instead of the data's extent. */
+  timeWindow?: TimeWindow
+  /** Enables drag-to-select on the plot; requires `timeWindow`. */
+  onRangeSelect?: (start: Date, end: Date) => void
+  /** Reference lines (e.g. alert thresholds); y markers are kept in view. */
+  markers?: GraphMarkers
 }) {
   const graphTheme = useGraphTheme()
-  const { colors } = useTheme()
-  const [selected, setSelected] = useState<Key | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
   const graph = useMemo(() => {
     if (data.find(({ id }) => id === selected)) {
       return data.filter(({ id }) => id === selected)
@@ -108,45 +158,57 @@ export function Graph({
 
     return data
   }, [data, selected])
+  const yAxis = useMemo(() => {
+    const { min, max } = seriesExtent([
+      ...graph.flatMap(({ data }) => data.map(({ y }) => y)),
+      ...(markers ?? []).filter(({ axis }) => axis === 'y').map((m) => m.value),
+    ])
+    return niceAxis(min, max, { base: yTickBase })
+  }, [graph, markers, yTickBase])
+  const [plotRef, chartWidth] = useElementWidth<HTMLDivElement>()
+  const xAxis = useMemo(() => {
+    const window = timeWindow ?? dataWindow(graph)
+    if (!window) return null
+    return niceTimeTicks(
+      window.start,
+      window.end,
+      chartWidth - GRAPH_MARGIN.left - GRAPH_MARGIN.right,
+      { overhangPx: { left: GRAPH_MARGIN.left, right: GRAPH_MARGIN.right } }
+    )
+  }, [chartWidth, graph, timeWindow])
 
   if (graph.length === 0) return <CaptionP>no data</CaptionP>
 
-  const hasData = !!graph[0].data[0]
-  const timeRange = hasData
-    ? `${dateFormat(data[0].data[0].x)} — ${dateFormat(
-        /* @ts-expect-error */
-        last(data?.[0]?.data).x
-      )}`
-    : null
-  const toggleSelected = (id: Key) => setSelected(selected ? null : id)
+  const toggleSelected = (id: string) => setSelected(selected ? null : id)
   const hasDashedSeries = graph.some(({ dashed }) => dashed)
-  const line = (
+  const chart = (
     <ResponsiveLine
       data={graph}
-      margin={{
-        top: 20,
-        right: 20,
-        bottom: 100,
-        left: 50,
-      }}
+      margin={GRAPH_MARGIN}
       lineWidth={1}
       enablePoints={false}
       enableArea
       areaOpacity={0.05}
       useMesh
-      animate
-      xScale={{ type: 'time', format: 'native' }}
+      animate={!timeWindow}
+      xScale={{
+        type: 'time',
+        format: 'native',
+        ...(timeWindow && { min: timeWindow.start, max: timeWindow.end }),
+      }}
       yScale={{
         type: 'linear',
-        min: 0,
-        max: 'auto',
+        min: yAxis.min,
+        max: yAxis.max,
         stacked: false,
         reverse: false,
       }}
+      gridYValues={yAxis.ticks}
       colors={COLORS}
       yFormat={yFormat}
       xFormat={dateFormat}
       tooltip={SliceTooltip}
+      markers={markers}
       layers={
         hasDashedSeries
           ? [
@@ -159,147 +221,83 @@ export function Graph({
               'points',
               'slices',
               'mesh',
-              'legends',
             ]
-          : undefined
+          : [
+              'grid',
+              'markers',
+              'axes',
+              'areas',
+              'crosshair',
+              'lines',
+              'points',
+              'slices',
+              'mesh',
+            ]
       }
       axisLeft={{
         tickSize: 0,
+        tickValues: yAxis.ticks,
         format: yFormat,
         tickPadding: 5,
         tickRotation: 0,
-        legendOffset: -50,
-        legendPosition: 'start',
       }}
+      gridXValues={xAxis?.ticks}
       axisBottom={{
-        format: '%H:%M',
-        tickPadding: 10,
-        tickRotation: tickRotation || 45,
+        format: xAxis?.format ?? '%H:%M',
+        tickValues: xAxis?.ticks ?? 0,
+        tickPadding: 8,
+        tickRotation: 0,
         tickSize: 0,
-        legend: wrapLegend ? null : timeRange,
-        legendOffset: 70,
-        legendPosition: 'middle',
       }}
-      pointLabel="y"
-      pointLabelYOffset={-15}
-      legends={
-        wrapLegend
-          ? []
-          : [
-              {
-                anchor: 'bottom',
-                onClick: ({ id }) => toggleSelected(id),
-                direction: 'row',
-                justify: false,
-                translateY: 56,
-                itemsSpacing: 10,
-                itemDirection: 'left-to-right',
-                itemWidth: 100,
-                itemHeight: 20,
-                symbolSize: 12,
-                symbolShape: 'circle',
-                itemTextColor: colors['text-xlight'],
-                effects: [
-                  {
-                    on: 'hover',
-                    style: {
-                      itemBackground: 'rgba(0, 0, 0, .03)',
-                      itemTextColor: colors['text-light'],
-                    },
-                  },
-                ],
-              },
-            ]
-      }
       theme={graphTheme}
     />
   )
 
-  if (!wrapLegend) return line
-
   return (
-    <div css={{ height: '100%', position: 'relative', width: '100%' }}>
-      {line}
-      {timeRange && (
+    <div
+      css={{
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: 0,
+        width: '100%',
+      }}
+    >
+      <div css={{ flex: 1, minHeight: 0, position: 'relative' }}>
         <div
-          css={{
-            bottom: 46,
-            color: colors['text-light'],
-            fontSize: 11,
-            left: 50,
-            lineHeight: '16px',
-            pointerEvents: 'none',
-            position: 'absolute',
-            right: 20,
-            textAlign: 'center',
-          }}
+          ref={plotRef}
+          css={{ inset: 0, position: 'absolute' }}
         >
-          {timeRange}
-        </div>
-      )}
-      <div
-        css={{
-          bottom: 0,
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '4px 10px',
-          left: 50,
-          maxHeight: 42,
-          overflowY: 'auto',
-          position: 'absolute',
-          right: 20,
-        }}
-      >
-        {data.map(({ dashed, id }, index) => {
-          const isSelected = selected === id
-
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => toggleSelected(id)}
-              css={{
-                all: 'unset',
-                alignItems: 'center',
-                borderRadius: 4,
-                color: colors['text-xlight'],
-                cursor: 'pointer',
-                display: 'flex',
-                gap: 6,
-                lineHeight: '16px',
-                maxWidth: '100%',
-                minWidth: 0,
-                opacity: selected && !isSelected ? 0.45 : 1,
-                padding: '2px 4px',
-                '&:hover': {
-                  background: 'rgba(0, 0, 0, .03)',
-                  color: colors['text-light'],
-                },
-              }}
+          {timeWindow && onRangeSelect ? (
+            <ChartRangeSelect
+              timeWindow={timeWindow}
+              margin={GRAPH_MARGIN}
+              onRangeSelect={onRangeSelect}
+              style={{ height: '100%' }}
             >
-              <svg
-                aria-hidden
-                height={12}
-                width={12}
-                css={{ flex: '0 0 12px' }}
-              >
-                <line
-                  x1={0}
-                  x2={12}
-                  y1={6}
-                  y2={6}
-                  stroke={
-                    isSelected ? COLORS[0] : COLORS[index % COLORS.length]
-                  }
-                  strokeDasharray={dashed ? '4 3' : undefined}
-                  strokeWidth={2}
-                />
-              </svg>
-              <span css={{ minWidth: 0, overflowWrap: 'anywhere' }}>{id}</span>
-            </button>
-          )
-        })}
+              {chart}
+            </ChartRangeSelect>
+          ) : (
+            chart
+          )}
+        </div>
       </div>
+      <GraphLegend
+        items={data.map(({ dashed, id }, index) => ({
+          id,
+          label: id,
+          dashed,
+          color: selected === id ? COLORS[0] : COLORS[index % COLORS.length],
+        }))}
+        selectedId={selected}
+        onSelect={toggleSelected}
+        maxHeight={42}
+        style={{
+          paddingLeft: GRAPH_MARGIN.left,
+          paddingRight: GRAPH_MARGIN.right,
+        }}
+      />
     </div>
   )
 }

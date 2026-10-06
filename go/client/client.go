@@ -537,9 +537,10 @@ func (t *AgentPromptFragment) GetSeq() int64 {
 }
 
 type ScmCredentialFragment struct {
-	Token    string  "json:\"token\" graphql:\"token\""
-	Username string  "json:\"username\" graphql:\"username\""
-	ExaKey   *string "json:\"exaKey,omitempty\" graphql:\"exaKey\""
+	Token    string                       "json:\"token\" graphql:\"token\""
+	Username string                       "json:\"username\" graphql:\"username\""
+	ExaKey   *string                      "json:\"exaKey,omitempty\" graphql:\"exaKey\""
+	Proxy    *ScmCredentialFragment_Proxy "json:\"proxy,omitempty\" graphql:\"proxy\""
 }
 
 func (t *ScmCredentialFragment) GetToken() string {
@@ -559,6 +560,12 @@ func (t *ScmCredentialFragment) GetExaKey() *string {
 		t = &ScmCredentialFragment{}
 	}
 	return t.ExaKey
+}
+func (t *ScmCredentialFragment) GetProxy() *ScmCredentialFragment_Proxy {
+	if t == nil {
+		t = &ScmCredentialFragment{}
+	}
+	return t.Proxy
 }
 
 type PluralCredsFragment struct {
@@ -4041,6 +4048,7 @@ type WorkbenchDashboardGraphFragment struct {
 	Title       *string                                "json:\"title,omitempty\" graphql:\"title\""
 	Description *string                                "json:\"description,omitempty\" graphql:\"description\""
 	Type        DashboardGraphType                     "json:\"type\" graphql:\"type\""
+	Unit        *DashboardGraphUnit                    "json:\"unit,omitempty\" graphql:\"unit\""
 	SectionID   *string                                "json:\"sectionId,omitempty\" graphql:\"sectionId\""
 	Markdown    *string                                "json:\"markdown,omitempty\" graphql:\"markdown\""
 	Options     map[string]any                         "json:\"options,omitempty\" graphql:\"options\""
@@ -4071,6 +4079,12 @@ func (t *WorkbenchDashboardGraphFragment) GetType() *DashboardGraphType {
 		t = &WorkbenchDashboardGraphFragment{}
 	}
 	return &t.Type
+}
+func (t *WorkbenchDashboardGraphFragment) GetUnit() *DashboardGraphUnit {
+	if t == nil {
+		t = &WorkbenchDashboardGraphFragment{}
+	}
+	return t.Unit
 }
 func (t *WorkbenchDashboardGraphFragment) GetSectionID() *string {
 	if t == nil {
@@ -7838,6 +7852,31 @@ func (t *TinyAgentRuntimeFragment_Cluster) GetName() string {
 	return t.Name
 }
 
+type ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
+}
+
 type AgentRunFragment_Skills struct {
 	Contents    string  "json:\"contents\" graphql:\"contents\""
 	Description *string "json:\"description,omitempty\" graphql:\"description\""
@@ -7921,6 +7960,31 @@ func (t *AgentRunFragment_Usage) GetTotalTokens() *int64 {
 		t = &AgentRunFragment_Usage{}
 	}
 	return t.TotalTokens
+}
+
+type AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
 }
 
 type AgentRunFragment_User struct {
@@ -18030,6 +18094,31 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
 	return t.TotalTokens
 }
 
+type GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
+}
+
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18231,6 +18320,31 @@ func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalToke
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
 	}
 	return t.TotalTokens
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -18494,6 +18608,31 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRu
 	return t.TotalTokens
 }
 
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
+}
+
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18684,6 +18823,31 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalTokens() 
 	return t.TotalTokens
 }
 
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
+}
+
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18810,6 +18974,31 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() 
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
 	}
 	return t.TotalTokens
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
@@ -51727,6 +51916,11 @@ fragment ScmCredentialFragment on ScmCreds {
 	token
 	username
 	exaKey
+	proxy {
+		enabled
+		url
+		noproxy
+	}
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -51964,6 +52158,11 @@ fragment ScmCredentialFragment on ScmCreds {
 	token
 	username
 	exaKey
+	proxy {
+		enabled
+		url
+		noproxy
+	}
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -52224,6 +52423,11 @@ fragment ScmCredentialFragment on ScmCreds {
 	token
 	username
 	exaKey
+	proxy {
+		enabled
+		url
+		noproxy
+	}
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -52471,6 +52675,11 @@ fragment ScmCredentialFragment on ScmCreds {
 	token
 	username
 	exaKey
+	proxy {
+		enabled
+		url
+		noproxy
+	}
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -52656,6 +52865,11 @@ fragment ScmCredentialFragment on ScmCreds {
 	token
 	username
 	exaKey
+	proxy {
+		enabled
+		url
+		noproxy
+	}
 }
 fragment PluralCredsFragment on PluralCreds {
 	token
@@ -64229,6 +64443,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	title
 	description
 	type
+	unit
 	sectionId
 	markdown
 	options
@@ -64303,6 +64518,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	title
 	description
 	type
+	unit
 	sectionId
 	markdown
 	options
@@ -64377,6 +64593,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
 	title
 	description
 	type
+	unit
 	sectionId
 	markdown
 	options

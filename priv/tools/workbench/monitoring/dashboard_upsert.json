@@ -20,6 +20,11 @@
           "enum": ["timeseries", "gauge", "logs", "markdown", "table", "stat", "bar", "pie", "heatmap", "traces", "section"],
           "description": "Visualization type. A section is a collapsible container graph and does not need a datasource."
         },
+        "unit": {
+          "type": "string",
+          "enum": ["none", "bytes", "time", "milliseconds", "cpu", "percent"],
+          "description": "Unit of the plotted values, used to format axes and tooltips. bytes: raw byte counts or byte rates. time: durations in seconds (eg Prometheus *_seconds metrics). milliseconds: durations in milliseconds (eg *_milliseconds or *_ms metrics, such as PromEx/Elixir histograms); check the metric name rather than assuming seconds. cpu: CPU cores (fractions render as millicores). percent: values on a 0-100 scale; multiply 0-1 ratios by 100 in the query. Omit or use none for plain counts and rates."
+        },
         "section_id": {
           "type": "string",
           "description": "Optional identifier of a graph whose type is section. Section graphs cannot themselves belong to another section."
@@ -78,7 +83,7 @@
               "description": { "type": "string" },
               "type": {
                 "type": "string",
-                "enum": ["text", "number", "boolean", "select", "time_range"]
+                "enum": ["text", "number", "boolean", "select"]
               },
               "default": { "type": "string" },
               "options": { "type": "array", "items": { "type": "string" } },

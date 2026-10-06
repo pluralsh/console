@@ -27,6 +27,7 @@ import {
   getClusterDetailsPath,
   getServiceDetailsPath,
   SERVICE_COMPONENTS_PATH,
+  SERVICE_OBSERVABILITY_REL_PATH,
   SERVICE_PRS_PATH,
 } from 'routes/cdRoutesConsts'
 
@@ -238,6 +239,9 @@ function ServiceDetailsBase() {
     )?.params ?? {}
 
   const personaType = useServicePersonaType()
+  // Logs and observability trade the sidecar for horizontal room for log lines,
+  // alert tables, and metrics grids.
+  const fullWidth = tab === 'logs' || tab === SERVICE_OBSERVABILITY_REL_PATH
 
   const [isRefetching, setIsRefetching] = useState(false)
 
@@ -333,8 +337,11 @@ function ServiceDetailsBase() {
           </div>
         </div>
       </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer role="main">
+      {!fullWidth && <ResponsiveLayoutSpacer />}
+      <ResponsiveLayoutContentContainer
+        role="main"
+        css={fullWidth ? { width: 'auto', maxWidth: 'none' } : undefined}
+      >
         {!serviceDeployment && error ? (
           <GqlError error={error} />
         ) : (
@@ -354,14 +361,18 @@ function ServiceDetailsBase() {
           />
         )}
       </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer>
-        {isLoading ? (
-          <SidecarSkeleton />
-        ) : (
-          <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
-        )}
-      </ResponsiveLayoutSidecarContainer>
-      <ResponsiveLayoutSpacer />
+      {!fullWidth && (
+        <>
+          <ResponsiveLayoutSidecarContainer>
+            {isLoading ? (
+              <SidecarSkeleton />
+            ) : (
+              <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
+            )}
+          </ResponsiveLayoutSidecarContainer>
+          <ResponsiveLayoutSpacer />
+        </>
+      )}
     </ResponsiveLayoutPage>
   )
 }

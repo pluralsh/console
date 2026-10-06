@@ -51,6 +51,9 @@ export const CUSTOM_RESOURCES_REL_PATH = 'customresourcedefinitions'
 
 export const AUDIT_REL_PATH = 'audit'
 
+export const METRICS_REL_PATH = 'metrics'
+export const LOGS_REL_PATH = 'logs'
+
 export const NAMESPACED_RESOURCE_DETAILS_REL_PATH = ':namespace/:name'
 export const RESOURCE_DETAILS_REL_PATH = ':name'
 
@@ -94,6 +97,14 @@ export function getConfigurationAbsPath(clusterId: string | null | undefined) {
 
 export function getClusterAbsPath(clusterId: string | null | undefined) {
   return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CLUSTER_REL_PATH}`
+}
+
+export function getMetricsAbsPath(clusterId: string | null | undefined) {
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${METRICS_REL_PATH}`
+}
+
+export function getLogsAbsPath(clusterId: string | null | undefined) {
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${LOGS_REL_PATH}`
 }
 
 export function getRbacAbsPath(clusterId: string | null | undefined) {

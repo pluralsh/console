@@ -22,6 +22,10 @@ import { useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { duration } from 'utils/datetime'
+import {
+  isCmdToolKind,
+  resolveToolCallKind,
+} from 'components/ai/chatbot/toolCallDisplay'
 
 const MAX_STREAMED_OUTPUT_LENGTH = 1 << 20
 
@@ -105,7 +109,8 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   const displayItems: ChatDisplayItem[] = useMemo(
     () =>
       groupConsecutiveToolMessages(
-        isEmpty(messages) ? [getMockUserChat(run.prompt)] : messages
+        isEmpty(messages) ? [getMockUserChat(run.prompt)] : messages,
+        isCommandToolMessage
       ),
     [messages, run.prompt]
   )
@@ -172,6 +177,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
               {...rowData}
               {...chatMessagePropsShared}
               {...getToolMessageProps(rowData.id)}
+              standaloneCommand={isCommandToolMessage(rowData)}
               userMsgWrapperStyle={{
                 backgroundColor:
                   mode === 'light' ? colors['fill-two'] : colors['fill-one'],
@@ -214,6 +220,15 @@ const isHiddenAgentMessage = (msg: AgentMessageFragment) =>
   msg.message === '__plrl_ignore__' &&
   !msg.metadata?.tool &&
   !msg.metadata?.file
+
+const isCommandToolMessage = (msg: ChatFragment) =>
+  msg.type === ChatType.Tool &&
+  isCmdToolKind(
+    resolveToolCallKind(
+      msg.attributes?.tool?.name ?? '',
+      msg.attributes?.tool?.arguments
+    )
+  )
 
 const overlayToolOutput = (
   msg: AgentMessageFragment,

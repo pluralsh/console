@@ -11,6 +11,7 @@ defmodule Console.GraphQl.Deployments.Observability do
   ecto_enum :monitor_aggregate,           Monitor.Aggregate
   ecto_enum :monitor_operator,            Monitor.Operator
   ecto_enum :dashboard_graph_type,        Dashboard.Graph.Type
+  ecto_enum :dashboard_graph_unit,        Dashboard.Graph.Unit
   ecto_enum :dashboard_input_type,        Dashboard.Input.Type
   ecto_enum :dashboard_datasource_type,   Dashboard.Datasource.Type
 
@@ -209,6 +210,8 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :title, :string, description: "Graph title"
     field :description, :string, description: "Optional graph description"
     field :type, non_null(:dashboard_graph_type), description: "Graph visualization type"
+    field :unit, :dashboard_graph_unit,
+      description: "Unit of the plotted values, used to format axes and tooltips"
     field :section_id, :string,
       description: "Identifier of the section graph containing this graph; sections cannot be nested"
 
@@ -428,6 +431,8 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :title, :string, description: "Graph title"
     field :description, :string, description: "Optional graph description"
     field :type, non_null(:dashboard_graph_type), description: "Graph visualization type"
+    field :unit, :dashboard_graph_unit,
+      description: "Unit of the plotted values, used to format axes and tooltips"
     field :tool_id, :id,
       description: "ID of the configured workbench tool backing this graph's datasource"
 

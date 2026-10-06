@@ -1,10 +1,10 @@
 defmodule Console.Schema.DeploymentSettings do
   use Console.Schema.Base
-  alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
+  alias Console.Schema.{PolicyBinding, GitRepository, ScmConnection, Gates.JobSpec}
   alias Piazza.Ecto.EncryptedString
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5, openai_compatible: 6, xai: 7
-  defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2
+  defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2, loki: 3
   defenum VectorStore, elastic: 0, opensearch: 1, postgres: 2
   defenum OpenAIMethod, chat: 0, responses: 1, auto: 2
   defenum BedrockEndpoint, runtime: 0, mantle: 1
@@ -98,6 +98,43 @@ defmodule Console.Schema.DeploymentSettings do
     end
   end
 
+  defmodule Loki do
+    use Piazza.Ecto.Schema
+
+    embedded_schema do
+      field :host,            :string
+      field :user,            :string
+      field :password,        EncryptedString
+      field :cluster_label,   :string, default: "cluster"
+      field :namespace_label, :string, default: "namespace"
+    end
+
+    @label_format ~r/^[a-zA-Z_][a-zA-Z0-9_]*$/
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(host user password cluster_label namespace_label)a)
+      |> validate_required([:host])
+      |> validate_format(:cluster_label, @label_format, message: "must be a valid loki label name")
+      |> validate_format(:namespace_label, @label_format, message: "must be a valid loki label name")
+    end
+
+    def headers(%__MODULE__{user: u, password: p}, headers) when is_binary(u) and is_binary(p) do
+      [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | headers]
+    end
+    def headers(_, headers), do: headers
+
+    def url(%__MODULE__{host: host}, path) when is_binary(host) do
+      Path.join(host, path)
+    end
+
+    def cluster_label(%__MODULE__{cluster_label: l}) when is_binary(l) and byte_size(l) > 0, do: l
+    def cluster_label(_), do: "cluster"
+
+    def namespace_label(%__MODULE__{namespace_label: l}) when is_binary(l) and byte_size(l) > 0, do: l
+    def namespace_label(_), do: "namespace"
+  end
+
   defmodule Opensearch do
     use Console.Schema.Base
 
@@ -162,6 +199,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defmodule OpenAI do
     use Console.Schema.Base
+    alias Console.Schema.ScmConnection
     alias Console.Schema.DeploymentSettings.{OauthToken, OpenAIMethod}
     alias Piazza.Ecto.EncryptedString
 
@@ -174,6 +212,7 @@ defmodule Console.Schema.DeploymentSettings do
       field :method,          OpenAIMethod, default: :auto
 
       embeds_one :token_exchange, OauthToken, on_replace: :update
+      embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
 
       embeds_many :headers, Header, on_replace: :delete do
         field :name,  :string
@@ -188,7 +227,14 @@ defmodule Console.Schema.DeploymentSettings do
       |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
       |> trim_changes(~w(access_token)a)
       |> cast_embed(:token_exchange)
+      |> cast_embed(:proxy, with: &proxy_changeset/2)
       |> cast_embed(:headers, with: &header_changeset/2)
+    end
+
+    defp proxy_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(enabled url noproxy)a)
+      |> validate_required([:url])
     end
 
     defp header_changeset(model, attrs) do
@@ -242,6 +288,7 @@ defmodule Console.Schema.DeploymentSettings do
       embeds_one :victoria, Connection, on_replace: :update
       embeds_one :elastic,  Elastic, on_replace: :update
       embeds_one :opensearch, Opensearch, on_replace: :update
+      embeds_one :loki,       Loki, on_replace: :update
     end
 
     embeds_one :cost, Cost, on_replace: :update do
@@ -303,6 +350,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :embedding_model, :string
 
         field :proxy_models,    {:array, :string}
+        embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
       end
 
       embeds_one :xai, OpenAI, on_replace: :update
@@ -313,6 +361,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :url,             :string
         field :authorization,   EncryptedString
         field :embedding_model, :string
+        embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
       end
 
       embeds_one :azure, Azure, on_replace: :update do
@@ -325,6 +374,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :deployments,      :map
 
         field :proxy_models,    {:array, :string}
+        embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
       end
 
       embeds_one :bedrock, Bedrock, on_replace: :update do
@@ -341,6 +391,7 @@ defmodule Console.Schema.DeploymentSettings do
         # Deprecated for most configs; maps client model ID -> inference profile ID when aliases cannot be inferred (e.g. application profile suffixes).
         field :deployments,           :map
         field :endpoint,              BedrockEndpoint, default: :runtime
+        embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
 
         embeds_many :model_settings, ModelSettings, on_replace: :delete do
           field :model_id,              :string
@@ -357,6 +408,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :location,             :string
         field :embedding_model,      :string
         field :proxy_models,         {:array, :string}
+        embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
       end
 
       embeds_one :nexus, Nexus, on_replace: :update do
@@ -462,18 +514,26 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:price_sheets, with: &price_sheet_changeset/2)
   end
 
+  defp proxy_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled url noproxy)a)
+    |> validate_required([:url])
+  end
+
   defp analysis_rates_changeset(model, attrs), do: model |> cast(attrs, ~w(fast slow)a)
 
   defp ai_api_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(access_token model tool_model embedding_model base_url proxy_models)a)
     |> trim_changes(~w(access_token)a)
+    |> cast_embed(:proxy, with: &proxy_changeset/2)
   end
 
   defp ollama_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url model tool_model embedding_model authorization)a)
     |> trim_changes(~w(authorization)a)
+    |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> validate_required(~w(url model)a)
   end
 
@@ -481,6 +541,7 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model proxy_models deployments)a)
     |> trim_changes(~w(access_token)a)
+    |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> validate_required(~w(access_token endpoint)a)
     |> validate_change(:endpoint, fn :endpoint, endpoint ->
       with %URI{path: path, scheme: "https"} <- URI.parse(endpoint),
@@ -497,6 +558,7 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments endpoint)a)
     |> cast_embed(:model_settings, with: &bedrock_model_settings_changeset/2)
+    |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> trim_changes(~w(access_token aws_access_key_id aws_secret_access_key)a)
     |> validate_required(~w(region)a)
   end
@@ -510,6 +572,7 @@ defmodule Console.Schema.DeploymentSettings do
   defp vertex_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(model tool_model embedding_model service_account_json project location endpoint proxy_models)a)
+    |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> validate_required([:project, :location])
     |> validate_change(:service_account_json, fn :service_account_json, json ->
       case Jason.decode(json) do
@@ -588,6 +651,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:victoria)
     |> cast_embed(:elastic)
     |> cast_embed(:opensearch)
+    |> cast_embed(:loki)
   end
 
   defp price_sheet_changeset(model, attrs) do

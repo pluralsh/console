@@ -79,3 +79,6 @@ RUN set -eux; \
 COPY --from=cli /prebake /usr/local/bin/prebake
 COPY --from=fcp /opt/fcp/bin/fcp /usr/local/bin/fcp
 WORKDIR /data
+
+RUN chown -R 65532:65532 /data
+USER 65532:65532

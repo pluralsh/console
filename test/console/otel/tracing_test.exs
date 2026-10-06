@@ -122,6 +122,28 @@ defmodule Console.Otel.TracingTest do
     end
   end
 
+  describe "OpentelemetryEcto handler" do
+    test "does not raise when $callers contains a pid on another node" do
+      node = "console@remote-host"
+      remote_pid = :erlang.binary_to_term(
+        <<131, 88, 100, byte_size(node)::16, node::binary, 16466::32, 0::32, 1::32>>
+      )
+      assert node(remote_pid) == :"console@remote-host"
+
+      Task.async(fn ->
+        Process.put(:"$callers", [remote_pid])
+
+        OpentelemetryEcto.handle_event(
+          [:console, :repo, :query],
+          %{total_time: System.convert_time_unit(1, :millisecond, :native)},
+          %{query: "select 1", source: nil, result: {:ok, %{}}, repo: Console.Repo, type: :ecto_sql_query},
+          []
+        )
+      end)
+      |> Task.await()
+    end
+  end
+
   describe "strip_http_query_metadata/1" do
     test "clears the query string on a copied conn without changing the original" do
       conn = %Plug.Conn{query_string: "token=secret&query=mutation{login}"}

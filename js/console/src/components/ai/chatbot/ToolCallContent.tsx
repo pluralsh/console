@@ -20,7 +20,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
+import { shimmerWithinCss } from 'components/utils/typography/Text'
 import { prettifyToolJson } from './toolCallDisplay'
 
 enum ToolCallTab {
@@ -28,11 +29,35 @@ enum ToolCallTab {
   Output = 'output',
 }
 
-export function useSlimToolCodeCss({
-  showLanguageIcon = false,
-}: { showLanguageIcon?: boolean } = {}) {
-  const { colors } = useTheme()
+/** Darker surface behind tool output, so it sinks below the chat. */
+export const toolSurfaceCss = (theme: DefaultTheme) => ({
+  backgroundColor: theme.colors['fill-accent'],
+  border: theme.borders['fill-one'],
+})
+
+export const toolOutputTextCss = (theme: DefaultTheme) => ({
+  ...theme.partials.text.mono,
+  fontSize: 13,
+  lineHeight: '18px',
+  fontWeight: 200,
+})
+
+/** Sink tool code into the accent fill. Syntax colors stay on the design-system theme. */
+export function useQuietToolCodeCss() {
+  const theme = useTheme()
+
   return {
+    '&&': toolSurfaceCss(theme),
+    '& pre': toolOutputTextCss(theme),
+  } as const
+}
+
+export function useSlimToolCodeCss() {
+  const { colors } = useTheme()
+  const quietCodeCss = useQuietToolCodeCss()
+
+  return {
+    ...quietCodeCss,
     overflow: 'auto',
     minHeight: 0,
     '& > div > div:first-child': {
@@ -40,11 +65,6 @@ export function useSlimToolCodeCss({
       padding: 8,
       color: colors['text-light'],
     },
-    ...(!showLanguageIcon && {
-      '& > div > div:first-child svg': {
-        display: 'none',
-      },
-    }),
   } as const
 }
 
@@ -72,7 +92,7 @@ export function RunningToolOutputCode({
 
   return (
     <Code
-      fillLevel={fillLevel}
+      fillLevel={fillLevel ?? 0}
       title={showHeader ? 'Response' : undefined}
       showHeader={showHeader}
       css={{
@@ -96,9 +116,11 @@ export function ToolCallContent({
   hideArguments = false,
   flushTop = false,
   isPending,
+  shimmer = false,
   transparent = false,
   maxOutputHeight,
   ansiOutput = false,
+  collapsedOutputLines,
 }: {
   content: string
   attributes: Nullable<ChatTypeAttributes>
@@ -106,12 +128,21 @@ export function ToolCallContent({
   hideArguments?: boolean
   flushTop?: boolean
   isPending?: boolean
+  /** Loading sweep on code and log text, without changing pending output. */
+  shimmer?: boolean
   transparent?: boolean
   maxOutputHeight?: number | string
   ansiOutput?: boolean
+  collapsedOutputLines?: number
 }) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
   const slimCodeCss = useSlimToolCodeCss()
+  const showShimmer = isPending || shimmer
+  const codeCss = {
+    ...slimCodeCss,
+    ...(showShimmer && shimmerWithinCss(theme)),
+  }
 
   const showInput = !hideArguments
   const hasResponse = !!(isPending || customResultBody || content)
@@ -170,7 +201,8 @@ export function ToolCallContent({
         <Code
           language="json"
           showHeader={false}
-          css={slimCodeCss}
+          fillLevel={0}
+          css={codeCss}
         >
           {prettifyToolJson(
             JSON.stringify(attributes?.tool?.arguments ?? null)
@@ -189,12 +221,13 @@ export function ToolCallContent({
               maxHeight: maxOutputHeight,
               overflow: 'auto',
             }),
+            ...(showShimmer && shimmerWithinCss(theme)),
           }}
         >
           {isPending && isEmpty(content) ? (
             <RunningToolOutputCode
               showHeader={false}
-              fillLevel={2}
+              fillLevel={0}
               transparent={transparent}
             />
           ) : customResultBody ? (
@@ -202,17 +235,19 @@ export function ToolCallContent({
           ) : ansiOutput && !isEmpty(content) ? (
             <PreviewablePanel
               contentKey={`resp:${content.length}:ansi`}
+              subtle
               transparent={transparent}
               unclamped={!!maxOutputHeight}
+              collapsedLines={collapsedOutputLines}
             >
               {plainResponse}
             </PreviewablePanel>
           ) : isPending ? (
             <Code
-              fillLevel={2}
+              fillLevel={0}
               showHeader={false}
               css={{
-                ...slimCodeCss,
+                ...codeCss,
                 ...(transparent && {
                   backgroundColor: 'transparent',
                   borderTopLeftRadius: 0,
@@ -226,8 +261,9 @@ export function ToolCallContent({
             <Code
               language="json"
               showHeader={false}
+              fillLevel={0}
               css={{
-                ...slimCodeCss,
+                ...codeCss,
                 ...(transparent && {
                   backgroundColor: 'transparent',
                   borderTopLeftRadius: 0,
@@ -240,14 +276,17 @@ export function ToolCallContent({
           ) : !isEmpty(content) ? (
             <PreviewablePanel
               contentKey={`resp:${content.length}:plain`}
+              subtle
               transparent={transparent}
               unclamped={!!maxOutputHeight}
+              collapsedLines={collapsedOutputLines}
             >
               {plainResponse}
             </PreviewablePanel>
           ) : (
             <PreviewablePanel
               contentKey="resp:empty"
+              subtle
               transparent={transparent}
             >
               <EmptyOutputSC>No output yet</EmptyOutputSC>
@@ -292,6 +331,7 @@ export function PreviewablePanel({
   transparent = false,
   unclamped = false,
   collapsedLines = 4,
+  shimmer = false,
 }: {
   children: ReactNode
   contentKey: string
@@ -305,6 +345,8 @@ export function PreviewablePanel({
   unclamped?: boolean
   /** Whole-line clamp while collapsed. */
   collapsedLines?: number
+  /** Sweep the loading shimmer across text inside the box, including code. */
+  shimmer?: boolean
 }) {
   const [expandedContentKey, setExpandedContentKey] = useState<string | null>(
     null
@@ -352,6 +394,7 @@ export function PreviewablePanel({
         $fade={!unclamped && !expanded && canExpand}
         $collapsedLines={collapsedLines}
         $unclamped={unclamped}
+        $shimmer={shimmer}
       >
         {children}
       </PreviewContentSC>
@@ -408,16 +451,19 @@ const PreviewBoxSC = styled.div<{
   minHeight: 0,
   flexShrink: $unclamped ? 0 : undefined,
   overflow: $unclamped ? 'visible' : 'hidden',
-  border: $subtle ? theme.borders['fill-one'] : theme.borders['fill-two'],
-  borderRadius: theme.borderRadiuses.medium,
+  ...($subtle
+    ? toolSurfaceCss(theme)
+    : {
+        border: theme.borders['fill-two'],
+        backgroundColor: theme.colors['fill-two'],
+      }),
+  borderRadius: theme.borderRadiuses.large,
   ...($transparent && {
     borderTop: 'none',
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
+    backgroundColor: 'transparent',
   }),
-  backgroundColor: $transparent
-    ? 'transparent'
-    : theme.colors[$subtle ? 'fill-one' : 'fill-two'],
 }))
 
 const EmptyOutputSC = styled.div(({ theme }) => ({
@@ -428,7 +474,7 @@ const EmptyOutputSC = styled.div(({ theme }) => ({
 const AnsiOutputSC = styled.pre(({ theme }) => ({
   margin: 0,
   color: theme.colors['text-light'],
-  fontFamily: theme.fontFamilies.mono,
+  ...toolOutputTextCss(theme),
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
 }))
@@ -448,8 +494,17 @@ const PreviewContentSC = styled.div<{
   $fade?: boolean
   $collapsedLines: number
   $unclamped: boolean
+  $shimmer?: boolean
 }>(
-  ({ theme, $expanded, $flushBottom, $fade, $collapsedLines, $unclamped }) => ({
+  ({
+    theme,
+    $expanded,
+    $flushBottom,
+    $fade,
+    $collapsedLines,
+    $unclamped,
+    $shimmer,
+  }) => ({
     minHeight: 0,
     // Margin (not padding) so max-height maps cleanly to whole line boxes.
     margin: theme.spacing.small,
@@ -467,6 +522,7 @@ const PreviewContentSC = styled.div<{
       maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
       WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
     }),
+    ...($shimmer && shimmerWithinCss(theme)),
   })
 )
 

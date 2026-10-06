@@ -21,10 +21,7 @@ import {
 import { useTheme } from 'styled-components'
 import { SETTINGS_BREADCRUMBS } from '../Settings'
 import { ChatbotConnectionForm } from './ChatbotConnectionForm'
-import {
-  SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
-  SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
-} from './chatbotSetupGuide'
+import { chatbotSetupGuide } from './chatbotSetupGuide'
 
 export function ChatbotEditSettings() {
   const navigate = useNavigate()
@@ -41,6 +38,10 @@ export function ChatbotEditSettings() {
   })
   const chatbot = data?.chatProviderConnection
   const editPath = getChatbotsSettingsEditAbsPath({ chatbotId })
+  const setupGuide = useMemo(
+    () => chatbotSetupGuide(chatbot?.type),
+    [chatbot?.type]
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -70,12 +71,7 @@ export function ChatbotEditSettings() {
             <Button
               secondary
               startIcon={<SidePanelOpenIcon />}
-              onClick={() =>
-                openSetupGuidePanel({
-                  documentationUrl: SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
-                  markdownPath: SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
-                })
-              }
+              onClick={() => openSetupGuidePanel(setupGuide)}
               css={{ whiteSpace: 'nowrap' }}
             >
               Setup guide
@@ -83,7 +79,7 @@ export function ChatbotEditSettings() {
           )}
         </Flex>
       ),
-      [isOpen, openSetupGuidePanel, theme]
+      [isOpen, openSetupGuidePanel, setupGuide, theme]
     )
   )
 
@@ -95,11 +91,8 @@ export function ChatbotEditSettings() {
   useEffect(() => {
     if (!isOpen) return
 
-    openSetupGuidePanel({
-      documentationUrl: SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
-      markdownPath: SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
-    })
-  }, [isOpen, openSetupGuidePanel])
+    openSetupGuidePanel(setupGuide)
+  }, [isOpen, openSetupGuidePanel, setupGuide])
 
   if (error) return <GqlError error={error} />
   if (loading && !chatbot) return <LoadingIndicator />

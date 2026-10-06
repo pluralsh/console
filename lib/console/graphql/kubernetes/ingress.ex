@@ -10,7 +10,6 @@ defmodule Console.GraphQl.Kubernetes.Ingress do
 
     field :certificates, list_of(:certificate) do
       resolve(fn model, _, _ -> Kubernetes.ingress_certificates(model) end)
-      middleware(ErrorHandler)
     end
 
     field(:raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end)

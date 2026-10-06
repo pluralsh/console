@@ -46,7 +46,7 @@ versions:
         indicates whether selected applications accepted the content; it is now `operational`
         unless the operator cannot parse the object (then `failed`). The former `ignored`
         value is removed; per-application state is now in `status.conditions`.']
-  chart_version: 0.68.0
+  chart_version: 0.68.1
   images: ['victoriametrics/operator:v0.75.0']
 - version: 0.74.1
   kube: ['1.37', '1.36', '1.35']

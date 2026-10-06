@@ -1122,6 +1122,8 @@ type AnsibleConfigurationAttributes struct {
 type AnthropicSettings struct {
 	// the anthropic model version to use
 	Model *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
@@ -1131,6 +1133,8 @@ type AnthropicSettings struct {
 type AnthropicSettingsAttributes struct {
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -1387,6 +1391,8 @@ type AzureOpenaiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// mapping from model id to azure openai deployment name
 	Deployments *string `json:"deployments,omitempty"`
 	// addditional models to support within the integrated ai proxy
@@ -1398,6 +1404,8 @@ type AzureOpenaiSettings struct {
 	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
 	Endpoint string  `json:"endpoint"`
 	Model    *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
@@ -1454,6 +1462,8 @@ type BedrockAiAttributes struct {
 	AccessToken *string `json:"accessToken,omitempty"`
 	// the aws region the model is hosted in
 	Region *string `json:"region,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the aws access key id to use (DEPRECATED)
 	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
 	// the aws secret access key to use (DEPRECATED)
@@ -1474,6 +1484,8 @@ type BedrockAiAttributes struct {
 type BedrockAiSettings struct {
 	// AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults.
 	ModelID *string `json:"modelId,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// Bedrock model or inference profile for tool calls. Same ID formats as modelId.
 	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the openai bedrock aws access key id to use (DEPRECATED)
@@ -2184,10 +2196,12 @@ type Cluster struct {
 	// list all alerts discovered for this cluster
 	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// Queries logs for a cluster out of loki
-	Logs               []*LogStream        `json:"logs,omitempty"`
-	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
-	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
-	NetworkGraph       []*NetworkMeshEdge  `json:"networkGraph,omitempty"`
+	Logs           []*LogStream    `json:"logs,omitempty"`
+	ClusterMetrics *ClusterMetrics `json:"clusterMetrics,omitempty"`
+	// cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node
+	ClusterUsageMetrics *ClusterUsageMetrics `json:"clusterUsageMetrics,omitempty"`
+	ClusterNodeMetrics  *ClusterNodeMetrics  `json:"clusterNodeMetrics,omitempty"`
+	NetworkGraph        []*NetworkMeshEdge   `json:"networkGraph,omitempty"`
 	// a list of node healthstatistics for this cluster
 	NodeStatistics []*NodeStatistic `json:"nodeStatistics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
@@ -2865,6 +2879,56 @@ type ClusterUsageHistoryEdge struct {
 	Cursor *string              `json:"cursor,omitempty"`
 }
 
+// Cluster or service usage timeseries; when grouped, each series carries the grouping's label (`namespace`, `node` or `pod`)
+type ClusterUsageMetrics struct {
+	// cpu usage in cores
+	CPU []*MetricResponse `json:"cpu,omitempty"`
+	// cpu requests in cores
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// cpu limits in cores
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// allocatable node cpu in cores, absent when grouped by namespace
+	CPUAllocatable []*MetricResponse `json:"cpuAllocatable,omitempty"`
+	// fraction (0-1) of CFS periods throttled
+	CPUThrottling []*MetricResponse `json:"cpuThrottling,omitempty"`
+	// working set memory in bytes
+	Memory []*MetricResponse `json:"memory,omitempty"`
+	// memory requests in bytes
+	MemoryRequests []*MetricResponse `json:"memoryRequests,omitempty"`
+	// memory limits in bytes
+	MemoryLimits []*MetricResponse `json:"memoryLimits,omitempty"`
+	// allocatable node memory in bytes, absent when grouped by namespace
+	MemoryAllocatable []*MetricResponse `json:"memoryAllocatable,omitempty"`
+	// container OOM kills within each rate window
+	OomKills []*MetricResponse `json:"oomKills,omitempty"`
+	// pod network receive throughput in bytes/s
+	NetworkReceive []*MetricResponse `json:"networkReceive,omitempty"`
+	// pod network transmit throughput in bytes/s
+	NetworkTransmit []*MetricResponse `json:"networkTransmit,omitempty"`
+	// pod received packets dropped per second
+	NetworkReceiveDropped []*MetricResponse `json:"networkReceiveDropped,omitempty"`
+	// pod transmitted packets dropped per second
+	NetworkTransmitDropped []*MetricResponse `json:"networkTransmitDropped,omitempty"`
+	// container filesystem usage in bytes
+	EphemeralStorage []*MetricResponse `json:"ephemeralStorage,omitempty"`
+	// container filesystem read throughput in bytes/s
+	FsReads []*MetricResponse `json:"fsReads,omitempty"`
+	// container filesystem write throughput in bytes/s
+	FsWrites []*MetricResponse `json:"fsWrites,omitempty"`
+	// persistent volume usage in bytes
+	VolumeUsage []*MetricResponse `json:"volumeUsage,omitempty"`
+	// persistent volume capacity in bytes
+	VolumeCapacity []*MetricResponse `json:"volumeCapacity,omitempty"`
+	// fraction (0-1) of capacity used by the fullest persistent volume
+	VolumeFullness []*MetricResponse `json:"volumeFullness,omitempty"`
+	// running pod count
+	PodsRunning []*MetricResponse `json:"podsRunning,omitempty"`
+	// pending pod count
+	PodsPending []*MetricResponse `json:"podsPending,omitempty"`
+	// container restarts within each rate window
+	Restarts []*MetricResponse `json:"restarts,omitempty"`
+}
+
 type ClusterVulnAggregate struct {
 	Cluster *Cluster `json:"cluster,omitempty"`
 	Count   int64    `json:"count"`
@@ -3443,6 +3507,8 @@ type DashboardGraphAttributes struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// Unit of the plotted values, used to format axes and tooltips
+	Unit *DashboardGraphUnit `json:"unit,omitempty"`
 	// Identifier of the section graph containing this graph; sections cannot be nested
 	SectionID *string `json:"sectionId,omitempty"`
 	// Markdown content for markdown graphs
@@ -4436,12 +4502,16 @@ type HTTPIngressRule struct {
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyAttributes struct {
+	// whether this proxy is enabled (defaults to true)
+	Enabled *bool   `json:"enabled,omitempty"`
 	URL     string  `json:"url"`
 	Noproxy *string `json:"noproxy,omitempty"`
 }
 
 // Configuration for http proxy usage in connections to Git or SCM providers
 type HTTPProxyConfiguration struct {
+	// whether this proxy is enabled
+	Enabled bool    `json:"enabled"`
 	URL     string  `json:"url"`
 	Noproxy *string `json:"noproxy,omitempty"`
 }
@@ -4995,6 +5065,8 @@ type LoggingSettings struct {
 	Elastic *ElasticsearchConnection `json:"elastic,omitempty"`
 	// configures a connection to aws opensearch for logging
 	Opensearch *OpensearchConnection `json:"opensearch,omitempty"`
+	// configures a connection to grafana loki for logging
+	Loki *LokiLoggingConnection `json:"loki,omitempty"`
 }
 
 type LoggingSettingsAttributes struct {
@@ -5003,6 +5075,7 @@ type LoggingSettingsAttributes struct {
 	Victoria   *HTTPConnectionAttributes          `json:"victoria,omitempty"`
 	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
+	Loki       *LokiLoggingConnectionAttributes   `json:"loki,omitempty"`
 }
 
 type LoginInfo struct {
@@ -5035,6 +5108,28 @@ type LokiLineFilter struct {
 	Text *string `json:"text,omitempty"`
 	// whether to treat this string as a regex match
 	Regex *bool `json:"regex,omitempty"`
+}
+
+type LokiLoggingConnection struct {
+	Host string `json:"host"`
+	// user to connect w/ for basic auth
+	User *string `json:"user,omitempty"`
+	// the stream label identifying the cluster a log came from
+	ClusterLabel *string `json:"clusterLabel,omitempty"`
+	// the stream label identifying the namespace a log came from
+	NamespaceLabel *string `json:"namespaceLabel,omitempty"`
+}
+
+type LokiLoggingConnectionAttributes struct {
+	Host string `json:"host"`
+	// user to connect w/ for basic auth
+	User *string `json:"user,omitempty"`
+	// password to connect w/ for basic auth
+	Password *string `json:"password,omitempty"`
+	// the stream label identifying the cluster a log came from, defaults to cluster
+	ClusterLabel *string `json:"clusterLabel,omitempty"`
+	// the stream label identifying the namespace a log came from, defaults to namespace
+	NamespaceLabel *string `json:"namespaceLabel,omitempty"`
 }
 
 type LokiQuery struct {
@@ -6265,6 +6360,8 @@ type OidcStepResponse struct {
 
 type OllamaAttributes struct {
 	Model string `json:"model"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -6279,6 +6376,8 @@ type OllamaAttributes struct {
 // Settings for a self-hosted ollama-based LLM deployment
 type OllamaSettings struct {
 	Model string `json:"model"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the url your ollama deployment is hosted on
@@ -6301,6 +6400,8 @@ type OpenaiSettings struct {
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// the openai model version to use
 	Model *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -6319,6 +6420,8 @@ type OpenaiSettingsAttributes struct {
 	BaseURL     *string `json:"baseUrl,omitempty"`
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -6924,6 +7027,8 @@ type Pod struct {
 	Raw      string    `json:"raw"`
 	Logs     []*string `json:"logs,omitempty"`
 	Events   []*Event  `json:"events,omitempty"`
+	// prometheus timeseries for this pod, only available when the pod is queried with a cluster or service id
+	Metrics *PodMetrics `json:"metrics,omitempty"`
 }
 
 type PodCondition struct {
@@ -6948,6 +7053,44 @@ type PodDelta struct {
 type PodEdge struct {
 	Node   *Pod    `json:"node,omitempty"`
 	Cursor *string `json:"cursor,omitempty"`
+}
+
+// Pod-level prometheus timeseries; container-scoped series carry a `container` label
+type PodMetrics struct {
+	// cpu usage in cores, by container
+	CPU []*MetricResponse `json:"cpu,omitempty"`
+	// cpu requests in cores, by container
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// cpu limits in cores, by container
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// fraction (0-1) of CFS periods throttled, by container
+	CPUThrottling []*MetricResponse `json:"cpuThrottling,omitempty"`
+	// working set memory in bytes, by container
+	Memory []*MetricResponse `json:"memory,omitempty"`
+	// memory requests in bytes, by container
+	MemoryRequests []*MetricResponse `json:"memoryRequests,omitempty"`
+	// memory limits in bytes, by container
+	MemoryLimits []*MetricResponse `json:"memoryLimits,omitempty"`
+	// container filesystem usage in bytes, by container
+	EphemeralStorage []*MetricResponse `json:"ephemeralStorage,omitempty"`
+	// ephemeral storage requests in bytes, by container
+	EphemeralStorageRequests []*MetricResponse `json:"ephemeralStorageRequests,omitempty"`
+	// ephemeral storage limits in bytes, by container
+	EphemeralStorageLimits []*MetricResponse `json:"ephemeralStorageLimits,omitempty"`
+	// filesystem read throughput in bytes/s, by container
+	FsReads []*MetricResponse `json:"fsReads,omitempty"`
+	// filesystem write throughput in bytes/s, by container
+	FsWrites []*MetricResponse `json:"fsWrites,omitempty"`
+	// pod network receive throughput in bytes/s
+	NetworkReceive []*MetricResponse `json:"networkReceive,omitempty"`
+	// pod network transmit throughput in bytes/s
+	NetworkTransmit []*MetricResponse `json:"networkTransmit,omitempty"`
+	// pod received packets dropped per second
+	NetworkReceiveDropped []*MetricResponse `json:"networkReceiveDropped,omitempty"`
+	// pod transmitted packets dropped per second
+	NetworkTransmitDropped []*MetricResponse `json:"networkTransmitDropped,omitempty"`
+	// cumulative restart count, by container
+	Restarts []*MetricResponse `json:"restarts,omitempty"`
 }
 
 type PodSpec struct {
@@ -8300,6 +8443,8 @@ type ScmCreds struct {
 	BaseURL  *string `json:"baseUrl,omitempty"`
 	Username string  `json:"username"`
 	Token    string  `json:"token"`
+	// the proxy to use for git and SCM API requests
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the exa key for the agent
 	ExaKey *string `json:"exaKey,omitempty"`
 }
@@ -9062,7 +9207,9 @@ type ServiceDeployment struct {
 	Monitors               *MonitorConnection              `json:"monitors,omitempty"`
 	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
 	ServiceMetrics         *ServiceComponentMetrics        `json:"serviceMetrics,omitempty"`
-	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
+	// the cluster usage metric set scoped to this service's namespace; only selected fields are queried
+	ServiceUsageMetrics *ClusterUsageMetrics     `json:"serviceUsageMetrics,omitempty"`
+	ComponentMetrics    *ServiceComponentMetrics `json:"componentMetrics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
 	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
 	// whether this service is editable
@@ -10346,6 +10493,8 @@ type VersionReference struct {
 type VertexAiAttributes struct {
 	// the vertex model id to use
 	Model *string `json:"model,omitempty"`
+	// an HTTP proxy to use for this provider's API calls
+	Proxy *HTTPProxyAttributes `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
@@ -10366,6 +10515,8 @@ type VertexAiAttributes struct {
 type VertexAiSettings struct {
 	// the vertex ai model to use
 	Model *string `json:"model,omitempty"`
+	// the HTTP proxy used for this provider's API calls
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
@@ -10962,6 +11113,8 @@ type WorkbenchDashboardGraph struct {
 	Description *string `json:"description,omitempty"`
 	// Graph visualization type
 	Type DashboardGraphType `json:"type"`
+	// Unit of the plotted values, used to format axes and tooltips
+	Unit *DashboardGraphUnit `json:"unit,omitempty"`
 	// ID of the configured workbench tool backing this graph's datasource
 	ToolID *string `json:"toolId,omitempty"`
 	// Configured workbench tool backing this graph's datasource
@@ -14164,6 +14317,64 @@ func (e ClusterDistro) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type ClusterMetricsGrouping string
+
+const (
+	// a single cluster-wide series
+	ClusterMetricsGroupingCluster   ClusterMetricsGrouping = "CLUSTER"
+	ClusterMetricsGroupingNamespace ClusterMetricsGrouping = "NAMESPACE"
+	ClusterMetricsGroupingNode      ClusterMetricsGrouping = "NODE"
+)
+
+var AllClusterMetricsGrouping = []ClusterMetricsGrouping{
+	ClusterMetricsGroupingCluster,
+	ClusterMetricsGroupingNamespace,
+	ClusterMetricsGroupingNode,
+}
+
+func (e ClusterMetricsGrouping) IsValid() bool {
+	switch e {
+	case ClusterMetricsGroupingCluster, ClusterMetricsGroupingNamespace, ClusterMetricsGroupingNode:
+		return true
+	}
+	return false
+}
+
+func (e ClusterMetricsGrouping) String() string {
+	return string(e)
+}
+
+func (e *ClusterMetricsGrouping) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ClusterMetricsGrouping(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ClusterMetricsGrouping", str)
+	}
+	return nil
+}
+
+func (e ClusterMetricsGrouping) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ClusterMetricsGrouping) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ClusterMetricsGrouping) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type ClusterUpgradeStatus string
 
 const (
@@ -14825,6 +15036,69 @@ func (e *DashboardGraphType) UnmarshalJSON(b []byte) error {
 }
 
 func (e DashboardGraphType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DashboardGraphUnit string
+
+const (
+	DashboardGraphUnitNone         DashboardGraphUnit = "NONE"
+	DashboardGraphUnitBytes        DashboardGraphUnit = "BYTES"
+	DashboardGraphUnitTime         DashboardGraphUnit = "TIME"
+	DashboardGraphUnitCPU          DashboardGraphUnit = "CPU"
+	DashboardGraphUnitPercent      DashboardGraphUnit = "PERCENT"
+	DashboardGraphUnitMilliseconds DashboardGraphUnit = "MILLISECONDS"
+)
+
+var AllDashboardGraphUnit = []DashboardGraphUnit{
+	DashboardGraphUnitNone,
+	DashboardGraphUnitBytes,
+	DashboardGraphUnitTime,
+	DashboardGraphUnitCPU,
+	DashboardGraphUnitPercent,
+	DashboardGraphUnitMilliseconds,
+}
+
+func (e DashboardGraphUnit) IsValid() bool {
+	switch e {
+	case DashboardGraphUnitNone, DashboardGraphUnitBytes, DashboardGraphUnitTime, DashboardGraphUnitCPU, DashboardGraphUnitPercent, DashboardGraphUnitMilliseconds:
+		return true
+	}
+	return false
+}
+
+func (e DashboardGraphUnit) String() string {
+	return string(e)
+}
+
+func (e *DashboardGraphUnit) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DashboardGraphUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DashboardGraphUnit", str)
+	}
+	return nil
+}
+
+func (e DashboardGraphUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DashboardGraphUnit) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DashboardGraphUnit) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -15887,17 +16161,19 @@ const (
 	LogDriverVictoria   LogDriver = "VICTORIA"
 	LogDriverElastic    LogDriver = "ELASTIC"
 	LogDriverOpensearch LogDriver = "OPENSEARCH"
+	LogDriverLoki       LogDriver = "LOKI"
 )
 
 var AllLogDriver = []LogDriver{
 	LogDriverVictoria,
 	LogDriverElastic,
 	LogDriverOpensearch,
+	LogDriverLoki,
 }
 
 func (e LogDriver) IsValid() bool {
 	switch e {
-	case LogDriverVictoria, LogDriverElastic, LogDriverOpensearch:
+	case LogDriverVictoria, LogDriverElastic, LogDriverOpensearch, LogDriverLoki:
 		return true
 	}
 	return false
@@ -18463,6 +18739,63 @@ func (e *ServiceMesh) UnmarshalJSON(b []byte) error {
 }
 
 func (e ServiceMesh) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ServiceMetricsGrouping string
+
+const (
+	// a single series totaled across the service's namespace
+	ServiceMetricsGroupingService ServiceMetricsGrouping = "SERVICE"
+	// one series per pod (persistent volumes are broken out by claim instead)
+	ServiceMetricsGroupingPod ServiceMetricsGrouping = "POD"
+)
+
+var AllServiceMetricsGrouping = []ServiceMetricsGrouping{
+	ServiceMetricsGroupingService,
+	ServiceMetricsGroupingPod,
+}
+
+func (e ServiceMetricsGrouping) IsValid() bool {
+	switch e {
+	case ServiceMetricsGroupingService, ServiceMetricsGroupingPod:
+		return true
+	}
+	return false
+}
+
+func (e ServiceMetricsGrouping) String() string {
+	return string(e)
+}
+
+func (e *ServiceMetricsGrouping) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ServiceMetricsGrouping(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ServiceMetricsGrouping", str)
+	}
+	return nil
+}
+
+func (e ServiceMetricsGrouping) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ServiceMetricsGrouping) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ServiceMetricsGrouping) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

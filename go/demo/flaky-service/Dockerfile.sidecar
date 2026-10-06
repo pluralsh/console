@@ -13,3 +13,5 @@ RUN chmod +x ./api_caller.sh
 # Set the default command to run the shell script with the provided arguments
 CMD ["./api_caller.sh", "-e", "localhost:8080/api", "-m", "localhost:8081/metrics", "-t", "1.34"]
 
+RUN adduser -D -u 65532 sidecar && chown sidecar:sidecar /api_caller.sh
+USER sidecar

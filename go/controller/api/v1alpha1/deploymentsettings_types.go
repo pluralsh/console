@@ -132,6 +132,17 @@ type DeploymentSettingsSpec struct {
 	// +kubebuilder:validation:Optional
 	AgentHelmValuesTemplateable *bool `json:"agentHelmValuesTemplateable,omitempty"`
 
+	// AgentHelmValuesTemplate is a raw string template of custom helm values to
+	// apply to all agents. Unlike AgentHelmValues it is not parsed as YAML by the
+	// operator, so it may contain template expressions that would not be valid YAML
+	// on their own (for example, unquoted Liquid tags).
+	//
+	// When set to a non-empty string, it takes precedence over AgentHelmValues,
+	// which is ignored, and AgentHelmValuesTemplateable is always treated as true.
+	//
+	// +kubebuilder:validation:Optional
+	AgentHelmValuesTemplate *string `json:"agentHelmValuesTemplate,omitempty"`
+
 	// ManagementRepo is the root repo for setting up
 	// your infrastructure with Plural. Usually this
 	// will be your `plural up repo`
@@ -203,7 +214,7 @@ type LoggingSettings struct {
 
 	// Driver is the type of log aggregation solution you wish to use.
 	//
-	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC;OPENSEARCH
+	// +kubebuilder:validation:Enum=VICTORIA;ELASTIC;OPENSEARCH;LOKI
 	// +kubebuilder:default=VICTORIA
 	// +kubebuilder:validation:Optional
 	Driver *console.LogDriver `json:"driver,omitempty"`
@@ -222,6 +233,11 @@ type LoggingSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Opensearch *OpensearchConnection `json:"opensearch,omitempty"`
+
+	// Loki configures a connection to grafana loki
+	//
+	// +kubebuilder:validation:Optional
+	Loki *LokiConnection `json:"loki,omitempty"`
 }
 
 type ElasticsearchConnection struct {
@@ -349,6 +365,37 @@ func (r *HTTPConnection) Attributes(ctx context.Context, c client.Client, namesp
 		attr.Password = lo.ToPtr(password)
 	}
 	return attr, nil
+}
+
+type LokiConnection struct {
+	HTTPConnection `json:",inline"`
+
+	// ClusterLabel is the stream label identifying the cluster a log came from. Defaults to "cluster".
+	//
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern=`^[a-zA-Z_][a-zA-Z0-9_]*$`
+	ClusterLabel *string `json:"clusterLabel,omitempty"`
+
+	// NamespaceLabel is the stream label identifying the namespace a log came from. Defaults to "namespace".
+	//
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern=`^[a-zA-Z_][a-zA-Z0-9_]*$`
+	NamespaceLabel *string `json:"namespaceLabel,omitempty"`
+}
+
+func (r *LokiConnection) Attributes(ctx context.Context, c client.Client, namespace string) (*console.LokiLoggingConnectionAttributes, error) {
+	conn, err := r.HTTPConnection.Attributes(ctx, c, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return &console.LokiLoggingConnectionAttributes{
+		Host:           conn.Host,
+		User:           conn.User,
+		Password:       conn.Password,
+		ClusterLabel:   r.ClusterLabel,
+		NamespaceLabel: r.NamespaceLabel,
+	}, nil
 }
 
 type DeploymentSettingsBindings struct {
@@ -604,6 +651,14 @@ func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, name
 		}
 		attr.Opensearch = connection
 	}
+
+	if in.Loki != nil {
+		connection, err := in.Loki.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Loki = connection
+	}
 	return attr, nil
 }
 
@@ -695,6 +750,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Anthropic.ToolModel,
 			EmbeddingModel: in.Anthropic.EmbeddingModel,
 			ProxyModels:    lo.ToSlicePtr(in.Anthropic.ProxyModels),
+			Proxy:          in.Anthropic.Proxy.Attributes(),
 		}
 	}
 
@@ -723,6 +779,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken:    token,
 			Deployments:    deployments,
 			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
+			Proxy:          in.Azure.Proxy.Attributes(),
 		}
 	}
 
@@ -745,6 +802,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			EmbeddingModel:     in.Vertex.EmbeddingModel,
 			ToolModel:          in.Vertex.ToolModel,
 			ProxyModels:        lo.ToSlicePtr(in.Vertex.ProxyModels),
+			Proxy:              in.Vertex.Proxy.Attributes(),
 		}
 	}
 
@@ -792,6 +850,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
 			Deployments:        deployments,
 			ModelSettings:      modelSettings,
+			Proxy:              in.Bedrock.Proxy.Attributes(),
 		}
 	}
 
@@ -806,6 +865,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:         in.Ollama.Model,
 			ToolModel:     in.Ollama.ToolModel,
 			Authorization: auth,
+			Proxy:         in.Ollama.Proxy.Attributes(),
 		}
 	}
 
@@ -896,6 +956,11 @@ func (in *AISettings) checkProvider(provider *console.AiProvider, ptype string) 
 }
 
 type AIProviderSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Model is the LLM model name to use.
 	//
 	// +kubebuilder:validation:Optional
@@ -930,6 +995,11 @@ type AIProviderSettings struct {
 }
 
 type OpenAISettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Model is the LLM model name to use.
 	//
 	// +kubebuilder:validation:Optional
@@ -1111,6 +1181,11 @@ func (in *OAuth2TokenExchange) TokenExchangeAttributes(ctx context.Context, c cl
 
 // OllamaSettings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama
 type OllamaSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// URL is the url this model is queryable on
 	//
 	// +kubebuilder:validation:Required
@@ -1134,6 +1209,11 @@ type OllamaSettings struct {
 }
 
 type AzureOpenAISettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Endpoint is your Azure OpenAI endpoint,
 	// should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}"
 	//
@@ -1191,6 +1271,11 @@ type BedrockModelSettings struct {
 }
 
 type BedrockSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// ModelID is the primary AWS Bedrock model or inference profile identifier.
 	// Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,
 	// global.anthropic.claude-haiku-4-5-20251001-v1:0).
@@ -1260,6 +1345,11 @@ type BedrockSettings struct {
 }
 
 type VertexSettings struct {
+	// Proxy configures an HTTP proxy for this provider's API calls.
+	//
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex
 	//
 	// +kubebuilder:validation:Optional
@@ -1398,6 +1488,7 @@ func (in *OpenAISettings) Attributes(ctx context.Context, c client.Client, names
 		Method:         in.Method,
 		ProxyModels:    lo.ToSlicePtr(in.ProxyModels),
 		Headers:        httpHeaderAttributes(in.Headers),
+		Proxy:          in.Proxy.Attributes(),
 	}
 	if in.TokenExchange != nil {
 		tokenExchange, err := in.TokenExchange.Attributes(ctx, c, namespace)

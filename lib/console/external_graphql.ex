@@ -98,7 +98,8 @@ defmodule Console.ExternalGraphQl do
   def middleware(middleware, _field, %{identifier: type}) when type in [:query, :mutation] do
     SafeResolution.apply(middleware) ++ [ErrorHandler]
   end
-  def middleware(middleware, _field, _object), do: middleware
+  def middleware(middleware, _field, %{identifier: :subscription}), do: middleware
+  def middleware(middleware, _field, object), do: SafeResolution.wrap(middleware, object)
 
   query do
     field :deployment_settings, :deployment_settings do

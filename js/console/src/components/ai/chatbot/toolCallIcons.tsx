@@ -3,14 +3,14 @@ import {
   McpLogoIcon,
   PythonLogoIcon,
   TerminalIcon,
-  ToolIcon,
+  ToolsFilledIcon,
 } from '@pluralsh/design-system'
 import { isCmdToolKind, ToolCallKind } from './toolCallDisplay'
 
 /** Icon next to a tool name when it is not a configured workbench tool. */
 export function ToolCallKindIcon({
   kind,
-  size = 12,
+  size = 14,
   ...props
 }: { kind: ToolCallKind } & IconProps) {
   if (kind === 'python_sandbox') {
@@ -28,7 +28,7 @@ export function ToolCallKindIcon({
     ? TerminalIcon
     : kind === 'mcp_tool_call'
       ? McpLogoIcon
-      : ToolIcon
+      : ToolsFilledIcon
 
   return (
     <Icon
