@@ -90,8 +90,8 @@ fragment Workbench on Workbench {
     id
   }
   configuration {
-    selfService
     infrastructure {
+      selfService
       services
       stacks
       kubernetes

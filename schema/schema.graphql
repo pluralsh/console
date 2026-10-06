@@ -3247,9 +3247,6 @@ input WorkbenchAttributes {
 }
 
 input WorkbenchConfigurationAttributes {
-  "enable the self-service subagent for catalog and PR automation workflows"
-  selfService: Boolean
-
   "infrastructure capabilities (services, stacks, kubernetes)"
   infrastructure: WorkbenchInfrastructureAttributes
 
@@ -3261,6 +3258,9 @@ input WorkbenchConfigurationAttributes {
 }
 
 input WorkbenchInfrastructureAttributes {
+  "enable the self-service subagent for catalog and PR automation workflows"
+  selfService: Boolean
+
   "enable services capability"
   services: Boolean
 
@@ -4856,9 +4856,6 @@ type WorkbenchJobResultTodo {
 }
 
 type WorkbenchConfiguration {
-  "self-service subagent capability enabled"
-  selfService: Boolean
-
   "infrastructure capabilities"
   infrastructure: WorkbenchInfrastructure
 
@@ -4870,6 +4867,9 @@ type WorkbenchConfiguration {
 }
 
 type WorkbenchInfrastructure {
+  "self-service subagent capability enabled"
+  selfService: Boolean
+
   "services capability enabled"
   services: Boolean
 

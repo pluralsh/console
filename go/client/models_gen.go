@@ -11011,8 +11011,6 @@ type WorkbenchCodingAttributes struct {
 }
 
 type WorkbenchConfiguration struct {
-	// self-service subagent capability enabled
-	SelfService *bool `json:"selfService,omitempty"`
 	// infrastructure capabilities
 	Infrastructure *WorkbenchInfrastructure `json:"infrastructure,omitempty"`
 	// coding capabilities
@@ -11022,8 +11020,6 @@ type WorkbenchConfiguration struct {
 }
 
 type WorkbenchConfigurationAttributes struct {
-	// enable the self-service subagent for catalog and PR automation workflows
-	SelfService *bool `json:"selfService,omitempty"`
 	// infrastructure capabilities (services, stacks, kubernetes)
 	Infrastructure *WorkbenchInfrastructureAttributes `json:"infrastructure,omitempty"`
 	// coding capabilities (mode, repositories, babysitting)
@@ -11293,6 +11289,8 @@ type WorkbenchEvalResultsWorkbenchAverage struct {
 }
 
 type WorkbenchInfrastructure struct {
+	// self-service subagent capability enabled
+	SelfService *bool `json:"selfService,omitempty"`
 	// services capability enabled
 	Services *bool `json:"services,omitempty"`
 	// stacks capability enabled
@@ -11308,6 +11306,8 @@ type WorkbenchInfrastructure struct {
 }
 
 type WorkbenchInfrastructureAttributes struct {
+	// enable the self-service subagent for catalog and PR automation workflows
+	SelfService *bool `json:"selfService,omitempty"`
 	// enable services capability
 	Services *bool `json:"services,omitempty"`
 	// enable stacks capability

@@ -108,9 +108,8 @@ defmodule Console.Schema.Workbench do
     field :memory,         Type
 
     embeds_one :configuration, Configuration, on_replace: :update do
-      field :self_service, :boolean, default: false
-
       embeds_one :infrastructure, Infrastructure, on_replace: :update do
+        field :self_service,    :boolean, default: false
         field :services,        :boolean
         field :stacks,          :boolean
         field :kubernetes,      :boolean
@@ -255,7 +254,7 @@ defmodule Console.Schema.Workbench do
 
   def configuration_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, [:self_service])
+    |> cast(attrs, [])
     |> cast_embed(:infrastructure, with: &infrastructure_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
     |> cast_embed(:observability, with: &observability_changeset/2)
@@ -263,7 +262,7 @@ defmodule Console.Schema.Workbench do
 
   def infrastructure_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(services stacks kubernetes pod_logs vulnerabilities sentinels)a)
+    |> cast(attrs, ~w(self_service services stacks kubernetes pod_logs vulnerabilities sentinels)a)
   end
 
   def coding_changeset(model, attrs \\ %{}) do

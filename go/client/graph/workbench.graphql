@@ -18,6 +18,7 @@ fragment WorkbenchFragment on Workbench {
             repositories
         }
         infrastructure {
+            selfService
             services
             stacks
             kubernetes
