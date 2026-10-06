@@ -1,15 +1,11 @@
-import {
-  Card,
-  EmptyState,
-  ErrorIcon,
-  Flex,
-  Spinner,
-} from '@pluralsh/design-system'
+import { Card, ErrorIcon, Flex } from '@pluralsh/design-system'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { AlertSourceLink } from 'components/utils/alerts/AlertSourceLink'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import {
+  BoardLoadingOrEmpty,
   BoardSC,
+  BoardSectionSC,
   BoardTitleSC,
   LoadMoreSentinel,
   useBoardLoadMore,
@@ -38,20 +34,18 @@ export function WorkbenchAlertsBoard({
     [alerts]
   )
 
-  if (isEmpty(alerts)) {
-    return loading ? (
-      <LoadingSC>
-        <Spinner />
-      </LoadingSC>
-    ) : (
-      <EmptyState message="No alerts found." />
+  if (isEmpty(alerts))
+    return (
+      <BoardLoadingOrEmpty
+        loading={loading}
+        message="No alerts found."
+      />
     )
-  }
 
   return (
     <BoardSC>
       {!isEmpty(firing) && (
-        <SectionSC>
+        <BoardSectionSC>
           <SectionTitleSC>
             <ErrorIcon
               size={16}
@@ -67,9 +61,9 @@ export function WorkbenchAlertsBoard({
               />
             ))}
           </WorkbenchJobCardGridSC>
-        </SectionSC>
+        </BoardSectionSC>
       )}
-      <SectionSC>
+      <BoardSectionSC>
         <BoardTitleSC>All alerts</BoardTitleSC>
         <WorkbenchJobCardGridSC>
           {alerts.map((alert) => (
@@ -79,7 +73,7 @@ export function WorkbenchAlertsBoard({
             />
           ))}
         </WorkbenchJobCardGridSC>
-      </SectionSC>
+      </BoardSectionSC>
       {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
     </BoardSC>
   )
@@ -122,13 +116,6 @@ function WorkbenchAlertCard({ alert }: { alert: AlertFragment }) {
   )
 }
 
-const SectionSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  paddingBottom: theme.spacing.large,
-}))
-
 const SectionTitleSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -160,9 +147,3 @@ const TitleSC = styled.p(({ theme }) => ({
   wordBreak: 'break-word',
   color: theme.colors['text-light'],
 }))
-
-const LoadingSC = styled(Flex)({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-})

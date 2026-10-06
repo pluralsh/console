@@ -1,6 +1,7 @@
-import { EmptyState, Flex, Spinner } from '@pluralsh/design-system'
 import {
+  BoardLoadingOrEmpty,
   BoardSC,
+  BoardSectionSC,
   BoardTitleSC,
   LoadMoreSentinel,
   useBoardLoadMore,
@@ -26,19 +27,17 @@ export function WorkbenchJobsBoard({
 }) {
   const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
 
-  if (isEmpty(jobs)) {
-    return loading ? (
-      <LoadingSC>
-        <Spinner />
-      </LoadingSC>
-    ) : (
-      <EmptyState message="No jobs found." />
+  if (isEmpty(jobs))
+    return (
+      <BoardLoadingOrEmpty
+        loading={loading}
+        message="No jobs found."
+      />
     )
-  }
 
   return (
     <BoardSC>
-      <SectionSC>
+      <BoardSectionSC>
         <BoardTitleSC>Recent jobs</BoardTitleSC>
         <RecentGridSC>
           {jobs.slice(0, RECENT_JOBS_COUNT).map((job) => (
@@ -48,8 +47,8 @@ export function WorkbenchJobsBoard({
             />
           ))}
         </RecentGridSC>
-      </SectionSC>
-      <SectionSC>
+      </BoardSectionSC>
+      <BoardSectionSC>
         <BoardTitleSC>All jobs</BoardTitleSC>
         <WorkbenchJobCardGridSC>
           {jobs.map((job) => (
@@ -59,27 +58,14 @@ export function WorkbenchJobsBoard({
             />
           ))}
         </WorkbenchJobCardGridSC>
-      </SectionSC>
+      </BoardSectionSC>
       {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
     </BoardSC>
   )
 }
-
-const SectionSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  paddingBottom: theme.spacing.large,
-}))
 
 const RecentGridSC = styled(WorkbenchJobCardGridSC)(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
     '& > :nth-child(n + 3)': { display: 'none' },
   },
 }))
-
-const LoadingSC = styled(Flex)({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-})

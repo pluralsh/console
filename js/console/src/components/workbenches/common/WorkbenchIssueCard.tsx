@@ -4,6 +4,7 @@ import { WorkbenchIssueFragment } from 'generated/graphql'
 import { startCase } from 'lodash'
 import { cloneElement, ReactNode } from 'react'
 import styled from 'styled-components'
+import { TRUNCATE } from 'components/utils/truncate'
 import { formatDateTime } from 'utils/datetime'
 import { ensureURLValidity } from 'utils/url'
 import { IssueStatusChip } from './IssueStatusChip'
@@ -144,17 +145,13 @@ const LinkTextSC = styled.div({
 const LinkUrlSC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['action-link-inline'],
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  ...TRUNCATE,
 }))
 
 const LinkTitleSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  ...TRUNCATE,
 }))
 
 const PropsRowSC = styled.div({

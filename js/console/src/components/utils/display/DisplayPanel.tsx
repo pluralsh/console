@@ -1,4 +1,9 @@
-import { FloatingPortal } from '@floating-ui/react'
+import {
+  FloatingFocusManager,
+  FloatingPortal,
+  useDismiss,
+  useInteractions,
+} from '@floating-ui/react'
 import {
   Button,
   Card,
@@ -15,14 +20,13 @@ import {
   SortDescIcon,
   useFloatingDropdown,
 } from '@pluralsh/design-system'
-import { useClickOutside } from '@react-hooks-library/core'
+import usePersistedState from 'components/hooks/usePersistedState'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import { xor } from 'lodash'
 import {
   ComponentProps,
   ReactElement,
   ReactNode,
-  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -41,14 +45,21 @@ const DISPLAY_VIEW_OPTIONS: Record<
   details: { label: 'Details', icon: <OpenPanelFilledLeftIcon /> },
 }
 
-export function parseDisplayView(
-  value: unknown,
+// View choice remembered per user (localStorage), restricted to `views`.
+export function usePersistedDisplayView(
+  storageKey: string,
   views: DisplayView[],
-  fallback: DisplayView
-): DisplayView {
-  return views.includes(value as DisplayView)
-    ? (value as DisplayView)
-    : fallback
+  defaultView: DisplayView
+) {
+  return usePersistedState<DisplayView>(
+    storageKey,
+    defaultView,
+    0,
+    (value: unknown) =>
+      views.includes(value as DisplayView)
+        ? (value as DisplayView)
+        : defaultView
+  )
 }
 
 export function toggleListValue<T>(list: T[], value: T): T[] {
@@ -102,44 +113,27 @@ export function DisplayPopover({
     minWidth: DISPLAY_POPOVER_WIDTH,
     maxHeight: '80vh',
     sizeToContent: true,
+    open,
+    onOpenChange: setOpen,
   })
-
-  // The panel is portalled to the end of the document, so move keyboard focus
-  // into it when it opens.
-  useEffect(() => {
-    if (!open) return
-    const id = requestAnimationFrame(() =>
-      floating.refs.floating.current
-        ?.querySelector<HTMLElement>(
-          'button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])'
-        )
-        ?.focus()
-    )
-    return () => cancelAnimationFrame(id)
-  }, [open, floating.refs.floating])
-
-  useClickOutside(ref, (event) => {
-    if (
-      event.target instanceof Node &&
-      floating.refs.floating.current?.contains(event.target)
-    )
-      return
-
-    setOpen(false)
-  })
+  // Escape is handled below instead, so it can be stopped from also reaching
+  // global handlers (e.g. one clearing a tab's search).
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    useDismiss(floating.context, { escapeKey: false }),
+  ])
 
   return (
-    // Escape is handled here rather than globally, and stopped, so it only
-    // closes the popover (and not e.g. also clear a tab's search). React events
-    // bubble through the portal, so this covers the panel too.
+    // React events bubble through the portal, so this also covers the panel.
     <div
       ref={triggerRef}
-      onKeyDown={(e) => {
-        if (e.key !== 'Escape' || !open) return
-        e.stopPropagation()
-        setOpen(false)
-        ref.current?.querySelector('button')?.focus()
-      }}
+      {...getReferenceProps({
+        onKeyDown: (e) => {
+          if (e.key !== 'Escape' || !open) return
+          e.stopPropagation()
+          setOpen(false)
+          ref.current?.querySelector('button')?.focus()
+        },
+      })}
     >
       <DisplayButton
         showDot={showDot}
@@ -148,19 +142,25 @@ export function DisplayPopover({
       />
       {open && (
         <FloatingPortal id={theme.portals.default.id}>
-          <PopoverPanelSC
-            ref={floating.refs.setFloating}
-            role="dialog"
-            aria-label="Display options"
-            fillLevel={1}
-            style={{
-              position: floating.strategy,
-              left: floating.x ?? 0,
-              top: floating.y ?? 0,
-            }}
+          <FloatingFocusManager
+            context={floating.context}
+            modal={false}
           >
-            {children}
-          </PopoverPanelSC>
+            <PopoverPanelSC
+              ref={floating.refs.setFloating}
+              role="dialog"
+              aria-label="Display options"
+              fillLevel={1}
+              style={{
+                position: floating.strategy,
+                left: floating.x ?? 0,
+                top: floating.y ?? 0,
+              }}
+              {...getFloatingProps()}
+            >
+              {children}
+            </PopoverPanelSC>
+          </FloatingFocusManager>
         </FloatingPortal>
       )}
     </div>

@@ -1,11 +1,10 @@
 import { Flex } from '@pluralsh/design-system'
-import usePersistedState from 'components/hooks/usePersistedState'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayPopover,
   DisplayView,
   DisplayViewToggle,
-  parseDisplayView,
+  usePersistedDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import {
   AlertsTable,
@@ -33,16 +32,10 @@ const DEFAULT_WORKBENCH_ALERTS_VIEW: DisplayView = 'list'
 
 export function WorkbenchAlerts() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [view, setView] = usePersistedState(
+  const [view, setView] = usePersistedDisplayView(
     WORKBENCH_ALERTS_VIEW_STORAGE_KEY,
-    DEFAULT_WORKBENCH_ALERTS_VIEW,
-    0,
-    (value: unknown): DisplayView =>
-      parseDisplayView(
-        value,
-        WORKBENCH_ALERTS_VIEWS,
-        DEFAULT_WORKBENCH_ALERTS_VIEW
-      )
+    WORKBENCH_ALERTS_VIEWS,
+    DEFAULT_WORKBENCH_ALERTS_VIEW
   )
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -76,7 +69,6 @@ export function WorkbenchAlerts() {
 
   return (
     <WorkbenchPageLayout
-      sidebar={{ kind: 'none' }}
       headerActions={
         <DisplayPopover showDot={false}>
           <DisplayViewToggle
@@ -87,7 +79,9 @@ export function WorkbenchAlerts() {
         </DisplayPopover>
       }
     >
-      {!error && view === 'details' ? (
+      {error ? (
+        <GqlError error={error} />
+      ) : view === 'details' ? (
         <WorkbenchAlertsDetails
           alerts={alerts}
           loading={loading}
@@ -98,22 +92,18 @@ export function WorkbenchAlerts() {
       ) : (
         <WrapperSC>
           {view === 'board' ? (
-            error ? (
-              <GqlError error={error} />
-            ) : (
-              <WorkbenchAlertsBoard
-                alerts={alerts}
-                loading={loading}
-                hasNextPage={!!pageInfo?.hasNextPage}
-                fetchNextPage={fetchNextPage}
-              />
-            )
+            <WorkbenchAlertsBoard
+              alerts={alerts}
+              loading={loading}
+              hasNextPage={!!pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+            />
           ) : (
             <TableContainerSC>
               <AlertsTable
                 alerts={alerts}
                 loading={!data && loading}
-                error={error}
+                error={null}
                 hasNextPage={pageInfo?.hasNextPage}
                 fetchNextPage={fetchNextPage}
                 setVirtualSlice={setVirtualSlice}

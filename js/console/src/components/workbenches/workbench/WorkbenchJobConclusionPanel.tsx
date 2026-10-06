@@ -11,33 +11,53 @@ import {
   DetailsTitleSC,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { useWorkbenchJobQuery, WorkbenchJobStatus } from 'generated/graphql'
-import { ReactNode, useLayoutEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchJobMeta } from './job/WorkbenchJobMeta'
-import { WorkbenchJobResult } from './job/WorkbenchJobResult'
+import { isJobRunning } from './job/WorkbenchJobActivity'
+import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 
 const PROMPT_CLAMP_LINES = 4
-const UNCLAMPED_LINES = 999
+
+// Job for a details panel, polled only while it runs (finished jobs don't
+// change). The status from the list is used until the job loads.
+export function usePolledWorkbenchJob(
+  jobId: string,
+  listStatus?: Nullable<WorkbenchJobStatus>
+) {
+  const query = useWorkbenchJobQuery({
+    variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
+  })
+  const { startPolling, stopPolling } = query
+  const running = isJobRunning(query.data?.workbenchJob?.status ?? listStatus)
+
+  useEffect(() => {
+    if (!running) return
+    startPolling(POLL_INTERVAL)
+    return () => stopPolling()
+  }, [running, startPolling, stopPolling])
+
+  return query
+}
 
 // "Conclusion" column of the Details views: the job's prompt and result, with
 // an error banner for failed jobs.
 export function WorkbenchJobConclusionPanel({
   jobId,
+  jobStatus,
   workbenchId,
   headerActions,
 }: {
   jobId: string
+  jobStatus?: Nullable<WorkbenchJobStatus>
   workbenchId: string
   headerActions?: ReactNode
 }) {
-  const { data, loading, error } = useWorkbenchJobQuery({
-    variables: { id: jobId },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
+  const { data, loading, error } = usePolledWorkbenchJob(jobId, jobStatus)
   const job = data?.workbenchJob
   const viewJobLink = (
     <DetailsLinkSC
@@ -84,12 +104,12 @@ export function WorkbenchJobConclusionPanel({
                 />
                 <ExpandablePrompt prompt={job.prompt ?? ''} />
               </Flex>
-              <WorkbenchJobResult
-                job={job}
-                loading={false}
-                showAlertAndIssue={false}
-                scrollable={false}
-              />
+              <Flex
+                direction="column"
+                gap="xlarge"
+              >
+                <WorkbenchJobResultContent job={job} />
+              </Flex>
             </>
           )
         )}
@@ -119,7 +139,7 @@ export function ExpandablePrompt({ prompt }: { prompt: string }) {
         <WorkbenchStoredPromptMarkdown
           text={prompt}
           density="jobCard"
-          clampLines={expanded ? UNCLAMPED_LINES : PROMPT_CLAMP_LINES}
+          clampLines={expanded ? null : PROMPT_CLAMP_LINES}
           promptColor="text-xlight"
         />
       </div>

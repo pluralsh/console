@@ -11,6 +11,7 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   PanelHeaderSC,
   SidePanelContent,
@@ -169,21 +170,25 @@ export type WorkbenchJobTabsData = ReturnType<typeof useWorkbenchJobTabsData>
 
 // Job data behind the job tabs, shared by the job side panel and the Jobs tab
 // details view. On the job page, polling is handled by the page itself (which
-// keeps the cache up to date); views without that pass `pollInterval`.
+// keeps the cache up to date); views without that pass `pollActivities` to
+// refresh activities (draft PRs) while the job runs.
 export function useWorkbenchJobTabsData(
   jobId: string,
-  { pollInterval }: { pollInterval?: number } = {}
+  { pollActivities = false }: { pollActivities?: boolean } = {}
 ) {
   const { data, loading } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
   })
-  const { data: activitiesData } = useWorkbenchJobActivitiesQuery({
+  const {
+    data: activitiesData,
+    startPolling,
+    stopPolling,
+  } = useWorkbenchJobActivitiesQuery({
     skip: !jobId,
     variables: { id: jobId },
-    fetchPolicy: pollInterval ? 'cache-and-network' : 'cache-first',
-    pollInterval,
+    fetchPolicy: pollActivities ? 'cache-and-network' : 'cache-first',
   })
   const {
     hasActions,
@@ -192,6 +197,14 @@ export function useWorkbenchJobTabsData(
   } = useWorkbenchJobActionSummary(jobId)
   const job = data?.workbenchJob
   const isLoading = loading && !job
+  const pollingActivities = pollActivities && isJobRunning(job?.status)
+
+  useEffect(() => {
+    if (!pollingActivities) return
+    startPolling(POLL_INTERVAL)
+    return () => stopPolling()
+  }, [pollingActivities, startPolling, stopPolling])
+
   const activities = useMemo(
     () =>
       activitiesData?.workbenchJob?.activities?.edges

@@ -33,7 +33,6 @@ import { mapExistingNodes } from 'utils/graphql'
 import {
   Link,
   Outlet,
-  useLocation,
   useMatch,
   useNavigate,
   useOutletContext,
@@ -46,7 +45,6 @@ import {
   getWorkbenchEvalSettingsAbsPath,
   getWorkbenchSavedPromptsAbsPath,
   getWorkbenchWebhookTriggersAbsPath,
-  WORKBENCH_JOBS_PARAM_JOB,
   WORKBENCH_JOBS_REL_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
@@ -89,10 +87,9 @@ export enum WorkbenchMoreMenuKey {
   Delete = 'delete',
 }
 
+// `tools`: tools, webhooks, chatbots and crons, only relevant when launching
 export type WorkbenchSidebar =
-  | { kind: 'default' }
-  | { kind: 'none' }
-  | { kind: 'custom'; content: ReactNode }
+  { kind: 'tools' } | { kind: 'none' } | { kind: 'custom'; content: ReactNode }
 
 export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
@@ -105,7 +102,7 @@ export type WorkbenchPageLayoutProps = {
 }
 
 export function WorkbenchPageLayout({
-  sidebar = { kind: 'default' },
+  sidebar = { kind: 'none' },
   showEditWorkbenchButton = true,
   headerActions,
   contentBackground,
@@ -117,6 +114,12 @@ export function WorkbenchPageLayout({
   const navigate = useNavigate()
   const { workbenchId, workbench, openToolsEdit, openDelete } =
     useOutletContext<WorkbenchOutletContext>()
+
+  // set by the tab layout rather than the parent route, so pages without it
+  // (e.g. a job) can set their own, deeper breadcrumbs
+  useSetBreadcrumbs(
+    useMemo(() => getWorkbenchBreadcrumbs(workbench), [workbench])
+  )
 
   const { tab = '' } =
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
@@ -348,7 +351,7 @@ function renderWorkbenchSidebar(
   switch (sidebar.kind) {
     case 'none':
       return null
-    case 'default':
+    case 'tools':
       return (
         <WorkbenchSidePanel
           workbenchId={workbenchId}
@@ -362,11 +365,6 @@ function renderWorkbenchSidebar(
 
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
-  const { pathname } = useLocation()
-  // the job page sets its own, deeper breadcrumbs
-  const isJobPage = !!useMatch(
-    `${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_JOBS_REL_PATH}/:${WORKBENCH_JOBS_PARAM_JOB}`
-  )
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -397,13 +395,6 @@ export function Workbench() {
         })
       },
     })
-
-  useSetBreadcrumbs(
-    useMemo(() => {
-      void pathname
-      return isJobPage ? undefined : getWorkbenchBreadcrumbs(workbench)
-    }, [isJobPage, pathname, workbench])
-  )
 
   const outletContext = useMemo<WorkbenchOutletContext>(
     () => ({

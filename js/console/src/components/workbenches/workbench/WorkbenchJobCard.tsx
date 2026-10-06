@@ -1,6 +1,7 @@
 import { Card, CaretRightIcon } from '@pluralsh/design-system'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsageChips'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
@@ -25,7 +26,7 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
         {user ? (
           <CaptionP
             $color="text-xlight"
-            css={{ ...TRUNCATE_STYLE }}
+            css={TRUNCATE}
           >
             {user.name}
           </CaptionP>
@@ -71,12 +72,6 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
     </JobCardSC>
   )
 }
-
-const TRUNCATE_STYLE = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-} as const
 
 export const WorkbenchJobCardGridSC = styled.div(({ theme }) => ({
   display: 'grid',

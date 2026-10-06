@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import {
+  BoardCenteredSC,
   BoardSC,
   BoardTitleSC,
   LoadMoreSentinel,
@@ -44,9 +45,9 @@ export function WorkbenchIssuesBoard({
 
   if (loading && isEmpty(issues)) {
     return (
-      <LoadingSC>
+      <BoardCenteredSC>
         <Spinner />
-      </LoadingSC>
+      </BoardCenteredSC>
     )
   }
 
@@ -225,10 +226,3 @@ const EmptyCardTextSC = styled.p(({ theme }) => ({
   width: '100%',
   color: theme.colors['text-light'],
 }))
-
-const LoadingSC = styled(Flex)({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: 160,
-})

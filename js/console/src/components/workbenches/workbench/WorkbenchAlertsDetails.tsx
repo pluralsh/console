@@ -4,15 +4,11 @@ import {
   EmptyState,
   ErrorIcon,
   Flex,
-  Spinner,
-  Tab,
-  TabList,
   Tooltip,
 } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   getAlertAnnotations,
-  getAlertTags,
+  getAlertTagEntries,
 } from 'components/utils/alerts/alertDetails'
 import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
 import {
@@ -26,7 +22,10 @@ import {
 } from 'components/utils/alerts/AlertSourceLink'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { GqlError } from 'components/utils/Alert'
+import { toggleListValue } from 'components/utils/display/DisplayPanel'
+import { TRUNCATE } from 'components/utils/truncate'
 import {
+  BoardLoadingOrEmpty,
   LoadMoreSentinel,
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
@@ -35,7 +34,7 @@ import {
   DetailsColumnSC,
   DetailsErrorBanner,
   DetailsExpandButton,
-  DetailsGutterStatus,
+  DetailsIconTitleSC,
   DetailsLayoutSC,
   DetailsLinkSC,
   DetailsListAgeSC,
@@ -46,24 +45,29 @@ import {
   DetailsPanelBodySC,
   DetailsPanelHeader,
   DetailsStatusGutter,
+  DetailsTabBodySC,
+  DetailsTabs,
   DetailsTitleSC,
+  getJobGutterStatus,
+  useDetailsSelection,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import {
   AlertFragment,
   AlertSeverity,
   AlertState,
-  useWorkbenchJobQuery,
   WorkbenchJobStatus,
 } from 'generated/graphql'
-import { countBy, isEmpty, xor } from 'lodash'
-import { ReactNode, useMemo, useRef, useState } from 'react'
+import { countBy, isEmpty } from 'lodash'
+import { ReactNode, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { formatDateTime, formatShortAge } from 'utils/datetime'
-import { isJobRunning } from './job/WorkbenchJobActivity'
-import { WorkbenchJobResult } from './job/WorkbenchJobResult'
-import { ExpandablePrompt } from './WorkbenchJobConclusionPanel'
+import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
+import {
+  ExpandablePrompt,
+  usePolledWorkbenchJob,
+} from './WorkbenchJobConclusionPanel'
 
 type AlertDetailsTab = 'Annotations' | 'Tags' | 'All information'
 
@@ -86,8 +90,6 @@ export function WorkbenchAlertsDetails({
   fetchNextPage: () => void
   fallbackWorkbenchId: string
 }) {
-  const [selectedId, setSelectedId] = useState<string>()
-  const [detailsOpen, setDetailsOpen] = useState(true)
   const [severities, setSeverities] = useState<AlertSeverity[]>([])
   const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
 
@@ -108,18 +110,17 @@ export function WorkbenchAlertsDetails({
         : alerts.filter(({ severity }) => activeSeverities.includes(severity)),
     [alerts, activeSeverities]
   )
-  const selected = visible.find(({ id }) => id === selectedId) ?? visible[0]
+  const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
+    useDetailsSelection(visible)
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
 
-  if (isEmpty(alerts)) {
-    return loading ? (
-      <CenteredSC>
-        <Spinner />
-      </CenteredSC>
-    ) : (
-      <EmptyState message="No alerts found." />
+  if (isEmpty(alerts))
+    return (
+      <BoardLoadingOrEmpty
+        loading={loading}
+        message="No alerts found."
+      />
     )
-  }
 
   return (
     <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
@@ -140,8 +141,10 @@ export function WorkbenchAlertsDetails({
                   !activeSeverities.includes(severity)
                 }
                 aria-pressed={activeSeverities.includes(severity)}
-                onClick={() => setSeverities(xor(activeSeverities, [severity]))}
-                css={{ borderRadius: 12 }}
+                onClick={() =>
+                  setSeverities(toggleListValue(activeSeverities, severity))
+                }
+                rounded
               >
                 {ALERT_SEVERITY_SHORT_LABELS[severity]} (
                 {severityCounts[severity]})
@@ -167,13 +170,15 @@ export function WorkbenchAlertsDetails({
               selected={alert.id === selected?.id}
               onSelect={() => setSelectedId(alert.id)}
               gutter={
-                <DetailsStatusGutter status={getAlertGutterStatus(alert)} />
+                <DetailsStatusGutter
+                  status={getJobGutterStatus(alert.workbenchJob?.status)}
+                />
               }
               title={
-                <AlertTitleSC>
+                <DetailsIconTitleSC>
                   <AlertSeverityIcon severity={alert.severity} />
                   <span>{alert.title}</span>
-                </AlertTitleSC>
+                </DetailsIconTitleSC>
               }
               end={
                 <>
@@ -235,7 +240,8 @@ function AlertConclusionPanel({
   workbenchId: string
   headerActions?: ReactNode
 }) {
-  const jobId = alert.workbenchJob?.id
+  const job = alert.workbenchJob
+  const jobId = job?.id
   const viewJobLink = jobId && (
     <DetailsLinkSC
       as={Link}
@@ -244,9 +250,10 @@ function AlertConclusionPanel({
       View job
     </DetailsLinkSC>
   )
-  const annotations = getAlertAnnotations(alert)
-  const tags = getAlertTags(alert)
-  const summary = alert.annotations?.summary
+  const summary =
+    typeof alert.annotations?.summary === 'string'
+      ? alert.annotations.summary
+      : null
 
   return (
     <DetailsColumnSC>
@@ -264,15 +271,11 @@ function AlertConclusionPanel({
           direction="column"
           gap="medium"
         >
-          <DetailsTitleSC>
-            {typeof summary === 'string' && summary
-              ? summary
-              : getAlertName(alert)}
-          </DetailsTitleSC>
+          <DetailsTitleSC>{summary || getAlertName(alert)}</DetailsTitleSC>
           {alert.title && <ExpandablePrompt prompt={alert.title} />}
         </Flex>
         <SummaryCardSC>
-          {typeof summary === 'string' && summary && (
+          {summary && (
             <SummaryField label="Alert summary">{summary}</SummaryField>
           )}
           {alert.cluster?.name && (
@@ -300,47 +303,34 @@ function AlertConclusionPanel({
             </SummaryField>
           )}
         </SummaryCardSC>
-        {!isEmpty(annotations) && (
-          <SectionSC>
-            <SectionTitleSC>Annotations</SectionTitleSC>
-            <KeyValueCardSC>
-              {annotations.map(([key, value]) => (
-                <KeyValueRow
-                  key={key}
-                  label={key}
-                  value={value}
-                />
-              ))}
-            </KeyValueCardSC>
-          </SectionSC>
+        <KeyValueSection
+          title="Annotations"
+          entries={getAlertAnnotations(alert)}
+        />
+        <KeyValueSection
+          title="Tags"
+          entries={getAlertTagEntries(alert)}
+        />
+        {job && (
+          <AlertJobResult
+            jobId={job.id}
+            jobStatus={job.status}
+          />
         )}
-        {!isEmpty(tags) && (
-          <SectionSC>
-            <SectionTitleSC>Tags</SectionTitleSC>
-            <KeyValueCardSC>
-              {tags.map((tag) => (
-                <KeyValueRow
-                  key={tag.id}
-                  label={tag.name}
-                  value={tag.value}
-                />
-              ))}
-            </KeyValueCardSC>
-          </SectionSC>
-        )}
-        {jobId && <AlertJobResult jobId={jobId} />}
       </DetailsPanelBodySC>
     </DetailsColumnSC>
   )
 }
 
 // Result of the job the alert triggered, under the alert information.
-function AlertJobResult({ jobId }: { jobId: string }) {
-  const { data, error } = useWorkbenchJobQuery({
-    variables: { id: jobId },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
+function AlertJobResult({
+  jobId,
+  jobStatus,
+}: {
+  jobId: string
+  jobStatus: WorkbenchJobStatus
+}) {
+  const { data, error } = usePolledWorkbenchJob(jobId, jobStatus)
   const job = data?.workbenchJob
 
   if (error) return <GqlError error={error} />
@@ -348,12 +338,7 @@ function AlertJobResult({ jobId }: { jobId: string }) {
 
   return (
     <JobResultSC>
-      <WorkbenchJobResult
-        job={job}
-        loading={false}
-        showAlertAndIssue={false}
-        scrollable={false}
-      />
+      <WorkbenchJobResultContent job={job} />
     </JobResultSC>
   )
 }
@@ -365,11 +350,7 @@ function AlertDetailsPanel({
   alert: AlertFragment
   onCollapse: () => void
 }) {
-  const theme = useTheme()
-  const tabStateRef = useRef<any>(null)
   const [tab, setTab] = useState<AlertDetailsTab>('Annotations')
-  const annotations = getAlertAnnotations(alert)
-  const tags = getAlertTags(alert)
 
   return (
     <DetailsColumnSC>
@@ -379,71 +360,24 @@ function AlertDetailsPanel({
           onClick={onCollapse}
         />
       </DetailsPanelHeader>
-      <Flex
-        flexShrink={0}
-        css={{ backgroundColor: theme.colors['fill-one'] }}
-      >
-        <TabList
-          scrollable
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: tab,
-            onSelectionChange: (key) => setTab(String(key) as AlertDetailsTab),
-          }}
-          flexShrink={0}
-        >
-          {ALERT_DETAILS_TABS.map((label) => (
-            <Tab
-              key={label}
-              textValue={label}
-            >
-              {label}
-            </Tab>
-          ))}
-        </TabList>
-        <Flex
-          flex={1}
-          css={{ borderBottom: theme.borders.default }}
-        />
-      </Flex>
-      <TabBodySC>
-        {tab === 'Annotations' &&
-          (isEmpty(annotations) ? (
-            <EmptyState message="No annotations." />
-          ) : (
-            <ChipsSC>
-              {annotations.map(([key, value]) => (
-                <Chip
-                  key={key}
-                  size="small"
-                  fillLevel={1}
-                  tooltip={`${key}: ${value}`}
-                  truncateWidth={360}
-                >
-                  {key}: {value}
-                </Chip>
-              ))}
-            </ChipsSC>
-          ))}
-        {tab === 'Tags' &&
-          (isEmpty(tags) ? (
-            <EmptyState message="No tags." />
-          ) : (
-            <ChipsSC>
-              {tags.map((tag) => (
-                <Chip
-                  key={tag.id}
-                  size="small"
-                  fillLevel={1}
-                  tooltip={`${tag.name}: ${tag.value}`}
-                  truncateWidth={360}
-                >
-                  {tag.name}: {tag.value}
-                </Chip>
-              ))}
-            </ChipsSC>
-          ))}
+      <DetailsTabs
+        tabs={ALERT_DETAILS_TABS}
+        selected={tab}
+        onChange={setTab}
+      />
+      <DetailsTabBodySC>
+        {tab === 'Annotations' && (
+          <KeyValueChips
+            entries={getAlertAnnotations(alert)}
+            emptyMessage="No annotations."
+          />
+        )}
+        {tab === 'Tags' && (
+          <KeyValueChips
+            entries={getAlertTagEntries(alert)}
+            emptyMessage="No tags."
+          />
+        )}
         {tab === 'All information' && (
           <KeyValueCardSC>
             <KeyValueRow
@@ -492,8 +426,59 @@ function AlertDetailsPanel({
             />
           </KeyValueCardSC>
         )}
-      </TabBodySC>
+      </DetailsTabBodySC>
     </DetailsColumnSC>
+  )
+}
+
+function KeyValueSection({
+  title,
+  entries,
+}: {
+  title: string
+  entries: [string, string][]
+}) {
+  if (isEmpty(entries)) return null
+
+  return (
+    <SectionSC>
+      <SectionTitleSC>{title}</SectionTitleSC>
+      <KeyValueCardSC>
+        {entries.map(([label, value], i) => (
+          <KeyValueRow
+            key={`${label}-${i}`}
+            label={label}
+            value={value}
+          />
+        ))}
+      </KeyValueCardSC>
+    </SectionSC>
+  )
+}
+
+function KeyValueChips({
+  entries,
+  emptyMessage,
+}: {
+  entries: [string, string][]
+  emptyMessage: string
+}) {
+  if (isEmpty(entries)) return <EmptyState message={emptyMessage} />
+
+  return (
+    <ChipsSC>
+      {entries.map(([label, value], i) => (
+        <Chip
+          key={`${label}-${i}`}
+          size="small"
+          fillLevel={1}
+          tooltip={`${label}: ${value}`}
+          truncateWidth={360}
+        >
+          {label}: {value}
+        </Chip>
+      ))}
+    </ChipsSC>
   )
 }
 
@@ -529,30 +514,10 @@ function KeyValueRow({
   )
 }
 
-function getAlertGutterStatus({
-  workbenchJob,
-}: AlertFragment): DetailsGutterStatus {
-  if (workbenchJob?.status === WorkbenchJobStatus.Failed) return 'failed'
-  if (isJobRunning(workbenchJob?.status)) return 'running'
-  return null
-}
-
 const SeverityChipsSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
   gap: theme.spacing.xsmall,
-}))
-
-const AlertTitleSC = styled.span(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-  minWidth: 0,
-  '& > span:last-child': {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
 }))
 
 const FiringIconSC = styled.span({
@@ -629,9 +594,7 @@ const KeyValueLabelSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   flexShrink: 0,
   width: 150,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  ...TRUNCATE,
   color: theme.colors['text-input-disabled'],
 }))
 
@@ -647,21 +610,8 @@ const JobResultSC = styled.div(({ theme }) => ({
   paddingTop: theme.spacing.large,
 }))
 
-const TabBodySC = styled.div(({ theme }) => ({
-  flex: 1,
-  minHeight: 0,
-  overflowY: 'auto',
-  padding: theme.spacing.medium,
-}))
-
 const ChipsSC = styled.div({
   display: 'flex',
   flexWrap: 'wrap',
   gap: 10,
-})
-
-const CenteredSC = styled(Flex)({
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
 })

@@ -1,11 +1,10 @@
 import { Flex } from '@pluralsh/design-system'
-import usePersistedState from 'components/hooks/usePersistedState'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayPopover,
   DisplayView,
   DisplayViewToggle,
-  parseDisplayView,
+  usePersistedDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useWorkbenchJobsQuery } from 'generated/graphql'
@@ -25,12 +24,10 @@ const DEFAULT_WORKBENCH_JOBS_VIEW: DisplayView = 'list'
 
 export function WorkbenchJobs() {
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
-  const [view, setView] = usePersistedState(
+  const [view, setView] = usePersistedDisplayView(
     WORKBENCH_JOBS_VIEW_STORAGE_KEY,
-    DEFAULT_WORKBENCH_JOBS_VIEW,
-    0,
-    (value: unknown): DisplayView =>
-      parseDisplayView(value, WORKBENCH_JOBS_VIEWS, DEFAULT_WORKBENCH_JOBS_VIEW)
+    WORKBENCH_JOBS_VIEWS,
+    DEFAULT_WORKBENCH_JOBS_VIEW
   )
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -42,7 +39,6 @@ export function WorkbenchJobs() {
 
   return (
     <WorkbenchPageLayout
-      sidebar={{ kind: 'none' }}
       showEditWorkbenchButton={false}
       headerActions={
         <>
@@ -59,7 +55,9 @@ export function WorkbenchJobs() {
         </>
       }
     >
-      {!error && view === 'details' ? (
+      {error ? (
+        <GqlError error={error} />
+      ) : view === 'details' ? (
         <WorkbenchJobsDetails
           workbenchId={workbenchId}
           jobs={jobs}
@@ -69,9 +67,7 @@ export function WorkbenchJobs() {
         />
       ) : (
         <WrapperSC>
-          {error ? (
-            <GqlError error={error} />
-          ) : view === 'board' ? (
+          {view === 'board' ? (
             <WorkbenchJobsBoard
               jobs={jobs}
               loading={loading}

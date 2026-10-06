@@ -1,3 +1,4 @@
+import { EmptyState, Flex, Spinner } from '@pluralsh/design-system'
 import { isNil } from 'lodash'
 import { useCallback, useEffect, useRef } from 'react'
 import styled from 'styled-components'
@@ -42,6 +43,36 @@ export function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
 
   return <LoadMoreSentinelSC ref={ref} />
 }
+
+// Spinner on the first load, then an empty state, for a view with no items.
+export function BoardLoadingOrEmpty({
+  loading,
+  message,
+}: {
+  loading: boolean
+  message: string
+}) {
+  return loading ? (
+    <BoardCenteredSC>
+      <Spinner />
+    </BoardCenteredSC>
+  ) : (
+    <EmptyState message={message} />
+  )
+}
+
+export const BoardCenteredSC = styled(Flex)({
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+})
+
+export const BoardSectionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  paddingBottom: theme.spacing.large,
+}))
 
 export const BoardSC = styled.div({
   display: 'flex',

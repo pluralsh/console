@@ -52,19 +52,11 @@ export type WorkbenchJobDraftPr =
 export function WorkbenchJobResult({
   job,
   loading,
-  showAlertAndIssue = true,
-  scrollable = true,
 }: {
   job: Nullable<WorkbenchJobFragment>
   loading: boolean
-  showAlertAndIssue?: boolean
-  // false lets a parent scroll container scroll the result with other content
-  scrollable?: boolean
 }) {
   const { spacing } = useTheme()
-  const resultText = getWorkbenchJobResultText(job)
-  const hasConclusion =
-    !isJobRunning(job?.status) && !!job?.result?.conclusion?.trim()
 
   if (loading)
     return (
@@ -79,30 +71,47 @@ export function WorkbenchJobResult({
     <Flex
       direction="column"
       gap="xlarge"
-      {...(scrollable && { height: '100%', minHeight: 0, overflow: 'auto' })}
+      height="100%"
+      minHeight={0}
+      overflow="auto"
     >
-      {showAlertAndIssue && (
-        <>
-          <WorkbenchJobTriggerAlert alert={job?.alert} />
-          <WorkbenchJobTriggerIssue issue={job?.issue} />
-        </>
-      )}
+      <WorkbenchJobTriggerAlert alert={job?.alert} />
+      <WorkbenchJobTriggerIssue issue={job?.issue} />
+      <WorkbenchJobResultContent job={job} />
+    </Flex>
+  )
+}
+
+// Chatbot trigger, result text and todos, without trigger cards or its own
+// scroll area, for views that show the alert/issue elsewhere and scroll the
+// result together with other content.
+export function WorkbenchJobResultContent({
+  job,
+}: {
+  job: Nullable<WorkbenchJobFragment>
+}) {
+  const resultText = getWorkbenchJobResultText(job)
+  const hasConclusion =
+    !isJobRunning(job?.status) && !!job?.result?.conclusion?.trim()
+
+  return (
+    <>
       <WorkbenchJobTriggerChatbot job={job} />
       {resultText && (
         <Flex
           direction="column"
-          overflow={scrollable ? 'auto' : undefined}
+          overflow="auto"
         >
           <ChatMarkdown text={resultText} />
         </Flex>
       )}
       {!isEmpty(getWorkbenchJobTodos(job?.result)) && !hasConclusion && (
         <WorkbenchJobTodos
-          loading={loading}
+          loading={false}
           result={job?.result}
         />
       )}
-    </Flex>
+    </>
   )
 }
 

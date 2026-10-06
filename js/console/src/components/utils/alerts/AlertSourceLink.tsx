@@ -4,6 +4,7 @@ import { AlertFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { cloneElement } from 'react'
 import styled from 'styled-components'
+import { TRUNCATE } from 'components/utils/truncate'
 import { ensureURLValidity } from 'utils/url'
 
 // The alert's `alertname` tag (as sent by Grafana and Prometheus-style
@@ -79,7 +80,5 @@ const IconSC = styled.span({
 
 const NameSC = styled.span({
   minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  ...TRUNCATE,
 })

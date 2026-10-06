@@ -1,11 +1,18 @@
 import {
   AgentLoadingIcon,
+  Flex,
   HamburgerMenuCollapsedIcon,
   HamburgerMenuCollapseIcon,
   IconFrame,
+  Tab,
+  TabList,
 } from '@pluralsh/design-system'
-import { ReactNode } from 'react'
-import styled from 'styled-components'
+import { TRUNCATE } from 'components/utils/truncate'
+import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
+import { WorkbenchJobStatus } from 'generated/graphql'
+import { ReactNode, useRef, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { BoardTitleSC } from './WorkbenchBoard'
 
 // Shared building blocks for the workbench Details views (jobs, issues,
 // alerts): a selectable list on the left and detail panels on the right.
@@ -15,6 +22,29 @@ const STATUS_GUTTER_SIZE = 10
 const DETAILS_PANEL_HEADER_HEIGHT = 44
 
 export type DetailsGutterStatus = 'running' | 'failed' | null
+
+// Selected list item (falls back to the first one) and whether the right-most
+// details panel is open.
+export function useDetailsSelection<T extends { id: string }>(items: T[]) {
+  const [selectedId, setSelectedId] = useState<string>()
+  const [detailsOpen, setDetailsOpen] = useState(true)
+
+  return {
+    selected: items.find(({ id }) => id === selectedId) ?? items[0],
+    setSelectedId,
+    detailsOpen,
+    setDetailsOpen,
+  }
+}
+
+// Gutter marker for an item's workbench job.
+export function getJobGutterStatus(
+  status: Nullable<WorkbenchJobStatus>
+): DetailsGutterStatus {
+  if (status === WorkbenchJobStatus.Failed) return 'failed'
+  if (isJobRunning(status)) return 'running'
+  return null
+}
 
 export function DetailsListItem({
   selected,
@@ -141,6 +171,51 @@ export function DetailsErrorBanner({
   )
 }
 
+// Underline tabs under a details panel header, as in Figma.
+export function DetailsTabs<T extends string>({
+  tabs,
+  selected,
+  onChange,
+}: {
+  tabs: T[]
+  selected: T
+  onChange: (tab: T) => void
+}) {
+  const theme = useTheme()
+  const tabStateRef = useRef<any>(null)
+
+  return (
+    <Flex
+      flexShrink={0}
+      css={{ backgroundColor: theme.colors['fill-one'] }}
+    >
+      <TabList
+        scrollable
+        stateRef={tabStateRef}
+        stateProps={{
+          orientation: 'horizontal',
+          selectedKey: selected,
+          onSelectionChange: (key) => onChange(String(key) as T),
+        }}
+        flexShrink={0}
+      >
+        {tabs.map((label) => (
+          <Tab
+            key={label}
+            textValue={label}
+          >
+            {label}
+          </Tab>
+        ))}
+      </TabList>
+      <Flex
+        flex={1}
+        css={{ borderBottom: theme.borders.default }}
+      />
+    </Flex>
+  )
+}
+
 // Fixed-width, right-aligned age (e.g. "40d 22h") so the icons before it
 // line up across rows.
 export const DetailsListAgeSC = styled.span({
@@ -192,6 +267,23 @@ export const DetailsColumnSC = styled.div(({ theme }) => ({
   '&:last-child': { borderRight: 'none' },
 }))
 
+export const DetailsTabBodySC = styled.div(({ theme }) => ({
+  flex: 1,
+  minHeight: 0,
+  overflowY: 'auto',
+  padding: theme.spacing.medium,
+}))
+
+// Leading icon (fixed size) followed by truncated text, for list titles.
+export const DetailsIconTitleSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  '& > :first-child': { flexShrink: 0 },
+  '& > :last-child': TRUNCATE,
+}))
+
 export const DetailsPanelBodySC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -207,18 +299,9 @@ export const DetailsPanelBodySC = styled.div(({ theme }) => ({
 }))
 
 // Mono title at the top of a details panel body.
-export const DetailsTitleSC = styled.h2(({ theme }) => ({
-  ...theme.partials.text.mono,
-  fontSize: 18,
-  fontWeight: 400,
-  lineHeight: '24px',
-  letterSpacing: 0,
-  margin: 0,
+export const DetailsTitleSC = styled(BoardTitleSC)(({ theme }) => ({
+  ...TRUNCATE,
   paddingTop: theme.spacing.small,
-  color: theme.colors.text,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
 }))
 
 export const DetailsLinkSC = styled.span(({ theme }) => ({
@@ -273,20 +356,14 @@ const ListItemTextSC = styled.div(({ theme }) => ({
 
 const ListItemTitleSC = styled.div(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
+  ...TRUNCATE,
   color: theme.colors['text-light'],
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  // keep rich titles (prompt markdown) on the same line height
-  '& *': { lineHeight: theme.partials.text.body2LooseLineHeight.lineHeight },
 }))
 
 const ListItemSubtitleSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
+  ...TRUNCATE,
   color: theme.colors['text-xlight'],
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
 }))
 
 const ListItemEndSC = styled.div(({ theme }) => ({

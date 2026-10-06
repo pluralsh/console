@@ -1,6 +1,5 @@
 import { Flex, SearchIcon } from '@pluralsh/design-system'
 import { useDebounce, useKeyDown } from '@react-hooks-library/core'
-import usePersistedState from 'components/hooks/usePersistedState'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
@@ -8,7 +7,7 @@ import { GqlError } from 'components/utils/Alert'
 import {
   DisplayFilterEmpty,
   DisplayPopover,
-  parseDisplayView,
+  usePersistedDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
@@ -16,7 +15,7 @@ import {
   IssueWebhookProvider,
   useWorkbenchIssuesQuery,
 } from 'generated/graphql'
-import { compact, fromPairs, isEmpty, isNil } from 'lodash'
+import { compact, fromPairs, isEmpty, isNil, omit } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
@@ -34,7 +33,6 @@ import {
   toIssueFilterVariables,
   visibleIssueProviders,
   WorkbenchIssuesDisplayState,
-  WorkbenchIssuesView,
 } from './workbenchIssuesDisplay'
 
 const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
@@ -42,27 +40,25 @@ const SEARCH_INPUT_WIDTH = 520
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [persistedView, setPersistedView] = usePersistedState(
+  // the view is remembered per user, filters and sort only for the visit
+  const [view, setView] = usePersistedDisplayView(
     WORKBENCH_ISSUES_VIEW_STORAGE_KEY,
-    DEFAULT_WORKBENCH_ISSUES_DISPLAY.view,
-    0,
-    (value: unknown): WorkbenchIssuesView =>
-      parseDisplayView(
-        value,
-        WORKBENCH_ISSUES_VIEWS,
-        DEFAULT_WORKBENCH_ISSUES_DISPLAY.view
-      )
+    WORKBENCH_ISSUES_VIEWS,
+    DEFAULT_WORKBENCH_ISSUES_DISPLAY.view
   )
+  const [filters, setFilters] = useState(() =>
+    omit(DEFAULT_WORKBENCH_ISSUES_DISPLAY, 'view')
+  )
+  const display = useMemo(() => ({ ...filters, view }), [filters, view])
   const [searchString, setSearchString] = useState('')
-  const [display, setDisplay] = useState(() => ({
-    ...DEFAULT_WORKBENCH_ISSUES_DISPLAY,
-    view: persistedView,
-  }))
   const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const filterVars = useMemo(() => toIssueFilterVariables(display), [display])
-  const updateDisplay = (next: WorkbenchIssuesDisplayState) => {
-    setDisplay(next)
-    setPersistedView(next.view)
+  const updateDisplay = ({
+    view: nextView,
+    ...nextFilters
+  }: WorkbenchIssuesDisplayState) => {
+    setFilters(nextFilters)
+    setView(nextView)
   }
   const clearSearch = () => setSearchString('')
 
@@ -109,7 +105,6 @@ export function WorkbenchIssues() {
 
   return (
     <WorkbenchPageLayout
-      sidebar={{ kind: 'none' }}
       showEditWorkbenchButton={false}
       headerActions={
         <>
