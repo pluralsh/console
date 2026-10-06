@@ -23,6 +23,7 @@ import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
+import { WorkbenchIssuesDetails } from './WorkbenchIssuesDetails'
 import { WorkbenchIssuesDisplayOptions } from './WorkbenchIssuesDisplayOptions'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
@@ -111,19 +112,21 @@ export function WorkbenchIssues() {
       showEditWorkbenchButton={false}
       headerActions={
         <>
-          <IconExpander
-            tooltip="Search issues"
-            icon={<SearchIcon />}
-            active={!!searchString}
-            onClear={clearSearch}
-          >
-            <ExpandedInput
-              width={SEARCH_INPUT_WIDTH}
-              inputValue={searchString}
-              onChange={setSearchString}
-              placeholder="Search issues"
-            />
-          </IconExpander>
+          {display.view !== 'details' && (
+            <IconExpander
+              tooltip="Search issues"
+              icon={<SearchIcon />}
+              active={!!searchString}
+              onClear={clearSearch}
+            >
+              <ExpandedInput
+                width={SEARCH_INPUT_WIDTH}
+                inputValue={searchString}
+                onChange={setSearchString}
+                placeholder="Search issues"
+              />
+            </IconExpander>
+          )}
           <DisplayPopover showDot={hasUncheckedIssueFilters(display)}>
             <WorkbenchIssuesDisplayOptions
               state={display}
@@ -137,6 +140,16 @@ export function WorkbenchIssues() {
     >
       {error ? (
         <GqlError error={error} />
+      ) : display.view === 'details' && !filterEmptyKind ? (
+        <WorkbenchIssuesDetails
+          issues={issues}
+          loading={loading}
+          hasNextPage={!!pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          searchString={searchString}
+          onSearchChange={setSearchString}
+          fallbackWorkbenchId={workbenchId}
+        />
       ) : (
         <WrapperSC>
           {filterEmptyKind ? (

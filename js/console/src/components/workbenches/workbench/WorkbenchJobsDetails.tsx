@@ -3,8 +3,6 @@ import {
   Chip,
   EmptyState,
   Flex,
-  HamburgerMenuCollapsedIcon,
-  HamburgerMenuCollapseIcon,
   IconFrame,
   Input,
   prettifyRepoUrl,
@@ -16,7 +14,6 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
@@ -24,57 +21,46 @@ import {
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
 import {
+  DetailsCollapseButton,
   DetailsColumnSC,
-  DetailsErrorBanner,
+  DetailsExpandButton,
   DetailsGutterStatus,
   DetailsLayoutSC,
-  DetailsLinkSC,
+  DetailsListAgeSC,
   DetailsListItem,
   DetailsListItemsSC,
   DetailsListSC,
   DetailsListSearchSC,
-  DetailsPanelBodySC,
   DetailsPanelHeader,
   DetailsStatusGutter,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import {
   PrStatus,
   PullRequestBasicFragment,
-  useWorkbenchJobQuery,
   useWorkbenchJobSearchQuery,
   WorkbenchJobStatus,
   WorkbenchJobTinyFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import {
-  ComponentProps,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import { Link } from 'react-router-dom'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
+import { ComponentProps, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { formatShortAge, fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isJobRunning } from './job/WorkbenchJobActivity'
-import { WorkbenchJobMeta } from './job/WorkbenchJobMeta'
 import {
   useSelectedJobTab,
   useWorkbenchJobTabsData,
   WorkbenchJobCommonTabContent,
   WorkbenchJobTabsData,
 } from './job/WorkbenchJobPanel'
-import { WorkbenchJobPrs, WorkbenchJobResult } from './job/WorkbenchJobResult'
+import { WorkbenchJobPrs } from './job/WorkbenchJobResult'
 import { WorkbenchJobTriggerAlert } from './job/WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './job/WorkbenchJobTriggerIssue'
 import { WorkbenchJobUsage } from './job/WorkbenchJobUsage'
+import { WorkbenchJobConclusionPanel } from './WorkbenchJobConclusionPanel'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 
 const SEARCH_LIMIT = 50
-const PROMPT_CLAMP_LINES = 4
-const UNCLAMPED_LINES = 999
 
 type JobListItem = Pick<
   WorkbenchJobTinyFragment,
@@ -184,7 +170,9 @@ export function WorkbenchJobsDetails({
                 end={
                   <>
                     <JobPrIcon job={job} />
-                    {formatShortAge(job.insertedAt)}
+                    <DetailsListAgeSC>
+                      {formatShortAge(job.insertedAt)}
+                    </DetailsListAgeSC>
                   </>
                 }
               />
@@ -198,10 +186,16 @@ export function WorkbenchJobsDetails({
       {selected && (
         <WorkbenchJobConclusionPanel
           key={`conclusion-${selected.id}`}
-          item={selected}
-          workbenchId={workbenchId}
-          detailsOpen={detailsOpen}
-          onOpenDetails={() => setDetailsOpen(true)}
+          jobId={selected.id}
+          workbenchId={selected.workbench?.id ?? workbenchId}
+          headerActions={
+            !detailsOpen && (
+              <DetailsExpandButton
+                label="Show job details"
+                onClick={() => setDetailsOpen(true)}
+              />
+            )
+          }
         />
       )}
       {selected && detailsOpen && (
@@ -230,130 +224,6 @@ function JobPrIcon({ job }: { job: JobListItem }) {
   )
 }
 
-function WorkbenchJobConclusionPanel({
-  item,
-  workbenchId,
-  detailsOpen,
-  onOpenDetails,
-}: {
-  item: JobListItem
-  workbenchId: string
-  detailsOpen: boolean
-  onOpenDetails: () => void
-}) {
-  const { data, loading, error } = useWorkbenchJobQuery({
-    variables: { id: item.id },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-  const job = data?.workbenchJob
-  const status = job?.status ?? item.status
-  const jobPath = getWorkbenchJobAbsPath({
-    workbenchId: item.workbench?.id ?? workbenchId,
-    jobId: item.id,
-  })
-  const viewJobLink = (
-    <DetailsLinkSC
-      as={Link}
-      to={jobPath}
-    >
-      View job
-    </DetailsLinkSC>
-  )
-
-  return (
-    <DetailsColumnSC>
-      <DetailsPanelHeader title="Conclusion">
-        {viewJobLink}
-        {!detailsOpen && (
-          <IconFrame
-            clickable
-            type="tertiary"
-            size="large"
-            textValue="Show job details"
-            tooltip="Show job details"
-            icon={<HamburgerMenuCollapseIcon />}
-            onClick={onOpenDetails}
-          />
-        )}
-      </DetailsPanelHeader>
-      <DetailsPanelBodySC>
-        {status === WorkbenchJobStatus.Failed && (
-          <DetailsErrorBanner action={viewJobLink}>
-            Workbench job reported an error.
-            {job?.error ? ` ${job.error}` : ''}
-          </DetailsErrorBanner>
-        )}
-        {error && <GqlError error={error} />}
-        {!job && loading ? (
-          <RectangleSkeleton
-            $height={320}
-            $width="100%"
-          />
-        ) : (
-          job && (
-            <>
-              <Flex
-                direction="column"
-                gap="medium"
-              >
-                <JobTitleSC>{job.workbench?.name}</JobTitleSC>
-                <WorkbenchJobMeta
-                  stacked
-                  job={job}
-                />
-                <ExpandablePrompt prompt={job.prompt ?? ''} />
-              </Flex>
-              <WorkbenchJobResult
-                job={job}
-                loading={false}
-                showAlertAndIssue={false}
-                scrollable={false}
-              />
-            </>
-          )
-        )}
-      </DetailsPanelBodySC>
-    </DetailsColumnSC>
-  )
-}
-
-function ExpandablePrompt({ prompt }: { prompt: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [expanded, setExpanded] = useState(false)
-  const [overflowing, setOverflowing] = useState(false)
-
-  useLayoutEffect(() => {
-    if (expanded) return
-    const clamped = ref.current?.querySelector(':scope > div > div')
-    setOverflowing(!!clamped && clamped.scrollHeight > clamped.clientHeight + 1)
-  }, [expanded, prompt])
-
-  return (
-    <Flex
-      direction="column"
-      gap="medium"
-    >
-      <div ref={ref}>
-        <WorkbenchStoredPromptMarkdown
-          text={prompt}
-          density="jobCard"
-          clampLines={expanded ? UNCLAMPED_LINES : PROMPT_CLAMP_LINES}
-          promptColor="text-xlight"
-        />
-      </div>
-      {(overflowing || expanded) && (
-        <ReadMoreSC
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? 'Read less' : 'Read more'}
-        </ReadMoreSC>
-      )}
-    </Flex>
-  )
-}
-
 function WorkbenchJobDetailsPanel({
   jobId,
   onCollapse,
@@ -377,13 +247,8 @@ function WorkbenchJobDetailsPanel({
         {job?.updatedAt && (
           <UpdatedAtSC>updated {fromNow(job.updatedAt)}</UpdatedAtSC>
         )}
-        <IconFrame
-          clickable
-          type="tertiary"
-          size="large"
-          textValue="Hide job details"
-          tooltip="Hide job details"
-          icon={<HamburgerMenuCollapsedIcon />}
+        <DetailsCollapseButton
+          label="Hide job details"
           onClick={onCollapse}
         />
       </DetailsPanelHeader>
@@ -565,30 +430,6 @@ function getJobGutterStatus({ status }: JobListItem): DetailsGutterStatus {
   if (isJobRunning(status)) return 'running'
   return null
 }
-
-const JobTitleSC = styled.h2(({ theme }) => ({
-  ...theme.partials.text.mono,
-  fontSize: 18,
-  fontWeight: 400,
-  lineHeight: '24px',
-  letterSpacing: 0,
-  margin: 0,
-  paddingTop: theme.spacing.small,
-  color: theme.colors.text,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-}))
-
-const ReadMoreSC = styled.button(({ theme }) => ({
-  all: 'unset',
-  ...theme.partials.text.body2,
-  alignSelf: 'flex-start',
-  cursor: 'pointer',
-  color: theme.colors['text-input-disabled'],
-  '&:hover': { color: theme.colors['text-light'] },
-  '&:focus-visible': { outline: theme.borders['outline-focused'] },
-}))
 
 const UpdatedAtSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,

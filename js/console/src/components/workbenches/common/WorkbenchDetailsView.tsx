@@ -1,4 +1,9 @@
-import { AgentLoadingIcon } from '@pluralsh/design-system'
+import {
+  AgentLoadingIcon,
+  HamburgerMenuCollapsedIcon,
+  HamburgerMenuCollapseIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -76,6 +81,48 @@ export function DetailsPanelHeader({
   )
 }
 
+// Hides the right-most details panel (menu-collapse icon, as in Evals).
+export function DetailsCollapseButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <IconFrame
+      clickable
+      type="tertiary"
+      size="large"
+      textValue={label}
+      tooltip={label}
+      icon={<HamburgerMenuCollapsedIcon />}
+      onClick={onClick}
+    />
+  )
+}
+
+// Brings a collapsed details panel back.
+export function DetailsExpandButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <IconFrame
+      clickable
+      type="tertiary"
+      size="large"
+      textValue={label}
+      tooltip={label}
+      icon={<HamburgerMenuCollapseIcon />}
+      onClick={onClick}
+    />
+  )
+}
+
 export function DetailsErrorBanner({
   children,
   action,
@@ -93,6 +140,14 @@ export function DetailsErrorBanner({
     </ErrorBannerSC>
   )
 }
+
+// Fixed-width, right-aligned age (e.g. "40d 22h") so the icons before it
+// line up across rows.
+export const DetailsListAgeSC = styled.span({
+  minWidth: 52,
+  textAlign: 'right',
+  whiteSpace: 'nowrap',
+})
 
 export const DetailsLayoutSC = styled.div<{ $panelCount: number }>(
   ({ theme, $panelCount }) => ({
@@ -193,9 +248,12 @@ const GutterSC = styled.div({
 const ListItemTextSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  justifyContent: 'center',
   gap: theme.spacing.xxsmall,
   flex: 1,
   minWidth: 0,
+  // title + subtitle height, so single-line rows keep the same height
+  minHeight: 42,
 }))
 
 const ListItemTitleSC = styled.div(({ theme }) => ({

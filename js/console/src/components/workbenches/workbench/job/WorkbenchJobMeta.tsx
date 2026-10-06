@@ -69,6 +69,7 @@ export function WorkbenchJobMeta({
               <InfoOutlineIcon
                 size={10}
                 color="icon-light"
+                css={{ flexShrink: 0 }}
               />
             </Tooltip>
           )}

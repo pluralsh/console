@@ -10,7 +10,11 @@ import { ISSUE_STATUS_OPTIONS } from 'components/workbenches/common/issueStatus'
 
 export type WorkbenchIssuesView = DisplayView
 
-export const WORKBENCH_ISSUES_VIEWS: WorkbenchIssuesView[] = ['list', 'board']
+export const WORKBENCH_ISSUES_VIEWS: WorkbenchIssuesView[] = [
+  'list',
+  'board',
+  'details',
+]
 
 export type WorkbenchIssuesDisplayState = {
   view: WorkbenchIssuesView
