@@ -957,6 +957,9 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
     marginTop: theme.spacing.small,
+    // The activity list adds 24px under this row. Pull that back so the 32px
+    // copy row is the whole gap under the prompt.
+    marginBottom: -theme.spacing.large,
   })
 )
 
