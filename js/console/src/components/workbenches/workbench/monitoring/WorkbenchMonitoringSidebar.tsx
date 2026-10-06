@@ -41,7 +41,7 @@ import {
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
   WORKBENCH_MONITORING_MONITOR_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -275,6 +275,8 @@ export function WorkbenchMonitoringSidebar({
 }
 
 function MonitoringListSkeleton({ count }: { count: number }) {
+  const theme = useTheme()
+
   return (
     <Flex
       direction="column"
@@ -287,8 +289,8 @@ function MonitoringListSkeleton({ count }: { count: number }) {
           align="center"
         >
           <RectangleSkeleton
-            $height={32}
-            $width={32}
+            $height="xlarge"
+            $width={theme.spacing.xlarge}
             css={{ flexShrink: 0 }}
           />
           <Flex
@@ -596,14 +598,14 @@ const RowIconSC = styled(IconFrame)({
   flexShrink: 0,
 })
 
-const RowTextSC = styled.div({
+const RowTextSC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
-  gap: 4,
+  gap: theme.spacing.xxsmall,
   justifyContent: 'center',
   minWidth: 0,
-})
+}))
 
 const RowTitleSC = styled.span(({ theme }) => ({
   ...TRUNCATE,
