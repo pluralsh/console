@@ -1,5 +1,6 @@
 import {
   AddIcon,
+  Button,
   CheckIcon,
   CloseIcon,
   EmptyState,
@@ -148,18 +149,24 @@ export function WorkbenchMonitoringSidebar({
             <GroupSC $first>
               <GroupHeaderSC>
                 <span>Dashboards</span>
-                <IconFrame
-                  clickable
-                  size="small"
-                  icon={<AddIcon />}
-                  tooltip="New dashboard"
-                  aria-label="New dashboard"
-                  onClick={() =>
-                    navigate(
-                      getWorkbenchMonitoringDashboardCreateAbsPath(workbenchId)
-                    )
-                  }
-                />
+                {(dashboardsLoading ||
+                  hasFilter ||
+                  dashboardNodes.length > 0) && (
+                  <IconFrame
+                    clickable
+                    size="small"
+                    icon={<AddIcon />}
+                    tooltip="New dashboard"
+                    aria-label="New dashboard"
+                    onClick={() =>
+                      navigate(
+                        getWorkbenchMonitoringDashboardCreateAbsPath(
+                          workbenchId
+                        )
+                      )
+                    }
+                  />
+                )}
               </GroupHeaderSC>
               {dashboards.error && (
                 <PaddedSC>
@@ -180,13 +187,30 @@ export function WorkbenchMonitoringSidebar({
                     <MonitoringListSkeleton count={3} />
                   </PaddedSC>
                 ) : dashboardNodes.length === 0 ? (
-                  <PaddedSC>
-                    <CaptionP $color="text-xlight">
-                      {hasFilter
-                        ? 'No dashboards match this filter.'
-                        : 'No dashboards yet.'}
-                    </CaptionP>
-                  </PaddedSC>
+                  hasFilter ? (
+                    <PaddedSC>
+                      <CaptionP $color="text-xlight">
+                        No dashboards match this filter.
+                      </CaptionP>
+                    </PaddedSC>
+                  ) : (
+                    <EmptyAddSC>
+                      <EmptyAddButtonSC
+                        small
+                        tertiary
+                        startIcon={<AddIcon size={12} />}
+                        onClick={() =>
+                          navigate(
+                            getWorkbenchMonitoringDashboardCreateAbsPath(
+                              workbenchId
+                            )
+                          )
+                        }
+                      >
+                        Add dashboard
+                      </EmptyAddButtonSC>
+                    </EmptyAddSC>
+                  )
                 ) : (
                   <>
                     {dashboardNodes.map((dashboard) => (
@@ -208,18 +232,20 @@ export function WorkbenchMonitoringSidebar({
             <GroupSC>
               <GroupHeaderSC>
                 <span>Monitors</span>
-                <IconFrame
-                  clickable
-                  size="small"
-                  icon={<AddIcon />}
-                  tooltip="New monitor"
-                  aria-label="New monitor"
-                  onClick={() =>
-                    navigate(
-                      getWorkbenchMonitoringMonitorCreateAbsPath(workbenchId)
-                    )
-                  }
-                />
+                {(monitorsLoading || hasFilter || monitorNodes.length > 0) && (
+                  <IconFrame
+                    clickable
+                    size="small"
+                    icon={<AddIcon />}
+                    tooltip="New monitor"
+                    aria-label="New monitor"
+                    onClick={() =>
+                      navigate(
+                        getWorkbenchMonitoringMonitorCreateAbsPath(workbenchId)
+                      )
+                    }
+                  />
+                )}
               </GroupHeaderSC>
               {monitors.error && (
                 <PaddedSC>
@@ -240,13 +266,30 @@ export function WorkbenchMonitoringSidebar({
                     <MonitoringListSkeleton count={3} />
                   </PaddedSC>
                 ) : monitorNodes.length === 0 ? (
-                  <PaddedSC>
-                    <CaptionP $color="text-xlight">
-                      {hasFilter
-                        ? 'No monitors match this filter.'
-                        : 'No monitors yet.'}
-                    </CaptionP>
-                  </PaddedSC>
+                  hasFilter ? (
+                    <PaddedSC>
+                      <CaptionP $color="text-xlight">
+                        No monitors match this filter.
+                      </CaptionP>
+                    </PaddedSC>
+                  ) : (
+                    <EmptyAddSC>
+                      <EmptyAddButtonSC
+                        small
+                        tertiary
+                        startIcon={<AddIcon size={12} />}
+                        onClick={() =>
+                          navigate(
+                            getWorkbenchMonitoringMonitorCreateAbsPath(
+                              workbenchId
+                            )
+                          )
+                        }
+                      >
+                        Add monitor
+                      </EmptyAddButtonSC>
+                    </EmptyAddSC>
+                  )
                 ) : (
                   <>
                     {monitorNodes.map((monitor) => (
@@ -508,6 +551,24 @@ const GroupSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
 
 const PaddedSC = styled.div(({ theme }) => ({
   padding: `0 ${theme.spacing.medium}px`,
+}))
+
+const EmptyAddSC = styled.div(({ theme }) => ({
+  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px 0`,
+}))
+
+const EmptyAddButtonSC = styled(Button)(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.caption,
+  alignSelf: 'start',
+  color: theme.colors['text-xlight'],
+  padding: 0,
+
+  '&:hover': {
+    ...theme.partials.reset.button,
+    ...theme.partials.text.caption,
+    color: theme.colors['text-light'],
+  },
 }))
 
 const GroupHeaderSC = styled.div(({ theme }) => ({
