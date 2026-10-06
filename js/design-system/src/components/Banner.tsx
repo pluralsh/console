@@ -93,13 +93,15 @@ const BannerOuter = styled(Flex)<{
   }
 })
 
-const BannerInner = styled.div<{ $compact: boolean }>(({ $compact, theme }) => ({
-  display: 'flex',
-  alignItems: $compact ? 'center' : 'flex-start',
-  gap: $compact ? theme.spacing.small : theme.spacing.medium,
-  flex: '1 1 auto',
-  minWidth: 0,
-}))
+const BannerInner = styled.div<{ $compact: boolean }>(
+  ({ $compact, theme }) => ({
+    display: 'flex',
+    alignItems: $compact ? 'center' : 'flex-start',
+    gap: $compact ? theme.spacing.small : theme.spacing.medium,
+    flex: '1 1 auto',
+    minWidth: 0,
+  })
+)
 
 const IconWrap = styled.div<{ $compact: boolean }>(({ $compact }) => ({
   display: 'flex',

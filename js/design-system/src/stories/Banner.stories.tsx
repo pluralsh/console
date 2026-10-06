@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import styled from 'styled-components'
 
 import Banner, { BANNER_SEVERITIES } from '../components/Banner'
@@ -130,6 +131,12 @@ function Description() {
 }
 
 function NotificationDesignTemplate() {
+  const [dismissed, setDismissed] = useState<ReadonlyArray<string>>([])
+  const dismiss = (key: string) =>
+    setDismissed((current) =>
+      current.includes(key) ? current : [...current, key]
+    )
+
   return (
     <Flex
       direction="column"
@@ -137,27 +144,39 @@ function NotificationDesignTemplate() {
       gap="xxlarge"
       width={464}
     >
-      {DESIGN_ORDER.map((severity) => (
-        <Banner
-          key={`${severity}-compact`}
-          severity={severity}
-          heading={compactHeading[severity]}
-          action={<ActionLink />}
-          fullWidth={severity !== 'success'}
-          onClose={() => {}}
-        />
-      ))}
-      {DESIGN_ORDER.map((severity) => (
-        <Banner
-          key={`${severity}-detail`}
-          severity={severity}
-          heading={compactHeading[severity]}
-          fullWidth
-          onClose={() => {}}
-        >
-          <Description />
-        </Banner>
-      ))}
+      {DESIGN_ORDER.map((severity) => {
+        const key = `${severity}-compact`
+
+        if (dismissed.includes(key)) return null
+
+        return (
+          <Banner
+            key={key}
+            severity={severity}
+            heading={compactHeading[severity]}
+            action={<ActionLink />}
+            fullWidth={severity !== 'success'}
+            onClose={() => dismiss(key)}
+          />
+        )
+      })}
+      {DESIGN_ORDER.map((severity) => {
+        const key = `${severity}-detail`
+
+        if (dismissed.includes(key)) return null
+
+        return (
+          <Banner
+            key={key}
+            severity={severity}
+            heading={compactHeading[severity]}
+            fullWidth
+            onClose={() => dismiss(key)}
+          >
+            <Description />
+          </Banner>
+        )
+      })}
     </Flex>
   )
 }
