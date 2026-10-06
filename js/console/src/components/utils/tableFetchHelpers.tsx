@@ -34,11 +34,21 @@ export function useSlicePolling<
   }: { interval?: number; skip?: boolean } & FetchSliceOptions
 ) {
   const { loading, refetch: originalRefetch } = queryResult
+  const { virtualSlice, pageSize } = fetchSliceOpts
 
   const fetchSlice = useFetchSlice(queryResult, fetchSliceOpts)
-  const refetch = !fetchSliceOpts?.virtualSlice?.start?.index
-    ? originalRefetch
-    : fetchSlice
+  const { refetchLoaded, loadedCount } = useRefetchLoaded(
+    queryResult,
+    fetchSliceOpts
+  )
+  // Virtualized tables report the visible slice and only poll that. Lists
+  // that don't (boards, card grids) poll everything loaded so far, since a
+  // plain refetch returns just the first page and drops the rest.
+  const refetch = virtualSlice?.start?.index
+    ? fetchSlice
+    : !virtualSlice && loadedCount > pageSize
+      ? refetchLoaded
+      : originalRefetch
 
   const poll = useEffectEvent(() => {
     refetch()
@@ -121,6 +131,42 @@ export function useFetchSlice<
       }),
     [fetchMore, after, first, keyPath, queryKey]
   )
+}
+
+// Re-fetches all loaded items from the start and replaces the connection with
+// the result, so updates, additions and removals all come through.
+function useRefetchLoaded<
+  QData,
+  QVariables extends {
+    first?: InputMaybe<number> | undefined
+    after?: InputMaybe<string> | undefined
+  },
+>(
+  queryResult: QueryResult<QData, QVariables>,
+  { keyPath }: Pick<FetchSliceOptions, 'keyPath'>
+) {
+  const queryKey = keyPath[keyPath.length - 1]
+  const loadedCount: number = queryResult?.data?.[queryKey]?.edges?.length ?? 0
+  const { fetchMore } = queryResult
+
+  const refetchLoaded = useCallback(
+    () =>
+      fetchMore({
+        variables: { first: loadedCount, after: null },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          const next = reduceNestedData(keyPath, fetchMoreResult)?.[queryKey]
+          if (!next) return prev
+
+          return updateNestedConnection(keyPath, prev, {
+            ...reduceNestedData(keyPath, prev),
+            [queryKey]: next,
+          })
+        },
+      }),
+    [fetchMore, keyPath, loadedCount, queryKey]
+  )
+
+  return { refetchLoaded, loadedCount }
 }
 
 export const reduceNestedData = (path: string[], data: any) =>
