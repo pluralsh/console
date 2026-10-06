@@ -30,6 +30,7 @@ import {
 import { isEmpty, isNil, uniqBy } from 'lodash'
 import {
   ReactElement,
+  ReactNode,
   useCallback,
   useEffect,
   useEffectEvent,
@@ -60,7 +61,8 @@ import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab =
+const NO_EXCLUDED_TABS: JobPanelTab[] = []
+export type JobPanelTab =
   | 'Result'
   | 'Dashboard'
   | 'Topology'
@@ -70,13 +72,47 @@ type JobPanelTab =
   | 'Actions'
 
 export function WorkbenchJobPanelContent() {
-  const { spacing } = useTheme()
   const { pathname } = useLocation() // useParams won't work because the panel renders outside the workbench route tree
   const jobId =
     matchPath(WORKBENCH_JOB_ABS_PATH, pathname)?.params[
       WORKBENCH_JOBS_PARAM_JOB
     ] ?? ''
   const { setOpen } = useWorkbenchJobPanel()
+
+  return (
+    <SidePanelContent>
+      <WorkbenchJobTabs
+        jobId={jobId}
+        onEmpty={() => setOpen(false)}
+        headerActions={
+          <IconFrame
+            clickable
+            css={{ flexShrink: 0 }}
+            icon={<CloseIcon />}
+            onClick={() => setOpen(false)}
+            tooltip="Close panel"
+          />
+        }
+      />
+    </SidePanelContent>
+  )
+}
+
+// Tabbed job details (result, dashboard, PRs, eval, usage, actions) shared by
+// the job side panel and the Jobs tab details view.
+export function WorkbenchJobTabs({
+  jobId,
+  excludedTabs = NO_EXCLUDED_TABS,
+  headerActions,
+  onEmpty,
+}: {
+  jobId: string
+  excludedTabs?: JobPanelTab[]
+  headerActions?: ReactNode
+  onEmpty?: () => void
+}) {
+  const { spacing } = useTheme()
+  const handleEmpty = useEffectEvent(() => onEmpty?.())
   const tabStateRef = useRef<any>(null)
   const [selectedTab, setSelectedTab] = useState<JobPanelTab>('Result')
 
@@ -163,8 +199,9 @@ export function WorkbenchJobPanelContent() {
         hasActions,
         hasActionsAwaitingApproval,
         isLoading
-      ),
+      ).filter(({ label }) => !excludedTabs.includes(label)),
     [
+      excludedTabs,
       hasActions,
       hasActionsAwaitingApproval,
       hasDraftPrsAwaitingApproval,
@@ -181,11 +218,11 @@ export function WorkbenchJobPanelContent() {
 
   useEffect(() => {
     if (isLoading || areActionsLoading) return
-    if (job && isEmpty(tabs)) setOpen(false)
-  }, [areActionsLoading, isLoading, job, setOpen, tabs])
+    if (job && isEmpty(tabs)) handleEmpty()
+  }, [areActionsLoading, isLoading, job, tabs])
 
   return (
-    <SidePanelContent>
+    <>
       <PanelHeaderSC>
         <TabListWrapperSC>
           <TabList
@@ -222,13 +259,7 @@ export function WorkbenchJobPanelContent() {
             ))}
           </TabList>
         </TabListWrapperSC>
-        <IconFrame
-          clickable
-          css={{ flexShrink: 0 }}
-          icon={<CloseIcon />}
-          onClick={() => setOpen(false)}
-          tooltip="Close panel"
-        />
+        {headerActions}
       </PanelHeaderSC>
       <ContentWrapperSC>
         <ContentInnerSC>
@@ -268,7 +299,7 @@ export function WorkbenchJobPanelContent() {
           )}
         </ContentInnerSC>
       </ContentWrapperSC>
-    </SidePanelContent>
+    </>
   )
 }
 

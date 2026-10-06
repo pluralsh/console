@@ -15,11 +15,12 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
 import { WorkbenchJobsBoard } from './WorkbenchJobsBoard'
+import { WorkbenchJobsDetails } from './WorkbenchJobsDetails'
 import { WorkbenchJobsSearch } from './WorkbenchJobsSearch'
 import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
 
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
-const WORKBENCH_JOBS_VIEWS: DisplayView[] = ['list', 'board']
+const WORKBENCH_JOBS_VIEWS: DisplayView[] = ['list', 'board', 'details']
 const DEFAULT_WORKBENCH_JOBS_VIEW: DisplayView = 'list'
 
 export function WorkbenchJobs() {
@@ -55,29 +56,38 @@ export function WorkbenchJobs() {
         </>
       }
     >
-      <WrapperSC>
-        {error ? (
-          <GqlError error={error} />
-        ) : view === 'board' ? (
-          <WorkbenchJobsBoard
-            jobs={jobs}
-            loading={loading}
-            hasNextPage={!!pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-          />
-        ) : (
-          <TableContainerSC>
-            <WorkbenchJobsTableContent
+      {!error && view === 'details' ? (
+        <WorkbenchJobsDetails
+          jobs={jobs}
+          loading={loading}
+          hasNextPage={!!pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+        />
+      ) : (
+        <WrapperSC>
+          {error ? (
+            <GqlError error={error} />
+          ) : view === 'board' ? (
+            <WorkbenchJobsBoard
               jobs={jobs}
               loading={loading}
-              loaded={!!data}
-              pageInfo={pageInfo}
+              hasNextPage={!!pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
-              setVirtualSlice={setVirtualSlice}
             />
-          </TableContainerSC>
-        )}
-      </WrapperSC>
+          ) : (
+            <TableContainerSC>
+              <WorkbenchJobsTableContent
+                jobs={jobs}
+                loading={loading}
+                loaded={!!data}
+                pageInfo={pageInfo}
+                fetchNextPage={fetchNextPage}
+                setVirtualSlice={setVirtualSlice}
+              />
+            </TableContainerSC>
+          )}
+        </WrapperSC>
+      )}
     </WorkbenchPageLayout>
   )
 }

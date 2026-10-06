@@ -6,6 +6,7 @@ import {
   isBefore,
   isAfter,
   fromNow,
+  formatShortAge,
   isValidDuration,
   parseDurationToMinutes,
   toDateOrUndef,
@@ -78,6 +79,26 @@ describe('datetime utils', () => {
       expect(isAfter('2024-01-14')).toBe(false)
       expect(isAfter('2024-01-16', '2024-01-14')).toBe(true)
       expect(isAfter('2024-01-14', '2024-01-16')).toBe(false)
+    })
+  })
+
+  describe('formatShortAge', () => {
+    it.each([
+      ['2024-01-15T11:59:30Z', 'now'],
+      ['2024-01-15T12:05:00Z', 'now'],
+      ['2024-01-15T11:20:00Z', '40m'],
+      ['2024-01-15T10:00:00Z', '2h'],
+      ['2024-01-15T09:30:00Z', '2h 30m'],
+      ['2024-01-12T08:00:00Z', '3d 4h'],
+      ['2023-08-15T12:00:00Z', '153d'],
+      ['2021-12-15T12:00:00Z', '2y 31d'],
+    ])('formats %s as %s', (date, expected) => {
+      expect(formatShortAge(date)).toBe(expected)
+    })
+
+    it('returns empty string for missing or invalid dates', () => {
+      expect(formatShortAge(null)).toBe('')
+      expect(formatShortAge('not a date')).toBe('')
     })
   })
 
