@@ -3,10 +3,16 @@ import { IssueLink } from 'components/workbenches/common/IssueLink'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { CaptionP } from 'components/utils/typography/Text'
 import { IssueStatus, WorkbenchIssueFragment } from 'generated/graphql'
-import { includes, isEmpty, isNil } from 'lodash'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { includes, isEmpty } from 'lodash'
+import { useMemo } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
+import {
+  BoardSC,
+  BoardTitleSC,
+  LoadMoreSentinel,
+  useBoardLoadMore,
+} from './WorkbenchBoard'
 import {
   groupIssuesByStatus,
   ISSUE_STATUS_LABELS,
@@ -29,16 +35,7 @@ export function WorkbenchIssuesBoard({
   fallbackWorkbenchId?: string
 }) {
   const grouped = useMemo(() => groupIssuesByStatus(issues), [issues])
-  const fetchingRef = useRef(false)
-  const loadMore = useCallback(() => {
-    if (fetchingRef.current || loading || !hasNextPage) return
-    fetchingRef.current = true
-    fetchNextPage()
-  }, [fetchNextPage, hasNextPage, loading])
-
-  useEffect(() => {
-    if (!loading) fetchingRef.current = false
-  }, [loading])
+  const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
 
   const visibleStatuses = useMemo(
     () => ISSUE_STATUS_OPTIONS.filter((status) => includes(statuses, status)),
@@ -57,9 +54,9 @@ export function WorkbenchIssuesBoard({
     <BoardSC>
       <HeaderBandSC $columnCount={visibleStatuses.length}>
         {visibleStatuses.map((status) => (
-          <ColumnTitleSC key={status}>
+          <BoardTitleSC key={status}>
             {ISSUE_STATUS_LABELS[status]}
-          </ColumnTitleSC>
+          </BoardTitleSC>
         ))}
       </HeaderBandSC>
       <ColumnsRowSC $columnCount={visibleStatuses.length}>
@@ -137,40 +134,12 @@ function EmptyColumnCard() {
   )
 }
 
-function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const element = ref.current
-    if (isNil(element)) return
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting) onVisible()
-    })
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [onVisible])
-
-  return <LoadMoreSentinelSC ref={ref} />
-}
-
 function boardGrid(columnCount: number) {
   return {
     display: 'grid',
     gridTemplateColumns: `repeat(${Math.max(columnCount, 1)}, minmax(0, 1fr))`,
   } as const
 }
-
-const BoardSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  width: '100%',
-  minWidth: 0,
-  minHeight: 0,
-  overflowX: 'hidden',
-  overflowY: 'auto',
-})
 
 const HeaderBandSC = styled.div<{ $columnCount: number }>(
   ({ theme, $columnCount }) => ({
@@ -202,16 +171,6 @@ const ColumnSC = styled.div({
   gap: 0,
   minWidth: 0,
 })
-
-const ColumnTitleSC = styled.h2(({ theme }) => ({
-  ...theme.partials.text.mono,
-  fontSize: 18,
-  fontWeight: 400,
-  lineHeight: '24px',
-  letterSpacing: 0,
-  margin: 0,
-  color: theme.colors.text,
-}))
 
 const CardsSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -266,10 +225,6 @@ const EmptyCardTextSC = styled.p(({ theme }) => ({
   width: '100%',
   color: theme.colors['text-light'],
 }))
-
-const LoadMoreSentinelSC = styled.div({
-  height: 1,
-})
 
 const LoadingSC = styled(Flex)({
   flex: 1,

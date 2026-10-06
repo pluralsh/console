@@ -1,22 +1,82 @@
 import { Flex } from '@pluralsh/design-system'
-import { WorkbenchJobsTable } from './WorkbenchJobsTable'
-import { WorkbenchJobsSearch } from './WorkbenchJobsSearch'
+import usePersistedState from 'components/hooks/usePersistedState'
+import { GqlError } from 'components/utils/Alert'
+import {
+  DisplayPopover,
+  DisplayView,
+  DisplayViewToggle,
+  parseDisplayView,
+} from 'components/utils/display/DisplayPanel'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { useWorkbenchJobsQuery } from 'generated/graphql'
+import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
 import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
+import { WorkbenchJobsBoard } from './WorkbenchJobsBoard'
+import { WorkbenchJobsSearch } from './WorkbenchJobsSearch'
+import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
+
+const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
+const WORKBENCH_JOBS_VIEWS: DisplayView[] = ['list', 'board']
+const DEFAULT_WORKBENCH_JOBS_VIEW: DisplayView = 'list'
 
 export function WorkbenchJobs() {
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
+  const [view, setView] = usePersistedState(
+    WORKBENCH_JOBS_VIEW_STORAGE_KEY,
+    DEFAULT_WORKBENCH_JOBS_VIEW,
+    0,
+    (value: unknown): DisplayView =>
+      parseDisplayView(value, WORKBENCH_JOBS_VIEWS, DEFAULT_WORKBENCH_JOBS_VIEW)
+  )
+
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
+      { id: workbenchId }
+    )
+  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
 
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
-      headerActions={<WorkbenchJobsSearch workbenchId={workbenchId} />}
+      headerActions={
+        <>
+          <WorkbenchJobsSearch workbenchId={workbenchId} />
+          <DisplayPopover showDot={false}>
+            <DisplayViewToggle
+              view={view}
+              views={WORKBENCH_JOBS_VIEWS}
+              onChange={setView}
+            />
+          </DisplayPopover>
+        </>
+      }
     >
       <WrapperSC>
-        <TableContainerSC>
-          <WorkbenchJobsTable workbenchId={workbenchId} />
-        </TableContainerSC>
+        {error ? (
+          <GqlError error={error} />
+        ) : view === 'board' ? (
+          <WorkbenchJobsBoard
+            jobs={jobs}
+            loading={loading}
+            hasNextPage={!!pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+          />
+        ) : (
+          <TableContainerSC>
+            <WorkbenchJobsTableContent
+              jobs={jobs}
+              loading={loading}
+              loaded={!!data}
+              pageInfo={pageInfo}
+              fetchNextPage={fetchNextPage}
+              setVirtualSlice={setVirtualSlice}
+            />
+          </TableContainerSC>
+        )}
       </WrapperSC>
     </WorkbenchPageLayout>
   )

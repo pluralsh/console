@@ -13,30 +13,20 @@ import { WorkbenchQueuedPromptChip } from 'components/workbenches/common/Workben
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
-import { GqlError } from 'components/utils/Alert'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
-import {
-  VirtualSlice,
-  useFetchPaginatedData,
-} from 'components/utils/table/useFetchPaginatedData'
+import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { WorkbenchUsageSummaryChip } from 'components/workbenches/common/WorkbenchUsageChips'
-import {
-  PageInfoFragment,
-  WorkbenchJobTinyFragment,
-  useWorkbenchJobsQuery,
-} from 'generated/graphql'
-import { useMemo } from 'react'
+import { PageInfoFragment, WorkbenchJobTinyFragment } from 'generated/graphql'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchEvalResultAbsPath,
   getWorkbenchJobAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ActivityModalIcon } from './job/WorkbenchJobActivityResults'
 import {
@@ -46,28 +36,6 @@ import {
 
 const WORKBENCH_JOB_ROW_HEIGHT = 52
 const getWorkbenchJobRowHeight = () => WORKBENCH_JOB_ROW_HEIGHT
-
-export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
-      { id: workbenchId }
-    )
-  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
-
-  if (error) return <GqlError error={error} />
-
-  return (
-    <WorkbenchJobsTableContent
-      jobs={jobs}
-      loading={loading}
-      loaded={!!data}
-      pageInfo={pageInfo}
-      fetchNextPage={fetchNextPage}
-      setVirtualSlice={setVirtualSlice}
-    />
-  )
-}
 
 export function WorkbenchJobsTableContent({
   jobs,
