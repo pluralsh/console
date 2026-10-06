@@ -92,10 +92,87 @@ function Template({ closeButton, ...args }: any) {
   )
 }
 
+const DESIGN_ORDER = ['danger', 'info', 'warning', 'success'] as const
+
+const compactHeading = {
+  danger: 'You have an error.',
+  info: 'Here’s some info.',
+  warning: 'Here’s a warning.',
+  success: 'Success!',
+} as const
+
+function ActionLink() {
+  return (
+    <Link
+      href="#"
+      onClick={(e) => e.preventDefault()}
+    >
+      Action
+    </Link>
+  )
+}
+
+function Description() {
+  return (
+    <>
+      {
+        'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
+      }
+      <Link
+        href="#"
+        onClick={(e) => e.preventDefault()}
+      >
+        incidents
+      </Link>
+      .
+    </>
+  )
+}
+
+function NotificationDesignTemplate() {
+  return (
+    <Flex
+      direction="column"
+      align="flex-start"
+      gap="xxlarge"
+      width={464}
+    >
+      {DESIGN_ORDER.map((severity) => (
+        <Banner
+          key={`${severity}-compact`}
+          severity={severity}
+          heading={compactHeading[severity]}
+          action={<ActionLink />}
+          fullWidth={severity !== 'success'}
+          onClose={() => {}}
+        />
+      ))}
+      {DESIGN_ORDER.map((severity) => (
+        <Banner
+          key={`${severity}-detail`}
+          severity={severity}
+          heading={compactHeading[severity]}
+          fullWidth
+          onClose={() => {}}
+        >
+          <Description />
+        </Banner>
+      ))}
+    </Flex>
+  )
+}
+
 export const Default: Story = {
   render: Template,
   args: {
     closeButton: false,
     severity: 'info',
+  },
+}
+
+export const NotificationDesign: Story = {
+  render: NotificationDesignTemplate,
+  globals: {
+    theme: 'dark',
   },
 }
