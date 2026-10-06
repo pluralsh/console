@@ -596,9 +596,9 @@ const RowActionsSC = styled.div({
 
 const FiringDotSC = styled.span(({ theme }) => ({
   backgroundColor: theme.colors['icon-danger'],
-  borderRadius: 5,
-  height: 10,
-  width: 10,
+  borderRadius: '50%',
+  height: theme.spacing.xsmall,
+  width: theme.spacing.xsmall,
 }))
 
 const DeleteSC = styled.span({
