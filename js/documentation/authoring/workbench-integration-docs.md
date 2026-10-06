@@ -40,6 +40,8 @@ Do not copy a setup guide verbatim. Rewrite it as public documentation in the se
 
 The files under `js/console/public/setup-guides/` are embedded Console assets, not pages on the documentation site. Do not turn their repository paths into `/setup-guides/...` links. Link only to an existing published documentation route or an authoritative external page.
 
+Add links when they help the reader continue to relevant setup or conceptual documentation. Link the first natural mention, avoid duplicate nearby links, and never construct a URL by translating a repository path.
+
 Do not invent permissions, API methods, Console fields, screenshots, or image paths.
 
 Name operations the way the code names them, without the configured-tool suffix. `slack_post_message_#{name}` is the operation `slack_post_message`.
