@@ -2,13 +2,11 @@ import {
   AddIcon,
   CheckIcon,
   CloseIcon,
-  DashboardIcon,
   EmptyState,
   Flex,
   IconFrame,
   Input,
   SearchIcon,
-  SirenIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -41,7 +39,7 @@ import {
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
   WORKBENCH_MONITORING_MONITOR_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -275,8 +273,6 @@ export function WorkbenchMonitoringSidebar({
 }
 
 function MonitoringListSkeleton({ count }: { count: number }) {
-  const theme = useTheme()
-
   return (
     <Flex
       direction="column"
@@ -285,28 +281,17 @@ function MonitoringListSkeleton({ count }: { count: number }) {
       {times(count, (i) => (
         <Flex
           key={i}
-          gap="small"
-          align="center"
+          direction="column"
+          gap="xsmall"
         >
           <RectangleSkeleton
-            $height="xlarge"
-            $width={theme.spacing.xlarge}
-            css={{ flexShrink: 0 }}
+            $height="xsmall"
+            $width="70%"
           />
-          <Flex
-            direction="column"
-            gap="xsmall"
-            flex={1}
-          >
-            <RectangleSkeleton
-              $height="xsmall"
-              $width="70%"
-            />
-            <RectangleSkeleton
-              $height="xsmall"
-              $width="45%"
-            />
-          </Flex>
+          <RectangleSkeleton
+            $height="xsmall"
+            $width="45%"
+          />
         </Flex>
       ))}
     </Flex>
@@ -346,12 +331,6 @@ function DashboardRow({
         })}
         aria-label={`Dashboard ${dashboard.name}`}
       >
-        <RowIconSC
-          aria-hidden="true"
-          size="medium"
-          type="secondary"
-          icon={<DashboardIcon />}
-        />
         <RowTextSC>
           <RowTitleSC>{dashboard.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -429,12 +408,6 @@ function MonitorRow({
         })}
         aria-label={`Monitor ${monitor.name}`}
       >
-        <RowIconSC
-          aria-hidden="true"
-          size="medium"
-          type="secondary"
-          icon={<SirenIcon />}
-        />
         <RowTextSC>
           <RowTitleSC>{monitor.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -585,17 +558,12 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
   },
 }))
 
-const RowLinkSC = styled(Link)(({ theme }) => ({
+const RowLinkSC = styled(Link)({
   alignItems: 'center',
   display: 'flex',
   flex: 1,
-  gap: theme.spacing.small,
   minWidth: 0,
   textDecoration: 'none',
-}))
-
-const RowIconSC = styled(IconFrame)({
-  flexShrink: 0,
 })
 
 const RowTextSC = styled.div(({ theme }) => ({
