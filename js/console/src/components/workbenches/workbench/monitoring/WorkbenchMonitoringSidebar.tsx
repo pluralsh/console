@@ -194,22 +194,17 @@ export function WorkbenchMonitoringSidebar({
                       </CaptionP>
                     </PaddedSC>
                   ) : (
-                    <EmptyAddSC>
-                      <EmptyAddButtonSC
-                        small
-                        tertiary
-                        startIcon={<AddIcon size={12} />}
-                        onClick={() =>
-                          navigate(
-                            getWorkbenchMonitoringDashboardCreateAbsPath(
-                              workbenchId
-                            )
+                    <EmptyAddButton
+                      onClick={() =>
+                        navigate(
+                          getWorkbenchMonitoringDashboardCreateAbsPath(
+                            workbenchId
                           )
-                        }
-                      >
-                        Add dashboard
-                      </EmptyAddButtonSC>
-                    </EmptyAddSC>
+                        )
+                      }
+                    >
+                      Add dashboard
+                    </EmptyAddButton>
                   )
                 ) : (
                   <>
@@ -273,22 +268,17 @@ export function WorkbenchMonitoringSidebar({
                       </CaptionP>
                     </PaddedSC>
                   ) : (
-                    <EmptyAddSC>
-                      <EmptyAddButtonSC
-                        small
-                        tertiary
-                        startIcon={<AddIcon size={12} />}
-                        onClick={() =>
-                          navigate(
-                            getWorkbenchMonitoringMonitorCreateAbsPath(
-                              workbenchId
-                            )
+                    <EmptyAddButton
+                      onClick={() =>
+                        navigate(
+                          getWorkbenchMonitoringMonitorCreateAbsPath(
+                            workbenchId
                           )
-                        }
-                      >
-                        Add monitor
-                      </EmptyAddButtonSC>
-                    </EmptyAddSC>
+                        )
+                      }
+                    >
+                      Add monitor
+                    </EmptyAddButton>
                   )
                 ) : (
                   <>
@@ -312,6 +302,27 @@ export function WorkbenchMonitoringSidebar({
         )}
       </GroupsSC>
     </WrapperSC>
+  )
+}
+
+function EmptyAddButton({
+  children,
+  onClick,
+}: {
+  children: string
+  onClick: () => void
+}) {
+  return (
+    <PaddedSC>
+      <EmptyAddButtonSC
+        small
+        tertiary
+        startIcon={<AddIcon size={12} />}
+        onClick={onClick}
+      >
+        {children}
+      </EmptyAddButtonSC>
+    </PaddedSC>
   )
 }
 
@@ -553,10 +564,7 @@ const PaddedSC = styled.div(({ theme }) => ({
   padding: `0 ${theme.spacing.medium}px`,
 }))
 
-const EmptyAddSC = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px 0`,
-}))
-
+// Same treatment as the workbench side panel empty add button.
 const EmptyAddButtonSC = styled(Button)(({ theme }) => ({
   ...theme.partials.reset.button,
   ...theme.partials.text.caption,
