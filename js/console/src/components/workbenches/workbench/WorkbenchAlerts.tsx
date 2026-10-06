@@ -76,6 +76,7 @@ export function WorkbenchAlerts() {
 
   return (
     <WorkbenchPageLayout
+      sidebar={{ kind: 'none' }}
       headerActions={
         <DisplayPopover showDot={false}>
           <DisplayViewToggle

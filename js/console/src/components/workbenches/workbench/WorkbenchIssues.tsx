@@ -109,6 +109,7 @@ export function WorkbenchIssues() {
 
   return (
     <WorkbenchPageLayout
+      sidebar={{ kind: 'none' }}
       showEditWorkbenchButton={false}
       headerActions={
         <>

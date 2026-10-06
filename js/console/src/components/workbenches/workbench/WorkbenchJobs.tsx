@@ -42,6 +42,7 @@ export function WorkbenchJobs() {
 
   return (
     <WorkbenchPageLayout
+      sidebar={{ kind: 'none' }}
       showEditWorkbenchButton={false}
       headerActions={
         <>
