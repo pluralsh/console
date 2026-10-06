@@ -71,6 +71,66 @@ func TestWithFunctionCode(t *testing.T) {
 	})
 }
 
+func TestSelectFunctionKey(t *testing.T) {
+	t.Parallel()
+	provider := &AzureProvider{}
+
+	t.Run("returns default key when present", func(t *testing.T) {
+		t.Parallel()
+		other := "other-key"
+		def := "default-key"
+		got := provider.selectFunctionKey(map[string]*string{"abc": &other, "default": &def})
+		if got != "default-key" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("skips an empty default key", func(t *testing.T) {
+		t.Parallel()
+		empty := ""
+		val := "abc"
+		got := provider.selectFunctionKey(map[string]*string{"default": &empty, "k": &val})
+		if got != "abc" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("returns empty when no keys", func(t *testing.T) {
+		t.Parallel()
+		if got := provider.selectFunctionKey(nil); got != "" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+}
+
+func TestParseFunctionKeys(t *testing.T) {
+	t.Parallel()
+	provider := &AzureProvider{}
+
+	t.Run("reads keys at the top level", func(t *testing.T) {
+		t.Parallel()
+		keys := parseFunctionKeys([]byte(`{"default":"abc","other":"def"}`))
+		if got := provider.selectFunctionKey(keys); got != "abc" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("skips values that aren't keys", func(t *testing.T) {
+		t.Parallel()
+		keys := parseFunctionKeys([]byte(`{"properties":{"default":"abc"}}`))
+		if got := provider.selectFunctionKey(keys); got != "" {
+			t.Fatalf("unexpected key: %q", got)
+		}
+	})
+
+	t.Run("returns nothing for invalid JSON", func(t *testing.T) {
+		t.Parallel()
+		if keys := parseFunctionKeys([]byte(`not json`)); keys != nil {
+			t.Fatalf("unexpected keys: %v", keys)
+		}
+	})
+}
+
 func TestSelectHostKey(t *testing.T) {
 	t.Parallel()
 	provider := &AzureProvider{}
