@@ -529,9 +529,6 @@ const GroupListSC = styled.div(() => ({
   overflowY: 'auto',
 }))
 
-// IconFrame small (24) + gap + IconFrame small; matches inline confirm.
-const ROW_ACTION_WIDTH = 52
-
 const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
   alignItems: 'center',
   // Note: Figma fill tokens predate the DS rename; these current tokens
@@ -591,8 +588,7 @@ const RowActionsSC = styled.div({
   alignItems: 'center',
   display: 'grid',
   flexShrink: 0,
-  justifyItems: 'end',
-  width: ROW_ACTION_WIDTH,
+  justifyItems: 'center',
   '& > *': {
     gridArea: '1 / 1',
   },
@@ -611,7 +607,6 @@ const DeleteSC = styled.span({
   flexShrink: 0,
   justifyContent: 'flex-end',
   transition: 'opacity 0.15s ease',
-  width: ROW_ACTION_WIDTH,
 })
 
 const InlineConfirmSC = styled.span(({ theme }) => ({
@@ -620,5 +615,5 @@ const InlineConfirmSC = styled.span(({ theme }) => ({
   flexShrink: 0,
   gap: theme.spacing.xxsmall,
   justifyContent: 'flex-end',
-  width: ROW_ACTION_WIDTH,
+  justifySelf: 'end',
 }))
