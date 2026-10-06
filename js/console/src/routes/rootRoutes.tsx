@@ -17,6 +17,11 @@ const Sandbox =
     ? lazy(() => import('components/utils/Sandbox'))
     : null
 
+const NotificationTest =
+  import.meta.env.MODE === 'development'
+    ? lazy(() => import('components/utils/NotificationTest'))
+    : null
+
 function Root() {
   return (
     <Suspense fallback={<FullPageLoadingIndicator />}>
@@ -52,6 +57,9 @@ export const rootRoutes = [
         element: <Invite />,
       },
       ...(!!Sandbox ? [{ path: 'sandbox', element: <Sandbox /> }] : []),
+      ...(!!NotificationTest
+        ? [{ path: 'dev/notifications', element: <NotificationTest /> }]
+        : []),
       {
         path: '*',
         element: <Console />,
