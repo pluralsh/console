@@ -13,7 +13,6 @@ defmodule Console.Deployments.Stacks do
   alias Console.AI.{Provider, Tools.ApproveStack}
   alias Console.Deployments.Policy, as: PolicyEngine
   alias Console.Deployments.Policy.Input, as: PolicyInput
-  alias Console.Deployments.Stacks.Plan
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
     User,
@@ -626,7 +625,7 @@ defmodule Console.Deployments.Stacks do
     |> case do
       [_ | _] = policies ->
         with {:ok, engine, path} <- PolicyEngine.compile_policies(:stack, policies),
-             {:ok, result} <- PolicyEngine.eval_policy(engine, stack_policy_input(run), Enum.map(policies, & &1.id), path) do
+             {:ok, result} <- PolicyEngine.eval_policy(engine, PolicyInput.stack_approval(run), Enum.map(policies, & &1.id), path) do
           case result do
             %{"deny" => [_ | _] = denials} ->
               {:decide, %{result: :rejected, reason: PolicyEngine.policy_reason(denials, "denied by stack policy")}}
@@ -639,28 +638,6 @@ defmodule Console.Deployments.Stacks do
     end
   end
   defp maybe_policy_approval(_), do: :continue
-
-  defp stack_policy_input(%StackRun{} = run) do
-    %{
-      "stage" => "approval",
-      "now" => DateTime.to_iso8601(DateTime.utc_now()),
-      "plan" => stack_plan(run),
-      "actor" => PolicyInput.actor(run.actor),
-      "run_type" => Plan.run_type(run),
-      "stack" => PolicyInput.stack(run.stack),
-      "commit" => PolicyInput.commit(run),
-      "costs" => PolicyInput.costs(run.infracost_resources),
-      "violations" => PolicyInput.violations(run.violations),
-      "run" => run_intent(run),
-      "variables" => PolicyInput.variables(run),
-      "environment" => PolicyInput.environment(run.environment),
-      "files" => PolicyInput.files(run.files)
-    }
-  end
-
-  defp stack_plan(%StackRun{state: %StackState{plan_json: plan}}) when is_map(plan),
-    do: Plan.convert(plan)
-  defp stack_plan(_), do: Plan.convert(nil)
 
   defp maybe_ai_approval(%StackRun{
     type: :terraform,
@@ -907,18 +884,27 @@ defmodule Console.Deployments.Stacks do
     steps =
       Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: infer_stage(&1), status: :pending, name: "cmd #{&2}"}))
       |> template_cmds(ctx)
-    stack = Repo.preload(stack, @run_preloads)
 
-    %StackRun{stack_id: id, status: :queued}
-    |> StackRun.changeset(
-      stack_attrs(stack, sha)
-      |> Map.put(:message, name || @default_run_name)
-      |> Map.put(:steps, steps)
-    )
-    |> allow(user, :write)
-    |> when_ok(fn cs ->
-      after_run_policy(stack, sha, custom_run_policy_attrs(user, name), fn -> Repo.insert(cs) end)
+    start_transaction()
+    |> add_operation(:stack, fn _ ->
+      stack
+      |> Repo.preload(@run_preloads)
+      |> allow(user, :write)
     end)
+    |> add_operation(:run, fn %{stack: stack} ->
+      after_run_policy(stack, sha, custom_run_policy_attrs(user, name), fn ->
+        %StackRun{stack_id: id, status: :queued}
+        |> StackRun.changeset(
+          stack_attrs(stack, sha)
+          |> Map.put(:message, name || @default_run_name)
+          |> Map.put(:steps, steps)
+        )
+        |> Repo.insert()
+      end)
+      |> ok_or_policy_deny()
+    end)
+    |> execute(extract: :run)
+    |> unwrap_policy_deny()
     |> notify(:create)
   end
   def create_custom_run(stack_id, commands, name, ctx, user) when is_binary(stack_id) do
@@ -1030,7 +1016,7 @@ defmodule Console.Deployments.Stacks do
     with {:ok, engine, path} <- PolicyEngine.compile_policies(:stack, policies),
          {:ok, result} <- PolicyEngine.eval_policy(
            engine,
-           stack_run_policy_input(stack, sha, attrs),
+           PolicyInput.stack_run(stack, sha, attrs, policy_actor(attrs, stack)),
            Enum.map(policies, & &1.id),
            path
          ) do
@@ -1042,55 +1028,8 @@ defmodule Console.Deployments.Stacks do
     do: {:deny, PolicyEngine.policy_reason(denials, "denied by stack policy")}
   defp deny_run_result(_), do: :continue
 
-  defp stack_run_policy_input(%Stack{} = stack, sha, attrs) do
-    %{
-      "stage" => "run",
-      "now" => DateTime.to_iso8601(DateTime.utc_now()),
-      "trigger" => trigger_input(attrs),
-      "actor" => PolicyInput.actor(policy_actor(attrs, stack)),
-      "stack" => PolicyInput.stack(stack),
-      "commit" => PolicyInput.commit(commit_attrs(sha, attrs)),
-      "run" => run_intent(stack, attrs),
-      "variables" => PolicyInput.variables(stack),
-      "environment" => PolicyInput.environment(stack.environment),
-      "files" => PolicyInput.files(stack.files),
-      "changes" => PolicyInput.changes(attrs[:changes])
-    }
-  end
-
-  defp commit_attrs(sha, attrs) do
-    %{sha: sha, message: attrs[:message], committer: attrs[:committer]}
-  end
-
-  defp trigger_input(%{trigger: %{source: source}}), do: %{"source" => trigger_source(source)}
-  defp trigger_input(%{trigger: source}), do: %{"source" => trigger_source(source)}
-  defp trigger_input(_), do: %{}
-
-  defp trigger_source(source) when is_atom(source), do: Atom.to_string(source)
-  defp trigger_source(source) when is_binary(source), do: source
-  defp trigger_source(_), do: nil
-
   defp policy_actor(%{policy_actor: %User{} = user}, _), do: Repo.preload(user, :groups)
   defp policy_actor(_, %Stack{actor: actor}), do: actor
-
-  defp run_intent(%StackRun{dry_run: dry_run, destroy: destroy, pull_request_id: pr_id}) do
-    %{
-      "dry_run" => !!dry_run,
-      "destroy" => !!destroy,
-      "pull_request" => is_binary(pr_id)
-    }
-  end
-  defp run_intent(%Stack{} = stack, attrs) do
-    %{
-      "dry_run" => !!attrs[:dry_run],
-      "destroy" => destroy_run?(stack, attrs),
-      "pull_request" => is_binary(attrs[:pull_request_id])
-    }
-  end
-
-  defp destroy_run?(%Stack{deleted_at: deleted}, _) when not is_nil(deleted), do: true
-  defp destroy_run?(_, %{destroy: true}), do: true
-  defp destroy_run?(_, _), do: false
 
   defp manual_run_attrs(%User{} = user, message) do
     %{message: message, trigger: %{source: :manual}, policy_actor: user}

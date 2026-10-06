@@ -1,4 +1,5 @@
 defmodule Console.Deployments.Policy.Input do
+  alias Console.Deployments.Stacks.Plan
   alias Console.Schema.{
     GitRepository,
     Project,
@@ -8,10 +9,47 @@ defmodule Console.Deployments.Policy.Input do
     StackInfracostResource,
     StackPolicyViolation,
     StackRun,
+    StackState,
     StackViolationCause,
     User,
     Workbench
   }
+
+  @doc "Builds the full input document for a run-stage stack policy evaluation."
+  def stack_run(%Stack{} = stack, sha, attrs, user) do
+    %{
+      "stage" => "run",
+      "now" => now(),
+      "trigger" => trigger(attrs),
+      "actor" => actor(user),
+      "stack" => __MODULE__.stack(stack),
+      "commit" => commit(%{sha: sha, message: attrs[:message], committer: attrs[:committer]}),
+      "run" => run_intent(stack, attrs),
+      "variables" => variables(stack),
+      "environment" => environment(stack.environment),
+      "files" => files(stack.files),
+      "changes" => changes(attrs[:changes])
+    }
+  end
+
+  @doc "Builds the full input document for an approval-stage stack policy evaluation."
+  def stack_approval(%StackRun{} = run) do
+    %{
+      "stage" => "approval",
+      "now" => now(),
+      "plan" => plan(run),
+      "actor" => actor(run.actor),
+      "run_type" => Plan.run_type(run),
+      "stack" => stack(run.stack),
+      "commit" => commit(run),
+      "costs" => costs(run.infracost_resources),
+      "violations" => violations(run.violations),
+      "run" => run_intent(run),
+      "variables" => variables(run),
+      "environment" => environment(run.environment),
+      "files" => files(run.files)
+    }
+  end
 
   @doc "Builds the target payload used as binding policy input."
   def binding(%Workbench{} = target), do: %{workbench: clean_binding_target(target)}
@@ -184,4 +222,37 @@ defmodule Console.Deployments.Policy.Input do
 
   defp repo_url(%GitRepository{url: url}), do: url
   defp repo_url(_), do: nil
+
+  defp now(), do: DateTime.to_iso8601(DateTime.utc_now())
+
+  defp trigger(%{trigger: %{source: source}}), do: %{"source" => trigger_source(source)}
+  defp trigger(%{trigger: source}), do: %{"source" => trigger_source(source)}
+  defp trigger(_), do: %{}
+
+  defp trigger_source(source) when is_atom(source), do: Atom.to_string(source)
+  defp trigger_source(source) when is_binary(source), do: source
+  defp trigger_source(_), do: nil
+
+  defp run_intent(%StackRun{dry_run: dry_run, destroy: destroy, pull_request_id: pr_id}) do
+    %{
+      "dry_run" => !!dry_run,
+      "destroy" => !!destroy,
+      "pull_request" => is_binary(pr_id)
+    }
+  end
+  defp run_intent(%Stack{} = stack, attrs) do
+    %{
+      "dry_run" => !!attrs[:dry_run],
+      "destroy" => destroy_run?(stack, attrs),
+      "pull_request" => is_binary(attrs[:pull_request_id])
+    }
+  end
+
+  defp destroy_run?(%Stack{deleted_at: deleted}, _) when not is_nil(deleted), do: true
+  defp destroy_run?(_, %{destroy: true}), do: true
+  defp destroy_run?(_, _), do: false
+
+  defp plan(%StackRun{state: %StackState{plan_json: plan}}) when is_map(plan),
+    do: Plan.convert(plan)
+  defp plan(_), do: Plan.convert(nil)
 end

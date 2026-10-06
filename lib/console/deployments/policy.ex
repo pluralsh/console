@@ -292,58 +292,48 @@ defmodule Console.Deployments.Policy do
     end
   end
 
-  defp attach_binding(%BindingPolicy{type: :stack} = binding, %Stack{} = stack, user),
-    do: sync_stack_binding(binding, stack, user, :attach)
-  defp attach_binding(%BindingPolicy{} = binding, target, user) do
+  defp attach_binding(binding, target, user) do
     case fetch_attachment(binding, target) do
       %{} -> :ok
       _ -> reconcile_target(:attach, binding, target, user)
     end
+
+    Enum.each(owned_attachments(binding, target), &drop_stale_attachment(&1, binding, target, user))
   end
 
-  defp detach_binding(%BindingPolicy{type: :stack} = binding, %Stack{} = stack, user),
-    do: sync_stack_binding(binding, stack, user, :detach)
-  defp detach_binding(%BindingPolicy{id: id} = binding, target, user) do
-    case fetch_attachment(binding, target) do
-      %{binding_policy_id: ^id} -> reconcile_target(:detach, binding, target, user)
-      _ -> :ok
-    end
+  defp detach_binding(binding, target, user) do
+    Enum.each(owned_attachments(binding, target), &release_attachment(&1, binding, target, user))
   end
 
   defp fetch_attachment(%BindingPolicy{policy_id: id}, %Workbench{id: wid}),
     do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
+  defp fetch_attachment(%BindingPolicy{policy_id: id} = binding, %Stack{id: sid}),
+    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid, type: stack_policy_type(binding))
 
-  defp sync_stack_binding(binding, stack, user, :detach) do
-    Enum.each(owned_stack_attachments(binding, stack), &release_stack_attachment(&1, binding, stack, user))
+  defp owned_attachments(%BindingPolicy{id: id}, %Workbench{id: wid}) do
+    case Repo.get_by(WorkbenchPolicy, binding_policy_id: id, workbench_id: wid) do
+      nil -> []
+      attachment -> [attachment]
+    end
   end
-  defp sync_stack_binding(binding, stack, user, :attach) do
-    desired = stack_policy_type(binding)
-    owned = owned_stack_attachments(binding, stack)
-
-    ensure_stack_attachment(binding, stack, user, desired, owned)
-    Enum.each(owned, &drop_stale_stack_attachment(&1, desired, binding, stack, user))
-  end
-
-  defp ensure_stack_attachment(binding, stack, user, desired, owned) do
-    owned
-    |> Enum.find(& &1.type == desired)
-    |> create_missing_stack_attachment(binding, stack, user, desired)
+  defp owned_attachments(%BindingPolicy{id: id}, %Stack{id: sid}) do
+    StackPolicy.for_stack(sid)
+    |> StackPolicy.for_binding(id)
+    |> Repo.all()
   end
 
-  defp create_missing_stack_attachment(%StackPolicy{}, _, _, _, _), do: :ok
-  defp create_missing_stack_attachment(_, binding, stack, user, desired) do
-    attach_stack_unless_present(binding, stack, user, stack_type_attached?(binding, stack, desired))
+  defp drop_stale_attachment(%StackPolicy{type: type} = attachment, binding, target, user) do
+    drop_stale_attachment(type, stack_policy_type(binding), attachment, binding, target, user)
   end
+  defp drop_stale_attachment(_, _, _, _), do: :ok
 
-  defp attach_stack_unless_present(_, _, _, true), do: :ok
-  defp attach_stack_unless_present(binding, stack, user, false),
-    do: reconcile_target(:attach, binding, stack, user)
+  defp drop_stale_attachment(type, type, _, _, _, _), do: :ok
+  defp drop_stale_attachment(_, _, attachment, binding, target, user),
+    do: release_attachment(attachment, binding, target, user)
 
-  defp drop_stale_stack_attachment(%{type: type} = attachment, desired, binding, stack, user) when type != desired,
-    do: release_stack_attachment(attachment, binding, stack, user)
-  defp drop_stale_stack_attachment(_, _, _, _, _), do: :ok
-
-  defp release_stack_attachment(attachment, binding, stack, user) do
+  defp release_attachment(%WorkbenchPolicy{}, binding, target, user),
+    do: reconcile_target(:detach, binding, target, user)
+  defp release_attachment(%StackPolicy{} = attachment, binding, stack, user) do
     binding
     |> sibling_stack_bindings()
     |> Enum.map(&stack_attachment_claim(&1, stack, attachment.type))
@@ -397,19 +387,6 @@ defmodule Console.Deployments.Policy do
   defp keep_or_release_stack_attachment(_, true, _, _), do: :ok
   defp keep_or_release_stack_attachment(_, false, attachment, user),
     do: Stacks.delete_stack_policy(attachment.id, user)
-
-  defp owned_stack_attachments(%BindingPolicy{id: id}, %Stack{id: sid}) do
-    StackPolicy.for_stack(sid)
-    |> StackPolicy.for_binding(id)
-    |> Repo.all()
-  end
-
-  defp stack_type_attached?(%BindingPolicy{policy_id: policy_id}, %Stack{id: stack_id}, type) do
-    StackPolicy.for_stack(stack_id)
-    |> StackPolicy.for_policy(policy_id)
-    |> StackPolicy.for_type(type)
-    |> Repo.exists?()
-  end
 
   defp reconcile_target(:attach, %BindingPolicy{id: binding_id, policy_id: id} = binding, %Workbench{} = wb, user),
     do: Workbenches.create_workbench_policy(%{
