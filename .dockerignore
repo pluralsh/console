@@ -1,7 +1,6 @@
+# Context ignore file for the console prebake image. CI copies this over .dockerignore.
+.idea/
 .vscode/
-.gitignore
-.dockerignore
-
 /_build/
 /cover/
 /deps/
@@ -12,10 +11,11 @@ erl_crash.dump
 watchman-*.tar
 /priv/data
 /data
-
-Dockerfile*
-Makefile
-README*
+/binaries/
+secrets/
+.gopath/
+.cache/
+/target/
 **/node_modules/
 .pnp.*
 /js/.yarn/*
@@ -25,6 +25,4 @@ README*
 /js/design-system/dist/
 /js/design-system/storybook-static/
 /js/documentation/.next/
-
-# Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json

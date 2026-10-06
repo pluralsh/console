@@ -45,7 +45,7 @@ All native integrations respect your existing RBAC — enabling a capability her
 
 | Tool | What the agent can do |
 |---|---|
-| **[GitHub](/plural-features/workbenches/integrations/tools/github)** | Read repositories, list PRs, and (in Write mode) open pull requests |
+| **[GitHub](/plural-features/workbenches/integrations/tools/github)** | Read, search, and comment on issues and pull requests; review and close pull requests; read releases, tags, and code scanning, Dependabot, or secret scanning alerts |
 | **[GitLab](/plural-features/workbenches/integrations/tools/gitlab)** | Same as GitHub for GitLab projects |
 | **[Bitbucket Cloud](/plural-features/workbenches/integrations/tools/bitbucket)** | Same as GitHub for Bitbucket Cloud |
 | **[Bitbucket Data Center](/plural-features/workbenches/integrations/tools/bitbucket-datacenter)** | Same as GitHub for self-hosted Bitbucket Data Center |
@@ -54,7 +54,7 @@ All native integrations respect your existing RBAC — enabling a capability her
 
 | Tool | What the agent can do |
 |---|---|
-| **[Slack](/plural-features/workbenches/integrations/tools/slack)** | Post messages and read channel history |
+| **[Slack](/plural-features/workbenches/integrations/tools/slack)** | Post, edit, and react to messages; read channel history; create channels and manage invites and user groups |
 | **Microsoft Teams** | Post messages to Teams channels |
 
 ### Issue tracking
@@ -63,6 +63,12 @@ All native integrations respect your existing RBAC — enabling a capability her
 |---|---|
 | **[Atlassian (Jira)](/plural-features/workbenches/integrations/tools/atlassian)** | Create, read, and update Jira issues |
 | **[Linear](/plural-features/workbenches/integrations/tools/linear)** | Create and update Linear issues |
+
+### Incident management
+
+| Tool | What the agent can do |
+|---|---|
+| **[PagerDuty](/plural-features/workbenches/integrations/tools/pagerduty)** | Read incidents, notes, and timeline log entries |
 
 ### Cloud
 
