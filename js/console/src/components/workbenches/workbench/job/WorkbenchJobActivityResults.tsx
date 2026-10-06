@@ -2,9 +2,7 @@ import { Line, LineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
-  CheckIcon,
   Code,
-  CopyIcon,
   DiffMethod,
   DiffViewer,
   ExpandIcon,
@@ -191,25 +189,16 @@ function UserPromptActions({
           {formatDateTime(timestamp, 'h:mmA')}
         </CaptionP>
       )}
-      <IconFrame
-        clickable
-        as="div"
-        size="small"
-        tooltip="Copy to clipboard"
-        type="tertiary"
-        style={{ width: 16, height: 16 }}
+      <Button
+        small
+        floating
         onClick={(e) => {
           e.stopPropagation()
           handleCopy()
         }}
-        icon={
-          copied ? (
-            <CheckIcon color="icon-success" />
-          ) : (
-            <CopyIcon color="icon-xlight" />
-          )
-        }
-      />
+      >
+        {copied ? 'Copied' : 'Copy'}
+      </Button>
     </PromptActionsSC>
   )
 }
@@ -960,28 +949,25 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     position: 'relative',
     width: '100%',
     marginTop: $fullWidth ? 0 : theme.spacing.small,
-    // Hover target for the copy row. The negative margin eats this padding
-    // back out so it doesn't stack on the list's activity gap.
-    paddingBottom: theme.spacing.small,
+    // Clearance under the card, then the copy row. Negative margin folds the
+    // list's activity gap into this space so it isn't added twice.
+    paddingBottom: theme.spacing.xlarge + theme.spacing.xxsmall,
     marginBottom: -theme.spacing.small,
   })
 )
 
-// Sits in the activity gap (spacing.small) under the card. Hover only fades
-// the controls in, so the thread doesn't jump and the prompt isn't a taller
-// hole than the messages under it. Anything taller hangs into the card
-// padding instead of the next row.
+// Fully below the card, right-aligned. Hover fades it in; the row stays put
+// so the thread doesn't jump and the button never covers the prompt.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
   position: 'absolute',
   right: 0,
   bottom: 0,
-  left: 0,
   zIndex: 1,
   display: 'flex',
-  alignItems: 'flex-end',
+  alignItems: 'center',
   justifyContent: 'flex-end',
-  gap: theme.spacing.xxsmall,
-  height: theme.spacing.small,
+  gap: theme.spacing.xsmall,
+  height: theme.spacing.xlarge,
   opacity: $show ? 1 : 0,
   transition: 'opacity 0.15s ease',
   pointerEvents: 'none',
