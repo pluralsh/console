@@ -537,11 +537,30 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
   display: 'flex',
   gap: theme.spacing.xsmall,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  position: 'relative',
+  // Dashboard delete sits over the title so the name can use the full row.
+  '& > .delete-action, & > .inline-confirm': {
+    backgroundColor: $selected
+      ? theme.colors['fill-two-selected']
+      : theme.colors['fill-zero-selected'],
+    paddingLeft: theme.spacing.xsmall,
+    position: 'absolute',
+    right: theme.spacing.medium,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    zIndex: 1,
+  },
   '&:hover': {
     backgroundColor: $selected
       ? theme.colors['fill-two-selected']
       : theme.colors['fill-one-hover'],
   },
+  '&:hover > .delete-action, &:focus-within > .delete-action, &:hover > .inline-confirm, &:focus-within > .inline-confirm':
+    {
+      backgroundColor: $selected
+        ? theme.colors['fill-two-selected']
+        : theme.colors['fill-one-hover'],
+    },
   '& .delete-action': {
     opacity: 0,
     pointerEvents: 'none',
