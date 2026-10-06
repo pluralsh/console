@@ -14,6 +14,7 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
@@ -233,7 +234,8 @@ function WorkbenchJobDetailsPanel({
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const data = useWorkbenchJobTabsData(jobId)
+  // the job page's activity stream isn't mounted here, so poll for draft PRs
+  const data = useWorkbenchJobTabsData(jobId, { pollInterval: POLL_INTERVAL })
   const { job, isLoading } = data
   const tabs = useMemo(() => getDetailsTabs(data), [data])
   const [selectedTab, setSelectedTab] = useSelectedJobTab<DetailsTab>(

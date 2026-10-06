@@ -168,9 +168,12 @@ export function WorkbenchJobPanelContent() {
 export type WorkbenchJobTabsData = ReturnType<typeof useWorkbenchJobTabsData>
 
 // Job data behind the job tabs, shared by the job side panel and the Jobs tab
-// details view. Polling is handled by the job page / details view, which keeps
-// the cache up to date.
-export function useWorkbenchJobTabsData(jobId: string) {
+// details view. On the job page, polling is handled by the page itself (which
+// keeps the cache up to date); views without that pass `pollInterval`.
+export function useWorkbenchJobTabsData(
+  jobId: string,
+  { pollInterval }: { pollInterval?: number } = {}
+) {
   const { data, loading } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
@@ -179,7 +182,8 @@ export function useWorkbenchJobTabsData(jobId: string) {
   const { data: activitiesData } = useWorkbenchJobActivitiesQuery({
     skip: !jobId,
     variables: { id: jobId },
-    fetchPolicy: 'cache-first',
+    fetchPolicy: pollInterval ? 'cache-and-network' : 'cache-first',
+    pollInterval,
   })
   const {
     hasActions,

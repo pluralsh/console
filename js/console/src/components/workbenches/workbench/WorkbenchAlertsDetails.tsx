@@ -1,4 +1,5 @@
 import {
+  Button,
   Chip,
   EmptyState,
   ErrorIcon,
@@ -94,12 +95,18 @@ export function WorkbenchAlertsDetails({
     () => countBy(alerts, ({ severity }) => severity),
     [alerts]
   )
+  // ignore selected severities whose chip disappeared (no alerts left), so the
+  // filter can't get stuck on a chip that can no longer be toggled off
+  const activeSeverities = useMemo(
+    () => severities.filter((severity) => severityCounts[severity]),
+    [severities, severityCounts]
+  )
   const visible = useMemo(
     () =>
-      isEmpty(severities)
+      isEmpty(activeSeverities)
         ? alerts
-        : alerts.filter(({ severity }) => severities.includes(severity)),
-    [alerts, severities]
+        : alerts.filter(({ severity }) => activeSeverities.includes(severity)),
+    [alerts, activeSeverities]
   )
   const selected = visible.find(({ id }) => id === selectedId) ?? visible[0]
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
@@ -129,10 +136,11 @@ export function WorkbenchAlertsDetails({
                 fillLevel={2}
                 severity={alertSeverityToChipSeverity[severity]}
                 inactive={
-                  !isEmpty(severities) && !severities.includes(severity)
+                  !isEmpty(activeSeverities) &&
+                  !activeSeverities.includes(severity)
                 }
-                aria-pressed={severities.includes(severity)}
-                onClick={() => setSeverities(xor(severities, [severity]))}
+                aria-pressed={activeSeverities.includes(severity)}
+                onClick={() => setSeverities(xor(activeSeverities, [severity]))}
                 css={{ borderRadius: 12 }}
               >
                 {ALERT_SEVERITY_SHORT_LABELS[severity]} (
@@ -142,6 +150,17 @@ export function WorkbenchAlertsDetails({
           </SeverityChipsSC>
         </DetailsListSearchSC>
         <DetailsListItemsSC>
+          {isEmpty(visible) && (
+            <EmptyState message="No alerts match the selected severities.">
+              <Button
+                small
+                secondary
+                onClick={() => setSeverities([])}
+              >
+                Reset filters
+              </Button>
+            </EmptyState>
+          )}
           {visible.map((alert) => (
             <DetailsListItem
               key={alert.id}

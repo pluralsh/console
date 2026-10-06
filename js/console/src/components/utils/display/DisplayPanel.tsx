@@ -15,13 +15,14 @@ import {
   SortDescIcon,
   useFloatingDropdown,
 } from '@pluralsh/design-system'
-import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
+import { useClickOutside } from '@react-hooks-library/core'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import { xor } from 'lodash'
 import {
   ComponentProps,
   ReactElement,
   ReactNode,
+  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -56,15 +57,19 @@ export function toggleListValue<T>(list: T[], value: T): T[] {
 
 export function DisplayButton({
   showDot,
+  expanded,
   onClick,
 }: {
   showDot: boolean
+  expanded?: boolean
   onClick: () => void
 }) {
   return (
     <Button
       secondary
       startIcon={<FiltersIcon />}
+      aria-haspopup="dialog"
+      aria-expanded={expanded}
       onClick={onClick}
     >
       <DisplayLabelSC>
@@ -99,6 +104,20 @@ export function DisplayPopover({
     sizeToContent: true,
   })
 
+  // The panel is portalled to the end of the document, so move keyboard focus
+  // into it when it opens.
+  useEffect(() => {
+    if (!open) return
+    const id = requestAnimationFrame(() =>
+      floating.refs.floating.current
+        ?.querySelector<HTMLElement>(
+          'button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        )
+        ?.focus()
+    )
+    return () => cancelAnimationFrame(id)
+  }, [open, floating.refs.floating])
+
   useClickOutside(ref, (event) => {
     if (
       event.target instanceof Node &&
@@ -109,18 +128,30 @@ export function DisplayPopover({
     setOpen(false)
   })
 
-  useKeyDown(['Escape'], () => setOpen(false))
-
   return (
-    <div ref={triggerRef}>
+    // Escape is handled here rather than globally, and stopped, so it only
+    // closes the popover (and not e.g. also clear a tab's search). React events
+    // bubble through the portal, so this covers the panel too.
+    <div
+      ref={triggerRef}
+      onKeyDown={(e) => {
+        if (e.key !== 'Escape' || !open) return
+        e.stopPropagation()
+        setOpen(false)
+        ref.current?.querySelector('button')?.focus()
+      }}
+    >
       <DisplayButton
         showDot={showDot}
+        expanded={open}
         onClick={() => setOpen(!open)}
       />
       {open && (
         <FloatingPortal id={theme.portals.default.id}>
           <PopoverPanelSC
             ref={floating.refs.setFloating}
+            role="dialog"
+            aria-label="Display options"
             fillLevel={1}
             style={{
               position: floating.strategy,
