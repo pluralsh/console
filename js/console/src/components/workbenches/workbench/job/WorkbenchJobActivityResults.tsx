@@ -186,28 +186,30 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      {timestamp && (
-        <CaptionP $color="text-long-form">
-          {formatDateTime(timestamp, 'h:mmA')}
-        </CaptionP>
-      )}
-      <IconFrame
-        clickable
-        as="div"
-        tooltip={copied ? 'Copied' : 'Copy to clipboard'}
-        type="tertiary"
-        onClick={(e) => {
-          e.stopPropagation()
-          handleCopy()
-        }}
-        icon={
-          copied ? (
-            <CheckIcon color="icon-success" />
-          ) : (
-            <CopyIcon color="icon-xlight" />
-          )
-        }
-      />
+      <div>
+        {timestamp && (
+          <CaptionP $color="text-long-form">
+            {formatDateTime(timestamp, 'h:mmA')}
+          </CaptionP>
+        )}
+        <IconFrame
+          clickable
+          as="div"
+          tooltip="Copy to clipboard"
+          type="tertiary"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleCopy()
+          }}
+          icon={
+            copied ? (
+              <CheckIcon color="icon-success" />
+            ) : (
+              <CopyIcon color="icon-xlight" />
+            )
+          }
+        />
+      </div>
     </PromptActionsSC>
   )
 }
@@ -955,32 +957,32 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     display: 'flex',
     flexDirection: 'column',
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
-    position: 'relative',
     width: '100%',
     marginTop: $fullWidth ? 0 : theme.spacing.small,
-    // Clearance under the card, then the copy row. Negative margin folds the
-    // list's activity gap into this space so it isn't added twice.
-    paddingBottom: theme.spacing.xlarge + theme.spacing.xxsmall,
+    // The activity list already adds its own gap under this row.
     marginBottom: -theme.spacing.small,
   })
 )
 
-// Fully below the card, right-aligned. Hover fades it in; the row stays put
-// so the thread doesn't jump and the button never covers the prompt.
+// Same timestamp and copy icon as before. The row stays at full height so
+// hover only fades it in and the thread does not jump.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  position: 'absolute',
-  right: 0,
-  bottom: 0,
-  zIndex: 1,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: theme.spacing.xsmall,
-  height: theme.spacing.xlarge,
+  display: 'grid',
+  gridTemplateRows: '1fr',
+  justifyItems: 'end',
+  width: '100%',
   opacity: $show ? 1 : 0,
-  transition: 'opacity 0.15s ease',
-  pointerEvents: 'none',
-  '& > *': { pointerEvents: $show ? 'auto' : 'none' },
+  transition: 'opacity 0.25s ease',
+  pointerEvents: $show ? 'auto' : 'none',
+  '> div': {
+    overflow: 'hidden',
+    minHeight: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: theme.spacing.xxsmall,
+    paddingTop: 6,
+  },
 }))
 
 const PromptCardSC = styled(Card)<{
