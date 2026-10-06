@@ -7,6 +7,7 @@ import styled from 'styled-components'
 
 const DETAILS_LIST_WIDTH = 350
 const STATUS_GUTTER_SIZE = 10
+const DETAILS_PANEL_HEADER_HEIGHT = 44
 
 export type DetailsGutterStatus = 'running' | 'failed' | null
 
@@ -52,7 +53,7 @@ export function DetailsStatusGutter({
   if (status === 'running')
     return (
       <AgentLoadingIcon
-        size={STATUS_GUTTER_SIZE}
+        size={STATUS_GUTTER_SIZE - 1}
         variant="cursorEq"
       />
     )
@@ -106,11 +107,25 @@ export const DetailsLayoutSC = styled.div<{ $panelCount: number }>(
 export const DetailsListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  minWidth: 0,
+  minHeight: 0,
+  borderRight: theme.borders.default,
+}))
+
+export const DetailsListSearchSC = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  padding: theme.spacing.medium,
+  borderBottom: theme.borders.default,
+}))
+
+export const DetailsListItemsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
   gap: theme.spacing.xsmall,
+  flex: 1,
   minHeight: 0,
   overflowY: 'auto',
   overflowX: 'hidden',
-  borderRight: theme.borders.default,
 }))
 
 export const DetailsColumnSC = styled.div(({ theme }) => ({
@@ -178,7 +193,7 @@ const GutterSC = styled.div({
 const ListItemTextSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xxxsmall,
+  gap: theme.spacing.xxsmall,
   flex: 1,
   minWidth: 0,
 }))
@@ -189,6 +204,8 @@ const ListItemTitleSC = styled.div(({ theme }) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  // keep rich titles (prompt markdown) on the same line height
+  '& *': { lineHeight: theme.partials.text.body2LooseLineHeight.lineHeight },
 }))
 
 const ListItemSubtitleSC = styled.div(({ theme }) => ({
@@ -214,7 +231,7 @@ const PanelHeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   gap: theme.spacing.small,
   flexShrink: 0,
-  minHeight: 44,
+  minHeight: DETAILS_PANEL_HEADER_HEIGHT,
   padding: `0 ${theme.spacing.medium}px`,
   borderBottom: theme.borders.default,
   backgroundColor: theme.colors['fill-one'],

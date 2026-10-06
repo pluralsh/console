@@ -30,7 +30,6 @@ import {
 import { isEmpty, isNil, uniqBy } from 'lodash'
 import {
   ReactElement,
-  ReactNode,
   useCallback,
   useEffect,
   useEffectEvent,
@@ -61,8 +60,7 @@ import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-const NO_EXCLUDED_TABS: JobPanelTab[] = []
-export type JobPanelTab =
+type JobPanelTab =
   | 'Result'
   | 'Dashboard'
   | 'Topology'
@@ -72,51 +70,107 @@ export type JobPanelTab =
   | 'Actions'
 
 export function WorkbenchJobPanelContent() {
+  const { spacing } = useTheme()
   const { pathname } = useLocation() // useParams won't work because the panel renders outside the workbench route tree
   const jobId =
     matchPath(WORKBENCH_JOB_ABS_PATH, pathname)?.params[
       WORKBENCH_JOBS_PARAM_JOB
     ] ?? ''
   const { setOpen } = useWorkbenchJobPanel()
+  const tabStateRef = useRef<any>(null)
+  const data = useWorkbenchJobTabsData(jobId)
+  const { job, isLoading, areActionsLoading } = data
+  const tabs = useMemo(() => getPanelTabs(data), [data])
+  const [selectedTab, setSelectedTab] = useSelectedJobTab(tabs, 'Result')
+
+  useEffect(() => {
+    if (isLoading || areActionsLoading) return
+    if (job && isEmpty(tabs)) setOpen(false)
+  }, [areActionsLoading, isLoading, job, setOpen, tabs])
 
   return (
     <SidePanelContent>
-      <WorkbenchJobTabs
-        jobId={jobId}
-        onEmpty={() => setOpen(false)}
-        headerActions={
-          <IconFrame
-            clickable
-            css={{ flexShrink: 0 }}
-            icon={<CloseIcon />}
-            onClick={() => setOpen(false)}
-            tooltip="Close panel"
+      <PanelHeaderSC>
+        <TabListWrapperSC>
+          <TabList
+            scrollable
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: selectedTab,
+              onSelectionChange: (key) =>
+                setSelectedTab(String(key) as JobPanelTab),
+            }}
+            css={{ gap: spacing.small, width: '100%' }}
+          >
+            {tabs.map(({ label, icon, showDot }) => (
+              <PanelSubTabSC
+                key={label}
+                textValue={label}
+              >
+                {icon}
+                {label !== 'Result' ? (
+                  showDot ? (
+                    <TabLabelWithIndicatorDot showDot>
+                      {label}
+                    </TabLabelWithIndicatorDot>
+                  ) : (
+                    label
+                  )
+                ) : !isJobRunning(job?.status) && job?.result?.conclusion ? (
+                  'Conclusion'
+                ) : (
+                  'Working theory'
+                )}
+              </PanelSubTabSC>
+            ))}
+          </TabList>
+        </TabListWrapperSC>
+        <IconFrame
+          clickable
+          css={{ flexShrink: 0 }}
+          icon={<CloseIcon />}
+          onClick={() => setOpen(false)}
+          tooltip="Close panel"
+        />
+      </PanelHeaderSC>
+      <ContentWrapperSC>
+        <ContentInnerSC>
+          {selectedTab === 'Result' &&
+            (isLoading || hasWorkbenchJobResultContent(job)) && (
+              <WorkbenchJobResult
+                job={job}
+                loading={isLoading}
+              />
+            )}
+          {selectedTab === 'Pull requests' && job?.id && (
+            <WorkbenchJobPrs
+              generatedPrs={data.generatedPrs}
+              draftPrs={data.draftPrs}
+              workbenchId={job.workbench?.id ?? ''}
+              workbenchName={job.workbench?.name ?? ''}
+              jobId={job.id}
+            />
+          )}
+          {selectedTab === 'Usage' && job?.usage && (
+            <WorkbenchJobUsage usage={job.usage} />
+          )}
+          <WorkbenchJobCommonTabContent
+            tab={selectedTab}
+            job={job}
           />
-        }
-      />
+        </ContentInnerSC>
+      </ContentWrapperSC>
     </SidePanelContent>
   )
 }
 
-// Tabbed job details (result, dashboard, PRs, eval, usage, actions) shared by
-// the job side panel and the Jobs tab details view.
-export function WorkbenchJobTabs({
-  jobId,
-  excludedTabs = NO_EXCLUDED_TABS,
-  headerActions,
-  onEmpty,
-}: {
-  jobId: string
-  excludedTabs?: JobPanelTab[]
-  headerActions?: ReactNode
-  onEmpty?: () => void
-}) {
-  const { spacing } = useTheme()
-  const handleEmpty = useEffectEvent(() => onEmpty?.())
-  const tabStateRef = useRef<any>(null)
-  const [selectedTab, setSelectedTab] = useState<JobPanelTab>('Result')
+export type WorkbenchJobTabsData = ReturnType<typeof useWorkbenchJobTabsData>
 
-  // polling handled by WorkbenchJob.tsx which should also update the cache
+// Job data behind the job tabs, shared by the job side panel and the Jobs tab
+// details view. Polling is handled by the job page / details view, which keeps
+// the cache up to date.
+export function useWorkbenchJobTabsData(jobId: string) {
   const { data, loading } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
@@ -141,7 +195,10 @@ export function WorkbenchJobTabs({
         .filter(isNonNullable) ?? [],
     [activitiesData]
   )
-  const pullRequests = job?.pullRequests?.filter(isNonNullable) ?? []
+  const pullRequests = useMemo(
+    () => job?.pullRequests?.filter(isNonNullable) ?? [],
+    [job?.pullRequests]
+  )
   const generatedPrs = useMemo(
     () =>
       pullRequests.filter(
@@ -189,26 +246,35 @@ export function WorkbenchJobTabs({
 
     return [...agentRunDrafts, ...patchPrDrafts]
   }, [activities, pullRequests])
-  const hasDraftPrsAwaitingApproval = draftPrs.length > 0
 
-  const tabs = useMemo(
-    () =>
-      getPanelTabs(
-        job,
-        hasDraftPrsAwaitingApproval,
-        hasActions,
-        hasActionsAwaitingApproval,
-        isLoading
-      ).filter(({ label }) => !excludedTabs.includes(label)),
-    [
-      excludedTabs,
+  return useMemo(
+    () => ({
+      job,
+      isLoading,
+      areActionsLoading,
+      generatedPrs,
+      draftPrs,
       hasActions,
       hasActionsAwaitingApproval,
-      hasDraftPrsAwaitingApproval,
+    }),
+    [
+      areActionsLoading,
+      draftPrs,
+      generatedPrs,
+      hasActions,
+      hasActionsAwaitingApproval,
       isLoading,
       job,
     ]
   )
+}
+
+// Keeps the selection on an available tab as tabs appear and disappear.
+export function useSelectedJobTab<T extends string>(
+  tabs: { label: T }[],
+  initial: T
+) {
+  const [selectedTab, setSelectedTab] = useState<T>(initial)
 
   useEffect(() => {
     if (tabs.some(({ label }) => label === selectedTab)) return
@@ -216,91 +282,36 @@ export function WorkbenchJobTabs({
     if (tabs[0]) setSelectedTab(tabs[0].label)
   }, [selectedTab, tabs])
 
-  useEffect(() => {
-    if (isLoading || areActionsLoading) return
-    if (job && isEmpty(tabs)) handleEmpty()
-  }, [areActionsLoading, isLoading, job, tabs])
+  return [selectedTab, setSelectedTab] as const
+}
 
-  return (
-    <>
-      <PanelHeaderSC>
-        <TabListWrapperSC>
-          <TabList
-            scrollable
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: selectedTab,
-              onSelectionChange: (key) =>
-                setSelectedTab(String(key) as JobPanelTab),
-            }}
-            css={{ gap: spacing.small, width: '100%' }}
-          >
-            {tabs.map(({ label, icon, showDot }) => (
-              <PanelSubTabSC
-                key={label}
-                textValue={label}
-              >
-                {icon}
-                {label !== 'Result' ? (
-                  showDot ? (
-                    <TabLabelWithIndicatorDot showDot>
-                      {label}
-                    </TabLabelWithIndicatorDot>
-                  ) : (
-                    label
-                  )
-                ) : !isJobRunning(job?.status) && job?.result?.conclusion ? (
-                  'Conclusion'
-                ) : (
-                  'Working theory'
-                )}
-              </PanelSubTabSC>
-            ))}
-          </TabList>
-        </TabListWrapperSC>
-        {headerActions}
-      </PanelHeaderSC>
-      <ContentWrapperSC>
-        <ContentInnerSC>
-          {selectedTab === 'Result' &&
-            (isLoading || hasWorkbenchJobResultContent(job)) && (
-              <WorkbenchJobResult
-                job={job}
-                loading={isLoading}
-              />
-            )}
-          {selectedTab === 'Dashboard' && job?.id && (
-            <WorkbenchJobCanvas
-              jobId={job.id}
-              canvas={job?.result?.canvas}
-            />
-          )}
-          {selectedTab === 'Topology' && (
-            <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
-          )}
-          {selectedTab === 'Pull requests' && job?.id && (
-            <WorkbenchJobPrs
-              generatedPrs={generatedPrs}
-              draftPrs={draftPrs}
-              workbenchId={job.workbench?.id ?? ''}
-              workbenchName={job.workbench?.name ?? ''}
-              jobId={job.id}
-            />
-          )}
-          {selectedTab === 'Eval' && job?.evalResult && (
-            <WorkbenchJobEval job={job} />
-          )}
-          {selectedTab === 'Usage' && job?.usage && (
-            <WorkbenchJobUsage usage={job?.usage} />
-          )}
-          {selectedTab === 'Actions' && job?.id && (
-            <WorkbenchJobActions jobId={job.id} />
-          )}
-        </ContentInnerSC>
-      </ContentWrapperSC>
-    </>
-  )
+// Tab content that renders the same in the job side panel and the details view.
+export function WorkbenchJobCommonTabContent({
+  tab,
+  job,
+}: {
+  tab: string
+  job: Nullable<WorkbenchJobFragment>
+}) {
+  if (!job?.id) return null
+
+  switch (tab) {
+    case 'Dashboard':
+      return (
+        <WorkbenchJobCanvas
+          jobId={job.id}
+          canvas={job.result?.canvas}
+        />
+      )
+    case 'Topology':
+      return <WorkbenchJobTopology topology={job.result?.topology ?? ''} />
+    case 'Eval':
+      return job.evalResult ? <WorkbenchJobEval job={job} /> : null
+    case 'Actions':
+      return <WorkbenchJobActions jobId={job.id} />
+    default:
+      return null
+  }
 }
 
 export function useWorkbenchJobPanel(autoOpen?: Nullable<boolean>) {
@@ -376,13 +387,13 @@ const PanelSubTabSC = styled(SubTab)(({ theme }) => ({
   },
 }))
 
-const getPanelTabs = (
-  job: Nullable<WorkbenchJobFragment>,
-  hasDraftPrsAwaitingApproval: boolean,
-  hasActions: boolean,
-  hasActionsAwaitingApproval: boolean,
-  isLoading: boolean
-) =>
+const getPanelTabs = ({
+  job,
+  isLoading,
+  draftPrs,
+  hasActions,
+  hasActionsAwaitingApproval,
+}: WorkbenchJobTabsData) =>
   [
     (isLoading || hasWorkbenchJobResultContent(job)) && {
       label: 'Result',
@@ -396,10 +407,10 @@ const getPanelTabs = (
       label: 'Topology',
       icon: <GraphIcon size={12} />,
     },
-    (!isEmpty(job?.pullRequests) || hasDraftPrsAwaitingApproval) && {
+    (!isEmpty(job?.pullRequests) || !isEmpty(draftPrs)) && {
       label: 'Pull requests',
       icon: <PrIcon size={12} />,
-      showDot: hasDraftPrsAwaitingApproval,
+      showDot: !isEmpty(draftPrs),
     },
     job?.evalResult && {
       label: 'Eval',

@@ -52,9 +52,14 @@ export type WorkbenchJobDraftPr =
 export function WorkbenchJobResult({
   job,
   loading,
+  showAlertAndIssue = true,
+  scrollable = true,
 }: {
   job: Nullable<WorkbenchJobFragment>
   loading: boolean
+  showAlertAndIssue?: boolean
+  // false lets a parent scroll container scroll the result with other content
+  scrollable?: boolean
 }) {
   const { spacing } = useTheme()
   const resultText = getWorkbenchJobResultText(job)
@@ -74,17 +79,19 @@ export function WorkbenchJobResult({
     <Flex
       direction="column"
       gap="xlarge"
-      height="100%"
-      minHeight={0}
-      overflow="auto"
+      {...(scrollable && { height: '100%', minHeight: 0, overflow: 'auto' })}
     >
-      <WorkbenchJobTriggerAlert alert={job?.alert} />
-      <WorkbenchJobTriggerIssue issue={job?.issue} />
+      {showAlertAndIssue && (
+        <>
+          <WorkbenchJobTriggerAlert alert={job?.alert} />
+          <WorkbenchJobTriggerIssue issue={job?.issue} />
+        </>
+      )}
       <WorkbenchJobTriggerChatbot job={job} />
       {resultText && (
         <Flex
           direction="column"
-          overflow="auto"
+          overflow={scrollable ? 'auto' : undefined}
         >
           <ChatMarkdown text={resultText} />
         </Flex>

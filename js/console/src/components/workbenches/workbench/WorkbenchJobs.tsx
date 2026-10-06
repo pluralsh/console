@@ -45,7 +45,9 @@ export function WorkbenchJobs() {
       showEditWorkbenchButton={false}
       headerActions={
         <>
-          <WorkbenchJobsSearch workbenchId={workbenchId} />
+          {view !== 'details' && (
+            <WorkbenchJobsSearch workbenchId={workbenchId} />
+          )}
           <DisplayPopover showDot={false}>
             <DisplayViewToggle
               view={view}
@@ -58,6 +60,7 @@ export function WorkbenchJobs() {
     >
       {!error && view === 'details' ? (
         <WorkbenchJobsDetails
+          workbenchId={workbenchId}
           jobs={jobs}
           loading={loading}
           hasNextPage={!!pageInfo?.hasNextPage}

@@ -795,6 +795,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
 
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
+  updatedAt
   usage {
     ...WorkbenchJobUsage
   }
@@ -984,6 +985,14 @@ fragment WorkbenchJobSearchRow on WorkbenchJob {
   id
   prompt
   status
+  insertedAt
+  user {
+    id
+    name
+  }
+  workbench {
+    id
+  }
   result {
     id
     conclusion
