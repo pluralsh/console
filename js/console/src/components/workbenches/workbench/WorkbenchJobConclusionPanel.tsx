@@ -8,6 +8,7 @@ import {
   DetailsLinkSC,
   DetailsPanelBodySC,
   DetailsPanelHeader,
+  DetailsTitleSC,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { useWorkbenchJobQuery, WorkbenchJobStatus } from 'generated/graphql'
 import { ReactNode, useLayoutEffect, useRef, useState } from 'react'
@@ -76,7 +77,7 @@ export function WorkbenchJobConclusionPanel({
                 direction="column"
                 gap="medium"
               >
-                <JobTitleSC>{job.workbench?.name}</JobTitleSC>
+                <DetailsTitleSC>{job.workbench?.name}</DetailsTitleSC>
                 <WorkbenchJobMeta
                   stacked
                   job={job}
@@ -97,7 +98,8 @@ export function WorkbenchJobConclusionPanel({
   )
 }
 
-function ExpandablePrompt({ prompt }: { prompt: string }) {
+// Prompt (or other text) clamped to a few lines with Read more / Read less.
+export function ExpandablePrompt({ prompt }: { prompt: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [expanded, setExpanded] = useState(false)
   const [overflowing, setOverflowing] = useState(false)
@@ -132,20 +134,6 @@ function ExpandablePrompt({ prompt }: { prompt: string }) {
     </Flex>
   )
 }
-
-const JobTitleSC = styled.h2(({ theme }) => ({
-  ...theme.partials.text.mono,
-  fontSize: 18,
-  fontWeight: 400,
-  lineHeight: '24px',
-  letterSpacing: 0,
-  margin: 0,
-  paddingTop: theme.spacing.small,
-  color: theme.colors.text,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-}))
 
 const ReadMoreSC = styled.button(({ theme }) => ({
   all: 'unset',

@@ -25,9 +25,10 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
 import { WorkbenchAlertsBoard } from './WorkbenchAlertsBoard'
+import { WorkbenchAlertsDetails } from './WorkbenchAlertsDetails'
 
 const WORKBENCH_ALERTS_VIEW_STORAGE_KEY = 'workbench-alerts-view'
-const WORKBENCH_ALERTS_VIEWS: DisplayView[] = ['list', 'board']
+const WORKBENCH_ALERTS_VIEWS: DisplayView[] = ['list', 'board', 'details']
 const DEFAULT_WORKBENCH_ALERTS_VIEW: DisplayView = 'list'
 
 export function WorkbenchAlerts() {
@@ -85,35 +86,45 @@ export function WorkbenchAlerts() {
         </DisplayPopover>
       }
     >
-      <WrapperSC>
-        {view === 'board' ? (
-          error ? (
-            <GqlError error={error} />
+      {!error && view === 'details' ? (
+        <WorkbenchAlertsDetails
+          alerts={alerts}
+          loading={loading}
+          hasNextPage={!!pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          fallbackWorkbenchId={workbenchId}
+        />
+      ) : (
+        <WrapperSC>
+          {view === 'board' ? (
+            error ? (
+              <GqlError error={error} />
+            ) : (
+              <WorkbenchAlertsBoard
+                alerts={alerts}
+                loading={loading}
+                hasNextPage={!!pageInfo?.hasNextPage}
+                fetchNextPage={fetchNextPage}
+              />
+            )
           ) : (
-            <WorkbenchAlertsBoard
-              alerts={alerts}
-              loading={loading}
-              hasNextPage={!!pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-            />
-          )
-        ) : (
-          <TableContainerSC>
-            <AlertsTable
-              alerts={alerts}
-              loading={!data && loading}
-              error={error}
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              setVirtualSlice={setVirtualSlice}
-              hideHeader
-              columns={columns}
-              fillLevel={0}
-              rowBg="stripes"
-            />
-          </TableContainerSC>
-        )}
-      </WrapperSC>
+            <TableContainerSC>
+              <AlertsTable
+                alerts={alerts}
+                loading={!data && loading}
+                error={error}
+                hasNextPage={pageInfo?.hasNextPage}
+                fetchNextPage={fetchNextPage}
+                setVirtualSlice={setVirtualSlice}
+                hideHeader
+                columns={columns}
+                fillLevel={0}
+                rowBg="stripes"
+              />
+            </TableContainerSC>
+          )}
+        </WrapperSC>
+      )}
     </WorkbenchPageLayout>
   )
 }

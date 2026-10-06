@@ -206,6 +206,21 @@ export const DetailsPanelBodySC = styled.div(({ theme }) => ({
       : theme.colors['fill-accent'],
 }))
 
+// Mono title at the top of a details panel body.
+export const DetailsTitleSC = styled.h2(({ theme }) => ({
+  ...theme.partials.text.mono,
+  fontSize: 18,
+  fontWeight: 400,
+  lineHeight: '24px',
+  letterSpacing: 0,
+  margin: 0,
+  paddingTop: theme.spacing.small,
+  color: theme.colors.text,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}))
+
 export const DetailsLinkSC = styled.span(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
   cursor: 'pointer',

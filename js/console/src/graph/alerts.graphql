@@ -26,6 +26,10 @@ fragment Alert on Alert {
     id
     status
   }
+  cluster {
+    id
+    name
+  }
   updatedAt
 }
 
