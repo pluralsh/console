@@ -2,7 +2,6 @@ import { Radio } from '@pluralsh/design-system'
 import {
   DisplayFilterRow,
   DisplayFilterRows,
-  DisplayPanel,
   DisplayRadioGroup,
   DisplaySection,
   DisplaySectionHeader,
@@ -23,10 +22,11 @@ import {
 import { startCase } from 'lodash'
 import {
   visibleIssueProviders,
+  WORKBENCH_ISSUES_VIEWS,
   WorkbenchIssuesDisplayState,
 } from './workbenchIssuesDisplay'
 
-export function WorkbenchIssuesDisplayPanel({
+export function WorkbenchIssuesDisplayOptions({
   state,
   onChange,
   providerCounts,
@@ -40,9 +40,10 @@ export function WorkbenchIssuesDisplayPanel({
   const providers = visibleIssueProviders(providerCounts)
 
   return (
-    <DisplayPanel>
+    <>
       <DisplayViewToggle
         view={state.view}
+        views={WORKBENCH_ISSUES_VIEWS}
         onChange={(view) => onChange({ ...state, view })}
       />
       <DisplaySection>
@@ -65,7 +66,7 @@ export function WorkbenchIssuesDisplayPanel({
         </DisplayFilterRows>
       </DisplaySection>
       <DisplaySection>
-        <DisplaySectionHeader>Ticket status</DisplaySectionHeader>
+        <DisplaySectionHeader>Issue status</DisplaySectionHeader>
         <DisplayFilterRows compact>
           {ISSUE_STATUS_OPTIONS.map((status) => (
             <DisplayFilterRow
@@ -114,6 +115,6 @@ export function WorkbenchIssuesDisplayPanel({
           </Radio>
         </DisplayRadioGroup>
       </DisplaySection>
-    </DisplayPanel>
+    </>
   )
 }

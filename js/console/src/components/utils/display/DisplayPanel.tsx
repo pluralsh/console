@@ -1,3 +1,4 @@
+import { FloatingPortal } from '@floating-ui/react'
 import {
   Button,
   Card,
@@ -8,16 +9,46 @@ import {
   FiltersIcon,
   Flex,
   IconFrame,
+  OpenPanelFilledLeftIcon,
   RadioGroup,
   SortAscIcon,
   SortDescIcon,
+  useFloatingDropdown,
 } from '@pluralsh/design-system'
+import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import { xor } from 'lodash'
-import { ComponentProps, ReactElement, ReactNode } from 'react'
-import styled from 'styled-components'
+import {
+  ComponentProps,
+  ReactElement,
+  ReactNode,
+  useRef,
+  useState,
+} from 'react'
+import styled, { useTheme } from 'styled-components'
 
-export type DisplayView = 'list' | 'board'
+export type DisplayView = 'list' | 'board' | 'details'
+
+const DISPLAY_POPOVER_WIDTH = 301
+
+const DISPLAY_VIEW_OPTIONS: Record<
+  DisplayView,
+  { label: string; icon: ReactElement }
+> = {
+  list: { label: 'List', icon: <DiffUnifiedIcon /> },
+  board: { label: 'Board', icon: <DiffColumnIcon /> },
+  details: { label: 'Details', icon: <OpenPanelFilledLeftIcon /> },
+}
+
+export function parseDisplayView(
+  value: unknown,
+  views: DisplayView[],
+  fallback: DisplayView
+): DisplayView {
+  return views.includes(value as DisplayView)
+    ? (value as DisplayView)
+    : fallback
+}
 
 export function toggleListValue<T>(list: T[], value: T): T[] {
   return xor(list, [value])
@@ -48,29 +79,84 @@ export function DisplayPanel({ children }: { children: ReactNode }) {
   return <PanelSC fillLevel={1}>{children}</PanelSC>
 }
 
+// Display button with its panel floating over the content below it.
+export function DisplayPopover({
+  showDot,
+  children,
+}: {
+  showDot: boolean
+  children: ReactNode
+}) {
+  const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false)
+  const { floating, triggerRef } = useFloatingDropdown({
+    triggerRef: ref,
+    placement: 'bottom-end',
+    width: DISPLAY_POPOVER_WIDTH,
+    minWidth: DISPLAY_POPOVER_WIDTH,
+    maxHeight: '80vh',
+    sizeToContent: true,
+  })
+
+  useClickOutside(ref, (event) => {
+    if (
+      event.target instanceof Node &&
+      floating.refs.floating.current?.contains(event.target)
+    )
+      return
+
+    setOpen(false)
+  })
+
+  useKeyDown(['Escape'], () => setOpen(false))
+
+  return (
+    <div ref={triggerRef}>
+      <DisplayButton
+        showDot={showDot}
+        onClick={() => setOpen(!open)}
+      />
+      {open && (
+        <FloatingPortal id={theme.portals.default.id}>
+          <PopoverPanelSC
+            ref={floating.refs.setFloating}
+            fillLevel={1}
+            style={{
+              position: floating.strategy,
+              left: floating.x ?? 0,
+              top: floating.y ?? 0,
+            }}
+          >
+            {children}
+          </PopoverPanelSC>
+        </FloatingPortal>
+      )}
+    </div>
+  )
+}
+
 export function DisplayViewToggle({
   view,
+  views = ['list', 'board'],
   onChange,
 }: {
   view: DisplayView
+  views?: DisplayView[]
   onChange: (view: DisplayView) => void
 }) {
   return (
-    <ViewToggleSC>
-      <ViewChip
-        selected={view === 'list'}
-        icon={<DiffUnifiedIcon />}
-        onClick={() => onChange('list')}
-      >
-        List
-      </ViewChip>
-      <ViewChip
-        selected={view === 'board'}
-        icon={<DiffColumnIcon />}
-        onClick={() => onChange('board')}
-      >
-        Board
-      </ViewChip>
+    <ViewToggleSC $count={views.length}>
+      {views.map((option) => (
+        <ViewChip
+          key={option}
+          selected={view === option}
+          icon={DISPLAY_VIEW_OPTIONS[option].icon}
+          onClick={() => onChange(option)}
+        >
+          {DISPLAY_VIEW_OPTIONS[option].label}
+        </ViewChip>
+      ))}
     </ViewToggleSC>
   )
 }
@@ -266,11 +352,22 @@ const PanelSC = styled(Card)(({ theme }) => ({
   width: 230,
 }))
 
-const ViewToggleSC = styled.div(({ theme }) => ({
+const PopoverPanelSC = styled(Card)(({ theme }) => ({
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  overflowY: 'auto',
+  padding: `0 ${theme.spacing.medium}px`,
+  boxShadow: theme.boxShadows.moderate,
+  zIndex: theme.zIndexes.selectPopover,
+  '& > :last-child': { borderBottom: 'none' },
+}))
+
+const ViewToggleSC = styled.div<{ $count: number }>(({ theme, $count }) => ({
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
+  gridTemplateColumns: `repeat(${$count}, 1fr)`,
   gap: theme.spacing.xxsmall,
-  padding: `${theme.spacing.medium}px 0`,
+  padding: `${theme.spacing.medium}px 0 ${theme.spacing.xsmall}px`,
 }))
 
 const SectionSC = styled.div(({ theme }) => ({

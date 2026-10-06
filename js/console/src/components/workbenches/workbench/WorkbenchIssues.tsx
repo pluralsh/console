@@ -6,10 +6,9 @@ import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIss
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
 import { GqlError } from 'components/utils/Alert'
 import {
-  DisplayButton,
-  DisplayContentSC,
   DisplayFilterEmpty,
-  DisplayMainSC,
+  DisplayPopover,
+  parseDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
@@ -24,10 +23,11 @@ import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
-import { WorkbenchIssuesDisplayPanel } from './WorkbenchIssuesDisplayPanel'
+import { WorkbenchIssuesDisplayOptions } from './WorkbenchIssuesDisplayOptions'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
   getIssueFilterEmptyKind,
+  WORKBENCH_ISSUES_VIEWS,
   hasUncheckedIssueFilters,
   resetIssueFilters,
   toIssueFilterVariables,
@@ -46,10 +46,13 @@ export function WorkbenchIssues() {
     DEFAULT_WORKBENCH_ISSUES_DISPLAY.view,
     0,
     (value: unknown): WorkbenchIssuesView =>
-      value === 'board' ? 'board' : 'list'
+      parseDisplayView(
+        value,
+        WORKBENCH_ISSUES_VIEWS,
+        DEFAULT_WORKBENCH_ISSUES_DISPLAY.view
+      )
   )
   const [searchString, setSearchString] = useState('')
-  const [displayOpen, setDisplayOpen] = useState(false)
   const [display, setDisplay] = useState(() => ({
     ...DEFAULT_WORKBENCH_ISSUES_DISPLAY,
     view: persistedView,
@@ -121,10 +124,14 @@ export function WorkbenchIssues() {
               placeholder="Search issues"
             />
           </IconExpander>
-          <DisplayButton
-            showDot={hasUncheckedIssueFilters(display)}
-            onClick={() => setDisplayOpen(!displayOpen)}
-          />
+          <DisplayPopover showDot={hasUncheckedIssueFilters(display)}>
+            <WorkbenchIssuesDisplayOptions
+              state={display}
+              onChange={updateDisplay}
+              providerCounts={providerCounts}
+              statusCounts={statusCounts}
+            />
+          </DisplayPopover>
         </>
       }
     >
@@ -132,43 +139,31 @@ export function WorkbenchIssues() {
         <GqlError error={error} />
       ) : (
         <WrapperSC>
-          <DisplayContentSC>
-            <DisplayMainSC>
-              {filterEmptyKind ? (
-                <DisplayFilterEmpty
-                  title={`No ${filterEmptyKind} selected`}
-                  description={`It looks like there are no ${filterEmptyKind} selected.`}
-                  onReset={() => updateDisplay(resetIssueFilters(display))}
-                />
-              ) : display.view === 'board' ? (
-                <WorkbenchIssuesBoard
-                  issues={issues}
-                  statuses={display.statuses}
-                  loading={loading}
-                  hasNextPage={!!pageInfo?.hasNextPage}
-                  fetchNextPage={fetchNextPage}
-                  fallbackWorkbenchId={workbenchId}
-                />
-              ) : (
-                <WorkbenchIssuesTable
-                  issues={issues}
-                  loading={isNil(data) && loading}
-                  hasNextPage={pageInfo?.hasNextPage}
-                  fetchNextPage={fetchNextPage}
-                  setVirtualSlice={setVirtualSlice}
-                  fallbackWorkbenchId={workbenchId}
-                />
-              )}
-            </DisplayMainSC>
-            {displayOpen && (
-              <WorkbenchIssuesDisplayPanel
-                state={display}
-                onChange={updateDisplay}
-                providerCounts={providerCounts}
-                statusCounts={statusCounts}
-              />
-            )}
-          </DisplayContentSC>
+          {filterEmptyKind ? (
+            <DisplayFilterEmpty
+              title={`No ${filterEmptyKind} selected`}
+              description={`It looks like there are no ${filterEmptyKind} selected.`}
+              onReset={() => updateDisplay(resetIssueFilters(display))}
+            />
+          ) : display.view === 'board' ? (
+            <WorkbenchIssuesBoard
+              issues={issues}
+              statuses={display.statuses}
+              loading={loading}
+              hasNextPage={!!pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+              fallbackWorkbenchId={workbenchId}
+            />
+          ) : (
+            <WorkbenchIssuesTable
+              issues={issues}
+              loading={isNil(data) && loading}
+              hasNextPage={pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+              setVirtualSlice={setVirtualSlice}
+              fallbackWorkbenchId={workbenchId}
+            />
+          )}
         </WrapperSC>
       )}
     </WorkbenchPageLayout>

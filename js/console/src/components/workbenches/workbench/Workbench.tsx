@@ -46,6 +46,7 @@ import {
   getWorkbenchEvalSettingsAbsPath,
   getWorkbenchSavedPromptsAbsPath,
   getWorkbenchWebhookTriggersAbsPath,
+  WORKBENCH_JOBS_PARAM_JOB,
   WORKBENCH_JOBS_REL_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
@@ -362,6 +363,10 @@ function renderWorkbenchSidebar(
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
   const { pathname } = useLocation()
+  // the job page sets its own, deeper breadcrumbs
+  const isJobPage = !!useMatch(
+    `${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_JOBS_REL_PATH}/:${WORKBENCH_JOBS_PARAM_JOB}`
+  )
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -396,8 +401,8 @@ export function Workbench() {
   useSetBreadcrumbs(
     useMemo(() => {
       void pathname
-      return getWorkbenchBreadcrumbs(workbench)
-    }, [pathname, workbench])
+      return isJobPage ? undefined : getWorkbenchBreadcrumbs(workbench)
+    }, [isJobPage, pathname, workbench])
   )
 
   const outletContext = useMemo<WorkbenchOutletContext>(
