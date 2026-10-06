@@ -1,6 +1,12 @@
-import { Banner, Button, Flex } from '@pluralsh/design-system'
-import { ReactNode, useEffect, useState } from 'react'
-import styled from 'styled-components'
+import {
+  Banner,
+  Button,
+  Flex,
+  styledThemeDark,
+  styledThemeLight,
+} from '@pluralsh/design-system'
+import { CSSProperties, ReactNode, useState } from 'react'
+import styled, { ThemeProvider } from 'styled-components'
 
 import {
   SimpleToastProvider,
@@ -10,6 +16,7 @@ import {
 const SEVERITIES = ['danger', 'info', 'warning', 'success'] as const
 
 type DesignSeverity = (typeof SEVERITIES)[number]
+type ConsoleTheme = typeof styledThemeDark
 
 const compactHeading = {
   danger: 'You have an error.',
@@ -20,6 +27,16 @@ const compactHeading = {
 
 const description =
   'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
+
+function colorVars(colors: ConsoleTheme['colors']): CSSProperties {
+  const style: Record<string, string> = {}
+
+  for (const [key, value] of Object.entries(colors)) {
+    if (typeof value === 'string') style[`--color-${key}`] = value
+  }
+
+  return style
+}
 
 function ActionLink() {
   return (
@@ -47,98 +64,97 @@ function Description() {
   )
 }
 
-function NotificationCases() {
-  const { popToast } = useSimpleToast()
+function ModeColumn({ theme, label }: { theme: ConsoleTheme; label: string }) {
+  return (
+    <ThemeProvider theme={theme}>
+      <PanelSC style={colorVars(theme.colors)}>
+        <LabelSC>{label}</LabelSC>
+        <Gallery />
+      </PanelSC>
+    </ThemeProvider>
+  )
+}
+
+function Gallery() {
   const [dismissed, setDismissed] = useState<ReadonlyArray<string>>([])
-
-  useEffect(() => {
-    popToast({
-      heading: compactHeading.danger,
-      content: <Description />,
-      severity: 'danger',
-      delayTimeout: 'none',
-    })
-  }, [popToast])
-
   const dismiss = (key: string) =>
     setDismissed((current) =>
       current.includes(key) ? current : [...current, key]
     )
 
   return (
-    <PageSC>
-      <Flex
-        direction="column"
-        align="flex-start"
-        gap="large"
+    <CaseColumnSC>
+      {SEVERITIES.map((severity) => {
+        const key = `${severity}-compact`
+
+        if (dismissed.includes(key)) return null
+
+        return (
+          <Case
+            key={key}
+            severity={severity}
+            heading={compactHeading[severity]}
+            action={<ActionLink />}
+            fullWidth={severity !== 'success'}
+            onClose={() => dismiss(key)}
+          />
+        )
+      })}
+      {SEVERITIES.map((severity) => {
+        const key = `${severity}-detail`
+
+        if (dismissed.includes(key)) return null
+
+        return (
+          <Case
+            key={key}
+            severity={severity}
+            heading={compactHeading[severity]}
+            fullWidth
+            onClose={() => dismiss(key)}
+          >
+            <Description />
+          </Case>
+        )
+      })}
+    </CaseColumnSC>
+  )
+}
+
+function ToastButtons() {
+  const { popToast } = useSimpleToast()
+
+  return (
+    <Flex
+      gap="small"
+      wrap="wrap"
+    >
+      <Button
+        secondary
+        onClick={() =>
+          popToast({
+            heading: compactHeading.danger,
+            content: <Description />,
+            severity: 'danger',
+            delayTimeout: 'none',
+          })
+        }
       >
-        <Flex
-          gap="small"
-          wrap="wrap"
-        >
-          <Button
-            secondary
-            onClick={() =>
-              popToast({
-                heading: compactHeading.danger,
-                content: <Description />,
-                severity: 'danger',
-                delayTimeout: 'none',
-              })
-            }
-          >
-            Show error toast
-          </Button>
-          <Button
-            secondary
-            onClick={() =>
-              popToast({
-                content: compactHeading.success,
-                severity: 'success',
-                delayTimeout: 'none',
-              })
-            }
-          >
-            Show success toast
-          </Button>
-        </Flex>
-        <CaseColumnSC>
-          {SEVERITIES.map((severity) => {
-            const key = `${severity}-compact`
-
-            if (dismissed.includes(key)) return null
-
-            return (
-              <Case
-                key={key}
-                severity={severity}
-                heading={compactHeading[severity]}
-                action={<ActionLink />}
-                fullWidth={severity !== 'success'}
-                onClose={() => dismiss(key)}
-              />
-            )
-          })}
-          {SEVERITIES.map((severity) => {
-            const key = `${severity}-detail`
-
-            if (dismissed.includes(key)) return null
-
-            return (
-              <Case
-                key={key}
-                severity={severity}
-                heading={compactHeading[severity]}
-                fullWidth
-                onClose={() => dismiss(key)}
-              >
-                <Description />
-              </Case>
-            )
-          })}
-        </CaseColumnSC>
-      </Flex>
-    </PageSC>
+        Show error toast
+      </Button>
+      <Button
+        secondary
+        onClick={() =>
+          popToast({
+            content: compactHeading.success,
+            severity: 'success',
+            delayTimeout: 'none',
+          })
+        }
+      >
+        Show success toast
+      </Button>
+    </Flex>
   )
 }
 
@@ -173,7 +189,19 @@ function Case({
 export default function NotificationTest() {
   return (
     <SimpleToastProvider>
-      <NotificationCases />
+      <PageSC>
+        <ToastButtons />
+        <ColumnsSC>
+          <ModeColumn
+            theme={styledThemeDark}
+            label="Dark"
+          />
+          <ModeColumn
+            theme={styledThemeLight}
+            label="Light"
+          />
+        </ColumnsSC>
+      </PageSC>
     </SimpleToastProvider>
   )
 }
@@ -181,11 +209,32 @@ export default function NotificationTest() {
 const PageSC = styled.div(({ theme }) => ({
   minHeight: '100vh',
   boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.large,
   padding: theme.spacing.xlarge,
-  backgroundColor:
-    theme.mode === 'light'
-      ? theme.colors['page-background']
-      : theme.colors['fill-zero'],
+  backgroundColor: theme.colors['page-background'],
+}))
+
+const ColumnsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'flex-start',
+  gap: theme.spacing.xlarge,
+}))
+
+const PanelSC = styled.section(({ theme }) => ({
+  backgroundColor: theme.colors['fill-zero'],
+  color: theme.colors.text,
+  padding: theme.spacing.xlarge,
+  borderRadius: theme.borderRadiuses.large,
+}))
+
+const LabelSC = styled.h2(({ theme }) => ({
+  ...theme.partials.text.subtitle2,
+  margin: 0,
+  marginBottom: theme.spacing.large,
+  color: theme.colors.text,
 }))
 
 const CaseColumnSC = styled.div(({ theme }) => ({

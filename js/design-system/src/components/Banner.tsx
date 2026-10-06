@@ -89,7 +89,7 @@ const BannerOuter = styled(Flex)<{
     color: theme.colors.text,
     maxWidth: $fullWidth ? undefined : 480,
     width: $fullWidth ? '100%' : 'fit-content',
-    boxShadow: light ? theme.boxShadows.moderate : TOAST_SHADOW,
+    boxShadow: TOAST_SHADOW,
   }
 })
 
