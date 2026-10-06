@@ -186,7 +186,7 @@ export function WorkbenchMonitoringSidebar({
                   <PaddedSC>
                     <MonitoringListSkeleton count={3} />
                   </PaddedSC>
-                ) : dashboardNodes.length === 0 ? (
+                ) : dashboardNodes.length === 0 && !dashboards.error ? (
                   hasFilter ? (
                     <PaddedSC>
                       <CaptionP $color="text-xlight">
@@ -260,7 +260,7 @@ export function WorkbenchMonitoringSidebar({
                   <PaddedSC>
                     <MonitoringListSkeleton count={3} />
                   </PaddedSC>
-                ) : monitorNodes.length === 0 ? (
+                ) : monitorNodes.length === 0 && !monitors.error ? (
                   hasFilter ? (
                     <PaddedSC>
                       <CaptionP $color="text-xlight">
