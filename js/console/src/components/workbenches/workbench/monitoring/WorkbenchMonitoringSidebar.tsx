@@ -456,6 +456,11 @@ function MonitorRow({
   return (
     <RowSC $selected={selectedId === monitor.id}>
       <RowLinkSC
+        className={
+          monitor.state === AlertState.Firing && !confirming
+            ? 'has-firing-dot'
+            : undefined
+        }
         to={getWorkbenchMonitoringMonitorAbsPath({
           workbenchId,
           monitorId: monitor.id,
@@ -471,46 +476,44 @@ function MonitorRow({
           </RowSubtitleSC>
         </RowTextSC>
       </RowLinkSC>
-      <RowActionsSC>
-        {monitor.state === AlertState.Firing && !confirming && (
-          <FiringDotSC
-            className="firing-dot"
-            role="img"
-            aria-label="Firing"
+      {monitor.state === AlertState.Firing && !confirming && (
+        <FiringDotSC
+          className="firing-dot"
+          role="img"
+          aria-label="Firing"
+        />
+      )}
+      {confirming ? (
+        <InlineConfirmSC className="inline-confirm">
+          <IconFrame
+            clickable
+            size="small"
+            icon={<CheckIcon color="icon-success" />}
+            tooltip="Confirm delete"
+            aria-label={`Confirm delete ${monitor.name}`}
+            onClick={() => deleteMonitor()}
           />
-        )}
-        {confirming ? (
-          <InlineConfirmSC className="inline-confirm">
-            <IconFrame
-              clickable
-              size="small"
-              icon={<CheckIcon color="icon-success" />}
-              tooltip="Confirm delete"
-              aria-label={`Confirm delete ${monitor.name}`}
-              onClick={() => deleteMonitor()}
-            />
-            <IconFrame
-              clickable
-              size="small"
-              icon={<CloseIcon />}
-              tooltip="Cancel"
-              aria-label="Cancel delete"
-              onClick={() => setConfirming(false)}
-            />
-          </InlineConfirmSC>
-        ) : (
-          <DeleteSC className="delete-action">
-            <IconFrame
-              clickable
-              size="small"
-              icon={<TrashCanIcon color="icon-danger" />}
-              tooltip="Delete monitor"
-              aria-label={`Delete ${monitor.name}`}
-              onClick={() => setConfirming(true)}
-            />
-          </DeleteSC>
-        )}
-      </RowActionsSC>
+          <IconFrame
+            clickable
+            size="small"
+            icon={<CloseIcon />}
+            tooltip="Cancel"
+            aria-label="Cancel delete"
+            onClick={() => setConfirming(false)}
+          />
+        </InlineConfirmSC>
+      ) : (
+        <DeleteSC className="delete-action">
+          <IconFrame
+            clickable
+            size="small"
+            icon={<TrashCanIcon color="icon-danger" />}
+            tooltip="Delete monitor"
+            aria-label={`Delete ${monitor.name}`}
+            onClick={() => setConfirming(true)}
+          />
+        </DeleteSC>
+      )}
     </RowSC>
   )
 }
@@ -613,7 +616,7 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
     gap: theme.spacing.xsmall,
     padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
     position: 'relative',
-    // Dashboard delete sits over the title so the name can use the full row.
+    // Delete sits over the title so the name can use the full row.
     '& > .delete-action, & > .inline-confirm': {
       alignItems: 'center',
       backgroundImage: actionFade(
@@ -644,6 +647,17 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
     },
     '&:hover .firing-dot, &:focus-within .firing-dot': {
       opacity: 0,
+    },
+    // 8px dot centered on the 24px section plus. Plus inset is spacing.medium.
+    '& > .firing-dot': {
+      position: 'absolute',
+      right: theme.spacing.large,
+      top: '50%',
+      transform: 'translateY(-50%)',
+    },
+    // Keep the name clear of the dot until hover, when the dot hides.
+    '&:not(:hover):not(:focus-within) > .has-firing-dot': {
+      paddingRight: theme.spacing.large,
     },
   }
 })
@@ -676,16 +690,6 @@ const RowSubtitleSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-light'],
 }))
-
-const RowActionsSC = styled.div({
-  alignItems: 'center',
-  display: 'grid',
-  flexShrink: 0,
-  justifyItems: 'center',
-  '& > *': {
-    gridArea: '1 / 1',
-  },
-})
 
 const FiringDotSC = styled.span(({ theme }) => ({
   backgroundColor: theme.colors['icon-danger'],
