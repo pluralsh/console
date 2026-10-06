@@ -529,50 +529,55 @@ const GroupListSC = styled.div(() => ({
   overflowY: 'auto',
 }))
 
-const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
-  alignItems: 'center',
-  // Note: Figma fill tokens predate the DS rename; these current tokens
-  // match the Figma rendered hexes (selected #2A2E37, hover #252932).
-  backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
-  display: 'flex',
-  gap: theme.spacing.xsmall,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  position: 'relative',
-  // Dashboard delete sits over the title so the name can use the full row.
-  '& > .delete-action, & > .inline-confirm': {
-    backgroundColor: $selected
-      ? theme.colors['fill-two-selected']
-      : theme.colors['fill-zero-selected'],
-    paddingLeft: theme.spacing.xsmall,
-    position: 'absolute',
-    right: theme.spacing.medium,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    zIndex: 1,
-  },
-  '&:hover': {
-    backgroundColor: $selected
-      ? theme.colors['fill-two-selected']
-      : theme.colors['fill-one-hover'],
-  },
-  '&:hover > .delete-action, &:focus-within > .delete-action, &:hover > .inline-confirm, &:focus-within > .inline-confirm':
-    {
-      backgroundColor: $selected
-        ? theme.colors['fill-two-selected']
-        : theme.colors['fill-one-hover'],
+const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
+  const selectedColor = theme.colors['fill-two-selected']
+  const hoverColor = theme.colors['fill-one-hover']
+  const actionFade = (color: string) =>
+    `linear-gradient(to right, transparent, ${color} ${theme.spacing.large}px)`
+
+  return {
+    alignItems: 'center',
+    // Note: Figma fill tokens predate the DS rename; these current tokens
+    // match the Figma rendered hexes (selected #2A2E37, hover #252932).
+    backgroundColor: $selected ? selectedColor : undefined,
+    display: 'flex',
+    gap: theme.spacing.xsmall,
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    position: 'relative',
+    // Dashboard delete sits over the title so the name can use the full row.
+    '& > .delete-action, & > .inline-confirm': {
+      alignItems: 'center',
+      backgroundImage: actionFade(
+        $selected ? selectedColor : theme.colors['fill-zero-selected']
+      ),
+      bottom: 0,
+      display: 'flex',
+      paddingLeft: theme.spacing.large,
+      position: 'absolute',
+      right: theme.spacing.medium,
+      top: 0,
+      zIndex: 1,
     },
-  '& .delete-action': {
-    opacity: 0,
-    pointerEvents: 'none',
-  },
-  '&:hover .delete-action, &:focus-within .delete-action': {
-    opacity: 1,
-    pointerEvents: 'auto',
-  },
-  '&:hover .firing-dot, &:focus-within .firing-dot': {
-    opacity: 0,
-  },
-}))
+    '&:hover': {
+      backgroundColor: $selected ? selectedColor : hoverColor,
+    },
+    '&:hover > .delete-action, &:focus-within > .delete-action, &:hover > .inline-confirm, &:focus-within > .inline-confirm':
+      {
+        backgroundImage: actionFade($selected ? selectedColor : hoverColor),
+      },
+    '& .delete-action': {
+      opacity: 0,
+      pointerEvents: 'none',
+    },
+    '&:hover .delete-action, &:focus-within .delete-action': {
+      opacity: 1,
+      pointerEvents: 'auto',
+    },
+    '&:hover .firing-dot, &:focus-within .firing-dot': {
+      opacity: 0,
+    },
+  }
+})
 
 const RowLinkSC = styled(Link)({
   alignItems: 'center',
