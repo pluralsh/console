@@ -1,3 +1,8 @@
+---
+name: workbench-integration-docs
+description: Expand Workbench integration documentation from repository stubs and open one reviewable pull request.
+---
+
 # Author workbench integration docs
 
 This file is a prompt for an agent. It is not a published page. The docs site only indexes Markdown under `js/documentation/pages/`.
