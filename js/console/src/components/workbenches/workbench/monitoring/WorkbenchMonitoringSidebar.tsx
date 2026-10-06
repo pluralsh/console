@@ -283,12 +283,12 @@ function MonitoringListSkeleton({ count }: { count: number }) {
       {times(count, (i) => (
         <Flex
           key={i}
-          gap="medium"
+          gap="small"
           align="center"
         >
           <RectangleSkeleton
-            $height={40}
-            $width={40}
+            $height={32}
+            $width={32}
             css={{ flexShrink: 0 }}
           />
           <Flex
@@ -346,7 +346,7 @@ function DashboardRow({
       >
         <RowIconSC
           aria-hidden="true"
-          size="large"
+          size="medium"
           type="secondary"
           icon={<DashboardIcon />}
         />
@@ -429,7 +429,7 @@ function MonitorRow({
       >
         <RowIconSC
           aria-hidden="true"
-          size="large"
+          size="medium"
           type="secondary"
           icon={<SirenIcon />}
         />
@@ -583,14 +583,14 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
   },
 }))
 
-const RowLinkSC = styled(Link)({
+const RowLinkSC = styled(Link)(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
   flex: 1,
-  gap: 16,
+  gap: theme.spacing.small,
   minWidth: 0,
   textDecoration: 'none',
-})
+}))
 
 const RowIconSC = styled(IconFrame)({
   flexShrink: 0,
