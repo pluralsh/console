@@ -26,6 +26,17 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o nexus \
     ./cmd/main.go
 
+# Pin timezone data independently of the distroless base image.
+FROM debian:12.15-slim@sha256:3783cc01769c7b2b1b83a5c5ad96c815348e28ed7da68e2e3687004faa906251 AS tzdata
+
+ARG TZDATA_VERSION=2026c-0+deb12u1
+
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata="${TZDATA_VERSION}" \
+ && dpkg-query -W -f='${Version}\n' tzdata | grep -Fx "${TZDATA_VERSION}" \
+ && awk 'BEGIN {RS=""} $1 == "Package:" && $2 == "tzdata" {print; exit}' /var/lib/dpkg/status > /tzdata.status \
+ && cp /var/lib/dpkg/info/tzdata.md5sums /tzdata.md5sums
+
 # Runtime stage
 FROM gcr.io/distroless/static-debian12:nonroot
 
@@ -47,6 +58,11 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
+
+# Replace the distroless tzdata payload and package metadata with the pinned security update.
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=tzdata /tzdata.status /var/lib/dpkg/status.d/tzdata
+COPY --from=tzdata /tzdata.md5sums /var/lib/dpkg/status.d/tzdata
 
 WORKDIR /app
 
