@@ -27,8 +27,8 @@ import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 import { isActivityTerminal } from './workbenchJobActivityCollapse'
 
-/** 24px between activity rows. With each title's 4px padding, title-to-title is 32px. */
-export const ACTIVITY_GAP = 'large' as const
+/** Cursor-like proximity between top-level activities (~12px). */
+export const ACTIVITY_GAP = 'small' as const
 
 export function WorkbenchJobActivities({
   jobId,
