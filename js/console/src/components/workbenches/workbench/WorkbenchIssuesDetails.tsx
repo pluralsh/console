@@ -1,4 +1,4 @@
-import { EmptyState, Input, SearchIcon } from '@pluralsh/design-system'
+import { EmptyState } from '@pluralsh/design-system'
 import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhookIcons'
 import { IssueStatusIcon } from 'components/workbenches/common/IssueStatusChip'
 import {
@@ -23,6 +23,7 @@ import {
   useDetailsSelection,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchIssueCard } from 'components/workbenches/common/WorkbenchIssueCard'
+import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import { WorkbenchIssueFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { cloneElement } from 'react'
@@ -71,13 +72,11 @@ export function WorkbenchIssuesDetails({
     <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       <DetailsListSC>
         <DetailsListSearchSC>
-          <Input
+          <WorkbenchSearchInput
             size="small"
-            showClearButton
-            startIcon={<SearchIcon />}
-            placeholder="Search issues"
             value={searchString}
-            onChange={(e) => onSearchChange(e.currentTarget.value)}
+            onChange={onSearchChange}
+            placeholder="Search issues"
           />
         </DetailsListSearchSC>
         <DetailsListItemsSC>

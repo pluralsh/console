@@ -19,11 +19,14 @@ export function WorkbenchJobsBoard({
   loading,
   hasNextPage,
   fetchNextPage,
+  showRecent = true,
 }: {
   jobs: WorkbenchJobTinyFragment[]
   loading: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
+  // off while searching: "recent" means nothing for search results
+  showRecent?: boolean
 }) {
   const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
 
@@ -37,19 +40,21 @@ export function WorkbenchJobsBoard({
 
   return (
     <BoardSC>
+      {showRecent && (
+        <BoardSectionSC>
+          <BoardTitleSC>Recent jobs</BoardTitleSC>
+          <RecentGridSC>
+            {jobs.slice(0, RECENT_JOBS_COUNT).map((job) => (
+              <WorkbenchJobCard
+                key={job.id}
+                job={job}
+              />
+            ))}
+          </RecentGridSC>
+        </BoardSectionSC>
+      )}
       <BoardSectionSC>
-        <BoardTitleSC>Recent jobs</BoardTitleSC>
-        <RecentGridSC>
-          {jobs.slice(0, RECENT_JOBS_COUNT).map((job) => (
-            <WorkbenchJobCard
-              key={job.id}
-              job={job}
-            />
-          ))}
-        </RecentGridSC>
-      </BoardSectionSC>
-      <BoardSectionSC>
-        <BoardTitleSC>All jobs</BoardTitleSC>
+        <BoardTitleSC>{showRecent ? 'All jobs' : 'Matching jobs'}</BoardTitleSC>
         <WorkbenchJobCardGridSC>
           {jobs.map((job) => (
             <WorkbenchJobCard

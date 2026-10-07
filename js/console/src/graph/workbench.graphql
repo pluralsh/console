@@ -982,24 +982,7 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
 }
 
 fragment WorkbenchJobSearchRow on WorkbenchJob {
-  id
-  prompt
-  status
-  insertedAt
-  user {
-    id
-    name
-  }
-  workbench {
-    id
-  }
-  result {
-    id
-    conclusion
-  }
-  pullRequests {
-    ...PullRequestBasic
-  }
+  ...WorkbenchJobTiny
 }
 
 query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {

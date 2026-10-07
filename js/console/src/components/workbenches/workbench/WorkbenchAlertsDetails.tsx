@@ -51,6 +51,7 @@ import {
   getJobGutterStatus,
   useDetailsSelection,
 } from 'components/workbenches/common/WorkbenchDetailsView'
+import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
   AlertFragment,
   AlertSeverity,
@@ -83,12 +84,16 @@ export function WorkbenchAlertsDetails({
   hasNextPage,
   fetchNextPage,
   fallbackWorkbenchId,
+  searchString,
+  onSearchChange,
 }: {
   alerts: AlertFragment[]
   loading: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
   fallbackWorkbenchId: string
+  searchString: string
+  onSearchChange: (value: string) => void
 }) {
   const [severities, setSeverities] = useState<AlertSeverity[]>([])
   const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
@@ -114,7 +119,7 @@ export function WorkbenchAlertsDetails({
     useDetailsSelection(visible)
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
 
-  if (isEmpty(alerts))
+  if (isEmpty(alerts) && !searchString)
     return (
       <BoardLoadingOrEmpty
         loading={loading}
@@ -126,39 +131,52 @@ export function WorkbenchAlertsDetails({
     <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       <DetailsListSC>
         <DetailsListSearchSC>
-          <SeverityChipsSC>
-            {ALERT_SEVERITY_ORDER.filter(
-              (severity) => severityCounts[severity]
-            ).map((severity) => (
-              <Chip
-                key={severity}
-                clickable
-                size="small"
-                fillLevel={2}
-                severity={alertSeverityToChipSeverity[severity]}
-                inactive={
-                  !isEmpty(activeSeverities) &&
-                  !activeSeverities.includes(severity)
-                }
-                aria-pressed={activeSeverities.includes(severity)}
-                onClick={() =>
-                  setSeverities(toggleListValue(activeSeverities, severity))
-                }
-                rounded
-              >
-                {ALERT_SEVERITY_SHORT_LABELS[severity]} (
-                {severityCounts[severity]})
-              </Chip>
-            ))}
-          </SeverityChipsSC>
+          <WorkbenchSearchInput
+            size="small"
+            value={searchString}
+            onChange={onSearchChange}
+            placeholder="Search alerts"
+          />
         </DetailsListSearchSC>
+        {!isEmpty(alerts) && (
+          <DetailsListSearchSC>
+            <SeverityChipsSC>
+              {ALERT_SEVERITY_ORDER.filter(
+                (severity) => severityCounts[severity]
+              ).map((severity) => (
+                <Chip
+                  key={severity}
+                  clickable
+                  size="small"
+                  fillLevel={2}
+                  severity={alertSeverityToChipSeverity[severity]}
+                  inactive={
+                    !isEmpty(activeSeverities) &&
+                    !activeSeverities.includes(severity)
+                  }
+                  aria-pressed={activeSeverities.includes(severity)}
+                  onClick={() =>
+                    setSeverities(toggleListValue(activeSeverities, severity))
+                  }
+                  rounded
+                >
+                  {ALERT_SEVERITY_SHORT_LABELS[severity]} (
+                  {severityCounts[severity]})
+                </Chip>
+              ))}
+            </SeverityChipsSC>
+          </DetailsListSearchSC>
+        )}
         <DetailsListItemsSC>
           {isEmpty(visible) && (
-            <EmptyState message="No alerts match the selected severities.">
+            <EmptyState message="No alerts match the search or severities.">
               <Button
                 small
                 secondary
-                onClick={() => setSeverities([])}
+                onClick={() => {
+                  setSeverities([])
+                  onSearchChange('')
+                }}
               >
                 Reset filters
               </Button>

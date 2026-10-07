@@ -1,4 +1,5 @@
 import { Flex } from '@pluralsh/design-system'
+import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayPopover,
@@ -7,20 +8,26 @@ import {
   usePersistedDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useWorkbenchJobsQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
+import {
+  useWorkbenchJobSearchQuery,
+  useWorkbenchJobsQuery,
+} from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
 import { WorkbenchJobsBoard } from './WorkbenchJobsBoard'
 import { WorkbenchJobsDetails } from './WorkbenchJobsDetails'
-import { WorkbenchJobsSearch } from './WorkbenchJobsSearch'
 import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
 
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
 const WORKBENCH_JOBS_VIEWS: DisplayView[] = ['list', 'board', 'details']
 const DEFAULT_WORKBENCH_JOBS_VIEW: DisplayView = 'list'
+const SEARCH_LIMIT = 50
+const noop = () => {}
 
 export function WorkbenchJobs() {
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
@@ -29,59 +36,96 @@ export function WorkbenchJobs() {
     WORKBENCH_JOBS_VIEWS,
     DEFAULT_WORKBENCH_JOBS_VIEW
   )
+  const [searchString, setSearchString] = useState('')
+  const query = useDebounce(searchString, 200).trim()
+  const searching = !!query
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
       { id: workbenchId }
     )
-  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
+  const search = useWorkbenchJobSearchQuery({
+    variables: { workbenchId, q: query, limit: SEARCH_LIMIT },
+    skip: !searching,
+    fetchPolicy: 'network-only',
+  })
+
+  // searching shows the (unpaginated) search results in every view
+  const jobs = useMemo(
+    () =>
+      searching
+        ? (search.data?.workbenchJobSearch ?? []).filter(isNonNullable)
+        : mapExistingNodes(data?.workbench?.runs),
+    [data, search.data, searching]
+  )
+  const list = searching
+    ? {
+        loading: search.loading,
+        loaded: !!search.data,
+        hasNextPage: false,
+        fetchNextPage: noop,
+      }
+    : {
+        loading,
+        loaded: !!data,
+        hasNextPage: !!pageInfo?.hasNextPage,
+        fetchNextPage,
+      }
+  const listError = searching ? search.error : error
 
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
       headerActions={
-        <>
-          {view !== 'details' && (
-            <WorkbenchJobsSearch workbenchId={workbenchId} />
-          )}
-          <DisplayPopover showDot={false}>
-            <DisplayViewToggle
-              view={view}
-              views={WORKBENCH_JOBS_VIEWS}
-              onChange={setView}
-            />
-          </DisplayPopover>
-        </>
+        <DisplayPopover showDot={false}>
+          <DisplayViewToggle
+            view={view}
+            views={WORKBENCH_JOBS_VIEWS}
+            onChange={setView}
+          />
+        </DisplayPopover>
       }
     >
-      {error ? (
-        <GqlError error={error} />
-      ) : view === 'details' ? (
-        <WorkbenchJobsDetails
-          workbenchId={workbenchId}
-          jobs={jobs}
-          loading={loading}
-          hasNextPage={!!pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-        />
+      {view === 'details' ? (
+        listError ? (
+          <GqlError error={listError} />
+        ) : (
+          <WorkbenchJobsDetails
+            workbenchId={workbenchId}
+            jobs={jobs}
+            loading={list.loading}
+            hasNextPage={list.hasNextPage}
+            fetchNextPage={list.fetchNextPage}
+            searchString={searchString}
+            onSearchChange={setSearchString}
+          />
+        )
       ) : (
         <WrapperSC>
-          {view === 'board' ? (
+          <WorkbenchSearchInput
+            value={searchString}
+            onChange={setSearchString}
+            placeholder="Search jobs"
+          />
+          {listError ? (
+            <GqlError error={listError} />
+          ) : view === 'board' ? (
             <WorkbenchJobsBoard
               jobs={jobs}
-              loading={loading}
-              hasNextPage={!!pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
+              loading={list.loading}
+              hasNextPage={list.hasNextPage}
+              fetchNextPage={list.fetchNextPage}
+              showRecent={!searching}
             />
           ) : (
             <TableContainerSC>
               <WorkbenchJobsTableContent
                 jobs={jobs}
-                loading={loading}
-                loaded={!!data}
-                pageInfo={pageInfo}
-                fetchNextPage={fetchNextPage}
+                loading={list.loading}
+                loaded={list.loaded}
+                pageInfo={searching ? undefined : pageInfo}
+                fetchNextPage={list.fetchNextPage}
                 setVirtualSlice={setVirtualSlice}
               />
             </TableContainerSC>
@@ -94,7 +138,7 @@ export function WorkbenchJobs() {
 
 const WrapperSC = styled(Flex)(({ theme }) => ({
   flexDirection: 'column',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
   flex: 1,
   minHeight: 400,
   overflow: 'hidden',

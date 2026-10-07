@@ -4,14 +4,10 @@ import {
   EmptyState,
   Flex,
   IconFrame,
-  Input,
   prettifyRepoUrl,
   PrIcon,
   PrMergedIcon,
-  SearchIcon,
 } from '@pluralsh/design-system'
-import { useDebounce } from '@react-hooks-library/core'
-import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
@@ -36,14 +32,14 @@ import {
   getJobGutterStatus,
   useDetailsSelection,
 } from 'components/workbenches/common/WorkbenchDetailsView'
+import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
   PrStatus,
   PullRequestBasicFragment,
-  useWorkbenchJobSearchQuery,
   WorkbenchJobTinyFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ComponentProps, useMemo, useState } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import styled from 'styled-components'
 import { formatShortAge, fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -59,16 +55,6 @@ import { WorkbenchJobTriggerIssue } from './job/WorkbenchJobTriggerIssue'
 import { WorkbenchJobUsage } from './job/WorkbenchJobUsage'
 import { WorkbenchJobConclusionPanel } from './WorkbenchJobConclusionPanel'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
-
-const SEARCH_LIMIT = 50
-
-type JobListItem = Pick<
-  WorkbenchJobTinyFragment,
-  'id' | 'prompt' | 'status' | 'insertedAt' | 'user'
-> & {
-  workbench?: Nullable<{ id: string }>
-  pullRequests?: Nullable<Nullable<Pick<PullRequestBasicFragment, 'status'>>[]>
-}
 
 type DetailsTab =
   | 'Pull requests'
@@ -86,38 +72,22 @@ export function WorkbenchJobsDetails({
   loading,
   hasNextPage,
   fetchNextPage,
+  searchString,
+  onSearchChange,
 }: {
   workbenchId: string
   jobs: WorkbenchJobTinyFragment[]
   loading: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
+  searchString: string
+  onSearchChange: (value: string) => void
 }) {
-  const [query, setQuery] = useState('')
-  const trimmedQuery = useDebounce(query, 200).trim()
   const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
-
-  const {
-    data: searchData,
-    loading: searchLoading,
-    error: searchError,
-  } = useWorkbenchJobSearchQuery({
-    variables: { workbenchId, q: trimmedQuery, limit: SEARCH_LIMIT },
-    skip: !trimmedQuery,
-    fetchPolicy: 'network-only',
-  })
-  const searching = !!trimmedQuery
-  const items: JobListItem[] = useMemo(
-    () =>
-      searching
-        ? (searchData?.workbenchJobSearch ?? []).filter(isNonNullable)
-        : jobs,
-    [jobs, searchData, searching]
-  )
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
-    useDetailsSelection(items)
+    useDetailsSelection(jobs)
 
-  if (isEmpty(jobs) && !searching)
+  if (isEmpty(jobs) && !searchString)
     return (
       <BoardLoadingOrEmpty
         loading={loading}
@@ -129,25 +99,21 @@ export function WorkbenchJobsDetails({
     <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       <DetailsListSC>
         <DetailsListSearchSC>
-          <Input
+          <WorkbenchSearchInput
             size="small"
-            showClearButton
-            startIcon={<SearchIcon />}
+            value={searchString}
+            onChange={onSearchChange}
             placeholder="Search jobs"
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
           />
         </DetailsListSearchSC>
         <DetailsListItemsSC>
-          {searchError ? (
-            <GqlError error={searchError} />
-          ) : searching && isEmpty(items) ? (
+          {isEmpty(jobs) ? (
             <BoardLoadingOrEmpty
-              loading={searchLoading}
+              loading={loading}
               message="No matching jobs found."
             />
           ) : (
-            items.map((job) => (
+            jobs.map((job) => (
               <DetailsListItem
                 key={job.id}
                 selected={job.id === selected?.id}
@@ -176,9 +142,7 @@ export function WorkbenchJobsDetails({
               />
             ))
           )}
-          {!searching && hasNextPage && (
-            <LoadMoreSentinel onVisible={loadMore} />
-          )}
+          {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
         </DetailsListItemsSC>
       </DetailsListSC>
       {selected && (
@@ -208,7 +172,7 @@ export function WorkbenchJobsDetails({
   )
 }
 
-function JobPrIcon({ job }: { job: JobListItem }) {
+function JobPrIcon({ job }: { job: WorkbenchJobTinyFragment }) {
   const prs = job.pullRequests?.filter(isNonNullable) ?? []
   if (isEmpty(prs)) return null
   const merged = prs.some(({ status }) => status === PrStatus.Merged)

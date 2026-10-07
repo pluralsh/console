@@ -15,9 +15,11 @@ import {
   ColAlertTitle,
   getColAlertViewJob,
 } from '../../utils/alerts/AlertsTable'
+import { getAlertName } from 'components/utils/alerts/AlertSourceLink'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import { useWorkbenchAlertsQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -42,9 +44,19 @@ export function WorkbenchAlerts() {
       { queryHook: useWorkbenchAlertsQuery, keyPath: ['workbench', 'alerts'] },
       { id: workbenchId }
     )
+  const [searchString, setSearchString] = useState('')
+  const query = useDeferredValue(searchString.trim().toLowerCase())
+  // the workbench alerts query can't search, so this filters loaded alerts
   const alerts = useMemo(
-    () => mapExistingNodes(data?.workbench?.alerts),
-    [data]
+    () =>
+      mapExistingNodes(data?.workbench?.alerts).filter(
+        (alert) =>
+          !query ||
+          [alert.title, getAlertName(alert)].some((text) =>
+            text?.toLowerCase().includes(query)
+          )
+      ),
+    [data, query]
   )
 
   const columns = useMemo(
@@ -88,9 +100,16 @@ export function WorkbenchAlerts() {
           hasNextPage={!!pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
           fallbackWorkbenchId={workbenchId}
+          searchString={searchString}
+          onSearchChange={setSearchString}
         />
       ) : (
         <WrapperSC>
+          <WorkbenchSearchInput
+            value={searchString}
+            onChange={setSearchString}
+            placeholder="Search alerts"
+          />
           {view === 'board' ? (
             <WorkbenchAlertsBoard
               alerts={alerts}

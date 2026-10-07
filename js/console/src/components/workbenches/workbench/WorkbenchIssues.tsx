@@ -1,8 +1,8 @@
-import { Flex, SearchIcon } from '@pluralsh/design-system'
-import { useDebounce, useKeyDown } from '@react-hooks-library/core'
-import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
+import { Flex } from '@pluralsh/design-system'
+import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
+import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayFilterEmpty,
@@ -36,7 +36,6 @@ import {
 } from './workbenchIssuesDisplay'
 
 const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
-const SEARCH_INPUT_WIDTH = 520
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -60,9 +59,6 @@ export function WorkbenchIssues() {
     setFilters(nextFilters)
     setView(nextView)
   }
-  const clearSearch = () => setSearchString('')
-
-  useKeyDown(['Escape'], clearSearch)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -108,21 +104,6 @@ export function WorkbenchIssues() {
       showEditWorkbenchButton={false}
       headerActions={
         <>
-          {display.view !== 'details' && (
-            <IconExpander
-              tooltip="Search issues"
-              icon={<SearchIcon />}
-              active={!!searchString}
-              onClear={clearSearch}
-            >
-              <ExpandedInput
-                width={SEARCH_INPUT_WIDTH}
-                inputValue={searchString}
-                onChange={setSearchString}
-                placeholder="Search issues"
-              />
-            </IconExpander>
-          )}
           <DisplayPopover showDot={hasUncheckedIssueFilters(display)}>
             <WorkbenchIssuesDisplayOptions
               state={display}
@@ -134,9 +115,7 @@ export function WorkbenchIssues() {
         </>
       }
     >
-      {error ? (
-        <GqlError error={error} />
-      ) : display.view === 'details' && !filterEmptyKind ? (
+      {display.view === 'details' && !error && !filterEmptyKind ? (
         <WorkbenchIssuesDetails
           issues={issues}
           loading={loading}
@@ -148,7 +127,14 @@ export function WorkbenchIssues() {
         />
       ) : (
         <WrapperSC>
-          {filterEmptyKind ? (
+          <WorkbenchSearchInput
+            value={searchString}
+            onChange={setSearchString}
+            placeholder="Search issues"
+          />
+          {error ? (
+            <GqlError error={error} />
+          ) : filterEmptyKind ? (
             <DisplayFilterEmpty
               title={`No ${filterEmptyKind} selected`}
               description={`It looks like there are no ${filterEmptyKind} selected.`}
