@@ -1,6 +1,9 @@
 import { Card, ErrorIcon, Flex } from '@pluralsh/design-system'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
-import { AlertSourceLink } from 'components/utils/alerts/AlertSourceLink'
+import {
+  AlertSourceLink,
+  getAlertTitle,
+} from 'components/utils/alerts/AlertSourceLink'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import {
   BoardCardGridSC,
@@ -126,7 +129,7 @@ function WorkbenchAlertCard({
     <CardSC fillLevel={1}>
       <CardTargetButtonSC
         type="button"
-        aria-label={`Show details of ${alert.title ?? 'alert'}`}
+        aria-label={`Show details of ${getAlertTitle(alert)}`}
         onClick={onOpen}
       />
       <Flex
@@ -146,7 +149,7 @@ function WorkbenchAlertCard({
         )}
         <DetailsCaptionSC>{fromNow(alert.updatedAt)}</DetailsCaptionSC>
       </Flex>
-      <TitleSC>{alert.title}</TitleSC>
+      <TitleSC>{getAlertTitle(alert)}</TitleSC>
       <Flex
         align="center"
         justify="space-between"

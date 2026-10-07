@@ -15,6 +15,11 @@ export function getAlertName(alert: Pick<AlertFragment, 'title' | 'tags'>) {
   )
 }
 
+// Alert title for list rows and cards, falling back to the alert name.
+export function getAlertTitle(alert: Pick<AlertFragment, 'title' | 'tags'>) {
+  return alert.title || getAlertName(alert) || 'Untitled alert'
+}
+
 // Link to the alert in its source (e.g. Grafana): source icon + alert name,
 // or `label` instead of the name.
 export function AlertSourceLink({

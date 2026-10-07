@@ -13,6 +13,7 @@ import {
 import {
   AlertSourceLink,
   getAlertName,
+  getAlertTitle,
 } from 'components/utils/alerts/AlertSourceLink'
 import { alertStateLabel } from 'components/utils/alerts/AlertStateChip'
 import { GqlError } from 'components/utils/Alert'
@@ -186,7 +187,7 @@ export function useWorkbenchAlertsDetails({
             title={
               <DetailsIconTitleSC>
                 <AlertSeverityIcon severity={alert.severity} />
-                <span>{alert.title}</span>
+                <span>{getAlertTitle(alert)}</span>
               </DetailsIconTitleSC>
             }
             end={

@@ -7,11 +7,11 @@ import { AlertSeverity } from 'generated/graphql'
 import styled from 'styled-components'
 
 export const ALERT_SEVERITY_ORDER = [
-  AlertSeverity.Undefined,
   AlertSeverity.Critical,
   AlertSeverity.High,
   AlertSeverity.Medium,
   AlertSeverity.Low,
+  AlertSeverity.Undefined,
 ]
 
 export const ALERT_SEVERITY_LABELS: Record<AlertSeverity, string> = {

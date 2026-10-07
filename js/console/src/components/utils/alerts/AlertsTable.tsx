@@ -22,6 +22,7 @@ import { isEmpty, upperFirst } from 'lodash'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
+import { toHttpURL } from 'utils/url'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { AiInsightSummaryIcon } from '../AiInsights'
 import { GqlError } from '../Alert'
@@ -106,6 +107,7 @@ export function AlertsTable({
 
 function UrlCell({ getValue }: CellContext<AlertFragment, unknown>) {
   const { url, insight } = getValue() as AlertFragment
+  const href = toHttpURL(url)
 
   return (
     <Flex
@@ -124,17 +126,21 @@ function UrlCell({ getValue }: CellContext<AlertFragment, unknown>) {
           placement="top"
           label={url}
         >
-          <InlineA
-            href={url}
-            style={{
-              ...TRUNCATE,
-              minWidth: 0,
-            }}
-          >
-            {url ?? ''}
-          </InlineA>
+          {href ? (
+            <InlineA
+              href={href}
+              style={{
+                ...TRUNCATE,
+                minWidth: 0,
+              }}
+            >
+              {url}
+            </InlineA>
+          ) : (
+            <span css={{ ...TRUNCATE, minWidth: 0 }}>{url ?? ''}</span>
+          )}
         </Tooltip>
-        {!!url && (
+        {!!href && (
           <ArrowTopRightIcon
             size={16}
             color="text"
