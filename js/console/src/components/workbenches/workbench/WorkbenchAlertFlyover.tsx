@@ -8,7 +8,7 @@ import { DetailsField } from 'components/workbenches/common/WorkbenchDetailsView
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { WorkbenchAlertFragment, WorkbenchJobStatus } from 'generated/graphql'
 import { upperFirst } from 'lodash'
-import { cloneElement } from 'react'
+import { cloneElement, useState } from 'react'
 import styled from 'styled-components'
 import { AlertInformation } from './WorkbenchAlertsDetails'
 
@@ -31,7 +31,12 @@ export function WorkbenchAlertFlyover({
   fallbackWorkbenchId: string
   onClose: () => void
 }) {
-  const job = alert?.workbenchJob
+  // the last alert shown, kept so the content stays while the flyover animates
+  // closed (or after the alert left the list) instead of going blank
+  const [lastAlert, setLastAlert] = useState(alert)
+  if (alert && alert !== lastAlert) setLastAlert(alert)
+  const shown = alert ?? lastAlert
+  const job = shown?.workbenchJob
 
   return (
     <Flyover
@@ -40,20 +45,20 @@ export function WorkbenchAlertFlyover({
       width="min(629px, 100%)"
       minWidth={320}
       header={
-        alert && (
+        shown && (
           <HeaderSC>
-            {cloneElement(getObservabilityWebhookTypeIcon(alert.type), {
+            {cloneElement(getObservabilityWebhookTypeIcon(shown.type), {
               size: 16,
             })}
             <HeaderTitleSC>
-              {getAlertSummary(alert) || getAlertName(alert)}
+              {getAlertSummary(shown) || getAlertName(shown)}
             </HeaderTitleSC>
           </HeaderSC>
         )
       }
       css={{ padding: 0 }}
     >
-      {alert && (
+      {shown && (
         <BodySC>
           <Flex
             justify="space-between"
@@ -62,7 +67,7 @@ export function WorkbenchAlertFlyover({
           >
             {job ? (
               <WorkbenchViewJobChip
-                workbenchId={alert.workbench?.id ?? fallbackWorkbenchId}
+                workbenchId={shown.workbench?.id ?? fallbackWorkbenchId}
                 jobId={job.id}
                 status={job.status}
                 onNavigate={onClose}
@@ -72,7 +77,7 @@ export function WorkbenchAlertFlyover({
             )}
             <Flex gap="large">
               <DetailsField label="State">
-                <AlertStateChip state={alert.state} />
+                <AlertStateChip state={shown.state} />
               </DetailsField>
               {job && (
                 <DetailsField label="Job status">
@@ -86,7 +91,7 @@ export function WorkbenchAlertFlyover({
               )}
             </Flex>
           </Flex>
-          <AlertInformation alert={alert} />
+          <AlertInformation alert={shown} />
         </BodySC>
       )}
     </Flyover>

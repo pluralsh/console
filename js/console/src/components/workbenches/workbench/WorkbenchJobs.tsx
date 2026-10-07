@@ -226,6 +226,7 @@ export function WorkbenchJobs() {
             onChange={updateDisplay}
             statusCounts={statusCounts}
             prStateCounts={prStateCounts}
+            searching={searching}
           />
         </DisplayPopover>
       }

@@ -18,6 +18,7 @@ import {
   RadioGroup,
   SortAscIcon,
   SortDescIcon,
+  Tooltip,
   useFloatingDropdown,
 } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
@@ -232,28 +233,46 @@ export function DisplayFilterRow({
 export function DisplaySortHeader({
   descending,
   onToggle,
+  disabledReason,
 }: {
   descending: boolean
   onToggle: () => void
+  // disables the toggle, explaining why in its tooltip
+  disabledReason?: string
 }) {
+  const toggle = (
+    <IconFrame
+      clickable
+      disabled={!!disabledReason}
+      textValue={`Sort ${descending ? 'descending' : 'ascending'}`}
+      size="small"
+      type="tertiary"
+      tooltip={!disabledReason && (descending ? 'Descending' : 'Ascending')}
+      icon={descending ? <SortDescIcon /> : <SortAscIcon />}
+      onClick={onToggle}
+      css={{
+        width: 28,
+        height: 20,
+        borderRadius: 6,
+        '& svg': { width: 12, height: 12 },
+      }}
+    />
+  )
+
   return (
     <SortHeaderSC>
       <SectionTitleSC>Sort by</SectionTitleSC>
-      <IconFrame
-        clickable
-        textValue={`Sort ${descending ? 'descending' : 'ascending'}`}
-        size="small"
-        type="tertiary"
-        tooltip={descending ? 'Descending' : 'Ascending'}
-        icon={descending ? <SortDescIcon /> : <SortAscIcon />}
-        onClick={onToggle}
-        css={{
-          width: 28,
-          height: 20,
-          borderRadius: 6,
-          '& svg': { width: 12, height: 12 },
-        }}
-      />
+      {disabledReason ? (
+        // disabled buttons get no hover events, so the wrapper shows the tooltip
+        <Tooltip
+          placement="top"
+          label={disabledReason}
+        >
+          <DisabledToggleSC>{toggle}</DisabledToggleSC>
+        </Tooltip>
+      ) : (
+        toggle
+      )}
     </SortHeaderSC>
   )
 }
@@ -421,6 +440,11 @@ const SectionTitleSC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2Bold,
   color: theme.colors.text,
 }))
+
+const DisabledToggleSC = styled.span({
+  display: 'inline-flex',
+  '& > *': { pointerEvents: 'none' },
+})
 
 const SortHeaderSC = styled(Flex)(({ theme }) => ({
   alignItems: 'center',

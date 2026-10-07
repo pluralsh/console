@@ -27,9 +27,12 @@ export function WorkbenchJobsDisplayOptions({
   onChange,
   statusCounts,
   prStateCounts,
+  searching = false,
 }: {
   state: WorkbenchJobsDisplayState
   onChange: (next: WorkbenchJobsDisplayState) => void
+  // search results come back by relevance, ignoring the sort
+  searching?: boolean
   statusCounts: Partial<Record<WorkbenchJobStatus, number>>
   prStateCounts: Partial<Record<WorkbenchJobPrState, number>>
 }) {
@@ -80,6 +83,9 @@ export function WorkbenchJobsDisplayOptions({
       </DisplaySection>
       <DisplaySection>
         <DisplaySortHeader
+          disabledReason={
+            searching ? 'Search results are sorted by relevance' : undefined
+          }
           descending={state.direction === SortDirection.Desc}
           onToggle={() =>
             onChange({
