@@ -956,7 +956,11 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     flexDirection: 'column',
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
-    marginTop: theme.spacing.small,
+    // Same 4px as a title's padding, so the gap above a later prompt totals 32px.
+    marginTop: theme.spacing.xxsmall,
+    // The copy row is 32px. Cancel the 24px list gap and the next title's 4px
+    // padding so that row is the whole gap under the card.
+    marginBottom: -(theme.spacing.large + theme.spacing.xxsmall),
   })
 )
 

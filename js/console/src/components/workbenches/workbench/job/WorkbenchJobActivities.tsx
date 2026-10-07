@@ -27,8 +27,8 @@ import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 import { isActivityTerminal } from './workbenchJobActivityCollapse'
 
-/** Cursor-like proximity between top-level activities (~12px). */
-export const ACTIVITY_GAP = 'small' as const
+/** 24px between rows. Each title's 4px padding makes the total gap 32px. */
+export const ACTIVITY_GAP = 'large' as const
 
 export function WorkbenchJobActivities({
   jobId,
