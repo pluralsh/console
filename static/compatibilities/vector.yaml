@@ -3,6 +3,22 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.59.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were provided in the supplied v0.59.0 notes (they
+        only list assets). Treat this as a routine version bump unless you find the
+        full upstream release notes diff.]
+    breaking_changes: ['No breaking-change details were provided in the supplied v0.59.0
+        notes (they only list assets). Before upgrading in production, review the
+        full v0.59.0 release notes/CHANGELOG for config/schema changes and deprecated
+        components.']
+  chart_version: 0.59.0
+  images: ['docker.io/timberio/vector:0.59.0-distroless-libc']
 - version: 0.58.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

@@ -53,7 +53,7 @@ addons:
           performance improvements (less pod listing) and safer handling to prevent
           panics.']
       breaking_changes: []
-    chart_version: 2.43.5
+    chart_version: 2.43.6
     images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
   - version: 1.9.1
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -17875,6 +17875,37 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.12.0
+    kube: ['1.36']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / chart behavior changes (2.11.0 \u2192 2.12.0)\n\
+        - **New toggle:** `rbac.leaderElection.create` (chart) to control creation\
+        \ of RBAC resources needed for leader election.\n  - If you run **replicas\
+        \ > 1**, ensure leader election is enabled and the needed RBAC exists (either\
+        \ let the chart create it, or provide your own).\n- **New chart warning:**\
+        \ chart will **warn when `replicas > 1` without leader election** configured.\n\
+        - **Template behavior:** chart templates no longer hard-`fail` in some scenarios\
+        \ (\u201CRemove fail from templates\u201D), so upgrades may proceed where\
+        \ they previously stopped; review rendered manifests if you relied on that\
+        \ fail-fast behavior.\n- **Image registry config:** a prior breaking change\
+        \ around `imageRegistry` was **reverted** in 2.12.0. If you changed image\
+        \ registry settings during 2.11.x testing, re-validate your `global.imageRegistry`\
+        \ / image settings still behave as expected.\n"
+      chart_updates: [Reverted a breaking change related to `imageRegistry` handling
+          to restore previous behavior., Removed `fail` directives from Helm templates
+          to avoid hard failures during rendering., Added `rbac.leaderElection.create`
+          value to optionally manage leader-election RBAC resources., Added a chart
+          warning when `replicas` is set to more than 1 without leader election enabled/configured.]
+      features: [Password generator supports configuring a prefix and suffix., 'Conjur
+          provider: added support for Cloud Authenticators.', 'Helm chart: can now
+          toggle creation of leader election RBAC via `rbac.leaderElection.create`.',
+        Helm chart emits a warning when scaling above 1 replica without leader election
+          to prevent split-brain behavior.]
+      breaking_changes: []
+    chart_version: 2.12.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.12.0']
   - version: 2.11.0
     kube: ['1.36']
     requirements: []
@@ -20432,6 +20463,30 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 92.0.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Default Linux-only workloads to `kubernetes.io/os: linux` (adds/standardizes
+          nodeSelector on applicable workloads).', 'CI/dependency maintenance: helm-unittest
+          bumped to v1.2.1; GitHub workflow dependency updates (major).', Dependency
+          refresh via renovate (non-major) already occurred in 91.9.0; 92.0.0 mainly
+          carries CI and scheduling default changes.]
+      features: ['Linux-only components now default to scheduling on Linux nodes using
+          the `kubernetes.io/os: linux` nodeSelector, reducing accidental placement
+          on Windows nodes in mixed clusters.']
+      breaking_changes: ['In mixed OS clusters, workloads that previously could schedule
+          onto non-Linux nodes (or relied on custom scheduling) may now be constrained
+          to Linux unless you override nodeSelector/tolerations in values.']
+    chart_version: 92.0.0
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.11.2',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 91.9.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -24396,6 +24451,53 @@ addons:
   release_url: https://github.com/rook/rook/releases/tag/v{vsn}
   helm_repository_url: https://charts.rook.io/release
   versions:
+  - version: 1.21.0
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '## Helm values / packaging changes to plan for
+
+        - **OCI chart tags drop the `v` prefix**: if you pull charts by tag (OCI or
+        scripts), use `1.21.0` instead of `v1.21.0`.
+
+        - **msgrv2 required by default**: if you must disable it, set `cephClusterSpec.network.connections.requireMsgr2:
+        false` in Helm values.
+
+        - **rook-ceph-cluster chart can create `CephObjectStoreUser`** resources via
+        new value `cephObjectStoreUsers`.
+
+        - **Toolbox chart behavior change**: toolbox manifests/deployments now auto-reload
+        keyring and `ceph.conf` after CephX rotation/mon failover/config overrides.
+
+        - **Default CSI driver images no longer set by Rook**: after upgrade the configmap
+        `rook-csi-operator-image-set-configmap` contains empty values so the ceph-csi-operator
+        uses its defaults; ensure any custom CSI image overrides are still present.'
+      chart_updates: ['Helm/OCI packaging: chart tags no longer include `v` prefix.',
+        rook-ceph-cluster chart supports templating `CephObjectStoreUser` via `cephObjectStoreUsers`.,
+        Toolbox deployment templates updated to auto-reload keyring and `ceph.conf`
+          after relevant changes., CSI image-set configmap behavior updated (empties
+          by default; ceph-csi-operator defaults take over).]
+      features: [Ceph Umbrella (v21) becomes a supported Ceph version once v21.2.0
+          is released., RBD QoS can be configured using `VolumeAttributesClass` with
+          krbd + cgroup v2 `io.max`., Automated OSD replacement via annotating an
+          OSD deployment; preserves CRUSH position for later reuse (host-based OSDs
+          only; PVC-based not supported)., Helm chart can create `CephObjectStoreUser`
+          resources using `cephObjectStoreUsers`., 'Toolbox auto-reloads keyring and
+          `ceph.conf` after CephX key rotation, mon failover, or config override changes.',
+        Dashboard TLS cert can be sourced from a same-namespace TLS Secret via `spec.dashboard.sslCertificateRef`
+          and reconciled on updates., '`CephObjectStoreUser` supports `spec.defaultPlacement`
+          and `spec.defaultStorageClass` and reports effective values in status.',
+        CSI driver images defaulting is delegated to ceph-csi-operator built-ins;
+          Rook no longer pins defaults.]
+      breaking_changes: [Helm OCI chart tags no longer include the `v` prefix; update
+          any automation that references `v1.21.0`., 'Ceph msgrv2 is required by default
+          and needs kernel 5.11+; set `network.connections.requireMsgr2: false` if
+          you must run without msgrv2.', New NFS installs must explicitly define a
+          CephBlockPool for the `.nfs` pool; Rook no longer auto-creates it (upgrades
+          unaffected if `.nfs` already exists).]
+    chart_version: 1.21.0
+    images: []
   - version: 1.20.0
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -26976,7 +27078,17 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["No concrete feature changes were provided in the pasted notes for\
+          \ v3.33.0 vs v3.32.0\u2014only the presence of standard release artifacts\
+          \ (images/bundles, Windows package, Helm chart, CRD charts, OpenShift bundle).",
+        'The release continues to publish tigera-operator as a Helm 3 chart and CRDs
+          as separate charts, implying the same deployment model as prior releases.']
+      breaking_changes: [No breaking changes were listed in the pasted notes; must
+          review the actual GitHub release notes/changelog for v3.33.0 and the tigera-operator
+          chart CHANGELOG/values.yaml diff to confirm.]
     chart_version: 3.33.0
     images: ['quay.io/tigera/operator:v1.44.0']
   - version: 3.32.0
@@ -27990,6 +28102,22 @@ addons:
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
   helm_repository_url: https://helm.vector.dev/
   versions:
+  - version: 0.59.0
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were provided in the supplied v0.59.0 notes (they
+          only list assets). Treat this as a routine version bump unless you find
+          the full upstream release notes diff.]
+      breaking_changes: ['No breaking-change details were provided in the supplied
+          v0.59.0 notes (they only list assets). Before upgrading in production, review
+          the full v0.59.0 release notes/CHANGELOG for config/schema changes and deprecated
+          components.']
+    chart_version: 0.59.0
+    images: ['docker.io/timberio/vector:0.59.0-distroless-libc']
   - version: 0.58.0
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -31037,13 +31165,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
-  - version: 9.5.4
+  - version: 9.5.5
     kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 9.5.4
-    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+    chart_version: 9.5.5
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.5.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -32132,74 +32260,48 @@ addons:
   helm_repository_url: https://kubescape.github.io/helm-charts
   helm_values: clusterName=example,account=example
   versions:
-  - version: 1.40.4
+  - version: 1.40.5
     kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "### Helm values / configuration changes to review\n\n- **`kubescape.submit`\
-        \ removed from docs**: the README no longer references `kubescape.submit`\
-        \ (it was dead). If you still have this value in your `values.yaml`, it is\
-        \ likely ignored and can be removed.\n\n- **New: expose `defaultFrameworks`**\n\
-        \  - The chart now exposes a `defaultFrameworks` value for **kubescape-operator\
-        \ posture scans**.\n  - Operator now **honors install-time `defaultFrameworks`**\
-        \ for posture scans.\n  - Action: if you want to control which frameworks\
-        \ are scanned by default, set `defaultFrameworks` explicitly; otherwise behavior\
-        \ should remain the chart default.\n\n- **New: opt-in RBAC for runtime posture**\n\
-        \  - Chart adds **optional RBAC** to support \u201Cagent runtime posture\u201D\
-        .\n  - Action: if you enable the runtime posture feature, ensure you also\
-        \ enable/accept the new RBAC toggle(s) and verify they align with your cluster\u2019\
-        s RBAC policies.\n\n- **New: storage APIServer host networking option**\n\
-        \  - Storage can now be configured to run its APIServer **on the host network**\
-        \ (opt-in).\n  - Action: only enable if required; validate network policy/firewalling\
-        \ and port conflicts.\n\n- **New: disable exec + open tracing options**\n\
-        \  - Adds chart options to disable **exec tracing** and **open tracing**.\n\
-        \  - Action: if you have security/compliance concerns, consider disabling;\
-        \ otherwise defaults likely keep prior behavior.\n\n- **Autoupdater: pod metadata\
-        \ overrides**\n  - Autoupdater supports overriding pod metadata (labels/annotations).\n\
-        \  - Action: if you rely on standardized labels/annotations for policy/monitoring,\
-        \ consider using these overrides.\n\n- **Node-agent config refactor**\n  -\
-        \ \u201CExtra\u201D node-agent configuration moved under an `extra` section.\n\
-        \  - Action: if you currently set node-agent \u201Cextra\u201D config keys,\
-        \ confirm the new path and adjust `values.yaml` accordingly.\n\n- **RBAC tightening\
-        \ (may affect custom workflows)**\n  - **Node-agent**: dropped RBAC for `pods/delete`.\n\
-        \  - **Workload container securityContexts** now drop **all Linux capabilities**.\n\
-        \  - Action: if you had workloads/sidecars depending on additional capabilities\
-        \ or node-agent deleting pods, confirm your flows still work.\n"
-      chart_updates: ['Updated component images/versions: operator bumped to v0.2.162
-          (Bottlerocket detection support); storage image bumped to v0.0.298 (chart
-          note) and upstream storage includes additional fixes/features in this release
-          train.', 'Node-agent behavior update: auto-set `super_t` on Bottlerocket
-          node groups; Prometheus OTEL exporter enabled; malware detection changed
-          (ClamAV removed, moved to hash sensor).', 'Security hardening in templates:
-          drop all Linux capabilities in workload container securityContexts; pin
-          `runAsGroup` wherever `runAsUser` is pinned.', "Reliability/compat fixes:\
-          \ mount CA certs into sbom-scanner sidecar; mount `config.json` as a file\
-          \ (avoid masking policy dir); don\u2019t mask baked policy library when\
-          \ downloads are off.", 'CRD/template polish: omit empty annotations key
-          on seccompprofiles CRD when empty; align SecurityException vulnerability
-          schema with kubevuln types.']
-      features: [Configurable `defaultFrameworks` for operator posture scans; operator
-          honors the install-time setting for default frameworks., Opt-in RBAC support
-          for agent runtime posture (feature gated)., Storage APIServer can be run
-          on the host network (opt-in)., Autoupdater supports pod metadata overrides
-          (labels/annotations)., 'Bottlerocket node groups: node-agent can auto-detect
-          and auto-set `super_t` to work correctly on Bottlerocket.', Options added
-          to disable exec tracing and open tracing.]
-      breaking_changes: ['Node-agent malware detection change: **ClamAV removed**
-          and malware detection moved to the **hash sensor**. If you depended on ClamAV-specific
-          behavior/artifacts, validate the new detection path.', 'Node-agent RBAC
-          reduced: **pods/delete permission removed**. If you had automation relying
-          on node-agent deleting pods, it will no longer be allowed by default.',
-        "Node-agent values structure change: some \u201Cextra node-agent configuration\u201D\
-          \ moved under an `extra` section; existing `values.yaml` may need path updates.",
-        'SecurityContext hardening: workloads now **drop all Linux capabilities**
-          by default and `runAsGroup` is pinned alongside `runAsUser`; if any container
-          required extra capabilities or different group IDs, you must override explicitly.']
-    chart_version: 1.40.4
-    images: ['quay.io/kubescape/http-request:v0.2.23', 'quay.io/kubescape/kubescape:v4.0.13',
+      helm_changes: ''
+      chart_updates: [No release-note details were provided for kubescape-operator
+          chart version 1.40.4 or 1.40.5; 1.40.5 is marked pre-release with no 'What's
+          Changed' section in the supplied notes., 'From 1.40.3 notes (the only detailed
+          set provided): chart now scopes OTEL config to node-agent via `otelUrl`
+          and drops the bundled OpenTelemetry collector.', Kubernetes minimum version
+          is enforced as >= 1.28 via a Helm `kubeVersion` guard., Operator enables
+          CEL admission rules; SecurityException CRDs gain CEL validation; one orphan/uninstallable
+          SecurityException CRD is removed upstream (from kubescape app notes)., Prometheus
+          exporter ServiceMonitor is decoupled from kubescape ServiceMonitor., 'Synchronizer
+          now syncs additional resources (ServiceAccounts, ContainerProfiles, AISandboxHeartbeats
+          endpoint registration).', 'Node-agent autoscaling/affinity changes: targets
+          label-less nodes via DoesNotExist affinity; autoscaler mount guard aligned;
+          GKE Autopilot allowlist default bumped to 1.40-v2 and allowlist synchronizer
+          installed when enabled.', 'Storage: storage pod restarts when storage config
+          changes.']
+      features: [Configurable `proxyRegistryMap` for kubevuln cluster config to support
+          proxy/registry mapping., 'New kubevuln knobs: `cveMatchingMode` and `trustedVendors`
+          for improved CVE matching behavior.', 'Opt-in remediation capability (`capabilities.remediation`)
+          with gated mutating RBAC; operator action/remediate workflows expanded upstream
+          (annotate, dry-run, quarantine).', 'Node-agent: alert deduplication bypass
+          exposed and a master switch added; expanded OpenTelemetry traces/logs/metrics
+          support upstream.', 'Synchronizer: can sync ContainerProfiles and additional
+          resource types to backend; adds Kafka backend upstream (synchronizer component).',
+        'Storage: IPv6-only cluster support via configurable bind address upstream;
+          ContainerProfile consolidation/compaction improvements upstream.']
+      breaking_changes: [Kubernetes >= 1.28 is now required (Helm will block install/upgrade
+          on older clusters)., "Bundled OpenTelemetry collector is dropped; OTEL is\
+          \ now scoped to node-agent via `otelUrl`\u2014clusters relying on the chart-provided\
+          \ collector must deploy their own collector and update values accordingly.",
+        CEL validation/admission features may require Kubernetes/CRD compatibility
+          (and can cause previously-accepted custom resources to be rejected if they
+          fail new CEL rules).]
+    chart_version: 1.40.5
+    images: ['quay.io/kubescape/http-request:v0.2.23', 'quay.io/kubescape/kubescape:v4.0.14',
       'quay.io/kubescape/kubevuln:v0.3.430', 'quay.io/kubescape/node-agent:v0.3.219',
-      'quay.io/kubescape/operator:v0.2.169', 'quay.io/kubescape/storage:v0.0.331']
+      'quay.io/kubescape/operator:v0.2.172', 'quay.io/kubescape/storage:v0.0.348']
   - version: 1.40.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -33042,12 +33144,12 @@ addons:
   helm_values: wizApiToken.secret.create=false,imagePullSecret.username=dummy,imagePullSecret.password=dummy
   chart_name: wiz-sensor
   versions:
-  - version: 1.0.12402
+  - version: 1.0.12603
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.0.12447
+    chart_version: 1.0.12603
     images: ['wizio.azurecr.io/sensor:v1']
   - version: 1.0.3999
     kube: ['1.37', '1.36', '1.35', '1.34']

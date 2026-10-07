@@ -3,6 +3,53 @@ git_url: https://github.com/rook/rook
 release_url: https://github.com/rook/rook/releases/tag/v{vsn}
 helm_repository_url: https://charts.rook.io/release
 versions:
+- version: 1.21.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '## Helm values / packaging changes to plan for
+
+      - **OCI chart tags drop the `v` prefix**: if you pull charts by tag (OCI or
+      scripts), use `1.21.0` instead of `v1.21.0`.
+
+      - **msgrv2 required by default**: if you must disable it, set `cephClusterSpec.network.connections.requireMsgr2:
+      false` in Helm values.
+
+      - **rook-ceph-cluster chart can create `CephObjectStoreUser`** resources via
+      new value `cephObjectStoreUsers`.
+
+      - **Toolbox chart behavior change**: toolbox manifests/deployments now auto-reload
+      keyring and `ceph.conf` after CephX rotation/mon failover/config overrides.
+
+      - **Default CSI driver images no longer set by Rook**: after upgrade the configmap
+      `rook-csi-operator-image-set-configmap` contains empty values so the ceph-csi-operator
+      uses its defaults; ensure any custom CSI image overrides are still present.'
+    chart_updates: ['Helm/OCI packaging: chart tags no longer include `v` prefix.',
+      rook-ceph-cluster chart supports templating `CephObjectStoreUser` via `cephObjectStoreUsers`.,
+      Toolbox deployment templates updated to auto-reload keyring and `ceph.conf`
+        after relevant changes., CSI image-set configmap behavior updated (empties
+        by default; ceph-csi-operator defaults take over).]
+    features: [Ceph Umbrella (v21) becomes a supported Ceph version once v21.2.0 is
+        released., RBD QoS can be configured using `VolumeAttributesClass` with krbd
+        + cgroup v2 `io.max`., Automated OSD replacement via annotating an OSD deployment;
+        preserves CRUSH position for later reuse (host-based OSDs only; PVC-based
+        not supported)., Helm chart can create `CephObjectStoreUser` resources using
+        `cephObjectStoreUsers`., 'Toolbox auto-reloads keyring and `ceph.conf` after
+        CephX key rotation, mon failover, or config override changes.', Dashboard
+        TLS cert can be sourced from a same-namespace TLS Secret via `spec.dashboard.sslCertificateRef`
+        and reconciled on updates., '`CephObjectStoreUser` supports `spec.defaultPlacement`
+        and `spec.defaultStorageClass` and reports effective values in status.', CSI
+        driver images defaulting is delegated to ceph-csi-operator built-ins; Rook
+        no longer pins defaults.]
+    breaking_changes: [Helm OCI chart tags no longer include the `v` prefix; update
+        any automation that references `v1.21.0`., 'Ceph msgrv2 is required by default
+        and needs kernel 5.11+; set `network.connections.requireMsgr2: false` if you
+        must run without msgrv2.', New NFS installs must explicitly define a CephBlockPool
+        for the `.nfs` pool; Rook no longer auto-creates it (upgrades unaffected if
+        `.nfs` already exists).]
+  chart_version: 1.21.0
+  images: []
 - version: 1.20.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
   requirements: []
