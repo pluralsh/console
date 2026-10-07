@@ -20,6 +20,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Jira,
     Pagerduty,
     Sentry,
+    ServiceNow,
     Slack,
     Teams
   }
@@ -129,6 +130,9 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Sentry.IssueRead,
     Sentry.ListIssueEvents,
     Sentry.ListIssues,
+    ServiceNow.GetRecord,
+    ServiceNow.ListComments,
+    ServiceNow.ListRecords,
     Slack.FindChannelByName,
     Slack.ListChannels,
     Slack.ListMessages,

@@ -28,6 +28,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Atlassian]: extractAtlassianMetadata,
   [WorkbenchToolType.Jira]: extractJiraMetadata,
   [WorkbenchToolType.JiraDatacenter]: extractJiraDatacenterMetadata,
+  [WorkbenchToolType.ServiceNow]: extractServiceNowMetadata,
   [WorkbenchToolType.Linear]: extractLinearMetadata,
   [WorkbenchToolType.Slack]: extractSlackMetadata,
   [WorkbenchToolType.Pagerduty]: extractPagerdutyMetadata,
@@ -207,6 +208,19 @@ function extractJiraDatacenterMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.jiraDatacenter?.url }]
+}
+
+function extractServiceNowMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'URL', value: configuration?.serviceNow?.url },
+    { label: 'Username', value: configuration?.serviceNow?.username },
+    {
+      label: 'Delete',
+      value: configuration?.serviceNow?.allowDelete ? 'Allowed' : 'Disabled',
+    },
+  ]
 }
 
 function extractLinearMetadata(

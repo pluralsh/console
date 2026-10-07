@@ -12236,6 +12236,8 @@ type WorkbenchToolConfiguration struct {
 	Jira *WorkbenchToolJiraConnection `json:"jira,omitempty"`
 	// jira data center connection (no secrets)
 	JiraDatacenter *WorkbenchToolJiraDatacenterConnection `json:"jiraDatacenter,omitempty"`
+	// servicenow connection (no secrets)
+	ServiceNow *WorkbenchToolServiceNowConnection `json:"serviceNow,omitempty"`
 	// exa connection (no secrets)
 	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
 	// github connection (no secrets)
@@ -12301,6 +12303,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Jira *WorkbenchToolJiraConnectionAttributes `json:"jira,omitempty"`
 	// jira data center connection (ticketing)
 	JiraDatacenter *WorkbenchToolJiraDatacenterConnectionAttributes `json:"jiraDatacenter,omitempty"`
+	// servicenow connection (ticketing)
+	ServiceNow *WorkbenchToolServiceNowConnectionAttributes `json:"serviceNow,omitempty"`
 	// exa connection (search)
 	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
 	// github connection (integration)
@@ -12678,6 +12682,26 @@ type WorkbenchToolSentryConnectionAttributes struct {
 	URL *string `json:"url,omitempty"`
 	// Sentry user auth token or internal integration token (encrypted at rest)
 	AccessToken *string `json:"accessToken,omitempty"`
+}
+
+type WorkbenchToolServiceNowConnection struct {
+	// servicenow instance URL
+	URL string `json:"url"`
+	// servicenow basic auth user (password never exposed)
+	Username *string `json:"username,omitempty"`
+	// whether agents may permanently delete tickets
+	AllowDelete *bool `json:"allowDelete,omitempty"`
+}
+
+type WorkbenchToolServiceNowConnectionAttributes struct {
+	// servicenow instance URL (for example, https://example.service-now.com)
+	URL string `json:"url"`
+	// servicenow user for basic auth (required if not using OAuth token exchange)
+	Username *string `json:"username,omitempty"`
+	// servicenow password for basic auth (required if not using OAuth token exchange)
+	Password *string `json:"password,omitempty"`
+	// whether agents may permanently delete tickets (defaults to false)
+	AllowDelete *bool `json:"allowDelete,omitempty"`
 }
 
 type WorkbenchToolSlackConnection struct {
@@ -20478,6 +20502,7 @@ const (
 	WorkbenchToolTypeVictoriaLogs        WorkbenchToolType = "VICTORIA_LOGS"
 	WorkbenchToolTypeJira                WorkbenchToolType = "JIRA"
 	WorkbenchToolTypeJiraDatacenter      WorkbenchToolType = "JIRA_DATACENTER"
+	WorkbenchToolTypeServiceNow          WorkbenchToolType = "SERVICE_NOW"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -20514,11 +20539,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeVictoriaLogs,
 	WorkbenchToolTypeJira,
 	WorkbenchToolTypeJiraDatacenter,
+	WorkbenchToolTypeServiceNow,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs, WorkbenchToolTypeJira, WorkbenchToolTypeJiraDatacenter:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs, WorkbenchToolTypeJira, WorkbenchToolTypeJiraDatacenter, WorkbenchToolTypeServiceNow:
 		return true
 	}
 	return false

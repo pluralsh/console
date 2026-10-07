@@ -2968,6 +2968,7 @@ enum WorkbenchToolType {
   VICTORIA_LOGS
   JIRA
   JIRA_DATACENTER
+  SERVICE_NOW
 }
 
 enum WorkbenchToolCategory {
@@ -3569,6 +3570,9 @@ input WorkbenchToolConfigurationAttributes {
   "jira data center connection (ticketing)"
   jiraDatacenter: WorkbenchToolJiraDatacenterConnectionAttributes
 
+  "servicenow connection (ticketing)"
+  serviceNow: WorkbenchToolServiceNowConnectionAttributes
+
   "exa connection (search)"
   exa: WorkbenchToolExaConnectionAttributes
 
@@ -3872,6 +3876,20 @@ input WorkbenchToolJiraDatacenterConnectionAttributes {
 
   "jira data center personal access token"
   apiToken: String
+}
+
+input WorkbenchToolServiceNowConnectionAttributes {
+  "servicenow instance URL (for example, https:\/\/example.service-now.com)"
+  url: String!
+
+  "servicenow user for basic auth (required if not using OAuth token exchange)"
+  username: String
+
+  "servicenow password for basic auth (required if not using OAuth token exchange)"
+  password: String
+
+  "whether agents may permanently delete tickets (defaults to false)"
+  allowDelete: Boolean
 }
 
 input WorkbenchToolExaConnectionAttributes {
@@ -5348,6 +5366,9 @@ type WorkbenchToolConfiguration {
   "jira data center connection (no secrets)"
   jiraDatacenter: WorkbenchToolJiraDatacenterConnection
 
+  "servicenow connection (no secrets)"
+  serviceNow: WorkbenchToolServiceNowConnection
+
   "exa connection (no secrets)"
   exa: WorkbenchToolExaConnection
 
@@ -5570,6 +5591,17 @@ type WorkbenchToolJiraConnection {
 type WorkbenchToolJiraDatacenterConnection {
   "jira data center base URL (PAT never exposed)"
   url: String!
+}
+
+type WorkbenchToolServiceNowConnection {
+  "servicenow instance URL"
+  url: String!
+
+  "servicenow basic auth user (password never exposed)"
+  username: String
+
+  "whether agents may permanently delete tickets"
+  allowDelete: Boolean
 }
 
 type WorkbenchToolExaConnection {

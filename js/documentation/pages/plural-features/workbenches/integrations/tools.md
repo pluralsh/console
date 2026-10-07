@@ -63,6 +63,7 @@ All native integrations respect your existing RBAC — enabling a capability her
 |---|---|
 | **[Atlassian (Jira)](/plural-features/workbenches/integrations/tools/atlassian)** | Create, read, and update Jira issues |
 | **[Linear](/plural-features/workbenches/integrations/tools/linear)** | Create and update Linear issues |
+| **[ServiceNow](/plural-features/workbenches/integrations/tools/service-now)** | Create, read, update, and comment on incidents, change requests, problems, and catalog tasks |
 
 ### Cloud
 

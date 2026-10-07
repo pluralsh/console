@@ -153,6 +153,21 @@ function jiraDatacenterConfigurationIsComplete(
   return isEditing || scmTokenIsSet(c?.apiToken)
 }
 
+function serviceNowConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['serviceNow'] | null | undefined,
+  oauth: Nullable<OauthTokenExchangeAttributes>,
+  persistedOauthType: Nullable<OauthTokenExchangeType>,
+  isEditing: boolean
+): boolean {
+  if (!(c?.url ?? '').trim()) return false
+  if (oauth?.enabled)
+    return oauthTokenExchangeIsComplete(oauth, persistedOauthType)
+
+  return (
+    !!(c?.username ?? '').trim() && (isEditing || scmTokenIsSet(c?.password))
+  )
+}
+
 export type WorkbenchToolFormState = Omit<
   Pick<
     WorkbenchToolAttributes,
@@ -276,6 +291,13 @@ export function WorkbenchToolForm({
     (type !== WorkbenchToolType.JiraDatacenter ||
       jiraDatacenterConfigurationIsComplete(
         state.configuration?.jiraDatacenter,
+        state.oauth,
+        tool?.oauth?.type,
+        !!tool?.id
+      )) &&
+    (type !== WorkbenchToolType.ServiceNow ||
+      serviceNowConfigurationIsComplete(
+        state.configuration?.serviceNow,
         state.oauth,
         tool?.oauth?.type,
         !!tool?.id
@@ -730,6 +752,17 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   [WorkbenchToolType.JiraDatacenter]: (config) => {
     const { url } = config?.jiraDatacenter ?? {}
     return { jiraDatacenter: { url: url ?? '', apiToken: '' } }
+  },
+  [WorkbenchToolType.ServiceNow]: (config) => {
+    const { url, username, allowDelete } = config?.serviceNow ?? {}
+    return {
+      serviceNow: {
+        url: url ?? '',
+        username: username ?? '',
+        password: '',
+        allowDelete: !!allowDelete,
+      },
+    }
   },
   [WorkbenchToolType.Exa]: () => ({ exa: { apiKey: '' } }),
   [WorkbenchToolType.Github]: (config) => {

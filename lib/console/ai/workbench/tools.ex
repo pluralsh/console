@@ -32,7 +32,8 @@ defmodule Console.AI.Workbench.Tools do
     Docker,
     Sentry,
     Slack,
-    Jira
+    Jira,
+    ServiceNow
   }
   alias Console.Repo
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchTool}
@@ -43,7 +44,7 @@ defmodule Console.AI.Workbench.Tools do
   @tool_preloads [:cloud_connection, :mcp_server, :scm_connection]
 
   @obs_categories MapSet.new(~w(metrics logs traces error_tracking)a)
-  @integration_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker jira jira_datacenter)a
+  @integration_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker jira jira_datacenter service_now)a
 
   @doc """
   Maps each constructed tool name to `{module, workbench_tool}`.
@@ -213,6 +214,7 @@ defmodule Console.AI.Workbench.Tools do
   defp expand_integration(%WorkbenchTool{tool: type} = tool)
        when type in [:jira, :jira_datacenter],
        do: Jira.Tools.expand(tool)
+  defp expand_integration(%WorkbenchTool{tool: :service_now} = tool), do: ServiceNow.Tools.expand(tool)
 
   defp expand_integration(_), do: []
 

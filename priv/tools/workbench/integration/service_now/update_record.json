@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "change_request",
+        "problem",
+        "sc_task"
+      ],
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Record sys_id (32 hex characters) or record number, for example INC0010001 or CHG0030002."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Fields to change keyed by column name using raw values, for example {\"state\": \"6\", \"close_code\": \"Solved (Permanently)\", \"close_notes\": \"...\"} or {\"assigned_to\": \"<user sys_id or user_name>\"}. State values differ per table and instance; read the record with display_value=all first if unsure."
+    }
+  },
+  "required": [
+    "table",
+    "record_id",
+    "fields"
+  ]
+}

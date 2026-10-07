@@ -259,6 +259,7 @@ export const docsStructure: DocSection[] = [
                     title: 'Jira Data Center',
                   },
                   { path: 'linear', title: 'Linear' },
+                  { path: 'service-now', title: 'ServiceNow' },
                   { path: 'azure-devops', title: 'Azure DevOps' },
                   { path: 'http', title: 'HTTP' },
                   { path: 'mcp', title: 'MCP' },

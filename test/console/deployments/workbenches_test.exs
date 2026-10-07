@@ -382,6 +382,11 @@ defmodule Console.Deployments.WorkbenchesTest do
           url: "https://jira.example.com",
           api_token: "jira-datacenter-token"
         }}], [:ticketing]},
+        {:service_now, [configuration: %{service_now: %{
+          url: "https://example.service-now.com",
+          username: "plural.agent",
+          password: "service-now-password"
+        }}], [:ticketing]},
         {:exa, [configuration: %{exa: %{
           api_key: "exa-api-key"
         }}], [:search]},

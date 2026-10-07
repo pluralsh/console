@@ -278,6 +278,11 @@ fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
   jiraDatacenter {
     url
   }
+  serviceNow {
+    url
+    username
+    allowDelete
+  }
   linear {
     url
   }

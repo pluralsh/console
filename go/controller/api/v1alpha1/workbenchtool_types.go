@@ -131,7 +131,7 @@ type WorkbenchToolSpec struct {
 
 	// The type of tool.
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum:=HTTP;ELASTIC;DATADOG;PROMETHEUS;LOKI;TEMPO;SENTRY;MCP;LINEAR;ATLASSIAN;SPLUNK;DYNATRACE;CLOUDWATCH;AZURE;CLOUD;JAEGER;EXA;GITHUB;SLACK;TEAMS;GITLAB;BITBUCKET;BITBUCKET_DATACENTER;AZURE_DEVOPS;PAGERDUTY;OPENSEARCH;LAMBDA;CLOUD_RUN;AZURE_FUNCTION;DOCKER;VICTORIA_LOGS;JIRA;JIRA_DATACENTER
+	// +kubebuilder:validation:Enum:=HTTP;ELASTIC;DATADOG;PROMETHEUS;LOKI;TEMPO;SENTRY;MCP;LINEAR;ATLASSIAN;SPLUNK;DYNATRACE;CLOUDWATCH;AZURE;CLOUD;JAEGER;EXA;GITHUB;SLACK;TEAMS;GITLAB;BITBUCKET;BITBUCKET_DATACENTER;AZURE_DEVOPS;PAGERDUTY;OPENSEARCH;LAMBDA;CLOUD_RUN;AZURE_FUNCTION;DOCKER;VICTORIA_LOGS;JIRA;JIRA_DATACENTER;SERVICE_NOW
 	Tool console.WorkbenchToolType `json:"tool"`
 
 	// Categories for the tool.
@@ -255,6 +255,10 @@ type WorkbenchToolConfiguration struct {
 	// Jira Data Center connection (ticketing).
 	// +kubebuilder:validation:Optional
 	JiraDatacenter *WorkbenchToolJiraDatacenterConfig `json:"jiraDatacenter,omitempty"`
+
+	// ServiceNow connection (ticketing).
+	// +kubebuilder:validation:Optional
+	ServiceNow *WorkbenchToolServiceNowConfig `json:"serviceNow,omitempty"`
 
 	// Exa connection (search).
 	// +kubebuilder:validation:Optional
@@ -397,6 +401,11 @@ func (c *WorkbenchToolConfiguration) Attributes(ctx context.Context, cl client.C
 		return nil, err
 	}
 
+	serviceNow, err := c.ServiceNow.Attributes(ctx, cl, namespace)
+	if err != nil {
+		return nil, err
+	}
+
 	exa, err := c.Exa.Attributes(ctx, cl, namespace)
 	if err != nil {
 		return nil, err
@@ -448,6 +457,7 @@ func (c *WorkbenchToolConfiguration) Attributes(ctx context.Context, cl client.C
 		Teams:               teams,
 		Atlassian:           atlassian,
 		JiraDatacenter:      jiraDatacenter,
+		ServiceNow:          serviceNow,
 		Exa:                 exa,
 		Github:              github,
 		Gitlab:              gitlab,
@@ -1247,6 +1257,46 @@ func (c *WorkbenchToolJiraDatacenterConfig) Attributes(ctx context.Context, cl c
 			return nil, err
 		}
 		attr.APIToken = lo.ToPtr(apiToken)
+	}
+
+	return attr, nil
+}
+
+// WorkbenchToolServiceNowConfig defines a ServiceNow connection.
+type WorkbenchToolServiceNowConfig struct {
+	// ServiceNow instance URL, for example https://example.service-now.com.
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
+	// Username for basic auth when OAuth is not used.
+	// +kubebuilder:validation:Optional
+	Username *string `json:"username,omitempty"`
+
+	// PasswordSecretRef references the basic auth password when OAuth is not used.
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
+
+	// AllowDelete lets agents permanently delete tickets. Defaults to false.
+	// +kubebuilder:validation:Optional
+	AllowDelete *bool `json:"allowDelete,omitempty"`
+}
+
+func (c *WorkbenchToolServiceNowConfig) Attributes(ctx context.Context, cl client.Client, namespace string) (*console.WorkbenchToolServiceNowConnectionAttributes, error) {
+	if c == nil {
+		return nil, nil
+	}
+
+	attr := &console.WorkbenchToolServiceNowConnectionAttributes{
+		URL:         c.URL,
+		Username:    c.Username,
+		AllowDelete: c.AllowDelete,
+	}
+	if c.PasswordSecretRef != nil {
+		password, err := utils.GetSecretKey(ctx, cl, c.PasswordSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Password = lo.ToPtr(password)
 	}
 
 	return attr, nil
