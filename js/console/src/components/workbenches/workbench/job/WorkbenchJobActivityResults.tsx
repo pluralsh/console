@@ -966,13 +966,15 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
 
 // Always takes its height so hovering doesn't shift the transcript. The row is
 // the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
-// below the card.
+// below the card. The extra 7px brings the card-to-notes gap up to 54px, in
+// line with the gap from that notes line to the next activity title.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
   gap: theme.spacing.xxsmall,
   width: '100%',
+  paddingBottom: 7,
   opacity: $show ? 1 : 0,
   transition: 'opacity 0.15s ease',
   pointerEvents: $show ? 'auto' : 'none',
