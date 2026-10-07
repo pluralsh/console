@@ -16052,6 +16052,7 @@ const (
 	IssueWebhookProviderAzureDevops         IssueWebhookProvider = "AZURE_DEVOPS"
 	IssueWebhookProviderBitbucket           IssueWebhookProvider = "BITBUCKET"
 	IssueWebhookProviderBitbucketDatacenter IssueWebhookProvider = "BITBUCKET_DATACENTER"
+	IssueWebhookProviderServiceNow          IssueWebhookProvider = "SERVICE_NOW"
 )
 
 var AllIssueWebhookProvider = []IssueWebhookProvider{
@@ -16063,11 +16064,12 @@ var AllIssueWebhookProvider = []IssueWebhookProvider{
 	IssueWebhookProviderAzureDevops,
 	IssueWebhookProviderBitbucket,
 	IssueWebhookProviderBitbucketDatacenter,
+	IssueWebhookProviderServiceNow,
 }
 
 func (e IssueWebhookProvider) IsValid() bool {
 	switch e {
-	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops, IssueWebhookProviderBitbucket, IssueWebhookProviderBitbucketDatacenter:
+	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops, IssueWebhookProviderBitbucket, IssueWebhookProviderBitbucketDatacenter, IssueWebhookProviderServiceNow:
 		return true
 	}
 	return false

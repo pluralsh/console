@@ -5932,7 +5932,8 @@ export enum IssueWebhookProvider {
   Github = 'GITHUB',
   Gitlab = 'GITLAB',
   Jira = 'JIRA',
-  Linear = 'LINEAR'
+  Linear = 'LINEAR',
+  ServiceNow = 'SERVICE_NOW'
 }
 
 export type IssuerRef = {

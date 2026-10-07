@@ -296,6 +296,7 @@ export const docsStructure: DocSection[] = [
                   { path: 'gitlab', title: 'GitLab' },
                   { path: 'jira', title: 'Jira' },
                   { path: 'linear', title: 'Linear' },
+                  { path: 'service-now', title: 'ServiceNow' },
                 ],
               },
               {

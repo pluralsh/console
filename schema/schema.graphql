@@ -1875,6 +1875,7 @@ enum IssueWebhookProvider {
   AZURE_DEVOPS
   BITBUCKET
   BITBUCKET_DATACENTER
+  SERVICE_NOW
 }
 
 enum IssueStatus {

@@ -72,3 +72,4 @@ Example prompts:
 ## Related
 
 * [Workbench tools](/plural-features/workbenches/integrations/tools)
+* [ServiceNow webhook](/plural-features/workbenches/integrations/webhooks/service-now)
