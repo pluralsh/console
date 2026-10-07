@@ -1073,8 +1073,6 @@ query WorkbenchAlertCounts($id: ID!) {
 fragment WorkbenchAlert on Alert {
   ...Alert
   workbenchJob {
-    id
-    status
     error
   }
   cluster {

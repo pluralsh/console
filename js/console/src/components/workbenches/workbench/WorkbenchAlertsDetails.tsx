@@ -86,7 +86,7 @@ export function useWorkbenchAlertsDetails({
   fetchingMore,
   hasNextPage,
   fetchNextPage,
-  fallbackWorkbenchId,
+  workbenchId,
   searchString,
   onSearchChange,
   severities,
@@ -102,7 +102,7 @@ export function useWorkbenchAlertsDetails({
   fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
-  fallbackWorkbenchId: string
+  workbenchId: string
   searchString: string
   onSearchChange: (value: string) => void
   // the display severity filter, applied server-side
@@ -123,7 +123,6 @@ export function useWorkbenchAlertsDetails({
 
   // the view isn't shown: skip building the list and panels for every item
   if (!active) return { sidebar: null, content: null }
-  const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
 
   const sidebar = (
     <DetailsListSC>
@@ -191,15 +190,13 @@ export function useWorkbenchAlertsDetails({
                     placement="top"
                     label="Firing"
                   >
-                    <FiringIconSC
+                    <ErrorIcon
+                      size={16}
+                      color="icon-danger"
                       role="img"
                       aria-label="Firing"
-                    >
-                      <ErrorIcon
-                        size={16}
-                        color="icon-danger"
-                      />
-                    </FiringIconSC>
+                      flexShrink={0}
+                    />
                   </Tooltip>
                 )}
                 <DetailsListAgeSC>
@@ -572,11 +569,6 @@ const SeverityChipsSC = styled.div(({ theme }) => ({
   flexWrap: 'wrap',
   gap: theme.spacing.xsmall,
 }))
-
-const FiringIconSC = styled.span({
-  display: 'flex',
-  flexShrink: 0,
-})
 
 const SummaryCardSC = styled.div(({ theme }) => ({
   display: 'flex',

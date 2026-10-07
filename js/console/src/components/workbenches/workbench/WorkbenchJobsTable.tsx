@@ -41,6 +41,7 @@ export function WorkbenchJobsTableContent({
   jobs,
   loading,
   loaded,
+  fetchingMore,
   pageInfo,
   fetchNextPage,
   setVirtualSlice,
@@ -49,6 +50,8 @@ export function WorkbenchJobsTableContent({
   jobs: WorkbenchJobTinyFragment[]
   loading: boolean
   loaded: boolean
+  // a next page in flight; polls also go through fetchMore, so not `loading`
+  fetchingMore: boolean
   pageInfo: PageInfoFragment | undefined
   fetchNextPage: () => void
   setVirtualSlice: (slice: VirtualSlice) => void
@@ -72,7 +75,7 @@ export function WorkbenchJobsTableContent({
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
-      isFetchingNextPage={loading}
+      isFetchingNextPage={fetchingMore}
       onVirtualSliceChange={setVirtualSlice}
       emptyStateProps={{ message: 'No jobs found.' }}
       getRowLink={({ original }) => {

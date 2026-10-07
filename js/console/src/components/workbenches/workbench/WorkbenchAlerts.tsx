@@ -116,7 +116,7 @@ export function WorkbenchAlerts() {
         if (!alert.workbenchJob?.id) return null
 
         return {
-          workbenchId: alert.workbench?.id ?? workbenchId,
+          workbenchId,
           jobId: alert.workbenchJob.id,
           status: alert.workbenchJob.status,
         }
@@ -144,7 +144,7 @@ export function WorkbenchAlerts() {
     fetchingMore,
     hasNextPage: !!pageInfo?.hasNextPage,
     fetchNextPage,
-    fallbackWorkbenchId: workbenchId,
+    workbenchId,
     emptyState,
   }
   const details = useWorkbenchAlertsDetails({

@@ -32,7 +32,7 @@ export function WorkbenchAlertsBoard({
   fetchingMore,
   hasNextPage,
   fetchNextPage,
-  fallbackWorkbenchId,
+  workbenchId,
   totalCount,
   emptyState,
 }: {
@@ -43,7 +43,7 @@ export function WorkbenchAlertsBoard({
   fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
-  fallbackWorkbenchId: string
+  workbenchId: string
   // alerts matching the current search and filters, across all pages
   totalCount?: Nullable<number>
   emptyState: EmptyListState
@@ -109,7 +109,7 @@ export function WorkbenchAlertsBoard({
       />
       <WorkbenchAlertFlyover
         alert={openAlert}
-        fallbackWorkbenchId={fallbackWorkbenchId}
+        workbenchId={workbenchId}
         onClose={() => setOpenAlertId(undefined)}
       />
     </BoardSC>

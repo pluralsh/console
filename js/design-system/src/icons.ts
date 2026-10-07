@@ -274,7 +274,6 @@ export { default as SentryLogoIcon } from './components/icons/SentryLogoIcon'
 export { default as ServersIcon } from './components/icons/ServersIcon'
 export {
   default as SeverityIcon,
-  type SeverityIconLevel,
   type SeverityIconSeverity,
 } from './components/icons/SeverityIcon'
 export { default as ShareIcon } from './components/icons/ShareIcon'

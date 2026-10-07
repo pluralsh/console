@@ -39,13 +39,10 @@ export function AlertSourceLink({
   label?: string
 }) {
   const href = toHttpURL(alert.url)
-  const icon = (
-    <IconSC>
-      {cloneElement(getObservabilityWebhookTypeIcon(alert.type), {
-        size: 12,
-      })}
-    </IconSC>
-  )
+  const icon = cloneElement(getObservabilityWebhookTypeIcon(alert.type), {
+    size: 12,
+    flexShrink: 0,
+  })
   const name = <NameSC>{label ?? getAlertName(alert)}</NameSC>
 
   if (isEmpty(href))
@@ -87,15 +84,6 @@ const LinkSC = styled.a(({ theme }) => ({
   // without a usable URL it's plain text, so it shouldn't look clickable
   'span&': { color: theme.colors.text },
 }))
-
-const IconSC = styled.span({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  width: 12,
-  height: 12,
-})
 
 const NameSC = styled.span({
   minWidth: 0,

@@ -4,7 +4,6 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { AlertSeverity } from 'generated/graphql'
-import styled from 'styled-components'
 
 export const ALERT_SEVERITY_ORDER = [
   AlertSeverity.Critical,
@@ -45,26 +44,14 @@ export function AlertSeverityIcon({
       placement="top"
       label={label}
     >
-      <IconWrapSC
-        $size={size}
+      <SeverityIcon
+        severity={SEVERITY_ICON_SEVERITIES[severity]}
+        size={size}
         role="img"
         aria-label={label}
-      >
-        <SeverityIcon
-          severity={SEVERITY_ICON_SEVERITIES[severity]}
-          size={size}
-        />
-      </IconWrapSC>
+        // never shrinks next to truncated text
+        flexShrink={0}
+      />
     </Tooltip>
   )
 }
-
-// fixed size, so the mark never shrinks next to truncated text
-const IconWrapSC = styled.span<{ $size: number }>(({ $size }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  width: $size,
-  height: $size,
-}))

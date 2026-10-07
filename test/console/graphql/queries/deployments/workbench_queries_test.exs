@@ -777,9 +777,10 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
     test "it can sort workbench alerts" do
       workbench = insert(:workbench)
-      # zulu was created first but updated last
-      zulu  = insert(:alert, workbench: workbench, title: "Zulu", inserted_at: Timex.now() |> Timex.shift(days: -3), updated_at: Timex.now() |> Timex.shift(hours: -1))
-      alpha = insert(:alert, workbench: workbench, title: "Alpha", inserted_at: Timex.now() |> Timex.shift(days: -1), updated_at: Timex.now() |> Timex.shift(days: -1))
+      # zulu was created first but updated last, and alerts without a title sort last by title
+      zulu     = insert(:alert, workbench: workbench, title: "Zulu", inserted_at: Timex.now() |> Timex.shift(days: -3), updated_at: Timex.now() |> Timex.shift(hours: -1))
+      alpha    = insert(:alert, workbench: workbench, title: "Alpha", inserted_at: Timex.now() |> Timex.shift(days: -1), updated_at: Timex.now() |> Timex.shift(days: -1))
+      untitled = insert(:alert, workbench: workbench, title: nil, inserted_at: Timex.now() |> Timex.shift(days: -2), updated_at: Timex.now() |> Timex.shift(days: -2))
 
       query = """
         query Workbench($id: ID!, $sort: AlertSort, $direction: SortDirection) {
@@ -792,39 +793,14 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       """
 
       for {vars, expected} <- [
-        {%{"sort" => "TITLE", "direction" => "ASC"}, [alpha, zulu]},
-        {%{"sort" => "TITLE", "direction" => "DESC"}, [zulu, alpha]},
-        {%{"sort" => "UPDATED_AT", "direction" => "ASC"}, [alpha, zulu]},
-        {%{"sort" => "UPDATED_AT"}, [zulu, alpha]},
-        {%{"direction" => "ASC"}, [alpha, zulu]}
+        {%{"sort" => "TITLE", "direction" => "ASC"}, [alpha, zulu, untitled]},
+        {%{"sort" => "TITLE", "direction" => "DESC"}, [zulu, alpha, untitled]},
+        {%{"sort" => "UPDATED_AT", "direction" => "ASC"}, [untitled, alpha, zulu]},
+        {%{"sort" => "UPDATED_AT"}, [zulu, alpha, untitled]},
+        {%{"direction" => "ASC"}, [untitled, alpha, zulu]}
       ] do
         {:ok, %{data: %{"workbench" => found}}} =
           run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})
-
-        assert from_connection(found["alerts"])
-               |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
-      end
-    end
-
-    test "it sorts workbench alerts without a title last" do
-      workbench = insert(:workbench)
-      untitled = insert(:alert, workbench: workbench, title: nil)
-      alpha    = insert(:alert, workbench: workbench, title: "Alpha")
-      zulu     = insert(:alert, workbench: workbench, title: "Zulu")
-
-      query = """
-        query Workbench($id: ID!, $direction: SortDirection) {
-          workbench(id: $id) {
-            alerts(first: 10, sort: TITLE, direction: $direction) {
-              edges { node { id } }
-            }
-          }
-        }
-      """
-
-      for {direction, expected} <- [{"ASC", [alpha, zulu, untitled]}, {"DESC", [zulu, alpha, untitled]}] do
-        {:ok, %{data: %{"workbench" => found}}} =
-          run_query(query, %{"id" => workbench.id, "direction" => direction}, %{current_user: admin_user()})
 
         assert from_connection(found["alerts"])
                |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
@@ -2364,52 +2340,16 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       ]
     end
 
-    test "it applies status and pull request filters to search results" do
-      enable_vector_store()
-
-      workbench = insert(:workbench)
-      failed = insert(:workbench_job, workbench: workbench, status: :failed)
-      successful = insert(:workbench_job, workbench: workbench, status: :successful)
-      insert(:pull_request, workbench_job: successful, status: :merged)
-      insert(:workbench_job, workbench: workbench, status: :successful)
-
-      expect(Console.AI.VectorStore, :fetch, 2, fn "outage", _ ->
-        {:ok, Enum.map([failed, successful], fn job ->
-          %Console.AI.VectorStore.Response{
-            type: :workbench,
-            workbench_job: %Console.Schema.WorkbenchJob.Mini{id: job.id}
-          }
-        end)}
-      end)
-
-      query = """
-        query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
-          workbenchJobSearch(q: "outage", workbenchId: $workbenchId, statuses: $statuses, prStates: $prStates) {
-            id
-          }
-        }
-      """
-
-      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
-        run_query(query, %{"workbenchId" => workbench.id, "statuses" => ["FAILED"]}, %{current_user: admin_user()})
-
-      assert ids_equal(found, [failed])
-
-      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
-        run_query(query, %{"workbenchId" => workbench.id, "prStates" => ["MERGED"]}, %{current_user: admin_user()})
-
-      assert ids_equal(found, [successful])
-    end
-
-    test "filtered searches fetch more candidates and keep relevance order" do
+    test "it filters search results by status and pull request state in relevance order" do
       enable_vector_store()
 
       workbench = insert(:workbench)
       [first_failed, second_failed, third_failed] = insert_list(3, :workbench_job, workbench: workbench, status: :failed)
       [first_ok, second_ok] = insert_list(2, :workbench_job, workbench: workbench, status: :successful)
+      insert(:pull_request, workbench_job: second_ok, status: :merged)
       ranked = [first_ok, second_failed, second_ok, first_failed, third_failed]
 
-      expect(Console.AI.VectorStore, :fetch, 2, fn "outage", opts ->
+      expect(Console.AI.VectorStore, :fetch, 3, fn "outage", opts ->
         {:ok, ranked
               |> Enum.take(opts[:count])
               |> Enum.map(&%Console.AI.VectorStore.Response{
@@ -2419,18 +2359,23 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       end)
 
       query = """
-        query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus]) {
-          workbenchJobSearch(q: "outage", workbenchId: $workbenchId, limit: 2, statuses: $statuses) {
+        query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+          workbenchJobSearch(q: "outage", workbenchId: $workbenchId, limit: 2, statuses: $statuses, prStates: $prStates) {
             id
           }
         }
       """
 
-      # 4 candidates for a limit of 2: the failed ones among them, most relevant first
+      # 4 candidates for a limit of 2: the matching ones among them, most relevant first
       {:ok, %{data: %{"workbenchJobSearch" => found}}} =
         run_query(query, %{"workbenchId" => workbench.id, "statuses" => ["FAILED"]}, %{current_user: admin_user()})
 
       assert Enum.map(found, & &1["id"]) == [second_failed.id, first_failed.id]
+
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id, "prStates" => ["MERGED"]}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == [second_ok.id]
 
       # unfiltered searches fetch just the limit, in relevance order
       {:ok, %{data: %{"workbenchJobSearch" => found}}} =

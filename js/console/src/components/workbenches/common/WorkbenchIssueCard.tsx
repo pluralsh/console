@@ -1,7 +1,7 @@
 import { ArrowTopRightIcon, TicketIcon } from '@pluralsh/design-system'
 import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhookIcons'
 import { WorkbenchIssueFragment } from 'generated/graphql'
-import { startCase } from 'lodash'
+import { humanizeIssueWebhookProvider } from 'utils/webhookLabels'
 import { cloneElement } from 'react'
 import styled from 'styled-components'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -62,7 +62,7 @@ export function WorkbenchIssueCard({
               {cloneElement(getIssueWebhookProviderIcon(issue.provider), {
                 size: 12,
               })}
-              {startCase(issue.provider.toLowerCase())}
+              {humanizeIssueWebhookProvider(issue.provider)}
             </ProviderSC>
           </DetailsField>
         </PropsRowSC>

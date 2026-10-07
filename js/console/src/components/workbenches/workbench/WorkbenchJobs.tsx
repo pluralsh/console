@@ -229,6 +229,7 @@ export function WorkbenchJobs() {
                 jobs={jobs}
                 loading={list.loading}
                 loaded={list.loaded}
+                fetchingMore={list.fetchingMore}
                 pageInfo={searching ? undefined : pageInfo}
                 fetchNextPage={list.fetchNextPage}
                 setVirtualSlice={tableSliceActive ? setVirtualSlice : noop}

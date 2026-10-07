@@ -4,7 +4,6 @@ import { type SemanticColorKey } from '../../theme/colors'
 import { type IconProps, resolveThemeColor } from './createIcon'
 import Icon from '../Icon'
 
-export type SeverityIconLevel = 0 | 1 | 2 | 3
 export type SeverityIconSeverity =
   'critical' | 'high' | 'medium' | 'low' | 'undefined'
 
@@ -12,7 +11,7 @@ export type SeverityIconSeverity =
 // high and critical are both fully filled, critical in the stronger color.
 const SEVERITY_DEFAULTS: Record<
   SeverityIconSeverity,
-  { level: SeverityIconLevel; color: SemanticColorKey | 'currentColor' }
+  { level: 0 | 1 | 2 | 3; color: SemanticColorKey | 'currentColor' }
 > = {
   critical: { level: 3, color: 'icon-danger-critical' },
   high: { level: 3, color: 'icon-danger' },
@@ -28,24 +27,20 @@ const BARS = [
 ]
 
 // Signal-bar severity mark. `severity` (default `undefined`: all bars empty)
-// sets how many of the 3 bars are filled and their color; `level` and `color`
-// override those. Empty bars use `secondaryColor` (defaults to
-// `border-fill-two`).
+// sets how many of the 3 bars are filled and their color; `color` overrides
+// the latter. Empty bars use `secondaryColor` (defaults to `border-fill-two`).
 function SeverityIcon({
   ref,
   severity = 'undefined',
-  level,
   size = 16,
   color,
   secondaryColor = 'border-fill-two',
   ...props
 }: Omit<IconProps, 'fullColor'> & {
   severity?: SeverityIconSeverity
-  level?: SeverityIconLevel
 }) {
   const { colors } = useTheme()
   const defaults = SEVERITY_DEFAULTS[severity]
-  const filledBars = level ?? defaults.level
   const filled = resolveThemeColor(color ?? defaults.color, colors)
   const empty = resolveThemeColor(secondaryColor, colors)
 
@@ -65,7 +60,7 @@ function SeverityIcon({
           <path
             key={d}
             d={d}
-            fill={i < filledBars ? filled : empty}
+            fill={i < defaults.level ? filled : empty}
           />
         ))}
       </svg>

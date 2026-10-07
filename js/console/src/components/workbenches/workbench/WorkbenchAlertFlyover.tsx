@@ -14,11 +14,11 @@ import { AlertInformation } from './WorkbenchAlertsDetails'
 // Quick side view with all alert information, opened from a board card.
 export function WorkbenchAlertFlyover({
   alert,
-  fallbackWorkbenchId,
+  workbenchId,
   onClose,
 }: {
   alert: Nullable<WorkbenchAlertFragment>
-  fallbackWorkbenchId: string
+  workbenchId: string
   onClose: () => void
 }) {
   // the last alert shown, kept so the content stays while the flyover animates
@@ -39,6 +39,7 @@ export function WorkbenchAlertFlyover({
           <HeaderSC>
             {cloneElement(getObservabilityWebhookTypeIcon(shown.type), {
               size: 16,
+              flexShrink: 0,
             })}
             <HeaderTitleSC>{getAlertHeading(shown)}</HeaderTitleSC>
           </HeaderSC>
@@ -55,7 +56,7 @@ export function WorkbenchAlertFlyover({
           >
             {job ? (
               <WorkbenchViewJobChip
-                workbenchId={shown.workbench?.id ?? fallbackWorkbenchId}
+                workbenchId={workbenchId}
                 jobId={job.id}
                 status={job.status}
                 onNavigate={onClose}
@@ -89,7 +90,6 @@ const HeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.small,
   minWidth: 0,
-  '& > :first-child': { flexShrink: 0 },
 }))
 
 const HeaderTitleSC = styled.h2(({ theme }) => ({
