@@ -16,10 +16,12 @@ import {
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
 import {
+  DetailsCaptionSC,
   DetailsCollapseButton,
   DetailsColumnSC,
   DetailsExpandButton,
   DetailsLayoutSC,
+  DetailsLinkRowSC,
   DetailsListAgeSC,
   DetailsListItem,
   DetailsListItemsSC,
@@ -213,7 +215,7 @@ function WorkbenchJobDetailsPanel({
     <DetailsColumnSC>
       <DetailsPanelHeader title="Job details">
         {job?.updatedAt && (
-          <UpdatedAtSC>updated {fromNow(job.updatedAt)}</UpdatedAtSC>
+          <DetailsCaptionSC>updated {fromNow(job.updatedAt)}</DetailsCaptionSC>
         )}
         <DetailsCollapseButton
           label="Hide job details"
@@ -305,7 +307,7 @@ function WorkbenchJobDetailsTabContent({
 
 function PrRow({ pr }: { pr: PullRequestBasicFragment }) {
   return (
-    <PrRowSC
+    <DetailsLinkRowSC
       href={pr.url}
       target="_blank"
       rel="noopener noreferrer"
@@ -332,7 +334,7 @@ function PrRow({ pr }: { pr: PullRequestBasicFragment }) {
         color="icon-light"
         css={{ flexShrink: 0 }}
       />
-    </PrRowSC>
+    </DetailsLinkRowSC>
   )
 }
 
@@ -373,26 +375,8 @@ function getDetailsTabs({
     .map((label) => ({ label }))
 }
 
-const UpdatedAtSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
-  letterSpacing: 0,
-  color: theme.colors['text-xlight'],
-  whiteSpace: 'nowrap',
-}))
-
 const PrListSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
   gap: 6,
 })
-
-const PrRowSC = styled.a(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  padding: 10,
-  borderRadius: theme.borderRadiuses.medium,
-  textDecoration: 'none',
-  '&:hover': { backgroundColor: theme.colors['fill-zero-hover'] },
-  '&:focus-visible': { outline: theme.borders['outline-focused'] },
-}))

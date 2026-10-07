@@ -1,4 +1,5 @@
 import {
+  BoardCardGridSC,
   BoardLoadingOrEmpty,
   BoardSC,
   BoardSectionSC,
@@ -9,7 +10,7 @@ import {
 import { WorkbenchJobTinyFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import styled from 'styled-components'
-import { WorkbenchJobCard, WorkbenchJobCardGridSC } from './WorkbenchJobCard'
+import { WorkbenchJobCard } from './WorkbenchJobCard'
 
 // One full row of the card grid (3 columns, 2 below the desktop breakpoint).
 const RECENT_JOBS_COUNT = 3
@@ -63,21 +64,21 @@ export function WorkbenchJobsBoard({
       )}
       <BoardSectionSC>
         <BoardTitleSC>{showRecent ? 'All jobs' : 'Matching jobs'}</BoardTitleSC>
-        <WorkbenchJobCardGridSC>
+        <BoardCardGridSC>
           {jobs.map((job) => (
             <WorkbenchJobCard
               key={job.id}
               job={job}
             />
           ))}
-        </WorkbenchJobCardGridSC>
+        </BoardCardGridSC>
       </BoardSectionSC>
       {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
     </BoardSC>
   )
 }
 
-const RecentGridSC = styled(WorkbenchJobCardGridSC)(({ theme }) => ({
+const RecentGridSC = styled(BoardCardGridSC)(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
     '& > :nth-child(n + 3)': { display: 'none' },
   },

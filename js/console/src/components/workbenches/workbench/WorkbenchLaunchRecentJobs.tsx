@@ -5,9 +5,10 @@ import { Subtitle2H1 } from 'components/utils/typography/Text'
 import { useWorkbenchJobsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
+import { BoardCardGridSC } from 'components/workbenches/common/WorkbenchBoard'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchJobCard, WorkbenchJobCardGridSC } from './WorkbenchJobCard'
+import { WorkbenchJobCard } from './WorkbenchJobCard'
 
 const RECENT_JOBS_COUNT = 3
 
@@ -31,7 +32,7 @@ export function WorkbenchLaunchRecentJobs({
   return (
     <SectionSC>
       <Subtitle2H1>Recent jobs</Subtitle2H1>
-      <WorkbenchJobCardGridSC>
+      <BoardCardGridSC>
         {isEmpty(jobs)
           ? Array.from({ length: RECENT_JOBS_COUNT }).map((_, i) => (
               <RectangleSkeleton
@@ -46,7 +47,7 @@ export function WorkbenchLaunchRecentJobs({
                 job={job}
               />
             ))}
-      </WorkbenchJobCardGridSC>
+      </BoardCardGridSC>
     </SectionSC>
   )
 }

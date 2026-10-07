@@ -4,10 +4,11 @@ import { getAlertSummary } from 'components/utils/alerts/alertDetails'
 import { getAlertName } from 'components/utils/alerts/AlertSourceLink'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { TRUNCATE } from 'components/utils/truncate'
+import { DetailsField } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { AlertFragment, WorkbenchJobStatus } from 'generated/graphql'
 import { upperFirst } from 'lodash'
-import { cloneElement, ReactNode } from 'react'
+import { cloneElement } from 'react'
 import styled from 'styled-components'
 import { AlertInformation } from './WorkbenchAlertsDetails'
 
@@ -70,18 +71,18 @@ export function WorkbenchAlertFlyover({
               <span />
             )}
             <Flex gap="large">
-              <Field label="State">
+              <DetailsField label="State">
                 <AlertStateChip state={alert.state} />
-              </Field>
+              </DetailsField>
               {job && (
-                <Field label="Job status">
+                <DetailsField label="Job status">
                   <Chip
                     size="small"
                     severity={JOB_STATUS_SEVERITY[job.status]}
                   >
                     {upperFirst(job.status.toLowerCase())}
                   </Chip>
-                </Field>
+                </DetailsField>
               )}
             </Flex>
           </Flex>
@@ -89,15 +90,6 @@ export function WorkbenchAlertFlyover({
         </BodySC>
       )}
     </Flyover>
-  )
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <FieldSC>
-      <FieldLabelSC>{label}</FieldLabelSC>
-      {children}
-    </FieldSC>
   )
 }
 
@@ -126,16 +118,4 @@ const BodySC = styled.div(({ theme }) => ({
     theme.mode === 'light'
       ? theme.colors['fill-zero']
       : theme.colors['fill-accent'],
-}))
-
-const FieldSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: theme.spacing.xxsmall,
-}))
-
-const FieldLabelSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
 }))

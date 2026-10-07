@@ -3,6 +3,7 @@ import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { AlertSourceLink } from 'components/utils/alerts/AlertSourceLink'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import {
+  BoardCardGridSC,
   BoardLoadingOrEmpty,
   BoardSC,
   BoardSectionSC,
@@ -16,10 +17,10 @@ import {
 import { AlertFragment, AlertState } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
+import { DetailsCaptionSC } from 'components/workbenches/common/WorkbenchDetailsView'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { WorkbenchAlertFlyover } from './WorkbenchAlertFlyover'
-import { WorkbenchJobCardGridSC } from './WorkbenchJobCard'
 
 export function WorkbenchAlertsBoard({
   alerts,
@@ -73,7 +74,7 @@ export function WorkbenchAlertsBoard({
             />
             <BoardTitleSC>Firing</BoardTitleSC>
           </SectionTitleSC>
-          <WorkbenchJobCardGridSC>
+          <BoardCardGridSC>
             {firing.map((alert) => (
               <WorkbenchAlertCard
                 key={alert.id}
@@ -81,12 +82,12 @@ export function WorkbenchAlertsBoard({
                 onOpen={() => setOpenAlertId(alert.id)}
               />
             ))}
-          </WorkbenchJobCardGridSC>
+          </BoardCardGridSC>
         </BoardSectionSC>
       )}
       <BoardSectionSC>
         <BoardTitleSC>All alerts</BoardTitleSC>
-        <WorkbenchJobCardGridSC>
+        <BoardCardGridSC>
           {alerts.map((alert) => (
             <WorkbenchAlertCard
               key={alert.id}
@@ -94,7 +95,7 @@ export function WorkbenchAlertsBoard({
               onOpen={() => setOpenAlertId(alert.id)}
             />
           ))}
-        </WorkbenchJobCardGridSC>
+        </BoardCardGridSC>
       </BoardSectionSC>
       {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
       <WorkbenchAlertFlyover
@@ -135,7 +136,7 @@ function WorkbenchAlertCard({
         ) : (
           <span />
         )}
-        <AgeSC>{fromNow(alert.updatedAt)}</AgeSC>
+        <DetailsCaptionSC>{fromNow(alert.updatedAt)}</DetailsCaptionSC>
       </Flex>
       <TitleSC>{alert.title}</TitleSC>
       <Flex
@@ -169,12 +170,6 @@ const CardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   minWidth: 0,
   ...clickableCardStyles(theme),
-}))
-
-const AgeSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  whiteSpace: 'nowrap',
 }))
 
 const TitleSC = styled.p(({ theme }) => ({

@@ -27,12 +27,13 @@ const BARS = [
   'M11 3.5C11 3.22386 11.2239 3 11.5 3H13.5C13.7761 3 14 3.22386 14 3.5V13.5C14 13.7761 13.7761 14 13.5 14H11.5C11.2239 14 11 13.7761 11 13.5V3.5Z',
 ]
 
-// Signal-bar severity mark. `severity` sets how many of the 3 bars are filled
-// and their color; `level` and `color` override those. Empty bars use
-// `secondaryColor` (defaults to `border-fill-two`).
+// Signal-bar severity mark. `severity` (default `undefined`: all bars empty)
+// sets how many of the 3 bars are filled and their color; `level` and `color`
+// override those. Empty bars use `secondaryColor` (defaults to
+// `border-fill-two`).
 function SeverityIcon({
   ref,
-  severity = 'critical',
+  severity = 'undefined',
   level,
   size = 16,
   color,

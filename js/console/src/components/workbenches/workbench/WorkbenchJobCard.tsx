@@ -77,15 +77,6 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
   )
 }
 
-export const WorkbenchJobCardGridSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-  gap: theme.spacing.medium,
-  [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  },
-}))
-
 const JobCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',

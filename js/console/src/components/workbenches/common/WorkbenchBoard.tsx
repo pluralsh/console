@@ -68,6 +68,16 @@ export const BoardCenteredSC = styled(Flex)({
   justifyContent: 'center',
 })
 
+// 3 card columns, 2 below the desktop breakpoint.
+export const BoardCardGridSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  gap: theme.spacing.medium,
+  [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  },
+}))
+
 export const BoardSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',

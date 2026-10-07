@@ -2,12 +2,13 @@ import { ArrowTopRightIcon, TicketIcon } from '@pluralsh/design-system'
 import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhookIcons'
 import { WorkbenchIssueFragment } from 'generated/graphql'
 import { startCase } from 'lodash'
-import { cloneElement, ReactNode } from 'react'
+import { cloneElement } from 'react'
 import styled from 'styled-components'
 import { TRUNCATE } from 'components/utils/truncate'
 import { formatDateTime } from 'utils/datetime'
 import { ensureURLValidity } from 'utils/url'
 import { IssueStatusChip } from './IssueStatusChip'
+import { DetailsField, DetailsLinkRowSC } from './WorkbenchDetailsView'
 
 // Issue summary card shown in the Issues details panel.
 export function WorkbenchIssueCard({
@@ -29,7 +30,7 @@ export function WorkbenchIssueCard({
         <HeaderTitleSC>Issue</HeaderTitleSC>
       </HeaderSC>
       <BodySC>
-        <LinkRowSC
+        <DetailsLinkRowSC
           href={href}
           target="_blank"
           rel="noopener noreferrer"
@@ -43,45 +44,30 @@ export function WorkbenchIssueCard({
             color="icon-light"
             css={{ flexShrink: 0 }}
           />
-        </LinkRowSC>
+        </DetailsLinkRowSC>
         <PropsRowSC>
           {issue.insertedAt && (
-            <IssueProp label="Date">
+            <DetailsField label="Date">
               {formatDateTime(issue.insertedAt, 'M/D/YYYY h:mma')}
-            </IssueProp>
+            </DetailsField>
           )}
-          <IssueProp label="Status">
+          <DetailsField label="Status">
             <IssueStatusChip
               status={issue.status}
               fillLevel={1}
             />
-          </IssueProp>
-          <IssueProp label="Provider">
+          </DetailsField>
+          <DetailsField label="Provider">
             <ProviderSC>
               {cloneElement(getIssueWebhookProviderIcon(issue.provider), {
                 size: 12,
               })}
               {startCase(issue.provider.toLowerCase())}
             </ProviderSC>
-          </IssueProp>
+          </DetailsField>
         </PropsRowSC>
       </BodySC>
     </CardSC>
-  )
-}
-
-function IssueProp({
-  label,
-  children,
-}: {
-  label: string
-  children: ReactNode
-}) {
-  return (
-    <PropSC>
-      <PropLabelSC>{label}</PropLabelSC>
-      <PropValueSC>{children}</PropValueSC>
-    </PropSC>
   )
 }
 
@@ -124,17 +110,6 @@ const BodySC = styled.div({
   gap: 6,
 })
 
-const LinkRowSC = styled.a(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.medium,
-  padding: 10,
-  borderRadius: theme.borderRadiuses.medium,
-  textDecoration: 'none',
-  '&:hover': { backgroundColor: theme.colors['fill-zero-hover'] },
-  '&:focus-visible': { outline: theme.borders['outline-focused'] },
-}))
-
 const LinkTextSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
@@ -159,29 +134,8 @@ const PropsRowSC = styled.div({
   flexWrap: 'wrap',
   gap: 6,
   paddingBottom: 10,
+  '& > *': { padding: '0 10px', whiteSpace: 'nowrap' },
 })
-
-const PropSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
-  padding: '0 10px',
-}))
-
-const PropLabelSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  whiteSpace: 'nowrap',
-}))
-
-const PropValueSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
-  display: 'flex',
-  alignItems: 'center',
-  minHeight: 20,
-  color: theme.colors.text,
-  whiteSpace: 'nowrap',
-}))
 
 const ProviderSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,

@@ -35,6 +35,7 @@ import {
   DetailsColumnSC,
   DetailsErrorBanner,
   DetailsExpandButton,
+  DetailsField,
   DetailsIconTitleSC,
   DetailsLayoutSC,
   DetailsLinkSC,
@@ -318,14 +319,25 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
       {alert.title && <ExpandablePrompt prompt={alert.title} />}
       <SummaryCardSC>
         {summary && (
-          <SummaryField label="Alert summary">{summary}</SummaryField>
+          <DetailsField
+            valueSize="caption"
+            label="Alert summary"
+          >
+            {summary}
+          </DetailsField>
         )}
         {alert.cluster?.name && (
-          <SummaryField label="Plural Cluster">
+          <DetailsField
+            valueSize="caption"
+            label="Plural Cluster"
+          >
             {alert.cluster.name}
-          </SummaryField>
+          </DetailsField>
         )}
-        <SummaryField label="Severity">
+        <DetailsField
+          valueSize="caption"
+          label="Severity"
+        >
           <Flex
             align="center"
             gap="xxsmall"
@@ -333,16 +345,22 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
             <AlertSeverityIcon severity={alert.severity} />
             {ALERT_SEVERITY_SHORT_LABELS[alert.severity]}
           </Flex>
-        </SummaryField>
-        <SummaryField label="State">
+        </DetailsField>
+        <DetailsField
+          valueSize="caption"
+          label="State"
+        >
           <AlertStateChip state={alert.state} />
-        </SummaryField>
+        </DetailsField>
         {alert.url && (
-          <SummaryField label="Source link">
+          <DetailsField
+            valueSize="caption"
+            label="Source link"
+          >
             <SmallLinkSC>
               <AlertSourceLink alert={alert} />
             </SmallLinkSC>
-          </SummaryField>
+          </DetailsField>
         )}
       </SummaryCardSC>
       <KeyValueSection
@@ -517,21 +535,6 @@ function KeyValueChips({
   )
 }
 
-function SummaryField({
-  label,
-  children,
-}: {
-  label: string
-  children: ReactNode
-}) {
-  return (
-    <SummaryFieldSC>
-      <SummaryLabelSC>{label}</SummaryLabelSC>
-      <SummaryValueSC>{children}</SummaryValueSC>
-    </SummaryFieldSC>
-  )
-}
-
 function KeyValueRow({
   label,
   value,
@@ -567,26 +570,6 @@ const SummaryCardSC = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.default,
-}))
-
-const SummaryFieldSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
-  minWidth: 0,
-}))
-
-const SummaryLabelSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  whiteSpace: 'nowrap',
-}))
-
-const SummaryValueSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors.text,
-  minWidth: 0,
-  wordBreak: 'break-word',
 }))
 
 const SmallLinkSC = styled.div(({ theme }) => ({

@@ -219,6 +219,44 @@ export function DetailsTabs<T extends string>({
   )
 }
 
+// Caption label over a value, for the summary fields in details panels, the
+// issue card and the alert quick view.
+export function DetailsField({
+  label,
+  valueSize = 'body2',
+  children,
+}: {
+  label: string
+  valueSize?: 'body2' | 'caption'
+  children: ReactNode
+}) {
+  return (
+    <FieldSC>
+      <FieldLabelSC>{label}</FieldLabelSC>
+      <FieldValueSC $size={valueSize}>{children}</FieldValueSC>
+    </FieldSC>
+  )
+}
+
+// Clickable row linking out (pull requests, issues).
+export const DetailsLinkRowSC = styled.a(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  padding: 10,
+  borderRadius: theme.borderRadiuses.medium,
+  textDecoration: 'none',
+  '&:hover': { backgroundColor: theme.colors['fill-zero-hover'] },
+  '&:focus-visible': { outline: theme.borders['outline-focused'] },
+}))
+
+// Muted single-line caption, e.g. "updated 3 hours ago" or a card's age.
+export const DetailsCaptionSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  whiteSpace: 'nowrap',
+}))
+
 // Fixed-width, right-aligned age (e.g. "40d 22h") so the icons before it
 // line up across rows.
 export const DetailsListAgeSC = styled.span({
@@ -408,6 +446,31 @@ const PanelHeaderActionsSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   color: theme.colors['text-xlight'],
 }))
+
+const FieldSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
+}))
+
+const FieldLabelSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  whiteSpace: 'nowrap',
+}))
+
+const FieldValueSC = styled.div<{ $size: 'body2' | 'caption' }>(
+  ({ theme, $size }) => ({
+    ...theme.partials.text[$size],
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
+    color: theme.colors.text,
+    wordBreak: 'break-word',
+  })
+)
 
 const FailedDotSC = styled.span<{ $size?: number }>(({ theme, $size = 6 }) => ({
   display: 'inline-block',
