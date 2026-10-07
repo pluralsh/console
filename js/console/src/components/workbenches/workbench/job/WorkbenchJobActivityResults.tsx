@@ -956,25 +956,20 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     flexDirection: 'column',
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
-    // Same 4px as a title's padding, so the gap above a later prompt totals 32px.
-    marginTop: theme.spacing.xxsmall,
-    // The copy row is 32px. Cancel the 24px list gap and the next title's 4px
-    // padding so that row is the whole gap under the card.
-    marginBottom: -(theme.spacing.large + theme.spacing.xxsmall),
+    // The 32px copy row stands in for the list gap under the card.
+    marginBottom: -theme.spacing.xlarge,
   })
 )
 
 // Always takes its height so hovering doesn't shift the transcript. The row is
 // the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
-// below the card. The extra 3px makes the card-to-notes gap match the gap from
-// that notes line to the next activity title.
+// below the card.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
   gap: theme.spacing.xxsmall,
   width: '100%',
-  paddingBottom: 3,
   opacity: $show ? 1 : 0,
   transition: 'opacity 0.15s ease',
   pointerEvents: $show ? 'auto' : 'none',
