@@ -23,6 +23,7 @@ const (
 	ToolQuery_MetricsSearch_FullMethodName      = "/toolquery.ToolQuery/MetricsSearch"
 	ToolQuery_MetricsLabelSearch_FullMethodName = "/toolquery.ToolQuery/MetricsLabelSearch"
 	ToolQuery_Logs_FullMethodName               = "/toolquery.ToolQuery/Logs"
+	ToolQuery_LogAggregate_FullMethodName       = "/toolquery.ToolQuery/LogAggregate"
 	ToolQuery_Traces_FullMethodName             = "/toolquery.ToolQuery/Traces"
 	ToolQuery_InvokeLambda_FullMethodName       = "/toolquery.ToolQuery/InvokeLambda"
 	ToolQuery_RunLua_FullMethodName             = "/toolquery.ToolQuery/RunLua"
@@ -36,6 +37,7 @@ type ToolQueryClient interface {
 	MetricsSearch(ctx context.Context, in *MetricsSearchInput, opts ...grpc.CallOption) (*MetricsSearchOutput, error)
 	MetricsLabelSearch(ctx context.Context, in *MetricsLabelSearchInput, opts ...grpc.CallOption) (*MetricsLabelSearchOutput, error)
 	Logs(ctx context.Context, in *LogsQueryInput, opts ...grpc.CallOption) (*LogsQueryOutput, error)
+	LogAggregate(ctx context.Context, in *LogAggregateInput, opts ...grpc.CallOption) (*LogAggregateOutput, error)
 	Traces(ctx context.Context, in *TracesQueryInput, opts ...grpc.CallOption) (*TracesQueryOutput, error)
 	InvokeLambda(ctx context.Context, in *InvokeLambdaInput, opts ...grpc.CallOption) (*InvokeLambdaOutput, error)
 	RunLua(ctx context.Context, in *RunLuaInput, opts ...grpc.CallOption) (*RunLuaOutput, error)
@@ -89,6 +91,16 @@ func (c *toolQueryClient) Logs(ctx context.Context, in *LogsQueryInput, opts ...
 	return out, nil
 }
 
+func (c *toolQueryClient) LogAggregate(ctx context.Context, in *LogAggregateInput, opts ...grpc.CallOption) (*LogAggregateOutput, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LogAggregateOutput)
+	err := c.cc.Invoke(ctx, ToolQuery_LogAggregate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *toolQueryClient) Traces(ctx context.Context, in *TracesQueryInput, opts ...grpc.CallOption) (*TracesQueryOutput, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TracesQueryOutput)
@@ -127,6 +139,7 @@ type ToolQueryServer interface {
 	MetricsSearch(context.Context, *MetricsSearchInput) (*MetricsSearchOutput, error)
 	MetricsLabelSearch(context.Context, *MetricsLabelSearchInput) (*MetricsLabelSearchOutput, error)
 	Logs(context.Context, *LogsQueryInput) (*LogsQueryOutput, error)
+	LogAggregate(context.Context, *LogAggregateInput) (*LogAggregateOutput, error)
 	Traces(context.Context, *TracesQueryInput) (*TracesQueryOutput, error)
 	InvokeLambda(context.Context, *InvokeLambdaInput) (*InvokeLambdaOutput, error)
 	RunLua(context.Context, *RunLuaInput) (*RunLuaOutput, error)
@@ -151,6 +164,9 @@ func (UnimplementedToolQueryServer) MetricsLabelSearch(context.Context, *Metrics
 }
 func (UnimplementedToolQueryServer) Logs(context.Context, *LogsQueryInput) (*LogsQueryOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method Logs not implemented")
+}
+func (UnimplementedToolQueryServer) LogAggregate(context.Context, *LogAggregateInput) (*LogAggregateOutput, error) {
+	return nil, status.Error(codes.Unimplemented, "method LogAggregate not implemented")
 }
 func (UnimplementedToolQueryServer) Traces(context.Context, *TracesQueryInput) (*TracesQueryOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method Traces not implemented")
@@ -254,6 +270,24 @@ func _ToolQuery_Logs_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ToolQuery_LogAggregate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogAggregateInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ToolQueryServer).LogAggregate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ToolQuery_LogAggregate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ToolQueryServer).LogAggregate(ctx, req.(*LogAggregateInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ToolQuery_Traces_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TracesQueryInput)
 	if err := dec(in); err != nil {
@@ -330,6 +364,10 @@ var ToolQuery_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logs",
 			Handler:    _ToolQuery_Logs_Handler,
+		},
+		{
+			MethodName: "LogAggregate",
+			Handler:    _ToolQuery_LogAggregate_Handler,
 		},
 		{
 			MethodName: "Traces",

@@ -33,6 +33,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_one_present([:service_id, :cluster_id])
   end
@@ -69,12 +70,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
     }
   end
 
-  def logs_query(%{query: q, limit: l, facets: f, time_range: tr, operator: op}) do
+  def logs_query(%{query: q, limit: l, facets: f, time_range: tr, operator: op} = logs) do
     Query.new(
       query: q,
       limit: l,
       operator: op,
       facets: Enum.map(f || [], & %{key: &1.name, value: &1.value}),
+      bucket_size: Map.get(logs, :bucket_size),
       time: to_time(tr)
     )
   end
@@ -82,5 +84,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
   defp to_time(%{start: %{} = start_ts, end: %{} = end_ts}) do
     %Time{before: end_ts, after: start_ts}
   end
-  defp to_time(_), do: %Time{before: Timex.now(), after: Timex.now() |> Timex.shift(minutes: -30)}
+
+  defp to_time(_) do
+    %{start: start_ts, end: end_ts} = TimeRange.default()
+    %Time{before: end_ts, after: start_ts}
+  end
 end

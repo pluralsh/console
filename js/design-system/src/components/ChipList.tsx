@@ -21,7 +21,7 @@ export type ChipListProps<TValue> = {
   emptyState?: JSX.Element | null
   onClickCondition?: (value: TValue) => boolean
   onClick?: Dispatch<TValue>
-} & ChipProps
+} & Omit<ChipProps, 'onClick'>
 
 function ChipList<TValue = string>({
   values = [],

@@ -45,6 +45,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     |> cast(attrs, @valid)
     |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> validate_required([:query])
   end
 
@@ -61,7 +62,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   @metric_limit 500
 
   def implement(%__MODULE__{} = tool) do
-    tool = Map.put_new(tool, :time_range, TimeRange.default())
+    tool = TimeRange.ensure(tool)
     with :ok <- TimeRange.safe(tool.time_range),
          {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
@@ -73,7 +74,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
 
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()) do
       {:ok, Enum.map(output.metrics, &mapify/1)}
     end
@@ -90,10 +91,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
 
   defp input(%__MODULE__{tool: tool, query: q, step: s, time_range: tr, options: options}) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
-      tr = TimeRange.to_proto(tr)
-      {:ok, %MetricsQueryInput{connection: connection, query: q, step: s,  range: tr, options: metrics_options(tool, options)}}
+      {:ok, %MetricsQueryInput{connection: connection, query: q, step: s, range: range(tool, tr), options: metrics_options(tool, options)}}
     end
   end
+
+  # Dynatrace carries timeframe in DQL and rejects separate range/step fields.
+  defp range(%{tool: :dynatrace}, _), do: nil
+  defp range(_, tr), do: TimeRange.to_proto(tr)
 
   defp metrics_options(%{tool: :azure} = tool, options) do
     query_azure = azure_opts(options)
@@ -120,7 +124,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   def azure_opts(%{azure: %{} = az}), do: az
   def azure_opts(_), do: %{}
 
-  @known_providers ~w(prometheus cloudwatch datadog elastic loki splunk tempo dynatrace newrelic)a
+  @known_providers ~w(prometheus cloudwatch datadog elastic loki victoria_logs splunk tempo dynatrace newrelic)a
 
   def provider_hint(%Console.Schema.WorkbenchTool{tool: type}) when type in @known_providers,
     do: "This tool is configured against #{type}, and so you should be able to use its documented query format as needed."

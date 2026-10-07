@@ -15,14 +15,16 @@ const Title = styled.h2(({ theme }) => ({
   marginTop: theme.spacing.large,
   marginBottom: theme.spacing.medium,
   '&::after': {
-    // Use to align baseline with Hero 2 text
+    // Align baseline with Hero 2 without expanding the title box (Safari).
     ...theme.partials.marketingText.hero2,
-    display: 'inline',
+    display: 'inline-block',
     verticalAlign: 'baseline',
-    content: '"​"',
-    width: '0',
+    content: '"\\200b"',
+    width: 0,
+    height: 0,
     overflow: 'hidden',
-    position: 'relative',
+    lineHeight: 0,
+    fontSize: 0,
   },
 }))
 
@@ -54,6 +56,9 @@ const StyledLink = styled(NextLink as any)<{ $active: boolean }>(
     display: 'block',
     ...theme.partials.marketingText.componentLinkSmall,
     color: theme.colors['text-xlight'],
+    '&&:any-link': {
+      color: theme.colors['text-xlight'],
+    },
     textDecoration: 'none',
     margin: 0,
     paddingLeft: theme.spacing.medium,
@@ -70,6 +75,9 @@ const StyledLink = styled(NextLink as any)<{ $active: boolean }>(
     ...($active
       ? {
           color: theme.colors.text,
+          '&&:any-link': {
+            color: theme.colors.text,
+          },
           '&::before ': {
             zIndex: 1,
             borderLeft: `3px solid ${theme.colors['border-primary']}`,
@@ -78,7 +86,7 @@ const StyledLink = styled(NextLink as any)<{ $active: boolean }>(
           },
         }
       : {}),
-    '&:hover': {
+    '&:hover, &&:any-link:hover': {
       textDecoration: 'underline',
       color: theme.colors.text,
     },
@@ -102,7 +110,8 @@ const StyledLink = styled(NextLink as any)<{ $active: boolean }>(
 
 export const ScrollContainer = styled.div(({ theme: _ }) => ({
   overflowY: 'auto',
-  maxHeight: '-webkit-fill-available',
+  minHeight: 0,
+  maxHeight: 'calc(100vh - var(--top-nav-height) - 72px)',
 }))
 
 const scrollThreshold = 48
@@ -247,8 +256,6 @@ const getRenderedElementTops = (items: MarkdocHeading[]) =>
 const WrapperNavSC = styled.nav(({ theme: _ }) => ({
   display: 'flex',
   flexDirection: 'column',
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
   width: '100%',
+  minHeight: 0,
 }))

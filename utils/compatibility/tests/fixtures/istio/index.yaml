@@ -1,0 +1,52 @@
+# Source: https://blob.istio.io/istio-release/charts/index.yaml; retrieved 2026-09-08. Exact representative chart entries.
+apiVersion: v1
+entries:
+  istiod:
+  - apiVersion: v2
+    appVersion: 1.31.0
+    created: '2026-08-31T13:15:04.686641609Z'
+    description: Helm chart for istio control plane
+    digest: df73f8fba27f2ae51c90f9483c5298e164b5241fcd349a04375df32d7f9fe2e7
+    icon: https://istio.io/latest/favicons/android-192x192.png
+    keywords:
+    - istio
+    - istiod
+    - istio-discovery
+    name: istiod
+    sources:
+    - https://github.com/istio/istio
+    urls:
+    - https://blob.istio.io/istio-release/charts/istiod-1.31.0.tgz
+    version: 1.31.0
+  - apiVersion: v2
+    appVersion: 1.31.0-rc.0
+    created: '2026-08-19T12:43:06.491753858Z'
+    description: Helm chart for istio control plane
+    digest: 34d7b6807439a6376b5821afb803912cf5c23d2b90267603dca3c1981bd83d22
+    icon: https://istio.io/latest/favicons/android-192x192.png
+    keywords:
+    - istio
+    - istiod
+    - istio-discovery
+    name: istiod
+    sources:
+    - https://github.com/istio/istio
+    urls:
+    - https://blob.istio.io/istio-release/charts/istiod-1.31.0-rc.0.tgz
+    version: 1.31.0-rc.0
+  - apiVersion: v2
+    appVersion: 1.30.0
+    created: '2026-05-18T18:06:02.13491212Z'
+    description: Helm chart for istio control plane
+    digest: 7a34c7688da34107841e9585b226b94357769749f82502fdc4fb43a6bc3db320
+    icon: https://istio.io/latest/favicons/android-192x192.png
+    keywords:
+    - istio
+    - istiod
+    - istio-discovery
+    name: istiod
+    sources:
+    - https://github.com/istio/istio
+    urls:
+    - https://blob.istio.io/istio-release/charts/istiod-1.30.0.tgz
+    version: 1.30.0

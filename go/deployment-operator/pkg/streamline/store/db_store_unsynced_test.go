@@ -16,7 +16,7 @@ func TestSetComponentUnsynced(t *testing.T) {
 	require.NoError(t, err)
 
 	serviceID := "test-service"
-	component := createComponent(testUID, WithService(serviceID))
+	component := createComponent(testUID, WithService(serviceID), WithLabels(map[string]string{"app": "console"}))
 	err = storeInstance.SaveComponent(component)
 	require.NoError(t, err)
 
@@ -25,6 +25,7 @@ func TestSetComponentUnsynced(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, savedComponent)
 	assert.Equal(t, testUID, savedComponent.UID)
+	assert.Equal(t, map[string]string{"app": "console"}, savedComponent.Labels)
 
 	// Set component unsynced
 	err = storeInstance.SetComponentUnsynced(component)
@@ -48,4 +49,5 @@ func TestSetComponentUnsynced(t *testing.T) {
 	assert.Equal(t, testKind, unsyncedComponent.Kind)
 	assert.Equal(t, testName, unsyncedComponent.Name)
 	assert.Equal(t, testNamespace, unsyncedComponent.Namespace)
+	assert.Empty(t, unsyncedComponent.Labels)
 }

@@ -1,4 +1,4 @@
-FROM golang:1.26.6-alpine3.23 AS builder
+FROM golang:1.27.1-alpine3.23 AS builder
 
 ARG HELM_VERSION=v3.21.2
 ARG TARGETARCH
@@ -56,3 +56,4 @@ USER 65532:65532
 ENV GOMONTY_FFI_CACHE_DIR=/tmp/gomonty
 
 ENTRYPOINT ["/workspace/deployment-agent"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/workspace/deployment-agent", "--help"]

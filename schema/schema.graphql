@@ -511,6 +511,11 @@ type RootQueryType {
     id: ID!
   ): Monitor
 
+  workbenchDashboard(
+    "Fetch a single dashboard by ID"
+    id: ID!
+  ): WorkbenchDashboard
+
   deploymentSettings: DeploymentSettings
 
   "The model defaults for each configurable provider"
@@ -528,7 +533,34 @@ type RootQueryType {
 
   federatedCredential(id: ID!): FederatedCredential
 
-  flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
+  flows(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    q: String
+
+    "return flows that have at least one service in one of these statuses"
+    statuses: [ServiceDeploymentStatus]
+
+    "field to sort flows by"
+    sort: FlowSort
+
+    "sort direction"
+    direction: SortDirection
+
+    "flow ids to rank first when sorting by favorited"
+    favoriteIds: [ID]
+  ): FlowConnection
+
+  flowServiceCounts(
+    "restrict counts to flows matching this search"
+    q: String
+  ): [ServiceStatusCount]
 
   flow(id: ID, name: String): Flow
 
@@ -1316,6 +1348,23 @@ type RootMutationType {
     id: ID!
   ): Monitor
 
+  createDashboard(
+    "Create a dashboard for a workbench"
+    attributes: DashboardAttributes!
+  ): WorkbenchDashboard
+
+  updateDashboard(
+    "Update an existing dashboard"
+    id: ID!
+
+    attributes: DashboardAttributes!
+  ): WorkbenchDashboard
+
+  deleteDashboard(
+    "Delete an existing dashboard"
+    id: ID!
+  ): WorkbenchDashboard
+
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
 
   enableDeployments: DeploymentSettings
@@ -1351,6 +1400,8 @@ type RootMutationType {
   deleteFlow(id: ID!): Flow
 
   upsertMcpServer(attributes: McpServerAttributes!): McpServer
+
+  updateMcpServer(id: ID!, attributes: McpServerAttributes!): McpServer
 
   deleteMcpServer(id: ID!): McpServer
 
@@ -1745,6 +1796,10 @@ type RootSubscriptionType {
 
   workbenchExecStream(activityId: ID!): WorkbenchJobExecStream
 
+  workbenchDashboardDelta(id: ID, workbenchId: ID): WorkbenchDashboardDelta
+
+  workbenchMonitorDelta(id: ID, workbenchId: ID): MonitorDelta
+
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
 
@@ -1827,6 +1882,11 @@ enum IssueStatus {
   IN_PROGRESS
   CANCELLED
   COMPLETED
+}
+
+enum IssueSort {
+  INSERTED_AT
+  TITLE
 }
 
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
@@ -1987,6 +2047,21 @@ type Issue {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchIssueCounts {
+  providers: [IssueCountByProvider]
+  statuses: [IssueCountByStatus]
+}
+
+type IssueCountByProvider {
+  provider: IssueWebhookProvider!
+  count: Int!
+}
+
+type IssueCountByStatus {
+  status: IssueStatus!
+  count: Int!
 }
 
 "A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"
@@ -2232,13 +2307,13 @@ input AgentPrReviewAttributes {
   "the URL of the pull request being reviewed"
   url: String!
 
-  "the A-F confidence grade"
+  "the PR's A-F mergeability grade, not the reviewer's confidence: A is merge-ready, B has only minor non-blocking concerns, C or lower requires changes before merge"
   confidence: AgentReviewConfidence!
 
   "a summary of the pull request review"
   summary: String!
 
-  "an explanation of the confidence grade"
+  "an explanation of the mergeability grade based on findings and blockers; do not describe review certainty"
   confidenceComment: String!
 
   "file-level summaries"
@@ -2539,6 +2614,9 @@ type AgentRun {
 
   pluralCreds: PluralCreds
 
+  "the MCP endpoint for the workbench that spawned this run, if any"
+  workbenchMcpUrl: String
+
   "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
   pod: Pod
 
@@ -2593,6 +2671,9 @@ type ScmCreds {
   username: String!
 
   token: String!
+
+  "the proxy to use for git and SCM API requests"
+  proxy: HttpProxyConfiguration
 
   "the exa key for the agent"
   exaKey: String
@@ -2884,6 +2965,9 @@ enum WorkbenchToolType {
   CLOUD_RUN
   AZURE_FUNCTION
   DOCKER
+  VICTORIA_LOGS
+  JIRA
+  JIRA_DATACENTER
 }
 
 enum WorkbenchToolCategory {
@@ -2909,6 +2993,11 @@ enum WorkbenchToolHttpMethod {
   PUT
   DELETE
   PATCH
+}
+
+enum SplunkTokenType {
+  BEARER
+  SPLUNK
 }
 
 enum WorkbenchJobStatus {
@@ -2949,6 +3038,8 @@ enum WorkbenchJobActivityType {
   KUBERNETES
   VERIFY
   EXEC
+  MONITORING
+  SELF_SERVICE
 }
 
 enum WorkbenchCanvasBlockType {
@@ -2970,6 +3061,8 @@ enum WorkbenchSkillSubagent {
   SKILL
   HISTORY
   SEARCH
+  MONITORING
+  SELF_SERVICE
 }
 
 enum WorkbenchChatbotMessageBehavior {
@@ -3056,6 +3149,9 @@ input WorkbenchJobKubernetesModesAttributes {
   "whether kubernetes exec actions are enabled"
   exec: Boolean
 
+  "whether kubernetes node drain actions are enabled"
+  drain: Boolean
+
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
 
@@ -3121,6 +3217,9 @@ input WorkbenchAttributes {
 }
 
 input WorkbenchConfigurationAttributes {
+  "enable the self-service subagent for catalog and PR automation workflows"
+  selfService: Boolean
+
   "infrastructure capabilities (services, stacks, kubernetes)"
   infrastructure: WorkbenchInfrastructureAttributes
 
@@ -3286,6 +3385,23 @@ input WorkbenchEvalAttributes {
 
   "rules for evaluating job progress"
   progressRules: String
+
+  "optional automation for creating skill-update jobs from low-scoring evals"
+  automation: WorkbenchEvalAutomationAttributes
+}
+
+input WorkbenchEvalAutomationAttributes {
+  "whether low-scoring evals automatically create skill-update jobs"
+  enabled: Boolean
+
+  "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+  maxScore: Int
+
+  "maximum number of skills the workbench may have when automation creates a new skill"
+  maxSkills: Int
+
+  "optional guidance included in automatically created skill-update jobs"
+  instructions: String
 }
 
 input WorkbenchWebhookMatchesAttributes {
@@ -3376,6 +3492,9 @@ input WorkbenchToolAttributes {
   "whether this tool requires approval before execution"
   approval: Boolean
 
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchangeAttributes
+
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
 
@@ -3401,6 +3520,9 @@ input WorkbenchToolConfigurationAttributes {
 
   "loki connection (logs)"
   loki: WorkbenchToolLokiConnectionAttributes
+
+  "victoria logs connection (logs)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnectionAttributes
 
   "splunk connection (logs)"
   splunk: WorkbenchToolSplunkConnectionAttributes
@@ -3440,6 +3562,12 @@ input WorkbenchToolConfigurationAttributes {
 
   "atlassian\/jira connection (ticketing)"
   atlassian: WorkbenchToolAtlassianConnectionAttributes
+
+  "jira cloud connection (ticketing)"
+  jira: WorkbenchToolJiraConnectionAttributes
+
+  "jira data center connection (ticketing)"
+  jiraDatacenter: WorkbenchToolJiraDatacenterConnectionAttributes
 
   "exa connection (search)"
   exa: WorkbenchToolExaConnectionAttributes
@@ -3555,6 +3683,26 @@ input WorkbenchToolLokiConnectionAttributes {
   tenantId: String
 }
 
+input WorkbenchToolVictoriaLogsConnectionAttributes {
+  "victoria logs base url"
+  url: String!
+
+  "bearer token or api key"
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
+}
+
 input WorkbenchToolTempoConnectionAttributes {
   "tempo base url"
   url: String!
@@ -3590,8 +3738,11 @@ input WorkbenchToolSplunkConnectionAttributes {
   "splunk base url"
   url: String!
 
-  "bearer token"
+  "splunk authentication token"
   token: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String
@@ -3702,6 +3853,25 @@ input WorkbenchToolAtlassianConnectionAttributes {
 
   "atlassian account email (required if not using service_account)"
   email: String
+}
+
+input WorkbenchToolJiraConnectionAttributes {
+  "jira cloud site URL (for example, https:\/\/example.atlassian.net)"
+  url: String!
+
+  "atlassian API token"
+  apiToken: String!
+
+  "atlassian account email"
+  email: String!
+}
+
+input WorkbenchToolJiraDatacenterConnectionAttributes {
+  "jira data center base URL"
+  url: String!
+
+  "jira data center personal access token"
+  apiToken: String
 }
 
 input WorkbenchToolExaConnectionAttributes {
@@ -3919,6 +4089,9 @@ type Workbench {
 
     "show runs spawned from issues"
     issue: Boolean
+
+    "show runs spawned from a specific monitor"
+    monitorId: ID
   ): WorkbenchJobConnection
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
@@ -3928,6 +4101,32 @@ type Workbench {
   workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
 
   workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection
+
+  workbenchDashboards(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search dashboards by name"
+    q: String
+  ): WorkbenchDashboardConnection
+
+  monitors(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search monitors by name"
+    q: String
+  ): MonitorConnection
 
   "eval configuration for this workbench (at most one; null if none configured)"
   eval: WorkbenchEval
@@ -3940,7 +4139,32 @@ type Workbench {
 
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
-  issues(after: String, first: Int, before: String, last: Int): IssueConnection
+  issues(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search issues by title or external id"
+    q: String
+
+    "filter issues by provider"
+    providers: [IssueWebhookProvider]
+
+    "filter issues by status"
+    statuses: [IssueStatus]
+
+    "field to sort issues by"
+    sort: IssueSort
+
+    "sort direction"
+    direction: SortDirection
+  ): IssueConnection
+
+  issueCounts: WorkbenchIssueCounts
 
   "users that have read or write access to this workbench"
   users: [User]
@@ -4025,6 +4249,9 @@ type WorkbenchJob {
   "pull requests associated with this workbench job"
   pullRequests: [PullRequest]
 
+  "dashboards and monitors associated with this workbench job"
+  associations: [WorkbenchJobAssociation]
+
   "the alert this run was spawned from"
   alert: Alert
 
@@ -4090,6 +4317,21 @@ type WorkbenchJob {
   updatedAt: DateTime
 }
 
+type WorkbenchJobAssociation {
+  "the id of the association"
+  id: String!
+
+  "the associated dashboard"
+  dashboard: WorkbenchDashboard
+
+  "the associated monitor"
+  monitor: Monitor
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type WorkbenchJobModes {
   "whether planning mode is enabled for this job"
   plan: Boolean
@@ -4146,6 +4388,9 @@ type WorkbenchJobKubernetesModes {
 
   "whether kubernetes exec actions are enabled"
   exec: Boolean
+
+  "whether kubernetes node drain actions are enabled"
+  drain: Boolean
 
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
@@ -4273,6 +4518,9 @@ type WorkbenchJobActivityResult {
   "kubernetes request approval payload when present"
   kubeRequest: WorkbenchJobActivityKubeRequest
 
+  "kubernetes node drain approval payload when present"
+  kubeDrain: WorkbenchJobActivityKubeDrain
+
   "kubernetes exec payload when present"
   kubeExec: WorkbenchJobActivityKubeExec
 
@@ -4364,6 +4612,17 @@ type WorkbenchJobActivityKubeExec {
   container: String
 
   "why this command is needed and its expected effect"
+  explanation: String
+}
+
+type WorkbenchJobActivityKubeDrain {
+  "the target cluster handle"
+  handle: String
+
+  "the target node name"
+  node: String
+
+  "why this node drain is needed and its expected impact"
   explanation: String
 }
 
@@ -4514,6 +4773,9 @@ type WorkbenchJobResultTodo {
 }
 
 type WorkbenchConfiguration {
+  "self-service subagent capability enabled"
+  selfService: Boolean
+
   "infrastructure capabilities"
   infrastructure: WorkbenchInfrastructure
 
@@ -4760,12 +5022,29 @@ type WorkbenchEval {
   "rules for evaluating job progress"
   progressRules: String
 
+  "automation for creating skill-update jobs from low-scoring evals"
+  automation: WorkbenchEvalAutomation
+
   "the workbench this eval belongs to"
   workbench: Workbench
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchEvalAutomation {
+  "whether low-scoring evals automatically create skill-update jobs"
+  enabled: Boolean!
+
+  "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+  maxScore: Int
+
+  "maximum number of skills the workbench may have when automation creates a new skill"
+  maxSkills: Int!
+
+  "optional guidance included in automatically created skill-update jobs"
+  instructions: String
 }
 
 type WorkbenchEvalFeedback {
@@ -4856,6 +5135,9 @@ type WorkbenchUsageTimeseries {
 
   "number of output tokens produced during this interval"
   outputTokens: Int
+
+  "total tokens consumed during this interval"
+  totalTokens: Int
 
   "total cost for this interval, in USD"
   totalCost: Float
@@ -4960,6 +5242,9 @@ type WorkbenchTool {
   "whether this tool requires approval before execution"
   approval: Boolean
 
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchange
+
   "the project of this tool"
   project: Project
 
@@ -5015,6 +5300,9 @@ type WorkbenchToolConfiguration {
   "loki connection (no secrets)"
   loki: WorkbenchToolLokiConnection
 
+  "victoria logs connection (no secrets)"
+  victoriaLogs: WorkbenchToolVictoriaLogsConnection
+
   "splunk connection (no secrets)"
   splunk: WorkbenchToolSplunkConnection
 
@@ -5053,6 +5341,12 @@ type WorkbenchToolConfiguration {
 
   "atlassian connection (no secrets)"
   atlassian: WorkbenchToolAtlassianConnection
+
+  "jira cloud connection (no secrets)"
+  jira: WorkbenchToolJiraConnection
+
+  "jira data center connection (no secrets)"
+  jiraDatacenter: WorkbenchToolJiraDatacenterConnection
 
   "exa connection (no secrets)"
   exa: WorkbenchToolExaConnection
@@ -5147,6 +5441,20 @@ type WorkbenchToolLokiConnection {
   tenantId: String
 }
 
+type WorkbenchToolVictoriaLogsConnection {
+  "victoria logs base url"
+  url: String
+
+  "basic auth username"
+  username: String
+
+  "optional AccountID tenant header"
+  accountId: String
+
+  "optional ProjectID tenant header"
+  projectId: String
+}
+
 type WorkbenchToolTempoConnection {
   "tempo base url"
   url: String
@@ -5169,6 +5477,9 @@ type WorkbenchToolJaegerConnection {
 type WorkbenchToolSplunkConnection {
   "splunk base url"
   url: String
+
+  "authorization realm for token authentication"
+  tokenType: SplunkTokenType
 
   "basic auth username"
   username: String
@@ -5246,6 +5557,19 @@ type WorkbenchToolAtlassianConnection {
 
   "atlassian account email for use with PAT authentication"
   email: String
+}
+
+type WorkbenchToolJiraConnection {
+  "jira cloud site URL"
+  url: String!
+
+  "atlassian account email (API token never exposed)"
+  email: String!
+}
+
+type WorkbenchToolJiraDatacenterConnection {
+  "jira data center base URL (PAT never exposed)"
+  url: String!
 }
 
 type WorkbenchToolExaConnection {
@@ -6111,6 +6435,17 @@ enum McpServerProtocol {
   STREAMABLE_HTTP
 }
 
+enum OauthTokenExchangeType {
+  CLIENT_SECRET
+  CLIENT_ASSERTION
+}
+
+enum FlowSort {
+  NAME
+  SERVICE_COUNT
+  FAVORITED
+}
+
 input FlowAttributes {
   name: String!
 
@@ -6159,6 +6494,19 @@ input McpServerAttributes {
   writeBindings: [PolicyBindingAttributes]
 }
 
+input OauthTokenExchangeAttributes {
+  enabled: Boolean
+  type: OauthTokenExchangeType
+  tokenUrl: String
+  clientId: String
+  clientSecret: String
+  privateKey: String
+  keyId: String
+  audience: String
+  resource: String
+  scopes: [String]
+}
+
 input McpServerAssociationAttributes {
   serverId: ID
 }
@@ -6172,10 +6520,14 @@ input McpServerAuthenticationAttributes {
   "whether to use Plural's built-in JWT authentication"
   plural: Boolean
 
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchangeAttributes
+
   headers: [McpHeaderAttributes]
 }
 
 input McpHeaderAttributes {
+  id: ID
   name: String!
   value: String!
 }
@@ -6201,6 +6553,11 @@ input PreviewEnvironmentTemplateAttributes {
 
   "how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)"
   previewTtl: String
+}
+
+type ComponentStatusCount {
+  state: ComponentState!
+  count: Int!
 }
 
 type Flow {
@@ -6237,6 +6594,27 @@ type Flow {
 
   "the project this flow belongs to"
   project: Project
+
+  "the number of services in this flow"
+  serviceCount: Int
+
+  "the number of service components in this flow"
+  componentCount: Int
+
+  "the number of alerts for services in this flow"
+  alertCount: Int
+
+  "the number of pipelines in this flow"
+  pipelineCount: Int
+
+  "the number of pending pipeline gates in this flow"
+  pendingPipelineCount: Int
+
+  "a rollup of service statuses in this flow"
+  serviceStatuses: [ServiceStatusCount]
+
+  "a rollup of component states in this flow"
+  componentStatuses: [ComponentStatusCount]
 
   services(after: String, first: Int, before: String, last: Int): ServiceDeploymentConnection
 
@@ -6317,16 +6695,34 @@ type McpServer {
   updatedAt: DateTime
 }
 
+type OauthTokenExchange {
+  enabled: Boolean
+  type: OauthTokenExchangeType
+  tokenUrl: String
+  clientId: String
+  keyId: String
+  audience: String
+  resource: String
+  scopes: [String]
+}
+
 type McpServerAuthentication {
   "built-in Plural JWT authentication"
   plural: Boolean
+
+  "OAuth2 client credentials token exchange"
+  oauth: OauthTokenExchange
 
   "any custom HTTP headers needed for authentication"
   headers: [McpServerHeader]
 }
 
 type McpServerHeader {
+  id: ID!
+
   name: String!
+
+  "obfuscated header value; the real secret is never returned over GraphQL"
   value: String!
 }
 
@@ -6496,6 +6892,7 @@ enum LogDriver {
   VICTORIA
   ELASTIC
   OPENSEARCH
+  LOKI
 }
 
 enum VectorStore {
@@ -6508,6 +6905,11 @@ enum OpenAiMethod {
   CHAT
   RESPONSES
   AUTO
+}
+
+enum BedrockEndpoint {
+  RUNTIME
+  MANTLE
 }
 
 enum Provider {
@@ -6614,6 +7016,23 @@ input LoggingSettingsAttributes {
   victoria: HttpConnectionAttributes
   elastic: ElasticsearchConnectionAttributes
   opensearch: OpensearchConnectionAttributes
+  loki: LokiLoggingConnectionAttributes
+}
+
+input LokiLoggingConnectionAttributes {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+
+  "the stream label identifying the cluster a log came from, defaults to cluster"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from, defaults to namespace"
+  namespaceLabel: String
 }
 
 input ElasticsearchConnectionAttributes {
@@ -6714,6 +7133,9 @@ input OpenaiSettingsAttributes {
 
   model: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -6741,18 +7163,33 @@ input OpenaiHeaderAttributes {
 input OpenaiTokenExchangeAttributes {
   enabled: Boolean
 
+  type: OauthTokenExchangeType
+
   "token endpoint URL"
   tokenUrl: String
 
   clientId: String
 
   clientSecret: String
+
+  privateKey: String
+
+  keyId: String
+
+  audience: String
+
+  resource: String
+
+  scopes: [String]
 }
 
 input AnthropicSettingsAttributes {
   accessToken: String
 
   model: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -6766,6 +7203,9 @@ input AnthropicSettingsAttributes {
 
 input OllamaAttributes {
   model: String!
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -6801,6 +7241,9 @@ input AzureOpenaiAttributes {
   "the azure openai access token to use"
   accessToken: String!
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "mapping from model id to azure openai deployment name"
   deployments: Json
 
@@ -6821,6 +7264,9 @@ input BedrockAiAttributes {
   "the aws region the model is hosted in"
   region: String
 
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
+
   "the aws access key id to use (DEPRECATED)"
   awsAccessKeyId: String
 
@@ -6830,16 +7276,33 @@ input BedrockAiAttributes {
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
 
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
+
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
 
-  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID."
   deployments: Json
+
+  "Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata."
+  modelSettings: [BedrockModelSettingsAttributes]
+}
+
+input BedrockModelSettingsAttributes {
+  "the foundation model ID served by the inference profile"
+  modelId: String!
+
+  "the full ARN of the Bedrock application inference profile"
+  inferenceProfileArn: String!
 }
 
 input VertexAiAttributes {
   "the vertex model id to use"
   model: String
+
+  "an HTTP proxy to use for this provider's API calls"
+  proxy: HttpProxyAttributes
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7170,6 +7633,9 @@ type OpenaiSettings {
   "the openai model version to use"
   model: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
@@ -7198,16 +7664,29 @@ type OpenaiHeader {
 type OpenaiTokenExchange {
   enabled: Boolean
 
+  type: OauthTokenExchangeType
+
   "token endpoint URL"
   tokenUrl: String
 
   clientId: String
+
+  keyId: String
+
+  audience: String
+
+  resource: String
+
+  scopes: [String]
 }
 
 "Anthropic connection information"
 type AnthropicSettings {
   "the anthropic model version to use"
   model: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7219,6 +7698,9 @@ type AnthropicSettings {
 "Settings for a self-hosted ollama-based LLM deployment"
 type OllamaSettings {
   model: String!
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -7233,6 +7715,9 @@ type AzureOpenaiSettings {
   endpoint: String!
 
   model: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -7255,6 +7740,9 @@ type BedrockAiSettings {
   "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases. Omit for Plural defaults."
   modelId: String
 
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
+
   "Bedrock model or inference profile for tool calls. Same ID formats as modelId."
   toolModelId: String
 
@@ -7267,17 +7755,31 @@ type BedrockAiSettings {
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
 
+  "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
+  endpoint: BedrockEndpoint
+
   "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
   proxyModels: [String]
 
-  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+  "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID."
   deployments: Map
+
+  "Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata."
+  modelSettings: [BedrockModelSettings]
+}
+
+type BedrockModelSettings {
+  modelId: String
+  inferenceProfileArn: String
 }
 
 "Settings for usage of GCP VertexAI for LLMs"
 type VertexAiSettings {
   "the vertex ai model to use"
   model: String
+
+  "the HTTP proxy used for this provider's API calls"
+  proxy: HttpProxyConfiguration
 
   "the model to use for vector embeddings"
   embeddingModel: String
@@ -7313,6 +7815,22 @@ type LoggingSettings {
 
   "configures a connection to aws opensearch for logging"
   opensearch: OpensearchConnection
+
+  "configures a connection to grafana loki for logging"
+  loki: LokiLoggingConnection
+}
+
+type LokiLoggingConnection {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "the stream label identifying the cluster a log came from"
+  clusterLabel: String
+
+  "the stream label identifying the namespace a log came from"
+  namespaceLabel: String
 }
 
 type ElasticsearchConnection {
@@ -7482,6 +8000,7 @@ enum AlertState {
 
 enum MonitorType {
   LOG
+  METRICS
 }
 
 enum MonitorAggregate {
@@ -7493,6 +8012,44 @@ enum MonitorAggregate {
 enum MonitorOperator {
   OR
   AND
+}
+
+enum DashboardGraphType {
+  TIMESERIES
+  GAUGE
+  LOGS
+  MARKDOWN
+  TABLE
+  STAT
+  BAR
+  PIE
+  HEATMAP
+  TRACES
+  SECTION
+}
+
+enum DashboardGraphUnit {
+  NONE
+  BYTES
+  TIME
+  CPU
+  PERCENT
+  MILLISECONDS
+}
+
+enum DashboardInputType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  SELECT
+  TIME_RANGE
+}
+
+enum DashboardDatasourceType {
+  LOGS
+  METRICS
+  TRACES
+  LABELS
 }
 
 "Attributes for creating or updating an external observability provider"
@@ -7548,6 +8105,12 @@ input MonitorAttributes {
   "ID of the workbench this monitor should be attached to"
   workbenchId: ID
 
+  "Prompt used when the monitor starts a workbench investigation"
+  prompt: String
+
+  "Mode-specific options for monitor-triggered workbench jobs"
+  modes: WorkbenchJobModesAttributes
+
   "Short name used to identify this monitor"
   name: String!
 
@@ -7560,7 +8123,7 @@ input MonitorAttributes {
   "Severity level applied to alerts generated by this monitor"
   severity: AlertSeverity!
 
-  "Monitor type (currently log‑based only)"
+  "Monitor data type"
   type: MonitorType!
 
   "Cron schedule defining when the monitor is evaluated (for example *\/5 * * * *)"
@@ -7585,11 +8148,17 @@ input MonitorThresholdAttributes {
 "Wrapper for the underlying query definition for a monitor"
 input MonitorQueryAttributes {
   "Log query used when the monitor type is log‑based"
-  log: MonitorLogQueryAttributes!
+  log: MonitorLogQueryAttributes
+
+  "Metrics query used when the monitor type is metrics-based"
+  metrics: MonitorMetricsQueryAttributes
 }
 
 "Log query configuration for a monitor"
 input MonitorLogQueryAttributes {
+  "Named workbench logs tool; when omitted, uses the native Plural logs provider"
+  tool: String
+
   "Log query string passed through to the underlying log provider"
   query: String!
 
@@ -7604,6 +8173,49 @@ input MonitorLogQueryAttributes {
 
   "Optional key\/value facets applied as additional filters on the log query"
   facets: [MonitorFacetAttributes]
+
+  "Provider-specific log query options"
+  options: MonitorLogOptionsAttributes
+}
+
+"Metrics query configuration for a monitor"
+input MonitorMetricsQueryAttributes {
+  "Named workbench metrics tool; when omitted, uses the native Plural metrics provider"
+  tool: String
+
+  "Metrics query string passed through to the underlying metrics provider"
+  query: String!
+
+  "Metrics query step (for example 5m)"
+  step: String
+
+  "Lookback duration for the metrics query (for example 1h)"
+  duration: String
+
+  "Provider-specific metrics query options"
+  options: MonitorMetricsOptionsAttributes
+}
+
+input MonitorLogOptionsAttributes {
+  azure: MonitorLogAzureOptionsAttributes
+}
+
+input MonitorLogAzureOptionsAttributes {
+  resourceId: String
+}
+
+input MonitorMetricsOptionsAttributes {
+  azure: MonitorMetricsAzureOptionsAttributes
+}
+
+input MonitorMetricsAzureOptionsAttributes {
+  resourceId: String
+  metricsNamespace: String
+  aggregation: String
+  filter: String
+  orderBy: String
+  rollUpBy: String
+  metricsEndpoint: String
 }
 
 "Key\/value facet used to further filter log queries"
@@ -7613,6 +8225,115 @@ input MonitorFacetAttributes {
 
   "Facet value to match for the given key"
   value: String!
+}
+
+"Attributes used to create or update a dashboard"
+input DashboardAttributes {
+  "ID of the workbench that owns this dashboard"
+  workbenchId: ID
+
+  "Dashboard name, unique within its workbench"
+  name: String
+
+  "Optional dashboard description"
+  description: String
+
+  "Graphs arranged on the dashboard grid"
+  graphs: [DashboardGraphAttributes]
+
+  "User-configurable dashboard variables"
+  inputs: [DashboardInputAttributes]
+}
+
+input DashboardTimeRangeAttributes {
+  "Inclusive start of the query range"
+  start: DateTime!
+
+  "Inclusive end of the query range"
+  end: DateTime!
+}
+
+input DashboardGraphAttributes {
+  "Stable identifier unique within the dashboard"
+  identifier: String!
+
+  "Graph title"
+  title: String
+
+  "Optional graph description"
+  description: String
+
+  "Graph visualization type"
+  type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
+
+  "Identifier of the section graph containing this graph; sections cannot be nested"
+  sectionId: String
+
+  "Markdown content for markdown graphs"
+  markdown: String
+
+  "Visualization-specific display options; sections may set collapsed"
+  options: Json
+
+  "Grid position and size"
+  layout: DashboardGraphLayoutAttributes!
+
+  "Tool call used to fetch external data"
+  datasource: DashboardDatasourceAttributes
+}
+
+input DashboardGraphLayoutAttributes {
+  "Zero-based horizontal grid coordinate"
+  x: Int!
+
+  "Zero-based vertical grid coordinate"
+  y: Int!
+
+  "Width in grid columns"
+  w: Int!
+
+  "Height in grid rows"
+  h: Int!
+}
+
+input DashboardDatasourceAttributes {
+  "Kind of data returned by the datasource"
+  type: DashboardDatasourceType!
+
+  "Observability tool used to render the graph"
+  tool: String!
+
+  "Input passed to the observability tool"
+  input: Json!
+}
+
+input DashboardInputAttributes {
+  "Variable name referenced by graph datasource inputs"
+  name: String!
+
+  "Human-readable input label"
+  label: String
+
+  "Optional input description"
+  description: String
+
+  "Input control type"
+  type: DashboardInputType!
+
+  "Default input value"
+  default: String
+
+  "Allowed values for select inputs"
+  options: [String]
+
+  "Whether a value is required when rendering"
+  required: Boolean
+
+  "Tool query used to populate input options, such as metric label search"
+  datasource: DashboardDatasourceAttributes
 }
 
 "Attributes used to persist a human‑authored resolution for an alert"
@@ -7716,7 +8437,7 @@ type Monitor {
   "Current state of the monitor (either firing or resolved)"
   state: AlertState
 
-  "Monitor type (currently log‑based only)"
+  "Monitor data type"
   type: MonitorType!
 
   "Cron schedule defining when the monitor is evaluated"
@@ -7725,11 +8446,20 @@ type Monitor {
   "Next scheduled time this monitor will be evaluated, if any"
   nextRunAt: DateTime
 
+  "Prompt used when this monitor starts a workbench investigation"
+  prompt: String
+
+  "Mode-specific options for monitor-triggered workbench jobs"
+  modes: WorkbenchJobModes
+
   "Underlying query configuration used to fetch data for this monitor"
   query: MonitorQuery!
 
   "Threshold configuration that determines when the monitor should fire"
   threshold: MonitorThreshold!
+
+  "Live threshold preview from evaluating this monitor's query"
+  preview: AlertTimeseries
 
   "The service deployment this monitor is attached to"
   service: ServiceDeployment
@@ -7737,9 +8467,158 @@ type Monitor {
   "The workbench this monitor is attached to"
   workbench: Workbench
 
+  "The user whose identity is used for monitor-triggered workbench jobs"
+  user: User
+
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A workbench-owned collection of observability graphs"
+type WorkbenchDashboard {
+  "Stable identifier for this dashboard"
+  id: ID!
+
+  "Dashboard name"
+  name: String!
+
+  "Optional dashboard description"
+  description: String
+
+  "Graphs arranged on the dashboard grid"
+  graphs: [WorkbenchDashboardGraph]
+
+  "User-configurable dashboard variables"
+  inputs: [WorkbenchDashboardInput]
+
+  workbench: Workbench
+
+  graph(
+    "Identifier of the graph to query"
+    identifier: String!
+
+    "Dashboard input values used for variable substitution"
+    input: Json!
+
+    "Time range applied to the datasource query"
+    timeRange: DashboardTimeRangeAttributes!
+  ): WorkbenchDashboardGraphResult
+
+  input(
+    "Name of the dashboard input to populate"
+    identifier: String!
+
+    "Dashboard input values used for variable substitution"
+    input: Json!
+
+    "Time range applied to the datasource query"
+    timeRange: DashboardTimeRangeAttributes!
+  ): [String]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchDashboardGraphResult {
+  "Metric points returned by a metrics datasource"
+  metrics: [WorkbenchJobActivityMetric]
+
+  "Log entries returned by a logs datasource"
+  logs: [WorkbenchJobActivityLog]
+
+  "Trace spans returned by a traces datasource"
+  traces: [WorkbenchJobActivityTrace]
+}
+
+type WorkbenchDashboardGraph {
+  "Stable identifier unique within the dashboard"
+  identifier: String!
+
+  "Graph title"
+  title: String
+
+  "Optional graph description"
+  description: String
+
+  "Graph visualization type"
+  type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
+
+  "ID of the configured workbench tool backing this graph's datasource"
+  toolId: ID
+
+  "Configured workbench tool backing this graph's datasource"
+  workbenchTool: WorkbenchTool
+
+  "Identifier of the section graph containing this graph"
+  sectionId: String
+
+  "Markdown content for markdown graphs"
+  markdown: String
+
+  "Visualization-specific display options; sections may set collapsed"
+  options: Map
+
+  "Grid position and size"
+  layout: WorkbenchDashboardGraphLayout!
+
+  "Tool call used to fetch external data"
+  datasource: WorkbenchDashboardDatasource
+}
+
+type WorkbenchDashboardGraphLayout {
+  "Zero-based horizontal grid coordinate"
+  x: Int!
+
+  "Zero-based vertical grid coordinate"
+  y: Int!
+
+  "Width in grid columns"
+  w: Int!
+
+  "Height in grid rows"
+  h: Int!
+}
+
+type WorkbenchDashboardDatasource {
+  "Kind of data returned by the datasource"
+  type: DashboardDatasourceType!
+
+  "Observability tool used to render the graph"
+  tool: String!
+
+  "Input passed to the observability tool"
+  input: Map!
+}
+
+type WorkbenchDashboardInput {
+  "Variable name referenced by graph datasource inputs"
+  name: String!
+
+  "Human-readable input label"
+  label: String
+
+  "Optional input description"
+  description: String
+
+  "Input control type"
+  type: DashboardInputType!
+
+  "Default input value"
+  default: String
+
+  "Allowed values for select inputs"
+  options: [String]
+
+  "Whether a value is required when rendering"
+  required: Boolean
+
+  "Tool query used to populate input options, such as metric label search"
+  datasource: WorkbenchDashboardDatasource
 }
 
 "A single key\/value facet used when filtering log queries"
@@ -7753,6 +8632,9 @@ type MonitorFacet {
 
 "Log‑level query parameters for a monitor"
 type MonitorLogQuery {
+  "Named workbench logs tool, or null for the native Plural logs provider"
+  tool: String
+
   "Log query string passed through to the underlying log provider"
   query: String!
 
@@ -7767,12 +8649,53 @@ type MonitorLogQuery {
 
   "Optional list of facets used to filter log results"
   facets: [MonitorFacet]
+
+  options: MonitorLogOptions
+}
+
+"Metrics-level query parameters for a monitor"
+type MonitorMetricsQuery {
+  "Named workbench metrics tool, or null for the native Plural metrics provider"
+  tool: String
+
+  query: String!
+
+  step: String
+
+  duration: String
+
+  options: MonitorMetricsOptions
+}
+
+type MonitorLogOptions {
+  azure: MonitorLogAzureOptions
+}
+
+type MonitorLogAzureOptions {
+  resourceId: String
+}
+
+type MonitorMetricsOptions {
+  azure: MonitorMetricsAzureOptions
+}
+
+type MonitorMetricsAzureOptions {
+  resourceId: String
+  metricsNamespace: String
+  aggregation: String
+  filter: String
+  orderBy: String
+  rollUpBy: String
+  metricsEndpoint: String
 }
 
 "Wrapper object for all query types used by a monitor"
 type MonitorQuery {
   "Log query configuration used by this monitor"
-  log: MonitorLogQuery!
+  log: MonitorLogQuery
+
+  "Metrics query configuration used by this monitor"
+  metrics: MonitorMetricsQuery
 }
 
 "Threshold configuration defining when a monitor should fire alerts"
@@ -7889,6 +8812,30 @@ type KubernetesControllerMetrics {
 
   "Memory usage metrics for pods managed by this controller"
   podMem: [MetricResponse]
+
+  "CPU requests for the controller"
+  cpuRequests: [MetricResponse]
+
+  "Memory requests for the controller"
+  memRequests: [MetricResponse]
+
+  "CPU limits for the controller"
+  cpuLimits: [MetricResponse]
+
+  "Memory limits for the controller"
+  memLimits: [MetricResponse]
+
+  "CPU requests for pods managed by this controller"
+  podCpuRequests: [MetricResponse]
+
+  "Memory requests for pods managed by this controller"
+  podMemRequests: [MetricResponse]
+
+  "CPU limits for pods managed by this controller"
+  podCpuLimits: [MetricResponse]
+
+  "Memory limits for pods managed by this controller"
+  podMemLimits: [MetricResponse]
 }
 
 "Time series data associated with an alert evaluation"
@@ -7918,6 +8865,21 @@ type AlertConnection {
 type MonitorConnection {
   pageInfo: PageInfo!
   edges: [MonitorEdge]
+}
+
+type WorkbenchDashboardConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchDashboardEdge]
+}
+
+type MonitorDelta {
+  delta: Delta
+  payload: Monitor
+}
+
+type WorkbenchDashboardDelta {
+  delta: Delta
+  payload: WorkbenchDashboard
 }
 
 enum StackStatus {
@@ -10337,6 +11299,7 @@ input GateJobAttributes {
   "if you'd rather define the job spec via straight k8s yaml"
   raw: String
 
+  "containers to run in this job; an empty list clears configured containers"
   containers: [ContainerAttributes]
 
   labels: Json
@@ -10840,6 +11803,14 @@ enum RendererType {
   KUSTOMIZE
 }
 
+enum ServiceMetricsGrouping {
+  "a single series totaled across the service's namespace"
+  SERVICE
+
+  "one series per pod (persistent volumes are broken out by claim instead)"
+  POD
+}
+
 input ServiceDeploymentAttributes {
   name: String!
 
@@ -11314,6 +12285,9 @@ type ServiceDeployment {
 
   serviceMetrics(start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
+  "the cluster usage metric set scoped to this service's namespace; only selected fields are queried"
+  serviceUsageMetrics(groupBy: ServiceMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
+
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
   "A pod-level set of utilization metrics for this cluster for rendering a heat map"
@@ -11332,6 +12306,14 @@ type ServiceComponentMetrics {
   mem: [MetricResponse]
   podCpu: [MetricResponse]
   podMem: [MetricResponse]
+  cpuRequests: [MetricResponse]
+  memRequests: [MetricResponse]
+  cpuLimits: [MetricResponse]
+  memLimits: [MetricResponse]
+  podCpuRequests: [MetricResponse]
+  podMemRequests: [MetricResponse]
+  podCpuLimits: [MetricResponse]
+  podMemLimits: [MetricResponse]
 }
 
 "a representation of a past revision of a service"
@@ -11824,6 +12806,15 @@ enum TagType {
 enum HeatMapFlavor {
   POD
   NAMESPACE
+  NODE
+}
+
+enum ClusterMetricsGrouping {
+  "a single cluster-wide series"
+  CLUSTER
+
+  NAMESPACE
+
   NODE
 }
 
@@ -12461,6 +13452,78 @@ type ClusterMetrics {
   memoryUsage: [MetricResponse]
 }
 
+"Cluster or service usage timeseries; when grouped, each series carries the grouping's label (`namespace`, `node` or `pod`)"
+type ClusterUsageMetrics {
+  "cpu usage in cores"
+  cpu: [MetricResponse]
+
+  "cpu requests in cores"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits in cores"
+  cpuLimits: [MetricResponse]
+
+  "allocatable node cpu in cores, absent when grouped by namespace"
+  cpuAllocatable: [MetricResponse]
+
+  "fraction (0-1) of CFS periods throttled"
+  cpuThrottling: [MetricResponse]
+
+  "working set memory in bytes"
+  memory: [MetricResponse]
+
+  "memory requests in bytes"
+  memoryRequests: [MetricResponse]
+
+  "memory limits in bytes"
+  memoryLimits: [MetricResponse]
+
+  "allocatable node memory in bytes, absent when grouped by namespace"
+  memoryAllocatable: [MetricResponse]
+
+  "container OOM kills within each rate window"
+  oomKills: [MetricResponse]
+
+  "pod network receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "pod network transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "pod received packets dropped per second"
+  networkReceiveDropped: [MetricResponse]
+
+  "pod transmitted packets dropped per second"
+  networkTransmitDropped: [MetricResponse]
+
+  "container filesystem usage in bytes"
+  ephemeralStorage: [MetricResponse]
+
+  "container filesystem read throughput in bytes\/s"
+  fsReads: [MetricResponse]
+
+  "container filesystem write throughput in bytes\/s"
+  fsWrites: [MetricResponse]
+
+  "persistent volume usage in bytes"
+  volumeUsage: [MetricResponse]
+
+  "persistent volume capacity in bytes"
+  volumeCapacity: [MetricResponse]
+
+  "fraction (0-1) of capacity used by the fullest persistent volume"
+  volumeFullness: [MetricResponse]
+
+  "running pod count"
+  podsRunning: [MetricResponse]
+
+  "pending pod count"
+  podsPending: [MetricResponse]
+
+  "container restarts within each rate window"
+  restarts: [MetricResponse]
+}
+
 type ClusterNodeMetrics {
   cpu: [MetricResponse]
   memory: [MetricResponse]
@@ -12712,6 +13775,9 @@ type Cluster {
   logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
   clusterMetrics(start: DateTime, stop: DateTime, step: String): ClusterMetrics
+
+  "cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node"
+  clusterUsageMetrics(groupBy: ClusterMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
 
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 
@@ -13978,7 +15044,11 @@ input ScmConnectionAttributes {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 input HttpProxyAttributes {
+  "whether this proxy is enabled (defaults to true)"
+  enabled: Boolean
+
   url: String!
+
   noproxy: String
 }
 
@@ -15180,7 +16250,11 @@ type ObserverAgentAction {
 
 "Configuration for http proxy usage in connections to Git or SCM providers"
 type HttpProxyConfiguration {
+  "whether this proxy is enabled"
+  enabled: Boolean!
+
   url: String!
+
   noproxy: String
 }
 
@@ -16635,11 +17709,73 @@ type ReplicaSetStatus {
 
 type Pod {
   status: PodStatus!
+
   spec: PodSpec!
+
   metadata: Metadata!
+
   raw: String!
+
   logs(container: String!, sinceSeconds: Int!): [String]
+
   events: [Event]
+
+  "prometheus timeseries for this pod, only available when the pod is queried with a cluster or service id"
+  metrics(start: DateTime, stop: DateTime, step: String): PodMetrics
+}
+
+"Pod-level prometheus timeseries; container-scoped series carry a `container` label"
+type PodMetrics {
+  "cpu usage in cores, by container"
+  cpu: [MetricResponse]
+
+  "cpu requests in cores, by container"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits in cores, by container"
+  cpuLimits: [MetricResponse]
+
+  "fraction (0-1) of CFS periods throttled, by container"
+  cpuThrottling: [MetricResponse]
+
+  "working set memory in bytes, by container"
+  memory: [MetricResponse]
+
+  "memory requests in bytes, by container"
+  memoryRequests: [MetricResponse]
+
+  "memory limits in bytes, by container"
+  memoryLimits: [MetricResponse]
+
+  "container filesystem usage in bytes, by container"
+  ephemeralStorage: [MetricResponse]
+
+  "ephemeral storage requests in bytes, by container"
+  ephemeralStorageRequests: [MetricResponse]
+
+  "ephemeral storage limits in bytes, by container"
+  ephemeralStorageLimits: [MetricResponse]
+
+  "filesystem read throughput in bytes\/s, by container"
+  fsReads: [MetricResponse]
+
+  "filesystem write throughput in bytes\/s, by container"
+  fsWrites: [MetricResponse]
+
+  "pod network receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "pod network transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "pod received packets dropped per second"
+  networkReceiveDropped: [MetricResponse]
+
+  "pod transmitted packets dropped per second"
+  networkTransmitDropped: [MetricResponse]
+
+  "cumulative restart count, by container"
+  restarts: [MetricResponse]
 }
 
 type PodStatus {
@@ -16791,6 +17927,7 @@ input ServiceAccountAttributes {
   name: String
   email: String
   roles: UserRoleAttributes
+  allowedScopes: [String!]
   assumeBindings: [PolicyBindingAttributes]
 }
 
@@ -16867,6 +18004,9 @@ input PersonaConfigurationAttributes {
   "enable individual parts of the services views"
   services: PersonaServicesAttributes
 
+  "enable individual settings tabs"
+  settings: PersonaSettingsAttributes
+
   "enable individual parts of the ai views"
   ai: PersonaAiAttributes
 }
@@ -16914,6 +18054,19 @@ input PersonaServicesAttributes {
   configuration: Boolean
 }
 
+input PersonaSettingsAttributes {
+  userManagement: Boolean
+  global: Boolean
+  ai: Boolean
+  webhooks: Boolean
+  chatbots: Boolean
+  cloudConnections: Boolean
+  projects: Boolean
+  notifications: Boolean
+  audits: Boolean
+  accessTokens: Boolean
+}
+
 input PersonaAiAttributes {
   pr: Boolean
 }
@@ -16947,6 +18100,7 @@ type User {
   readTimestamp: DateTime
   buildTimestamp: DateTime
   refreshToken: RefreshToken
+  allowedScopes: [String!]
   assumeBindings: [PolicyBinding]
   groups: [Group]
   personas: [Persona]
@@ -16992,6 +18146,9 @@ type Group {
 
   "automatically adds all users in the system to this group"
   global: Boolean
+
+  "number of users in this group"
+  memberCount: Int
 
   insertedAt: DateTime
 
@@ -17117,6 +18274,9 @@ type PersonaConfiguration {
   "enable individual parts of the services views"
   services: PersonaServices
 
+  "enable individual settings tabs"
+  settings: PersonaSettings
+
   "enable individual parts of the ai views"
   ai: PersonaAi
 }
@@ -17162,6 +18322,19 @@ type PersonaHome {
 type PersonaServices {
   secrets: Boolean
   configuration: Boolean
+}
+
+type PersonaSettings {
+  userManagement: Boolean
+  global: Boolean
+  ai: Boolean
+  webhooks: Boolean
+  chatbots: Boolean
+  cloudConnections: Boolean
+  projects: Boolean
+  notifications: Boolean
+  audits: Boolean
+  accessTokens: Boolean
 }
 
 type PersonaAi {
@@ -17309,6 +18482,11 @@ enum Delta {
   CREATE
   UPDATE
   DELETE
+}
+
+enum SortDirection {
+  ASC
+  DESC
 }
 
 type MetricResult {
@@ -17669,6 +18847,11 @@ type StackRunEdge {
 
 type InfrastructureStackEdge {
   node: InfrastructureStack
+  cursor: String
+}
+
+type WorkbenchDashboardEdge {
+  node: WorkbenchDashboard
   cursor: String
 }
 

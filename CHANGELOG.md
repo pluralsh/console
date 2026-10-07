@@ -1,5 +1,14 @@
 # Changelog
 
+- [v0.12.49](releases/v0.12.49.md)
+- [v0.12.48](releases/v0.12.48.md)
+- [v0.12.47](releases/v0.12.47.md)
+- [v0.12.46](releases/v0.12.46.md)
+- [v0.12.45](releases/v0.12.45.md)
+- [v0.12.44](releases/v0.12.44.md)
+- [v0.12.43](releases/v0.12.43.md)
+- [v0.12.42](releases/v0.12.42.md)
+- [v0.12.41](releases/v0.12.41.md)
 - [v0.12.40](releases/v0.12.40.md)
 - [v0.12.39](releases/v0.12.39.md)
 - [v0.12.38](releases/v0.12.38.md)

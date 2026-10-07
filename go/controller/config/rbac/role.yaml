@@ -39,6 +39,7 @@ rules:
   - complianceReportGenerators
   - customcompatibilitymatrices
   - customstackruns
+  - dashboards
   - deploymentsettings
   - federatedcredentials
   - flows
@@ -50,6 +51,7 @@ rules:
   - infrastructurestacks
   - managednamespaces
   - mcpservers
+  - monitors
   - namespacecredentialss
   - notificationrouters
   - notificationsinks
@@ -101,6 +103,7 @@ rules:
   - complianceReportGenerators/finalizers
   - customcompatibilitymatrices/finalizers
   - customstackruns/finalizers
+  - dashboards/finalizers
   - deploymentsettings/finalizers
   - federatedcredentials/finalizers
   - flows/finalizers
@@ -112,6 +115,7 @@ rules:
   - infrastructurestacks/finalizers
   - managednamespaces/finalizers
   - mcpservers/finalizers
+  - monitors/finalizers
   - namespacecredentialss/finalizers
   - notificationrouters/finalizers
   - notificationsinks/finalizers
@@ -157,6 +161,7 @@ rules:
   - complianceReportGenerators/status
   - customcompatibilitymatrices/status
   - customstackruns/status
+  - dashboards/status
   - deploymentsettings/status
   - federatedcredentials/status
   - flows/status
@@ -168,6 +173,7 @@ rules:
   - infrastructurestacks/status
   - managednamespaces/status
   - mcpservers/status
+  - monitors/status
   - namespacecredentialss/status
   - notificationrouters/status
   - notificationsinks/status

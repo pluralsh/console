@@ -2,12 +2,13 @@
   "extends": "../console/tsconfig.app.json",
   "compilerOptions": {
     "composite": true,
-    "baseUrl": ".",
     "rootDir": "./src",
     "outDir": "dist",
     // Override parent tsconfig.app.json (keeps noImplicitAny off for console)
     "noImplicitAny": true,
-    "paths": {}
+    "paths": {
+      "*": ["./*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["src/**/*.stories.ts", "src/**/*.stories.tsx"]

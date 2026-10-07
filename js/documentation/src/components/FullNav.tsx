@@ -72,6 +72,8 @@ export const NavButtons = styled(NavButtonsUnstyled)<{ desktop: boolean }>(
 export const NavWrap = styled.div((_) => ({
   position: 'relative',
   flexGrow: 1,
+  flex: 1,
+  minHeight: 0,
 }))
 
 function NavButton({
@@ -102,7 +104,7 @@ export function FullNav({
   const previousPath = usePrevious(thisPath)
 
   useEffect(() => {
-    if (thisPath !== previousPath) {
+    if (previousPath && thisPath !== previousPath) {
       if (setIsOpen) {
         setIsOpen(false)
       }

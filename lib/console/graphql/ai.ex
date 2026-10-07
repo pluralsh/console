@@ -312,7 +312,6 @@ defmodule Console.GraphQl.AI do
     @desc "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
     field :resource, :kubernetes_unstructured do
       resolve &AI.raw_resource/3
-      middleware ErrorHandler
     end
   end
 
@@ -457,6 +456,9 @@ defmodule Console.GraphQl.AI do
 
     connection field :agent_sessions, node_type: :agent_session do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :read
 
       resolve &AI.sessions/2
     end
@@ -646,6 +648,9 @@ defmodule Console.GraphQl.AI do
     @desc "Creates a chat thread and agent session that will operate autonomously based on the prompt provided"
     field :create_agent_session, :chat_thread do
       middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
       arg :attributes, non_null(:agent_session_attributes)
 
       resolve &AI.create_agent_session/2

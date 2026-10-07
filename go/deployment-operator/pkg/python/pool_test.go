@@ -50,6 +50,32 @@ valuesFiles.append("first.yaml")
 	}
 }
 
+func TestRunReturnsWarnings(t *testing.T) {
+	p := testPool(t, Config{WorkerCount: 1, QueueSize: 1})
+
+	// A script variable named warnings must not interfere with warn().
+	result, err := p.Run(context.Background(), "warnings = [1]\nwarn(\"careful\")\nwarn(\"again\")", nil)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(result.Warnings) != 2 || result.Warnings[0] != "careful" || result.Warnings[1] != "again" {
+		t.Fatalf("unexpected warnings: %#v", result.Warnings)
+	}
+
+	_, err = p.Run(context.Background(), `warn(1)`, nil)
+	if err == nil || !strings.Contains(err.Error(), "TypeError") {
+		t.Fatalf("expected TypeError for non-string warn() argument, got %v", err)
+	}
+
+	result, err = p.Run(context.Background(), `values["a"] = 1`, nil)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(result.Warnings) != 0 {
+		t.Fatalf("expected no warnings, got %#v", result.Warnings)
+	}
+}
+
 func TestRunUsesFreshState(t *testing.T) {
 	p := testPool(t, Config{WorkerCount: 1, QueueSize: 2})
 
@@ -256,6 +282,60 @@ func TestCloseIsIdempotentDuringRuns(t *testing.T) {
 	}
 	closeWG.Wait()
 	runsWG.Wait()
+}
+
+func TestRunK8sObjectMeta(t *testing.T) {
+	p := testPool(t, Config{WorkerCount: 1, QueueSize: 1})
+	SetObjectMetaLookup(func(group, version, kind, namespace, name string) (map[string]any, error) {
+		if group != "" || version != "v1" || kind != "Namespace" || namespace != "" || name != "kube-system" {
+			return nil, nil
+		}
+		return map[string]any{
+			"uid":       "cfb1383b-37cc-4d91-b943-aab5119e4cb1",
+			"name":      name,
+			"namespace": namespace,
+			"labels":    map[string]string{"kubernetes.io/metadata.name": "kube-system"},
+		}, nil
+	})
+	t.Cleanup(func() { SetObjectMetaLookup(nil) })
+
+	result, err := p.Run(context.Background(), `
+ns = k8s_object_meta("", "v1", "Namespace", "", "kube-system")
+values["observeClusterId"] = ns["uid"]
+values["name"] = ns["name"]
+values["namespace"] = ns["namespace"]
+values["label"] = ns["labels"]["kubernetes.io/metadata.name"]
+missing = k8s_object_meta("apps", "v1", "Deployment", "default", "missing")
+values["missing"] = missing is None
+`, nil)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if result.Values["observeClusterId"] != "cfb1383b-37cc-4d91-b943-aab5119e4cb1" {
+		t.Fatalf("unexpected uid: %#v", result.Values)
+	}
+	if result.Values["name"] != "kube-system" || result.Values["namespace"] != "" {
+		t.Fatalf("unexpected identity: %#v", result.Values)
+	}
+	if result.Values["label"] != "kube-system" {
+		t.Fatalf("unexpected label: %#v", result.Values)
+	}
+	if result.Values["missing"] != true {
+		t.Fatalf("expected None on cache miss: %#v", result.Values)
+	}
+}
+
+func TestRunK8sObjectMetaRaisesStoreErrors(t *testing.T) {
+	p := testPool(t, Config{WorkerCount: 1, QueueSize: 1})
+	SetObjectMetaLookup(func(string, string, string, string, string) (map[string]any, error) {
+		return nil, errors.New("store unavailable")
+	})
+	t.Cleanup(func() { SetObjectMetaLookup(nil) })
+
+	_, err := p.Run(context.Background(), `k8s_object_meta("", "v1", "Namespace", "", "kube-system")`, nil)
+	if err == nil || !strings.Contains(err.Error(), "python RuntimeError") {
+		t.Fatalf("expected RuntimeError, got %v", err)
+	}
 }
 
 func TestRunSupportsConcurrentJobs(t *testing.T) {

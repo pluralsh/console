@@ -8,6 +8,7 @@ import { GqlError } from 'components/utils/Alert'
 import { WorkbenchGraphCard } from './common/WorkbenchGraphCard'
 import { WorkbenchStatCard } from './common/WorkbenchStatCard'
 import {
+  billedTokenCount,
   compactDateLabel,
   formatTokenCost,
   formatTokenCount,
@@ -22,6 +23,7 @@ type UsageEntry = {
   timestamp?: Nullable<string>
   inputTokens?: Nullable<number>
   outputTokens?: Nullable<number>
+  totalTokens?: Nullable<number>
   totalCost?: Nullable<number>
   workbench?: Nullable<{ id: string; name: string }>
 }
@@ -480,7 +482,7 @@ function deriveTotals(entries: UsageEntry[]): UsageTotals {
 
       acc.inputTokens += inputTokens
       acc.outputTokens += outputTokens
-      acc.totalTokens += inputTokens + outputTokens
+      acc.totalTokens += billedTokenCount(entry)
 
       if (totalCost != null) {
         acc.totalCost += totalCost

@@ -16,16 +16,27 @@ on:
 permissions:
   contents: 'read'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   # title:
   #   name: Title check
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Check pull request title
-  #       uses: amannn/action-semantic-pull-request@v5
+  #       uses: amannn/action-semantic-pull-request@v6
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   body:
+    needs: [vouch]
     name: Body check
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.*.labels.*.name, 'dependencies') && !contains(github.event.*.labels.*.name, 'release')}}

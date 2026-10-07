@@ -50,7 +50,61 @@ defmodule Console.AI.Workbench.EnvironmentTest do
 
       assert Environment.subagents(job)
              |> MapSet.new()
-             |> MapSet.equal?(MapSet.new([:observability, :integration, :coding, :infrastructure]))
+             |> MapSet.equal?(
+               MapSet.new([
+                 :observability,
+                 :monitoring,
+                 :integration,
+                 :coding,
+                 :infrastructure
+               ])
+             )
+    end
+
+    test "includes self_service when configuration.self_service is enabled" do
+      workbench = insert(:workbench, configuration: %{self_service: true})
+      job = insert(:workbench_job, workbench: workbench) |> Repo.preload(workbench: :tools)
+
+      assert :self_service in Environment.subagents(job)
+    end
+
+    test "excludes self_service when configuration.self_service is absent" do
+      workbench = insert(:workbench, configuration: %{infrastructure: %{services: true}})
+      job = insert(:workbench_job, workbench: workbench) |> Repo.preload(workbench: :tools)
+
+      refute :self_service in Environment.subagents(job)
+    end
+
+    test "exposes docker/oci tools on both the infrastructure and integration subagents" do
+      workbench = insert(:workbench)
+      docker_tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          tool: :docker,
+          name: "dockerhub",
+          configuration: %{docker: %{url: "registry-1.docker.io"}}
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: docker_tool)
+
+      job =
+        insert(:workbench_job, workbench: workbench)
+        |> Repo.preload(workbench: :tools)
+
+      subagents = Environment.subagents(job) |> MapSet.new()
+      assert MapSet.member?(subagents, :infrastructure)
+      assert MapSet.member?(subagents, :integration)
+      assert Environment.subagent_tool?(docker_tool, :infrastructure)
+      assert Environment.subagent_tool?(docker_tool, :integration)
+    end
+  end
+
+  describe "actions/1" do
+    test "advertises kubernetes actions when node drain is enabled" do
+      job = insert(:workbench_job, modes: %{kubernetes: %{drain: true}})
+      environment = Environment.new(job, [], [])
+
+      assert Environment.actions(environment).kubernetes
     end
   end
 

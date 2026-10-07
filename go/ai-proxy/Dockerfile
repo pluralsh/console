@@ -1,5 +1,5 @@
 # Build the binary
-FROM golang:1.26.6 as builder
+FROM golang:1.27.1 as builder
 ARG TARGETOS
 ARG TARGETARCH
 ARG VERSION
@@ -39,3 +39,4 @@ COPY --from=builder /workspace/ai-proxy .
 USER 65532:65532
 
 ENTRYPOINT ["/ai-proxy"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/ai-proxy", "--help"]

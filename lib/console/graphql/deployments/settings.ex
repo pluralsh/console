@@ -8,13 +8,17 @@ defmodule Console.GraphQl.Deployments.Settings do
   ecto_enum :log_driver, DeploymentSettings.LogDriver
   ecto_enum :vector_store, DeploymentSettings.VectorStore
   ecto_enum :open_ai_method, DeploymentSettings.OpenAIMethod
+  ecto_enum :bedrock_endpoint, DeploymentSettings.BedrockEndpoint
   ecto_enum :provider, CloudConnection.Provider
 
   @bedrock_model_id_doc "AWS Bedrock model or inference profile identifier. Use a foundation model ID (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0) or a regional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0). Nexus registers the bare model ID for routing and auto-maps 3-part profile IDs to Bifrost aliases."
 
   @bedrock_proxy_models_doc "Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId."
 
-  @bedrock_deployments_doc "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically). Still needed for explicit client model name overrides, application inference profile resource IDs (profile suffix only, not full ARN), or when alias mapping cannot be inferred. Maps client-facing model ID to inference profile ID. Example: {\"anthropic.claude-3-5-sonnet-20241022-v2:0\": \"us.anthropic.claude-3-5-sonnet-20241022-v2:0\"}"
+  @bedrock_deployments_doc "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID."
+
+  @bedrock_endpoint_doc "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs."
+  @bedrock_model_settings_doc "Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata."
 
   input_object :project_attributes do
     field :name, non_null(:string)
@@ -103,6 +107,17 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :victoria, :http_connection_attributes
     field :elastic, :elasticsearch_connection_attributes
     field :opensearch, :opensearch_connection_attributes
+    field :loki, :loki_logging_connection_attributes
+  end
+
+  input_object :loki_logging_connection_attributes do
+    field :host,     non_null(:string)
+    field :user,     :string, description: "user to connect w/ for basic auth"
+    field :password, :string, description: "password to connect w/ for basic auth"
+    field :cluster_label, :string,
+      description: "the stream label identifying the cluster a log came from, defaults to cluster"
+    field :namespace_label, :string,
+      description: "the stream label identifying the namespace a log came from, defaults to namespace"
   end
 
   input_object :elasticsearch_connection_attributes do
@@ -182,6 +197,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :base_url, :string
     field :access_token, :string
     field :model, :string
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -210,14 +226,21 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   input_object :openai_token_exchange_attributes do
     field :enabled, :boolean
+    field :type, :oauth_token_exchange_type
     field :token_url, :string, description: "token endpoint URL"
     field :client_id, :string
     field :client_secret, :string
+    field :private_key, :string
+    field :key_id, :string
+    field :audience, :string
+    field :resource, :string
+    field :scopes, list_of(:string)
   end
 
   input_object :anthropic_settings_attributes do
     field :access_token, :string
     field :model, :string
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -231,6 +254,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   input_object :ollama_attributes do
     field :model, non_null(:string)
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -260,6 +284,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :access_token, non_null(:string), description: "the azure openai access token to use"
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :deployments, :json,
       description: "mapping from model id to azure openai deployment name"
@@ -277,6 +302,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :access_token, :string, description: "the openai bedrock access token to use"
     field :region, :string, description: "the aws region the model is hosted in"
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
     field :aws_access_key_id, :string, description: "the aws access key id to use (DEPRECATED)"
 
     field :aws_secret_access_key, :string,
@@ -286,12 +312,24 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
 
+    field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :json, description: @bedrock_deployments_doc
+    field :model_settings, list_of(:bedrock_model_settings_attributes),
+      description: @bedrock_model_settings_doc
+  end
+
+  input_object :bedrock_model_settings_attributes do
+    field :model_id, non_null(:string),
+      description: "the foundation model ID served by the inference profile"
+
+    field :inference_profile_arn, non_null(:string),
+      description: "the full ARN of the Bedrock application inference profile"
   end
 
   input_object :vertex_ai_attributes do
     field :model, :string, description: "the vertex model id to use"
+    field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -588,6 +626,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
 
     field :model, :string, description: "the openai model version to use"
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -617,13 +656,19 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "OAuth2 token endpoint client credentials for OpenAI-compatible APIs"
   object :openai_token_exchange do
     field :enabled, :boolean
+    field :type, :oauth_token_exchange_type
     field :token_url, :string, description: "token endpoint URL"
     field :client_id, :string
+    field :key_id, :string
+    field :audience, :string
+    field :resource, :string
+    field :scopes, list_of(:string)
   end
 
   @desc "Anthropic connection information"
   object :anthropic_settings do
     field :model, :string, description: "the anthropic model version to use"
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -636,6 +681,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Settings for a self-hosted ollama-based LLM deployment"
   object :ollama_settings do
     field :model, non_null(:string)
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model, :string,
       description:
@@ -651,6 +697,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
 
     field :model, :string
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
 
     field :tool_model, :string,
@@ -669,6 +716,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Settings for usage of AWS Bedrock for LLMs"
   object :bedrock_ai_settings do
     field :model_id, :string, description: @bedrock_model_id_doc <> " Omit for Plural defaults."
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
     field :tool_model_id, :string,
       description:
@@ -684,13 +732,22 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
 
+    field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :map, description: @bedrock_deployments_doc
+    field :model_settings, list_of(:bedrock_model_settings),
+      description: @bedrock_model_settings_doc
+  end
+
+  object :bedrock_model_settings do
+    field :model_id, :string
+    field :inference_profile_arn, :string
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"
   object :vertex_ai_settings do
     field :model, :string, description: "the vertex ai model to use"
+    field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
 
     field :tool_model, :string,
@@ -721,6 +778,16 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :opensearch, :opensearch_connection,
       description: "configures a connection to aws opensearch for logging"
+
+    field :loki, :loki_logging_connection,
+      description: "configures a connection to grafana loki for logging"
+  end
+
+  object :loki_logging_connection do
+    field :host, non_null(:string)
+    field :user, :string, description: "user to connect w/ for basic auth"
+    field :cluster_label, :string, description: "the stream label identifying the cluster a log came from"
+    field :namespace_label, :string, description: "the stream label identifying the namespace a log came from"
   end
 
   object :elasticsearch_connection do

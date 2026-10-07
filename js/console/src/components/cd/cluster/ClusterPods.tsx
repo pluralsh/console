@@ -186,8 +186,10 @@ export function ClusterPods() {
           placeholder="Filter pods"
           value={filterString}
           onChange={(e) => setFilterString(e.currentTarget.value)}
-          marginBottom={theme.spacing.medium}
-          flexGrow={1}
+          css={{
+            flexGrow: 1,
+            marginBottom: theme.spacing.medium,
+          }}
         />
         {isEmpty(namespaces) ? null : (
           <div

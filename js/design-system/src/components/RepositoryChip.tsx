@@ -1,28 +1,24 @@
-import { type ReactNode, useState } from 'react'
-import { Flex, type FlexProps, Img, P } from 'honorable'
+import { type ComponentPropsWithRef, type ReactNode, useState } from 'react'
+import styled, { type StyledObject } from 'styled-components'
 
+import Flex, { type FlexProps } from './Flex'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import PlusIcon from './icons/PlusIcon'
 import WrapWithIf from './WrapWithIf'
 import Tooltip from './Tooltip'
 
-type TagProps = FlexProps & {
-  label: string
-  imageUrl?: string
-  checked?: boolean
-  disabled?: boolean
-  icon?: ReactNode
-  tooltip?: string
-}
-
-const iconProps = {
-  backgroundColor: 'fill-three',
-  padding: 2,
-  border: '1px solid border-input',
-  borderRadius: 'medium',
-  width: 24,
-  height: 24,
-}
+type TagProps = Omit<FlexProps, 'tooltip'> &
+  Pick<
+    ComponentPropsWithRef<'div'>,
+    'onClick' | 'onMouseEnter' | 'onMouseLeave'
+  > & {
+    label: string
+    imageUrl?: string
+    checked?: boolean
+    disabled?: boolean
+    icon?: ReactNode
+    tooltip?: string
+  }
 
 function RepositoryChip({
   label,
@@ -31,6 +27,11 @@ function RepositoryChip({
   disabled = false,
   icon = null,
   tooltip,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  css,
+  className,
   ...props
 }: TagProps) {
   const [hovered, setHovered] = useState(false)
@@ -40,53 +41,34 @@ function RepositoryChip({
       condition={!!tooltip}
       wrapper={<Tooltip label={tooltip} />}
     >
-      <Flex
-        padding="xsmall"
-        align="center"
-        justify="space-between"
-        cursor={disabled ? 'not-allowed' : 'pointer'}
-        opacity={disabled ? 0.5 : 1}
-        borderRadius="large"
-        border={`1px solid ${
-          checked ? 'border-outline-focused' : 'border-fill-two'
-        }`}
-        backgroundColor="fill-two"
-        _hover={disabled ? {} : { backgroundColor: 'fill-two-hover' }}
-        transition="background-color 200ms ease"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        whiteSpace="nowrap"
-        {...props}
+      <RepositoryChipSC
+        $checked={checked}
+        $disabled={disabled}
+        className={className}
+        onClick={onClick}
+        onMouseEnter={(e) => {
+          setHovered(true)
+          onMouseEnter?.(e)
+        }}
+        onMouseLeave={(e) => {
+          setHovered(false)
+          onMouseLeave?.(e)
+        }}
+        css={{ ...props, ...css } as StyledObject}
       >
         <Flex
           align="center"
           overflow="hidden"
         >
           {icon ? (
-            <Flex
-              align="center"
-              justify="center"
-              {...iconProps}
-            >
-              {icon}
-            </Flex>
+            <IconWrapSC>{icon}</IconWrapSC>
           ) : imageUrl ? (
-            <Img
+            <IconImgSC
               src={imageUrl}
-              objectPosition="center"
-              {...iconProps}
+              alt={label}
             />
           ) : null}
-          <P
-            body2
-            marginLeft="medium"
-            overflow="hidden"
-            textOverflow="ellipsis"
-            whiteSpace="nowrap"
-            title={label}
-          >
-            {label}
-          </P>
+          <LabelSC title={label}>{label}</LabelSC>
         </Flex>
         <CheckRoundedIcon
           color="border-outline-focused"
@@ -99,9 +81,65 @@ function RepositoryChip({
           marginLeft="small"
           height={16}
         />
-      </Flex>
+      </RepositoryChipSC>
     </WrapWithIf>
   )
 }
+
+const RepositoryChipSC = styled.div<{
+  $checked: boolean
+  $disabled: boolean
+}>(({ theme, $checked, $disabled }) => ({
+  display: 'flex',
+  padding: theme.spacing.xsmall,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  cursor: $disabled ? 'not-allowed' : 'pointer',
+  opacity: $disabled ? 0.5 : 1,
+  borderRadius: theme.borderRadiuses.large,
+  border: `1px solid ${
+    $checked
+      ? theme.colors['border-outline-focused']
+      : theme.colors['border-fill-two']
+  }`,
+  backgroundColor: theme.colors['fill-two'],
+  whiteSpace: 'nowrap',
+  transition: 'background-color 200ms ease',
+  ...(!$disabled && {
+    '&:hover': {
+      backgroundColor: theme.colors['fill-two-hover'],
+    },
+  }),
+}))
+
+const IconWrapSC = styled(Flex)(({ theme }) => ({
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: theme.colors['fill-three'],
+  padding: 2,
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+  width: 24,
+  height: 24,
+}))
+
+const LabelSC = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.body2,
+  marginLeft: theme.spacing.medium,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}))
+
+const IconImgSC = styled.img(({ theme }) => ({
+  objectPosition: 'center',
+  backgroundColor: theme.colors['fill-three'],
+  padding: 2,
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+  width: 24,
+  height: 24,
+}))
 
 export default RepositoryChip

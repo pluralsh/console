@@ -1,6 +1,6 @@
 import { ComponentPropsWithRef, type ReactNode } from 'react'
 
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import AppIcon, { type AppIconProps } from './AppIcon'
 import Flex, { type FlexProps } from './Flex'
 
@@ -24,6 +24,8 @@ function PageCard({
   children,
   ...props
 }: PageCardProps) {
+  const theme = useTheme()
+
   return (
     <WrapperSC>
       <Flex
@@ -44,8 +46,10 @@ function PageCard({
                 <Flex
                   width={12}
                   alignItems="center"
-                  color="action-link-inline"
-                  {...{ '& svg': { width: '100%' } }}
+                  css={{
+                    color: theme.colors['action-link-inline'],
+                    '& svg': { width: '100%' },
+                  }}
                 >
                   {subheadingIcon}
                 </Flex>

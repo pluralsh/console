@@ -19,6 +19,12 @@ message AiConfig {
   OpenAiConfig xai = 8;
 }
 
+message HttpProxyConfig {
+  string url = 1;
+  optional string noProxy = 2;
+  optional bool enabled = 3;
+}
+
 message OpenAiTokenExchange {
   optional bool enabled = 1;
   optional string tokenUrl = 2;
@@ -43,6 +49,7 @@ message OpenAiConfig {
   repeated string proxyModels = 6;
   optional OpenAiTokenExchange tokenExchange = 7;
   optional OpenAiMethod method = 8;
+  optional HttpProxyConfig proxy = 9;
 }
 
 message AnthropicConfig {
@@ -52,6 +59,7 @@ message AnthropicConfig {
   optional string embeddingModel = 4;
   optional string toolModel = 5;
   repeated string proxyModels = 6;
+  optional HttpProxyConfig proxy = 7;
 }
 
 message VertexAiConfig {
@@ -64,6 +72,17 @@ message VertexAiConfig {
   optional string project = 7;
   optional string location = 8;
   repeated string proxyModels = 9;
+  optional HttpProxyConfig proxy = 10;
+}
+
+enum BedrockEndpoint {
+  RUNTIME = 0;
+  MANTLE = 1;
+}
+
+message BedrockModelSettings {
+  string modelId = 1;
+  string inferenceProfileArn = 2;
 }
 
 message BedrockConfig {
@@ -76,6 +95,9 @@ message BedrockConfig {
   optional string awsSecretAccessKey = 7;
   repeated string proxyModels = 8;
   map<string, string> deployments = 9;
+  optional BedrockEndpoint endpoint = 10;
+  repeated BedrockModelSettings modelSettings = 11;
+  optional HttpProxyConfig proxy = 12;
 }
 
 message AzureOpenAiConfig {
@@ -87,6 +109,7 @@ message AzureOpenAiConfig {
   optional string accessToken = 7;
   repeated string proxyModels = 8;
   map<string, string> deployments = 9;
+  optional HttpProxyConfig proxy = 10;
 }
 
 message ProxyAuthenticationRequest {

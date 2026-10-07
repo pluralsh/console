@@ -18,6 +18,9 @@ Example (from `config/config.yaml`):
 server:
   address: ":8080"
   path: "/ai/proxy"
+  # Setting both files enables HTTPS; omit both to serve HTTP.
+  certificateFile: "/etc/nexus/tls/tls.crt"
+  keyFile: "/etc/nexus/tls/tls.key"
   readTimeout: "30s"
   idleTimeout: "120s"
 
@@ -39,6 +42,8 @@ observability:
 - `--config` Path to a config file (YAML/JSON)
 - `--server-address` HTTP bind address (e.g. `:8080`)
 - `--server-path` Base path for HTTP routes (e.g. `/ai/proxy`)
+- `--server-certificate-file` X.509 certificate file for HTTPS
+- `--server-key-file` X.509 private key file for HTTPS
 - `--server-read-timeout` Read timeout (e.g. `30s`)
 - `--server-idle-timeout` Idle timeout (e.g. `120s`)
 - `--console-endpoint` Console gRPC endpoint (`host:port`)
@@ -54,6 +59,8 @@ include:
 
 - `NEXUS_SERVER_ADDRESS`
 - `NEXUS_SERVER_PATH`
+- `NEXUS_SERVER_CERTIFICATEFILE`
+- `NEXUS_SERVER_KEYFILE`
 - `NEXUS_CONSOLE_GRPCENDPOINT`
 - `NEXUS_OBSERVABILITY_LOGLEVEL`
 - `NEXUS_CONSOLE_REQUESTTIMEOUT`
@@ -69,6 +76,7 @@ the key currently wired in `internal/config/loader.go`.
 `internal/config/validator.go` enforces:
 
 - `server.address` must be `:port` or `host:port`
+- `server.certificateFile` and `server.keyFile` must either both be set or both be omitted
 - `console.grpcEndpoint` must be `host:port`
 - `console.configTTL` must be positive and at least 10 seconds
 - `console.requestTimeout` must be positive

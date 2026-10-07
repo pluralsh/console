@@ -170,9 +170,12 @@ const Button = memo(
         )}
         <Flex
           alignItems="center"
-          visibility={loading ? 'hidden' : 'inherit'}
           width={justifyContent === 'flex-start' ? '100%' : undefined}
           {...innerFlexProps}
+          css={{
+            visibility: loading ? 'hidden' : 'inherit',
+            ...innerFlexProps?.css,
+          }}
         >
           {children}
         </Flex>
@@ -202,7 +205,7 @@ export const ButtonBaseSC = styled.button<{
     $type,
     $noPadding,
   }) => ({
-    // default styles that were baked into honorable (and not already being overridden)
+    // baseline button styles
     cursor: 'pointer',
     position: 'relative',
     display: 'flex',
@@ -380,7 +383,6 @@ const IconSC = styled.span<{
     alignItems: 'center',
     justifyContent: 'center',
     visibility: $loading ? 'hidden' : 'inherit',
-    // adapted from honorable theme styles
     margin:
       $position === 'start' ? `0 ${marginSize}px 0 0` : `0 0 0 ${marginSize}px`,
   }

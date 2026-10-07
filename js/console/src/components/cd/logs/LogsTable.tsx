@@ -4,15 +4,13 @@ import {
   LogAggregationQueryResult,
   LogFacetInput,
   LogLineFragment,
+  LogQueryOperator,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useCallback, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { LogContextPanel } from './LogContextPanel'
 import { LogLine } from './LogLine'
-import { DEFAULT_LOG_QUERY_LENGTH, secondsToDuration } from './Logs'
-import { LogsFiltersT } from './LogsFilters'
-import type { LogsTimeRange } from './Logs'
 
 const columnHelper = createColumnHelper<LogLineFragment>()
 
@@ -20,41 +18,48 @@ export function LogsTable({
   logs,
   loading,
   initialLoading,
-  filters,
+  queryLength,
+  queryOperator,
+  duration,
+  rangeStart,
   fetchMore,
-  setLive,
+  setFollowing,
   addLabel,
   labels,
   clusterId,
   serviceId,
-  rangeFilter,
 }: {
   logs: LogLineFragment[]
   loading?: boolean
   initialLoading?: boolean
-  filters: LogsFiltersT
+  queryLength: number
+  queryOperator: LogQueryOperator
+  /** ISO 8601 duration of the selected window, e.g. `PT900S`. */
+  duration: string
+  /** Start of an absolute window; older pages stop here. */
+  rangeStart?: Date
   fetchMore: LogAggregationQueryResult['fetchMore']
-  live: boolean
-  setLive: (live: boolean) => void
+  /** Called with `false` when scrolled away from the newest logs, `true` on return. */
+  setFollowing?: (following: boolean) => void
   addLabel: (key: string, value: string) => void
   labels: LogFacetInput[]
   clusterId?: string
   serviceId?: string
-  rangeFilter?: LogsTimeRange | null
 }) {
   const theme = useTheme()
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
   const [logLine, setLogLine] = useState<Nullable<LogLineFragment>>(null)
   const [hasNextPage, setHasNextPage] = useState(true)
-  const { queryLength, sinceSeconds, queryOperator } = filters
-  const duration = secondsToDuration(sinceSeconds)
 
   const fetchOlderLogs = useCallback(() => {
     if (loading || !hasNextPage) return
+    const before = logs[logs.length - 1]?.timestamp
     fetchMore({
       variables: {
-        limit: queryLength || DEFAULT_LOG_QUERY_LENGTH,
-        time: { before: logs[logs.length - 1]?.timestamp, duration },
+        limit: queryLength,
+        time: rangeStart
+          ? { before, after: rangeStart.toISOString() }
+          : { before, duration },
         operator: queryOperator,
       },
       updateQuery: (prev, { fetchMoreResult }) => {
@@ -74,6 +79,7 @@ export function LogsTable({
     queryLength,
     logs,
     duration,
+    rangeStart,
     queryOperator,
   ])
 
@@ -81,12 +87,11 @@ export function LogsTable({
   const onScrollCapture = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const scrollTop = e.currentTarget.scrollTop
-      if (scrollTop === 0 && !filters.date && !rangeFilter) setLive(true)
-      // if user scrolls away from the top, disable live logs
-      else if (scrollTop > 0 && lastScrollTop.current === 0) setLive(false)
+      if (scrollTop === 0) setFollowing?.(true)
+      else if (lastScrollTop.current === 0) setFollowing?.(false)
       lastScrollTop.current = scrollTop
     },
-    [setLive, filters.date, rangeFilter]
+    [setFollowing]
   )
 
   return (
@@ -101,11 +106,7 @@ export function LogsTable({
         data={logs}
         columns={cols}
         isFetchingNextPage={loading}
-        hasNextPage={
-          !rangeFilter &&
-          hasNextPage &&
-          logs.length >= (queryLength || DEFAULT_LOG_QUERY_LENGTH)
-        }
+        hasNextPage={hasNextPage && logs.length >= queryLength}
         reactVirtualOptions={{ overscan: 25 }}
         fetchNextPage={fetchOlderLogs}
         loading={!!initialLoading}

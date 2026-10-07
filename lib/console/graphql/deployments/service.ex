@@ -8,6 +8,11 @@ defmodule Console.GraphQl.Deployments.Service do
   ecto_enum :service_promotion,         Service.Promotion
   ecto_enum :renderer_type,             Service.RendererType
 
+  enum :service_metrics_grouping do
+    value :service, description: "a single series totaled across the service's namespace"
+    value :pod, description: "one series per pod (persistent volumes are broken out by claim instead)"
+  end
+
   input_object :service_deployment_attributes do
     field :name,             non_null(:string)
     field :namespace,        non_null(:string)
@@ -322,6 +327,16 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.metrics/3
     end
 
+    @desc "the cluster usage metric set scoped to this service's namespace; only selected fields are queried"
+    field :service_usage_metrics, :cluster_usage_metrics do
+      arg :group_by, :service_metrics_grouping, default_value: :service
+      arg :start,    :datetime
+      arg :stop,     :datetime
+      arg :step,     :string
+
+      resolve &Deployments.service_usage_metrics/3
+    end
+
     field :component_metrics, :service_component_metrics do
       arg :component_id, non_null(:id)
       arg :start,        :datetime
@@ -347,6 +362,14 @@ defmodule Console.GraphQl.Deployments.Service do
     field :mem, list_of(:metric_response)
     field :pod_cpu, list_of(:metric_response)
     field :pod_mem, list_of(:metric_response)
+    field :cpu_requests, list_of(:metric_response)
+    field :mem_requests, list_of(:metric_response)
+    field :cpu_limits, list_of(:metric_response)
+    field :mem_limits, list_of(:metric_response)
+    field :pod_cpu_requests, list_of(:metric_response)
+    field :pod_mem_requests, list_of(:metric_response)
+    field :pod_cpu_limits, list_of(:metric_response)
+    field :pod_mem_limits, list_of(:metric_response)
   end
 
   @desc "a representation of a past revision of a service"
@@ -628,7 +651,10 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "fetches details of this service deployment, and can be called by the deploy operator"
     field :service_deployment, :service_deployment do
       middleware Authenticated, :cluster
-      middleware Scope, api: "serviceDeployment"
+      middleware Scope,
+        resource: :service,
+        action: :read,
+        api: "serviceDeployment"
       arg :id,      :id
       arg :cluster, :string, description: "the handle of the cluster for this service"
       arg :name,    :string

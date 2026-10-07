@@ -45,6 +45,21 @@ describe('getActionPolicyToolName', () => {
     ).toBe('exec_k8s_pod')
   })
 
+  it('maps node drain actions to their approval policy tool', () => {
+    const drainAction = action({
+      status: WorkbenchJobActivityStatus.NeedsApproval,
+      type: WorkbenchJobActivityType.Kubernetes,
+      result: {
+        kubeDrain: {
+          handle: 'cluster-a',
+          node: 'worker-0',
+        },
+      },
+    })
+
+    expect(getActionPolicyToolName(drainAction)).toBe('drain_k8s_node')
+  })
+
   it('builds function-call policy names from tool type and name', () => {
     expect(
       getActionPolicyToolName(

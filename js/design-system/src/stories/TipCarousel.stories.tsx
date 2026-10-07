@@ -1,10 +1,10 @@
-import { A } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import TipCarousel from '../components/TipCarousel'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'TipCarousel',
+  title: 'Tip Carousel',
   component: TipCarousel,
   argTypes: {
     autoAdvanceTime: {
@@ -22,18 +22,20 @@ export default meta
 type Story = StoryObj<any>
 
 function Template(args: any) {
+  const theme = useTheme()
+
   return (
     <TipCarousel {...args}>
       <>
         You can use service accounts to have an entire team manage a set of
         installations for one of your plural clusters, learn more{' '}
-        <A
-          inline
+        <a
           href="#"
           target="_blank"
+          css={theme.partials.text.inlineLink}
         >
           here
-        </A>
+        </a>
         .
       </>
       <>

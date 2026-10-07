@@ -14,6 +14,11 @@ defmodule Console.GraphQl.Schema.Base do
     value :after
   end
 
+  enum :sort_direction do
+    value :asc
+    value :desc
+  end
+
   object :metric_result do
     field :timestamp, :long, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
     field :value,     :string
@@ -32,7 +37,7 @@ defmodule Console.GraphQl.Schema.Base do
       import Console.GraphQl.Schema.Helpers
       import Console.GraphQl.Schema.Base
       alias Console.Graphql.Middleware.Nested
-      alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, ClusterAuthenticated, Scope, ErrorHandler, VectorStoreEnabled}
+      alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, ClusterAuthenticated, Scope, VectorStoreEnabled}
     end
   end
 

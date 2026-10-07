@@ -9,7 +9,7 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method, :token_exchange, :headers]
+  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method, :token_exchange, :headers, :proxy]
 
   @type t :: %__MODULE__{}
 
@@ -28,6 +28,7 @@ defmodule Console.AI.OpenAI do
       method: Map.get(opts, :method) || :auto,
       token_exchange: Map.get(opts, :token_exchange),
       headers: Map.get(opts, :headers),
+      proxy: Map.get(opts, :proxy),
       stream: Stream.stream()
     }
   end
@@ -47,13 +48,13 @@ defmodule Console.AI.OpenAI do
   @doc """
   Generate a openai completion
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = openai, messages, opts) do
-    with {:ok, provider_opts} <- provider_options(openai) do
+    model = openai_model(openai, opts[:model], model_type(opts[:client]))
+    with {:ok, provider_opts} <- request_options(openai, model) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, base_opts(provider_opts ++ [tools: tools(opts)], opts))
-      |> reqllm_result()
+      |> generate_text(model, openai.stream, base_opts(provider_opts ++ [tools: tools(opts)], opts))
     end
   end
 
@@ -65,10 +66,11 @@ defmodule Console.AI.OpenAI do
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = openai, messages, tools, opts) do
-    with {:ok, provider_opts} <- provider_options(openai) do
+    model = openai_model(openai, opts[:model], model_type(opts[:client]))
+    with {:ok, provider_opts} <- request_options(openai, model) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, base_opts(provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required], opts))
+      |> generate_text(model, openai.stream, base_opts(provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required], opts))
       |> reqllm_result()
       |> tool_calls()
     end
@@ -96,13 +98,34 @@ defmodule Console.AI.OpenAI do
 
   def tools?(), do: true
 
+  defp request_options(%__MODULE__{} = openai, model) do
+    with {:ok, opts} <- provider_options(openai),
+      do: {:ok, [{:pricing_context, pricing_context(model)} | opts]}
+  end
+
   defp provider_options(%__MODULE__{base_url: base_url} = openai) do
     with {:ok, key} <- api_key(openai),
       do: {:ok, Enum.filter([base_url: base_url, api_key: key] ++ http_options(openai), fn {_, v} -> not is_nil(v) end)}
   end
 
+  # ReqLLM omits all costs for models with conditional tariffs (eg the gpt-5.6 family's batch,
+  # service tier and data residency modifiers) unless these billing facts are supplied.  We never
+  # request a service tier, batch, or regional processing, so these describe every call we make.
+  defp pricing_context(model) do
+    %{api: pricing_api(model), service_tier: "default", regional_processing: false}
+  end
+
+  defp pricing_api(model) do
+    case ReqLLM.RequestPlan.openai_surface(model) do
+      {:ok, :openai_responses, _, _} -> "responses"
+      _ -> "chat_completions"
+    end
+  rescue
+    _ -> "chat_completions"
+  end
+
   defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
-    case TokenExchange.exchange(token.token_url, token.client_id, token.client_secret) do
+    case TokenExchange.exchange(token) do
       {:ok, %OAuth2.AccessToken{access_token: token}} when is_binary(token) -> {:ok, token}
       {:ok, token} when is_binary(token) -> {:ok, token}
       err -> err

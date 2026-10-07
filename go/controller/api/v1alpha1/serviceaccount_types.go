@@ -66,6 +66,7 @@ func (in *ServiceAccount) Attributes(assumeBindings []*console.PolicyBindingAttr
 	attrs := console.ServiceAccountAttributes{
 		Name:           lo.ToPtr(in.ConsoleName()),
 		Email:          &in.Spec.Email,
+		AllowedScopes:  in.Spec.AllowedScopes,
 		AssumeBindings: assumeBindings,
 	}
 
@@ -106,6 +107,11 @@ type ServiceAccountSpec struct {
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=some@email.com
 	Email string `json:"email"`
+
+	// AllowedScopes define the Console API endpoints that can be granted to access
+	// tokens created for this service account. An empty list imposes no restriction.
+	// +kubebuilder:validation:Optional
+	AllowedScopes []string `json:"allowedScopes,omitempty"`
 
 	// Scopes define the access boundaries for this service account, controlling
 	// which Console APIs and resources it can interact with. Each scope can restrict

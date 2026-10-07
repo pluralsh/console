@@ -1,5 +1,7 @@
 defmodule ConsoleWeb.GitControllerTest do
   use ConsoleWeb.ConnCase, async: false
+  use Mimic
+  alias Console.Deployments.Git.Discovery
 
   describe "agent_chart/2" do
     test "it can download the current valid agent chart", %{conn: conn} do
@@ -10,6 +12,28 @@ defmodule ConsoleWeb.GitControllerTest do
   end
 
   describe "#tarball/2" do
+    test "it serves the embedded chart for the current deploy operator", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        name: "deploy-operator",
+        repository: git,
+        git: %{ref: Console.Deployments.Settings.agent_ref(), folder: "charts/deployment-operator"}
+      )
+      chart = Console.Deployments.Settings.agent_service_chart()
+      digest = Console.sha_file(chart)
+
+      conn =
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/v1/git/tarballs", %{id: svc.id})
+
+      body = response(conn, 200)
+      assert body == File.read!(chart)
+      assert {:ok, files} = :erl_tar.extract({:binary, body}, [:compressed, :memory])
+      assert List.keymember?(files, ~c"Chart.yaml", 0)
+      assert get_resp_header(conn, "x-plrl-digest") == [digest]
+    end
+
     test "it will download git content for valid deploy tokens", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
@@ -80,6 +104,24 @@ defmodule ConsoleWeb.GitControllerTest do
       assert error.message == "could not resolve ref doesnt-exist"
     end
 
+    test "if the agent is bootstrapping it persists a warning", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      %{id: id} = svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      expect(Discovery, :digest, fn _, _ -> {:error, :agent_bootstrapping} end)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/v1/git/tarballs", %{id: id})
+      |> response(425)
+
+      %{errors: [error]} = svc = refetch(svc) |> Console.Repo.preload([:errors])
+      assert svc.status == :stale
+      assert error.source == "git"
+      assert error.message == "Git or Helm agent is bootstrapping"
+      assert error.warning
+    end
+
     test "if fetching and dependencies are not satisfied, it will 402 and persist an error", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
@@ -112,6 +154,23 @@ defmodule ConsoleWeb.GitControllerTest do
   end
 
   describe "#digest/2" do
+    test "it returns the embedded chart digest for the current deploy operator", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service,
+        name: "deploy-operator",
+        repository: git,
+        git: %{ref: Console.Deployments.Settings.agent_ref(), folder: "charts/deployment-operator"}
+      )
+
+      response =
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/ext/v1/digests", %{id: svc.id})
+        |> response(200)
+
+      assert response == Console.sha_file(Console.Deployments.Settings.agent_service_chart())
+    end
+
     test "it will return digests for valid deploy tokens", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
@@ -134,6 +193,24 @@ defmodule ConsoleWeb.GitControllerTest do
       %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
       assert error.source == "git"
       assert error.message == "could not resolve ref doesnt-exist"
+    end
+
+    test "if the agent is bootstrapping it persists a warning", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      %{id: id} = svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      expect(Discovery, :digest, fn _, _ -> {:error, :agent_bootstrapping} end)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/ext/v1/digests", %{id: id})
+      |> response(425)
+
+      %{errors: [error]} = svc = refetch(svc) |> Console.Repo.preload([:errors])
+      assert svc.status == :stale
+      assert error.source == "git"
+      assert error.message == "Git or Helm agent is bootstrapping"
+      assert error.warning
     end
 
     @tag :skip
@@ -201,14 +278,10 @@ defmodule ConsoleWeb.GitControllerTest do
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
       other_cluster = insert(:cluster)
 
-      build_conn()
-      |> Map.put(:remote_ip, {127, 0, 0, 42})
-      |> add_auth_headers(other_cluster)
-      |> get("/v1/digests", %{id: svc.id})
-      |> response(403)
+      assert {:allow, 1} = Hammer.check_rate(bucket, :timer.seconds(1), 1)
 
       build_conn()
-      |> Map.put(:remote_ip, {127, 0, 0, 43})
+      |> Map.put(:remote_ip, {127, 0, 0, 42})
       |> add_auth_headers(other_cluster)
       |> get("/v1/git/tarballs", %{id: svc.id})
       |> response(429)

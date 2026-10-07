@@ -61,25 +61,23 @@ const ReactFlowWrapperSC = styled.div<{
   }),
 }))
 
-const ReactFlowAreaSC = styled.div<{ $fullscreen?: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    backgroundColor:
-      theme.mode === 'dark'
-        ? theme.colors.grey[950]
-        : theme.colors['fill-zero'],
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-    overflow: 'hidden',
+const ReactFlowAreaSC = styled.div<{
+  $borderless?: boolean
+  $fullscreen?: boolean
+}>(({ theme, $borderless, $fullscreen }) => ({
+  backgroundColor:
+    theme.mode === 'dark' ? theme.colors.grey[950] : theme.colors['fill-zero'],
+  width: '100%',
+  height: '100%',
+  position: 'relative',
+  overflow: 'hidden',
 
-    ...($fullscreen
-      ? {}
-      : {
-          border: theme.borders.default,
-          borderRadius: theme.borderRadiuses.large,
-        }),
-  })
-)
+  ...(!$fullscreen &&
+    !$borderless && {
+      border: theme.borders.default,
+      borderRadius: theme.borderRadiuses.large,
+    }),
+}))
 
 const ReactFlowActionWrapperSC = styled.div(({ theme }) => ({
   position: 'absolute',
@@ -95,6 +93,8 @@ export function ReactFlowGraph({
   elkOptions,
   resetView,
   allowFullscreen = false,
+  borderless = false,
+  showActions = true,
   showLayoutingIndicator = true,
   additionalOverlays,
   edgesSelectable = false,
@@ -105,6 +105,8 @@ export function ReactFlowGraph({
   elkOptions: LayoutOptions // this needs to be memoized before being passed in, otherwise will cause infinite render loop
   resetView?: () => void
   allowFullscreen?: boolean
+  borderless?: boolean
+  showActions?: boolean
   showLayoutingIndicator?: boolean
   additionalOverlays?: ReactNode
   edgesSelectable?: boolean
@@ -153,7 +155,10 @@ export function ReactFlowGraph({
       disabled={!fullscreen} // controls focus lock
       $fullscreen={fullscreen}
     >
-      <ReactFlowAreaSC $fullscreen={fullscreen}>
+      <ReactFlowAreaSC
+        $borderless={borderless}
+        $fullscreen={fullscreen}
+      >
         {showLayoutingIndicator && isLayouting && (
           <RectangleSkeleton
             $height="100%"
@@ -188,28 +193,30 @@ export function ReactFlowGraph({
             />
             <MarkerDefs />
           </ReactFlow>
-          <ReactFlowActionWrapperSC>
-            {allowFullscreen && (
+          {showActions && (
+            <ReactFlowActionWrapperSC>
+              {allowFullscreen && (
+                <IconFrame
+                  clickable
+                  type="floating"
+                  icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
+                  tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                  onClick={toggleFullscreen}
+                >
+                  Fullscreen
+                </IconFrame>
+              )}
               <IconFrame
                 clickable
                 type="floating"
-                icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
-                tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                onClick={toggleFullscreen}
+                icon={<ReloadIcon />}
+                tooltip="Reset view"
+                onClick={resetView || defaultResetView}
               >
-                Fullscreen
+                Reset view
               </IconFrame>
-            )}
-            <IconFrame
-              clickable
-              type="floating"
-              icon={<ReloadIcon />}
-              tooltip="Reset view"
-              onClick={resetView || defaultResetView}
-            >
-              Reset view
-            </IconFrame>
-          </ReactFlowActionWrapperSC>
+            </ReactFlowActionWrapperSC>
+          )}
           {additionalOverlays}
         </ReactFlowWrapperSC>
       </ReactFlowAreaSC>

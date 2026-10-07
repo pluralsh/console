@@ -9,8 +9,7 @@ import {
   useDeploymentSettingsSuspenseQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
-import { produce } from 'immer'
-import merge from 'lodash/merge'
+import mergeWith from 'lodash/mergeWith'
 import pick from 'lodash/pick'
 import { FormEvent, useMemo, useReducer, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -26,16 +25,15 @@ import {
 } from './AISettingsProviders.tsx'
 import { providerSettingsKey } from './aiModelRoutingUtils'
 
-const updateSettings = produce(
-  (
-    original: Omit<AiSettingsAttributes, 'enabled' | 'provider'>,
-    update: PartialDeep<Omit<AiSettingsAttributes, 'enabled' | 'provider'>>
-  ) => {
-    merge(original, update)
+type ProviderSettings = Omit<AiSettingsAttributes, 'enabled' | 'provider'>
 
-    return original
-  }
-)
+export const updateSettings = (
+  original: ProviderSettings,
+  update: PartialDeep<ProviderSettings>
+): ProviderSettings =>
+  mergeWith({}, original, update, (_currentValue, updatedValue) =>
+    Array.isArray(updatedValue) ? [...updatedValue] : undefined
+  )
 
 export function AISettingsProvider() {
   const theme = useTheme()
@@ -79,7 +77,13 @@ export function AISettingsProvider() {
     [enabled, connectingProvider, providerSettings]
   )
 
-  const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
+  const showMutationError = (error: Error) =>
+    popToast({
+      content: error.message || 'Failed to update AI provider settings',
+      severity: 'danger',
+    })
+
+  const [mutation, { loading }] = useUpdateDeploymentSettingsMutation({
     onCompleted: (data) => {
       popToast({ content: 'Changes saved', severity: 'success' })
       setEditModalOpen(false)
@@ -91,6 +95,7 @@ export function AISettingsProvider() {
         initialSettingsAttributes(data?.updateDeploymentSettings?.ai)
       )
     },
+    onError: showMutationError,
   })
 
   const saveSettings = (
@@ -122,7 +127,10 @@ export function AISettingsProvider() {
     setEnabled(checked)
     mutation({
       variables: { attributes: { ai: { enabled: checked } } },
-      onError: () => setEnabled(previous),
+      onError: (error) => {
+        setEnabled(previous)
+        showMutationError(error)
+      },
     })
   }
 
@@ -161,7 +169,6 @@ export function AISettingsProvider() {
     modelDefaultsByProvider,
     loading,
     saveDisabled: !ai?.enabled && !enabled,
-    error,
     deploymentSettingsError,
   }
 

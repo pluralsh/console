@@ -1,0 +1,1 @@
+[View agent run](<%= Console.url("/ai/agent-runs/#{@run.id}") %>)

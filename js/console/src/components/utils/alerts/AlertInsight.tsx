@@ -109,7 +109,7 @@ export function AlertInsight({
       <Flex
         gap="small"
         align="center"
-        whiteSpace="nowrap"
+        css={{ whiteSpace: 'nowrap' }}
       >
         {type === 'service' ? (
           alertSummary

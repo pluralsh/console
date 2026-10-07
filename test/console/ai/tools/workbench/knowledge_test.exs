@@ -89,6 +89,7 @@ defmodule Console.AI.Tools.Workbench.KnowledgeTest do
       names = SubagentBase.skill_knowledge_tools(job, %{})
               |> Enum.map(&Tool.name/1)
 
+      assert "workbench_context" in names
       assert "workbench_skills" in names
       assert "workbench_skill" in names
       assert "workbench_list_knowledge" in names

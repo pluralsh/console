@@ -4,7 +4,7 @@ import {
   Flex,
   FormField,
   IconFrame,
-  Input2,
+  Input,
   KeyIcon,
   Modal,
   Switch,
@@ -188,7 +188,7 @@ function CreateServiceAccountTokenForm({
               label="Expiry"
               hint="TTL of the access token, e.g. 1h, 1d, 1w. Leave blank for no expiry."
             >
-              <Input2
+              <Input
                 value={expiry}
                 onChange={(e) => setExpiry(e.target.value)}
                 placeholder="e.g. 1d"

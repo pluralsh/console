@@ -113,6 +113,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ClusterUpgradeStep,
     Workbench,
     WorkbenchJob,
+    WorkbenchJobAssociation,
     WorkbenchJobActivity,
     WorkbenchJobThought,
     WorkbenchJobResult,
@@ -130,7 +131,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ObservabilityWebhook,
     IssueWebhook,
     Issue,
-    Monitor
+    Monitor,
+    Dashboard
   }
 
   def query(Project, _), do: Project
@@ -234,6 +236,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(WorkbenchPolicy, _), do: WorkbenchPolicy
   def query(StackPolicy, _), do: StackPolicy
   def query(WorkbenchJob, _), do: WorkbenchJob
+  def query(WorkbenchJobAssociation, _), do: WorkbenchJobAssociation
   def query(WorkbenchJobActivity, _), do: WorkbenchJobActivity.ordered()
   def query(WorkbenchJobThought, _), do: WorkbenchJobThought.ordered()
   def query(WorkbenchJobResult, _), do: WorkbenchJobResult.ordered()
@@ -250,6 +253,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(IssueWebhook, _), do: IssueWebhook.ordered()
   def query(Issue, _), do: Issue.ordered()
   def query(Monitor, _), do: Monitor
+  def query(Dashboard, _), do: Dashboard.ordered()
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

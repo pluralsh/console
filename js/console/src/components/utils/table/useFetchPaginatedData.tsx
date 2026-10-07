@@ -1,5 +1,6 @@
 import {
   ErrorPolicy,
+  NetworkStatus,
   OperationVariables,
   QueryHookOptions,
   QueryResult,
@@ -53,6 +54,8 @@ export type FetchPaginatedDataResult<TQueryType> = {
   pageInfo: PageInfoFragment
   fetchNextPage: Dispatch<void>
   setVirtualSlice: (slice: VirtualSlice) => void
+  /** True while a fetchMore request is in flight; false during poll/refetch. */
+  fetchingMore: boolean
 }
 
 export function useFetchPaginatedData<
@@ -87,9 +90,11 @@ export function useFetchPaginatedData<
     loading,
     error,
     fetchMore,
+    networkStatus,
   } = queryResult
 
   const data = currentData || previousData
+  const fetchingMore = networkStatus === NetworkStatus.fetchMore
   const { pageInfo, reducedQueryResult } = useMemo(() => {
     const reducedData = reduceNestedData(options.keyPath, currentData)
 
@@ -138,5 +143,6 @@ export function useFetchPaginatedData<
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
+    fetchingMore,
   }
 }

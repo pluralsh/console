@@ -19,11 +19,16 @@ spec:
       targetPort: {{ .Values.kas.service.kubernetesApiPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-k8s-api
+      {{- if .Values.kas.tls.enabled }}
+      appProtocol: https
+      {{- end }}
     - port: {{ .Values.kas.service.agentProxyPort }}
       targetPort: {{ .Values.kas.service.agentProxyPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-agent-proxy
-      {{- if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
+      {{- if .Values.kas.tls.enabled }}
+      appProtocol: kubernetes.io/wss
+      {{- else if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
       appProtocol: {{ .Values.gatewayApi.appProtocol | quote }}
       {{- end }}
     - port: {{ .Values.kas.api.port }}

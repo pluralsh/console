@@ -85,7 +85,7 @@ function SshKeyUpload({
           multiline
           minRows={2}
           maxRows={4}
-          value={privateKey}
+          value={privateKey ?? ''}
           placeholder="Private key"
           onChange={(e) => {
             setPrivateKey(e.currentTarget.value)

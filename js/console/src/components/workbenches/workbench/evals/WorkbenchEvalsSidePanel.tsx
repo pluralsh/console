@@ -8,7 +8,7 @@ import {
   EvalGradeCategory,
 } from 'components/workbenches/common/evalGrade'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { VirtualList } from 'components/utils/VirtualList'
 import { formatDateTime } from 'utils/datetime'
 import { WorkbenchEvalResultRowFragment } from 'generated/graphql'
 import { groupBy } from 'lodash'
@@ -108,31 +108,18 @@ export function WorkbenchEvalsSidePanel({
         ))}
       </Flex>
       <Flex
-        direction="column"
-        gap="small"
         flex={1}
         minHeight={0}
-        overflowY="auto"
       >
-        {loading ? (
-          <Flex
-            direction="column"
-            gap="xsmall"
-            padding="small"
-          >
-            {Array.from({ length: 3 }).map((_, index) => (
-              <RectangleSkeleton
-                key={index}
-                $height={52}
-                $width="100%"
-              />
-            ))}
-          </Flex>
-        ) : filteredEvalRows.length ? (
-          <Flex direction="column">
-            {filteredEvalRows.map((row) => (
+        {loading || filteredEvalRows.length ? (
+          <VirtualList
+            data={filteredEvalRows}
+            loading={loading}
+            skeletonProps={{ gap: 'xsmall', height: 52, numRows: 3 }}
+            getRowId={(row) => row.id}
+            style={{ height: '100%' }}
+            renderer={({ rowData: row }) => (
               <EvalLinkSC
-                key={row.id}
                 $active={selectedEvalResultId === row.id}
                 onClick={() => onSelectEvalResultId(row.id)}
               >
@@ -160,8 +147,8 @@ export function WorkbenchEvalsSidePanel({
                   </span>
                 </Flex>
               </EvalLinkSC>
-            ))}
-          </Flex>
+            )}
+          />
         ) : (
           <Body2P
             $color="text-xlight"

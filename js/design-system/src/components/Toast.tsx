@@ -22,8 +22,8 @@ type ToastProps = {
   onCloseComplete?: () => void
   show?: boolean
   severity?: ToastSeverity
-  layerProps?: ComponentProps<'div'>
-} & BannerProps
+  layerProps?: Omit<ComponentProps<'div'>, 'ref'>
+} & Omit<BannerProps, 'position' | 'ref'>
 
 const defaults = {
   closeTimeout: 10000, // 10 seconds
@@ -34,7 +34,6 @@ const defaults = {
 }
 
 function Toast({
-  ref,
   position = defaults.position,
   closeTimeout: closeTimeoutProp = defaults.closeTimeout,
   onClose = defaults.onClose,
@@ -83,7 +82,6 @@ function Toast({
       onCloseComplete={() => {
         onCloseComplete()
       }}
-      ref={ref}
       {...layerProps}
     >
       <Banner

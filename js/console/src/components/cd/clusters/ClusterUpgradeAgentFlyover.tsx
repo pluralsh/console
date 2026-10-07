@@ -30,7 +30,6 @@ import {
   ClusterUpgradeStepFragment,
   PrStatus,
 } from 'generated/graphql'
-import { capitalize } from 'lodash'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
@@ -90,7 +89,7 @@ export function ClusterUpgradeAgentFlyover({
                 wrapInFrame={false}
                 type={clusterUpgrade.runtime?.type}
               />
-              {capitalize(clusterUpgrade.runtime?.name)}
+              {clusterUpgrade.runtime?.name}
             </Flex>
           }
           secondPartialType="body2"

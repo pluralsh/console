@@ -37,7 +37,6 @@ export const scrollBar = ({ fillLevel }: { fillLevel: FillLevel }) => {
     },
   }
 
-  // Type-cast allows to be used in Honorable, Emotion and
-  // styled-components components
+  // Type-cast allows it to be spread into styled-components style objects
   return style as StringObj
 }

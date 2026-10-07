@@ -109,7 +109,7 @@ export function Confirm({
                   submit()
                 }
               }}
-              placeholder={confirmationText}
+              placeholder={confirmationText ?? undefined}
               css={{
                 color: theme.colors.text,
                 borderColor: theme.colors['text-danger-light'],

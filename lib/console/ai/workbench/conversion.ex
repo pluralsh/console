@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Conversion do
     DatadogConnection,
     PrometheusConnection,
     LokiConnection,
+    VictoriaLogsConnection,
     SplunkConnection,
     TempoConnection,
     JaegerConnection,
@@ -56,11 +57,25 @@ defmodule Console.AI.Workbench.Conversion do
     }}
   end
 
+  def to_proto(%WorkbenchTool{tool: :victoria_logs, configuration: %{victoria_logs: %{} = victoria_logs}}) do
+    {:ok, %ToolConnection{
+      connection: {:victoria_logs, %VictoriaLogsConnection{
+        url: victoria_logs.url,
+        token: victoria_logs.token,
+        username: victoria_logs.username,
+        password: victoria_logs.password,
+        account_id: victoria_logs.account_id,
+        project_id: victoria_logs.project_id,
+      }}
+    }}
+  end
+
   def to_proto(%WorkbenchTool{tool: :splunk, configuration: %{splunk: %{} = splunk}}) do
     {:ok, %ToolConnection{
       connection: {:splunk, %SplunkConnection{
         url: splunk.url,
         token: splunk.token,
+        token_type: splunk_token_type(splunk.token_type),
         username: splunk.username,
         password: splunk.password,
       }}
@@ -150,4 +165,7 @@ defmodule Console.AI.Workbench.Conversion do
   end
 
   def to_proto(_), do: {:error, "No tool connection found"}
+
+  defp splunk_token_type(:splunk), do: :SPLUNK
+  defp splunk_token_type(_), do: :BEARER
 end

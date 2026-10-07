@@ -13,6 +13,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini/events"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -223,6 +224,9 @@ func (in *Gemini) args(prompt string, resume bool) []string {
 	}
 
 	args := []string{"--output-format", "stream-json"}
+	for _, dir := range in.includeDirectories() {
+		args = append(args, "--include-directories", dir)
+	}
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		args = append([]string{"--approval-mode", "yolo"}, args...)
 	}
@@ -230,6 +234,23 @@ func (in *Gemini) args(prompt string, resume bool) []string {
 		return append(args, "--resume", in.sessionID, "--prompt", in.Config.Run.Prompt)
 	}
 	return append(args, "--prompt", in.Config.Run.Prompt)
+}
+
+func (in *Gemini) includeDirectories() []string {
+	candidates := append([]string{in.Config.RepositoryDir}, prebake.ExtraReadDirs()...)
+	dirs := make([]string, 0, len(candidates))
+	seen := make(map[string]struct{}, len(candidates))
+	for _, dir := range candidates {
+		if dir == "" {
+			continue
+		}
+		if _, ok := seen[dir]; ok {
+			continue
+		}
+		seen[dir] = struct{}{}
+		dirs = append(dirs, dir)
+	}
+	return dirs
 }
 
 func (in *Gemini) Configure(_, _ string) error {
@@ -242,6 +263,7 @@ func (in *Gemini) Configure(_, _ string) error {
 
 	input := &ConfigTemplateInput{
 		RepositoryDir:     in.Config.RepositoryDir,
+		ExtraDirectories:  prebake.ExtraReadDirs(),
 		AgentRunID:        in.Config.Run.ID,
 		AgentRunMode:      in.Config.Run.Mode,
 		InactivityTimeout: int64(in.Config.Run.Runtime.Config.Gemini.InactivityTimeout.Seconds()),

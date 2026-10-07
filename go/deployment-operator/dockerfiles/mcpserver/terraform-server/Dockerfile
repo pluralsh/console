@@ -1,4 +1,4 @@
-FROM golang:1.26.6-alpine AS builder
+FROM golang:1.27.1-alpine AS builder
 
 WORKDIR /workspace
 
@@ -25,7 +25,8 @@ FROM alpine:3.22.1
 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+WORKDIR /app
+RUN adduser -D -u 65532 mcp && chown mcp:mcp /app
 
 # Copy the binary from the builder stage
 COPY --from=builder /workspace/deployment-operator/terraform-mcpserver .
@@ -35,3 +36,5 @@ COPY --from=builder /workspace/deployment-operator/terraform-mcpserver .
 
 # Run the MCP server
 CMD ["./terraform-mcpserver"]
+USER mcp
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/app/terraform-mcpserver", "--help"]

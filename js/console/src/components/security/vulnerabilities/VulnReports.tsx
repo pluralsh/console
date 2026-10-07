@@ -98,11 +98,11 @@ export function VulnerabilityReports() {
     <ContentWrapperSC>
       <FiltersWrapperSC>
         <Input
-          flex={1}
           startIcon={<SearchIcon color="icon-light" />}
           placeholder="Search vulnerability reports"
           value={reportsQ}
           onChange={(e) => setReportsQ(e.target.value)}
+          css={{ flex: 1 }}
         />
         <Flex>
           <FillLevelProvider value={1}>

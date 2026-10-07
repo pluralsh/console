@@ -22,6 +22,7 @@ import {
   MonitorAggregate,
   MonitorAttributes,
   MonitorFragment,
+  MonitorLogQueryAttributes,
   MonitorLogQueryFragment,
   MonitorOperator,
   MonitorType,
@@ -51,6 +52,14 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 export type ServiceMonitorStepKey =
   'description' | 'threshold-config' | 'log-query'
+
+export type ServiceMonitorAttributes = Omit<
+  MonitorAttributes,
+  'query' | 'type'
+> & {
+  query: { log: MonitorLogQueryAttributes }
+  type: MonitorType.Log
+}
 
 const STEPS: { key: ServiceMonitorStepKey; label: string }[] = [
   { key: 'log-query', label: 'Log query' },
@@ -114,10 +123,10 @@ function ServiceMonitorCreateOrEditInner({
     setCurStepState(newStep)
   }
   const { state, update, hasUpdates, reset } =
-    useUpdateState<MonitorAttributes>(
+    useUpdateState<ServiceMonitorAttributes>(
       sanitizeInitialFormState(monitor, serviceId)
     )
-  const allowSubmit = hasUpdates && isFormValid(state)
+  const allowSubmit = hasUpdates && isMonitorFormValid(state)
   const onSuccess = (shouldNav: boolean) => {
     if (shouldNav) navigate('..', { relative: 'path' })
     popToast({
@@ -156,7 +165,7 @@ function ServiceMonitorCreateOrEditInner({
             }
             endIcon={
               visitedSteps.has(key) ? (
-                getStepIcon(key, state, mode === 'edit')
+                getMonitorFormStepIcon(key, state, mode === 'edit')
               ) : mode === 'create' ? (
                 <CircleDashIcon size={12} />
               ) : null
@@ -253,15 +262,16 @@ const WrapperSC = styled.div(({ theme }) => ({
   overflow: 'auto',
 }))
 
-const sanitizeInitialFormState = (
+export const sanitizeInitialFormState = (
   monitor: Nullable<MonitorFragment>,
   serviceId: string
-): MonitorAttributes => {
+): ServiceMonitorAttributes => {
   const {
     name = '',
+    description,
+    alertTemplate,
     evaluationCron = '',
     severity = AlertSeverity.Undefined,
-    type = MonitorType.Log,
     query: initialQuery,
     threshold: initialThreshold,
   } = monitor ?? {}
@@ -282,10 +292,12 @@ const sanitizeInitialFormState = (
   }
   return {
     name,
+    description,
+    alertTemplate,
     evaluationCron,
     query,
     severity,
-    type,
+    type: MonitorType.Log,
     threshold,
     serviceId: monitor?.service?.id ?? serviceId,
     ...(monitor?.workbench?.id && { workbenchId: monitor.workbench.id }),
@@ -295,9 +307,9 @@ const sanitizeInitialFormState = (
 const facetArrToAttributeArr = (arr: MonitorLogQueryFragment['facets']) =>
   arr?.filter(isNonNullable)?.map(({ key, value }) => ({ key, value })) ?? []
 
-const getStepIcon = (
+export const getMonitorFormStepIcon = (
   key: ServiceMonitorStepKey,
-  state: MonitorAttributes,
+  state: ServiceMonitorAttributes,
   onlyShowFailures: boolean = false
 ) => {
   const { name, evaluationCron, threshold, query } = state
@@ -327,7 +339,7 @@ const getStepIcon = (
   }
 }
 
-const isFormValid = (state: MonitorAttributes) => {
+export const isMonitorFormValid = (state: ServiceMonitorAttributes) => {
   const { name, evaluationCron, threshold, query } = state
   const { value, aggregate } = threshold
   const { query: q, bucketSize, duration, operator } = query.log

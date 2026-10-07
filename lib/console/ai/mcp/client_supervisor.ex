@@ -2,6 +2,8 @@ defmodule Console.AI.MCP.ClientSupervisor do
   use Supervisor
 
   alias Console.Schema.{ChatThread, McpServer, User, WorkbenchJob, WorkbenchTool}
+  alias Console.Schema.DeploymentSettings.OauthToken
+  alias Console.AI.Provider.TokenExchange
   alias Console.AI.MCP.Agent
   alias Console.Jwt.MCP
 
@@ -62,6 +64,19 @@ defmodule Console.AI.MCP.ClientSupervisor do
 
   def client_name(%WorkbenchTool{id: tool_id}, %WorkbenchJob{id: job_id}),
     do: "Plural-#{tool_id}-#{job_id}"
+
+  defp auth_headers(
+         _,
+         %McpServer{
+           authentication: %{oauth: %OauthToken{enabled: enabled} = oauth}
+         }
+       )
+       when enabled != false do
+    case TokenExchange.authorization_header(oauth) do
+      {:ok, {name, value}} -> %{name => value}
+      {:error, error} -> raise "MCP OAuth token exchange failed: #{error}"
+    end
+  end
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do
     {:ok, jwt, _} = MCP.mint(user)

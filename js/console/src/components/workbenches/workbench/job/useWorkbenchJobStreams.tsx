@@ -1,4 +1,4 @@
-import { ApolloCache, ApolloClient, useApolloClient } from '@apollo/client'
+import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
   Delta,
   useWorkbenchCanvasStreamSubscription,
@@ -17,37 +17,37 @@ import {
   WorkbenchJobProgressFragment,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
-import { Dispatch, SetStateAction, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   appendConnectionToEnd,
-  mapExistingNodes,
   updateCache,
   updateFragment,
 } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import {
-  defaultClosedIds,
-  isActivityTerminal,
-} from './workbenchJobActivityCollapse'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { produce } from 'immer'
 
 // keyed by activity id, 'none' value puts it at the top level of the job
 type WorkbenchJobTextStreamMap = Record<string, string>
 
+// keyed by activity id
+type WorkbenchJobLatestThoughtMap = Record<string, WorkbenchJobThoughtFragment>
+
 export type WorkbenchJobLevelThinkingItem = WorkbenchJobProgressFragment & {
   localKey: number
 }
 
-// only returns a map of the ephemeral text streams, others subs are added to Apollo cache
+// only returns maps of the ephemeral streams, others subs are added to Apollo cache
 export function useWorkbenchJobStreams(
   jobId: Nullable<string>,
-  setClosedIds: Dispatch<SetStateAction<Set<string> | null>>
+  activityQueryLoaded: boolean
 ) {
   const client = useApolloClient()
   const [textStreamMap, setTextStreamMap] = useState<WorkbenchJobTextStreamMap>(
     {}
   )
+  const [latestThoughtMap, setLatestThoughtMap] =
+    useState<WorkbenchJobLatestThoughtMap>({})
   const [jobLevelThinking, setJobLevelThinking] = useState<
     WorkbenchJobLevelThinkingItem[]
   >([])
@@ -96,30 +96,20 @@ export function useWorkbenchJobStreams(
     ignoreResults: true,
     onData: ({ data: { data } }) => {
       const thought = data?.workbenchJobThoughtDelta?.payload
-      if (!thought?.activity?.id) return
+      const activityId = thought?.activity?.id
+      if (!thought || !activityId) return
       appendThoughtToActivityCache(client.cache, thought)
+      setLatestThoughtMap((prev) => ({ ...prev, [activityId]: thought }))
     },
   })
   useWorkbenchJobActivityDeltaSubscription({
     variables: { jobId: jobId ?? '' },
-    skip: !jobId,
+    skip: !jobId || !activityQueryLoaded,
     ignoreResults: true,
     onData: ({ data: { data } }) => {
-      if (data?.workbenchJobActivityDelta?.delta === Delta.Create)
-        setJobLevelThinking([])
+      const activityDelta = data?.workbenchJobActivityDelta
 
-      const payload = data?.workbenchJobActivityDelta?.payload
-      if (
-        payload?.id &&
-        (isActivityTerminal(payload?.status) || !!payload.result?.output)
-      )
-        setClosedIds((prev) => {
-          const next = new Set(
-            prev ?? readDefaultClosedIdsFromCache(client, jobId ?? '')
-          )
-          next.add(payload.id)
-          return next
-        })
+      if (activityDelta?.delta === Delta.Create) setJobLevelThinking([])
 
       appendActivityToCache(
         client.cache,
@@ -139,23 +129,7 @@ export function useWorkbenchJobStreams(
     },
   })
 
-  return { textStreamMap, jobLevelThinking }
-}
-
-function readDefaultClosedIdsFromCache(
-  client: ApolloClient<object>,
-  jobId: string
-): Set<string> {
-  if (!jobId) return new Set()
-  try {
-    const data = client.readQuery<WorkbenchJobActivitiesQuery>({
-      query: WorkbenchJobActivitiesDocument,
-      variables: { id: jobId },
-    })
-    return defaultClosedIds(mapExistingNodes(data?.workbenchJob?.activities))
-  } catch {
-    return new Set()
-  }
+  return { textStreamMap, latestThoughtMap, jobLevelThinking }
 }
 
 export const appendActivityToCache = (

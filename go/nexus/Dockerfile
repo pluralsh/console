@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.26.6-alpine AS builder
+FROM golang:1.27.1-alpine AS builder
 
 WORKDIR /build
 
@@ -65,3 +65,4 @@ USER nonroot:nonroot
 ENTRYPOINT ["/app/nexus"]
 CMD ["--config", "/app/config/config.yaml"]
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/app/nexus", "--help"]

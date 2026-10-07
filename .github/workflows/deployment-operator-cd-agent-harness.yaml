@@ -25,16 +25,27 @@ env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
   REGISTRY_IMAGE: pluralsh/agent-harness-base
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   output-versions:
+    needs: [vouch]
     name: Output versions
     runs-on: ubuntu-latest
     env:
       NODE_VERSION: 24.11.1
-      CLAUDE_VERSION: 2.1.72
+      CLAUDE_VERSION: 2.1.236
       GEMINI_VERSION: 0.44.1
-      OPENCODE_VERSION: 1.17.3
-      CODEX_VERSION: 0.104.0
+      OPENCODE_VERSION: 1.18.23
+      CODEX_VERSION: 0.153.4
       PI_VERSION: 0.84.1
     outputs:
       node: ${{ env.NODE_VERSION }}
@@ -53,6 +64,7 @@ jobs:
           echo "PI_VERSION=$PI_VERSION"
 
   build-base-image:
+    needs: [vouch]
     name: Build base image
     permissions:
       contents: 'read'
@@ -69,7 +81,7 @@ jobs:
     runs-on: ${{ matrix.platforms.runner }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Prepare
@@ -78,27 +90,25 @@ jobs:
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY_IMAGE }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/agent-harness/base.Dockerfile"
@@ -106,8 +116,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=agent-harness-base-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=agent-harness-base-${{ env.PLATFORM_PAIR }}
           build-args: |
             VERSION=${{ steps.meta.outputs.version }}
       - name: Export digest
@@ -135,27 +145,27 @@ jobs:
       version: ${{ steps.meta.outputs.version }}
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-*
           merge-multiple: true
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ghcr.io/pluralsh/agent-harness-base
@@ -179,13 +189,13 @@ jobs:
       matrix:
         agents:
           - name: claude
-            version: 2.1.72
+            version: 2.1.236
           - name: gemini
             version: 0.44.1
           - name: opencode
-            version: 1.17.3
+            version: 1.18.23
           - name: codex
-            version: 0.104.0
+            version: 0.153.4
           - name: pi
             version: 0.84.1
     permissions:
@@ -195,12 +205,12 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           # list of Docker images to use as base name for tags
           images: |
@@ -212,22 +222,22 @@ jobs:
             type=sha,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }},priority=800
             type=ref,event=pr,suffix=-${{ matrix.agents.name }}-${{ matrix.agents.version }},priority=600
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/agent-harness/${{ matrix.agents.name }}.Dockerfile"
@@ -235,8 +245,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=agent-harness-${{ matrix.agents.name }}
+          cache-to: type=gha,mode=max,scope=agent-harness-${{ matrix.agents.name }}
           build-args: |
             NODE_VERSION=${{ needs.output-versions.outputs.node }}
             AGENT_VERSION=${{ matrix.agents.version }}

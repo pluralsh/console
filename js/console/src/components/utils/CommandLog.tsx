@@ -44,7 +44,7 @@ function CommandLogLine({ line, number, follow }) {
 }
 
 export default function CommandLog({ text, follow }) {
-  const { spacing } = useTheme()
+  const { spacing, partials } = useTheme()
   if (!text) return null
 
   const lines = text.match(/[^\r\n]+/g)
@@ -52,7 +52,7 @@ export default function CommandLog({ text, follow }) {
   return (
     <Flex
       direction="column"
-      fontFamily="Monument Mono"
+      css={partials.text.mono}
       paddingTop={spacing.small}
       paddingBottom={spacing.small}
       overflowY="auto"

@@ -3,6 +3,7 @@ defmodule Console.Deployments.Observability do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.Deployments.Observability.Metrics
+  alias Console.AI.Workbench.Toolchain
   alias Console.Deployments.Observability.Monitor, as: MonitorImpl
   alias Prometheus.Client, as: PrometheusClient
   alias Console.Deployments.Settings
@@ -14,6 +15,8 @@ defmodule Console.Deployments.Observability do
     Project,
     Service,
     Monitor,
+    Dashboard,
+    Workbench,
     AlertResolution,
     DeploymentSettings,
     ObservabilityProvider,
@@ -30,10 +33,11 @@ defmodule Console.Deployments.Observability do
   require Logger
 
   @type error :: Console.error
-  @type provider_resp :: {:ok, ObservabilityProvider.t} | error
-  @type webhook_resp  :: {:ok, ObservabilityWebhook.t} | error
-  @type monitor_resp  :: {:ok, Monitor.t} | error
-  @type alert_resp    :: {:ok, Alert.t} | error
+  @type provider_resp  :: {:ok, ObservabilityProvider.t} | error
+  @type webhook_resp   :: {:ok, ObservabilityWebhook.t} | error
+  @type monitor_resp   :: {:ok, Monitor.t} | error
+  @type dashboard_resp :: {:ok, Dashboard.t} | error
+  @type alert_resp     :: {:ok, Alert.t} | error
 
   @spec get_provider(binary) :: ObservabilityProvider.t | nil
   def get_provider(id), do: Repo.get(ObservabilityProvider, id)
@@ -66,6 +70,87 @@ defmodule Console.Deployments.Observability do
   def get_monitor!(id), do: Repo.get!(Monitor, id)
   def get_monitor(id), do: Repo.get(Monitor, id)
 
+  def get_dashboard!(id), do: Repo.get!(Dashboard, id)
+  def get_dashboard(id), do: Repo.get(Dashboard, id)
+
+  @spec create_dashboard(map, User.t()) :: dashboard_resp
+  def create_dashboard(attrs, %User{} = user) do
+    changeset = Dashboard.changeset(%Dashboard{}, attrs)
+
+    with {:ok, changeset} <- put_dashboard_tool_ids(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write) do
+      Repo.insert(changeset)
+      |> notify(:create)
+    end
+  end
+
+  @spec update_dashboard(map, binary, User.t()) :: dashboard_resp
+  def update_dashboard(attrs, id, %User{} = user) do
+    changeset = Dashboard.changeset(get_dashboard!(id), Map.drop(attrs, [:workbench_id, "workbench_id"]))
+
+    with {:ok, changeset} <- put_dashboard_tool_ids(changeset, user),
+         {:ok, changeset} <- allow(changeset, user, :write) do
+      Repo.update(changeset)
+      |> notify(:update)
+    end
+  end
+
+  defp put_dashboard_tool_ids(%Ecto.Changeset{valid?: true} = changeset, %User{} = user) do
+    dashboard = Ecto.Changeset.apply_changes(changeset)
+
+    case Repo.preload(dashboard, :workbench) do
+      %Dashboard{workbench: %Workbench{} = workbench} = dashboard ->
+        with {:ok, graphs} <- resolve_graph_tool_ids(dashboard.graphs, workbench, user),
+             :ok <- Toolchain.validate_all(workbench, input_tool_queries(dashboard.inputs), user) do
+          {:ok, Ecto.Changeset.put_embed(changeset, :graphs, graphs)}
+        end
+
+      _ -> {:error, "dashboard workbench not found"}
+    end
+  end
+
+  defp put_dashboard_tool_ids(changeset, _), do: {:ok, changeset}
+
+  defp resolve_graph_tool_ids(graphs, %Workbench{} = workbench, %User{} = user) do
+    Enum.reduce_while(graphs, {:ok, []}, fn
+      %{datasource: %{type: type, tool: tool, input: input}} = graph, {:ok, graphs}
+      when type in [:metrics, :logs, :traces, :labels] ->
+        case Toolchain.resolve_workbench_tool(workbench, type, tool, input || %{}, user) do
+          {:ok, resolved} ->
+            tool_id = if resolved, do: resolved.id
+            {:cont, {:ok, [%{graph | tool_id: tool_id} | graphs]}}
+
+          {:error, _} = error ->
+            {:halt, error}
+        end
+
+      graph, {:ok, graphs} ->
+        {:cont, {:ok, [%{graph | tool_id: nil} | graphs]}}
+    end)
+    |> case do
+      {:ok, graphs} -> {:ok, Enum.reverse(graphs)}
+      error -> error
+    end
+  end
+
+  defp input_tool_queries(inputs) do
+    Enum.flat_map(inputs, fn
+      %{datasource: %{type: type, tool: tool, input: input}}
+      when type in [:metrics, :logs, :traces, :labels] ->
+        [{type, tool, input || %{}}]
+
+      _ -> []
+    end)
+  end
+
+  @spec delete_dashboard(binary, User.t()) :: dashboard_resp
+  def delete_dashboard(id, %User{} = user) do
+    get_dashboard!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete)
+  end
+
   @spec get_alert!(binary) :: Alert.t | nil
   def get_alert!(id), do: Repo.get!(Alert, id)
 
@@ -73,11 +158,16 @@ defmodule Console.Deployments.Observability do
   Create a new monitor, cannot be done if the user doesn't have read access to the service it belongs to
   """
   @spec create_monitor(map, User.t) :: monitor_resp
-  def create_monitor(attrs, %User{} = user) do
+  def create_monitor(attrs, %User{id: user_id} = user) do
     %Monitor{}
-    |> Monitor.changeset(Map.put(attrs, :last_run_at, Timex.now()))
+    |> Monitor.changeset(
+      attrs
+      |> Map.put(:last_run_at, Timex.now())
+      |> Map.put(:user_id, user_id)
+    )
     |> allow(user, :read)
     |> when_ok(:insert)
+    |> notify(:create)
   end
 
   @doc """
@@ -89,6 +179,7 @@ defmodule Console.Deployments.Observability do
     |> Monitor.changeset(attrs)
     |> allow(user, :read)
     |> when_ok(:update)
+    |> notify(:update)
   end
 
   @doc """
@@ -99,17 +190,19 @@ defmodule Console.Deployments.Observability do
     Repo.get!(Monitor, id)
     |> allow(user, :read)
     |> when_ok(:delete)
+    |> notify(:delete)
   end
 
   @spec mark_run(Monitor.t) :: monitor_resp
   def mark_run(%Monitor{} = monitor) do
     Monitor.changeset(monitor, %{last_run_at: Timex.now()})
     |> Repo.update()
+    |> notify(:update)
   end
 
   @spec run_monitor(Monitor.t) :: alert_resp | :ignore
   def run_monitor(%Monitor{} = monitor) do
-    monitor = Repo.preload(monitor, [:alert, service: :cluster])
+    monitor = Repo.preload(monitor, [:alert, :workbench, :user, service: :cluster])
     with {:ok, result, results} <- MonitorImpl.query(monitor),
          {:ok, attrs} <- monitor_attrs(monitor, result, results) do
       start_transaction()
@@ -117,6 +210,7 @@ defmodule Console.Deployments.Observability do
       |> add_operation(:monitor, fn _ ->
         Monitor.changeset(monitor, %{state: result})
         |> Repo.update()
+        |> notify(:update)
       end)
       |> execute(extract: :update)
       |> case do
@@ -125,6 +219,33 @@ defmodule Console.Deployments.Observability do
       end
     end
   end
+
+  @doc """
+  Live threshold preview for a monitor: runs the configured query and returns
+  timeseries points plus the threshold for charting in the UI.
+  """
+  @spec preview_monitor(Monitor.t) :: {:ok, map} | Console.error
+  def preview_monitor(%Monitor{} = monitor) do
+    monitor = Repo.preload(monitor, [:workbench, :user, service: :cluster])
+    with {:ok, _state, results} <- MonitorImpl.query(monitor) do
+      {:ok, %{
+        threshold: monitor.threshold && monitor.threshold.value,
+        metrics: Enum.flat_map(results, &preview_metric/1)
+      }}
+    end
+  end
+
+  defp preview_metric(%{timestamp: ts, count: count}),
+    do: [%{timestamp: preview_unix(ts), value: to_string(count)}]
+  defp preview_metric(%{timestamp: ts, value: value}),
+    do: [%{timestamp: preview_unix(ts), value: to_string(value)}]
+  defp preview_metric(_), do: []
+
+  defp preview_unix(%DateTime{} = dt), do: DateTime.to_unix(dt)
+  defp preview_unix(%NaiveDateTime{} = ndt),
+    do: DateTime.from_naive!(ndt, "Etc/UTC") |> DateTime.to_unix()
+  defp preview_unix(n) when is_number(n), do: n
+  defp preview_unix(_), do: 0
 
   defp monitor_alert(%Monitor{alert: %Alert{} = alert}, attrs, :resolved) do
     Alert.changeset(alert, attrs)
@@ -292,10 +413,29 @@ defmodule Console.Deployments.Observability do
   @doc """
   Queries opinionated metrics for a set of different, relevant scopes
   """
-  @spec query(Cluster.t | {Cluster.t, binary} | ServiceComponent.t, binary, binary, binary) :: {:ok, map} | error
+  @spec query(
+    Cluster.t | {Cluster.t, binary} | {:usage, Cluster.t, :cluster | :namespace | :node, [atom]} |
+      {:usage, Service.t, :service | :pod, [atom]} |
+      {:pod, Cluster.t, binary, binary} | Service.t | ServiceComponent.t,
+    binary, binary, binary
+  ) :: {:ok, map} | error
   def query(%Cluster{handle: cluster}, start, stop, step) do
     queries(:cluster)
     |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
+  end
+
+  def query({:usage, %Cluster{handle: cluster}, grouping, keys}, start, stop, step) do
+    queries(:cluster_usage, grouping)
+    |> Keyword.take(keys)
+    |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
+  end
+
+  def query({:usage, %Service{namespace: ns} = service, grouping, keys}, start, stop, step) do
+    %{cluster: %Cluster{handle: cluster}} = Repo.preload(service, [:cluster])
+
+    queries(:service_usage, grouping)
+    |> Keyword.take(keys)
+    |> bulk_range_query(%{cluster: cluster, namespace: ns, rate: rate_window(step)}, start, stop, step)
   end
 
   def query({%Cluster{handle: cluster}, node}, start, stop, step) do
@@ -308,6 +448,16 @@ defmodule Console.Deployments.Observability do
     bulk_range_query(
       queries(:service),
       [cluster: service.cluster.handle, namespace: ns, rate: rate_window(step)],
+      start,
+      stop,
+      step
+    )
+  end
+
+  def query({:pod, %Cluster{handle: cluster}, namespace, name}, start, stop, step) do
+    queries(:pod)
+    |> bulk_range_query(
+      [cluster: cluster, namespace: namespace, name: name, rate: rate_window(step)],
       start,
       stop,
       step
@@ -356,7 +506,7 @@ defmodule Console.Deployments.Observability do
             Logger.error "prometheus query #{query} failed: #{inspect(err)}"
             {name, []}
         end
-      end, max_concurrency: 5)
+      end, max_concurrency: 5, timeout: task_timeout(PrometheusClient.query_timeout()), on_timeout: :kill_task)
       |> Enum.filter(fn
         {:ok, _} -> true
         _ -> false
@@ -375,7 +525,7 @@ defmodule Console.Deployments.Observability do
             Logger.error "prometheus query #{query} failed: #{inspect(err)}"
             {name, []}
         end
-      end, max_concurrency: 5)
+      end, max_concurrency: 5, timeout: task_timeout(PrometheusClient.range_query_timeout()), on_timeout: :kill_task)
       |> Enum.filter(fn
         {:ok, _} -> true
         _ -> false
@@ -384,6 +534,11 @@ defmodule Console.Deployments.Observability do
       |> ok()
     end
   end
+
+  # leaves room for the client's 30s connect timeout on top of the receive timeout, so the
+  # http request normally fails first; a killed task drops just that metric rather than
+  # crashing the whole resolver
+  defp task_timeout(request_timeout), do: request_timeout + :timer.seconds(45)
 
   defp get_connection(scope) do
     with %DeploymentSettings{} = settings <- Settings.fetch(),
@@ -408,5 +563,17 @@ defmodule Console.Deployments.Observability do
     do: handle_notify(PubSub.ObservabilityWebhookDeleted, webhook)
   defp notify({:ok, %AlertResolution{} = res}, :create),
     do: handle_notify(PubSub.AlertResolutionCreated, res)
+  defp notify({:ok, %Dashboard{} = dashboard}, :create),
+    do: handle_notify(PubSub.DashboardCreated, dashboard)
+  defp notify({:ok, %Dashboard{} = dashboard}, :update),
+    do: handle_notify(PubSub.DashboardUpdated, dashboard)
+  defp notify({:ok, %Dashboard{} = dashboard}, :delete),
+    do: handle_notify(PubSub.DashboardDeleted, dashboard)
+  defp notify({:ok, %Monitor{} = monitor}, :create),
+    do: handle_notify(PubSub.MonitorCreated, monitor)
+  defp notify({:ok, %Monitor{} = monitor}, :update),
+    do: handle_notify(PubSub.MonitorUpdated, monitor)
+  defp notify({:ok, %Monitor{} = monitor}, :delete),
+    do: handle_notify(PubSub.MonitorDeleted, monitor)
   defp notify(pass, _), do: pass
 end

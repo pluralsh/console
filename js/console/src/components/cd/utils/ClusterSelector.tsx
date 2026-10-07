@@ -2,7 +2,7 @@ import {
   ClusterIcon,
   ComboBox,
   FillLevel,
-  Input2,
+  Input,
   ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -44,7 +44,7 @@ export default function ClusterSelector({
   showUpgrades?: boolean
   placeholder?: string
   deselectLabel?: string
-  inputProps?: ComponentPropsWithRef<typeof Input2>
+  inputProps?: ComponentPropsWithRef<typeof Input>
   fillLevel?: FillLevel
 } & Omit<ComponentPropsWithRef<typeof ComboBox>, 'children'>) {
   const theme = useTheme()

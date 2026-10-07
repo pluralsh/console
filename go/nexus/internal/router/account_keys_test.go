@@ -50,6 +50,102 @@ func TestHandleOpenAIKeys_noAPIKey(t *testing.T) {
 	require.Empty(t, keys[0].Value.Val)
 }
 
+func TestAccountProviderProxy(t *testing.T) {
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{
+			Enabled: true,
+			Openai: &pb.OpenAiConfig{
+				Proxy: &pb.HttpProxyConfig{Url: "http://proxy.example.com:8080"},
+			},
+		}},
+		tokenCache: tokenexchange.NewCache(),
+		logger:     zap.NewNop(),
+	}
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.OpenAI)
+	require.NoError(t, err)
+	require.NotNil(t, providerConfig.ProxyConfig)
+	require.Equal(t, schemas.HTTPProxy, providerConfig.ProxyConfig.Type)
+	require.Equal(t, "http://proxy.example.com:8080", providerConfig.ProxyConfig.URL.GetValue())
+}
+
+func TestAccountWiresProxyToEveryConfiguredBifrostProvider(t *testing.T) {
+	proxy := func() *pb.HttpProxyConfig {
+		return &pb.HttpProxyConfig{Url: "http://proxy.example.com:8080"}
+	}
+	tests := []struct {
+		name     string
+		provider schemas.ModelProvider
+		config   *pb.AiConfig
+	}{
+		{name: "openai", provider: schemas.OpenAI, config: &pb.AiConfig{Openai: &pb.OpenAiConfig{Proxy: proxy()}}},
+		{name: "openai compatible", provider: openAICompatibleProvider, config: &pb.AiConfig{OpenaiCompatible: &pb.OpenAiConfig{Proxy: proxy()}}},
+		{name: "xai", provider: schemas.XAI, config: &pb.AiConfig{Xai: &pb.OpenAiConfig{Proxy: proxy()}}},
+		{name: "anthropic", provider: schemas.Anthropic, config: &pb.AiConfig{Anthropic: &pb.AnthropicConfig{Proxy: proxy()}}},
+		{name: "vertex", provider: schemas.Vertex, config: &pb.AiConfig{VertexAi: &pb.VertexAiConfig{Proxy: proxy()}}},
+		{name: "bedrock", provider: schemas.Bedrock, config: &pb.AiConfig{Bedrock: &pb.BedrockConfig{Proxy: proxy()}}},
+		{name: "azure", provider: schemas.Azure, config: &pb.AiConfig{Azure: &pb.AzureOpenAiConfig{Proxy: proxy()}}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.config.Enabled = true
+			acct := &Account{
+				consoleClient: &mockConsoleClient{cfg: test.config},
+				tokenCache:    tokenexchange.NewCache(),
+				logger:        zap.NewNop(),
+			}
+
+			providerConfig, err := acct.GetConfigForProvider(test.provider)
+			require.NoError(t, err)
+			require.NotNil(t, providerConfig.ProxyConfig)
+			require.Equal(t, schemas.HTTPProxy, providerConfig.ProxyConfig.Type)
+			require.Equal(t, "http://proxy.example.com:8080", providerConfig.ProxyConfig.URL.GetValue())
+		})
+	}
+}
+
+func TestAccountProviderProxyHonorsNoProxy(t *testing.T) {
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{
+			Enabled: true,
+			Openai: &pb.OpenAiConfig{
+				BaseUrl: lo.ToPtr("https://models.internal/v1"),
+				Proxy: &pb.HttpProxyConfig{
+					Url:     "http://proxy.example.com:8080",
+					NoProxy: lo.ToPtr(".internal"),
+				},
+			},
+		}},
+		tokenCache: tokenexchange.NewCache(),
+		logger:     zap.NewNop(),
+	}
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.OpenAI)
+	require.NoError(t, err)
+	require.Nil(t, providerConfig.ProxyConfig)
+}
+
+func TestAccountProviderProxyCanBeDisabled(t *testing.T) {
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{
+			Enabled: true,
+			Openai: &pb.OpenAiConfig{
+				Proxy: &pb.HttpProxyConfig{
+					Url:     "http://proxy.example.com:8080",
+					Enabled: lo.ToPtr(false),
+				},
+			},
+		}},
+		tokenCache: tokenexchange.NewCache(),
+		logger:     zap.NewNop(),
+	}
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.OpenAI)
+	require.NoError(t, err)
+	require.Nil(t, providerConfig.ProxyConfig)
+}
+
 func TestHandleOpenAIKeys_tokenExchangeUsesCache(t *testing.T) {
 	var tokenCalls atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -118,6 +214,159 @@ func TestHandleOpenAIKeys_tokenExchangeEnabledIncomplete(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestAccountBedrockRuntimeEndpointIsDefault(t *testing.T) {
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId: lo.ToPtr("anthropic.claude-sonnet-4-6"),
+			Region:  lo.ToPtr("us-east-1"),
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providers, err := acct.GetConfiguredProviders()
+	require.NoError(t, err)
+	require.Contains(t, providers, schemas.Bedrock)
+	require.NotContains(t, providers, schemas.BedrockMantle)
+
+	provider, model, _, err := (&OpenAIRouter{consoleClient: acct.consoleClient}).resolveModel(
+		context.Background(),
+		"bedrock/anthropic.claude-sonnet-4-6",
+	)
+	require.NoError(t, err)
+	require.Equal(t, schemas.Bedrock, provider)
+	require.Equal(t, "anthropic.claude-sonnet-4-6", model)
+
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.NotNil(t, keys[0].BedrockKeyConfig)
+	require.Nil(t, keys[0].BedrockMantleKeyConfig)
+	require.Nil(t, keys[0].UseOpenAIEndpoints)
+	require.Empty(t, keys[0].BedrockKeyConfig.AccessKey.GetValue())
+	require.Empty(t, keys[0].BedrockKeyConfig.SecretKey.GetValue())
+}
+
+func TestAccountBedrockModelSettingsUseApplicationInferenceProfile(t *testing.T) {
+	modelID := "anthropic.claude-sonnet-4-6"
+	inferenceProfileARN := "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/abcdef123456"
+	inferenceProfilePrefix := "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile"
+	inferenceProfileID := "abcdef123456"
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId: lo.ToPtr(modelID),
+			Region:  lo.ToPtr("us-east-1"),
+			ModelSettings: []*pb.BedrockModelSettings{
+				{
+					ModelId:             modelID,
+					InferenceProfileArn: inferenceProfileARN,
+				},
+			},
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.Contains(t, keys[0].Models, modelID)
+
+	alias, ok := keys[0].Aliases[modelID]
+	require.True(t, ok)
+	require.Equal(t, inferenceProfileID, alias.ModelID)
+	require.NotNil(t, alias.ModelName)
+	require.Equal(t, modelID, *alias.ModelName)
+	require.NotNil(t, alias.BedrockAliasCfg)
+	require.NotNil(t, alias.InferenceProfileARN)
+	require.Equal(t, inferenceProfilePrefix, alias.InferenceProfileARN.GetValue())
+	require.Equal(t,
+		inferenceProfileARN,
+		alias.InferenceProfileARN.GetValue()+"/"+alias.ModelID,
+		"Bifrost should reconstruct the exact application inference profile ARN",
+	)
+}
+
+func TestSplitBedrockInferenceProfileARN(t *testing.T) {
+	t.Run("splits a full application inference profile ARN", func(t *testing.T) {
+		prefix, resourceID, ok := splitBedrockInferenceProfileARN(
+			"arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/abcdef123456",
+		)
+
+		require.True(t, ok)
+		require.Equal(t, "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile", prefix)
+		require.Equal(t, "abcdef123456", resourceID)
+	})
+
+	t.Run("rejects a prefix-only ARN", func(t *testing.T) {
+		prefix, resourceID, ok := splitBedrockInferenceProfileARN(
+			"arn:aws:bedrock:us-east-1:123456789012:application-inference-profile",
+		)
+
+		require.False(t, ok)
+		require.Empty(t, prefix)
+		require.Empty(t, resourceID)
+	})
+}
+
+func TestAccountBedrockMantleEndpointUsesMantleAndRuntimeEmbeddings(t *testing.T) {
+	endpoint := pb.BedrockEndpoint_MANTLE
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId:          lo.ToPtr("anthropic.claude-sonnet-4-6"),
+			ToolModelId:      lo.ToPtr("openai.gpt-5.4"),
+			EmbeddingModelId: lo.ToPtr("cohere.embed-english-v3"),
+			ProxyModels:      []string{"google.gemma-4-27b"},
+			AccessToken:      lo.ToPtr("bedrock-token"),
+			Region:           lo.ToPtr("us-west-2"),
+			Endpoint:         &endpoint,
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providers, err := acct.GetConfiguredProviders()
+	require.NoError(t, err)
+	require.ElementsMatch(t, []schemas.ModelProvider{schemas.BedrockMantle, schemas.Bedrock}, providers)
+
+	provider, model, _, err := (&OpenAIRouter{consoleClient: acct.consoleClient}).resolveModel(
+		context.Background(),
+		"bedrock/anthropic.claude-sonnet-4-6",
+	)
+	require.NoError(t, err)
+	require.Equal(t, schemas.BedrockMantle, provider)
+	require.Equal(t, "anthropic.claude-sonnet-4-6", model)
+
+	mantleKeys, err := acct.GetKeysForProvider(context.Background(), schemas.BedrockMantle)
+	require.NoError(t, err)
+	require.Len(t, mantleKeys, 1)
+	require.Nil(t, mantleKeys[0].BedrockKeyConfig)
+	require.NotNil(t, mantleKeys[0].BedrockMantleKeyConfig)
+	require.Equal(t, "bedrock-token", mantleKeys[0].Value.GetValue())
+	require.ElementsMatch(t,
+		[]string{"anthropic.claude-sonnet-4-6", "openai.gpt-5.4", "google.gemma-4-27b"},
+		mantleKeys[0].Models,
+	)
+
+	runtimeKeys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, runtimeKeys, 1)
+	require.NotNil(t, runtimeKeys[0].BedrockKeyConfig)
+	require.Equal(t, []string{"cohere.embed-english-v3"}, []string(runtimeKeys[0].Models))
+}
+
 func TestAccountOpenAICompatibleProvider(t *testing.T) {
 	chat := pb.OpenAiMethod_CHAT
 	cfg := &pb.AiConfig{
@@ -155,6 +404,7 @@ func TestAccountOpenAICompatibleProvider(t *testing.T) {
 	providerConfig, err := acct.GetConfigForProvider(openAICompatibleProvider)
 	require.NoError(t, err)
 	require.Equal(t, "https://litellm.example", providerConfig.NetworkConfig.BaseURL)
+	require.True(t, providerConfig.NetworkConfig.AllowPrivateNetwork)
 	require.NotNil(t, providerConfig.CustomProviderConfig)
 	require.Equal(t, schemas.OpenAI, providerConfig.CustomProviderConfig.BaseProviderType)
 	require.True(t, providerConfig.CustomProviderConfig.AllowedRequests.ChatCompletion)

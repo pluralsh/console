@@ -30,13 +30,14 @@ Enable only events Plural should process, usually:
 
 - Issues (opened/edited/closed/reopened)
 - Issue comments
+- Pull requests (opened/edited/closed/reopened)
 - Labels
 
 Avoid "Send me everything" in production.
 
 ## 4. Validate
 
-Use GitHub's ping delivery and create a test issue. Confirm in Plural that:
+Use GitHub's ping delivery and create a test issue or pull request. Confirm in Plural that:
 
 - the request is accepted
 - signature verification succeeds

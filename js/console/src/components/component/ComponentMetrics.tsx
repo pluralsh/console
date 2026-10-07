@@ -1,102 +1,157 @@
-import { Card, EmptyState } from '@pluralsh/design-system'
+import { EmptyState } from '@pluralsh/design-system'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import RangePicker from 'components/utils/RangePicker'
+import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
+import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
+import {
+  type TimeRangeState,
+  useRangeQueryData,
+  useTimeRange,
+} from 'components/utils/timerange/useTimeRange'
 
 import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
-import isEmpty from 'lodash/isEmpty'
 
-import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
 
 import { ComponentDetailsContext } from './ComponentDetails'
 import {
   PodResourceReservation,
   getPodResourceReservations,
 } from 'components/utils/metrics/podResourceReservations.ts'
-import { ResourceMetricsGraphs } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import {
+  ResourceMetricsGraphs,
+  hasResourceMetrics,
+} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
 import { ComponentDetailsWithPodsT } from './useFetchComponentDetails.tsx'
-
-type Duration = (typeof DURATIONS)[number]
 
 function Metric({
   serviceId,
   componentId,
   podReservations,
-  duration: { offset },
-  ...props
+  timeRange,
 }: {
   serviceId?: string
   componentId?: string
   podReservations?: PodResourceReservation[]
-  duration: Duration
-  maxHeight?: string
-  overflowY?: string
+  timeRange: TimeRangeState
 }) {
   const theme = useTheme()
-  const start = useMetricsQueryStart(offset)
-  const step = getMetricQueryStep(offset)
-  const { data, loading } = useServiceDeploymentComponentMetricsQuery({
+  const {
+    data: currentData,
+    previousData,
+    loading,
+  } = useServiceDeploymentComponentMetricsQuery({
     variables: {
       id: serviceId,
       componentId: componentId ?? '',
-      step,
-      start,
+      ...metricsQueryWindow(timeRange.timeWindow),
     },
     skip: !serviceId || !componentId,
-    pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
   })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
 
-  const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } =
-      data?.serviceDeployment?.componentMetrics || {}
+  const {
+    cpu,
+    mem,
+    podCpu,
+    podMem,
+    cpuRequests,
+    memRequests,
+    cpuLimits,
+    memLimits,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+  } = useMemo(() => {
+    const {
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    } = data?.serviceDeployment?.componentMetrics || {}
 
     return {
       cpu: (cpu || []).filter(isNonNullable),
       mem: (mem || []).filter(isNonNullable),
       podCpu: (podCpu || []).filter(isNonNullable),
       podMem: (podMem || []).filter(isNonNullable),
+      cpuRequests: (cpuRequests || []).filter(isNonNullable),
+      memRequests: (memRequests || []).filter(isNonNullable),
+      cpuLimits: (cpuLimits || []).filter(isNonNullable),
+      memLimits: (memLimits || []).filter(isNonNullable),
+      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
+      podMemRequests: (podMemRequests || []).filter(isNonNullable),
+      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
+      podMemLimits: (podMemLimits || []).filter(isNonNullable),
     }
   }, [data])
 
-  let content = <EmptyState message="No metrics available" />
-
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
-    content = (
-      <ResourceMetricsGraphs
-        cpu={cpu}
-        mem={mem}
-        podCpu={podCpu}
-        podMem={podMem}
-        podReservations={podReservations}
-      />
-    )
-  }
-
   if (loading && !data) return <LoadingIndicator />
 
+  if (
+    !hasResourceMetrics({
+      cpu,
+      mem,
+      podCpu,
+      podMem,
+      cpuRequests,
+      memRequests,
+      cpuLimits,
+      memLimits,
+      podCpuRequests,
+      podMemRequests,
+      podCpuLimits,
+      podMemLimits,
+    })
+  )
+    return (
+      <MetricsCard css={{ padding: theme.spacing.medium }}>
+        <EmptyState message="No metrics available" />
+      </MetricsCard>
+    )
+
   return (
-    <Card
-      css={{
-        padding: theme.spacing.medium,
-        overflow: 'auto',
-        gap: theme.spacing.small,
-      }}
-      {...props}
-    >
-      {content}
-    </Card>
+    <ResourceMetricsGraphs
+      cpu={cpu}
+      mem={mem}
+      podCpu={podCpu}
+      podMem={podMem}
+      cpuRequests={cpuRequests}
+      memRequests={memRequests}
+      cpuLimits={cpuLimits}
+      memLimits={memLimits}
+      podCpuRequests={podCpuRequests}
+      podMemRequests={podMemRequests}
+      podCpuLimits={podCpuLimits}
+      podMemLimits={podMemLimits}
+      podReservations={podReservations}
+      timeWindow={timeRange.timeWindow}
+      onRangeSelect={timeRange.selectWindow}
+    />
   )
 }
 
 export default function ComponentMetrics() {
   const theme = useTheme()
-  const [duration, setDuration] = useState<Duration>(DURATIONS[0])
+  const timeRange = useTimeRange()
   const { component, componentDetails, serviceId } =
     useOutletContext<ComponentDetailsContext>()
 
@@ -118,20 +173,15 @@ export default function ComponentMetrics() {
         overflow: 'hidden',
       }}
     >
-      <RangePicker
-        duration={duration}
-        setDuration={setDuration}
-        position="sticky"
-        top={0}
-      />
-      <Metric
-        serviceId={serviceId}
-        componentId={component?.id}
-        podReservations={podReservations}
-        duration={duration}
-        maxHeight="100%"
-        overflowY="auto"
-      />
+      <MetricsTimeRangeControl timeRange={timeRange} />
+      <MetricsScrollSC>
+        <Metric
+          serviceId={serviceId}
+          componentId={component?.id}
+          podReservations={podReservations}
+          timeRange={timeRange}
+        />
+      </MetricsScrollSC>
     </div>
   )
 }

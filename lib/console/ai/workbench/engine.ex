@@ -1,8 +1,6 @@
 defmodule Console.AI.Workbench.Engine do
   @moduledoc """
-  The overarching orchestrator to manage workbench execution.  The general architecture is as follows:
-
-  The engine first calls a plan subagent to compile a general plan of attack. From there it falls into an execution loop which:
+  The overarching orchestrator to manage workbench execution. It runs an execution loop which:
 
   1. Runs a small agentic process to fetch skill information or take notes, but ultimately delegates to a variety of subagents
   2. Each subagent does work independently and comes back with a result, these are marked as activities that can be presented in UI but also as
@@ -15,6 +13,7 @@ defmodule Console.AI.Workbench.Engine do
   import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
+  alias Console.AI.Provider.Base, as: ProviderBase
   alias Console.Deployments.Workbenches
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage, User}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
@@ -26,7 +25,8 @@ defmodule Console.AI.Workbench.Engine do
     Heartbeat,
     Canvas,
     Activity,
-    Tools
+    Tools,
+    Tracking
   }
   alias Console.AI.Tools.Workbench.{
     Codemode,
@@ -39,23 +39,22 @@ defmodule Console.AI.Workbench.Engine do
     FetchNotes,
     SkillBackfill,
     FunctionCall,
+    KubeDrain,
     KubeRequest,
     KubeShell,
     Infrastructure.KubeExec,
     Infrastructure.KubeUpdate,
     Infrastructure.KubeDelete
   }
+  alias Console.AI.Tools.Workbench.Infrastructure.KubeDrain, as: KubeDrainTool
   alias Console.AI.Tool.Approval, as: Approval
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
+  alias ReqLLM.Context
 
   require EEx
   require Logger
 
-  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200, verifiable: false]
-
-  defmodule Acc do
-    defstruct [messages: [], activities: []]
-  end
+  defstruct [:job, :user, :environment, :context, iterations: 0, max: 200, verifiable: false]
 
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job = preload_job(job)
@@ -86,40 +85,53 @@ defmodule Console.AI.Workbench.Engine do
       pause: :timer.seconds(1),
       backoff: 2,
       max_pause: :timer.seconds(10),
-      retry_if: &match?({:error, :rate_limited}, &1)
+      retry_if: &match?({:error, reason} when reason in [:agent_bootstrapping, :rate_limited], &1)
     )
   end
 
   def run(%__MODULE__{job: job} = engine) do
-    Console.AI.Provider.external_errors()
+    Tracking.with_run(job, fn ->
+      Console.AI.Provider.external_errors()
 
-    list_activities(job)
-    |> then(& verifiable(%{engine | activities: &1}))
-    |> loop()
+      list_activities(job)
+      |> then(&put_in(engine.environment.activities, &1))
+      |> verifiable()
+      |> loop()
+    end)
   end
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})
     when iter >= max, do: Workbenches.fail_job("Max iterations reached", job)
-  defp loop(%__MODULE__{job: job, environment: environment, activities: activities, messages: msgs} = engine) do
-    messages = case msgs do
-      [_ | _] = msgs -> Enum.map(msgs, &Message.to_message/1)
-      _ -> Enum.map(activities, &Message.to_message/1)
-    end
+  defp loop(
+         %__MODULE__{
+           job: job,
+           environment: %Environment{activities: activities} = environment
+         } = engine
+       ) do
+    context = workbench_context(engine)
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(50, engine_opts(environment) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
-    |> MemoryEngine.reduce([{:user, job.prompt} | Enum.reverse(messages)], &reducer/2)
+    |> MemoryEngine.new(50,
+      engine_opts(environment) ++
+        [
+          system_prompt: &sysprompt(job, environment, &1),
+          acc: [],
+          callback: &callback(job, &1)
+        ]
+    )
+    |> MemoryEngine.reduce_with_context(context, &reducer/2)
     |> case do
-      {:ok, %Complete{
-        conclusion: conclusion,
-        metrics_query: metrics_query,
-        traces_query: traces_query,
-        logs: logs,
-        traces: traces,
-        todos: todos,
-        topology: topology,
-        criticism: criticism
-      }} ->
+      {:ok,
+       {%Complete{
+          conclusion: conclusion,
+          metrics_query: metrics_query,
+          traces_query: traces_query,
+          logs: logs,
+          traces: traces,
+          todos: todos,
+          topology: topology,
+          criticism: criticism
+        }, _context}} ->
         drop_empty(%{
           conclusion: conclusion,
           todos: todos,
@@ -133,65 +145,165 @@ defmodule Console.AI.Workbench.Engine do
           }),
         })
         |> Workbenches.complete_job(job)
-      {:ok, {msgs, l}} when is_list(l) -> spawn_activities(l, msgs, engine)
-      {:ok, %Acc{messages: msgs}} when is_list(msgs) ->
-        Workbenches.fail_job("Workbench job was not properly completed, last messsage: #{inspect(elem(List.last(msgs), 1))}", job)
+      {:ok, {[_ | _] = actions, %Context{} = context}} ->
+        spawn_activities(actions, context, engine)
+      {:ok, {_, %Context{}}} ->
+        Workbenches.fail_job("Workbench job was not properly completed", job)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
   end
 
-  defp tool_fmt(%Notes{} = notes), do: String.trim(notes_message(notes: notes))
-  defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
-  defp tool_fmt(%CanvasTool{}), do: "launched canvas subagent, waiting for the result"
-  defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
-  defp tool_fmt(%FunctionCall{} = call), do: "launched function call #{call.tool.name}, waiting for the result"
-  defp tool_fmt(%KubeRequest{method: m, path: p}), do: "launched kubernetes #{m} request against #{p}, waiting for the result"
-  defp tool_fmt(pass), do: pass
+  defp reducer(messages, _) do
+    case Enum.find(messages, &match?(%Complete{}, &1)) do
+      %Complete{} = complete ->
+        {:halt, complete}
 
-  defp reducer(messages, %Acc{messages: msgs}) do
-    Enum.reduce_while(messages, {[], []}, fn
-      %Complete{} = complete, _ -> {:halt, complete}
-      %Subagent{} = subagent, {msgs, acts} -> {:cont, {msgs, [subagent | acts]}}
-      %FunctionCall{} = function_call, {msgs, acts} -> {:cont, {msgs, [function_call | acts]}}
-      %CanvasTool{} = canvas, {msgs, acts} -> {:cont, {msgs, [canvas | acts]}}
-      %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
-      %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
-      %KubeRequest{} = kube_request, {msgs, acts} -> {:cont, {msgs, [kube_request | acts]}}
-      %KubeShell{} = kube_shell, {msgs, acts} -> {:cont, {msgs, [kube_shell | acts]}}
-      msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
-    end)
-    |> case do
-      %Complete{} = complete -> {:halt, complete}
-      {new, [_ | _] = acts} -> {:halt, {new ++ msgs, acts}}
-      {new, []} -> {:cont, %Acc{messages: new ++ msgs}}
+      _ ->
+        case Enum.filter(messages, &activity?/1) do
+          [_ | _] = actions -> {:halt, actions}
+          [] -> {:cont, []}
+        end
     end
   end
 
-  defp spawn_activities(actions, msgs, engine) do
-    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
-    |> Enum.flat_map(fn
-      {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
-      {:ok, {:error, error}} ->
-        Logger.error("Error spawning activity: #{inspect(error)}")
-        []
-      _ -> []
-    end)
-    |> then(
-      &%{
+  defp activity?(%Subagent{}), do: true
+  defp activity?(%FunctionCall{}), do: true
+  defp activity?(%CanvasTool{}), do: true
+  defp activity?(%Notes{}), do: true
+  defp activity?(%SkillBackfill{}), do: true
+  defp activity?(%KubeRequest{}), do: true
+  defp activity?(%KubeDrain{}), do: true
+  defp activity?(%KubeShell{}), do: true
+  defp activity?(_), do: false
+
+  defp spawn_activities(all_actions, %Context{} = context, engine) do
+    {memos, actions} = Enum.split_with(all_actions, &match?(%Notes{}, &1))
+    {memo_activities, memo_results} = run_activities(memos, engine, max_concurrency: 1)
+
+    engine = case memo_activities do
+      [_ | _] = activities ->
+        engine = put_in(engine.environment.activities, activities ++ engine.environment.activities)
+        %{engine | job: refresh_job(engine.job)}
+
+      [] ->
         engine
-        | activities: &1 ++ engine.activities,
-          messages: &1 ++ msgs,
-          iterations: engine.iterations + 1,
-          job: refresh_job(engine.job)
-      }
-    )
+    end
+
+    {activities, activity_results} = run_activities(actions, engine)
+    context =
+      append_activity_results(
+        context,
+        all_actions,
+        Map.merge(memo_results, activity_results)
+      )
+
+    engine = put_in(engine.environment.activities, activities ++ engine.environment.activities)
+
+    %{
+      engine
+      | context: context,
+        iterations: engine.iterations + 1,
+        job: refresh_job(engine.job)
+    }
     |> verifiable()
     |> loop()
   end
 
-  @supported_subagents ~w(infrastructure integration coding observability memory skill history search verify)a
+  defp run_activities(actions, engine, opts \\ []) do
+    results =
+      Tracking.async_stream(
+        actions,
+        &spawn_activity(&1, engine),
+        Keyword.merge([max_concurrency: 10, timeout: :timer.hours(4)], opts)
+      )
 
-  defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
+    actions
+    |> Enum.zip(results)
+    |> Enum.reduce({[], %{}}, fn
+      {action, {:ok, {:ok, %WorkbenchJobActivity{} = activity}}}, {activities, results} ->
+        {
+          [activity | activities],
+          put_activity_result(results, action, activity_result(action, activity))
+        }
+
+      {action, {:ok, {:error, error}}}, {activities, results} ->
+        Logger.error("Error spawning activity: #{inspect(error)}")
+        {activities, put_activity_result(results, action, failed_activity_result(action, error))}
+
+      {action, error}, {activities, results} ->
+        Logger.error("Error spawning activity: #{inspect(error)}")
+        {activities, put_activity_result(results, action, failed_activity_result(action, error))}
+    end)
+    |> then(fn {activities, results} -> {Enum.reverse(activities), results} end)
+  end
+
+  defp activity_result(%Notes{} = notes, %WorkbenchJobActivity{}),
+    do: tool_result(notes, String.trim(notes_message(notes: notes)))
+
+  defp activity_result(action, %WorkbenchJobActivity{} = activity) do
+    case Message.to_message(activity) do
+      {:tool, content, _} when is_binary(content) -> tool_result(action, content)
+      {:assistant, content} when is_binary(content) -> tool_result(action, content)
+      _ -> failed_activity_result(action, "activity produced no output")
+    end
+  end
+
+  defp failed_activity_result(action, error),
+    do: tool_result(action, "failed to run activity: #{inspect(error)}")
+
+  defp tool_result(
+         %{id: %Console.AI.Tool{id: id, name: name}},
+         content
+       )
+       when is_binary(id) and is_binary(name) and is_binary(content),
+       do: Context.tool_result(id, name, content)
+
+  defp tool_result(_, _), do: nil
+
+  defp put_activity_result(results, action, %ReqLLM.Message{} = result) do
+    case action_call_id(action) do
+      id when is_binary(id) -> Map.put(results, id, result)
+      _ -> results
+    end
+  end
+  defp put_activity_result(results, _, _), do: results
+
+  defp append_activity_results(%Context{} = context, actions, results) do
+    Enum.reduce(actions, context, fn action, context ->
+      case Map.fetch(results, action_call_id(action)) do
+        {:ok, %ReqLLM.Message{} = result} ->
+          append_tool_result(context, result)
+
+        :error ->
+          case failed_activity_result(action, "activity produced no result") do
+            %ReqLLM.Message{} = result -> append_tool_result(context, result)
+            _ -> context
+          end
+      end
+    end)
+  end
+
+  defp append_tool_result(
+         %Context{} = context,
+         %ReqLLM.Message{role: :tool} = result
+       ),
+       do: Context.append(context, result)
+
+  defp action_call_id(%{id: %Console.AI.Tool{id: id}}), do: id
+  defp action_call_id(_), do: nil
+
+  @supported_subagents ~w(infrastructure integration coding observability monitoring memory skill history search verify self_service)a
+
+  defp spawn_activity(action, %__MODULE__{job: job} = engine) do
+    Tracking.with_activity(action, job, fn ->
+      do_spawn_activity(action, engine)
+    end)
+  end
+
+  defp do_spawn_activity(
+         %Subagent{subagent: type, prompt: prompt} = call,
+         %__MODULE__{job: job, environment: %Environment{} = environment}
+       )
       when type in @supported_subagents do
     module = subagent_module(type)
     Console.AI.Provider.external_errors()
@@ -199,35 +311,41 @@ defmodule Console.AI.Workbench.Engine do
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
       Console.safely(fn ->
-        module.run(activity, job, %{environment | activities: activities})
+        module.run(activity, job, environment)
       end, &crash_fallback/1)
       |> Workbenches.update_job_activity(activity)
       |> log_error("Failed to update job activity")
     end
   end
 
-  defp spawn_activity(%SkillBackfill{prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities}) do
+  defp do_spawn_activity(
+         %SkillBackfill{prompt: prompt} = call,
+         %__MODULE__{job: job, environment: %Environment{} = environment}
+       ) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
     Console.AI.Provider.external_errors()
 
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :skill, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       # stream_callbacks(activity)
       Console.safely(fn ->
-        SA.Skill.run(activity, job, %{environment | activities: activities})
+        SA.Skill.run(activity, job, environment)
       end, &crash_fallback/1)
       |> Workbenches.update_job_activity(activity)
       |> log_error("Failed to update job activity")
     end
   end
 
-  defp spawn_activity(%CanvasTool{prompt: prompt} = call, %__MODULE__{job: job, activities: activities, environment: environment}) do
+  defp do_spawn_activity(
+         %CanvasTool{prompt: prompt} = call,
+         %__MODULE__{job: job, environment: %Environment{} = environment}
+       ) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     Console.AI.Provider.external_errors()
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :canvas, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       Canvas.new(activity, existing_canvas(job))
 
       output = Console.safely(fn ->
-        SA.Canvas.run(activity, job, %{environment | activities: activities})
+        SA.Canvas.run(activity, job, environment)
       end, & "error running subagent: #{inspect(&1)}, feel free to try again if it is still necessary")
 
       Canvas.canvas()
@@ -241,7 +359,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
+  defp do_spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
     Console.mapify(status)
     |> Map.drop([:id])
     |> then(& %{
@@ -253,7 +371,7 @@ defmodule Console.AI.Workbench.Engine do
     |> Workbenches.update_job_status(job)
   end
 
-  defp spawn_activity(%FunctionCall{} = call, %__MODULE__{user: user}) do
+  defp do_spawn_activity(%FunctionCall{} = call, %__MODULE__{user: user}) do
     case FunctionCall.invoke(call) do
       {:ok, %WorkbenchJobActivity{status: :successful} = activity} -> {:ok, activity}
       {:ok, %WorkbenchJobActivity{status: :needs_approval} = activity} -> poll_activity(activity, user)
@@ -261,7 +379,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{user: user, job: job}) do
+  defp do_spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :kubernetes,
       status: :needs_approval,
@@ -277,7 +395,23 @@ defmodule Console.AI.Workbench.Engine do
       do: poll_activity(activity, user)
   end
 
-  defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
+  defp do_spawn_activity(%KubeDrain{handle: handle, node: node} = request, %__MODULE__{user: user, job: job}) do
+    attrs = %{
+      type: :kubernetes,
+      status: :needs_approval,
+      prompt: "draining kubernetes node #{node} on cluster #{handle}",
+      tool_call: tool_attrs(request),
+      result: Map.merge(%{
+        output: "request pending user approval",
+        explanation: request.explanation,
+        kube_drain: Console.mapify(request)
+      }, Approval.attrs(request.approval))
+    }
+    with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
+      do: poll_activity(activity, user)
+  end
+
+  defp do_spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :exec,
       status: :needs_approval,
@@ -293,7 +427,7 @@ defmodule Console.AI.Workbench.Engine do
       do: poll_activity(activity, user)
   end
 
-  defp spawn_activity(_, _), do: :ignore
+  defp do_spawn_activity(_, _), do: :ignore
 
   defp poll_activity(%WorkbenchJobActivity{} = activity, %User{} = user) do
     with {:ok, %WorkbenchJobActivity{} = activity} <- Workbenches.auto_approve_activity(activity, user),
@@ -313,15 +447,28 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:integration), do: SA.Integration
   defp subagent_module(:coding), do: SA.Coding
   defp subagent_module(:observability), do: SA.Observability
+  defp subagent_module(:monitoring), do: SA.Monitoring
   defp subagent_module(:memory), do: SA.Memory
   defp subagent_module(:history), do: SA.History
   defp subagent_module(:skill), do: SA.Skill
   defp subagent_module(:search), do: SA.Search
   defp subagent_module(:verify), do: SA.Verify
+  defp subagent_module(:self_service), do: SA.SelfService
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}
   defp tool_attrs(_), do: nil
+
+  defp workbench_context(%__MODULE__{context: %Context{} = context}), do: context
+  defp workbench_context(%__MODULE__{
+         job: %WorkbenchJob{} = job,
+         environment: %Environment{activities: activities}
+       }) do
+    activities
+    |> Enum.reverse()
+    |> Enum.map(&Message.to_message/1)
+    |> then(&ProviderBase.reqllm_messages([{:user, job.prompt} | &1]))
+  end
 
   defp list_activities(%WorkbenchJob{id: id}) do
     WorkbenchJobActivity.ordered()
@@ -341,16 +488,23 @@ defmodule Console.AI.Workbench.Engine do
 
     categories = Environment.categories(job)
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
+    tool_names = SA.tool_names(subagents, env)
 
     skill_knowledge_tools(job, skills) ++ [
       %KnowledgeUpsert{job: job},
       %KnowledgeDelete{job: job},
-      %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
+      %Subagents{
+        bench: job.workbench,
+        job: job,
+        subagents: subagents,
+        categories: categories,
+        tool_names: tool_names
+      },
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       %Codemode{tools: []},
       Notes,
-      Complete,
+      %Complete{job: job, user: env.user},
     ] ++ type_tools(job)
       ++ function_tools(env)
       ++ kube_tools(job)
@@ -367,11 +521,14 @@ defmodule Console.AI.Workbench.Engine do
     do: Tools.function_tools(funcs, job)
   defp function_tools(_), do: []
 
-  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do
+  defp kube_tools(
+    %WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e, drain: drain}}} = job
+  ) do
     Enum.reject([
       (if u, do: %KubeUpdate{job: job, user: job.user}, else: nil),
       (if d, do: %KubeDelete{job: job, user: job.user}, else: nil),
-      (if e, do: %KubeExec{job: job, user: job.user}, else: nil)
+      (if e, do: %KubeExec{job: job, user: job.user}, else: nil),
+      (if drain, do: %KubeDrainTool{job: job, user: job.user}, else: nil)
     ], &is_nil/1)
   end
   defp kube_tools(_), do: []
@@ -379,12 +536,12 @@ defmodule Console.AI.Workbench.Engine do
   defp sysprompt(%WorkbenchJob{type: :skill, referenced_job: job} = workbench_job, _, _),
     do: String.trim(skill_system_prompt(job: job, prompt: WorkbenchJob.objective(workbench_job)))
   defp sysprompt(%WorkbenchJob{} = job, environment, engine) do
-    objective = WorkbenchJob.objective(job)
     String.trim(system_prompt(
       job: job,
-      prompt: objective,
       engine: engine,
-      actions: Environment.actions(environment)
+      actions: Environment.actions(environment),
+      review: WorkbenchJob.coding_review?(job),
+      self_service: :self_service in Environment.subagents(environment)
     ))
   end
 
@@ -402,7 +559,12 @@ defmodule Console.AI.Workbench.Engine do
 
   @preloads [:result, :flow, :pull_requests, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
-  defp verifiable(%__MODULE__{activities: activities, job: %WorkbenchJob{pull_requests: prs}} = engine) do
+  defp verifiable(
+         %__MODULE__{
+           environment: %Environment{activities: activities},
+           job: %WorkbenchJob{pull_requests: prs}
+         } = engine
+       ) do
     verifiable =
       (is_list(prs) && Enum.any?(prs, & &1.status == :merged)) ||
       (is_list(activities) && Enum.any?(activities, & &1.status == :successful && is_action(&1.type)))
@@ -413,7 +575,19 @@ defmodule Console.AI.Workbench.Engine do
   defp verifiable(engine), do: engine
 
   defp preload_job(%WorkbenchJob{type: :skill} = job),
-    do: Repo.preload(job, @preloads ++ [referenced_job: [:result, workbench: [:workbench_skills, :repository], activities: :thoughts]])
+    do:
+      Repo.preload(
+        job,
+        @preloads ++
+          [
+            referenced_job: [
+              :result,
+              {:eval_result, :workbench_eval},
+              {:workbench, [:workbench_skills, :repository]},
+              {:activities, :thoughts}
+            ]
+          ]
+      )
   defp preload_job(job), do: Repo.preload(job, @preloads)
 
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]

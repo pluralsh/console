@@ -11,6 +11,8 @@ defmodule Console.GraphQl do
     PipelineGateLoader,
     ClusterLoader,
     PolicyCountLoader,
+    GroupMemberCountLoader,
+    FlowSummaryLoader,
     Deployments,
     AI
   }
@@ -38,7 +40,9 @@ defmodule Console.GraphQl do
     HelmRepositoryLoader,
     PipelineGateLoader,
     ClusterLoader,
-    PolicyCountLoader
+    PolicyCountLoader,
+    GroupMemberCountLoader,
+    FlowSummaryLoader
   ]
 
   def context(ctx) do
@@ -59,7 +63,8 @@ defmodule Console.GraphQl do
   def middleware(middleware, _field, %{identifier: type}) when type in [:query, :mutation] do
     SafeResolution.apply(middleware) ++ [ErrorHandler]
   end
-  def middleware(middleware, _field, _object), do: middleware
+  def middleware(middleware, _field, %{identifier: :subscription}), do: middleware
+  def middleware(middleware, _field, object), do: SafeResolution.wrap(middleware, object)
 
   query do
     import_fields :configuration_queries
@@ -89,6 +94,7 @@ defmodule Console.GraphQl do
     import_fields :ai_subscriptions
     import_fields :agent_subscriptions
     import_fields :workbench_subscriptions
+    import_fields :observability_subscriptions
     import_fields :cluster_subscriptions
   end
 

@@ -29,6 +29,14 @@ export const Default: Story = {
   },
 }
 
+export const Small: Story = {
+  render: Template,
+  args: {
+    ...Default.args,
+    size: 'small',
+  },
+}
+
 function LightDarkTemplate(args: any) {
   return (
     <LightDarkSwitch

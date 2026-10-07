@@ -2,7 +2,7 @@ import {
   Button,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   ReturnIcon,
   Select,
@@ -59,8 +59,10 @@ const SUPPORTED_TYPES = [
 
 export function ChatbotConnectionForm({
   existingConnection,
+  onTypeChange,
 }: {
   existingConnection?: Nullable<ChatProviderConnectionFragment>
+  onTypeChange?: (type: ChatProviderConnectionType) => void
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -142,12 +144,12 @@ export function ChatbotConnectionForm({
             <Select
               selectedKey={formState.type}
               isDisabled={mode === 'edit'}
-              onSelectionChange={(key) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  type: key as ChatProviderConnectionType,
-                }))
-              }
+              onSelectionChange={(key) => {
+                const type = key as ChatProviderConnectionType
+
+                setFormState((prev) => ({ ...prev, type }))
+                onTypeChange?.(type)
+              }}
               leftContent={chatProviderConnectionIcon(formState.type)}
             >
               {SUPPORTED_TYPES.map((type) => (
@@ -169,7 +171,7 @@ export function ChatbotConnectionForm({
                 : 'Display name shown when selecting this chatbot connection.'
             }
           >
-            <Input2
+            <Input
               value={formState.name}
               onChange={(e) =>
                 setFormState((prev) => ({
@@ -274,7 +276,7 @@ function SlackFields({
             : 'Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here.'
         }
       >
-        <Input2
+        <Input
           value={formState.appToken}
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, appToken: e.target.value }))
@@ -293,7 +295,7 @@ function SlackFields({
             : 'Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode.'
         }
       >
-        <Input2
+        <Input
           value={formState.botToken}
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, botToken: e.target.value }))
@@ -325,7 +327,7 @@ function TeamsFields({
         label="Application (client) ID"
         hint="The Microsoft App ID of your Azure Bot registration (also used to validate inbound requests)."
       >
-        <Input2
+        <Input
           value={formState.clientId}
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, clientId: e.target.value }))
@@ -343,7 +345,7 @@ function TeamsFields({
             : 'A client secret generated for the bot app registration. Used to mint Bot Framework and Microsoft Graph tokens.'
         }
       >
-        <Input2
+        <Input
           value={formState.clientSecret}
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, clientSecret: e.target.value }))
@@ -358,7 +360,7 @@ function TeamsFields({
         label="Directory (tenant) ID"
         hint="The Azure AD tenant id the bot is registered in."
       >
-        <Input2
+        <Input
           value={formState.tenantId}
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, tenantId: e.target.value }))

@@ -1,23 +1,25 @@
-import { Div } from 'honorable'
+import styled from 'styled-components'
 
 import CatalogCard from '../components/CatalogCard'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'CatalogCard',
+  title: 'Catalog Card',
   component: CatalogCard,
 } satisfies Meta<any>
 
 export default meta
 type Story = StoryObj<any>
 
+const Grid = styled.div(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing.large,
+  gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
+}))
+
 function Template(args: any) {
   return (
-    <Div
-      display="grid"
-      gap="large"
-      gridTemplateColumns="repeat(auto-fit, minmax(256px, 1fr))"
-    >
+    <Grid>
       <CatalogCard {...args} />
       <CatalogCard {...args} />
       <CatalogCard {...args} />
@@ -43,7 +45,7 @@ function Template(args: any) {
           },
         }}
       />
-    </Div>
+    </Grid>
   )
 }
 

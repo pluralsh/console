@@ -102,7 +102,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
             inputProps={{
               css: { '&, &::placeholder': { color: colors[READONLY_COLOR] } },
             }}
-            value={clientId}
+            value={clientId ?? ''}
             placeholder="A client ID will be generated upon creation"
           />
         </FormField>
@@ -122,7 +122,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
             inputProps={{
               css: { '&, &::placeholder': { color: colors[READONLY_COLOR] } },
             }}
-            value={clientSecret}
+            value={clientSecret ?? ''}
             placeholder="A client secret will be generated upon creation"
           />
         </FormField>
@@ -145,7 +145,7 @@ function OidcCreateProviderForm({ onClose }: { onClose: () => void }) {
             </FormField>
             <FormField label="Description">
               <Input
-                value={form.description}
+                value={form.description ?? ''}
                 placeholder="Enter description"
                 onChange={(e) =>
                   updateForm(setForm, (d) => {
@@ -249,9 +249,9 @@ export function UrlsInput({
       >
         <Input
           value={value}
-          width="100%"
           placeholder="Enter a redirect URL"
           onChange={({ target: { value } }) => setValue(value)}
+          css={{ flexGrow: 1 }}
         />
         <Button
           secondary

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -219,6 +220,10 @@ func (in *EKSCloudProvider) toInsightDetails(insight *types.Insight) []*console.
 
 	result := make([]*console.UpgradeInsightDetailAttributes, 0)
 	for _, r := range insight.CategorySpecificSummary.DeprecationDetails {
+		if r.ReplacedWith == nil || strings.TrimSpace(*r.ReplacedWith) == "" {
+			continue
+		}
+
 		result = append(result, &console.UpgradeInsightDetailAttributes{
 			Used:        r.Usage,
 			Replacement: r.ReplacedWith,

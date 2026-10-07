@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "cluster": {
+      "type": "string",
+      "description": "The Plural cluster handle identifying the cluster that contains the target node"
+    },
+    "node": {
+      "type": "string",
+      "description": "The exact name of the Kubernetes node to cordon and drain"
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Clearly explain why the node must be drained, the workloads that may be disrupted, and the expected impact so the user can make an informed approval decision"
+    }
+  },
+  "required": ["cluster", "node", "explanation"]
+}

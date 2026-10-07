@@ -3,8 +3,8 @@ defmodule Console.AI.Tools.Workbench.Eval do
   The tool for evaluating the quality of a workbench job.
   """
   use Console.AI.Tools.Workbench.Base
-  alias Console.Repo
-  alias Console.Schema.{WorkbenchJob, WorkbenchEval, WorkbenchEvalResult}
+  alias Console.Deployments.Workbenches
+  alias Console.Schema.{WorkbenchJob, WorkbenchEval}
 
   embedded_schema do
     field :job,     :map, virtual: true
@@ -30,8 +30,7 @@ defmodule Console.AI.Tools.Workbench.Eval do
   end
 
   def implement(%__MODULE__{job: %WorkbenchJob{} = job, eval: %WorkbenchEval{} = eval} = model) do
-    %WorkbenchEvalResult{workbench_eval_id: eval.id, workbench_job_id: job.id}
-    |> WorkbenchEvalResult.changeset(%{
+    Workbenches.create_workbench_eval_result(%{
       grade: model.grade,
       feedback: %{
         summary: model.summary,
@@ -39,7 +38,6 @@ defmodule Console.AI.Tools.Workbench.Eval do
         result: model.result,
         logic: model.logic
       }
-    })
-    |> Repo.insert()
+    }, eval, job)
   end
 end

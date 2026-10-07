@@ -12,8 +12,8 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
   alias Console.Uploads
   alias ConsoleWeb.ReqStream
 
-  plug Scope, [resource: :ai, action: :read] when action in [:show, :index, :download]
-  plug Scope, [resource: :ai, action: :write] when action in [:create]
+  plug Scope, [resource: :agent, action: :read] when action in [:show, :index, :download]
+  plug Scope, [resource: :agent, action: :write] when action in [:create]
 
   @doc """
   Fetches an agent run by id.
@@ -21,7 +21,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
   operation :show,
     operation_id: "GetAgentRun",
     tags: ["agent"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["agent.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the agent run"]
     ],
@@ -39,7 +39,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
   operation :index,
     operation_id: "ListAgentRuns",
     tags: ["agent"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["agent.read"],
     parameters: [
       runtime_id: [in: :query, schema: %{type: :string}, required: false, description: "Filter by runtime id"],
       page: [in: :query, schema: %{type: :integer}, required: false, description: "Page number for pagination"],
@@ -106,7 +106,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
   operation :create,
     operation_id: "CreateAgentRun",
     tags: ["agent"],
-    "x-required-scopes": ["ai.write"],
+    "x-required-scopes": ["agent.write"],
     request_body: OpenAPI.AI.AgentRunInput,
     responses: [ok: OpenAPI.AI.AgentRun]
   def create(conn, %{"runtime_id" => runtime_id}) do

@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.VerifyTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.AI.Workbench.{Environment, Subagents}
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
 
   setup :set_mimic_global
 
@@ -18,7 +18,7 @@ defmodule Console.AI.Workbench.Subagents.VerifyTest do
         }
       )
 
-      expect(Provider, :completion, fn _, opts ->
+      expect_reqllm_completion(fn _, opts ->
         preface = Keyword.fetch!(opts, :preface)
         assert preface =~ "verifying whether the requested work has actually been completed"
         assert preface =~ "Infrastructure tools can inspect Plural Services and Stacks"

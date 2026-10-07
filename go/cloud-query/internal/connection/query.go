@@ -10,15 +10,19 @@ import (
 )
 
 func (in *connection) Query(q string, args ...any) (columns []string, rows [][]any, err error) {
+	return in.QueryWithContext(context.Background(), q, args...)
+}
+
+func (in *connection) QueryWithContext(ctx context.Context, q string, args ...any) (columns []string, rows [][]any, err error) {
 	klog.V(log.LogLevelDebug).InfoS("running query", "query", q)
 
-	tx, err := in.db.BeginTx(context.Background(), &sql.TxOptions{ReadOnly: true})
+	tx, err := in.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
 	if err != nil {
 		return columns, rows, err
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	qResponse, err := tx.Query(q, args...)
+	qResponse, err := tx.QueryContext(ctx, q, args...)
 	if err != nil {
 		return columns, rows, err
 	}
@@ -43,5 +47,5 @@ func (in *connection) Query(q string, args ...any) (columns []string, rows [][]a
 		rows = append(rows, values)
 	}
 
-	return columns, rows, err
+	return columns, rows, qResponse.Err()
 }

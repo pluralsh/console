@@ -3,12 +3,14 @@ package scm
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"golang.org/x/net/http/httpproxy"
 )
 
 // PRState is the state of a pull request.
@@ -141,14 +143,39 @@ type Client interface {
 	ReactToComment(ctx context.Context, prURL string, reactableID string, state CommentReactState) error
 }
 
+type ClientOption func(*clientOptions)
+
+type clientOptions struct {
+	proxyURL string
+	noProxy  string
+}
+
+// WithHTTPProxy configures an HTTP proxy on the SCM provider clients without
+// modifying process-wide proxy environment variables.
+func WithHTTPProxy(proxyURL, noProxy string) ClientOption {
+	return func(options *clientOptions) {
+		options.proxyURL = strings.TrimSpace(proxyURL)
+		options.noProxy = strings.TrimSpace(noProxy)
+	}
+}
+
 // NewClient returns a provider-dispatching SCM client using token auth.
 // The provider is inferred from the PR URL host.
-func NewClient(token string) Client {
-	return &dispatchClient{token: token}
+func NewClient(token string, options ...ClientOption) Client {
+	config := &clientOptions{}
+	for _, option := range options {
+		option(config)
+	}
+
+	return &dispatchClient{
+		token:      token,
+		httpClient: newHTTPClient(config),
+	}
 }
 
 type dispatchClient struct {
-	token string
+	token      string
+	httpClient *http.Client
 }
 
 func (d *dispatchClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetails, error) {
@@ -188,21 +215,42 @@ func (d *dispatchClient) clientFor(prURL string) (Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid PR URL %q: %w", prURL, err)
 	}
+	httpClient := d.httpClient
+	if httpClient == nil {
+		httpClient = newHTTPClient(&clientOptions{})
+	}
 	host := strings.ToLower(u.Host)
 	switch {
 	case parseOK(func() error { _, _, err := parseGitLabMRURL(prURL); return err }):
-		return newGitLabClient(d.token, host), nil
+		return newGitLabClient(d.token, host, httpClient), nil
 	case parseOK(func() error { _, err := parseADOPRURL(prURL); return err }):
-		return newAzureDevOpsClient(d.token), nil
+		return newAzureDevOpsClient(d.token, httpClient), nil
 	case parseOK(func() error { _, _, _, err := parseDCPRURL(prURL); return err }):
-		return newBitBucketClient(d.token, host), nil
+		return newBitBucketClient(d.token, host, httpClient), nil
 	case parseOK(func() error { _, _, _, err := parseCloudPRURL(prURL); return err }):
-		return newBitBucketClient(d.token, host), nil
+		return newBitBucketClient(d.token, host, httpClient), nil
 	case parseOK(func() error { _, _, _, err := parseGitHubPRURL(prURL); return err }):
-		return newGitHubClient(d.token, host), nil
+		return newGitHubClient(d.token, host, httpClient), nil
 	default:
 		return nil, fmt.Errorf("unsupported SCM host %q: only GitHub, GitLab, Bitbucket and Azure DevOps are supported", host)
 	}
+}
+
+func newHTTPClient(options *clientOptions) *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.Proxy = nil
+	if options.proxyURL != "" {
+		proxy := (&httpproxy.Config{
+			HTTPProxy:  options.proxyURL,
+			HTTPSProxy: options.proxyURL,
+			NoProxy:    options.noProxy,
+		}).ProxyFunc()
+		transport.Proxy = func(request *http.Request) (*url.URL, error) {
+			return proxy(request.URL)
+		}
+	}
+
+	return &http.Client{Transport: transport}
 }
 
 func parseOK(fn func() error) bool {

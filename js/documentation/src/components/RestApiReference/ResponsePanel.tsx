@@ -14,7 +14,7 @@ import {
 } from '@pluralsh/design-system'
 
 import isEmpty from 'lodash/isEmpty'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { useCopyText } from '@src/hooks/useCopyText'
 
@@ -64,6 +64,7 @@ const CodeContent = styled.div(({ theme }) => ({
 }))
 
 export function ResponsePanel({ detail }: { detail: EndpointDetail }) {
+  const theme = useTheme()
   const [selectedIndex, setSelectedIndex] = useState(0)
   const { responses } = detail
 
@@ -100,7 +101,7 @@ export function ResponsePanel({ detail }: { detail: EndpointDetail }) {
       <Card
         key={`${detail.id}-${selected.statusLabel}`}
         fillLevel={1}
-        borderColor="border-fill-two"
+        style={{ borderColor: theme.colors['border-fill-two'] }}
       >
         <ResponseHeader>
           <span>Response samples</span>

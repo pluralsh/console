@@ -2,6 +2,7 @@ defmodule Console.Deployments.Git.Cmd do
   import Console.Deployments.Pr.Git, only: [request_options: 1]
   alias Console.Schema.{GitRepository, ScmConnection}
   alias Console.Jwt.Github
+  alias Console.Otel.Tracing
 
   def save_private_key(%GitRepository{private_key: pk} = git) when is_binary(pk) do
     with {:ok, path} <- private_key_file(git),
@@ -50,8 +51,10 @@ defmodule Console.Deployments.Git.Cmd do
   defp maybe_overwrite_key(git), do: {:ok, git}
 
   def fetch(%GitRepository{} = repo) do
-    with {:ok, _} <- git(repo, "fetch", maybe_recurse_submodules(repo, ["--all", "--tags", "--force", "--prune", "--prune-tags"])),
-      do: reset(repo)
+    Tracing.span("git.pull", %{"git.repository.url" => Tracing.sanitize_url(repo.url)}, fn ->
+      with {:ok, _} <- git(repo, "fetch", maybe_recurse_submodules(repo, ["--all", "--tags", "--force", "--prune", "--prune-tags"])),
+        do: reset(repo)
+    end)
   end
 
   def reset(repo) do
@@ -137,10 +140,12 @@ defmodule Console.Deployments.Git.Cmd do
   end
 
   def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
-    with {:ok, _} = res <- git(git, "clone", maybe_recurse_submodules(git, ["--filter=blob:none", url(git), git.dir])),
-         :ok <- branches(git),
-         :ok <- unlock(git),
-      do: res
+    Tracing.span("git.clone", %{"git.repository.url" => Tracing.sanitize_url(git.url)}, fn ->
+      with {:ok, _} = res <- git(git, "clone", maybe_recurse_submodules(git, ["--filter=blob:none", url(git), git.dir])),
+           :ok <- branches(git),
+           :ok <- unlock(git),
+        do: res
+    end)
   end
 
   def git(%GitRepository{} = git, cmd, args \\ []) do
@@ -174,8 +179,8 @@ defmodule Console.Deployments.Git.Cmd do
 
   defp opts(%GitRepository{dir: dir} = repo), do: [env: env(repo), cd: dir, stderr_to_stdout: true]
 
-  defp env(%GitRepository{connection: %ScmConnection{proxy: %ScmConnection.Proxy{url: url}}} = repo)
-    when is_binary(url), do: [{"HTTP_PROXY", url}, {"HTTPS_PROXY", url} | env(%{repo | connection: nil})]
+  defp env(%GitRepository{connection: %ScmConnection{proxy: %ScmConnection.Proxy{enabled: enabled, url: url}}} = repo)
+    when enabled != false and is_binary(url), do: [{"HTTP_PROXY", url}, {"HTTPS_PROXY", url} | env(%{repo | connection: nil})]
   defp env(%GitRepository{auth_method: :basic, password: password}) when is_binary(password),
     do: [{"GIT_ACCESS_TOKEN", password}, {"GIT_ASKPASS", git_askpass()}]
   defp env(%GitRepository{auth_method: :ssh, private_key_file: pk_file} = git) when is_binary(pk_file),

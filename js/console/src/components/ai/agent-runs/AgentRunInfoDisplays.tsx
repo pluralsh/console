@@ -5,11 +5,14 @@ import {
   Card,
   CardProps,
   CheckOutlineIcon,
+  Chip,
+  ChipProps,
   FailedFilledIcon,
   Flex,
   FlexProps,
   IconFrame,
   IconProps,
+  prettifyRepoUrl,
   PrOpenIcon,
   SpinnerAlt,
   Tooltip,
@@ -21,6 +24,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P } from 'components/utils/typography/Text'
 import {
+  AgentRunMode,
   AgentRunStatus,
   AgentRunTinyFragment,
   AgentRuntimeType,
@@ -65,8 +69,17 @@ export function AgentRunInfoCard({
   agentRun: Nullable<AgentRunTinyFragment>
   showLinkButton?: boolean
 } & CardProps) {
-  const { colors } = useTheme()
-  const { id = '', status, prompt, insertedAt, updatedAt } = agentRun ?? {}
+  const { spacing } = useTheme()
+  const {
+    id = '',
+    status,
+    mode,
+    prompt,
+    repository,
+    branch,
+    insertedAt,
+    updatedAt,
+  } = agentRun ?? {}
   const workbenchJob = agentRun?.workbenchJob
   const workbench = workbenchJob?.workbench
   const detailsPath = getAgentRunAbsPath({
@@ -123,7 +136,6 @@ export function AgentRunInfoCard({
           }
           icon={
             <IconFrame
-              circle
               type="secondary"
               icon={
                 <AgentRunIcon
@@ -137,17 +149,23 @@ export function AgentRunInfoCard({
         />
         <Flex
           alignItems="center"
-          gap="xsmall"
+          gap="small"
           css={{ marginLeft: 'auto', flexShrink: 0 }}
         >
-          <RunStatusIcon
-            size="small"
-            status={resolvedStatus}
-            fullColor
-          />
-          <Body2P $color="text-xlight">
-            {capitalize(resolvedStatus ?? '')}
-          </Body2P>
+          <Flex
+            alignItems="center"
+            gap="xsmall"
+          >
+            <RunStatusIcon
+              size="small"
+              status={resolvedStatus}
+              fullColor
+            />
+            <Body2P $color="text-xlight">
+              {capitalize(resolvedStatus ?? '')}
+            </Body2P>
+          </Flex>
+          <AgentRunModeChip mode={mode} />
         </Flex>
         {showLinkButton && (
           <Button
@@ -168,21 +186,47 @@ export function AgentRunInfoCard({
       >
         {prompt}
       </Body2P>
-      <StretchedFlex>
-        <Body2P $color="text-xlight">
-          Start time{' '}
-          <span css={{ color: colors['text-light'] }}>
-            {formatDateTime(insertedAt)}
-          </span>
-        </Body2P>
-        {!isRunning && (
-          <Body2P $color="text-xlight">
-            End time{' '}
-            <span css={{ color: colors['text-light'] }}>
-              {formatDateTime(resolvedUpdatedAt)}
-            </span>
-          </Body2P>
-        )}
+      <StretchedFlex
+        wrap="wrap"
+        gap="small"
+        css={{ rowGap: spacing.xsmall }}
+      >
+        <Flex
+          alignItems="center"
+          gap="small"
+          wrap="wrap"
+          css={{ rowGap: spacing.xsmall, minWidth: 0 }}
+        >
+          <AgentRunMetaItem
+            label="Start time"
+            value={formatDateTime(insertedAt)}
+          />
+          {!isRunning && (
+            <AgentRunMetaItem
+              label="End time"
+              value={formatDateTime(resolvedUpdatedAt)}
+            />
+          )}
+        </Flex>
+        <Flex
+          alignItems="center"
+          gap="small"
+          wrap="wrap"
+          css={{ rowGap: spacing.xsmall, minWidth: 0 }}
+        >
+          {repository && (
+            <AgentRunMetaItem
+              label="Repository"
+              value={prettifyRepoUrl(repository, true)}
+            />
+          )}
+          {branch && (
+            <AgentRunMetaItem
+              label="Branch"
+              value={branch}
+            />
+          )}
+        </Flex>
       </StretchedFlex>
     </AgentRunStatusBoxSC>
   )
@@ -194,59 +238,103 @@ export function AgentRunInfoSimple({
 }: {
   agentRun: Nullable<AgentRunTinyFragment>
 } & FlexProps) {
-  const { id = '', status, prompt, pullRequests } = agentRun ?? {}
+  const { id = '', status, mode, prompt, pullRequests } = agentRun ?? {}
   return (
     <Flex
       alignItems="center"
       gap="xsmall"
+      width="100%"
       {...props}
     >
       <Body2P
         $color="text-xlight"
-        css={TRUNCATE}
+        css={{ ...TRUNCATE, flex: 1, minWidth: 0 }}
       >
         {prompt}
       </Body2P>
-      <IconFrame
-        clickable
-        as={Link}
-        to={getAgentRunAbsPath({ agentRunId: id })}
-        target="_blank"
-        rel="noopener noreferrer"
-        tooltip="View agent run details"
-        icon={
-          <ArrowTopRightIcon
-            css={{ width: 12 }}
-            color="icon-xlight"
-          />
-        }
-        size="small"
-        style={{ flexShrink: 0 }}
-      />
-      <PRsModalIcon
-        prs={pullRequests?.filter(isNonNullable) ?? []}
-        type="tertiary"
-        size="small"
-        icon={
-          <PrOpenIcon
-            css={{ width: 12 }}
-            color="icon-xlight"
-          />
-        }
-        style={{ flexShrink: 0 }}
-      />
-      <Tooltip
-        placement="top"
-        label={capitalize(status)}
+      <Flex
+        alignItems="center"
+        gap="xsmall"
+        css={{ flexShrink: 0, marginLeft: 'auto' }}
       >
-        <div>
-          <RunStatusIcon
-            size="small"
-            status={status}
-          />
-        </div>
-      </Tooltip>
+        <IconFrame
+          clickable
+          as={Link}
+          to={getAgentRunAbsPath({ agentRunId: id })}
+          target="_blank"
+          rel="noopener noreferrer"
+          tooltip="View agent run details"
+          icon={
+            <ArrowTopRightIcon
+              css={{ width: 12 }}
+              color="icon-xlight"
+            />
+          }
+          size="small"
+          style={{ flexShrink: 0 }}
+        />
+        <PRsModalIcon
+          prs={pullRequests?.filter(isNonNullable) ?? []}
+          type="tertiary"
+          size="small"
+          icon={
+            <PrOpenIcon
+              css={{ width: 12 }}
+              color="icon-xlight"
+            />
+          }
+          style={{ flexShrink: 0 }}
+        />
+        <AgentRunModeChip
+          mode={mode}
+          css={{ flexShrink: 0, minWidth: 72, justifyContent: 'center' }}
+        />
+        <Tooltip
+          placement="top"
+          label={capitalize(status)}
+        >
+          <div>
+            <RunStatusIcon
+              size="small"
+              status={status}
+            />
+          </div>
+        </Tooltip>
+      </Flex>
     </Flex>
+  )
+}
+
+function AgentRunModeChip({
+  mode,
+  ...props
+}: {
+  mode: Nullable<AgentRunMode>
+} & ChipProps) {
+  if (!mode) return null
+
+  return (
+    <Chip
+      size="small"
+      severity="info"
+      css={{ flexShrink: 0 }}
+      {...props}
+    >
+      {capitalize(mode)}
+    </Chip>
+  )
+}
+
+function AgentRunMetaItem({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme()
+
+  return (
+    <Body2P
+      $color="text-xlight"
+      css={{ ...TRUNCATE, minWidth: 0 }}
+    >
+      {label} <span css={{ color: colors['text-light'] }}>{value}</span>
+    </Body2P>
   )
 }
 

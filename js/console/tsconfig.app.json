@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "paths": {
+      "*": ["./src/*"]
+    },
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
@@ -14,8 +16,8 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "esModuleInterop": false,
     "resolveJsonModule": true,
+    "types": ["node", "vite/client", "vitest/globals"],
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

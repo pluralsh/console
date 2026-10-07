@@ -7,6 +7,7 @@ export enum MentionKind {
   Skill = 'plrl-skill',
   Vulnerability = 'plrl-vulnerability',
   Repository = 'plrl-repository',
+  Monitoring = 'plrl-monitoring',
 }
 
 export const PLRL_CHIP_TAG_NAMES: readonly MentionKind[] =
@@ -19,7 +20,10 @@ export const KIND_LABELS: Record<MentionKind, string> = {
   [MentionKind.Skill]: 'skill',
   [MentionKind.Vulnerability]: 'vulnerability',
   [MentionKind.Repository]: 'repository',
+  [MentionKind.Monitoring]: 'monitoring',
 }
+
+export type MonitoringResourceType = 'dashboard' | 'monitor'
 
 // --- Triggers ---
 
@@ -83,6 +87,11 @@ export type RepositoryChipAttrs = BaseChipAttrs<MentionKind.Repository> & {
   provider?: string
 }
 
+export type MonitoringChipAttrs = BaseChipAttrs<MentionKind.Monitoring> & {
+  'resource-type': MonitoringResourceType
+  'workbench-id': string
+}
+
 export type ChipAttrsByKind = {
   [MentionKind.Cluster]: ClusterChipAttrs
   [MentionKind.Service]: ServiceChipAttrs
@@ -90,6 +99,7 @@ export type ChipAttrsByKind = {
   [MentionKind.Skill]: SkillChipAttrs
   [MentionKind.Vulnerability]: VulnerabilityChipAttrs
   [MentionKind.Repository]: RepositoryChipAttrs
+  [MentionKind.Monitoring]: MonitoringChipAttrs
 }
 
 export type ChipAttrs = ChipAttrsByKind[MentionKind]
@@ -139,6 +149,12 @@ export const CHIP_ATTRIBUTE_SCHEMA: {
     'repo-slug',
     'provider',
   ],
+  [MentionKind.Monitoring]: [
+    'item-id',
+    'item-name',
+    'resource-type',
+    'workbench-id',
+  ],
 }
 
 type ChipAttrRecord = Record<string, string | null | undefined>
@@ -169,6 +185,7 @@ export function chipDisplayText(
     }
     case MentionKind.Repository:
     case MentionKind.Stack:
+    case MentionKind.Monitoring:
     default:
       return name
   }

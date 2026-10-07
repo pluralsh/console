@@ -5,37 +5,56 @@ metadata:
   labels:
     app.kubernetes.io/part-of: plural-deployment-controller
   {{- include "controller.labels" . | nindent 4 }}
+{{- $coreRules := list .Values.rbac.configMapsAndNamespaces .Values.rbac.secrets }}
+{{- range $rule := $coreRules }}
+{{- if or (has "*" $rule.resources) (has "*" $rule.verbs) }}
+{{- fail "RBAC resources and verbs must be explicitly enumerated; wildcards are not allowed" }}
+{{- end }}
+{{- end }}
+{{- $deploymentsRule := .Values.rbac.deploymentsPlural }}
+{{- if or
+  (has "*" $deploymentsRule.resources)
+  (has "*" $deploymentsRule.verbs)
+  (has "*" $deploymentsRule.finalizerVerbs)
+  (has "*" $deploymentsRule.statusVerbs)
+}}
+{{- fail "RBAC resources and verbs must be explicitly enumerated; wildcards are not allowed" }}
+{{- end }}
 rules:
 - apiGroups:
   - ""
   resources:
-  - configmaps
-  - namespaces
+{{ toYaml .Values.rbac.configMapsAndNamespaces.resources | indent 2 }}
   verbs:
-  - get
-  - list
-  - patch
-  - update
-  - watch
-  - create
+{{ toYaml .Values.rbac.configMapsAndNamespaces.verbs | indent 2 }}
 - apiGroups:
   - ""
   resources:
-  - secrets
+{{ toYaml .Values.rbac.secrets.resources | indent 2 }}
   verbs:
-  - get
-  - list
-  - patch
-  - update
-  - watch
-  - create
-  - delete
+{{ toYaml .Values.rbac.secrets.verbs | indent 2 }}
 - apiGroups:
   - deployments.plural.sh
   resources:
-  - '*'
+{{ toYaml $deploymentsRule.resources | indent 2 }}
   verbs:
-  - '*'
+{{ toYaml $deploymentsRule.verbs | indent 2 }}
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  {{- range $resource := $deploymentsRule.resources }}
+  - {{ $resource }}/finalizers
+  {{- end }}
+  verbs:
+{{ toYaml $deploymentsRule.finalizerVerbs | indent 2 }}
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  {{- range $resource := $deploymentsRule.resources }}
+  - {{ $resource }}/status
+  {{- end }}
+  verbs:
+{{ toYaml $deploymentsRule.statusVerbs | indent 2 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

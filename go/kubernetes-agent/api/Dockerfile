@@ -27,7 +27,7 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
-FROM golang:1.26.6-alpine AS builder
+FROM golang:1.27.1-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -70,3 +70,4 @@ USER nonroot:nonroot
 # The port that the application listens on.
 EXPOSE 8000 8001
 ENTRYPOINT ["/dashboard-api", "--insecure-bind-address=0.0.0.0", "--bind-address=0.0.0.0"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/dashboard-api", "--help"]

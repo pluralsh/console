@@ -1,0 +1,49 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "Optional provider-specific query used to select logs. Leave empty to aggregate logs without a text filter."
+        },
+        "bucket_size": {
+            "type": "string",
+            "description": "The duration of each aggregation bucket, for example 5m"
+        },
+        "operator": {
+            "type": "string",
+            "enum": ["and", "or"],
+            "default": "or",
+            "description": "How terms in the log query are combined. Facet filters are always combined with AND."
+        },
+        "facets": {
+            "type": "array",
+            "description": "The facets used to filter logs",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "value"]
+            }
+        },
+        "time_range": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time in ISO8601 format"
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time in ISO8601 format"
+                }
+            }
+        }
+    },
+    "required": ["bucket_size"]
+}

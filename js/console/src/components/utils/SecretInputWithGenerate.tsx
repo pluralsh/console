@@ -1,14 +1,14 @@
-import { Flex, IconFrame, Input2, ReloadIcon } from '@pluralsh/design-system'
+import { Flex, IconFrame, Input, ReloadIcon } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { generateRandomAlphanumeric } from 'utils/generateRandomAlphanumeric'
 import { ChangeEvent, ComponentProps, useCallback } from 'react'
 
 type SecretInputWithGenerateProps = {
   value: string
-  onChange: ComponentProps<typeof Input2>['onChange']
+  onChange: ComponentProps<typeof Input>['onChange']
   masked?: boolean
   defaultRevealed?: boolean
-} & Omit<ComponentProps<typeof Input2>, 'value' | 'onChange'>
+} & Omit<ComponentProps<typeof Input>, 'value' | 'onChange'>
 
 const inputGrowStyles = { flex: 1, minWidth: 0, width: '100%' } as const
 
@@ -40,7 +40,7 @@ export function SecretInputWithGenerate({
           {...props}
         />
       ) : (
-        <Input2
+        <Input
           value={value}
           onChange={onChange}
           css={inputGrowStyles}

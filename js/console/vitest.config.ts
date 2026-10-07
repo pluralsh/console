@@ -1,5 +1,5 @@
-import { defineConfig, Plugin } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
+import { resolve } from 'path'
+import { defineConfig } from 'vitest/config'
 
 // https://vitest.dev/config/
 export default defineConfig({
@@ -10,9 +10,17 @@ export default defineConfig({
     root: 'src',
   },
   cacheDir: '../node_modules/',
-  esbuild: { jsx: 'automatic' },
-  plugins: [tsconfigPaths() as Plugin],
+  oxc: { jsx: { runtime: 'automatic' } },
   resolve: {
+    tsconfigPaths: true,
     mainFields: ['module'],
+    // Same as vite.config.ts: resolve the design system from src so unit
+    // tests don't need `yarn workspace @pluralsh/design-system build`.
+    alias: {
+      '@pluralsh/design-system': resolve(
+        import.meta.dirname,
+        '../design-system/src'
+      ),
+    },
   },
 })

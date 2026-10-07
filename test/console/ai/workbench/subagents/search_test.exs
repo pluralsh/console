@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.SearchTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
   alias Console.AI.Workbench.{Engine, Environment, Subagents.Search}
 
   import ElasticsearchUtils
@@ -62,13 +62,13 @@ defmodule Console.AI.Workbench.Subagents.SearchTest do
       #   {:ok, "exa search results"}
       # end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "checking web", [
           %Tool{name: "exa_exa_web_search_exa", arguments: %{"query" => "status page"}, id: "1"}
         ]}
       end)
 
-      expect(Provider, :completion, fn msgs, _ ->
+      expect_reqllm_completion(fn msgs, _ ->
         assert Enum.any?(msgs, &match?({:tool, _, %{name: "exa_exa_web_search_exa"}}, &1))
 
         {:ok, "done", [

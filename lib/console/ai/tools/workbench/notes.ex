@@ -17,7 +17,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
   def name(), do: "workbench_notes"
   def json_schema(), do: @json_schema
-  def description(), do: "Record notes about the current task and plan.  Call this as work is completed throughout this job's duration."
+  def description(), do: "Record notes about the current task and plan. Call this as work is completed throughout this job's duration. If a user resteers the job, you MUST call this and reset `status.objective` to the new task (and regenerate todos and working theory); the result's current objective is not updated otherwise."
 
   def changeset(model, attrs) do
     model

@@ -3,7 +3,7 @@ defmodule Console.Deployments.AgentsTest do
   alias Console.Deployments.Agents
   alias Console.Deployments.Pr.Review
   alias Console.PubSub
-  alias Console.Schema.{AgentMessage, AgentPrompt, AgentPromptHistory, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
+  alias Console.Schema.{AgentMessage, AgentPrompt, AgentPromptHistory, ScmConnection, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
   use Mimic
 
   describe "upsert_agent_runtime/3" do
@@ -104,6 +104,17 @@ defmodule Console.Deployments.AgentsTest do
 
       {:error, _} = Agents.delete_agent_runtime(runtime.id, cluster)
 
+      assert refetch(runtime)
+    end
+
+    test "cannot delete an agent runtime still referenced by a workbench" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      insert(:workbench, agent_runtime: runtime)
+
+      {:error, %Ecto.Changeset{} = cs} = Agents.delete_agent_runtime(runtime.id, cluster)
+
+      assert elem(cs.errors[:id], 0) =~ "workbenches"
       assert refetch(runtime)
     end
   end
@@ -681,13 +692,20 @@ defmodule Console.Deployments.AgentsTest do
     test "it uses the runtime's bound scm connection" do
       cluster = insert(:cluster)
       default = insert(:scm_connection, default: true, token: "default-token")
-      runtime_conn = insert(:scm_connection, name: "runtime-github", token: "runtime-token")
+      runtime_conn = insert(:scm_connection,
+        name: "runtime-github",
+        token: "runtime-token",
+        proxy: %ScmConnection.Proxy{url: "http://proxy.example.com:8080", noproxy: "github.internal"}
+      )
       runtime = insert(:agent_runtime, cluster: cluster, connection: runtime_conn)
       run = insert(:agent_run, runtime: runtime)
 
       {:ok, creds} = Agents.scm_creds(run, cluster)
 
       assert creds.token == "runtime-token"
+      assert creds.proxy.enabled
+      assert creds.proxy.url == "http://proxy.example.com:8080"
+      assert creds.proxy.noproxy == "github.internal"
       refute creds.token == default.token
     end
   end
@@ -972,6 +990,40 @@ defmodule Console.Deployments.AgentsTest do
       assert updated.metadata.tool.state == :completed
       assert updated.metadata.tool.output == "0 failures"
       assert_receive {:event, %PubSub.AgentMessageUpdated{item: ^updated}}
+    end
+
+    test "it strips null bytes from message text and metadata" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      assert {:ok, updated} =
+               Agents.update_agent_message(
+                 %{
+                   message: "completed" <> <<0>>,
+                   role: message.role,
+                   metadata: %{
+                     reasoning: %{text: "reason" <> <<0>>},
+                     file: %{name: "output" <> <<0>>, text: "contents" <> <<0>>},
+                     tool: %{
+                       name: "shell" <> <<0>>,
+                       state: :completed,
+                       input: "mix test" <> <<0>>,
+                       output: "0 failures" <> <<0>>
+                     }
+                   }
+                 },
+                 message.id,
+                 runtime.cluster
+               )
+
+      assert updated.message == "completed"
+      assert updated.metadata.reasoning.text == "reason"
+      assert updated.metadata.file.name == "output"
+      assert updated.metadata.file.text == "contents"
+      assert updated.metadata.tool.name == "shell"
+      assert updated.metadata.tool.input == "mix test"
+      assert updated.metadata.tool.output == "0 failures"
     end
   end
 end

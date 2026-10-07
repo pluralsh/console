@@ -29,8 +29,8 @@ export default function StackEnvironmentApplyModal({
     hasUpdates,
     update,
   } = useUpdateState(initialValue)
-  const nameRef = useRef<HTMLInputElement>(undefined)
-  const valueRef = useRef<HTMLInputElement>(undefined)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const valueRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (mode === 'edit') {
@@ -124,9 +124,11 @@ export default function StackEnvironmentApplyModal({
       <FormField label="Value">
         <Input
           value={value}
-          type={secret ? 'password' : 'text'}
           onChange={(e) => update({ value: e.target.value })}
-          inputProps={{ ref: valueRef }}
+          inputProps={{
+            ref: valueRef,
+            type: secret ? 'password' : 'text',
+          }}
         />
       </FormField>
       <Switch

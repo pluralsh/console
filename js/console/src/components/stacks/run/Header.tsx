@@ -212,7 +212,8 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
           error={{ graphQLErrors: [...(error?.graphQLErrors ?? [])] }}
           header="Error (500)"
           margin="xlarge"
-          marginVertical="xxxlarge"
+          marginTop="xxxlarge"
+          marginBottom="xxxlarge"
         />
       )}
       {restartError && (
@@ -220,7 +221,8 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
           error={{ graphQLErrors: [...(restartError?.graphQLErrors ?? [])] }}
           header="Error (500)"
           margin="xlarge"
-          marginVertical="xxxlarge"
+          marginTop="xxxlarge"
+          marginBottom="xxxlarge"
         />
       )}
       <div

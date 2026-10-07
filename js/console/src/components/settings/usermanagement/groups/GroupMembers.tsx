@@ -19,7 +19,10 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_PAGE_SIZE,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 import UserInfo from 'components/utils/UserInfo'
 
 type GroupMembersMeta = {
@@ -32,12 +35,14 @@ export function GroupMembers({
   viewOnly,
   removeMember,
   newGroupUsers,
+  pageSize,
 }: {
   groupId: Nullable<string>
   viewOnly?: boolean
   addMember?: (user: UserFragment) => void
   removeMember?: Nullable<(user: UserFragment) => void>
   newGroupUsers?: UserFragment[]
+  pageSize?: number
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -45,6 +50,7 @@ export function GroupMembers({
         queryHook: useGroupMembersQuery,
         keyPath: ['groupMembers'],
         skip: !groupId,
+        pageSize,
       },
       { id: groupId ?? '' }
     )
@@ -56,6 +62,7 @@ export function GroupMembers({
         : (newGroupUsers?.map((user) => ({ user })) ?? []),
     [data?.groupMembers, groupId, newGroupUsers]
   )
+  const paginate = (pageSize ?? DEFAULT_PAGE_SIZE) < 1000
   const meta: GroupMembersMeta = {
     viewOnly,
     removeMember,
@@ -72,10 +79,14 @@ export function GroupMembers({
       loadingSkeletonRows={4}
       columns={cols}
       reactTableOptions={{ meta }}
-      hasNextPage={pageInfo?.hasNextPage}
-      fetchNextPage={fetchNextPage}
-      isFetchingNextPage={loading}
-      onVirtualSliceChange={setVirtualSlice}
+      {...(paginate
+        ? {
+            hasNextPage: pageInfo?.hasNextPage,
+            fetchNextPage,
+            isFetchingNextPage: loading,
+            onVirtualSliceChange: setVirtualSlice,
+          }
+        : {})}
       emptyStateProps={{ message: 'Add members to this group.' }}
     />
   )

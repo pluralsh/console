@@ -1,0 +1,5 @@
+apiVersion: v2
+name: lua-warnings
+description: A minimal Helm chart used to test Lua templating warnings
+version: 0.1.0
+appVersion: "1.0"

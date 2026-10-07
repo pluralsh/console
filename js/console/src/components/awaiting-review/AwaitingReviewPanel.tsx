@@ -58,7 +58,7 @@ export function AwaitingReviewPanel({
         align="center"
         gap="xsmall"
         padding="small"
-        borderBottom={theme.borders['fill-two']}
+        css={{ borderBottom: theme.borders['fill-two'] }}
       >
         <IconFrame icon={<ClipboardChecked color="icon-xlight" />} />
         <Overline css={{ flexGrow: 1 }}>Awaiting review</Overline>

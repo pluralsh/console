@@ -1,6 +1,7 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
   alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient, HelmRepository, OCIAuth}
+  alias Console.Schema.DeploymentSettings.OauthToken, as: TokenExchange
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
@@ -35,7 +36,10 @@ defmodule Console.Schema.WorkbenchTool do
     lambda: 26,
     cloud_run: 27,
     azure_function: 28,
-    docker: 29
+    docker: 29,
+    victoria_logs: 30,
+    jira: 31,
+    jira_datacenter: 32
 
   defenum Category,
     metrics: 0,
@@ -54,12 +58,15 @@ defmodule Console.Schema.WorkbenchTool do
     observability: 13
 
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
+  defenum SplunkTokenType, bearer: 0, splunk: 1
 
   schema "workbench_tools" do
     field :tool,            Tool
     field :categories,      {:array, Category}
     field :name,            :string
     field :approval,        :boolean, default: false
+
+    embeds_one :oauth, TokenExchange, on_replace: :update
 
     embeds_one :oauth_token, OauthToken, on_replace: :update do
       field :access_token,  :string
@@ -126,6 +133,17 @@ defmodule Console.Schema.WorkbenchTool do
         field :email,           :string
       end
 
+      embeds_one :jira, JiraConnection, on_replace: :update do
+        field :url,       :string
+        field :api_token, EncryptedString
+        field :email,     :string
+      end
+
+      embeds_one :jira_datacenter, JiraDatacenterConnection, on_replace: :update do
+        field :url,       :string
+        field :api_token, EncryptedString
+      end
+
       embeds_one :prometheus, PrometheusConnection, on_replace: :update do
         field :url,       :string
         field :token,     EncryptedString
@@ -147,11 +165,21 @@ defmodule Console.Schema.WorkbenchTool do
         field :password,  EncryptedString
       end
 
+      embeds_one :victoria_logs, VictoriaLogsConnection, on_replace: :update do
+        field :url,        :string
+        field :token,      EncryptedString
+        field :username,   :string
+        field :password,   EncryptedString
+        field :account_id, :string
+        field :project_id, :string
+      end
+
       embeds_one :splunk, SplunkConnection, on_replace: :update do
-        field :url,      :string
-        field :token,    EncryptedString
-        field :username, :string
-        field :password, EncryptedString
+        field :url,        :string
+        field :token,      EncryptedString
+        field :token_type, SplunkTokenType, default: :bearer
+        field :username,   :string
+        field :password,   EncryptedString
       end
 
       embeds_one :tempo, TempoConnection, on_replace: :update do
@@ -209,8 +237,8 @@ defmodule Console.Schema.WorkbenchTool do
       end
 
       embeds_one :bitbucket_datacenter, BitbucketDatacenterConnection, on_replace: :update do
-        field :url,      :string
-        field :token,    EncryptedString
+        field :url,   :string
+        field :token, EncryptedString
       end
 
       embeds_one :azure_devops, AzureDevopsConnection, on_replace: :update do
@@ -315,13 +343,17 @@ defmodule Console.Schema.WorkbenchTool do
     |> unique_constraint(:name)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> cast_embed(:oauth)
     |> cast_embed(:oauth_token, with: &oauth_token_changeset/2)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
+    |> validate_jira_datacenter_auth()
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cloud_connection_id)
     |> foreign_key_constraint(:mcp_server_id)
     |> foreign_key_constraint(:scm_connection_id)
-    |> validate_format(:name, ~r/^[a-z0-9]([\._a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, .,  and underscores allowed)")
+    |> validate_format(:name, ~r/^[a-z](?:[a-z0-9._]*[a-z0-9])?$/,
+      message: "must be a valid name for OpenAI tool calling: start with a lowercase letter, end with a letter or number, and contain only lowercase letters, numbers, dots, and underscores"
+    )
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :tool])
@@ -375,6 +407,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:splunk), do: [:logs]
   defp categories(:prometheus), do: [:metrics]
   defp categories(:loki), do: [:logs]
+  defp categories(:victoria_logs), do: [:logs]
   defp categories(:elastic), do: [:logs]
   defp categories(:opensearch), do: [:logs]
   defp categories(:tempo), do: [:traces]
@@ -386,6 +419,8 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:pagerduty), do: [:integration]
   defp categories(:teams), do: [:chat]
   defp categories(:atlassian), do: [:ticketing]
+  defp categories(:jira), do: [:ticketing]
+  defp categories(:jira_datacenter), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]
   defp categories(:gitlab), do: [:scm]
@@ -403,6 +438,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:opensearch, with: &opensearch_configuration_changeset/2)
     |> cast_embed(:prometheus, with: &prom_configuration_changeset/2)
     |> cast_embed(:loki, with: &loki_configuration_changeset/2)
+    |> cast_embed(:victoria_logs, with: &victoria_logs_configuration_changeset/2)
     |> cast_embed(:splunk, with: &splunk_configuration_changeset/2)
     |> cast_embed(:tempo, with: &tempo_configuration_changeset/2)
     |> cast_embed(:jaeger, with: &jaeger_configuration_changeset/2)
@@ -417,6 +453,8 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:pagerduty, with: &pagerduty_configuration_changeset/2)
     |> cast_embed(:teams, with: &teams_configuration_changeset/2)
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
+    |> cast_embed(:jira, with: &jira_configuration_changeset/2)
+    |> cast_embed(:jira_datacenter, with: &jira_datacenter_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
     |> cast_embed(:gitlab, with: &gitlab_configuration_changeset/2)
     |> cast_embed(:bitbucket, with: &bitbucket_configuration_changeset/2)
@@ -478,6 +516,12 @@ defmodule Console.Schema.WorkbenchTool do
     |> validate_required([:url])
   end
 
+  defp victoria_logs_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token username password account_id project_id)a)
+    |> validate_required([:url])
+  end
+
   defp tempo_configuration_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(url token tenant_id username password)a)
@@ -527,7 +571,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp splunk_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url token username password)a)
+    |> cast(attrs, ~w(url token token_type username password)a)
     |> then(fn cs ->
       case {get_field(cs, :token), get_field(cs, :username), get_field(cs, :password)} do
         {token, _, _} when is_binary(token) and token != "" -> cs
@@ -598,6 +642,34 @@ defmodule Console.Schema.WorkbenchTool do
       end
     end)
   end
+
+  defp jira_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url api_token email)a)
+    |> validate_required([:url, :api_token, :email])
+  end
+
+  defp jira_datacenter_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url api_token)a)
+    |> validate_required([:url])
+  end
+
+  defp validate_jira_datacenter_auth(changeset) do
+    with :jira_datacenter <- get_field(changeset, :tool),
+         %{jira_datacenter: jira} <- get_field(changeset, :configuration),
+         false <- present?(jira && jira.api_token),
+         false <- oauth_configured?(get_field(changeset, :oauth)) do
+      add_error(changeset, :configuration, "jira data center requires an API token or OAuth token exchange")
+    else
+      _ -> changeset
+    end
+  end
+
+  defp oauth_configured?(%TokenExchange{enabled: enabled}) when enabled != false, do: true
+  defp oauth_configured?(_), do: false
+
+  defp present?(value), do: is_binary(value) and String.trim(value) != ""
 
   defp github_configuration_changeset(model, attrs) do
     model

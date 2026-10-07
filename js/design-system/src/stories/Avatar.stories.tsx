@@ -1,4 +1,4 @@
-import { Avatar } from 'honorable'
+import { Avatar } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {

@@ -79,6 +79,18 @@ export function ServicesTreeDiagramServiceNode({
   return (
     <NodeBase
       id={id}
+      width={336}
+      style={{
+        backgroundColor: theme.colors['fill-two'],
+        borderColor:
+          data.status === ServiceDeploymentStatus.Failed
+            ? theme.colors['border-danger']
+            : data.status === ServiceDeploymentStatus.Stale
+              ? theme.colors['border-warning']
+              : undefined,
+        gap: 0,
+        padding: 0,
+      }}
       // additionalContent={
       //   !isEmpty(data.components) ? (
       //     <NodeBaseCard
@@ -129,17 +141,6 @@ export function ServicesTreeDiagramServiceNode({
       //     </NodeBaseCard>
       //   ) : undefined
       // }
-      backgroundColor="fill-two"
-      borderColor={
-        data.status === ServiceDeploymentStatus.Failed
-          ? theme.colors['border-danger']
-          : data.status === ServiceDeploymentStatus.Stale
-            ? theme.colors['border-warning']
-            : undefined
-      }
-      gap={0}
-      padding={0}
-      width={336}
     >
       <div
         css={{
@@ -500,9 +501,8 @@ export function ServicesTreeDiagramGlobalServiceNode({
   return (
     <NodeBase
       id={id}
-      gap={0}
-      padding={0}
       width={336}
+      style={{ gap: 0, padding: 0 }}
     >
       <div
         css={{

@@ -108,7 +108,7 @@ export function ModalForm({
     [disabled, loading, mutation]
   )
 
-  const inputRef = useRef<HTMLInputElement>(undefined)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     inputRef.current?.focus?.()

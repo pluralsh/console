@@ -81,12 +81,32 @@ spec:
         env:
         - name: KAS_SERVICE
         {{ if .Values.console.config.kasHost }}
+          {{- if .Values.kas.tls.enabled }}
+          value: {{ printf "https://%s" .Values.console.config.kasHost | quote }}
+          {{- else }}
           value: {{ .Values.console.config.kasHost }}
+          {{- end }}
+        {{ else if and .Values.kas.tls.enabled .Values.kas.ingress.kas_dns }}
+          value: {{ printf "https://%s" .Values.kas.ingress.kas_dns | quote }}
         {{ else }}
+          {{- if .Values.kas.tls.enabled }}
+          value: {{ printf "https://%s.%s:%v" (include "kas.serviceName" .) .Release.Namespace .Values.kas.service.kubernetesApiPort | quote }}
+          {{- else }}
           value: {{ include "kas.serviceName" . }}.{{ .Release.Namespace }}:{{ .Values.kas.service.kubernetesApiPort }}
+          {{- end }}
         {{ end }}
+        {{- if and .Values.kas.tls.enabled (not .Values.console.config.kasHost) }}
+        - name: KAS_INSECURE_SKIP_TLS_VERIFY
+          value: "true"
+        {{- end }}
         - name: REPLICAS
           value: {{ .Values.replicaCount | quote }}
+        {{- if .Values.console.tls.enabled }}
+        - name: CONSOLE_TLS_CERT_FILE
+          value: /etc/plrl/tls.crt
+        - name: CONSOLE_TLS_KEY_FILE
+          value: /etc/plrl/tls.key
+        {{- end }}
         {{ include "console.env" . | nindent 8 }}
         {{- if  .Values.extraEnv }}
         {{ toYaml .Values.extraEnv | nindent 8 }}
@@ -98,6 +118,11 @@ spec:
           mountPath: /shared
         - name: home-cache-dir
           mountPath: {{ .Values.homeDir }}/.cache
+        {{- if .Values.console.tls.enabled }}
+        - name: console-tls
+          mountPath: /etc/plrl
+          readOnly: true
+        {{- end }}
         {{ if .Values.cloud.pgRootCert }}
         - mountPath: /opt/app/certs
           name: pg-cert
@@ -117,7 +142,7 @@ spec:
         {{ end }}
         {{ end }}
         ports:
-        - name: http
+        - name: {{ ternary "https" "http" .Values.console.tls.enabled }}
           containerPort: {{ .Values.service.port }}
           protocol: TCP
         - name: metrics
@@ -132,10 +157,22 @@ spec:
         - name: grpc
           containerPort: 50051
           protocol: TCP
+        {{- $livenessProbe := deepCopy .Values.livenessProbe }}
+        {{- $readinessProbe := deepCopy .Values.readinessProbe }}
+        {{- if .Values.console.tls.enabled }}
+        {{- if hasKey $livenessProbe "httpGet" }}
+        {{- $_ := set $livenessProbe.httpGet "scheme" "HTTPS" }}
+        {{- $_ := set $livenessProbe.httpGet "port" "https" }}
+        {{- end }}
+        {{- if hasKey $readinessProbe "httpGet" }}
+        {{- $_ := set $readinessProbe.httpGet "scheme" "HTTPS" }}
+        {{- $_ := set $readinessProbe.httpGet "port" "https" }}
+        {{- end }}
+        {{- end }}
         livenessProbe:
-        {{ toYaml .Values.livenessProbe | nindent 10 }}
+        {{ toYaml $livenessProbe | nindent 10 }}
         readinessProbe:
-        {{ toYaml .Values.readinessProbe | nindent 10 }}
+        {{ toYaml $readinessProbe | nindent 10 }}
         resources:
         {{- toYaml .Values.resources | nindent 10 }}
       {{- with .Values.nodeSelector }}
@@ -157,6 +194,16 @@ spec:
         emptyDir: { }
       - name: home-cache-dir
         emptyDir: { }
+      {{- if .Values.console.tls.enabled }}
+      - name: console-tls
+        secret:
+          secretName: {{ required "console.tls.existingSecret is required when console TLS is enabled" .Values.console.tls.existingSecret }}
+          items:
+          - key: {{ .Values.console.tls.certificateKey }}
+            path: tls.crt
+          - key: {{ .Values.console.tls.privateKeyKey }}
+            path: tls.key
+      {{- end }}
       {{ if .Values.cloud.pgRootCert }}
       - name: pg-cert
         secret:

@@ -16,6 +16,7 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -32,6 +33,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	consoleclient "github.com/pluralsh/console/go/deployment-operator/pkg/client"
@@ -61,7 +63,11 @@ func initKubeManagerOrDie(config *rest.Config) manager.Manager {
 	}
 
 	mgr, err := ctrl.NewManager(config, ctrl.Options{
-		NewClient:              ctrlclient.New, // client reads directly from the API server
+		Client: ctrlclient.Options{
+			Cache: &ctrlclient.CacheOptions{
+				DisableFor: []ctrlclient.Object{&corev1.Secret{}},
+			},
+		},
 		Logger:                 setupLog,
 		Scheme:                 scheme,
 		LeaderElection:         args.EnableLeaderElection(),
@@ -138,6 +144,11 @@ func registerKubeReconcilersOrDie(
 	cluster, err := extConsoleClient.MyCluster()
 	if err != nil {
 		setupLog.Error(err, "unable to get cluster information from console")
+		os.Exit(1)
+	}
+	operatorNamespace, err := utils.GetOperatorNamespace()
+	if err != nil {
+		setupLog.Error(err, "unable to get operator namespace")
 		os.Exit(1)
 	}
 
@@ -309,17 +320,25 @@ func registerKubeReconcilersOrDie(
 	}
 
 	agentRuntimeReconciler := &controller.AgentRuntimeReconciler{
-		Client:           manager.GetClient(),
-		Scheme:           manager.GetScheme(),
-		ConsoleClient:    extConsoleClient,
-		CacheSyncTimeout: args.PollInterval() * 3,
-		Ctx:              ctx,
-		ClusterID:        cluster.MyCluster.ID,
+		Client:            manager.GetClient(),
+		Scheme:            manager.GetScheme(),
+		ConsoleClient:     extConsoleClient,
+		CacheSyncTimeout:  args.PollInterval() * 3,
+		Ctx:               ctx,
+		ClusterID:         cluster.MyCluster.ID,
+		OperatorNamespace: operatorNamespace,
 	}
 	if err := agentRuntimeReconciler.SetupWithManager(manager); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "AgentRuntime")
 	}
 	consoleManager.Socket.AddPublisher("agent_run", agentRuntimeReconciler)
+
+	if err := (&controller.ImageWarmerReconciler{
+		Client: manager.GetClient(),
+		Scheme: manager.GetScheme(),
+	}).SetupWithManager(manager); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ImageWarmer")
+	}
 
 	if err := (&controller.AgentRunReconciler{
 		Client:           manager.GetClient(),

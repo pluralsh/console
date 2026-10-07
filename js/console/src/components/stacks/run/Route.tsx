@@ -80,7 +80,8 @@ export default function StackRunDetail(): ReactNode {
             error={{ graphQLErrors: [{ ...error }] }}
             header="Error"
             margin="medium"
-            marginHorizontal="xxxxlarge"
+            marginLeft="xxxxlarge"
+            marginRight="xxxxlarge"
           />
         )}
         <EmptyState message="Stack run not found." />

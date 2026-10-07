@@ -11,7 +11,7 @@ defmodule Console.AI.Workbench.Subagents.History do
     tools(environment, job)
     |> MemoryEngine.new(20,
       engine_opts(environment) ++ [
-        system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
+        system_prompt: &String.trim(system_prompt(engine: &1)),
         acc: %{},
         callback: &callback(activity, environment, &1),
         continue_msg: cont_msg()
@@ -34,7 +34,7 @@ defmodule Console.AI.Workbench.Subagents.History do
     end
   end
 
-  defp tools(%Environment{skills: skills}, job) do
+  def tools(%Environment{skills: skills}, job) do
     job = Repo.preload(job, [referenced_job: [activities: :thoughts]])
     skills = Environment.subagent_skills(skills, :memory)
     skill_knowledge_tools(job, skills) ++ [

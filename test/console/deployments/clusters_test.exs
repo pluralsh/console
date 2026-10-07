@@ -2,7 +2,7 @@ defmodule Console.Deployments.ClustersTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.{Clusters, Services, Settings}
+  alias Console.Deployments.{Clusters, Services, Settings, Compatibilities}
   alias Kazan.Apis.Core.V1, as: CoreV1
   import KubernetesScaffolds
 
@@ -1481,8 +1481,17 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it errors if the upgrade plan is not ready" do
       user = admin_user()
-      cluster = insert(:cluster, current_version: "1.36.1", write_bindings: [%{user_id: user.id}])
-      insert(:cloud_addon, cluster: cluster, name: "coredns", version: "v1.14.3-eksbuild.2", distro: :eks)
+
+      # the compatibility matrix is updated continuously, so derive a cluster version whose next
+      # minor has no known coredns release instead of hardcoding one
+      %{versions: [_ | _] = vsns} = Compatibilities.CloudAddOns.fetch("eks", "coredns")
+      {addon_version, kube} =
+        vsns
+        |> Enum.flat_map(fn %{version: v, compatibilities: kube} -> Enum.map(kube || [], &{v, &1}) end)
+        |> Enum.max_by(fn {_, kube} -> Version.parse!("#{kube}.0") end, Version)
+
+      cluster = insert(:cluster, current_version: "#{kube}.1", write_bindings: [%{user_id: user.id}])
+      insert(:cloud_addon, cluster: cluster, name: "coredns", version: addon_version, distro: :eks)
 
       {:error, msg} = Clusters.create_cluster_upgrade(cluster.id, user)
 

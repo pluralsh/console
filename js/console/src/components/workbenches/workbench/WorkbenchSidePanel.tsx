@@ -283,23 +283,28 @@ const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
   backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders.hairline,
+  boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 0,
+  height: '100%',
   maxWidth: 250,
   minHeight: 0,
   minWidth: 250,
-  overflowX: 'hidden',
-  overflowY: 'auto',
-  WebkitOverflowScrolling: 'touch',
+  overflow: 'hidden',
   width: 250,
 }))
 
 const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
+  flex: 1,
   flexDirection: 'column',
   gap: theme.spacing.large,
+  minHeight: 0,
+  overflowX: 'hidden',
+  overflowY: 'auto',
   padding: theme.spacing.medium,
+  WebkitOverflowScrolling: 'touch',
 }))
 
 const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({

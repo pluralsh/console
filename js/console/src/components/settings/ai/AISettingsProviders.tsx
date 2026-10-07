@@ -1,4 +1,14 @@
-import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
+import {
+  Accordion,
+  AccordionItem,
+  Button,
+  ChipList,
+  Flex,
+  FormField,
+  Input,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
 import { FileDrop, FileDropFile } from 'components/utils/FileDrop.tsx'
 import { isEmpty } from 'lodash'
 import { useCallback, useState } from 'react'
@@ -7,6 +17,8 @@ import {
   AiProvider,
   AiSettings,
   AiSettingsAttributes,
+  BedrockEndpoint,
+  BedrockModelSettingsAttributes,
   ModelDefault,
   OpenAiMethod,
 } from '../../../generated/graphql.ts'
@@ -23,6 +35,51 @@ const bedrockEmbeddingModelTooltip =
   'Bedrock model used for embeddings and vector search.'
 const bedrockToolModelTooltip =
   'Bedrock model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
+const bedrockRegionTooltip = 'AWS region where your Bedrock models are hosted.'
+const bedrockEndpointTooltip =
+  'Bedrock API surface. Runtime uses InvokeModel or Converse; Mantle uses the Anthropic/OpenAI-compatible APIs.'
+
+const DEFAULT_BEDROCK_REGION = 'us-east-1'
+
+// Usable Amazon Bedrock commercial and GovCloud regions.
+// https://docs.aws.amazon.com/general/latest/gr/bedrock.html
+const BEDROCK_REGIONS = [
+  { value: 'us-east-1', label: 'US East (N. Virginia)' },
+  { value: 'us-east-2', label: 'US East (Ohio)' },
+  { value: 'us-west-1', label: 'US West (N. California)' },
+  { value: 'us-west-2', label: 'US West (Oregon)' },
+  { value: 'ca-central-1', label: 'Canada (Central)' },
+  { value: 'ca-west-1', label: 'Canada West (Calgary)' },
+  { value: 'mx-central-1', label: 'Mexico (Central)' },
+  { value: 'sa-east-1', label: 'South America (São Paulo)' },
+  { value: 'eu-central-1', label: 'Europe (Frankfurt)' },
+  { value: 'eu-central-2', label: 'Europe (Zurich)' },
+  { value: 'eu-north-1', label: 'Europe (Stockholm)' },
+  { value: 'eu-south-1', label: 'Europe (Milan)' },
+  { value: 'eu-south-2', label: 'Europe (Spain)' },
+  { value: 'eu-west-1', label: 'Europe (Ireland)' },
+  { value: 'eu-west-2', label: 'Europe (London)' },
+  { value: 'eu-west-3', label: 'Europe (Paris)' },
+  { value: 'af-south-1', label: 'Africa (Cape Town)' },
+  { value: 'il-central-1', label: 'Israel (Tel Aviv)' },
+  { value: 'me-central-1', label: 'Middle East (UAE)' },
+  { value: 'me-south-1', label: 'Middle East (Bahrain)' },
+  { value: 'ap-east-2', label: 'Asia Pacific (Taipei)' },
+  { value: 'ap-northeast-1', label: 'Asia Pacific (Tokyo)' },
+  { value: 'ap-northeast-2', label: 'Asia Pacific (Seoul)' },
+  { value: 'ap-northeast-3', label: 'Asia Pacific (Osaka)' },
+  { value: 'ap-south-1', label: 'Asia Pacific (Mumbai)' },
+  { value: 'ap-south-2', label: 'Asia Pacific (Hyderabad)' },
+  { value: 'ap-southeast-1', label: 'Asia Pacific (Singapore)' },
+  { value: 'ap-southeast-2', label: 'Asia Pacific (Sydney)' },
+  { value: 'ap-southeast-3', label: 'Asia Pacific (Jakarta)' },
+  { value: 'ap-southeast-4', label: 'Asia Pacific (Melbourne)' },
+  { value: 'ap-southeast-5', label: 'Asia Pacific (Malaysia)' },
+  { value: 'ap-southeast-6', label: 'Asia Pacific (New Zealand)' },
+  { value: 'ap-southeast-7', label: 'Asia Pacific (Thailand)' },
+  { value: 'us-gov-east-1', label: 'AWS GovCloud (US-East)' },
+  { value: 'us-gov-west-1', label: 'AWS GovCloud (US-West)' },
+] as const
 
 export const aiProviderToLabel = {
   [AiProvider.Openai]: 'OpenAI',
@@ -66,17 +123,23 @@ export function initialSettingsAttributes(
               },
             }
           : {}),
-        ...(ai.bedrock
-          ? {
-              bedrock: {
+        bedrock: {
+          ...(ai.bedrock
+            ? {
                 modelId: ai.bedrock.modelId,
                 toolModelId: ai.bedrock.toolModelId,
                 embeddingModel: ai.bedrock.embeddingModel,
+                modelSettings: ai.bedrock.modelSettings?.map((settings) => ({
+                  modelId: settings?.modelId ?? '',
+                  inferenceProfileArn: settings?.inferenceProfileArn ?? '',
+                })),
                 awsAccessKeyId: ai.bedrock.accessKeyId,
-                awsSecretAccessKey: '',
-              },
-            }
-          : {}),
+              }
+            : {}),
+          awsSecretAccessKey: '',
+          endpoint: ai.bedrock?.endpoint ?? BedrockEndpoint.Runtime,
+          region: ai.bedrock?.region ?? DEFAULT_BEDROCK_REGION,
+        },
         ...(ai.ollama
           ? {
               ollama: {
@@ -137,7 +200,13 @@ export function initialSettingsAttributes(
             }
           : {}),
       }
-    : {}
+    : {
+        bedrock: {
+          awsSecretAccessKey: '',
+          endpoint: BedrockEndpoint.Runtime,
+          region: DEFAULT_BEDROCK_REGION,
+        },
+      }
 }
 
 export function validateAttributes(
@@ -157,19 +226,11 @@ export function validateAttributes(
     case AiProvider.Anthropic:
       return !!settings.anthropic?.accessToken
     case AiProvider.Bedrock:
-      return true
+      return !!settings.bedrock?.region
     case AiProvider.Ollama:
-      return !!(
-        settings.ollama?.model &&
-        settings.ollama?.url &&
-        settings.ollama?.authorization
-      )
+      return !!(settings.ollama?.model && settings.ollama?.url)
     case AiProvider.Azure:
-      return !!(
-        settings.azure?.apiVersion &&
-        settings.azure?.endpoint &&
-        settings.azure?.accessToken
-      )
+      return !!(settings.azure?.endpoint && settings.azure?.accessToken)
     case AiProvider.Vertex:
       return !!(settings.vertex?.project && settings.vertex?.location)
     default:
@@ -195,7 +256,7 @@ export function OpenAISettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -206,7 +267,7 @@ export function OpenAISettings({
       <FormField
         label="Embedding Model"
         infoTooltip={embeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -221,7 +282,7 @@ export function OpenAISettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -232,18 +293,18 @@ export function OpenAISettings({
       <FormField
         label="Base URL"
         infoTooltip="Optional custom API base URL for OpenAI-compatible providers. Leave blank to use OpenAI."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.baseUrl}
+          value={settings?.baseUrl ?? ''}
           onChange={(e) => updateSettings({ baseUrl: e.currentTarget.value })}
         />
       </FormField>
       <FormField
         label="API method"
         infoTooltip="Choose which OpenAI API style to use. Auto lets Plural select the best method for each request."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Select
           isDisabled={!enabled}
@@ -269,7 +330,7 @@ export function OpenAISettings({
       <FormField
         label="Access token"
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -301,7 +362,7 @@ export function AnthropicSettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -312,7 +373,7 @@ export function AnthropicSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -323,7 +384,7 @@ export function AnthropicSettings({
       <FormField
         label="Access token"
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -350,12 +411,63 @@ export function BedrockSettings({
     update: NonNullable<Partial<AiSettingsAttributes['bedrock']>>
   ) => void
 }) {
+  const region = settings?.region ?? DEFAULT_BEDROCK_REGION
+  const [modelId, setModelId] = useState('')
+  const [inferenceProfileArn, setInferenceProfileArn] = useState('')
+  const modelSettings = (settings?.modelSettings ?? []).filter(
+    (settings): settings is BedrockModelSettingsAttributes => !!settings
+  )
+  const regionOptions =
+    region && !BEDROCK_REGIONS.some(({ value }) => value === region)
+      ? [...BEDROCK_REGIONS, { value: region, label: region }]
+      : BEDROCK_REGIONS
+
+  const addModelSettings = () => {
+    const normalizedModelId = modelId.trim()
+    const normalizedInferenceProfileArn = inferenceProfileArn.trim()
+    if (!normalizedModelId || !normalizedInferenceProfileArn) return
+
+    updateSettings({
+      modelSettings: [
+        ...modelSettings.filter(
+          (settings) => settings.modelId !== normalizedModelId
+        ),
+        {
+          modelId: normalizedModelId,
+          inferenceProfileArn: normalizedInferenceProfileArn,
+        },
+      ],
+    })
+    setModelId('')
+    setInferenceProfileArn('')
+  }
+
   return (
     <>
       <FormField
+        label="Region"
+        infoTooltip={bedrockRegionTooltip}
+        required={enabled}
+        style={{ flex: 1 }}
+      >
+        <Select
+          isDisabled={!enabled}
+          selectedKey={region}
+          onSelectionChange={(key) => updateSettings({ region: String(key) })}
+        >
+          {regionOptions.map(({ value, label }) => (
+            <ListBoxItem
+              key={value}
+              label={value}
+              description={label}
+            />
+          ))}
+        </Select>
+      </FormField>
+      <FormField
         label="Model ID"
         infoTooltip={bedrockModelIdTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -366,7 +478,7 @@ export function BedrockSettings({
       <FormField
         label="Embedding Model ID"
         infoTooltip={bedrockEmbeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -381,7 +493,7 @@ export function BedrockSettings({
       <FormField
         label="Tool model ID"
         infoTooltip={bedrockToolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -394,11 +506,11 @@ export function BedrockSettings({
       <FormField
         label="AWS access key ID"
         infoTooltip="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.awsAccessKeyId}
+          value={settings?.awsAccessKeyId ?? ''}
           onChange={(e) =>
             updateSettings({ awsAccessKeyId: e.currentTarget.value })
           }
@@ -407,7 +519,7 @@ export function BedrockSettings({
       <FormField
         label="AWS secret access key"
         infoTooltip="Optional. Leave blank to authenticate with AWS via EKS Pod Identity instead."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -417,6 +529,99 @@ export function BedrockSettings({
           }
         />
       </FormField>
+      <FormField
+        label="Endpoint"
+        infoTooltip={bedrockEndpointTooltip}
+        style={{ flex: 1 }}
+      >
+        <Select
+          isDisabled={!enabled}
+          selectedKey={settings?.endpoint ?? BedrockEndpoint.Runtime}
+          onSelectionChange={(key) =>
+            updateSettings({ endpoint: key as BedrockEndpoint })
+          }
+        >
+          <ListBoxItem
+            key={BedrockEndpoint.Runtime}
+            label="Runtime"
+            description="InvokeModel or Converse"
+          />
+          <ListBoxItem
+            key={BedrockEndpoint.Mantle}
+            label="Mantle"
+            description="Anthropic and OpenAI-compatible APIs"
+          />
+        </Select>
+      </FormField>
+      <Accordion type="single">
+        <AccordionItem trigger="Advanced settings">
+          <FormField
+            label="Model settings"
+            infoTooltip="Route a foundation model through an application inference profile ARN."
+          >
+            <Flex
+              direction="column"
+              gap="medium"
+            >
+              <Flex gap="medium">
+                <Input
+                  aria-label="Model ID"
+                  disabled={!enabled}
+                  placeholder="Model ID"
+                  value={modelId}
+                  onChange={(event) => setModelId(event.currentTarget.value)}
+                />
+                <Input
+                  aria-label="Inference profile ARN"
+                  disabled={!enabled}
+                  placeholder="Inference profile ARN"
+                  value={inferenceProfileArn}
+                  onChange={(event) =>
+                    setInferenceProfileArn(event.currentTarget.value)
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter') return
+                    event.preventDefault()
+                    addModelSettings()
+                  }}
+                />
+              </Flex>
+              <Button
+                type="button"
+                secondary
+                small
+                width="fit-content"
+                disabled={
+                  !enabled || !modelId.trim() || !inferenceProfileArn.trim()
+                }
+                onClick={addModelSettings}
+              >
+                Add mapping
+              </Button>
+              {modelSettings.length > 0 && (
+                <ChipList
+                  values={modelSettings}
+                  transformValue={(settings) =>
+                    `${settings.modelId} -> ${settings.inferenceProfileArn}`
+                  }
+                  limit={Infinity}
+                  size="small"
+                  closeButton
+                  emptyState={null}
+                  onClickCondition={() => true}
+                  onClick={(selected) =>
+                    updateSettings({
+                      modelSettings: modelSettings.filter(
+                        (settings) => settings.modelId !== selected.modelId
+                      ),
+                    })
+                  }
+                />
+              )}
+            </Flex>
+          </FormField>
+        </AccordionItem>
+      </Accordion>
     </>
   )
 }
@@ -440,7 +645,7 @@ export function OllamaSettings({
         label="Model"
         infoTooltip={modelTooltip}
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -451,7 +656,7 @@ export function OllamaSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -463,7 +668,7 @@ export function OllamaSettings({
         label="URL"
         infoTooltip="The URL your Ollama deployment is hosted on."
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -473,9 +678,8 @@ export function OllamaSettings({
       </FormField>
       <FormField
         label="Authorization"
-        infoTooltip="An HTTP Authorization header to use on calls to the Ollama API."
-        required={enabled}
-        flex={1}
+        infoTooltip="Optional HTTP Authorization header to use on calls to the Ollama API."
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -507,7 +711,7 @@ export function AzureSettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -517,12 +721,12 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="API version"
-        required={enabled}
-        flex={1}
+        infoTooltip="Optional Azure OpenAI API version. Leave blank to use the provider default."
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.apiVersion}
+          value={settings?.apiVersion ?? ''}
           onChange={(e) =>
             updateSettings({ apiVersion: e.currentTarget.value })
           }
@@ -531,7 +735,7 @@ export function AzureSettings({
       <FormField
         label="Embedding Model"
         infoTooltip={embeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -546,7 +750,7 @@ export function AzureSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -558,11 +762,11 @@ export function AzureSettings({
         label="Endpoint"
         infoTooltip="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments."
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.endpoint}
+          value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>
@@ -570,7 +774,7 @@ export function AzureSettings({
         label="Access token"
         infoTooltip="The Azure OpenAI access token to use."
         required={enabled}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <InputRevealer
           disabled={!enabled}
@@ -642,7 +846,7 @@ export function VertexSettings({
       <FormField
         label="Model"
         infoTooltip={modelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -653,7 +857,7 @@ export function VertexSettings({
       <FormField
         label="Embedding Model"
         infoTooltip={embeddingModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -668,7 +872,7 @@ export function VertexSettings({
       <FormField
         label="Project"
         infoTooltip="The GCP Project ID"
-        flex={1}
+        style={{ flex: 1 }}
         required={enabled}
       >
         <Input
@@ -680,7 +884,7 @@ export function VertexSettings({
       <FormField
         label="Tool model"
         infoTooltip={toolModelTooltip}
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
@@ -691,7 +895,7 @@ export function VertexSettings({
       <FormField
         label="Location"
         infoTooltip="The GCP Location you're querying from."
-        flex={1}
+        style={{ flex: 1 }}
         required={enabled}
       >
         <Input
@@ -703,11 +907,11 @@ export function VertexSettings({
       <FormField
         label="Endpoint"
         infoTooltip="Custom Vertex AI endpoint for dedicated deployments. Leave blank to use the default endpoint."
-        flex={1}
+        style={{ flex: 1 }}
       >
         <Input
           disabled={!enabled}
-          value={settings?.endpoint}
+          value={settings?.endpoint ?? ''}
           onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>

@@ -43,6 +43,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         "name" => "configured-workbench",
         "projectId" => project.id,
         "configuration" => %{
+          "selfService" => true,
           "infrastructure" => %{"services" => true, "stacks" => true, "kubernetes" => false},
           "coding" => %{"mode" => "ANALYZE", "repositories" => ["repo1", "repo2"]}
         }
@@ -54,6 +55,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             id
             name
             configuration {
+              selfService
               infrastructure { services stacks kubernetes }
               coding { mode repositories }
             }
@@ -62,6 +64,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"attributes" => attrs}, %{current_user: admin_user()})
 
       assert workbench["name"] == "configured-workbench"
+      assert workbench["configuration"]["selfService"] == true
       assert workbench["configuration"]["infrastructure"]["services"] == true
       assert workbench["configuration"]["infrastructure"]["stacks"] == true
       assert workbench["configuration"]["infrastructure"]["kubernetes"] == false
@@ -182,6 +185,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       attrs = %{
         "name" => workbench.name,
         "configuration" => %{
+          "selfService" => true,
           "infrastructure" => %{"services" => false, "stacks" => true, "kubernetes" => true},
           "coding" => %{"mode" => "WRITE", "repositories" => ["single-repo"]}
         }
@@ -192,6 +196,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
           updateWorkbench(id: $id, attributes: $attributes) {
             id
             configuration {
+              selfService
               infrastructure { services stacks kubernetes }
               coding { mode repositories }
             }
@@ -200,6 +205,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"id" => workbench.id, "attributes" => attrs}, %{current_user: admin_user()})
 
       assert updated["id"] == workbench.id
+      assert updated["configuration"]["selfService"] == true
       assert updated["configuration"]["infrastructure"]["services"] == false
       assert updated["configuration"]["infrastructure"]["stacks"] == true
       assert updated["configuration"]["infrastructure"]["kubernetes"] == true
@@ -1552,6 +1558,12 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             conclusionRules
             promptRules
             progressRules
+            automation {
+              enabled
+              maxScore
+              maxSkills
+              instructions
+            }
             workbench { id }
           }
         }
@@ -1560,7 +1572,13 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         "attributes" => %{
           "conclusionRules" => "c1",
           "promptRules" => "p1",
-          "progressRules" => "g1"
+          "progressRules" => "g1",
+          "automation" => %{
+            "enabled" => true,
+            "maxScore" => 8,
+            "maxSkills" => 12,
+            "instructions" => "Prioritize runbooks."
+          }
         }
       }, %{current_user: admin_user()})
 
@@ -1568,6 +1586,28 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert eval["conclusionRules"] == "c1"
       assert eval["promptRules"] == "p1"
       assert eval["progressRules"] == "g1"
+      assert eval["automation"] == %{
+               "enabled" => true,
+               "maxScore" => 8,
+               "maxSkills" => 12,
+               "instructions" => "Prioritize runbooks."
+             }
+    end
+
+    test "requires a max score when automation is enabled" do
+      workbench = insert(:workbench)
+
+      {:ok, %{errors: [_ | _]}} =
+        run_query("""
+          mutation CreateWorkbenchEval($workbenchId: ID!, $attributes: WorkbenchEvalAttributes!) {
+            createWorkbenchEval(workbenchId: $workbenchId, attributes: $attributes) {
+              id
+            }
+          }
+        """, %{
+          "workbenchId" => workbench.id,
+          "attributes" => %{"automation" => %{"enabled" => true}}
+        }, %{current_user: admin_user()})
     end
 
     test "project readers cannot create an eval" do

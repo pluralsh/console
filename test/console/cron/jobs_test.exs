@@ -67,6 +67,8 @@ defmodule Console.Cron.JobsTest do
     test "it will delete old refresh_tokens" do
       keep = insert_list(3, :refresh_token)
       expire = insert_list(3, :refresh_token, inserted_at: Timex.now() |> Timex.shift(days: -8))
+      grace = insert(:refresh_token, expires_at: Timex.now() |> Timex.shift(hours: 1))
+      replaced = insert(:refresh_token, expires_at: Timex.now() |> Timex.shift(hours: -1))
 
       {_, _} = Jobs.prune_refresh_tokens()
 
@@ -75,6 +77,9 @@ defmodule Console.Cron.JobsTest do
 
       for notif <- expire,
         do: refute refetch(notif)
+
+      assert refetch(grace)
+      refute refetch(replaced)
     end
   end
 

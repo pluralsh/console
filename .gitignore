@@ -1,5 +1,5 @@
 # IDE
-/.idea
+.idea/
 /.vscode/**/*
 !/.vscode/settings.json
 !/.vscode/markdown.code-snippets
@@ -8,12 +8,13 @@
 .DS_Store
 
 # JavaScript workspace
-/node_modules
-/js/node_modules
+node_modules/
 /js/.yarn/*
 !/js/.yarn/releases/
 !/js/.yarn/releases/**
 .pnp.*
+*.tsbuildinfo
+.eslintcache
 
 # Binaries for programs and plugins
 *.exe
@@ -25,6 +26,8 @@
 # Go workspace
 go.work.sum
 .cache/
+.go/
+.gopath/
 
 # Test binary, built with `go test -c`
 *.test

@@ -1,6 +1,7 @@
 import {
   AccordionItem,
-  Card,
+  AgentLoadingIcon,
+  CaretDownIcon,
   DiffMethod,
   DiffViewer,
   FailedFilledIcon,
@@ -15,7 +16,6 @@ import {
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
-import { stripEmoji } from 'components/ai/stripEmoji'
 import {
   SimpleAccordion,
   SimpleToolCall,
@@ -23,9 +23,11 @@ import {
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import {
   getSearchQuery,
-  humanizeToolName,
+  toolCallTitle,
+  resolveToolCallKind,
   toolCallGroupHeader,
 } from 'components/ai/chatbot/toolCallDisplay'
+import { ToolCallKindIcon } from 'components/ai/chatbot/toolCallIcons'
 import { PreviewablePanel } from 'components/ai/chatbot/ToolCallContent'
 import {
   getWorkbenchToolLabel,
@@ -38,7 +40,11 @@ import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
-import { Body2P } from 'components/utils/typography/Text'
+import {
+  Body2BoldP,
+  Body2P,
+  shimmerWithinCss,
+} from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   useWorkbenchJobActivityQuery,
@@ -51,7 +57,7 @@ import {
   WorkbenchToolTinyFragment,
 } from 'generated/graphql'
 import { isEmpty, startCase } from 'lodash'
-import { type ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -63,11 +69,13 @@ import {
   hasWorkbenchMetricsToolQuery,
   JobActivityLogs,
   JobActivityMetrics,
-  JobActivityMetricsChart,
+  ExpandableJobActivityMetrics,
   JobActivityPrompt,
+  JobActivityTraces,
   MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
+import { getMetricSeries } from './workbenchJobMetrics'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 
@@ -75,6 +83,7 @@ export function WorkbenchJobActivity({
   isOpen,
   activity,
   textStream,
+  latestThought,
   jobId,
   workbenchId,
   workbenchName,
@@ -82,14 +91,15 @@ export function WorkbenchJobActivity({
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
+  latestThought?: Nullable<WorkbenchJobThoughtFragment>
   jobId: string
   workbenchId: string
   workbenchName: string
 }) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
-  const isRejected = status === WorkbenchJobActivityStatus.Rejected
 
   if (
     type === WorkbenchJobActivityType.Function ||
@@ -121,35 +131,13 @@ export function WorkbenchJobActivity({
       />
     )
 
-  const titleColor = 'text-xlight'
   const typeLabel = workbenchActivityTitle(type)
-  const taskSummary = workbenchActivityTaskSummary({
+  const activitySummary = workbenchActivitySummary({
+    isRunning,
     prompt,
     output: result?.output,
-    textStream,
+    error: result?.error,
   })
-  const titleNode = (
-    <ActivityTitleSC>
-      <Body2P
-        as="span"
-        className="type"
-        $color={titleColor}
-        $shimmer={isRunning}
-      >
-        {typeLabel}
-      </Body2P>
-      {taskSummary && (
-        <Body2P
-          as="span"
-          className="task"
-          $color="text-disabled"
-          $shimmer={isRunning}
-        >
-          {taskSummary}
-        </Body2P>
-      )}
-    </ActivityTitleSC>
-  )
   const trailingIcons = (
     <>
       {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
@@ -207,12 +195,6 @@ export function WorkbenchJobActivity({
           tooltip="Go to agent run details"
         />
       )}
-      {(status === WorkbenchJobActivityStatus.Failed || isRejected) && (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )}
     </>
   )
 
@@ -220,7 +202,7 @@ export function WorkbenchJobActivity({
     <AccordionItem
       key={id}
       value={id}
-      caret="right-quarter-mirror"
+      caret="none"
       padding="none"
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
@@ -230,45 +212,84 @@ export function WorkbenchJobActivity({
         maxWidth: '100%',
       }}
       trigger={
-        <Flex
-          gap="xsmall"
-          alignItems="center"
-          minWidth={0}
-          css={{ maxWidth: '100%' }}
-        >
-          {titleNode}
-          {trailingIcons}
-        </Flex>
+        <ActivityHeaderSC $hasStatusIcon={isRunning}>
+          <ActivityTitleRowSC>
+            <ActivityStatusIcon status={status} />
+            <Flex
+              gap="xsmall"
+              alignItems="center"
+              minWidth={0}
+              css={{ flex: '0 1 auto', maxWidth: '100%' }}
+            >
+              <Body2BoldP
+                as="span"
+                className="type"
+                $color="text-xlight"
+                $shimmer={isRunning}
+              >
+                {typeLabel}
+              </Body2BoldP>
+              {trailingIcons}
+              {isRunning && !agentRun && latestThought && (
+                <ActivityLatestTool thought={latestThought} />
+              )}
+            </Flex>
+            <ActivityCaretSC
+              $isOpen={isOpen}
+              size={10}
+            />
+          </ActivityTitleRowSC>
+          {!isOpen && activitySummary && (
+            <Body2P
+              as="span"
+              className="summary"
+              $color={isRunning ? 'text-xlight' : 'text-disabled'}
+              $shimmer={isRunning}
+            >
+              {activitySummary}
+            </Body2P>
+          )}
+        </ActivityHeaderSC>
       }
     >
       <Flex
         direction="column"
-        gap="small"
-        overflow="auto"
+        gap="large"
       >
-        {prompt && <JobActivityPrompt prompt={prompt} />}
-        <WorkbenchJobActivityThoughts
-          activityId={id}
-          skip={!isOpen}
-        />
-        {textStream && (
-          <Flex
-            direction="column"
-            maxHeight={120}
-            overflow="auto"
-          >
-            <SimplifiedMarkdown
-              text={textStream}
-              tone="thought"
-            />
-          </Flex>
+        {prompt && (
+          <JobActivityPrompt
+            prompt={prompt}
+            shimmer={isRunning}
+          />
         )}
+        <CollapseWhenEmptySC
+          direction="column"
+          gap="small"
+        >
+          <WorkbenchJobActivityThoughts
+            activityId={id}
+            skip={!isOpen}
+          />
+          {textStream && (
+            <Flex
+              direction="column"
+              maxHeight={120}
+              overflow="auto"
+              css={isRunning ? shimmerWithinCss(theme) : undefined}
+            >
+              <SimplifiedMarkdown
+                text={textStream}
+                tone="thought"
+              />
+            </Flex>
+          )}
+          {isRunning && <AILoadingText activityId={id} />}
+        </CollapseWhenEmptySC>
         <WorkbenchJobActivityResult
           activity={activity}
           jobId={jobId}
           metricsFetchEnabled={isOpen}
         />
-        {isRunning && <AILoadingText activityId={id} />}
       </Flex>
     </AccordionItem>
   )
@@ -449,7 +470,7 @@ function WorkbenchJobActivityResult({
   )
   const hasCanvasBlocks = !isEmpty((result?.canvas ?? []).filter(isNonNullable))
   return (
-    <Flex
+    <CollapseWhenEmptySC
       direction="column"
       gap="small"
     >
@@ -459,7 +480,7 @@ function WorkbenchJobActivityResult({
           css={{ wordBreak: 'break-word' }}
         />
       )}
-      {!hasCanvasBlocks && (
+      {!hasCanvasBlocks && result?.output && (
         <div>
           {markdownType === 'simplified' ? (
             <SimplifiedMarkdown
@@ -480,6 +501,12 @@ function WorkbenchJobActivityResult({
         jobId={jobId}
         fetchWhen={metricsFetchEnabled}
         metricsQuery={result?.metricsQuery}
+      />
+      <JobActivityTraces
+        jobId={jobId}
+        fetchWhen={metricsFetchEnabled}
+        traces={result?.traces}
+        tracesQuery={result?.tracesQuery}
       />
       <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
       {!isEmpty(otherAgentRuns) && (
@@ -504,9 +531,14 @@ function WorkbenchJobActivityResult({
         fillLevel={1}
         agentRun={agentRun}
       />
-    </Flex>
+    </CollapseWhenEmptySC>
   )
 }
+
+// children that render null leave an empty box that still takes a gap slot in the parent
+const CollapseWhenEmptySC = styled(Flex)({
+  '&:empty': { display: 'none' },
+})
 
 const MemoGroupSC = styled.div(({ theme }) => ({
   width: '100%',
@@ -542,6 +574,7 @@ function WorkbenchJobActivityThoughts({
   })
   const isLoading = !data && loading
   const activity = data?.workbenchJobActivity
+  const shimmer = isJobRunning(activity?.status)
 
   const { thoughts, lastThought, header } = useMemo(() => {
     const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
@@ -574,9 +607,9 @@ function WorkbenchJobActivityThoughts({
     const textParts = [
       toolCallGroupHeader(otherThoughts),
       numWithLogs > 0 &&
-        `${numWithLogs} fetched ${pluralize('log', numWithLogs)}`,
+        `${numWithLogs} fetch ${pluralize('log', numWithLogs)}`,
       numWithMetrics > 0 &&
-        `${numWithMetrics} fetched ${pluralize('metric', numWithMetrics)}`,
+        `${numWithMetrics} fetch ${pluralize('metric', numWithMetrics)}`,
     ].filter((part): part is string => !!part)
     const toolCounts = [...configuredToolCounts.values()]
     return {
@@ -587,13 +620,20 @@ function WorkbenchJobActivityThoughts({
           <WorkbenchToolCallSummary
             toolCounts={toolCounts}
             textParts={textParts}
+            shimmer={shimmer}
           />
         ) : (
-          textParts.join(', ') ||
-          `${thoughts.length} tool ${pluralize('call', thoughts.length)}`
+          <Body2P
+            as="span"
+            $color="text-xlight"
+            $shimmer={shimmer}
+          >
+            {textParts.join(', ') ||
+              `${thoughts.length} tool ${pluralize('call', thoughts.length)}`}
+          </Body2P>
         ),
     }
-  }, [activity?.thoughts])
+  }, [activity?.thoughts, shimmer])
 
   if (isEmpty(thoughts) && !isLoading) return null
   if (error)
@@ -607,7 +647,10 @@ function WorkbenchJobActivityThoughts({
     )
 
   return (
-    <>
+    <Flex
+      direction="column"
+      gap="small"
+    >
       <SimpleAccordion
         label={header}
         loading={isLoading}
@@ -617,95 +660,167 @@ function WorkbenchJobActivityThoughts({
       >
         <Flex
           direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
+          gap="small"
+          marginTop={spacing.medium}
         >
           {thoughts.map((thought, i) => (
             <WorkbenchJobActivityThought
               key={i}
               thought={thought}
+              shimmer={shimmer}
             />
           ))}
         </Flex>
       </SimpleAccordion>
       {!isExpanded && lastThought && isJobRunning(activity?.status) && (
         <EaseIn currentKey={lastThought.id}>
-          <WorkbenchJobActivityThought thought={lastThought} />
+          <WorkbenchJobActivityThought
+            thought={lastThought}
+            shimmer={shimmer}
+          />
         </EaseIn>
       )}
-    </>
+    </Flex>
   )
 }
 
 function WorkbenchJobActivityThought({
   thought,
+  shimmer = false,
 }: {
   thought: WorkbenchJobThoughtFragment
+  shimmer?: boolean
 }) {
   const { id, content, toolName, toolArgs, attributes, tool } = thought
   const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
   const query = getSearchQuery(toolArgs)
-  const toolIcon = tool ? (
-    <WorkbenchToolIcon
-      type={tool.tool}
-      provider={tool.cloudConnection?.provider}
-      size={12}
-    />
-  ) : undefined
+  const toolIcon = thoughtToolIcon({ tool, toolName, toolArgs })
+  const title =
+    toolName || tool ? workbenchToolCallTitle(toolName, tool) : undefined
+  const blankResult = isBlankToolPayload(content)
+  const isMetricsFetch =
+    !isEmpty(metrics) || isObservabilityFetch(toolName, 'metrics')
+  const metricSeriesCount = isMetricsFetch
+    ? getMetricSeries(metrics).length
+    : undefined
+  const noLogs =
+    isObservabilityFetch(toolName, 'logs') && isEmpty(logs) && blankResult
   return (
     <SimpleToolCall
       content={content}
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
-      customTitle={
-        tool ? compactWorkbenchToolCallTitle(toolName, tool) : undefined
-      }
+      customTitle={title}
       leadingIcon={toolIcon}
-      {...(!isEmpty(metrics) && {
+      shimmer={shimmer}
+      {...(metricSeriesCount != null && {
         customLabel: (
           <WorkbenchObservabilityToolLabel
             icon={toolIcon}
-            title="Fetched metrics"
+            title={`fetch metrics (${metricSeriesCount})`}
             query={query}
+            shimmer={shimmer}
           />
         ),
-        customResultBody: (
-          <Card>
-            <JobActivityMetricsChart
-              metrics={metrics}
-              lineProps={{
-                margin: { top: 20, right: 16, bottom: 25, left: 35 },
-              }}
-            />
-          </Card>
-        ),
+        ...(metricSeriesCount > 0 && {
+          customResultBody: <ExpandableJobActivityMetrics metrics={metrics} />,
+        }),
       })}
-      {...(!isEmpty(logs) && {
-        customLabel: (
-          <WorkbenchObservabilityToolLabel
-            icon={toolIcon}
-            title="Fetched logs"
-            query={query}
-          />
-        ),
-        customResultBody: (
-          <PreviewablePanel contentKey={`logs:${id}:${logs.length}`}>
-            <JobActivityLogs logs={logs} />
-          </PreviewablePanel>
-        ),
-      })}
+      {...(noLogs
+        ? {
+            customLabel: (
+              <WorkbenchObservabilityToolLabel
+                icon={toolIcon}
+                title="no logs"
+                query={query}
+                shimmer={shimmer}
+              />
+            ),
+            customResultBody: <EmptyToolResult message="No logs" />,
+          }
+        : !isEmpty(logs) && {
+            customLabel: (
+              <WorkbenchObservabilityToolLabel
+                icon={toolIcon}
+                title={title ?? 'fetch logs'}
+                query={query}
+                shimmer={shimmer}
+              />
+            ),
+            customResultBody: (
+              <PreviewablePanel
+                contentKey={`logs:${id}:${logs.length}`}
+                subtle
+                shimmer={shimmer}
+              >
+                <JobActivityLogs logs={logs} />
+              </PreviewablePanel>
+            ),
+          })}
     />
   )
+}
+
+function EmptyToolResult({ message }: { message: string }) {
+  return (
+    <PreviewablePanel
+      contentKey={message}
+      subtle
+      unclamped
+    >
+      <Body2P
+        as="span"
+        $color="text-disabled"
+        css={{ fontStyle: 'italic' }}
+      >
+        {message}
+      </Body2P>
+    </PreviewablePanel>
+  )
+}
+
+// Matches the tool names the API gives the native and per-connection fetch tools.
+function isObservabilityFetch(
+  toolName: Nullable<string>,
+  kind: 'logs' | 'metrics'
+) {
+  return (
+    toolName === `plrl_${kind}` ||
+    !!toolName?.startsWith(`workbench_observability_${kind}_`)
+  )
+}
+
+function isBlankToolPayload(content?: string | null) {
+  const text = content?.trim() ?? ''
+  if (!text) return true
+
+  try {
+    return isBlankValue(JSON.parse(text))
+  } catch {
+    return false
+  }
+}
+
+function isBlankValue(value: unknown): boolean {
+  if (value == null || value === '') return true
+  if (Array.isArray(value)) return value.every(isBlankValue)
+  if (typeof value === 'object') {
+    return Object.values(value as Record<string, unknown>).every(isBlankValue)
+  }
+
+  return false
 }
 
 function WorkbenchObservabilityToolLabel({
   icon,
   title,
   query,
+  shimmer = false,
 }: {
   icon?: ReactNode
   title: string
   query: string
+  shimmer?: boolean
 }) {
   return (
     <Flex
@@ -718,6 +833,7 @@ function WorkbenchObservabilityToolLabel({
       <Body2P
         as="span"
         $color="text-xlight"
+        $shimmer={shimmer}
         css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
       >
         {title}
@@ -726,6 +842,7 @@ function WorkbenchObservabilityToolLabel({
         <Body2P
           as="span"
           $color="text-disabled"
+          $shimmer={shimmer}
           css={{
             minWidth: 0,
             overflow: 'hidden',
@@ -743,9 +860,11 @@ function WorkbenchObservabilityToolLabel({
 function WorkbenchToolCallSummary({
   toolCounts,
   textParts,
+  shimmer = false,
 }: {
   toolCounts: Array<{ count: number; tool: WorkbenchToolTinyFragment }>
   textParts: string[]
+  shimmer?: boolean
 }) {
   const { spacing } = useTheme()
 
@@ -762,6 +881,7 @@ function WorkbenchToolCallSummary({
           key={part}
           as="span"
           $color="text-xlight"
+          $shimmer={shimmer}
           css={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -797,6 +917,7 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
+            $shimmer={shimmer}
             css={{ marginRight: spacing.xxsmall }}
           >
             {count}
@@ -804,13 +925,14 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
+            $shimmer={shimmer}
           >
             {getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)}
           </Body2P>
           <WorkbenchToolIcon
             type={tool.tool}
             provider={tool.cloudConnection?.provider}
-            size={12}
+            size={14}
             css={{ marginLeft: spacing.xxsmall }}
           />
         </span>
@@ -819,99 +941,154 @@ function WorkbenchToolCallSummary({
   )
 }
 
-function compactWorkbenchToolCallTitle(
-  toolName: Nullable<string>,
-  tool: WorkbenchToolTinyFragment
-): string {
-  const title = humanizeToolName(toolName ?? '')
-  const toolLabel = getWorkbenchToolLabel(
-    tool.tool,
-    tool.cloudConnection?.provider
-  )
-  const hiddenWords = new Set(
-    [toolLabel, startCase(tool.tool.replace(/_/g, ' ')), tool.name, 'gh']
-      .flatMap((value) => value.toLowerCase().split(/\s+/))
-      .filter(Boolean)
-  )
-  const withoutToolLabel = title
-    .split(/\s+/)
-    .filter((word) => !hiddenWords.has(word.toLowerCase()))
-    .join(' ')
+function ActivityLatestTool({
+  thought,
+}: {
+  thought: WorkbenchJobThoughtFragment
+}) {
+  const { toolName, toolArgs, tool } = thought
+  if (!toolName && !tool) return null
 
-  return withoutToolLabel || 'Tool call'
+  const title = workbenchToolCallTitle(toolName, tool)
+
+  return (
+    <ActivityLatestToolSC title={title}>
+      {thoughtToolIcon({ tool, toolName, toolArgs })}
+      <Body2P
+        as="span"
+        $color="text-disabled"
+        $shimmer
+        css={{
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {title}
+      </Body2P>
+    </ActivityLatestToolSC>
+  )
 }
 
-/** Cycles 1 → 2 → 3 dots every second for the job-level thinking label. */
-function useThinkingEllipsisCount() {
-  const [count, setCount] = useState(1)
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setCount((n) => (n >= 3 ? 1 : n + 1))
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [])
-  return count
+const ActivityLatestToolSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
+  maxWidth: '40ch',
+  flex: '0 1 auto',
+}))
+
+function thoughtToolIcon({
+  tool,
+  toolName,
+  toolArgs,
+}: {
+  tool?: Nullable<WorkbenchToolTinyFragment>
+  toolName?: Nullable<string>
+  toolArgs?: WorkbenchJobThoughtFragment['toolArgs']
+}) {
+  if (tool) {
+    return (
+      <WorkbenchToolIcon
+        type={tool.tool}
+        provider={tool.cloudConnection?.provider}
+        size={14}
+        css={{ flexShrink: 0 }}
+      />
+    )
+  }
+
+  return (
+    <ToolCallKindIcon kind={resolveToolCallKind(toolName ?? '', toolArgs)} />
+  )
+}
+
+function workbenchToolCallTitle(
+  toolName: Nullable<string>,
+  tool?: Nullable<WorkbenchToolTinyFragment>
+): string {
+  const toolLabel = tool
+    ? getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)
+    : undefined
+
+  return toolCallTitle({
+    name: toolName,
+    hiddenWords: tool
+      ? [toolLabel, startCase(tool.tool.replace(/_/g, ' ')), tool.name, 'gh']
+      : [],
+  })
 }
 
 /**
- * Job-level tool progress (between activities): same accordion + SimpleToolCall UI as
- * activity thoughts, with a fixed "thinking" label instead of the tool-call count header.
+ * Job-level status at the bottom of the transcript. "Thinking" and
+ * "Planning next moves" share one line so the change slides upward
+ * like a tool call, instead of swapping the whole block.
  */
 export function WorkbenchJobJobLevelThinking({
   items,
   jobRunning,
+  planning = false,
+  jobId,
 }: {
   items: Array<WorkbenchJobProgressFragment & { localKey: number }>
   jobRunning: boolean
+  planning?: boolean
+  jobId?: string
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
   const last = items.at(-1)
-  const ellipsisCount = useThinkingEllipsisCount()
+  const showThinking = !planning && items.length > 0
 
-  if (isEmpty(items)) return null
+  if (!showThinking && !planning) return null
 
   return (
-    <>
-      <SimpleAccordion
-        label={
-          <>
-            Thinking
-            <span
-              style={{
-                display: 'inline-block',
-                minWidth: '3ch',
-                textAlign: 'left',
-              }}
+    <Flex
+      direction="column"
+      gap="small"
+    >
+      <EaseIn currentKey={showThinking ? 'thinking' : 'planning'}>
+        {showThinking ? (
+          <SimpleAccordion
+            label={
+              <Body2P
+                as="span"
+                $color="text-xlight"
+                $shimmer={jobRunning}
+              >
+                Thinking
+              </Body2P>
+            }
+            loading={false}
+            isOpen={isExpanded}
+            setIsOpen={setIsExpanded}
+            hoverCaret
+          >
+            <Flex
+              direction="column"
+              gap="small"
+              marginTop={spacing.xsmall}
             >
-              {'.'.repeat(ellipsisCount)}
-            </span>
-          </>
-        }
-        loading={false}
-        isOpen={isExpanded}
-        setIsOpen={setIsExpanded}
-        hoverCaret
-      >
-        <Flex
-          direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
-        >
-          {items.map((item) => (
-            <WorkbenchJobLevelThinkingCall
-              key={item.localKey}
-              item={item}
-            />
-          ))}
-        </Flex>
-      </SimpleAccordion>
-      {!isExpanded && last && jobRunning && (
+              {items.map((item) => (
+                <WorkbenchJobLevelThinkingCall
+                  key={item.localKey}
+                  item={item}
+                />
+              ))}
+            </Flex>
+          </SimpleAccordion>
+        ) : (
+          <AILoadingText jobId={jobId} />
+        )}
+      </EaseIn>
+      {showThinking && !isExpanded && last && jobRunning && (
         <EaseIn currentKey={last.localKey}>
           <WorkbenchJobLevelThinkingCall item={last} />
         </EaseIn>
       )}
-    </>
+    </Flex>
   )
 }
 
@@ -938,6 +1115,25 @@ export const isJobRunning = (
   >
 ) => status === 'PENDING' || status === 'RUNNING'
 
+const ACTIVITY_STATUS_ICON_SIZE = 10
+
+function ActivityStatusIcon({
+  status,
+}: {
+  status: WorkbenchJobActivityStatus
+}) {
+  if (!isJobRunning(status)) return null
+
+  return (
+    <ActivityStatusIconSC>
+      <AgentLoadingIcon
+        size={ACTIVITY_STATUS_ICON_SIZE}
+        variant="cursorEq"
+      />
+    </ActivityStatusIconSC>
+  )
+}
+
 function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
   switch (type) {
     case WorkbenchJobActivityType.User:
@@ -957,22 +1153,24 @@ function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
   }
 }
 
-/** Prefer completed output, then stream, then prompt — first clean line. */
-function workbenchActivityTaskSummary({
+/** Show the delegated prompt while running and the result once terminal. */
+function workbenchActivitySummary({
+  isRunning,
   prompt,
   output,
-  textStream,
+  error,
 }: {
+  isRunning: boolean
   prompt?: Nullable<string>
   output?: Nullable<string>
-  textStream?: Nullable<string>
+  error?: Nullable<string>
 }): string {
-  const raw = [output, textStream, prompt]
+  const raw = (isRunning ? [prompt] : [output, error, prompt])
     .map((value) => value?.trim())
     .find(Boolean)
   if (!raw) return ''
 
-  const text = stripEmoji(prettifyPrompt(raw))
+  const text = prettifyPrompt(raw)
 
   const line =
     text
@@ -990,22 +1188,58 @@ function workbenchActivityTaskSummary({
   return line.replace(/\s+/g, ' ').trim()
 }
 
-const ActivityTitleSC = styled.span(({ theme }) => ({
+const ActivityCaretSC = styled(CaretDownIcon)<{ $isOpen: boolean }>(
+  ({ theme, $isOpen }) => ({
+    color: theme.colors['icon-xlight'],
+    flexShrink: 0,
+    opacity: $isOpen ? 1 : 0,
+    rotate: $isOpen ? '0deg' : '-90deg',
+    transition: 'opacity 0.15s ease, rotate 0.3s ease, scale 0.3s ease',
+  })
+)
+
+const ActivityStatusIconSC = styled.span({
   display: 'flex',
-  alignItems: 'baseline',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: ACTIVITY_STATUS_ICON_SIZE,
+  height: ACTIVITY_STATUS_ICON_SIZE,
+})
+
+const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
+  ({ theme, $hasStatusIcon }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xxsmall,
+    minWidth: 0,
+    maxWidth: '100%',
+    overflow: 'hidden',
+    [`&:hover ${ActivityCaretSC}`]: {
+      opacity: 1,
+    },
+    '.type': {
+      flexShrink: 0,
+    },
+    '.summary': {
+      display: 'block',
+      minWidth: 0,
+      maxWidth: '64ch',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      ...($hasStatusIcon && {
+        paddingLeft: ACTIVITY_STATUS_ICON_SIZE + theme.spacing.xsmall,
+      }),
+    },
+  })
+)
+
+const ActivityTitleRowSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
   gap: theme.spacing.xsmall,
   minWidth: 0,
   maxWidth: '100%',
   overflow: 'hidden',
-  '.type': {
-    flexShrink: 0,
-  },
-  '.task': {
-    minWidth: 0,
-    // Cap so the caret stays after the label; long tasks ellipsize.
-    maxWidth: '52ch',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
 }))

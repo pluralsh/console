@@ -1,8 +1,8 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import {
   ComponentProps,
-  FormEventHandler,
   ReactNode,
+  SubmitEventHandler,
   useCallback,
   useEffect,
   useState,
@@ -79,7 +79,7 @@ export function EditPersonaBindingsModal({
 
   const allowSubmit = true
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+  const onSubmit: SubmitEventHandler<HTMLElement> = useCallback(
     (e) => {
       e.preventDefault()
       if (bindings && allowSubmit) {

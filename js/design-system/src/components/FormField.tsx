@@ -1,7 +1,8 @@
 import { type AriaLabelingProps, type DOMProps } from '@react-types/shared'
-import { Div, type DivProps, Flex, Label, P } from 'honorable'
+import Flex from './Flex'
 import { isNil } from 'lodash-es'
 import {
+  type ComponentPropsWithRef,
   type LabelHTMLAttributes,
   type PropsWithChildren,
   type ReactNode,
@@ -13,9 +14,9 @@ import {
 import { useLabel } from 'react-aria'
 import IconFrame from './IconFrame'
 import { InfoOutlineIcon } from '../icons'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
-type FormFieldProps = DivProps &
+type FormFieldProps = ComponentPropsWithRef<'div'> &
   PropsWithChildren<{
     label?: ReactNode
     labelProps?: Omit<LabelHTMLAttributes<HTMLLabelElement>, 'id'>
@@ -63,7 +64,8 @@ function FormField({
   small,
   ...props
 }: FormFieldProps) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
   const hasLabel = label || required || infoTooltip
   const hasTopContent = hasLabel || caption
   const hasBottomContent = !isNil(hint) || typeof maxLength === 'number'
@@ -89,13 +91,8 @@ function FormField({
   const topContent = hasTopContent && (
     <Flex align="center">
       {hasLabel && (
-        <Label
-          caption={small}
-          body2={!small}
-          fontWeight="600"
-          flexShrink={0}
-          flexGrow={1}
-          margin={0}
+        <LabelSC
+          $small={small}
           {...labelProps}
         >
           {label}
@@ -111,62 +108,39 @@ function FormField({
               css={{ display: 'inline-flex', marginLeft: spacing.xxsmall }}
             />
           )}
-        </Label>
+        </LabelSC>
       )}
-      {caption && (
-        <P
-          caption={small}
-          body2={!small}
-          marginLeft="medium"
-          truncate
-          flexShrink={1}
-          color="text-light"
-        >
-          {caption}
-        </P>
-      )}
+      {caption && <CaptionSC $small={small}>{caption}</CaptionSC>}
     </Flex>
   )
 
   const bottomContent = hasBottomContent && (
     <Flex
       align="flex-start"
-      color="text-light"
-      marginTop={layout === 'vertical' ? 'xsmall' : 'xxxsmall'}
+      css={{
+        color: theme.colors['text-light'],
+        marginTop: layout === 'vertical' ? spacing.xsmall : spacing.xxxsmall,
+      }}
     >
-      {typeof hint === 'string' ? (
-        <P
-          flexGrow={1}
-          caption
-          color={error ? 'text-danger' : 'text-xlight'}
-        >
-          {hint}
-        </P>
-      ) : (
-        hint
-      )}
+      {typeof hint === 'string' ? <HintSC $error={error}>{hint}</HintSC> : hint}
       {typeof maxLength === 'number' && (
-        <P
-          caption
-          color="text-xlight"
-          marginLeft={hint ? 'medium' : 0}
-          whiteSpace="nowrap"
-          textAlign="right"
-          flexGrow={1}
-        >
+        <LengthSC $hasHint={!!hint}>
           {length} / {maxLength}
-        </P>
+        </LengthSC>
       )}
     </Flex>
   )
 
   const fieldContent = (
-    <Div
-      marginTop={layout === 'vertical' && hasTopContent ? 'xxsmall' : 0}
-      marginBottom={layout === 'vertical' && hasBottomContent ? 'xxsmall' : 0}
+    <div
+      css={{
+        marginTop: layout === 'vertical' && hasTopContent ? spacing.xxsmall : 0,
+        marginBottom:
+          layout === 'vertical' && hasBottomContent ? spacing.xxsmall : 0,
+      }}
     >
       {children}
-    </Div>
+    </div>
   )
 
   const content =
@@ -176,26 +150,20 @@ function FormField({
         gap="medium"
         {...props}
       >
-        <Div
-          flex="1 1 0"
-          minWidth={0}
-        >
+        <div css={{ flex: '1 1 0', minWidth: 0 }}>
           {topContent}
           {bottomContent}
-        </Div>
-        <Div
-          flex="1 1 0"
-          minWidth={0}
-        >
-          {fieldContent}
-        </Div>
+        </div>
+        <div css={{ flex: '1 1 0', minWidth: 0 }}>{fieldContent}</div>
       </Flex>
     ) : (
-      <Div {...props}>
-        {topContent && <Div marginBottom="xsmall">{topContent}</Div>}
+      <div {...props}>
+        {topContent && (
+          <div css={{ marginBottom: spacing.xsmall }}>{topContent}</div>
+        )}
         {fieldContent}
         {bottomContent}
-      </Div>
+      </div>
     )
 
   return (
@@ -204,5 +172,39 @@ function FormField({
     </FormFieldContext.Provider>
   )
 }
+
+const LabelSC = styled.label<{ $small?: boolean }>(({ theme, $small }) => ({
+  margin: 0,
+  ...($small ? theme.partials.text.caption : theme.partials.text.body2),
+  fontWeight: 600,
+  flexShrink: 0,
+  flexGrow: 1,
+}))
+
+const CaptionSC = styled.p<{ $small?: boolean }>(({ theme, $small }) => ({
+  margin: 0,
+  marginLeft: theme.spacing.medium,
+  ...($small ? theme.partials.text.caption : theme.partials.text.body2),
+  ...theme.partials.text.truncate,
+  flexShrink: 1,
+  color: theme.colors['text-light'],
+}))
+
+const HintSC = styled.p<{ $error?: boolean }>(({ theme, $error }) => ({
+  margin: 0,
+  flexGrow: 1,
+  ...theme.partials.text.caption,
+  color: $error ? theme.colors['text-danger'] : theme.colors['text-xlight'],
+}))
+
+const LengthSC = styled.p<{ $hasHint?: boolean }>(({ theme, $hasHint }) => ({
+  margin: 0,
+  marginLeft: $hasHint ? theme.spacing.medium : 0,
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  whiteSpace: 'nowrap',
+  textAlign: 'right',
+  flexGrow: 1,
+}))
 
 export default FormField

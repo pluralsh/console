@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "dashboard_name": {
+      "type": "string",
+      "description": "Unique name of the dashboard to permanently delete"
+    }
+  },
+  "required": ["dashboard_name"]
+}

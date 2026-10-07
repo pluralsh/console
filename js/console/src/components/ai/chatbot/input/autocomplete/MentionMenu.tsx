@@ -1,5 +1,4 @@
 import { CSSProperties, useMemo } from 'react'
-import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 import { ChipAttrs } from './mentionTypes'
 import { MentionResults } from './MentionResults'
@@ -45,8 +44,16 @@ export function MentionMenu({
 
   if (!isOpen || !style) return null
 
-  return createPortal(
-    <MenuSC style={style}>
+  // Rendered inline (not portalled to body) so Radix Dialog scroll-lock treats
+  // wheel/touch over the menu as inside the dialog and allows native scrolling.
+  // position:fixed still positions relative to the viewport.
+  // onMouseDown prevents scrollbar/padding clicks from blurring the editor,
+  // which would otherwise close the menu via selectionchange.
+  return (
+    <MenuSC
+      style={style}
+      onMouseDown={(e) => e.preventDefault()}
+    >
       <MentionResults
         items={items}
         highlightedIndex={highlightedIndex}
@@ -54,8 +61,7 @@ export function MentionMenu({
         onSelect={onSelect}
         onHover={onHover}
       />
-    </MenuSC>,
-    document.body
+    </MenuSC>
   )
 }
 
@@ -64,5 +70,6 @@ const MenuSC = styled.div(({ theme }) => ({
   border: theme.borders.input,
   borderRadius: theme.borderRadiuses.large,
   boxShadow: theme.boxShadows.modal,
-  overflow: 'hidden',
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
 }))

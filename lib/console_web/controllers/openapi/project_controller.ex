@@ -4,7 +4,8 @@ defmodule ConsoleWeb.OpenAPI.ProjectController do
   alias Console.Deployments.Settings
   alias Console.Schema.Project
 
-  plug Scope, [resource: :projects, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :project, action: :read, api: "project"] when action in [:show]
+  plug Scope, [resource: :project, action: :read, api: "projects"] when action in [:index]
 
   @doc """
   Gets a project by id
@@ -14,7 +15,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectController do
     summary: "Get a project by ID",
     description: "Retrieves a single project by its unique identifier",
     tags: ["projects"],
-    "x-required-scopes": ["projects.read"],
+    "x-required-scopes": ["project.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string, format: :uuid}, required: true, description: "The unique identifier of the project"]
     ],
@@ -34,7 +35,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectController do
     summary: "List all projects",
     description: "Returns a paginated list of all projects the authenticated user has access to",
     tags: ["projects"],
-    "x-required-scopes": ["projects.read"],
+    "x-required-scopes": ["project.read"],
     parameters: [
       page: [in: :query, schema: %{type: :integer}, required: false, description: "The page number for pagination"],
       per_page: [in: :query, schema: %{type: :integer}, required: false, description: "The number of items per page"]

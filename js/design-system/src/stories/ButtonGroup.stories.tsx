@@ -1,13 +1,19 @@
-import { Div, Flex, H1 } from 'honorable'
 import { type ComponentProps, useRef, useState } from 'react'
 
 import { type Key } from '@react-types/shared'
 
-import { SubTab, TabList, type TabListStateProps, TabPanel } from '..'
+import { Flex, SubTab, TabList, type TabListStateProps, TabPanel } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
+import styled from 'styled-components'
+
+const Heading = styled.h1(({ theme }) => ({
+  margin: 0,
+  marginBottom: 16,
+  ...theme.partials.text.title1,
+}))
 
 const meta = {
-  title: 'ButtonGroup',
+  title: 'Button Group',
   component: SubTab,
   argTypes: {
     size: {
@@ -59,9 +65,9 @@ function TemplateBasic(args: any) {
   }
 
   return (
-    <Div>
+    <div>
       <Flex
-        flexDirection="column"
+        direction="column"
         maxWidth={800}
       >
         <TabList
@@ -93,17 +99,12 @@ function TemplateBasic(args: any) {
             borderTop="1px solid border"
             borderBottom="1px solid border"
           >
-            <H1
-              title1
-              marginBottom="medium"
-            >
-              {tab?.label}
-            </H1>
+            <Heading>{tab?.label}</Heading>
             {tab?.content}
           </TabPanel>
         ))}
       </Flex>
-    </Div>
+    </div>
   )
 }
 

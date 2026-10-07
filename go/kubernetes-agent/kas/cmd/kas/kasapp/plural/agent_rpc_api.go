@@ -14,9 +14,10 @@ import (
 
 type ServerAgentRpcApi struct {
 	modserver2.RpcApi
-	Token          api.AgentToken
-	AgentInfoCache *cache.CacheWithErr[api.AgentToken, *api.AgentInfo]
-	PluralURL      string
+	Token                 api.AgentToken
+	AgentInfoCache        *cache.CacheWithErr[api.AgentToken, *api.AgentInfo]
+	PluralURL             string
+	InsecureSkipTLSVerify bool
 }
 
 func (a *ServerAgentRpcApi) AgentToken() api.AgentToken {
@@ -29,14 +30,15 @@ func (a *ServerAgentRpcApi) AgentInfo(ctx context.Context, log *zap.Logger) (*ap
 
 func (a *ServerAgentRpcApi) getAgentInfoCached(ctx context.Context) (*api.AgentInfo, error) {
 	return a.AgentInfoCache.GetItem(ctx, a.Token, func() (*api.AgentInfo, error) {
-		return plural.GetAgentInfo(ctx, a.Token, a.PluralURL)
+		return plural.GetAgentInfo(ctx, a.Token, a.PluralURL, a.InsecureSkipTLSVerify)
 	})
 }
 
 type ServerAgentRpcApiFactory struct {
-	RPCApiFactory  modserver2.RpcApiFactory
-	AgentInfoCache *cache.CacheWithErr[api.AgentToken, *api.AgentInfo]
-	PluralURL      string
+	RPCApiFactory         modserver2.RpcApiFactory
+	AgentInfoCache        *cache.CacheWithErr[api.AgentToken, *api.AgentInfo]
+	PluralURL             string
+	InsecureSkipTLSVerify bool
 }
 
 func (f *ServerAgentRpcApiFactory) New(ctx context.Context, fullMethodName string) (modserver2.AgentRpcApi, error) {
@@ -45,9 +47,10 @@ func (f *ServerAgentRpcApiFactory) New(ctx context.Context, fullMethodName strin
 		return nil, err
 	}
 	return &ServerAgentRpcApi{
-		RpcApi:         f.RPCApiFactory(ctx, fullMethodName),
-		Token:          api.AgentToken(token),
-		AgentInfoCache: f.AgentInfoCache,
-		PluralURL:      f.PluralURL,
+		RpcApi:                f.RPCApiFactory(ctx, fullMethodName),
+		Token:                 api.AgentToken(token),
+		AgentInfoCache:        f.AgentInfoCache,
+		PluralURL:             f.PluralURL,
+		InsecureSkipTLSVerify: f.InsecureSkipTLSVerify,
 	}, nil
 }

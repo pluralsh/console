@@ -1,4 +1,3 @@
-import { Div, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { type Key } from '@react-types/shared'
@@ -7,6 +6,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import {
   AppIcon,
   Chip,
+  Flex,
   ListBox,
   ListBoxFooter,
   ListBoxFooterPlus,
@@ -167,10 +167,10 @@ function Template() {
 
   return (
     <Flex
-      flexDirection="column"
+      direction="column"
       gap="large"
     >
-      <Div maxWidth={512}>
+      <div style={{ maxWidth: 512 }}>
         <ListBox
           selectedKey={selectedKey}
           onSelectionChange={(key) => {
@@ -188,10 +188,9 @@ function Template() {
             />
           ))}
         </ListBox>
-      </Div>
-      <Div
-        display="flex"
-        flexDirection="column"
+      </div>
+      <Flex
+        direction="column"
         maxWidth={512}
         maxHeight={200}
         overflow="hidden"
@@ -216,11 +215,10 @@ function Template() {
             />
           ))}
         </ListBox>
-      </Div>
+      </Flex>
 
-      <Div
-        display="flex"
-        flexDirection="column"
+      <Flex
+        direction="column"
         maxWidth={512}
         maxHeight={200}
         overflow="hidden"
@@ -246,11 +244,10 @@ function Template() {
             />
           ))}
         </ListBox>
-      </Div>
+      </Flex>
 
-      <Div
-        display="flex"
-        flexDirection="column"
+      <Flex
+        direction="column"
         maxWidth={224}
         maxHeight={200}
         overflow="hidden"
@@ -283,11 +280,10 @@ function Template() {
             />
           ))}
         </ListBox>
-      </Div>
+      </Flex>
 
-      <Div
-        display="flex"
-        flexDirection="column"
+      <Flex
+        direction="column"
         maxWidth={224}
         maxHeight={200}
         overflow="hidden"
@@ -315,7 +311,7 @@ function Template() {
             destructive
           />
         </ListBox>
-      </Div>
+      </Flex>
     </Flex>
   )
 }

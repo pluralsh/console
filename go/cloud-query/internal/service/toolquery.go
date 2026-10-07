@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -108,7 +109,7 @@ func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQuery
 		return nil, status.Error(codes.InvalidArgument, "input is required")
 	}
 
-	if err := in.validateInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+	if err := in.validateLogsInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
 		return nil, err
 	}
 	provider, err := tools.NewProvider(input.GetConnection())
@@ -119,6 +120,31 @@ func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQuery
 	output, err := provider.Logs(ctx, input)
 	if err != nil {
 		return nil, in.mapError("logs", err)
+	}
+
+	return output, nil
+}
+
+func (in *ToolQueryService) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+
+	if err := in.validateLogsInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+		return nil, err
+	}
+	if bucketSize, err := time.ParseDuration(input.GetBucketSize()); err != nil || bucketSize <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "bucket_size must be a positive duration")
+	}
+
+	provider, err := tools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapError("log_aggregate", err)
+	}
+
+	output, err := provider.LogAggregate(ctx, input)
+	if err != nil {
+		return nil, in.mapError("log_aggregate", err)
 	}
 
 	return output, nil
@@ -215,6 +241,18 @@ func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, 
 
 	if connection.GetDynatrace() != nil {
 		// skip time range validation for dynatrace as it is not required
+		return nil
+	}
+
+	return in.validateTimeRange(timeRange)
+}
+
+func (in *ToolQueryService) validateLogsInput(connection *toolquery.ToolConnection, _ string, timeRange *toolquery.TimeRange) error {
+	if err := in.validateSearchInput(connection); err != nil {
+		return err
+	}
+
+	if connection.GetDynatrace() != nil {
 		return nil
 	}
 

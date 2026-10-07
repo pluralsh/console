@@ -20,6 +20,7 @@ func secretKeySelectorSet(ref *corev1.SecretKeySelector) bool {
 // AgentRuntimeSpec defines the desired state of AgentRuntime
 //
 // +kubebuilder:validation:XValidation:rule="!has(self.streamingProxy) || !self.streamingProxy || (has(self.aiProxy) && self.aiProxy)",message="streamingProxy requires aiProxy to be enabled"
+// +kubebuilder:validation:XValidation:rule="!has(self.prewarm) || has(self.repositoryImage)",message="prewarm requires repositoryImage"
 type AgentRuntimeSpec struct {
 	// Name of this AgentRuntime.
 	// If not provided, the name from AgentRuntime.ObjectMeta will be used.
@@ -84,6 +85,17 @@ type AgentRuntimeSpec struct {
 	// +kubebuilder:validation:Optional
 	Memory *bool `json:"memory,omitempty"`
 
+	// RepositoryImage is an OCI image of precloned git repositories plus manifest.json.
+	// When set, an init container copies it into /plural/shared/repos before bootstrap
+	// so a matching repo can be copied locally instead of git clone.
+	// +kubebuilder:validation:Optional
+	RepositoryImage *string `json:"repositoryImage,omitempty"`
+
+	// Prewarm periodically pulls RepositoryImage onto selected nodes before
+	// agent runs are scheduled.
+	// +kubebuilder:validation:Optional
+	Prewarm *RepositoryImagePrewarm `json:"prewarm,omitempty"`
+
 	// AllowedRepositories the git repositories allowed to be used with this runtime.
 	// +kubebuilder:validation:Optional
 	AllowedRepositories []string `json:"allowedRepositories,omitempty"`
@@ -99,6 +111,22 @@ type AgentRuntimeSpec struct {
 	// configure tooling, or perform any other setup required by the agent.
 	// +kubebuilder:validation:Optional
 	BootstrapScript *string `json:"bootstrapScript,omitempty"`
+
+	// ReadOnlyRootFilesystem controls the default container securityContext.
+	// When unset, the root filesystem stays writable (the current default).
+	// Set true when extending a finished image that already contains compilers.
+	// Set false (or leave unset) together with mise.config to run
+	// `mise bootstrap --yes` at boot: https://mise.jdx.dev/bootstrap.html
+	// +kubebuilder:validation:Optional
+	ReadOnlyRootFilesystem *bool `json:"readOnlyRootFilesystem,omitempty"`
+
+	// Mise supplies a mise.toml applied before the coding agent starts.
+	// When the default container root is writable, the harness runs
+	// `mise trust` and `mise bootstrap --yes`. When readOnlyRootFilesystem is true,
+	// the config is still mounted so mise exec can use [tools] and [env],
+	// but bootstrap is skipped.
+	// +kubebuilder:validation:Optional
+	Mise *MiseSpec `json:"mise,omitempty"`
 
 	// Git configure commit signing on agent run. When provided, the runtime will be configured to sign git commits using the provided key reference.
 	Git *GitSpec `json:"git,omitempty"`
@@ -126,11 +154,75 @@ type AgentRuntimeSpec struct {
 	// +listType=map
 	// +listMapKey=name
 	MCPServers []MCPServer `json:"mcpServers,omitempty"`
+
+	// WorkbenchMCP exposes the originating workbench's read-only tools to coding
+	// agents through the credential-isolating MCP sidecar.
+	// +kubebuilder:validation:Optional
+	WorkbenchMCP *WorkbenchMCPConfig `json:"workbenchMcp,omitempty"`
+}
+
+// WorkbenchMCPCategory is a workbench tool category accepted by the Console MCP endpoint.
+// +kubebuilder:validation:Enum=metrics;logs;integration;ticketing;traces;error_tracking;infrastructure;search;scm;chat;function;coding;verification;observability
+type WorkbenchMCPCategory string
+
+const (
+	WorkbenchMCPCategoryMetrics        WorkbenchMCPCategory = "metrics"
+	WorkbenchMCPCategoryLogs           WorkbenchMCPCategory = "logs"
+	WorkbenchMCPCategoryIntegration    WorkbenchMCPCategory = "integration"
+	WorkbenchMCPCategoryTicketing      WorkbenchMCPCategory = "ticketing"
+	WorkbenchMCPCategoryTraces         WorkbenchMCPCategory = "traces"
+	WorkbenchMCPCategoryErrorTracking  WorkbenchMCPCategory = "error_tracking"
+	WorkbenchMCPCategoryInfrastructure WorkbenchMCPCategory = "infrastructure"
+	WorkbenchMCPCategorySearch         WorkbenchMCPCategory = "search"
+	WorkbenchMCPCategorySCM            WorkbenchMCPCategory = "scm"
+	WorkbenchMCPCategoryChat           WorkbenchMCPCategory = "chat"
+	WorkbenchMCPCategoryFunction       WorkbenchMCPCategory = "function"
+	WorkbenchMCPCategoryCoding         WorkbenchMCPCategory = "coding"
+	WorkbenchMCPCategoryVerification   WorkbenchMCPCategory = "verification"
+	WorkbenchMCPCategoryObservability  WorkbenchMCPCategory = "observability"
+)
+
+var defaultWorkbenchMCPCategories = []WorkbenchMCPCategory{
+	WorkbenchMCPCategoryMetrics,
+	WorkbenchMCPCategoryLogs,
+	WorkbenchMCPCategoryTraces,
+	WorkbenchMCPCategoryTicketing,
+	WorkbenchMCPCategorySearch,
+	WorkbenchMCPCategorySCM,
+	WorkbenchMCPCategoryInfrastructure,
+}
+
+type WorkbenchMCPConfig struct {
+	// Enabled controls whether workbench tools are available to coding agents.
+	// +kubebuilder:default:=false
+	Enabled bool `json:"enabled"`
+
+	// Categories limits the exposed workbench tools. When omitted, the default
+	// set is metrics, logs, traces, ticketing, search, scm, and infrastructure.
+	// +kubebuilder:validation:Optional
+	Categories []WorkbenchMCPCategory `json:"categories,omitempty"`
+}
+
+// RepositoryImagePrewarm configures periodic repository image warming.
+type RepositoryImagePrewarm struct {
+	// Cron is a standard five-field cron expression controlling how often the
+	// repository image is refreshed.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	Cron string `json:"cron"`
+
+	// Template optionally overrides the secure default warmer pod template.
+	// +kubebuilder:validation:Optional
+	Template *corev1.PodTemplateSpec `json:"template,omitempty"`
+
+	// Selector restricts warming to nodes matching this label selector.
+	// +kubebuilder:validation:Optional
+	Selector *metav1.LabelSelector `json:"selector,omitempty"`
 }
 
 // MCPServer is a remote MCP server exposed to agent runtimes.
 //
-// +kubebuilder:validation:XValidation:rule="self.name != 'plural' && self.name != 'codebase-memory-mcp'",message="mcpServers name cannot collide with built-in servers plural or codebase-memory-mcp"
+// +kubebuilder:validation:XValidation:rule="self.name != 'plural' && self.name != 'codebase-memory-mcp' && self.name != 'workbench'",message="mcpServers name cannot collide with built-in servers plural, codebase-memory-mcp, or workbench"
 type MCPServer struct {
 	// Name is the MCP server identifier used by the coding agent.
 	// +kubebuilder:validation:Required
@@ -185,6 +277,14 @@ type ExaConnection struct {
 	// ProxyURL is an HTTP proxy URL used for Exa API requests.
 	// +kubebuilder:validation:Optional
 	ProxyURL *string `json:"proxyUrl,omitempty"`
+}
+
+// MiseSpec is an inline mise.toml used for unattended bootstrap.
+// See https://mise.jdx.dev/bootstrap.html
+type MiseSpec struct {
+	// Config is the contents of a mise.toml.
+	// +kubebuilder:validation:Optional
+	Config *string `json:"config,omitempty"`
 }
 
 type GitSpec struct {
@@ -438,6 +538,14 @@ type PiConfig struct {
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API Pi should use.
+	// CHAT selects openai-completions and forces /chat/completions.
+	// RESPONSES selects openai-responses and forces /responses.
+	// AUTO preserves the current openai-responses default.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// Endpoint overrides the OpenAI-compatible provider base URL.
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
@@ -454,6 +562,7 @@ func (in *PiConfig) ToPiConfigRaw(secretGetter func(corev1.SecretKeySelector) (*
 	result := &PiConfigRaw{
 		Provider: in.Provider,
 		Model:    in.Model,
+		Method:   in.Method,
 		Endpoint: in.Endpoint,
 		Timeout:  in.Timeout,
 	}
@@ -474,11 +583,12 @@ func (in *PiConfig) ToPiConfigRaw(secretGetter func(corev1.SecretKeySelector) (*
 
 // PiConfigRaw contains resolved credentials and configuration for Pi.
 type PiConfigRaw struct {
-	APIKey   string           `json:"apiKey,omitempty"`
-	Provider *string          `json:"provider,omitempty"`
-	Model    *string          `json:"model,omitempty"`
-	Endpoint *string          `json:"endpoint,omitempty"`
-	Timeout  *metav1.Duration `json:"timeout,omitempty"`
+	APIKey   string                `json:"apiKey,omitempty"`
+	Provider *string               `json:"provider,omitempty"`
+	Model    *string               `json:"model,omitempty"`
+	Method   *console.OpenAiMethod `json:"method,omitempty"`
+	Endpoint *string               `json:"endpoint,omitempty"`
+	Timeout  *metav1.Duration      `json:"timeout,omitempty"`
 }
 
 type CodexConfig struct {
@@ -636,8 +746,8 @@ func (in *ClaudeConfig) ToClaudeConfigRaw(secretGetter func(corev1.SecretKeySele
 const openCodeOpenAICompatibleProvider = "openai-compatible"
 
 // OpenCodeOpenAICompatibleConfig configures a custom OpenAI-compatible API provider in opencode.json.
-// The harness writes a provider block with npm @ai-sdk/openai-compatible. Use this for endpoints
-// that are not listed on https://models.dev (for example LiteLLM, vLLM, or a private gateway).
+// Use this for endpoints that are not listed on https://models.dev (for example LiteLLM, vLLM,
+// or a private gateway).
 //
 // When set and the parent AgentRuntime has spec.aiProxy false, spec.config.opencode.provider and
 // spec.config.opencode.endpoint are ignored in favor of this block.
@@ -688,6 +798,14 @@ type OpenCodeConfig struct {
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API OpenCode should use.
+	// CHAT selects @ai-sdk/openai-compatible and forces /chat/completions.
+	// RESPONSES selects @ai-sdk/openai and forces /responses.
+	// AUTO preserves the provider default.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// TokenSecretRef references a Secret containing the API token for OpenCode.
 	// Optional when aiProxy is enabled; authentication uses the Console deploy token instead.
 	// +kubebuilder:validation:Optional
@@ -714,6 +832,7 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 			Provider:         lo.ToPtr(openCodeOpenAICompatibleProvider),
 			Endpoint:         &compat.Endpoint,
 			Model:            compat.Model,
+			Method:           in.Method,
 			Timeout:          in.Timeout,
 			OpenAICompatible: true,
 		}
@@ -745,6 +864,7 @@ func (in *OpenCodeConfig) ToOpenCodeConfigRaw(secretGetter func(corev1.SecretKey
 		Provider: in.Provider,
 		Endpoint: in.Endpoint,
 		Model:    in.Model,
+		Method:   in.Method,
 		Timeout:  in.Timeout,
 	}
 
@@ -783,6 +903,9 @@ type OpenCodeConfigRaw struct {
 
 	// Model is the LLM model to use.
 	Model *string `json:"model,omitempty"`
+
+	// Method configures which OpenAI API OpenCode should use.
+	Method *console.OpenAiMethod `json:"method,omitempty"`
 
 	// Token is the raw API token for OpenCode.
 	Token string `json:"token,omitempty"`
@@ -877,6 +1000,15 @@ type AgentRuntimeBindings struct {
 	Create []Binding `json:"create,omitempty"`
 }
 
+type AgentRuntimeStatus struct {
+	Status `json:",inline"`
+
+	// ImageWarmerName is the generated name of the ImageWarmer managed for
+	// this runtime.
+	// +kubebuilder:validation:Optional
+	ImageWarmerName *string `json:"imageWarmerName,omitempty"`
+}
+
 func (in *AgentRuntime) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	currentSha, err := hasher(in.Attributes())
 	if err != nil {
@@ -892,6 +1024,20 @@ func (in *AgentRuntime) IsAiProxyEnabled() bool {
 
 func (in *AgentRuntime) IsStreamingProxyEnabled() bool {
 	return in.IsAiProxyEnabled() && in.Spec.StreamingProxy != nil && *in.Spec.StreamingProxy
+}
+
+func (in *AgentRuntime) IsWorkbenchMCPEnabled() bool {
+	return in != nil && in.Spec.WorkbenchMCP != nil && in.Spec.WorkbenchMCP.Enabled
+}
+
+func (in *AgentRuntime) WorkbenchMCPCategories() []WorkbenchMCPCategory {
+	if !in.IsWorkbenchMCPEnabled() {
+		return nil
+	}
+	if len(in.Spec.WorkbenchMCP.Categories) > 0 {
+		return in.Spec.WorkbenchMCP.Categories
+	}
+	return append([]WorkbenchMCPCategory(nil), defaultWorkbenchMCPCategories...)
 }
 
 func (in *AgentRuntime) ConsoleName() string {
@@ -952,8 +1098,8 @@ type AgentRuntime struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   AgentRuntimeSpec `json:"spec,omitempty"`
-	Status Status           `json:"status,omitempty"`
+	Spec   AgentRuntimeSpec   `json:"spec,omitempty"`
+	Status AgentRuntimeStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

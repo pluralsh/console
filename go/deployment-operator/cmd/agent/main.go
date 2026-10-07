@@ -255,8 +255,10 @@ func initPythonRuntimeOrDie() func() {
 		os.Exit(1)
 	}
 
+	pythonruntime.SetObjectMetaLookup(streamline.LookupObjectMeta)
 	pythonruntime.SetDefaultPool(pythonPool)
 	return func() {
+		pythonruntime.SetObjectMetaLookup(nil)
 		pythonruntime.SetDefaultPool(nil)
 		if err := pythonPool.Close(); err != nil {
 			setupLog.Error(err, "unable to shutdown Python runtime")

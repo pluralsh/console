@@ -1,8 +1,6 @@
-import { Flex } from 'honorable'
-import { useTheme } from 'styled-components'
-
-import { Card, Code, WrapWithIf } from '..'
+import { Card, Code, Flex, WrapWithIf } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
+import { useTheme } from 'styled-components'
 
 import {
   cCode,
@@ -55,13 +53,15 @@ export default meta
 type Story = StoryObj<any>
 
 function Template({ onFillLevel, ...args }: any) {
+  const theme = useTheme()
+
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
       wrapper={
         <Card
           fillLevel={onFillLevel}
-          padding="medium"
+          css={{ padding: theme.spacing.medium }}
         />
       }
     >
@@ -182,21 +182,20 @@ const tabs = [
 
 function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
   const theme = useTheme()
-
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
       wrapper={
         <Card
           fillLevel={onFillLevel}
-          padding="medium"
+          css={{ padding: theme.spacing.medium }}
         />
       }
     >
       {' '}
       <Flex
         flexDirection="column"
-        gap={theme.spacing.xxlarge}
+        gap="xxlarge"
         width="100%"
       >
         <Flex
@@ -307,13 +306,14 @@ const bigMermaid = `flowchart LR
     System metrics and logs are reviewed, rollback mechanisms stay armed, and stakeholder communications are sent out."]`
 
 function MermaidTemplate({ onFillLevel, ...args }: any) {
+  const theme = useTheme()
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
       wrapper={
         <Card
           fillLevel={onFillLevel}
-          padding="medium"
+          css={{ padding: theme.spacing.medium }}
         />
       }
     >
@@ -391,20 +391,19 @@ const mermaidTabs = [
 
 function MermaidWithTabsTemplate({ onFillLevel, title, ...args }: any) {
   const theme = useTheme()
-
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
       wrapper={
         <Card
           fillLevel={onFillLevel}
-          padding="medium"
+          css={{ padding: theme.spacing.medium }}
         />
       }
     >
       <Flex
         flexDirection="column"
-        gap={theme.spacing.xxlarge}
+        gap="xxlarge"
         width="100%"
       >
         <Flex

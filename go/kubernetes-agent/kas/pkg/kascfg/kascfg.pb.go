@@ -1875,9 +1875,11 @@ type ConfigurationFile struct {
 	// Private API for kas->kas communication.
 	PrivateApi *PrivateApiCF `protobuf:"bytes,5,opt,name=private_api,proto3" json:"private_api,omitempty"`
 	// Plural URL address
-	PluralUrl     string `protobuf:"bytes,6,opt,name=plural_url,proto3" json:"plural_url,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	PluralUrl string `protobuf:"bytes,6,opt,name=plural_url,proto3" json:"plural_url,omitempty"`
+	// Skip TLS certificate verification when connecting to Plural Console.
+	PluralInsecureSkipTlsVerify bool `protobuf:"varint,7,opt,name=plural_insecure_skip_tls_verify,proto3" json:"plural_insecure_skip_tls_verify,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *ConfigurationFile) Reset() {
@@ -1950,6 +1952,13 @@ func (x *ConfigurationFile) GetPluralUrl() string {
 		return x.PluralUrl
 	}
 	return ""
+}
+
+func (x *ConfigurationFile) GetPluralInsecureSkipTlsVerify() bool {
+	if x != nil {
+		return x.PluralInsecureSkipTlsVerify
+	}
+	return false
 }
 
 var File_pkg_kascfg_kascfg_proto protoreflect.FileDescriptor
@@ -2105,7 +2114,7 @@ const file_pkg_kascfg_kascfg_proto_rawDesc = "" +
 	"\x05ApiCF\x12B\n" +
 	"\x06listen\x18\x01 \x01(\v2 .plural.agent.kascfg.ListenApiCFB\b\xfaB\x05\x8a\x01\x02\x10\x01R\x06listen\"Y\n" +
 	"\fPrivateApiCF\x12I\n" +
-	"\x06listen\x18\x01 \x01(\v2'.plural.agent.kascfg.ListenPrivateApiCFB\b\xfaB\x05\x8a\x01\x02\x10\x01R\x06listen\"\xf8\x02\n" +
+	"\x06listen\x18\x01 \x01(\v2'.plural.agent.kascfg.ListenPrivateApiCFB\b\xfaB\x05\x8a\x01\x02\x10\x01R\x06listen\"\xc2\x03\n" +
 	"\x11ConfigurationFile\x122\n" +
 	"\x05agent\x18\x01 \x01(\v2\x1c.plural.agent.kascfg.AgentCFR\x05agent\x12J\n" +
 	"\robservability\x18\x02 \x01(\v2$.plural.agent.kascfg.ObservabilityCFR\robservability\x12<\n" +
@@ -2114,7 +2123,8 @@ const file_pkg_kascfg_kascfg_proto_rawDesc = "" +
 	"\vprivate_api\x18\x05 \x01(\v2!.plural.agent.kascfg.PrivateApiCFB\b\xfaB\x05\x8a\x01\x02\x10\x01R\vprivate_api\x12\x1e\n" +
 	"\n" +
 	"plural_url\x18\x06 \x01(\tR\n" +
-	"plural_url*:\n" +
+	"plural_url\x12H\n" +
+	"\x1fplural_insecure_skip_tls_verify\x18\a \x01(\bR\x1fplural_insecure_skip_tls_verify*:\n" +
 	"\x0elog_level_enum\x12\b\n" +
 	"\x04info\x10\x00\x12\t\n" +
 	"\x05debug\x10\x01\x12\b\n" +

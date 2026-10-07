@@ -116,7 +116,7 @@ export default function StackConfiguration() {
       >
         <FormField label="Image">
           <Input
-            value={image}
+            value={image ?? ''}
             placeholder="Enter image"
             onChange={(e) => setImage(e.currentTarget.value)}
           />
@@ -126,7 +126,7 @@ export default function StackConfiguration() {
           required
         >
           <Input
-            value={version}
+            value={version ?? ''}
             placeholder="Enter image version"
             onChange={(e) => setVersion(e.currentTarget.value)}
           />

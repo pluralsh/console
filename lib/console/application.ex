@@ -9,6 +9,8 @@ defmodule Console.Application do
       config: %{metadata: [:file, :line]}
     })
 
+    Console.Otel.Tracing.setup()
+
     children = [
       %{
         id: :pg,
@@ -36,6 +38,13 @@ defmodule Console.Application do
       :hackney_pool.child_spec(:ai_pool, [max_connections: 100, max_per_host: 100]),
       :hackney_pool.child_spec(:kazan_pool, [max_connections: 100, max_per_host: 100]),
       Console.Bootstrapper,
+      # the transport is driven by ConsoleWeb.Plugs.WorkbenchMCP off our own router, so it
+      # needs to be up regardless of whether anubis thinks an http server is running.
+      # Registry.PG publishes session pids over the erlang cluster so a tool call can
+      # land on a different console pod than initialize without 404ing.
+      {Console.AI.Workbench.MCP.Server,
+        transport: {:streamable_http, start: true},
+        registry: {Anubis.Server.Registry.PG, []}},
       ConsoleWeb.Endpoint,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Stacks.Supervisor,
@@ -82,14 +91,18 @@ defmodule Console.Application do
     :ok
   end
 
-  defp cloud_query_client(:test), do: []
+  @doc false
+  def cloud_query_client(env, enabled \\ Console.conf(:cloudquery, false))
+  def cloud_query_client(:test, _), do: []
+  def cloud_query_client(_, false), do: []
 
-  defp cloud_query_client(_) do
+  def cloud_query_client(_, true) do
     [
       {GRPC.Client.Connection,
         name: CloudQuery.Client,
         target: Console.conf(:cloudquery_host),
-        adapter: GRPC.Client.Adapters.Mint
+        adapter: CloudQuery.Client.adapter(),
+        interceptors: CloudQuery.Client.interceptors()
       }
     ]
   end

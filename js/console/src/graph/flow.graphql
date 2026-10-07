@@ -9,13 +9,20 @@ fragment FlowBasic on Flow {
     id
     name
   }
-  alerts(first: 500) {
-    # just to get the count
-    edges {
-      node {
-        id
-      }
-    }
+  agentRuntime {
+    id
+  }
+  serviceCount
+  componentCount
+  alertCount
+  pipelineCount
+  pendingPipelineCount
+  serviceStatuses {
+    ...ServiceStatusCount
+  }
+  componentStatuses {
+    state
+    count
   }
 }
 
@@ -85,8 +92,24 @@ fragment PreviewEnvironmentTemplateConnection on PreviewEnvironmentTemplateConne
   }
 }
 
-query Flows($first: Int = 100, $after: String, $q: String) {
-  flows(first: $first, after: $after, q: $q) {
+query Flows(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $statuses: [ServiceDeploymentStatus]
+  $sort: FlowSort
+  $direction: SortDirection
+  $favoriteIds: [ID]
+) {
+  flows(
+    first: $first
+    after: $after
+    q: $q
+    statuses: $statuses
+    sort: $sort
+    direction: $direction
+    favoriteIds: $favoriteIds
+  ) {
     edges {
       node {
         ...FlowBasicWithBindings
@@ -95,6 +118,9 @@ query Flows($first: Int = 100, $after: String, $q: String) {
     pageInfo {
       ...PageInfo
     }
+  }
+  flowServiceCounts(q: $q) {
+    ...ServiceStatusCount
   }
 }
 

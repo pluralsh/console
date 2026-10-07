@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { type CssProps, Div, Flex, type FlexProps } from 'honorable'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
-import Tooltip from '../components/Tooltip'
+import Flex, { type FlexProps } from './Flex'
+import Tooltip from './Tooltip'
 
 import CopyIcon from './icons/CopyIcon'
 
@@ -18,7 +18,6 @@ function Codeline({
   ...props
 }: CodelineProps) {
   const [copied, setCopied] = useState(false)
-  const theme = useTheme()
 
   const handleCopy = useCallback(() => {
     if (onCopyClick) {
@@ -41,38 +40,11 @@ function Codeline({
   }, [copied])
 
   return (
-    <Flex
-      border="1px solid border-input"
-      borderRadius="medium"
-      {...props}
-    >
-      <Flex
-        align="center"
-        paddingVertical="xsmall"
-        paddingHorizontal="medium"
-        overflowX="auto"
-        flexGrow={1}
-        position="relative"
-      >
-        <Div
-          body2
-          {...(theme.partials.text.code as CssProps)}
-          color="text-light"
-          flexGrow={1}
-          whiteSpace="pre"
-          textOverflow="ellipsis"
-          overflow="hidden"
-        >
-          {displayText || children}
-        </Div>
-      </Flex>
-      <Flex
-        width={38}
-        height={38}
-        alignItems="center"
-        justifyContent="center"
-        flexShrink={0}
-      >
+    <CodelineSC {...props}>
+      <CodeWrapSC>
+        <CodeTextSC>{displayText || children}</CodeTextSC>
+      </CodeWrapSC>
+      <CopyWrapSC>
         <Tooltip
           offset={8}
           label="Copied!"
@@ -85,26 +57,66 @@ function Codeline({
           }}
           manualOpen={copied}
         >
-          <Flex
-            alignItems="center"
-            justifyContent="center"
-            width={32}
-            height={32}
-            cursor="pointer"
-            borderRadius="medium"
-            _hover={{ backgroundColor: 'fill-zero-hover' }}
-            _active={{ backgroundColor: 'fill-zero-selected' }}
-            onClick={handleCopy}
-          >
-            <CopyIcon
-              color="text-light"
-              {...{ '& svg': { display: 'block' } }}
-            />
-          </Flex>
+          <CopyButtonSC onClick={handleCopy}>
+            <CopyIcon color="text-light" />
+          </CopyButtonSC>
         </Tooltip>
-      </Flex>
-    </Flex>
+      </CopyWrapSC>
+    </CodelineSC>
   )
 }
+
+const CodelineSC = styled(Flex)(({ theme }) => ({
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
+const CodeWrapSC = styled(Flex)(({ theme }) => ({
+  alignItems: 'center',
+  paddingTop: theme.spacing.xsmall,
+  paddingBottom: theme.spacing.xsmall,
+  paddingLeft: theme.spacing.medium,
+  paddingRight: theme.spacing.medium,
+  overflowX: 'auto',
+  flexGrow: 1,
+  position: 'relative',
+}))
+
+const CopyWrapSC = styled(Flex)({
+  width: 38,
+  height: 38,
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+})
+
+const CopyButtonSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 32,
+  height: 32,
+  cursor: 'pointer',
+  borderRadius: theme.borderRadiuses.medium,
+  '&:hover': {
+    backgroundColor: theme.colors['fill-zero-hover'],
+  },
+  '&:active': {
+    backgroundColor: theme.colors['fill-zero-selected'],
+  },
+  '& svg': {
+    display: 'block',
+  },
+}))
+
+const CodeTextSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  ...theme.partials.text.code,
+  color: theme.colors['text-light'],
+  flexGrow: 1,
+  whiteSpace: 'pre',
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+}))
 
 export default Codeline

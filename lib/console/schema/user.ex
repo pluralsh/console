@@ -25,6 +25,7 @@ defmodule Console.Schema.User do
     field :jwt,              :string, virtual: true
     field :refresh_token,    :string, virtual: true
     field :service_account,  :boolean
+    field :allowed_scopes,   {:array, :string}
     field :deleted_at,       :utc_datetime_usec
     field :read_timestamp,   :utc_datetime_usec
     field :build_timestamp,  :utc_datetime_usec
@@ -156,7 +157,7 @@ defmodule Console.Schema.User do
     from(u in query, order_by: ^order)
   end
 
-  @valid ~w(name email password deleted_at profile plural_id service_account homepage signing_private_key)a
+  @valid ~w(name email password deleted_at profile plural_id service_account allowed_scopes homepage signing_private_key)a
 
   def changeset(model, attrs \\ %{}) do
     model

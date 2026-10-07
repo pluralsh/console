@@ -1,12 +1,16 @@
-import { Flex, H3 } from 'honorable'
-
-import { Card, PluralLogoMark, WrapWithIf } from '..'
+import { Card, Flex, PluralLogoMark, WrapWithIf } from '..'
+import styled, { useTheme } from 'styled-components'
 
 import AppIcon from '../components/AppIcon'
 import type { Meta, StoryObj } from '@storybook/react'
 
+const Heading = styled.h3(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.subtitle1,
+}))
+
 const meta = {
-  title: 'AppIcon',
+  title: 'App Icon',
   component: AppIcon,
   argTypes: {
     icon: {
@@ -49,6 +53,7 @@ const sizes = [
 ]
 
 function Template({ onFillLevel, icon, ...args }: any) {
+  const theme = useTheme()
   const iconProps =
     icon === 'Airflow'
       ? { url: '/logos/airflow-logo.svg' }
@@ -58,24 +63,24 @@ function Template({ onFillLevel, icon, ...args }: any) {
 
   return (
     <Flex
-      gap={16}
+      gap="medium"
       direction="column"
     >
       {sizes.map(({ label, size }) => (
         <>
-          <H3>{label}</H3>
+          <Heading>{label}</Heading>
           <WrapWithIf
             condition={onFillLevel > 0}
             wrapper={
               <Card
                 fillLevel={onFillLevel}
-                padding="small"
+                css={{ padding: theme.spacing.small }}
               />
             }
           >
             <Flex
               direction="row"
-              gap={16}
+              gap="medium"
             >
               <AppIcon
                 size={size}

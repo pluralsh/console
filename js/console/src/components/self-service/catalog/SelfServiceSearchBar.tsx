@@ -77,7 +77,7 @@ export function SelfServiceSearchBar({
                 : 'Search'
             }
             startIcon={<MagnifyingGlassIcon color="icon-light" />}
-            width="100%"
+            css={{ width: '100%' }}
           />
           {showSearchDropdown && (
             <div

@@ -1,4 +1,4 @@
-go 1.26.5
+go 1.27.1
 
 use (
 	./ai-proxy
@@ -17,6 +17,7 @@ use (
 	./observability-proxy // github.com/pluralsh/console/go/observability-proxy
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
 	./polly // github.com/pluralsh/console/go/polly
+	./repository-prebake
 	./sign
 	./tools // github.com/pluralsh/console/go/tools
 )

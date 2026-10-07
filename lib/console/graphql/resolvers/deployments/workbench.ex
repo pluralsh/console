@@ -510,6 +510,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     Enum.reduce(args, query, fn
       {:alert, true}, q -> WorkbenchJob.with_alert(q)
       {:issue, true}, q -> WorkbenchJob.with_issue(q)
+      {:monitor_id, id}, q when is_binary(id) -> WorkbenchJob.for_monitor(q, id)
       _, q -> q
     end)
   end

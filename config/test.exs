@@ -519,6 +519,25 @@ config :console, Console.Mailer,
 config :console, Console.Deployments.Metrics.Provider.NewRelic,
   plug: {Req.Test, Console.Deployments.Metrics.Provider.NewRelic}
 
+config :console,
+       Console.AI.Tools.Workbench.Observability.External.Datadog,
+       plug: {Req.Test, Console.AI.Tools.Workbench.Observability.External.Datadog}
+
+config :console,
+       Console.AI.Tools.Workbench.Observability.External.Dynatrace,
+       plug: {Req.Test, Console.AI.Tools.Workbench.Observability.External.Dynatrace}
+
+config :console,
+       Console.AI.Tools.Workbench.Observability.External.Splunk,
+       plug: {Req.Test, Console.AI.Tools.Workbench.Observability.External.Splunk}
+
+config :console,
+       Console.AI.Tools.Workbench.Observability.External.Azure,
+       plug: {Req.Test, Console.AI.Tools.Workbench.Observability.External.Azure}
+
+config :console, Console.AI.Tools.Workbench.Observability.External.Sentry,
+  plug: {Req.Test, Console.AI.Tools.Workbench.Observability.External.Sentry}
+
 config :elasticsearch,
   host: System.get_env("ELASTICSEARCH_HOST", "http://localhost:9200"),
   index: "testindex",

@@ -3,7 +3,7 @@
     "properties": {
         "conclusion": {
             "type": "string",
-            "description": "The conclusion to this workbench job you want to record"
+            "description": "The conclusion to this workbench job you want to record. This does not update the result's current objective; if the user resteered, reset `objective` via `workbench_notes` before completing."
         },
         "topology": {
             "type": "string",

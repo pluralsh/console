@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/helm-test-ci.yaml"
       - "go/helm-test/**"
+      - "charts/controller/**"
       - "charts/console/**"
       - "charts/console-rapid/**"
 permissions:
@@ -16,8 +17,19 @@ env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   build:
+    needs: [vouch]
     name: Test
     runs-on: ubuntu-latest
     defaults:
@@ -25,10 +37,11 @@ jobs:
         shell: bash
         working-directory: go/helm-test
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/helm-test/go.mod
+          cache-dependency-path: go/helm-test/go.sum
           cache: true
       - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make test

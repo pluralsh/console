@@ -1,9 +1,9 @@
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import react from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import { Readable } from 'node:stream'
 import { resolve } from 'path'
 import { defineConfig, type Plugin } from 'vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
 
 const API_URL = process.env.BASE_URL
   ? `https://${process.env.BASE_URL}`
@@ -78,7 +78,7 @@ const objectStoreDevProxy = {
                 'query($id:ID!){agentRun(id:$id){upload{patch session screenRecording}}}',
               variables: { id: dl[1] },
             }),
-          }).then((r) => r.json())
+          }).then((r) => r.json() as Promise<{ data?: any; errors?: any[] }>)
           const field = dl[2] === 'screen_recording' ? 'screenRecording' : dl[2]
           const upload = data?.agentRun?.upload?.[field]
           if (errors?.length || !upload) throw new Error()
@@ -112,14 +112,11 @@ const objectStoreDevProxy = {
 export default defineConfig({
   plugins: [
     basicSsl(),
-    react({
-      babel: {
-        plugins: ['styled-components'],
-        babelrc: false,
-        configFile: false,
-      },
+    react(),
+    babel({
+      plugins: ['styled-components'],
+      exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]generated[/\\]/],
     }),
-    tsconfigPaths({ loose: true }),
     objectStoreDevProxy,
     // this was very memory intensive (from source maps) and ultimately not that useful
     // could consider reenabling in the future if we rework DS bundling/publishing
@@ -162,8 +159,12 @@ export default defineConfig({
     },
   },
   resolve: {
+    tsconfigPaths: true,
     alias: {
-      '@pluralsh/design-system': resolve(__dirname, '../design-system/src'),
+      '@pluralsh/design-system': resolve(
+        import.meta.dirname,
+        '../design-system/src'
+      ),
     },
   },
 })

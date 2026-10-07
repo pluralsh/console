@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.AI.WorkbenchController do
   alias Console.Deployments.Workbenches
   alias Console.Schema.Workbench
 
-  plug Scope, [resource: :ai, action: :read] when action in [:show, :show_by_name, :index]
+  plug Scope, [resource: :workbench, action: :read] when action in [:show, :show_by_name, :index]
 
   @doc """
   Fetches a workbench by id.
@@ -18,7 +18,7 @@ defmodule ConsoleWeb.OpenAPI.AI.WorkbenchController do
   operation :show,
     operation_id: "GetWorkbench",
     tags: ["workbench"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["workbench.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the workbench"]
     ],

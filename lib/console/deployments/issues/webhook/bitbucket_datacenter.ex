@@ -1,5 +1,7 @@
 defmodule Console.Deployments.Issues.Webhook.BitbucketDatacenter do
   @behaviour Console.Deployments.Issues.Provider
+  @behaviour Console.Deployments.Issues.Scm
+  alias Console.Deployments.Issues.Scm
 
   def body(%{"comment" => %{"text" => body}}) when is_binary(body), do: body
   def body(%{"comment" => %{"content" => %{"raw" => body}}}) when is_binary(body), do: body
@@ -41,6 +43,12 @@ defmodule Console.Deployments.Issues.Webhook.BitbucketDatacenter do
   def status(%{"pullRequest" => %{"state" => state}}), do: map_status(state)
   def status(%{"pullrequest" => %{"state" => state}}), do: map_status(state)
   def status(_), do: :open
+
+  def pull_request?(%{"pullRequest" => _} = payload), do: not is_map_key(payload, "comment")
+  def pull_request?(%{"pullrequest" => _} = payload), do: not is_map_key(payload, "comment")
+  def pull_request?(_), do: false
+
+  def reference_urls(url), do: [Scm.base_reference_url(url)]
 
   defp infer_repo(%{"repository" => %{"full_name" => full_name}}) when is_binary(full_name), do: full_name
   defp infer_repo(%{"pullRequest" => %{} = pr}) do

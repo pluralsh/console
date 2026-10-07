@@ -1,0 +1,185 @@
+defmodule Console.AI.Tools.Workbench.SubagentsTest do
+  use Console.DataCase, async: true
+
+  alias Console.AI.Tool
+  alias Console.AI.Workbench.Environment
+  alias Console.AI.Workbench.Subagents, as: RuntimeSubagents
+  alias Console.AI.Tools.Workbench.{
+    ObservabilityResult,
+    Result,
+    Subagent,
+    Subagents
+  }
+  alias Console.Schema.{Workbench, WorkbenchJob}
+
+  describe "subagent prompt guidance" do
+    test "accepts the monitoring subagent" do
+      assert {:ok, %Subagent{subagent: :monitoring}} =
+               Tool.validate(
+                 %Subagent{subagents: [:monitoring]},
+                 %{
+                   "subagent" => "monitoring",
+                   "prompt" => "Create persistent API monitoring"
+                 }
+               )
+    end
+
+    test "requires a descriptive first line without generic labels" do
+      tool = %Subagent{subagents: [:coding]}
+      prompt_description =
+        get_in(Subagent.json_schema(tool), ["properties", "prompt", "description"])
+
+      assert Subagent.description(tool) =~ "first line"
+      assert prompt_description =~ "first line"
+      assert prompt_description =~ ~s("Task")
+      assert prompt_description =~ ~s("Job")
+    end
+  end
+
+  describe "subagent result guidance" do
+    test "requires conclusions to describe the completed work on the first line" do
+      for tool <- [Result, ObservabilityResult] do
+        output_description =
+          get_in(tool.json_schema(), ["properties", "output", "description"])
+
+        assert tool.description() =~ "first line"
+        assert output_description =~ "first line"
+        assert output_description =~ "work completed"
+      end
+    end
+  end
+
+  describe "implement/1" do
+    test "lists the cached applicable tool names in each subagent description" do
+      environment = %Environment{
+        job: %WorkbenchJob{workbench: %Workbench{}},
+        tools: %{},
+        skills: %{},
+        activities: []
+      }
+
+      tool_names = RuntimeSubagents.tool_names([:memory], environment)
+
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: environment.job,
+          subagents: [:memory],
+          categories: [],
+          tool_names: tool_names
+        })
+
+      assert [%{"name" => "memory", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "Available tools: #{Enum.join(tool_names.memory, ", ")}."
+      assert "agent_scratchpad" in tool_names.memory
+      assert "subagent_result" in tool_names.memory
+      assert "workbench_activity_search" in tool_names.memory
+    end
+
+    test "limits displayed tool names to 15" do
+      names = Enum.map(1..16, &"tool_#{String.pad_leading("#{&1}", 2, "0")}")
+
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:memory],
+          categories: [],
+          tool_names: %{memory: names}
+        })
+
+      assert [%{"description" => description}] = Jason.decode!(encoded)
+      assert description =~ "tool_15, and 1 more."
+      refute description =~ "tool_16"
+    end
+
+    test "describes infrastructure as covering kubernetes, IaaS, and Docker/OCI" do
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:infrastructure],
+          categories: []
+        })
+
+      assert [%{"name" => "infrastructure", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "Docker/OCI"
+    end
+
+    test "describes monitoring as persistent dashboard and monitor management" do
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:monitoring],
+          categories: [:metrics, :logs]
+        })
+
+      assert [%{"name" => "monitoring", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "create"
+      assert description =~ "dashboards and monitors"
+      assert description =~ "metrics, logs"
+    end
+
+    test "describes self_service as catalog and PR automation workflows" do
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:self_service],
+          categories: []
+        })
+
+      assert [%{"name" => "self_service", "description" => description}] =
+               Jason.decode!(encoded)
+
+      assert description =~ "catalog"
+      assert description =~ "PR automation"
+      assert description =~ "coding"
+    end
+
+    test "accepts the self_service subagent" do
+      assert {:ok, %Subagent{subagent: :self_service}} =
+               Tool.validate(
+                 %Subagent{subagents: [:self_service]},
+                 %{
+                   "subagent" => "self_service",
+                   "prompt" => "Provision a postgres cluster via catalog automation"
+                 }
+               )
+    end
+
+    test "mentions review mode on the coding subagent only when enabled" do
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{},
+          subagents: [:coding],
+          categories: []
+        })
+
+      %{"name" => "coding", "description" => disabled} = Jason.decode!(encoded) |> List.first()
+      refute disabled =~ "Review mode is enabled"
+
+      {:ok, encoded} =
+        Subagents.implement(%Subagents{
+          bench: %Workbench{},
+          job: %WorkbenchJob{
+            modes: %WorkbenchJob.Modes{coding: %WorkbenchJob.Modes.Coding{review: true}}
+          },
+          subagents: [:coding],
+          categories: []
+        })
+
+      %{"name" => "coding", "description" => enabled} = Jason.decode!(encoded) |> List.first()
+      assert enabled =~ "Review mode is enabled for this job"
+      assert enabled =~ "review mode"
+    end
+  end
+end

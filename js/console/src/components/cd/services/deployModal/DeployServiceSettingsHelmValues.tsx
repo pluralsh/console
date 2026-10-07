@@ -255,7 +255,7 @@ const HelmValuesFilesInput = memo(
                     >
                       <Input
                         error={errors.duplicate}
-                        value={valuesFile}
+                        value={valuesFile ?? ''}
                         inputProps={{ 'aria-label': 'Name' }}
                         onChange={(e) => {
                           setHelmValuesFiles((helmValues) =>

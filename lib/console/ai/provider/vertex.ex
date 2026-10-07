@@ -7,7 +7,7 @@ defmodule Console.AI.Vertex do
   alias Console.AI.{Utils, Stream}
   alias Console.AI.GothManager
 
-  defstruct [:service_account_json, :model, :tool_model, :embedding_model, :project, :location, :endpoint, :stream]
+  defstruct [:service_account_json, :model, :tool_model, :embedding_model, :project, :location, :endpoint, :stream, :proxy]
 
   @type t :: %__MODULE__{}
 
@@ -23,6 +23,7 @@ defmodule Console.AI.Vertex do
       project: opts.project,
       location: opts.location,
       endpoint: opts.endpoint,
+      proxy: Map.get(opts, :proxy),
       stream: Stream.stream(),
     }
   end
@@ -32,13 +33,12 @@ defmodule Console.AI.Vertex do
   @doc """
   Generate a openai completion
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = vtx, messages, opts) do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
       |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client]))}", vtx.stream, base_opts(Keyword.put(provider_options, :tools, tools(opts)), opts))
-      |> reqllm_result()
     end
   end
 
@@ -82,7 +82,7 @@ defmodule Console.AI.Vertex do
 
   defp provider_options(%__MODULE__{project: p, location: l} = vertex) do
     with {:ok, %{token: token}} <- client(vertex) do
-      {:ok, [project_id: p, region: l, access_token: token]}
+      {:ok, [project_id: p, region: l, access_token: token] ++ http_options(vertex)}
     end
   end
 

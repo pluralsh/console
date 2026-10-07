@@ -15,19 +15,28 @@ import (
 )
 
 // Query implements the cloudquery.CloudQueryServer interface
-func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryResult, error) {
-	c, _, err := in.createProviderConnection(input.GetConnection())
-	if err != nil {
-		return nil, err
-	}
-
-	return in.handleQuery(c, input.GetQuery())
+func (in *CloudQueryService) Query(ctx context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryResult, error) {
+	query := input.GetQuery()
+	var out *cloudquery.QueryResult
+	err := in.withProviderConnection(input.GetConnection(), func(c connection.Connection) error {
+		result, err := in.handleQuery(ctx, c, query)
+		if err != nil {
+			return err
+		}
+		out = result
+		return nil
+	})
+	return out, wrapInternal(err, "failed to execute query '%s': %v", query, err)
 }
 
-func (in *CloudQueryService) handleQuery(c connection.Connection, query string) (*cloudquery.QueryResult, error) {
-	columns, rows, err := c.Query(query)
+type queryConnection interface {
+	QueryWithContext(context.Context, string, ...any) ([]string, [][]any, error)
+}
+
+func (in *CloudQueryService) handleQuery(ctx context.Context, c queryConnection, query string) (*cloudquery.QueryResult, error) {
+	columns, rows, err := c.QueryWithContext(ctx, query)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to execute query '%s': %v", query, err)
+		return nil, err
 	}
 	klog.V(log.LogLevelDebug).InfoS("found query results", "rows", len(rows))
 

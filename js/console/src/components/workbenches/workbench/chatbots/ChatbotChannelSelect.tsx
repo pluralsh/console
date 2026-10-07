@@ -3,7 +3,7 @@ import {
   ComboBox,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -67,7 +67,7 @@ export function ChatbotChannelSelect({
           direction="column"
           gap="xsmall"
         >
-          <Input2
+          <Input
             value={channel}
             onChange={(e) => onChannelChange(e.target.value)}
             disabled={isDisabled}

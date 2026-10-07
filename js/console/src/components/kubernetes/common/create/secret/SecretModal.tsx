@@ -163,7 +163,7 @@ export function CreateSecretModal({
             onChange={(e) => {
               setName(e.target.value)
             }}
-            required
+            inputProps={{ required: true }}
           />
         </FormField>
         <FormField
@@ -191,7 +191,7 @@ export function CreateSecretModal({
               placeholder="Enter namespace"
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
-              required
+              inputProps={{ required: true }}
             />
           )}
         </FormField>

@@ -138,6 +138,7 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			}
 		}
 	})
+
 }
 
 func TestSettingsTemplate_ExternalMCPServer(t *testing.T) {

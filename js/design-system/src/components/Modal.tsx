@@ -1,6 +1,11 @@
 // this is just styling, actual modal logic is in ModalWrapper
 
-import { type ComponentPropsWithRef, type ReactNode, useCallback } from 'react'
+import {
+  type ComponentPropsWithoutRef,
+  type DOMAttributes,
+  type ReactNode,
+  useCallback,
+} from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -34,7 +39,15 @@ type ModalPropsType = ModalWrapperProps & {
   actions?: ReactNode
   severity?: ModalSeverity
   asForm?: boolean
-  formProps?: ComponentPropsWithRef<'form'>
+  // Ref is omitted and handlers are generalized to HTMLElement: the card is
+  // div-based but may be forwarded as a <form>, and React 19 types event
+  // handlers strictly by element, so form-element handlers would not be
+  // assignable here.
+  formProps?: Omit<
+    ComponentPropsWithoutRef<'form'>,
+    keyof DOMAttributes<HTMLElement>
+  > &
+    DOMAttributes<HTMLElement>
 }
 
 const severityToIconColorKey = {

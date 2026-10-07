@@ -86,7 +86,7 @@ export default function StackActions({
       ) : (
         <Flex
           align="center"
-          borderRadius={theme.borderRadiuses.medium}
+          css={{ borderRadius: theme.borderRadiuses.medium }}
         >
           <KickButton
             key={stack?.id ?? 'id'}
@@ -160,7 +160,8 @@ export default function StackActions({
         show={!!error}
         severity="danger"
         margin="xlarge"
-        marginVertical="xxxlarge"
+        marginTop="xxxlarge"
+        marginBottom="xxxlarge"
       >
         Error: {error?.message}
       </Toast>

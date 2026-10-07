@@ -44,6 +44,7 @@ const (
 	EnvOpenCodeProvider         = "PLRL_OPENCODE_PROVIDER"
 	EnvOpenCodeEndpoint         = "PLRL_OPENCODE_ENDPOINT"
 	EnvOpenCodeModel            = "PLRL_OPENCODE_MODEL"
+	EnvOpenCodeMethod           = "PLRL_OPENCODE_METHOD"
 	EnvOpenCodeToken            = "PLRL_OPENCODE_TOKEN"
 	EnvOpenCodeOpenAICompatible = "PLRL_OPENCODE_OPENAI_COMPATIBLE"
 
@@ -68,11 +69,18 @@ const (
 	EnvPiAPIKey   = "PLRL_PI_API_KEY"
 	EnvPiProvider = "PLRL_PI_PROVIDER"
 	EnvPiEndpoint = "PLRL_PI_ENDPOINT"
+	EnvPiMethod   = "PLRL_PI_METHOD"
 
 	EnvDindEnabled    = "PLRL_DIND_ENABLED"
 	EnvBrowserEnabled = "PLRL_BROWSER_ENABLED"
 	EnvMemoryEnabled  = "PLRL_MEMORY_ENABLED"
+	EnvMiseBootstrap  = "PLRL_MISE_BOOTSTRAP"
 	EnvExecTimeout    = "PLRL_EXEC_TIMEOUT"
+
+	EnvMiseGlobalConfigFile    = "MISE_GLOBAL_CONFIG_FILE"
+	EnvMiseDataDir             = "MISE_DATA_DIR"
+	EnvMiseErlangCompile       = "MISE_ERLANG_COMPILE"
+	EnvMiseErlangPrecompiledOS = "MISE_ERLANG_PRECOMPILED_OS"
 
 	EnvGitProxy = "PLRL_GIT_PROXY"
 
@@ -80,6 +88,7 @@ const (
 	EnvMcpExcludeTools = "PLRL_EXCLUDE_TOOLS"
 	EnvStreamingProxy  = "PLRL_STREAMING_PROXY"
 	EnvMCPServers      = "PLRL_MCP_SERVERS"
+	EnvWorkbenchMCPURL = "PLRL_WORKBENCH_MCP_URL"
 )
 
 var (
@@ -398,6 +407,11 @@ func (r *AgentRunReconciler) reconcilePod(ctx context.Context, run *v1alpha1.Age
 		return nil, fmt.Errorf("failed to reconcile bootstrap config map: %w", err)
 	}
 
+	miseCM, err := r.reconcileMiseConfigMap(ctx, run, runtime)
+	if err != nil {
+		return nil, fmt.Errorf("failed to reconcile mise config map: %w", err)
+	}
+
 	pod := &corev1.Pod{}
 	if err := r.Get(ctx, client.ObjectKey{Name: run.Name, Namespace: run.Namespace}, pod); err != nil {
 		if !errors.IsNotFound(err) {
@@ -425,6 +439,12 @@ func (r *AgentRunReconciler) reconcilePod(ctx context.Context, run *v1alpha1.Age
 	if bootstrapCM != nil {
 		if err := utils.TryAddOwnerRef(ctx, r.Client, pod, bootstrapCM, r.Scheme); err != nil {
 			return pod, fmt.Errorf("failed to add owner ref to bootstrap config map: %w", err)
+		}
+	}
+
+	if miseCM != nil {
+		if err := utils.TryAddOwnerRef(ctx, r.Client, pod, miseCM, r.Scheme); err != nil {
+			return pod, fmt.Errorf("failed to add owner ref to mise config map: %w", err)
 		}
 	}
 
@@ -462,6 +482,38 @@ func (r *AgentRunReconciler) reconcileBootstrapConfigMap(ctx context.Context, ru
 	return cm, nil
 }
 
+// reconcileMiseConfigMap creates a ConfigMap holding the runtime mise.toml.
+func (r *AgentRunReconciler) reconcileMiseConfigMap(ctx context.Context, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) (*corev1.ConfigMap, error) {
+	config := runtimeMiseConfig(runtime)
+	if config == "" {
+		return nil, nil
+	}
+
+	logger := log.FromContext(ctx)
+	name := run.Name + "-mise"
+
+	cm := &corev1.ConfigMap{}
+	if err := r.Get(ctx, types.NamespacedName{Name: name, Namespace: run.Namespace}, cm); err != nil {
+		if !errors.IsNotFound(err) {
+			return nil, fmt.Errorf("failed to get mise config map: %w", err)
+		}
+
+		cm = &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: run.Namespace},
+			Data: map[string]string{
+				miseConfigConfigMapKey: config,
+			},
+		}
+
+		logger.V(2).Info("creating mise config map", "namespace", cm.Namespace, "name", cm.Name)
+		if err = r.Create(ctx, cm); err != nil {
+			return nil, fmt.Errorf("failed to create mise config map: %w", err)
+		}
+	}
+
+	return cm, nil
+}
+
 func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) (*corev1.Secret, error) {
 	logger := log.FromContext(ctx)
 
@@ -479,6 +531,7 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve mcp servers: %w", err)
 	}
+	mcpServers = withWorkbenchMCPServer(mcpServers, run, runtime)
 
 	var exaConnection *v1alpha1.ExaConnectionRaw
 	if runtime.Spec.ExaConnection != nil {
@@ -582,6 +635,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		result[EnvOpenCodeEndpoint] = lo.FromPtr(config.OpenCode.Endpoint)
 		result[EnvOpenCodeModel] = lo.FromPtr(config.OpenCode.Model)
 		result[EnvOpenCodeToken] = config.OpenCode.Token
+		if config.OpenCode.Method != nil {
+			result[EnvOpenCodeMethod] = config.OpenCode.Method.String()
+		}
 		if config.OpenCode.OpenAICompatible {
 			result[EnvOpenCodeOpenAICompatible] = "true"
 		}
@@ -660,6 +716,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		result[EnvPiModel] = lo.FromPtr(config.Pi.Model)
 		result[EnvPiAPIKey] = config.Pi.APIKey
 		result[EnvPiProvider] = lo.FromPtr(config.Pi.Provider)
+		if config.Pi.Method != nil {
+			result[EnvPiMethod] = config.Pi.Method.String()
+		}
 		if config.Pi.Timeout != nil {
 			result[EnvExecTimeout] = config.Pi.Timeout.Duration.String()
 		}

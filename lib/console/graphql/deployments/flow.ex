@@ -1,9 +1,16 @@
 defmodule Console.GraphQl.Deployments.Flow do
   use Console.GraphQl.Schema.Base
   alias Console.Middleware.AdminRequired
-  alias Console.GraphQl.Resolvers.{Deployments, User}
+  alias Console.GraphQl.Resolvers.{Deployments, User, FlowSummaryLoader}
 
   ecto_enum :mcp_server_protocol, Console.Schema.McpServer.Protocol
+  ecto_enum :oauth_token_exchange_type, Console.Schema.DeploymentSettings.OauthToken.Type
+
+  enum :flow_sort do
+    value :name
+    value :service_count
+    value :favorited
+  end
 
   input_object :flow_attributes do
     field :name,                non_null(:string)
@@ -31,6 +38,19 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :write_bindings, list_of(:policy_binding_attributes)
   end
 
+  input_object :oauth_token_exchange_attributes do
+    field :enabled,       :boolean
+    field :type,          :oauth_token_exchange_type
+    field :token_url,     :string
+    field :client_id,     :string
+    field :client_secret, :string
+    field :private_key,   :string
+    field :key_id,        :string
+    field :audience,      :string
+    field :resource,      :string
+    field :scopes,        list_of(:string)
+  end
+
   input_object :mcp_server_association_attributes do
     field :server_id, :id
   end
@@ -41,10 +61,12 @@ defmodule Console.GraphQl.Deployments.Flow do
 
   input_object :mcp_server_authentication_attributes do
     field :plural, :boolean, description: "whether to use Plural's built-in JWT authentication"
+    field :oauth, :oauth_token_exchange_attributes, description: "OAuth2 client credentials token exchange"
     field :headers, list_of(:mcp_header_attributes)
   end
 
   input_object :mcp_header_attributes do
+    field :id,    :id
     field :name,  non_null(:string)
     field :value, non_null(:string)
   end
@@ -57,6 +79,11 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :template,             non_null(:service_template_attributes), description: "a set of service configuration overrides to use while cloning"
     field :connection_id,        :id, description: "an scm connection id to use for PR preview comment generation"
     field :preview_ttl,          :string, description: "how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)"
+  end
+
+  object :component_status_count do
+    field :state, non_null(:component_state)
+    field :count, non_null(:integer)
   end
 
   object :flow do
@@ -79,6 +106,27 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this flow"
     field :project,        :project, resolve: dataloader(Deployments), description: "the project this flow belongs to"
 
+    field :service_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:service_count),
+      description: "the number of services in this flow"
+    field :component_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:component_count),
+      description: "the number of service components in this flow"
+    field :alert_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:alert_count),
+      description: "the number of alerts for services in this flow"
+    field :pipeline_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:pipeline_count),
+      description: "the number of pipelines in this flow"
+    field :pending_pipeline_count, :integer,
+      resolve: FlowSummaryLoader.resolve(:pending_pipeline_count),
+      description: "the number of pending pipeline gates in this flow"
+    field :service_statuses, list_of(:service_status_count),
+      resolve: FlowSummaryLoader.resolve(:service_statuses),
+      description: "a rollup of service statuses in this flow"
+    field :component_statuses, list_of(:component_status_count),
+      resolve: FlowSummaryLoader.resolve(:component_statuses),
+      description: "a rollup of component states in this flow"
     connection field :services, node_type: :service_deployment do
       resolve &Deployments.services_for_flow/3
     end
@@ -147,14 +195,31 @@ defmodule Console.GraphQl.Deployments.Flow do
     timestamps()
   end
 
+  object :oauth_token_exchange do
+    field :enabled,   :boolean
+    field :type,      :oauth_token_exchange_type
+    field :token_url, :string
+    field :client_id, :string
+    field :key_id,    :string
+    field :audience,  :string
+    field :resource,  :string
+    field :scopes,    list_of(:string)
+  end
+
   object :mcp_server_authentication do
     field :plural,  :boolean, description: "built-in Plural JWT authentication"
+    field :oauth, :oauth_token_exchange, description: "OAuth2 client credentials token exchange"
     field :headers, list_of(:mcp_server_header), description: "any custom HTTP headers needed for authentication"
   end
 
   object :mcp_server_header do
+    field :id,    non_null(:id)
     field :name,  non_null(:string)
-    field :value, non_null(:string)
+    field :value, non_null(:string),
+      description: "obfuscated header value; the real secret is never returned over GraphQL",
+      resolve: fn _, _, _ ->
+        {:ok, Console.Schema.McpServer.obfuscated_header_value()}
+      end
   end
 
   object :mcp_server_audit do
@@ -219,8 +284,24 @@ defmodule Console.GraphQl.Deployments.Flow do
         resource: :flow,
         action: :read
       arg :q, :string
+      arg :statuses, list_of(:service_deployment_status),
+        description: "return flows that have at least one service in one of these statuses"
+      arg :sort, :flow_sort, description: "field to sort flows by"
+      arg :direction, :sort_direction, description: "sort direction"
+      arg :favorite_ids, list_of(:id),
+        description: "flow ids to rank first when sorting by favorited"
 
       resolve &Deployments.list_flows/2
+    end
+
+    field :flow_service_counts, list_of(:service_status_count) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :flow,
+        action: :read
+      arg :q, :string, description: "restrict counts to flows matching this search"
+
+      resolve &Deployments.flow_service_counts/2
     end
 
     field :flow, :flow do
@@ -296,6 +377,17 @@ defmodule Console.GraphQl.Deployments.Flow do
       arg :attributes, non_null(:mcp_server_attributes)
 
       resolve &Deployments.upsert_mcp_server/2
+    end
+
+    field :update_mcp_server, :mcp_server do
+      middleware Authenticated
+      middleware Scope,
+        resource: :settings,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:mcp_server_attributes)
+
+      resolve &Deployments.update_mcp_server/2
     end
 
     field :delete_mcp_server, :mcp_server do

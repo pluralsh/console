@@ -44,6 +44,9 @@ import {
   chatProviderConnectionLabel,
 } from './chatbots/utils'
 
+const WORKBENCH_JOB_ROW_HEIGHT = 52
+const getWorkbenchJobRowHeight = () => WORKBENCH_JOB_ROW_HEIGHT
+
 export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -89,6 +92,11 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       lockColumnsOnScroll={false}
+      reactVirtualOptions={{
+        estimateSize: getWorkbenchJobRowHeight,
+        measureElement: getWorkbenchJobRowHeight,
+      }}
+      overflowX="hidden"
       data={jobs}
       columns={
         columns ?? [userColumn, promptColumn, usageColumn, ...actionColumns]
@@ -148,11 +156,13 @@ export const promptColumn = columnHelper.accessor(
     id: 'prompt',
     meta: { gridTemplate: 'minmax(0, 1fr)' },
     cell: ({ getValue }) => (
-      <WorkbenchStoredPromptMarkdown
-        text={getValue()}
-        density="tableCell"
-        clampLines={1}
-      />
+      <div css={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
+        <WorkbenchStoredPromptMarkdown
+          text={getValue()}
+          density="tableCell"
+          clampLines={1}
+        />
+      </div>
     ),
   }
 )
@@ -359,7 +369,10 @@ function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
         fullColor
         status={job.status}
       />
-      <CaretRightIcon color="icon-xlight" />
+      <CaretRightIcon
+        color="icon-xlight"
+        size={12}
+      />
     </div>
   )
 }

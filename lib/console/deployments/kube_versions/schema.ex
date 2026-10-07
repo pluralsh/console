@@ -21,7 +21,15 @@ defmodule Console.Deployments.KubeVersions.Changelog do
       removals: summary["removals"],
       features: summary["features"],
       bug_fixes: summary["bug_fixes"],
-      api_updates: summary["api_updates"]
+      api_updates: normalize_api_updates(summary["api_updates"])
     }
   end
+
+  defp normalize_api_updates(updates) when is_map(updates) do
+    updates
+    |> Enum.sort_by(fn {api, _description} -> api end)
+    |> Enum.map(fn {api, description} -> "#{api}: #{description}" end)
+  end
+
+  defp normalize_api_updates(updates), do: updates
 end

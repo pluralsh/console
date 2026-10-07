@@ -99,13 +99,8 @@ const SHIMMER_SPREAD = '5%'
 // how long one full sweep takes
 const SHIMMER_DURATION = '1.75s'
 
-const sharedTextStyles = ({
-  theme,
-  $color,
-  $shimmer,
-}: { theme: DefaultTheme } & TextProps) => ({
-  color: $color && theme.colors[$color],
-  ...($shimmer && {
+export function shimmerTextCss(theme: DefaultTheme) {
+  return {
     '@keyframes shimmer-text': {
       '0%': { backgroundPosition: '100% center' },
       '100%': { backgroundPosition: '0% center' },
@@ -114,7 +109,35 @@ const sharedTextStyles = ({
     backgroundSize: '250% 100%, auto',
     backgroundRepeat: 'no-repeat, padding-box',
     backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
     color: 'transparent',
     animation: `shimmer-text ${SHIMMER_DURATION} linear infinite`,
-  }),
+    '@media (prefers-reduced-motion: reduce)': {
+      animationDuration: '6s',
+    },
+  }
+}
+
+/** Shimmer text inside a box without clipping the box fill itself. */
+export function shimmerWithinCss(theme: DefaultTheme) {
+  const { '@keyframes shimmer-text': shimmerKeyframes, ...text } =
+    shimmerTextCss(theme)
+
+  return {
+    '@keyframes shimmer-text': shimmerKeyframes,
+    '& :is(p, span, li, pre, code, h1, h2, h3, h4, td, th)': {
+      ...text,
+      color: 'transparent !important',
+    },
+  }
+}
+
+const sharedTextStyles = ({
+  theme,
+  $color,
+  $shimmer,
+}: { theme: DefaultTheme } & TextProps) => ({
+  color: $color && theme.colors[$color],
+  ...($shimmer && shimmerTextCss(theme)),
 })

@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "monitor_id": {
+      "type": "string",
+      "description": "Provider-specific monitor or alert ID returned by the external monitor list tool"
+    },
+    "scope": {
+      "type": "string",
+      "description": "Provider scope when required, such as a Sentry organization slug"
+    }
+  },
+  "required": ["monitor_id"]
+}

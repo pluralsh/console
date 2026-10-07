@@ -21,7 +21,7 @@ Policies only add constraints or automate an existing approval step. They do not
 
 | Type | Rego package | Purpose |
 |---|---|---|
-| Workbench | `plrl.wb.admission` | Deny tool calls or automatically approve operations that require approval |
+| Workbench | `plrl.workbench` | Deny tool calls or automatically approve operations that require approval |
 | Stack | `plrl.stack` | Approve or reject stack runs from plan, stack, commit, and actor data |
 | Binding | `plrl.binding` | Select which workbenches or stacks receive another policy |
 

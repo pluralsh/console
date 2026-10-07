@@ -133,7 +133,6 @@ function IconWrapper({
 }: {
   icon: ReactNode
   children?: ReactNode
-  gap?: SemanticSpacingKey
 } & FlexProps) {
   return (
     <Flex

@@ -6,10 +6,22 @@ import {
   Flex,
   Markdown,
 } from '@pluralsh/design-system'
+import { ansiToJson } from 'anser'
+import { textStyle } from 'components/utils/AnsiText'
 import { ChatTypeAttributes } from 'generated/graphql'
+import escapeCarriageReturn from 'escape-carriage'
 import isJson from 'is-json'
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { isEmpty } from 'lodash'
+import {
+  ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
+import { shimmerWithinCss } from 'components/utils/typography/Text'
 import { prettifyToolJson } from './toolCallDisplay'
 
 enum ToolCallTab {
@@ -17,11 +29,35 @@ enum ToolCallTab {
   Output = 'output',
 }
 
-export function useSlimToolCodeCss({
-  showLanguageIcon = false,
-}: { showLanguageIcon?: boolean } = {}) {
-  const { colors } = useTheme()
+/** Darker surface behind tool output, so it sinks below the chat. */
+export const toolSurfaceCss = (theme: DefaultTheme) => ({
+  backgroundColor: theme.colors['fill-accent'],
+  border: theme.borders['fill-one'],
+})
+
+export const toolOutputTextCss = (theme: DefaultTheme) => ({
+  ...theme.partials.text.mono,
+  fontSize: 13,
+  lineHeight: '18px',
+  fontWeight: 200,
+})
+
+/** Sink tool code into the accent fill. Syntax colors stay on the design-system theme. */
+export function useQuietToolCodeCss() {
+  const theme = useTheme()
+
   return {
+    '&&': toolSurfaceCss(theme),
+    '& pre': toolOutputTextCss(theme),
+  } as const
+}
+
+export function useSlimToolCodeCss() {
+  const { colors } = useTheme()
+  const quietCodeCss = useQuietToolCodeCss()
+
+  return {
+    ...quietCodeCss,
     overflow: 'auto',
     minHeight: 0,
     '& > div > div:first-child': {
@@ -29,11 +65,6 @@ export function useSlimToolCodeCss({
       padding: 8,
       color: colors['text-light'],
     },
-    ...(!showLanguageIcon && {
-      '& > div > div:first-child svg': {
-        display: 'none',
-      },
-    }),
   } as const
 }
 
@@ -43,9 +74,11 @@ const RUNNING_DOTS = ['', '.', '..', '...'] as const
 export function RunningToolOutputCode({
   fillLevel,
   showHeader = true,
+  transparent = false,
 }: {
   fillLevel?: 0 | 1 | 2 | 3
   showHeader?: boolean
+  transparent?: boolean
 }) {
   const slimCodeCss = useSlimToolCodeCss()
   const [dotIndex, setDotIndex] = useState(0)
@@ -59,10 +92,17 @@ export function RunningToolOutputCode({
 
   return (
     <Code
-      fillLevel={fillLevel}
+      fillLevel={fillLevel ?? 0}
       title={showHeader ? 'Response' : undefined}
       showHeader={showHeader}
-      css={slimCodeCss}
+      css={{
+        ...slimCodeCss,
+        ...(transparent && {
+          backgroundColor: 'transparent',
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+        }),
+      }}
     >
       {`running${RUNNING_DOTS[dotIndex]}`}
     </Code>
@@ -76,6 +116,11 @@ export function ToolCallContent({
   hideArguments = false,
   flushTop = false,
   isPending,
+  shimmer = false,
+  transparent = false,
+  maxOutputHeight,
+  ansiOutput = false,
+  collapsedOutputLines,
 }: {
   content: string
   attributes: Nullable<ChatTypeAttributes>
@@ -83,9 +128,21 @@ export function ToolCallContent({
   hideArguments?: boolean
   flushTop?: boolean
   isPending?: boolean
+  /** Loading sweep on code and log text, without changing pending output. */
+  shimmer?: boolean
+  transparent?: boolean
+  maxOutputHeight?: number | string
+  ansiOutput?: boolean
+  collapsedOutputLines?: number
 }) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
   const slimCodeCss = useSlimToolCodeCss()
+  const showShimmer = isPending || shimmer
+  const codeCss = {
+    ...slimCodeCss,
+    ...(showShimmer && shimmerWithinCss(theme)),
+  }
 
   const showInput = !hideArguments
   const hasResponse = !!(isPending || customResultBody || content)
@@ -97,8 +154,18 @@ export function ToolCallContent({
   const activeTab = showInput ? tab : ToolCallTab.Output
   const showingInput = showInput && activeTab === ToolCallTab.Input
   const showingOutput = activeTab === ToolCallTab.Output
+  const outputRef = useRef<HTMLDivElement>(null)
 
-  const plainResponse = (
+  useLayoutEffect(() => {
+    const element = outputRef.current
+    if (!maxOutputHeight || !showingOutput || !element) return
+
+    element.scrollTop = element.scrollHeight
+  }, [content, customResultBody, isPending, maxOutputHeight, showingOutput])
+
+  const plainResponse = ansiOutput ? (
+    <AnsiOutput text={content} />
+  ) : (
     <Markdown
       text={content}
       css={{ whiteSpace: 'pre-line' }}
@@ -134,7 +201,8 @@ export function ToolCallContent({
         <Code
           language="json"
           showHeader={false}
-          css={slimCodeCss}
+          fillLevel={0}
+          css={codeCss}
         >
           {prettifyToolJson(
             JSON.stringify(attributes?.tool?.arguments ?? null)
@@ -144,31 +212,83 @@ export function ToolCallContent({
 
       {showingOutput && (
         <Flex
+          ref={outputRef}
           direction="column"
           minWidth={0}
           width="100%"
+          css={{
+            ...(maxOutputHeight && {
+              maxHeight: maxOutputHeight,
+              overflow: 'auto',
+            }),
+            ...(showShimmer && shimmerWithinCss(theme)),
+          }}
         >
-          {isPending ? (
+          {isPending && isEmpty(content) ? (
             <RunningToolOutputCode
               showHeader={false}
-              fillLevel={2}
+              fillLevel={0}
+              transparent={transparent}
             />
           ) : customResultBody ? (
             customResultBody
+          ) : ansiOutput && !isEmpty(content) ? (
+            <PreviewablePanel
+              contentKey={`resp:${content.length}:ansi`}
+              subtle
+              transparent={transparent}
+              unclamped={!!maxOutputHeight}
+              collapsedLines={collapsedOutputLines}
+            >
+              {plainResponse}
+            </PreviewablePanel>
+          ) : isPending ? (
+            <Code
+              fillLevel={0}
+              showHeader={false}
+              css={{
+                ...codeCss,
+                ...(transparent && {
+                  backgroundColor: 'transparent',
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                }),
+              }}
+            >
+              {content}
+            </Code>
           ) : isJson(content) ? (
             <Code
               language="json"
               showHeader={false}
-              css={slimCodeCss}
+              fillLevel={0}
+              css={{
+                ...codeCss,
+                ...(transparent && {
+                  backgroundColor: 'transparent',
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                }),
+              }}
             >
               {prettifyToolJson(content)}
             </Code>
-          ) : content ? (
-            <PreviewablePanel contentKey={`resp:${content.length}:plain`}>
+          ) : !isEmpty(content) ? (
+            <PreviewablePanel
+              contentKey={`resp:${content.length}:plain`}
+              subtle
+              transparent={transparent}
+              unclamped={!!maxOutputHeight}
+              collapsedLines={collapsedOutputLines}
+            >
               {plainResponse}
             </PreviewablePanel>
           ) : (
-            <PreviewablePanel contentKey="resp:empty">
+            <PreviewablePanel
+              contentKey="resp:empty"
+              subtle
+              transparent={transparent}
+            >
               <EmptyOutputSC>No output yet</EmptyOutputSC>
             </PreviewablePanel>
           )}
@@ -178,12 +298,40 @@ export function ToolCallContent({
   )
 }
 
+function AnsiOutput({ text }: { text: string }) {
+  const blocks = useMemo(
+    () =>
+      ansiToJson(escapeCarriageReturn(text), {
+        json: true,
+        remove_empty: true,
+      }),
+    [text]
+  )
+
+  return (
+    <AnsiOutputSC>
+      {blocks.map((block, index) => (
+        <span
+          key={index}
+          style={textStyle(block)}
+        >
+          {block.content}
+        </span>
+      ))}
+    </AnsiOutputSC>
+  )
+}
+
 /** Boxed preview panel: content clamps on whole lines; Show more sits inside the box. */
 export function PreviewablePanel({
   children,
   contentKey,
   header,
   subtle = false,
+  transparent = false,
+  unclamped = false,
+  collapsedLines = 4,
+  shimmer = false,
 }: {
   children: ReactNode
   contentKey: string
@@ -191,6 +339,14 @@ export function PreviewablePanel({
   header?: ReactNode
   /** Use a quieter surface for nested content such as activity prompts. */
   subtle?: boolean
+  /** Let the parent surface show through while retaining the border. */
+  transparent?: boolean
+  /** Let a constrained parent own scrolling instead of clamping this panel. */
+  unclamped?: boolean
+  /** Whole-line clamp while collapsed. */
+  collapsedLines?: number
+  /** Sweep the loading shimmer across text inside the box, including code. */
+  shimmer?: boolean
 }) {
   const [expandedContentKey, setExpandedContentKey] = useState<string | null>(
     null
@@ -200,6 +356,8 @@ export function PreviewablePanel({
   const expanded = expandedContentKey === contentKey
 
   useLayoutEffect(() => {
+    if (unclamped) return
+
     const element = contentRef.current
     if (!element) return
 
@@ -218,20 +376,29 @@ export function PreviewablePanel({
     resizeObserver.observe(element)
 
     return () => resizeObserver.disconnect()
-  }, [contentKey, expanded])
+  }, [contentKey, expanded, unclamped])
+
+  const showExpand = !unclamped && canExpand
 
   return (
-    <PreviewBoxSC $subtle={subtle}>
+    <PreviewBoxSC
+      $subtle={subtle}
+      $transparent={transparent}
+      $unclamped={unclamped}
+    >
       {header != null && <PreviewHeaderSC>{header}</PreviewHeaderSC>}
       <PreviewContentSC
         ref={contentRef}
         $expanded={expanded}
-        $flushBottom={canExpand}
-        $fade={!expanded && canExpand}
+        $flushBottom={showExpand}
+        $fade={!unclamped && !expanded && canExpand}
+        $collapsedLines={collapsedLines}
+        $unclamped={unclamped}
+        $shimmer={shimmer}
       >
         {children}
       </PreviewContentSC>
-      {canExpand && (
+      {showExpand && (
         <ShowMoreSC
           type="button"
           aria-expanded={expanded}
@@ -273,20 +440,43 @@ function SegmentedControlBtn({
   )
 }
 
-const PreviewBoxSC = styled.div<{ $subtle: boolean }>(({ theme, $subtle }) => ({
+const PreviewBoxSC = styled.div<{
+  $subtle: boolean
+  $transparent: boolean
+  $unclamped: boolean
+}>(({ theme, $subtle, $transparent, $unclamped }) => ({
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
   minHeight: 0,
-  overflow: 'hidden',
-  border: $subtle ? theme.borders['fill-one'] : theme.borders['fill-two'],
-  borderRadius: theme.borderRadiuses.medium,
-  backgroundColor: theme.colors[$subtle ? 'fill-one' : 'fill-two'],
+  flexShrink: $unclamped ? 0 : undefined,
+  overflow: $unclamped ? 'visible' : 'hidden',
+  ...($subtle
+    ? toolSurfaceCss(theme)
+    : {
+        border: theme.borders['fill-two'],
+        backgroundColor: theme.colors['fill-two'],
+      }),
+  borderRadius: theme.borderRadiuses.large,
+  ...($transparent && {
+    borderTop: 'none',
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    backgroundColor: 'transparent',
+  }),
 }))
 
 const EmptyOutputSC = styled.div(({ theme }) => ({
   color: theme.colors['text-disabled'],
   fontStyle: 'italic',
+}))
+
+const AnsiOutputSC = styled.pre(({ theme }) => ({
+  margin: 0,
+  color: theme.colors['text-light'],
+  ...toolOutputTextCss(theme),
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'anywhere',
 }))
 
 const PreviewHeaderSC = styled.div(({ theme }) => ({
@@ -302,21 +492,39 @@ const PreviewContentSC = styled.div<{
   $expanded: boolean
   $flushBottom: boolean
   $fade?: boolean
-}>(({ theme, $expanded, $flushBottom, $fade }) => ({
-  minHeight: 0,
-  // Margin (not padding) so max-height maps cleanly to whole line boxes.
-  margin: theme.spacing.small,
-  marginBottom: $flushBottom ? 0 : theme.spacing.small,
-  fontSize: theme.partials.text.body2.fontSize,
-  lineHeight: 1.45,
-  maxHeight: $expanded ? '16lh' : '4lh',
-  overflow: $expanded ? 'auto' : 'hidden',
-  color: theme.colors['text-long-form'],
-  ...($fade && {
-    maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
-    WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
-  }),
-}))
+  $collapsedLines: number
+  $unclamped: boolean
+  $shimmer?: boolean
+}>(
+  ({
+    theme,
+    $expanded,
+    $flushBottom,
+    $fade,
+    $collapsedLines,
+    $unclamped,
+    $shimmer,
+  }) => ({
+    minHeight: 0,
+    // Margin (not padding) so max-height maps cleanly to whole line boxes.
+    margin: theme.spacing.small,
+    marginBottom: $flushBottom ? 0 : theme.spacing.small,
+    fontSize: theme.partials.text.body2.fontSize,
+    lineHeight: 1.45,
+    maxHeight: $unclamped
+      ? 'none'
+      : $expanded
+        ? '16lh'
+        : `${$collapsedLines}lh`,
+    overflow: $unclamped ? 'visible' : $expanded ? 'auto' : 'hidden',
+    color: theme.colors['text-long-form'],
+    ...($fade && {
+      maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+      WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+    }),
+    ...($shimmer && shimmerWithinCss(theme)),
+  })
+)
 
 /** Shared expand control (Prompt / tool previews / user prompts). */
 export const ShowMoreSC = styled.button(({ theme }) => ({

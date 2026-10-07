@@ -11,8 +11,28 @@ defmodule Console.AI.Provider.Base do
   def select_model(%{model_id: model}, _) when is_binary(model), do: model
   def select_model(%{model: model}, _), do: model
 
-  def http_options(%{headers: [_ | _] = headers}), do: [req_http_options: [headers: Enum.map(headers, &{&1.name, &1.value})]]
-  def http_options(_), do: []
+  def http_options(provider) do
+    headers = case Map.get(provider, :headers) do
+      [_ | _] = headers -> [headers: Enum.map(headers, &{&1.name, &1.value})]
+      _ -> []
+    end
+
+    connect = proxy_options(provider)
+
+    case Keyword.merge(headers, connect) do
+      [] -> []
+      opts -> [req_http_options: opts]
+    end
+  end
+
+  defp proxy_options(%{proxy: %{enabled: false}}), do: []
+  defp proxy_options(%{proxy: %{url: url} = proxy} = provider) when is_binary(url) and url != "" do
+    case Map.get(provider, :base_url) || Map.get(provider, :url) || Map.get(provider, :endpoint) do
+      target when is_binary(target) -> Console.Utils.HTTP.proxy_options(proxy, target)
+      _ -> Console.Utils.HTTP.req_options(proxy: url)
+    end
+  end
+  defp proxy_options(_), do: []
 
   def chunk_size(model) do
     case ReqLLM.model(model) do
@@ -54,7 +74,8 @@ defmodule Console.AI.Provider.Base do
     end
   end
 
-  def reqllm_messages(messages) do
+  def reqllm_messages(%Context{} = context), do: context
+  def reqllm_messages(messages) when is_list(messages) do
     Enum.flat_map(messages, fn
       {:system, content} -> [Context.system(content)]
       {:user, content} -> [Context.user(content)]
@@ -73,8 +94,10 @@ defmodule Console.AI.Provider.Base do
   defp usage_callback(result, callback) when is_function(callback, 1) do
     Meter.incr_tokens(result)
 
-    ReqLLM.Response.usage(result)
-    |> callback.()
+    case Response.usage(result) do
+      %{} = usage -> callback.(usage)
+      _ -> :ok
+    end
   end
   defp usage_callback(result, _), do: Meter.incr_tokens(result)
 
@@ -126,7 +149,7 @@ defmodule Console.AI.Provider.Base do
   defp model(%LLMDB.Model{} = model), do: {:ok, model}
   defp model(model), do: {:error, "invalid model: #{inspect(model)}"}
 
-  defp to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}) do
+  def to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}) do
     case JSON.decode(args) do
       {:ok, args} -> %Tool{id: id, name: name, arguments: args}
       _ -> %Tool{id: id, name: name, arguments: %{}}

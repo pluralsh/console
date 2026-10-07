@@ -102,6 +102,23 @@ defmodule Console.Deployments.SentinelTest do
       assert_receive {:event, %PubSub.SentinelRunCreated{item: ^run}}
     end
 
+    test "project readers can run a sentinel" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project, checks: [
+        %{type: :log, name: "test", configuration: %{log: %{namespace: "test", duration: "1h", query: "error"}}}
+      ])
+
+      {:ok, run} = Sentinels.run_sentinel(%{}, sentinel.id, user)
+
+      assert run.sentinel_id == sentinel.id
+      assert run.status == :pending
+      assert length(run.checks) == 1
+
+      assert refetch(sentinel).last_run_at
+      assert_receive {:event, %PubSub.SentinelRunCreated{item: ^run}}
+    end
+
     test "it can run a sentinel with a crontab" do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])

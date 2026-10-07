@@ -4,8 +4,8 @@ import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOption
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { createAppDeployment, createAppDeploymentFromFile, createImagePullSecret, createNamespace, deleteNamespacedResource, deleteResource, drainNode, execShell, getAllConfigMaps, getAllCronJobs, getAllDaemonSets, getAllDeployments, getAllEvents, getAllHorizontalPodAutoscalers, getAllIngresses, getAllJobs, getAllNetworkPolicies, getAllPersistentVolumeClaims, getAllPodDisruptionBudgets, getAllPods, getAllReplicaSets, getAllReplicationControllers, getAllRoleBindings, getAllRoles, getAllSecrets, getAllServiceAccounts, getAllServices, getAllStatefulSets, getAvailableProtocols, getClusterRole, getClusterRoleBinding, getClusterRoleBindings, getClusterRoles, getConfigMap, getConfigMaps, getContainerLogs, getCronJob, getCronJobEvents, getCronJobJobs, getCronJobs, getCsrfToken, getCustomResourceDefinition, getCustomResourceDefinitions, getCustomResourceObject, getCustomResourceObjectEvents, getCustomResourceObjects, getDaemonSet, getDaemonSetEvents, getDaemonSetPods, getDaemonSets, getDaemonSetServices, getDeployment, getDeploymentEvents, getDeploymentNewReplicaSet, getDeploymentOldReplicaSets, getDeployments, getEvents, getHorizontalPodAutoscaler, getHorizontalPodAutoscalers, getHorizontalPodAutoscalersForResource, getIngress, getIngressClass, getIngressClasses, getIngresses, getIngressEvents, getJob, getJobEvents, getJobPods, getJobs, getLogFile, getLogSource, getNamespace, getNamespacedResource, getNamespacedResourceReplicas, getNamespaceEvents, getNamespaces, getNetworkPolicies, getNetworkPolicy, getNode, getNodeEvents, getNodePods, getNodes, getPersistentVolume, getPersistentVolumeClaim, getPersistentVolumeClaims, getPersistentVolumes, getPersistentVolumeWithNamespace, getPod, getPodContainers, getPodDisruptionBudget, getPodDisruptionBudgets, getPodEvents, getPodLogs, getPodPersistentVolumeClaims, getPods, getReplicaSet, getReplicaSetEvents, getReplicaSetPods, getReplicaSets, getReplicaSetServices, getReplicationController, getReplicationControllerEvents, getReplicationControllerPods, getReplicationControllers, getReplicationControllerServices, getResource, getResourceReplicas, getRole, getRoleBinding, getRoleBindings, getRoles, getSecret, getSecrets, getService, getServiceAccount, getServiceAccountImagePullSecrets, getServiceAccounts, getServiceAccountSecrets, getServiceEvents, getServiceIngresses, getServicePods, getServices, getStatefulSet, getStatefulSetEvents, getStatefulSetPods, getStatefulSets, getStorageClass, getStorageClasses, getStorageClassPersistentVolumes, handleGetState, type Options, pauseDeployment, restartDaemonSet, restartDeployment, restartStatefulSet, resumeDeployment, rollbackDeployment, scaleNamespacedResource, scaleResource, triggerCronJob, updateNamespacedResource, updateReplicationControllerReplicas, updateResource, validateAppName, validateImageReference, validateProtocol } from '../sdk.gen';
-import type { CreateAppDeploymentData, CreateAppDeploymentFromFileData, CreateAppDeploymentFromFileResponse, CreateAppDeploymentResponse, CreateImagePullSecretData, CreateImagePullSecretResponse, CreateNamespaceData, CreateNamespaceResponse, DeleteNamespacedResourceData, DeleteResourceData, DrainNodeData, ExecShellData, ExecShellResponse, GetAllConfigMapsData, GetAllConfigMapsResponse, GetAllCronJobsData, GetAllCronJobsResponse, GetAllDaemonSetsData, GetAllDaemonSetsResponse, GetAllDeploymentsData, GetAllDeploymentsResponse, GetAllEventsData, GetAllEventsResponse, GetAllHorizontalPodAutoscalersData, GetAllHorizontalPodAutoscalersResponse, GetAllIngressesData, GetAllIngressesResponse, GetAllJobsData, GetAllJobsResponse, GetAllNetworkPoliciesData, GetAllNetworkPoliciesResponse, GetAllPersistentVolumeClaimsData, GetAllPersistentVolumeClaimsResponse, GetAllPodDisruptionBudgetsData, GetAllPodDisruptionBudgetsResponse, GetAllPodsData, GetAllPodsResponse, GetAllReplicaSetsData, GetAllReplicaSetsResponse, GetAllReplicationControllersData, GetAllReplicationControllersResponse, GetAllRoleBindingsData, GetAllRoleBindingsResponse, GetAllRolesData, GetAllRolesResponse, GetAllSecretsData, GetAllSecretsResponse, GetAllServiceAccountsData, GetAllServiceAccountsResponse, GetAllServicesData, GetAllServicesResponse, GetAllStatefulSetsData, GetAllStatefulSetsResponse, GetAvailableProtocolsData, GetAvailableProtocolsResponse, GetClusterRoleBindingData, GetClusterRoleBindingResponse, GetClusterRoleBindingsData, GetClusterRoleBindingsResponse, GetClusterRoleData, GetClusterRoleResponse, GetClusterRolesData, GetClusterRolesResponse, GetConfigMapData, GetConfigMapResponse, GetConfigMapsData, GetConfigMapsResponse, GetContainerLogsData, GetContainerLogsResponse, GetCronJobData, GetCronJobEventsData, GetCronJobEventsResponse, GetCronJobJobsData, GetCronJobJobsResponse, GetCronJobResponse, GetCronJobsData, GetCronJobsResponse, GetCsrfTokenData, GetCsrfTokenResponse, GetCustomResourceDefinitionData, GetCustomResourceDefinitionResponse, GetCustomResourceDefinitionsData, GetCustomResourceDefinitionsResponse, GetCustomResourceObjectData, GetCustomResourceObjectEventsData, GetCustomResourceObjectEventsResponse, GetCustomResourceObjectResponse, GetCustomResourceObjectsData, GetCustomResourceObjectsResponse, GetDaemonSetData, GetDaemonSetEventsData, GetDaemonSetEventsResponse, GetDaemonSetPodsData, GetDaemonSetPodsResponse, GetDaemonSetResponse, GetDaemonSetsData, GetDaemonSetServicesData, GetDaemonSetServicesResponse, GetDaemonSetsResponse, GetDeploymentData, GetDeploymentEventsData, GetDeploymentEventsResponse, GetDeploymentNewReplicaSetData, GetDeploymentNewReplicaSetResponse, GetDeploymentOldReplicaSetsData, GetDeploymentOldReplicaSetsResponse, GetDeploymentResponse, GetDeploymentsData, GetDeploymentsResponse, GetEventsData, GetEventsResponse, GetHorizontalPodAutoscalerData, GetHorizontalPodAutoscalerResponse, GetHorizontalPodAutoscalersData, GetHorizontalPodAutoscalersForResourceData, GetHorizontalPodAutoscalersForResourceResponse, GetHorizontalPodAutoscalersResponse, GetIngressClassData, GetIngressClassesData, GetIngressClassesResponse, GetIngressClassResponse, GetIngressData, GetIngressesData, GetIngressesResponse, GetIngressEventsData, GetIngressEventsResponse, GetIngressResponse, GetJobData, GetJobEventsData, GetJobEventsResponse, GetJobPodsData, GetJobPodsResponse, GetJobResponse, GetJobsData, GetJobsResponse, GetLogFileData, GetLogFileResponse, GetLogSourceData, GetLogSourceResponse, GetNamespaceData, GetNamespacedResourceData, GetNamespacedResourceReplicasData, GetNamespacedResourceReplicasResponse, GetNamespacedResourceResponse, GetNamespaceEventsData, GetNamespaceEventsResponse, GetNamespaceResponse, GetNamespacesData, GetNamespacesResponse, GetNetworkPoliciesData, GetNetworkPoliciesResponse, GetNetworkPolicyData, GetNetworkPolicyResponse, GetNodeData, GetNodeEventsData, GetNodeEventsResponse, GetNodePodsData, GetNodePodsResponse, GetNodeResponse, GetNodesData, GetNodesResponse, GetPersistentVolumeClaimData, GetPersistentVolumeClaimResponse, GetPersistentVolumeClaimsData, GetPersistentVolumeClaimsResponse, GetPersistentVolumeData, GetPersistentVolumeResponse, GetPersistentVolumesData, GetPersistentVolumesResponse, GetPersistentVolumeWithNamespaceData, GetPersistentVolumeWithNamespaceResponse, GetPodContainersData, GetPodContainersResponse, GetPodData, GetPodDisruptionBudgetData, GetPodDisruptionBudgetResponse, GetPodDisruptionBudgetsData, GetPodDisruptionBudgetsResponse, GetPodEventsData, GetPodEventsResponse, GetPodLogsData, GetPodLogsResponse, GetPodPersistentVolumeClaimsData, GetPodPersistentVolumeClaimsResponse, GetPodResponse, GetPodsData, GetPodsResponse, GetReplicaSetData, GetReplicaSetEventsData, GetReplicaSetEventsResponse, GetReplicaSetPodsData, GetReplicaSetPodsResponse, GetReplicaSetResponse, GetReplicaSetsData, GetReplicaSetServicesData, GetReplicaSetServicesResponse, GetReplicaSetsResponse, GetReplicationControllerData, GetReplicationControllerEventsData, GetReplicationControllerEventsResponse, GetReplicationControllerPodsData, GetReplicationControllerPodsResponse, GetReplicationControllerResponse, GetReplicationControllersData, GetReplicationControllerServicesData, GetReplicationControllerServicesResponse, GetReplicationControllersResponse, GetResourceData, GetResourceReplicasData, GetResourceReplicasResponse, GetResourceResponse, GetRoleBindingData, GetRoleBindingResponse, GetRoleBindingsData, GetRoleBindingsResponse, GetRoleData, GetRoleResponse, GetRolesData, GetRolesResponse, GetSecretData, GetSecretResponse, GetSecretsData, GetSecretsResponse, GetServiceAccountData, GetServiceAccountImagePullSecretsData, GetServiceAccountImagePullSecretsResponse, GetServiceAccountResponse, GetServiceAccountsData, GetServiceAccountSecretsData, GetServiceAccountSecretsResponse, GetServiceAccountsResponse, GetServiceData, GetServiceEventsData, GetServiceEventsResponse, GetServiceIngressesData, GetServiceIngressesResponse, GetServicePodsData, GetServicePodsResponse, GetServiceResponse, GetServicesData, GetServicesResponse, GetStatefulSetData, GetStatefulSetEventsData, GetStatefulSetEventsResponse, GetStatefulSetPodsData, GetStatefulSetPodsResponse, GetStatefulSetResponse, GetStatefulSetsData, GetStatefulSetsResponse, GetStorageClassData, GetStorageClassesData, GetStorageClassesResponse, GetStorageClassPersistentVolumesData, GetStorageClassPersistentVolumesResponse, GetStorageClassResponse, HandleGetStateData, PauseDeploymentData, PauseDeploymentResponse, RestartDaemonSetData, RestartDaemonSetResponse, RestartDeploymentData, RestartDeploymentResponse, RestartStatefulSetData, RestartStatefulSetResponse, ResumeDeploymentData, ResumeDeploymentResponse, RollbackDeploymentData, RollbackDeploymentResponse, ScaleNamespacedResourceData, ScaleNamespacedResourceResponse, ScaleResourceData, ScaleResourceResponse, TriggerCronJobData, UpdateNamespacedResourceData, UpdateReplicationControllerReplicasData, UpdateResourceData, ValidateAppNameData, ValidateAppNameResponse, ValidateImageReferenceData, ValidateImageReferenceResponse, ValidateProtocolData, ValidateProtocolResponse } from '../types.gen';
+import { createAppDeployment, createAppDeploymentFromFile, createImagePullSecret, createNamespace, deleteNamespacedResource, deleteResource, drainNode, execShell, getAllConfigMaps, getAllCronJobs, getAllDaemonSets, getAllDeployments, getAllEvents, getAllHorizontalPodAutoscalers, getAllIngresses, getAllJobs, getAllNetworkPolicies, getAllPersistentVolumeClaims, getAllPodDisruptionBudgets, getAllPods, getAllReplicaSets, getAllReplicationControllers, getAllRoleBindings, getAllRoles, getAllSecrets, getAllServiceAccounts, getAllServices, getAllStatefulSets, getAvailableProtocols, getClusterRole, getClusterRoleBinding, getClusterRoleBindings, getClusterRoles, getConfigMap, getConfigMaps, getContainerLogs, getCronJob, getCronJobEvents, getCronJobJobs, getCronJobs, getCsrfToken, getCustomResourceDefinition, getCustomResourceDefinitions, getCustomResourceObject, getCustomResourceObjectEvents, getCustomResourceObjects, getDaemonSet, getDaemonSetEvents, getDaemonSetPods, getDaemonSets, getDaemonSetServices, getDeployment, getDeploymentEvents, getDeploymentNewReplicaSet, getDeploymentOldReplicaSets, getDeployments, getEvents, getHealth, getHorizontalPodAutoscaler, getHorizontalPodAutoscalers, getHorizontalPodAutoscalersForResource, getIngress, getIngressClass, getIngressClasses, getIngresses, getIngressEvents, getJob, getJobEvents, getJobPods, getJobs, getLogFile, getLogSource, getNamespace, getNamespacedResource, getNamespacedResourceReplicas, getNamespaceEvents, getNamespaces, getNetworkPolicies, getNetworkPolicy, getNode, getNodeEvents, getNodePods, getNodes, getPersistentVolume, getPersistentVolumeClaim, getPersistentVolumeClaims, getPersistentVolumes, getPersistentVolumeWithNamespace, getPod, getPodContainers, getPodDisruptionBudget, getPodDisruptionBudgets, getPodEvents, getPodLogs, getPodPersistentVolumeClaims, getPods, getReplicaSet, getReplicaSetEvents, getReplicaSetPods, getReplicaSets, getReplicaSetServices, getReplicationController, getReplicationControllerEvents, getReplicationControllerPods, getReplicationControllers, getReplicationControllerServices, getResource, getResourceReplicas, getRole, getRoleBinding, getRoleBindings, getRoles, getSecret, getSecrets, getService, getServiceAccount, getServiceAccountImagePullSecrets, getServiceAccounts, getServiceAccountSecrets, getServiceEvents, getServiceIngresses, getServicePods, getServices, getStatefulSet, getStatefulSetEvents, getStatefulSetPods, getStatefulSets, getStorageClass, getStorageClasses, getStorageClassPersistentVolumes, handleGetState, type Options, pauseDeployment, restartDaemonSet, restartDeployment, restartStatefulSet, resumeDeployment, rollbackDeployment, scaleNamespacedResource, scaleResource, triggerCronJob, updateNamespacedResource, updateReplicationControllerReplicas, updateResource, validateAppName, validateImageReference, validateProtocol } from '../sdk.gen';
+import type { CreateAppDeploymentData, CreateAppDeploymentFromFileData, CreateAppDeploymentFromFileResponse, CreateAppDeploymentResponse, CreateImagePullSecretData, CreateImagePullSecretResponse, CreateNamespaceData, CreateNamespaceResponse, DeleteNamespacedResourceData, DeleteResourceData, DrainNodeData, ExecShellData, ExecShellResponse, GetAllConfigMapsData, GetAllConfigMapsResponse, GetAllCronJobsData, GetAllCronJobsResponse, GetAllDaemonSetsData, GetAllDaemonSetsResponse, GetAllDeploymentsData, GetAllDeploymentsResponse, GetAllEventsData, GetAllEventsResponse, GetAllHorizontalPodAutoscalersData, GetAllHorizontalPodAutoscalersResponse, GetAllIngressesData, GetAllIngressesResponse, GetAllJobsData, GetAllJobsResponse, GetAllNetworkPoliciesData, GetAllNetworkPoliciesResponse, GetAllPersistentVolumeClaimsData, GetAllPersistentVolumeClaimsResponse, GetAllPodDisruptionBudgetsData, GetAllPodDisruptionBudgetsResponse, GetAllPodsData, GetAllPodsResponse, GetAllReplicaSetsData, GetAllReplicaSetsResponse, GetAllReplicationControllersData, GetAllReplicationControllersResponse, GetAllRoleBindingsData, GetAllRoleBindingsResponse, GetAllRolesData, GetAllRolesResponse, GetAllSecretsData, GetAllSecretsResponse, GetAllServiceAccountsData, GetAllServiceAccountsResponse, GetAllServicesData, GetAllServicesResponse, GetAllStatefulSetsData, GetAllStatefulSetsResponse, GetAvailableProtocolsData, GetAvailableProtocolsResponse, GetClusterRoleBindingData, GetClusterRoleBindingResponse, GetClusterRoleBindingsData, GetClusterRoleBindingsResponse, GetClusterRoleData, GetClusterRoleResponse, GetClusterRolesData, GetClusterRolesResponse, GetConfigMapData, GetConfigMapResponse, GetConfigMapsData, GetConfigMapsResponse, GetContainerLogsData, GetContainerLogsResponse, GetCronJobData, GetCronJobEventsData, GetCronJobEventsResponse, GetCronJobJobsData, GetCronJobJobsResponse, GetCronJobResponse, GetCronJobsData, GetCronJobsResponse, GetCsrfTokenData, GetCsrfTokenResponse, GetCustomResourceDefinitionData, GetCustomResourceDefinitionResponse, GetCustomResourceDefinitionsData, GetCustomResourceDefinitionsResponse, GetCustomResourceObjectData, GetCustomResourceObjectEventsData, GetCustomResourceObjectEventsResponse, GetCustomResourceObjectResponse, GetCustomResourceObjectsData, GetCustomResourceObjectsResponse, GetDaemonSetData, GetDaemonSetEventsData, GetDaemonSetEventsResponse, GetDaemonSetPodsData, GetDaemonSetPodsResponse, GetDaemonSetResponse, GetDaemonSetsData, GetDaemonSetServicesData, GetDaemonSetServicesResponse, GetDaemonSetsResponse, GetDeploymentData, GetDeploymentEventsData, GetDeploymentEventsResponse, GetDeploymentNewReplicaSetData, GetDeploymentNewReplicaSetResponse, GetDeploymentOldReplicaSetsData, GetDeploymentOldReplicaSetsResponse, GetDeploymentResponse, GetDeploymentsData, GetDeploymentsResponse, GetEventsData, GetEventsResponse, GetHealthData, GetHealthResponse, GetHorizontalPodAutoscalerData, GetHorizontalPodAutoscalerResponse, GetHorizontalPodAutoscalersData, GetHorizontalPodAutoscalersForResourceData, GetHorizontalPodAutoscalersForResourceResponse, GetHorizontalPodAutoscalersResponse, GetIngressClassData, GetIngressClassesData, GetIngressClassesResponse, GetIngressClassResponse, GetIngressData, GetIngressesData, GetIngressesResponse, GetIngressEventsData, GetIngressEventsResponse, GetIngressResponse, GetJobData, GetJobEventsData, GetJobEventsResponse, GetJobPodsData, GetJobPodsResponse, GetJobResponse, GetJobsData, GetJobsResponse, GetLogFileData, GetLogFileResponse, GetLogSourceData, GetLogSourceResponse, GetNamespaceData, GetNamespacedResourceData, GetNamespacedResourceReplicasData, GetNamespacedResourceReplicasResponse, GetNamespacedResourceResponse, GetNamespaceEventsData, GetNamespaceEventsResponse, GetNamespaceResponse, GetNamespacesData, GetNamespacesResponse, GetNetworkPoliciesData, GetNetworkPoliciesResponse, GetNetworkPolicyData, GetNetworkPolicyResponse, GetNodeData, GetNodeEventsData, GetNodeEventsResponse, GetNodePodsData, GetNodePodsResponse, GetNodeResponse, GetNodesData, GetNodesResponse, GetPersistentVolumeClaimData, GetPersistentVolumeClaimResponse, GetPersistentVolumeClaimsData, GetPersistentVolumeClaimsResponse, GetPersistentVolumeData, GetPersistentVolumeResponse, GetPersistentVolumesData, GetPersistentVolumesResponse, GetPersistentVolumeWithNamespaceData, GetPersistentVolumeWithNamespaceResponse, GetPodContainersData, GetPodContainersResponse, GetPodData, GetPodDisruptionBudgetData, GetPodDisruptionBudgetResponse, GetPodDisruptionBudgetsData, GetPodDisruptionBudgetsResponse, GetPodEventsData, GetPodEventsResponse, GetPodLogsData, GetPodLogsResponse, GetPodPersistentVolumeClaimsData, GetPodPersistentVolumeClaimsResponse, GetPodResponse, GetPodsData, GetPodsResponse, GetReplicaSetData, GetReplicaSetEventsData, GetReplicaSetEventsResponse, GetReplicaSetPodsData, GetReplicaSetPodsResponse, GetReplicaSetResponse, GetReplicaSetsData, GetReplicaSetServicesData, GetReplicaSetServicesResponse, GetReplicaSetsResponse, GetReplicationControllerData, GetReplicationControllerEventsData, GetReplicationControllerEventsResponse, GetReplicationControllerPodsData, GetReplicationControllerPodsResponse, GetReplicationControllerResponse, GetReplicationControllersData, GetReplicationControllerServicesData, GetReplicationControllerServicesResponse, GetReplicationControllersResponse, GetResourceData, GetResourceReplicasData, GetResourceReplicasResponse, GetResourceResponse, GetRoleBindingData, GetRoleBindingResponse, GetRoleBindingsData, GetRoleBindingsResponse, GetRoleData, GetRoleResponse, GetRolesData, GetRolesResponse, GetSecretData, GetSecretResponse, GetSecretsData, GetSecretsResponse, GetServiceAccountData, GetServiceAccountImagePullSecretsData, GetServiceAccountImagePullSecretsResponse, GetServiceAccountResponse, GetServiceAccountsData, GetServiceAccountSecretsData, GetServiceAccountSecretsResponse, GetServiceAccountsResponse, GetServiceData, GetServiceEventsData, GetServiceEventsResponse, GetServiceIngressesData, GetServiceIngressesResponse, GetServicePodsData, GetServicePodsResponse, GetServiceResponse, GetServicesData, GetServicesResponse, GetStatefulSetData, GetStatefulSetEventsData, GetStatefulSetEventsResponse, GetStatefulSetPodsData, GetStatefulSetPodsResponse, GetStatefulSetResponse, GetStatefulSetsData, GetStatefulSetsResponse, GetStorageClassData, GetStorageClassesData, GetStorageClassesResponse, GetStorageClassPersistentVolumesData, GetStorageClassPersistentVolumesResponse, GetStorageClassResponse, HandleGetStateData, PauseDeploymentData, PauseDeploymentResponse, RestartDaemonSetData, RestartDaemonSetResponse, RestartDeploymentData, RestartDeploymentResponse, RestartStatefulSetData, RestartStatefulSetResponse, ResumeDeploymentData, ResumeDeploymentResponse, RollbackDeploymentData, RollbackDeploymentResponse, ScaleNamespacedResourceData, ScaleNamespacedResourceResponse, ScaleResourceData, ScaleResourceResponse, TriggerCronJobData, UpdateNamespacedResourceData, UpdateReplicationControllerReplicasData, UpdateResourceData, ValidateAppNameData, ValidateAppNameResponse, ValidateImageReferenceData, ValidateImageReferenceResponse, ValidateProtocolData, ValidateProtocolResponse } from '../types.gen';
 
 /**
  * deletes a non-namespaced resource
@@ -109,27 +109,30 @@ export const getResourceInfiniteQueryKey = (options: Options<GetResourceData>): 
 /**
  * returns a non-namespaced resource
  */
-export const getResourceInfiniteOptions = (options: Options<GetResourceData>) => infiniteQueryOptions<GetResourceResponse, AxiosError<DefaultError>, InfiniteData<GetResourceResponse>, QueryKey<Options<GetResourceData>>, string | Pick<QueryKey<Options<GetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getResource({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getResourceInfiniteQueryKey(options)
-});
+export const getResourceInfiniteOptions = (options: Options<GetResourceData>) => {
+    const opts = infiniteQueryOptions<GetResourceResponse, AxiosError<DefaultError>, InfiniteData<GetResourceResponse>, QueryKey<Options<GetResourceData>>, string | Pick<QueryKey<Options<GetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getResource({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getResourceInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * creates or updates a non-namespaced resource
@@ -188,27 +191,30 @@ export const getNamespacedResourceInfiniteQueryKey = (options: Options<GetNamesp
 /**
  * returns unstructured resource from a namespace
  */
-export const getNamespacedResourceInfiniteOptions = (options: Options<GetNamespacedResourceData>) => infiniteQueryOptions<GetNamespacedResourceResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacedResourceResponse>, QueryKey<Options<GetNamespacedResourceData>>, string | Pick<QueryKey<Options<GetNamespacedResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNamespacedResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNamespacedResource({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNamespacedResourceInfiniteQueryKey(options)
-});
+export const getNamespacedResourceInfiniteOptions = (options: Options<GetNamespacedResourceData>) => {
+    const opts = infiniteQueryOptions<GetNamespacedResourceResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacedResourceResponse>, QueryKey<Options<GetNamespacedResourceData>>, string | Pick<QueryKey<Options<GetNamespacedResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNamespacedResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNamespacedResource({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNamespacedResourceInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * creates or updates a resource in a namespace
@@ -267,27 +273,30 @@ export const getAvailableProtocolsInfiniteQueryKey = (options?: Options<GetAvail
 /**
  * returns a list of available protocols for the service
  */
-export const getAvailableProtocolsInfiniteOptions = (options?: Options<GetAvailableProtocolsData>) => infiniteQueryOptions<GetAvailableProtocolsResponse, AxiosError<DefaultError>, InfiniteData<GetAvailableProtocolsResponse>, QueryKey<Options<GetAvailableProtocolsData>>, string | Pick<QueryKey<Options<GetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAvailableProtocols({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAvailableProtocolsInfiniteQueryKey(options)
-});
+export const getAvailableProtocolsInfiniteOptions = (options?: Options<GetAvailableProtocolsData>) => {
+    const opts = infiniteQueryOptions<GetAvailableProtocolsResponse, AxiosError<DefaultError>, InfiniteData<GetAvailableProtocolsResponse>, QueryKey<Options<GetAvailableProtocolsData>>, string | Pick<QueryKey<Options<GetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAvailableProtocols({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAvailableProtocolsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * checks if provided image is valid
@@ -380,27 +389,30 @@ export const getClusterRolesInfiniteQueryKey = (options?: Options<GetClusterRole
 /**
  * returns a list of ClusterRoles
  */
-export const getClusterRolesInfiniteOptions = (options?: Options<GetClusterRolesData>) => infiniteQueryOptions<GetClusterRolesResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRolesResponse>, QueryKey<Options<GetClusterRolesData>>, string | Pick<QueryKey<Options<GetClusterRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetClusterRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getClusterRoles({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getClusterRolesInfiniteQueryKey(options)
-});
+export const getClusterRolesInfiniteOptions = (options?: Options<GetClusterRolesData>) => {
+    const opts = infiniteQueryOptions<GetClusterRolesResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRolesResponse>, QueryKey<Options<GetClusterRolesData>>, string | Pick<QueryKey<Options<GetClusterRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetClusterRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getClusterRoles({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getClusterRolesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getClusterRoleQueryKey = (options: Options<GetClusterRoleData>) => createQueryKey('getClusterRole', options);
 
@@ -425,27 +437,30 @@ export const getClusterRoleInfiniteQueryKey = (options: Options<GetClusterRoleDa
 /**
  * returns detailed information about ClusterRole
  */
-export const getClusterRoleInfiniteOptions = (options: Options<GetClusterRoleData>) => infiniteQueryOptions<GetClusterRoleResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleResponse>, QueryKey<Options<GetClusterRoleData>>, string | Pick<QueryKey<Options<GetClusterRoleData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetClusterRoleData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getClusterRole({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getClusterRoleInfiniteQueryKey(options)
-});
+export const getClusterRoleInfiniteOptions = (options: Options<GetClusterRoleData>) => {
+    const opts = infiniteQueryOptions<GetClusterRoleResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleResponse>, QueryKey<Options<GetClusterRoleData>>, string | Pick<QueryKey<Options<GetClusterRoleData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetClusterRoleData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getClusterRole({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getClusterRoleInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getClusterRoleBindingsQueryKey = (options?: Options<GetClusterRoleBindingsData>) => createQueryKey('getClusterRoleBindings', options);
 
@@ -470,27 +485,30 @@ export const getClusterRoleBindingsInfiniteQueryKey = (options?: Options<GetClus
 /**
  * returns a list of ClusterRoleBindings
  */
-export const getClusterRoleBindingsInfiniteOptions = (options?: Options<GetClusterRoleBindingsData>) => infiniteQueryOptions<GetClusterRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleBindingsResponse>, QueryKey<Options<GetClusterRoleBindingsData>>, string | Pick<QueryKey<Options<GetClusterRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetClusterRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getClusterRoleBindings({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getClusterRoleBindingsInfiniteQueryKey(options)
-});
+export const getClusterRoleBindingsInfiniteOptions = (options?: Options<GetClusterRoleBindingsData>) => {
+    const opts = infiniteQueryOptions<GetClusterRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleBindingsResponse>, QueryKey<Options<GetClusterRoleBindingsData>>, string | Pick<QueryKey<Options<GetClusterRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetClusterRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getClusterRoleBindings({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getClusterRoleBindingsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getClusterRoleBindingQueryKey = (options: Options<GetClusterRoleBindingData>) => createQueryKey('getClusterRoleBinding', options);
 
@@ -515,27 +533,30 @@ export const getClusterRoleBindingInfiniteQueryKey = (options: Options<GetCluste
 /**
  * returns detailed information about ClusterRoleBinding
  */
-export const getClusterRoleBindingInfiniteOptions = (options: Options<GetClusterRoleBindingData>) => infiniteQueryOptions<GetClusterRoleBindingResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleBindingResponse>, QueryKey<Options<GetClusterRoleBindingData>>, string | Pick<QueryKey<Options<GetClusterRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetClusterRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getClusterRoleBinding({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getClusterRoleBindingInfiniteQueryKey(options)
-});
+export const getClusterRoleBindingInfiniteOptions = (options: Options<GetClusterRoleBindingData>) => {
+    const opts = infiniteQueryOptions<GetClusterRoleBindingResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleBindingResponse>, QueryKey<Options<GetClusterRoleBindingData>>, string | Pick<QueryKey<Options<GetClusterRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetClusterRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getClusterRoleBinding({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getClusterRoleBindingInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllConfigMapsQueryKey = (options?: Options<GetAllConfigMapsData>) => createQueryKey('getAllConfigMaps', options);
 
@@ -560,27 +581,30 @@ export const getAllConfigMapsInfiniteQueryKey = (options?: Options<GetAllConfigM
 /**
  * returns a list of ConfigMaps from all namespaces
  */
-export const getAllConfigMapsInfiniteOptions = (options?: Options<GetAllConfigMapsData>) => infiniteQueryOptions<GetAllConfigMapsResponse, AxiosError<DefaultError>, InfiniteData<GetAllConfigMapsResponse>, QueryKey<Options<GetAllConfigMapsData>>, string | Pick<QueryKey<Options<GetAllConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllConfigMaps({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllConfigMapsInfiniteQueryKey(options)
-});
+export const getAllConfigMapsInfiniteOptions = (options?: Options<GetAllConfigMapsData>) => {
+    const opts = infiniteQueryOptions<GetAllConfigMapsResponse, AxiosError<DefaultError>, InfiniteData<GetAllConfigMapsResponse>, QueryKey<Options<GetAllConfigMapsData>>, string | Pick<QueryKey<Options<GetAllConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllConfigMaps({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllConfigMapsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getConfigMapsQueryKey = (options: Options<GetConfigMapsData>) => createQueryKey('getConfigMaps', options);
 
@@ -605,27 +629,30 @@ export const getConfigMapsInfiniteQueryKey = (options: Options<GetConfigMapsData
 /**
  * returns a list of ConfigMaps in a namespaces
  */
-export const getConfigMapsInfiniteOptions = (options: Options<GetConfigMapsData>) => infiniteQueryOptions<GetConfigMapsResponse, AxiosError<DefaultError>, InfiniteData<GetConfigMapsResponse>, QueryKey<Options<GetConfigMapsData>>, string | Pick<QueryKey<Options<GetConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getConfigMaps({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getConfigMapsInfiniteQueryKey(options)
-});
+export const getConfigMapsInfiniteOptions = (options: Options<GetConfigMapsData>) => {
+    const opts = infiniteQueryOptions<GetConfigMapsResponse, AxiosError<DefaultError>, InfiniteData<GetConfigMapsResponse>, QueryKey<Options<GetConfigMapsData>>, string | Pick<QueryKey<Options<GetConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getConfigMaps({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getConfigMapsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getConfigMapQueryKey = (options: Options<GetConfigMapData>) => createQueryKey('getConfigMap', options);
 
@@ -650,27 +677,30 @@ export const getConfigMapInfiniteQueryKey = (options: Options<GetConfigMapData>)
 /**
  * returns detailed information about ConfigMap
  */
-export const getConfigMapInfiniteOptions = (options: Options<GetConfigMapData>) => infiniteQueryOptions<GetConfigMapResponse, AxiosError<DefaultError>, InfiniteData<GetConfigMapResponse>, QueryKey<Options<GetConfigMapData>>, string | Pick<QueryKey<Options<GetConfigMapData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetConfigMapData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getConfigMap({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getConfigMapInfiniteQueryKey(options)
-});
+export const getConfigMapInfiniteOptions = (options: Options<GetConfigMapData>) => {
+    const opts = infiniteQueryOptions<GetConfigMapResponse, AxiosError<DefaultError>, InfiniteData<GetConfigMapResponse>, QueryKey<Options<GetConfigMapData>>, string | Pick<QueryKey<Options<GetConfigMapData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetConfigMapData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getConfigMap({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getConfigMapInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCustomResourceDefinitionsQueryKey = (options?: Options<GetCustomResourceDefinitionsData>) => createQueryKey('getCustomResourceDefinitions', options);
 
@@ -695,27 +725,30 @@ export const getCustomResourceDefinitionsInfiniteQueryKey = (options?: Options<G
 /**
  * returns a list of CustomResourceDefinition
  */
-export const getCustomResourceDefinitionsInfiniteOptions = (options?: Options<GetCustomResourceDefinitionsData>) => infiniteQueryOptions<GetCustomResourceDefinitionsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceDefinitionsResponse>, QueryKey<Options<GetCustomResourceDefinitionsData>>, string | Pick<QueryKey<Options<GetCustomResourceDefinitionsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCustomResourceDefinitionsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCustomResourceDefinitions({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCustomResourceDefinitionsInfiniteQueryKey(options)
-});
+export const getCustomResourceDefinitionsInfiniteOptions = (options?: Options<GetCustomResourceDefinitionsData>) => {
+    const opts = infiniteQueryOptions<GetCustomResourceDefinitionsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceDefinitionsResponse>, QueryKey<Options<GetCustomResourceDefinitionsData>>, string | Pick<QueryKey<Options<GetCustomResourceDefinitionsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCustomResourceDefinitionsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCustomResourceDefinitions({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCustomResourceDefinitionsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCustomResourceDefinitionQueryKey = (options: Options<GetCustomResourceDefinitionData>) => createQueryKey('getCustomResourceDefinition', options);
 
@@ -740,27 +773,30 @@ export const getCustomResourceDefinitionInfiniteQueryKey = (options: Options<Get
 /**
  * returns detailed information about CustomResourceDefinition
  */
-export const getCustomResourceDefinitionInfiniteOptions = (options: Options<GetCustomResourceDefinitionData>) => infiniteQueryOptions<GetCustomResourceDefinitionResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceDefinitionResponse>, QueryKey<Options<GetCustomResourceDefinitionData>>, string | Pick<QueryKey<Options<GetCustomResourceDefinitionData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCustomResourceDefinitionData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCustomResourceDefinition({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCustomResourceDefinitionInfiniteQueryKey(options)
-});
+export const getCustomResourceDefinitionInfiniteOptions = (options: Options<GetCustomResourceDefinitionData>) => {
+    const opts = infiniteQueryOptions<GetCustomResourceDefinitionResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceDefinitionResponse>, QueryKey<Options<GetCustomResourceDefinitionData>>, string | Pick<QueryKey<Options<GetCustomResourceDefinitionData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCustomResourceDefinitionData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCustomResourceDefinition({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCustomResourceDefinitionInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCustomResourceObjectsQueryKey = (options: Options<GetCustomResourceObjectsData>) => createQueryKey('getCustomResourceObjects', options);
 
@@ -785,27 +821,30 @@ export const getCustomResourceObjectsInfiniteQueryKey = (options: Options<GetCus
 /**
  * returns a list of objects of CustomResourceDefinition
  */
-export const getCustomResourceObjectsInfiniteOptions = (options: Options<GetCustomResourceObjectsData>) => infiniteQueryOptions<GetCustomResourceObjectsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectsResponse>, QueryKey<Options<GetCustomResourceObjectsData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCustomResourceObjectsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCustomResourceObjects({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCustomResourceObjectsInfiniteQueryKey(options)
-});
+export const getCustomResourceObjectsInfiniteOptions = (options: Options<GetCustomResourceObjectsData>) => {
+    const opts = infiniteQueryOptions<GetCustomResourceObjectsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectsResponse>, QueryKey<Options<GetCustomResourceObjectsData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCustomResourceObjectsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCustomResourceObjects({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCustomResourceObjectsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCustomResourceObjectQueryKey = (options: Options<GetCustomResourceObjectData>) => createQueryKey('getCustomResourceObject', options);
 
@@ -830,27 +869,30 @@ export const getCustomResourceObjectInfiniteQueryKey = (options: Options<GetCust
 /**
  * returns detailed information about custom resource object
  */
-export const getCustomResourceObjectInfiniteOptions = (options: Options<GetCustomResourceObjectData>) => infiniteQueryOptions<GetCustomResourceObjectResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectResponse>, QueryKey<Options<GetCustomResourceObjectData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCustomResourceObjectData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCustomResourceObject({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCustomResourceObjectInfiniteQueryKey(options)
-});
+export const getCustomResourceObjectInfiniteOptions = (options: Options<GetCustomResourceObjectData>) => {
+    const opts = infiniteQueryOptions<GetCustomResourceObjectResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectResponse>, QueryKey<Options<GetCustomResourceObjectData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCustomResourceObjectData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCustomResourceObject({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCustomResourceObjectInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCustomResourceObjectEventsQueryKey = (options: Options<GetCustomResourceObjectEventsData>) => createQueryKey('getCustomResourceObjectEvents', options);
 
@@ -875,27 +917,30 @@ export const getCustomResourceObjectEventsInfiniteQueryKey = (options: Options<G
 /**
  * returns Events for custom resource object
  */
-export const getCustomResourceObjectEventsInfiniteOptions = (options: Options<GetCustomResourceObjectEventsData>) => infiniteQueryOptions<GetCustomResourceObjectEventsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectEventsResponse>, QueryKey<Options<GetCustomResourceObjectEventsData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCustomResourceObjectEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCustomResourceObjectEventsInfiniteQueryKey(options)
-});
+export const getCustomResourceObjectEventsInfiniteOptions = (options: Options<GetCustomResourceObjectEventsData>) => {
+    const opts = infiniteQueryOptions<GetCustomResourceObjectEventsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectEventsResponse>, QueryKey<Options<GetCustomResourceObjectEventsData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCustomResourceObjectEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCustomResourceObjectEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllCronJobsQueryKey = (options?: Options<GetAllCronJobsData>) => createQueryKey('getAllCronJobs', options);
 
@@ -920,27 +965,30 @@ export const getAllCronJobsInfiniteQueryKey = (options?: Options<GetAllCronJobsD
 /**
  * returns a list of CronJobs from all namespaces
  */
-export const getAllCronJobsInfiniteOptions = (options?: Options<GetAllCronJobsData>) => infiniteQueryOptions<GetAllCronJobsResponse, AxiosError<DefaultError>, InfiniteData<GetAllCronJobsResponse>, QueryKey<Options<GetAllCronJobsData>>, string | Pick<QueryKey<Options<GetAllCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllCronJobs({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllCronJobsInfiniteQueryKey(options)
-});
+export const getAllCronJobsInfiniteOptions = (options?: Options<GetAllCronJobsData>) => {
+    const opts = infiniteQueryOptions<GetAllCronJobsResponse, AxiosError<DefaultError>, InfiniteData<GetAllCronJobsResponse>, QueryKey<Options<GetAllCronJobsData>>, string | Pick<QueryKey<Options<GetAllCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllCronJobs({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllCronJobsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCronJobsQueryKey = (options: Options<GetCronJobsData>) => createQueryKey('getCronJobs', options);
 
@@ -965,27 +1013,30 @@ export const getCronJobsInfiniteQueryKey = (options: Options<GetCronJobsData>): 
 /**
  * returns a list of CronJobs in a namespaces
  */
-export const getCronJobsInfiniteOptions = (options: Options<GetCronJobsData>) => infiniteQueryOptions<GetCronJobsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobsResponse>, QueryKey<Options<GetCronJobsData>>, string | Pick<QueryKey<Options<GetCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCronJobs({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCronJobsInfiniteQueryKey(options)
-});
+export const getCronJobsInfiniteOptions = (options: Options<GetCronJobsData>) => {
+    const opts = infiniteQueryOptions<GetCronJobsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobsResponse>, QueryKey<Options<GetCronJobsData>>, string | Pick<QueryKey<Options<GetCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCronJobs({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCronJobsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCronJobQueryKey = (options: Options<GetCronJobData>) => createQueryKey('getCronJob', options);
 
@@ -1010,27 +1061,30 @@ export const getCronJobInfiniteQueryKey = (options: Options<GetCronJobData>): Qu
 /**
  * returns detailed information about CronJob
  */
-export const getCronJobInfiniteOptions = (options: Options<GetCronJobData>) => infiniteQueryOptions<GetCronJobResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobResponse>, QueryKey<Options<GetCronJobData>>, string | Pick<QueryKey<Options<GetCronJobData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCronJobData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCronJob({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCronJobInfiniteQueryKey(options)
-});
+export const getCronJobInfiniteOptions = (options: Options<GetCronJobData>) => {
+    const opts = infiniteQueryOptions<GetCronJobResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobResponse>, QueryKey<Options<GetCronJobData>>, string | Pick<QueryKey<Options<GetCronJobData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCronJobData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCronJob({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCronJobInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCronJobEventsQueryKey = (options: Options<GetCronJobEventsData>) => createQueryKey('getCronJobEvents', options);
 
@@ -1055,27 +1109,30 @@ export const getCronJobEventsInfiniteQueryKey = (options: Options<GetCronJobEven
 /**
  * returns a list of Events for CronJob
  */
-export const getCronJobEventsInfiniteOptions = (options: Options<GetCronJobEventsData>) => infiniteQueryOptions<GetCronJobEventsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobEventsResponse>, QueryKey<Options<GetCronJobEventsData>>, string | Pick<QueryKey<Options<GetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCronJobEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCronJobEventsInfiniteQueryKey(options)
-});
+export const getCronJobEventsInfiniteOptions = (options: Options<GetCronJobEventsData>) => {
+    const opts = infiniteQueryOptions<GetCronJobEventsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobEventsResponse>, QueryKey<Options<GetCronJobEventsData>>, string | Pick<QueryKey<Options<GetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCronJobEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCronJobEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getCronJobJobsQueryKey = (options: Options<GetCronJobJobsData>) => createQueryKey('getCronJobJobs', options);
 
@@ -1100,27 +1157,30 @@ export const getCronJobJobsInfiniteQueryKey = (options: Options<GetCronJobJobsDa
 /**
  * returns a list of Jobs for CronJob
  */
-export const getCronJobJobsInfiniteOptions = (options: Options<GetCronJobJobsData>) => infiniteQueryOptions<GetCronJobJobsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobJobsResponse>, QueryKey<Options<GetCronJobJobsData>>, string | Pick<QueryKey<Options<GetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCronJobJobs({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCronJobJobsInfiniteQueryKey(options)
-});
+export const getCronJobJobsInfiniteOptions = (options: Options<GetCronJobJobsData>) => {
+    const opts = infiniteQueryOptions<GetCronJobJobsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobJobsResponse>, QueryKey<Options<GetCronJobJobsData>>, string | Pick<QueryKey<Options<GetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCronJobJobs({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCronJobJobsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * triggers a Job based on CronJob
@@ -1162,27 +1222,30 @@ export const getCsrfTokenInfiniteQueryKey = (options: Options<GetCsrfTokenData>)
 /**
  * generates a one-time CSRF token that can be used by POST request
  */
-export const getCsrfTokenInfiniteOptions = (options: Options<GetCsrfTokenData>) => infiniteQueryOptions<GetCsrfTokenResponse, AxiosError<DefaultError>, InfiniteData<GetCsrfTokenResponse>, QueryKey<Options<GetCsrfTokenData>>, string | Pick<QueryKey<Options<GetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getCsrfToken({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getCsrfTokenInfiniteQueryKey(options)
-});
+export const getCsrfTokenInfiniteOptions = (options: Options<GetCsrfTokenData>) => {
+    const opts = infiniteQueryOptions<GetCsrfTokenResponse, AxiosError<DefaultError>, InfiniteData<GetCsrfTokenResponse>, QueryKey<Options<GetCsrfTokenData>>, string | Pick<QueryKey<Options<GetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getCsrfToken({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getCsrfTokenInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllDaemonSetsQueryKey = (options?: Options<GetAllDaemonSetsData>) => createQueryKey('getAllDaemonSets', options);
 
@@ -1207,27 +1270,30 @@ export const getAllDaemonSetsInfiniteQueryKey = (options?: Options<GetAllDaemonS
 /**
  * returns a list of DaemonSets from all namespaces
  */
-export const getAllDaemonSetsInfiniteOptions = (options?: Options<GetAllDaemonSetsData>) => infiniteQueryOptions<GetAllDaemonSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllDaemonSetsResponse>, QueryKey<Options<GetAllDaemonSetsData>>, string | Pick<QueryKey<Options<GetAllDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllDaemonSets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllDaemonSetsInfiniteQueryKey(options)
-});
+export const getAllDaemonSetsInfiniteOptions = (options?: Options<GetAllDaemonSetsData>) => {
+    const opts = infiniteQueryOptions<GetAllDaemonSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllDaemonSetsResponse>, QueryKey<Options<GetAllDaemonSetsData>>, string | Pick<QueryKey<Options<GetAllDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllDaemonSets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllDaemonSetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDaemonSetsQueryKey = (options: Options<GetDaemonSetsData>) => createQueryKey('getDaemonSets', options);
 
@@ -1252,27 +1318,30 @@ export const getDaemonSetsInfiniteQueryKey = (options: Options<GetDaemonSetsData
 /**
  * returns a list of DaemonSets in a namespaces
  */
-export const getDaemonSetsInfiniteOptions = (options: Options<GetDaemonSetsData>) => infiniteQueryOptions<GetDaemonSetsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetsResponse>, QueryKey<Options<GetDaemonSetsData>>, string | Pick<QueryKey<Options<GetDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDaemonSets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDaemonSetsInfiniteQueryKey(options)
-});
+export const getDaemonSetsInfiniteOptions = (options: Options<GetDaemonSetsData>) => {
+    const opts = infiniteQueryOptions<GetDaemonSetsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetsResponse>, QueryKey<Options<GetDaemonSetsData>>, string | Pick<QueryKey<Options<GetDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDaemonSets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDaemonSetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDaemonSetQueryKey = (options: Options<GetDaemonSetData>) => createQueryKey('getDaemonSet', options);
 
@@ -1297,27 +1366,30 @@ export const getDaemonSetInfiniteQueryKey = (options: Options<GetDaemonSetData>)
 /**
  * returns detailed information about DaemonSet
  */
-export const getDaemonSetInfiniteOptions = (options: Options<GetDaemonSetData>) => infiniteQueryOptions<GetDaemonSetResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetResponse>, QueryKey<Options<GetDaemonSetData>>, string | Pick<QueryKey<Options<GetDaemonSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDaemonSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDaemonSet({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDaemonSetInfiniteQueryKey(options)
-});
+export const getDaemonSetInfiniteOptions = (options: Options<GetDaemonSetData>) => {
+    const opts = infiniteQueryOptions<GetDaemonSetResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetResponse>, QueryKey<Options<GetDaemonSetData>>, string | Pick<QueryKey<Options<GetDaemonSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDaemonSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDaemonSet({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDaemonSetInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDaemonSetEventsQueryKey = (options: Options<GetDaemonSetEventsData>) => createQueryKey('getDaemonSetEvents', options);
 
@@ -1342,27 +1414,30 @@ export const getDaemonSetEventsInfiniteQueryKey = (options: Options<GetDaemonSet
 /**
  * returns a list of Events for DaemonSet
  */
-export const getDaemonSetEventsInfiniteOptions = (options: Options<GetDaemonSetEventsData>) => infiniteQueryOptions<GetDaemonSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetEventsResponse>, QueryKey<Options<GetDaemonSetEventsData>>, string | Pick<QueryKey<Options<GetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDaemonSetEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDaemonSetEventsInfiniteQueryKey(options)
-});
+export const getDaemonSetEventsInfiniteOptions = (options: Options<GetDaemonSetEventsData>) => {
+    const opts = infiniteQueryOptions<GetDaemonSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetEventsResponse>, QueryKey<Options<GetDaemonSetEventsData>>, string | Pick<QueryKey<Options<GetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDaemonSetEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDaemonSetEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDaemonSetPodsQueryKey = (options: Options<GetDaemonSetPodsData>) => createQueryKey('getDaemonSetPods', options);
 
@@ -1387,27 +1462,30 @@ export const getDaemonSetPodsInfiniteQueryKey = (options: Options<GetDaemonSetPo
 /**
  * returns a list of Pods for DaemonSet
  */
-export const getDaemonSetPodsInfiniteOptions = (options: Options<GetDaemonSetPodsData>) => infiniteQueryOptions<GetDaemonSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetPodsResponse>, QueryKey<Options<GetDaemonSetPodsData>>, string | Pick<QueryKey<Options<GetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDaemonSetPods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDaemonSetPodsInfiniteQueryKey(options)
-});
+export const getDaemonSetPodsInfiniteOptions = (options: Options<GetDaemonSetPodsData>) => {
+    const opts = infiniteQueryOptions<GetDaemonSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetPodsResponse>, QueryKey<Options<GetDaemonSetPodsData>>, string | Pick<QueryKey<Options<GetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDaemonSetPods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDaemonSetPodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * rollout restart of the Daemon Set
@@ -1449,27 +1527,30 @@ export const getDaemonSetServicesInfiniteQueryKey = (options: Options<GetDaemonS
 /**
  * returns a list of Services for DaemonSet
  */
-export const getDaemonSetServicesInfiniteOptions = (options: Options<GetDaemonSetServicesData>) => infiniteQueryOptions<GetDaemonSetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetServicesResponse>, QueryKey<Options<GetDaemonSetServicesData>>, string | Pick<QueryKey<Options<GetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDaemonSetServices({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDaemonSetServicesInfiniteQueryKey(options)
-});
+export const getDaemonSetServicesInfiniteOptions = (options: Options<GetDaemonSetServicesData>) => {
+    const opts = infiniteQueryOptions<GetDaemonSetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetServicesResponse>, QueryKey<Options<GetDaemonSetServicesData>>, string | Pick<QueryKey<Options<GetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDaemonSetServices({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDaemonSetServicesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllDeploymentsQueryKey = (options?: Options<GetAllDeploymentsData>) => createQueryKey('getAllDeployments', options);
 
@@ -1494,27 +1575,30 @@ export const getAllDeploymentsInfiniteQueryKey = (options?: Options<GetAllDeploy
 /**
  * returns a list of Deployments from all namespaces
  */
-export const getAllDeploymentsInfiniteOptions = (options?: Options<GetAllDeploymentsData>) => infiniteQueryOptions<GetAllDeploymentsResponse, AxiosError<DefaultError>, InfiniteData<GetAllDeploymentsResponse>, QueryKey<Options<GetAllDeploymentsData>>, string | Pick<QueryKey<Options<GetAllDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllDeployments({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllDeploymentsInfiniteQueryKey(options)
-});
+export const getAllDeploymentsInfiniteOptions = (options?: Options<GetAllDeploymentsData>) => {
+    const opts = infiniteQueryOptions<GetAllDeploymentsResponse, AxiosError<DefaultError>, InfiniteData<GetAllDeploymentsResponse>, QueryKey<Options<GetAllDeploymentsData>>, string | Pick<QueryKey<Options<GetAllDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllDeployments({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllDeploymentsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDeploymentsQueryKey = (options: Options<GetDeploymentsData>) => createQueryKey('getDeployments', options);
 
@@ -1539,27 +1623,30 @@ export const getDeploymentsInfiniteQueryKey = (options: Options<GetDeploymentsDa
 /**
  * returns a list of Deployments in a namespaces
  */
-export const getDeploymentsInfiniteOptions = (options: Options<GetDeploymentsData>) => infiniteQueryOptions<GetDeploymentsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentsResponse>, QueryKey<Options<GetDeploymentsData>>, string | Pick<QueryKey<Options<GetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDeployments({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDeploymentsInfiniteQueryKey(options)
-});
+export const getDeploymentsInfiniteOptions = (options: Options<GetDeploymentsData>) => {
+    const opts = infiniteQueryOptions<GetDeploymentsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentsResponse>, QueryKey<Options<GetDeploymentsData>>, string | Pick<QueryKey<Options<GetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDeployments({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDeploymentsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDeploymentQueryKey = (options: Options<GetDeploymentData>) => createQueryKey('getDeployment', options);
 
@@ -1584,27 +1671,30 @@ export const getDeploymentInfiniteQueryKey = (options: Options<GetDeploymentData
 /**
  * returns detailed information about Deployment
  */
-export const getDeploymentInfiniteOptions = (options: Options<GetDeploymentData>) => infiniteQueryOptions<GetDeploymentResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentResponse>, QueryKey<Options<GetDeploymentData>>, string | Pick<QueryKey<Options<GetDeploymentData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDeploymentData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDeployment({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDeploymentInfiniteQueryKey(options)
-});
+export const getDeploymentInfiniteOptions = (options: Options<GetDeploymentData>) => {
+    const opts = infiniteQueryOptions<GetDeploymentResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentResponse>, QueryKey<Options<GetDeploymentData>>, string | Pick<QueryKey<Options<GetDeploymentData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDeploymentData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDeployment({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDeploymentInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDeploymentEventsQueryKey = (options: Options<GetDeploymentEventsData>) => createQueryKey('getDeploymentEvents', options);
 
@@ -1629,27 +1719,30 @@ export const getDeploymentEventsInfiniteQueryKey = (options: Options<GetDeployme
 /**
  * returns a list of Events for Deployment
  */
-export const getDeploymentEventsInfiniteOptions = (options: Options<GetDeploymentEventsData>) => infiniteQueryOptions<GetDeploymentEventsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentEventsResponse>, QueryKey<Options<GetDeploymentEventsData>>, string | Pick<QueryKey<Options<GetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDeploymentEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDeploymentEventsInfiniteQueryKey(options)
-});
+export const getDeploymentEventsInfiniteOptions = (options: Options<GetDeploymentEventsData>) => {
+    const opts = infiniteQueryOptions<GetDeploymentEventsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentEventsResponse>, QueryKey<Options<GetDeploymentEventsData>>, string | Pick<QueryKey<Options<GetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDeploymentEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDeploymentEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDeploymentNewReplicaSetQueryKey = (options: Options<GetDeploymentNewReplicaSetData>) => createQueryKey('getDeploymentNewReplicaSet', options);
 
@@ -1674,27 +1767,30 @@ export const getDeploymentNewReplicaSetInfiniteQueryKey = (options: Options<GetD
 /**
  * returns a list of new ReplicaSets for Deployment
  */
-export const getDeploymentNewReplicaSetInfiniteOptions = (options: Options<GetDeploymentNewReplicaSetData>) => infiniteQueryOptions<GetDeploymentNewReplicaSetResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentNewReplicaSetResponse>, QueryKey<Options<GetDeploymentNewReplicaSetData>>, string | Pick<QueryKey<Options<GetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDeploymentNewReplicaSet({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDeploymentNewReplicaSetInfiniteQueryKey(options)
-});
+export const getDeploymentNewReplicaSetInfiniteOptions = (options: Options<GetDeploymentNewReplicaSetData>) => {
+    const opts = infiniteQueryOptions<GetDeploymentNewReplicaSetResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentNewReplicaSetResponse>, QueryKey<Options<GetDeploymentNewReplicaSetData>>, string | Pick<QueryKey<Options<GetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDeploymentNewReplicaSet({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDeploymentNewReplicaSetInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getDeploymentOldReplicaSetsQueryKey = (options: Options<GetDeploymentOldReplicaSetsData>) => createQueryKey('getDeploymentOldReplicaSets', options);
 
@@ -1719,27 +1815,30 @@ export const getDeploymentOldReplicaSetsInfiniteQueryKey = (options: Options<Get
 /**
  * returns a list of old ReplicaSets for Deployment
  */
-export const getDeploymentOldReplicaSetsInfiniteOptions = (options: Options<GetDeploymentOldReplicaSetsData>) => infiniteQueryOptions<GetDeploymentOldReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentOldReplicaSetsResponse>, QueryKey<Options<GetDeploymentOldReplicaSetsData>>, string | Pick<QueryKey<Options<GetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getDeploymentOldReplicaSets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDeploymentOldReplicaSetsInfiniteQueryKey(options)
-});
+export const getDeploymentOldReplicaSetsInfiniteOptions = (options: Options<GetDeploymentOldReplicaSetsData>) => {
+    const opts = infiniteQueryOptions<GetDeploymentOldReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentOldReplicaSetsResponse>, QueryKey<Options<GetDeploymentOldReplicaSetsData>>, string | Pick<QueryKey<Options<GetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getDeploymentOldReplicaSets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getDeploymentOldReplicaSetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * pauses the Deployment
@@ -1832,27 +1931,30 @@ export const getAllEventsInfiniteQueryKey = (options?: Options<GetAllEventsData>
 /**
  * returns a list of Events from all namespaces
  */
-export const getAllEventsInfiniteOptions = (options?: Options<GetAllEventsData>) => infiniteQueryOptions<GetAllEventsResponse, AxiosError<DefaultError>, InfiniteData<GetAllEventsResponse>, QueryKey<Options<GetAllEventsData>>, string | Pick<QueryKey<Options<GetAllEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllEventsInfiniteQueryKey(options)
-});
+export const getAllEventsInfiniteOptions = (options?: Options<GetAllEventsData>) => {
+    const opts = infiniteQueryOptions<GetAllEventsResponse, AxiosError<DefaultError>, InfiniteData<GetAllEventsResponse>, QueryKey<Options<GetAllEventsData>>, string | Pick<QueryKey<Options<GetAllEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getEventsQueryKey = (options: Options<GetEventsData>) => createQueryKey('getEvents', options);
 
@@ -1877,27 +1979,78 @@ export const getEventsInfiniteQueryKey = (options: Options<GetEventsData>): Quer
 /**
  * returns a list of Events in a namespace
  */
-export const getEventsInfiniteOptions = (options: Options<GetEventsData>) => infiniteQueryOptions<GetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetEventsResponse>, QueryKey<Options<GetEventsData>>, string | Pick<QueryKey<Options<GetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getEvents({
+export const getEventsInfiniteOptions = (options: Options<GetEventsData>) => {
+    const opts = infiniteQueryOptions<GetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetEventsResponse>, QueryKey<Options<GetEventsData>>, string | Pick<QueryKey<Options<GetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const getHealthQueryKey = (options?: Options<GetHealthData>) => createQueryKey('getHealth', options);
+
+/**
+ * returns the health of the server
+ */
+export const getHealthOptions = (options?: Options<GetHealthData>) => queryOptions<GetHealthResponse, AxiosError<DefaultError>, GetHealthResponse, ReturnType<typeof getHealthQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getHealth({
             ...options,
-            ...params,
+            ...queryKey[0],
             signal,
             throwOnError: true
         });
         return data;
     },
-    queryKey: getEventsInfiniteQueryKey(options)
+    queryKey: getHealthQueryKey(options)
 });
+
+export const getHealthInfiniteQueryKey = (options?: Options<GetHealthData>): QueryKey<Options<GetHealthData>> => createQueryKey('getHealth', options, true);
+
+/**
+ * returns the health of the server
+ */
+export const getHealthInfiniteOptions = (options?: Options<GetHealthData>) => {
+    const opts = infiniteQueryOptions<GetHealthResponse, AxiosError<DefaultError>, InfiniteData<GetHealthResponse>, QueryKey<Options<GetHealthData>>, string | Pick<QueryKey<Options<GetHealthData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetHealthData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getHealth({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getHealthInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllHorizontalPodAutoscalersQueryKey = (options?: Options<GetAllHorizontalPodAutoscalersData>) => createQueryKey('getAllHorizontalPodAutoscalers', options);
 
@@ -1922,27 +2075,30 @@ export const getAllHorizontalPodAutoscalersInfiniteQueryKey = (options?: Options
 /**
  * returns a list of HorizontalPodAutoscalers from all namespaces
  */
-export const getAllHorizontalPodAutoscalersInfiniteOptions = (options?: Options<GetAllHorizontalPodAutoscalersData>) => infiniteQueryOptions<GetAllHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, InfiniteData<GetAllHorizontalPodAutoscalersResponse>, QueryKey<Options<GetAllHorizontalPodAutoscalersData>>, string | Pick<QueryKey<Options<GetAllHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllHorizontalPodAutoscalers({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllHorizontalPodAutoscalersInfiniteQueryKey(options)
-});
+export const getAllHorizontalPodAutoscalersInfiniteOptions = (options?: Options<GetAllHorizontalPodAutoscalersData>) => {
+    const opts = infiniteQueryOptions<GetAllHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, InfiniteData<GetAllHorizontalPodAutoscalersResponse>, QueryKey<Options<GetAllHorizontalPodAutoscalersData>>, string | Pick<QueryKey<Options<GetAllHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllHorizontalPodAutoscalers({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllHorizontalPodAutoscalersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getHorizontalPodAutoscalersQueryKey = (options: Options<GetHorizontalPodAutoscalersData>) => createQueryKey('getHorizontalPodAutoscalers', options);
 
@@ -1967,27 +2123,30 @@ export const getHorizontalPodAutoscalersInfiniteQueryKey = (options: Options<Get
 /**
  * returns a list of HorizontalPodAutoscalers in a namespaces
  */
-export const getHorizontalPodAutoscalersInfiniteOptions = (options: Options<GetHorizontalPodAutoscalersData>) => infiniteQueryOptions<GetHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalersResponse>, QueryKey<Options<GetHorizontalPodAutoscalersData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getHorizontalPodAutoscalers({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getHorizontalPodAutoscalersInfiniteQueryKey(options)
-});
+export const getHorizontalPodAutoscalersInfiniteOptions = (options: Options<GetHorizontalPodAutoscalersData>) => {
+    const opts = infiniteQueryOptions<GetHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalersResponse>, QueryKey<Options<GetHorizontalPodAutoscalersData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getHorizontalPodAutoscalers({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getHorizontalPodAutoscalersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getHorizontalPodAutoscalerQueryKey = (options: Options<GetHorizontalPodAutoscalerData>) => createQueryKey('getHorizontalPodAutoscaler', options);
 
@@ -2012,27 +2171,30 @@ export const getHorizontalPodAutoscalerInfiniteQueryKey = (options: Options<GetH
 /**
  * returns detailed information about HorizontalPodAutoscaler
  */
-export const getHorizontalPodAutoscalerInfiniteOptions = (options: Options<GetHorizontalPodAutoscalerData>) => infiniteQueryOptions<GetHorizontalPodAutoscalerResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalerResponse>, QueryKey<Options<GetHorizontalPodAutoscalerData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalerData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalerData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getHorizontalPodAutoscaler({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getHorizontalPodAutoscalerInfiniteQueryKey(options)
-});
+export const getHorizontalPodAutoscalerInfiniteOptions = (options: Options<GetHorizontalPodAutoscalerData>) => {
+    const opts = infiniteQueryOptions<GetHorizontalPodAutoscalerResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalerResponse>, QueryKey<Options<GetHorizontalPodAutoscalerData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalerData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalerData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getHorizontalPodAutoscaler({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getHorizontalPodAutoscalerInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllIngressesQueryKey = (options?: Options<GetAllIngressesData>) => createQueryKey('getAllIngresses', options);
 
@@ -2057,27 +2219,30 @@ export const getAllIngressesInfiniteQueryKey = (options?: Options<GetAllIngresse
 /**
  * returns a list of Ingresses from all namespaces
  */
-export const getAllIngressesInfiniteOptions = (options?: Options<GetAllIngressesData>) => infiniteQueryOptions<GetAllIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetAllIngressesResponse>, QueryKey<Options<GetAllIngressesData>>, string | Pick<QueryKey<Options<GetAllIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllIngresses({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllIngressesInfiniteQueryKey(options)
-});
+export const getAllIngressesInfiniteOptions = (options?: Options<GetAllIngressesData>) => {
+    const opts = infiniteQueryOptions<GetAllIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetAllIngressesResponse>, QueryKey<Options<GetAllIngressesData>>, string | Pick<QueryKey<Options<GetAllIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllIngresses({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllIngressesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getIngressesQueryKey = (options: Options<GetIngressesData>) => createQueryKey('getIngresses', options);
 
@@ -2102,27 +2267,30 @@ export const getIngressesInfiniteQueryKey = (options: Options<GetIngressesData>)
 /**
  * returns a list of Ingresses in a namespaces
  */
-export const getIngressesInfiniteOptions = (options: Options<GetIngressesData>) => infiniteQueryOptions<GetIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetIngressesResponse>, QueryKey<Options<GetIngressesData>>, string | Pick<QueryKey<Options<GetIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getIngresses({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getIngressesInfiniteQueryKey(options)
-});
+export const getIngressesInfiniteOptions = (options: Options<GetIngressesData>) => {
+    const opts = infiniteQueryOptions<GetIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetIngressesResponse>, QueryKey<Options<GetIngressesData>>, string | Pick<QueryKey<Options<GetIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getIngresses({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getIngressesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getIngressEventsQueryKey = (options: Options<GetIngressEventsData>) => createQueryKey('getIngressEvents', options);
 
@@ -2147,27 +2315,30 @@ export const getIngressEventsInfiniteQueryKey = (options: Options<GetIngressEven
 /**
  * returns a list of Events for Ingress
  */
-export const getIngressEventsInfiniteOptions = (options: Options<GetIngressEventsData>) => infiniteQueryOptions<GetIngressEventsResponse, AxiosError<DefaultError>, InfiniteData<GetIngressEventsResponse>, QueryKey<Options<GetIngressEventsData>>, string | Pick<QueryKey<Options<GetIngressEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetIngressEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getIngressEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getIngressEventsInfiniteQueryKey(options)
-});
+export const getIngressEventsInfiniteOptions = (options: Options<GetIngressEventsData>) => {
+    const opts = infiniteQueryOptions<GetIngressEventsResponse, AxiosError<DefaultError>, InfiniteData<GetIngressEventsResponse>, QueryKey<Options<GetIngressEventsData>>, string | Pick<QueryKey<Options<GetIngressEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetIngressEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getIngressEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getIngressEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getIngressQueryKey = (options: Options<GetIngressData>) => createQueryKey('getIngress', options);
 
@@ -2192,27 +2363,30 @@ export const getIngressInfiniteQueryKey = (options: Options<GetIngressData>): Qu
 /**
  * returns detailed information about Ingress
  */
-export const getIngressInfiniteOptions = (options: Options<GetIngressData>) => infiniteQueryOptions<GetIngressResponse, AxiosError<DefaultError>, InfiniteData<GetIngressResponse>, QueryKey<Options<GetIngressData>>, string | Pick<QueryKey<Options<GetIngressData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetIngressData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getIngress({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getIngressInfiniteQueryKey(options)
-});
+export const getIngressInfiniteOptions = (options: Options<GetIngressData>) => {
+    const opts = infiniteQueryOptions<GetIngressResponse, AxiosError<DefaultError>, InfiniteData<GetIngressResponse>, QueryKey<Options<GetIngressData>>, string | Pick<QueryKey<Options<GetIngressData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetIngressData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getIngress({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getIngressInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getIngressClassesQueryKey = (options?: Options<GetIngressClassesData>) => createQueryKey('getIngressClasses', options);
 
@@ -2237,27 +2411,30 @@ export const getIngressClassesInfiniteQueryKey = (options?: Options<GetIngressCl
 /**
  * returns a list of IngressClasses
  */
-export const getIngressClassesInfiniteOptions = (options?: Options<GetIngressClassesData>) => infiniteQueryOptions<GetIngressClassesResponse, AxiosError<DefaultError>, InfiniteData<GetIngressClassesResponse>, QueryKey<Options<GetIngressClassesData>>, string | Pick<QueryKey<Options<GetIngressClassesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetIngressClassesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getIngressClasses({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getIngressClassesInfiniteQueryKey(options)
-});
+export const getIngressClassesInfiniteOptions = (options?: Options<GetIngressClassesData>) => {
+    const opts = infiniteQueryOptions<GetIngressClassesResponse, AxiosError<DefaultError>, InfiniteData<GetIngressClassesResponse>, QueryKey<Options<GetIngressClassesData>>, string | Pick<QueryKey<Options<GetIngressClassesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetIngressClassesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getIngressClasses({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getIngressClassesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getIngressClassQueryKey = (options: Options<GetIngressClassData>) => createQueryKey('getIngressClass', options);
 
@@ -2282,27 +2459,30 @@ export const getIngressClassInfiniteQueryKey = (options: Options<GetIngressClass
 /**
  * returns detailed information about IngressClass
  */
-export const getIngressClassInfiniteOptions = (options: Options<GetIngressClassData>) => infiniteQueryOptions<GetIngressClassResponse, AxiosError<DefaultError>, InfiniteData<GetIngressClassResponse>, QueryKey<Options<GetIngressClassData>>, string | Pick<QueryKey<Options<GetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getIngressClass({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getIngressClassInfiniteQueryKey(options)
-});
+export const getIngressClassInfiniteOptions = (options: Options<GetIngressClassData>) => {
+    const opts = infiniteQueryOptions<GetIngressClassResponse, AxiosError<DefaultError>, InfiniteData<GetIngressClassResponse>, QueryKey<Options<GetIngressClassData>>, string | Pick<QueryKey<Options<GetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getIngressClass({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getIngressClassInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const handleGetStateQueryKey = (options?: Options<HandleGetStateData>) => createQueryKey('handleGetState', options);
 
@@ -2321,27 +2501,30 @@ export const handleGetStateOptions = (options?: Options<HandleGetStateData>) => 
 
 export const handleGetStateInfiniteQueryKey = (options?: Options<HandleGetStateData>): QueryKey<Options<HandleGetStateData>> => createQueryKey('handleGetState', options, true);
 
-export const handleGetStateInfiniteOptions = (options?: Options<HandleGetStateData>) => infiniteQueryOptions<unknown, AxiosError<DefaultError>, InfiniteData<unknown>, QueryKey<Options<HandleGetStateData>>, string | Pick<QueryKey<Options<HandleGetStateData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStateData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetState({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: handleGetStateInfiniteQueryKey(options)
-});
+export const handleGetStateInfiniteOptions = (options?: Options<HandleGetStateData>) => {
+    const opts = infiniteQueryOptions<unknown, AxiosError<DefaultError>, InfiniteData<unknown>, QueryKey<Options<HandleGetStateData>>, string | Pick<QueryKey<Options<HandleGetStateData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<HandleGetStateData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await handleGetState({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: handleGetStateInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllJobsQueryKey = (options?: Options<GetAllJobsData>) => createQueryKey('getAllJobs', options);
 
@@ -2366,27 +2549,30 @@ export const getAllJobsInfiniteQueryKey = (options?: Options<GetAllJobsData>): Q
 /**
  * returns a list of Jobs from all namespaces
  */
-export const getAllJobsInfiniteOptions = (options?: Options<GetAllJobsData>) => infiniteQueryOptions<GetAllJobsResponse, AxiosError<DefaultError>, InfiniteData<GetAllJobsResponse>, QueryKey<Options<GetAllJobsData>>, string | Pick<QueryKey<Options<GetAllJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllJobs({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllJobsInfiniteQueryKey(options)
-});
+export const getAllJobsInfiniteOptions = (options?: Options<GetAllJobsData>) => {
+    const opts = infiniteQueryOptions<GetAllJobsResponse, AxiosError<DefaultError>, InfiniteData<GetAllJobsResponse>, QueryKey<Options<GetAllJobsData>>, string | Pick<QueryKey<Options<GetAllJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllJobs({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllJobsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getJobsQueryKey = (options: Options<GetJobsData>) => createQueryKey('getJobs', options);
 
@@ -2411,27 +2597,30 @@ export const getJobsInfiniteQueryKey = (options: Options<GetJobsData>): QueryKey
 /**
  * returns a list of Jobs in a namespaces
  */
-export const getJobsInfiniteOptions = (options: Options<GetJobsData>) => infiniteQueryOptions<GetJobsResponse, AxiosError<DefaultError>, InfiniteData<GetJobsResponse>, QueryKey<Options<GetJobsData>>, string | Pick<QueryKey<Options<GetJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getJobs({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getJobsInfiniteQueryKey(options)
-});
+export const getJobsInfiniteOptions = (options: Options<GetJobsData>) => {
+    const opts = infiniteQueryOptions<GetJobsResponse, AxiosError<DefaultError>, InfiniteData<GetJobsResponse>, QueryKey<Options<GetJobsData>>, string | Pick<QueryKey<Options<GetJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getJobs({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getJobsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getJobQueryKey = (options: Options<GetJobData>) => createQueryKey('getJob', options);
 
@@ -2456,27 +2645,30 @@ export const getJobInfiniteQueryKey = (options: Options<GetJobData>): QueryKey<O
 /**
  * returns detailed information about Job
  */
-export const getJobInfiniteOptions = (options: Options<GetJobData>) => infiniteQueryOptions<GetJobResponse, AxiosError<DefaultError>, InfiniteData<GetJobResponse>, QueryKey<Options<GetJobData>>, string | Pick<QueryKey<Options<GetJobData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetJobData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getJob({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getJobInfiniteQueryKey(options)
-});
+export const getJobInfiniteOptions = (options: Options<GetJobData>) => {
+    const opts = infiniteQueryOptions<GetJobResponse, AxiosError<DefaultError>, InfiniteData<GetJobResponse>, QueryKey<Options<GetJobData>>, string | Pick<QueryKey<Options<GetJobData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetJobData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getJob({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getJobInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getJobEventsQueryKey = (options: Options<GetJobEventsData>) => createQueryKey('getJobEvents', options);
 
@@ -2501,27 +2693,30 @@ export const getJobEventsInfiniteQueryKey = (options: Options<GetJobEventsData>)
 /**
  * returns a list of Events for Job
  */
-export const getJobEventsInfiniteOptions = (options: Options<GetJobEventsData>) => infiniteQueryOptions<GetJobEventsResponse, AxiosError<DefaultError>, InfiniteData<GetJobEventsResponse>, QueryKey<Options<GetJobEventsData>>, string | Pick<QueryKey<Options<GetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getJobEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getJobEventsInfiniteQueryKey(options)
-});
+export const getJobEventsInfiniteOptions = (options: Options<GetJobEventsData>) => {
+    const opts = infiniteQueryOptions<GetJobEventsResponse, AxiosError<DefaultError>, InfiniteData<GetJobEventsResponse>, QueryKey<Options<GetJobEventsData>>, string | Pick<QueryKey<Options<GetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getJobEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getJobEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getJobPodsQueryKey = (options: Options<GetJobPodsData>) => createQueryKey('getJobPods', options);
 
@@ -2546,27 +2741,30 @@ export const getJobPodsInfiniteQueryKey = (options: Options<GetJobPodsData>): Qu
 /**
  * returns a list of Pods for Job
  */
-export const getJobPodsInfiniteOptions = (options: Options<GetJobPodsData>) => infiniteQueryOptions<GetJobPodsResponse, AxiosError<DefaultError>, InfiniteData<GetJobPodsResponse>, QueryKey<Options<GetJobPodsData>>, string | Pick<QueryKey<Options<GetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getJobPods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getJobPodsInfiniteQueryKey(options)
-});
+export const getJobPodsInfiniteOptions = (options: Options<GetJobPodsData>) => {
+    const opts = infiniteQueryOptions<GetJobPodsResponse, AxiosError<DefaultError>, InfiniteData<GetJobPodsResponse>, QueryKey<Options<GetJobPodsData>>, string | Pick<QueryKey<Options<GetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getJobPods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getJobPodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getLogFileQueryKey = (options: Options<GetLogFileData>) => createQueryKey('getLogFile', options);
 
@@ -2591,27 +2789,30 @@ export const getLogFileInfiniteQueryKey = (options: Options<GetLogFileData>): Qu
 /**
  * returns a text file with logs from a Container
  */
-export const getLogFileInfiniteOptions = (options: Options<GetLogFileData>) => infiniteQueryOptions<GetLogFileResponse, AxiosError<DefaultError>, InfiniteData<GetLogFileResponse>, QueryKey<Options<GetLogFileData>>, string | Pick<QueryKey<Options<GetLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getLogFile({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getLogFileInfiniteQueryKey(options)
-});
+export const getLogFileInfiniteOptions = (options: Options<GetLogFileData>) => {
+    const opts = infiniteQueryOptions<GetLogFileResponse, AxiosError<DefaultError>, InfiniteData<GetLogFileResponse>, QueryKey<Options<GetLogFileData>>, string | Pick<QueryKey<Options<GetLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getLogFile({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getLogFileInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getLogSourceQueryKey = (options: Options<GetLogSourceData>) => createQueryKey('getLogSource', options);
 
@@ -2636,27 +2837,30 @@ export const getLogSourceInfiniteQueryKey = (options: Options<GetLogSourceData>)
 /**
  * returns log sources for a resource
  */
-export const getLogSourceInfiniteOptions = (options: Options<GetLogSourceData>) => infiniteQueryOptions<GetLogSourceResponse, AxiosError<DefaultError>, InfiniteData<GetLogSourceResponse>, QueryKey<Options<GetLogSourceData>>, string | Pick<QueryKey<Options<GetLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getLogSource({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getLogSourceInfiniteQueryKey(options)
-});
+export const getLogSourceInfiniteOptions = (options: Options<GetLogSourceData>) => {
+    const opts = infiniteQueryOptions<GetLogSourceResponse, AxiosError<DefaultError>, InfiniteData<GetLogSourceResponse>, QueryKey<Options<GetLogSourceData>>, string | Pick<QueryKey<Options<GetLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getLogSource({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getLogSourceInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodLogsQueryKey = (options: Options<GetPodLogsData>) => createQueryKey('getPodLogs', options);
 
@@ -2681,27 +2885,30 @@ export const getPodLogsInfiniteQueryKey = (options: Options<GetPodLogsData>): Qu
 /**
  * returns logs from a Pod
  */
-export const getPodLogsInfiniteOptions = (options: Options<GetPodLogsData>) => infiniteQueryOptions<GetPodLogsResponse, AxiosError<DefaultError>, InfiniteData<GetPodLogsResponse>, QueryKey<Options<GetPodLogsData>>, string | Pick<QueryKey<Options<GetPodLogsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodLogsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPodLogs({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodLogsInfiniteQueryKey(options)
-});
+export const getPodLogsInfiniteOptions = (options: Options<GetPodLogsData>) => {
+    const opts = infiniteQueryOptions<GetPodLogsResponse, AxiosError<DefaultError>, InfiniteData<GetPodLogsResponse>, QueryKey<Options<GetPodLogsData>>, string | Pick<QueryKey<Options<GetPodLogsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodLogsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPodLogs({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodLogsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getContainerLogsQueryKey = (options: Options<GetContainerLogsData>) => createQueryKey('getContainerLogs', options);
 
@@ -2726,27 +2933,30 @@ export const getContainerLogsInfiniteQueryKey = (options: Options<GetContainerLo
 /**
  * returns logs from a Container
  */
-export const getContainerLogsInfiniteOptions = (options: Options<GetContainerLogsData>) => infiniteQueryOptions<GetContainerLogsResponse, AxiosError<DefaultError>, InfiniteData<GetContainerLogsResponse>, QueryKey<Options<GetContainerLogsData>>, string | Pick<QueryKey<Options<GetContainerLogsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetContainerLogsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getContainerLogs({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getContainerLogsInfiniteQueryKey(options)
-});
+export const getContainerLogsInfiniteOptions = (options: Options<GetContainerLogsData>) => {
+    const opts = infiniteQueryOptions<GetContainerLogsResponse, AxiosError<DefaultError>, InfiniteData<GetContainerLogsResponse>, QueryKey<Options<GetContainerLogsData>>, string | Pick<QueryKey<Options<GetContainerLogsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetContainerLogsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getContainerLogs({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getContainerLogsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNamespacesQueryKey = (options?: Options<GetNamespacesData>) => createQueryKey('getNamespaces', options);
 
@@ -2771,27 +2981,30 @@ export const getNamespacesInfiniteQueryKey = (options?: Options<GetNamespacesDat
 /**
  * returns a list of Namespaces
  */
-export const getNamespacesInfiniteOptions = (options?: Options<GetNamespacesData>) => infiniteQueryOptions<GetNamespacesResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacesResponse>, QueryKey<Options<GetNamespacesData>>, string | Pick<QueryKey<Options<GetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNamespaces({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNamespacesInfiniteQueryKey(options)
-});
+export const getNamespacesInfiniteOptions = (options?: Options<GetNamespacesData>) => {
+    const opts = infiniteQueryOptions<GetNamespacesResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacesResponse>, QueryKey<Options<GetNamespacesData>>, string | Pick<QueryKey<Options<GetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNamespaces({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNamespacesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * create a Namespace
@@ -2833,27 +3046,30 @@ export const getNamespaceInfiniteQueryKey = (options: Options<GetNamespaceData>)
 /**
  * returns detailed information about Namespace
  */
-export const getNamespaceInfiniteOptions = (options: Options<GetNamespaceData>) => infiniteQueryOptions<GetNamespaceResponse, AxiosError<DefaultError>, InfiniteData<GetNamespaceResponse>, QueryKey<Options<GetNamespaceData>>, string | Pick<QueryKey<Options<GetNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNamespace({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNamespaceInfiniteQueryKey(options)
-});
+export const getNamespaceInfiniteOptions = (options: Options<GetNamespaceData>) => {
+    const opts = infiniteQueryOptions<GetNamespaceResponse, AxiosError<DefaultError>, InfiniteData<GetNamespaceResponse>, QueryKey<Options<GetNamespaceData>>, string | Pick<QueryKey<Options<GetNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNamespace({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNamespaceInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNamespaceEventsQueryKey = (options: Options<GetNamespaceEventsData>) => createQueryKey('getNamespaceEvents', options);
 
@@ -2878,27 +3094,30 @@ export const getNamespaceEventsInfiniteQueryKey = (options: Options<GetNamespace
 /**
  * returns a list of Events for Namespace
  */
-export const getNamespaceEventsInfiniteOptions = (options: Options<GetNamespaceEventsData>) => infiniteQueryOptions<GetNamespaceEventsResponse, AxiosError<DefaultError>, InfiniteData<GetNamespaceEventsResponse>, QueryKey<Options<GetNamespaceEventsData>>, string | Pick<QueryKey<Options<GetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNamespaceEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNamespaceEventsInfiniteQueryKey(options)
-});
+export const getNamespaceEventsInfiniteOptions = (options: Options<GetNamespaceEventsData>) => {
+    const opts = infiniteQueryOptions<GetNamespaceEventsResponse, AxiosError<DefaultError>, InfiniteData<GetNamespaceEventsResponse>, QueryKey<Options<GetNamespaceEventsData>>, string | Pick<QueryKey<Options<GetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNamespaceEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNamespaceEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllNetworkPoliciesQueryKey = (options?: Options<GetAllNetworkPoliciesData>) => createQueryKey('getAllNetworkPolicies', options);
 
@@ -2923,27 +3142,30 @@ export const getAllNetworkPoliciesInfiniteQueryKey = (options?: Options<GetAllNe
 /**
  * returns a list of NetworkPolicies from all namespaces
  */
-export const getAllNetworkPoliciesInfiniteOptions = (options?: Options<GetAllNetworkPoliciesData>) => infiniteQueryOptions<GetAllNetworkPoliciesResponse, AxiosError<DefaultError>, InfiniteData<GetAllNetworkPoliciesResponse>, QueryKey<Options<GetAllNetworkPoliciesData>>, string | Pick<QueryKey<Options<GetAllNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllNetworkPolicies({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllNetworkPoliciesInfiniteQueryKey(options)
-});
+export const getAllNetworkPoliciesInfiniteOptions = (options?: Options<GetAllNetworkPoliciesData>) => {
+    const opts = infiniteQueryOptions<GetAllNetworkPoliciesResponse, AxiosError<DefaultError>, InfiniteData<GetAllNetworkPoliciesResponse>, QueryKey<Options<GetAllNetworkPoliciesData>>, string | Pick<QueryKey<Options<GetAllNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllNetworkPolicies({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllNetworkPoliciesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNetworkPoliciesQueryKey = (options: Options<GetNetworkPoliciesData>) => createQueryKey('getNetworkPolicies', options);
 
@@ -2968,27 +3190,30 @@ export const getNetworkPoliciesInfiniteQueryKey = (options: Options<GetNetworkPo
 /**
  * returns a list of NetworkPolicies in a namespaces
  */
-export const getNetworkPoliciesInfiniteOptions = (options: Options<GetNetworkPoliciesData>) => infiniteQueryOptions<GetNetworkPoliciesResponse, AxiosError<DefaultError>, InfiniteData<GetNetworkPoliciesResponse>, QueryKey<Options<GetNetworkPoliciesData>>, string | Pick<QueryKey<Options<GetNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNetworkPolicies({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNetworkPoliciesInfiniteQueryKey(options)
-});
+export const getNetworkPoliciesInfiniteOptions = (options: Options<GetNetworkPoliciesData>) => {
+    const opts = infiniteQueryOptions<GetNetworkPoliciesResponse, AxiosError<DefaultError>, InfiniteData<GetNetworkPoliciesResponse>, QueryKey<Options<GetNetworkPoliciesData>>, string | Pick<QueryKey<Options<GetNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNetworkPolicies({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNetworkPoliciesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNetworkPolicyQueryKey = (options: Options<GetNetworkPolicyData>) => createQueryKey('getNetworkPolicy', options);
 
@@ -3013,27 +3238,30 @@ export const getNetworkPolicyInfiniteQueryKey = (options: Options<GetNetworkPoli
 /**
  * returns detailed information about NetworkPolicy
  */
-export const getNetworkPolicyInfiniteOptions = (options: Options<GetNetworkPolicyData>) => infiniteQueryOptions<GetNetworkPolicyResponse, AxiosError<DefaultError>, InfiniteData<GetNetworkPolicyResponse>, QueryKey<Options<GetNetworkPolicyData>>, string | Pick<QueryKey<Options<GetNetworkPolicyData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNetworkPolicyData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNetworkPolicy({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNetworkPolicyInfiniteQueryKey(options)
-});
+export const getNetworkPolicyInfiniteOptions = (options: Options<GetNetworkPolicyData>) => {
+    const opts = infiniteQueryOptions<GetNetworkPolicyResponse, AxiosError<DefaultError>, InfiniteData<GetNetworkPolicyResponse>, QueryKey<Options<GetNetworkPolicyData>>, string | Pick<QueryKey<Options<GetNetworkPolicyData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNetworkPolicyData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNetworkPolicy({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNetworkPolicyInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNodesQueryKey = (options?: Options<GetNodesData>) => createQueryKey('getNodes', options);
 
@@ -3058,27 +3286,30 @@ export const getNodesInfiniteQueryKey = (options?: Options<GetNodesData>): Query
 /**
  * returns a list of Nodes
  */
-export const getNodesInfiniteOptions = (options?: Options<GetNodesData>) => infiniteQueryOptions<GetNodesResponse, AxiosError<DefaultError>, InfiniteData<GetNodesResponse>, QueryKey<Options<GetNodesData>>, string | Pick<QueryKey<Options<GetNodesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNodesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNodes({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNodesInfiniteQueryKey(options)
-});
+export const getNodesInfiniteOptions = (options?: Options<GetNodesData>) => {
+    const opts = infiniteQueryOptions<GetNodesResponse, AxiosError<DefaultError>, InfiniteData<GetNodesResponse>, QueryKey<Options<GetNodesData>>, string | Pick<QueryKey<Options<GetNodesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNodesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNodes({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNodesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNodeQueryKey = (options: Options<GetNodeData>) => createQueryKey('getNode', options);
 
@@ -3103,27 +3334,30 @@ export const getNodeInfiniteQueryKey = (options: Options<GetNodeData>): QueryKey
 /**
  * returns detailed information about Node
  */
-export const getNodeInfiniteOptions = (options: Options<GetNodeData>) => infiniteQueryOptions<GetNodeResponse, AxiosError<DefaultError>, InfiniteData<GetNodeResponse>, QueryKey<Options<GetNodeData>>, string | Pick<QueryKey<Options<GetNodeData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNodeData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNode({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNodeInfiniteQueryKey(options)
-});
+export const getNodeInfiniteOptions = (options: Options<GetNodeData>) => {
+    const opts = infiniteQueryOptions<GetNodeResponse, AxiosError<DefaultError>, InfiniteData<GetNodeResponse>, QueryKey<Options<GetNodeData>>, string | Pick<QueryKey<Options<GetNodeData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNodeData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNode({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNodeInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * drains Node
@@ -3165,27 +3399,30 @@ export const getNodeEventsInfiniteQueryKey = (options: Options<GetNodeEventsData
 /**
  * returns a list of Events for Node
  */
-export const getNodeEventsInfiniteOptions = (options: Options<GetNodeEventsData>) => infiniteQueryOptions<GetNodeEventsResponse, AxiosError<DefaultError>, InfiniteData<GetNodeEventsResponse>, QueryKey<Options<GetNodeEventsData>>, string | Pick<QueryKey<Options<GetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNodeEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNodeEventsInfiniteQueryKey(options)
-});
+export const getNodeEventsInfiniteOptions = (options: Options<GetNodeEventsData>) => {
+    const opts = infiniteQueryOptions<GetNodeEventsResponse, AxiosError<DefaultError>, InfiniteData<GetNodeEventsResponse>, QueryKey<Options<GetNodeEventsData>>, string | Pick<QueryKey<Options<GetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNodeEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNodeEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNodePodsQueryKey = (options: Options<GetNodePodsData>) => createQueryKey('getNodePods', options);
 
@@ -3210,27 +3447,30 @@ export const getNodePodsInfiniteQueryKey = (options: Options<GetNodePodsData>): 
 /**
  * returns a list of Pods for Node
  */
-export const getNodePodsInfiniteOptions = (options: Options<GetNodePodsData>) => infiniteQueryOptions<GetNodePodsResponse, AxiosError<DefaultError>, InfiniteData<GetNodePodsResponse>, QueryKey<Options<GetNodePodsData>>, string | Pick<QueryKey<Options<GetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNodePods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNodePodsInfiniteQueryKey(options)
-});
+export const getNodePodsInfiniteOptions = (options: Options<GetNodePodsData>) => {
+    const opts = infiniteQueryOptions<GetNodePodsResponse, AxiosError<DefaultError>, InfiniteData<GetNodePodsResponse>, QueryKey<Options<GetNodePodsData>>, string | Pick<QueryKey<Options<GetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNodePods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNodePodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPersistentVolumesQueryKey = (options?: Options<GetPersistentVolumesData>) => createQueryKey('getPersistentVolumes', options);
 
@@ -3255,27 +3495,30 @@ export const getPersistentVolumesInfiniteQueryKey = (options?: Options<GetPersis
 /**
  * returns a list of PersistentVolumes from all namespaces
  */
-export const getPersistentVolumesInfiniteOptions = (options?: Options<GetPersistentVolumesData>) => infiniteQueryOptions<GetPersistentVolumesResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumesResponse>, QueryKey<Options<GetPersistentVolumesData>>, string | Pick<QueryKey<Options<GetPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPersistentVolumes({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPersistentVolumesInfiniteQueryKey(options)
-});
+export const getPersistentVolumesInfiniteOptions = (options?: Options<GetPersistentVolumesData>) => {
+    const opts = infiniteQueryOptions<GetPersistentVolumesResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumesResponse>, QueryKey<Options<GetPersistentVolumesData>>, string | Pick<QueryKey<Options<GetPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPersistentVolumes({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPersistentVolumesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPersistentVolumeWithNamespaceQueryKey = (options: Options<GetPersistentVolumeWithNamespaceData>) => createQueryKey('getPersistentVolumeWithNamespace', options);
 
@@ -3300,27 +3543,30 @@ export const getPersistentVolumeWithNamespaceInfiniteQueryKey = (options: Option
 /**
  * returns detailed information about PersistentVolume
  */
-export const getPersistentVolumeWithNamespaceInfiniteOptions = (options: Options<GetPersistentVolumeWithNamespaceData>) => infiniteQueryOptions<GetPersistentVolumeWithNamespaceResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeWithNamespaceResponse>, QueryKey<Options<GetPersistentVolumeWithNamespaceData>>, string | Pick<QueryKey<Options<GetPersistentVolumeWithNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPersistentVolumeWithNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPersistentVolumeWithNamespace({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPersistentVolumeWithNamespaceInfiniteQueryKey(options)
-});
+export const getPersistentVolumeWithNamespaceInfiniteOptions = (options: Options<GetPersistentVolumeWithNamespaceData>) => {
+    const opts = infiniteQueryOptions<GetPersistentVolumeWithNamespaceResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeWithNamespaceResponse>, QueryKey<Options<GetPersistentVolumeWithNamespaceData>>, string | Pick<QueryKey<Options<GetPersistentVolumeWithNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPersistentVolumeWithNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPersistentVolumeWithNamespace({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPersistentVolumeWithNamespaceInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPersistentVolumeQueryKey = (options: Options<GetPersistentVolumeData>) => createQueryKey('getPersistentVolume', options);
 
@@ -3345,27 +3591,30 @@ export const getPersistentVolumeInfiniteQueryKey = (options: Options<GetPersiste
 /**
  * returns detailed information about PersistentVolume
  */
-export const getPersistentVolumeInfiniteOptions = (options: Options<GetPersistentVolumeData>) => infiniteQueryOptions<GetPersistentVolumeResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeResponse>, QueryKey<Options<GetPersistentVolumeData>>, string | Pick<QueryKey<Options<GetPersistentVolumeData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPersistentVolumeData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPersistentVolume({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPersistentVolumeInfiniteQueryKey(options)
-});
+export const getPersistentVolumeInfiniteOptions = (options: Options<GetPersistentVolumeData>) => {
+    const opts = infiniteQueryOptions<GetPersistentVolumeResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeResponse>, QueryKey<Options<GetPersistentVolumeData>>, string | Pick<QueryKey<Options<GetPersistentVolumeData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPersistentVolumeData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPersistentVolume({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPersistentVolumeInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllPersistentVolumeClaimsQueryKey = (options?: Options<GetAllPersistentVolumeClaimsData>) => createQueryKey('getAllPersistentVolumeClaims', options);
 
@@ -3390,27 +3639,30 @@ export const getAllPersistentVolumeClaimsInfiniteQueryKey = (options?: Options<G
 /**
  * returns a list of PersistentVolumeClaim
  */
-export const getAllPersistentVolumeClaimsInfiniteOptions = (options?: Options<GetAllPersistentVolumeClaimsData>) => infiniteQueryOptions<GetAllPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPersistentVolumeClaimsResponse>, QueryKey<Options<GetAllPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetAllPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllPersistentVolumeClaims({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllPersistentVolumeClaimsInfiniteQueryKey(options)
-});
+export const getAllPersistentVolumeClaimsInfiniteOptions = (options?: Options<GetAllPersistentVolumeClaimsData>) => {
+    const opts = infiniteQueryOptions<GetAllPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPersistentVolumeClaimsResponse>, QueryKey<Options<GetAllPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetAllPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllPersistentVolumeClaims({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllPersistentVolumeClaimsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPersistentVolumeClaimsQueryKey = (options: Options<GetPersistentVolumeClaimsData>) => createQueryKey('getPersistentVolumeClaims', options);
 
@@ -3435,27 +3687,30 @@ export const getPersistentVolumeClaimsInfiniteQueryKey = (options: Options<GetPe
 /**
  * returns a list of PersistentVolumeClaim from specified namespace
  */
-export const getPersistentVolumeClaimsInfiniteOptions = (options: Options<GetPersistentVolumeClaimsData>) => infiniteQueryOptions<GetPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeClaimsResponse>, QueryKey<Options<GetPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPersistentVolumeClaims({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPersistentVolumeClaimsInfiniteQueryKey(options)
-});
+export const getPersistentVolumeClaimsInfiniteOptions = (options: Options<GetPersistentVolumeClaimsData>) => {
+    const opts = infiniteQueryOptions<GetPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeClaimsResponse>, QueryKey<Options<GetPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPersistentVolumeClaims({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPersistentVolumeClaimsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPersistentVolumeClaimQueryKey = (options: Options<GetPersistentVolumeClaimData>) => createQueryKey('getPersistentVolumeClaim', options);
 
@@ -3480,27 +3735,30 @@ export const getPersistentVolumeClaimInfiniteQueryKey = (options: Options<GetPer
 /**
  * returns detailed information about PersistentVolumeClaim
  */
-export const getPersistentVolumeClaimInfiniteOptions = (options: Options<GetPersistentVolumeClaimData>) => infiniteQueryOptions<GetPersistentVolumeClaimResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeClaimResponse>, QueryKey<Options<GetPersistentVolumeClaimData>>, string | Pick<QueryKey<Options<GetPersistentVolumeClaimData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPersistentVolumeClaimData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPersistentVolumeClaim({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPersistentVolumeClaimInfiniteQueryKey(options)
-});
+export const getPersistentVolumeClaimInfiniteOptions = (options: Options<GetPersistentVolumeClaimData>) => {
+    const opts = infiniteQueryOptions<GetPersistentVolumeClaimResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeClaimResponse>, QueryKey<Options<GetPersistentVolumeClaimData>>, string | Pick<QueryKey<Options<GetPersistentVolumeClaimData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPersistentVolumeClaimData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPersistentVolumeClaim({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPersistentVolumeClaimInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllPodsQueryKey = (options?: Options<GetAllPodsData>) => createQueryKey('getAllPods', options);
 
@@ -3525,27 +3783,30 @@ export const getAllPodsInfiniteQueryKey = (options?: Options<GetAllPodsData>): Q
 /**
  * returns a list of Pods from all namespaces
  */
-export const getAllPodsInfiniteOptions = (options?: Options<GetAllPodsData>) => infiniteQueryOptions<GetAllPodsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPodsResponse>, QueryKey<Options<GetAllPodsData>>, string | Pick<QueryKey<Options<GetAllPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllPods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllPodsInfiniteQueryKey(options)
-});
+export const getAllPodsInfiniteOptions = (options?: Options<GetAllPodsData>) => {
+    const opts = infiniteQueryOptions<GetAllPodsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPodsResponse>, QueryKey<Options<GetAllPodsData>>, string | Pick<QueryKey<Options<GetAllPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllPods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllPodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodsQueryKey = (options: Options<GetPodsData>) => createQueryKey('getPods', options);
 
@@ -3570,27 +3831,30 @@ export const getPodsInfiniteQueryKey = (options: Options<GetPodsData>): QueryKey
 /**
  * returns a list of Pods in a namespaces
  */
-export const getPodsInfiniteOptions = (options: Options<GetPodsData>) => infiniteQueryOptions<GetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetPodsResponse>, QueryKey<Options<GetPodsData>>, string | Pick<QueryKey<Options<GetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodsInfiniteQueryKey(options)
-});
+export const getPodsInfiniteOptions = (options: Options<GetPodsData>) => {
+    const opts = infiniteQueryOptions<GetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetPodsResponse>, QueryKey<Options<GetPodsData>>, string | Pick<QueryKey<Options<GetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodQueryKey = (options: Options<GetPodData>) => createQueryKey('getPod', options);
 
@@ -3615,27 +3879,30 @@ export const getPodInfiniteQueryKey = (options: Options<GetPodData>): QueryKey<O
 /**
  * returns detailed information about Pod
  */
-export const getPodInfiniteOptions = (options: Options<GetPodData>) => infiniteQueryOptions<GetPodResponse, AxiosError<DefaultError>, InfiniteData<GetPodResponse>, QueryKey<Options<GetPodData>>, string | Pick<QueryKey<Options<GetPodData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPod({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodInfiniteQueryKey(options)
-});
+export const getPodInfiniteOptions = (options: Options<GetPodData>) => {
+    const opts = infiniteQueryOptions<GetPodResponse, AxiosError<DefaultError>, InfiniteData<GetPodResponse>, QueryKey<Options<GetPodData>>, string | Pick<QueryKey<Options<GetPodData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPod({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodContainersQueryKey = (options: Options<GetPodContainersData>) => createQueryKey('getPodContainers', options);
 
@@ -3660,27 +3927,30 @@ export const getPodContainersInfiniteQueryKey = (options: Options<GetPodContaine
 /**
  * returns a list of containers for Pod
  */
-export const getPodContainersInfiniteOptions = (options: Options<GetPodContainersData>) => infiniteQueryOptions<GetPodContainersResponse, AxiosError<DefaultError>, InfiniteData<GetPodContainersResponse>, QueryKey<Options<GetPodContainersData>>, string | Pick<QueryKey<Options<GetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPodContainers({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodContainersInfiniteQueryKey(options)
-});
+export const getPodContainersInfiniteOptions = (options: Options<GetPodContainersData>) => {
+    const opts = infiniteQueryOptions<GetPodContainersResponse, AxiosError<DefaultError>, InfiniteData<GetPodContainersResponse>, QueryKey<Options<GetPodContainersData>>, string | Pick<QueryKey<Options<GetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPodContainers({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodContainersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodEventsQueryKey = (options: Options<GetPodEventsData>) => createQueryKey('getPodEvents', options);
 
@@ -3705,27 +3975,30 @@ export const getPodEventsInfiniteQueryKey = (options: Options<GetPodEventsData>)
 /**
  * returns a list of Events for Pod
  */
-export const getPodEventsInfiniteOptions = (options: Options<GetPodEventsData>) => infiniteQueryOptions<GetPodEventsResponse, AxiosError<DefaultError>, InfiniteData<GetPodEventsResponse>, QueryKey<Options<GetPodEventsData>>, string | Pick<QueryKey<Options<GetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPodEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodEventsInfiniteQueryKey(options)
-});
+export const getPodEventsInfiniteOptions = (options: Options<GetPodEventsData>) => {
+    const opts = infiniteQueryOptions<GetPodEventsResponse, AxiosError<DefaultError>, InfiniteData<GetPodEventsResponse>, QueryKey<Options<GetPodEventsData>>, string | Pick<QueryKey<Options<GetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPodEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodPersistentVolumeClaimsQueryKey = (options: Options<GetPodPersistentVolumeClaimsData>) => createQueryKey('getPodPersistentVolumeClaims', options);
 
@@ -3750,27 +4023,30 @@ export const getPodPersistentVolumeClaimsInfiniteQueryKey = (options: Options<Ge
 /**
  * returns a list of containers for Pod
  */
-export const getPodPersistentVolumeClaimsInfiniteOptions = (options: Options<GetPodPersistentVolumeClaimsData>) => infiniteQueryOptions<GetPodPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetPodPersistentVolumeClaimsResponse>, QueryKey<Options<GetPodPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPodPersistentVolumeClaims({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodPersistentVolumeClaimsInfiniteQueryKey(options)
-});
+export const getPodPersistentVolumeClaimsInfiniteOptions = (options: Options<GetPodPersistentVolumeClaimsData>) => {
+    const opts = infiniteQueryOptions<GetPodPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetPodPersistentVolumeClaimsResponse>, QueryKey<Options<GetPodPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPodPersistentVolumeClaims({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodPersistentVolumeClaimsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const execShellQueryKey = (options: Options<ExecShellData>) => createQueryKey('execShell', options);
 
@@ -3795,27 +4071,30 @@ export const execShellInfiniteQueryKey = (options: Options<ExecShellData>): Quer
 /**
  * handles exec into pod
  */
-export const execShellInfiniteOptions = (options: Options<ExecShellData>) => infiniteQueryOptions<ExecShellResponse, AxiosError<DefaultError>, InfiniteData<ExecShellResponse>, QueryKey<Options<ExecShellData>>, string | Pick<QueryKey<Options<ExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<ExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await execShell({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: execShellInfiniteQueryKey(options)
-});
+export const execShellInfiniteOptions = (options: Options<ExecShellData>) => {
+    const opts = infiniteQueryOptions<ExecShellResponse, AxiosError<DefaultError>, InfiniteData<ExecShellResponse>, QueryKey<Options<ExecShellData>>, string | Pick<QueryKey<Options<ExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await execShell({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: execShellInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllPodDisruptionBudgetsQueryKey = (options?: Options<GetAllPodDisruptionBudgetsData>) => createQueryKey('getAllPodDisruptionBudgets', options);
 
@@ -3840,27 +4119,30 @@ export const getAllPodDisruptionBudgetsInfiniteQueryKey = (options?: Options<Get
 /**
  * returns a list of PodDisruptionBudget
  */
-export const getAllPodDisruptionBudgetsInfiniteOptions = (options?: Options<GetAllPodDisruptionBudgetsData>) => infiniteQueryOptions<GetAllPodDisruptionBudgetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPodDisruptionBudgetsResponse>, QueryKey<Options<GetAllPodDisruptionBudgetsData>>, string | Pick<QueryKey<Options<GetAllPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllPodDisruptionBudgets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllPodDisruptionBudgetsInfiniteQueryKey(options)
-});
+export const getAllPodDisruptionBudgetsInfiniteOptions = (options?: Options<GetAllPodDisruptionBudgetsData>) => {
+    const opts = infiniteQueryOptions<GetAllPodDisruptionBudgetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPodDisruptionBudgetsResponse>, QueryKey<Options<GetAllPodDisruptionBudgetsData>>, string | Pick<QueryKey<Options<GetAllPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllPodDisruptionBudgets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllPodDisruptionBudgetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodDisruptionBudgetsQueryKey = (options: Options<GetPodDisruptionBudgetsData>) => createQueryKey('getPodDisruptionBudgets', options);
 
@@ -3885,27 +4167,30 @@ export const getPodDisruptionBudgetsInfiniteQueryKey = (options: Options<GetPodD
 /**
  * returns a list of PodDisruptionBudget from specified namespace
  */
-export const getPodDisruptionBudgetsInfiniteOptions = (options: Options<GetPodDisruptionBudgetsData>) => infiniteQueryOptions<GetPodDisruptionBudgetsResponse, AxiosError<DefaultError>, InfiniteData<GetPodDisruptionBudgetsResponse>, QueryKey<Options<GetPodDisruptionBudgetsData>>, string | Pick<QueryKey<Options<GetPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPodDisruptionBudgets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodDisruptionBudgetsInfiniteQueryKey(options)
-});
+export const getPodDisruptionBudgetsInfiniteOptions = (options: Options<GetPodDisruptionBudgetsData>) => {
+    const opts = infiniteQueryOptions<GetPodDisruptionBudgetsResponse, AxiosError<DefaultError>, InfiniteData<GetPodDisruptionBudgetsResponse>, QueryKey<Options<GetPodDisruptionBudgetsData>>, string | Pick<QueryKey<Options<GetPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPodDisruptionBudgets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodDisruptionBudgetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getPodDisruptionBudgetQueryKey = (options: Options<GetPodDisruptionBudgetData>) => createQueryKey('getPodDisruptionBudget', options);
 
@@ -3930,27 +4215,30 @@ export const getPodDisruptionBudgetInfiniteQueryKey = (options: Options<GetPodDi
 /**
  * returns detailed information about PodDisruptionBudget
  */
-export const getPodDisruptionBudgetInfiniteOptions = (options: Options<GetPodDisruptionBudgetData>) => infiniteQueryOptions<GetPodDisruptionBudgetResponse, AxiosError<DefaultError>, InfiniteData<GetPodDisruptionBudgetResponse>, QueryKey<Options<GetPodDisruptionBudgetData>>, string | Pick<QueryKey<Options<GetPodDisruptionBudgetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetPodDisruptionBudgetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getPodDisruptionBudget({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getPodDisruptionBudgetInfiniteQueryKey(options)
-});
+export const getPodDisruptionBudgetInfiniteOptions = (options: Options<GetPodDisruptionBudgetData>) => {
+    const opts = infiniteQueryOptions<GetPodDisruptionBudgetResponse, AxiosError<DefaultError>, InfiniteData<GetPodDisruptionBudgetResponse>, QueryKey<Options<GetPodDisruptionBudgetData>>, string | Pick<QueryKey<Options<GetPodDisruptionBudgetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetPodDisruptionBudgetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getPodDisruptionBudget({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getPodDisruptionBudgetInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllReplicaSetsQueryKey = (options?: Options<GetAllReplicaSetsData>) => createQueryKey('getAllReplicaSets', options);
 
@@ -3975,27 +4263,30 @@ export const getAllReplicaSetsInfiniteQueryKey = (options?: Options<GetAllReplic
 /**
  * returns a list of ReplicaSets from all namespaces
  */
-export const getAllReplicaSetsInfiniteOptions = (options?: Options<GetAllReplicaSetsData>) => infiniteQueryOptions<GetAllReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllReplicaSetsResponse>, QueryKey<Options<GetAllReplicaSetsData>>, string | Pick<QueryKey<Options<GetAllReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllReplicaSets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllReplicaSetsInfiniteQueryKey(options)
-});
+export const getAllReplicaSetsInfiniteOptions = (options?: Options<GetAllReplicaSetsData>) => {
+    const opts = infiniteQueryOptions<GetAllReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllReplicaSetsResponse>, QueryKey<Options<GetAllReplicaSetsData>>, string | Pick<QueryKey<Options<GetAllReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllReplicaSets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllReplicaSetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicaSetsQueryKey = (options: Options<GetReplicaSetsData>) => createQueryKey('getReplicaSets', options);
 
@@ -4020,27 +4311,30 @@ export const getReplicaSetsInfiniteQueryKey = (options: Options<GetReplicaSetsDa
 /**
  * returns a list of ReplicaSets in a namespace
  */
-export const getReplicaSetsInfiniteOptions = (options: Options<GetReplicaSetsData>) => infiniteQueryOptions<GetReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetsResponse>, QueryKey<Options<GetReplicaSetsData>>, string | Pick<QueryKey<Options<GetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicaSets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicaSetsInfiniteQueryKey(options)
-});
+export const getReplicaSetsInfiniteOptions = (options: Options<GetReplicaSetsData>) => {
+    const opts = infiniteQueryOptions<GetReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetsResponse>, QueryKey<Options<GetReplicaSetsData>>, string | Pick<QueryKey<Options<GetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicaSets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicaSetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicaSetQueryKey = (options: Options<GetReplicaSetData>) => createQueryKey('getReplicaSet', options);
 
@@ -4065,27 +4359,30 @@ export const getReplicaSetInfiniteQueryKey = (options: Options<GetReplicaSetData
 /**
  * returns detailed information about ReplicaSet
  */
-export const getReplicaSetInfiniteOptions = (options: Options<GetReplicaSetData>) => infiniteQueryOptions<GetReplicaSetResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetResponse>, QueryKey<Options<GetReplicaSetData>>, string | Pick<QueryKey<Options<GetReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicaSet({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicaSetInfiniteQueryKey(options)
-});
+export const getReplicaSetInfiniteOptions = (options: Options<GetReplicaSetData>) => {
+    const opts = infiniteQueryOptions<GetReplicaSetResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetResponse>, QueryKey<Options<GetReplicaSetData>>, string | Pick<QueryKey<Options<GetReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicaSet({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicaSetInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicaSetEventsQueryKey = (options: Options<GetReplicaSetEventsData>) => createQueryKey('getReplicaSetEvents', options);
 
@@ -4110,27 +4407,30 @@ export const getReplicaSetEventsInfiniteQueryKey = (options: Options<GetReplicaS
 /**
  * returns a list of Events for ReplicaSet
  */
-export const getReplicaSetEventsInfiniteOptions = (options: Options<GetReplicaSetEventsData>) => infiniteQueryOptions<GetReplicaSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetEventsResponse>, QueryKey<Options<GetReplicaSetEventsData>>, string | Pick<QueryKey<Options<GetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicaSetEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicaSetEventsInfiniteQueryKey(options)
-});
+export const getReplicaSetEventsInfiniteOptions = (options: Options<GetReplicaSetEventsData>) => {
+    const opts = infiniteQueryOptions<GetReplicaSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetEventsResponse>, QueryKey<Options<GetReplicaSetEventsData>>, string | Pick<QueryKey<Options<GetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicaSetEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicaSetEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicaSetPodsQueryKey = (options: Options<GetReplicaSetPodsData>) => createQueryKey('getReplicaSetPods', options);
 
@@ -4155,27 +4455,30 @@ export const getReplicaSetPodsInfiniteQueryKey = (options: Options<GetReplicaSet
 /**
  * returns a list of Pods for ReplicaSet
  */
-export const getReplicaSetPodsInfiniteOptions = (options: Options<GetReplicaSetPodsData>) => infiniteQueryOptions<GetReplicaSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetPodsResponse>, QueryKey<Options<GetReplicaSetPodsData>>, string | Pick<QueryKey<Options<GetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicaSetPods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicaSetPodsInfiniteQueryKey(options)
-});
+export const getReplicaSetPodsInfiniteOptions = (options: Options<GetReplicaSetPodsData>) => {
+    const opts = infiniteQueryOptions<GetReplicaSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetPodsResponse>, QueryKey<Options<GetReplicaSetPodsData>>, string | Pick<QueryKey<Options<GetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicaSetPods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicaSetPodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicaSetServicesQueryKey = (options: Options<GetReplicaSetServicesData>) => createQueryKey('getReplicaSetServices', options);
 
@@ -4200,27 +4503,30 @@ export const getReplicaSetServicesInfiniteQueryKey = (options: Options<GetReplic
 /**
  * returns a list of Services for ReplicaSet
  */
-export const getReplicaSetServicesInfiniteOptions = (options: Options<GetReplicaSetServicesData>) => infiniteQueryOptions<GetReplicaSetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetServicesResponse>, QueryKey<Options<GetReplicaSetServicesData>>, string | Pick<QueryKey<Options<GetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicaSetServices({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicaSetServicesInfiniteQueryKey(options)
-});
+export const getReplicaSetServicesInfiniteOptions = (options: Options<GetReplicaSetServicesData>) => {
+    const opts = infiniteQueryOptions<GetReplicaSetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetServicesResponse>, QueryKey<Options<GetReplicaSetServicesData>>, string | Pick<QueryKey<Options<GetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicaSetServices({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicaSetServicesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllReplicationControllersQueryKey = (options?: Options<GetAllReplicationControllersData>) => createQueryKey('getAllReplicationControllers', options);
 
@@ -4245,27 +4551,30 @@ export const getAllReplicationControllersInfiniteQueryKey = (options?: Options<G
 /**
  * returns a list of ReplicationControllers from all namespaces
  */
-export const getAllReplicationControllersInfiniteOptions = (options?: Options<GetAllReplicationControllersData>) => infiniteQueryOptions<GetAllReplicationControllersResponse, AxiosError<DefaultError>, InfiniteData<GetAllReplicationControllersResponse>, QueryKey<Options<GetAllReplicationControllersData>>, string | Pick<QueryKey<Options<GetAllReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllReplicationControllers({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllReplicationControllersInfiniteQueryKey(options)
-});
+export const getAllReplicationControllersInfiniteOptions = (options?: Options<GetAllReplicationControllersData>) => {
+    const opts = infiniteQueryOptions<GetAllReplicationControllersResponse, AxiosError<DefaultError>, InfiniteData<GetAllReplicationControllersResponse>, QueryKey<Options<GetAllReplicationControllersData>>, string | Pick<QueryKey<Options<GetAllReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllReplicationControllers({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllReplicationControllersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicationControllersQueryKey = (options: Options<GetReplicationControllersData>) => createQueryKey('getReplicationControllers', options);
 
@@ -4290,27 +4599,30 @@ export const getReplicationControllersInfiniteQueryKey = (options: Options<GetRe
 /**
  * returns a list of ReplicationController in a namespace
  */
-export const getReplicationControllersInfiniteOptions = (options: Options<GetReplicationControllersData>) => infiniteQueryOptions<GetReplicationControllersResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllersResponse>, QueryKey<Options<GetReplicationControllersData>>, string | Pick<QueryKey<Options<GetReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicationControllers({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicationControllersInfiniteQueryKey(options)
-});
+export const getReplicationControllersInfiniteOptions = (options: Options<GetReplicationControllersData>) => {
+    const opts = infiniteQueryOptions<GetReplicationControllersResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllersResponse>, QueryKey<Options<GetReplicationControllersData>>, string | Pick<QueryKey<Options<GetReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicationControllers({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicationControllersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicationControllerQueryKey = (options: Options<GetReplicationControllerData>) => createQueryKey('getReplicationController', options);
 
@@ -4335,27 +4647,30 @@ export const getReplicationControllerInfiniteQueryKey = (options: Options<GetRep
 /**
  * returns detailed information about ReplicationController
  */
-export const getReplicationControllerInfiniteOptions = (options: Options<GetReplicationControllerData>) => infiniteQueryOptions<GetReplicationControllerResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerResponse>, QueryKey<Options<GetReplicationControllerData>>, string | Pick<QueryKey<Options<GetReplicationControllerData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicationControllerData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicationController({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicationControllerInfiniteQueryKey(options)
-});
+export const getReplicationControllerInfiniteOptions = (options: Options<GetReplicationControllerData>) => {
+    const opts = infiniteQueryOptions<GetReplicationControllerResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerResponse>, QueryKey<Options<GetReplicationControllerData>>, string | Pick<QueryKey<Options<GetReplicationControllerData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicationControllerData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicationController({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicationControllerInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicationControllerEventsQueryKey = (options: Options<GetReplicationControllerEventsData>) => createQueryKey('getReplicationControllerEvents', options);
 
@@ -4380,27 +4695,30 @@ export const getReplicationControllerEventsInfiniteQueryKey = (options: Options<
 /**
  * returns a list of Events for ReplicationController
  */
-export const getReplicationControllerEventsInfiniteOptions = (options: Options<GetReplicationControllerEventsData>) => infiniteQueryOptions<GetReplicationControllerEventsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerEventsResponse>, QueryKey<Options<GetReplicationControllerEventsData>>, string | Pick<QueryKey<Options<GetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicationControllerEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicationControllerEventsInfiniteQueryKey(options)
-});
+export const getReplicationControllerEventsInfiniteOptions = (options: Options<GetReplicationControllerEventsData>) => {
+    const opts = infiniteQueryOptions<GetReplicationControllerEventsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerEventsResponse>, QueryKey<Options<GetReplicationControllerEventsData>>, string | Pick<QueryKey<Options<GetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicationControllerEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicationControllerEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicationControllerPodsQueryKey = (options: Options<GetReplicationControllerPodsData>) => createQueryKey('getReplicationControllerPods', options);
 
@@ -4425,27 +4743,30 @@ export const getReplicationControllerPodsInfiniteQueryKey = (options: Options<Ge
 /**
  * returns a list of Pods for ReplicationController
  */
-export const getReplicationControllerPodsInfiniteOptions = (options: Options<GetReplicationControllerPodsData>) => infiniteQueryOptions<GetReplicationControllerPodsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerPodsResponse>, QueryKey<Options<GetReplicationControllerPodsData>>, string | Pick<QueryKey<Options<GetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicationControllerPods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicationControllerPodsInfiniteQueryKey(options)
-});
+export const getReplicationControllerPodsInfiniteOptions = (options: Options<GetReplicationControllerPodsData>) => {
+    const opts = infiniteQueryOptions<GetReplicationControllerPodsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerPodsResponse>, QueryKey<Options<GetReplicationControllerPodsData>>, string | Pick<QueryKey<Options<GetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicationControllerPods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicationControllerPodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getReplicationControllerServicesQueryKey = (options: Options<GetReplicationControllerServicesData>) => createQueryKey('getReplicationControllerServices', options);
 
@@ -4470,27 +4791,30 @@ export const getReplicationControllerServicesInfiniteQueryKey = (options: Option
 /**
  * returns a list of Services for ReplicationController
  */
-export const getReplicationControllerServicesInfiniteOptions = (options: Options<GetReplicationControllerServicesData>) => infiniteQueryOptions<GetReplicationControllerServicesResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerServicesResponse>, QueryKey<Options<GetReplicationControllerServicesData>>, string | Pick<QueryKey<Options<GetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getReplicationControllerServices({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getReplicationControllerServicesInfiniteQueryKey(options)
-});
+export const getReplicationControllerServicesInfiniteOptions = (options: Options<GetReplicationControllerServicesData>) => {
+    const opts = infiniteQueryOptions<GetReplicationControllerServicesResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerServicesResponse>, QueryKey<Options<GetReplicationControllerServicesData>>, string | Pick<QueryKey<Options<GetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getReplicationControllerServices({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getReplicationControllerServicesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * scales ReplicationController to a number of replicas
@@ -4532,27 +4856,30 @@ export const getAllRolesInfiniteQueryKey = (options?: Options<GetAllRolesData>):
 /**
  * returns a list of Roles from all namespace
  */
-export const getAllRolesInfiniteOptions = (options?: Options<GetAllRolesData>) => infiniteQueryOptions<GetAllRolesResponse, AxiosError<DefaultError>, InfiniteData<GetAllRolesResponse>, QueryKey<Options<GetAllRolesData>>, string | Pick<QueryKey<Options<GetAllRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllRoles({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllRolesInfiniteQueryKey(options)
-});
+export const getAllRolesInfiniteOptions = (options?: Options<GetAllRolesData>) => {
+    const opts = infiniteQueryOptions<GetAllRolesResponse, AxiosError<DefaultError>, InfiniteData<GetAllRolesResponse>, QueryKey<Options<GetAllRolesData>>, string | Pick<QueryKey<Options<GetAllRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllRoles({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllRolesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getRolesQueryKey = (options: Options<GetRolesData>) => createQueryKey('getRoles', options);
 
@@ -4577,27 +4904,30 @@ export const getRolesInfiniteQueryKey = (options: Options<GetRolesData>): QueryK
 /**
  * returns a list of Roles in a namespace
  */
-export const getRolesInfiniteOptions = (options: Options<GetRolesData>) => infiniteQueryOptions<GetRolesResponse, AxiosError<DefaultError>, InfiniteData<GetRolesResponse>, QueryKey<Options<GetRolesData>>, string | Pick<QueryKey<Options<GetRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getRoles({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getRolesInfiniteQueryKey(options)
-});
+export const getRolesInfiniteOptions = (options: Options<GetRolesData>) => {
+    const opts = infiniteQueryOptions<GetRolesResponse, AxiosError<DefaultError>, InfiniteData<GetRolesResponse>, QueryKey<Options<GetRolesData>>, string | Pick<QueryKey<Options<GetRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getRoles({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getRolesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getRoleQueryKey = (options: Options<GetRoleData>) => createQueryKey('getRole', options);
 
@@ -4622,27 +4952,30 @@ export const getRoleInfiniteQueryKey = (options: Options<GetRoleData>): QueryKey
 /**
  * returns detailed information about Role
  */
-export const getRoleInfiniteOptions = (options: Options<GetRoleData>) => infiniteQueryOptions<GetRoleResponse, AxiosError<DefaultError>, InfiniteData<GetRoleResponse>, QueryKey<Options<GetRoleData>>, string | Pick<QueryKey<Options<GetRoleData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetRoleData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getRole({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getRoleInfiniteQueryKey(options)
-});
+export const getRoleInfiniteOptions = (options: Options<GetRoleData>) => {
+    const opts = infiniteQueryOptions<GetRoleResponse, AxiosError<DefaultError>, InfiniteData<GetRoleResponse>, QueryKey<Options<GetRoleData>>, string | Pick<QueryKey<Options<GetRoleData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetRoleData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getRole({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getRoleInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllRoleBindingsQueryKey = (options?: Options<GetAllRoleBindingsData>) => createQueryKey('getAllRoleBindings', options);
 
@@ -4667,27 +5000,30 @@ export const getAllRoleBindingsInfiniteQueryKey = (options?: Options<GetAllRoleB
 /**
  * returns a list of RoleBindings from all namespace
  */
-export const getAllRoleBindingsInfiniteOptions = (options?: Options<GetAllRoleBindingsData>) => infiniteQueryOptions<GetAllRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetAllRoleBindingsResponse>, QueryKey<Options<GetAllRoleBindingsData>>, string | Pick<QueryKey<Options<GetAllRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllRoleBindings({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllRoleBindingsInfiniteQueryKey(options)
-});
+export const getAllRoleBindingsInfiniteOptions = (options?: Options<GetAllRoleBindingsData>) => {
+    const opts = infiniteQueryOptions<GetAllRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetAllRoleBindingsResponse>, QueryKey<Options<GetAllRoleBindingsData>>, string | Pick<QueryKey<Options<GetAllRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllRoleBindings({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllRoleBindingsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getRoleBindingsQueryKey = (options: Options<GetRoleBindingsData>) => createQueryKey('getRoleBindings', options);
 
@@ -4712,27 +5048,30 @@ export const getRoleBindingsInfiniteQueryKey = (options: Options<GetRoleBindings
 /**
  * returns a list of RoleBindings in a namespace
  */
-export const getRoleBindingsInfiniteOptions = (options: Options<GetRoleBindingsData>) => infiniteQueryOptions<GetRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetRoleBindingsResponse>, QueryKey<Options<GetRoleBindingsData>>, string | Pick<QueryKey<Options<GetRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getRoleBindings({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getRoleBindingsInfiniteQueryKey(options)
-});
+export const getRoleBindingsInfiniteOptions = (options: Options<GetRoleBindingsData>) => {
+    const opts = infiniteQueryOptions<GetRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetRoleBindingsResponse>, QueryKey<Options<GetRoleBindingsData>>, string | Pick<QueryKey<Options<GetRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getRoleBindings({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getRoleBindingsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getRoleBindingQueryKey = (options: Options<GetRoleBindingData>) => createQueryKey('getRoleBinding', options);
 
@@ -4757,27 +5096,30 @@ export const getRoleBindingInfiniteQueryKey = (options: Options<GetRoleBindingDa
 /**
  * returns detailed information about RoleBinding
  */
-export const getRoleBindingInfiniteOptions = (options: Options<GetRoleBindingData>) => infiniteQueryOptions<GetRoleBindingResponse, AxiosError<DefaultError>, InfiniteData<GetRoleBindingResponse>, QueryKey<Options<GetRoleBindingData>>, string | Pick<QueryKey<Options<GetRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getRoleBinding({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getRoleBindingInfiniteQueryKey(options)
-});
+export const getRoleBindingInfiniteOptions = (options: Options<GetRoleBindingData>) => {
+    const opts = infiniteQueryOptions<GetRoleBindingResponse, AxiosError<DefaultError>, InfiniteData<GetRoleBindingResponse>, QueryKey<Options<GetRoleBindingData>>, string | Pick<QueryKey<Options<GetRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getRoleBinding({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getRoleBindingInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getNamespacedResourceReplicasQueryKey = (options: Options<GetNamespacedResourceReplicasData>) => createQueryKey('getNamespacedResourceReplicas', options);
 
@@ -4802,27 +5144,30 @@ export const getNamespacedResourceReplicasInfiniteQueryKey = (options: Options<G
 /**
  * returns a number of replicas of namespaced resource
  */
-export const getNamespacedResourceReplicasInfiniteOptions = (options: Options<GetNamespacedResourceReplicasData>) => infiniteQueryOptions<GetNamespacedResourceReplicasResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacedResourceReplicasResponse>, QueryKey<Options<GetNamespacedResourceReplicasData>>, string | Pick<QueryKey<Options<GetNamespacedResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetNamespacedResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getNamespacedResourceReplicas({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getNamespacedResourceReplicasInfiniteQueryKey(options)
-});
+export const getNamespacedResourceReplicasInfiniteOptions = (options: Options<GetNamespacedResourceReplicasData>) => {
+    const opts = infiniteQueryOptions<GetNamespacedResourceReplicasResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacedResourceReplicasResponse>, QueryKey<Options<GetNamespacedResourceReplicasData>>, string | Pick<QueryKey<Options<GetNamespacedResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetNamespacedResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getNamespacedResourceReplicas({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getNamespacedResourceReplicasInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * scales a namespaced resource
@@ -4864,27 +5209,30 @@ export const getResourceReplicasInfiniteQueryKey = (options: Options<GetResource
 /**
  * returns a number of replicas of non-namespaced resource
  */
-export const getResourceReplicasInfiniteOptions = (options: Options<GetResourceReplicasData>) => infiniteQueryOptions<GetResourceReplicasResponse, AxiosError<DefaultError>, InfiniteData<GetResourceReplicasResponse>, QueryKey<Options<GetResourceReplicasData>>, string | Pick<QueryKey<Options<GetResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getResourceReplicas({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getResourceReplicasInfiniteQueryKey(options)
-});
+export const getResourceReplicasInfiniteOptions = (options: Options<GetResourceReplicasData>) => {
+    const opts = infiniteQueryOptions<GetResourceReplicasResponse, AxiosError<DefaultError>, InfiniteData<GetResourceReplicasResponse>, QueryKey<Options<GetResourceReplicasData>>, string | Pick<QueryKey<Options<GetResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getResourceReplicas({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getResourceReplicasInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * scales a non-namespaced resource
@@ -4926,27 +5274,30 @@ export const getAllSecretsInfiniteQueryKey = (options?: Options<GetAllSecretsDat
 /**
  * returns a list of Secrets from all namespaces
  */
-export const getAllSecretsInfiniteOptions = (options?: Options<GetAllSecretsData>) => infiniteQueryOptions<GetAllSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetAllSecretsResponse>, QueryKey<Options<GetAllSecretsData>>, string | Pick<QueryKey<Options<GetAllSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllSecrets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllSecretsInfiniteQueryKey(options)
-});
+export const getAllSecretsInfiniteOptions = (options?: Options<GetAllSecretsData>) => {
+    const opts = infiniteQueryOptions<GetAllSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetAllSecretsResponse>, QueryKey<Options<GetAllSecretsData>>, string | Pick<QueryKey<Options<GetAllSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllSecrets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllSecretsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * stores ImagePullSecret in a Kubernetes Secret
@@ -4988,27 +5339,30 @@ export const getSecretsInfiniteQueryKey = (options: Options<GetSecretsData>): Qu
 /**
  * returns a list of Secrets in a namespace
  */
-export const getSecretsInfiniteOptions = (options: Options<GetSecretsData>) => infiniteQueryOptions<GetSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetSecretsResponse>, QueryKey<Options<GetSecretsData>>, string | Pick<QueryKey<Options<GetSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getSecrets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getSecretsInfiniteQueryKey(options)
-});
+export const getSecretsInfiniteOptions = (options: Options<GetSecretsData>) => {
+    const opts = infiniteQueryOptions<GetSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetSecretsResponse>, QueryKey<Options<GetSecretsData>>, string | Pick<QueryKey<Options<GetSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getSecrets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getSecretsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getSecretQueryKey = (options: Options<GetSecretData>) => createQueryKey('getSecret', options);
 
@@ -5033,27 +5387,30 @@ export const getSecretInfiniteQueryKey = (options: Options<GetSecretData>): Quer
 /**
  * returns detailed information about Secret
  */
-export const getSecretInfiniteOptions = (options: Options<GetSecretData>) => infiniteQueryOptions<GetSecretResponse, AxiosError<DefaultError>, InfiniteData<GetSecretResponse>, QueryKey<Options<GetSecretData>>, string | Pick<QueryKey<Options<GetSecretData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetSecretData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getSecret({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getSecretInfiniteQueryKey(options)
-});
+export const getSecretInfiniteOptions = (options: Options<GetSecretData>) => {
+    const opts = infiniteQueryOptions<GetSecretResponse, AxiosError<DefaultError>, InfiniteData<GetSecretResponse>, QueryKey<Options<GetSecretData>>, string | Pick<QueryKey<Options<GetSecretData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetSecretData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getSecret({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getSecretInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllServicesQueryKey = (options?: Options<GetAllServicesData>) => createQueryKey('getAllServices', options);
 
@@ -5078,27 +5435,30 @@ export const getAllServicesInfiniteQueryKey = (options?: Options<GetAllServicesD
 /**
  * returns a list of Services from all namespaces
  */
-export const getAllServicesInfiniteOptions = (options?: Options<GetAllServicesData>) => infiniteQueryOptions<GetAllServicesResponse, AxiosError<DefaultError>, InfiniteData<GetAllServicesResponse>, QueryKey<Options<GetAllServicesData>>, string | Pick<QueryKey<Options<GetAllServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllServices({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllServicesInfiniteQueryKey(options)
-});
+export const getAllServicesInfiniteOptions = (options?: Options<GetAllServicesData>) => {
+    const opts = infiniteQueryOptions<GetAllServicesResponse, AxiosError<DefaultError>, InfiniteData<GetAllServicesResponse>, QueryKey<Options<GetAllServicesData>>, string | Pick<QueryKey<Options<GetAllServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllServices({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllServicesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServicesQueryKey = (options: Options<GetServicesData>) => createQueryKey('getServices', options);
 
@@ -5123,27 +5483,30 @@ export const getServicesInfiniteQueryKey = (options: Options<GetServicesData>): 
 /**
  * returns a list of Services in a namespace
  */
-export const getServicesInfiniteOptions = (options: Options<GetServicesData>) => infiniteQueryOptions<GetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetServicesResponse>, QueryKey<Options<GetServicesData>>, string | Pick<QueryKey<Options<GetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServices({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServicesInfiniteQueryKey(options)
-});
+export const getServicesInfiniteOptions = (options: Options<GetServicesData>) => {
+    const opts = infiniteQueryOptions<GetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetServicesResponse>, QueryKey<Options<GetServicesData>>, string | Pick<QueryKey<Options<GetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServices({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServicesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServiceQueryKey = (options: Options<GetServiceData>) => createQueryKey('getService', options);
 
@@ -5168,27 +5531,30 @@ export const getServiceInfiniteQueryKey = (options: Options<GetServiceData>): Qu
 /**
  * returns detailed information about Service
  */
-export const getServiceInfiniteOptions = (options: Options<GetServiceData>) => infiniteQueryOptions<GetServiceResponse, AxiosError<DefaultError>, InfiniteData<GetServiceResponse>, QueryKey<Options<GetServiceData>>, string | Pick<QueryKey<Options<GetServiceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServiceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getService({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServiceInfiniteQueryKey(options)
-});
+export const getServiceInfiniteOptions = (options: Options<GetServiceData>) => {
+    const opts = infiniteQueryOptions<GetServiceResponse, AxiosError<DefaultError>, InfiniteData<GetServiceResponse>, QueryKey<Options<GetServiceData>>, string | Pick<QueryKey<Options<GetServiceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServiceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getService({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServiceInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServiceEventsQueryKey = (options: Options<GetServiceEventsData>) => createQueryKey('getServiceEvents', options);
 
@@ -5213,27 +5579,30 @@ export const getServiceEventsInfiniteQueryKey = (options: Options<GetServiceEven
 /**
  * returns a list of Events for Service
  */
-export const getServiceEventsInfiniteOptions = (options: Options<GetServiceEventsData>) => infiniteQueryOptions<GetServiceEventsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceEventsResponse>, QueryKey<Options<GetServiceEventsData>>, string | Pick<QueryKey<Options<GetServiceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServiceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServiceEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServiceEventsInfiniteQueryKey(options)
-});
+export const getServiceEventsInfiniteOptions = (options: Options<GetServiceEventsData>) => {
+    const opts = infiniteQueryOptions<GetServiceEventsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceEventsResponse>, QueryKey<Options<GetServiceEventsData>>, string | Pick<QueryKey<Options<GetServiceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServiceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServiceEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServiceEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServiceIngressesQueryKey = (options: Options<GetServiceIngressesData>) => createQueryKey('getServiceIngresses', options);
 
@@ -5258,27 +5627,30 @@ export const getServiceIngressesInfiniteQueryKey = (options: Options<GetServiceI
 /**
  * returns a list of Ingresses for Service
  */
-export const getServiceIngressesInfiniteOptions = (options: Options<GetServiceIngressesData>) => infiniteQueryOptions<GetServiceIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetServiceIngressesResponse>, QueryKey<Options<GetServiceIngressesData>>, string | Pick<QueryKey<Options<GetServiceIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServiceIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServiceIngresses({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServiceIngressesInfiniteQueryKey(options)
-});
+export const getServiceIngressesInfiniteOptions = (options: Options<GetServiceIngressesData>) => {
+    const opts = infiniteQueryOptions<GetServiceIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetServiceIngressesResponse>, QueryKey<Options<GetServiceIngressesData>>, string | Pick<QueryKey<Options<GetServiceIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServiceIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServiceIngresses({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServiceIngressesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServicePodsQueryKey = (options: Options<GetServicePodsData>) => createQueryKey('getServicePods', options);
 
@@ -5303,27 +5675,30 @@ export const getServicePodsInfiniteQueryKey = (options: Options<GetServicePodsDa
 /**
  * returns a list of Pods for Service
  */
-export const getServicePodsInfiniteOptions = (options: Options<GetServicePodsData>) => infiniteQueryOptions<GetServicePodsResponse, AxiosError<DefaultError>, InfiniteData<GetServicePodsResponse>, QueryKey<Options<GetServicePodsData>>, string | Pick<QueryKey<Options<GetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServicePods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServicePodsInfiniteQueryKey(options)
-});
+export const getServicePodsInfiniteOptions = (options: Options<GetServicePodsData>) => {
+    const opts = infiniteQueryOptions<GetServicePodsResponse, AxiosError<DefaultError>, InfiniteData<GetServicePodsResponse>, QueryKey<Options<GetServicePodsData>>, string | Pick<QueryKey<Options<GetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServicePods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServicePodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllServiceAccountsQueryKey = (options?: Options<GetAllServiceAccountsData>) => createQueryKey('getAllServiceAccounts', options);
 
@@ -5348,27 +5723,30 @@ export const getAllServiceAccountsInfiniteQueryKey = (options?: Options<GetAllSe
 /**
  * returns a list of ServiceAccounts from all namespaces
  */
-export const getAllServiceAccountsInfiniteOptions = (options?: Options<GetAllServiceAccountsData>) => infiniteQueryOptions<GetAllServiceAccountsResponse, AxiosError<DefaultError>, InfiniteData<GetAllServiceAccountsResponse>, QueryKey<Options<GetAllServiceAccountsData>>, string | Pick<QueryKey<Options<GetAllServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllServiceAccounts({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllServiceAccountsInfiniteQueryKey(options)
-});
+export const getAllServiceAccountsInfiniteOptions = (options?: Options<GetAllServiceAccountsData>) => {
+    const opts = infiniteQueryOptions<GetAllServiceAccountsResponse, AxiosError<DefaultError>, InfiniteData<GetAllServiceAccountsResponse>, QueryKey<Options<GetAllServiceAccountsData>>, string | Pick<QueryKey<Options<GetAllServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllServiceAccounts({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllServiceAccountsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServiceAccountsQueryKey = (options: Options<GetServiceAccountsData>) => createQueryKey('getServiceAccounts', options);
 
@@ -5393,27 +5771,30 @@ export const getServiceAccountsInfiniteQueryKey = (options: Options<GetServiceAc
 /**
  * returns a list of ServiceAccounts in a namespaces
  */
-export const getServiceAccountsInfiniteOptions = (options: Options<GetServiceAccountsData>) => infiniteQueryOptions<GetServiceAccountsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountsResponse>, QueryKey<Options<GetServiceAccountsData>>, string | Pick<QueryKey<Options<GetServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServiceAccounts({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServiceAccountsInfiniteQueryKey(options)
-});
+export const getServiceAccountsInfiniteOptions = (options: Options<GetServiceAccountsData>) => {
+    const opts = infiniteQueryOptions<GetServiceAccountsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountsResponse>, QueryKey<Options<GetServiceAccountsData>>, string | Pick<QueryKey<Options<GetServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServiceAccounts({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServiceAccountsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServiceAccountQueryKey = (options: Options<GetServiceAccountData>) => createQueryKey('getServiceAccount', options);
 
@@ -5438,27 +5819,30 @@ export const getServiceAccountInfiniteQueryKey = (options: Options<GetServiceAcc
 /**
  * returns detailed information about ServiceAccount
  */
-export const getServiceAccountInfiniteOptions = (options: Options<GetServiceAccountData>) => infiniteQueryOptions<GetServiceAccountResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountResponse>, QueryKey<Options<GetServiceAccountData>>, string | Pick<QueryKey<Options<GetServiceAccountData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServiceAccountData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServiceAccount({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServiceAccountInfiniteQueryKey(options)
-});
+export const getServiceAccountInfiniteOptions = (options: Options<GetServiceAccountData>) => {
+    const opts = infiniteQueryOptions<GetServiceAccountResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountResponse>, QueryKey<Options<GetServiceAccountData>>, string | Pick<QueryKey<Options<GetServiceAccountData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServiceAccountData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServiceAccount({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServiceAccountInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServiceAccountImagePullSecretsQueryKey = (options: Options<GetServiceAccountImagePullSecretsData>) => createQueryKey('getServiceAccountImagePullSecrets', options);
 
@@ -5483,27 +5867,30 @@ export const getServiceAccountImagePullSecretsInfiniteQueryKey = (options: Optio
 /**
  * returns a list of ImagePullSecret Secrets for ServiceAccount
  */
-export const getServiceAccountImagePullSecretsInfiniteOptions = (options: Options<GetServiceAccountImagePullSecretsData>) => infiniteQueryOptions<GetServiceAccountImagePullSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountImagePullSecretsResponse>, QueryKey<Options<GetServiceAccountImagePullSecretsData>>, string | Pick<QueryKey<Options<GetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServiceAccountImagePullSecrets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServiceAccountImagePullSecretsInfiniteQueryKey(options)
-});
+export const getServiceAccountImagePullSecretsInfiniteOptions = (options: Options<GetServiceAccountImagePullSecretsData>) => {
+    const opts = infiniteQueryOptions<GetServiceAccountImagePullSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountImagePullSecretsResponse>, QueryKey<Options<GetServiceAccountImagePullSecretsData>>, string | Pick<QueryKey<Options<GetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServiceAccountImagePullSecrets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServiceAccountImagePullSecretsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getServiceAccountSecretsQueryKey = (options: Options<GetServiceAccountSecretsData>) => createQueryKey('getServiceAccountSecrets', options);
 
@@ -5528,27 +5915,30 @@ export const getServiceAccountSecretsInfiniteQueryKey = (options: Options<GetSer
 /**
  * returns a list of Secrets for ServiceAccount
  */
-export const getServiceAccountSecretsInfiniteOptions = (options: Options<GetServiceAccountSecretsData>) => infiniteQueryOptions<GetServiceAccountSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountSecretsResponse>, QueryKey<Options<GetServiceAccountSecretsData>>, string | Pick<QueryKey<Options<GetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getServiceAccountSecrets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getServiceAccountSecretsInfiniteQueryKey(options)
-});
+export const getServiceAccountSecretsInfiniteOptions = (options: Options<GetServiceAccountSecretsData>) => {
+    const opts = infiniteQueryOptions<GetServiceAccountSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountSecretsResponse>, QueryKey<Options<GetServiceAccountSecretsData>>, string | Pick<QueryKey<Options<GetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getServiceAccountSecrets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getServiceAccountSecretsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getAllStatefulSetsQueryKey = (options?: Options<GetAllStatefulSetsData>) => createQueryKey('getAllStatefulSets', options);
 
@@ -5573,27 +5963,30 @@ export const getAllStatefulSetsInfiniteQueryKey = (options?: Options<GetAllState
 /**
  * returns a list of StatefulSets from all namespaces
  */
-export const getAllStatefulSetsInfiniteOptions = (options?: Options<GetAllStatefulSetsData>) => infiniteQueryOptions<GetAllStatefulSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllStatefulSetsResponse>, QueryKey<Options<GetAllStatefulSetsData>>, string | Pick<QueryKey<Options<GetAllStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetAllStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getAllStatefulSets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getAllStatefulSetsInfiniteQueryKey(options)
-});
+export const getAllStatefulSetsInfiniteOptions = (options?: Options<GetAllStatefulSetsData>) => {
+    const opts = infiniteQueryOptions<GetAllStatefulSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllStatefulSetsResponse>, QueryKey<Options<GetAllStatefulSetsData>>, string | Pick<QueryKey<Options<GetAllStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetAllStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getAllStatefulSets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getAllStatefulSetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getStatefulSetsQueryKey = (options: Options<GetStatefulSetsData>) => createQueryKey('getStatefulSets', options);
 
@@ -5618,27 +6011,30 @@ export const getStatefulSetsInfiniteQueryKey = (options: Options<GetStatefulSets
 /**
  * returns a list of StatefulSets in a namespaces
  */
-export const getStatefulSetsInfiniteOptions = (options: Options<GetStatefulSetsData>) => infiniteQueryOptions<GetStatefulSetsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetsResponse>, QueryKey<Options<GetStatefulSetsData>>, string | Pick<QueryKey<Options<GetStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getStatefulSets({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getStatefulSetsInfiniteQueryKey(options)
-});
+export const getStatefulSetsInfiniteOptions = (options: Options<GetStatefulSetsData>) => {
+    const opts = infiniteQueryOptions<GetStatefulSetsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetsResponse>, QueryKey<Options<GetStatefulSetsData>>, string | Pick<QueryKey<Options<GetStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getStatefulSets({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getStatefulSetsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getStatefulSetQueryKey = (options: Options<GetStatefulSetData>) => createQueryKey('getStatefulSet', options);
 
@@ -5663,27 +6059,30 @@ export const getStatefulSetInfiniteQueryKey = (options: Options<GetStatefulSetDa
 /**
  * returns detailed information about StatefulSets
  */
-export const getStatefulSetInfiniteOptions = (options: Options<GetStatefulSetData>) => infiniteQueryOptions<GetStatefulSetResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetResponse>, QueryKey<Options<GetStatefulSetData>>, string | Pick<QueryKey<Options<GetStatefulSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetStatefulSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getStatefulSet({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getStatefulSetInfiniteQueryKey(options)
-});
+export const getStatefulSetInfiniteOptions = (options: Options<GetStatefulSetData>) => {
+    const opts = infiniteQueryOptions<GetStatefulSetResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetResponse>, QueryKey<Options<GetStatefulSetData>>, string | Pick<QueryKey<Options<GetStatefulSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetStatefulSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getStatefulSet({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getStatefulSetInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getStatefulSetEventsQueryKey = (options: Options<GetStatefulSetEventsData>) => createQueryKey('getStatefulSetEvents', options);
 
@@ -5708,27 +6107,30 @@ export const getStatefulSetEventsInfiniteQueryKey = (options: Options<GetStatefu
 /**
  * returns a list of Events for StatefulSets
  */
-export const getStatefulSetEventsInfiniteOptions = (options: Options<GetStatefulSetEventsData>) => infiniteQueryOptions<GetStatefulSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetEventsResponse>, QueryKey<Options<GetStatefulSetEventsData>>, string | Pick<QueryKey<Options<GetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getStatefulSetEvents({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getStatefulSetEventsInfiniteQueryKey(options)
-});
+export const getStatefulSetEventsInfiniteOptions = (options: Options<GetStatefulSetEventsData>) => {
+    const opts = infiniteQueryOptions<GetStatefulSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetEventsResponse>, QueryKey<Options<GetStatefulSetEventsData>>, string | Pick<QueryKey<Options<GetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getStatefulSetEvents({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getStatefulSetEventsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getStatefulSetPodsQueryKey = (options: Options<GetStatefulSetPodsData>) => createQueryKey('getStatefulSetPods', options);
 
@@ -5753,27 +6155,30 @@ export const getStatefulSetPodsInfiniteQueryKey = (options: Options<GetStatefulS
 /**
  * returns  a list of Pods for StatefulSets
  */
-export const getStatefulSetPodsInfiniteOptions = (options: Options<GetStatefulSetPodsData>) => infiniteQueryOptions<GetStatefulSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetPodsResponse>, QueryKey<Options<GetStatefulSetPodsData>>, string | Pick<QueryKey<Options<GetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getStatefulSetPods({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getStatefulSetPodsInfiniteQueryKey(options)
-});
+export const getStatefulSetPodsInfiniteOptions = (options: Options<GetStatefulSetPodsData>) => {
+    const opts = infiniteQueryOptions<GetStatefulSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetPodsResponse>, QueryKey<Options<GetStatefulSetPodsData>>, string | Pick<QueryKey<Options<GetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getStatefulSetPods({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getStatefulSetPodsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 /**
  * rollout restart of the Daemon Set
@@ -5815,27 +6220,30 @@ export const getStorageClassesInfiniteQueryKey = (options?: Options<GetStorageCl
 /**
  * returns a list of StorageClasses
  */
-export const getStorageClassesInfiniteOptions = (options?: Options<GetStorageClassesData>) => infiniteQueryOptions<GetStorageClassesResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassesResponse>, QueryKey<Options<GetStorageClassesData>>, string | Pick<QueryKey<Options<GetStorageClassesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetStorageClassesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getStorageClasses({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getStorageClassesInfiniteQueryKey(options)
-});
+export const getStorageClassesInfiniteOptions = (options?: Options<GetStorageClassesData>) => {
+    const opts = infiniteQueryOptions<GetStorageClassesResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassesResponse>, QueryKey<Options<GetStorageClassesData>>, string | Pick<QueryKey<Options<GetStorageClassesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetStorageClassesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getStorageClasses({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getStorageClassesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getStorageClassQueryKey = (options: Options<GetStorageClassData>) => createQueryKey('getStorageClass', options);
 
@@ -5860,27 +6268,30 @@ export const getStorageClassInfiniteQueryKey = (options: Options<GetStorageClass
 /**
  * returns detailed information about StorageClass
  */
-export const getStorageClassInfiniteOptions = (options: Options<GetStorageClassData>) => infiniteQueryOptions<GetStorageClassResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassResponse>, QueryKey<Options<GetStorageClassData>>, string | Pick<QueryKey<Options<GetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getStorageClass({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getStorageClassInfiniteQueryKey(options)
-});
+export const getStorageClassInfiniteOptions = (options: Options<GetStorageClassData>) => {
+    const opts = infiniteQueryOptions<GetStorageClassResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassResponse>, QueryKey<Options<GetStorageClassData>>, string | Pick<QueryKey<Options<GetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getStorageClass({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getStorageClassInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getStorageClassPersistentVolumesQueryKey = (options: Options<GetStorageClassPersistentVolumesData>) => createQueryKey('getStorageClassPersistentVolumes', options);
 
@@ -5905,27 +6316,30 @@ export const getStorageClassPersistentVolumesInfiniteQueryKey = (options: Option
 /**
  * returns a list of PersistentVolumes assigned to StorageClass
  */
-export const getStorageClassPersistentVolumesInfiniteOptions = (options: Options<GetStorageClassPersistentVolumesData>) => infiniteQueryOptions<GetStorageClassPersistentVolumesResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassPersistentVolumesResponse>, QueryKey<Options<GetStorageClassPersistentVolumesData>>, string | Pick<QueryKey<Options<GetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getStorageClassPersistentVolumes({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getStorageClassPersistentVolumesInfiniteQueryKey(options)
-});
+export const getStorageClassPersistentVolumesInfiniteOptions = (options: Options<GetStorageClassPersistentVolumesData>) => {
+    const opts = infiniteQueryOptions<GetStorageClassPersistentVolumesResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassPersistentVolumesResponse>, QueryKey<Options<GetStorageClassPersistentVolumesData>>, string | Pick<QueryKey<Options<GetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getStorageClassPersistentVolumes({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getStorageClassPersistentVolumesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getHorizontalPodAutoscalersForResourceQueryKey = (options: Options<GetHorizontalPodAutoscalersForResourceData>) => createQueryKey('getHorizontalPodAutoscalersForResource', options);
 
@@ -5950,24 +6364,27 @@ export const getHorizontalPodAutoscalersForResourceInfiniteQueryKey = (options: 
 /**
  * returns a list of HorizontalPodAutoscalers for resource
  */
-export const getHorizontalPodAutoscalersForResourceInfiniteOptions = (options: Options<GetHorizontalPodAutoscalersForResourceData>) => infiniteQueryOptions<GetHorizontalPodAutoscalersForResourceResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalersForResourceResponse>, QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await getHorizontalPodAutoscalersForResource({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getHorizontalPodAutoscalersForResourceInfiniteQueryKey(options)
-});
+export const getHorizontalPodAutoscalersForResourceInfiniteOptions = (options: Options<GetHorizontalPodAutoscalersForResourceData>) => {
+    const opts = infiniteQueryOptions<GetHorizontalPodAutoscalersForResourceResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalersForResourceResponse>, QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getHorizontalPodAutoscalersForResource({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getHorizontalPodAutoscalersForResourceInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};

@@ -105,6 +105,7 @@ export function modesFormValue(
           update: modes.kubernetes.update,
           delete: modes.kubernetes.delete,
           exec: modes.kubernetes.exec,
+          drain: modes.kubernetes.drain,
           requireNamespaces:
             modes.kubernetes.requireNamespaces?.filter(
               (namespace): namespace is string => !!namespace
@@ -156,6 +157,7 @@ export function disableKubernetesModes(
     update: false,
     delete: false,
     exec: false,
+    drain: false,
   }
 }
 
@@ -163,13 +165,18 @@ export function disableKubernetesModes(
 export function enableKubernetesModes(
   current: WorkbenchJobKubernetesModesAttributes | null | undefined
 ): WorkbenchJobKubernetesModesAttributes {
-  const wasEnabled = !!current?.update || !!current?.delete || !!current?.exec
+  const wasEnabled =
+    !!current?.update ||
+    !!current?.delete ||
+    !!current?.exec ||
+    !!current?.drain
 
   return {
     ...current,
     update: wasEnabled ? !!current?.update : true,
     delete: wasEnabled ? !!current?.delete : false,
     exec: wasEnabled ? !!current?.exec : false,
+    drain: wasEnabled ? !!current?.drain : false,
   }
 }
 

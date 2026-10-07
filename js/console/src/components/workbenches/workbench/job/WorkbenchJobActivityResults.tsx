@@ -1,4 +1,4 @@
-import { ResponsiveLine, ResponsiveLineCanvas } from '@nivo/line'
+import { Line, LineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
@@ -7,35 +7,40 @@ import {
   CopyIcon,
   DiffMethod,
   DiffViewer,
+  ExpandIcon,
   Flex,
-  FlexProps,
   IconFrame,
   IconProps,
   Modal,
   NotebookIcon,
   useCopyText,
+  useResizeObserver,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import {
   PreviewablePanel,
   ShowMoreSC,
+  toolSurfaceCss,
 } from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
+import { GraphLegend } from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobLogsToolQuery,
   useWorkbenchJobMetricsToolQuery,
+  useWorkbenchJobTracesToolQuery,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityResultFragment,
+  WorkbenchJobActivityTraceFragment,
   WorkbenchToolQueryData,
 } from 'generated/graphql'
-import { groupBy, isEmpty, isNil } from 'lodash'
+import { isEmpty } from 'lodash'
 import {
   ComponentPropsWithRef,
   ComponentType,
@@ -50,6 +55,13 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
+import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
+import {
+  getMetricSeries,
+  metricSeriesId,
+  type MetricSeries,
+} from './workbenchJobMetrics'
+import { TraceWaterfall } from './WorkbenchJobTraces'
 
 export function MemoActivityIcon({
   jobUpdate,
@@ -124,6 +136,7 @@ export function ExpandableUserPrompt({
       onMouseLeave={() => setShowActions(false)}
     >
       <PromptCardSC
+        cornerSize="large"
         $fullWidth={fullWidth}
         $isExpanded={isExpandable && isExpanded}
       >
@@ -204,25 +217,29 @@ function UserPromptActions({
 export function JobActivityLogs({
   logs,
   cardWrapper = false,
+  variant = 'default',
 }: {
   logs: WorkbenchJobActivityLogFragment[]
   cardWrapper?: boolean
+  variant?: 'canvas' | 'default'
 }) {
   if (isEmpty(logs)) return null
+
+  const lines = logs.map((log, i) => (
+    <LogLine
+      key={i}
+      line={{ log: log.message, timestamp: log.timestamp }}
+    />
+  ))
+
+  if (variant === 'canvas') return <CanvasLogPanelSC>{lines}</CanvasLogPanelSC>
 
   return (
     <WrapWithIf
       condition={cardWrapper}
       wrapper={<Card css={{ height: '100%', overflow: 'auto' }} />}
     >
-      <Flex direction="column">
-        {logs.map((log, i) => (
-          <LogLine
-            key={i}
-            line={{ log: log.message, timestamp: log.timestamp }}
-          />
-        ))}
-      </Flex>
+      <Flex direction="column">{lines}</Flex>
     </WrapWithIf>
   )
 }
@@ -250,11 +267,13 @@ export function JobActivityLogsFromTool({
   logsQuery,
   fetchWhen = true,
   cardWrapper = false,
+  variant,
 }: {
   jobId: string
   logsQuery: Nullable<WorkbenchMetricsToolQueryInput>
   fetchWhen?: boolean
   cardWrapper?: boolean
+  variant?: 'canvas' | 'default'
 }) {
   const shouldRunQuery =
     !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(logsQuery)
@@ -298,11 +317,19 @@ export function JobActivityLogsFromTool({
     <JobActivityLogs
       logs={logs}
       cardWrapper={cardWrapper}
+      variant={variant}
     />
   )
 }
 
 /** Renders pre-fetched metric points (e.g. thought tool attributes). */
+export const METRICS_CHART_MARGIN = {
+  top: 10,
+  right: 25,
+  bottom: 30,
+  left: 30,
+} as const
+
 export function JobActivityMetricsChart({
   metrics,
   lineProps,
@@ -310,30 +337,34 @@ export function JobActivityMetricsChart({
 }: {
   metrics: WorkbenchJobActivityMetricFragment[]
   lineProps?: Partial<
-    ComponentPropsWithRef<typeof ResponsiveLine> &
-      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+    ComponentPropsWithRef<typeof Line> &
+      ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
+  const chartRef = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState({ width: 0, height: 0 })
+
+  useResizeObserver(chartRef, (rect) => {
+    const width = Math.floor(rect.width)
+    const height = Math.floor(rect.height)
+    setSize((prev) =>
+      prev.width === width && prev.height === height ? prev : { width, height }
+    )
+  })
 
   const graphData = useMemo(() => {
-    const grouped = groupBy(
-      metrics,
-      ({ name, labels }) =>
-        `${name ?? 'metric'}{${
-          Object.entries(labels ?? {})
-            .map(([key, value]) => `${key}:${value}`)
-            .join(',') ?? ''
-        }}`
-    )
-    return Object.entries(grouped).map(([name, points]) => ({
-      id: name,
-      data: points
-        .map((p) => ({ x: toDateOrUndef(p.timestamp), y: p.value }))
-        .filter(
-          (pt): pt is { x: Date; y: number } => !isNil(pt.x) && !isNil(pt.y)
-        ),
-    }))
+    return getMetricSeries(metrics)
+  }, [metrics])
+  const leftMargin = useMemo(() => {
+    let min = Infinity
+    let max = -Infinity
+    for (const { value } of metrics) {
+      if (typeof value !== 'number') continue
+      if (value < min) min = value
+      if (value > max) max = value
+    }
+    return yAxisWidth(min, max, null)
   }, [metrics])
 
   if (isEmpty(metrics)) return null
@@ -342,32 +373,151 @@ export function JobActivityMetricsChart({
     theme: graphTheme,
     data: graphData,
     colors: COLORS,
-    margin: { top: 10, right: 25, bottom: 30, left: 30 } as const,
+    margin: { ...METRICS_CHART_MARGIN, left: leftMargin, right: 32 },
     xScale: { type: 'time' as const, format: 'native' as const },
     yScale: { type: 'linear' as const },
     xFormat: dateFormat,
     lineWidth: 1,
     enablePoints: false,
-    axisLeft: { tickValues: 5 },
+    axisLeft: {
+      tickValues: 5,
+      format: (value: number) => formatUnitValue(value, null),
+    },
     axisBottom: { format: '%H:%M:%S', tickValues: 5 },
     tooltip: SliceTooltip,
   }
 
+  const ready = size.width > 0 && size.height > 0
+
   return (
-    <MetricsChartSC {...props}>
-      {metrics.length > CANVAS_THRESHOLD ? (
-        <ResponsiveLineCanvas
-          {...sharedProps}
-          {...lineProps}
-        />
-      ) : (
-        <ResponsiveLine
-          {...sharedProps}
-          useMesh
-          {...lineProps}
-        />
-      )}
+    <MetricsChartSC
+      ref={chartRef}
+      {...props}
+    >
+      {ready &&
+        (metrics.length > CANVAS_THRESHOLD ? (
+          <LineCanvas
+            width={size.width}
+            height={size.height}
+            {...sharedProps}
+            {...lineProps}
+          />
+        ) : (
+          <Line
+            width={size.width}
+            height={size.height}
+            {...sharedProps}
+            useMesh
+            {...lineProps}
+          />
+        ))}
     </MetricsChartSC>
+  )
+}
+
+/** Inline metrics chart that opens in the same modal as activity metrics. */
+export function ExpandableJobActivityMetrics({
+  metrics,
+}: {
+  metrics: WorkbenchJobActivityMetricFragment[]
+}) {
+  const [open, setOpen] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
+  const expandTriggerRef = useRef<HTMLDivElement>(null)
+  const series = useMemo(() => getMetricSeries(metrics), [metrics])
+  const selectedSeriesIndex = series.findIndex(
+    ({ id }) => id === selectedSeriesId
+  )
+  const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
+  const visibleMetrics = effectiveSelectedId
+    ? metrics.filter((metric) => metricSeriesId(metric) === effectiveSelectedId)
+    : metrics
+
+  const close = () => {
+    setOpen(false)
+    setFinishedAnimating(false)
+  }
+
+  return (
+    <>
+      <MetricsPanelSC>
+        <Flex
+          direction="column"
+          gap="xsmall"
+          width="100%"
+        >
+          <Flex justify="flex-end">
+            <IconFrame
+              ref={expandTriggerRef}
+              clickable
+              size="small"
+              type="tertiary"
+              icon={<ExpandIcon size={16} />}
+              textValue="Full screen"
+              tooltip="Full screen"
+              onClick={(event) => {
+                event.stopPropagation()
+                setOpen(true)
+              }}
+            />
+          </Flex>
+          <JobActivityMetricsChart metrics={metrics} />
+        </Flex>
+      </MetricsPanelSC>
+      <Modal
+        header="Metrics"
+        size="large"
+        open={open}
+        onClose={close}
+        scrollable={false}
+        onAnimationEnd={() => setFinishedAnimating(true)}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          requestAnimationFrame(() => expandTriggerRef.current?.focus())
+        }}
+        actions={
+          <Button
+            secondary
+            onClick={close}
+          >
+            Close
+          </Button>
+        }
+      >
+        {finishedAnimating ? (
+          <Flex
+            direction="column"
+            gap="small"
+          >
+            <JobActivityMetricsChart
+              metrics={visibleMetrics}
+              css={{ height: 240 }}
+              lineProps={{
+                margin: { top: 10, right: 25, bottom: 30, left: 30 },
+                colors:
+                  selectedSeriesIndex >= 0
+                    ? [COLORS[selectedSeriesIndex % COLORS.length]]
+                    : COLORS,
+              }}
+            />
+            <WorkbenchJobMetricsLegend
+              series={series}
+              selectedId={effectiveSelectedId}
+              maxHeight={160}
+              onSelect={(id) =>
+                setSelectedSeriesId((selected) => (selected === id ? null : id))
+              }
+            />
+          </Flex>
+        ) : (
+          <RectangleSkeleton
+            $height={240}
+            $width="100%"
+          />
+        )}
+      </Modal>
+    </>
   )
 }
 
@@ -380,6 +530,9 @@ export function JobActivityMetrics({
   metricsQuery,
   fetchWhen = true,
   withLegend = false,
+  withSummary = true,
+  withTimeRange = false,
+  title,
   lineProps,
   skeletonHeight = 160,
   ...props
@@ -389,12 +542,16 @@ export function JobActivityMetrics({
   /** When false, skips the GraphQL request (e.g. collapsed activity accordion). */
   fetchWhen?: boolean
   withLegend?: boolean
+  withSummary?: boolean
+  withTimeRange?: boolean
+  title?: Nullable<string>
   skeletonHeight?: number
   lineProps?: Partial<
-    ComponentPropsWithRef<typeof ResponsiveLine> &
-      ComponentPropsWithRef<typeof ResponsiveLineCanvas>
+    ComponentPropsWithRef<typeof Line> &
+      ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
+  const [timeRange, setTimeRange] = useState<MetricsTimeRange>('1d')
   const shouldRunQuery =
     !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(metricsQuery)
 
@@ -431,10 +588,18 @@ export function JobActivityMetrics({
       />
     )
 
-  if (isEmpty(metrics)) return null
+  const visibleMetrics = filterMetricsByRange(metrics, timeRange)
 
-  const seriesNames = Object.keys(groupBy(metrics, (m) => m.name ?? 'metric'))
-  const summaryText = metricsQuery?.summary?.trim()
+  if (isEmpty(visibleMetrics)) return null
+
+  const series = getMetricSeries(visibleMetrics)
+  const summaryText = withSummary ? metricsQuery?.summary?.trim() : undefined
+  const legend = (
+    <WorkbenchJobMetricsLegend
+      series={series}
+      paddingLeft={20}
+    />
+  )
 
   const chartBlock = (
     <Flex
@@ -442,8 +607,20 @@ export function JobActivityMetrics({
       gap="xsmall"
       width="100%"
     >
+      {(title || withTimeRange) && (
+        <MetricsChartHeaderSC>
+          {title && <Body1P>{title}</Body1P>}
+          {withTimeRange && (
+            <MetricsRangeControl
+              value={timeRange}
+              onChange={setTimeRange}
+            />
+          )}
+        </MetricsChartHeaderSC>
+      )}
+      {withLegend && legend}
       <JobActivityMetricsChart
-        metrics={metrics}
+        metrics={visibleMetrics}
         lineProps={lineProps}
         {...props}
       />
@@ -458,59 +635,182 @@ export function JobActivityMetrics({
     </Flex>
   )
 
-  if (!withLegend) return chartBlock
+  return chartBlock
+}
+
+export type MetricsTimeRange = '1h' | '2h' | '6h' | '1d' | '7d'
+
+const METRICS_TIME_RANGES: { label: string; value: MetricsTimeRange }[] = [
+  { label: '1H', value: '1h' },
+  { label: '2H', value: '2h' },
+  { label: '6H', value: '6h' },
+  { label: '1D', value: '1d' },
+  { label: '7D', value: '7d' },
+]
+
+export function MetricsRangeControl({
+  value,
+  onChange,
+}: {
+  value: MetricsTimeRange
+  onChange: (value: MetricsTimeRange) => void
+}) {
+  return (
+    <MetricsRangeControlSC aria-label="Metrics time range">
+      {METRICS_TIME_RANGES.map(({ label, value: range }) => (
+        <MetricsRangeButtonSC
+          key={range}
+          $active={range === value}
+          type="button"
+          onClick={() => onChange(range)}
+        >
+          {label}
+        </MetricsRangeButtonSC>
+      ))}
+    </MetricsRangeControlSC>
+  )
+}
+
+function filterMetricsByRange(
+  metrics: WorkbenchJobActivityMetricFragment[],
+  range: MetricsTimeRange
+) {
+  const latest = Math.max(
+    ...metrics
+      .map((metric) => toDateOrUndef(metric.timestamp)?.getTime())
+      .filter(isNonNullable)
+  )
+
+  if (!Number.isFinite(latest)) return metrics
+
+  const durationByRange: Record<MetricsTimeRange, number> = {
+    '1h': 60 * 60 * 1_000,
+    '2h': 2 * 60 * 60 * 1_000,
+    '6h': 6 * 60 * 60 * 1_000,
+    '1d': 24 * 60 * 60 * 1_000,
+    '7d': 7 * 24 * 60 * 60 * 1_000,
+  }
+  const from = latest - durationByRange[range]
+
+  return metrics.filter((metric) => {
+    const timestamp = toDateOrUndef(metric.timestamp)?.getTime()
+    return timestamp != null && timestamp >= from
+  })
+}
+
+/**
+ * Renders the stored trace result when available, otherwise reloads it through
+ * `tracesTool` from the query that produced the canvas or activity result.
+ */
+export function JobActivityTraces({
+  jobId,
+  traces,
+  tracesQuery,
+  fetchWhen = true,
+  withSummary = true,
+}: {
+  jobId: string
+  traces?: Nullable<Nullable<WorkbenchJobActivityTraceFragment>[]>
+  tracesQuery: Nullable<WorkbenchMetricsToolQueryInput>
+  fetchWhen?: boolean
+  withSummary?: boolean
+}) {
+  const directTraces = traces?.filter(isNonNullable) ?? []
+  const shouldRunQuery =
+    !!jobId &&
+    fetchWhen &&
+    isEmpty(directTraces) &&
+    hasWorkbenchMetricsToolQuery(tracesQuery)
+
+  const { data, loading, error } = useWorkbenchJobTracesToolQuery({
+    variables: {
+      id: jobId,
+      name: tracesQuery?.toolName?.trim(),
+      arguments: tracesQuery?.toolArgs
+        ? JSON.stringify(tracesQuery.toolArgs)
+        : undefined,
+    },
+    skip: !shouldRunQuery,
+  })
+
+  if (isEmpty(directTraces) && !hasWorkbenchMetricsToolQuery(tracesQuery))
+    return null
+
+  if (!fetchWhen) return null
+
+  if (error)
+    return (
+      <GqlError
+        error={error}
+        css={{ wordBreak: 'break-word' }}
+      />
+    )
+
+  if (isEmpty(directTraces) && (loading || !data))
+    return (
+      <RectangleSkeleton
+        $height={200}
+        $width="100%"
+      />
+    )
+
+  const fetchedTraces =
+    data?.workbenchJob?.tracesTool?.filter(isNonNullable) ?? []
+  const resolvedTraces = isEmpty(directTraces) ? fetchedTraces : directTraces
+
+  if (isEmpty(resolvedTraces)) return null
 
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      width="100%"
-    >
-      {chartBlock}
-      <WorkbenchJobMetricsLegend
-        seriesNames={seriesNames}
-        paddingLeft={20}
-      />
-    </Flex>
+    <TraceWaterfall
+      traces={resolvedTraces}
+      summary={withSummary ? tracesQuery?.summary : undefined}
+    />
   )
 }
 
 export function WorkbenchJobMetricsLegend({
-  seriesNames,
-  ...props
+  series,
+  maxHeight,
+  selectedId,
+  onSelect,
+  paddingLeft,
 }: {
-  seriesNames: string[]
-} & FlexProps) {
-  if (isEmpty(seriesNames)) return null
-
+  series: MetricSeries[]
+  maxHeight?: number
+  selectedId?: string | null
+  onSelect?: (id: string) => void
+  paddingLeft?: number
+}) {
   return (
-    <Flex
-      wrap="wrap"
-      gap="small"
-      align="center"
-      {...props}
-    >
-      {seriesNames.map((name, i) => (
-        <Flex
-          key={name}
-          align="center"
-          gap="xsmall"
-        >
-          <MetricsLegendSwatchSC $color={COLORS[i % COLORS.length]} />
-          <Body2P $color="text-light">{name}</Body2P>
-        </Flex>
-      ))}
-    </Flex>
+    <GraphLegend
+      items={series.map(({ id, label, shortLabel }, i) => ({
+        id,
+        label: shortLabel,
+        title: label,
+        color: COLORS[i % COLORS.length],
+      }))}
+      selectedId={selectedId}
+      onSelect={onSelect}
+      maxHeight={maxHeight}
+      style={{ paddingLeft }}
+    />
   )
 }
 
-export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
+export function JobActivityPrompt({
+  prompt,
+  shimmer = false,
+}: {
+  prompt: Nullable<string>
+  shimmer?: boolean
+}) {
   if (!prompt) return null
   return (
     <PreviewablePanel
-      header="Prompt"
       contentKey={`prompt:${prompt.length}`}
       subtle
+      collapsedLines={2}
+      shimmer={shimmer}
     >
       <SimplifiedMarkdown
         text={prompt}
@@ -588,17 +888,68 @@ export function ActivityModalIcon({
   )
 }
 
+const MetricsPanelSC = styled.div(({ theme }) => ({
+  ...toolSurfaceCss(theme),
+  borderRadius: theme.borderRadiuses.large,
+  minWidth: 0,
+  overflow: 'hidden',
+  padding: 8,
+  width: '100%',
+}))
+
 const MetricsChartSC = styled.div(() => ({
   height: 160,
   width: '100%',
 }))
 
-const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
-  width: 12,
-  height: 12,
-  borderRadius: 2,
+const MetricsChartHeaderSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.small,
+  justifyContent: 'space-between',
+  minWidth: 0,
+  width: '100%',
+}))
+
+const MetricsRangeControlSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  background: theme.colors['fill-zero'],
+  border: `1px solid ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
   flexShrink: 0,
-  background: $color,
+  gap: 2,
+  padding: 2,
+}))
+
+const MetricsRangeButtonSC = styled.button<{ $active: boolean }>(
+  ({ theme, $active }) => ({
+    ...theme.partials.reset.button,
+    ...theme.partials.text.buttonSmall,
+    background: $active ? theme.colors['fill-three'] : 'transparent',
+    borderRadius: theme.borderRadiuses.medium,
+    color: theme.colors['text-light'],
+    cursor: $active ? 'default' : 'pointer',
+    minHeight: 32,
+    minWidth: 32,
+    padding: `0 ${theme.spacing.xsmall}px`,
+    '&:focus-visible': {
+      outline: `1px solid ${theme.colors['border-outline-focused']}`,
+      outlineOffset: 1,
+    },
+  })
+)
+
+const CanvasLogPanelSC = styled.div(({ theme }) => ({
+  background: theme.colors['fill-one'],
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  flex: '0 1 auto',
+  flexDirection: 'column',
+  maxHeight: 300,
+  overflowY: 'auto',
+  padding: `${theme.spacing.medium}px 0`,
+  width: '100%',
 }))
 
 const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(

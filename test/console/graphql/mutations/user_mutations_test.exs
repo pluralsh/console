@@ -524,11 +524,18 @@ defmodule Console.GraphQl.UserMutationsTest do
 
       {:ok, %{data: %{"createServiceAccount" => svc}}} = run_query("""
         mutation create($attrs: ServiceAccountAttributes!) {
-          createServiceAccount(attributes: $attrs) { name }
+          createServiceAccount(attributes: $attrs) { name allowedScopes }
         }
-      """, %{"attrs" => %{"name" => "name", "email" => "someone@example.com"}}, %{current_user: admin})
+      """, %{
+        "attrs" => %{
+          "name" => "name",
+          "email" => "someone@example.com",
+          "allowedScopes" => ["service.read"]
+        }
+      }, %{current_user: admin})
 
       assert svc["name"] == "name"
+      assert svc["allowedScopes"] == ["service.read"]
     end
 
     test "nonadmins cannot create service accounts" do
@@ -576,15 +583,31 @@ defmodule Console.GraphQl.UserMutationsTest do
           createPersona(attributes: $attrs) {
             id
             bindings { group { id } }
+            configuration {
+              settings {
+                userManagement
+                accessTokens
+              }
+            }
           }
         }
       """, %{"attrs" => %{
         "name" => "some-persona",
         "bindings" => [%{"groupId" => group.id}],
+        "configuration" => %{
+          "settings" => %{
+            "userManagement" => false,
+            "accessTokens" => true,
+          },
+        },
       }}, %{current_user: admin_user()})
 
       assert persona["id"]
       assert hd(persona["bindings"])["group"]["id"] == group.id
+      assert persona["configuration"]["settings"] == %{
+        "userManagement" => false,
+        "accessTokens" => true,
+      }
     end
 
     test "nonadmins cannot create a persona" do

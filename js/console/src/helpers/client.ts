@@ -13,11 +13,13 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
+import { mergeConnectionsByNodeId } from 'utils/graphql'
 
 import fragments from '../generated/fragments.json'
 import { fetchToken } from './auth'
 
 import { onErrorHandler } from './refreshToken'
+import { shouldRetryRequest } from './retryPolicy'
 
 import customFetch from './uploadLink'
 
@@ -73,11 +75,11 @@ export function buildClient(
 
   const retryLink = new RetryLink({
     delay: { initial: 200, max: 5000 },
-    attempts: {
-      max: Infinity,
-      retryIf: (error, operation) =>
-        !!error && !!fetchToken() && !operation.getContext().noRetry,
-    },
+    attempts: (attempt, operation, error) =>
+      shouldRetryRequest(attempt, error, {
+        authenticated: !!fetchToken(),
+        noRetry: operation.getContext().noRetry,
+      }),
   })
 
   const socket = new PhoenixSocket(wsUrl, {
@@ -129,6 +131,8 @@ export function buildClient(
     cache: new InMemoryCache({
       possibleTypes: fragments.possibleTypes,
       typePolicies: {
+        // un-normalized and fetched piecemeal by each cluster metrics graph
+        ClusterUsageMetrics: { merge: true },
         Command: {
           fields: {
             exitCode: {
@@ -160,6 +164,20 @@ export function buildClient(
                   ...incoming,
                   edges: [...(existing.edges || []), ...(incoming.edges || [])],
                 }
+              },
+            },
+          },
+        },
+        WorkbenchJob: {
+          fields: {
+            // Poll responses can have been resolved before a subscription event
+            // arrives. Preserve activity edges added by the subscription when
+            // that older response is written to the cache.
+            activities: {
+              merge(existing, incoming, options) {
+                if (options.args?.status || options.args?.type) return incoming
+
+                return mergeConnectionsByNodeId(existing, incoming, options)
               },
             },
           },

@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "description": "Search tags for a Docker/OCI repository slug.",
+  "description": "List one page of tags for a Docker/OCI repository slug. Registries return tags in their own order (not necessarily sorted by recency), so if the tag you need isn't on this page, call again with the returned next_cursor until next_cursor is null.",
   "properties": {
     "repository_slug": {
       "type": "string",
@@ -8,14 +8,18 @@
     },
     "query": {
       "type": "string",
-      "description": "Optional case-insensitive substring used to filter tags in memory."
+      "description": "Optional case-insensitive substring used to filter the tags within the fetched page. Filtering happens after the page is fetched, so a page can return no matches while next_cursor is still set; keep paginating to search the rest of the repository."
     },
-    "limit": {
+    "page_size": {
       "type": "integer",
       "default": 100,
       "minimum": 1,
       "maximum": 1000,
-      "description": "Maximum number of tags to return."
+      "description": "Number of tags to request from the registry for this page (before query filtering). Use larger pages when filtering with query."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque pagination cursor from a previous call's next_cursor. Omit to start from the first page."
     }
   },
   "required": ["repository_slug"],

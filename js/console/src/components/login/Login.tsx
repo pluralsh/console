@@ -38,7 +38,14 @@ const POLL_INTERVAL = 30 * 1000
 
 const setInputFocus = (ref: RefObject<any>) => {
   requestAnimationFrame(() => {
-    ref.current?.querySelector('input')?.focus()
+    const node = ref.current
+
+    if (!node) return
+    if (typeof node.focus === 'function' && node.matches?.('input, textarea')) {
+      node.focus()
+      return
+    }
+    node.querySelector?.('input, textarea')?.focus()
   })
 }
 

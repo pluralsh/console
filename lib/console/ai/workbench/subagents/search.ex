@@ -7,11 +7,11 @@ defmodule Console.AI.Workbench.Subagents.Search do
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{}, %Environment{} = environment) do
     tools(environment)
     |> MemoryEngine.new(20,
       engine_opts(environment) ++ [
-        system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
+        system_prompt: String.trim(system_prompt()),
         acc: %{},
         callback: &callback(activity, environment, &1),
         continue_msg: cont_msg()
@@ -34,7 +34,7 @@ defmodule Console.AI.Workbench.Subagents.Search do
     end
   end
 
-  defp tools(%Environment{skills: skills, tools: tools, job: job}) do
+  def tools(%Environment{skills: skills, tools: tools, job: job}) do
     skills = Environment.subagent_skills(skills, :search)
 
     MCP.expand_tools(Environment.subagent_tools(tools, :search), job)
@@ -44,5 +44,5 @@ defmodule Console.AI.Workbench.Subagents.Search do
     ])
   end
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "search.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "search.md.eex"]), [])
 end

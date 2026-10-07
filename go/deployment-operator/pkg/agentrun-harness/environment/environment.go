@@ -3,7 +3,9 @@ package environment
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
+	osexec "os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -11,8 +13,11 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/polly/fs"
+
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -33,6 +38,9 @@ func (in *environment) Setup() error {
 	}
 	if err := in.cloneRepository(); err != nil {
 		return fmt.Errorf("failed to clone repository: %w", err)
+	}
+	if err := ConfigurePrebakeGitSafeDirectories(); err != nil {
+		return fmt.Errorf("failed to configure prebake git safe directories: %w", err)
 	}
 
 	return nil
@@ -69,19 +77,15 @@ func (in *environment) cloneRepository() error {
 		if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
 			return err
 		}
-		return in.configureRepository(repoDirPath, userName, userEmail)
+		return in.finalizeRepository(repoDirPath, userName, userEmail)
 	}
 
-	// Set proxy for clone via environment variable so it takes effect immediately.
-	// The same proxy is later written into the repo-local git config so that
-	// subsequent push/fetch operations inside the cloned repo also use it.
-	if proxy := os.Getenv("PLRL_GIT_PROXY"); proxy != "" {
-		if err := os.Setenv("https_proxy", proxy); err != nil {
-			return err
-		}
-		if err := os.Setenv("http_proxy", proxy); err != nil {
-			return err
-		}
+	copied, err := in.cloneFromPrebake(repoDirPath)
+	if err != nil {
+		return err
+	}
+	if copied {
+		return in.finalizeRepository(repoDirPath, userName, userEmail)
 	}
 
 	cloneArgs := []string{"clone"}
@@ -90,12 +94,144 @@ func (in *environment) cloneRepository() error {
 	}
 	cloneArgs = append(cloneArgs, in.agentRun.Repository, repoDir)
 
-	if err := exec.NewExecutable("git", exec.WithArgs(cloneArgs), exec.WithDir(in.dir)).Run(context.Background()); err != nil {
+	if err := exec.NewExecutable("git", exec.WithArgs(in.gitNetworkArgs(cloneArgs)), exec.WithDir(in.dir)).Run(context.Background()); err != nil {
 		return err
 	}
 
 	repoDirPath = path.Join(in.dir, repoDir)
-	return in.configureRepository(repoDirPath, userName, userEmail)
+	return in.finalizeRepository(repoDirPath, userName, userEmail)
+}
+
+func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
+	match, err := prebake.Lookup(in.agentRun.Repository)
+	if err != nil {
+		klog.ErrorS(err, "failed to load repository prebake manifest, falling back to git clone")
+		return false, nil
+	}
+	if match == nil {
+		return false, nil
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("placing prebaked repository", "src", match.Dir, "dst", repoDirPath, "url", in.agentRun.Repository)
+	moveRepository := in.movePrebakedRepository
+	if moveRepository == nil {
+		moveRepository = fs.MoveDir
+	}
+	if err := moveRepository(match.Dir, repoDirPath); err != nil {
+		if _, statErr := os.Stat(filepath.Join(repoDirPath, ".git")); statErr == nil {
+			klog.ErrorS(err, "prebake source leftover after placing working copy", "src", match.Dir, "dst", repoDirPath)
+		} else {
+			if removeErr := os.RemoveAll(repoDirPath); removeErr != nil {
+				klog.ErrorS(removeErr, "failed to clean up incomplete prebake copy", "dir", repoDirPath)
+			}
+			klog.ErrorS(err, "prebake place failed, falling back to git clone", "src", match.Dir)
+			return false, nil
+		}
+	}
+
+	if err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"remote", "set-url", "origin", in.agentRun.Repository}),
+		exec.WithDir(repoDirPath),
+	).Run(context.Background()); err != nil {
+		if addErr := exec.NewExecutable("git",
+			exec.WithArgs([]string{"remote", "add", "origin", in.agentRun.Repository}),
+			exec.WithDir(repoDirPath),
+		).Run(context.Background()); addErr != nil {
+			return false, fmt.Errorf("failed to set origin remote after prebake place: %w", err)
+		}
+	}
+
+	in.updateFromOrigin(repoDirPath)
+	return true, nil
+}
+
+// movePrebakedRepositoryFast keeps the normal same-volume rename path effectively
+// free, but uses fcp for the cross-filesystem fallback when agent-bootstrap
+// explicitly enables it. Other environment consumers retain polly/fs behavior.
+func movePrebakedRepositoryFast(src, dst string) error {
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+	if _, err := os.Lstat(dst); err == nil {
+		return fmt.Errorf("move prebaked repository: destination already exists: %s", dst)
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	if err := copyPrebakedRepository(src, dst); err != nil {
+		_ = os.RemoveAll(dst)
+		return err
+	}
+	if err := os.RemoveAll(src); err != nil {
+		return fmt.Errorf("move prebaked repository: copied to %s but failed to remove %s: %w", dst, src, err)
+	}
+	return nil
+}
+
+func copyPrebakedRepository(src, dst string) error {
+	binary, lookupErr := osexec.LookPath("fcp")
+	if lookupErr == nil {
+		output, copyErr := osexec.Command(binary, src, dst).CombinedOutput()
+		if copyErr == nil {
+			return nil
+		}
+		if removeErr := os.RemoveAll(dst); removeErr != nil {
+			return fmt.Errorf("fcp failed: %w; remove partial destination: %w", copyErr, removeErr)
+		}
+		klog.ErrorS(copyErr, "fcp failed, using portable repository copy", "src", src, "dst", dst, "output", strings.TrimSpace(string(output)))
+	}
+	return fs.CopyDir(src, dst)
+}
+
+// updateFromOrigin refreshes the copied prebake checkout, then applies the
+// agent run branch. The run branch is not expected to exist in the image; it
+// is fetched from origin like `git clone --branch`. Failures keep the local copy.
+func (in *environment) updateFromOrigin(repoDirPath string) {
+	if out, err := exec.NewExecutable("git",
+		exec.WithArgs(in.gitNetworkArgs([]string{"fetch", "origin"})),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		klog.InfoS("prebake fetch failed, using local copy", "dir", repoDirPath, "err", err, "out", string(out))
+		return
+	}
+
+	current, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"branch", "--show-current"}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background())
+	if err != nil {
+		klog.InfoS("prebake could not determine current branch, using fetched copy", "dir", repoDirPath, "err", err)
+	} else if branch := strings.TrimSpace(string(current)); branch != "" {
+		if out, err := exec.NewExecutable("git",
+			exec.WithArgs([]string{"merge", "--ff-only", "origin/" + branch}),
+			exec.WithDir(repoDirPath),
+		).RunWithOutput(context.Background()); err != nil {
+			klog.InfoS("prebake fast-forward failed, using local copy", "dir", repoDirPath, "branch", branch, "err", err, "out", string(out))
+		}
+	}
+
+	if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
+		klog.InfoS("prebake checkout of run branch failed, using prebake branch", "dir", repoDirPath, "err", err)
+	}
+}
+
+// ConfigurePrebakeGitSafeDirectories marks every repository in the prebake
+// manifest as a git safe.directory so the harness can inspect them.
+func ConfigurePrebakeGitSafeDirectories() error {
+	repos, err := prebake.List()
+	if err != nil {
+		klog.ErrorS(err, "failed to load repository prebake manifest")
+		return nil
+	}
+	for _, repo := range repos {
+		if err := ConfigureGitSafeDirectory(repo.Dir); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // commitIdentity resolves the author identity for commits created by this run.
@@ -144,7 +280,7 @@ func (in *environment) checkoutRequestedBranch(repoDirPath string) error {
 	}
 
 	if out, err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"fetch", "origin", branch}),
+		exec.WithArgs(in.gitNetworkArgs([]string{"fetch", "origin", branch})),
 		exec.WithDir(repoDirPath),
 	).RunWithOutput(context.Background()); err != nil {
 		return fmt.Errorf("failed to fetch branch %s: %w: %s", branch, err, out)
@@ -155,6 +291,40 @@ func (in *environment) checkoutRequestedBranch(repoDirPath string) error {
 		exec.WithDir(repoDirPath),
 	).RunWithOutput(context.Background()); err != nil {
 		return fmt.Errorf("failed to checkout branch %s: %w: %s", branch, err, out)
+	}
+
+	return nil
+}
+
+func (in *environment) finalizeRepository(repoDirPath, userName, userEmail string) error {
+	if err := in.checkoutFollowupBranch(repoDirPath); err != nil {
+		return err
+	}
+	return in.configureRepository(repoDirPath, userName, userEmail)
+}
+
+func (in *environment) checkoutFollowupBranch(repoDirPath string) error {
+	if in.agentRun == nil || !in.agentRun.Followup {
+		return nil
+	}
+
+	headBranch := strings.TrimSpace(lo.FromPtr(in.agentRun.HeadBranch))
+	if headBranch == "" {
+		return fmt.Errorf("follow-up agent run requires a head branch to check out")
+	}
+
+	if output, err := exec.NewExecutable("git",
+		exec.WithArgs(in.gitNetworkArgs([]string{"fetch", "origin", headBranch})),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		return fmt.Errorf("fetch follow-up head branch %q: %w: %s", headBranch, err, output)
+	}
+
+	if output, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"checkout", "-B", headBranch, "origin/" + headBranch}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		return fmt.Errorf("check out follow-up head branch %q: %w: %s", headBranch, err, output)
 	}
 
 	return nil
@@ -240,8 +410,16 @@ func (in *environment) configureGitCredentials() (string, error) {
 		return "", nil
 	}
 
-	klog.V(log.LogLevelDefault).InfoS("configuring git credentials", "username", in.agentRun.ScmCreds.Username)
-	if err := os.Setenv("GIT_ACCESS_TOKEN", in.agentRun.ScmCreds.Token); err != nil {
+	username := strings.TrimSpace(in.agentRun.ScmCreds.Username)
+	if username == "" {
+		username = defaultGitUsername
+	}
+
+	klog.V(log.LogLevelDefault).InfoS("configuring git credentials", "username", username)
+	if err := os.Setenv(EnvGitAccessToken, in.agentRun.ScmCreds.Token); err != nil {
+		return "", err
+	}
+	if err := os.Setenv(EnvGitUsername, username); err != nil {
 		return "", err
 	}
 
@@ -256,15 +434,28 @@ func (in *environment) configureGitCredentials() (string, error) {
 		return "", err
 	}
 
-	if err := os.Setenv("GIT_ASKPASS", askpassPath); err != nil {
+	if err := os.Setenv(EnvGitAskpass, askpassPath); err != nil {
 		return "", err
 	}
 
 	return askpassPath, nil
 }
 
+// gitAskpassScript answers git credential prompts for HTTP Basic.
+// Git calls ASKPASS once for "Username for ..." and once for "Password for ...".
+// Bitbucket Data Center requires the real username plus the PAT as password;
+// returning the token for both prompts 401s.
 func gitAskpassScript() string {
-	return "#!/bin/sh\necho ${GIT_ACCESS_TOKEN}"
+	return `#!/bin/sh
+case "$1" in
+*[Uu]sername*)
+	printf '%s\n' "${GIT_USERNAME:-apikey}"
+	;;
+*)
+	printf '%s\n' "${GIT_ACCESS_TOKEN}"
+	;;
+esac
+`
 }
 
 // configureGitSigning configures SSH commit signing using the mounted private key.
@@ -293,12 +484,10 @@ func (in *environment) configureGitSigning(repoDirPath string) error {
 }
 
 // configureGitProxy writes http.proxy into the repo-local git config so that
-// push/fetch operations inside the already-cloned repository use the proxy.
-// The proxy is also applied to the git clone itself via https_proxy/http_proxy
-// environment variables set earlier in cloneRepository.
+// later push/fetch operations inside the repository use the proxy.
 func (in *environment) configureGitProxy(repoDirPath string) error {
-	proxy := os.Getenv("PLRL_GIT_PROXY")
-	if proxy == "" {
+	proxy, noProxy := in.scmProxy()
+	if proxy == "" || proxyBypassed(in.agentRun.Repository, noProxy) {
 		return nil
 	}
 
@@ -307,6 +496,44 @@ func (in *environment) configureGitProxy(repoDirPath string) error {
 		exec.WithArgs([]string{"config", "http.proxy", proxy}),
 		exec.WithDir(repoDirPath),
 	).Run(context.Background())
+}
+
+// gitNetworkArgs applies the proxy only to this git invocation. This is needed
+// before the repository exists and avoids leaking proxy configuration to other
+// processes in the harness container.
+func (in *environment) gitNetworkArgs(args []string) []string {
+	proxy, noProxy := in.scmProxy()
+	if proxy == "" || proxyBypassed(in.agentRun.Repository, noProxy) {
+		return args
+	}
+
+	return append([]string{"-c", "http.proxy=" + proxy}, args...)
+}
+
+func (in *environment) scmProxy() (string, string) {
+	if in.agentRun.ScmCreds != nil && in.agentRun.ScmCreds.Proxy != nil && in.agentRun.ScmCreds.Proxy.Enabled {
+		proxy := strings.TrimSpace(in.agentRun.ScmCreds.Proxy.URL)
+		if proxy != "" {
+			return proxy, strings.TrimSpace(lo.FromPtr(in.agentRun.ScmCreds.Proxy.Noproxy))
+		}
+	}
+
+	return strings.TrimSpace(os.Getenv("PLRL_GIT_PROXY")), strings.TrimSpace(os.Getenv(EnvNoProxy))
+}
+
+func proxyBypassed(target, noProxy string) bool {
+	parsed, err := url.Parse(target)
+	if err != nil || parsed.Hostname() == "" {
+		return false
+	}
+	host := strings.ToLower(parsed.Hostname())
+	for entry := range strings.SplitSeq(noProxy, ",") {
+		entry = strings.TrimPrefix(strings.ToLower(strings.TrimSpace(entry)), ".")
+		if entry != "" && (host == entry || strings.HasSuffix(host, "."+entry)) {
+			return true
+		}
+	}
+	return false
 }
 
 func configureCodebaseMemoryGitExclude(repoDirPath string) error {
@@ -337,6 +564,9 @@ func configureCodebaseMemoryGitExclude(repoDirPath string) error {
 func (in *environment) init() types.Environment {
 	if in.agentRun == nil {
 		klog.Fatal("could not initialize environment: agentRun is nil")
+	}
+	if in.movePrebakedRepository == nil {
+		in.movePrebakedRepository = fs.MoveDir
 	}
 
 	if len(in.dir) != 0 {

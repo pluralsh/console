@@ -35,35 +35,35 @@ export function SentinelNode({ id, data }: PipelineGateNodeProps) {
         firstColor="text"
         second={sentinel?.name ?? 'Unknown name'}
       />
-      <Card
-        clickable
-        as={Link}
+      <Link
         to={getSentinelRunAbsPath({
           sentinelId: sentinel?.id ?? '',
           runId: sentinelRun?.id ?? '',
         })}
-        style={{ textDecoration: 'none', padding: spacing.small }}
+        style={{ textDecoration: 'none' }}
       >
-        {sentinelRun ? (
-          <StretchedFlex gap="xlarge">
-            <StackedText
-              first={getRunNameFromId(sentinelRun?.id ?? '')}
-              firstPartialType="body2Bold"
-              firstColor="text"
-              second={
-                sentinelRun.completedAt
-                  ? `Completed ${fromNow(sentinelRun.completedAt)}`
-                  : sentinelRun.insertedAt
-                    ? `Started ${fromNow(sentinelRun.insertedAt)}`
-                    : '---'
-              }
-            />
-            {statusToIcon(sentinelRun?.status, true)}
-          </StretchedFlex>
-        ) : (
-          <Body2P $color="text-xlight">No runs yet</Body2P>
-        )}
-      </Card>
+        <Card style={{ padding: spacing.small }}>
+          {sentinelRun ? (
+            <StretchedFlex gap="xlarge">
+              <StackedText
+                first={getRunNameFromId(sentinelRun?.id ?? '')}
+                firstPartialType="body2Bold"
+                firstColor="text"
+                second={
+                  sentinelRun.completedAt
+                    ? `Completed ${fromNow(sentinelRun.completedAt)}`
+                    : sentinelRun.insertedAt
+                      ? `Started ${fromNow(sentinelRun.insertedAt)}`
+                      : '---'
+                }
+              />
+              {statusToIcon(sentinelRun?.status, true)}
+            </StretchedFlex>
+          ) : (
+            <Body2P $color="text-xlight">No runs yet</Body2P>
+          )}
+        </Card>
+      </Link>
       {[GateState.Pending, GateState.Closed].includes(meta.state) && (
         <ForceGateButton id={gateId ?? ''} />
       )}

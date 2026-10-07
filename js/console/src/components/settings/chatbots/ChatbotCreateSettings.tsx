@@ -7,7 +7,8 @@ import {
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { StackedTextSC } from 'components/utils/table/StackedText'
 import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
-import { useEffect, useEffectEvent, useMemo } from 'react'
+import { ChatProviderConnectionType } from 'generated/graphql'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import {
   CHATBOTS_SETTINGS_ABS_PATH,
   CHATBOTS_SETTINGS_CREATE_ABS_PATH,
@@ -15,10 +16,7 @@ import {
 import { useTheme } from 'styled-components'
 import { SETTINGS_BREADCRUMBS } from '../Settings'
 import { ChatbotConnectionForm } from './ChatbotConnectionForm'
-import {
-  SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
-  SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
-} from './chatbotSetupGuide'
+import { chatbotSetupGuide } from './chatbotSetupGuide'
 
 const CHATBOTS_SETTINGS_CREATE_BREADCRUMBS = [
   ...SETTINGS_BREADCRUMBS,
@@ -30,6 +28,8 @@ export function ChatbotCreateSettings() {
   const theme = useTheme()
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
+  const [type, setType] = useState(ChatProviderConnectionType.Slack)
+  const setupGuide = useMemo(() => chatbotSetupGuide(type), [type])
 
   useSetBreadcrumbs(CHATBOTS_SETTINGS_CREATE_BREADCRUMBS)
   useSetPageHeaderContent(
@@ -51,12 +51,7 @@ export function ChatbotCreateSettings() {
             <Button
               secondary
               startIcon={<SidePanelOpenIcon />}
-              onClick={() =>
-                openSetupGuidePanel({
-                  documentationUrl: SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
-                  markdownPath: SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
-                })
-              }
+              onClick={() => openSetupGuidePanel(setupGuide)}
               css={{ whiteSpace: 'nowrap' }}
             >
               Setup guide
@@ -64,7 +59,7 @@ export function ChatbotCreateSettings() {
           )}
         </Flex>
       ),
-      [isOpen, openSetupGuidePanel, theme]
+      [isOpen, openSetupGuidePanel, setupGuide, theme]
     )
   )
 
@@ -76,11 +71,8 @@ export function ChatbotCreateSettings() {
   useEffect(() => {
     if (!isOpen) return
 
-    openSetupGuidePanel({
-      documentationUrl: SLACK_CHATBOT_SETUP_GUIDE_DOCUMENTATION_URL,
-      markdownPath: SLACK_CHATBOT_SETUP_GUIDE_MARKDOWN_PATH,
-    })
-  }, [isOpen, openSetupGuidePanel])
+    openSetupGuidePanel(setupGuide)
+  }, [isOpen, openSetupGuidePanel, setupGuide])
 
-  return <ChatbotConnectionForm />
+  return <ChatbotConnectionForm onTypeChange={setType} />
 }

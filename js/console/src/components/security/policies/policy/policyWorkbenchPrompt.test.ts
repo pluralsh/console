@@ -8,13 +8,13 @@ describe('buildPolicyWorkbenchPrompt', () => {
   it('includes the policy name, fenced rego, fenced json, and update placeholder', () => {
     const prompt = buildPolicyWorkbenchPrompt({
       name: 'kubernetes-guardrails',
-      policy: 'package plrl.wb.admission\n\ndeny contains msg if {\n  true\n}',
+      policy: 'package plrl.workbench\n\ndeny contains msg if {\n  true\n}',
       input: '{\n  "tool_name": "workbench_notes"\n}',
     })
 
     expect(prompt).toContain('named kubernetes-guardrails')
     expect(prompt).toContain(POLICY_UPDATE_PLACEHOLDER)
-    expect(prompt).toContain('```rego\npackage plrl.wb.admission')
+    expect(prompt).toContain('```rego\npackage plrl.workbench')
     expect(prompt).toContain(
       '```json\n{\n  "tool_name": "workbench_notes"\n}\n```'
     )

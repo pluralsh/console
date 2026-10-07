@@ -32,6 +32,7 @@ export function WorkbenchVerificationLoopControl({
       gap="small"
     >
       <Switch
+        size="small"
         aria-label={VERIFICATION_LOOP_LABEL}
         checked={checked}
         disabled={disabled}
@@ -111,22 +112,28 @@ export function WorkbenchKubernetesMutationFields({
   allowUpdates,
   allowDeletes,
   allowExec,
+  allowDrain,
   onAllowUpdatesChange,
   onAllowDeletesChange,
   onAllowExecChange,
+  onAllowDrainChange,
   updatesDisabled = false,
   deletesDisabled = false,
   execDisabled = false,
+  drainDisabled = false,
 }: {
   allowUpdates: boolean
   allowDeletes: boolean
   allowExec: boolean
+  allowDrain: boolean
   onAllowUpdatesChange: (checked: boolean) => void
   onAllowDeletesChange: (checked: boolean) => void
   onAllowExecChange: (checked: boolean) => void
+  onAllowDrainChange: (checked: boolean) => void
   updatesDisabled?: boolean
   deletesDisabled?: boolean
   execDisabled?: boolean
+  drainDisabled?: boolean
 }) {
   return (
     <>
@@ -159,6 +166,14 @@ export function WorkbenchKubernetesMutationFields({
           onChange={(e) => onAllowExecChange(e.target.checked)}
         >
           Allow command execution
+        </Checkbox>
+        <Checkbox
+          small
+          checked={allowDrain}
+          disabled={drainDisabled}
+          onChange={(e) => onAllowDrainChange(e.target.checked)}
+        >
+          Allow node drain
         </Checkbox>
       </Flex>
     </>

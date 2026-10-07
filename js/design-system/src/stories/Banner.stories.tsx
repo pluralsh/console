@@ -1,10 +1,21 @@
-import { A, Flex, H1 } from 'honorable'
+import styled from 'styled-components'
 
 import Banner, { BANNER_SEVERITIES } from '../components/Banner'
+import Flex from '../components/Flex'
 import type { Meta, StoryObj } from '@storybook/react'
 
+const Link = styled.a(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))
+
+const Heading = styled.h1(({ theme }) => ({
+  margin: 0,
+  marginTop: 16,
+  ...theme.partials.text.subtitle2,
+}))
+
 const meta = {
-  title: 'Banner (AKA Toast Content)',
+  title: 'Banner',
   component: Banner,
   argTypes: {
     closeButton: {
@@ -34,12 +45,12 @@ function Template({ closeButton, ...args }: any) {
       <Banner
         heading="You have an error."
         action={
-          <A
+          <Link
             href="#"
-            onClick={(e: any) => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
           >
             Fix it
-          </A>
+          </Link>
         }
         {...args}
       />
@@ -48,84 +59,29 @@ function Template({ closeButton, ...args }: any) {
         {...args}
       />
       <Banner
-        heading="Success!"
-        action={
-          <A
-            href="#"
-            onClick={(e: any) => e.preventDefault()}
-          >
-            Next
-          </A>
-        }
-        {...args}
-      />
-      <Banner
-        heading="You have an error"
-        {...args}
-      >
-        {
-          'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
-        }
-        <A
-          inline
-          href="#"
-          onClick={(e: any) => e.preventDefault()}
-        >
-          incidents
-        </A>
-        .
-      </Banner>
-      <Banner
         heading="Here's some info"
         {...args}
       >
         {
           'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
         }
-        <A
-          inline
+        <Link
           href="#"
-          onClick={(e: any) => e.preventDefault()}
+          onClick={(e) => e.preventDefault()}
         >
           incidents
-        </A>
-        .
-      </Banner>
-      <Banner
-        heading="Success!"
-        {...args}
-      >
-        {
-          'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
-        }
-        <A
-          inline
-          href="#"
-          onClick={(e: any) => e.preventDefault()}
-        >
-          incidents
-        </A>
+        </Link>
         .
       </Banner>
 
-      <H1
-        marginTop="medium"
-        subtitle2
-      >
-        Backwards compatibility only
-      </H1>
+      <Heading>Backwards compatibility only</Heading>
       <Banner {...args}>
         You really shouldn&apos;t have content here without a heading, but
         including to make sure old usage still looks good.{' '}
-        <A color="action-link-inline">Now go do something</A>.
+        <Link>Now go do something</Link>.
       </Banner>
 
-      <H1
-        marginTop="medium"
-        subtitle2
-      >
-        fullWidth=true
-      </H1>
+      <Heading>fullWidth=true</Heading>
       <Banner
         {...args}
         fullWidth

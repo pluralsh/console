@@ -29,6 +29,7 @@ func main() {
 	if err := agentrunenv.New(
 		agentrunenv.WithAgentRun(run),
 		agentrunenv.WithWorkingDir(args.WorkingDir()),
+		agentrunenv.WithFastPrebakeCopy(),
 	).Setup(); err != nil {
 		klog.Fatalf("could not prepare repository workspace: %v", err)
 	}

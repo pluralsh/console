@@ -1,15 +1,18 @@
-## Plural AI review
+### Plural Summary
 
 <%= @review.summary %>
 
-### Confidence: <%= @review.confidence |> to_string() |> String.upcase() %>
+### Mergeability Grade: <%= @review.confidence |> to_string() |> String.upcase() %>
 
 <%= @review.confidence_comment %>
 <%= if Enum.any?(@review.files) do %>
 
-### Files changed
+<details>
+<summary><strong>Files changed (<%= length(@review.files) %>)</strong></summary>
 
-<%= for file <- @review.files do %>
-- `<%= file.filename %>` — <%= file.summary %>
+| Filename | Summary |
+| --- | --- |
+<%= for file <- @review.files do %>| `<%= Console.Deployments.Pr.Review.table_cell(file.filename) %>` | <%= Console.Deployments.Pr.Review.table_cell(file.summary) %> |
 <% end %>
+</details>
 <% end %>

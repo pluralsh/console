@@ -63,10 +63,14 @@ func run() error {
 		return fmt.Errorf("could not get credentials: %w", err)
 	}
 
+	credentials := newCredentialStore(lo.FromPtr(agentRun.PluralCreds.Token))
+	if err = credentials.updateSCMCredentials(agentRun); err != nil {
+		return fmt.Errorf("could not configure SCM credentials: %w", err)
+	}
 	client := console.New(args.ConsoleApiURL(), *agentRun.PluralCreds.Token)
 	mcpServer := agent.NewServer(
 		client,
-		createServerOptions(client, extClient, agentRun)...,
+		createServerOptions(client, extClient, agentRun, credentials)...,
 	)
 
 	err = environment.New(
@@ -78,9 +82,9 @@ func run() error {
 		return fmt.Errorf("could not setup environment: %w", err)
 	}
 
-	startSCMCredentialsRefresh(ctx, extClient, args.AgentRunID(), scmCredentialsRefreshInterval)
+	startCredentialsRefresh(ctx, extClient, args.AgentRunID(), scmCredentialsRefreshInterval, credentials)
 
-	grpcServer := scm.NewServer()
+	grpcServer := scm.NewServer(credentials.SCMClient)
 
 	mcpErrChan := startMcpServer(mcpServer)
 	scmErrChan, err := grpcServer.Start()
@@ -167,7 +171,11 @@ func startMcpServer(server *agent.Server) <-chan error {
 	return errChan
 }
 
-func createServerOptions(client, runtimeClient console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
+func createServerOptions(
+	client, runtimeClient console.Client,
+	agentRun *consoleclient.AgentRunFragment,
+	credentials *credentialStore,
+) []agent.Option {
 	opts := []agent.Option{
 		agent.WithTools(),
 		agent.WithVersion(Version),
@@ -176,11 +184,18 @@ func createServerOptions(client, runtimeClient console.Client, agentRun *console
 	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
 		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL()))
 	}
+	if upstream := helpers.GetPluralEnv(controller.EnvWorkbenchMCPURL, ""); upstream != "" {
+		opts = append(opts, agent.WithWorkbenchMCPProxy(upstream, credentials.PluralToken))
+	}
 
-	return append(opts, createServerTools(client, runtimeClient, agentRun)...)
+	return append(opts, createServerTools(client, runtimeClient, agentRun, credentials.SCMClient)...)
 }
 
-func createServerTools(client, runtimeClient console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
+func createServerTools(
+	client, runtimeClient console.Client,
+	agentRun *consoleclient.AgentRunFragment,
+	scmClient tool.SCMClientProvider,
+) []agent.Option {
 	excludedTools, err := args.ExcludeTools()
 	if err != nil {
 		klog.Fatalf("could not parse excluded tools: %v", err)
@@ -194,9 +209,9 @@ func createServerTools(client, runtimeClient console.Client, agentRun *consolecl
 		tool.FetchTodosTool:        tool.NewFetchTodos(client, args.AgentRunID()),
 		tool.UpdateAnalysisTool:    tool.NewUpdateAnalysis(client, args.AgentRunID()),
 		tool.UpdateTodosTool:       tool.NewUpdateTodos(client, args.AgentRunID()),
-		tool.GetPRStateTool:        tool.NewGetPRState(),
-		tool.GetCILogsTool:         tool.NewGetCILogs(),
-		tool.ReactToCommentTool:    tool.NewReactToComment(),
+		tool.GetPRStateTool:        tool.NewGetPRState(scmClient),
+		tool.GetCILogsTool:         tool.NewGetCILogs(scmClient),
+		tool.ReactToCommentTool:    tool.NewReactToComment(scmClient),
 		tool.DownloadManifestsTool: tool.NewDownloadManifests(client),
 	}
 

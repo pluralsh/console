@@ -1,7 +1,6 @@
-import { Div, Flex, H1 } from 'honorable'
 import { type ComponentProps } from 'react'
 
-import { StatusOkIcon, WrapWithIf } from '..'
+import { Flex, StatusOkIcon, WrapWithIf } from '..'
 import Chip from '../components/Chip'
 import Card from '../components/Card'
 
@@ -9,6 +8,13 @@ import { SEVERITIES } from '../types'
 
 import { Link } from './NavigationContextStub'
 import type { Meta, StoryObj } from '@storybook/react'
+import styled, { useTheme } from 'styled-components'
+
+const Heading = styled.h1(({ theme }) => ({
+  margin: 0,
+  marginBottom: 12,
+  ...theme.partials.text.subtitle2,
+}))
 
 const meta = {
   title: 'Chip',
@@ -48,6 +54,8 @@ const versionsArgs = [
 ]
 
 function Template({ onFillLevel, asLink, ...args }: any) {
+  const theme = useTheme()
+
   if (asLink) {
     args = { ...args, as: Link, href: '#' }
   }
@@ -60,19 +68,14 @@ function Template({ onFillLevel, asLink, ...args }: any) {
       {/* - With icon */}
       {sizes.map((size) => (
         <div>
-          <H1
-            subtitle2
-            marginBottom="small"
-          >
-            {`${size[0].toUpperCase()}${size.slice(1)}`}
-          </H1>
-          <Div marginBottom="xlarge">
+          <Heading>{`${size[0].toUpperCase()}${size.slice(1)}`}</Heading>
+          <div style={{ marginBottom: 32 }}>
             <WrapWithIf
               condition={onFillLevel > 0}
               wrapper={
                 <Card
                   fillLevel={onFillLevel}
-                  padding="small"
+                  css={{ padding: theme.spacing.small }}
                 />
               }
             >
@@ -99,26 +102,20 @@ function Template({ onFillLevel, asLink, ...args }: any) {
                 ))}
               </Flex>
             </WrapWithIf>
-          </Div>
+          </div>
         </div>
       ))}
 
       {/* Wrapping */}
-      <H1
-        subtitle2
-        marginBottom="small"
-      >
-        Wrapping
-      </H1>
+      <Heading>Wrapping</Heading>
       <Flex gap="medium">
         <Card
-          padding="medium"
-          width="160px"
+          css={{ padding: theme.spacing.medium, width: 160 }}
           fillLevel={onFillLevel}
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               severity="neutral"
@@ -151,13 +148,12 @@ function Template({ onFillLevel, asLink, ...args }: any) {
           </Flex>
         </Card>
         <Card
-          width="400px"
-          padding="medium"
+          css={{ width: 400, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               size="small"
@@ -186,13 +182,12 @@ function Template({ onFillLevel, asLink, ...args }: any) {
           </Flex>
         </Card>
         <Card
-          width="200px"
-          padding="medium"
+          css={{ width: 200, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               size="small"
@@ -209,13 +204,12 @@ function Template({ onFillLevel, asLink, ...args }: any) {
           </Flex>
         </Card>
         <Card
-          width="120px"
-          padding="medium"
+          css={{ width: 120, padding: theme.spacing.medium }}
           fillLevel={onFillLevel}
         >
           <Flex
             gap="xsmall"
-            wrap
+            wrap="wrap"
           >
             <Chip
               size="small"

@@ -24,6 +24,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Metrics do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> validate_required([:query])
   end
 

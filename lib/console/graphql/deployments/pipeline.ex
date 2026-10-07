@@ -71,7 +71,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   input_object :gate_job_attributes do
     field :namespace,       non_null(:string)
     field :raw,             :string, description: "if you'd rather define the job spec via straight k8s yaml"
-    field :containers,      list_of(:container_attributes)
+    field :containers,      list_of(:container_attributes), description: "containers to run in this job; an empty list clears configured containers"
     field :labels,          :json
     field :annotations,     :json
     field :node_selector,   :json
@@ -236,7 +236,6 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
     field :job, :job do
       resolve fn gate, _, _ -> Pipelines.gate_job(gate) end
-      middleware ErrorHandler
     end
 
     field :sentinel,     :sentinel, description: "the sentinel this gate will execute", resolve: dataloader(Deployments)

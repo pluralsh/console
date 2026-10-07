@@ -4,31 +4,26 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
-- version: 1.20.1
-  kube: ['1.36', '1.35', '1.34']
+- version: 1.20.2
+  kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **New/adjusted Helm values surfaced by this patch:**\n  - `envoy.httpUpstreamLingerTimeout`\
-      \ now **accepts `0`** and will be correctly templated into the Envoy config\
-      \ ConfigMap (previously `0` could be treated as \u201Cunset\u201D).\n  - `endpointPolicyUpdateTimeoutDuration`\
-      \ can now be **set via Helm** (previously not configurable from chart values).\n\
-      \n- **Potential behavior change to watch for (no action unless you rely on old\
-      \ behavior):**\n  - Envoy route idle timeout behavior is restored to use `http-idle-timeout`\
-      \ as the source again; if you had workarounds/tuning around idle timeouts, re-validate\
-      \ after upgrade."
-    chart_updates: [ClusterMesh documentation and guidance is updated/overhauled (Helm-first
-        setup and cert configuration instructions)., Fix for ClusterMesh MCS-API CRD
-        install/upgrade race when `clustermesh-apiserver` starts before the CRD version
-        is present., 'Helm templating fix so `envoy.httpUpstreamLingerTimeout: 0`
-        is rendered into the ConfigMap.', Helm support added to pass through `endpointPolicyUpdateTimeoutDuration`.]
-    features: [ClusterMesh documentation is substantially improved with Helm-first
-        setup and clearer certificate configuration guidance., Faster recovery for
-        disrupted TCP connections when accessing DSR-enabled Services (improves resiliency/perceived
-        reliability).]
+    helm_changes: ''
+    chart_updates: ["No Helm chart changelog was provided in the notes you shared;\
+        \ summary below is based on Cilium application release notes only. Expect\
+        \ this to be a patch-level chart/app bump with no intentional values changes,\
+        \ but validate against the chart\u2019s own CHANGELOG/values.schema.json before\
+        \ upgrading."]
+    features: ['Gateway API: adds a node label selector to control Gateway API behavior
+        when `hostNetwork` is enabled (minor functional enhancement).', 'Operational
+        extension: adds extension points for `cilium-envoy` DaemonSet readiness/liveness/startup
+        probes (helps tailoring probe config via Helm/overrides).']
     breaking_changes: []
-  chart_version: 1.20.1
-  images: []
+  chart_version: 1.20.2
+  images: ['quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463',
+    'quay.io/cilium/cilium:v1.20.2@sha256:2939231d0d3e3ebddcd80fffa168b7ddcc78fdf0dc864d1c8c126ff523c54f01',
+    'quay.io/cilium/operator-generic:v1.20.2@sha256:64d8798350e8569b8e7622563fed6e44dce2625f311e4651b774816516c744fc']
 - version: 1.20.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -73,7 +68,57 @@ versions:
         from 0.3.1 to 1.0.0, which can affect clusters using custom CNI config management
         or validating CNI config schema/format.']
   chart_version: 1.20.0
-  images: []
+  images: ['quay.io/cilium/cilium-envoy:v1.37.5-1782911245-7cffc778c923f68a77954a53b1a98d6b5353f004@sha256:583057dd4f7d54cd41efff3c413aa0b148ac201f522e2c3336851fa89c78b039',
+    'quay.io/cilium/cilium:v1.20.0@sha256:383968cd5e8873f7976fa76aa6196045643558f4cc9518a207b9335cb24a0e93',
+    'quay.io/cilium/operator-generic:v1.20.0@sha256:80744a8cc7c91c2f9e6347629406844eb35d79b30a732c6d41c15b17232a74f3']
+- version: 1.19.8
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / configuration items to review\n\n- **EndpointSlice\
+      \ label filtering when `k8s-service-proxy-name` is used (already in 1.19.4):**\
+      \ If you set `--k8s-service-proxy-name`, any **hand-managed `EndpointSlice`\
+      \ objects must carry** the label `service.kubernetes.io/service-proxy-name`\
+      \ to be watched/used.\n- **Flags/values that were previously accepted but ignored\
+      \ are now honored (1.19.8):**\n  - `vtep-sync-interval`\n  - `enable-xt-socket-fallback`\n\
+      \  - `eni-delete-on-termination` **when using a custom CNI config**\n  - `enableIdentityMark`\
+      \ **Helm value outside CNI chaining mode**\n  - `lb-retry-backoff-max`\n  -\
+      \ Hubble: **four config knobs** that previously didn\u2019t reach their sink\
+      \ (verify your Hubble config behaves as expected after upgrade).\n- **Helm chart\
+      \ image overrides:** 1.19.8 adds **general busybox image values** for substitution\
+      \ (helps with air-gapped/custom registries). If you previously patched templates\
+      \ or used ad-hoc overrides, consider switching to the new values.\n- **clustermesh-apiserver\
+      \ etcd user/role management:** A bug was fixed around revoking stale roles on\
+      \ config change; **Helm-chart-provisioned configuration is noted as not affected**,\
+      \ but if you run custom etcd roles/users you should re-check post-upgrade behavior.\n\
+      - **Operator networking/health ports (from 1.19.4):** Chart ensured operator\
+      \ health port is **not set as hostPort when hostNetwork is disabled**. If you\
+      \ relied on hostPort exposure without hostNetwork, verify your access pattern.\n\
+      \n## Practical upgrade notes (what to validate)\n\n- If you currently set any\
+      \ of the \u201Cpreviously ignored\u201D options above, **expect behavior to\
+      \ change** after upgrading to 1.19.8 (because they\u2019ll start taking effect).\
+      \ Review your `values.yaml`/CLI flags and confirm the intended behavior.\n-\
+      \ If you use Gateway API with default `bpf.tproxy=false`, ensure nodes have\
+      \ **iptables + netfilter TPROXY modules** available (documented in 1.19.8)."
+    chart_updates: [Added extension points for `cilium-envoy` DaemonSet readiness/liveness/startup
+        probes (allows customization without patching manifests)., Added Helm support
+        for substituting a general BusyBox image via values (improves custom-registry/air-gapped
+        deployments).]
+    features: ["More configurable health probing for the cilium-envoy DaemonSet via\
+        \ probe \u201Cextension points\u201D, making it easier to tailor readiness/liveness\
+        \ behavior to your environment.", Improved chart flexibility for custom registries
+        by adding generic BusyBox image values for substitution.]
+    breaking_changes: [Configuration options that were previously accepted but silently
+        ignored are now applied; clusters relying on the old no-op behavior may see
+        changes in networking/LB/IPAM behavior after the upgrade., 'If you set `k8s-service-proxy-name`
+        and manage EndpointSlices manually, missing `service.kubernetes.io/service-proxy-name`
+        labels will cause those EndpointSlices to be ignored (service routing may
+        break).']
+  chart_version: 1.19.8
+  images: ['quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463',
+    'quay.io/cilium/cilium:v1.19.8@sha256:e9f7ee1f2f3a41e44339612e3b6b88170bdde7679c9c9461f287bb27702a8ecf',
+    'quay.io/cilium/operator-generic:v1.19.8@sha256:786ec9bb1a9344435e3e3f994bc4ed3a4a85afa6a314e98681af241f8be79833']
 - version: 1.19.4
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -109,7 +154,9 @@ versions:
         on the operator health port being exposed via `hostPort` while `hostNetwork`
         was disabled, that exposure no longer happens by default in this chart version.']
   chart_version: 1.19.4
-  images: []
+  images: ['quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3',
+    'quay.io/cilium/cilium:v1.19.4@sha256:2eb67991eaa9368ba199c2fac2c573cb0ffdeb79184533344f42fc9a7ff6af3c',
+    'quay.io/cilium/operator-generic:v1.19.4@sha256:1aa2b62735e7d8ab49ee840ae59c346932024c88901579121395c1271b435f71']
 - version: 1.19.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -152,7 +199,26 @@ versions:
         mode (if enabled) will drop unencrypted inter-node traffic; ensure all nodes
         are correctly enrolled/compatible before turning it on.]
   chart_version: 1.19.0
-  images: []
+  images: ['quay.io/cilium/cilium-envoy:v1.35.9-1768828720-c6e4827ebca9c47af2a3a6540c563c30947bae29@sha256:696582a3391ce05a62edb4140e6a99f774351f363f5b5d7f1581f3a244430249',
+    'quay.io/cilium/cilium:v1.19.0@sha256:be9f8571c2e114b3e12e41f785f2356ade703b2eac936aa878805565f0468c60',
+    'quay.io/cilium/operator-generic:v1.19.0@sha256:5b04006015e5800307dc6314676edc4c0bb7ac2fc7848be2b94b43bb030ab648']
+- version: 1.18.14
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds Helm values to override a general-purpose BusyBox image used
+        by chart hooks/jobs., 'Adds extension points (values/templating) for cilium-envoy
+        DaemonSet readiness, liveness, and startup probes.']
+    features: ['No major new user-facing features; this is a patch release focused
+        on bugfixes, hardening, and dependency updates.']
+    breaking_changes: [None called out in the provided notes; treat as a patch upgrade
+        but validate any previously ignored config options now being enforced.]
+  chart_version: 1.18.14
+  images: ['quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463',
+    'quay.io/cilium/cilium:v1.18.14@sha256:0e65a0910d74be4d56ebc8f8a010b566f9177444667dbb8eb5b2d8d840ea5406',
+    'quay.io/cilium/operator-generic:v1.18.14@sha256:6a77082c3938edad0433f53c46a90b8da08c9e4a9a255e51a1c2ff410db60104']
 - version: 1.18.10
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -1028,59 +1094,67 @@ versions:
   images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
     'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
   eolAt: '2025-02-04'
-- version: 1.14.2
+- version: 1.14.3
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: '## Helm / values changes to review
-
-      The app release notes include a few Helm-relevant behavior and value changes
-      (some are from 1.14.0; 1.14.2 itself has only a small Helm fix):
-
-
-      ### Values/behavior changes introduced in 1.14.0 (affecting upgrades from 1.14.0)
-
-      - **`authentication.mutual.spire.install.enabled` default changed to `true`.**
-      If you were not using SPIRE/mTLS, explicitly set this to `false` to avoid installing
-      extra components.
-
-      - **CNI config file management changed.** Cilium now manages the CNI config
-      file; setting **`cni.exclusive=false` disables overwriting** (useful for chaining
-      other CNIs such as Istio).
-
-      - **CNI chaining supported via `cni.chainingTarget`.** If you previously used
-      custom chaining approaches, confirm your intended chaining target.
-
-      - **Helm chart can configure `kvstoremesh`.** If you use clustermesh at scale,
-      review/enable the new `kvstoremesh` settings.
-
-      - **Helm chart changes around clustermesh CA/TLS configuration.** Notes mention
-      deprecating clustermesh CA config in favor of global CA config and simplifying
-      TLS configuration; review your `clustermesh.*` / global CA values.
-
-      - **`enableEndpointCRD` Helm option type changed from string to boolean.** If
-      you had `'
-    chart_updates: ['1.14.2 is a patch release focused on stability: multiple IPsec
-        fixes, Gateway API fixes, NodePort datapath fixes, and smaller operational
-        improvements.', 'Minor Helm chart change in 1.14.2: fixes Envoy DaemonSet
-        log level handling when multiple verbose debug groups are configured.']
-    features: ['Gateway API: support for additional/extended Gateway API features
-        (more complete feature coverage) compared to earlier 1.14.x.', 'Operational
-        visibility: `cilium status` now shows SPIRE connection information (helps
-        validate mutual-auth/SPIRE deployments).']
-    breaking_changes: ["1.14.0 had a strong warning: do not upgrade to 1.14.0 if you\
-        \ are using IPsec. For a 1.14.0 \u2192 1.14.2 target, treat IPsec as a key\
-        \ risk area and ensure you land on 1.14.2 quickly (or upgrade directly to\
-        \ 1.14.2).", 'Helm value type change: `enableEndpointCRD` changed from string
-        to boolean in 1.14.0; existing values files may fail template rendering or
-        silently misconfigure if not updated.']
-  chart_version: 1.14.2
-  images: ['quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35',
-    'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
+    helm_changes: "## Helm / values changes to be aware of (1.14.0 \u2192 1.14.3)\n\
+      \nEven though 1.14.3 is a patch release, you\u2019re upgrading **from 1.14.0**,\
+      \ so you must account for 1.14.0\u2019s chart/values behavior changes.\n\n-\
+      \ **IPsec upgrade warning (1.14.0):** *Do not upgrade to 1.14.0 if using IPsec.*\
+      \ Since you\u2019re already on 1.14.0, the practical takeaway is: **treat 1.14.3\
+      \ as an IPsec stability/security patch** and validate IPsec carefully during\
+      \ rollout.\n\n- **CNI config file management changed (1.14.0):**\n  - Cilium\
+      \ now **manages the CNI configuration file** and by default **overwrites changes**.\n\
+      \  - Set **`cni.exclusive=false`** if you need Cilium **not** to overwrite the\
+      \ CNI conf (for CNI chaining scenarios / other plugins modifying the conf).\n\
+      \  - If you want to chain Cilium with another CNI, use **`cni.chainingTarget`**.\n\
+      \n- **kube-proxy replacement value format change (1.14.x):**\n  - There were\
+      \ changes around `kubeProxyReplacement`/`--kube-proxy-replacement` being represented/handled\
+      \ as **string/boolean** in chart logic. Re-check your current values and ensure\
+      \ you\u2019re using the supported format for your chart version (typically `\"\
+      strict\"|\"partial\"|\"disabled\"` historically, moving toward boolean in some\
+      \ paths).\n\n- **SPIRE mutual auth default changed (1.14.x):**\n  - Default\
+      \ Helm value **`authentication.mutual.spire.install.enabled`** changed to **`true`**.\n\
+      \  - If you do *not* want SPIRE installed/managed by the chart, explicitly set\
+      \ it to `false`.\n\n- **Tunnel / routing mode Helm rendering fix (1.14.3):**\n\
+      \  - 1.14.3 includes a fix: **chart now derives `routing-mode` and `tunnel-protocol`\
+      \ based on `.Values.tunnel` and `.Values.routingMode`**.\n  - Action: **review\
+      \ your `tunnel`, `routingMode`, and `tunnelProtocol` values** for consistency;\
+      \ after upgrade the rendered agent flags may change if you were relying on older/incorrect\
+      \ rendering.\n\n- **New/adjustable option (daemon value) mentioned in 1.14.3\
+      \ notes:**\n  - `conntrackGCMaxInterval` introduced to cap conntrack GC interval\
+      \ (helps ToFQDN CIDR identity cleanup latency). Decide if you need to set this\
+      \ explicitly.\n"
+    chart_updates: ['Chart behavior around CNI config management and chaining is significant
+        in the 1.14 line: Cilium overwrites the CNI conf by default unless `cni.exclusive=false`,
+        and chaining is configured via `cni.chainingTarget`.', 1.14.3 includes a Helm-related
+        fix that changes how `routing-mode` and `tunnel-protocol` are computed from
+        `tunnel` and `routingMode` values; verify rendered manifests/agent flags match
+        your intended datapath mode., 'Defaults changed in the 1.14 line for SPIRE
+        installation: `authentication.mutual.spire.install.enabled` now defaults to
+        true; explicitly opt out if undesired.']
+    features: [Security hardening in 1.14.3 includes dependency bumps to address HTTP/2
+        Stream Cancellation/rapid reset class issues (CVE-2023-44487 via Envoy advisory)
+        and Go/grpc vulnerabilities., 'Large policy-scale improvements in 1.14.3 reduce
+        Cilium initialization time dramatically in clusters with many NetworkPolicies/CiliumNetworkPolicies,
+        and reduce overhead by making full policy map sync periodic.', 'Operational
+        tunable added: `conntrackGCMaxInterval` lets you cap conntrack GC interval
+        to avoid very long delays in releasing ToFQDN-derived CIDR identities.']
+    breaking_changes: ['Potential behavior change from Helm rendering fix in 1.14.3:
+        if your deployment had inconsistent `tunnel`/`routingMode`/`tunnelProtocol`
+        values, the upgraded chart may now render different `--routing-mode` / `--tunnel-protocol`
+        flags than before.', '1.14 line change: Cilium manages and overwrites the
+        CNI config by default; if you rely on other tooling/plugins to modify the
+        CNI config, you must set `cni.exclusive=false` and/or configure `cni.chainingTarget`
+        to avoid disruption.']
+  chart_version: 1.14.3
+  images: ['quay.io/cilium/cilium:v1.14.3@sha256:e5ca22526e01469f8d10c14e2339a82a13ad70d9a359b879024715540eef4ace',
+    'quay.io/cilium/operator-generic:v1.14.3@sha256:c9613277b72103ed36e9c0d16b9a17cafd507461d59340e432e3e9c23468b5e2']
   eolAt: '2025-02-04'
 - version: 1.14.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1205,32 +1279,25 @@ versions:
   images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
     'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
   eolAt: '2024-07-24'
-- version: 1.13.7
+- version: 1.13.8
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **1.13.2 note:** the release explicitly warns: *\u201CWhen updating\
-      \ to this release, make sure that you are using new helm chart version.\u201D\
-      * Ensure you also bump the **Cilium Helm chart** along with the app version.\n\
-      - **cert-manager users:** Helm now **mandates issuer configuration** when using\
-      \ cert-manager to generate certificates (1.13.2 bugfix note). Verify your values\
-      \ include the required issuer settings if you rely on cert-manager.\n"
-    chart_updates: [No explicit Helm chart template/structure changes were included
-        in the provided notes beyond the cert-manager issuer requirement and the general
-        reminder to use the matching chart version.]
-    features: ['Better observability for NAT map allocation drops: Cilium now reports
-        the kernel error code when drops occur due to failures creating NAT map entries
-        (1.13.7).', 'BGP operations visibility: `cilium bgp peers` now shows operational
-        state of BGP peers (1.13.2).', 'Host routing/fast-forward support expanded:
-        fast-forward (BPF host routing) can work on L2-less devices (1.13.2).']
+    helm_changes: ''
+    chart_updates: []
+    features: [1.13.8 is a security-focused bugfix release that addresses the HTTP/2
+        Rapid Reset / Stream Cancellation attack (CVE-2023-44487) via updated Envoy
+        and Go/x/net dependencies., Security and dependency updates include bumping
+        gRPC to 1.56.3 and updating Azure SDK components used by the vendor/azure
+        integration.]
     breaking_changes: []
-  chart_version: 1.13.7
-  images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
-    'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
+  chart_version: 1.13.8
+  images: ['quay.io/cilium/cilium:v1.13.8@sha256:774f0f11e171a96b59158884e0151eb522a2cf3fe23a7af7a140ae31ac30271b',
+    'quay.io/cilium/operator-generic:v1.13.8@sha256:324d17fa59f9a5fa5f957f088567cb66f15d8771880f6ced755e79e8e4b085fd']
   eolAt: '2024-07-24'
 - version: 1.13.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1306,23 +1373,37 @@ versions:
   chart_version: 1.12.18
   images: ['quay.io/cilium/cilium:v1.12.18@sha256:71218d52b2b9a63525e31e9be716810605696cbc02008e658953212f638d6b6b',
     'quay.io/cilium/operator-generic:v1.12.18@sha256:ac9b8a95d6faddacc1bca4145562c5143543dfbbc41b244383b52b8be83238ab']
-- version: 1.12.14
+- version: 1.12.15
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ["No Helm chart changelog was provided in the notes you pasted,\
-        \ so I can\u2019t list exact chart/values changes for 1.12.9\u21921.12.14\
-        \ from source material here.", 'From the v1.12.9 release notes: when updating
-        to 1.12.9 you must also use the corresponding new Helm chart version (implies
-        chart/version coupling; verify chart version for 1.12.14 in the Cilium Helm
-        chart release notes).']
-    features: []
+    chart_updates: []
+    features: ['Security hardening update: includes fixes for the HTTP/2 Stream Cancellation
+        Attack (CVE-2023-44487) via updated Envoy and Go/x-net/grpc dependencies.',
+      'Improved observability/troubleshooting: adds additional datapath drop notifications
+        and fixes trace notification identity reporting for certain hairpinned reply
+        traffic.']
     breaking_changes: []
-  chart_version: 1.12.14
-  images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
-    'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
+  chart_version: 1.12.15
+  images: ['quay.io/cilium/cilium:v1.12.15@sha256:24c4c9d756b2467ec20475309b68d640cdf91aa0008e136a826197590f028cca',
+    'quay.io/cilium/operator-generic:v1.12.15@sha256:ef8acf5b11f033032b55e2ece07179d925bfcb6f0cb501a898fdc031bad900ea']
+- version: 1.12.5
+  kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Helm chart: ServiceMonitor relabelings are now configurable;
+        node label was re-introduced on cilium/hubble metrics (may affect Prometheus
+        label sets/alerts/dashboards).']
+    features: [Added a BPF backend map downgrade path (v3 -> v2) to make downgrades
+        safer/possible in more scenarios.]
+    breaking_changes: []
+  chart_version: 1.12.5
+  images: ['quay.io/cilium/cilium:v1.12.5@sha256:06ce2b0a0a472e73334a7504ee5c5d8b2e2d7b72ef728ad94e564740dd505be5',
+    'quay.io/cilium/operator-generic:v1.12.5@sha256:b296eb7f0f7656a5cc19724f40a8a7121b7fd725278b7d61dc91fe0b7ffd7c0e']
 - version: 1.12.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -1383,6 +1464,24 @@ versions:
   chart_version: 1.12.0
   images: ['quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade',
     'quay.io/cilium/operator-generic:v1.12.0@sha256:bb2a42eda766e5d4a87ee8a5433f089db81b72dd04acf6b59fcbb445a95f9410']
+- version: 1.11.13
+  kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Envoy was updated to v1.21.3 (in 1.11.6) to address several moderate/high/critical
+        CVEs, improving security posture during the 1.11.x line.', 'Bugtool gained
+        an option to exclude endpoint objects from its output (present by 1.11.13),
+        useful when collecting diagnostics without leaking workload details.', 'Preflight
+        validation became stricter: validate-cnp now fails if a CiliumClusterwideNetworkPolicy
+        uses an empty toEndpoints/fromEndpoints selector (present by 1.11.13), helping
+        catch unsafe/invalid policies earlier.']
+    breaking_changes: []
+  chart_version: 1.11.13
+  images: ['quay.io/cilium/cilium:v1.11.13@sha256:cc5212dd709d1fadf19ffeae602d2af54d03634791f0f1a7e3bab0bd263918a1',
+    'quay.io/cilium/operator-generic:v1.11.13@sha256:a34fc3d5007201bdfe7fc3a469351dc6b9f190720ea54622f94cdfb0b28c6726']
 - version: 1.11.6
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -1568,6 +1667,37 @@ versions:
   chart_version: 1.11.0
   images: ['quay.io/cilium/cilium:v1.11.0@sha256:ea677508010800214b0b5497055f38ed3bff57963fa2399bcb1c69cf9476453a',
     'quay.io/cilium/operator-generic:v1.11.0@sha256:b522279577d0d5f1ad7cadaacb7321d1b172d8ae8c8bc816e503c897b420cfe3']
+- version: 1.10.19
+  kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- No Helm chart changelog was provided in the notes you shared,\
+      \ so there are **no explicit Helm values changes** I can call out from this\
+      \ input.\n- From the v1.10.12 notes, be aware of Helm-related behavior changes\
+      \ that may affect your deployment manifests:\n  - The chart **uses ports 80/443\
+      \ by default for the Hubble peer service**.\n  - The chart **doesn\u2019t generate\
+      \ the hubble-peer Service during preflight checks**.\n  - Behavior around `hubble.listenAddress`\
+      \ changed: **an empty value should no longer disable the peer service**.\n\n\
+      (If you can share the Helm chart release notes between 1.10.12 and 1.10.19,\
+      \ I can extract exact `values.yaml` key changes.)"
+    chart_updates: [Envoy version updated to v1.21.3 in v1.10.12 to address multiple
+        CVEs., UI images updated to v0.9.0 and the Envoy proxy container is dropped
+        (per v1.10.12 notes)., 'Hubble Relay deployment fix in v1.10.19: `TerminationMessagePolicy`
+        corrected.', CNI bumped to 1.2.0 in v1.10.19., Hubble CLI image bumped to
+        v0.11.1 in v1.10.19.]
+    features: ['Improved FQDN/DNS scalability: concurrency limiting for DNS message
+        processing plus reduced lock contention under bursty DNS traffic.', 'Additional
+        FQDN observability: new/expanded metrics (identity type label; active FQDN
+        connections per endpoint; improved DNS proxy error metrics) and a tunable
+        FQDN regex LRU size.']
+    breaking_changes: ['No explicit breaking changes are called out in the release
+        notes you provided. Treat the UI change (dropping the Envoy proxy container)
+        as potentially behavior-impacting if you relied on that container being present
+        (e.g., sidecar expectations, probes, or custom manifests).']
+  chart_version: 1.10.19
+  images: ['quay.io/cilium/cilium:v1.10.19@sha256:63c76e5c2317b22f9e11c5d30f1b799cd19eb88649c03941f66dbd9b8f487f15',
+    'quay.io/cilium/operator-generic:v1.10.19@sha256:d09f5ca4738bb9190c977f4ffed77e2aec2eae50db2a75368cbcc3f8f7ab6708']
 - version: 1.10.12
   kube: ['1.26', '1.25', '1.24']
   requirements: []

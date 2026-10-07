@@ -1,6 +1,6 @@
 import {
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Select,
   TicketIcon,
@@ -139,7 +139,7 @@ function ObservabilityWebhookFields({
         label="Name"
         required
       >
-        <Input2
+        <Input
           value={formState.observabilityName}
           disabled={mode === 'edit'}
           onChange={(e) =>
@@ -219,7 +219,7 @@ function IssueWebhookFields({
         label="Name"
         required
       >
-        <Input2
+        <Input
           value={formState.issueName}
           onChange={(e) =>
             setFormState((prev) => ({

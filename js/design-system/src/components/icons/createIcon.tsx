@@ -1,9 +1,8 @@
-import {
-  Icon as HonorableIcon,
-  type IconProps as HonorableIconProps,
-  useTheme,
-} from 'honorable'
 import { type ReactNode } from 'react'
+import { type DefaultTheme, useTheme } from 'styled-components'
+
+import { type SemanticColorKey } from '../../theme/colors'
+import Icon, { type IconProps as IconLayoutProps } from '../Icon'
 
 type IconBaseProps = {
   size?: number | string
@@ -13,10 +12,20 @@ type IconBaseProps = {
   mode?: string
 }
 
-export type IconProps = HonorableIconProps & IconBaseProps
+export type IconProps = IconLayoutProps & IconBaseProps
+
+function resolveThemeColor(
+  color: string | undefined,
+  colors: DefaultTheme['colors']
+) {
+  if (color == null) return color
+  const resolved = colors[color as SemanticColorKey]
+
+  return typeof resolved === 'string' ? resolved : color
+}
 
 function createIcon(render: (props: IconBaseProps) => ReactNode) {
-  function Icon({
+  function CreatedIcon({
     ref,
     size = 16,
     color = 'currentColor',
@@ -25,27 +34,24 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
     ...props
   }: IconProps) {
     const theme = useTheme()
-    const workingColor = theme.utils?.resolveColorString(color)
 
     return (
-      <HonorableIcon
+      <Icon
         ref={ref}
-        {...{ lineHeight: 0 }}
-        {...{ '& *': { transition: 'stroke 150ms linear, fill 150ms linear' } }}
         {...props}
       >
         {render({
           size,
-          color: workingColor,
-          secondaryColor,
+          color: resolveThemeColor(color, theme.colors),
+          secondaryColor: resolveThemeColor(secondaryColor, theme.colors),
           fullColor,
           mode: theme.mode,
         })}
-      </HonorableIcon>
+      </Icon>
     )
   }
 
-  return Icon
+  return CreatedIcon
 }
 
 export default createIcon

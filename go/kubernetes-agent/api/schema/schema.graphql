@@ -699,6 +699,23 @@ type Query {
     """Aggregations to be performed for each metric (default: sum)"""
     aggregations: String
   ): common_EventList @httpOperation(subgraph: "api", path: "/api/v1/event/{args.namespace}", operationSpecificHeaders: [["Content-Type", "application/json"], ["Accept", "application/json"]], httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
+  """returns the health of the server"""
+  GetHealth(
+    """
+    Comma delimited string used to apply filtering: 'propertyName,filterValue'
+    """
+    filterBy: String
+    """Name of the column to sort by"""
+    sortBy: String
+    """Number of items to return when pagination is applied"""
+    itemsPerPage: String
+    """Page number to return items from"""
+    page: String
+    """Metric names to download"""
+    metricNames: String
+    """Aggregations to be performed for each metric (default: sum)"""
+    aggregations: String
+  ): handler_HealthResponse @httpOperation(subgraph: "api", path: "/api/v1/health", operationSpecificHeaders: [["Content-Type", "application/json"], ["Accept", "application/json"]], httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
   """returns a list of HorizontalPodAutoscalers from all namespaces"""
   GetAllHorizontalPodAutoscalers(
     """
@@ -1051,7 +1068,21 @@ type Query {
     metricNames: String
     """Aggregations to be performed for each metric (default: sum)"""
     aggregations: String
-  ): logs_LogDetails @httpOperation(subgraph: "api", path: "/api/v1/log/{args.namespace}/{args.pod}", operationSpecificHeaders: [["Content-Type", "application/json"], ["Accept", "application/json"]], httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
+    """timestamp of the reference log line"""
+    referenceTimestamp: String
+    """line number of the reference log line"""
+    referenceLineNum: Int
+    """inclusive offset from the reference log line"""
+    offsetFrom: Int
+    """exclusive offset from the reference log line"""
+    offsetTo: Int
+    """position to load logs from: beginning or end"""
+    logFilePosition: String
+    """maximum number of lines to load from the end of the log"""
+    tailLines: PositiveInt = 500
+    """return logs from the previous container instance"""
+    previous: Boolean
+  ): logs_LogDetails @httpOperation(subgraph: "api", path: "/api/v1/log/{args.namespace}/{args.pod}", operationSpecificHeaders: [["Content-Type", "application/json"], ["Accept", "application/json"]], httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\",\"referenceTimestamp\":\"referenceTimestamp\",\"referenceLineNum\":\"referenceLineNum\",\"offsetFrom\":\"offsetFrom\",\"offsetTo\":\"offsetTo\",\"logFilePosition\":\"logFilePosition\",\"tailLines\":\"tailLines\",\"previous\":\"previous\"}")
   """returns logs from a Container"""
   GetContainerLogs(
     """namespace of the Pod"""
@@ -1074,7 +1105,21 @@ type Query {
     metricNames: String
     """Aggregations to be performed for each metric (default: sum)"""
     aggregations: String
-  ): logs_LogDetails @httpOperation(subgraph: "api", path: "/api/v1/log/{args.namespace}/{args.pod}/{args.container}", operationSpecificHeaders: [["Content-Type", "application/json"], ["Accept", "application/json"]], httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
+    """timestamp of the reference log line"""
+    referenceTimestamp: String
+    """line number of the reference log line"""
+    referenceLineNum: Int
+    """inclusive offset from the reference log line"""
+    offsetFrom: Int
+    """exclusive offset from the reference log line"""
+    offsetTo: Int
+    """position to load logs from: beginning or end"""
+    logFilePosition: String
+    """maximum number of lines to load from the end of the log"""
+    tailLines: PositiveInt = 500
+    """return logs from the previous container instance"""
+    previous: Boolean
+  ): logs_LogDetails @httpOperation(subgraph: "api", path: "/api/v1/log/{args.namespace}/{args.pod}/{args.container}", operationSpecificHeaders: [["Content-Type", "application/json"], ["Accept", "application/json"]], httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\",\"referenceTimestamp\":\"referenceTimestamp\",\"referenceLineNum\":\"referenceLineNum\",\"offsetFrom\":\"offsetFrom\",\"offsetTo\":\"offsetTo\",\"logFilePosition\":\"logFilePosition\",\"tailLines\":\"tailLines\",\"previous\":\"previous\"}")
   """returns a list of Namespaces"""
   GetNamespaces(
     """
@@ -2984,6 +3029,10 @@ type replicaset_ReplicaSetList {
   status: common_ResourceStatus!
 }
 
+type handler_HealthResponse {
+  status: String!
+}
+
 type horizontalpodautoscaler_HorizontalPodAutoscalerList {
   errors: [JSON]!
   horizontalpodautoscalers: [horizontalpodautoscaler_HorizontalPodAutoscaler]!
@@ -3110,7 +3159,7 @@ type v1_IngressRule {
   	  Currently the port of an Ingress is implicitly :80 for http and
   	  :443 for https.
   Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
-  
+
   host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.
   """
   host: String
@@ -3245,6 +3294,7 @@ type logs_LogDetails {
 type logs_LogInfo {
   containerName: String!
   fromDate: String!
+  hasMore: Boolean!
   initContainerName: String!
   podName: String!
   toDate: String!
@@ -3261,12 +3311,16 @@ type logs_Selection {
   offsetFrom: Int!
   offsetTo: Int!
   referencePoint: logs_LogLineId!
+  tailLines: Int!
 }
 
 type logs_LogLineId {
   lineNum: Int!
   timestamp: String!
 }
+
+"""Integers that will have a value greater than 0."""
+scalar PositiveInt
 
 type namespace_NamespaceList {
   errors: [JSON]!
@@ -4310,7 +4364,7 @@ type v1_FileKeySelector {
   key: String!
   """
   Specify whether the file or its key must be defined. If the file or key does not exist, then the env var is not published. If optional is set to true and the specified key does not exist, the environment variable will not be set in the Pod's containers.
-  
+
   If optional is set to false and the specified key does not exist, an error will be returned during Pod creation.
   """
   optional: Boolean
@@ -4402,7 +4456,7 @@ type v1_GRPCAction {
   port: Int!
   """
   Service is the name of the service to place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-  
+
   If this is not specified, the default behavior is defined by gRPC.
   """
   service: String!
@@ -4444,9 +4498,9 @@ type v1_TCPSocketAction {
 type v1_ResourceRequirements {
   """
   Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.
-  
+
   This field depends on the DynamicResourceAllocation feature gate.
-  
+
   This field is immutable. It can only be set for containers.
   """
   claims: [v1_ResourceClaim]
@@ -4519,7 +4573,7 @@ type v1_SecurityContext {
   """
   privileged: Boolean
   """
-  procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows.
+  procMount denotes the type of proc mount to use for the containers. The default value is Default which uses the container runtime defaults for readonly paths and masked paths. Note that this field cannot be set when spec.os.name is windows.
   """
   procMount: String
   """
@@ -4588,7 +4642,7 @@ type v1_SeccompProfile {
   localhostProfile: String
   """
   type indicates which kind of seccomp profile will be applied. Valid options are:
-  
+
   Localhost - a profile defined in a file on the node should be used. RuntimeDefault - the container runtime default profile should be used. Unconfined - no profile should be applied.
   """
   type: String!
@@ -4642,7 +4696,7 @@ type v1_ContainerStatus {
   name: String!
   """
   Ready specifies whether the container is currently passing its readiness check. The value will change as readiness probes keep executing. If no readiness probes are specified, this field defaults to true once the container is fully started (see Started field).
-  
+
   The value is typically used to determine whether a container is ready to accept traffic.
   """
   ready: Boolean!
@@ -4708,10 +4762,14 @@ type v1_ResourceHealth {
                 temporary and permanent issues.
    - Unknown: The status cannot be determined.
               For example, Device Plugin got unregistered and hasn't been re-registered since.
-  
+
   In future we may want to introduce the PermanentlyUnhealthy Status.
   """
   health: String
+  """
+  Message provides human-readable context for Health (e.g. "ECC error count exceeded threshold"). This field is populated by the kubelet when ResourceHealthStatusMessage is enabled if the DRA plugin returns a message, and is null otherwise.
+  """
+  message: String
   """
   ResourceID is the unique identifier of the resource. See the ResourceID type for more information.
   """
@@ -4791,6 +4849,22 @@ type v1_VolumeMountStatus {
   RecursiveReadOnly must be set to Disabled, Enabled, or unspecified (for non-readonly mounts). An IfPossible value in the original VolumeMount must be translated to Disabled or Enabled, depending on the mount result.
   """
   recursiveReadOnly: String
+  volumeStatus: v1_VolumeStatus
+}
+
+"""
+VolumeStatus represents the status of a mounted volume. At most one of its members must be specified.
+"""
+type v1_VolumeStatus {
+  image: v1_ImageVolumeStatus
+}
+
+"""ImageVolumeStatus represents the image-based volume status."""
+type v1_ImageVolumeStatus {
+  """
+  ImageRef is the digest of the image used for this volume. It should have a value that's similar to the pod's status.containerStatuses[i].imageID. The ImageRef length should not exceed 256 characters.
+  """
+  imageRef: String
 }
 
 type pod_VolumeMount {
@@ -5046,9 +5120,9 @@ type v1_ObjectMeta {
   finalizers: [String]
   """
   GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Name field has not been provided. If this field is used, the name returned to the client will be different than the name passed. This value will also be combined with a unique suffix. The provided value has the same validation rules as the Name field, and may be truncated by the length of the suffix required to make the value unique on the server.
-  
+
   If this field is specified and the generated name exists, the server will return a 409.
-  
+
   Applied only if Name is not specified. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency
   """
   generateName: String
@@ -5070,7 +5144,7 @@ type v1_ObjectMeta {
   name: String
   """
   Namespace defines the space within which each name must be unique. An empty namespace is equivalent to the "default" namespace, but "default" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty.
-  
+
   Must be a DNS_LABEL. Cannot be updated. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces
   """
   namespace: String
@@ -5080,7 +5154,7 @@ type v1_ObjectMeta {
   ownerReferences: [v1_OwnerReference]
   """
   An opaque value that represents the internal version of this object that can be used by clients to determine when objects have changed. May be used for optimistic concurrency, change detection, and the watch operation on a resource or set of resources. Clients must treat these values as opaque and passed unmodified back to the server. They may only be valid for a particular resource or set of resources.
-  
+
   Populated by the system. Read-only. Value must be treated as opaque by clients and . More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
   """
   resourceVersion: String
@@ -5090,7 +5164,7 @@ type v1_ObjectMeta {
   selfLink: String
   """
   UID is the unique in time and space value for this object. It is typically generated by the server on successful creation of a resource and is not allowed to change on PUT operations.
-  
+
   Populated by the system. Read-only. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
   """
   uid: String
@@ -5110,9 +5184,9 @@ type v1_ManagedFieldsEntry {
   fieldsType: String
   """
   FieldsV1 stores a set of fields in a data structure like a Trie, in JSON format.
-  
+
   Each key is either a '.' representing the field itself, and will always map to an empty set, or a string representing a sub-field or item. The string will follow one of these four formats: 'f:<name>', where <name> is the name of a field in a struct, or key in a map 'v:<value>', where <value> is the exact json formatted value of a list item 'i:<index>', where <index> is position of a item in a list 'k:<keys>', where <keys> is a map of  a list item's key fields to their unique values If a key maps to an empty Fields value, the field that key represents is part of the set.
-  
+
   The exact format is defined in sigs.k8s.io/structured-merge-diff
   """
   fieldsV1: JSON
@@ -5446,44 +5520,54 @@ PodCertificateProjection provides a private key and X.509 certificate in the pod
 type v1_PodCertificateProjection {
   """
   Write the certificate chain at this path in the projected volume.
-  
+
   Most applications should use credentialBundlePath.  When using keyPath and certificateChainPath, your application needs to check that the key and leaf certificate are consistent, because it is possible to read the files mid-rotation.
   """
   certificateChainPath: String
   """
   Write the credential bundle at this path in the projected volume.
-  
+
   The credential bundle is a single file that contains multiple PEM blocks. The first PEM block is a PRIVATE KEY block, containing a PKCS#8 private key.
-  
+
   The remaining blocks are CERTIFICATE blocks, containing the issued certificate chain from the signer (leaf and any intermediates).
-  
+
   Using credentialBundlePath lets your Pod's application code make a single atomic read that retrieves a consistent key and certificate chain.  If you project them to separate files, your application code will need to additionally check that the leaf certificate was issued to the key.
   """
   credentialBundlePath: String
   """
   Write the key at this path in the projected volume.
-  
+
   Most applications should use credentialBundlePath.  When using keyPath and certificateChainPath, your application needs to check that the key and leaf certificate are consistent, because it is possible to read the files mid-rotation.
   """
   keyPath: String
   """
   The type of keypair Kubelet will generate for the pod.
-  
+
   Valid values are "RSA3072", "RSA4096", "ECDSAP256", "ECDSAP384", "ECDSAP521", and "ED25519".
   """
   keyType: String
   """
   maxExpirationSeconds is the maximum lifetime permitted for the certificate.
-  
+
   Kubelet copies this value verbatim into the PodCertificateRequests it generates for this projection.
-  
+
   If omitted, kube-apiserver will set it to 86400(24 hours). kube-apiserver will reject values shorter than 3600 (1 hour).  The maximum allowable value is 7862400 (91 days).
-  
+
   The signer implementation is then free to issue a certificate with any lifetime *shorter* than MaxExpirationSeconds, but no shorter than 3600 seconds (1 hour).  This constraint is enforced by kube-apiserver. `kubernetes.io` signers will never issue certificates with a lifetime longer than 24 hours.
   """
   maxExpirationSeconds: Int
   """Kubelet's generated CSRs will be addressed to this signer."""
   signerName: String
+  """
+  userAnnotations allow pod authors to pass additional information to the signer implementation.  Kubernetes does not restrict or validate this metadata in any way.
+
+  These values are copied verbatim into the `spec.unverifiedUserAnnotations` field of the PodCertificateRequest objects that Kubelet creates.
+
+  Entries are subject to the same validation as object metadata annotations, with the addition that all keys must be domain-prefixed. No restrictions are placed on values, except an overall size limitation on the entire field.
+
+  Signers should document the keys and values they support. Signers should deny requests that contain keys they do not recognize.
+  """
+  userAnnotations: JSON
 }
 
 """
@@ -5652,7 +5736,7 @@ type v1_PodSecurityContext {
   appArmorProfile: v1_AppArmorProfile
   """
   A special supplemental group that applies to all containers in a pod. Some volume types allow the Kubelet to change the ownership of that volume to be owned by the pod:
-  
+
   1. The owning GID will be the FSGroup 2. The setgid bit is set (new files created in the volume will be owned by FSGroup) 3. The permission bits are OR'd with rw-rw
   """
   fsGroup: BigInt
@@ -5674,15 +5758,15 @@ type v1_PodSecurityContext {
   runAsUser: BigInt
   """
   seLinuxChangePolicy defines how the container's SELinux label is applied to all volumes used by the Pod. It has no effect on nodes that do not support SELinux or to volumes does not support SELinux. Valid values are "MountOption" and "Recursive".
-  
+
   "Recursive" means relabeling of all files on all Pod volumes by the container runtime. This may be slow for large volumes, but allows mixing privileged and unprivileged Pods sharing the same volume on the same node.
-  
+
   "MountOption" mounts all eligible Pod volumes with `-o context` mount option. This requires all Pods that share the same volume to use the same SELinux label. It is not possible to share the same volume among privileged and unprivileged Pods. Eligible volumes are in-tree FibreChannel and iSCSI volumes, and all CSI volumes whose CSI driver announces SELinux support by setting spec.seLinuxMount: true in their CSIDriver instance. Other volumes are always re-labelled recursively. "MountOption" value is allowed only when SELinuxMount feature gate is enabled.
-  
+
   If not specified and SELinuxMount feature gate is enabled, "MountOption" is used. If not specified and SELinuxMount feature gate is disabled, "MountOption" is used for ReadWriteOncePod volumes and "Recursive" for all other volumes.
-  
+
   This field affects only Pods that have SELinux label set, either in PodSecurityContext or in SecurityContext of all containers.
-  
+
   All Pods that use the same volume should use the same seLinuxChangePolicy, otherwise some pods can get stuck in ContainerCreating state. Note that this field cannot be set when spec.os.name is windows.
   """
   seLinuxChangePolicy: String
@@ -5877,14 +5961,14 @@ type endpoint_Endpoint {
 type v1_EndpointPort {
   """
   The application protocol for this port. This is used as a hint for implementations to offer richer behavior for protocols that they understand. This field follows standard Kubernetes label syntax. Valid values are either:
-  
+
   * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
-  
+
   * Kubernetes-defined prefixed names:
     * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
     * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
     * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
-  
+
   * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
   """
   appProtocol: String

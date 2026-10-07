@@ -8,7 +8,8 @@ type Keys<T> = T extends object
 
 export function hasAccess(
   persona: Nullable<PersonaConfigurationFragment>,
-  feature: Keys<Omit<PersonaConfigurationFragment, 'all'>>
+  feature: Keys<Omit<PersonaConfigurationFragment, 'all'>>,
+  defaultValue = false
 ): boolean {
   const keys = feature.split('.')
   let current: any = persona
@@ -27,5 +28,5 @@ export function hasAccess(
     return current
   }
 
-  return false
+  return defaultValue
 }

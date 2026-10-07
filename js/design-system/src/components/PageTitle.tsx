@@ -1,5 +1,6 @@
-import { Flex, type FlexProps, H1 } from 'honorable'
+import Flex, { type FlexProps } from './Flex'
 import { type ComponentProps, type ReactNode } from 'react'
+import styled, { useTheme } from 'styled-components'
 
 export type PageTitleProps = {
   heading?: ReactNode
@@ -13,10 +14,12 @@ function PageTitle({
   children,
   ...props
 }: PageTitleProps) {
+  const theme = useTheme()
+
   return (
     <Flex
       ref={ref}
-      borderBottom="1px solid border"
+      css={{ borderBottom: theme.borders.default }}
       paddingBottom="large"
       marginBottom="large"
       gap="large"
@@ -24,17 +27,15 @@ function PageTitle({
       justifyContent="space-between"
       {...props}
     >
-      {heading && (
-        <H1
-          title1
-          {...headingProps}
-        >
-          {heading}
-        </H1>
-      )}
+      {heading && <HeadingSC {...headingProps}>{heading}</HeadingSC>}
       {children}
     </Flex>
   )
 }
+
+const HeadingSC = styled.h1(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.title1,
+}))
 
 export default PageTitle

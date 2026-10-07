@@ -9,12 +9,12 @@ defmodule Console.Deployments.NotificationsTest do
       {:ok, sink} = Notifications.upsert_sink(%{
         name: "sink",
         type: :slack,
-        configuration: %{slack: %{url: "some.url"}}
+        configuration: %{slack: %{url: "https://hooks.slack.com/services/test"}}
       }, admin_user())
 
       assert sink.name == "sink"
       assert sink.type == :slack
-      assert sink.configuration.slack.url == "some.url"
+      assert sink.configuration.slack.url == "https://hooks.slack.com/services/test"
     end
 
     test "it can update a notif sink" do
@@ -23,20 +23,20 @@ defmodule Console.Deployments.NotificationsTest do
       {:ok, up} = Notifications.upsert_sink(%{
         name: "sink",
         type: :slack,
-        configuration: %{slack: %{url: "some.url"}}
+        configuration: %{slack: %{url: "https://hooks.slack.com/services/test"}}
       }, admin_user())
 
       assert up.id == sink.id
       assert up.name == "sink"
       assert up.type == :slack
-      assert up.configuration.slack.url == "some.url"
+      assert up.configuration.slack.url == "https://hooks.slack.com/services/test"
     end
 
     test "non-admins cannot create sinks" do
       {:error, _} = Notifications.upsert_sink(%{
         name: "sink",
         type: :slack,
-        configuration: %{slack: %{url: "some.url"}}
+        configuration: %{slack: %{url: "https://hooks.slack.com/services/test"}}
       }, insert(:user))
     end
   end

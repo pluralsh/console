@@ -28,6 +28,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     |> cast(attrs, @valid)
     |> validate_required(@valid -- [:base_branch, :head_branch, :babysit, :approval, :followup, :pr_url])
     |> fix_mode(bench, job)
+    |> AgentRun.validate_followup_mode()
     |> fix_babysit(bench, job)
     |> fix_approval(bench, job)
     |> validate_repository(bench)
@@ -36,10 +37,9 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   end
 
   defp fix_mode(cs, bench, job) do
-    if get_field(cs, :mode) == :review && !review_enabled?(job) do
-      add_error(cs, :mode, "review mode is not enabled for this workbench job")
-    else
-      fix_write_mode(cs, bench, job)
+    case {get_field(cs, :mode), WorkbenchJob.coding_review?(job)} do
+      {:review, false} -> add_error(cs, :mode, "review mode is not enabled for this workbench job")
+      _ -> fix_write_mode(cs, bench, job)
     end
   end
 
@@ -56,11 +56,6 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     end
   end
   defp fix_write_mode(cs, _, _), do: cs
-
-  defp review_enabled?(%WorkbenchJob{
-    modes: %WorkbenchJob.Modes{coding: %WorkbenchJob.Modes.Coding{review: true}}
-  }), do: true
-  defp review_enabled?(_), do: false
 
   defp fix_babysit(cs, _, %WorkbenchJob{modes: %WorkbenchJob.Modes{coding: %{babysit: true}}}),
     do: put_change(cs, :babysit, true)
@@ -89,14 +84,25 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   defp validate_repository(cs, _), do: cs
 
   @json_schema Console.priv_file!("tools/workbench/coding_agent.json") |> Jason.decode!()
+  @review_json_schema Console.priv_file!("tools/workbench/coding_agent_review.json") |> Jason.decode!()
 
   def json_schema(%__MODULE__{job: job}) do
-    modes = if review_enabled?(job), do: ~w(analyze write review), else: ~w(analyze write)
-    put_in(@json_schema, ["properties", "mode", "enum"], modes)
+    case WorkbenchJob.coding_review?(job) do
+      true -> @review_json_schema
+      _ -> @json_schema
+    end
   end
   def json_schema(_), do: @json_schema
   def name(_), do: "workbench_coding_agent"
-  def description(_), do: "Invokes a coding agent to analyze a repository, make a code change, or review an existing pull request. Only use this once you've gathered enough information to craft an effective prompt."
+  def description(%__MODULE__{job: job}) do
+    case WorkbenchJob.coding_review?(job) do
+      true ->
+        "Invokes a coding agent to analyze a repository, make a code change, or review an existing pull request. Review mode is enabled for this job. For pull request review tasks you MUST set mode=review, base_branch to the PR's head branch (the branch containing the changes, not the PR target), and pr_url to the pull request URL. Only use this once you've gathered enough information to craft an effective prompt."
+      _ ->
+        "Invokes a coding agent to analyze a repository or make a code change. Only use this once you've gathered enough information to craft an effective prompt."
+    end
+  end
+  def description(_), do: "Invokes a coding agent to analyze a repository or make a code change. Only use this once you've gathered enough information to craft an effective prompt."
 
   @run_attrs ~w(mode repository prompt activity babysit approval followup head_branch)a
 

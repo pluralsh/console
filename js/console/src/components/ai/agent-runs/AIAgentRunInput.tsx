@@ -101,7 +101,7 @@ export function AIAgentRunInput() {
                     small
                     checked={babysit}
                     onChange={(e) => setBabysit(e.target.checked)}
-                    {...{
+                    css={{
                       '& .label': { userSelect: 'none', textWrap: 'nowrap' },
                     }}
                   >
@@ -116,7 +116,7 @@ export function AIAgentRunInput() {
                     small
                     checked={approval}
                     onChange={(e) => setApproval(e.target.checked)}
-                    {...{
+                    css={{
                       '& .label': { userSelect: 'none', textWrap: 'nowrap' },
                     }}
                   >

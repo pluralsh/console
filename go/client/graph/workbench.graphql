@@ -53,6 +53,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
     name
     tool
     categories
+    approval
     project {
         ...TinyProjectFragment
     }
@@ -104,6 +105,12 @@ fragment WorkbenchToolFragment on WorkbenchTool {
             url
             username
             tenantId
+        }
+        victoriaLogs {
+            url
+            username
+            accountId
+            projectId
         }
         splunk {
             url
@@ -299,6 +306,32 @@ query GetWorkbenchToolTiny($id: ID, $name: String) {
     workbenchTool(id: $id, name: $name) {
         id
         name
+    }
+}
+
+fragment WorkbenchJobModesFragment on WorkbenchJobModes {
+    plan
+    verification
+    model {
+        provider
+        model
+    }
+    coding {
+        babysit
+        approval
+        review
+    }
+    budget {
+        cost
+        tokens
+    }
+    kubernetes {
+        update
+        delete
+        exec
+        drain
+        excludeNamespaces
+        requireNamespaces
     }
 }
 

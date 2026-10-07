@@ -3,7 +3,9 @@ defmodule Console.AI.Tools.Workbench.SkillCreate do
   alias Console.Schema.WorkbenchSkill
 
   embedded_schema do
-    field :job, :map, virtual: true
+    field :job,         :map, virtual: true
+    field :max_skills,  :integer, virtual: true
+    field :skill_count, :integer, virtual: true
     field :name, :string
     field :description, :string
     field :contents, :string
@@ -19,6 +21,11 @@ defmodule Console.AI.Tools.Workbench.SkillCreate do
     model
     |> cast(attrs, [:name, :description, :contents])
     |> validate_required([:name, :description, :contents])
+  end
+
+  def implement(%__MODULE__{max_skills: max, skill_count: count})
+      when is_integer(max) and is_integer(count) and count >= max do
+    {:error, "workbench already has the configured maximum of #{max} skills"}
   end
 
   def implement(%__MODULE__{job: job} = model) do

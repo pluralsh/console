@@ -375,9 +375,40 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       )
       deployment_settings(prometheus_connection: %{url: "example.com"})
 
-      expect(Req, :post, 4, fn _, _ ->
+      expect(Req, :post, 12, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        value =
+          cond do
+            String.contains?(query, "container_cpu_usage_seconds_total") and String.contains?(query, "by (pod)") ->
+              "pod-cpu"
+            String.contains?(query, "container_memory_working_set_bytes") and String.contains?(query, "by (pod)") ->
+              "pod-mem"
+            String.contains?(query, "container_cpu_usage_seconds_total") ->
+              "cpu"
+            String.contains?(query, "container_memory_working_set_bytes") ->
+              "mem"
+            String.contains?(query, "resource_requests{resource=\"cpu\"") and String.contains?(query, "by (pod)") ->
+              "pod-cpu-requests"
+            String.contains?(query, "resource_requests{resource=\"memory\"") and String.contains?(query, "by (pod)") ->
+              "pod-mem-requests"
+            String.contains?(query, "resource_limits{resource=\"cpu\"") and String.contains?(query, "by (pod)") ->
+              "pod-cpu-limits"
+            String.contains?(query, "resource_limits{resource=\"memory\"") and String.contains?(query, "by (pod)") ->
+              "pod-mem-limits"
+            String.contains?(query, "resource_requests{resource=\"cpu\"") ->
+              "cpu-requests"
+            String.contains?(query, "resource_requests{resource=\"memory\"") ->
+              "mem-requests"
+            String.contains?(query, "resource_limits{resource=\"cpu\"") ->
+              "cpu-limits"
+            String.contains?(query, "resource_limits{resource=\"memory\"") ->
+              "mem-limits"
+            true ->
+              "unknown"
+          end
+
         {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
-          %{values: [[1, "1"]]}
+          %{values: [[1, value]]}
         ]}})}}
       end)
 
@@ -388,13 +419,71 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
             id
             componentMetrics(componentId: $componentId) {
               cpu { values { timestamp value } }
+              mem { values { timestamp value } }
+              podCpu { values { timestamp value } }
+              podMem { values { timestamp value } }
+              cpuRequests { values { timestamp value } }
+              memRequests { values { timestamp value } }
+              cpuLimits { values { timestamp value } }
+              memLimits { values { timestamp value } }
+              podCpuRequests { values { timestamp value } }
+              podMemRequests { values { timestamp value } }
+              podCpuLimits { values { timestamp value } }
+              podMemLimits { values { timestamp value } }
             }
           }
         }
       """, %{"id" => service.id, "componentId" => component.id}, %{current_user: user})
 
       assert found["id"] == service.id
-      refute Enum.empty?(found["componentMetrics"]["cpu"])
+      metrics = found["componentMetrics"]
+      assert hd(hd(metrics["cpu"])["values"])["value"] == "cpu"
+      assert hd(hd(metrics["mem"])["values"])["value"] == "mem"
+      assert hd(hd(metrics["podCpu"])["values"])["value"] == "pod-cpu"
+      assert hd(hd(metrics["podMem"])["values"])["value"] == "pod-mem"
+      assert hd(hd(metrics["cpuRequests"])["values"])["value"] == "cpu-requests"
+      assert hd(hd(metrics["memRequests"])["values"])["value"] == "mem-requests"
+      assert hd(hd(metrics["cpuLimits"])["values"])["value"] == "cpu-limits"
+      assert hd(hd(metrics["memLimits"])["values"])["value"] == "mem-limits"
+      assert hd(hd(metrics["podCpuRequests"])["values"])["value"] == "pod-cpu-requests"
+      assert hd(hd(metrics["podMemRequests"])["values"])["value"] == "pod-mem-requests"
+      assert hd(hd(metrics["podCpuLimits"])["values"])["value"] == "pod-cpu-limits"
+      assert hd(hd(metrics["podMemLimits"])["values"])["value"] == "pod-mem-limits"
+    end
+
+    test "it only runs the selected service usage queries, grouped by pod" do
+      user = admin_user()
+      service = insert(:service, namespace: "ns")
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(Req, :post, 3, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        assert query =~ ~s|cluster="#{service.cluster.handle}",namespace="ns"|
+        label = if query =~ "kubelet_volume_stats", do: "persistentvolumeclaim", else: "pod"
+        assert query =~ "by (#{label}) ("
+
+        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
+          %{metric: %{label => "x"}, values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!) {
+          serviceDeployment(id: $id) {
+            serviceUsageMetrics(groupBy: POD) {
+              __typename
+              cpuThrottling { metric values { timestamp value } }
+              networkReceive { metric values { timestamp value } }
+              volumeFullness { metric values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      metrics = found["serviceUsageMetrics"]
+      assert hd(metrics["cpuThrottling"])["metric"]["pod"] == "x"
+      assert hd(metrics["networkReceive"])["metric"]["pod"] == "x"
+      assert hd(metrics["volumeFullness"])["metric"]["persistentvolumeclaim"] == "x"
     end
 
     test "it can fetch a service heat map" do

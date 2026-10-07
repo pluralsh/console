@@ -43,6 +43,16 @@ defmodule Console.Schema.ServiceComponent do
     from(sc in query, where: sc.service_id == ^service_id)
   end
 
+  def count_by_flow_state(ids) do
+    from(sc in __MODULE__,
+      join: s in assoc(sc, :service),
+      where: s.flow_id in ^ids,
+      group_by: [s.flow_id, sc.state],
+      select: {s.flow_id, %{state: sc.state, count: count(sc.id)}}
+    )
+  end
+
+
   def for_group(query, nil), do: from(sc in query, where: is_nil(sc.group))
   def for_group(query, group), do: from(sc in query, where: sc.group == ^group)
 

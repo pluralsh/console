@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "dashboard_id": {
+      "type": "string",
+      "description": "Provider-specific dashboard ID returned by the external dashboard list tool"
+    },
+    "scope": {
+      "type": "string",
+      "description": "Provider scope when required, such as a Sentry organization slug"
+    }
+  },
+  "required": ["dashboard_id"]
+}

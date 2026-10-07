@@ -1,5 +1,11 @@
 import Config
 
+# Trace exporting is enabled at runtime only when an OTLP endpoint is supplied.
+# Keeping the exporter disabled by default avoids adding export overhead to local
+# and test environments while still allowing the release to bootstrap handlers.
+config :opentelemetry,
+  traces_exporter: :none
+
 config :console,
   ecto_repos: [Console.Repo],
   socket: :forge_socket
@@ -65,6 +71,7 @@ config :console,
   kas_dns: "https://kas.example.com",
   qps: 1_000,
   tarball_qps: 100,
+  max_request_body_length: 100_000_000,
   cache_agent_qps: 50,
   cache_agent_queue_limit: 50,
   cache_agent_queue_shed: 5,

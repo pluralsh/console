@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "issue_id": {
+      "type": "string",
+      "description": "Jira issue key or numeric ID."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque nextCursor from a previous response."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 50,
+      "description": "Maximum comments to return."
+    }
+  },
+  "required": ["issue_id"]
+}

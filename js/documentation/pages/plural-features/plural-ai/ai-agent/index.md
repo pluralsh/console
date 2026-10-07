@@ -52,5 +52,6 @@ Agent can be used in a variety of ways to improve your development workflow and 
 ## Next steps
 
 - Run your first agent task by following this [guide](/plural-features/plural-ai/ai-agent/configure-agent).
+- Speed up clone and compile with [prebaked repositories](/plural-features/plural-ai/ai-agent/repository-prebake).
 - Configure browser-assisted testing in [remote browser setup](/plural-features/plural-ai/ai-agent/remote-browser).
 - Review the [AgentRuntime API reference](/api-reference/kubernetes/agent-api-reference#agentruntime) and [BrowserConfig API reference](/api-reference/kubernetes/agent-api-reference#browserconfig).

@@ -21,37 +21,33 @@ permissions:
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    name: Build
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
+  test:
+    needs: [vouch]
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
         working-directory: go/datastore
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/datastore/go.mod
+          cache-dependency-path: go/datastore/go.sum
           cache: true
       - name: Download dependencies
         run: go mod download
-      - run: PATH=$PATH:$GOPATH/bin make build
-  unit-test:
-    name: Unit tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/datastore
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go/datastore/go.mod
-          cache: true
       - name: Test
         run: PATH=$PATH:$GOPATH/bin make test

@@ -54,6 +54,14 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsLabelSearch do
     end
   end
 
+  def structured(%__MODULE__{} = tool) do
+    with {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(tool),
+         {:ok, %MetricsLabelSearchOutput{} = output} <- Stub.metrics_label_search(conn, input, Client.metrics_rpc_opts()) do
+      {:ok, Enum.map(output.results, & &1.name)}
+    end
+  end
+
   defp input(%__MODULE__{tool: tool, metric: m, query: q, label: label, limit: l, options: options}) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
       {:ok, %MetricsLabelSearchInput{

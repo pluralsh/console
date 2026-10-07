@@ -10,7 +10,6 @@ import {
   hoverCaretAccordionCss,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
-import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
@@ -26,10 +25,7 @@ import {
 import { WorkbenchJobEvalPromptCard } from './WorkbenchJobEvalPromptCard'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
-import {
-  defaultClosedIds,
-  isActivityTerminal,
-} from './workbenchJobActivityCollapse'
+import { isActivityTerminal } from './workbenchJobActivityCollapse'
 
 /** Cursor-like proximity between top-level activities (~12px). */
 export const ACTIVITY_GAP = 'small' as const
@@ -48,28 +44,23 @@ export function WorkbenchJobActivities({
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 30_000,
+    pollInterval: 15_000,
   })
 
   const job = data?.workbenchJob
-  const activities = mapExistingNodes(job?.activities)
+  const activities = useMemo(
+    () => mapExistingNodes(job?.activities),
+    [job?.activities]
+  )
   const activityGroups = useMemo(
     () => groupConsecutiveMemos(activities),
     [activities]
   )
 
-  const [closedIds, setClosedIds] = useState<Set<string> | null>(null)
-  if (closedIds === null && !!data) setClosedIds(defaultClosedIds(activities))
+  const [openIds, setOpenIds] = useState<string[]>([])
 
-  const openIds = useMemo(
-    () => activities.filter((a) => !closedIds?.has(a.id)).map((a) => a.id),
-    [activities, closedIds]
-  )
-
-  const { textStreamMap, jobLevelThinking } = useWorkbenchJobStreams(
-    jobId,
-    setClosedIds
-  )
+  const { textStreamMap, latestThoughtMap, jobLevelThinking } =
+    useWorkbenchJobStreams(jobId, !!data)
 
   const userPromptIndices = useMemo(() => {
     const indices = [0] // 0 is initial user prompt in topContent
@@ -79,6 +70,42 @@ export function WorkbenchJobActivities({
     })
     return indices
   }, [activityGroups])
+
+  const noneStream = textStreamMap['none'] ?? ''
+  const showBottomLoader =
+    isJobRunning(job?.status) &&
+    activities.every(({ status }) => isActivityTerminal(status)) &&
+    jobLevelThinking.length === 0
+  // Keep this element stable. A new one on each render re-pins the list to
+  // the end, so an accordion opened at the bottom jumps upward.
+  const bottomStatus =
+    jobLevelThinking.length > 0
+      ? 'thinking'
+      : showBottomLoader
+        ? 'planning'
+        : null
+  const bottomContent = useMemo(
+    () => (
+      <>
+        {bottomStatus && (
+          <WorkbenchJobJobLevelThinking
+            items={jobLevelThinking}
+            jobRunning={isJobRunning(job?.status)}
+            planning={bottomStatus === 'planning'}
+            jobId={jobId}
+          />
+        )}
+        {noneStream && (
+          <SimplifiedMarkdown
+            text={noneStream}
+            tone="thought"
+          />
+        )}
+        <ChatEndSpaceSC />
+      </>
+    ),
+    [bottomStatus, job?.status, jobId, jobLevelThinking, noneStream]
+  )
 
   if (!data && loading)
     return (
@@ -100,22 +127,16 @@ export function WorkbenchJobActivities({
         <ActivitiesAccordionSC
           type="multiple"
           value={openIds}
-          onValueChange={(newOpenIds: string[]) => {
-            setClosedIds(
-              new Set(
-                activities
-                  .filter((a) => !newOpenIds.includes(a.id))
-                  .map((a) => a.id)
-              )
-            )
-          }}
+          onValueChange={setOpenIds}
         >
           <VirtualList
             isReversed
             data={activityGroups}
             itemGap={ACTIVITY_GAP}
             style={{
-              padding: `${spacing.large}px ${spacing.large}px ${spacing.medium}px`,
+              padding: `${spacing.large}px ${spacing.large}px 0`,
+              // Keep the clicked row from being pinned when it grows at the bottom.
+              overflowAnchor: 'none',
             }}
             keepMounted={userPromptIndices}
             topContent={
@@ -134,32 +155,7 @@ export function WorkbenchJobActivities({
                 />
               )
             }
-            bottomContent={
-              <>
-                {jobLevelThinking.length > 0 && (
-                  <WorkbenchJobJobLevelThinking
-                    items={jobLevelThinking}
-                    jobRunning={isJobRunning(job?.status)}
-                  />
-                )}
-                {textStreamMap['none'] && (
-                  <SimplifiedMarkdown
-                    text={textStreamMap['none']}
-                    tone="thought"
-                  />
-                )}
-                {isJobRunning(job?.status) &&
-                  activities.every(({ status }) =>
-                    isActivityTerminal(status)
-                  ) &&
-                  jobLevelThinking.length === 0 && (
-                    <AILoadingText
-                      jobId={jobId}
-                      marginTop={spacing.small}
-                    />
-                  )}
-              </>
-            }
+            bottomContent={bottomContent}
             renderer={({ rowData }) => {
               const [activity] = rowData.activities
 
@@ -180,6 +176,7 @@ export function WorkbenchJobActivities({
                   workbenchId={workbenchId}
                   workbenchName={workbenchName}
                   textStream={textStreamMap[activity.id] ?? ''}
+                  latestThought={latestThoughtMap[activity.id]}
                 />
               )
             }}
@@ -223,6 +220,12 @@ const ActivitiesAccordionSC = styled(Accordion)({
   height: '100%',
   ...hoverCaretAccordionCss,
 })
+
+/** Room under the last message so an accordion at the end opens downward. */
+const ChatEndSpaceSC = styled.div(({ theme }) => ({
+  height: theme.spacing.xxxxlarge,
+  flexShrink: 0,
+}))
 
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',

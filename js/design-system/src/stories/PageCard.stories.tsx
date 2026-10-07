@@ -1,8 +1,8 @@
-import { A, Flex } from 'honorable'
-
 import CheckedShieldIcon from '../components/icons/CheckedShieldIcon'
 
-import { PageCard } from '../index'
+import { useTheme } from 'styled-components'
+
+import { Flex, PageCard } from '../index'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
@@ -14,6 +14,8 @@ export default meta
 type Story = StoryObj<any>
 
 function Template() {
+  const theme = useTheme()
+
   return (
     <Flex
       flexWrap="wrap"
@@ -34,12 +36,12 @@ function Template() {
         subheading={
           <>
             Admin at{' '}
-            <A
+            <a
               href="#"
-              inline
+              css={theme.partials.text.inlineLink}
             >
               Plural
-            </A>
+            </a>
           </>
         }
         icon={{

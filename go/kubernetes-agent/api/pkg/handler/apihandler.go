@@ -97,7 +97,8 @@ type HealthResponse struct {
 	Status string `json:"status"`
 }
 
-type JSON string
+// JSON documents an arbitrary JSON object request body.
+type JSON map[string]interface{}
 
 // CreateHTTPAPIHandler creates a new HTTP handler that handles all requests to the API of the backend.
 func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, error) {
@@ -1046,7 +1047,7 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			Param(apiV1Ws.PathParameter("kind", "kind of the resource")).
 			Param(apiV1Ws.PathParameter("namespace", "namespace of the resource")).
 			Param(apiV1Ws.PathParameter("name", "name of the resource")).
-			Reads(JSON("")).
+			Reads(JSON{}).
 			Returns(http.StatusNoContent, "", nil))
 
 	// Verber (non-namespaced)
@@ -1076,7 +1077,7 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			Doc("creates or updates a non-namespaced resource").
 			Param(apiV1Ws.PathParameter("kind", "kind of the resource")).
 			Param(apiV1Ws.PathParameter("name", "name of the resource")).
-			Reads(JSON("")).
+			Reads(JSON{}).
 			Returns(http.StatusNoContent, "", nil))
 
 	// Generic resource scaling
@@ -1408,6 +1409,17 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			Doc("returns logs from a Pod").
 			Param(apiV1Ws.PathParameter("namespace", "namespace of the Pod")).
 			Param(apiV1Ws.PathParameter("pod", "name of the Pod")).
+			Param(apiV1Ws.QueryParameter("referenceTimestamp", "timestamp of the reference log line")).
+			Param(apiV1Ws.QueryParameter("referenceLineNum", "line number of the reference log line").DataType("integer")).
+			Param(apiV1Ws.QueryParameter("offsetFrom", "inclusive offset from the reference log line").DataType("integer")).
+			Param(apiV1Ws.QueryParameter("offsetTo", "exclusive offset from the reference log line").DataType("integer")).
+			Param(apiV1Ws.QueryParameter("logFilePosition", "position to load logs from: beginning or end")).
+			Param(apiV1Ws.QueryParameter("tailLines", "maximum number of lines to load from the end of the log").
+				DataType("integer").
+				DefaultValue(strconv.Itoa(logs.DefaultTailLines)).
+				Minimum(1).
+				Maximum(float64(logs.MaxTailLines))).
+			Param(apiV1Ws.QueryParameter("previous", "return logs from the previous container instance").DataType("boolean")).
 			Writes(logs.LogDetails{}).
 			Returns(http.StatusOK, "OK", logs.LogDetails{}))
 	apiV1Ws.Route(
@@ -1419,6 +1431,17 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			Param(apiV1Ws.PathParameter("namespace", "namespace of the Pod")).
 			Param(apiV1Ws.PathParameter("pod", "name of the Pod")).
 			Param(apiV1Ws.PathParameter("container", "name of container in the Pod")).
+			Param(apiV1Ws.QueryParameter("referenceTimestamp", "timestamp of the reference log line")).
+			Param(apiV1Ws.QueryParameter("referenceLineNum", "line number of the reference log line").DataType("integer")).
+			Param(apiV1Ws.QueryParameter("offsetFrom", "inclusive offset from the reference log line").DataType("integer")).
+			Param(apiV1Ws.QueryParameter("offsetTo", "exclusive offset from the reference log line").DataType("integer")).
+			Param(apiV1Ws.QueryParameter("logFilePosition", "position to load logs from: beginning or end")).
+			Param(apiV1Ws.QueryParameter("tailLines", "maximum number of lines to load from the end of the log").
+				DataType("integer").
+				DefaultValue(strconv.Itoa(logs.DefaultTailLines)).
+				Minimum(1).
+				Maximum(float64(logs.MaxTailLines))).
+			Param(apiV1Ws.QueryParameter("previous", "return logs from the previous container instance").DataType("boolean")).
 			Writes(logs.LogDetails{}).
 			Returns(http.StatusOK, "OK", logs.LogDetails{}))
 	apiV1Ws.Route(
@@ -3547,10 +3570,15 @@ func (in *APIHandler) handleLogs(request *restful.Request, response *restful.Res
 	offsetFrom, err1 := strconv.Atoi(request.QueryParameter("offsetFrom"))
 	offsetTo, err2 := strconv.Atoi(request.QueryParameter("offsetTo"))
 	logFilePosition := request.QueryParameter("logFilePosition")
+	tailLines, err := strconv.Atoi(request.QueryParameter("tailLines"))
+	if err != nil {
+		tailLines = 0
+	}
 
-	logSelector := logs.DefaultSelection
+	logSelector := *logs.DefaultSelection
+	logSelector.TailLines = logs.NormalizeTailLines(tailLines)
 	if err1 == nil && err2 == nil {
-		logSelector = &logs.Selection{
+		logSelector = logs.Selection{
 			ReferencePoint: logs.LogLineId{
 				LogTimestamp: logs.LogTimestamp(refTimestamp),
 				LineNum:      refLineNum,
@@ -3558,10 +3586,11 @@ func (in *APIHandler) handleLogs(request *restful.Request, response *restful.Res
 			OffsetFrom:      offsetFrom,
 			OffsetTo:        offsetTo,
 			LogFilePosition: logFilePosition,
+			TailLines:       logs.NormalizeTailLines(tailLines),
 		}
 	}
 
-	result, err := container.GetLogDetails(k8sClient, namespace, podID, containerID, logSelector, usePreviousLogs)
+	result, err := container.GetLogDetails(k8sClient, namespace, podID, containerID, &logSelector, usePreviousLogs)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return

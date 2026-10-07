@@ -114,7 +114,7 @@ function TagMultiSelectUnstyled({
             innerChips
               ? selectedTagArr.map((key) => ({
                   key,
-                  children: key,
+                  children: key.toString(),
                 }))
               : undefined
           }

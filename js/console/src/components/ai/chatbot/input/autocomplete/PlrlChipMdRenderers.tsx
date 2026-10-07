@@ -4,6 +4,8 @@ import {
   GitPullIcon,
   GitHubLogoIcon,
   GitLabLogoIcon,
+  DashboardIcon,
+  SirenIcon,
   StackIcon,
   Tooltip,
   WarningShieldIcon,
@@ -25,6 +27,10 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
+import {
+  getWorkbenchMonitoringDashboardAbsPath,
+  getWorkbenchMonitoringMonitorAbsPath,
+} from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { chipDisplayText, ChipAttrsByKind, MentionKind } from './mentionTypes'
 import {
@@ -212,6 +218,42 @@ function PlrlRepositoryChip(props: RenderedChipProps<MentionKind.Repository>) {
   return <ChipBody icon={icon}>{label}</ChipBody>
 }
 
+function PlrlMonitoringChip(props: RenderedChipProps<MentionKind.Monitoring>) {
+  const id = props['item-id']
+  const workbenchId = props['workbench-id']
+  const resourceType = props['resource-type']
+  const label =
+    chipDisplayText(MentionKind.Monitoring, {
+      'item-name': props['item-name'],
+    }) ||
+    props['item-name'] ||
+    id
+  const icon =
+    resourceType === 'monitor' ? (
+      <SirenIcon size={12} />
+    ) : (
+      <DashboardIcon size={12} />
+    )
+  const to =
+    id && workbenchId
+      ? resourceType === 'monitor'
+        ? getWorkbenchMonitoringMonitorAbsPath({ workbenchId, monitorId: id })
+        : getWorkbenchMonitoringDashboardAbsPath({
+            workbenchId,
+            dashboardId: id,
+          })
+      : undefined
+
+  return (
+    <WrapWithIf
+      condition={!!to}
+      wrapper={<ChipLinkSC to={to!} />}
+    >
+      <ChipBody icon={icon}>{label}</ChipBody>
+    </WrapWithIf>
+  )
+}
+
 function repositoryChipIcon(provider?: string): ReactNode {
   switch (provider) {
     case ScmType.Github:
@@ -254,6 +296,7 @@ export const plrlChipComponents = {
   [MentionKind.Skill]: PlrlSkillChip,
   [MentionKind.Vulnerability]: PlrlVulnerabilityChip,
   [MentionKind.Repository]: PlrlRepositoryChip,
+  [MentionKind.Monitoring]: PlrlMonitoringChip,
 } satisfies {
   [K in MentionKind]: ComponentType<RenderedChipProps<K>>
 }

@@ -1,7 +1,11 @@
-import { Div, Flex, H1, P } from 'honorable'
-
-import { IconFrame, type IconFrameProps, TrashCanIcon } from '../index'
+import { IconFrame, type IconFrameProps, TrashCanIcon, Flex } from '../index'
 import type { Meta, StoryObj } from '@storybook/react'
+import styled from 'styled-components'
+
+const Caption = styled.p(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.caption,
+}))
 
 const meta = {
   title: 'Icon Frame',
@@ -34,22 +38,17 @@ function Template({
   return (
     <>
       {types.map((type) => (
-        <Div key={type}>
-          <H1
-            caption
-            marginBottom="xxsmall"
-          >
-            type=&quot;{type}&quot;
-          </H1>
+        <div key={type}>
+          <Caption style={{ marginBottom: 4 }}>type=&quot;{type}&quot;</Caption>
           <Flex
             gap="xsmall"
-            marginBottom="xlarge"
+            marginBottom={32}
             alignItems="center"
             flexWrap="wrap"
           >
             {sizes.map((size) => (
               <>
-                <P caption>size=&quot;{size}&quot;</P>
+                <Caption>size=&quot;{size}&quot;</Caption>
                 <IconFrame
                   size={size || 'medium'}
                   clickable={clickable === undefined ? true : clickable}
@@ -63,7 +62,7 @@ function Template({
               </>
             ))}
           </Flex>
-        </Div>
+        </div>
       ))}
     </>
   )

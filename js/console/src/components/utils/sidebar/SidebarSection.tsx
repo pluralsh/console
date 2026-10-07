@@ -8,12 +8,15 @@ export function SidebarSection({ grow = 0, ...props }: FlexProps) {
       direction="column"
       grow={grow}
       align="center"
-      borderBottom={borders.hairline}
       gap="xxsmall"
       padding="small"
       width="100%"
-      {...{ '&:last-of-type': { border: 'none' } }}
       {...props}
+      css={{
+        borderBottom: borders.hairline,
+        '&:last-of-type': { border: 'none' },
+        ...props.css,
+      }}
     />
   )
 }

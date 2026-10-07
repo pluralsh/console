@@ -5,6 +5,18 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - batch
   resources:
   - jobs
@@ -22,6 +34,7 @@ rules:
   resources:
   - agentruntimes
   - customhealths
+  - imagewarmers
   - kubecostextractors
   - pipelinegates
   verbs:
@@ -37,6 +50,7 @@ rules:
   resources:
   - agentruntimes/finalizers
   - customhealths/finalizers
+  - imagewarmers/finalizers
   - kubecostextractors/finalizers
   - pipelinegates/finalizers
   verbs:
@@ -46,6 +60,7 @@ rules:
   resources:
   - agentruntimes/status
   - customhealths/status
+  - imagewarmers/status
   - kubecostextractors/status
   - pipelinegates/status
   verbs:

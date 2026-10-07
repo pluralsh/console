@@ -1,7 +1,7 @@
 import { mergeRefs } from '@react-aria/utils'
 import { type Key, type Node } from '@react-types/shared'
 import { type AriaTabListProps } from '@react-types/tabs'
-import { Flex, type FlexProps } from 'honorable'
+import Flex, { type FlexProps } from './Flex'
 import {
   Children,
   type ComponentProps,
@@ -129,7 +129,11 @@ function TabList({
 
   if (renderer) {
     return renderer(
-      { ...props, ...tabListProps, ...{ children: tabChildren } },
+      {
+        ...props,
+        ...tabListProps,
+        ...{ children: tabChildren },
+      } as HTMLAttributes<HTMLElement>,
       mergedRef,
       state
     )
@@ -177,7 +181,6 @@ const TabClone = styled(
   position: 'relative',
   '&:focus, &:focus-visible': {
     outline: 'none',
-    color: 'inherit',
     zIndex: theme.zIndexes.base + 1,
   },
   '&:focus-visible': {
@@ -220,15 +223,9 @@ function TabRenderer({ item, state, stateProps, stateRef }: TabRendererProps) {
       {
         ...{
           cursor: 'pointer',
-          _focus: { outline: 'none', color: 'inherit' },
-          _focusVisible: {
-            ...theme.partials.focus.default,
-            color: 'inherit',
-          },
+          _focusVisible: { ...theme.partials.focus.default },
           position: 'relative',
           '&:focus, &:focus-visible': {
-            outline: 'none',
-            color: 'inherit',
             zIndex: theme.zIndexes.base + 1,
           },
         },

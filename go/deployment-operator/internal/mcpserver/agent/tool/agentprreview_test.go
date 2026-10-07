@@ -21,7 +21,13 @@ func TestAgentPrReviewInputSchema(t *testing.T) {
 
 	properties := schema["properties"].(map[string]any)
 	require.Equal(t, float64(maxReviewComments), properties["comments"].(map[string]any)["maxItems"])
-	require.Equal(t, []any{"A", "B", "C", "D", "E", "F"}, properties["confidence"].(map[string]any)["enum"])
+	confidence := properties["confidence"].(map[string]any)
+	require.Equal(t, []any{"A", "B", "C", "D", "E", "F"}, confidence["enum"])
+	require.Contains(t, confidence["description"], "mergeability grade rather than review confidence")
+	require.Contains(t, properties["confidenceComment"].(map[string]any)["description"], "mergeability grade")
+
+	reviewTool := NewAgentPrReview(nil, "run-1").(*AgentPrReview)
+	require.Contains(t, reviewTool.description, "A-F mergeability grade")
 
 	comment := properties["comments"].(map[string]any)["items"].(map[string]any)
 	commentProperties := comment["properties"].(map[string]any)

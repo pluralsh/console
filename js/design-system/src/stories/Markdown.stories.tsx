@@ -1,5 +1,3 @@
-import { Div } from 'honorable'
-
 import { Markdown } from '..'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -237,16 +235,13 @@ type Story = StoryObj<any>
 
 function Template() {
   return (
-    <Div
-      minWidth="400px"
-      maxWidth="800px"
-    >
+    <div style={{ minWidth: 400, maxWidth: 800 }}>
       <Markdown
         text={markdown}
         gitUrl="https://github.com/pluralsh/console/"
         mainBranch="master"
       />
-    </Div>
+    </div>
   )
 }
 

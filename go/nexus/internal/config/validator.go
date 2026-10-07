@@ -69,6 +69,13 @@ func validateServer(cfg *ServerConfig) ValidationErrors {
 		})
 	}
 
+	if (cfg.CertificateFile == "") != (cfg.KeyFile == "") {
+		errors = append(errors, ValidationError{
+			Field:   "server.tls",
+			Message: "certificateFile and keyFile must both be configured to enable TLS",
+		})
+	}
+
 	// Validate timeouts
 	if cfg.ReadTimeout < 0 {
 		errors = append(errors, ValidationError{

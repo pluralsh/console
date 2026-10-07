@@ -2,9 +2,11 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -42,7 +44,9 @@ func New(cfg *config.ServerConfig, consoleClient console.Client) *Server {
 func (s *Server) SetupRoutes() {
 	r := s.router
 
-	r.Use(middleware.StripPrefix(s.config.Path))
+	// health endpoints are also served unprefixed so load balancers sharing a health check path
+	// across backends (e.g. an ALB on the console ingress) can probe nexus directly
+	r.Use(stripPrefixExcept(s.config.Path, "/health", "/healthz", "/ready"))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(nexusmw.RequestLogger())
@@ -52,6 +56,7 @@ func (s *Server) SetupRoutes() {
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Timeout(30 * time.Second)) // Short timeout for health checks
 		r.Get("/health", HealthHandler())
+		r.Get("/healthz", HealthHandler())
 		r.Get("/ready", ReadyHandler(s.consoleClient))
 	})
 
@@ -63,6 +68,20 @@ func (s *Server) SetupRoutes() {
 		r.Use(nexusmw.Auth(s.consoleClient))
 		r.Mount("/", s.bifrostHandler)
 	})
+}
+
+// stripPrefixExcept behaves like middleware.StripPrefix but leaves the given exact paths untouched
+func stripPrefixExcept(prefix string, paths ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		stripped := http.StripPrefix(prefix, next)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if slices.Contains(paths, r.URL.Path) {
+				next.ServeHTTP(w, r)
+				return
+			}
+			stripped.ServeHTTP(w, r)
+		})
+	}
 }
 
 // Start initializes and starts the HTTP server
@@ -105,9 +124,17 @@ func (s *Server) Start(ctx context.Context) (<-chan struct{}, error) {
 		WriteTimeout:      writeTimeout, // 0 = no timeout, allows infinite streaming
 		IdleTimeout:       idleTimeout,
 		MaxHeaderBytes:    1 << 20, // 1 MB
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		},
 	}
 
-	s.logger.Info("starting HTTP server",
+	protocol := "HTTP"
+	if s.config.CertificateFile != "" {
+		protocol = "HTTPS"
+	}
+	s.logger.Info("starting server",
+		zap.String("protocol", protocol),
 		zap.String("address", addr),
 	)
 
@@ -115,9 +142,14 @@ func (s *Server) Start(ctx context.Context) (<-chan struct{}, error) {
 	errChan := make(chan error, 1)
 
 	go func() {
-		err = s.httpServer.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			errChan <- fmt.Errorf("server error: %w", err)
+		var serveErr error
+		if s.config.CertificateFile != "" {
+			serveErr = s.httpServer.ListenAndServeTLS(s.config.CertificateFile, s.config.KeyFile)
+		} else {
+			serveErr = s.httpServer.ListenAndServe()
+		}
+		if serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+			errChan <- fmt.Errorf("server error: %w", serveErr)
 		}
 	}()
 

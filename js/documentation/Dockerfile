@@ -10,11 +10,13 @@ COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
 COPY js/documentation/package.json ./documentation/package.json
 COPY js/eslint-config/package.json ./eslint-config/package.json
+COPY js/stylelint-config/package.json ./stylelint-config/package.json
 RUN corepack enable \
   && yarn install --immutable
 
 COPY js/design-system/ ./design-system/
 COPY js/documentation/ ./documentation/
+COPY js/eslint-config/ ./eslint-config/
 
 ARG NEXT_PUBLIC_ROOT_URL
 ARG NEXT_PUBLIC_GA_ID
@@ -34,3 +36,6 @@ EXPOSE 3000
 
 WORKDIR /app/documentation
 CMD ["node", "/app/node_modules/next/dist/bin/next", "start", "-p", "3000"]
+RUN chown -R node:node /app
+USER node
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD ["node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]

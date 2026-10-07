@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.CanvasTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.AI.Workbench.{Subagents, Environment, Canvas}
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
   import ElasticsearchUtils
 
   setup :set_mimic_global
@@ -23,7 +23,7 @@ defmodule Console.AI.Workbench.Subagents.CanvasTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "building dashboard", [
           %Tool{
             id: "1",

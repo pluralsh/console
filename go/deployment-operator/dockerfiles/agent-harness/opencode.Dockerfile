@@ -1,6 +1,6 @@
 ARG NODE_IMAGE_TAG=24
 ARG NODE_IMAGE=node:${NODE_IMAGE_TAG}-slim
-ARG AGENT_VERSION=1.17.3
+ARG AGENT_VERSION=1.18.23
 
 ARG AGENT_HARNESS_BASE_IMAGE_TAG=latest
 ARG AGENT_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/agent-harness-base
@@ -36,3 +36,5 @@ USER 65532:65532
 
 # The entrypoint remains the agent-harness binary
 # The agent-harness will call the opencode CLI as needed
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["opencode", "--version"]

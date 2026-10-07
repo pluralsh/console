@@ -15,7 +15,8 @@ defmodule Console.AI.XAI do
     :stream,
     :method,
     :token_exchange,
-    :headers
+    :headers,
+    :proxy
   ]
 
   @type t :: %__MODULE__{}
@@ -33,6 +34,7 @@ defmodule Console.AI.XAI do
       method: Map.get(opts, :method) || :auto,
       token_exchange: Map.get(opts, :token_exchange),
       headers: Map.get(opts, :headers),
+      proxy: Map.get(opts, :proxy),
       stream: Stream.stream()
     }
   end
@@ -46,7 +48,7 @@ defmodule Console.AI.XAI do
     }}
   end
 
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = xai, messages, opts) do
     with {:ok, provider_opts} <- provider_options(xai) do
       messages
@@ -56,7 +58,6 @@ defmodule Console.AI.XAI do
         xai.stream,
         base_opts(provider_opts ++ [tools: tools(opts)], opts)
       )
-      |> reqllm_result()
     end
   end
 
@@ -101,7 +102,7 @@ defmodule Console.AI.XAI do
   end
 
   defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
-    case TokenExchange.exchange(token.token_url, token.client_id, token.client_secret) do
+    case TokenExchange.exchange(token) do
       {:ok, %OAuth2.AccessToken{access_token: token}} when is_binary(token) -> {:ok, token}
       {:ok, token} when is_binary(token) -> {:ok, token}
       err -> err

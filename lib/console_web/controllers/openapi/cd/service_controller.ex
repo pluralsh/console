@@ -10,8 +10,11 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceController do
   alias Console.Deployments.Services
   alias Console.Schema.Service
 
-  plug Scope, [resource: :service, action: :read] when action in [:show, :index]
-  plug Scope, [resource: :service, action: :write] when action in [:create, :update, :delete, :kick]
+  plug Scope, [resource: :service, action: :read, api: "serviceDeployment"] when action in [:show]
+  plug Scope, [resource: :service, action: :read, api: "serviceDeployments"] when action in [:index]
+  plug Scope, [resource: :service, action: :write, api: "createServiceDeployment"] when action in [:create]
+  plug Scope, [resource: :service, action: :write, api: "updateServiceDeployment"] when action in [:update]
+  plug Scope, [resource: :service, action: :write, api: "deleteServiceDeployment"] when action in [:delete]
 
   @doc """
   Fetches a service deployment by id.

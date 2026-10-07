@@ -1,27 +1,44 @@
 import {
-  Card,
+  DeploymentIcon,
   EmptyState,
   Flex,
   HeatMapIcon,
   ListBoxItem,
-  Select,
+  SmallPodIcon,
   TimeSeriesIcon,
 } from '@pluralsh/design-system'
+import { CompactSelect } from 'components/utils/CompactSelect'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
+import {
+  MetricsGraphGrid,
+  MetricsScrollSC,
+} from 'components/utils/metrics/MetricsGraphCard'
+import { MetricsSection } from 'components/utils/metrics/MetricsSection'
+import {
+  type ClusterMetricGraph,
+  usageFieldVariables,
+} from 'components/cd/cluster/metrics/clusterMetricsGraphs'
+import { UsageMetricGraphCard } from 'components/cd/cluster/metrics/UsageMetricGraphCard'
+import { serviceMetricSections } from './metrics/serviceMetricsGraphs'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
-import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
-import RangePicker from 'components/utils/RangePicker'
+import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
+import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
+import {
+  type TimeRangeState,
+  useRangeQueryData,
+  useTimeRange,
+} from 'components/utils/timerange/useTimeRange'
 import {
   HeatMapFlavor,
-  MetricResponseFragment,
+  ServiceMetricsGrouping,
   useServiceHeatMapQuery,
-  useServiceMetricsQuery,
+  useServiceUsageMetricsQuery,
 } from 'generated/graphql'
-import { capitalize, isEmpty } from 'lodash'
+import { capitalize } from 'lodash'
 import { useTheme } from 'styled-components'
 
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
@@ -32,10 +49,7 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { Prometheus } from 'utils/prometheus.ts'
-import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
 
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
@@ -132,8 +146,9 @@ function ServiceMetricsHeatmap() {
           align="center"
         >
           <CaptionP $color="text-xlight">Group by</CaptionP>
-          <Select
-            width={160}
+          <CompactSelect
+            size="small"
+            width={140}
             selectedKey={heatMapFlavor}
             onSelectionChange={(e) => setHeatMapFlavor(e as HeatMapFlavor)}
           >
@@ -145,11 +160,11 @@ function ServiceMetricsHeatmap() {
                   label={capitalize(flavor)}
                 />
               ))}
-          </Select>
+          </CompactSelect>
         </Flex>
       </Flex>
       {!(heatMapData || isLoading) ? (
-        <Card css={{ padding: spacing.xlarge, flex: 1 }}>
+        <MetricsCard css={{ padding: spacing.xlarge, flex: 1 }}>
           {heatMapError ? (
             <GqlError
               css={{ width: '100%' }}
@@ -158,10 +173,10 @@ function ServiceMetricsHeatmap() {
           ) : (
             <EmptyState message="Utilization heatmaps not available." />
           )}
-        </Card>
+        </MetricsCard>
       ) : (
         <>
-          <Card
+          <MetricsCard
             header={{
               content: `memory utilization by ${heatMapFlavor}`,
               outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
@@ -181,8 +196,8 @@ function ServiceMetricsHeatmap() {
                 utilizationType="memory"
               />
             )}
-          </Card>
-          <Card
+          </MetricsCard>
+          <MetricsCard
             header={{
               content: `cpu utilization by ${heatMapFlavor}`,
               outerProps: { style: { flexShrink: 0, height: 'fit-content' } },
@@ -202,211 +217,135 @@ function ServiceMetricsHeatmap() {
                 utilizationType="cpu"
               />
             )}
-          </Card>
+          </MetricsCard>
         </>
       )}
     </Flex>
   )
 }
 
-const convertVals = (values) =>
-  values.map(({ timestamp, value }) => ({
-    x: new Date(timestamp * 1000),
-    y: parseFloat(value),
-  }))
-
-function Graphs({
-  cpu: [cpu],
-  mem: [mem],
-}: {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-}) {
-  const theme = useTheme()
-
-  const { cpuValues, memValues } = useMemo(
-    () => ({
-      cpuValues: cpu?.values ? convertVals(cpu?.values) : null,
-      memValues: mem?.values ? convertVals(mem?.values) : null,
-    }),
-    [cpu, mem]
-  )
-
-  if (!memValues && !cpuValues) return null
-
-  return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
-    >
-      {cpuValues && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Overall CPU Usage (cores)" />
-          <Graph
-            data={[{ id: 'cpu', data: cpuValues }]}
-            yFormat={(v) => Prometheus.format(v, 'cpu')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-      {memValues && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Overall Memory Usage (bytes)" />
-          <Graph
-            data={[{ id: 'memory', data: memValues }]}
-            yFormat={(v) => Prometheus.format(v, 'memory')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-    </div>
-  )
-}
-
-function PodGraphs({
-  cpu,
-  mem,
-}: {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-}) {
-  const { cpuGraph, memGraph } = useMemo(() => {
-    const cpuGraph = cpu.map(({ metric, values }) => ({
-      id: (metric as any)?.pod,
-      data: convertVals(values),
-    }))
-    const memGraph = mem.map(({ metric, values }) => ({
-      id: (metric as any)?.pod,
-      data: convertVals(values),
-    }))
-
-    return { cpuGraph, memGraph }
-  }, [cpu, mem])
-
-  if (!memGraph && !cpuGraph) return null
-
-  return (
-    <Flex
-      gap="large"
-      grow={1}
-      height={320}
-      padding="large"
-    >
-      {!isEmpty(cpuGraph) && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Pod CPU Usage (cores)" />
-          <Graph
-            data={cpuGraph}
-            yFormat={(v) => Prometheus.format(v, 'cpu')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-      {!isEmpty(memGraph) && (
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <GraphHeader title="Pod Memory Usage (bytes)" />
-          <Graph
-            data={memGraph}
-            yFormat={(v) => Prometheus.format(v, 'memory')}
-            tickRotation={undefined}
-          />
-        </Flex>
-      )}
-    </Flex>
-  )
-}
+const GROUPINGS = [
+  {
+    key: ServiceMetricsGrouping.Service,
+    label: 'Service',
+    icon: <DeploymentIcon size={16} />,
+  },
+  {
+    key: ServiceMetricsGrouping.Pod,
+    label: 'Pod',
+    icon: <SmallPodIcon size={16} />,
+  },
+]
 
 function ServiceMetricsTimeseries() {
-  const theme = useTheme()
   const { serviceId } = useParams()
-  const [duration, setDuration] = useState<any>(DURATIONS[0])
-  const start = useMetricsQueryStart(duration.offset)
-  const {
-    data,
-    loading,
-    error: metricsError,
-  } = useServiceMetricsQuery({
-    variables: {
-      id: serviceId ?? '',
-      step: getMetricQueryStep(duration.offset),
-      start,
-    },
-    skip: !serviceId,
-    pollInterval: 60_000,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } =
-      data?.serviceDeployment?.serviceMetrics || {}
-
-    return {
-      cpu: (cpu || []).filter(isNonNullable),
-      mem: (mem || []).filter(isNonNullable),
-      podCpu: (podCpu || []).filter(isNonNullable),
-      podMem: (podMem || []).filter(isNonNullable),
-    }
-  }, [data])
-
-  let content = <EmptyState message="No metrics available" />
-
-  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
-    content = (
-      <>
-        <Graphs
-          cpu={cpu}
-          mem={mem}
-        />
-        <PodGraphs
-          cpu={podCpu}
-          mem={podMem}
-        />
-      </>
-    )
-  }
+  const timeRange = useTimeRange()
+  const [grouping, setGrouping] = useState(ServiceMetricsGrouping.Service)
+  const sections = useMemo(() => serviceMetricSections(grouping), [grouping])
 
   return (
     <Flex
       direction="column"
-      gap="small"
+      gap="medium"
       height="100%"
       width="100%"
-      overflow="auto"
+      minHeight={0}
     >
-      <RangePicker
-        duration={duration}
-        setDuration={setDuration}
-        position="sticky"
-        top={0}
-      />
-      {!data && loading ? (
-        <RectangleSkeleton
-          $height="100%"
-          $width="100%"
-        />
-      ) : metricsError ? (
-        <GqlError error={metricsError} />
-      ) : (
-        <Card css={{ padding: theme.spacing.medium }}>{content}</Card>
-      )}
+      <Flex
+        align="center"
+        justifyContent="space-between"
+        gap="medium"
+        wrap="wrap"
+      >
+        <Flex
+          gap="small"
+          align="center"
+        >
+          <CaptionP $color="text-xlight">Group by</CaptionP>
+          <CompactSelect
+            size="small"
+            width={140}
+            selectedKey={grouping}
+            leftContent={GROUPINGS.find(({ key }) => key === grouping)?.icon}
+            onSelectionChange={(key) =>
+              setGrouping(key as ServiceMetricsGrouping)
+            }
+          >
+            {GROUPINGS.map(({ key, label, icon }) => (
+              <ListBoxItem
+                key={key}
+                label={label}
+                leftContent={icon}
+              />
+            ))}
+          </CompactSelect>
+        </Flex>
+        <MetricsTimeRangeControl timeRange={timeRange} />
+      </Flex>
+      <MetricsScrollSC>
+        {sections.map(({ key, title, description, graphs }) => (
+          <MetricsSection
+            key={key}
+            title={title}
+            description={description}
+          >
+            <MetricsGraphGrid>
+              {graphs.map((graph) => (
+                <ServiceMetricGraphCard
+                  key={`${grouping}-${graph.key}`}
+                  serviceId={serviceId}
+                  grouping={grouping}
+                  graph={graph}
+                  timeRange={timeRange}
+                />
+              ))}
+            </MetricsGraphGrid>
+          </MetricsSection>
+        ))}
+      </MetricsScrollSC>
     </Flex>
+  )
+}
+
+function ServiceMetricGraphCard({
+  serviceId,
+  grouping,
+  graph,
+  timeRange,
+}: {
+  serviceId?: string
+  grouping: ServiceMetricsGrouping
+  graph: ClusterMetricGraph
+  timeRange: TimeRangeState
+}) {
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = useServiceUsageMetricsQuery({
+    variables: {
+      serviceId: serviceId ?? '',
+      groupBy: grouping,
+      ...metricsQueryWindow(timeRange.timeWindow),
+      ...usageFieldVariables(graph.fields),
+    },
+    skip: !serviceId,
+    fetchPolicy: 'cache-and-network',
+  })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
+
+  return (
+    <UsageMetricGraphCard
+      graph={graph}
+      metrics={data?.serviceDeployment?.serviceUsageMetrics}
+      loading={loading}
+      error={error}
+      timeRange={timeRange}
+    />
   )
 }
 

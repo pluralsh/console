@@ -9,10 +9,10 @@ import {
 import { Key } from '@react-types/shared'
 
 import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs'
+import { PodMetrics } from 'components/cd/cluster/pod/PodMetrics'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { reverse } from 'lodash'
 import { ReactElement, useMemo, useState } from 'react'
 import {
   Outlet,
@@ -29,12 +29,12 @@ import {
   PodPodDetail,
 } from '../../../generated/kubernetes'
 import {
-  getContainerLogsOptions,
+  getContainerLogsInfiniteOptions,
   getPodEventsInfiniteOptions,
   getPodOptions,
 } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import { AxiosInstance } from '../../../helpers/axios.ts'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 
 import {
   getResourceDetailsAbsPath,
@@ -67,6 +67,7 @@ import { toReadiness } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'containers', label: 'Containers' },
   { path: 'events', label: 'Events' },
   { path: 'logs', label: 'Logs' },
@@ -218,6 +219,18 @@ export function PodInfo(): ReactElement<any> {
   )
 }
 
+export function PodMetricsView(): ReactElement<any> {
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+
+  return (
+    <PodMetrics
+      clusterId={clusterId}
+      name={name}
+      namespace={namespace}
+    />
+  )
+}
+
 export function PodContainers(): ReactElement<any> {
   const pod = useOutletContext() as PodPodDetail
 
@@ -251,18 +264,56 @@ export function PodLogs(): ReactElement<any> {
   const [selected, setSelected] = useState<Nullable<Key>>(
     containers.at(0) ?? ''
   )
-
-  const { data, isLoading, refetch, error } = useQuery({
-    ...getContainerLogsOptions({
+  const path = {
+    container: selected as string,
+    pod: name,
+    namespace,
+  }
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error,
+  } = useInfiniteQuery({
+    ...getContainerLogsInfiniteOptions({
       client: AxiosInstance(clusterId),
-      path: {
-        container: selected as string,
-        pod: name,
-        namespace,
-      },
+      path,
     }),
-    refetchInterval: 30_000,
+    initialPageParam: { path },
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.info.hasMore) return undefined
+
+      const pageSize =
+        lastPage.selection.offsetTo - lastPage.selection.offsetFrom
+      const tailLines = lastPage.selection.tailLines
+      const query = {
+        referenceTimestamp: lastPage.selection.referencePoint.timestamp,
+        referenceLineNum: lastPage.selection.referencePoint.lineNum,
+        offsetFrom: lastPage.selection.offsetFrom - pageSize,
+        offsetTo: lastPage.selection.offsetFrom,
+        logFilePosition: lastPage.selection.logFilePosition,
+        tailLines: lastPage.info.truncated ? tailLines * 2 : tailLines,
+      }
+
+      return { path, query }
+    },
+    refetchInterval: (query) =>
+      (query.state.data?.pages?.length ?? 0) > 1 ? false : 30_000,
   })
+
+  const logs = useMemo(
+    () =>
+      data?.pages.flatMap((page) =>
+        page.logs.map((line) => line.content || '').reverse()
+      ) ?? [],
+    [data?.pages]
+  )
+  const latestPage = data?.pages.at(-1)
+  const isTerminallyTruncated =
+    latestPage?.info.truncated && !latestPage.info.hasMore
 
   if (error)
     return (
@@ -306,10 +357,14 @@ export function PodLogs(): ReactElement<any> {
         </FormField>
       </div>
       <ContainerLogsTable
-        logs={reverse(data?.logs.map((line) => line?.content || '') || [])}
+        logs={logs}
         loading={isLoading}
         refetch={refetch}
         container={selected as string}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        isTerminallyTruncated={isTerminallyTruncated}
       />
     </div>
   )

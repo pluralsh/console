@@ -5,7 +5,7 @@ import {
   Divider,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   Select,
   SelectButton,
@@ -17,6 +17,7 @@ import { FormBindings } from 'components/utils/bindings'
 import {
   PolicyBindingFragment,
   Provider,
+  SplunkTokenType,
   WorkbenchToolCategory,
   WorkbenchToolAttributes,
   WorkbenchToolConfigurationAttributes,
@@ -24,6 +25,8 @@ import {
   WorkbenchToolHttpMethod,
   WorkbenchToolType,
   HelmAuthProvider,
+  OauthTokenExchangeAttributes,
+  OauthTokenExchangeType,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isValidJson } from 'utils/isValidJson'
@@ -40,6 +43,7 @@ import { McpServerSelectField } from './mcp-server/McpServerSelectField'
 import { ScmConnectionWorkbenchSelect } from './scm-connection/ScmConnectionWorkbenchSelect'
 import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
+import { oauthTokenExchangeIsComplete } from './OauthTokenExchangeFormFields'
 import {
   categoryToLabel,
   cloudFunctionProviderForWorkbenchTool,
@@ -136,6 +140,19 @@ function bitbucketDatacenterConfigurationIsComplete(
   return (c?.url ?? '').trim().length > 0 && scmTokenIsSet(c?.token)
 }
 
+function jiraDatacenterConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['jiraDatacenter'] | null | undefined,
+  oauth: Nullable<OauthTokenExchangeAttributes>,
+  persistedOauthType: Nullable<OauthTokenExchangeType>,
+  isEditing: boolean
+): boolean {
+  if (!(c?.url ?? '').trim()) return false
+  if (oauth?.enabled)
+    return oauthTokenExchangeIsComplete(oauth, persistedOauthType)
+
+  return isEditing || scmTokenIsSet(c?.apiToken)
+}
+
 export type WorkbenchToolFormState = Omit<
   Pick<
     WorkbenchToolAttributes,
@@ -146,6 +163,7 @@ export type WorkbenchToolFormState = Omit<
     | 'mcpServerId'
     | 'scmConnectionId'
     | 'approval'
+    | 'oauth'
     | 'readBindings'
     | 'writeBindings'
   >,
@@ -203,6 +221,18 @@ export function WorkbenchToolForm({
     name: tool?.name ?? '',
     categories: tool?.categories ?? defaultCategories,
     configuration: sanitizeInitialConfiguration(tool),
+    oauth: tool?.oauth
+      ? {
+          enabled: tool.oauth.enabled !== false,
+          type: tool.oauth.type ?? OauthTokenExchangeType.ClientSecret,
+          tokenUrl: tool.oauth.tokenUrl,
+          clientId: tool.oauth.clientId,
+          keyId: tool.oauth.keyId,
+          audience: tool.oauth.audience,
+          resource: tool.oauth.resource,
+          scopes: tool.oauth.scopes,
+        }
+      : undefined,
     cloudConnectionId: tool?.cloudConnection?.id,
     mcpServerId: tool?.mcpServer?.id,
     scmConnectionId: tool?.scmConnection?.id,
@@ -230,6 +260,8 @@ export function WorkbenchToolForm({
       })) &&
     (type !== WorkbenchToolType.Opensearch ||
       opensearchConfigurationIsComplete(state.configuration?.opensearch)) &&
+    (type !== WorkbenchToolType.VictoriaLogs ||
+      !!(state.configuration?.victoriaLogs?.url ?? '').trim()) &&
     (type !== WorkbenchToolType.Gitlab ||
       hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.gitlab?.token)) &&
@@ -240,6 +272,13 @@ export function WorkbenchToolForm({
       hasRegisteredScm ||
       bitbucketDatacenterConfigurationIsComplete(
         state.configuration?.bitbucketDatacenter
+      )) &&
+    (type !== WorkbenchToolType.JiraDatacenter ||
+      jiraDatacenterConfigurationIsComplete(
+        state.configuration?.jiraDatacenter,
+        state.oauth,
+        tool?.oauth?.type,
+        !!tool?.id
       )) &&
     (type !== WorkbenchToolType.AzureDevops ||
       hasRegisteredScm ||
@@ -313,10 +352,8 @@ export function WorkbenchToolForm({
             <FormField
               required
               label="Name"
-              value={state.name}
-              onChange={(e) => update({ name: e.target.value })}
             >
-              <Input2
+              <Input
                 placeholder="Enter a name for the tool"
                 value={state.name}
                 onChange={(e) => update({ name: e.target.value })}
@@ -386,6 +423,7 @@ export function WorkbenchToolForm({
                   type={type}
                   state={state}
                   update={update}
+                  persistedOauthType={tool?.oauth?.type}
                 />
               </>
             ) : null}
@@ -652,6 +690,12 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     const { url, username, tenantId } = config?.loki ?? {}
     return { loki: { url: url ?? '', username, tenantId } }
   },
+  [WorkbenchToolType.VictoriaLogs]: (config) => {
+    const { url, username, accountId, projectId } = config?.victoriaLogs ?? {}
+    return {
+      victoriaLogs: { url: url ?? '', username, accountId, projectId },
+    }
+  },
   [WorkbenchToolType.Prometheus]: (config) => {
     const { url, username, tenantId, awsSigv4, awsAccessKeyId, awsRegion } =
       config?.prometheus ?? {}
@@ -679,6 +723,14 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     const { email } = config?.atlassian ?? {}
     return { atlassian: { email: email ?? '' } }
   },
+  [WorkbenchToolType.Jira]: (config) => {
+    const { url, email } = config?.jira ?? {}
+    return { jira: { url: url ?? '', email: email ?? '', apiToken: '' } }
+  },
+  [WorkbenchToolType.JiraDatacenter]: (config) => {
+    const { url } = config?.jiraDatacenter ?? {}
+    return { jiraDatacenter: { url: url ?? '', apiToken: '' } }
+  },
   [WorkbenchToolType.Exa]: () => ({ exa: { apiKey: '' } }),
   [WorkbenchToolType.Github]: (config) => {
     const { url, toolset, appId, installationId } = config?.github ?? {}
@@ -703,12 +755,23 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   },
   [WorkbenchToolType.BitbucketDatacenter]: (config) => {
     const { url } = config?.bitbucketDatacenter ?? {}
-    return { bitbucketDatacenter: { url: url ?? '', token: '' } }
+    return {
+      bitbucketDatacenter: {
+        url: url ?? '',
+        token: '',
+      },
+    }
   },
   [WorkbenchToolType.AzureDevops]: () => ({ azureDevops: { token: '' } }),
   [WorkbenchToolType.Splunk]: (config) => {
-    const { url, username } = config?.splunk ?? {}
-    return { splunk: { url: url ?? '', username } }
+    const { url, tokenType, username } = config?.splunk ?? {}
+    return {
+      splunk: {
+        url: url ?? '',
+        tokenType: tokenType ?? SplunkTokenType.Bearer,
+        username,
+      },
+    }
   },
   [WorkbenchToolType.Cloudwatch]: (config) => {
     const { region, logGroupNames, roleArn, roleSessionName } =

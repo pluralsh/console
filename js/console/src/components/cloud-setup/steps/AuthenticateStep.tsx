@@ -23,7 +23,7 @@ export function AuthenticateStep() {
           small
           checked={isChecked}
           onChange={(e) => setIsChecked(e.target.checked)}
-          {...{ '& .label': { userSelect: 'none', textWrap: 'nowrap' } }}
+          css={{ '& .label': { userSelect: 'none', textWrap: 'nowrap' } }}
         >
           {`I successfully authenticated my cloud instance locally.`}
           <span css={{ color: colors['text-danger'] }}>*</span>

@@ -1,13 +1,18 @@
 package environment
 
 import (
+	"encoding/json"
 	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
+	"github.com/pluralsh/console/go/polly/fs"
 )
 
 func TestConfigureCodebaseMemoryGitExclude(t *testing.T) {
@@ -52,6 +57,94 @@ func TestCommitIdentityPrefersInitiatingUser(t *testing.T) {
 	}
 }
 
+func TestGitAskpassScriptAnswersUsernameAndPasswordPrompts(t *testing.T) {
+	script := filepath.Join(t.TempDir(), gitAskpassFileName)
+	if err := os.WriteFile(script, []byte(gitAskpassScript()), 0700); err != nil {
+		t.Fatal(err)
+	}
+
+	env := []string{EnvGitUsername + "=mjg", EnvGitAccessToken + "=some-pat"}
+	if got := runAskpass(t, script, env, "Username for 'https://bitbucket.example.com': "); got != "mjg" {
+		t.Fatalf("username prompt = %q, want mjg", got)
+	}
+	if got := runAskpass(t, script, env, "Password for 'https://mjg@bitbucket.example.com': "); got != "some-pat" {
+		t.Fatalf("password prompt = %q, want some-pat", got)
+	}
+}
+
+func TestGitAskpassScriptDefaultsUsernameWhenUnset(t *testing.T) {
+	script := filepath.Join(t.TempDir(), gitAskpassFileName)
+	if err := os.WriteFile(script, []byte(gitAskpassScript()), 0700); err != nil {
+		t.Fatal(err)
+	}
+
+	env := []string{EnvGitAccessToken + "=some-pat"}
+	if got := runAskpass(t, script, env, "Username for 'https://github.com': "); got != defaultGitUsername {
+		t.Fatalf("username prompt = %q, want %s", got, defaultGitUsername)
+	}
+}
+
+func TestConfigureGitCredentialsSetsAskpassEnv(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv(EnvGitAccessToken, "")
+	t.Setenv(EnvGitUsername, "")
+	t.Setenv(EnvGitAskpass, "")
+
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{Username: "mjg", Token: "some-pat"},
+		},
+		dir: workDir,
+	}
+
+	askpassPath, err := env.configureGitCredentials()
+	if err != nil {
+		t.Fatalf("configureGitCredentials() error = %v", err)
+	}
+	if askpassPath == "" {
+		t.Fatal("expected askpass path")
+	}
+	if os.Getenv(EnvGitUsername) != "mjg" {
+		t.Fatalf("GIT_USERNAME = %q, want mjg", os.Getenv(EnvGitUsername))
+	}
+	if os.Getenv(EnvGitAccessToken) != "some-pat" {
+		t.Fatalf("GIT_ACCESS_TOKEN = %q, want some-pat", os.Getenv(EnvGitAccessToken))
+	}
+	if os.Getenv(EnvGitAskpass) != askpassPath {
+		t.Fatalf("GIT_ASKPASS = %q, want %s", os.Getenv(EnvGitAskpass), askpassPath)
+	}
+
+	if got := runAskpass(t, askpassPath, os.Environ(), "Username for 'https://bitbucket.example.com': "); got != "mjg" {
+		t.Fatalf("username prompt = %q, want mjg", got)
+	}
+	if got := runAskpass(t, askpassPath, os.Environ(), "Password for 'https://bitbucket.example.com': "); got != "some-pat" {
+		t.Fatalf("password prompt = %q, want some-pat", got)
+	}
+}
+
+func TestConfigureGitCredentialsDefaultsEmptyUsername(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv(EnvGitUsername, "")
+
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{Token: "some-pat"},
+		},
+		dir: t.TempDir(),
+	}
+	if _, err := env.configureGitCredentials(); err != nil {
+		t.Fatalf("configureGitCredentials() error = %v", err)
+	}
+	if os.Getenv(EnvGitUsername) != defaultGitUsername {
+		t.Fatalf("GIT_USERNAME = %q, want %s", os.Getenv(EnvGitUsername), defaultGitUsername)
+	}
+}
+
 func TestCommitIdentityFallsBackToScmCredentials(t *testing.T) {
 	env := &environment{
 		agentRun: &v1.AgentRun{
@@ -66,5 +159,439 @@ func TestCommitIdentityFallsBackToScmCredentials(t *testing.T) {
 	}
 	if email != "agent@plural.sh" {
 		t.Fatalf("expected fallback email, got %q", email)
+	}
+}
+
+func TestSCMProxyPrefersCredentialProxy(t *testing.T) {
+	t.Setenv("PLRL_GIT_PROXY", "http://runtime-proxy.example.com:8080")
+	noProxy := "github.internal"
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: true,
+					URL:     "http://credential-proxy.example.com:8080",
+					Noproxy: &noProxy,
+				},
+			},
+		},
+	}
+
+	proxy, excluded := env.scmProxy()
+	if proxy != "http://credential-proxy.example.com:8080" {
+		t.Fatalf("scmProxy() proxy = %q, want credential proxy", proxy)
+	}
+	if excluded != noProxy {
+		t.Fatalf("scmProxy() no proxy = %q, want %q", excluded, noProxy)
+	}
+}
+
+func TestSCMProxyDisabledFallsBackToRuntimeProxy(t *testing.T) {
+	t.Setenv("PLRL_GIT_PROXY", "http://runtime-proxy.example.com:8080")
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: false,
+					URL:     "http://credential-proxy.example.com:8080",
+				},
+			},
+		},
+	}
+
+	proxy, _ := env.scmProxy()
+	if proxy != "http://runtime-proxy.example.com:8080" {
+		t.Fatalf("scmProxy() proxy = %q, want runtime fallback", proxy)
+	}
+}
+
+func TestGitNetworkArgsScopesProxyToCommand(t *testing.T) {
+	noProxy := "github.internal"
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: "https://github.com/pluralsh/console.git",
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: true,
+					URL:     "http://credential-proxy.example.com:8080",
+					Noproxy: &noProxy,
+				},
+			},
+		},
+	}
+
+	args := env.gitNetworkArgs([]string{"clone", env.agentRun.Repository, "repository"})
+	if got, want := strings.Join(args, " "), "-c http.proxy=http://credential-proxy.example.com:8080 clone https://github.com/pluralsh/console.git repository"; got != want {
+		t.Fatalf("gitNetworkArgs() = %q, want %q", got, want)
+	}
+}
+
+func TestGitNetworkArgsHonorsNoProxy(t *testing.T) {
+	noProxy := "github.com"
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: "https://github.com/pluralsh/console.git",
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: true,
+					URL:     "http://credential-proxy.example.com:8080",
+					Noproxy: &noProxy,
+				},
+			},
+		},
+	}
+
+	args := env.gitNetworkArgs([]string{"fetch", "origin"})
+	if got, want := strings.Join(args, " "), "fetch origin"; got != want {
+		t.Fatalf("gitNetworkArgs() = %q, want %q", got, want)
+	}
+}
+
+func TestCloneRepositoryCopiesPrebakeMatch(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("GIT_TERMINAL_PROMPT", "0")
+	t.Setenv("GIT_SSH_COMMAND", "false")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	src := initGitRepo(t, "prebaked")
+	prebakeDir := t.TempDir()
+	prebakedCopy := filepath.Join(prebakeDir, "console")
+	if err := fs.CopyDir(src, prebakedCopy); err != nil {
+		t.Fatalf("copy prebake fixture: %v", err)
+	}
+	writePrebakeManifest(t, prebakeDir, prebake.Manifest{
+		Version: 1,
+		Repositories: []prebake.ManifestRepo{{
+			URL:  "https://github.com/pluralsh/console.git",
+			Path: "console",
+		}},
+	})
+	t.Setenv(prebake.EnvDir, prebakeDir)
+
+	workDir := t.TempDir()
+	runURL := "git@" + "github.com" + ":pluralsh/console.git"
+	env := &environment{
+		agentRun: &v1.AgentRun{Repository: runURL},
+		dir:      workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	dest := filepath.Join(workDir, "repository")
+	if _, err := os.Stat(filepath.Join(dest, ".git")); err != nil {
+		t.Fatalf("expected copied repository at %s: %v", dest, err)
+	}
+	contents, err := os.ReadFile(filepath.Join(dest, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "prebaked\n" {
+		t.Fatalf("copied README = %q, want prebaked", contents)
+	}
+	if _, err := os.Stat(prebakedCopy); !os.IsNotExist(err) {
+		t.Fatalf("expected prebake source to be moved, stat(%s)=%v", prebakedCopy, err)
+	}
+	origin, err := exec.Command("git", "-C", dest, "remote", "get-url", "origin").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(origin)); got != runURL {
+		t.Fatalf("origin = %q, want agent run repository URL", got)
+	}
+}
+
+func TestCopyPrebakedRepositoryUsesFCPWhenAvailable(t *testing.T) {
+	binDir := t.TempDir()
+	marker := filepath.Join(t.TempDir(), "fcp-args")
+	fakeFCP := filepath.Join(binDir, "fcp")
+	if err := os.WriteFile(fakeFCP, []byte(`#!/bin/sh
+printf '%s\n%s\n' "$1" "$2" > "$FCP_MARKER"
+mkdir -p "$2"
+cp -R "$1"/. "$2"/
+`), 0755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("FCP_MARKER", marker)
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	src := t.TempDir()
+	if err := os.WriteFile(filepath.Join(src, "README"), []byte("fast"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	dst := filepath.Join(t.TempDir(), "copy")
+
+	if err := copyPrebakedRepository(src, dst); err != nil {
+		t.Fatalf("copyPrebakedRepository() failed: %v", err)
+	}
+
+	args, err := os.ReadFile(marker)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(args), src+"\n"+dst+"\n"; got != want {
+		t.Fatalf("fcp args = %q, want %q", got, want)
+	}
+	body, err := os.ReadFile(filepath.Join(dst, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := string(body); got != "fast" {
+		t.Fatalf("copied README = %q, want fast", got)
+	}
+}
+
+func TestCloneRepositoryPullsPrebakeFromOrigin(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "stale")
+	prebakeDir := t.TempDir()
+	prebakedCopy := filepath.Join(prebakeDir, "console")
+	if err := fs.CopyDir(origin, prebakedCopy); err != nil {
+		t.Fatalf("copy prebake fixture: %v", err)
+	}
+	writePrebakeManifest(t, prebakeDir, prebake.Manifest{
+		Version: 1,
+		Repositories: []prebake.ManifestRepo{{
+			URL:  origin,
+			Path: "console",
+		}},
+	})
+	t.Setenv(prebake.EnvDir, prebakeDir)
+
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("fresh\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "update")
+
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{Repository: origin},
+		dir:      workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	contents, err := os.ReadFile(filepath.Join(workDir, "repository", "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "fresh\n" {
+		t.Fatalf("copied README = %q, want fresh after origin pull", contents)
+	}
+}
+
+func TestCloneRepositoryChecksOutRunBranchFromOrigin(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "main")
+	runGit(t, origin, "checkout", "-b", "feature")
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("feature\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "feature")
+	runGit(t, origin, "checkout", "main")
+
+	prebakeDir := t.TempDir()
+	prebakedCopy := filepath.Join(prebakeDir, "console")
+	if err := fs.CopyDir(origin, prebakedCopy); err != nil {
+		t.Fatalf("copy prebake fixture: %v", err)
+	}
+	writePrebakeManifest(t, prebakeDir, prebake.Manifest{
+		Version: 1,
+		Repositories: []prebake.ManifestRepo{{
+			URL:  origin,
+			Path: "console",
+		}},
+	})
+	t.Setenv(prebake.EnvDir, prebakeDir)
+
+	feature := "feature"
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{Repository: origin, Branch: &feature},
+		dir:      workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	dest := filepath.Join(workDir, "repository")
+	contents, err := os.ReadFile(filepath.Join(dest, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "feature\n" {
+		t.Fatalf("copied README = %q, want feature after checking out run branch", contents)
+	}
+	current, err := exec.Command("git", "-C", dest, "branch", "--show-current").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(current)); got != "feature" {
+		t.Fatalf("branch = %q, want feature", got)
+	}
+}
+
+func TestCloneRepositoryChecksOutFollowupHeadBranch(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "main")
+	runGit(t, origin, "checkout", "-b", "feature")
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("feature\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "feature")
+	runGit(t, origin, "checkout", "main")
+
+	baseBranch := "main"
+	headBranch := "feature"
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: origin,
+			Branch:     &baseBranch,
+			HeadBranch: &headBranch,
+			Followup:   true,
+		},
+		dir: workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	dest := filepath.Join(workDir, "repository")
+	contents, err := os.ReadFile(filepath.Join(dest, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "feature\n" {
+		t.Fatalf("copied README = %q, want feature after checking out follow-up head branch", contents)
+	}
+	current, err := exec.Command("git", "-C", dest, "branch", "--show-current").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(current)); got != headBranch {
+		t.Fatalf("branch = %q, want %s", got, headBranch)
+	}
+}
+
+func TestCheckoutFollowupBranchRequiresHeadBranch(t *testing.T) {
+	env := &environment{agentRun: &v1.AgentRun{Followup: true}}
+
+	err := env.checkoutFollowupBranch(t.TempDir())
+
+	if err == nil || err.Error() != "follow-up agent run requires a head branch to check out" {
+		t.Fatalf("checkoutFollowupBranch() error = %v", err)
+	}
+}
+
+func TestCheckoutFollowupBranchSkipsRegularRuns(t *testing.T) {
+	env := &environment{agentRun: &v1.AgentRun{}}
+
+	if err := env.checkoutFollowupBranch(t.TempDir()); err != nil {
+		t.Fatalf("checkoutFollowupBranch() error = %v", err)
+	}
+}
+
+func TestCloneRepositoryFallsBackToGitClone(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	prebakeDir := t.TempDir()
+	writePrebakeManifest(t, prebakeDir, prebake.Manifest{
+		Version: 1,
+		Repositories: []prebake.ManifestRepo{{
+			URL:  "https://github.com/pluralsh/console.git",
+			Path: "console",
+		}},
+	})
+	t.Setenv(prebake.EnvDir, prebakeDir)
+
+	src := initGitRepo(t, "network")
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{Repository: src},
+		dir:      workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	contents, err := os.ReadFile(filepath.Join(workDir, "repository", "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "network\n" {
+		t.Fatalf("cloned README = %q, want network", contents)
+	}
+}
+
+func initGitRepo(t *testing.T, contents string) string {
+	t.Helper()
+	dir := t.TempDir()
+	runGit(t, dir, "init", "-b", "main")
+	runGit(t, dir, "config", "user.email", "test@example.com")
+	runGit(t, dir, "config", "user.name", "test")
+	if err := os.WriteFile(filepath.Join(dir, "README"), []byte(contents+"\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, dir, "add", "README")
+	runGit(t, dir, "commit", "-m", "init")
+	return dir
+}
+
+func runAskpass(t *testing.T, script string, env []string, prompt string) string {
+	t.Helper()
+	cmd := exec.Command(script, prompt)
+	cmd.Env = env
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("askpass %q: %v: %s", prompt, err, out)
+	}
+	return strings.TrimSpace(string(out))
+}
+
+func runGit(t *testing.T, dir string, args ...string) {
+	t.Helper()
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	cmd.Env = append(os.Environ(), "GIT_CONFIG_NOSYSTEM=1")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("git %v: %v: %s", args, err, out)
+	}
+}
+
+func writePrebakeManifest(t *testing.T, dir string, manifest prebake.Manifest) {
+	t.Helper()
+	data, err := json.Marshal(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path.Join(dir, prebake.ManifestFileName), data, 0644); err != nil {
+		t.Fatal(err)
 	}
 }

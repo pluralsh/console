@@ -443,6 +443,35 @@ func TestGetMCPServerEnvVars_ModeToolExclusions(t *testing.T) {
 	}
 }
 
+func TestBuildAgentRunPod_WorkbenchMCPUpstreamIsSidecarOnly(t *testing.T) {
+	upstream := "https://console.example/mcp/workbench/workbench-id"
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef:      v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Mode:            console.AgentRunModeAnalyze,
+			WorkbenchMCPURL: &upstream,
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:         console.AgentRuntimeTypeClaude,
+			WorkbenchMCP: &v1alpha1.WorkbenchMCPConfig{Enabled: true},
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	mcp := requireContainer(t, pod.Spec.InitContainers, mcpServerContainerName)
+	assert.Contains(t, mcp.Env, corev1.EnvVar{
+		Name:  EnvWorkbenchMCPURL,
+		Value: "https://console.example/mcp/workbench/workbench-id?categories=metrics%2Clogs%2Ctraces%2Cticketing%2Csearch%2Cscm%2Cinfrastructure",
+	})
+
+	bootstrap := requireContainer(t, pod.Spec.InitContainers, agentBootstrapContainerName)
+	assert.NotContains(t, bootstrap.Env, corev1.EnvVar{Name: EnvWorkbenchMCPURL})
+	assert.NotContains(t, requireContainer(t, pod.Spec.Containers, defaultContainer).Env, corev1.EnvVar{Name: EnvWorkbenchMCPURL})
+}
+
 func TestBuildAgentRunPod_PreservesCustomAgentBootstrapSecurityContext(t *testing.T) {
 	customSC := &corev1.SecurityContext{
 		ReadOnlyRootFilesystem: lo.ToPtr(false),
@@ -486,6 +515,253 @@ func TestBuildAgentRunPod_PreservesCustomAgentBootstrapSecurityContext(t *testin
 		if assert.NotNil(t, bootstrap.SecurityContext.ReadOnlyRootFilesystem) {
 			assert.False(t, *bootstrap.SecurityContext.ReadOnlyRootFilesystem)
 		}
+	}
+}
+
+func TestBuildAgentRunPod_RepositoryImage(t *testing.T) {
+	image := "ghcr.io/pluralsh/repos:latest"
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:            console.AgentRuntimeTypeClaude,
+			TargetNamespace: "default",
+			RepositoryImage: &image,
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	for _, volume := range pod.Spec.Volumes {
+		assert.Nil(t, volume.Image, "prebake must not add an image volume")
+	}
+
+	prebake := requireContainer(t, pod.Spec.InitContainers, repositoryPrebakeContainerName)
+	assert.Equal(t, image, prebake.Image)
+	assert.Equal(t, []string{"/bin/sh", "-c"}, prebake.Command)
+	assert.Equal(t, []string{repositoryPrebakeCopyCommand}, prebake.Args)
+	assert.Contains(t, prebake.Args[0], "command -v fcp")
+	assert.Contains(t, prebake.Args[0], "cp -a")
+	assert.Contains(t, prebake.VolumeMounts, corev1.VolumeMount{
+		Name:      sharedContextVolumeName,
+		MountPath: sharedContextVolumePath,
+	})
+	if assert.GreaterOrEqual(t, len(pod.Spec.InitContainers), 2) {
+		assert.Equal(t, repositoryPrebakeContainerName, pod.Spec.InitContainers[0].Name)
+		assert.Equal(t, agentBootstrapContainerName, pod.Spec.InitContainers[1].Name)
+	}
+}
+
+func TestBuildAgentRunPod_OmitsRepositoryImageWhenUnset(t *testing.T) {
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:            console.AgentRuntimeTypeClaude,
+			TargetNamespace: "default",
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	for _, container := range pod.Spec.InitContainers {
+		assert.NotEqual(t, repositoryPrebakeContainerName, container.Name)
+	}
+}
+
+func TestBuildAgentRunPod_ReadOnlyRootFilesystemAndMise(t *testing.T) {
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	miseConfig := "[tools]\nnode = \"24\"\n"
+
+	t.Run("writable root bootstraps mise", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:            console.AgentRuntimeTypeClaude,
+				TargetNamespace: "default",
+				Mise:            &v1alpha1.MiseSpec{Config: &miseConfig},
+			},
+		}
+		pod := buildAgentRunPod(run, runtime)
+		defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+		if assert.NotNil(t, defaultC.SecurityContext) && assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+			assert.False(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+		}
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "true"})
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseGlobalConfigFile, Value: miseConfigMountPath})
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseDataDir, Value: miseDataDir})
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseErlangCompile, Value: "false"})
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseErlangPrecompiledOS, Value: miseErlangPrecompiledOS})
+		assert.Contains(t, defaultC.VolumeMounts, corev1.VolumeMount{
+			Name:      miseConfigVolumeName,
+			MountPath: miseConfigMountPath,
+			SubPath:   miseConfigConfigMapKey,
+		})
+		requireVolume(t, pod.Spec.Volumes, miseConfigVolumeName)
+	})
+
+	t.Run("read-only root skips mise bootstrap", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:                   console.AgentRuntimeTypeClaude,
+				TargetNamespace:        "default",
+				ReadOnlyRootFilesystem: lo.ToPtr(true),
+				Mise:                   &v1alpha1.MiseSpec{Config: &miseConfig},
+			},
+		}
+		pod := buildAgentRunPod(run, runtime)
+		defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+		if assert.NotNil(t, defaultC.SecurityContext) && assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+			assert.True(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+		}
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "false"})
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseGlobalConfigFile, Value: miseConfigMountPath})
+		requireVolume(t, pod.Spec.Volumes, miseConfigVolumeName)
+	})
+
+	t.Run("template security context wins", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:                   console.AgentRuntimeTypeClaude,
+				TargetNamespace:        "default",
+				ReadOnlyRootFilesystem: lo.ToPtr(false),
+				Mise:                   &v1alpha1.MiseSpec{Config: &miseConfig},
+				Template: &corev1.PodTemplateSpec{
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{{
+							Name: defaultContainer,
+							SecurityContext: &corev1.SecurityContext{
+								ReadOnlyRootFilesystem: lo.ToPtr(true),
+							},
+						}},
+					},
+				},
+			},
+		}
+		pod := buildAgentRunPod(run, runtime)
+		defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+		if assert.NotNil(t, defaultC.SecurityContext) && assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+			assert.True(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+		}
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "false"})
+	})
+
+	t.Run("partial template security context fills read-only", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:                   console.AgentRuntimeTypeClaude,
+				TargetNamespace:        "default",
+				ReadOnlyRootFilesystem: lo.ToPtr(true),
+				Mise:                   &v1alpha1.MiseSpec{Config: &miseConfig},
+				Template: &corev1.PodTemplateSpec{
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{{
+							Name: defaultContainer,
+							SecurityContext: &corev1.SecurityContext{
+								RunAsUser: lo.ToPtr(int64(1000)),
+							},
+						}},
+					},
+				},
+			},
+		}
+		pod := buildAgentRunPod(run, runtime)
+		defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+		if assert.NotNil(t, defaultC.SecurityContext) {
+			if assert.NotNil(t, defaultC.SecurityContext.RunAsUser) {
+				assert.Equal(t, int64(1000), *defaultC.SecurityContext.RunAsUser)
+			}
+			if assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+				assert.True(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+			}
+		}
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "false"})
+	})
+
+	t.Run("omits mise volume when unset", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:            console.AgentRuntimeTypeClaude,
+				TargetNamespace: "default",
+			},
+		}
+		pod := buildAgentRunPod(run, runtime)
+		defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+		assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMiseBootstrap, Value: "false"})
+		for _, volume := range pod.Spec.Volumes {
+			assert.NotEqual(t, miseConfigVolumeName, volume.Name)
+		}
+	})
+}
+
+func TestBuildAgentRunPod_DindClearsReadOnlyRootFilesystem(t *testing.T) {
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:                   console.AgentRuntimeTypeClaude,
+			TargetNamespace:        "default",
+			Dind:                   lo.ToPtr(true),
+			ReadOnlyRootFilesystem: lo.ToPtr(true),
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+	if !assert.NotNil(t, defaultC.SecurityContext) {
+		return
+	}
+	if assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+		assert.False(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+	}
+	if assert.NotNil(t, defaultC.SecurityContext.Privileged) {
+		assert.True(t, *defaultC.SecurityContext.Privileged)
 	}
 }
 

@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "pr_automation_id": {
+      "type": "string",
+      "description": "The id of the PR automation to fetch. Prefer this when you already have an id from list or search results."
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the PR automation to fetch when you do not yet have its id."
+    }
+  },
+  "required": []
+}

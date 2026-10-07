@@ -86,6 +86,11 @@ fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
       method
       path
     }
+    kubeDrain {
+      handle
+      node
+      explanation
+    }
     kubeExec {
       handle
       command

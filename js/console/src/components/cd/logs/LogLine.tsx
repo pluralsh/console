@@ -56,7 +56,9 @@ export function LogLine({
       $highlighted={highlighted}
       onClick={onClick}
     >
-      {formatDateTime(timestamp, 'MM/DD/YYYY-HH:mm:ss[[UTC]]', true, true)}
+      <span>
+        {formatDateTime(timestamp, 'MM/DD/YYYY-HH:mm:ss[[UTC]]', true, true)}
+      </span>
       {(log || '').split('\n').map((line, index) => (
         <span key={index}>{line}</span>
       ))}
@@ -72,7 +74,7 @@ const LogLineWrapper = styled.div<{
   borderLeft: `4px solid ${$borderColor}`,
   color: $highlighted ? theme.colors.text : theme.colors['text-light'],
   wordBreak: 'break-word',
-  fontFamily: 'Monument Mono',
+  ...theme.partials.text.mono,
   fontSize: '12px',
   lineHeight: '20px',
   letterSpacing: '0.25px',

@@ -19,17 +19,9 @@ import (
 // so that Kubernetes GC cascades deletion from parent to child.
 func HandleWorkbenchRef(ctx context.Context, c runtimeclient.Client, scheme *runtime.Scheme,
 	child runtimeclient.Object, ref corev1.ObjectReference, namespace string) (string, *ctrl.Result, error) {
-	workbench := &v1alpha1.Workbench{}
-	ns := lo.Ternary(ref.Namespace == "", namespace, ref.Namespace)
-	if err := c.Get(ctx, runtimeclient.ObjectKey{Name: ref.Name, Namespace: ns}, workbench); err != nil {
-		if errors.IsNotFound(err) {
-			return "", lo.ToPtr(Wait()), fmt.Errorf("workbench not found: %s", err.Error())
-		}
-		return "", nil, fmt.Errorf("failed to get workbench: %s", err.Error())
-	}
-
-	if !workbench.Status.HasID() {
-		return "", lo.ToPtr(Wait()), fmt.Errorf("workbench is not ready")
+	workbench, res, err := getReadyWorkbench(ctx, c, ref, namespace)
+	if res != nil || err != nil {
+		return "", res, err
 	}
 
 	if err := controllerutil.SetOwnerReference(workbench, child, scheme); err != nil {
@@ -37,4 +29,31 @@ func HandleWorkbenchRef(ctx context.Context, c runtimeclient.Client, scheme *run
 	}
 
 	return workbench.Status.GetID(), nil, nil
+}
+
+// WorkbenchID is HandleWorkbenchRef without setting the workbench as the owner.
+func WorkbenchID(ctx context.Context, c runtimeclient.Client, ref corev1.ObjectReference, namespace string) (string, *ctrl.Result, error) {
+	workbench, res, err := getReadyWorkbench(ctx, c, ref, namespace)
+	if res != nil || err != nil {
+		return "", res, err
+	}
+
+	return workbench.Status.GetID(), nil, nil
+}
+
+func getReadyWorkbench(ctx context.Context, c runtimeclient.Client, ref corev1.ObjectReference, namespace string) (*v1alpha1.Workbench, *ctrl.Result, error) {
+	workbench := &v1alpha1.Workbench{}
+	ns := lo.Ternary(ref.Namespace == "", namespace, ref.Namespace)
+	if err := c.Get(ctx, runtimeclient.ObjectKey{Name: ref.Name, Namespace: ns}, workbench); err != nil {
+		if errors.IsNotFound(err) {
+			return nil, lo.ToPtr(Wait()), fmt.Errorf("workbench not found: %s", err.Error())
+		}
+		return nil, nil, fmt.Errorf("failed to get workbench: %s", err.Error())
+	}
+
+	if !workbench.Status.HasID() {
+		return nil, lo.ToPtr(Wait()), fmt.Errorf("workbench is not ready")
+	}
+
+	return workbench, nil, nil
 }

@@ -122,7 +122,7 @@ export function PipelineBaseNode({
         gap="small"
         minHeight={22}
         padding="small"
-        borderBottom={borders['fill-two']}
+        css={{ borderBottom: borders['fill-two'] }}
       >
         <OverlineH1
           as="h2"

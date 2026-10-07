@@ -12,10 +12,10 @@ export default function StackRunPlan(): ReactNode {
 
   return (
     <Card
-      flexGrow={1}
       overflowY="auto"
       maxHeight="100%"
       minHeight={0}
+      css={{ flexGrow: 1 }}
     >
       <CommandLog
         text={value}

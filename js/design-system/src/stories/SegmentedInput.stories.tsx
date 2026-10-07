@@ -28,7 +28,7 @@ const EMPTY_SEGMENTS = [
 ]
 
 const meta = {
-  title: 'SegmentedInput',
+  title: 'Segmented Input',
   component: SegmentedInput,
   argTypes: {
     format: {

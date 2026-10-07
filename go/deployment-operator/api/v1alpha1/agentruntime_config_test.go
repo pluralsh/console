@@ -28,6 +28,39 @@ func TestSecretKeySelectorSet(t *testing.T) {
 	}
 }
 
+func TestAgentRuntimeWorkbenchMCPCategories(t *testing.T) {
+	runtime := &AgentRuntime{}
+	if runtime.IsWorkbenchMCPEnabled() {
+		t.Fatal("workbench MCP should be disabled when configuration is absent")
+	}
+
+	runtime.Spec.WorkbenchMCP = &WorkbenchMCPConfig{Enabled: true}
+	got := runtime.WorkbenchMCPCategories()
+	want := []WorkbenchMCPCategory{
+		WorkbenchMCPCategoryMetrics,
+		WorkbenchMCPCategoryLogs,
+		WorkbenchMCPCategoryTraces,
+		WorkbenchMCPCategoryTicketing,
+		WorkbenchMCPCategorySearch,
+		WorkbenchMCPCategorySCM,
+		WorkbenchMCPCategoryInfrastructure,
+	}
+	if len(got) != len(want) {
+		t.Fatalf("categories = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("categories = %v, want %v", got, want)
+		}
+	}
+
+	runtime.Spec.WorkbenchMCP.Categories = []WorkbenchMCPCategory{WorkbenchMCPCategoryObservability}
+	got = runtime.WorkbenchMCPCategories()
+	if len(got) != 1 || got[0] != WorkbenchMCPCategoryObservability {
+		t.Fatalf("explicit categories = %v", got)
+	}
+}
+
 func TestCodexConfig_ToCodexConfigRawWithoutSecret(t *testing.T) {
 	method := console.OpenAiMethodChat
 	cfg := &CodexConfig{
@@ -51,7 +84,9 @@ func TestCodexConfig_ToCodexConfigRawWithoutSecret(t *testing.T) {
 }
 
 func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatible(t *testing.T) {
+	method := console.OpenAiMethodChat
 	cfg := &OpenCodeConfig{
+		Method: &method,
 		OpenAICompatible: &OpenCodeOpenAICompatibleConfig{
 			Endpoint: "https://litellm.example/v1",
 			Model:    new("gpt-4"),
@@ -80,16 +115,17 @@ func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatible(t *testing.T) {
 	if raw.Token != "secret-token" {
 		t.Fatalf("token = %q, want secret-token", raw.Token)
 	}
+	if raw.Method == nil || *raw.Method != console.OpenAiMethodChat {
+		t.Fatalf("method = %v, want %s", raw.Method, console.OpenAiMethodChat)
+	}
 }
 
-func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatibleIgnoredWithAiProxy(t *testing.T) {
+func TestOpenCodeConfig_ToOpenCodeConfigRawMethodWithAiProxy(t *testing.T) {
+	method := console.OpenAiMethodChat
 	cfg := &OpenCodeConfig{
 		Provider: new("openai"),
 		Model:    new("gpt-5.4"),
-		OpenAICompatible: &OpenCodeOpenAICompatibleConfig{
-			Endpoint: "https://litellm.example/v1",
-			Model:    new("gpt-4"),
-		},
+		Method:   &method,
 	}
 
 	raw, err := cfg.ToOpenCodeConfigRaw(func(corev1.SecretKeySelector) (*corev1.Secret, error) {
@@ -99,13 +135,32 @@ func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatibleIgnoredWithAiProxy(t 
 	if err != nil {
 		t.Fatalf("ToOpenCodeConfigRaw() error = %v", err)
 	}
-	if raw.OpenAICompatible {
-		t.Fatal("expected OpenAICompatible=false when aiProxy is enabled")
-	}
 	if raw.Provider == nil || *raw.Provider != "openai" {
 		t.Fatalf("provider = %v, want openai", raw.Provider)
 	}
-	if raw.Endpoint != nil && *raw.Endpoint != "" {
-		t.Fatalf("endpoint = %v, want unset", raw.Endpoint)
+	if raw.Model == nil || *raw.Model != "gpt-5.4" {
+		t.Fatalf("model = %v, want parent gpt-5.4", raw.Model)
+	}
+	if raw.Method == nil || *raw.Method != console.OpenAiMethodChat {
+		t.Fatalf("method = %v, want %s", raw.Method, console.OpenAiMethodChat)
+	}
+}
+
+func TestPiConfig_ToPiConfigRawMethod(t *testing.T) {
+	method := console.OpenAiMethodChat
+	cfg := &PiConfig{
+		Model:  new("gpt-5.4"),
+		Method: &method,
+	}
+
+	raw, err := cfg.ToPiConfigRaw(func(corev1.SecretKeySelector) (*corev1.Secret, error) {
+		t.Fatal("secret getter should not be called")
+		return nil, nil
+	})
+	if err != nil {
+		t.Fatalf("ToPiConfigRaw() error = %v", err)
+	}
+	if raw.Method == nil || *raw.Method != console.OpenAiMethodChat {
+		t.Fatalf("method = %v, want %s", raw.Method, console.OpenAiMethodChat)
 	}
 }

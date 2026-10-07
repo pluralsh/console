@@ -86,6 +86,12 @@ func WithName(name string) CreateComponentOption {
 	}
 }
 
+func WithLabels(labels map[string]string) CreateComponentOption {
+	return func(u *unstructured.Unstructured) {
+		u.SetLabels(labels)
+	}
+}
+
 type CreateStoreKeyOption func(entry *common.Component)
 
 func WithStoreKeyName(name string) CreateStoreKeyOption {
@@ -232,6 +238,53 @@ func TestComponentCache_DeleteComponent(t *testing.T) {
 		require.Len(t, attributes, 1)
 		require.Len(t, attributes[0].Children, 1)
 	})
+}
+
+func TestComponentCache_SyncServiceComponents(t *testing.T) {
+	t.Run("preserves ownership of an applied component", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background())
+		require.NoError(t, err)
+		defer func() {
+			require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+		}()
+
+		const (
+			serviceA    = "service-a"
+			serviceB    = "service-b"
+			originalUID = "original-uid"
+		)
+		componentA := createComponent(originalUID, WithName("shared-component"), WithService(serviceA))
+		require.NoError(t, storeInstance.SaveComponent(componentA))
+
+		componentB := createComponent("replacement-uid", WithName("shared-component"), WithService(serviceB))
+		require.NoError(t, storeInstance.SyncServiceComponents(serviceB, []unstructured.Unstructured{componentB}))
+
+		appliedComponent, err := storeInstance.GetAppliedComponent(componentB)
+		require.NoError(t, err)
+		require.NotNil(t, appliedComponent)
+		assert.Equal(t, originalUID, appliedComponent.UID)
+		assert.Equal(t, serviceA, appliedComponent.ServiceID)
+	})
+}
+
+func TestComponentCache_SyncAppliedResourceTakesOverService(t *testing.T) {
+	storeInstance, err := store.NewDatabaseStore(context.Background())
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+	}()
+
+	componentA := createComponent("uid", WithName("shared"), WithService("service-a"))
+	require.NoError(t, storeInstance.SaveComponent(componentA))
+
+	componentB := createComponent("uid", WithName("shared"), WithService("service-b"))
+	require.NoError(t, storeInstance.SyncServiceComponents("service-b", []unstructured.Unstructured{componentB}))
+	require.NoError(t, storeInstance.SyncAppliedResource(componentB))
+
+	got, err := storeInstance.GetAppliedComponent(componentB)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, "service-b", got.ServiceID)
 }
 
 func TestComponentCache_DeleteUnsyncedComponentsByKeys(t *testing.T) {

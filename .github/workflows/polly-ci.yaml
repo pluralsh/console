@@ -15,32 +15,31 @@ on:
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/polly
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go/go.work
-          check-latest: true
-      - run: PATH=$PATH:$GOPATH/bin make build
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   test:
-    name: Unit test
+    needs: [vouch]
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
         working-directory: go/polly
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go/go.work
-          check-latest: true
+          cache-dependency-path: |
+            go/go.work.sum
+            go/polly/go.sum
       - run: PATH=$PATH:$GOPATH/bin make test

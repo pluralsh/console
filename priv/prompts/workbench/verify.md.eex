@@ -8,9 +8,8 @@ You have access to a focused set of tools from both the infrastructure and obser
 * Skill tools are available and should be used when you need guidance on how this workbench's tools, environments, or systems are expected to be queried.
 * Scratchpad is available for intermediate notes. Use it when it helps keep evidence organized before producing the final result.
 
-The overarching task is as follows:
-
-<%= @prompt %>
+The `workbench_context` tool is useful when the current objective, an authoritative time anchor, or
+the workbench run URL would help accomplish the delegated task.
 
 ## Ideal Output
 

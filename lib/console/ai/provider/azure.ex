@@ -6,7 +6,7 @@ defmodule Console.AI.Azure do
   import Console.AI.Provider.Base
   alias Console.AI.{Utils, Stream}
 
-  defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model, :deployments, :stream]
+  defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model, :deployments, :stream, :proxy]
 
   @type t :: %__MODULE__{}
 
@@ -23,6 +23,7 @@ defmodule Console.AI.Azure do
       embedding_model: opts.embedding_model || model_defaults[:embedding_model],
       base_url: opts.endpoint,
       deployments: opts.deployments,
+      proxy: Map.get(opts, :proxy),
       stream: Stream.stream(),
     }
   end
@@ -32,12 +33,11 @@ defmodule Console.AI.Azure do
   @doc """
   Generate a openai completion
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = az, messages, opts) do
     messages
     |> reqllm_messages()
     |> generate_text("azure:#{select_model(az, opts[:model], opts[:client])}", az.stream, base_opts(provider_options(az, az.model) ++ [tools: tools(opts)], opts))
-    |> reqllm_result()
   end
 
   @doc """
@@ -73,7 +73,7 @@ defmodule Console.AI.Azure do
   def tools?(), do: true
 
   defp provider_options(%__MODULE__{base_url: base_url, access_token: key} = az, model) do
-    [base_url: normalize_url(base_url), api_key: key, deployment: deployment(az, model)]
+    [base_url: normalize_url(base_url), api_key: key, deployment: deployment(az, model)] ++ http_options(az)
     |> Enum.filter(fn {_, v} -> not is_nil(v) end)
   end
 

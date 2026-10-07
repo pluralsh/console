@@ -83,12 +83,12 @@ export default function PodDisruptionBudget(): ReactElement<any> {
           )}
           {!isNullish(pdb?.minAvailable) && (
             <SidecarItem heading="Min available">
-              {pdb?.minAvailable}
+              {String(pdb?.minAvailable)}
             </SidecarItem>
           )}
           {!isNullish(pdb?.maxUnavailable) && (
             <SidecarItem heading="Max unavailable">
-              {pdb?.maxUnavailable}
+              {String(pdb?.maxUnavailable)}
             </SidecarItem>
           )}
           {pdb?.unhealthyPodEvictionPolicy && (

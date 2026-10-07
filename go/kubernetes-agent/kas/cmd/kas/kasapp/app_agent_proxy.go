@@ -16,6 +16,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/wstunnel"
 )
 
@@ -70,6 +71,17 @@ func deriveAgentProxyListenConfig(cfg *kascfg.ConfigurationFile) agentProxyListe
 // within this file.
 func startAgentWebsocketProxyServer(stage stager.Stage, log *zap.Logger, cfg *kascfg.ConfigurationFile) error {
 	listenCfg := deriveAgentProxyListenConfig(cfg)
+	var certFile, keyFile string
+	// The proxy and Kubernetes API are the public HTTP endpoints, so they share
+	// the Kubernetes API listener's TLS configuration.
+	if cfg != nil && cfg.Agent != nil && cfg.Agent.KubernetesApi != nil && cfg.Agent.KubernetesApi.Listen != nil {
+		certFile = cfg.Agent.KubernetesApi.Listen.CertificateFile
+		keyFile = cfg.Agent.KubernetesApi.Listen.KeyFile
+	}
+	tlsConfig, err := tlstool.MaybeDefaultServerTLSConfig(certFile, keyFile)
+	if err != nil {
+		return fmt.Errorf("agent proxy TLS configuration: %w", err)
+	}
 
 	proxyHandler, err := newAgentWebsocketProxyHandler(log, cfg)
 	if err != nil {
@@ -97,10 +109,14 @@ func startAgentWebsocketProxyServer(stage stager.Stage, log *zap.Logger, cfg *ka
 		if err != nil {
 			return err
 		}
+		if tlsConfig != nil {
+			lis = tls.NewListener(lis, tlsConfig)
+		}
 		addr := lis.Addr()
 		log.Info("Agent WebSocket proxy listen endpoint is up",
 			zap.String("network", addr.Network()),
 			zap.String("address", addr.String()),
+			zap.Bool("tls", tlsConfig != nil),
 		)
 
 		// Run the HTTP server until context is done.

@@ -12,6 +12,7 @@ fragment Group on Group {
   name
   description
   global
+  memberCount
   insertedAt
   updatedAt
 }

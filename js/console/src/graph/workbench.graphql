@@ -39,6 +39,7 @@ fragment WorkbenchJobModesFields on WorkbenchJobModes {
     update
     delete
     exec
+    drain
     excludeNamespaces
     requireNamespaces
   }
@@ -89,6 +90,7 @@ fragment Workbench on Workbench {
     id
   }
   configuration {
+    selfService
     infrastructure {
       services
       stacks
@@ -195,134 +197,163 @@ fragment WorkbenchTool on WorkbenchTool {
   writeBindings {
     ...PolicyBinding
   }
+  oauth {
+    enabled
+    type
+    tokenUrl
+    clientId
+    keyId
+    audience
+    resource
+    scopes
+  }
   configuration {
-    http {
+    ...WorkbenchToolConfigurationFields
+  }
+}
+
+fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
+  http {
+    url
+    method
+    headers {
+      name
+      value
+    }
+    body
+    inputSchema
+  }
+  datadog {
+    site
+  }
+  elastic {
+    index
+    url
+    username
+  }
+  opensearch {
+    host
+    index
+    awsAccessKeyId
+    awsRegion
+    assumeRoleArn
+    usePodIdentity
+  }
+  loki {
+    url
+    username
+    tenantId
+  }
+  victoriaLogs {
+    url
+    username
+    accountId
+    projectId
+  }
+  prometheus {
+    url
+    username
+    tenantId
+    awsSigv4
+    awsAccessKeyId
+    awsRegion
+  }
+  tempo {
+    url
+    username
+    tenantId
+  }
+  jaeger {
+    url
+    username
+  }
+  atlassian {
+    email
+    url
+  }
+  jira {
+    email
+    url
+  }
+  jiraDatacenter {
+    url
+  }
+  linear {
+    url
+  }
+  slack {
+    url
+  }
+  pagerduty {
+    url
+  }
+  teams {
+    clientId
+    tenantId
+  }
+  splunk {
+    url
+    tokenType
+    username
+  }
+  cloudwatch {
+    logGroupNames
+    region
+    roleArn
+    roleSessionName
+  }
+  azure {
+    subscriptionId
+    tenantId
+    clientId
+    prometheusUrl
+  }
+  dynatrace {
+    url
+  }
+  sentry {
+    url
+  }
+  github {
+    url
+    toolset
+    appId
+    installationId
+  }
+  gitlab {
+    url
+  }
+  bitbucket {
+    url
+  }
+  bitbucketDatacenter {
+    url
+  }
+  azureDevops {
+    url
+  }
+  lambda {
+    lambdaArn
+    description
+    inputSchema
+  }
+  cloudRun {
+    identifier
+    description
+    inputSchema
+  }
+  azureFunction {
+    identifier
+    description
+    inputSchema
+  }
+  docker {
+    url
+    provider
+    proxy {
+      enabled
       url
-      method
-      headers {
-        name
-        value
-      }
-      body
-      inputSchema
-    }
-    datadog {
-      site
-    }
-    elastic {
-      index
-      url
-      username
-    }
-    opensearch {
-      host
-      index
-      awsAccessKeyId
-      awsRegion
-      assumeRoleArn
-      usePodIdentity
-    }
-    loki {
-      url
-      username
-      tenantId
-    }
-    prometheus {
-      url
-      username
-      tenantId
-      awsSigv4
-      awsAccessKeyId
-      awsRegion
-    }
-    tempo {
-      url
-      username
-      tenantId
-    }
-    jaeger {
-      url
-      username
-    }
-    atlassian {
-      email
-      url
-    }
-    linear {
-      url
-    }
-    slack {
-      url
-    }
-    pagerduty {
-      url
-    }
-    teams {
-      clientId
-      tenantId
-    }
-    splunk {
-      url
-      username
-    }
-    cloudwatch {
-      logGroupNames
-      region
-      roleArn
-      roleSessionName
-    }
-    azure {
-      subscriptionId
-      tenantId
-      clientId
-      prometheusUrl
-    }
-    dynatrace {
-      url
-    }
-    sentry {
-      url
-    }
-    github {
-      url
-      toolset
-      appId
-      installationId
-    }
-    gitlab {
-      url
-    }
-    bitbucket {
-      url
-    }
-    bitbucketDatacenter {
-      url
-    }
-    azureDevops {
-      url
-    }
-    lambda {
-      lambdaArn
-      description
-      inputSchema
-    }
-    cloudRun {
-      identifier
-      description
-      inputSchema
-    }
-    azureFunction {
-      identifier
-      description
-      inputSchema
-    }
-    docker {
-      url
-      provider
-      proxy {
-        url
-        noproxy
-      }
+      noproxy
     }
   }
 }
@@ -477,6 +508,11 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     path
     queryParams
     contentType
+  }
+  kubeDrain {
+    handle
+    node
+    explanation
   }
   kubeExec {
     handle
@@ -676,6 +712,9 @@ fragment WorkbenchJobPullRequest on PullRequest {
 }
 
 fragment WorkbenchJobUsageTiny on WorkbenchJobUsage {
+  cachedTokens
+  inputTokens
+  outputTokens
   totalCost
   totalTokens
 }
@@ -863,6 +902,7 @@ query WorkbenchesUsage($period: EvalResultsPeriod = WEEK) {
     timestamp
     inputTokens
     outputTokens
+    totalTokens
     totalCost
     workbench {
       id
@@ -914,6 +954,12 @@ query WorkbenchEvalSettings($id: ID!) {
       promptRules
       conclusionRules
       progressRules
+      automation {
+        enabled
+        maxScore
+        maxSkills
+        instructions
+      }
     }
   }
 }
@@ -1004,10 +1050,37 @@ query WorkbenchesIssues($first: Int = 100, $after: String) {
   }
 }
 
-query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchIssues(
+  $id: ID!
+  $q: String
+  $providers: [IssueWebhookProvider]
+  $statuses: [IssueStatus]
+  $sort: IssueSort
+  $direction: SortDirection
+  $first: Int = 100
+  $after: String
+) {
   workbench(id: $id) {
     id
-    issues(first: $first, after: $after) {
+    issueCounts {
+      providers {
+        provider
+        count
+      }
+      statuses {
+        status
+        count
+      }
+    }
+    issues(
+      q: $q
+      providers: $providers
+      statuses: $statuses
+      sort: $sort
+      direction: $direction
+      first: $first
+      after: $after
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -1278,7 +1351,7 @@ query WorkbenchJobActivities($id: ID!) {
         grade
       }
     }
-    activities(first: 100) {
+    activities(first: 1000) {
       edges {
         node {
           ...WorkbenchJobActivity
@@ -1369,6 +1442,11 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
       path
       queryParams
       contentType
+    }
+    kubeDrain {
+      handle
+      node
+      explanation
     }
     kubeExec {
       handle
@@ -1464,6 +1542,9 @@ query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
     edges {
       node {
         ...WorkbenchToolTiny
+        configuration {
+          ...WorkbenchToolConfigurationFields
+        }
       }
     }
   }
@@ -1484,6 +1565,38 @@ mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
 mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
   updateWorkbench(id: $id, attributes: $attributes) {
     ...Workbench
+  }
+}
+
+mutation CreateWorkbenchSkill(
+  $workbenchId: ID!
+  $attributes: WorkbenchSkillAttributes!
+) {
+  createWorkbenchSkill(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+
+mutation UpdateWorkbenchSkill(
+  $id: ID!
+  $attributes: WorkbenchSkillAttributes!
+) {
+  updateWorkbenchSkill(id: $id, attributes: $attributes) {
+    id
+    name
+    description
+    contents
+    subagents
+  }
+}
+
+mutation DeleteWorkbenchSkill($id: ID!) {
+  deleteWorkbenchSkill(id: $id) {
+    id
   }
 }
 
@@ -1517,6 +1630,12 @@ mutation CreateWorkbenchEval(
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
 
@@ -1526,6 +1645,12 @@ mutation UpdateWorkbenchEval($id: ID!, $attributes: WorkbenchEvalAttributes!) {
     promptRules
     conclusionRules
     progressRules
+    automation {
+      enabled
+      maxScore
+      maxSkills
+      instructions
+    }
   }
 }
 

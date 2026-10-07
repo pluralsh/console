@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunController do
   alias Console.Deployments.Sentinels
   alias Console.Schema.SentinelRun
 
-  plug Scope, [resource: :ai, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :sentinel, action: :read] when action in [:show, :index]
 
   @doc """
   Fetches a sentinel run by id.
@@ -18,7 +18,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunController do
   operation :show,
     operation_id: "GetSentinelRun",
     tags: ["sentinel"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["sentinel.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the sentinel run"]
     ],
@@ -38,7 +38,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunController do
   operation :index,
     operation_id: "ListSentinelRuns",
     tags: ["sentinel"],
-    "x-required-scopes": ["ai.read"],
+    "x-required-scopes": ["sentinel.read"],
     parameters: [
       sentinel_id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the sentinel"],
       page: [in: :query, schema: %{type: :integer}, required: false, description: "Page number for pagination"],

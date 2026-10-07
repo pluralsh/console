@@ -1,5 +1,9 @@
-import { Div, type DivProps } from 'honorable'
-import { type ComponentProps, type ReactNode } from 'react'
+import {
+  type CSSProperties,
+  type ComponentProps,
+  type ComponentPropsWithRef,
+  type ReactNode,
+} from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
 
 import {
@@ -32,7 +36,24 @@ type BaseCardProps = {
   tabsOuterProps?: ComponentProps<'div'>
 }
 
-type CardProps = DivProps & BaseCardProps
+type CardLayoutProps = {
+  overflow?: CSSProperties['overflow']
+  overflowX?: CSSProperties['overflowX']
+  overflowY?: CSSProperties['overflowY']
+  width?: CSSProperties['width']
+  height?: CSSProperties['height']
+  minWidth?: CSSProperties['minWidth']
+  minHeight?: CSSProperties['minHeight']
+  maxWidth?: CSSProperties['maxWidth']
+  maxHeight?: CSSProperties['maxHeight']
+}
+
+type CardProps = BaseCardProps &
+  Omit<
+    ComponentPropsWithRef<'div'>,
+    'color' | 'translate' | keyof CardLayoutProps
+  > &
+  CardLayoutProps
 
 export const fillToNeutralBgC = {
   0: 'fill-one',
@@ -108,7 +129,7 @@ const HeaderSC = styled.div<{
   })
 )
 
-const CardSC = styled(Div)<{
+const CardSC = styled.div<{
   $hasHeader: boolean
   $hasTabs: boolean
   $fillLevel: CardFillLevel
@@ -185,25 +206,40 @@ const CardSC = styled(Div)<{
 const OuterWrapSC = styled.div<{
   $overflowVisible: boolean
   $cornerSize: CornerSize
-}>(({ theme, $overflowVisible: overflowVisible, $cornerSize: cornerSize }) => {
-  const outerRadius = theme.borderRadiuses[cornerSize]
-  // Inner white/header pieces use outerRadius; shadow host uses outer+border
-  // so the curve isn’t flush with the opaque fill (reads as a hard clip).
-  const shadowRadius = outerRadius + borderWidths.default
+  $width?: CSSProperties['width']
+  $minWidth?: CSSProperties['minWidth']
+  $maxWidth?: CSSProperties['maxWidth']
+}>(
+  ({
+    theme,
+    $overflowVisible: overflowVisible,
+    $cornerSize: cornerSize,
+    $width,
+    $minWidth,
+    $maxWidth,
+  }) => {
+    const outerRadius = theme.borderRadiuses[cornerSize]
+    // Inner white/header pieces use outerRadius; shadow host uses outer+border
+    // so the curve isn’t flush with the opaque fill (reads as a hard clip).
+    const shadowRadius = outerRadius + borderWidths.default
 
-  return {
-    display: 'flex',
-    flexDirection: 'column',
-    // Light mode cards use box-shadow; overflow:hidden clips it on all sides.
-    overflow: overflowVisible || theme.mode === 'light' ? 'visible' : 'hidden',
-    width: '100%',
-    height: '100%',
-    ...(theme.mode === 'light' && {
-      borderRadius: shadowRadius,
-      boxShadow: theme.boxShadows.slight,
-    }),
+    return {
+      display: 'flex',
+      flexDirection: 'column',
+      // Light mode cards use box-shadow; overflow:hidden clips it on all sides.
+      overflow:
+        overflowVisible || theme.mode === 'light' ? 'visible' : 'hidden',
+      width: $width ?? '100%',
+      height: '100%',
+      ...($minWidth != null ? { minWidth: $minWidth } : {}),
+      ...($maxWidth != null ? { maxWidth: $maxWidth } : {}),
+      ...(theme.mode === 'light' && {
+        borderRadius: shadowRadius,
+        boxShadow: theme.boxShadows.slight,
+      }),
+    }
   }
-})
+)
 
 function Card({
   ref,
@@ -219,6 +255,13 @@ function Card({
   overflow,
   overflowX,
   overflowY,
+  width,
+  height,
+  minWidth,
+  minHeight,
+  maxWidth,
+  maxHeight,
+  css,
   ...props
 }: CardProps) {
   const hasHeader = !!header
@@ -226,6 +269,20 @@ function Card({
   const { size, content: headerContent, headerProps, outerProps } = header ?? {}
   const overflowSpecified =
     overflow != null || overflowX != null || overflowY != null
+  const cssObj =
+    css && typeof css === 'object' && !Array.isArray(css)
+      ? (css as CSSProperties)
+      : undefined
+  const {
+    width: cssWidth,
+    minWidth: cssMinWidth,
+    maxWidth: cssMaxWidth,
+    ...restCss
+  } = cssObj ?? {}
+  const wrapWidth = width ?? cssWidth
+  const wrapMinWidth = minWidth ?? cssMinWidth
+  const wrapMaxWidth = maxWidth ?? cssMaxWidth
+  const hasChrome = hasHeader || hasTabs
 
   const mainFillLevel = useDecideFillLevel({ fillLevel })
   const headerFillLevel = useDecideFillLevel({ fillLevel: mainFillLevel + 1 })
@@ -233,12 +290,15 @@ function Card({
   return (
     <FillLevelProvider value={mainFillLevel}>
       <WrapWithIf
-        condition={hasHeader || hasTabs}
+        condition={hasChrome}
         wrapper={
           <OuterWrapSC
             $overflowVisible={hasTabs}
             $cornerSize={cornerSize}
             {...(hasTabs ? tabsOuterProps : outerProps)}
+            $width={wrapWidth}
+            $minWidth={wrapMinWidth}
+            $maxWidth={wrapMaxWidth}
           />
         }
       >
@@ -263,15 +323,32 @@ function Card({
           $hasHeader={hasHeader}
           $hasTabs={hasTabs}
           {...(clickable && {
-            forwardedAs: 'button',
+            as: 'button' as const,
             type: 'button',
             'data-clickable': 'true',
           })}
           $disabled={clickable && disabled}
           $overflowSpecified={overflowSpecified}
-          overflow={overflow}
-          overflowX={overflowX}
-          overflowY={overflowY}
+          css={{
+            ...restCss,
+            ...(overflow != null ? { overflow } : {}),
+            ...(overflowX != null ? { overflowX } : {}),
+            ...(overflowY != null ? { overflowY } : {}),
+            ...(hasChrome
+              ? { width: '100%' }
+              : wrapWidth != null
+                ? { width: wrapWidth }
+                : {}),
+            ...(!hasChrome && wrapMinWidth != null
+              ? { minWidth: wrapMinWidth }
+              : {}),
+            ...(!hasChrome && wrapMaxWidth != null
+              ? { maxWidth: wrapMaxWidth }
+              : {}),
+            ...(height != null ? { height } : {}),
+            ...(minHeight != null ? { minHeight } : {}),
+            ...(maxHeight != null ? { maxHeight } : {}),
+          }}
           {...props}
         >
           {children}

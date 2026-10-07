@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "cluster": {
+      "type": "string",
+      "description": "The Plural cluster handle identifying which cluster to inspect"
+    },
+    "group": {
+      "type": "string",
+      "description": "The Kubernetes API group containing the kind"
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the Kubernetes API group"
+    },
+    "query": {
+      "type": "string",
+      "description": "A case-insensitive kind or schema name to search for within the API group and version"
+    }
+  },
+  "required": ["cluster", "group", "version", "query"]
+}

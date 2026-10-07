@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Div } from 'honorable'
+import styled from 'styled-components'
 
 import Input from '../components/Input'
 import FormField from '../components/FormField'
@@ -8,17 +8,26 @@ import CaretDownIcon from '../components/icons/CaretDownIcon'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
-  title: 'FormField',
+  title: 'Form Field',
   component: FormField,
 } satisfies Meta<any>
 
 export default meta
 type Story = StoryObj<any>
 
+const HintBox = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-one'],
+  padding: theme.spacing.medium,
+  width: '100%',
+  textAlign: 'center',
+  border: theme.borders.default,
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
 function Template(args: any) {
   const [value, setValue] = useState('')
   const {
-    valid,
+    valid: _valid,
     disabled,
     error,
     large,
@@ -52,7 +61,6 @@ function Template(args: any) {
         onChange={(event) =>
           setValue(event.target.value.substring(0, maxLength))
         }
-        valid={valid}
         error={error}
         large={large}
         small={small}
@@ -70,7 +78,7 @@ function Template(args: any) {
 
 function AllSizesTemplate(args: any) {
   return (
-    <Div maxWidth="400px">
+    <div style={{ maxWidth: 400 }}>
       <Template
         large
         {...args}
@@ -84,7 +92,7 @@ function AllSizesTemplate(args: any) {
         small
         {...args}
       />
-    </Div>
+    </div>
   )
 }
 
@@ -193,18 +201,7 @@ export const ArbitraryHintContent: Story = {
   render: AllSizesTemplate,
   args: {
     label: 'Label',
-    hint: (
-      <Div
-        backgroundColor="fill-one"
-        padding="medium"
-        width="100%"
-        textAlign="center"
-        border="1px solid border"
-        borderRadius="medium"
-      >
-        Put whatever you want in the hint!
-      </Div>
-    ),
+    hint: <HintBox>Put whatever you want in the hint!</HintBox>,
   },
 }
 

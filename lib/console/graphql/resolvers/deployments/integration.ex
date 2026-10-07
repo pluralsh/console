@@ -5,9 +5,37 @@ defmodule Console.GraphQl.Resolvers.Deployments.Integration do
 
   def list_issues(%Workbench{id: id}, args, _) do
     Issue.for_workbench(id)
-    |> Issue.ordered()
+    |> maybe_search(Issue, args)
+    |> issue_filters(args)
+    |> issue_order(args)
     |> paginate(args)
   end
+
+  def issue_counts(%Workbench{id: id}, _, _) do
+    issues = Issue.for_workbench(id)
+
+    {:ok, %{
+      providers: Console.Repo.all(Issue.count_by_provider(issues)),
+      statuses: Console.Repo.all(Issue.count_by_status(issues))
+    }}
+  end
+
+  defp issue_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:providers, p}, q when is_list(p) -> Issue.for_providers(q, p)
+      {:statuses, s}, q when is_list(s) -> Issue.for_statuses(q, s)
+      _, q -> q
+    end)
+  end
+
+  defp issue_order(query, args) do
+    field = issue_sort_field(Map.get(args, :sort))
+    dir = Map.get(args, :direction) || :desc
+    Issue.ordered(query, [{dir, field}, {dir, :id}])
+  end
+
+  defp issue_sort_field(:title), do: :title
+  defp issue_sort_field(_), do: :inserted_at
 
   def chat_connections(args, %{context: %{current_user: user}}) do
     ChatConnection.for_user(user)

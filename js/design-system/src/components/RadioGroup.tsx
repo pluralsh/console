@@ -1,11 +1,15 @@
-import { type PropsWithChildren, createContext } from 'react'
-import { Div, type DivProps } from 'honorable'
+import {
+  type ComponentPropsWithRef,
+  type PropsWithChildren,
+  createContext,
+} from 'react'
 import { type AriaRadioGroupProps, useRadioGroup } from 'react-aria'
 import { type RadioGroupState, useRadioGroupState } from 'react-stately'
 
 export const RadioContext = createContext<RadioGroupState | null>(null)
 
-type RadioGroupProps = AriaRadioGroupProps & PropsWithChildren<DivProps>
+type RadioGroupProps = AriaRadioGroupProps &
+  PropsWithChildren<ComponentPropsWithRef<'div'>>
 
 function RadioGroup({
   name,
@@ -21,9 +25,13 @@ function RadioGroup({
   validationState,
   isRequired,
   children,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
   ...props
 }: RadioGroupProps) {
   const stateProps = {
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
     name,
     label,
     description,
@@ -41,12 +49,12 @@ function RadioGroup({
   const { radioGroupProps } = useRadioGroup(stateProps, state)
 
   return (
-    <Div
+    <div
       {...props}
       {...radioGroupProps}
     >
       <RadioContext.Provider value={state}>{children}</RadioContext.Provider>
-    </Div>
+    </div>
   )
 }
 

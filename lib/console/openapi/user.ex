@@ -26,6 +26,7 @@ defmodule Console.OpenAPI.User do
       id: string(),
       email: string(format: :email),
       service_account: boolean(),
+      allowed_scopes: array_of(string()),
       roles: Console.OpenAPI.User.Roles
     }),
     required: [:id, :email, :inserted_at]

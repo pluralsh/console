@@ -1,6 +1,7 @@
 defmodule Console.Deployments.PolicyTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Policy
+  alias Console.Deployments.Policy.Input
   alias Console.Schema.{BindingPolicy, PolicyConstraint, VulnerabilityReport}
 
   describe "create_policy/2" do
@@ -355,12 +356,54 @@ defmodule Console.Deployments.PolicyTest do
       assert result["approve"] == []
       assert result["sample"] == 0
     end
+
+    test "evaluates workbench policies that still use the legacy package" do
+      policy = insert(:policy,
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "blocked by legacy policy"}] if {
+          input.blocked == true
+        }
+        """
+      )
+
+      {:ok, allowed} = Policy.evaluate_policy(policy, %{"blocked" => false})
+      assert allowed["deny"] == []
+      assert allowed["sample"] == 0
+
+      {:ok, denied} = Policy.evaluate_policy(policy, %{"blocked" => true})
+      assert [%{"message" => "blocked by legacy policy"}] = denied["deny"]
+    end
+
+    test "propagates primary query errors instead of falling back" do
+      legacy_policy = %{
+        name: "legacy",
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+        """
+      }
+
+      {:ok, engine, _} = Policy.compile_policies(:workbench, [legacy_policy])
+
+      assert {:error, _} =
+               Policy.eval_policy(
+                 engine,
+                 %{},
+                 [],
+                 {:fallback, "data.plrl.workbench[", "data.plrl.wb.admission.result"}
+               )
+    end
   end
 
   describe "evaluate_custom_policy/3" do
     test "evaluates unsaved source without a stored policy" do
       {:ok, result} = Policy.evaluate_custom_policy(:workbench, """
-        package plrl.wb.admission
+        package plrl.workbench
 
         sample := 0
 
@@ -399,20 +442,22 @@ defmodule Console.Deployments.PolicyTest do
   describe "actor/1" do
     test "builds a cleaned actor payload from a user" do
       group = insert(:group, name: "admins")
-      user = insert(:user, name: "Pat", email: "pat@example.com")
+      user = insert(:user, name: "Pat", email: "pat@example.com", roles: %{admin: true})
       insert(:group_member, group: group, user: user)
       user = Repo.preload(user, :groups)
 
-      assert Policy.actor(user) == %{
+      assert Input.actor(user) == %{
         "id" => user.id,
         "name" => "Pat",
         "email" => "pat@example.com",
+        "service_account" => false,
+        "roles" => %{"admin" => true},
         "groups" => ["admins"]
       }
     end
 
     test "returns an empty map when no user is present" do
-      assert Policy.actor(nil) == %{}
+      assert Input.actor(nil) == %{}
     end
   end
 
@@ -428,7 +473,7 @@ defmodule Console.Deployments.PolicyTest do
         sha: "abc123"
       )
 
-      assert Policy.stack(stack) == %{
+      assert Input.stack(stack) == %{
         "name" => "prod-network",
         "project" => %{"id" => project.id, "name" => "infra"},
         "git" => %{
@@ -441,7 +486,7 @@ defmodule Console.Deployments.PolicyTest do
     end
 
     test "returns an empty map when no stack is present" do
-      assert Policy.stack(nil) == %{}
+      assert Input.stack(nil) == %{}
     end
   end
 
@@ -453,7 +498,7 @@ defmodule Console.Deployments.PolicyTest do
         committer: "alice@example.com"
       )
 
-      assert Policy.commit(run) == %{
+      assert Input.commit(run) == %{
         "sha" => "abc123",
         "message" => "add web instance",
         "committer" => "alice@example.com"
@@ -461,7 +506,7 @@ defmodule Console.Deployments.PolicyTest do
     end
 
     test "returns an empty map when no run is present" do
-      assert Policy.commit(nil) == %{}
+      assert Input.commit(nil) == %{}
     end
   end
 

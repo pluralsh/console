@@ -37,6 +37,36 @@ defmodule Console.GRPC.ServerTest do
       assert config.openai.proxyModels == Provider.defaults(:openai)[:proxy_models]
     end
 
+    test "forwards provider-scoped HTTP proxy configuration to Nexus" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          openai: %{
+            access_token: "openai-token",
+            proxy: %{
+              url: "http://proxy.example.com:8080",
+              noproxy: "models.internal"
+            }
+          },
+          anthropic: %{
+            access_token: "anthropic-token",
+            proxy: %{
+              enabled: false,
+              url: "http://disabled-proxy.example.com:8080"
+            }
+          }
+        }
+      )
+
+      config = Server.get_ai_config(%Plrl.AiConfigRequest{}, nil)
+
+      assert config.openai.proxy.url == "http://proxy.example.com:8080"
+      assert config.openai.proxy.noProxy == "models.internal"
+      assert config.openai.proxy.enabled
+      refute config.anthropic.proxy.enabled
+      assert config.anthropic.proxy.url == "http://disabled-proxy.example.com:8080"
+    end
+
     test "preserves configured OpenAI-compatible api keys" do
       deployment_settings(
         ai: %{
@@ -51,6 +81,36 @@ defmodule Console.GRPC.ServerTest do
       config = Server.get_ai_config(%Plrl.AiConfigRequest{}, nil)
 
       assert config.openaiCompatible.apiKey == "configured-token"
+    end
+
+    test "forwards configured Bedrock bearer tokens" do
+      model_id = "anthropic.claude-sonnet-4-6"
+      inference_profile_arn =
+        "arn:aws:bedrock:us-east-2:123456789012:inference-profile/us.openai.gpt-5.6-luna"
+
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          bedrock: %{
+            access_token: "bedrock-token",
+            endpoint: :mantle,
+            model_settings: [
+              %{model_id: model_id, inference_profile_arn: inference_profile_arn}
+            ]
+          }
+        }
+      )
+
+      config = Server.get_ai_config(%Plrl.AiConfigRequest{}, nil)
+
+      assert config.bedrock.accessToken == "bedrock-token"
+      assert config.bedrock.endpoint == :MANTLE
+      assert config.bedrock.modelSettings == [
+               %Plrl.BedrockModelSettings{
+                 modelId: model_id,
+                 inferenceProfileArn: inference_profile_arn
+               }
+             ]
     end
 
     test "returns xAI configuration" do

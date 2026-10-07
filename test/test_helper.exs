@@ -53,9 +53,9 @@ Mimic.copy(Console.AI.Graph.Indexer.Sink)
 Mimic.copy(Req)
 Mimic.copy(Oidcc.Token)
 Mimic.copy(Kazan.Client.Imp)
-Mimic.copy(Console.AI.Workbench.Subagents.Plan)
 Mimic.copy(Console.AI.Workbench.Subagents.Infrastructure)
 Mimic.copy(Console.AI.Workbench.Subagents.Integration)
+Mimic.copy(Console.AI.Workbench.Subagents.Monitoring)
 Mimic.copy(Console.AI.Workbench.Subagents.Canvas)
 Mimic.copy(Console.AI.Workbench.Skills)
 Mimic.copy(Console.AI.Workbench.Activity)
@@ -75,7 +75,9 @@ Mimic.copy(ReqLLM)
 Mimic.copy(Console.ClusterRing)
 Mimic.copy(Console.Uploads)
 
-ExUnit.start()
+# :external tests depend on live third-party services or continuously updated remote data and
+# flake on rate limits/timeouts; run them explicitly with `mix test --include external`
+ExUnit.start(exclude: [:external])
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)
 
 {:ok, _} = Application.ensure_all_started(:ex_machina)

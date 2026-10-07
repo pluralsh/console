@@ -43,6 +43,18 @@ type SplunkSearchResponseResult struct {
 	Server     string   `json:"splunk_server"`
 }
 
+type SplunkAggregateResponse struct {
+	Preview bool                          `json:"preview"`
+	Result  SplunkAggregateResponseResult `json:"result"`
+}
+
+type SplunkAggregateResponseResult struct {
+	Timestamp string `json:"_time"`
+	Count     string `json:"count"`
+}
+
+var splunkRawTimestampFields = []string{"time", "timestamp", "@timestamp"}
+
 func NewSplunkProvider(conn *toolquery.SplunkConnection) LogsProvider {
 	return &SplunkProvider{conn: conn}
 }
@@ -61,6 +73,7 @@ func (in *SplunkProvider) Logs(ctx context.Context, input *toolquery.LogsQueryIn
 	client := client.NewSplunkClient(
 		in.conn.GetUrl(),
 		in.conn.GetToken(),
+		in.conn.GetTokenType(),
 		in.conn.GetUsername(),
 		in.conn.GetPassword(),
 	)
@@ -72,6 +85,43 @@ func (in *SplunkProvider) Logs(ctx context.Context, input *toolquery.LogsQueryIn
 	}
 
 	return in.toLogsQueryOutput(body)
+}
+
+func (in *SplunkProvider) LogAggregate(ctx context.Context, input *toolquery.LogAggregateInput) (*toolquery.LogAggregateOutput, error) {
+	if in.conn == nil || input == nil {
+		return nil, ErrInvalidArgument
+	}
+	if in.conn.GetUrl() == "" {
+		return nil, fmt.Errorf("%w: missing url", ErrInvalidArgument)
+	}
+	if in.conn.GetToken() == "" && (in.conn.GetUsername() == "" || in.conn.GetPassword() == "") {
+		return nil, fmt.Errorf("%w: missing auth (token or username/password required)", ErrInvalidArgument)
+	}
+
+	search := splunkSearchWithFacets(input.GetQuery(), 0, input.GetFacets())
+	search = fmt.Sprintf("%s | bin _time span=%s | stats count as count by _time | sort 0 _time", search, input.GetBucketSize())
+	params := url.Values{
+		"search":        {search},
+		"earliest_time": {in.toSplunkTime(input.GetRange().GetStart().AsTime())},
+		"latest_time":   {in.toSplunkTime(input.GetRange().GetEnd().AsTime())},
+		"output_mode":   {"json"},
+	}
+
+	client := client.NewSplunkClient(
+		in.conn.GetUrl(),
+		in.conn.GetToken(),
+		in.conn.GetTokenType(),
+		in.conn.GetUsername(),
+		in.conn.GetPassword(),
+	)
+	defer client.Close()
+
+	body, err := client.ExportSearch(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return in.toLogAggregateOutput(body)
 }
 
 func (in *SplunkProvider) queryParams(input *toolquery.LogsQueryInput) url.Values {
@@ -106,7 +156,7 @@ func (in *SplunkProvider) toLogsQueryOutput(responseBody string) (*toolquery.Log
 			continue
 		}
 
-		if item.Preview || item.Result.Message == "" || item.Result.Timestamp == "" {
+		if item.Preview || item.Result.Message == "" {
 			continue
 		}
 
@@ -126,8 +176,45 @@ func (in *SplunkProvider) toLogsQueryOutput(responseBody string) (*toolquery.Log
 	return &toolquery.LogsQueryOutput{Logs: logs}, nil
 }
 
+func (in *SplunkProvider) toLogAggregateOutput(responseBody string) (*toolquery.LogAggregateOutput, error) {
+	buckets := make([]*toolquery.LogAggregateBucket, 0)
+	scanner := bufio.NewScanner(strings.NewReader(responseBody))
+	scanner.Buffer(make([]byte, bufio.MaxScanTokenSize), 10*1024*1024)
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+
+		var item SplunkAggregateResponse
+		if err := json.Unmarshal([]byte(line), &item); err != nil || item.Preview {
+			continue
+		}
+		timestamp, err := in.parseTime(item.Result.Timestamp)
+		if err != nil {
+			klog.Errorf("error parsing splunk aggregate timestamp: %v", err)
+			continue
+		}
+		count, err := strconv.ParseInt(item.Result.Count, 10, 64)
+		if err != nil {
+			klog.Errorf("error parsing splunk aggregate count: %v", err)
+			continue
+		}
+		buckets = append(buckets, &toolquery.LogAggregateBucket{
+			Timestamp: timestamppb.New(timestamp),
+			Count:     count,
+		})
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return &toolquery.LogAggregateOutput{Buckets: buckets}, nil
+}
+
 func (in *SplunkProvider) toLogEntry(result SplunkSearchResponseResult) (*toolquery.LogEntry, error) {
-	timestamp, err := in.parseTime(result.Timestamp)
+	timestamp, err := in.parseLogTime(result)
 	if err != nil {
 		return nil, err
 	}
@@ -137,6 +224,55 @@ func (in *SplunkProvider) toLogEntry(result SplunkSearchResponseResult) (*toolqu
 		Message:   result.Message,
 		Labels:    in.toLabels(result),
 	}, nil
+}
+
+func (in *SplunkProvider) parseLogTime(result SplunkSearchResponseResult) (time.Time, error) {
+	candidates := []string{result.Timestamp}
+
+	var rawFields map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(result.Message), &rawFields); err == nil {
+		for _, field := range splunkRawTimestampFields {
+			if value := splunkRawTimestampValue(rawFields[field]); value != "" {
+				candidates = append(candidates, value)
+			}
+		}
+	}
+	candidates = append(candidates, result.IndexTime)
+
+	var lastErr error
+	for _, candidate := range candidates {
+		if strings.TrimSpace(candidate) == "" {
+			continue
+		}
+		if timestamp, err := in.parseTime(candidate); err == nil {
+			return timestamp, nil
+		} else {
+			lastErr = err
+		}
+	}
+
+	if lastErr != nil {
+		return time.Time{}, lastErr
+	}
+	return time.Time{}, fmt.Errorf("%w: missing splunk log timestamp", ErrInvalidArgument)
+}
+
+func splunkRawTimestampValue(value json.RawMessage) string {
+	if len(value) == 0 {
+		return ""
+	}
+
+	var text string
+	if err := json.Unmarshal(value, &text); err == nil {
+		return text
+	}
+
+	var number json.Number
+	if err := json.Unmarshal(value, &number); err == nil {
+		return number.String()
+	}
+
+	return ""
 }
 
 func (in *SplunkProvider) toLabels(result SplunkSearchResponseResult) map[string]string {
@@ -169,6 +305,10 @@ func (in *SplunkProvider) parseTime(value string) (time.Time, error) {
 	if raw == "" {
 		klog.V(log.LogLevelInfo).InfoS("empty splunk log timestamp value, defaulting to zero time")
 		return time.Time{}, nil
+	}
+
+	if unixSeconds, err := strconv.ParseInt(raw, 10, 64); err == nil {
+		return time.Unix(unixSeconds, 0).UTC(), nil
 	}
 
 	if unixFloat, err := strconv.ParseFloat(raw, 64); err == nil {

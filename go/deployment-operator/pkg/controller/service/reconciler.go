@@ -5,18 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
-	"github.com/pluralsh/console/go/polly/cache"
-	"github.com/pluralsh/console/go/polly/containers"
 	"golang.org/x/time/rate"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/cache"
+	"github.com/pluralsh/console/go/polly/containers"
+
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,6 +26,9 @@ import (
 	ctrclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/polly/algorithms"
 
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	clienterrors "github.com/pluralsh/console/go/deployment-operator/internal/errors"
@@ -449,7 +452,7 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 		if len(activeDependents) > 0 {
 			if err := s.UpdateErrors(id, &console.ServiceErrorAttributes{
 				Message: "service is being deleted, but there are active dependents: " + strings.Join(activeDependents, ", "),
-				Warning: lo.ToPtr(true),
+				Warning: new(true),
 				Source:  "delete",
 			}); err != nil {
 				logger.Error(err, "failed to update errors")
@@ -501,7 +504,7 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 		return
 	}
 
-	manifests, err := template.Render(dir, svc, s.mapper)
+	manifests, warnings, err := template.Render(dir, svc, s.mapper)
 	if err != nil {
 		logger.Error(err, "failed to render manifests", "service", svc.Name)
 		return
@@ -579,6 +582,9 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 	// Extract images metadata from the applied resources
 	metadata := s.ExtractMetadata(manifests)
 
+	// Prepend templating warnings (e.g. from Lua or Python scripts) so they are reported alongside apply errors.
+	errs = slices.Concat(warnings, errs)
+
 	if err = s.UpdateStatus(ctx, svc.ID, svc.Revision.ID, svc.Sha, svc.Status, lo.ToSlicePtr(components), lo.ToSlicePtr(errs), metadata); err != nil {
 		logger.Error(err, "Failed to update service status, ignoring for now")
 	} else {
@@ -614,7 +620,7 @@ func isExpectedError(err error) bool {
 	var httpErr *manis.HTTPError
 	if errors.As(err, &httpErr) {
 		switch httpErr.StatusCode {
-		case http.StatusPaymentRequired, http.StatusForbidden, http.StatusTooManyRequests:
+		case http.StatusPaymentRequired, http.StatusForbidden, http.StatusTooEarly, http.StatusTooManyRequests:
 			return true
 		}
 	}

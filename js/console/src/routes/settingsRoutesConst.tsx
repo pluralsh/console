@@ -31,6 +31,16 @@ export const AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH =
 export const AI_SETTINGS_MCP_SERVERS_REL_PATH = 'mcp-servers' as const
 export const AI_SETTINGS_MCP_SERVERS_ABS_PATH =
   `${AI_SETTINGS_ABS_PATH}/${AI_SETTINGS_MCP_SERVERS_REL_PATH}` as const
+export const AI_SETTINGS_MCP_SERVER_ID_PARAM_ID = 'mcpServerId' as const
+export const AI_SETTINGS_MCP_SERVERS_EDIT_REL_PATH =
+  `:${AI_SETTINGS_MCP_SERVER_ID_PARAM_ID}/edit` as const
+export const AI_SETTINGS_MCP_SERVERS_EDIT_PATH_MATCHER_ABS =
+  `${AI_SETTINGS_MCP_SERVERS_ABS_PATH}/${AI_SETTINGS_MCP_SERVERS_EDIT_REL_PATH}` as const
+export const getAiSettingsMcpServerEditAbsPath = ({
+  mcpServerId,
+}: {
+  mcpServerId: Nullable<string>
+}) => `${AI_SETTINGS_MCP_SERVERS_ABS_PATH}/${mcpServerId ?? ''}/edit`
 
 // webhooks
 export const WEBHOOKS_SETTINGS_REL_PATH = 'webhooks' as const

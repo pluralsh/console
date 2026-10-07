@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -27,9 +28,9 @@ type gitLabClient struct {
 	gl *gogitlab.Client
 }
 
-func newGitLabClient(token, host string) *gitLabClient {
+func newGitLabClient(token, host string, client *http.Client) *gitLabClient {
 	baseURL := fmt.Sprintf("https://%s/", host)
-	gl, _ := gogitlab.NewClient(token, gogitlab.WithBaseURL(baseURL))
+	gl, _ := gogitlab.NewClient(token, gogitlab.WithBaseURL(baseURL), gogitlab.WithHTTPClient(client))
 	return &gitLabClient{gl: gl}
 }
 

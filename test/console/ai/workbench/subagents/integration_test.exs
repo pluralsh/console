@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
   use Mimic
   alias Console.AI.Workbench.{Subagents, Environment, Engine, MCP}
   alias Console.AI.Tools.Workbench.Http
-  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tool
   alias Console.Schema.WorkbenchJobThought
   import ElasticsearchUtils
 
@@ -25,7 +25,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "try infrastructure",
          [
            %Tool{
@@ -38,7 +38,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
 
       expect(Http, :implement, fn %Http{} -> {:ok, "http response: world (status 200)"} end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete",
          [
            %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}
@@ -103,22 +103,22 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "enabling tools",
          [
            %Tool{name: "enable_tools", arguments: %{"tools" => ["mcp_example_echo"]}, id: "0"}
          ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "try mcp",
          [
            %Tool{name: "mcp_example_echo", arguments: %{"message" => "world"}, id: "1"}
          ]}
       end)
 
-      expect(Provider, :completion, fn msgs, _ ->
-        assert Enum.any?(msgs, &match?({:tool, "Echo: world", _}, &1))
+      expect_reqllm_completion(fn messages, _ ->
+        assert Enum.any?(messages, &match?({:tool, "Echo: world", _}, &1))
 
         {:ok, "enabling result",
          [
@@ -126,7 +126,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
          ]}
       end)
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "complete",
          [
            %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}
@@ -194,16 +194,16 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "try mcp",
          [
            %Tool{name: "linear_linear_list_teams", arguments: %{"query" => "Eng"}, id: "1"}
          ]}
       end)
 
-      expect(Provider, :completion, fn msgs, _ ->
+      expect_reqllm_completion(fn messages, _ ->
         {:tool, tool_result, _} =
-          Enum.find(msgs, &match?({:tool, _, %{name: "linear_linear_list_teams"}}, &1))
+          Enum.find(messages, &match?({:tool, _, %{name: "linear_linear_list_teams"}}, &1))
 
         {:ok, _} = Jason.decode(tool_result)
 
@@ -252,7 +252,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
         }
       )
 
-      expect(Provider, :completion, fn _, _ ->
+      expect_reqllm_completion(fn _, _ ->
         {:ok, "list slack channels",
          [
            %Tool{
@@ -263,9 +263,9 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
          ]}
       end)
 
-      expect(Provider, :completion, fn msgs, _ ->
+      expect_reqllm_completion(fn messages, _ ->
         {:tool, tool_result, _} =
-          Enum.find(msgs, &match?({:tool, _, %{name: "slack_list_channels_slack"}}, &1))
+          Enum.find(messages, &match?({:tool, _, %{name: "slack_list_channels_slack"}}, &1))
 
         {:ok, _} = Jason.decode(tool_result)
 
@@ -298,4 +298,5 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
       assert result[:result][:output] == "complete"
     end
   end
+
 end

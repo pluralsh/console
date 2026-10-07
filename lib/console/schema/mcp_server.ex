@@ -1,7 +1,10 @@
 defmodule Console.Schema.McpServer do
   use Piazza.Ecto.Schema
   alias Console.Schema.{PolicyBinding, Project, User}
+  alias Console.Schema.DeploymentSettings.OauthToken, as: TokenExchange
   alias Console.Deployments.Policies.Rbac
+
+  @obfuscated_header_value "*****"
 
   defenum Protocol, sse: 0, streamable_http: 1
 
@@ -28,6 +31,8 @@ defmodule Console.Schema.McpServer do
 
     embeds_one :authentication, Authentication, on_replace: :update do
       field :plural, :boolean
+
+      embeds_one :oauth, TokenExchange, on_replace: :update
 
       embeds_many :headers, Header, on_replace: :delete do
         field :name,  :string
@@ -67,10 +72,19 @@ defmodule Console.Schema.McpServer do
     from(m in query, order_by: ^order)
   end
 
+  def obfuscated_header_value, do: @obfuscated_header_value
+
+  def obfuscated_header_value?(value) when is_binary(value),
+    do: value == @obfuscated_header_value
+
+  def obfuscated_header_value?(_), do: false
+
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(url name confirm project_id protocol)a)
     |> cast_embed(:authentication, with: &auth_changeset/2)
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:project_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
@@ -80,14 +94,31 @@ defmodule Console.Schema.McpServer do
   defp auth_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(plural)a)
+    |> cast_embed(:oauth)
     |> cast_embed(:headers, with: &header_changeset/2)
   end
 
   defp header_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(name value)a)
+    |> preserve_obfuscated_value()
     |> validate_required(~w(name value)a)
   end
+
+  defp preserve_obfuscated_value(%{data: %{value: previous}} = changeset)
+       when is_binary(previous) do
+    case fetch_change(changeset, :value) do
+      {:ok, value} ->
+        if obfuscated_header_value?(value),
+          do: delete_change(changeset, :value),
+          else: changeset
+
+      :error ->
+        changeset
+    end
+  end
+
+  defp preserve_obfuscated_value(changeset), do: changeset
 
   def rbac_changeset(model, attrs \\ %{}) do
     model

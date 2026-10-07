@@ -2,7 +2,7 @@ import {
   Card,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   SearchIcon,
   Select,
@@ -14,14 +14,16 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { EditableDivWrapperSC } from 'components/workbenches/tools/WorkbenchToolFormFields'
 import {
   MonitorAggregate,
-  MonitorAttributes,
   MonitorOperator,
   useLogAggregationQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { ServiceMonitorStepKey } from './ServiceMonitorCreateOrEdit'
+import type {
+  ServiceMonitorAttributes,
+  ServiceMonitorStepKey,
+} from './ServiceMonitorCreateOrEdit'
 
 export const DURATION_OPTIONS = [
   '5m',
@@ -41,8 +43,8 @@ export function ServiceMonitorForm({
   curStep,
   isLoading,
 }: {
-  state: MonitorAttributes
-  update: (update: Partial<MonitorAttributes>) => void
+  state: ServiceMonitorAttributes
+  update: (update: Partial<ServiceMonitorAttributes>) => void
   curStep: ServiceMonitorStepKey
   isLoading: boolean
 }) {
@@ -81,14 +83,14 @@ export function ServiceMonitorForm({
               required
               label="Monitor name"
             >
-              <Input2
+              <Input
                 placeholder="Enter monitor name"
                 value={state.name}
                 onChange={(e) => update({ name: e.target.value })}
               />
             </StretchedFormField>
             <StretchedFormField label="Monitor description">
-              <Input2
+              <Input
                 placeholder="Enter monitor description"
                 value={state.description ?? ''}
                 onChange={(e) => update({ description: e.target.value })}
@@ -108,7 +110,7 @@ export function ServiceMonitorForm({
               </span>
             }
           >
-            <Input2
+            <Input
               placeholder="*/5 * * * * or @daily"
               value={state.evaluationCron}
               onChange={(e) => update({ evaluationCron: e.target.value })}
@@ -145,7 +147,7 @@ export function ServiceMonitorForm({
             required
             label="Threshold value"
           >
-            <Input2
+            <Input
               placeholder="Enter numeric value"
               value={state.threshold.value}
               error={isNaN(state.threshold.value)}
@@ -243,7 +245,7 @@ export function ServiceMonitorForm({
             </StretchedFormField>
           </Flex>
           <Flex gap="medium">
-            <Input2
+            <Input
               startIcon={<SearchIcon />}
               placeholder="Enter query to search on logs (required)"
               value={log.query}

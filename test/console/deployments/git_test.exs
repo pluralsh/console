@@ -558,7 +558,7 @@ defmodule Console.Deployments.GitTest do
 
     test "it can create a pull request with a bitbucket datacenter connection" do
       user = insert(:user)
-      %{id: conn_id} = conn = insert(:scm_connection, type: :bitbucket_datacenter, base_url: "https://bitbucket.example.com", username: "mjg", token: "some-pat")
+      conn = insert(:scm_connection, type: :bitbucket_datacenter, base_url: "https://bitbucket.example.com", username: "mjg", token: "some-pat")
       pra = insert(:pr_automation,
         identifier: "pluralsh/console",
         cluster: build(:cluster),
@@ -572,14 +572,16 @@ defmodule Console.Deployments.GitTest do
         ]
       )
       expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
-      expect(Req, :post, fn "https://bitbucket.example.com/rest/api/latest/projects/pluralsh/repos/console/pull-requests", _ ->
+      expect(Req, :post, fn "https://bitbucket.example.com/rest/api/1.0/projects/pluralsh/repos/console/pull-requests", opts ->
+        body = Jason.decode!(opts[:body])
+        assert body["fromRef"] == %{"id" => "refs/heads/pr-test"}
+        assert body["toRef"] == %{"id" => "refs/heads/master"}
+
         {:ok, %Req.Response{status: 200, body: Jason.encode!(%{"id" => 1})}}
       end)
       expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
       expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
       expect(Console.Deployments.Pr.Git, :push, fn _, "pr-test" -> {:ok, ""} end)
-      expect(Console.Deployments.Pr.Git, :sha, fn %{connection: %{id: ^conn_id}}, "pr-test" -> {:ok, "sha"} end)
-      expect(Console.Deployments.Pr.Git, :sha, fn %{connection: %{id: ^conn_id}}, "master" -> {:ok, "sha"} end)
 
       {:ok, pr} = Git.create_pull_request(%{
         "first" => 10,

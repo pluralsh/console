@@ -33,15 +33,8 @@ body {
 }
 
 code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-/*  Undo mysterious global :focus / :focus-visible styles set by (probably) honorable */
-html :focus,
-html :focus-visible {
-  background-color: unset;
-  color: unset;
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-ligatures: none;
 }
 
 body h1,

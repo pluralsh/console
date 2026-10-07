@@ -99,9 +99,11 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   input_object :agent_pr_review_attributes do
     field :url,                non_null(:string), description: "the URL of the pull request being reviewed"
-    field :confidence,         non_null(:agent_review_confidence), description: "the A-F confidence grade"
+    field :confidence,         non_null(:agent_review_confidence),
+      description: "the PR's A-F mergeability grade, not the reviewer's confidence: A is merge-ready, B has only minor non-blocking concerns, C or lower requires changes before merge"
     field :summary,            non_null(:string), description: "a summary of the pull request review"
-    field :confidence_comment, non_null(:string), description: "an explanation of the confidence grade"
+    field :confidence_comment, non_null(:string),
+      description: "an explanation of the mergeability grade based on findings and blockers; do not describe review certainty"
     field :files,              list_of(:agent_pr_review_file_attributes), description: "file-level summaries"
     field :comments,           list_of(:agent_pr_review_comment_attributes), description: "up to three inline review findings"
   end
@@ -253,11 +255,13 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     field :scm_creds,    :scm_creds, resolve: &Deployments.agent_scm_credentials/3
     field :plural_creds, :plural_creds, resolve: &Deployments.agent_plural_creds/3
+    field :workbench_mcp_url, :string,
+      resolve: fn run, _, _ -> Agents.workbench_mcp_url(run) end,
+      description: "the MCP endpoint for the workbench that spawned this run, if any"
 
     @desc "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
     field :pod, :pod do
       resolve fn run, _, _ -> Agents.run_pod(run) end
-      middleware ErrorHandler
     end
 
     field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
@@ -291,6 +295,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :base_url, :string, description: "the base url of the scm connection"
     field :username, non_null(:string)
     field :token,    non_null(:string)
+    field :proxy,    :http_proxy_configuration, description: "the proxy to use for git and SCM API requests"
 
     field :exa_key, :string, description: "the exa key for the agent", resolve: fn
       _, _, _ -> {:ok, Console.conf(:exa_api_key)}

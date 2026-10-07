@@ -49,6 +49,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:time_range)
+    |> TimeRange.put_default()
     |> cast_embed(:options, with: &options_changeset/2)
     |> validate_required([:query])
   end
@@ -72,6 +73,8 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
   end
 
   def implement(%__MODULE__{} = tool) do
+    tool = TimeRange.ensure(tool)
+
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
          {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input, Client.cloud_query_rpc_opts()),
@@ -81,6 +84,8 @@ defmodule Console.AI.Tools.Workbench.Observability.Traces do
   end
 
   def structured(%__MODULE__{} = tool) do
+    tool = TimeRange.ensure(tool)
+
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
          {:ok, %TracesQueryOutput{} = output} <- Stub.traces(conn, input, Client.cloud_query_rpc_opts()) do

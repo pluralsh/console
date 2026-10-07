@@ -38,6 +38,11 @@ type AgentRunSpec struct {
 	// +kubebuilder:validation:Optional
 	FlowID *string `json:"flowId,omitempty"`
 
+	// WorkbenchMCPURL is the Console MCP endpoint for the workbench that
+	// originated this run. It is populated by the AgentRuntime controller.
+	// +kubebuilder:validation:Optional
+	WorkbenchMCPURL *string `json:"workbenchMcpUrl,omitempty"`
+
 	// Language is the programming language used in the agent run.
 	//
 	// Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.

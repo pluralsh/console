@@ -32,17 +32,16 @@ const CODEX_TOOL_NAMES = new Set([
 const CLAUDE_BATCH_TOOLS = new Set(['bash', 'read', 'grep', 'edit'])
 
 const TITLE_OVERRIDES: Record<string, string> = {
-  workbench_subagent: 'Subagent',
-  workbench_subagents: 'Subagents',
-  subagent_result: 'Result',
-  enable_tools: 'Enable tools',
-  python_sandbox: 'Python sandbox',
-  workbench_lua: 'Lua',
-  workbench_notes: 'Notes',
-  workbench_plan: 'Plan',
-  current_time: 'Time',
-  agent_scratchpad: 'Scratchpad',
-  saved_prompt: 'Prompt',
+  workbench_subagent: 'subagent',
+  workbench_subagents: 'subagents',
+  subagent_result: 'result',
+  enable_tools: 'enable tools',
+  python_sandbox: 'python sandbox',
+  workbench_lua: 'lua',
+  workbench_notes: 'notes',
+  current_time: 'time',
+  agent_scratchpad: 'scratchpad',
+  saved_prompt: 'prompt',
 }
 
 const STRIP_PREFIXES = [
@@ -101,6 +100,21 @@ export function resolveToolCallKind(
   if (name.includes('grep')) return 'grep'
 
   return 'generic'
+}
+
+export function isCmdToolKind(kind: ToolCallKind): boolean {
+  return kind === 'bash' || kind === 'command_execution'
+}
+
+/** Running cmds stay open so stdout can be watched; they collapse as soon as they complete. */
+export function shouldUnfurlCmdTool({
+  kind,
+  isPending,
+}: {
+  kind: ToolCallKind
+  isPending?: boolean
+}): boolean {
+  return isCmdToolKind(kind) && !!isPending
 }
 
 /** Key used when batching consecutive tool calls in a group header. */
@@ -189,36 +203,48 @@ export function toolCallGroupHeader(
     .join(', ')
 }
 
-export function toolCallDisplayTitle(
-  kind: ToolCallKind,
-  toolName: string,
+/** Lowercase, verb-first label for a tool call. */
+export function toolCallTitle({
+  name = '',
+  kind,
+  args,
+  pending = false,
+  hiddenWords,
+}: {
+  name?: string | null
+  kind?: ToolCallKind
   args?: ToolArguments
-): string {
+  pending?: boolean
+  /** Connection and product words to drop, such as "prometheus". */
+  hiddenWords?: Iterable<string | null | undefined>
+} = {}): string {
+  const toolName = name ?? ''
+
   switch (kind) {
     case 'command_execution':
     case 'bash':
-      return isShellCommand(getCommand(toolName, args)) ? 'Bash' : 'Command'
+      return isShellCommand(getCommand(toolName, args)) ? 'bash' : 'command'
     case 'python_sandbox':
-      return 'Python sandbox'
+      return 'python sandbox'
     case 'file_change':
     case 'edit':
-      return 'Edit'
+      return 'edit'
     case 'web_search':
-      return 'Search'
+      return 'search'
     case 'mcp_tool_call':
-      return 'MCP'
+      return 'mcp'
     case 'read':
-      return 'Read'
+      return 'read'
     case 'grep':
-      return 'Grep'
+      return 'grep'
     case 'subagent':
-      return 'Subagent'
+      return pending ? formatSubagentTitle(args) : 'subagent'
     case 'subagent_result':
-      return 'Result'
+      return 'result'
     case 'enable_tools':
-      return 'Enable tools'
+      return 'enable tools'
     default:
-      return humanizeToolName(toolName)
+      return styleToolName(toolName, hiddenWords)
   }
 }
 
@@ -266,9 +292,65 @@ export function toolCallDisplaySubtitle(
   return truncate(preview.replace(/\s+/g, ' ').trim(), { length: 72 })
 }
 
-export function humanizeToolName(toolName: string): string {
+/** Natural-language heading for a shell command, when supplied by the agent. */
+export function toolCallDisplayDescription(args?: ToolArguments): string {
+  if (args && !Array.isArray(args)) {
+    for (const key of ['description', 'explanation', 'summary'] as const) {
+      const value = args[key]
+      if (typeof value === 'string' && value.trim()) return value.trim()
+    }
+  }
+
+  return ''
+}
+
+/**
+ * Trailing words that are the action in a tool name. "run" is left in place
+ * because a sentinel run is a noun.
+ */
+const TRAILING_VERBS = new Set([
+  'add',
+  'aggregate',
+  'close',
+  'create',
+  'delete',
+  'describe',
+  'drain',
+  'enable',
+  'exec',
+  'fetch',
+  'get',
+  'inspect',
+  'invoke',
+  'list',
+  'post',
+  'query',
+  'react',
+  'read',
+  'remove',
+  'reply',
+  'save',
+  'search',
+  'transition',
+  'update',
+  'upsert',
+])
+
+const FETCH_NOUNS = new Set([
+  'log',
+  'logs',
+  'metric',
+  'metrics',
+  'trace',
+  'traces',
+])
+
+function styleToolName(
+  toolName: string,
+  hiddenWords: Iterable<string | null | undefined> = []
+): string {
   const lower = toolName.toLowerCase().trim()
-  if (!lower) return 'Tool'
+  if (!lower) return 'tool'
   if (TITLE_OVERRIDES[lower]) return TITLE_OVERRIDES[lower]
 
   let rest = toolName.trim()
@@ -279,8 +361,35 @@ export function humanizeToolName(toolName: string): string {
     }
   }
 
-  const humanized = startCase(rest.replace(/[_-]+/g, ' ').trim())
-  return humanized || 'Tool'
+  const hidden = new Set(
+    [...hiddenWords].flatMap((value) =>
+      (value ?? '').toLowerCase().split(/\s+/).filter(Boolean)
+    )
+  )
+  const words = (
+    startCase(rest.replace(/[_-]+/g, ' ').trim()).toLowerCase() || 'tool'
+  )
+    .split(/\s+/)
+    .filter((word) => word && !hidden.has(word))
+  const titled = prefixFetch(leadWithVerb(words))
+
+  return titled.join(' ') || 'tool'
+}
+
+function leadWithVerb(words: string[]): string[] {
+  if (words.length < 2) return words
+  const verb = words[words.length - 1]
+  if (!TRAILING_VERBS.has(verb)) return words
+
+  return [verb, ...words.slice(0, -1)]
+}
+
+function prefixFetch(words: string[]): string[] {
+  if (words.length === 1 && FETCH_NOUNS.has(words[0])) {
+    return ['fetch', words[0]]
+  }
+
+  return words
 }
 
 export function getSubagentRole(args?: ToolArguments): string {
@@ -293,10 +402,13 @@ export function getSubagentPrompt(args?: ToolArguments): string {
   return typeof args.prompt === 'string' ? args.prompt : ''
 }
 
-function formatSubagentSubtitle(args?: ToolArguments): string {
+function formatSubagentTitle(args?: ToolArguments): string {
   const role = startCase(getSubagentRole(args).replace(/[_-]+/g, ' '))
-  const prompt = getSubagentPrompt(args)
-  return [role, prompt].filter(Boolean).join(' · ')
+  return role ? `${role} subagent` : 'Subagent'
+}
+
+function formatSubagentSubtitle(args?: ToolArguments): string {
+  return getSubagentPrompt(args)
 }
 
 export function getCommand(toolName: string, args?: ToolArguments): string {

@@ -22,7 +22,8 @@ const (
 			apply_sha TEXT,
 			server_sha TEXT,
 			manifest BOOLEAN DEFAULT 0, -- Indicates if the component was created from an original manifest set of a service
-			applied BOOLEAN DEFAULT 0 -- Indicates if the component was already applied to the cluster
+			applied BOOLEAN DEFAULT 0, -- Indicates if the component was already applied to the cluster
+			labels TEXT -- JSON object of Kubernetes object labels
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_component ON component("group", version, kind, namespace, name);
 		CREATE INDEX IF NOT EXISTS idx_parent ON component(parent_uid);
@@ -68,7 +69,7 @@ const (
 	`
 
 	getAppliedComponent = `
-		SELECT uid, "group", version, kind, namespace, name, health, parent_uid, manifest_sha, transient_manifest_sha, apply_sha, server_sha, service_id, manifest
+		SELECT uid, "group", version, kind, namespace, name, health, parent_uid, manifest_sha, transient_manifest_sha, apply_sha, server_sha, service_id, manifest, labels
 		FROM component
 		WHERE name = ? AND namespace = ? AND "group" = ? AND version = ? AND kind = ? AND applied = 1
 	`
@@ -100,7 +101,8 @@ const (
 		    service_id,
 		    delete_phase,
 		    server_sha,
-		    applied
+		    applied,
+		    labels
 		) VALUES (
 			?,
 			?,
@@ -115,6 +117,7 @@ const (
 		    ?,
 		    ?,
 		    ?,
+		    ?,
 		    ?
 		) ON CONFLICT("group", version, kind, namespace, name) DO UPDATE SET
 			uid = excluded.uid,
@@ -125,7 +128,8 @@ const (
 			service_id = excluded.service_id,
 			delete_phase = excluded.delete_phase,
 			server_sha = excluded.server_sha,
-		    applied = excluded.applied
+		    applied = excluded.applied,
+		    labels = excluded.labels
 	`
 
 	setComponentUnsynced = `
@@ -137,7 +141,8 @@ const (
 		    server_sha = '',
 		    manifest_sha = '',
 		    transient_manifest_sha = '',
-		    apply_sha = ''
+		    apply_sha = '',
+		    labels = ''
 		WHERE "group" = ? AND version = ? AND kind = ? AND namespace = ? AND name = ?
 	`
 

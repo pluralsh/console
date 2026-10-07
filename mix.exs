@@ -1,46 +1,11 @@
 defmodule Console.MixProject do
   use Mix.Project
 
-  defp version do
-    case :file.consult(~c"hex_metadata.config") do
-      {:ok, data} ->
-        {"version", version} = List.keyfind(data, "version", 0)
-        version
-      _ ->
-        version =
-          case System.cmd("git", ~w[describe --dirty=+dirty]) do
-            {"go/" <> _, 0} -> "0.0.0"
-            {version, 0} ->
-              String.trim_leading(String.trim(version), "v")
-
-            {_, code} ->
-              Mix.shell().error("Git exited with code #{code}, falling back to 0.0.0")
-
-              "0.0.0"
-          end
-
-        case Version.parse(version) do
-          {:ok, %Version{pre: ["pre" <> _ | _]} = version} ->
-            to_string(version)
-
-          {:ok, %Version{pre: []} = version} ->
-            to_string(version)
-
-          {:ok, %Version{patch: patch, pre: pre} = version} ->
-            to_string(%{version | patch: patch + 1, pre: ["dev" | pre]})
-
-          :error ->
-            Mix.shell().error("Failed to parse #{version}, falling back to 0.0.0")
-
-            "0.0.0"
-        end
-    end
-  end
-
   def project do
     [
       app: :console,
-      version: version(),
+      # deployed versions come from CONSOLE_VERSION (chart appVersion) and GIT_COMMIT at runtime
+      version: "0.1.0",
       build_path: "_build",
       config_path: "config/config.exs",
       deps_path: "deps",
@@ -57,6 +22,8 @@ defmodule Console.MixProject do
           runtime_config_path: "rel/runtime.exs",
           applications: [
             runtime_tools: :permanent,
+            opentelemetry_exporter: :permanent,
+            opentelemetry: :permanent,
             console: :permanent
           ]
         ]
@@ -82,6 +49,7 @@ defmodule Console.MixProject do
       {:ex_machina, "~> 2.8", only: :test},
       {:dns_cluster, "~> 0.2.0"},
       {:ex_aws, "~> 2.7"},
+      {:ex_aws_cloudwatch, "~> 2.0"},
       {:ex_aws_sts, "~> 2.3.0"},
       {:configparser_ex, "~> 5.0"},
       {:crontab, "~> 1.1"},
@@ -89,8 +57,15 @@ defmodule Console.MixProject do
       {:slack_elixir, git: "https://github.com/pluralsh/slack_elixir.git", ref: "a55bf71744bd7b80ecebe75a60e54953cf8a8514"},
       {:absinthe_client, "~> 0.1.0"},
       {:postgrex, "~> 0.22"},
-      {:grpc, "~> 1.0"},
+      # Pin until the supervised Gun connection recovery fixes from grpc#568,
+      # grpc#583, and grpc#586 are included in a release.
+      {:grpc,
+       github: "elixir-grpc/grpc",
+       sparse: "grpc",
+       ref: "b0d999892cb76e1d7b9bcabb02d22a4e9410fefc"},
+      {:gun, "~> 2.4"},
       {:grpc_server, "~> 1.0"},
+      {:recon, "~> 2.5"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_pubsub, "~> 2.0"},
@@ -111,6 +86,20 @@ defmodule Console.MixProject do
       {:telemetry_poller, "~> 1.1"},
       {:cowboy_telemetry, "~> 0.4"},
       {:telemetry_registry, "~> 0.3"},
+      {:opentelemetry_api, "~> 1.5"},
+      {:opentelemetry, "~> 1.7"},
+      {:opentelemetry_exporter, "~> 1.10"},
+      {:opentelemetry_bandit, "~> 0.3"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      {:opentelemetry_ecto, "~> 1.2"},
+      {:opentelemetry_absinthe, "~> 2.4"},
+      # hex 0.3.0 raises badarg on remote pids in $callers (fixed upstream in
+      # open-telemetry/opentelemetry-erlang-contrib#480, unreleased); swap back to hex once > 0.3.0 ships
+      {:opentelemetry_process_propagator,
+        github: "open-telemetry/opentelemetry-erlang-contrib",
+        sparse: "propagators/opentelemetry_process_propagator",
+        ref: "0dfdfa512b60e5a4569d90e263ba4f62fbaab9a0",
+        override: true},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
       {:anubis_mcp, "~> 1.14"},
@@ -187,7 +176,7 @@ defmodule Console.MixProject do
       {:scribe, "~> 0.11"},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.20"},
+      {:req_llm, "~> 1.26"},
       {:sweet_xml, ">= 0.0.0"},
       {:jaqex, "~> 0.1.3"},
       {:waffle, "~> 1.1", git: "https://github.com/jopedroliveira/waffle.git", tag: "v1.1.9-azure.3", override: true},

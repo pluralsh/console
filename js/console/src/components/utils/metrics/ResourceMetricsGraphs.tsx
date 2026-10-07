@@ -1,11 +1,14 @@
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
 import { MetricResponseFragment, MetricResult } from 'generated/graphql'
 import { Prometheus } from 'utils/prometheus.ts'
 import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
+import {
+  MetricsGraphCard,
+  MetricsGraphGrid,
+} from 'components/utils/metrics/MetricsGraphCard'
+import type { TimeWindow } from 'components/utils/timerange/timeRange'
 import {
   PodResourceReservation,
   addPodResourceReservationSeries,
@@ -14,6 +17,7 @@ import {
 type GraphSeries = {
   id: string
   data: { x: Date; y: number }[]
+  dashed?: boolean
 }
 
 type MetricGraph = {
@@ -36,48 +40,85 @@ function getMetricPod(metric: MetricResponseFragment['metric']): string {
   return typeof metric?.pod === 'string' ? metric.pod : ''
 }
 
-function MetricsRow({
+type RangeProps = {
+  timeWindow?: TimeWindow
+  onRangeSelect?: (start: Date, end: Date) => void
+}
+
+function MetricsGraphs({
   graphs,
-  wrapLegend,
+  timeWindow,
+  onRangeSelect,
 }: {
   graphs: MetricGraph[]
-  wrapLegend?: boolean
-}) {
-  const theme = useTheme()
+} & RangeProps) {
   const visibleGraphs = graphs.filter(({ data }) => !isEmpty(data))
 
   if (isEmpty(visibleGraphs)) return null
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
-    >
+    <MetricsGraphGrid>
       {visibleGraphs.map(({ data, format, title }) => (
-        <div
+        <MetricsGraphCard
           key={title}
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
+          title={title}
         >
-          <GraphHeader title={title} />
           <Graph
             data={data}
             yFormat={(v) => Prometheus.format(v, format)}
-            tickRotation={undefined}
-            wrapLegend={wrapLegend}
+            yTickBase={format === 'memory' ? 'binary' : 'decimal'}
+            timeWindow={timeWindow}
+            onRangeSelect={onRangeSelect}
           />
-        </div>
+        </MetricsGraphCard>
       ))}
-    </div>
+    </MetricsGraphGrid>
   )
+}
+
+type ResourceMetricsInput = {
+  cpu?: MetricResponseFragment[]
+  mem?: MetricResponseFragment[]
+  podCpu?: MetricResponseFragment[]
+  podMem?: MetricResponseFragment[]
+  cpuRequests?: MetricResponseFragment[]
+  memRequests?: MetricResponseFragment[]
+  cpuLimits?: MetricResponseFragment[]
+  memLimits?: MetricResponseFragment[]
+  podCpuRequests?: MetricResponseFragment[]
+  podMemRequests?: MetricResponseFragment[]
+  podCpuLimits?: MetricResponseFragment[]
+  podMemLimits?: MetricResponseFragment[]
+}
+
+export function hasResourceMetrics({
+  cpu,
+  mem,
+  podCpu,
+  podMem,
+  cpuRequests,
+  memRequests,
+  cpuLimits,
+  memLimits,
+  podCpuRequests,
+  podMemRequests,
+  podCpuLimits,
+  podMemLimits,
+}: ResourceMetricsInput): boolean {
+  return [
+    cpu,
+    mem,
+    podCpu,
+    podMem,
+    cpuRequests,
+    memRequests,
+    cpuLimits,
+    memLimits,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+  ].some((series) => !isEmpty(series))
 }
 
 export function ResourceMetricsGraphs({
@@ -85,46 +126,88 @@ export function ResourceMetricsGraphs({
   mem,
   podCpu,
   podMem,
+  cpuRequests,
+  memRequests,
+  cpuLimits,
+  memLimits,
+  podCpuRequests,
+  podMemRequests,
+  podCpuLimits,
+  podMemLimits,
   podReservations,
-}: {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-  podCpu: MetricResponseFragment[]
-  podMem: MetricResponseFragment[]
-  podReservations?: PodResourceReservation[]
-}) {
-  const overallGraphs = useMemo(
-    () => [
+  timeWindow,
+  onRangeSelect,
+}: ResourceMetricsInput &
+  RangeProps & {
+    cpu: MetricResponseFragment[]
+    mem: MetricResponseFragment[]
+    podCpu: MetricResponseFragment[]
+    podMem: MetricResponseFragment[]
+    podReservations?: PodResourceReservation[]
+  }) {
+  const overallGraphs = useMemo(() => {
+    const toOverallSeries = (
+      usage: MetricResponseFragment[],
+      requests: MetricResponseFragment[] | undefined,
+      limits: MetricResponseFragment[] | undefined,
+      usageId: string
+    ): GraphSeries[] => {
+      const series: GraphSeries[] = []
+      const usageData = usage[0]?.values
+        ? convertVals(usage[0].values)
+        : ([] as GraphSeries['data'])
+
+      if (usageData.length > 0) series.push({ id: usageId, data: usageData })
+
+      const requestsData = requests?.[0]?.values
+        ? convertVals(requests[0].values)
+        : []
+
+      if (requestsData.length > 0)
+        series.push({ id: 'requests', data: requestsData, dashed: true })
+
+      const limitsData = limits?.[0]?.values
+        ? convertVals(limits[0].values)
+        : []
+
+      if (limitsData.length > 0)
+        series.push({ id: 'limits', data: limitsData, dashed: true })
+
+      return series
+    }
+
+    return [
       {
-        data: cpu[0]?.values
-          ? [{ id: 'cpu', data: convertVals(cpu[0].values) }]
-          : [],
+        data: toOverallSeries(cpu, cpuRequests, cpuLimits, 'cpu'),
         format: 'cpu' as const,
         title: 'Overall CPU Usage (cores)',
       },
       {
-        data: mem[0]?.values
-          ? [{ id: 'memory', data: convertVals(mem[0].values) }]
-          : [],
+        data: toOverallSeries(mem, memRequests, memLimits, 'memory'),
         format: 'memory' as const,
         title: 'Overall Memory Usage (bytes)',
       },
-    ],
-    [cpu, mem]
-  )
+    ]
+  }, [cpu, mem, cpuRequests, memRequests, cpuLimits, memLimits])
   const podGraphs = useMemo(() => {
-    const cpuGraph = podCpu.map(({ metric, values }) => ({
-      id: getMetricPod(metric),
-      data: convertVals(values),
-    }))
-    const memGraph = podMem.map(({ metric, values }) => ({
-      id: getMetricPod(metric),
-      data: convertVals(values),
-    }))
+    const toPodGraph = (metrics: MetricResponseFragment[]): GraphSeries[] =>
+      metrics.map(({ metric, values }) => ({
+        id: getMetricPod(metric),
+        data: convertVals(values),
+      }))
+
+    const cpuGraph = toPodGraph(podCpu)
+    const memGraph = toPodGraph(podMem)
 
     return [
       {
-        data: addPodResourceReservationSeries(cpuGraph, podReservations, 'cpu'),
+        data: addPodResourceReservationSeries(
+          cpuGraph,
+          podReservations,
+          'cpu',
+          podCpuRequests ? toPodGraph(podCpuRequests) : undefined,
+          podCpuLimits ? toPodGraph(podCpuLimits) : undefined
+        ),
         format: 'cpu' as const,
         title: 'Pod CPU Usage (cores)',
       },
@@ -132,21 +215,29 @@ export function ResourceMetricsGraphs({
         data: addPodResourceReservationSeries(
           memGraph,
           podReservations,
-          'memory'
+          'memory',
+          podMemRequests ? toPodGraph(podMemRequests) : undefined,
+          podMemLimits ? toPodGraph(podMemLimits) : undefined
         ),
         format: 'memory' as const,
         title: 'Pod Memory Usage (bytes)',
       },
     ]
-  }, [podCpu, podMem, podReservations])
+  }, [
+    podCpu,
+    podMem,
+    podCpuRequests,
+    podMemRequests,
+    podCpuLimits,
+    podMemLimits,
+    podReservations,
+  ])
 
   return (
-    <>
-      <MetricsRow graphs={overallGraphs} />
-      <MetricsRow
-        graphs={podGraphs}
-        wrapLegend
-      />
-    </>
+    <MetricsGraphs
+      graphs={[...overallGraphs, ...podGraphs]}
+      timeWindow={timeWindow}
+      onRangeSelect={onRangeSelect}
+    />
   )
 }

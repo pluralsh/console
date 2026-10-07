@@ -159,10 +159,10 @@ function GatekeeperFilter({
           gap="small"
         >
           <Input
-            minHeight="fit-content"
             placeholder="Filter clusters"
             value={searchString}
             onChange={(e) => setSearchString?.(e.currentTarget.value)}
+            css={{ minHeight: 'fit-content' }}
           />
           <div
             css={{ overflowY: 'auto' }}
@@ -248,7 +248,7 @@ function GatekeeperFilter({
               <Checkbox
                 small
                 name={namespaceLabel}
-                value={namespace}
+                value={namespace.id}
                 checked={selectedNamespaces.includes(namespace.id)}
                 onChange={({ target: { checked } }: any) =>
                   handleCheckboxChange(

@@ -75,7 +75,11 @@ import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 
 import { AIAgentRunPodLogs } from 'components/ai/agent-runs/details/AIAgentRunPodLogs.tsx'
 import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
-import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
+import {
+  ClusterMetrics,
+  ClusterMetricsHeatmap,
+  ClusterMetricsTimeseries,
+} from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 import { ClusterUpgradePlan } from 'components/cd/cluster/upgrade-plan/ClusterUpgradePlan.tsx'
 import { ServiceMonitorCreateOrEdit } from 'components/cd/services/service/monitors/create-edit/ServiceMonitorCreateOrEdit.tsx'
@@ -102,6 +106,7 @@ import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
 import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
 import { PodEvents } from '../components/cd/cluster/pod/PodEvents.tsx'
 import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
+import { PodMetricsTab } from '../components/cd/cluster/pod/PodMetrics.tsx'
 import { AI_AGENT_RUNS_PARAM_RUN_ID } from './aiRoutesConsts.tsx'
 import {
   ALERT_INSIGHT_REL_PATH,
@@ -317,7 +322,25 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_METRICS_PATH}
       element={<ClusterMetrics />}
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="timeseries"
+          />
+        }
+      />
+      <Route
+        path="timeseries"
+        element={<ClusterMetricsTimeseries />}
+      />
+      <Route
+        path="heatmap"
+        element={<ClusterMetricsHeatmap />}
+      />
+    </Route>
     <Route
       path={CLUSTER_DETAILS_PATH}
       element={<ClusterDetails />}
@@ -476,6 +499,12 @@ export const getPodDetailsRoutes = (
       index
       element={<PodInfo />}
     />
+    {type !== 'agent-run' && (
+      <Route
+        path="metrics"
+        element={<PodMetricsTab />}
+      />
+    )}
     <Route
       path="events"
       element={<PodEvents />}

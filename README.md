@@ -24,6 +24,8 @@ We are currently trying to aggregate compatibility and dependency information fo
 * $150 for adding a new application and all to-date compatibility information
 * $300 for a new compatibility scraper (these are all defined in `utils/compatibility/scrapers`)
 
+Awards are limited to one award per contributor per calendar month. This helps keep the program sustainable and ensures reviewers can give submissions appropriate attention.
+
 To be eligible for the upgrade bounty you'll need to submit a PR to this repo with the changes and a link to whatever documentation confirms the correctness of the information.  We'll then review and if it's correct and useful for the broader community, you'll be eligible for the reward once merged.  A quality PR for compatibility tables includes:
 
 1. The table itself at `static/compatibilities`

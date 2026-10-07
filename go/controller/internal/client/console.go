@@ -3,22 +3,24 @@ package client
 import (
 	"context"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/gqlgo/gqlgenc/clientv2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/polly/http"
 )
 
 type client struct {
-	ctx           context.Context
-	url           string
-	consoleClient console.ConsoleClient
+	ctx                   context.Context
+	url                   string
+	insecureSkipTLSVerify bool
+	consoleClient         console.ConsoleClient
 }
 
 type ConsoleClient interface {
 	GetServices() ([]*console.ServiceDeploymentBaseFragment, error)
 	GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error)
 	GetServiceById(id string) (*console.ServiceDeploymentExtended, error)
+	GetServiceTinyByHandle(clusterHandle, serviceName string) (*console.GetServiceDeploymentTinyByHandle_ServiceDeployment, error)
 	CreateRepository(url string, privateKey, passphrase, username, password *string) (*console.CreateGitRepository, error)
 	CreateGitRepository(attrs console.GitAttributes) (*console.CreateGitRepository, error)
 	ListRepositories() (*console.ListGitRepositories, error)
@@ -236,17 +238,28 @@ type ConsoleClient interface {
 	GetIssueWebhookByName(ctx context.Context, name string) (*console.IssueWebhookFragment, error)
 	GetSentinelRun(ctx context.Context, id string) (*console.SentinelRunFragment, error)
 	RunSentinel(ctx context.Context, id string, overrides *console.SentinelRunOverrides) (*string, error)
+	CreateMonitor(ctx context.Context, attributes console.MonitorAttributes) (*console.MonitorFragment, error)
+	UpdateMonitor(ctx context.Context, id string, attributes console.MonitorAttributes) (*console.MonitorFragment, error)
+	GetMonitor(ctx context.Context, id string) (*console.MonitorFragment, error)
+	DeleteMonitor(ctx context.Context, id string) error
+	IsMonitorExists(ctx context.Context, id string) (bool, error)
+	CreateDashboard(ctx context.Context, attributes console.DashboardAttributes) (*console.WorkbenchDashboardFragment, error)
+	UpdateDashboard(ctx context.Context, id string, attributes console.DashboardAttributes) (*console.WorkbenchDashboardFragment, error)
+	GetDashboard(ctx context.Context, id string) (*console.WorkbenchDashboardFragment, error)
+	DeleteDashboard(ctx context.Context, id string) error
+	IsDashboardExists(ctx context.Context, id string) (bool, error)
 }
 
-func New(url, token string, datadogEnabled bool) ConsoleClient {
+func New(url, token string, datadogEnabled, insecureSkipTLSVerify bool) ConsoleClient {
 	interceptors := []clientv2.RequestInterceptor{console.PersistedQueryInterceptor}
 	if datadogEnabled {
 		interceptors = append(interceptors, console.DatadogTracingInterceptor)
 	}
 
 	return &client{
-		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, interceptors...),
-		url:           url,
-		ctx:           context.Background(),
+		consoleClient:         console.New(http.NewHttpClient(token, insecureSkipTLSVerify), url, nil, interceptors...),
+		url:                   url,
+		insecureSkipTLSVerify: insecureSkipTLSVerify,
+		ctx:                   context.Background(),
 	}
 }

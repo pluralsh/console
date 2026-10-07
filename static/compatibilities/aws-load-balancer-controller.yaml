@@ -5,6 +5,32 @@ helm_repository_url: https://aws.github.io/eks-charts
 helm_values: clusterName=example
 chart_name: aws-load-balancer-controller
 versions:
+- version: 3.6.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['**CRDs must be updated before/with the controller upgrade.**
+        Even though Gateway API CRD version stays at v1.6.0, v3.6.0 recommends re-applying
+        the latest AWS-vended CRDs as a safety measure.', 'Gateway API ReferenceGrant
+        now uses `gateway.networking.k8s.io/v1` (not a values change, but it affects
+        manifests/cluster CRDs).']
+    features: ["Cross-account TargetGroupBinding IP targets can optionally be registered\
+        \ with the pod\u2019s actual Availability Zone to improve zonal routing (opt-in;\
+        \ default behavior preserved).", 'New Ingress annotation `frontend-nlb-status-only`
+        allows Ingress status hostname to expose only the frontend NLB, improving
+        ExternalDNS behavior when an NLB fronts an ALB Ingress.', 'Downstream/automode
+        importers embedding the controller can customize Gateway names, finalizers,
+        and controller wiring; ReferenceGrant moved to `v1`.']
+    breaking_changes: ['No explicit breaking changes called out for v3.6.0, but you
+        must apply the latest AWS-vended CRDs before upgrading to avoid CRD/schema
+        drift issues.', Gateway API users should ensure ReferenceGrant `apiVersion`
+        is `gateway.networking.k8s.io/v1` where applicable (controller-side change;
+        manifests may need updating if pinned).]
+  chart_version: 3.6.0
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.0']
 - version: 3.5.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

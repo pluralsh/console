@@ -180,7 +180,6 @@ defmodule Console.Deployments.Services do
     |> Console.sha()
   end
 
-
   @doc """
   Fetches the files in the tarball for a service that will be delivered to the deployment operator
 

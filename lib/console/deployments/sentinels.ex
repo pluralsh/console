@@ -82,14 +82,14 @@ defmodule Console.Deployments.Sentinels do
   end
 
   @doc """
-  Runs a sentinel if the user has write access to the sentinel
+  Runs a sentinel if the user has read access to the sentinel
   """
   @spec run_sentinel(map, binary | Sentinel.t(), User.t()) :: sentinel_run_resp
   def run_sentinel(overrides, id, %User{} = user) when is_binary(id),
     do: run_sentinel(overrides, get_sentinel!(id), user)
 
   def run_sentinel(overrides, %Sentinel{} = sentinel, %User{} = user) do
-    with {:ok, sentinel} <- allow(sentinel, user, :write) do
+    with {:ok, sentinel} <- allow(sentinel, user, :read) do
       run_sentinel(overrides, sentinel)
     end
   end

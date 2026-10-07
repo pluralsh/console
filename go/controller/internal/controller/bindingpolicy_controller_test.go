@@ -32,7 +32,7 @@ var _ = Describe("BindingPolicy Controller", Ordered, func() {
 			id                = "binding-policy-123"
 			policyID          = "policy-ref-123"
 			bindPolicyID      = "bind-policy-ref-123"
-			rego              = "package plrl.wb.admission\n\nsample := 0"
+			rego              = "package plrl.workbench\n\nsample := 0"
 			bindRego          = "package plrl.binding\n\nbind := true"
 		)
 

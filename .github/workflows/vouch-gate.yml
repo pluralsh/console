@@ -1,0 +1,25 @@
+# Reusable gate: fail unless the actor is vouched, a write collaborator, or a bot.
+# Called by other workflows so untrusted users cannot run GitHub Actions.
+name: Vouch Gate
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check actor is vouched
+    runs-on: ubuntu-latest
+    steps:
+      - name: Allow scheduled runs
+        if: github.event_name == 'schedule'
+        run: echo "Scheduled workflow runs are not actor-gated"
+
+      - uses: mitchellh/vouch/action/check-user@d66fa29a64600490892131ad87597c30c91fcac4 # v1.5.0
+        if: github.event_name != 'schedule'
+        with:
+          user: ${{ github.event.pull_request.user.login || github.actor }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

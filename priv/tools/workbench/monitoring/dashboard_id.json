@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "dashboard_id": {
+      "type": "string",
+      "description": "ID of a dashboard belonging to this workbench"
+    }
+  },
+  "required": ["dashboard_id"]
+}

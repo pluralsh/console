@@ -33,6 +33,27 @@ defmodule Console.Schema.Pipeline do
     from(p in query, where: p.flow_id == ^flow_id)
   end
 
+  def for_flow_ids(query \\ __MODULE__, ids) do
+    from(p in query, where: p.flow_id in ^ids)
+  end
+
+  def count_by_flow(query \\ __MODULE__) do
+    from(p in query,
+      group_by: p.flow_id,
+      select: {p.flow_id, count(p.id)}
+    )
+  end
+
+  def pending_gate_count_by_flow(query \\ __MODULE__) do
+    from(p in query,
+      join: e in assoc(p, :edges),
+      join: g in assoc(e, :gates),
+      where: g.state == :pending,
+      group_by: p.flow_id,
+      select: {p.flow_id, count(g.id)}
+    )
+  end
+
   def search(query \\ __MODULE__, q) do
     from(p in query, where: ilike(p.name, ^"%#{q}%"))
   end

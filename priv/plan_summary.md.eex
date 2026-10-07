@@ -1,0 +1,23 @@
+## Summary
+
+<%= @summary %>
+
+## Blast Radius
+
+<%= @blast_radius %>
+
+<%= if @critical_systems not in [nil, []] do %>
+## Critical Systems
+
+<%= Enum.map(@critical_systems, &"* #{&1}") |> Enum.join("\n") %>
+
+<% end %>
+<%= if @notable_changes not in [nil, []] do %>
+## Notable Changes
+
+<%= Enum.map(@notable_changes, &"* #{&1}") |> Enum.join("\n") %>
+
+<% end %>
+## Safety Assessment
+
+<%= @safety %>

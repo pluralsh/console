@@ -1,4 +1,4 @@
-import { Flex, Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import { Flex, Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import {
   GlobalServiceFragment,
@@ -54,7 +54,7 @@ function GlobalServicesTableComponent({
       gap="small"
       height="100%"
     >
-      <Input2
+      <Input
         showClearButton
         placeholder="Search global services"
         startIcon={<SearchIcon />}

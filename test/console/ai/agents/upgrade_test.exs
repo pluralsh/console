@@ -1,7 +1,7 @@
 defmodule Console.AI.Agents.UpgradeTest do
   use Console.DataCase, async: false
   alias Console.AI.Agents.Upgrade
-  alias Console.AI.{Provider, VectorStore}
+  alias Console.AI.VectorStore
   alias Console.AI.Tool
   alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
@@ -28,7 +28,7 @@ defmodule Console.AI.Agents.UpgradeTest do
       step = insert(:cluster_upgrade_step, upgrade: upgrade, type: :addon, prompt: "Upgrade the addon")
       insert(:agent_runtime, name: "upgrade", default: true)
 
-      expect(Provider, :completion, fn _, _ -> {:ok, "Upgrade the addon", [
+      expect_reqllm_completion(fn _, _ -> {:ok, "Upgrade the addon", [
         %Tool{name: "__plrl__service_search", arguments: %{"query" => "error"}, id: "1"}
       ]} end)
       expect(VectorStore, :fetch, fn "error", _ ->
@@ -46,7 +46,7 @@ defmodule Console.AI.Agents.UpgradeTest do
           }
         ]}
       end)
-      expect(Provider, :completion, fn _, _ -> {:ok, "Upgrade the addon", [
+      expect_reqllm_completion(fn _, _ -> {:ok, "Upgrade the addon", [
         %Tool{name: "__plrl__coding_agent", arguments: %{"prompt" => "some prompt", "repository" => "https://github.com/plural/test.git"}, id: "2"}
       ]} end)
 

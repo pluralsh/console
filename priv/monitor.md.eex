@@ -18,3 +18,17 @@ Here are some of the details of the monitor for reference:
 ```
 
 <% end %>
+<%= if @monitor.type == :metrics do %>
+## Metrics Query
+
+```json
+<%= Jason.encode!(Console.mapify(@monitor.query.metrics), pretty: true) %>
+```
+
+## Query Results:
+
+```json
+<%= Jason.encode!(Console.mapify(@results), pretty: true) %>
+```
+
+<% end %>

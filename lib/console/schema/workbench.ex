@@ -15,6 +15,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchSkill,
     WorkbenchKnowledge,
     WorkbenchEval,
+    Dashboard,
     PolicyBinding,
     WorkbenchPolicy,
     FlowWorkbench,
@@ -107,6 +108,8 @@ defmodule Console.Schema.Workbench do
     field :memory,         Type
 
     embeds_one :configuration, Configuration, on_replace: :update do
+      field :self_service, :boolean, default: false
+
       embeds_one :infrastructure, Infrastructure, on_replace: :update do
         field :services,        :boolean
         field :stacks,          :boolean
@@ -163,6 +166,7 @@ defmodule Console.Schema.Workbench do
     has_many :workbench_skills,    WorkbenchSkill,           on_replace: :delete
     has_many :workbench_knowledge, WorkbenchKnowledge,       on_replace: :delete
     has_many :workbench_policies,  WorkbenchPolicy,          on_replace: :delete
+    has_many :dashboards,          Dashboard,                on_replace: :delete
     has_many :alerts,              Alert
 
     has_one :eval,                 WorkbenchEval
@@ -246,12 +250,12 @@ defmodule Console.Schema.Workbench do
     model
     |> cast(attrs, ~w(files)a)
     |> cast_embed(:ref)
-    |> validate_required([:ref, :files])
+    |> validate_required([:ref])
   end
 
   def configuration_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, [])
+    |> cast(attrs, [:self_service])
     |> cast_embed(:infrastructure, with: &infrastructure_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
     |> cast_embed(:observability, with: &observability_changeset/2)

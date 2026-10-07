@@ -76,7 +76,7 @@ export function Sentinels() {
       />
       <StretchedFlex gap="medium">
         <Input
-          style={{ width: '40%' }}
+          css={{ width: '40%' }}
           startIcon={<SearchIcon />}
           placeholder="Search by sentinel name"
           value={filterString}

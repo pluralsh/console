@@ -15,6 +15,7 @@ import {
   GoogleCloudRunIcon,
   IconFrame,
   IconProps,
+  JiraLogoIcon,
   LambdaIcon,
   LinearLogoIcon,
   LokiLogoIcon,
@@ -28,7 +29,8 @@ import {
   SlackLogoIcon,
   SplunkLogoIcon,
   TempoLogoIcon,
-  ToolsIcon,
+  ToolsFilledIcon,
+  VictoriaLogsLogoIcon,
   VSphereLogoIcon,
 } from '@pluralsh/design-system'
 import {
@@ -48,10 +50,13 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Opensearch,
   WorkbenchToolType.Http,
   WorkbenchToolType.Loki,
+  WorkbenchToolType.VictoriaLogs,
   WorkbenchToolType.Prometheus,
   WorkbenchToolType.Tempo,
   WorkbenchToolType.Jaeger,
   WorkbenchToolType.Atlassian,
+  WorkbenchToolType.Jira,
+  WorkbenchToolType.JiraDatacenter,
   WorkbenchToolType.Linear,
   WorkbenchToolType.Slack,
   WorkbenchToolType.Pagerduty,
@@ -86,6 +91,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Opensearch]: 'opensearch',
   [WorkbenchToolType.Prometheus]: 'prometheus',
   [WorkbenchToolType.Loki]: 'loki',
+  [WorkbenchToolType.VictoriaLogs]: 'victoriaLogs',
   [WorkbenchToolType.Tempo]: 'tempo',
   [WorkbenchToolType.Jaeger]: 'jaeger',
   [WorkbenchToolType.Datadog]: 'datadog',
@@ -94,6 +100,8 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Pagerduty]: 'pagerduty',
   [WorkbenchToolType.Teams]: 'teams',
   [WorkbenchToolType.Atlassian]: 'atlassian',
+  [WorkbenchToolType.Jira]: 'jira',
+  [WorkbenchToolType.JiraDatacenter]: 'jiraDatacenter',
   [WorkbenchToolType.Exa]: 'exa',
   [WorkbenchToolType.Github]: 'github',
   [WorkbenchToolType.Gitlab]: 'gitlab',
@@ -167,9 +175,12 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Opensearch]: 'OpenSearch',
   [WorkbenchToolType.Prometheus]: 'Prometheus',
   [WorkbenchToolType.Loki]: 'Loki',
+  [WorkbenchToolType.VictoriaLogs]: 'VictoriaLogs',
   [WorkbenchToolType.Tempo]: 'Tempo',
   [WorkbenchToolType.Datadog]: 'Datadog',
   [WorkbenchToolType.Atlassian]: 'Atlassian',
+  [WorkbenchToolType.Jira]: 'Jira Cloud',
+  [WorkbenchToolType.JiraDatacenter]: 'Jira Data Center',
   [WorkbenchToolType.Linear]: 'Linear',
   [WorkbenchToolType.Slack]: 'Slack',
   [WorkbenchToolType.Pagerduty]: 'PagerDuty',
@@ -239,8 +250,11 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Opensearch]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Prometheus]: [WorkbenchToolCategory.Metrics],
   [WorkbenchToolType.Loki]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.VictoriaLogs]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Jira]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.JiraDatacenter]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Slack]: [WorkbenchToolCategory.Chat],
   [WorkbenchToolType.Pagerduty]: [WorkbenchToolCategory.Integration],
@@ -294,10 +308,16 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Prometheus]:
     'Query metrics from Prometheus or Prometheus-compatible stores.',
   [WorkbenchToolType.Loki]: 'Query log data from Grafana Loki.',
+  [WorkbenchToolType.VictoriaLogs]:
+    'Query logs from VictoriaLogs using LogsQL.',
   [WorkbenchToolType.Tempo]:
     'Query trace data from Grafana Tempo for distributed tracing.',
   [WorkbenchToolType.Atlassian]:
     'Connect to Jira, Confluence, and other Atlassian products.',
+  [WorkbenchToolType.Jira]:
+    'Manage Jira Cloud issues and comments through the Jira REST API.',
+  [WorkbenchToolType.JiraDatacenter]:
+    'Manage Jira Data Center issues and comments through the Jira REST API.',
   [WorkbenchToolType.Linear]:
     'Connect to Linear for issue tracking and project management.',
   [WorkbenchToolType.Slack]:
@@ -441,7 +461,7 @@ export function WorkbenchToolIcon({
         ? McpLogoIcon
         : isConfigurableWorkbenchToolType(type)
           ? toolToIcon[type]
-          : ToolsIcon
+          : ToolsFilledIcon
 
   return (
     <Icon
@@ -510,10 +530,13 @@ const toolToIcon: Record<
   [WorkbenchToolType.Elastic]: ElasticsearchLogoIcon,
   [WorkbenchToolType.Opensearch]: OpenSearchLogoIcon,
   [WorkbenchToolType.Loki]: LokiLogoIcon,
+  [WorkbenchToolType.VictoriaLogs]: VictoriaLogsLogoIcon,
   [WorkbenchToolType.Prometheus]: PrometheusLogoIcon,
   [WorkbenchToolType.Tempo]: TempoLogoIcon,
-  [WorkbenchToolType.Http]: ToolsIcon,
+  [WorkbenchToolType.Http]: ToolsFilledIcon,
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
+  [WorkbenchToolType.Jira]: JiraLogoIcon,
+  [WorkbenchToolType.JiraDatacenter]: JiraLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
   [WorkbenchToolType.Slack]: SlackLogoIcon,
   [WorkbenchToolType.Pagerduty]: PagerdutyLogoIcon,
@@ -528,7 +551,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
   [WorkbenchToolType.Cloudwatch]: CloudWatchIcon,
   [WorkbenchToolType.Azure]: AzureLogoIcon,
-  [WorkbenchToolType.Jaeger]: ToolsIcon,
+  [WorkbenchToolType.Jaeger]: ToolsFilledIcon,
   [WorkbenchToolType.Sentry]: SentryLogoIcon,
   [WorkbenchToolType.Docker]: DockerLogoIcon,
   [WorkbenchToolType.Lambda]: LambdaIcon,

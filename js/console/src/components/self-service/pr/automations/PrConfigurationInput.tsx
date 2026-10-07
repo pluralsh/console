@@ -93,7 +93,7 @@ export function PrConfigurationInput({
       return (
         <Input
           value={value}
-          placeContent={config.placeholder}
+          placeholder={config.placeholder ?? undefined}
           onChange={(e) => {
             setValue(e.currentTarget.value)
           }}

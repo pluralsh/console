@@ -7,15 +7,26 @@ on:
     paths:
     - terraform/**/*
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   check-pr-body:
+    needs: [vouch]
     name: Ensure PR Body Format
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
       pull-requests: read
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       name: checkout repo
 
     - name: "check pr body has Plural Flow: console to link with Plural"

@@ -100,7 +100,7 @@ export function PipelineContextDetails() {
               {context?.id && (
                 <PropWideBold
                   title="ID"
-                  fontWeight={600}
+                  css={{ fontWeight: 600 }}
                 >
                   {context.id}
                 </PropWideBold>
@@ -108,7 +108,7 @@ export function PipelineContextDetails() {
               {context?.insertedAt && (
                 <PropWideBold
                   title="Date created"
-                  fontWeight={600}
+                  css={{ fontWeight: 600 }}
                 >
                   {context.insertedAt}
                 </PropWideBold>
@@ -116,7 +116,7 @@ export function PipelineContextDetails() {
               {context?.updatedAt && (
                 <PropWideBold
                   title="Date updated"
-                  fontWeight={600}
+                  css={{ fontWeight: 600 }}
                 >
                   {context.updatedAt}
                 </PropWideBold>

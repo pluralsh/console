@@ -1,4 +1,5 @@
-{{ $consoleUrl := .Values.consoleUrl | default (printf "http://console.%s:4000" .Release.Namespace) }}
+{{ $consoleScheme := ternary "https" "http" .Values.console.tls.enabled }}
+{{ $consoleUrl := .Values.consoleUrl | default (printf "%s://console.%s:4000" $consoleScheme .Release.Namespace) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,6 +37,9 @@ spec:
       - args:
         {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
         - --console-url={{ $consoleUrl }}/gql
+        {{- if .Values.console.tls.enabled }}
+        - --console-insecure-skip-tls-verify
+        {{- end }}
         - --console-token=$(CONSOLE_TOKEN)
         command:
         - /manager

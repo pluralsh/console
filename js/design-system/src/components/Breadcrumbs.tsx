@@ -1,5 +1,6 @@
 import {
   type ComponentProps,
+  type ComponentPropsWithoutRef,
   type ReactNode,
   type RefObject,
   useCallback,
@@ -9,7 +10,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Nav, type NavProps } from 'honorable'
 import styled from 'styled-components'
 import classNames from 'classnames'
 import { SwitchTransition, Transition } from 'react-transition-group'
@@ -291,7 +291,7 @@ type BreadcrumbPropsBase = {
   collapsible?: boolean
   breadcrumbs?: Breadcrumb[]
 }
-type BreadcrumbsProps = BreadcrumbPropsBase
+type BreadcrumbsProps = BreadcrumbPropsBase & ComponentPropsWithoutRef<'nav'>
 
 const DynamicBreadcrumbsSC = styled.div((_) => ({
   position: 'relative',
@@ -400,7 +400,7 @@ export function Breadcrumbs({
   collapsible = true,
   breadcrumbs: propsCrumbs,
   ...props
-}: BreadcrumbsProps & Omit<NavProps, 'ref'>) {
+}: BreadcrumbsProps) {
   const contextCrumbs = useContext(BreadcrumbsContext)?.breadcrumbs
   const breadcrumbs = propsCrumbs || contextCrumbs
   const nodeRef = useRef<HTMLDivElement>(null)
@@ -418,7 +418,7 @@ export function Breadcrumbs({
   }
 
   return (
-    <Nav
+    <nav
       aria-label="breadcrumbs"
       {...props}
     >
@@ -442,6 +442,6 @@ export function Breadcrumbs({
           )}
         </Transition>
       </SwitchTransition>
-    </Nav>
+    </nav>
   )
 }

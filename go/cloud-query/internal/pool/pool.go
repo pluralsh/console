@@ -128,21 +128,28 @@ func (c *ConnectionPool) grantReadOnlyAccess(connection string) error {
 
 func (c *ConnectionPool) cleanup(connection string) error {
 	query := fmt.Sprintf(`
-		-- Cleanup the connection
 		DROP SERVER IF EXISTS %[1]s CASCADE;
-
-		-- Cleanup the user
-		DROP OWNED BY %[2]s;
-		DROP USER IF EXISTS %[2]s;
-
-		-- Cleanup the schema
 		DROP SCHEMA IF EXISTS %[2]s CASCADE;`,
 		pq.QuoteIdentifier("steampipe_"+connection),
 		pq.QuoteIdentifier(connection),
 	)
+	if _, err := c.admin.Exec(query); err != nil {
+		if !IsStaleConnection(err) {
+			return fmt.Errorf("failed to cleanup connection '%s': %w", connection, err)
+		}
+	}
 
-	_, err := c.admin.Exec(query)
-	if err != nil {
+	role := pq.QuoteLiteral(connection)
+	roleQuery := fmt.Sprintf(`
+		DO $cleanup$
+		BEGIN
+			IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = %[1]s) THEN
+				EXECUTE format('DROP OWNED BY %%I', %[1]s);
+				EXECUTE format('DROP ROLE IF EXISTS %%I', %[1]s);
+			END IF;
+		END
+		$cleanup$;`, role)
+	if _, err := c.admin.Exec(roleQuery); err != nil && !IsStaleConnection(err) {
 		return fmt.Errorf("failed to cleanup connection '%s': %w", connection, err)
 	}
 
@@ -164,14 +171,20 @@ func (c *ConnectionPool) connect(config config.Configuration) (connection.Connec
 	}
 
 	data, exists := c.pool.Get(sha)
-	if exists && !data.alive(c.ttl) {
-		err = c.remove(cmap.Tuple[string, entry]{Key: sha, Val: data})
-		if err != nil {
+	recreate := !exists || !data.alive(c.ttl)
+	if exists && !recreate {
+		if pingErr := data.connection.Ping(); pingErr != nil {
+			klog.ErrorS(pingErr, "pooled connection is unhealthy, recreating", "connection", data.uuid)
+			recreate = true
+		}
+	}
+	if exists && recreate {
+		if err = c.remove(cmap.Tuple[string, entry]{Key: sha, Val: data}, true); err != nil && !IsStaleConnection(err) {
 			return nil, fmt.Errorf("failed to remove stale connection: %w", err)
 		}
 	}
 
-	if !exists || !data.alive(c.ttl) {
+	if recreate {
 		id, err := uuid.NewV6()
 		if err != nil {
 			return nil, err
@@ -221,16 +234,39 @@ func (c *ConnectionPool) Set(key string, value connection.Connection) {
 	c.pool.Set(key, entry{connection: value, ping: time.Now()})
 }
 
+func (c *ConnectionPool) Evict(config config.Configuration) error {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	sha, err := config.SHA()
+	if err != nil {
+		return err
+	}
+
+	data, exists := c.pool.Get(sha)
+	if !exists {
+		return nil
+	}
+
+	return c.remove(cmap.Tuple[string, entry]{Key: sha, Val: data}, true)
+}
+
 func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) error {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	return c.remove(t)
+	return c.remove(t, false)
 }
 
-func (c *ConnectionPool) remove(t cmap.Tuple[string, entry]) error {
+func (c *ConnectionPool) remove(t cmap.Tuple[string, entry], force bool) error {
 	current, exists := c.pool.Get(t.Key)
 	if !exists || current.uuid != t.Val.uuid {
+		return nil
+	}
+	// A TTL snapshot can go stale after Connect refreshes ping on the same
+	// role. Skip dropping a session that was reused while cleanup was queued.
+	if !force && current.alive(c.ttl) {
+		klog.V(log.LogLevelVerbose).InfoS("skipping cleanup of reused connection", "connection", current.uuid)
 		return nil
 	}
 

@@ -11,9 +11,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Project,
     ServiceComponent,
     Workbench,
-    Monitor
+    Monitor,
+    Dashboard
   }
   alias Console.Deployments.{Settings, Observability, Services}
+  alias Console.Deployments.Observability.Dashboard, as: DashboardRuntime
   alias Console.Services.Observability, as: ObsSvc
 
   @default_offset 30 * 60
@@ -85,6 +87,25 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
       }
       |> Observability.query(start, stop, step)
     end
+  end
+
+  def pod_metrics(%{metadata: %{namespace: ns, name: name}}, args, %{context: %{cluster: %Cluster{} = cluster}}) do
+    {start, stop, step} = prom_args(args)
+    Observability.query({:pod, cluster, ns, name}, start, stop, step)
+  end
+  def pod_metrics(_, _, _), do: {:error, "pod metrics require a cluster or service scoped pod query"}
+
+  # each metric is its own prometheus range query, so only run the ones actually selected
+  def cluster_usage_metrics(%Cluster{} = cluster, args, info) do
+    {start, stop, step} = prom_args(args)
+    keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
+    Observability.query({:usage, cluster, args[:group_by] || :cluster, keys}, start, stop, step)
+  end
+
+  def service_usage_metrics(%Service{} = service, args, info) do
+    {start, stop, step} = prom_args(args)
+    keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
+    Observability.query({:usage, service, args[:group_by] || :service, keys}, start, stop, step)
   end
 
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
@@ -160,12 +181,60 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Project{id: id}), do: Alert.for_project(id)
   defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
 
-  def get_monitor(%{id: id}, _), do: {:ok, Observability.get_monitor!(id)}
+  def get_monitor(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.get_monitor!(id) |> allow(user, :read)
+
+  def monitor_preview(%Monitor{} = monitor, _, %{context: %{current_user: user}}) do
+    case allow(monitor, user, :read) do
+      {:ok, monitor} -> Observability.preview_monitor(monitor)
+      error -> error
+    end
+  end
+
+  def get_dashboard(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.get_dashboard!(id) |> allow(user, :read)
+
+  def dashboard_graph(
+        %Dashboard{} = dashboard,
+        %{identifier: identifier, input: input, time_range: time_range},
+        %{context: %{current_user: user}}
+      ),
+      do: DashboardRuntime.graph(dashboard, identifier, input, time_range, user)
+
+  def dashboard_input(
+        %Dashboard{} = dashboard,
+        %{identifier: identifier, input: input, time_range: time_range},
+        %{context: %{current_user: user}}
+      ),
+      do: DashboardRuntime.input(dashboard, identifier, input, time_range, user)
+
+  def list_dashboards(%Workbench{id: workbench_id}, args, _) do
+    Dashboard.for_workbench(workbench_id)
+    |> maybe_search(Dashboard, args)
+    |> Dashboard.ordered()
+    |> paginate(args)
+  end
+
+  def create_dashboard(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.create_dashboard(attrs, user)
+
+  def update_dashboard(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.update_dashboard(attrs, id, user)
+
+  def delete_dashboard(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.delete_dashboard(id, user)
 
   def list_monitors(%Service{id: id}, args, _) do
     Monitor.for_service(id)
     |> maybe_search(Monitor, args)
     |> Monitor.ordered()
+    |> paginate(args)
+  end
+
+  def list_monitors(%Workbench{id: id}, args, _) do
+    Monitor.for_workbench(id)
+    |> maybe_search(Monitor, args)
+    |> Monitor.ordered(asc: :name, asc: :id)
     |> paginate(args)
   end
 

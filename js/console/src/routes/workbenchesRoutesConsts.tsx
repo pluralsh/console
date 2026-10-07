@@ -196,3 +196,51 @@ export const WORKBENCH_CHATBOTS_PATH_MATCHER_ABS = `${WORKBENCHES_ABS_PATH}/:${W
 export const WORKBENCH_JOBS_PATH_MATCHER_ABS = `${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_JOBS_REL_PATH}/*`
 export const WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS = `${WORKBENCHES_TOOLS_ADD_ABS_PATH}/*`
 export const WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS = `${WORKBENCHES_TOOLS_YOUR_ABS_PATH}/*`
+
+export const WORKBENCHES_MONITORING_REL_PATH = 'monitoring'
+export const WORKBENCH_MONITORING_DASHBOARDS_REL_PATH = 'dashboards'
+export const WORKBENCH_MONITORING_MONITORS_REL_PATH = 'monitors'
+export const WORKBENCH_MONITORING_DASHBOARD_PARAM_ID = 'monitoringDashboardId'
+export const WORKBENCH_MONITORING_MONITOR_PARAM_ID = 'monitoringMonitorId'
+
+export const getWorkbenchMonitoringAbsPath = (workbenchId: Nullable<string>) =>
+  `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_MONITORING_REL_PATH}`
+
+export const getWorkbenchMonitoringDashboardCreateAbsPath = (
+  workbenchId: Nullable<string>
+) =>
+  `${getWorkbenchMonitoringAbsPath(workbenchId)}/${WORKBENCH_MONITORING_DASHBOARDS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`
+
+export const getWorkbenchMonitoringMonitorCreateAbsPath = (
+  workbenchId: Nullable<string>
+) =>
+  `${getWorkbenchMonitoringAbsPath(workbenchId)}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`
+
+export const getWorkbenchMonitoringDashboardAbsPath = ({
+  workbenchId,
+  dashboardId,
+}: {
+  workbenchId: Nullable<string>
+  dashboardId: Nullable<string>
+}) =>
+  `${getWorkbenchMonitoringAbsPath(workbenchId)}/${WORKBENCH_MONITORING_DASHBOARDS_REL_PATH}/${dashboardId ?? ''}`
+
+export const getWorkbenchMonitoringMonitorAbsPath = ({
+  workbenchId,
+  monitorId,
+}: {
+  workbenchId: Nullable<string>
+  monitorId: Nullable<string>
+}) =>
+  `${getWorkbenchMonitoringAbsPath(workbenchId)}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/${monitorId ?? ''}`
+
+export const WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH = 'settings'
+
+export const getWorkbenchMonitoringMonitorSettingsAbsPath = ({
+  workbenchId,
+  monitorId,
+}: {
+  workbenchId: Nullable<string>
+  monitorId: Nullable<string>
+}) =>
+  `${getWorkbenchMonitoringMonitorAbsPath({ workbenchId, monitorId })}/${WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH}`

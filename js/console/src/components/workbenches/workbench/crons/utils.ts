@@ -1,8 +1,10 @@
-import CronExpressionParser from 'cron-parser'
+import { CronExpressionParser } from 'cron-parser'
 import cronstrue from 'cronstrue'
 import { dayjsExtended as dayjs, formatDateTime } from 'utils/datetime'
 
 export const CRON_PLACEHOLDER = '*/5 * * * *'
+
+const CRON_TZ = 'UTC'
 
 export function cronToExplanation({
   crontab,
@@ -19,9 +21,7 @@ export function cronToExplanation({
   if (!crontab) return fallback
 
   try {
-    const description = cronstrue.toString(crontab.trim(), {
-      throwExceptionOnParseError: true,
-    })
+    const description = describeCronExpression(crontab.trim())
 
     return nextRunText ? `${description}, next at ${nextRunText}` : description
   } catch {
@@ -33,12 +33,10 @@ export function buildCronPreview(expressionInput: string) {
   const expression = expressionInput.trim() || CRON_PLACEHOLDER
 
   try {
-    const description = cronstrue.toString(expression, {
-      throwExceptionOnParseError: true,
-    })
-    const nextTimes = getNextTriggerTimesUtc(expression, 3)
-
-    return { description, nextTimes }
+    return {
+      description: describeCronExpression(expression),
+      nextTimes: getNextTriggerTimesUtc(expression, 3),
+    }
   } catch {
     return {
       description: 'Invalid cron expression',
@@ -47,11 +45,36 @@ export function buildCronPreview(expressionInput: string) {
   }
 }
 
-function getNextTriggerTimesUtc(expression: string, count: number): string[] {
-  const iterator = CronExpressionParser.parse(expression, {
-    currentDate: new Date(),
-    tz: 'UTC',
+export function parseCronExpression(
+  expression: string,
+  currentDate: Date = new Date()
+) {
+  if (!expression.trim()) {
+    throw new Error('Cron expression is empty')
+  }
+
+  if (typeof CronExpressionParser?.parse !== 'function') {
+    throw new Error(
+      'cron-parser named export CronExpressionParser.parse is missing; default CJS imports are the module object under Vite ESM interop'
+    )
+  }
+
+  return CronExpressionParser.parse(expression, {
+    currentDate,
+    tz: CRON_TZ,
   })
+}
+
+export function describeCronExpression(expression: string) {
+  if (typeof cronstrue?.toString !== 'function') {
+    throw new Error('cronstrue.toString is missing')
+  }
+
+  return cronstrue.toString(expression, { throwExceptionOnParseError: true })
+}
+
+function getNextTriggerTimesUtc(expression: string, count: number): string[] {
+  const iterator = parseCronExpression(expression)
 
   return Array.from({ length: count }, () => formatCronDateUtc(iterator.next()))
 }
@@ -78,11 +101,7 @@ export function formatPreviewTimestamp(time: string): {
 
 export function validateCronExpression(expression: string) {
   try {
-    CronExpressionParser.parse(expression, {
-      currentDate: new Date(),
-      tz: 'UTC',
-    })
-
+    parseCronExpression(expression)
     return true
   } catch {
     return false

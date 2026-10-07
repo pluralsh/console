@@ -144,6 +144,11 @@ func openAIRequestModel(req interface{}) string {
 		return r.Model
 	case *openai.OpenAIResponsesRequest:
 		return r.Model
+	case *openAIResponsesRequest:
+		if r.request != nil {
+			return r.request.Model
+		}
+		return ""
 	case *openai.OpenAIEmbeddingRequest:
 		return r.Model
 	default:

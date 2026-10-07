@@ -31,8 +31,9 @@ defmodule Console.AI.Workbench.Heartbeat do
     {:ok, %State{job: job, booted: true, usage: preserve_usage(job.usage), reprompt: reprompt(job)}}
   end
 
-  def handle_cast({:usage, %{} = new_usage, _provider, _model, price_sheet}, %State{usage: usage} = state) do
+  def handle_cast({:usage, %{} = new_usage, provider, model, price_sheet}, %State{usage: usage} = state) do
     new_usage
+    |> normalize_usage(provider, model)
     |> ModelSelection.backfill_usage(price_sheet)
     |> merge_usage(usage)
     |> enforce_budget(state)
@@ -47,16 +48,57 @@ defmodule Console.AI.Workbench.Heartbeat do
     do: {:stop, {:shutdown, :cancel}, %{state | job: job, booted: booted}}
   def handle_cast(_, state), do: {:noreply, state}
 
+  # a single call with a missing counter (eg no cost because the model couldn't be priced)
+  # must not erase what has already been accumulated for the job
   defp merge_usage(new_usage, usage) do
-    Enum.reduce(new_usage, usage, fn {k, v}, acc ->
-      case Map.get(acc, k) do
-        old when (is_integer(old) or is_float(old)) and (is_integer(v) or is_float(v)) ->
-          Map.put(acc, k, old + v)
+    Enum.reduce(new_usage, usage, fn
+      {k, v}, acc when is_number(v) ->
+        case Map.get(acc, k) do
+          old when is_number(old) -> Map.put(acc, k, old + v)
+          _ -> Map.put(acc, k, v)
+        end
 
-        _ -> Map.put(acc, k, v)
-      end
+      _, acc -> acc
     end)
   end
+
+  # ReqLLM reports some Bedrock input and cache counters as separate dimensions
+  # while its total only includes uncached input and output. Keep the provider
+  # total when it is complete, otherwise reconstruct it before AIUsage
+  # sanitization drops the cache write counters. ReqLLM 1.25 introduced
+  # cache_read_tokens/cache_write_tokens as the canonical names while retaining
+  # cached_tokens/cache_creation_tokens as compatibility aliases.
+  defp normalize_usage(usage, :bedrock, model) when is_binary(model) do
+    if separate_cache_counters?(usage, model) do
+      input = numeric(usage[:input_tokens])
+      output = numeric(usage[:output_tokens])
+      cached = counter(usage, :cache_read_tokens, :cached_tokens)
+      cache_creation = counter(usage, :cache_write_tokens, :cache_creation_tokens)
+      reported = numeric(usage[:total_tokens])
+
+      usage
+      |> Map.put(:cached_tokens, cached)
+      |> Map.put(:total_tokens, max(reported, input + output + cached + cache_creation))
+    else
+      usage
+    end
+  end
+  defp normalize_usage(usage, _, _), do: usage
+
+  defp separate_cache_counters?(usage, model) do
+    Map.get(usage, :input_includes_cached, Map.get(usage, "input_includes_cached")) == false or
+      String.contains?(model, "anthropic.")
+  end
+
+  defp counter(usage, primary, fallback) do
+    case Map.get(usage, primary) do
+      value when is_number(value) -> value
+      _ -> numeric(Map.get(usage, fallback))
+    end
+  end
+
+  defp numeric(value) when is_number(value), do: value
+  defp numeric(_), do: 0
 
   def handle_info({:EXIT, _, _}, state), do: {:stop, :shutdown, state}
   def handle_info(:timeout, state), do: {:stop, :timeout, state}
@@ -69,7 +111,11 @@ defmodule Console.AI.Workbench.Heartbeat do
     end
   end
 
-  def terminate({:shutdown, :cancel}, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
+  def terminate({:shutdown, :cancel}, %State{job: job, usage: usage}) do
+    with {:ok, _} <- Workbenches.cancel_job_subagents(job) do
+      Workbenches.save_usage(job, usage)
+    end
+  end
   def terminate(:normal, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
   def terminate(:shutdown, %State{job: job, usage: usage}), do: Workbenches.pause_job(job, usage)
   def terminate(:timeout, %State{job: job, usage: usage}),

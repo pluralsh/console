@@ -7,7 +7,7 @@ import {
   CodeEditor,
   Flex,
   FormField,
-  Input2,
+  Input,
   ListBoxItem,
   AddIcon,
   MinusIcon,
@@ -19,6 +19,9 @@ import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   HelmAuthProvider,
+  OauthTokenExchangeAttributes,
+  OauthTokenExchangeType,
+  SplunkTokenType,
   WorkbenchToolHttpMethod,
   WorkbenchToolType,
 } from 'generated/graphql'
@@ -36,6 +39,7 @@ import {
   ConfigurableWorkbenchToolType,
   isConfigurableWorkbenchToolType,
 } from './workbenchToolsUtils'
+import { OauthTokenExchangeFormFields } from './OauthTokenExchangeFormFields'
 
 type ToolFormFieldProps<T extends ConfigurableWorkbenchToolType> = {
   config: ConfigForToolType<T>
@@ -46,10 +50,12 @@ export function WorkbenchToolFormFields({
   type,
   state,
   update,
+  persistedOauthType,
 }: {
   type: WorkbenchToolType
   state: WorkbenchToolFormState
   update: (update: DeepPartial<WorkbenchToolFormState>) => void
+  persistedOauthType?: Nullable<OauthTokenExchangeType>
 }) {
   if (!isConfigurableWorkbenchToolType(type)) return null
 
@@ -81,6 +87,8 @@ export function WorkbenchToolFormFields({
       return render(type, HttpFormFields)
     case WorkbenchToolType.Loki:
       return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.VictoriaLogs:
+      return render(type, VictoriaLogsFormFields)
     case WorkbenchToolType.Prometheus:
       return render(type, PrometheusFormFields)
     case WorkbenchToolType.Tempo:
@@ -89,6 +97,26 @@ export function WorkbenchToolFormFields({
       return render(type, JaegerFormFields)
     case WorkbenchToolType.Atlassian:
       return render(type, AtlassianFormFields)
+    case WorkbenchToolType.Jira:
+      return render(type, JiraFormFields)
+    case WorkbenchToolType.JiraDatacenter: {
+      const key = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]
+      const config =
+        state.configuration?.[key] ?? INITIAL_TOOL_CONFIG_BY_TYPE[type]({})[key]
+      return (
+        <JiraDatacenterFormFields
+          config={config}
+          setConfig={(next) =>
+            update({
+              configuration: { ...state.configuration, [key]: next },
+            })
+          }
+          oauth={state.oauth}
+          setOauth={(oauth) => update({ oauth })}
+          persistedOauthType={persistedOauthType}
+        />
+      )
+    }
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
     case WorkbenchToolType.Slack:
@@ -237,6 +265,7 @@ function OpensearchFormFields({
         }
       />
       <Switch
+        size="small"
         checked={usePodIdentity}
         onChange={(checked) =>
           set({
@@ -355,13 +384,13 @@ function HttpFormFields({
               gap="xsmall"
               align="center"
             >
-              <Input2
+              <Input
                 placeholder="Name"
                 value={h.name ?? ''}
                 onChange={(e) => setHeader(i, 'name', e.target.value)}
                 css={{ flex: 1 }}
               />
-              <Input2
+              <Input
                 placeholder="Value"
                 value={h.value ?? ''}
                 onChange={(e) => setHeader(i, 'value', e.target.value)}
@@ -541,6 +570,53 @@ function UrlUsernamePasswordTokenTenantFormFields<
   )
 }
 
+function VictoriaLogsFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.VictoriaLogs>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="VictoriaLogs base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Account ID"
+        placeholder="Optional AccountID tenant header"
+        value={c.accountId ?? ''}
+        onChange={(e) => set({ ...c, accountId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Project ID"
+        placeholder="Optional ProjectID tenant header"
+        value={c.projectId ?? ''}
+        onChange={(e) => set({ ...c, projectId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token / API key"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
 function PrometheusFormFields({
   config: c,
   setConfig: set,
@@ -555,6 +631,7 @@ function PrometheusFormFields({
         setConfig={set}
       />
       <Switch
+        size="small"
         checked={sigv4Enabled}
         onChange={(checked) =>
           set({
@@ -646,6 +723,79 @@ function AtlassianFormFields({
         onChange={(e) =>
           set({ ...c, serviceAccount: e.target.value || undefined })
         }
+      />
+    </>
+  )
+}
+
+function JiraFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Jira>) {
+  return (
+    <>
+      <InputField
+        label="Jira Cloud URL"
+        hint="Your Jira site URL, for example https://example.atlassian.net"
+        placeholder="https://example.atlassian.net"
+        required
+        value={c.url}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Email"
+        hint="Email address for the Atlassian account that owns the API token"
+        required
+        value={c.email}
+        onChange={(e) => set({ ...c, email: e.target.value })}
+      />
+      <InputField
+        label="API token"
+        hint="Leave blank when editing to keep the stored token unless you are rotating it."
+        required
+        revealer
+        value={c.apiToken}
+        onChange={(e) => set({ ...c, apiToken: e.target.value })}
+      />
+    </>
+  )
+}
+
+function JiraDatacenterFormFields({
+  config: c,
+  setConfig: set,
+  oauth,
+  setOauth,
+  persistedOauthType,
+}: ToolFormFieldProps<WorkbenchToolType.JiraDatacenter> & {
+  oauth?: Nullable<OauthTokenExchangeAttributes>
+  setOauth: (oauth: OauthTokenExchangeAttributes | undefined) => void
+  persistedOauthType?: Nullable<OauthTokenExchangeType>
+}) {
+  return (
+    <>
+      <InputField
+        label="Jira Data Center URL"
+        hint="Instance URL or REST API URL. Requests use the stable /rest/api/2 API."
+        placeholder="https://jira.example.com"
+        required
+        value={c.url}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      {!oauth?.enabled && (
+        <InputField
+          label="Personal access token"
+          hint="Used to authenticate directly with Jira Data Center. Leave blank when editing to keep the stored token."
+          required
+          revealer
+          value={c.apiToken ?? ''}
+          onChange={(e) => set({ ...c, apiToken: e.target.value })}
+        />
+      )}
+      <OauthTokenExchangeFormFields
+        oauth={oauth}
+        setOauth={setOauth}
+        persistedType={persistedOauthType}
       />
     </>
   )
@@ -999,11 +1149,36 @@ function SplunkFormFields({
         onChange={(e) => set({ ...c, password: e.target.value || undefined })}
       />
       <InputField
-        label="Bearer token"
+        label="Authentication token"
         revealer
         value={c.token ?? ''}
         onChange={(e) => set({ ...c, token: e.target.value || undefined })}
       />
+      <FormField
+        label="Token type"
+        hint="Bearer is used for Splunk authentication tokens; Splunk is used for session keys."
+      >
+        <Select
+          selectedKey={c.tokenType ?? SplunkTokenType.Bearer}
+          onSelectionChange={(key) =>
+            set({
+              ...c,
+              tokenType: (key as SplunkTokenType) ?? SplunkTokenType.Bearer,
+            })
+          }
+          selectionMode="single"
+          label="Token type"
+        >
+          <ListBoxItem
+            key={SplunkTokenType.Bearer}
+            label="Bearer"
+          />
+          <ListBoxItem
+            key={SplunkTokenType.Splunk}
+            label="Splunk"
+          />
+        </Select>
+      </FormField>
     </>
   )
 }
@@ -1425,7 +1600,7 @@ function JsonEditorField({
 
 type InputFieldProps = { label: string; hint?: string; required?: boolean } & (
   | ({ multiline: true } & ComponentProps<typeof EditableDiv>)
-  | ({ multiline?: false; revealer?: boolean } & ComponentProps<typeof Input2>)
+  | ({ multiline?: false; revealer?: boolean } & ComponentProps<typeof Input>)
 )
 function InputField({ label, hint, required, ...props }: InputFieldProps) {
   return (
@@ -1441,7 +1616,7 @@ function InputField({ label, hint, required, ...props }: InputFieldProps) {
       ) : props.revealer ? (
         <InputRevealer {...props} />
       ) : (
-        <Input2 {...props} />
+        <Input {...props} />
       )}
     </FormField>
   )

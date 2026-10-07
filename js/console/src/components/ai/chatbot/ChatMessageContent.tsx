@@ -39,6 +39,8 @@ import { AgentRunInfoCard } from '../agent-runs/AgentRunInfoDisplays.tsx'
 import { ChatMarkdown } from './ChatMarkdown'
 import { ChatMessageActions } from './ChatMessage'
 import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
+import { resolveToolCallKind } from './toolCallDisplay'
+import { ToolCallKindIcon } from './toolCallIcons'
 import { ToolCallContent } from './ToolCallContent'
 import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
@@ -63,6 +65,7 @@ type ChatMessageContentProps = {
   userMsgWrapperStyle?: StyledObject
   isPending?: boolean
   toolRuntime?: string
+  standaloneCommand?: boolean
 }
 
 export function ChatMessageContent({
@@ -86,6 +89,7 @@ export function ChatMessageContent({
   userMsgWrapperStyle,
   isPending,
   toolRuntime,
+  standaloneCommand,
 }: ChatMessageContentProps) {
   const { colors } = useTheme()
   switch (type) {
@@ -122,6 +126,7 @@ export function ChatMessageContent({
           serverName={serverName}
           isPending={isPending}
           toolRuntime={toolRuntime}
+          standaloneCommand={standaloneCommand}
         />
       )
     case ChatType.PrCall:
@@ -188,7 +193,7 @@ function FileMessageContent({
           <Flex
             gap="small"
             align="center"
-            wordBreak="break-word"
+            css={{ wordBreak: 'break-word' }}
             marginRight={theme.spacing.small}
             position="relative"
           >
@@ -454,6 +459,7 @@ function SimpleToolMessageContent({
   serverName,
   isPending,
   toolRuntime,
+  standaloneCommand,
 }: ChatMessageContentProps) {
   const pendingConfirmation = confirm && !confirmedAt
   const customResultBody = getToolMessageDetailsBody(content, attributes)
@@ -482,6 +488,7 @@ function SimpleToolMessageContent({
         attributes={attributes}
         isPending={isPending}
         toolRuntime={toolRuntime}
+        standaloneCommand={standaloneCommand}
         customLabel={
           serverName || pendingConfirmation ? (
             <ToolCallLabel
@@ -539,6 +546,7 @@ function ToolCallLabel({
       align="center"
       wrap="wrap"
     >
+      {toolName && <ToolCallKindIcon kind={resolveToolCallKind(toolName)} />}
       <Body2P
         $shimmer={isPending}
         $color="text-xlight"

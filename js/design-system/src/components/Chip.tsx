@@ -1,7 +1,9 @@
 import {
   ReactNode,
   type ComponentProps,
+  type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
+  type DOMAttributes,
   type ReactElement,
 } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
@@ -28,8 +30,17 @@ export type ChipProps = ComponentPropsWithRef<typeof Card> & {
   endIcon?: ReactNode
   loading?: boolean
   closeButton?: boolean
-  closeButtonProps?: ComponentPropsWithRef<'div'>
+  // Ref is omitted: the close control renders as a <button>, or as a <div>
+  // when the chip itself is clickable (nested buttons are invalid HTML), so a
+  // single ref type cannot cover both. Handlers are generalized to
+  // HTMLElement so the same props work for either element.
+  closeButtonProps?: Omit<
+    ComponentPropsWithoutRef<'div'>,
+    keyof DOMAttributes<HTMLElement>
+  > &
+    DOMAttributes<HTMLElement>
   clickable?: boolean
+  rounded?: boolean
   truncateWidth?: number
   truncateEdge?: 'start' | 'end'
   tooltip?: boolean | ComponentProps<typeof Tooltip>['label']
@@ -74,6 +85,7 @@ const ChipCardSC = styled(Card)<{
   $truncateWidth?: number
   $truncateEdge?: 'start' | 'end'
   $condensed?: boolean
+  $rounded?: boolean
 }>(({
   $size,
   $severity,
@@ -81,6 +93,7 @@ const ChipCardSC = styled(Card)<{
   $truncateWidth,
   $truncateEdge,
   $condensed,
+  $rounded,
   theme,
 }) => {
   const textColor = $inactive
@@ -108,6 +121,7 @@ const ChipCardSC = styled(Card)<{
       gap: $condensed ? 6 : theme.spacing.xsmall,
       // Chips are dense inline labels — hairline only, no Card elevation shadow
       ...(theme.mode === 'light' && { boxShadow: 'none' }),
+      ...($rounded && { borderRadius: 999, boxShadow: 'none' }),
     },
     '.children': {
       display: 'flex',
@@ -188,6 +202,7 @@ function Chip({
   disabled,
   tooltip,
   tooltipProps,
+  rounded = false,
   ...props
 }: ChipProps) {
   fillLevel = useDecideFillLevel({ fillLevel })
@@ -197,7 +212,6 @@ function Chip({
 
   let content = (
     <ChipCardSC
-      severity={severity}
       cornerSize="medium"
       fillLevel={fillLevel}
       clickable={clickable}
@@ -208,6 +222,7 @@ function Chip({
       $severity={severity}
       $truncateWidth={truncateWidth}
       $truncateEdge={truncateEdge}
+      $rounded={rounded}
       {...props}
     >
       {loading && (
@@ -228,13 +243,12 @@ function Chip({
       {endIcon}
       {closeButton && (
         <CloseButtonSC
-          disabled={disabled}
           $fillLevel={fillLevel}
           {...{
             [CHIP_CLOSE_ATTR_KEY]: '',
           }}
-          {...(clickable ? { as: 'div' } : {})}
-          {...(closeButtonProps || {})}
+          {...(clickable ? { as: 'div' as const } : { disabled })}
+          {...closeButtonProps}
         >
           <CloseIcon
             className="closeIcon"

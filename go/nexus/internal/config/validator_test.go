@@ -78,6 +78,19 @@ func TestValidateServer_InvalidAddress(t *testing.T) {
 	}
 }
 
+func TestValidateServer_TLSFilesMustBeConfiguredTogether(t *testing.T) {
+	cfg := config.Defaults()
+	cfg.Server.CertificateFile = "/tls/tls.crt"
+
+	err := config.Validate(cfg)
+	if err == nil {
+		t.Fatal("expected validation error when only a TLS certificate is configured")
+	}
+	if !strings.Contains(err.Error(), "certificateFile and keyFile must both be configured") {
+		t.Fatalf("unexpected validation error: %v", err)
+	}
+}
+
 func TestValidateServer_NegativeTimeouts(t *testing.T) {
 	cfg := config.Defaults()
 	cfg.Console.GRPCEndpoint = grpcEndpoint

@@ -73,7 +73,7 @@ export function AiInsightSummaryIcon({
         <Flex
           direction="column"
           maxWidth={320}
-          color={theme.colors.text}
+          css={{ color: theme.colors.text }}
         >
           <Flex
             gap="xsmall"

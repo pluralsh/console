@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
@@ -11,6 +12,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
@@ -33,7 +35,26 @@ const (
 
 // ConfigureSystemPrompt prepares system prompt/context files for the provider and puts them in the required directory
 // for the agent CLI to read during the run.
-func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) error {
+func (in *DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) error {
+	templateFile := systemPromptTemplateDir
+
+	switch in.Config.Run.Mode {
+	case console.AgentRunModeAnalyze:
+		templateFile = path.Join(templateFile, systemPromptAnalyzeTemplateFile)
+	case console.AgentRunModeWrite:
+		templateFile = path.Join(templateFile, systemPromptWriteTemplateFile)
+	case console.AgentRunModeReview:
+		templateFile = path.Join(templateFile, systemPromptReviewTemplateFile)
+	}
+
+	return in.configureSystemPrompt(runtime, templateFile)
+}
+
+func (in *DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRuntimeType) error {
+	return in.configureSystemPrompt(runtime, path.Join(systemPromptTemplateDir, systemPromptBabysitTemplateFile))
+}
+
+func (in *DefaultTool) configureSystemPrompt(runtime console.AgentRuntimeType, templateFile string) error {
 	providerDir := ""
 	switch runtime {
 	case console.AgentRuntimeTypeClaude:
@@ -49,17 +70,6 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 	}
 
 	outputFile := path.Join(in.Config.WorkDir, providerDir, SystemPromptFile)
-	templateFile := systemPromptTemplateDir
-
-	switch in.Config.Run.Mode {
-	case console.AgentRunModeAnalyze:
-		templateFile = path.Join(templateFile, systemPromptAnalyzeTemplateFile)
-	case console.AgentRunModeWrite:
-		templateFile = path.Join(templateFile, systemPromptWriteTemplateFile)
-	case console.AgentRunModeReview:
-		templateFile = path.Join(templateFile, systemPromptReviewTemplateFile)
-	}
-
 	content, err := systemPromptTemplate(templateFile, in.systemPromptInput())
 	if err != nil {
 		return err
@@ -73,58 +83,57 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 	return nil
 }
 
-func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRuntimeType) error {
-	providerDir := ""
-	switch runtime {
-	case console.AgentRuntimeTypeClaude:
-		providerDir = ".claude/prompts"
-	case console.AgentRuntimeTypeGemini:
-		providerDir = ".gemini"
-	case console.AgentRuntimeTypeOpencode:
-		providerDir = ".opencode/prompts"
-	case console.AgentRuntimeTypeCodex:
-		providerDir = ".codex"
-	case console.AgentRuntimeTypePi:
-		providerDir = ".pi/agent"
-	}
-
-	outputFile := path.Join(in.Config.WorkDir, providerDir, SystemPromptFile)
-	templateFile := path.Join(systemPromptTemplateDir, systemPromptBabysitTemplateFile)
-
-	content, err := systemPromptTemplate(templateFile, in.systemPromptInput())
-	if err != nil {
-		return fmt.Errorf("failed to render babysit system prompt template %q: %w", templateFile, err)
-	}
-
-	if err = helpers.File().Create(outputFile, content, 0644); err != nil {
-		return fmt.Errorf("failed to write babysit system prompt %q: %w", outputFile, err)
-	}
-
-	return nil
-}
-
-func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
+func (in *DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 	branch := ""
 	if in.Config.Run.Branch != nil {
 		branch = *in.Config.Run.Branch
 	}
 
 	return &SystemPromptTemplateInput{
-		Mode:           in.Config.Run.Mode,
-		ReviewDepth:    in.Config.Run.ReviewDepth,
-		BrowserEnabled: in.Config.Run.BrowserEnabled,
-		DindEnabled:    in.Config.Run.DindEnabled,
-		MemoryEnabled:  in.Config.Run.MemoryEnabled,
-		WorkDir:        in.Config.WorkDir,
-		RepositoryDir:  in.Config.RepositoryDir,
-		Prompt:         in.Config.Run.Prompt,
-		Branch:         branch,
-		PRURL:          in.Config.Run.PRURL,
-		Followup:       in.Config.Run.Followup,
+		Mode:                 in.Config.Run.Mode,
+		ReviewDepth:          in.Config.Run.ReviewDepth,
+		BrowserEnabled:       in.Config.Run.BrowserEnabled,
+		DindEnabled:          in.Config.Run.DindEnabled,
+		MemoryEnabled:        in.Config.Run.MemoryEnabled,
+		WorkDir:              in.Config.WorkDir,
+		RepositoryDir:        in.Config.RepositoryDir,
+		Prompt:               in.Config.Run.Prompt,
+		Branch:               branch,
+		PRURL:                in.Config.Run.PRURL,
+		Followup:             in.Config.Run.Followup,
+		PrebakedRepositories: prebakedRepositories(in.Config.Run.Repository),
 	}
 }
 
-func (in DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {
+func prebakedRepositories(assignedURL string) []PrebakedRepository {
+	repos, err := prebake.List()
+	if err != nil {
+		klog.ErrorS(err, "failed to load repository prebake manifest")
+		return nil
+	}
+	return extraPrebakedRepositories(repos, assignedURL)
+}
+
+func extraPrebakedRepositories(repos []prebake.Repository, assignedURL string) []PrebakedRepository {
+	if len(repos) == 0 {
+		return nil
+	}
+
+	assigned := prebake.NormalizeGitURL(assignedURL)
+	out := make([]PrebakedRepository, 0, len(repos))
+	for _, repo := range repos {
+		if assigned != "" && strings.EqualFold(prebake.NormalizeGitURL(repo.URL), assigned) {
+			continue
+		}
+		out = append(out, PrebakedRepository{URL: repo.URL, Dir: repo.Dir})
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func (in *DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {
 	return artifacts.NewUploadArtifactBuilder(artifacts.Config{
 		WorkDir:       in.Config.WorkDir,
 		RepositoryDir: in.Config.RepositoryDir,

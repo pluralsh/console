@@ -1,4 +1,3 @@
-import { Div } from 'honorable'
 import type { Meta, StoryObj } from '@storybook/react'
 
 import LoadingSpinner, {
@@ -6,7 +5,7 @@ import LoadingSpinner, {
 } from '../components/LoadingSpinner'
 
 const meta = {
-  title: 'LoadingSpinner',
+  title: 'Loading Spinner',
   component: LoadingSpinner,
 } satisfies Meta<any>
 
@@ -15,23 +14,22 @@ type Story = StoryObj<any>
 
 function Template(args: LoadingSpinnerProps) {
   return (
-    <Div position="relative">
-      <Div
-        position="absolute"
-        top="0"
-        bottom={0}
-        right={0}
-        left={0}
-        backgroundColor="red"
+    <div style={{ position: 'relative' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          right: 0,
+          left: 0,
+          backgroundColor: 'red',
+        }}
       >
-        <Div
-          width="100%"
-          position="relative"
-        >
+        <div style={{ width: '100%', position: 'relative' }}>
           <LoadingSpinner {...args} />
-        </Div>
-      </Div>
-    </Div>
+        </div>
+      </div>
+    </div>
   )
 }
 

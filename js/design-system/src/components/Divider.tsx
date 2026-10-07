@@ -1,4 +1,7 @@
-import { Div, Flex, type FlexProps, P } from 'honorable'
+import Flex, { type FlexProps } from './Flex'
+import styled from 'styled-components'
+
+import { type SemanticColorKey } from '../theme/colors'
 
 type DividerProps = FlexProps & {
   text?: string
@@ -17,30 +20,33 @@ function Divider({
       align="center"
       {...props}
     >
-      <Div
-        flexGrow={1}
-        height={1}
-        backgroundColor={backgroundColor}
-      />
+      <LineSC $backgroundColor={backgroundColor} />
       {!!text && (
         <>
-          <P
-            paddingHorizontal="xsmall"
-            flexShrink={0}
-            color={color}
-            size="small"
-          >
-            {text}
-          </P>
-          <Div
-            flexGrow={1}
-            height={1}
-            backgroundColor={backgroundColor}
-          />
+          <LabelSC $color={color}>{text}</LabelSC>
+          <LineSC $backgroundColor={backgroundColor} />
         </>
       )}
     </Flex>
   )
 }
+
+const LineSC = styled.div<{ $backgroundColor: string }>(
+  ({ theme, $backgroundColor }) => ({
+    flexGrow: 1,
+    height: 1,
+    backgroundColor:
+      theme.colors[$backgroundColor as SemanticColorKey] ?? $backgroundColor,
+  })
+)
+
+const LabelSC = styled.p<{ $color: string }>(({ theme, $color }) => ({
+  margin: 0,
+  paddingLeft: theme.spacing.xsmall,
+  paddingRight: theme.spacing.xsmall,
+  flexShrink: 0,
+  ...theme.partials.text.body2,
+  color: theme.colors[$color as SemanticColorKey] ?? $color,
+}))
 
 export default Divider

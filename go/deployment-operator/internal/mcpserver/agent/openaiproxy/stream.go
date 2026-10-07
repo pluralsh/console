@@ -95,13 +95,16 @@ func finishChunk(base openai.ChatCompletionChunk, choice openai.ChatCompletionCh
 		ServiceTier:       base.ServiceTier,
 		Choices: []openai.ChatCompletionChunkChoice{{
 			Index:        choice.Index,
-			Delta:        openai.ChatCompletionChunkChoiceDelta{},
+			Delta:        openai.ChatCompletionChunkChoiceDelta{Role: "assistant"},
 			FinishReason: choice.FinishReason,
 		}},
 	}
 }
 
 func withChoiceDelta(base openai.ChatCompletionChunk, index int64, delta openai.ChatCompletionChunkChoiceDelta) openai.ChatCompletionChunk {
+	if delta.Role == "" {
+		delta.Role = "assistant"
+	}
 	return openai.ChatCompletionChunk{
 		ID:                base.ID,
 		Object:            base.Object,

@@ -6,18 +6,42 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketDatacenterConnection}
 
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
-  def build(%WorkbenchTool{scm_connection: %ScmConnection{api_url: url, token: token}}),
-    do:
-      {:ok,
-       %{api_base: api_base(url), reactions_base: reactions_base(api_base(url)), token: token}}
+  def build(%WorkbenchTool{
+        scm_connection: %ScmConnection{
+          api_url: api_url,
+          base_url: base_url,
+          token: token
+        }
+      }) do
+    case api_url || base_url do
+      url when is_binary(url) ->
+        {:ok,
+         %{
+           api_base: api_base(url),
+           reactions_base: reactions_base(api_base(url)),
+           token: token
+         }}
+
+      _ ->
+        {:error, "Bitbucket Data Center connection is missing an API or base URL."}
+    end
+  end
 
   def build(%WorkbenchTool{
         configuration: %Configuration{
-          bitbucket_datacenter: %BitbucketDatacenterConnection{token: token, url: url}
+          bitbucket_datacenter: %BitbucketDatacenterConnection{
+            token: token,
+            url: url
+          }
         }
       }) do
     api_base = api_base(url)
-    {:ok, %{api_base: api_base, reactions_base: reactions_base(api_base), token: token}}
+    {:ok,
+     %{
+       api_base: api_base,
+       reactions_base: reactions_base(api_base),
+       token: token
+     }}
   end
 
   def build(%WorkbenchTool{}),
@@ -47,7 +71,8 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
   end
 
   @spec get(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
-  def get(%{api_base: base, token: token}, path, query \\ %{}) when is_binary(path) do
+  def get(%{api_base: base, token: token}, path, query \\ %{})
+      when is_binary(path) do
     url = base <> path <> Query.query_string(query)
 
     Req.get(url, [headers: auth_headers(token)] ++ http_opts())
@@ -119,12 +144,9 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
 
   defp enc_seg(s) when is_binary(s), do: URI.encode(String.trim(s), &URI.char_unreserved?/1)
 
-  # PAT as HTTP Basic password (any non-empty username works; x-token-auth is conventional for Bitbucket Server).
   defp auth_headers(token) do
-    basic = Base.encode64("x-token-auth:" <> token)
-
     [
-      {"Authorization", "Basic #{basic}"},
+      {"Authorization", "Bearer #{token}"},
       {"Accept", "application/json"}
     ]
   end

@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_tool_type, Console.Schema.WorkbenchTool.Tool
   ecto_enum :workbench_tool_category, Console.Schema.WorkbenchTool.Category
   ecto_enum :workbench_tool_http_method, Console.Schema.WorkbenchTool.HttpMethod
+  ecto_enum :splunk_token_type, Console.Schema.WorkbenchTool.SplunkTokenType
   ecto_enum :workbench_job_status, Console.Schema.WorkbenchJob.Status
   ecto_enum :workbench_job_activity_status, Console.Schema.WorkbenchJobActivity.Status
   ecto_enum :workbench_job_activity_type, Console.Schema.WorkbenchJobActivity.Type
@@ -55,6 +56,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
     field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
+    field :drain, :boolean, description: "whether kubernetes node drain actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -87,6 +89,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_configuration_attributes do
+    field :self_service,   :boolean, description: "enable the self-service subagent for catalog and PR automation workflows"
     field :infrastructure, :workbench_infrastructure_attributes, description: "infrastructure capabilities (services, stacks, kubernetes)"
     field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories, babysitting)"
     field :observability,  :workbench_observability_attributes, description: "observability capabilities (logs, metrics)"
@@ -175,6 +178,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
     field :prompt_rules,     :string, description: "rules for evaluating job prompts"
     field :progress_rules,   :string, description: "rules for evaluating job progress"
+    field :automation,       :workbench_eval_automation_attributes,
+      description: "optional automation for creating skill-update jobs from low-scoring evals"
+  end
+
+  input_object :workbench_eval_automation_attributes do
+    field :enabled,      :boolean, description: "whether low-scoring evals automatically create skill-update jobs"
+    field :max_score,    :integer, description: "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+    field :max_skills,   :integer, description: "maximum number of skills the workbench may have when automation creates a new skill"
+    field :instructions, :string, description: "optional guidance included in automatically created skill-update jobs"
   end
 
   input_object :workbench_webhook_matches_attributes do
@@ -214,6 +226,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
     field :scm_connection_id,    :id, description: "the SCM connection for this tool (e.g. shared Git provider credentials)"
     field :approval,             :boolean, description: "whether this tool requires approval before execution"
+    field :oauth,                :oauth_token_exchange_attributes, description: "OAuth2 client credentials token exchange"
     field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
     field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
@@ -225,6 +238,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :opensearch,           :workbench_tool_opensearch_connection_attributes, description: "aws opensearch connection (logs)"
     field :prometheus,           :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
     field :loki,                 :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
+    field :victoria_logs,        :workbench_tool_victoria_logs_connection_attributes, description: "victoria logs connection (logs)"
     field :splunk,               :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
     field :tempo,                :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
     field :jaeger,               :workbench_tool_jaeger_connection_attributes, description: "jaeger connection (traces)"
@@ -238,6 +252,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :pagerduty,            :workbench_tool_pagerduty_connection_attributes, description: "pagerduty connection (integration)"
     field :teams,                :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
     field :atlassian,            :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
+    field :jira,                 :workbench_tool_jira_connection_attributes, description: "jira cloud connection (ticketing)"
+    field :jira_datacenter,      :workbench_tool_jira_datacenter_connection_attributes, description: "jira data center connection (ticketing)"
     field :exa,                  :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,               :workbench_tool_github_connection_attributes, description: "github connection (integration)"
     field :gitlab,               :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
@@ -287,6 +303,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id, :string, description: "optional tenant id"
   end
 
+  input_object :workbench_tool_victoria_logs_connection_attributes do
+    field :url,        non_null(:string), description: "victoria logs base url"
+    field :token,      :string, description: "bearer token or api key"
+    field :username,   :string, description: "basic auth username"
+    field :password,   :string, description: "basic auth password"
+    field :account_id, :string, description: "optional AccountID tenant header"
+    field :project_id, :string, description: "optional ProjectID tenant header"
+  end
+
   input_object :workbench_tool_tempo_connection_attributes do
     field :url,       non_null(:string), description: "tempo base url"
     field :token,     :string, description: "bearer token or api key"
@@ -303,10 +328,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_splunk_connection_attributes do
-    field :url,       non_null(:string), description: "splunk base url"
-    field :token,     :string, description: "bearer token"
-    field :username,  :string, description: "basic auth username"
-    field :password,  :string, description: "basic auth password"
+    field :url,        non_null(:string), description: "splunk base url"
+    field :token,      :string, description: "splunk authentication token"
+    field :token_type, :splunk_token_type, default_value: :bearer, description: "authorization realm for token authentication"
+    field :username,   :string, description: "basic auth username"
+    field :password,   :string, description: "basic auth password"
   end
 
   input_object :workbench_tool_datadog_connection_attributes do
@@ -368,6 +394,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :service_account, :string, description: "encrypted service account JSON (alternative to api_token + email)"
     field :api_token,       :string, description: "atlassian API token (required if not using service_account)"
     field :email,           :string, description: "atlassian account email (required if not using service_account)"
+  end
+
+  input_object :workbench_tool_jira_connection_attributes do
+    field :url,       non_null(:string), description: "jira cloud site URL (for example, https://example.atlassian.net)"
+    field :api_token, non_null(:string), description: "atlassian API token"
+    field :email,     non_null(:string), description: "atlassian account email"
+  end
+
+  input_object :workbench_tool_jira_datacenter_connection_attributes do
+    field :url,       non_null(:string), description: "jira data center base URL"
+    field :api_token, :string, description: "jira data center personal access token"
   end
 
   input_object :workbench_tool_exa_connection_attributes do
@@ -503,6 +540,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Nested, check: true, msg: "workbench runs cannot be fetched through a policy"
       arg :alert, :boolean, description: "show runs spawned from alerts"
       arg :issue, :boolean, description: "show runs spawned from issues"
+      arg :monitor_id, :id, description: "show runs spawned from a specific monitor"
 
       resolve &Deployments.list_workbench_runs/3
     end
@@ -525,6 +563,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
     connection field :workbench_knowledge, node_type: :workbench_knowledge do
       middleware Nested, check: true, msg: "workbench knowledge cannot be fetched through a policy"
       resolve &Deployments.list_workbench_knowledge/3
+    end
+
+    connection field :workbench_dashboards, node_type: :workbench_dashboard do
+      middleware Nested, check: true, msg: "workbench dashboards cannot be fetched through a policy"
+      arg :q, :string, description: "search dashboards by name"
+      resolve &Deployments.list_dashboards/3
+    end
+
+    connection field :monitors, node_type: :monitor do
+      middleware Nested, check: true, msg: "workbench monitors cannot be fetched through a policy"
+      arg :q, :string, description: "search monitors by name"
+      resolve &Deployments.list_monitors/3
     end
 
     field :eval, :workbench_eval, description: "eval configuration for this workbench (at most one; null if none configured)" do
@@ -554,7 +604,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :issues, node_type: :issue do
       middleware Nested, check: true, msg: "workbench issues cannot be fetched through a policy"
+      arg :q, :string, description: "search issues by title or external id"
+      arg :providers, list_of(:issue_webhook_provider), description: "filter issues by provider"
+      arg :statuses, list_of(:issue_status), description: "filter issues by status"
+      arg :sort, :issue_sort, description: "field to sort issues by"
+      arg :direction, :sort_direction, description: "sort direction"
+
       resolve &Deployments.list_issues/3
+    end
+
+    field :issue_counts, :workbench_issue_counts do
+      middleware Nested, check: true, msg: "workbench issue counts cannot be fetched through a policy"
+      resolve &Deployments.issue_counts/3
     end
 
     @desc "users that have read or write access to this workbench"
@@ -605,16 +666,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve: dataloader(Deployments),
       description: "chatbot integration metadata for this job, when present"
 
-    field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
-    field :url,          non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
-    field :flow,         :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
-    field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
-    field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
-    field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
+    field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
+    field :url,           non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
+    field :flow,          :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
+    field :user,          :user, resolve: dataloader(User), description: "the user who created this run"
+    field :result,        :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
+    field :eval_result,   :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
+    field :associations,  list_of(:workbench_job_association), resolve: dataloader(Deployments), description: "dashboards and monitors associated with this workbench job"
 
-    field :alert,           :alert,        resolve: dataloader(Deployments), description: "the alert this run was spawned from"
-    field :issue,           :issue,        resolve: dataloader(Deployments), description: "the issue this run was spawned from"
+    field :alert,           :alert,         resolve: dataloader(Deployments), description: "the alert this run was spawned from"
+    field :issue,           :issue,         resolve: dataloader(Deployments), description: "the issue this run was spawned from"
     field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do
@@ -662,6 +724,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
     timestamps()
   end
 
+  object :workbench_job_association do
+    field :id, non_null(:string), description: "the id of the association"
+    field :dashboard, :workbench_dashboard, resolve: dataloader(Deployments), description: "the associated dashboard"
+    field :monitor, :monitor, resolve: dataloader(Deployments), description: "the associated monitor"
+
+    timestamps()
+  end
+
   object :workbench_job_modes do
     field :plan,         :boolean, description: "whether planning mode is enabled for this job"
     field :verification, :boolean, description: "whether verification mode is enabled for this job"
@@ -691,6 +761,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
     field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
+    field :drain, :boolean, description: "whether kubernetes node drain actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -749,6 +820,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :explanation,     :string, description: "why this action is needed and its expected effect"
     field :function_call,   :workbench_job_activity_function_call, description: "function call approval payload when present"
     field :kube_request,    :workbench_job_activity_kube_request, description: "kubernetes request approval payload when present"
+    field :kube_drain,      :workbench_job_activity_kube_drain, description: "kubernetes node drain approval payload when present"
     field :kube_exec,       :workbench_job_activity_kube_exec, description: "kubernetes exec payload when present"
     field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
@@ -791,6 +863,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :pod,       :string, description: "the target pod name"
     field :container, :string, description: "the target container name"
     field :explanation, :string, description: "why this command is needed and its expected effect"
+  end
+
+  object :workbench_job_activity_kube_drain do
+    field :handle,      :string, description: "the target cluster handle"
+    field :node,        :string, description: "the target node name"
+    field :explanation, :string, description: "why this node drain is needed and its expected impact"
   end
 
   object :workbench_job_activity_job_update do
@@ -904,6 +982,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_configuration do
+    field :self_service,   :boolean, description: "self-service subagent capability enabled"
     field :infrastructure, :workbench_infrastructure, description: "infrastructure capabilities"
     field :coding,         :workbench_coding, description: "coding capabilities"
     field :observability,  :workbench_observability, description: "observability capabilities"
@@ -1033,10 +1112,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
     field :prompt_rules,     :string, description: "rules for evaluating job prompts"
     field :progress_rules,   :string, description: "rules for evaluating job progress"
+    field :automation,       :workbench_eval_automation,
+      description: "automation for creating skill-update jobs from low-scoring evals"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this eval belongs to"
 
     timestamps()
+  end
+
+  object :workbench_eval_automation do
+    field :enabled,      non_null(:boolean), description: "whether low-scoring evals automatically create skill-update jobs"
+    field :max_score,    :integer, description: "exclusive upper grade threshold for triggering a skill-update job (0–10)"
+    field :max_skills,   non_null(:integer), description: "maximum number of skills the workbench may have when automation creates a new skill"
+    field :instructions, :string, description: "optional guidance included in automatically created skill-update jobs"
   end
 
   object :workbench_eval_feedback do
@@ -1096,6 +1184,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,     :workbench, description: "the workbench this usage data is associated with"
     field :input_tokens,  :integer, description: "number of input tokens consumed during this interval"
     field :output_tokens, :integer, description: "number of output tokens produced during this interval"
+    field :total_tokens,  :integer, description: "total tokens consumed during this interval"
     field :total_cost,    :float, description: "total cost for this interval, in USD"
   end
 
@@ -1143,6 +1232,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
     field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
     field :approval,         :boolean, description: "whether this tool requires approval before execution"
+    field :oauth,            :oauth_token_exchange, description: "OAuth2 client credentials token exchange"
     field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
     field :read_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this tool"
     field :write_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this tool"
@@ -1174,6 +1264,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :opensearch, :workbench_tool_opensearch_connection, description: "aws opensearch connection (no secrets)"
     field :prometheus, :workbench_tool_prometheus_connection, description: "prometheus connection (no secrets)"
     field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
+    field :victoria_logs, :workbench_tool_victoria_logs_connection, description: "victoria logs connection (no secrets)"
     field :splunk,    :workbench_tool_splunk_connection, description: "splunk connection (no secrets)"
     field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
     field :jaeger,    :workbench_tool_jaeger_connection, description: "jaeger connection (no secrets)"
@@ -1187,6 +1278,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :pagerduty, :workbench_tool_pagerduty_connection, description: "pagerduty connection (no secrets)"
     field :teams,     :workbench_tool_teams_connection, description: "microsoft teams / graph connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
+    field :jira,      :workbench_tool_jira_connection, description: "jira cloud connection (no secrets)"
+    field :jira_datacenter, :workbench_tool_jira_datacenter_connection,
+      description: "jira data center connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
     field :gitlab,    :workbench_tool_gitlab_connection, description: "gitlab connection (no secrets)"
@@ -1231,6 +1325,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tenant_id, :string, description: "optional tenant id"
   end
 
+  object :workbench_tool_victoria_logs_connection do
+    field :url,        :string, description: "victoria logs base url"
+    field :username,   :string, description: "basic auth username"
+    field :account_id, :string, description: "optional AccountID tenant header"
+    field :project_id, :string, description: "optional ProjectID tenant header"
+  end
+
   object :workbench_tool_tempo_connection do
     field :url,       :string, description: "tempo base url"
     field :username,  :string, description: "basic auth username"
@@ -1243,8 +1344,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_splunk_connection do
-    field :url,       :string, description: "splunk base url"
-    field :username,  :string, description: "basic auth username"
+    field :url,        :string, description: "splunk base url"
+    field :token_type, :splunk_token_type, description: "authorization realm for token authentication"
+    field :username,   :string, description: "basic auth username"
   end
 
   object :workbench_tool_datadog_connection do
@@ -1304,6 +1406,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :email, :string, description: "atlassian account email for use with PAT authentication"
   end
 
+  object :workbench_tool_jira_connection do
+    field :url,   non_null(:string), description: "jira cloud site URL"
+    field :email, non_null(:string), description: "atlassian account email (API token never exposed)"
+  end
+
+  object :workbench_tool_jira_datacenter_connection do
+    field :url, non_null(:string), description: "jira data center base URL (PAT never exposed)"
+  end
+
   object :workbench_tool_exa_connection do
     field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://api.exa.ai"} end,
       description: "static API URL for Exa (credentials never exposed)"
@@ -1347,8 +1458,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url, :string,
       description: "Docker/OCI registry host in use (credentials never exposed)",
       resolve: fn
-        %{url: url}, _ when is_binary(url) and byte_size(url) > 0 -> {:ok, url}
-        _, _ -> {:ok, "registry-1.docker.io"}
+        %{url: url}, _, _ when is_binary(url) and byte_size(url) > 0 -> {:ok, url}
+        _, _, _ -> {:ok, "registry-1.docker.io"}
       end
 
     field :provider, :helm_auth_provider, description: "registry authentication provider"
@@ -1356,8 +1467,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :proxy, :http_proxy_configuration,
       description: "optional HTTP proxy for registry requests",
       resolve: fn
-        %{auth: %{proxy: proxy}}, _ -> {:ok, proxy}
-        _, _ -> {:ok, nil}
+        %{auth: %{proxy: proxy}}, _, _ -> {:ok, proxy}
+        _, _, _ -> {:ok, nil}
       end
   end
 

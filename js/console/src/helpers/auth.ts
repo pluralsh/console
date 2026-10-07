@@ -30,7 +30,7 @@ Cookies.remove(LEGACY_REFRESH_TOKEN, { path: '/' })
 
 export function getEncryptedAuthValue(key: string) {
   try {
-    return encryptStorage.getItem(key)
+    return encryptStorage.getItem(key) ?? undefined
   } catch {
     localStorage.removeItem(key)
 

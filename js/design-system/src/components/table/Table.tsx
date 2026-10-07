@@ -83,6 +83,7 @@ function Table({
   hasNextPage,
   isFetchingNextPage,
   fetchNextPage,
+  endRowContent,
   onVirtualSliceChange,
   onScrollCapture,
   ...props
@@ -134,12 +135,15 @@ function Table({
   useEffect(() => setFixedGridTemplateColumns(null), [columns.length])
 
   const { rows: tableRows } = table.getRowModel()
+  const hasEndRow =
+    !!hasNextPage ||
+    (!isNil(endRowContent) && typeof endRowContent !== 'boolean')
   const getItemKey = useCallback(
     (i: number) => tableRows[i]?.id || i,
     [tableRows]
   )
   const rowVirtualizer = useVirtualizer<HTMLDivElement, Element>({
-    count: hasNextPage ? tableRows.length + 1 : tableRows.length,
+    count: hasEndRow ? tableRows.length + 1 : tableRows.length,
     overscan: 10,
     getItemKey,
     getScrollElement: () => tableContainerRef.current,
@@ -407,8 +411,16 @@ function Table({
                               $center={false}
                               colSpan={columns.length}
                             >
-                              <div>Loading</div>
-                              <Spinner color={theme.colors['text-xlight']} />
+                              {hasNextPage ? (
+                                <>
+                                  <div>Loading</div>
+                                  <Spinner
+                                    color={theme.colors['text-xlight']}
+                                  />
+                                </>
+                              ) : (
+                                endRowContent
+                              )}
                             </TdLoading>
                           ) : (
                             tableRow?.getVisibleCells().map((cell) =>

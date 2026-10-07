@@ -11,7 +11,9 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
   alias Console.Schema.Cluster
 
   plug Scope, [resource: :cluster, action: :read] when action in [:show, :index]
-  plug Scope, [resource: :cluster, action: :write] when action in [:create, :update, :delete]
+  plug Scope, [resource: :cluster, action: :write, api: "createCluster"] when action in [:create]
+  plug Scope, [resource: :cluster, action: :write, api: "updateCluster"] when action in [:update]
+  plug Scope, [resource: :cluster, action: :write, api: "deleteCluster"] when action in [:delete]
 
   @doc """
   Fetches a cluster by id.
@@ -46,6 +48,8 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
       tag: [in: :query, schema: %{type: :string}, required: false, description: "Filter by tag pair, using format {name}:{value}"],
       upgradeable: [in: :query, schema: %{type: :boolean}, required: false, description: "Filter by upgrade readiness"],
       compliance: [in: :query, schema: %{type: :string, enum: ["latest", "compliant", "outdated"]}, required: false, description: "Filter by version compliance status"],
+      min_health_score: [in: :query, schema: %{type: :integer, minimum: 0, maximum: 100}, required: false, description: "Minimum cluster health score (0-100)"],
+      max_health_score: [in: :query, schema: %{type: :integer, minimum: 0, maximum: 100}, required: false, description: "Maximum cluster health score (0-100)"],
       page: [in: :query, schema: %{type: :integer}, required: false, description: "Page number for pagination"],
       per_page: [in: :query, schema: %{type: :integer}, required: false, description: "Number of items per page"]
     ],
@@ -73,6 +77,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
       _, q -> q
     end)
     |> apply_tag_filter(params)
+    |> apply_health_score_filter(params)
   end
 
   defp apply_tag_filter(query, %{tag: pair}) when is_binary(pair) do
@@ -82,6 +87,17 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
     end
   end
   defp apply_tag_filter(query, _), do: query
+
+  defp apply_health_score_filter(query, %{min_health_score: min, max_health_score: max}),
+    do: Cluster.for_health_range(query, min, max)
+
+  defp apply_health_score_filter(query, %{min_health_score: min}),
+    do: Cluster.for_health_range(query, min, 100)
+
+  defp apply_health_score_filter(query, %{max_health_score: max}),
+    do: Cluster.for_health_range(query, 0, max)
+
+  defp apply_health_score_filter(query, _), do: query
 
   @doc """
   Creates a new cluster.

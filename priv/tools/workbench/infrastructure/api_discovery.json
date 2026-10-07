@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "cluster": {
+      "type": "string",
+      "description": "The Plural cluster handle identifying which cluster to inspect"
+    },
+    "group": {
+      "type": "string",
+      "description": "Optionally return only APIs whose Kubernetes API group contains this value"
+    },
+    "version": {
+      "type": "string",
+      "description": "Optionally return only APIs whose version contains this value"
+    },
+    "kind": {
+      "type": "string",
+      "description": "Optionally return only APIs whose resource kind contains this value"
+    }
+  },
+  "required": ["cluster"]
+}

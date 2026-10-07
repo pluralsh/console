@@ -1,5 +1,3 @@
-import { Span } from 'honorable'
-
 import dayjs from 'dayjs'
 import styled from 'styled-components'
 
@@ -20,7 +18,7 @@ const T = styled.span(({ theme }) => ({
 }))
 
 export default function Date({ date }: { date: dayjs.ConfigType }) {
-  if (!date) return <Span>n/a</Span>
+  if (!date) return <span>n/a</span>
 
   return (
     <Wrap>

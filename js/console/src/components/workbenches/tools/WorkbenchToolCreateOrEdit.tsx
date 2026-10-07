@@ -268,6 +268,7 @@ function formStateToAttributes(
     name,
     categories,
     configuration,
+    oauth,
     cloudConnectionId,
     mcpServerId,
     scmConnectionId,
@@ -282,6 +283,9 @@ function formStateToAttributes(
     ...(workbenchToolSupportsApproval(type) ? { approval: !!approval } : {}),
     readBindings: readBindings.map(bindingToBindingAttributes),
     writeBindings: writeBindings.map(bindingToBindingAttributes),
+    ...(type === WorkbenchToolType.JiraDatacenter && oauth
+      ? { oauth: deepOmitBlank(oauth) }
+      : {}),
   }
 
   const scmType = scmTypeForWorkbenchTool(type)

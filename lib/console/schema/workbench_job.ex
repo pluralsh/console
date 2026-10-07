@@ -7,6 +7,7 @@ defmodule Console.Schema.WorkbenchJob do
     WorkbenchEvalResult,
     WorkbenchJobResult,
     WorkbenchJobActivity,
+    WorkbenchJobAssociation,
     AIUsage,
     User,
     Alert,
@@ -35,6 +36,7 @@ defmodule Console.Schema.WorkbenchJob do
         field :update, :boolean, default: false
         field :delete, :boolean, default: false
         field :exec,   :boolean, default: false
+        field :drain,  :boolean, default: false
 
         field :exclude_namespaces, {:array, :string}
         field :require_namespaces, {:array, :string}
@@ -79,7 +81,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     defp kubernetes_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(update delete exec exclude_namespaces require_namespaces)a)
+      |> cast(attrs, ~w(update delete exec drain exclude_namespaces require_namespaces)a)
     end
   end
 
@@ -112,6 +114,9 @@ defmodule Console.Schema.WorkbenchJob do
     has_one  :eval_result,     WorkbenchEvalResult, on_replace: :update
     has_one  :chatbot_message, ChatbotMessage, on_replace: :update
     has_many :activities,      WorkbenchJobActivity, on_replace: :delete
+    has_many :associations,    WorkbenchJobAssociation, on_replace: :delete
+    has_many :dashboards,      through: [:associations, :dashboard]
+    has_many :monitors,        through: [:associations, :monitor]
     has_many :pull_requests,   PullRequest, on_replace: :delete
     has_many :queued_prompts,  QueuedPrompt, on_replace: :delete
 
@@ -150,6 +155,13 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.status == ^status)
   end
 
+  def for_monitor(query \\ __MODULE__, monitor_id) do
+    from(j in query,
+      join: a in assoc(j, :alert),
+      where: a.monitor_id == ^monitor_id
+    )
+  end
+
   def for_flow(query \\ __MODULE__, flow_id) do
     from(j in query, where: j.flow_id == ^flow_id)
   end
@@ -163,6 +175,7 @@ defmodule Console.Schema.WorkbenchJob do
         timestamp: r.timestamp,
         input_tokens: r.input_tokens,
         output_tokens: r.output_tokens,
+        total_tokens: r.total_tokens,
         total_cost: r.total_cost
       },
       order_by: [asc: r.timestamp]
@@ -183,6 +196,28 @@ defmodule Console.Schema.WorkbenchJob do
         timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, j.inserted_at),
         input_tokens: fragment("sum(coalesce((?->>'input_tokens')::integer, 0))", j.usage),
         output_tokens: fragment("sum(coalesce((?->>'output_tokens')::integer, 0))", j.usage),
+        total_tokens:
+          fragment(
+            """
+            sum(greatest(
+              coalesce((?->>'total_tokens')::integer, 0),
+              coalesce((?->>'input_tokens')::integer, 0) +
+              coalesce((?->>'output_tokens')::integer, 0) +
+              case
+                when coalesce((?->>'cached_tokens')::integer, 0) >
+                     coalesce((?->>'input_tokens')::integer, 0)
+                then coalesce((?->>'cached_tokens')::integer, 0)
+                else 0
+              end
+            ))
+            """,
+            j.usage,
+            j.usage,
+            j.usage,
+            j.usage,
+            j.usage,
+            j.usage
+          ),
         total_cost: fragment("sum(coalesce((?->>'total_cost')::double precision, 0.0))", j.usage)
       },
       order_by: [asc: 2]
@@ -278,6 +313,9 @@ defmodule Console.Schema.WorkbenchJob do
   def objective(%__MODULE__{result: %{objective: objective}}) when is_binary(objective) and byte_size(objective) > 0,
     do: objective
   def objective(%__MODULE__{prompt: prompt}), do: prompt
+
+  def coding_review?(%__MODULE__{modes: %{coding: %{review: true}}}), do: true
+  def coding_review?(_), do: false
 
   def update_changeset(model, attrs \\ %{}) do
     model

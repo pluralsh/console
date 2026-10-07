@@ -1,0 +1,11 @@
+# Prebake image for this repository with compile artifacts, plus extra-context
+# repos (public plural-cli/plural, and authed plrl-up-demos).
+repositories:
+  - url: https://github.com/pluralsh/console.git
+    path: console
+  - url: https://github.com/pluralsh/plural-cli.git
+    path: plural-cli
+  - url: https://github.com/pluralsh/plural.git
+    path: plural
+  - url: https://github.com/pluralsh/plrl-up-demos.git
+    path: plrl-up-demos

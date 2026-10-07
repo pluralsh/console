@@ -3,47 +3,201 @@ git_url: https://github.com/longhorn/longhorn
 release_url: https://github.com/longhorn/longhorn/releases/tag/v{vsn}
 helm_repository_url: https://charts.longhorn.io
 versions:
-- version: 1.10.1
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25']
+- version: 1.13.0
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: '### Helm values / upgrade notes
-
-      - **Use the Longhorn Manager hotfix image when targeting v1.10.1:** set the
-      manager image tag to `v1.10.1-hotfix-2` (the plain `v1.10.1` manager image has
-      known crash/regression issues).
-
-      - **Temporarily disable the upgrade version check if needed:** set `upgradeVersionCheck:
-      false` (or `preUpgradeChecker.upgradeVersionCheck: false` depending on your
-      chart values) to allow applying the hotfix image and/or performing certain recovery/downgrade
-      scenarios.
-
-      - **If upgrading from any v1.9.x to v1.10.x and your cluster may contain `v1beta1`
-      stored CRs:** perform the **manual CRD storage version migration** to `v1beta2`
-      *before* the Helm upgrade.
-
-      '
-    chart_updates: ['Helm chart behavior improvement: `defaultSettings` handling supports
-        automatic quoting and multiple types (reduces YAML/JSON typing pitfalls when
-        setting Longhorn global settings via Helm).']
-    features: ['V2 Data Engine: interrupt mode now supports **NVMe disks** starting
-        in v1.10.1 (v1.10.0 supported AIO disks only).', 'Improved scheduling visibility:
-        `CSIStorageCapacity` objects show schedulable/allocatable capacity (helps
-        capacity-aware scheduling with `WaitForFirstConsumer`).', Adds/extends installation
-        variant usage metrics (observability/telemetry improvement).]
-    breaking_changes: ['Longhorn v1.10.0 removes the `longhorn.io/v1beta1` API and
-        removes the deprecated `replica.status.evictionRequested` field. If any CRs
-        are still stored as `v1beta1`, upgrades to v1.10.x can fail until you migrate
-        CRD storedVersions to `v1beta2`.', 'Kubernetes requirement: v1.10.x requires
-        **Kubernetes v1.25+**; upgrading on older clusters is unsupported.']
-  chart_version: 1.10.1
-  images: ['longhornio/longhorn-manager:v1.10.1', 'longhornio/longhorn-share-manager:v1.10.1',
-    'longhornio/longhorn-ui:v1.10.1']
+    helm_changes: "## Helm / values changes to review\n\n- **Kubernetes minimum version\
+      \ jumps to v1.34** for install/upgrade to Longhorn **v1.13.0** (CSI external-provisioner\
+      \ v6.3.0). This is an upgrade prerequisite, not just a Helm change.\n- **New\
+      \ NetworkPolicy-related Helm values** (introduced across v1.12.1\u2013v1.12.2\
+      \ and relevant when landing on v1.13.0):\n  - `networkPolicies.v1DataEngineInitiatorSourceCIDRs`\n\
+      \  - `networkPolicies.recoveryBackendAdditionalIngressPorts`\n  - `networkPolicies.metricsScrapeSources`\
+      \ (to allow Prometheus/metrics scrapers to reach `longhorn-manager` on **:9500**)\n\
+      - **CSI service account change**: CSI controller sidecars move to a dedicated\
+      \ SA `longhorn-csi-service-account`.\n  - Optional hardening: `csi.allowControllerSecretAccess`\
+      \ can be set to **false** *after* removing StorageClass `csi.storage.k8s.io/provisioner-secret-*`\
+      \ parameters; default still allows Secret `get` for compatibility.\n- **New/updated\
+      \ StorageClass parameters** that may be set via chart-managed StorageClasses:\n\
+      \  - `volumeTopology: any|zonal|regional`\n  - `strictTopology` and `csi-allowed-topology-keys`\
+      \ (added in v1.12.0, but you may start using them during this upgrade)\n- V2\
+      \ tuning/settings you may choose to set (not required):\n  - `data-engine-interrupt-mode-enabled`\
+      \ (set to `{\"v2\":\"true\"}`; only when **no V2 volumes are attached**)\n \
+      \ - `data-engine-cpu-isolation-enabled` (defaults to `{\"v2\":\"true\"}` for\
+      \ **new installs** in v1.13.0; upgrades keep existing value)\n  - `data-engine-iobuf-large-pool-size`\
+      \ / `data-engine-iobuf-small-pool-size` (changing recreates idle V2 instance-manager\
+      \ pods)\n"
+    chart_updates: [Introduces a new `longhorn-global-manager` **Deployment** (defaults
+        to 3 replicas) that hosts cluster-wide controllers previously running in the
+        `longhorn-manager` DaemonSet; ensure at least one pod can schedule before/during
+        upgrade., Internal NetworkPolicies are created by default (since v1.12.1)
+        with follow-up compatibility fixes and new allow-list values in v1.12.2; review
+        if you rely on Prometheus scraping or host-originated traffic to Longhorn
+        components., CSI controller sidecars run under a dedicated `longhorn-csi-service-account`
+        (instead of the shared `longhorn-service-account`).]
+    features: ['V2 Data Engine **live upgrade**: V2 volumes can remain attached during
+        the Longhorn upgrade if prerequisites are met (supported live-upgrade path
+        to v1.13.0 is from v1.12.2).', V2 Data Engine **full interrupt mode** (event-driven)
+        to reduce idle/low-I/O CPU usage; polling remains default and interrupt mode
+        can slightly increase latency under sustained throughput., V2 **CPU isolation**
+        enabled by default for new installs to keep kernel work off SPDK reactor cores
+        (polling mode only)., '**VolumeGroupSnapshot** support (UI/kubectl/CSI VolumeGroupSnapshot
+        objects); CSI group snapshot/backup path exists but is disabled by default;
+        snapshots are per-volume (not point-in-time consistent across the group).',
+      Recurring jobs gain **age-based retention** (keep items newer than a duration
+        like `720h`) in addition to count-based retention., 'New scheduling capabilities:
+        `volumeTopology` (any/zonal/regional) to constrain replica placement to the
+        provisioned zone/region, plus an optional **scheduler extender** to improve
+        pod placement using real Longhorn disk capacity and locality.', 'Operational
+        scaling: new **longhorn-global-manager** reduces apiserver load and per-node
+        manager memory in large clusters.', 'Security hardening: broader **instance-manager
+        gRPC mTLS coverage** (when `longhorn-grpc-tls` secret configured) and default
+        internal NetworkPolicies with better configurability.']
+    breaking_changes: ['**Kubernetes minimum version is now v1.34** for Longhorn v1.13.0;
+        you must upgrade Kubernetes before upgrading Longhorn.', '**V2 live upgrade
+        is only supported when upgrading to v1.13.0 from v1.12.2**. If you are on
+        v1.12.0 or v1.12.1, you must detach all V2 volumes (and ensure replicas are
+        stopped) before upgrading.', '**Legacy V2 linked-clone volumes created in
+        v1.12.0 or earlier** can only be detached or deleted; to replace them, create
+        a new linked clone from the same source (no data copy).']
+  chart_version: 1.13.0
+  images: ['docker.io/longhornio/longhorn-manager:v1.13.0', 'docker.io/longhornio/longhorn-share-manager:v1.13.0',
+    'docker.io/longhornio/longhorn-ui:v1.13.0']
+- version: 1.12.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to review\n\n- **Default\
+      \ StorageClass creation can now be disabled via Helm** (issue #12906). If you\
+      \ currently rely on the chart creating the default `longhorn` StorageClass,\
+      \ confirm the value remains enabled or set it explicitly.\n- **New StorageClass\
+      \ parameters supported in the chart** (issue #9324), including:\n  - `strictTopology`\
+      \ (StorageClass parameter) to pin PV `nodeAffinity` more strictly when using\
+      \ `WaitForFirstConsumer`.\n  - Settings related to **topology-aware PV nodeAffinity\
+      \ control**.\n- **New setting to control which topology keys are propagated**\
+      \ via `csi-allowed-topology-keys` (cluster setting) and related StorageClass\
+      \ behavior (issue #12684). Expect changes in PV `nodeAffinity` behavior if you\
+      \ start using these.\n- **StorageClass annotations configurable via Helm values**\
+      \ (issue #13137). If you previously patched annotations manually, consider moving\
+      \ them into Helm values.\n- **Configurable engine-image DaemonSet liveness probe\
+      \ parameters** (issue #12846). Values added for probe period/timeout/failureThreshold;\
+      \ tune if you see restarts during upgrade or on smaller nodes.\n- **Chart distro\
+      \ label/metadata update**: Longhorn chart `distro` is set to `longhorn` (issue\
+      \ #13160). Mostly informational, but can affect tooling that reads this field.\n\
+      \n> Note: The changelog provided is primarily application release notes; verify\
+      \ exact value keys/names in the Longhorn chart `values.yaml` for v1.12.0 before\
+      \ applying."
+    chart_updates: [V2 Data Engine is GA in 1.12.0; V2 networking/scheduling/observability
+        enhancements and multiple stability fixes land in this release., V2 Backing
+        Images are **removed** in 1.12.0; clusters using V2 volumes created from backing
+        images must migrate those volumes before upgrade., 'Default V2 data-engine
+        CPU allocation increases: default `data-engine-cpu-mask` changes from `0x1`
+        (1 core) to `0x3` (2 cores).', Longhorn now supports dual-stack clusters (with
+        consistent IP family ordering across all nodes) and adds IPv6 support for
+        V2 volumes in IPv6-only clusters., 'Operational tooling and observability
+        improvements: longhornctl on-demand snapshot checksums; metrics-server integration
+        can be disabled; longhorn-manager memory usage reduced; engine-image liveness
+        probe settings configurable.', 'Multiple critical stability/scheduling fixes:
+        instance-manager panic during rebuild storms; replica auto-balance loop; CSIStorageCapacity
+        reporting for compute-only nodes; replica CR leak in failed local scheduling;
+        encrypted volume size correction behavior.']
+    features: ['V2 Data Engine is now GA, making V2 volumes more suitable for production
+        (with known limitations still documented).', 'Topology-aware PV nodeAffinity
+        control via `csi-allowed-topology-keys` plus StorageClass `strictTopology`,
+        improving placement with `WaitForFirstConsumer`.', 'Improved networking support:
+        dual-stack cluster support (with constraints) and IPv6 support for V2 volumes
+        in IPv6-only clusters.', 'New ops tooling: `longhornctl` can trigger on-demand
+        snapshot checksum calculation across a volume/node/cluster.', 'Observability/operability
+        knobs: ability to disable metrics-server-dependent metrics and configure engine-image
+        liveness probes.', 'Resource efficiency improvements: reduced longhorn-manager
+        memory usage through informer cache optimization.']
+    breaking_changes: ['**V2 Backing Images removed** in v1.12.0. Any V2 volume created
+        from a backing image must be migrated (backup+restore or delete) before upgrade
+        or you risk attachment failures.', '**V2 live upgrade constraint**: V2 volumes
+        do **not** support live upgrades between v1.12 patch releases; they must be
+        detached before upgrading within the 1.12.x line.', Dual-stack is supported
+        only when all nodes use the same IP family ordering (all IPv4-first or all
+        IPv6-first); mixed ordering can cause replica/engine connectivity failures.,
+      "Encrypted migratable volumes: live migration is not supported when using an\
+        \ engine image with CLI API version < 12\u2014upgrade engine image to v1.12.0+\
+        \ first.", UBLK frontend remains experimental and does not work on Linux kernel
+        >= 6.17 due to upstream API changes.]
+  chart_version: 1.12.0
+  images: ['docker.io/longhornio/longhorn-manager:v1.12.0', 'docker.io/longhornio/longhorn-share-manager:v1.12.0',
+    'docker.io/longhornio/longhorn-ui:v1.12.0']
+- version: 1.11.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / upgrade notes (1.10.0 \x7F\x7F\x7F\x7F 1.11.0)\n\
+      \n### Required / strongly recommended before you upgrade\n- **Kubernetes version:**\
+      \ Longhorn **v1.11.0 requires Kubernetes v1.25+** (same requirement as v1.10.0,\
+      \ but re-check before upgrading).\n\n### Hotfixes you should apply during the\
+      \ Helm upgrade\n- **Instance manager regression (memory leak):**\n  - Set **`longhorn-instance-manager`\
+      \ image** to `longhornio/longhorn-instance-manager:v1.11.0-hotfix-1` (instead\
+      \ of `v1.11.0`).\n  - Do this via `values.yaml` (chart values) before running\
+      \ `helm upgrade`.\n- **Manager regression (node/CNI label deadlock):**\n  -\
+      \ Temporarily set **`upgradeVersionCheck: false`** in `values.yaml` to bypass\
+      \ the upgrade check.\n  - Set **`longhorn-manager` image** to `longhornio/longhorn-manager:v1.11.0-hotfix-1`\
+      \ (instead of `v1.11.0`).\n\n### New/changed Helm knobs surfaced in 1.11.0 (review\
+      \ your values)\n- **`managerUrl` Helm chart setting** is now available (lets\
+      \ you define the Longhorn manager URL explicitly).\n- **UI Service custom labels/annotations**\
+      \ can be configured via values (if you previously used post-render/patches,\
+      \ move them into values).\n- **UI Service `loadBalancerClass`** is now configurable\
+      \ via values.\n- **TLS: multiple FQDNs** supported by the Helm chart (if you\
+      \ terminate TLS with multiple hostnames).\n- **Gateway API HTTPRoute support\
+      \ for Longhorn UI** is added (optional; relevant only if you use Gateway API).\n\
+      - **Resource limits configuration is now exposed** for:\n  - `longhorn-manager`\
+      \ / `instance-manager`\n  - CSI components\n  Review defaults vs. your cluster\
+      \ capacity; set explicit limits/requests if you run in resource-constrained\
+      \ environments.\n- **RollingUpdate strategy configuration** is introduced for\
+      \ the `longhorn-manager` and CSI deployments (review if you need custom surge/unavailable\
+      \ behavior).\n- **defaultSettings handling improved** (automatic quoting & multi-type\
+      \ support): re-check any `defaultSettings.*` values that relied on implicit\
+      \ string conversion.\n\n### Deprecation to plan for\n- **V2 Backing Image feature\
+      \ is deprecated in v1.11.0 and scheduled for removal in v1.12.0.**\n  - If you\
+      \ use **V2 volumes + backing images** (often for VM images), plan migration\
+      \ to **KubeVirt CDI** or another population mechanism before 1.12.\n"
+    chart_updates: [Adds Helm value/option to set `managerUrl`., Helm chart supports
+        multiple TLS FQDNs., 'Helm chart adds UI Service customization: annotations/labels
+        and `loadBalancerClass`.', Adds Gateway API `HTTPRoute` support for exposing
+        Longhorn UI., Exposes resource limits configuration for Longhorn manager/instance-manager
+        and CSI components., Introduces configurable RollingUpdate strategy for longhorn-manager
+        and CSI deployments., Improves `defaultSettings` rendering/quoting to better
+        support multiple value types.]
+    features: [V2 Data Engine is now **Technical Preview** with improved stability;
+        note that live engine upgrade is **not supported** yet (V2 volumes must be
+        detached for engine upgrade)., V2 Data Engine adds **`ublk` frontend** support
+        with tunable performance parameters globally/per-volume/StorageClass., V1
+        Data Engine supports **parallel replica rebuild** by streaming from multiple
+        healthy replicas to speed up redundancy restoration., New **balance-aware
+        replica scheduling** improves disk selection to avoid uneven storage usage.,
+      Adds **node disk health monitoring** using S.M.A.R.T. data (with a setting to
+        disable it if needed)., Share Manager can now use an **extra network interface**
+        for segmented networking setups., Adds full Kubernetes **ReadWriteOncePod
+        (RWOP)** support., StorageClasses now support **`allowedTopologies`** for
+        zone/region/node constrained provisioning., 'Observability improvements: real-time
+        volume performance monitoring and new metrics (e.g., last backup time).']
+    breaking_changes: ['Hotfix required for v1.11.0 images: upgrading to plain `v1.11.0`
+        has known regressions in `longhorn-instance-manager` (proxy connection leak)
+        and `longhorn-manager` (node/CNI label deadlock); use `*-hotfix-1` images
+        during upgrade.', V2 Backing Image feature is **deprecated** in 1.11.0 and
+        will be **removed in 1.12.0** (treat this as an upcoming breaking change if
+        you depend on it)., 'V2 engine upgrade behavior: while V2 is in Technical
+        Preview, **live upgrade is not supported**; V2 volumes must be detached before
+        engine upgrades (operational constraint that can break upgrade runbooks if
+        not planned).']
+  chart_version: 1.11.0
+  images: ['docker.io/longhornio/longhorn-manager:v1.11.0', 'docker.io/longhornio/longhorn-share-manager:v1.11.0',
+    'docker.io/longhornio/longhorn-ui:v1.11.0']
 - version: 1.10.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -94,8 +248,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.10.0', 'longhornio/longhorn-share-manager:v1.10.0',
     'longhornio/longhorn-ui:v1.10.0']
 - version: 1.9.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -135,8 +289,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.9.0', 'longhornio/longhorn-share-manager:v1.9.0',
     'longhornio/longhorn-ui:v1.9.0']
 - version: 1.8.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -193,8 +347,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.8.0', 'longhornio/longhorn-share-manager:v1.8.0',
     'longhornio/longhorn-ui:v1.8.0']
 - version: 1.7.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -227,8 +381,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.7.0', 'longhornio/longhorn-share-manager:v1.7.0',
     'longhornio/longhorn-ui:v1.7.0']
 - version: 1.6.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -276,8 +430,8 @@ versions:
   chart_version: 1.6.0
   images: ['longhornio/longhorn-manager:v1.6.0', 'longhornio/longhorn-ui:v1.6.0']
 - version: 1.5.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -321,8 +475,8 @@ versions:
   chart_version: 1.5.0
   images: ['longhornio/longhorn-manager:v1.5.0', 'longhornio/longhorn-ui:v1.5.0']
 - version: 1.4.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -392,8 +546,8 @@ versions:
   chart_version: 1.3.2
   images: []
 - version: 1.3.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
   requirements: []
   incompatibilities: []
   summary:
@@ -465,8 +619,8 @@ versions:
   chart_version: 1.2.6
   images: []
 - version: 1.2.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
   requirements: []
   incompatibilities: []
   summary:
@@ -523,8 +677,9 @@ versions:
   chart_version: 1.1.3
   images: []
 - version: 1.1.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+    '1.16']
   requirements: []
   incompatibilities: []
   summary:
@@ -554,9 +709,9 @@ versions:
   chart_version: 1.1.0
   images: ['longhornio/longhorn-manager:v1.1.0', 'longhornio/longhorn-ui:v1.1.0']
 - version: 1.0.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
-    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16',
-    '1.15', '1.14']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
+    '1.16', '1.15', '1.14']
   requirements: []
   incompatibilities: []
   summary: null

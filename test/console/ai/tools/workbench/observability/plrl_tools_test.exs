@@ -10,6 +10,21 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
     MetricsSearch
   }
 
+  test "query tools default to a one-hour lookback" do
+    for {tool, attrs} <- [
+          {%Logs{}, %{"service_id" => "svc-1"}},
+          {%LogsAggregate{},
+           %{"service_id" => "svc-1", "query" => "error", "bucket_size" => "5m"}},
+          {%LogLabels{}, %{"service_id" => "svc-1"}},
+          {Metrics, %{"query" => "up"}}
+        ] do
+      assert {:ok, %{time_range: %{start: start_ts, end: end_ts}}} =
+               Tool.validate(tool, attrs)
+
+      assert DateTime.diff(end_ts, start_ts, :second) == 3600
+    end
+  end
+
   describe "Logs (plrl_logs)" do
     test "changeset accepts service_id" do
       assert {:ok, %Logs{service_id: "svc-1"}} =
@@ -47,14 +62,20 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
 
   describe "LogsAggregate (plrl_logs_aggregate)" do
     test "changeset accepts service_id" do
-      assert {:ok, %LogsAggregate{service_id: "svc-1"}} =
-               Tool.validate(%LogsAggregate{}, %{"service_id" => "svc-1"})
+      assert {:ok, %LogsAggregate{service_id: "svc-1", bucket_size: "5m"}} =
+               Tool.validate(%LogsAggregate{}, %{
+                 "service_id" => "svc-1",
+                 "query" => "error",
+                 "bucket_size" => "5m"
+               })
     end
 
     test "changeset casts time range" do
       assert {:ok, %LogsAggregate{time_range: %{start: %DateTime{}, end: %DateTime{}}}} =
                Tool.validate(%LogsAggregate{}, %{
                  "service_id" => "svc-1",
+                 "query" => "error",
+                 "bucket_size" => "5m",
                  "time_range" => %{"start" => "2025-01-01T00:00:00Z", "end" => "2025-01-01T01:00:00Z"}
                })
     end

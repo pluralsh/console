@@ -11,8 +11,8 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
   alias Console.Deployments.Pipelines
   alias Console.Schema.Pipeline
 
-  plug Scope, [resource: :pipelines, action: :read] when action in [:show, :show_by_name, :index]
-  plug Scope, [resource: :pipelines, action: :write] when action in [:trigger]
+  plug Scope, [resource: :pipeline, action: :read] when action in [:show, :show_by_name, :index]
+  plug Scope, [resource: :pipeline, action: :write, api: "createPipelineContext"] when action in [:trigger]
 
   @doc """
   Fetches a pipeline by id.
@@ -24,7 +24,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
     summary: "Get a pipeline by ID",
     description: "Retrieves a single pipeline by its unique identifier, including its stages, edges, and gates",
     tags: ["pipelines"],
-    "x-required-scopes": ["pipelines.read"],
+    "x-required-scopes": ["pipeline.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the pipeline"]
     ],
@@ -45,7 +45,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
     summary: "Get a pipeline by name",
     description: "Retrieves a single pipeline by its exact name, including its stages, edges, and gates",
     tags: ["pipelines"],
-    "x-required-scopes": ["pipelines.read"],
+    "x-required-scopes": ["pipeline.read"],
     parameters: [
       name: [in: :query, schema: %{type: :string}, required: true, description: "The exact name of the pipeline"]
     ],
@@ -68,7 +68,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
     summary: "List all pipelines",
     description: "Returns a paginated list of all pipelines the authenticated user has access to",
     tags: ["pipelines"],
-    "x-required-scopes": ["pipelines.read"],
+    "x-required-scopes": ["pipeline.read"],
     parameters: [
       project_id: [in: :query, schema: %{type: :string}, required: false, description: "Filter pipelines by project ID"],
       q: [in: :query, schema: %{type: :string}, required: false, description: "Search pipelines by name"],
@@ -106,7 +106,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
     summary: "Trigger a pipeline run",
     description: "Creates a new pipeline context to trigger a pipeline run. The context data flows through stages and can be used for PR automations.",
     tags: ["pipelines"],
-    "x-required-scopes": ["pipelines.write"],
+    "x-required-scopes": ["pipeline.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true, description: "The pipeline ID or name:<name> reference to trigger"]
     ],

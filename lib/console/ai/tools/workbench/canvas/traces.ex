@@ -2,7 +2,6 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
   use Console.AI.Tools.Workbench.Base
   import Console.AI.Tools.Workbench.Canvas.MetricsBlock, only: [validate_tool: 3]
   alias Console.AI.Workbench.Canvas
-  alias Console.AI.Tools.Workbench.Observability
   alias Console.Schema.WorkbenchJobResult.{CanvasBlock, ToolGraph}
 
   embedded_schema do
@@ -19,7 +18,7 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
 
   def description(_),
     do:
-      "Add or replace a traces panel wired to a workbench traces tool: set `props.query.tool_name` and `props.query.tool_args` per that tool's schema. `layout` (x, y, w, h) is required; reuse `identifier` to refresh in place."
+      "Add or replace a full-width traces panel wired to a workbench traces tool: set `props.query.tool_name` and `props.query.tool_args` per that tool's schema. Use `layout.x: 0` and `layout.w: 3` so the trace timeline has the full dashboard row; `layout` (x, y, w, h) is required. Reuse `identifier` to refresh in place."
 
   def changeset(model, attrs) do
     model
@@ -29,8 +28,6 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
     |> validate_required([:identifier])
   end
 
-  @traces_tools [Observability.Traces]
-
   def implement(%__MODULE__{env: env, layout: layout, props: props} = model) do
     block = %CanvasBlock{
       identifier: model.identifier,
@@ -39,7 +36,7 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
       content: %CanvasBlock.Content{traces: props}
     }
 
-    with {:ok, _} <- validate_tool(env, props.query, @traces_tools),
+    with {:ok, _} <- validate_tool(env, props.query, :traces),
          {:ok, canvas} <- Canvas.insert(Canvas.canvas(), block) do
       Canvas.save(canvas)
       {:ok, "added traces block #{model.identifier} to canvas"}

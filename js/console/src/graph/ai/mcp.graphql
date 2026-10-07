@@ -2,6 +2,7 @@ fragment McpServer on McpServer {
   id
   name
   url
+  protocol
   confirm
   readBindings {
     ...PolicyBinding
@@ -11,10 +12,21 @@ fragment McpServer on McpServer {
   }
   authentication {
     headers {
+      id
       name
       value
     }
     plural
+    oauth {
+      enabled
+      type
+      tokenUrl
+      clientId
+      keyId
+      audience
+      resource
+      scopes
+    }
   }
 }
 
@@ -89,6 +101,12 @@ query GenerateMcpToken {
 
 mutation UpsertMcpServer($attributes: McpServerAttributes!) {
   upsertMcpServer(attributes: $attributes) {
+    ...McpServer
+  }
+}
+
+mutation UpdateMcpServer($id: ID!, $attributes: McpServerAttributes!) {
+  updateMcpServer(id: $id, attributes: $attributes) {
     ...McpServer
   }
 }

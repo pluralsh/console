@@ -59,6 +59,27 @@ defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobThoughtCreated do
   def deliver(%{item: thought}), do: {thought, :create}
 end
 
+defimpl Console.PubSub.Rtc, for: [
+  Console.PubSub.DashboardCreated,
+  Console.PubSub.MonitorCreated,
+] do
+  def deliver(%{item: item}), do: {item, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: [
+  Console.PubSub.DashboardUpdated,
+  Console.PubSub.MonitorUpdated,
+] do
+  def deliver(%{item: item}), do: {item, :update}
+end
+
+defimpl Console.PubSub.Rtc, for: [
+  Console.PubSub.DashboardDeleted,
+  Console.PubSub.MonitorDeleted,
+] do
+  def deliver(%{item: item}), do: {item, :delete}
+end
+
 defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageStdoutCreated do
   def deliver(%{item: stdout}), do: {stdout, :create}
 end

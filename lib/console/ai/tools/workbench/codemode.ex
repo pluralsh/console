@@ -7,6 +7,7 @@ defmodule Console.AI.Tools.Workbench.Codemode do
   require EEx
 
   @max_output_bytes 100_000
+  @max_runtime_ms :timer.minutes(1)
 
   embedded_schema do
     field(:tools, {:array, :map}, virtual: true)
@@ -32,7 +33,7 @@ defmodule Console.AI.Tools.Workbench.Codemode do
       python,
       functions: build_funcs(tools, policies),
       mounts: mounts(),
-      callback_timeout: :infinity,
+      callback_timeout: @max_runtime_ms,
       limits: %{
         # execution-time budget (always enforced)
         max_duration_secs: 60.0,

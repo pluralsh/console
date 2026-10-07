@@ -72,8 +72,8 @@ export function ProfileMenu() {
           }
         >
           <Avatar
-            name={me?.name}
-            src={me?.profile}
+            name={me?.name ?? undefined}
+            src={me?.profile ?? undefined}
             size={32}
             css={{
               transition: 'background-color 0.1s ease, filter 0.1s ease',
@@ -89,7 +89,7 @@ export function ProfileMenu() {
                     border: theme.borders.input,
                     fontSize: 12,
                     ...(theme.mode === 'light' && {
-                      // Honorable Avatar defaults to white initials (for purple fill);
+                      // Initials default to white (for action-primary fill);
                       // on light grey chrome use default dark text.
                       color: theme.colors.text,
                     }),

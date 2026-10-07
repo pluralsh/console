@@ -178,7 +178,7 @@ export function WebhookSetupGuidePanelContent() {
         direction="column"
         minHeight={0}
         overflow="auto"
-        color="text"
+        css={{ color: 'text' }}
       >
         <Flex
           direction="column"

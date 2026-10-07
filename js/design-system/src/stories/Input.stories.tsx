@@ -1,14 +1,13 @@
-import { Div, Flex } from 'honorable'
-
 import { type ChangeEvent, useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import BrowseAppsIcon from '../components/icons/BrowseAppsIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
 import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
-import Input2 from '../components/Input2'
 import { Card } from '../index'
+import Flex from '../components/Flex'
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
@@ -44,6 +43,7 @@ function InputSet(props: any) {
 
 function Template(args: any) {
   const [inputVal, setInputVal] = useState('')
+  const theme = useTheme()
 
   const props = {
     value: inputVal,
@@ -68,18 +68,18 @@ function Template(args: any) {
         {...props}
         small
       />
-      <Card padding="large">
+      <Card css={{ padding: theme.spacing.large }}>
         <InputSet {...props} />
       </Card>
       <Card
         fillLevel={2}
-        padding="large"
+        css={{ padding: theme.spacing.large }}
       >
         <InputSet {...props} />
       </Card>
       <Card
         fillLevel={3}
-        padding="large"
+        css={{ padding: theme.spacing.large }}
       >
         <InputSet {...props} />
       </Card>
@@ -103,28 +103,28 @@ function CustomInputTemplate(args: any) {
       direction="column"
       maxWidth="500px"
     >
-      <Div>
+      <div>
         <Input
           large
           width="100%"
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
+      </div>
+      <div style={{ marginTop: 16 }}>
         <Input
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
+      </div>
+      <div style={{ marginTop: 16 }}>
         <Input
           small
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
+      </div>
     </Flex>
   )
 }
@@ -145,28 +145,28 @@ function CustomInputV2Template(args: any) {
       direction="column"
       maxWidth="500px"
     >
-      <Div marginTop="medium">
-        <Input2
+      <div style={{ marginTop: 16 }}>
+        <Input
           size="large"
           width="100%"
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
-        <Input2
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <Input
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
-      <Div marginTop="medium">
-        <Input2
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <Input
           size="small"
           width="100%"
           value={inputVal}
           {...props}
         />
-      </Div>
+      </div>
     </Flex>
   )
 }

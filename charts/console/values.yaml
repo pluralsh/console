@@ -90,6 +90,21 @@ migrator:
 
 # console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
+  # tls configures the console web server to terminate TLS in the pod.
+  tls:
+    enabled: false
+    existingSecret: console-server-tls
+    certificateKey: tls.crt
+    privateKeyKey: tls.key
+    certificate:
+      enabled: false
+      annotations: {}
+      dnsNames: []
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+        group: cert-manager.io
+
   config:
     # homepage is used to configure the default homepage for the console.  Use ``clusters`` to show clusters, ``workbenches`` to show workbenches
     homepage: clusters
@@ -112,6 +127,10 @@ console:
     # tarballQps configures the global QPS limit for digest and git tarball endpoints.
     tarballQps: 100
 
+    # maxRequestBodyLength configures the maximum HTTP request body size in bytes.
+    # Leave unset to use the application default (100000000). Raise this if stack state uploads return 413.
+    maxRequestBodyLength: ~
+
     # cacheAgentQps configures the global QPS limit for pod-local cache agents.
     cacheAgentQps: ~
 
@@ -126,6 +145,12 @@ console:
 
     # healthmapClusterCount configures the number of clusters to show in the healthmap.
     healthmapClusterCount: ~
+
+    # tracing configures OpenTelemetry trace export from the Console.
+    tracing:
+      # endpoint is the full OTLP/HTTP traces endpoint. Leave unset to disable tracing.
+      # Example: http://otel-collector.observability:4318/v1/traces
+      endpoint: ~
 
     # rdsIamAuthentication is used to configure whether rds iam authentication should be enabled for all db connections.  Ensure your database is prepared to handle IAM authentication before enabling here.
     rdsIamAuthentication: false
@@ -246,6 +271,20 @@ ociAuth:
 
 aiProxy:
   enabled: false
+  # tls configures Nexus to terminate TLS in the pod.
+  tls:
+    enabled: false
+    existingSecret: nexus-server-tls
+    certificateKey: tls.crt
+    privateKeyKey: tls.key
+    certificate:
+      enabled: false
+      annotations: {}
+      dnsNames: []
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+        group: cert-manager.io
   replicaCount: 2
   image:
     repository: nexus
@@ -329,6 +368,69 @@ observabilityProxy:
     maxReplicas: 20
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: ~
+
+# ai configures optional AI-related services deployed by the chart.
+ai:
+  # localEmbeddings deploys the OpenAI-compatible embedding endpoint used by an AI proxy.
+  localEmbeddings:
+    enabled: false
+    # servedModelName is the model name accepted in OpenAI-compatible embedding requests.
+    servedModelName: nomic-ai/nomic-embed-text-v1.5
+    image:
+      # Leave empty to use global.registry, or set this for a different image registry.
+      registry: ""
+      repository: embedding-server
+      # Keep this independent from the Console chart version. Update it when the image is released.
+      tag: v0.1.0
+      pullPolicy: IfNotPresent
+    service:
+      port: 80
+    resources:
+      requests:
+        cpu: "2"
+        memory: 4Gi
+      limits:
+        cpu: "4"
+        memory: 8Gi
+    podLabels: {}
+    podAnnotations: {}
+    podSecurityContext: {}
+    containerSecurityContext:
+      capabilities:
+        drop:
+        - ALL
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      seccompProfile:
+        type: RuntimeDefault
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    extraArgs: []
+    # startupProbe gives TEI time to load the baked model before liveness checks begin.
+    startupProbe:
+      httpGet:
+        path: /health
+        port: http
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
 
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []
@@ -551,6 +653,9 @@ provider: custom
 # controller is used in Chart.yaml to determine if controller dependency should be installed
 controller:
   enabled: true
+  console:
+    tls:
+      enabled: false
 
 # flux2 is used to override some values in flux2 default chart (packaged in charts/flux2-2.14.0.tgz). See https://github.com/fluxcd-community/helm-charts/blob/main/charts/flux2/values.yaml
 flux2:
@@ -591,6 +696,7 @@ gitServer:
   image:
     repository: git-server
     tag: ~
+    pullPolicy: IfNotPresent
 
   containerSecurityContext:
     runAsNonRoot: true
@@ -762,6 +868,20 @@ dex:
       - <your-console-fqdn>
 
 kas:
+  # tls configures the public KAS listeners to terminate TLS in the pod.
+  tls:
+    enabled: false
+    existingSecret: kas-server-tls
+    certificateKey: tls.crt
+    privateKeyKey: tls.key
+    certificate:
+      enabled: false
+      annotations: {}
+      dnsNames: []
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+        group: cert-manager.io
   logging:
     level: info
   global:

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -39,11 +40,25 @@ const (
 	bootstrapScriptMountPath    = "/bootstrap/bootstrap.sh"
 	bootstrapScriptConfigMapKey = "bootstrap.sh"
 
+	miseConfigVolumeName   = "mise-config"
+	miseConfigMountPath    = "/mise/config.toml"
+	miseConfigConfigMapKey = "config.toml"
+	miseDataDir            = defaultTmpVolumePath + "/mise"
+	// Bob publishes OTP for Ubuntu, not Debian. Pin a glibc-compatible target so
+	// mise downloads a precompiled Erlang instead of compiling with kerl.
+	miseErlangPrecompiledOS = "ubuntu-24.04"
+
 	gitSigningKeyVolumeName = "git-signing-key"
 	gitSigningKeySecretKey  = "git-signing.key"
 
-	agentBootstrapContainerName = "agent-bootstrap"
-	mcpServerContainerName      = "mcpserver"
+	agentBootstrapContainerName    = "agent-bootstrap"
+	mcpServerContainerName         = "mcpserver"
+	repositoryPrebakeContainerName = "repository-prebake"
+	repositoryPrebakeImageDataDir  = "/data"
+	repositoryPrebakeCopyCommand   = "if command -v fcp >/dev/null 2>&1; then " +
+		"fcp " + repositoryPrebakeImageDataDir + " " + common.AgentRunRepositoryPrebakeDir + "; " +
+		"else mkdir -p " + common.AgentRunRepositoryPrebakeDir + " && " +
+		"cp -a " + repositoryPrebakeImageDataDir + "/. " + common.AgentRunRepositoryPrebakeDir + "/; fi"
 
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
@@ -63,6 +78,31 @@ func runtimeDindEnabled(runtime *v1alpha1.AgentRuntime) bool {
 
 func runtimeMemoryEnabled(runtime *v1alpha1.AgentRuntime) bool {
 	return runtime.Spec.Memory != nil && *runtime.Spec.Memory
+}
+
+func runtimeReadOnlyRootFilesystem(runtime *v1alpha1.AgentRuntime) bool {
+	if runtime == nil {
+		return false
+	}
+	if runtime.Spec.Template != nil {
+		for _, container := range runtime.Spec.Template.Spec.Containers {
+			if container.Name == defaultContainer && container.SecurityContext != nil && container.SecurityContext.ReadOnlyRootFilesystem != nil {
+				return *container.SecurityContext.ReadOnlyRootFilesystem
+			}
+		}
+	}
+	return runtime.Spec.ReadOnlyRootFilesystem != nil && *runtime.Spec.ReadOnlyRootFilesystem
+}
+
+func runtimeMiseConfig(runtime *v1alpha1.AgentRuntime) string {
+	if runtime == nil || runtime.Spec.Mise == nil || runtime.Spec.Mise.Config == nil {
+		return ""
+	}
+	return strings.TrimSpace(*runtime.Spec.Mise.Config)
+}
+
+func runtimeMiseBootstrap(runtime *v1alpha1.AgentRuntime) bool {
+	return runtimeMiseConfig(runtime) != "" && !runtimeReadOnlyRootFilesystem(runtime)
 }
 
 func upsertEnvVar(envs []corev1.EnvVar, want corev1.EnvVar) []corev1.EnvVar {
@@ -121,10 +161,10 @@ var (
 
 	// Check .github/workflows/deployment-operator-cd-agent-harness.yaml to see images being published.
 	defaultContainerVersions = map[console.AgentRuntimeType]string{
-		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.72",
+		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.236",
 		console.AgentRuntimeTypeGemini:   "%s-gemini-0.44.1",
-		console.AgentRuntimeTypeOpencode: "%s-opencode-1.17.3",
-		console.AgentRuntimeTypeCodex:    "%s-codex-0.104.0",
+		console.AgentRuntimeTypeOpencode: "%s-opencode-1.18.23",
+		console.AgentRuntimeTypeCodex:    "%s-codex-0.153.4",
 		console.AgentRuntimeTypePi:       "%s-pi-0.84.1",
 	}
 
@@ -188,9 +228,15 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 		enableBootstrapScript(run.Name+"-bootstrap", pod)
 	}
 
+	if runtimeMiseConfig(runtime) != "" {
+		enableMiseConfig(run.Name+"-mise", pod)
+	}
+
 	if runtime.Spec.Git != nil && runtime.Spec.Git.SigningKeyRef != nil {
 		enableGitSigningKey(run.Name, pod)
 	}
+
+	enableRepositoryPrebake(runtime, pod)
 
 	return pod
 }
@@ -228,7 +274,7 @@ func ensureDefaultContainer(containers []corev1.Container, run *v1alpha1.AgentRu
 			containers[index].Image = getDefaultContainerImage(containers[index].Image, runtime.Spec.Type)
 		}
 
-		containers[index].SecurityContext = ensureDefaultContainerSecurityContext(containers[index].SecurityContext)
+		containers[index].SecurityContext = ensureDefaultContainerSecurityContext(containers[index].SecurityContext, runtimeReadOnlyRootFilesystem(runtime))
 		containers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
 		containers[index].VolumeMounts = ensureDefaultVolumeMounts(containers[index].VolumeMounts)
 		containers[index].Env = ensureDefaultEnvVars(containers[index].Env, runtime)
@@ -291,7 +337,7 @@ func getDefaultContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime)
 		Name:            defaultContainer,
 		Image:           getDefaultContainerImage("", runtime.Spec.Type),
 		VolumeMounts:    ensureDefaultVolumeMounts(nil),
-		SecurityContext: ensureDefaultContainerSecurityContext(nil),
+		SecurityContext: ensureDefaultContainerSecurityContext(nil, runtimeReadOnlyRootFilesystem(runtime)),
 		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
 		Env:             getDefaultEnvVars(runtime),
 	}
@@ -317,7 +363,19 @@ func getDefaultEnvVars(runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 		{Name: EnvDindEnabled, Value: fmt.Sprintf("%t", runtimeDindEnabled(runtime))},
 		{Name: EnvBrowserEnabled, Value: fmt.Sprintf("%t", runtime.Spec.Browser.IsEnabled())},
 		{Name: EnvMemoryEnabled, Value: fmt.Sprintf("%t", runtimeMemoryEnabled(runtime))},
+		{Name: EnvMiseBootstrap, Value: fmt.Sprintf("%t", runtimeMiseBootstrap(runtime))},
 		{Name: common.CodebaseMemoryCacheEnv, Value: common.CodebaseMemoryCacheDir},
+	}
+
+	if runtimeMiseConfig(runtime) != "" {
+		envVars = append(envVars,
+			corev1.EnvVar{Name: EnvMiseGlobalConfigFile, Value: miseConfigMountPath},
+			corev1.EnvVar{Name: EnvMiseDataDir, Value: miseDataDir},
+			// The harness image is Debian, which has no Bob OTP build. Pin Ubuntu
+			// precompiled binaries so mise does not fall back to kerl/source.
+			corev1.EnvVar{Name: EnvMiseErlangCompile, Value: "false"},
+			corev1.EnvVar{Name: EnvMiseErlangPrecompiledOS, Value: miseErlangPrecompiledOS},
+		)
 	}
 
 	if runtimeDindEnabled(runtime) {
@@ -357,14 +415,17 @@ func ensureDefaultEnvVars(existing []corev1.EnvVar, runtime *v1alpha1.AgentRunti
 	return existing
 }
 
-func ensureDefaultContainerSecurityContext(sc *corev1.SecurityContext) *corev1.SecurityContext {
+func ensureDefaultContainerSecurityContext(sc *corev1.SecurityContext, readOnlyRootFilesystem bool) *corev1.SecurityContext {
 	if sc != nil {
+		if sc.ReadOnlyRootFilesystem == nil {
+			sc.ReadOnlyRootFilesystem = lo.ToPtr(readOnlyRootFilesystem)
+		}
 		return sc
 	}
 
 	return &corev1.SecurityContext{
 		AllowPrivilegeEscalation: lo.ToPtr(false),
-		ReadOnlyRootFilesystem:   lo.ToPtr(false),
+		ReadOnlyRootFilesystem:   lo.ToPtr(readOnlyRootFilesystem),
 		RunAsNonRoot:             lo.ToPtr(true),
 		RunAsUser:                lo.ToPtr(nonRootUID),
 		RunAsGroup:               lo.ToPtr(nonRootGID),
@@ -421,8 +482,7 @@ func ensureAgentBootstrapSecurityContext(sc *corev1.SecurityContext) *corev1.Sec
 		return sc
 	}
 
-	sc = ensureDefaultContainerSecurityContext(nil)
-	sc.ReadOnlyRootFilesystem = lo.ToPtr(true)
+	sc = ensureDefaultContainerSecurityContext(nil, true)
 	sc.Capabilities = &corev1.Capabilities{
 		Drop: []corev1.Capability{"ALL"},
 	}
@@ -459,9 +519,10 @@ func enableMCPServer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, pod
 		pod.Spec.InitContainers[index].Image = defaultImage
 	}
 
-	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext)
+	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext, false)
 	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
 	pod.Spec.InitContainers[index].Env = ensureMCPServerEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
+	pod.Spec.InitContainers[index].Env = ensureWorkbenchMCPProxyEnvVar(pod.Spec.InitContainers[index].Env, run, runtime)
 	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
 	pod.Spec.InitContainers[index].RestartPolicy = lo.ToPtr(corev1.ContainerRestartPolicyAlways)
 	if pod.Spec.InitContainers[index].StartupProbe == nil {
@@ -482,9 +543,9 @@ func getMCPServerContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntim
 	return corev1.Container{
 		Name:            mcpServerContainerName,
 		Image:           image,
-		SecurityContext: ensureDefaultContainerSecurityContext(nil),
+		SecurityContext: ensureDefaultContainerSecurityContext(nil, false),
 		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
-		Env:             getMCPServerEnvVars(run, runtime),
+		Env:             ensureWorkbenchMCPProxyEnvVar(getMCPServerEnvVars(run, runtime), run, runtime),
 		Command:         []string{"/agent-mcpserver"},
 		Args: []string{
 			"--address", common.AgentMCPServerAddress,
@@ -576,6 +637,14 @@ func ensureMCPServerEnvVars(existing []corev1.EnvVar, run *v1alpha1.AgentRun, ru
 	return existing
 }
 
+func ensureWorkbenchMCPProxyEnvVar(existing []corev1.EnvVar, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	upstream := workbenchMCPUpstreamURL(run, runtime)
+	if upstream == "" {
+		return existing
+	}
+	return upsertEnvVar(existing, corev1.EnvVar{Name: EnvWorkbenchMCPURL, Value: upstream})
+}
+
 func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.AgentRuntime) []corev1.VolumeMount {
 	result := append(
 		algorithms.Filter(mounts, func(v corev1.VolumeMount) bool {
@@ -599,6 +668,47 @@ func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.
 	return result
 }
 
+func repositoryImage(runtime *v1alpha1.AgentRuntime) string {
+	if runtime != nil && runtime.Spec.RepositoryImage != nil {
+		return strings.TrimSpace(*runtime.Spec.RepositoryImage)
+	}
+	return ""
+}
+
+func getRepositoryPrebakeContainer(image string) corev1.Container {
+	sc := ensureDefaultContainerSecurityContext(nil, true)
+	sc.Capabilities = &corev1.Capabilities{
+		Drop: []corev1.Capability{"ALL"},
+	}
+	return corev1.Container{
+		Name:            repositoryPrebakeContainerName,
+		Image:           image,
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Command:         []string{"/bin/sh", "-c"},
+		Args:            []string{repositoryPrebakeCopyCommand},
+		SecurityContext: sc,
+		VolumeMounts: []corev1.VolumeMount{{
+			Name:      sharedContextVolumeName,
+			MountPath: sharedContextVolumePath,
+		}},
+	}
+}
+
+func enableRepositoryPrebake(runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {
+	image := repositoryImage(runtime)
+	if image == "" {
+		return
+	}
+
+	copyContainer := getRepositoryPrebakeContainer(image)
+	pod.Spec.InitContainers = append(
+		[]corev1.Container{copyContainer},
+		algorithms.Filter(pod.Spec.InitContainers, func(container corev1.Container) bool {
+			return container.Name != repositoryPrebakeContainerName
+		})...,
+	)
+}
+
 func enableDind(pod *corev1.Pod) {
 	// Inject DOCKER_HOST so the Docker CLI finds the Podman socket.
 	wireDindClientContainer(pod)
@@ -611,11 +721,12 @@ func enableDind(pod *corev1.Pod) {
 		}
 		sc := pod.Spec.Containers[i].SecurityContext
 		if sc == nil {
-			sc = ensureDefaultContainerSecurityContext(nil)
+			sc = ensureDefaultContainerSecurityContext(nil, false)
 		}
 		sc.Privileged = lo.ToPtr(true)
 		sc.RunAsNonRoot = lo.ToPtr(false)
 		sc.AllowPrivilegeEscalation = lo.ToPtr(true)
+		sc.ReadOnlyRootFilesystem = lo.ToPtr(false)
 		// Run as root so Podman operates in rootful mode, avoiding newuidmap
 		// user-namespace issues with rootless Podman inside a privileged pod.
 		sc.RunAsUser = lo.ToPtr(int64(0))
@@ -684,6 +795,34 @@ func enableBootstrapScript(configMapName string, pod *corev1.Pod) {
 					Name:      bootstrapScriptVolumeName,
 					MountPath: bootstrapScriptMountPath,
 					SubPath:   bootstrapScriptConfigMapKey,
+				},
+			)
+			break
+		}
+	}
+}
+
+// enableMiseConfig mounts a ConfigMap containing mise.toml at miseConfigMountPath
+// inside the default container.
+func enableMiseConfig(configMapName string, pod *corev1.Pod) {
+	pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
+		Name: miseConfigVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
+				DefaultMode:          lo.ToPtr(int32(0444)),
+			},
+		},
+	})
+
+	for i := range pod.Spec.Containers {
+		if pod.Spec.Containers[i].Name == defaultContainer {
+			pod.Spec.Containers[i].VolumeMounts = append(
+				pod.Spec.Containers[i].VolumeMounts,
+				corev1.VolumeMount{
+					Name:      miseConfigVolumeName,
+					MountPath: miseConfigMountPath,
+					SubPath:   miseConfigConfigMapKey,
 				},
 			)
 			break

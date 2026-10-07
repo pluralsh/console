@@ -119,6 +119,7 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for http proxy usage in connections to Git or SCM providers"
   input_object :http_proxy_attributes do
+    field :enabled, :boolean, description: "whether this proxy is enabled (defaults to true)"
     field :url,     non_null(:string)
     field :noproxy, :string
   end
@@ -955,6 +956,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for http proxy usage in connections to Git or SCM providers"
   object :http_proxy_configuration do
+    field :enabled, non_null(:boolean),
+      description: "whether this proxy is enabled",
+      resolve: fn proxy, _, _ -> {:ok, Map.get(proxy, :enabled) != false} end
     field :url,     non_null(:string)
     field :noproxy, :string
   end
@@ -1132,7 +1136,7 @@ defmodule Console.GraphQl.Deployments.Git do
     connection field :scm_connections, node_type: :scm_connection do
       middleware Authenticated
       middleware Scope,
-        resource: :repos,
+        resource: :self_service,
         action: :read
 
       arg :type, :scm_type, description: "when set, only connections of this SCM provider type are returned"

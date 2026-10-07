@@ -306,7 +306,6 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
     field :job, :job do
       resolve fn run, _, _ -> Sentinels.run_job(run) end
-      middleware ErrorHandler
     end
 
     field :job_spec, :job_gate_spec, description: "the job that was run", resolve: fn
@@ -428,7 +427,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
       middleware Authenticated
       middleware Scope,
         resource: :sentinel,
-        action: :write
+        action: :read
       arg :id,        :id
       arg :name,      :string
       arg :overrides, :sentinel_run_overrides

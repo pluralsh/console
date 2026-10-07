@@ -1,0 +1,22 @@
+{
+  "model": {{ quote .Model }},
+  "temperature": 0.1,
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [{{ if .ReadOnly }}
+      "Read", "Grep", "Glob", "Bash(ls:*)", "Bash(cd:*)", "Bash(pwd)",
+      "Bash(git status)", "Bash(git diff:*)", "Bash(git branch:*)", "Bash(git log:*)",
+      "Bash(git show:*)", "Bash(git merge-base:*)", "Bash(git rev-parse:*)",
+      "Bash(head:*)", "Bash(tail:*)", "Bash(cat:*)", "Bash(grep:*)", "Bash(rg:*)",
+      "Bash(find:*)", "WebFetch", "mcp__plural__*", "mcp__codebase-memory-mcp__*"{{ else }}
+      "Read", "Write", "Edit", "MultiEdit", "Bash", "WebFetch",
+      "mcp__plural__*", "mcp__codebase-memory-mcp__*"{{ end }}{{ range .ExternalMCPServers }}{{ $server := . }}{{ if .HasAllowedTools }}{{ range .AllowedTools }}, {{ quote (printf "mcp__%s__%s" $server.Name .) }}{{ end }}{{ else }}, {{ quote (printf "mcp__%s__*" .Name) }}{{ end }}{{ end }}
+    ],
+    "deny": [{{ if .ReadOnly }}"Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)"{{ end }}]
+  },
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": {{ quote .BashDefaultTimeoutMS }},
+    "BASH_MAX_TIMEOUT_MS": {{ quote .BashMaxTimeoutMS }}
+  },
+  "availableModels": [{{ quote .Model }}]
+}

@@ -6,6 +6,10 @@ server:
   # Base path for all AI proxy requests
   path: ""
 
+  # Uncomment both paths to enable HTTPS. If omitted, Nexus serves HTTP.
+  # certificateFile: "/etc/nexus/tls/tls.crt"
+  # keyFile: "/etc/nexus/tls/tls.key"
+
   # Request timeouts
   readTimeout: "30s"
   idleTimeout: "120s"

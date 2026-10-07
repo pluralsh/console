@@ -81,21 +81,28 @@ defmodule Console.AI.Workbench.Environment do
   end
   defp model_opts(job, _), do: [usage_callback: &usage_callback(job, nil, &1)]
 
-  defp policies(%WorkbenchJob{workbench_id: id}) when is_binary(id) do
+  @doc """
+  Compiles the admission policies attached to a workbench into `Tool.Policy`
+  structs, which `Tool.policy/3` can apply to a tool call.
+  """
+  def policies(%Workbench{id: id}), do: policies(id)
+  def policies(%WorkbenchJob{workbench_id: id}), do: policies(id)
+  def policies(id) when is_binary(id) do
     Workbenches.get_workbench_policies(id)
-    |> Enum.map(fn
-      %{policy: %{id: id, name: name, policy: source}, matches: matches} ->
-        matches = matches || %{}
-        %Tool.Policy{
-          regexes: Map.get(matches, :parsed_regexes, []),
-          ignore: Map.get(matches, :ignore, []),
-          name: name,
-          policy: source,
-          policy_id: id
-        }
-    end)
+    |> Enum.map(&to_tool_policy/1)
   end
-  defp policies(_), do: []
+  def policies(_), do: []
+
+  defp to_tool_policy(%{policy: %{id: id, name: name, policy: source}, matches: matches}) do
+    matches = matches || %{}
+    %Tool.Policy{
+      regexes: Map.get(matches, :parsed_regexes, []),
+      ignore: Map.get(matches, :ignore, []),
+      name: name,
+      policy: source,
+      policy_id: id
+    }
+  end
 
   def actions(%__MODULE__{functions: funcs, job: job}) do
     %Actions{
@@ -104,7 +111,9 @@ defmodule Console.AI.Workbench.Environment do
     }
   end
 
-  defp has_k8s?(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}}), do: (u || d)
+  defp has_k8s?(
+    %WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e, drain: drain}}}
+  ), do: u || d || e || drain
   defp has_k8s?(_), do: false
 
   def with_builtins(skills) when is_map(skills) do
@@ -127,6 +136,7 @@ defmodule Console.AI.Workbench.Environment do
     |> Enum.concat(type_subagents(job))
     |> Enum.concat(coding_agents(bench))
     |> Enum.concat(infra_agents(bench))
+    |> Enum.concat(self_service_agents(bench))
     |> Enum.filter(&allow_subagent?(job, &1))
   end
 
@@ -173,6 +183,8 @@ defmodule Console.AI.Workbench.Environment do
     do: Enum.filter(tools, &subagent_tool?(&1, subagent))
   def subagent_tools(%{} = tools, subagent), do: subagent_tools(Map.values(tools), subagent)
 
+  def subagent_tool?(%WorkbenchTool{tool: :docker}, subagent)
+      when subagent in [:integration, :infrastructure], do: true
   def subagent_tool?(%WorkbenchTool{categories: categories}, subagent) when is_list(categories),
     do: Enum.any?(categories, & category_to_subagent(&1) == subagent)
   def subagent_tool?(_, :integration), do: true
@@ -199,11 +211,15 @@ defmodule Console.AI.Workbench.Environment do
   end
   defp infra_agents(_), do: []
 
+  defp self_service_agents(%Workbench{configuration: %{self_service: true}}), do: [:self_service]
+  defp self_service_agents(_), do: []
+
   defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]
-  defp type_subagents(_), do: []
+  defp type_subagents(_), do: [:monitoring]
 
   defp tool_agents(tools) do
     Enum.flat_map(tools || [], fn
+      %{tool: :docker} -> [:integration, :infrastructure]
       %{categories: [_ | _] = categories} -> categories
       _ -> [:integration]
     end)

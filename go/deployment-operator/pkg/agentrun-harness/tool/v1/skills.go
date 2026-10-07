@@ -24,7 +24,7 @@ type skillFrontmatter struct {
 }
 
 // ConfigureSkills sideloads agent-run skills into the provider-specific skills directory.
-func (in DefaultTool) ConfigureSkills(skillRoot string) error {
+func (in *DefaultTool) ConfigureSkills(skillRoot string) error {
 	if in.Config.Run == nil || len(in.Config.Run.Skills) == 0 {
 		return nil
 	}
@@ -62,7 +62,7 @@ func (in DefaultTool) ConfigureSkills(skillRoot string) error {
 	return nil
 }
 
-func (in DefaultTool) renderSkill(name string, skill agentrunv1.AgentSkill) (string, error) {
+func (in *DefaultTool) renderSkill(name string, skill agentrunv1.AgentSkill) (string, error) {
 	description := lo.CoalesceOrEmpty(
 		strings.TrimSpace(lo.FromPtr(skill.Description)),
 		fmt.Sprintf("Plural workbench skill from agent run %s", in.Config.Run.ID),
@@ -82,7 +82,7 @@ func (in DefaultTool) renderSkill(name string, skill agentrunv1.AgentSkill) (str
 	), nil
 }
 
-func (in DefaultTool) skillOutputPath(root, name string) (string, error) {
+func (in *DefaultTool) skillOutputPath(root, name string) (string, error) {
 	cleanRoot, err := filepath.Abs(root)
 	if err != nil {
 		return "", fmt.Errorf("failed resolving skill root %q: %w", root, err)

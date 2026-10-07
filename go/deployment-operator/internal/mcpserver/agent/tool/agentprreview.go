@@ -16,9 +16,9 @@ const maxReviewComments = 3
 
 type AgentPrReviewInputSchema struct {
 	URL               string                      `json:"url" jsonschema:"required,description=The URL of the pull request being reviewed"`
-	Confidence        string                      `json:"confidence" jsonschema:"required,enum=A,enum=B,enum=C,enum=D,enum=E,enum=F,description=The A-F confidence grade"`
+	Confidence        string                      `json:"confidence" jsonschema:"required,enum=A,enum=B,enum=C,enum=D,enum=E,enum=F,description=The PR A-F mergeability grade rather than review confidence. A means merge-ready. B means only minor non-blocking concerns. C or lower means changes are required before merge"`
 	Summary           string                      `json:"summary" jsonschema:"required,description=A summary of the pull request review"`
-	ConfidenceComment string                      `json:"confidenceComment" jsonschema:"required,description=An explanation of the confidence grade"`
+	ConfidenceComment string                      `json:"confidenceComment" jsonschema:"required,description=An explanation of the mergeability grade based on findings and blockers. Do not describe review certainty"`
 	Files             []AgentPrReviewFileInput    `json:"files,omitempty" jsonschema:"description=File-level summaries"`
 	Comments          []AgentPrReviewCommentInput `json:"comments,omitempty" jsonschema:"maxItems=3,description=Up to three inline review findings"`
 }
@@ -169,7 +169,7 @@ func NewAgentPrReview(client console.Client, agentRunID string) Tool {
 	return &AgentPrReview{
 		ConsoleTool: ConsoleTool{
 			id:          AgentPrReviewTool,
-			description: "Publish a normalized pull request review with an A-F confidence grade, file summaries, and up to three prioritized inline findings",
+			description: "Publish a normalized pull request review with an A-F mergeability grade, file summaries, and up to three prioritized inline findings",
 			client:      client,
 			agentRunID:  agentRunID,
 		},

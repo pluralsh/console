@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.26.6 AS builder
+FROM golang:1.27.1 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 ARG GIT_COMMIT=unknown
@@ -58,3 +58,4 @@ COPY --from=builder /workspace/controller/manager .
 USER 65532:65532
 
 ENTRYPOINT ["/manager"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/manager", "--help"]
