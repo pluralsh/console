@@ -70,7 +70,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     end)
   end
 
-  defp alert_order(query, args), do: Alert.sorted(query, args[:sort], args[:direction] || :desc)
+  defp alert_order(query, args), do: Alert.sorted(query, Map.get(args, :sort), Map.get(args, :direction) || :desc)
 
   def upsert_observability_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.upsert_provider(attrs, user)

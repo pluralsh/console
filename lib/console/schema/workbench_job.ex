@@ -164,17 +164,19 @@ defmodule Console.Schema.WorkbenchJob do
   """
   def for_pr_states(query \\ __MODULE__, states) do
     {none, statuses} = Enum.split_with(states, &(&1 == :none))
-    with_prs = from(pr in PullRequest, where: pr.status in ^statuses, select: pr.workbench_job_id)
-    from(j in query, where: j.id in subquery(with_prs) or (^(none != []) and j.id not in subquery(pr_job_ids())))
+    with_prs = PullRequest.for_statuses(statuses) |> PullRequest.workbench_job_ids()
+
+    case none do
+      [] -> from(j in query, where: j.id in subquery(with_prs))
+      _ -> from(j in query, where: j.id in subquery(with_prs) or j.id not in subquery(pr_job_ids()))
+    end
   end
 
   def without_pull_requests(query \\ __MODULE__) do
     from(j in query, where: j.id not in subquery(pr_job_ids()))
   end
 
-  defp pr_job_ids() do
-    from(pr in PullRequest.with_workbench(), select: pr.workbench_job_id)
-  end
+  defp pr_job_ids(), do: PullRequest.with_workbench() |> PullRequest.workbench_job_ids()
 
   def count_by_status(query \\ __MODULE__) do
     from(j in query, group_by: j.status, select: %{status: j.status, count: count(j.id)})

@@ -24,7 +24,7 @@ import {
 import usePersistedState from 'components/hooks/usePersistedState'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import { SortDirection } from 'generated/graphql'
-import { compact, isEmpty, mapValues, keyBy, omit, xor } from 'lodash'
+import { compact, isEmpty, omit, xor } from 'lodash'
 import {
   ComponentProps,
   ReactElement,
@@ -84,9 +84,9 @@ export function toCounts<E extends { count: number }, K extends string>(
   entries: Nullable<Nullable<E>[]>,
   getKey: (entry: E) => K
 ): Partial<Record<K, number>> {
-  return mapValues(keyBy(compact(entries), getKey), 'count') as Partial<
-    Record<K, number>
-  >
+  return Object.fromEntries(
+    compact(entries).map((entry) => [getKey(entry), entry.count])
+  ) as Partial<Record<K, number>>
 }
 
 export function toggleListValue<T>(list: T[], value: T): T[] {
