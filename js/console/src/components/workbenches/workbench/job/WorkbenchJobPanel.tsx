@@ -10,6 +10,7 @@ import {
   PrIcon,
   SubTab,
   TabList,
+  usePrevious,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
@@ -173,7 +174,7 @@ export type WorkbenchJobTabsData = ReturnType<typeof useWorkbenchJobTabsData>
 // keeps the cache up to date). The details view passes `inDetailsView`: its
 // conclusion panel already fetches and polls the job, so the job is read from
 // the cache, and activities (draft PRs) and actions are polled only while the
-// job runs.
+// job runs, plus once more when it stops so the final ones aren't missed.
 export function useWorkbenchJobTabsData(
   jobId: string,
   { inDetailsView = false }: { inDetailsView?: boolean } = {}
@@ -190,6 +191,7 @@ export function useWorkbenchJobTabsData(
     data: activitiesData,
     startPolling,
     stopPolling,
+    refetch: refetchActivities,
   } = useWorkbenchJobActivitiesQuery({
     skip: !jobId,
     variables: { id: jobId },
@@ -199,14 +201,28 @@ export function useWorkbenchJobTabsData(
     hasActions,
     hasActionsAwaitingApproval,
     isLoading: areActionsLoading,
+    refetch: refetchActions,
   } = useWorkbenchJobActionSummary(jobId, { poll: !inDetailsView || running })
   const pollingActivities = inDetailsView && running
+  const wasPollingActivities = usePrevious(pollingActivities)
 
   useEffect(() => {
     if (!pollingActivities) return
     startPolling(POLL_INTERVAL)
     return () => stopPolling()
   }, [pollingActivities, startPolling, stopPolling])
+
+  // the last poll may predate the job's final activities and actions
+  useEffect(() => {
+    if (!wasPollingActivities || pollingActivities) return
+    refetchActivities()
+    refetchActions()
+  }, [
+    pollingActivities,
+    refetchActions,
+    refetchActivities,
+    wasPollingActivities,
+  ])
 
   const activities = useMemo(
     () =>

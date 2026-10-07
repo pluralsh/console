@@ -6,7 +6,7 @@ export function useWorkbenchJobActionSummary(
   jobId: string,
   { poll = true }: { poll?: boolean } = {}
 ) {
-  const { data, loading } = useWorkbenchJobActionSummaryQuery({
+  const { data, loading, refetch } = useWorkbenchJobActionSummaryQuery({
     skip: !jobId,
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
@@ -23,5 +23,6 @@ export function useWorkbenchJobActionSummary(
       (edge) => !!edge?.node?.id
     ),
     isLoading: loading && !data,
+    refetch,
   }
 }
