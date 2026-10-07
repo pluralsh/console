@@ -22,12 +22,10 @@ defmodule Console.Deployments.Observability.Webhook.Grafana do
   def summary(%{"annotations" => %{"summary" => summary}}), do: "Alert Summary: #{summary}\n"
   def summary(_), do: ""
 
-  @doc """
-  This alert's entry in its stored webhook body, matched by fingerprint, since grafana sends a group of alerts per body.
-  """
-  def entry(%{payload: %{"alerts" => [_ | _] = alerts}, fingerprint: fp}) when is_binary(fp),
+  # this alert's entry in its stored webhook body, matched by fingerprint, since grafana sends a group of alerts per body
+  defp entry(%{payload: %{"alerts" => [_ | _] = alerts}, fingerprint: fp}) when is_binary(fp),
     do: Enum.find(alerts, &(is_map(&1) && &1["fingerprint"] == fp))
-  def entry(_), do: nil
+  defp entry(_), do: nil
 
   @doc """
   The evaluated query values, e.g. "A=1018071, B=1", falling back to grafana's verbose value string.

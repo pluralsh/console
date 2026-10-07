@@ -1,4 +1,8 @@
-import { DisplayView } from 'components/utils/display/DisplayPanel'
+import {
+  allSelected,
+  DisplayView,
+  filterVariable,
+} from 'components/utils/display/DisplayPanel'
 import { ALERT_SEVERITY_ORDER } from 'components/utils/alerts/AlertSeverityIcon'
 import {
   AlertSeverity,
@@ -8,43 +12,20 @@ import {
 } from 'generated/graphql'
 import { intersection, isEmpty, xor } from 'lodash'
 
-export type WorkbenchAlertsView = DisplayView
-
-export const WORKBENCH_ALERTS_VIEWS: WorkbenchAlertsView[] = [
-  'list',
-  'board',
-  'details',
-]
-
 export type WorkbenchAlertsDisplayState = {
-  view: WorkbenchAlertsView
+  view: DisplayView
   types: ObservabilityWebhookType[]
   severities: AlertSeverity[]
   sort: AlertSort
   direction: SortDirection
 }
 
-// a Record so a new API source fails type checking until it's labelled here
-export const ALERT_TYPE_LABELS: Record<ObservabilityWebhookType, string> = {
-  [ObservabilityWebhookType.Grafana]: 'Grafana',
-  [ObservabilityWebhookType.Datadog]: 'Datadog',
-  [ObservabilityWebhookType.Pagerduty]: 'PagerDuty',
-  [ObservabilityWebhookType.Newrelic]: 'New Relic',
-  [ObservabilityWebhookType.Sentry]: 'Sentry',
-  [ObservabilityWebhookType.Plural]: 'Plural',
-  [ObservabilityWebhookType.Alertops]: 'AlertOps',
-}
-
-export const ALL_ALERT_TYPES = Object.keys(
-  ALERT_TYPE_LABELS
-) as ObservabilityWebhookType[]
-
-export const ALERT_SEVERITY_OPTIONS: AlertSeverity[] = ALERT_SEVERITY_ORDER
+export const ALL_ALERT_TYPES = Object.values(ObservabilityWebhookType)
 
 export const DEFAULT_WORKBENCH_ALERTS_DISPLAY: WorkbenchAlertsDisplayState = {
   view: 'list',
   types: ALL_ALERT_TYPES,
-  severities: ALERT_SEVERITY_OPTIONS,
+  severities: ALERT_SEVERITY_ORDER,
   sort: AlertSort.UpdatedAt,
   direction: SortDirection.Desc,
 }
@@ -56,16 +37,10 @@ export function visibleAlertTypes(
   return ALL_ALERT_TYPES.filter((type) => (counts[type] ?? 0) > 0)
 }
 
-export function allAlertTypesSelected(
-  types: ObservabilityWebhookType[]
-): boolean {
-  return isEmpty(xor(types, ALL_ALERT_TYPES))
-}
-
 export function allAlertSeveritiesSelected(
   severities: AlertSeverity[]
 ): boolean {
-  return isEmpty(xor(severities, ALERT_SEVERITY_OPTIONS))
+  return allSelected(severities, ALERT_SEVERITY_ORDER)
 }
 
 export function hasUncheckedAlertFilters({
@@ -73,11 +48,12 @@ export function hasUncheckedAlertFilters({
   severities,
 }: Pick<WorkbenchAlertsDisplayState, 'types' | 'severities'>): boolean {
   return (
-    !allAlertTypesSelected(types) || !allAlertSeveritiesSelected(severities)
+    !allSelected(types, ALL_ALERT_TYPES) ||
+    !allAlertSeveritiesSelected(severities)
   )
 }
 
-export type AlertFilterEmptyKind = 'sources' | 'severities'
+type AlertFilterEmptyKind = 'sources' | 'severities'
 
 export function getAlertFilterEmptyKind(
   {
@@ -112,7 +88,7 @@ export function toggleAlertSeverityChip(
   if (allAlertSeveritiesSelected(severities)) return [severity]
   const next = xor(severities, [severity])
 
-  return isEmpty(next) ? ALERT_SEVERITY_OPTIONS : next
+  return isEmpty(next) ? ALERT_SEVERITY_ORDER : next
 }
 
 export function toAlertFilterVariables({
@@ -127,8 +103,8 @@ export function toAlertFilterVariables({
   direction: SortDirection
 } {
   return {
-    types: allAlertTypesSelected(types) ? undefined : types,
-    severities: allAlertSeveritiesSelected(severities) ? undefined : severities,
+    types: filterVariable(types, ALL_ALERT_TYPES),
+    severities: filterVariable(severities, ALERT_SEVERITY_ORDER),
     // always sent, so the sort direction applies to the default order too
     sort,
     direction,

@@ -1,41 +1,36 @@
-import { DisplayView } from 'components/utils/display/DisplayPanel'
+import {
+  allSelected,
+  DisplayView,
+  filterVariable,
+} from 'components/utils/display/DisplayPanel'
 import {
   SortDirection,
   WorkbenchJobPrState,
   WorkbenchJobStatus,
 } from 'generated/graphql'
-import { isEmpty, sortBy, xor } from 'lodash'
-
-export type WorkbenchJobsView = DisplayView
-
-export const WORKBENCH_JOBS_VIEWS: WorkbenchJobsView[] = [
-  'list',
-  'board',
-  'details',
-]
+import { isEmpty } from 'lodash'
 
 export type WorkbenchJobsDisplayState = {
-  view: WorkbenchJobsView
+  view: DisplayView
   statuses: WorkbenchJobStatus[]
   prStates: WorkbenchJobPrState[]
   direction: SortDirection
 }
 
-// every API status, in lifecycle order; a Record so a new API status fails
-// type checking until it's placed here
-const JOB_STATUS_ORDER: Record<WorkbenchJobStatus, number> = {
-  [WorkbenchJobStatus.Pending]: 0,
-  [WorkbenchJobStatus.Running]: 1,
-  [WorkbenchJobStatus.Paused]: 2,
-  [WorkbenchJobStatus.Successful]: 3,
-  [WorkbenchJobStatus.Failed]: 4,
-  [WorkbenchJobStatus.Cancelled]: 5,
+// every API status, in lifecycle (key) order; a Record so a new API status
+// fails type checking until it's placed here
+const JOB_STATUS_ORDER: Record<WorkbenchJobStatus, true> = {
+  [WorkbenchJobStatus.Pending]: true,
+  [WorkbenchJobStatus.Running]: true,
+  [WorkbenchJobStatus.Paused]: true,
+  [WorkbenchJobStatus.Successful]: true,
+  [WorkbenchJobStatus.Failed]: true,
+  [WorkbenchJobStatus.Cancelled]: true,
 }
 
-export const JOB_STATUS_OPTIONS: WorkbenchJobStatus[] = sortBy(
-  Object.values(WorkbenchJobStatus),
-  (status) => JOB_STATUS_ORDER[status]
-)
+export const JOB_STATUS_OPTIONS = Object.keys(
+  JOB_STATUS_ORDER
+) as WorkbenchJobStatus[]
 
 export const JOB_PR_STATE_LABELS: Record<WorkbenchJobPrState, string> = {
   [WorkbenchJobPrState.Open]: 'Open',
@@ -58,26 +53,17 @@ export const DEFAULT_WORKBENCH_JOBS_DISPLAY: WorkbenchJobsDisplayState = {
   direction: SortDirection.Desc,
 }
 
-export function allJobStatusesSelected(
-  statuses: WorkbenchJobStatus[]
-): boolean {
-  return isEmpty(xor(statuses, JOB_STATUS_OPTIONS))
-}
-
-export function allJobPrStatesSelected(
-  prStates: WorkbenchJobPrState[]
-): boolean {
-  return isEmpty(xor(prStates, JOB_PR_STATE_OPTIONS))
-}
-
 export function hasUncheckedJobFilters({
   statuses,
   prStates,
 }: Pick<WorkbenchJobsDisplayState, 'statuses' | 'prStates'>): boolean {
-  return !allJobStatusesSelected(statuses) || !allJobPrStatesSelected(prStates)
+  return (
+    !allSelected(statuses, JOB_STATUS_OPTIONS) ||
+    !allSelected(prStates, JOB_PR_STATE_OPTIONS)
+  )
 }
 
-export type JobFilterEmptyKind = 'statuses' | 'pull request states'
+type JobFilterEmptyKind = 'statuses' | 'pull request states'
 
 export function getJobFilterEmptyKind({
   statuses,
@@ -110,7 +96,7 @@ export function toJobFilterVariables({
   prStates?: WorkbenchJobPrState[]
 } {
   return {
-    statuses: allJobStatusesSelected(statuses) ? undefined : statuses,
-    prStates: allJobPrStatesSelected(prStates) ? undefined : prStates,
+    statuses: filterVariable(statuses, JOB_STATUS_OPTIONS),
+    prStates: filterVariable(prStates, JOB_PR_STATE_OPTIONS),
   }
 }

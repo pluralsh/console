@@ -24,7 +24,7 @@ const DETAILS_PANEL_HEADER_HEIGHT = 44
 // + 32 input) sits above the same border as the details panels
 export const DETAILS_TAB_STRIP_HEIGHT = 64
 
-export type DetailsGutterStatus = 'running' | 'failed' | null
+type DetailsGutterStatus = 'running' | 'failed' | null
 
 // State shared by the details views: the selected list item, falling back to
 // the first item while none is selected or the selected one has left the list,
@@ -121,11 +121,13 @@ export function DetailsPanelHeader({
   )
 }
 
-// Hides the right-most details panel.
-export function DetailsCollapseButton({
+// Hides the right-most details panel, or brings a collapsed one back.
+export function DetailsPanelToggle({
+  expand = false,
   label,
   onClick,
 }: {
+  expand?: boolean
   label: string
   onClick: () => void
 }) {
@@ -136,28 +138,9 @@ export function DetailsCollapseButton({
       size="large"
       textValue={label}
       tooltip={label}
-      icon={<HamburgerMenuCollapsedIcon />}
-      onClick={onClick}
-    />
-  )
-}
-
-// Brings a collapsed details panel back.
-export function DetailsExpandButton({
-  label,
-  onClick,
-}: {
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <IconFrame
-      clickable
-      type="tertiary"
-      size="large"
-      textValue={label}
-      tooltip={label}
-      icon={<HamburgerMenuCollapseIcon />}
+      icon={
+        expand ? <HamburgerMenuCollapseIcon /> : <HamburgerMenuCollapsedIcon />
+      }
       onClick={onClick}
     />
   )

@@ -128,10 +128,7 @@ export function useFetchSlice<
     () =>
       fetchMore({
         variables: { after, first },
-        updateQuery: (prev, { fetchMoreResult, variables: sent }) =>
-          isStaleResponse(observable, sent)
-            ? prev
-            : extendNestedConnection(keyPath, prev, fetchMoreResult),
+        updateQuery: appendPage(keyPath, observable),
       }),
     [fetchMore, after, first, keyPath, observable]
   )
@@ -192,6 +189,27 @@ export function isStaleResponse(
     omitBy(omit(vars, PAGE_VARIABLES), isUndefined)
 
   return !isEqual(listVariables(sent), listVariables(current))
+}
+
+// fetchMore's updateQuery appending the fetched page, unless it's stale
+export function appendPage<TData>(
+  keyPath: string[],
+  observable: Parameters<typeof isStaleResponse>[0]
+) {
+  return (
+    prev: TData,
+    {
+      fetchMoreResult,
+      variables,
+    }: { fetchMoreResult: unknown; variables?: Record<string, unknown> }
+  ): TData =>
+    isStaleResponse(observable, variables)
+      ? prev
+      : extendNestedConnection(
+          keyPath,
+          prev,
+          fetchMoreResult as Nullable<TData>
+        )
 }
 
 export const reduceNestedData = (path: string[], data: any) =>

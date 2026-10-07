@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchJobCard } from './WorkbenchJobCard'
 
-const LAUNCH_RECENT_JOBS_COUNT = 3
+export const LAUNCH_RECENT_JOBS_COUNT = 3
 
 export function WorkbenchLaunchRecentJobs({
   workbenchId,

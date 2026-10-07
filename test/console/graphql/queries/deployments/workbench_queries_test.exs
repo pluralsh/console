@@ -2312,20 +2312,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
   describe "workbenchJobSearch" do
     test "it can search vector-indexed workbench jobs" do
-      import ElasticsearchUtils
-
-      deployment_settings(
-        ai: %{
-          enabled: true,
-          provider: :openai,
-          openai: %{access_token: "key"},
-          vector_store: %{
-            enabled: true,
-            store: :elastic,
-            elastic: es_vector_settings()
-          }
-        }
-      )
+      enable_vector_store()
 
       workbench = insert(:workbench)
 
@@ -2378,20 +2365,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
 
     test "it applies status and pull request filters to search results" do
-      import ElasticsearchUtils
-
-      deployment_settings(
-        ai: %{
-          enabled: true,
-          provider: :openai,
-          openai: %{access_token: "key"},
-          vector_store: %{
-            enabled: true,
-            store: :elastic,
-            elastic: es_vector_settings()
-          }
-        }
-      )
+      enable_vector_store()
 
       workbench = insert(:workbench)
       failed = insert(:workbench_job, workbench: workbench, status: :failed)
@@ -2428,20 +2402,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
 
     test "filtered searches fetch more candidates and keep relevance order" do
-      import ElasticsearchUtils
-
-      deployment_settings(
-        ai: %{
-          enabled: true,
-          provider: :openai,
-          openai: %{access_token: "key"},
-          vector_store: %{
-            enabled: true,
-            store: :elastic,
-            elastic: es_vector_settings()
-          }
-        }
-      )
+      enable_vector_store()
 
       workbench = insert(:workbench)
       [first_failed, second_failed, third_failed] = insert_list(3, :workbench_job, workbench: workbench, status: :failed)
@@ -2945,5 +2906,22 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert row["merge_rate"] == 1.0
       assert row["timestamp"]
     end
+  end
+
+  defp enable_vector_store() do
+    import ElasticsearchUtils
+
+    deployment_settings(
+      ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{access_token: "key"},
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: es_vector_settings()
+        }
+      }
+    )
   end
 end

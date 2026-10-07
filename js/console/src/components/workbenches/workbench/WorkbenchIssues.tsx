@@ -1,26 +1,19 @@
-import { Flex } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
 import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
-import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
-import { GqlError } from 'components/utils/Alert'
+import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import {
-  DisplayFilterEmpty,
   DisplayPopover,
-  usePersistedDisplayView,
+  toCounts,
+  useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  IssueStatus,
-  IssueWebhookProvider,
-  useWorkbenchIssuesQuery,
-} from 'generated/graphql'
-import { compact, fromPairs, isEmpty, isNil, omit } from 'lodash'
+import { useWorkbenchIssuesQuery } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
 import { useWorkbenchIssuesDetails } from './WorkbenchIssuesDetails'
@@ -28,12 +21,10 @@ import { WorkbenchIssuesDisplayOptions } from './WorkbenchIssuesDisplayOptions'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
   getIssueFilterEmptyKind,
-  WORKBENCH_ISSUES_VIEWS,
   hasUncheckedIssueFilters,
   resetIssueFilters,
   toIssueFilterVariables,
   visibleIssueProviders,
-  WorkbenchIssuesDisplayState,
 } from './workbenchIssuesDisplay'
 
 const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
@@ -44,26 +35,13 @@ const ISSUES_KEY_PATH = ['workbench', 'issues']
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  // the view is remembered per user, filters and sort only for the visit
-  const [view, setView] = usePersistedDisplayView(
+  const { display, updateDisplay } = useDisplayState(
     WORKBENCH_ISSUES_VIEW_STORAGE_KEY,
-    WORKBENCH_ISSUES_VIEWS,
-    DEFAULT_WORKBENCH_ISSUES_DISPLAY.view
+    DEFAULT_WORKBENCH_ISSUES_DISPLAY
   )
-  const [filters, setFilters] = useState(() =>
-    omit(DEFAULT_WORKBENCH_ISSUES_DISPLAY, 'view')
-  )
-  const display = useMemo(() => ({ ...filters, view }), [filters, view])
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const filterVars = useMemo(() => toIssueFilterVariables(display), [display])
-  const updateDisplay = ({
-    view: nextView,
-    ...nextFilters
-  }: WorkbenchIssuesDisplayState) => {
-    setFilters(nextFilters)
-    setView(nextView)
-  }
 
   const {
     data,
@@ -91,23 +69,11 @@ export function WorkbenchIssues() {
     [data]
   )
   const providerCounts = useMemo(
-    () =>
-      fromPairs(
-        compact(data?.workbench?.issueCounts?.providers).map((entry) => [
-          entry.provider,
-          entry.count,
-        ])
-      ) as Partial<Record<IssueWebhookProvider, number>>,
+    () => toCounts(data?.workbench?.issueCounts?.providers, (e) => e.provider),
     [data]
   )
   const statusCounts = useMemo(
-    () =>
-      fromPairs(
-        compact(data?.workbench?.issueCounts?.statuses).map((entry) => [
-          entry.status,
-          entry.count,
-        ])
-      ) as Partial<Record<IssueStatus, number>>,
+    () => toCounts(data?.workbench?.issueCounts?.statuses, (e) => e.status),
     [data]
   )
   const filterEmptyKind = useMemo(
@@ -123,21 +89,26 @@ export function WorkbenchIssues() {
     if (!tableSliceActive) setVirtualSlice(undefined)
   }, [tableSliceActive, setVirtualSlice])
 
-  const details = useWorkbenchIssuesDetails({
-    active: display.view === 'details',
-    emptyState: {
-      searching: !!debouncedSearchString,
-      filtered: hasUncheckedIssueFilters(display),
-      onResetFilters: () => updateDisplay(resetIssueFilters(display)),
-    },
+  const filtered = hasUncheckedIssueFilters(display)
+  const onResetFilters = () => updateDisplay(resetIssueFilters(display))
+  const listProps = {
     issues,
     loading: !data && loading,
     fetchingMore,
     hasNextPage: !!pageInfo?.hasNextPage,
     fetchNextPage,
+    fallbackWorkbenchId: workbenchId,
+  }
+  const details = useWorkbenchIssuesDetails({
+    ...listProps,
+    active: display.view === 'details',
+    emptyState: {
+      searching: !!debouncedSearchString,
+      filtered,
+      onResetFilters,
+    },
     searchString,
     onSearchChange: setSearchString,
-    fallbackWorkbenchId: workbenchId,
   })
   const showDetails = display.view === 'details' && !error && !filterEmptyKind
 
@@ -149,66 +120,44 @@ export function WorkbenchIssues() {
         tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
-        <>
-          <DisplayPopover showDot={hasUncheckedIssueFilters(display)}>
-            <WorkbenchIssuesDisplayOptions
-              state={display}
-              onChange={updateDisplay}
-              providerCounts={providerCounts}
-              statusCounts={statusCounts}
-            />
-          </DisplayPopover>
-        </>
+        <DisplayPopover showDot={filtered}>
+          <WorkbenchIssuesDisplayOptions
+            state={display}
+            onChange={updateDisplay}
+            providerCounts={providerCounts}
+            statusCounts={statusCounts}
+          />
+        </DisplayPopover>
       }
     >
       {showDetails ? (
         details.content
       ) : (
-        <WrapperSC>
-          <WorkbenchSearchInput
-            value={searchString}
-            onChange={setSearchString}
-            placeholder="Search issues"
-          />
-          {error ? (
-            <GqlError error={error} />
-          ) : filterEmptyKind ? (
-            <DisplayFilterEmpty
-              title={`No ${filterEmptyKind} selected`}
-              description={`It looks like there are no ${filterEmptyKind} selected.`}
-              onReset={() => updateDisplay(resetIssueFilters(display))}
-            />
-          ) : display.view === 'board' ? (
+        <WorkbenchMonitoringContent
+          searchString={searchString}
+          onSearchChange={setSearchString}
+          searchPlaceholder="Search issues"
+          error={error}
+          filterEmptyKind={filterEmptyKind}
+          onResetFilters={onResetFilters}
+        >
+          {display.view === 'board' ? (
             <WorkbenchIssuesBoard
-              issues={issues}
+              {...listProps}
               statuses={display.statuses}
-              loading={!data && loading}
-              fetchingMore={fetchingMore}
-              hasNextPage={!!pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              fallbackWorkbenchId={workbenchId}
             />
           ) : (
             <WorkbenchIssuesTable
               issues={issues}
-              loading={isNil(data) && loading}
+              loading={listProps.loading}
               hasNextPage={pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
               setVirtualSlice={setVirtualSlice}
               fallbackWorkbenchId={workbenchId}
             />
           )}
-        </WrapperSC>
+        </WorkbenchMonitoringContent>
       )}
     </WorkbenchPageLayout>
   )
 }
-
-const WrapperSC = styled(Flex)(({ theme }) => ({
-  flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.medium,
-  minHeight: 160,
-  overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-}))

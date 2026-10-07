@@ -7,7 +7,6 @@ import {
   BoardTitle,
   BoardTitleSC,
   LoadMoreSentinel,
-  useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
 import { WorkbenchJobTinyFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
@@ -40,12 +39,6 @@ export function WorkbenchJobsBoard({
   totalCount?: Nullable<number>
   emptyState: EmptyListState
 }) {
-  const loadMore = useBoardLoadMore({
-    fetchingMore,
-    hasNextPage,
-    fetchNextPage,
-  })
-
   if (isEmpty(jobs))
     return (
       <BoardEmptyList
@@ -83,7 +76,11 @@ export function WorkbenchJobsBoard({
           ))}
         </BoardCardGridSC>
       </BoardSectionSC>
-      {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+      <LoadMoreSentinel
+        fetchingMore={fetchingMore}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
     </BoardSC>
   )
 }

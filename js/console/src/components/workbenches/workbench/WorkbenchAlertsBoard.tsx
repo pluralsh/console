@@ -17,7 +17,6 @@ import {
   clickableCardStyles,
   EmptyListState,
   LoadMoreSentinel,
-  useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
 import { WorkbenchAlertFragment, AlertState } from 'generated/graphql'
 import { isEmpty } from 'lodash'
@@ -49,11 +48,6 @@ export function WorkbenchAlertsBoard({
   totalCount?: Nullable<number>
   emptyState: EmptyListState
 }) {
-  const loadMore = useBoardLoadMore({
-    fetchingMore,
-    hasNextPage,
-    fetchNextPage,
-  })
   // by id, so the quick view follows polled updates of the alert
   const [openAlertId, setOpenAlertId] = useState<string>()
   const openAlert = alerts.find(({ id }) => id === openAlertId)
@@ -108,7 +102,11 @@ export function WorkbenchAlertsBoard({
           ))}
         </BoardCardGridSC>
       </BoardSectionSC>
-      {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+      <LoadMoreSentinel
+        fetchingMore={fetchingMore}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
       <WorkbenchAlertFlyover
         alert={openAlert}
         fallbackWorkbenchId={fallbackWorkbenchId}

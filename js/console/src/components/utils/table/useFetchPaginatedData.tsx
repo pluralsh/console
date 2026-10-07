@@ -9,8 +9,7 @@ import {
 import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
-  extendNestedConnection,
-  isStaleResponse,
+  appendPage,
   reduceNestedData,
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
@@ -128,10 +127,7 @@ export function useFetchPaginatedData<
     if (pageInfo?.hasNextPage) {
       fetchMore({
         variables: { after: pageInfo?.endCursor },
-        updateQuery: (prev, { fetchMoreResult, variables: sent }) =>
-          isStaleResponse(observable, sent)
-            ? prev
-            : extendNestedConnection(options.keyPath, prev, fetchMoreResult),
+        updateQuery: appendPage(options.keyPath, observable),
       })
     }
   }, [

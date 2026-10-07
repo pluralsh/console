@@ -1,24 +1,19 @@
-import { Flex } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { GqlError } from 'components/utils/Alert'
 import {
-  DisplayFilterEmpty,
   DisplayPopover,
-  usePersistedDisplayView,
+  toCounts,
+  useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
-import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
+import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import {
   SortDirection,
   useWorkbenchJobCountsQuery,
   useWorkbenchJobSearchQuery,
   useWorkbenchJobsQuery,
-  WorkbenchJobPrState,
-  WorkbenchJobStatus,
 } from 'generated/graphql'
-import { compact, fromPairs, omit } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
@@ -39,8 +34,6 @@ import {
   resetJobFilters,
   toJobFilterVariables,
   WORKBENCH_JOBS_PAGE_SIZE,
-  WORKBENCH_JOBS_VIEWS,
-  WorkbenchJobsDisplayState,
 } from './workbenchJobsDisplay'
 
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
@@ -51,23 +44,11 @@ const RUNS_KEY_PATH = ['workbench', 'runs']
 
 export function WorkbenchJobs() {
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
-  // the view is remembered per user, filters and sort only for the visit
-  const [view, setView] = usePersistedDisplayView(
+  const { display, filters, updateDisplay } = useDisplayState(
     WORKBENCH_JOBS_VIEW_STORAGE_KEY,
-    WORKBENCH_JOBS_VIEWS,
-    DEFAULT_WORKBENCH_JOBS_DISPLAY.view
+    DEFAULT_WORKBENCH_JOBS_DISPLAY
   )
-  const [filters, setFilters] = useState(() =>
-    omit(DEFAULT_WORKBENCH_JOBS_DISPLAY, 'view')
-  )
-  const display = useMemo(() => ({ ...filters, view }), [filters, view])
-  const updateDisplay = ({
-    view: nextView,
-    ...nextFilters
-  }: WorkbenchJobsDisplayState) => {
-    setFilters(nextFilters)
-    setView(nextView)
-  }
+  const { view } = display
   const filterVars = useMemo(() => toJobFilterVariables(filters), [filters])
   const filterEmptyKind = getJobFilterEmptyKind(filters)
   const [searchString, setSearchString] = useState('')
@@ -116,23 +97,12 @@ export function WorkbenchJobs() {
     fetchPolicy: 'cache-and-network',
   })
   const statusCounts = useMemo(
-    () =>
-      fromPairs(
-        compact(countsData?.workbench?.runCounts?.statuses).map((entry) => [
-          entry.status,
-          entry.count,
-        ])
-      ) as Partial<Record<WorkbenchJobStatus, number>>,
+    () => toCounts(countsData?.workbench?.runCounts?.statuses, (e) => e.status),
     [countsData]
   )
   const prStateCounts = useMemo(
     () =>
-      fromPairs(
-        compact(countsData?.workbench?.runCounts?.pullRequests).map((entry) => [
-          entry.state,
-          entry.count,
-        ])
-      ) as Partial<Record<WorkbenchJobPrState, number>>,
+      toCounts(countsData?.workbench?.runCounts?.pullRequests, (e) => e.state),
     [countsData]
   )
 
@@ -193,22 +163,24 @@ export function WorkbenchJobs() {
         fetchNextPage,
       }
   const listError = searching ? search.error : error
+  const filtered = hasUncheckedJobFilters(filters)
   const emptyState = {
     searching,
-    filtered: hasUncheckedJobFilters(filters),
+    filtered,
     onResetFilters: () => updateDisplay(resetJobFilters(display)),
   }
-  const details = useWorkbenchJobsDetails({
-    workbenchId,
+  const listProps = {
+    ...list,
     jobs,
     loading: !list.loaded && list.loading,
-    fetchingMore: list.fetchingMore,
-    hasNextPage: list.hasNextPage,
-    fetchNextPage: list.fetchNextPage,
+    emptyState,
+  }
+  const details = useWorkbenchJobsDetails({
+    ...listProps,
+    workbenchId,
     searchString,
     onSearchChange: setSearchString,
     active: view === 'details',
-    emptyState,
   })
   const showDetails = view === 'details' && !listError && !filterEmptyKind
 
@@ -220,7 +192,7 @@ export function WorkbenchJobs() {
         tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
-        <DisplayPopover showDot={hasUncheckedJobFilters(filters)}>
+        <DisplayPopover showDot={filtered}>
           <WorkbenchJobsDisplayOptions
             state={display}
             onChange={updateDisplay}
@@ -234,29 +206,19 @@ export function WorkbenchJobs() {
       {showDetails ? (
         details.content
       ) : (
-        <WrapperSC>
-          <WorkbenchSearchInput
-            value={searchString}
-            onChange={setSearchString}
-            placeholder="Search jobs"
-          />
-          {listError ? (
-            <GqlError error={listError} />
-          ) : filterEmptyKind ? (
-            <DisplayFilterEmpty
-              title={`No ${filterEmptyKind} selected`}
-              description={`It looks like there are no ${filterEmptyKind} selected.`}
-              onReset={() => updateDisplay(resetJobFilters(display))}
-            />
-          ) : view === 'board' ? (
+        <WorkbenchMonitoringContent
+          searchString={searchString}
+          onSearchChange={setSearchString}
+          searchPlaceholder="Search jobs"
+          error={listError}
+          filterEmptyKind={filterEmptyKind}
+          onResetFilters={emptyState.onResetFilters}
+          minHeight={400}
+        >
+          {view === 'board' ? (
             <WorkbenchJobsBoard
-              jobs={jobs}
-              loading={!list.loaded && list.loading}
-              fetchingMore={list.fetchingMore}
-              hasNextPage={list.hasNextPage}
-              fetchNextPage={list.fetchNextPage}
+              {...listProps}
               recentJobs={recentJobs}
-              emptyState={emptyState}
               totalCount={
                 searching ? jobs.length : data?.workbench?.runs?.totalCount
               }
@@ -273,20 +235,11 @@ export function WorkbenchJobs() {
               />
             </TableContainerSC>
           )}
-        </WrapperSC>
+        </WorkbenchMonitoringContent>
       )}
     </WorkbenchPageLayout>
   )
 }
-
-const WrapperSC = styled(Flex)(({ theme }) => ({
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  flex: 1,
-  minHeight: 400,
-  overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-}))
 
 const TableContainerSC = styled.div({
   flex: 1,

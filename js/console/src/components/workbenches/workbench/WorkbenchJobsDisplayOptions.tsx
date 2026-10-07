@@ -1,24 +1,17 @@
 import {
-  DisplayFilterRow,
-  DisplayFilterRows,
+  ALL_DISPLAY_VIEWS,
+  DisplayFilterSection,
   DisplaySection,
-  DisplaySectionHeader,
   DisplaySortField,
   DisplaySortHeader,
   DisplayViewToggle,
-  toggleListValue,
 } from 'components/utils/display/DisplayPanel'
-import {
-  SortDirection,
-  WorkbenchJobPrState,
-  WorkbenchJobStatus,
-} from 'generated/graphql'
+import { WorkbenchJobPrState, WorkbenchJobStatus } from 'generated/graphql'
 import { startCase } from 'lodash'
 import {
   JOB_PR_STATE_LABELS,
   JOB_PR_STATE_OPTIONS,
   JOB_STATUS_OPTIONS,
-  WORKBENCH_JOBS_VIEWS,
   WorkbenchJobsDisplayState,
 } from './workbenchJobsDisplay'
 
@@ -40,62 +33,34 @@ export function WorkbenchJobsDisplayOptions({
     <>
       <DisplayViewToggle
         view={state.view}
-        views={WORKBENCH_JOBS_VIEWS}
+        views={ALL_DISPLAY_VIEWS}
         onChange={(view) => onChange({ ...state, view })}
       />
-      <DisplaySection>
-        <DisplaySectionHeader>Status</DisplaySectionHeader>
-        <DisplayFilterRows compact>
-          {JOB_STATUS_OPTIONS.map((status) => (
-            <DisplayFilterRow
-              key={status}
-              label={startCase(status.toLowerCase())}
-              count={statusCounts[status] ?? 0}
-              checked={state.statuses.includes(status)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  statuses: toggleListValue(state.statuses, status),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
-      <DisplaySection>
-        <DisplaySectionHeader>Pull request</DisplaySectionHeader>
-        <DisplayFilterRows compact>
-          {JOB_PR_STATE_OPTIONS.map((prState) => (
-            <DisplayFilterRow
-              key={prState}
-              label={JOB_PR_STATE_LABELS[prState]}
-              count={prStateCounts[prState] ?? 0}
-              checked={state.prStates.includes(prState)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  prStates: toggleListValue(state.prStates, prState),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
+      <DisplayFilterSection
+        title="Status"
+        options={JOB_STATUS_OPTIONS}
+        selected={state.statuses}
+        counts={statusCounts}
+        getLabel={(status) => startCase(status.toLowerCase())}
+        compact
+        onChange={(statuses) => onChange({ ...state, statuses })}
+      />
+      <DisplayFilterSection
+        title="Pull request"
+        options={JOB_PR_STATE_OPTIONS}
+        selected={state.prStates}
+        counts={prStateCounts}
+        getLabel={(prState) => JOB_PR_STATE_LABELS[prState]}
+        compact
+        onChange={(prStates) => onChange({ ...state, prStates })}
+      />
       <DisplaySection>
         <DisplaySortHeader
           disabledReason={
             searching ? 'Search results are sorted by relevance' : undefined
           }
-          descending={state.direction === SortDirection.Desc}
-          onToggle={() =>
-            onChange({
-              ...state,
-              direction:
-                state.direction === SortDirection.Desc
-                  ? SortDirection.Asc
-                  : SortDirection.Desc,
-            })
-          }
+          direction={state.direction}
+          onChange={(direction) => onChange({ ...state, direction })}
         />
         {/* jobs only sort by creation date */}
         <DisplaySortField>Date created</DisplaySortField>

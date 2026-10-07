@@ -1,26 +1,24 @@
 import { Radio } from '@pluralsh/design-system'
 import {
-  DisplayFilterRow,
-  DisplayFilterRows,
+  ALL_DISPLAY_VIEWS,
+  DisplayFilterSection,
   DisplayRadioGroup,
   DisplaySection,
-  DisplaySectionHeader,
   DisplaySortHeader,
   DisplayViewToggle,
-  toggleListValue,
 } from 'components/utils/display/DisplayPanel'
-import { ALERT_SEVERITY_LABELS } from 'components/utils/alerts/AlertSeverityIcon'
+import {
+  ALERT_SEVERITY_LABELS,
+  ALERT_SEVERITY_ORDER,
+} from 'components/utils/alerts/AlertSeverityIcon'
 import {
   AlertSeverity,
   AlertSort,
   ObservabilityWebhookType,
-  SortDirection,
 } from 'generated/graphql'
+import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
 import {
-  ALERT_SEVERITY_OPTIONS,
-  ALERT_TYPE_LABELS,
   visibleAlertTypes,
-  WORKBENCH_ALERTS_VIEWS,
   WorkbenchAlertsDisplayState,
 } from './workbenchAlertsDisplay'
 
@@ -35,65 +33,34 @@ export function WorkbenchAlertsDisplayOptions({
   typeCounts: Partial<Record<ObservabilityWebhookType, number>>
   severityCounts: Partial<Record<AlertSeverity, number>>
 }) {
-  const types = visibleAlertTypes(typeCounts)
-
   return (
     <>
       <DisplayViewToggle
         view={state.view}
-        views={WORKBENCH_ALERTS_VIEWS}
+        views={ALL_DISPLAY_VIEWS}
         onChange={(view) => onChange({ ...state, view })}
       />
-      <DisplaySection>
-        <DisplaySectionHeader>Source from</DisplaySectionHeader>
-        <DisplayFilterRows>
-          {types.map((type) => (
-            <DisplayFilterRow
-              key={type}
-              label={ALERT_TYPE_LABELS[type]}
-              count={typeCounts[type] ?? 0}
-              checked={state.types.includes(type)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  types: toggleListValue(state.types, type),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
-      <DisplaySection>
-        <DisplaySectionHeader>Severity</DisplaySectionHeader>
-        <DisplayFilterRows compact>
-          {ALERT_SEVERITY_OPTIONS.map((severity) => (
-            <DisplayFilterRow
-              key={severity}
-              label={ALERT_SEVERITY_LABELS[severity]}
-              count={severityCounts[severity] ?? 0}
-              checked={state.severities.includes(severity)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  severities: toggleListValue(state.severities, severity),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
+      <DisplayFilterSection
+        title="Source from"
+        options={visibleAlertTypes(typeCounts)}
+        selected={state.types}
+        counts={typeCounts}
+        getLabel={humanizeObservabilityWebhookType}
+        onChange={(types) => onChange({ ...state, types })}
+      />
+      <DisplayFilterSection
+        title="Severity"
+        options={ALERT_SEVERITY_ORDER}
+        selected={state.severities}
+        counts={severityCounts}
+        getLabel={(severity) => ALERT_SEVERITY_LABELS[severity]}
+        compact
+        onChange={(severities) => onChange({ ...state, severities })}
+      />
       <DisplaySection>
         <DisplaySortHeader
-          descending={state.direction === SortDirection.Desc}
-          onToggle={() =>
-            onChange({
-              ...state,
-              direction:
-                state.direction === SortDirection.Desc
-                  ? SortDirection.Asc
-                  : SortDirection.Desc,
-            })
-          }
+          direction={state.direction}
+          onChange={(direction) => onChange({ ...state, direction })}
         />
         <DisplayRadioGroup
           value={state.sort}

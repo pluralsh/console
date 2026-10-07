@@ -12,7 +12,6 @@ import {
   BoardSC,
   BoardTitleSC,
   LoadMoreSentinel,
-  useBoardLoadMore,
 } from './WorkbenchBoard'
 import {
   groupIssuesByStatus,
@@ -40,11 +39,6 @@ export function WorkbenchIssuesBoard({
   fallbackWorkbenchId?: string
 }) {
   const grouped = useMemo(() => groupIssuesByStatus(issues), [issues])
-  const loadMore = useBoardLoadMore({
-    fetchingMore,
-    hasNextPage,
-    fetchNextPage,
-  })
 
   const visibleStatuses = useMemo(
     () => ISSUE_STATUS_OPTIONS.filter((status) => includes(statuses, status)),
@@ -87,7 +81,11 @@ export function WorkbenchIssuesBoard({
           </ColumnSC>
         ))}
       </ColumnsRowSC>
-      {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+      <LoadMoreSentinel
+        fetchingMore={fetchingMore}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
     </BoardSC>
   )
 }

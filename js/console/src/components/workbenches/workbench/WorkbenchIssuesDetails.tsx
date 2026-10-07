@@ -5,12 +5,10 @@ import {
   BoardEmptyList,
   EmptyListState,
   LoadMoreSentinel,
-  useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
 import {
-  DetailsCollapseButton,
+  DetailsPanelToggle,
   DetailsColumnSC,
-  DetailsExpandButton,
   DetailsIconTitleSC,
   DetailsLayoutSC,
   DetailsListAgeSC,
@@ -59,11 +57,6 @@ export function useWorkbenchIssuesDetails({
   active: boolean
   emptyState: EmptyListState
 }) {
-  const loadMore = useBoardLoadMore({
-    fetchingMore,
-    hasNextPage,
-    fetchNextPage,
-  })
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsViewState(issues)
 
@@ -72,7 +65,8 @@ export function useWorkbenchIssuesDetails({
   const selectedJob = selected?.workbenchJob
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
   const expandButton = !detailsOpen && (
-    <DetailsExpandButton
+    <DetailsPanelToggle
+      expand
       label="Show issue details"
       onClick={() => setDetailsOpen(true)}
     />
@@ -126,7 +120,11 @@ export function useWorkbenchIssuesDetails({
             />
           ))
         )}
-        {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+        <LoadMoreSentinel
+          fetchingMore={fetchingMore}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+        />
       </DetailsListItemsSC>
     </DetailsListSC>
   )
@@ -153,7 +151,7 @@ export function useWorkbenchIssuesDetails({
       {selected && detailsOpen && (
         <DetailsColumnSC key={`details-${selected.id}`}>
           <DetailsPanelHeader title="Issue details">
-            <DetailsCollapseButton
+            <DetailsPanelToggle
               label="Hide issue details"
               onClick={() => setDetailsOpen(false)}
             />

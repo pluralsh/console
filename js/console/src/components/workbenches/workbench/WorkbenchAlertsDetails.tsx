@@ -12,6 +12,7 @@ import {
 } from 'components/utils/alerts/AlertSeverityIcon'
 import {
   AlertSourceLink,
+  getAlertHeading,
   getAlertName,
   getAlertTitle,
 } from 'components/utils/alerts/AlertSourceLink'
@@ -22,13 +23,11 @@ import {
   BoardEmptyList,
   EmptyListState,
   LoadMoreSentinel,
-  useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
 import {
-  DetailsCollapseButton,
+  DetailsPanelToggle,
   DetailsColumnSC,
   DetailsErrorBanner,
-  DetailsExpandButton,
   DetailsField,
   DetailsIconTitleSC,
   DetailsLayoutSC,
@@ -54,16 +53,16 @@ import {
   AlertState,
   WorkbenchJobStatus,
 } from 'generated/graphql'
-import { compact, isEmpty } from 'lodash'
+import { isEmpty } from 'lodash'
 import { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime, formatShortAge } from 'utils/datetime'
+import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
 import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
 import {
-  ALERT_TYPE_LABELS,
   allAlertSeveritiesSelected,
   toggleAlertSeverityChip,
 } from './workbenchAlertsDisplay'
@@ -115,13 +114,10 @@ export function useWorkbenchAlertsDetails({
   active: boolean
   emptyState: EmptyListState
 }) {
-  const loadMore = useBoardLoadMore({
-    fetchingMore,
-    hasNextPage,
-    fetchNextPage,
-  })
-
   const severityFiltered = !allAlertSeveritiesSelected(severities)
+  const shownSeverities = ALERT_SEVERITY_ORDER.filter(
+    (severity) => severityCounts[severity]
+  )
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsViewState(alerts)
 
@@ -139,12 +135,10 @@ export function useWorkbenchAlertsDetails({
           placeholder="Search alerts"
         />
       </DetailsListSearchSC>
-      {!isEmpty(compact(Object.values(severityCounts))) && (
+      {!isEmpty(shownSeverities) && (
         <DetailsListSearchSC>
           <SeverityChipsSC>
-            {ALERT_SEVERITY_ORDER.filter(
-              (severity) => severityCounts[severity]
-            ).map((severity) => (
+            {shownSeverities.map((severity) => (
               <Chip
                 key={severity}
                 clickable
@@ -215,7 +209,11 @@ export function useWorkbenchAlertsDetails({
             }
           />
         ))}
-        {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+        <LoadMoreSentinel
+          fetchingMore={fetchingMore}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+        />
       </DetailsListItemsSC>
     </DetailsListSC>
   )
@@ -229,7 +227,8 @@ export function useWorkbenchAlertsDetails({
           workbenchId={workbenchId}
           headerActions={
             !detailsOpen && (
-              <DetailsExpandButton
+              <DetailsPanelToggle
+                expand
                 label="Show alert details"
                 onClick={() => setDetailsOpen(true)}
               />
@@ -260,11 +259,10 @@ function AlertConclusionPanel({
   headerActions?: ReactNode
 }) {
   const job = alert.workbenchJob
-  const jobId = job?.id
-  const viewJobLink = jobId && (
+  const viewJobLink = job && (
     <DetailsLinkSC
       as={Link}
-      to={getWorkbenchJobAbsPath({ workbenchId, jobId })}
+      to={getWorkbenchJobAbsPath({ workbenchId, jobId: job.id })}
     >
       View job
     </DetailsLinkSC>
@@ -276,15 +274,13 @@ function AlertConclusionPanel({
         {headerActions}
       </DetailsPanelHeader>
       <DetailsPanelBodySC>
-        {alert.workbenchJob?.status === WorkbenchJobStatus.Failed && (
+        {job?.status === WorkbenchJobStatus.Failed && (
           <DetailsErrorBanner action={viewJobLink}>
             Workbench job reported an error.
-            {alert.workbenchJob.error ? ` ${alert.workbenchJob.error}` : ''}
+            {job.error ? ` ${job.error}` : ''}
           </DetailsErrorBanner>
         )}
-        <DetailsTitleSC>
-          {getAlertSummary(alert) || getAlertName(alert)}
-        </DetailsTitleSC>
+        <DetailsTitleSC>{getAlertHeading(alert)}</DetailsTitleSC>
         <AlertInformation alert={alert} />
         {job && (
           <AlertJobResult
@@ -380,7 +376,7 @@ export function AlertInformation({ alert }: { alert: WorkbenchAlertFragment }) {
               <SmallLinkSC>
                 <AlertSourceLink
                   alert={{ ...alert, url: alert.silenceUrl }}
-                  label={`Silence in ${ALERT_TYPE_LABELS[alert.type]}`}
+                  label={`Silence in ${humanizeObservabilityWebhookType(alert.type)}`}
                 />
               </SmallLinkSC>
             </DetailsField>
@@ -433,7 +429,7 @@ function AlertDetailsPanel({
   return (
     <DetailsColumnSC>
       <DetailsPanelHeader title="Alert details">
-        <DetailsCollapseButton
+        <DetailsPanelToggle
           label="Hide alert details"
           onClick={onCollapse}
         />
@@ -457,52 +453,24 @@ function AlertDetailsPanel({
           />
         )}
         {tab === 'All information' && (
-          <KeyValueCardSC>
-            <KeyValueRow
-              label="Title"
-              value={alert.title}
-            />
-            <KeyValueRow
-              label="Name"
-              value={getAlertName(alert)}
-            />
-            <KeyValueRow
-              label="Source"
-              value={ALERT_TYPE_LABELS[alert.type]}
-            />
-            <KeyValueRow
-              label="Severity"
-              value={ALERT_SEVERITY_LABELS[alert.severity]}
-            />
-            <KeyValueRow
-              label="State"
-              value={alertStateLabel(alert.state)}
-            />
-            <KeyValueRow
-              label="Cluster"
-              value={alert.cluster?.name}
-            />
-            <KeyValueRow
-              label="Fingerprint"
-              value={alert.fingerprint}
-            />
-            <KeyValueRow
-              label="URL"
-              value={alert.url}
-            />
-            <KeyValueRow
-              label="Updated"
-              value={
-                alert.updatedAt
-                  ? formatDateTime(alert.updatedAt, 'M/D/YYYY h:mma')
-                  : null
-              }
-            />
-            <KeyValueRow
-              label="Message"
-              value={alert.message}
-            />
-          </KeyValueCardSC>
+          <KeyValueCard
+            entries={[
+              ['Title', alert.title],
+              ['Name', getAlertName(alert)],
+              ['Source', humanizeObservabilityWebhookType(alert.type)],
+              ['Severity', ALERT_SEVERITY_LABELS[alert.severity]],
+              ['State', alertStateLabel(alert.state)],
+              ['Cluster', alert.cluster?.name],
+              ['Fingerprint', alert.fingerprint],
+              ['URL', alert.url],
+              [
+                'Updated',
+                alert.updatedAt &&
+                  formatDateTime(alert.updatedAt, 'M/D/YYYY h:mma'),
+              ],
+              ['Message', alert.message],
+            ]}
+          />
         )}
       </DetailsTabBodySC>
     </DetailsColumnSC>
@@ -524,17 +492,33 @@ function KeyValueSection({
   return (
     <SectionSC>
       <SectionTitleSC>{title}</SectionTitleSC>
-      <KeyValueCardSC>
-        {entries.map(([label, value], i) => (
-          <KeyValueRow
-            key={`${label}-${i}`}
-            label={label}
-            value={value}
-            valueAlign={valueAlign}
-          />
-        ))}
-      </KeyValueCardSC>
+      <KeyValueCard
+        entries={entries}
+        valueAlign={valueAlign}
+      />
     </SectionSC>
+  )
+}
+
+// Label/value rows, skipping empty values.
+function KeyValueCard({
+  entries,
+  valueAlign = 'left',
+}: {
+  entries: [string, Nullable<string>][]
+  valueAlign?: 'left' | 'right'
+}) {
+  return (
+    <KeyValueCardSC>
+      {entries.map(([label, value], i) => (
+        <KeyValueRow
+          key={`${label}-${i}`}
+          label={label}
+          value={value}
+          valueAlign={valueAlign}
+        />
+      ))}
+    </KeyValueCardSC>
   )
 }
 

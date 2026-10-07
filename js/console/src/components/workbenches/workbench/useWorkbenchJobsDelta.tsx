@@ -8,10 +8,14 @@ import {
 } from 'generated/graphql'
 import { appendConnection } from 'utils/graphql'
 import { WORKBENCH_JOBS_PAGE_SIZE } from './workbenchJobsDisplay'
+import { LAUNCH_RECENT_JOBS_COUNT } from './WorkbenchLaunchRecentJobs'
 
-// the launch tab's recent jobs and budget warning (3), and the jobs tab's
+// the launch tab's recent jobs and budget warning, and the jobs tab's
 // unfiltered, newest-first list (its first page size)
-const WORKBENCH_JOBS_FIRST_VALUES = [3, WORKBENCH_JOBS_PAGE_SIZE] as const
+const WORKBENCH_JOBS_FIRST_VALUES = [
+  LAUNCH_RECENT_JOBS_COUNT,
+  WORKBENCH_JOBS_PAGE_SIZE,
+] as const
 
 export function useWorkbenchJobsDelta(workbenchId: Nullable<string>) {
   useWorkbenchJobDeltaSubscription({

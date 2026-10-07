@@ -5,8 +5,8 @@ import {
   SortDirection,
 } from 'generated/graphql'
 import { describe, expect, it } from 'vitest'
+import { ALERT_SEVERITY_ORDER } from 'components/utils/alerts/AlertSeverityIcon'
 import {
-  ALERT_SEVERITY_OPTIONS,
   ALL_ALERT_TYPES,
   DEFAULT_WORKBENCH_ALERTS_DISPLAY,
   getAlertFilterEmptyKind,
@@ -18,11 +18,8 @@ import {
 } from './workbenchAlertsDisplay'
 
 describe('workbenchAlertsDisplay', () => {
-  it('offers every API source and severity', () => {
-    expect([...ALL_ALERT_TYPES].sort()).toEqual(
-      Object.values(ObservabilityWebhookType).sort()
-    )
-    expect([...ALERT_SEVERITY_OPTIONS].sort()).toEqual(
+  it('offers every API severity', () => {
+    expect([...ALERT_SEVERITY_ORDER].sort()).toEqual(
       Object.values(AlertSeverity).sort()
     )
   })
@@ -71,7 +68,7 @@ describe('workbenchAlertsDisplay', () => {
       getAlertFilterEmptyKind(
         {
           types: [ObservabilityWebhookType.Datadog],
-          severities: ALERT_SEVERITY_OPTIONS,
+          severities: ALERT_SEVERITY_ORDER,
         },
         visible
       )
@@ -89,7 +86,7 @@ describe('workbenchAlertsDisplay', () => {
 
   it('toggles severity chips as a quick filter', () => {
     const high = toggleAlertSeverityChip(
-      ALERT_SEVERITY_OPTIONS,
+      ALERT_SEVERITY_ORDER,
       AlertSeverity.High
     )
 
@@ -99,7 +96,7 @@ describe('workbenchAlertsDisplay', () => {
       AlertSeverity.Low,
     ])
     expect(toggleAlertSeverityChip(high, AlertSeverity.High)).toEqual(
-      ALERT_SEVERITY_OPTIONS
+      ALERT_SEVERITY_ORDER
     )
   })
 })

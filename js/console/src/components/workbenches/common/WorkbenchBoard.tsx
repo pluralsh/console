@@ -6,15 +6,18 @@ import styled, { DefaultTheme } from 'styled-components'
 
 // Shared building blocks for the workbench Board views (issues, jobs, alerts).
 
-export function useBoardLoadMore({
-  fetchingMore,
-  hasNextPage,
-  fetchNextPage,
-}: {
+type LoadMoreProps = {
+  // a page or poll in flight, to pace loading more
   fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
-}) {
+}
+
+function useBoardLoadMore({
+  fetchingMore,
+  hasNextPage,
+  fetchNextPage,
+}: LoadMoreProps) {
   const fetchingRef = useRef(false)
 
   useEffect(() => {
@@ -28,7 +31,15 @@ export function useBoardLoadMore({
   }, [fetchNextPage, fetchingMore, hasNextPage])
 }
 
-export function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
+// Loads the next page once scrolled into view, while there is one.
+export function LoadMoreSentinel(props: LoadMoreProps) {
+  if (!props.hasNextPage) return null
+
+  return <LoadMoreSentinelInner {...props} />
+}
+
+function LoadMoreSentinelInner(props: LoadMoreProps) {
+  const onVisible = useBoardLoadMore(props)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -56,7 +67,7 @@ export type EmptyListState = {
   onResetFilters: () => void
 }
 
-export function emptyListMessage(
+function emptyListMessage(
   noun: string,
   { searching, filtered }: { searching: boolean; filtered: boolean }
 ) {
@@ -76,32 +87,14 @@ export function BoardEmptyList({
   loading: boolean
   emptyState: EmptyListState
 }) {
-  return (
-    <BoardLoadingOrEmpty
-      loading={loading}
-      message={emptyListMessage(noun, { searching, filtered })}
-      onResetFilters={filtered ? onResetFilters : undefined}
-    />
-  )
-}
-
-export function BoardLoadingOrEmpty({
-  loading,
-  message,
-  onResetFilters,
-}: {
-  loading: boolean
-  message: string
-  // offers to reset the display filters, when they narrowed the list
-  onResetFilters?: () => void
-}) {
   return loading ? (
     <BoardCenteredSC>
       <Spinner />
     </BoardCenteredSC>
   ) : (
-    <EmptyState message={message}>
-      {onResetFilters && (
+    <EmptyState message={emptyListMessage(noun, { searching, filtered })}>
+      {/* offers to reset the display filters, when they narrowed the list */}
+      {filtered && (
         <Button
           small
           secondary

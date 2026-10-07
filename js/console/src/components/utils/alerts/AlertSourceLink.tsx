@@ -6,6 +6,7 @@ import { cloneElement } from 'react'
 import styled from 'styled-components'
 import { TRUNCATE } from 'components/utils/truncate'
 import { toHttpURL } from 'utils/url'
+import { getAlertSummary } from './alertDetails'
 
 // The alert's `alertname` tag (as sent by Grafana and Prometheus-style
 // sources), falling back to the alert title.
@@ -18,6 +19,14 @@ export function getAlertName(alert: Pick<AlertFragment, 'title' | 'tags'>) {
 // Alert title for list rows and cards, falling back to the alert name.
 export function getAlertTitle(alert: Pick<AlertFragment, 'title' | 'tags'>) {
   return alert.title || getAlertName(alert) || 'Untitled alert'
+}
+
+// Alert heading for the details and quick views: its summary annotation,
+// falling back to the alert name.
+export function getAlertHeading(
+  alert: Pick<AlertFragment, 'title' | 'tags' | 'annotations'>
+) {
+  return getAlertSummary(alert) || getAlertName(alert)
 }
 
 // Link to the alert in its source (e.g. Grafana): source icon + alert name,

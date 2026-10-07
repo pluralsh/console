@@ -74,37 +74,6 @@ export function updateNestedConnection<TData>(
   return res
 }
 
-/**
- * Update a connection where incoming values overwrite previous existing values
- */
-export function updateConnection<
-  K extends string,
-  TData extends Partial<
-    Record<K, (Connection<any> & PaginatedResult<any>) | null>
-  >,
->(prev: TData, next: TData[K] | null | undefined, key: K) {
-  if (!next) {
-    return prev
-  }
-  const { edges, pageInfo } = next
-
-  const uniq = uniqWith(
-    [...(prev[key]?.edges ?? []), ...(edges ?? [])].reverse(),
-    (a, b) => (a?.node?.id ? a?.node?.id === b?.node?.id : false)
-  ).reverse()
-
-  return {
-    ...prev,
-    [key]: {
-      // newer connection fields (e.g. totalCount) win
-      ...prev[key],
-      ...next,
-      pageInfo,
-      edges: uniq,
-    },
-  }
-}
-
 export function deepUpdate(prev, path, update, ind = 0) {
   if (isString(path)) {
     return deepUpdate(prev, path.split('.'), update, ind)

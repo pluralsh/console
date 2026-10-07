@@ -1,25 +1,15 @@
-import { Chip, ChipSeverity, Flex, Flyover } from '@pluralsh/design-system'
+import { Flex, Flyover } from '@pluralsh/design-system'
+import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { getObservabilityWebhookTypeIcon } from 'components/settings/webhooks/webhookIcons'
-import { getAlertSummary } from 'components/utils/alerts/alertDetails'
-import { getAlertName } from 'components/utils/alerts/AlertSourceLink'
+import { getAlertHeading } from 'components/utils/alerts/AlertSourceLink'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { TRUNCATE } from 'components/utils/truncate'
 import { DetailsField } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
-import { WorkbenchAlertFragment, WorkbenchJobStatus } from 'generated/graphql'
-import { upperFirst } from 'lodash'
+import { WorkbenchAlertFragment } from 'generated/graphql'
 import { cloneElement, useState } from 'react'
 import styled from 'styled-components'
 import { AlertInformation } from './WorkbenchAlertsDetails'
-
-const JOB_STATUS_SEVERITY: Record<WorkbenchJobStatus, ChipSeverity> = {
-  [WorkbenchJobStatus.Pending]: 'info',
-  [WorkbenchJobStatus.Running]: 'info',
-  [WorkbenchJobStatus.Successful]: 'success',
-  [WorkbenchJobStatus.Failed]: 'danger',
-  [WorkbenchJobStatus.Cancelled]: 'neutral',
-  [WorkbenchJobStatus.Paused]: 'warning',
-}
 
 // Quick side view with all alert information, opened from a board card.
 export function WorkbenchAlertFlyover({
@@ -50,9 +40,7 @@ export function WorkbenchAlertFlyover({
             {cloneElement(getObservabilityWebhookTypeIcon(shown.type), {
               size: 16,
             })}
-            <HeaderTitleSC>
-              {getAlertSummary(shown) || getAlertName(shown)}
-            </HeaderTitleSC>
+            <HeaderTitleSC>{getAlertHeading(shown)}</HeaderTitleSC>
           </HeaderSC>
         )
       }
@@ -81,12 +69,10 @@ export function WorkbenchAlertFlyover({
               </DetailsField>
               {job && (
                 <DetailsField label="Job status">
-                  <Chip
+                  <RunStatusChip
                     size="small"
-                    severity={JOB_STATUS_SEVERITY[job.status]}
-                  >
-                    {upperFirst(job.status.toLowerCase())}
-                  </Chip>
+                    status={job.status}
+                  />
                 </DetailsField>
               )}
             </Flex>

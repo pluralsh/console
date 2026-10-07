@@ -165,9 +165,7 @@ defmodule Console.Schema.WorkbenchJob do
   def for_pr_states(query \\ __MODULE__, states) do
     {none, statuses} = Enum.split_with(states, &(&1 == :none))
     with_prs = from(pr in PullRequest, where: pr.status in ^statuses, select: pr.workbench_job_id)
-    matches = dynamic([j], j.id in subquery(with_prs))
-    matches = if none != [], do: dynamic([j], ^matches or j.id not in subquery(pr_job_ids())), else: matches
-    from(j in query, where: ^matches)
+    from(j in query, where: j.id in subquery(with_prs) or (^(none != []) and j.id not in subquery(pr_job_ids())))
   end
 
   def without_pull_requests(query \\ __MODULE__) do
@@ -175,7 +173,7 @@ defmodule Console.Schema.WorkbenchJob do
   end
 
   defp pr_job_ids() do
-    from(pr in PullRequest, where: not is_nil(pr.workbench_job_id), select: pr.workbench_job_id)
+    from(pr in PullRequest.with_workbench(), select: pr.workbench_job_id)
   end
 
   def count_by_status(query \\ __MODULE__) do
@@ -184,8 +182,7 @@ defmodule Console.Schema.WorkbenchJob do
 
   def count_by_pr_state(query \\ __MODULE__) do
     from(j in query,
-      join: pr in PullRequest,
-        on: pr.workbench_job_id == j.id,
+      join: pr in assoc(j, :pull_requests),
       group_by: pr.status,
       select: %{state: pr.status, count: count(j.id, :distinct)}
     )

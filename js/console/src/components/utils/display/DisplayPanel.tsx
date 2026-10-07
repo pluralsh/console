@@ -23,17 +23,22 @@ import {
 } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
-import { xor } from 'lodash'
+import { SortDirection } from 'generated/graphql'
+import { compact, isEmpty, mapValues, keyBy, omit, xor } from 'lodash'
 import {
   ComponentProps,
   ReactElement,
   ReactNode,
+  useCallback,
+  useMemo,
   useRef,
   useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 export type DisplayView = 'list' | 'board' | 'details'
+
+export const ALL_DISPLAY_VIEWS: DisplayView[] = ['list', 'board', 'details']
 
 const DISPLAY_POPOVER_WIDTH = 301
 
@@ -46,25 +51,58 @@ const DISPLAY_VIEW_OPTIONS: Record<
   details: { label: 'Details', icon: <OpenPanelFilledLeftIcon /> },
 }
 
-// View choice remembered per user (localStorage), restricted to `views`.
-export function usePersistedDisplayView(
+// Display state whose view is remembered per user (localStorage), while
+// filters and sort only last for the visit.
+export function useDisplayState<S extends { view: DisplayView }>(
   storageKey: string,
-  views: DisplayView[],
-  defaultView: DisplayView
+  defaults: S
 ) {
-  return usePersistedState<DisplayView>(
+  const [view, setView] = usePersistedState<DisplayView>(
     storageKey,
-    defaultView,
+    defaults.view,
     0,
     (value: unknown) =>
-      views.includes(value as DisplayView)
+      ALL_DISPLAY_VIEWS.includes(value as DisplayView)
         ? (value as DisplayView)
-        : defaultView
+        : defaults.view
   )
+  const [filters, setFilters] = useState(() => omit(defaults, 'view'))
+  const display = useMemo(() => ({ ...filters, view }) as S, [filters, view])
+  const updateDisplay = useCallback(
+    ({ view: nextView, ...nextFilters }: S) => {
+      setFilters(nextFilters)
+      setView(nextView)
+    },
+    [setView]
+  )
+
+  return { display, filters, updateDisplay }
+}
+
+// filter option counts keyed by option, from a list of count entries
+export function toCounts<E extends { count: number }, K extends string>(
+  entries: Nullable<Nullable<E>[]>,
+  getKey: (entry: E) => K
+): Partial<Record<K, number>> {
+  return mapValues(keyBy(compact(entries), getKey), 'count') as Partial<
+    Record<K, number>
+  >
 }
 
 export function toggleListValue<T>(list: T[], value: T): T[] {
   return xor(list, [value])
+}
+
+export function allSelected<T>(selected: T[], all: readonly T[]): boolean {
+  return isEmpty(xor(selected, all))
+}
+
+// a filter query variable, left out when every option is selected
+export function filterVariable<T>(
+  selected: T[],
+  all: readonly T[]
+): T[] | undefined {
+  return allSelected(selected, all) ? undefined : selected
 }
 
 export function DisplayButton({
@@ -195,17 +233,43 @@ export function DisplaySectionHeader({ children }: { children: ReactNode }) {
   return <SectionHeaderSC>{children}</SectionHeaderSC>
 }
 
-export function DisplayFilterRows({
+// A section of checkbox filters, one row per option with its count.
+export function DisplayFilterSection<T extends string>({
+  title,
+  options,
+  selected,
+  counts,
+  getLabel,
   compact,
-  children,
+  onChange,
 }: {
+  title: string
+  options: readonly T[]
+  selected: T[]
+  counts: Partial<Record<T, number>>
+  getLabel: (option: T) => string
   compact?: boolean
-  children: ReactNode
+  onChange: (selected: T[]) => void
 }) {
-  return <FilterRowsSC $compact={compact}>{children}</FilterRowsSC>
+  return (
+    <DisplaySection>
+      <DisplaySectionHeader>{title}</DisplaySectionHeader>
+      <FilterRowsSC $compact={compact}>
+        {options.map((option) => (
+          <DisplayFilterRow
+            key={option}
+            label={getLabel(option)}
+            count={counts[option] ?? 0}
+            checked={selected.includes(option)}
+            onChange={() => onChange(toggleListValue(selected, option))}
+          />
+        ))}
+      </FilterRowsSC>
+    </DisplaySection>
+  )
 }
 
-export function DisplayFilterRow({
+function DisplayFilterRow({
   label,
   count,
   checked,
@@ -231,15 +295,16 @@ export function DisplayFilterRow({
 }
 
 export function DisplaySortHeader({
-  descending,
-  onToggle,
+  direction,
+  onChange,
   disabledReason,
 }: {
-  descending: boolean
-  onToggle: () => void
+  direction: SortDirection
+  onChange: (direction: SortDirection) => void
   // disables the toggle, explaining why in its tooltip
   disabledReason?: string
 }) {
+  const descending = direction === SortDirection.Desc
   const toggle = (
     <IconFrame
       clickable
@@ -249,7 +314,9 @@ export function DisplaySortHeader({
       type="tertiary"
       tooltip={!disabledReason && (descending ? 'Descending' : 'Ascending')}
       icon={descending ? <SortDescIcon /> : <SortAscIcon />}
-      onClick={onToggle}
+      onClick={() =>
+        onChange(descending ? SortDirection.Asc : SortDirection.Desc)
+      }
       css={{
         width: 28,
         height: 20,

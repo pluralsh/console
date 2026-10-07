@@ -1,28 +1,20 @@
 import { Radio } from '@pluralsh/design-system'
 import {
-  DisplayFilterRow,
-  DisplayFilterRows,
+  ALL_DISPLAY_VIEWS,
+  DisplayFilterSection,
   DisplayRadioGroup,
   DisplaySection,
-  DisplaySectionHeader,
   DisplaySortHeader,
   DisplayViewToggle,
-  toggleListValue,
 } from 'components/utils/display/DisplayPanel'
 import {
   ISSUE_STATUS_LABELS,
   ISSUE_STATUS_OPTIONS,
 } from 'components/workbenches/common/issueStatus'
-import {
-  IssueSort,
-  SortDirection,
-  IssueStatus,
-  IssueWebhookProvider,
-} from 'generated/graphql'
-import { startCase } from 'lodash'
+import { IssueSort, IssueStatus, IssueWebhookProvider } from 'generated/graphql'
+import { humanizeIssueWebhookProvider } from 'utils/webhookLabels'
 import {
   visibleIssueProviders,
-  WORKBENCH_ISSUES_VIEWS,
   WorkbenchIssuesDisplayState,
 } from './workbenchIssuesDisplay'
 
@@ -37,65 +29,34 @@ export function WorkbenchIssuesDisplayOptions({
   providerCounts: Partial<Record<IssueWebhookProvider, number>>
   statusCounts: Partial<Record<IssueStatus, number>>
 }) {
-  const providers = visibleIssueProviders(providerCounts)
-
   return (
     <>
       <DisplayViewToggle
         view={state.view}
-        views={WORKBENCH_ISSUES_VIEWS}
+        views={ALL_DISPLAY_VIEWS}
         onChange={(view) => onChange({ ...state, view })}
       />
-      <DisplaySection>
-        <DisplaySectionHeader>Source from</DisplaySectionHeader>
-        <DisplayFilterRows>
-          {providers.map((provider) => (
-            <DisplayFilterRow
-              key={provider}
-              label={startCase(provider.toLowerCase())}
-              count={providerCounts[provider] ?? 0}
-              checked={state.providers.includes(provider)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  providers: toggleListValue(state.providers, provider),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
-      <DisplaySection>
-        <DisplaySectionHeader>Issue status</DisplaySectionHeader>
-        <DisplayFilterRows compact>
-          {ISSUE_STATUS_OPTIONS.map((status) => (
-            <DisplayFilterRow
-              key={status}
-              label={ISSUE_STATUS_LABELS[status]}
-              count={statusCounts[status] ?? 0}
-              checked={state.statuses.includes(status)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  statuses: toggleListValue(state.statuses, status),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
+      <DisplayFilterSection
+        title="Source from"
+        options={visibleIssueProviders(providerCounts)}
+        selected={state.providers}
+        counts={providerCounts}
+        getLabel={humanizeIssueWebhookProvider}
+        onChange={(providers) => onChange({ ...state, providers })}
+      />
+      <DisplayFilterSection
+        title="Issue status"
+        options={ISSUE_STATUS_OPTIONS}
+        selected={state.statuses}
+        counts={statusCounts}
+        getLabel={(status) => ISSUE_STATUS_LABELS[status]}
+        compact
+        onChange={(statuses) => onChange({ ...state, statuses })}
+      />
       <DisplaySection>
         <DisplaySortHeader
-          descending={state.direction === SortDirection.Desc}
-          onToggle={() =>
-            onChange({
-              ...state,
-              direction:
-                state.direction === SortDirection.Desc
-                  ? SortDirection.Asc
-                  : SortDirection.Desc,
-            })
-          }
+          direction={state.direction}
+          onChange={(direction) => onChange({ ...state, direction })}
         />
         <DisplayRadioGroup
           value={state.sort}

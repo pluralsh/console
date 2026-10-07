@@ -1,11 +1,9 @@
-import { Flex } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { GqlError } from 'components/utils/Alert'
 import {
-  DisplayFilterEmpty,
   DisplayPopover,
-  usePersistedDisplayView,
+  toCounts,
+  useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import {
   AlertsTable,
@@ -18,14 +16,12 @@ import {
 } from '../../utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
-import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
+import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import {
-  AlertSeverity,
-  ObservabilityWebhookType,
   useWorkbenchAlertCountsQuery,
   useWorkbenchAlertsQuery,
 } from 'generated/graphql'
-import { compact, fromPairs, isEmpty, omit } from 'lodash'
+import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
@@ -42,8 +38,6 @@ import {
   resetAlertFilters,
   toAlertFilterVariables,
   visibleAlertTypes,
-  WORKBENCH_ALERTS_VIEWS,
-  WorkbenchAlertsDisplayState,
 } from './workbenchAlertsDisplay'
 
 const WORKBENCH_ALERTS_VIEW_STORAGE_KEY = 'workbench-alerts-view'
@@ -54,24 +48,12 @@ const ALERTS_KEY_PATH = ['workbench', 'alerts']
 
 export function WorkbenchAlerts() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  // the view is remembered per user, filters and sort only for the visit
-  const [view, setView] = usePersistedDisplayView(
+  const { display, updateDisplay } = useDisplayState(
     WORKBENCH_ALERTS_VIEW_STORAGE_KEY,
-    WORKBENCH_ALERTS_VIEWS,
-    DEFAULT_WORKBENCH_ALERTS_DISPLAY.view
+    DEFAULT_WORKBENCH_ALERTS_DISPLAY
   )
-  const [filters, setFilters] = useState(() =>
-    omit(DEFAULT_WORKBENCH_ALERTS_DISPLAY, 'view')
-  )
-  const display = useMemo(() => ({ ...filters, view }), [filters, view])
+  const { view } = display
   const filterVars = useMemo(() => toAlertFilterVariables(display), [display])
-  const updateDisplay = ({
-    view: nextView,
-    ...nextFilters
-  }: WorkbenchAlertsDisplayState) => {
-    setFilters(nextFilters)
-    setView(nextView)
-  }
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const {
@@ -102,23 +84,15 @@ export function WorkbenchAlerts() {
     pollInterval: POLL_INTERVAL,
   })
   const typeCounts = useMemo(
-    () =>
-      fromPairs(
-        compact(countsData?.workbench?.alertCounts?.types).map((entry) => [
-          entry.type,
-          entry.count,
-        ])
-      ) as Partial<Record<ObservabilityWebhookType, number>>,
+    () => toCounts(countsData?.workbench?.alertCounts?.types, (e) => e.type),
     [countsData]
   )
   const severityCounts = useMemo(
     () =>
-      fromPairs(
-        compact(countsData?.workbench?.alertCounts?.severities).map((entry) => [
-          entry.severity,
-          entry.count,
-        ])
-      ) as Partial<Record<AlertSeverity, number>>,
+      toCounts(
+        countsData?.workbench?.alertCounts?.severities,
+        (e) => e.severity
+      ),
     [countsData]
   )
   const filterEmptyKind = useMemo(
@@ -158,20 +132,24 @@ export function WorkbenchAlerts() {
     if (!tableSliceActive) setVirtualSlice(undefined)
   }, [tableSliceActive, setVirtualSlice])
 
+  const filtered = hasUncheckedAlertFilters(display)
   const emptyState = {
     searching: !!debouncedSearchString,
-    filtered: hasUncheckedAlertFilters(display),
+    filtered,
     onResetFilters: () => updateDisplay(resetAlertFilters(display)),
   }
-  const details = useWorkbenchAlertsDetails({
-    active: view === 'details',
-    emptyState,
+  const listProps = {
     alerts,
     loading: !data && loading,
     fetchingMore,
     hasNextPage: !!pageInfo?.hasNextPage,
     fetchNextPage,
     fallbackWorkbenchId: workbenchId,
+    emptyState,
+  }
+  const details = useWorkbenchAlertsDetails({
+    ...listProps,
+    active: view === 'details',
     searchString,
     onSearchChange: setSearchString,
     severities: display.severities,
@@ -188,7 +166,7 @@ export function WorkbenchAlerts() {
         tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
-        <DisplayPopover showDot={hasUncheckedAlertFilters(display)}>
+        <DisplayPopover showDot={filtered}>
           <WorkbenchAlertsDisplayOptions
             state={display}
             onChange={updateDisplay}
@@ -201,36 +179,24 @@ export function WorkbenchAlerts() {
       {showDetails ? (
         details.content
       ) : (
-        <WrapperSC>
-          <WorkbenchSearchInput
-            value={searchString}
-            onChange={setSearchString}
-            placeholder="Search alerts"
-          />
-          {error ? (
-            <GqlError error={error} />
-          ) : filterEmptyKind ? (
-            <DisplayFilterEmpty
-              title={`No ${filterEmptyKind} selected`}
-              description={`It looks like there are no ${filterEmptyKind} selected.`}
-              onReset={() => updateDisplay(resetAlertFilters(display))}
-            />
-          ) : view === 'board' ? (
+        <WorkbenchMonitoringContent
+          searchString={searchString}
+          onSearchChange={setSearchString}
+          searchPlaceholder="Search alerts"
+          error={error}
+          filterEmptyKind={filterEmptyKind}
+          onResetFilters={emptyState.onResetFilters}
+        >
+          {view === 'board' ? (
             <WorkbenchAlertsBoard
+              {...listProps}
               totalCount={totalCount}
-              emptyState={emptyState}
-              alerts={alerts}
-              loading={!data && loading}
-              fetchingMore={fetchingMore}
-              hasNextPage={!!pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              fallbackWorkbenchId={workbenchId}
             />
           ) : (
             <TableContainerSC>
               <AlertsTable
                 alerts={alerts}
-                loading={!data && loading}
+                loading={listProps.loading}
                 error={null}
                 hasNextPage={pageInfo?.hasNextPage}
                 fetchNextPage={fetchNextPage}
@@ -242,20 +208,11 @@ export function WorkbenchAlerts() {
               />
             </TableContainerSC>
           )}
-        </WrapperSC>
+        </WorkbenchMonitoringContent>
       )}
     </WorkbenchPageLayout>
   )
 }
-
-const WrapperSC = styled(Flex)(({ theme }) => ({
-  flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.medium,
-  minHeight: 160,
-  overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-}))
 
 const TableContainerSC = styled.div({
   flex: 1,

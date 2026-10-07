@@ -15,13 +15,11 @@ import {
   BoardEmptyList,
   EmptyListState,
   LoadMoreSentinel,
-  useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
 import {
   DetailsCaptionSC,
-  DetailsCollapseButton,
+  DetailsPanelToggle,
   DetailsColumnSC,
-  DetailsExpandButton,
   DetailsLayoutSC,
   DetailsLinkRowSC,
   DetailsListAgeSC,
@@ -97,11 +95,6 @@ export function useWorkbenchJobsDetails({
   active: boolean
   emptyState: EmptyListState
 }) {
-  const loadMore = useBoardLoadMore({
-    fetchingMore,
-    hasNextPage,
-    fetchNextPage,
-  })
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsViewState(jobs)
 
@@ -149,7 +142,11 @@ export function useWorkbenchJobsDetails({
             />
           ))
         )}
-        {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+        <LoadMoreSentinel
+          fetchingMore={fetchingMore}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+        />
       </DetailsListItemsSC>
     </DetailsListSC>
   )
@@ -164,7 +161,8 @@ export function useWorkbenchJobsDetails({
           workbenchId={selected.workbench?.id ?? workbenchId}
           headerActions={
             !detailsOpen && (
-              <DetailsExpandButton
+              <DetailsPanelToggle
+                expand
                 label="Show job details"
                 onClick={() => setDetailsOpen(true)}
               />
@@ -221,7 +219,7 @@ function WorkbenchJobDetailsPanel({
         {job?.updatedAt && (
           <DetailsCaptionSC>updated {fromNow(job.updatedAt)}</DetailsCaptionSC>
         )}
-        <DetailsCollapseButton
+        <DetailsPanelToggle
           label="Hide job details"
           onClick={onCollapse}
         />
