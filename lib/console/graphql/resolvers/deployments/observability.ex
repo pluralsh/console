@@ -41,9 +41,38 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   def list_alerts(parent, args, _) do
     for_parent(parent)
     |> maybe_search(Alert, args)
-    |> Alert.ordered()
-    |> paginate(args)
+    |> alert_filters(args)
+    |> alert_order(args)
+    |> paginate_with_total(args)
   end
+
+  def alert_counts(%Workbench{id: id}, _, _) do
+    alerts = Alert.for_workbench(id)
+
+    {:ok, %{
+      types: Console.Repo.all(Alert.count_by_type(alerts)),
+      severities: Console.Repo.all(Alert.count_by_severity(alerts))
+    }}
+  end
+
+  defp alert_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:types, t}, q when is_list(t) -> Alert.for_types(q, t)
+      {:severities, s}, q when is_list(s) -> Alert.for_severities(q, s)
+      _, q -> q
+    end)
+  end
+
+  # without an explicit sort keep the default most-recently-updated ordering
+  defp alert_order(query, args) when is_map_key(args, :sort) or is_map_key(args, :direction) do
+    field = alert_sort_field(Map.get(args, :sort))
+    dir = Map.get(args, :direction) || :desc
+    Alert.ordered(query, [{dir, field}, {dir, :id}])
+  end
+  defp alert_order(query, _), do: Alert.ordered(query)
+
+  defp alert_sort_field(:title), do: :title
+  defp alert_sort_field(_), do: :inserted_at
 
   def upsert_observability_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.upsert_provider(attrs, user)

@@ -21,7 +21,6 @@ import {
   getAlertName,
 } from 'components/utils/alerts/AlertSourceLink'
 import { GqlError } from 'components/utils/Alert'
-import { toggleListValue } from 'components/utils/display/DisplayPanel'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
   BoardLoadingOrEmpty,
@@ -58,13 +57,18 @@ import {
   AlertState,
   WorkbenchJobStatus,
 } from 'generated/graphql'
-import { countBy, isEmpty } from 'lodash'
-import { ReactNode, useMemo, useState } from 'react'
+import { compact, isEmpty } from 'lodash'
+import { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime, formatShortAge } from 'utils/datetime'
 import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
+import {
+  ALERT_SEVERITY_OPTIONS,
+  allAlertSeveritiesSelected,
+  toggleAlertSeverityChip,
+} from './workbenchAlertsDisplay'
 import {
   ExpandablePrompt,
   usePolledWorkbenchJob,
@@ -88,6 +92,9 @@ export function useWorkbenchAlertsDetails({
   fallbackWorkbenchId,
   searchString,
   onSearchChange,
+  severities,
+  severityCounts,
+  onSeveritiesChange,
 }: {
   alerts: AlertFragment[]
   // first load only (spinner); later fetches don't blank the view
@@ -99,33 +106,21 @@ export function useWorkbenchAlertsDetails({
   fallbackWorkbenchId: string
   searchString: string
   onSearchChange: (value: string) => void
+  // the display severity filter, applied server-side
+  severities: AlertSeverity[]
+  // workbench-wide counts per severity
+  severityCounts: Partial<Record<AlertSeverity, number>>
+  onSeveritiesChange: (severities: AlertSeverity[]) => void
 }) {
-  const [severities, setSeverities] = useState<AlertSeverity[]>([])
   const loadMore = useBoardLoadMore({
     fetchingMore,
     hasNextPage,
     fetchNextPage,
   })
 
-  const severityCounts = useMemo(
-    () => countBy(alerts, ({ severity }) => severity),
-    [alerts]
-  )
-  // ignore selected severities whose chip disappeared (no alerts left), so the
-  // filter can't get stuck on a chip that can no longer be toggled off
-  const activeSeverities = useMemo(
-    () => severities.filter((severity) => severityCounts[severity]),
-    [severities, severityCounts]
-  )
-  const visible = useMemo(
-    () =>
-      isEmpty(activeSeverities)
-        ? alerts
-        : alerts.filter(({ severity }) => activeSeverities.includes(severity)),
-    [alerts, activeSeverities]
-  )
+  const filtered = !allAlertSeveritiesSelected(severities)
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
-    useDetailsSelection(visible)
+    useDetailsSelection(alerts)
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
 
   const sidebar = (
@@ -138,7 +133,7 @@ export function useWorkbenchAlertsDetails({
           placeholder="Search alerts"
         />
       </DetailsListSearchSC>
-      {!isEmpty(alerts) && (
+      {!isEmpty(compact(Object.values(severityCounts))) && (
         <DetailsListSearchSC>
           <SeverityChipsSC>
             {ALERT_SEVERITY_ORDER.filter(
@@ -150,13 +145,12 @@ export function useWorkbenchAlertsDetails({
                 size="small"
                 fillLevel={2}
                 severity={alertSeverityToChipSeverity[severity]}
-                inactive={
-                  !isEmpty(activeSeverities) &&
-                  !activeSeverities.includes(severity)
-                }
-                aria-pressed={activeSeverities.includes(severity)}
+                inactive={filtered && !severities.includes(severity)}
+                aria-pressed={filtered && severities.includes(severity)}
                 onClick={() =>
-                  setSeverities(toggleListValue(activeSeverities, severity))
+                  onSeveritiesChange(
+                    toggleAlertSeverityChip(severities, severity)
+                  )
                 }
                 rounded
               >
@@ -168,27 +162,26 @@ export function useWorkbenchAlertsDetails({
         </DetailsListSearchSC>
       )}
       <DetailsListItemsSC>
-        {isEmpty(alerts) ? (
-          <BoardLoadingOrEmpty
-            loading={loading}
-            message={
-              searchString ? 'No matching alerts found.' : 'No alerts found.'
-            }
-          />
-        ) : (
-          isEmpty(visible) && (
+        {isEmpty(alerts) &&
+          (filtered && !loading ? (
             <EmptyState message="No alerts match the selected severities.">
               <Button
                 small
                 secondary
-                onClick={() => setSeverities([])}
+                onClick={() => onSeveritiesChange(ALERT_SEVERITY_OPTIONS)}
               >
                 Reset filters
               </Button>
             </EmptyState>
-          )
-        )}
-        {visible.map((alert) => (
+          ) : (
+            <BoardLoadingOrEmpty
+              loading={loading}
+              message={
+                searchString ? 'No matching alerts found.' : 'No alerts found.'
+              }
+            />
+          ))}
+        {alerts.map((alert) => (
           <DetailsListItem
             key={alert.id}
             selected={alert.id === selected?.id}
@@ -290,6 +283,7 @@ function AlertConclusionPanel({
         {alert.workbenchJob?.status === WorkbenchJobStatus.Failed && (
           <DetailsErrorBanner action={viewJobLink}>
             Workbench job reported an error.
+            {alert.workbenchJob.error ? ` ${alert.workbenchJob.error}` : ''}
           </DetailsErrorBanner>
         )}
         <DetailsTitleSC>

@@ -70,7 +70,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchJob.for_workbench(workbench.id)
     |> workbench_job_filters(args)
     |> WorkbenchJob.ordered([{dir, :inserted_at}, {dir, :id}])
-    |> paginate(args)
+    |> paginate_with_total(args)
   end
 
   def run_counts(%Workbench{id: id}, _, _) do

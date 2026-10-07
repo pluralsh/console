@@ -2,9 +2,8 @@ import { Flex } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
 import {
+  DisplayFilterEmpty,
   DisplayPopover,
-  DisplayView,
-  DisplayViewToggle,
   usePersistedDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import {
@@ -19,8 +18,12 @@ import {
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
-import { useWorkbenchAlertsQuery } from 'generated/graphql'
-import { isEmpty } from 'lodash'
+import {
+  AlertSeverity,
+  ObservabilityWebhookType,
+  useWorkbenchAlertsQuery,
+} from 'generated/graphql'
+import { compact, fromPairs, isEmpty, omit } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
@@ -29,20 +32,42 @@ import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
 import { WorkbenchAlertsBoard } from './WorkbenchAlertsBoard'
 import { useWorkbenchAlertsDetails } from './WorkbenchAlertsDetails'
+import { WorkbenchAlertsDisplayOptions } from './WorkbenchAlertsDisplayOptions'
+import {
+  DEFAULT_WORKBENCH_ALERTS_DISPLAY,
+  getAlertFilterEmptyKind,
+  hasUncheckedAlertFilters,
+  resetAlertFilters,
+  toAlertFilterVariables,
+  visibleAlertTypes,
+  WORKBENCH_ALERTS_VIEWS,
+  WorkbenchAlertsDisplayState,
+} from './workbenchAlertsDisplay'
 
 const WORKBENCH_ALERTS_VIEW_STORAGE_KEY = 'workbench-alerts-view'
-const WORKBENCH_ALERTS_VIEWS: DisplayView[] = ['list', 'board', 'details']
-const DEFAULT_WORKBENCH_ALERTS_VIEW: DisplayView = 'list'
 
 const noop = () => {}
 
 export function WorkbenchAlerts() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
+  // the view is remembered per user, filters and sort only for the visit
   const [view, setView] = usePersistedDisplayView(
     WORKBENCH_ALERTS_VIEW_STORAGE_KEY,
     WORKBENCH_ALERTS_VIEWS,
-    DEFAULT_WORKBENCH_ALERTS_VIEW
+    DEFAULT_WORKBENCH_ALERTS_DISPLAY.view
   )
+  const [filters, setFilters] = useState(() =>
+    omit(DEFAULT_WORKBENCH_ALERTS_DISPLAY, 'view')
+  )
+  const display = useMemo(() => ({ ...filters, view }), [filters, view])
+  const filterVars = useMemo(() => toAlertFilterVariables(display), [display])
+  const updateDisplay = ({
+    view: nextView,
+    ...nextFilters
+  }: WorkbenchAlertsDisplayState) => {
+    setFilters(nextFilters)
+    setView(nextView)
+  }
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const {
@@ -58,8 +83,34 @@ export function WorkbenchAlerts() {
     {
       id: workbenchId,
       q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
+      ...filterVars,
     }
   )
+  const typeCounts = useMemo(
+    () =>
+      fromPairs(
+        compact(data?.workbench?.alertCounts?.types).map((entry) => [
+          entry.type,
+          entry.count,
+        ])
+      ) as Partial<Record<ObservabilityWebhookType, number>>,
+    [data]
+  )
+  const severityCounts = useMemo(
+    () =>
+      fromPairs(
+        compact(data?.workbench?.alertCounts?.severities).map((entry) => [
+          entry.severity,
+          entry.count,
+        ])
+      ) as Partial<Record<AlertSeverity, number>>,
+    [data]
+  )
+  const filterEmptyKind = useMemo(
+    () => getAlertFilterEmptyKind(display, visibleAlertTypes(typeCounts)),
+    [display, typeCounts]
+  )
+  const totalCount = data?.workbench?.alerts?.totalCount
   const alerts = useMemo(
     () => mapExistingNodes(data?.workbench?.alerts),
     [data]
@@ -101,8 +152,12 @@ export function WorkbenchAlerts() {
     fallbackWorkbenchId: workbenchId,
     searchString,
     onSearchChange: setSearchString,
+    severities: display.severities,
+    severityCounts,
+    onSeveritiesChange: (severities) =>
+      updateDisplay({ ...display, severities }),
   })
-  const showDetails = view === 'details' && !error
+  const showDetails = view === 'details' && !error && !filterEmptyKind
 
   return (
     <WorkbenchPageLayout
@@ -111,11 +166,12 @@ export function WorkbenchAlerts() {
         tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
-        <DisplayPopover showDot={false}>
-          <DisplayViewToggle
-            view={view}
-            views={WORKBENCH_ALERTS_VIEWS}
-            onChange={setView}
+        <DisplayPopover showDot={hasUncheckedAlertFilters(display)}>
+          <WorkbenchAlertsDisplayOptions
+            state={display}
+            onChange={updateDisplay}
+            typeCounts={typeCounts}
+            severityCounts={severityCounts}
           />
         </DisplayPopover>
       }
@@ -131,8 +187,15 @@ export function WorkbenchAlerts() {
             onChange={setSearchString}
             placeholder="Search alerts"
           />
-          {view === 'board' ? (
+          {filterEmptyKind ? (
+            <DisplayFilterEmpty
+              title={`No ${filterEmptyKind} selected`}
+              description={`It looks like there are no ${filterEmptyKind} selected.`}
+              onReset={() => updateDisplay(resetAlertFilters(display))}
+            />
+          ) : view === 'board' ? (
             <WorkbenchAlertsBoard
+              totalCount={totalCount}
               alerts={alerts}
               loading={!data && loading}
               fetchingMore={fetchingMore}

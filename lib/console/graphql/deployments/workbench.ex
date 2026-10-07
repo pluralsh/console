@@ -630,8 +630,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     connection field :alerts, node_type: :alert do
       middleware Nested, check: true, msg: "workbench alerts cannot be fetched through a policy"
       arg :q, :string, description: "search alerts by title, alertname tag or message"
+      arg :types, list_of(:observability_webhook_type), description: "filter alerts by source"
+      arg :severities, list_of(:alert_severity), description: "filter alerts by severity"
+      arg :sort, :alert_sort, description: "field to sort alerts by (defaults to most recently updated)"
+      arg :direction, :sort_direction, description: "sort direction"
 
       resolve &Deployments.list_alerts/3
+    end
+
+    field :alert_counts, :workbench_alert_counts do
+      middleware Nested, check: true, msg: "workbench alert counts cannot be fetched through a policy"
+      resolve &Deployments.alert_counts/3
     end
 
     connection field :issues, node_type: :issue do
@@ -1558,7 +1567,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench
   connection node_type: :workbench_tool
   connection node_type: :workbench_policy
-  connection node_type: :workbench_job
+  connection node_type: :workbench_job do
+    field :total_count, :integer,
+      description: "total number of jobs matching the query's filters (counted only when selected)",
+      resolve: &Console.GraphQl.Resolvers.Base.total_count/3
+
+    edge do
+    end
+  end
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
   connection node_type: :queued_prompt

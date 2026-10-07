@@ -1,6 +1,6 @@
 import { EmptyState, Flex, Spinner } from '@pluralsh/design-system'
 import { isNil } from 'lodash'
-import { useCallback, useEffect, useRef } from 'react'
+import { ReactNode, useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import styled, { DefaultTheme } from 'styled-components'
 
@@ -104,6 +104,28 @@ export const BoardTitleSC = styled.h2(({ theme }) => ({
   letterSpacing: 0,
   margin: 0,
   color: theme.colors.text,
+}))
+
+// a section title with its item count, e.g. "All jobs 291"; no count is shown
+// until it's known
+export function BoardTitle({
+  children,
+  count,
+}: {
+  children: ReactNode
+  count?: Nullable<number>
+}) {
+  return (
+    <BoardTitleSC>
+      {children}
+      {!isNil(count) && <BoardTitleCountSC>{count}</BoardTitleCountSC>}
+    </BoardTitleSC>
+  )
+}
+
+const BoardTitleCountSC = styled.span(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+  marginLeft: theme.spacing.medium,
 }))
 
 // Whole-card click target without nesting the card's own links and buttons

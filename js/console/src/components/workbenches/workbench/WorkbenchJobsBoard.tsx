@@ -3,6 +3,7 @@ import {
   BoardLoadingOrEmpty,
   BoardSC,
   BoardSectionSC,
+  BoardTitle,
   BoardTitleSC,
   LoadMoreSentinel,
   useBoardLoadMore,
@@ -21,6 +22,7 @@ export function WorkbenchJobsBoard({
   hasNextPage,
   fetchNextPage,
   showRecent = true,
+  totalCount,
 }: {
   jobs: WorkbenchJobTinyFragment[]
   // first load only (spinner); later fetches don't blank the view
@@ -31,6 +33,8 @@ export function WorkbenchJobsBoard({
   fetchNextPage: () => void
   // off while searching: "recent" means nothing for search results
   showRecent?: boolean
+  // jobs matching the current filters, across all pages
+  totalCount?: Nullable<number>
 }) {
   const loadMore = useBoardLoadMore({
     fetchingMore,
@@ -62,7 +66,9 @@ export function WorkbenchJobsBoard({
         </BoardSectionSC>
       )}
       <BoardSectionSC>
-        <BoardTitleSC>{showRecent ? 'All jobs' : 'Matching jobs'}</BoardTitleSC>
+        <BoardTitle count={totalCount}>
+          {showRecent ? 'All jobs' : 'Matching jobs'}
+        </BoardTitle>
         <BoardCardGridSC>
           {jobs.map((job) => (
             <WorkbenchJobCard

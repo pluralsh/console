@@ -727,6 +727,122 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       end
     end
 
+    test "it can filter workbench alerts by source and severity" do
+      workbench = insert(:workbench)
+      match = insert(:alert, workbench: workbench, type: :datadog, severity: :high)
+      insert(:alert, workbench: workbench, type: :grafana, severity: :high)
+      insert(:alert, workbench: workbench, type: :datadog, severity: :low)
+      insert(:alert, project: workbench.project, type: :datadog, severity: :high)
+
+      query = """
+        query Workbench($id: ID!, $types: [ObservabilityWebhookType], $severities: [AlertSeverity]) {
+          workbench(id: $id) {
+            alerts(first: 10, types: $types, severities: $severities) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query(query, %{
+        "id" => workbench.id,
+        "types" => ["DATADOG"],
+        "severities" => ["HIGH", "CRITICAL"]
+      }, %{current_user: admin_user()})
+
+      assert from_connection(found["alerts"])
+             |> ids_equal([match])
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "types" => []}, %{current_user: admin_user()})
+
+      assert from_connection(found["alerts"]) == []
+    end
+
+    test "it can sort workbench alerts" do
+      workbench = insert(:workbench)
+      zulu  = insert(:alert, workbench: workbench, title: "Zulu", inserted_at: Timex.now() |> Timex.shift(days: -1))
+      alpha = insert(:alert, workbench: workbench, title: "Alpha")
+
+      query = """
+        query Workbench($id: ID!, $sort: AlertSort, $direction: SortDirection) {
+          workbench(id: $id) {
+            alerts(first: 10, sort: $sort, direction: $direction) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {vars, expected} <- [
+        {%{"sort" => "TITLE", "direction" => "ASC"}, [alpha, zulu]},
+        {%{"sort" => "TITLE", "direction" => "DESC"}, [zulu, alpha]},
+        {%{"sort" => "INSERTED_AT", "direction" => "ASC"}, [zulu, alpha]},
+        {%{"sort" => "INSERTED_AT"}, [alpha, zulu]}
+      ] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})
+
+        assert from_connection(found["alerts"])
+               |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
+      end
+    end
+
+    test "it can fetch workbench alert counts" do
+      workbench = insert(:workbench)
+      insert(:alert, workbench: workbench, type: :grafana, severity: :high)
+      insert(:alert, workbench: workbench, type: :grafana, severity: :low)
+      insert(:alert, workbench: workbench, type: :datadog, severity: :high)
+      insert(:alert, project: workbench.project, type: :sentry, severity: :critical)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            alertCounts {
+              types { type count }
+              severities { severity count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert Enum.sort_by(found["alertCounts"]["types"], & &1["type"]) == [
+        %{"type" => "DATADOG", "count" => 1},
+        %{"type" => "GRAFANA", "count" => 2}
+      ]
+
+      assert Enum.sort_by(found["alertCounts"]["severities"], & &1["severity"]) == [
+        %{"severity" => "HIGH", "count" => 2},
+        %{"severity" => "LOW", "count" => 1}
+      ]
+    end
+
+    test "workbench alert and run connections report filtered total counts" do
+      workbench = insert(:workbench)
+      insert_list(3, :alert, workbench: workbench, severity: :high)
+      insert(:alert, workbench: workbench, severity: :low)
+      insert(:alert, project: workbench.project, severity: :high)
+      insert_list(2, :workbench_job, workbench: workbench, status: :failed)
+      insert(:workbench_job, workbench: workbench, status: :successful)
+      insert(:workbench_job, status: :failed)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            alerts(first: 1) { totalCount }
+            highAlerts: alerts(first: 1, severities: [HIGH]) { totalCount }
+            runs(first: 1) { totalCount }
+            failedRuns: runs(first: 1, statuses: [FAILED]) { totalCount }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["alerts"]["totalCount"] == 4
+      assert found["highAlerts"]["totalCount"] == 3
+      assert found["runs"]["totalCount"] == 3
+      assert found["failedRuns"]["totalCount"] == 2
+    end
+
     test "it can fetch workbench issues" do
       workbench = insert(:workbench)
       issues = insert_list(3, :issue, workbench: workbench)

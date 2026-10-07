@@ -25,6 +25,7 @@ fragment Alert on Alert {
   workbenchJob {
     id
     status
+    error
   }
   cluster {
     id

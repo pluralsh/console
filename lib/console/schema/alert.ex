@@ -156,6 +156,14 @@ defmodule Console.Schema.Alert do
     from(a in query, where: a.severity in ^severities)
   end
 
+  def count_by_type(query \\ __MODULE__) do
+    from(a in query, group_by: a.type, select: %{type: a.type, count: count(a.id)})
+  end
+
+  def count_by_severity(query \\ __MODULE__) do
+    from(a in query, group_by: a.severity, select: %{severity: a.severity, count: count(a.id)})
+  end
+
   def search(query \\ __MODULE__, q) do
     like = "%#{q}%"
     from(a in query,

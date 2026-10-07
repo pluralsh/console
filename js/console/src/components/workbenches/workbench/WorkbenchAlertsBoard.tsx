@@ -7,6 +7,7 @@ import {
   BoardLoadingOrEmpty,
   BoardSC,
   BoardSectionSC,
+  BoardTitle,
   BoardTitleSC,
   CardRaisedSC,
   CardTargetButtonSC,
@@ -29,6 +30,7 @@ export function WorkbenchAlertsBoard({
   hasNextPage,
   fetchNextPage,
   fallbackWorkbenchId,
+  totalCount,
 }: {
   alerts: AlertFragment[]
   // first load only (spinner); later fetches don't blank the view
@@ -38,6 +40,8 @@ export function WorkbenchAlertsBoard({
   hasNextPage: boolean
   fetchNextPage: () => void
   fallbackWorkbenchId: string
+  // alerts matching the current search and filters, across all pages
+  totalCount?: Nullable<number>
 }) {
   const loadMore = useBoardLoadMore({
     fetchingMore,
@@ -86,7 +90,7 @@ export function WorkbenchAlertsBoard({
         </BoardSectionSC>
       )}
       <BoardSectionSC>
-        <BoardTitleSC>All alerts</BoardTitleSC>
+        <BoardTitle count={totalCount}>All alerts</BoardTitle>
         <BoardCardGridSC>
           {alerts.map((alert) => (
             <WorkbenchAlertCard

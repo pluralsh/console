@@ -80,6 +80,7 @@ export function WorkbenchJobs() {
     { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
     {
       id: workbenchId,
+      withTotal: true,
       ...filterVars,
       direction:
         filters.direction === SortDirection.Desc
@@ -205,6 +206,9 @@ export function WorkbenchJobs() {
               hasNextPage={list.hasNextPage}
               fetchNextPage={list.fetchNextPage}
               showRecent={!searching}
+              totalCount={
+                searching ? jobs.length : data?.workbench?.runs?.totalCount
+              }
             />
           ) : (
             <TableContainerSC>

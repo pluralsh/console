@@ -972,6 +972,7 @@ query WorkbenchJobs(
   $statuses: [WorkbenchJobStatus]
   $prStates: [WorkbenchJobPrState]
   $direction: SortDirection
+  $withTotal: Boolean = false
 ) {
   workbench(id: $id) {
     id
@@ -982,6 +983,7 @@ query WorkbenchJobs(
       prStates: $prStates
       direction: $direction
     ) {
+      totalCount @include(if: $withTotal)
       pageInfo {
         ...PageInfo
       }
@@ -1054,10 +1056,38 @@ query RecentWorkbenchJobs($count: Int) {
   }
 }
 
-query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String, $q: String) {
+query WorkbenchAlerts(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $q: String
+  $types: [ObservabilityWebhookType]
+  $severities: [AlertSeverity]
+  $sort: AlertSort
+  $direction: SortDirection
+) {
   workbench(id: $id) {
     id
-    alerts(first: $first, after: $after, q: $q) {
+    alertCounts {
+      types {
+        type
+        count
+      }
+      severities {
+        severity
+        count
+      }
+    }
+    alerts(
+      first: $first
+      after: $after
+      q: $q
+      types: $types
+      severities: $severities
+      sort: $sort
+      direction: $direction
+    ) {
+      totalCount
       pageInfo {
         ...PageInfo
       }

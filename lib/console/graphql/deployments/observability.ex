@@ -708,6 +708,26 @@ defmodule Console.GraphQl.Deployments.Observability do
       description: "Memory limits for pods managed by this controller"
   end
 
+  enum :alert_sort do
+    value :inserted_at
+    value :title
+  end
+
+  object :workbench_alert_counts do
+    field :types,      list_of(:alert_count_by_type)
+    field :severities, list_of(:alert_count_by_severity)
+  end
+
+  object :alert_count_by_type do
+    field :type,  non_null(:observability_webhook_type)
+    field :count, non_null(:integer)
+  end
+
+  object :alert_count_by_severity do
+    field :severity, non_null(:alert_severity)
+    field :count,    non_null(:integer)
+  end
+
   @desc "Time series data associated with an alert evaluation"
   object :alert_timeseries do
     field :threshold, :float,
@@ -719,7 +739,14 @@ defmodule Console.GraphQl.Deployments.Observability do
 
   connection node_type: :observability_provider
   connection node_type: :observability_webhook
-  connection node_type: :alert
+  connection node_type: :alert do
+    field :total_count, :integer,
+      description: "total number of alerts matching the query's filters (counted only when selected)",
+      resolve: &Console.GraphQl.Resolvers.Base.total_count/3
+
+    edge do
+    end
+  end
   connection node_type: :monitor
   connection node_type: :workbench_dashboard
 

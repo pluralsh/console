@@ -4193,7 +4193,21 @@ type Workbench {
 
     "search alerts by title, alertname tag or message"
     q: String
+
+    "filter alerts by source"
+    types: [ObservabilityWebhookType]
+
+    "filter alerts by severity"
+    severities: [AlertSeverity]
+
+    "field to sort alerts by (defaults to most recently updated)"
+    sort: AlertSort
+
+    "sort direction"
+    direction: SortDirection
   ): AlertConnection
+
+  alertCounts: WorkbenchAlertCounts
 
   issues(
     after: String
@@ -5769,9 +5783,18 @@ type WorkbenchPolicyConnection {
   edges: [WorkbenchPolicyEdge]
 }
 
+type WorkbenchJobEdge {
+  node: WorkbenchJob
+  cursor: String
+}
+
 type WorkbenchJobConnection {
   pageInfo: PageInfo!
+
   edges: [WorkbenchJobEdge]
+
+  "total number of jobs matching the query's filters (counted only when selected)"
+  totalCount: Int
 }
 
 type WorkbenchJobActivityConnection {
@@ -8894,6 +8917,26 @@ type KubernetesControllerMetrics {
   podMemLimits: [MetricResponse]
 }
 
+enum AlertSort {
+  INSERTED_AT
+  TITLE
+}
+
+type WorkbenchAlertCounts {
+  types: [AlertCountByType]
+  severities: [AlertCountBySeverity]
+}
+
+type AlertCountByType {
+  type: ObservabilityWebhookType!
+  count: Int!
+}
+
+type AlertCountBySeverity {
+  severity: AlertSeverity!
+  count: Int!
+}
+
 "Time series data associated with an alert evaluation"
 type AlertTimeseries {
   "Threshold value used when evaluating this alert over time"
@@ -8913,9 +8956,18 @@ type ObservabilityWebhookConnection {
   edges: [ObservabilityWebhookEdge]
 }
 
+type AlertEdge {
+  node: Alert
+  cursor: String
+}
+
 type AlertConnection {
   pageInfo: PageInfo!
+
   edges: [AlertEdge]
+
+  "total number of alerts matching the query's filters (counted only when selected)"
+  totalCount: Int
 }
 
 type MonitorConnection {
@@ -18916,11 +18968,6 @@ type MonitorEdge {
   cursor: String
 }
 
-type AlertEdge {
-  node: Alert
-  cursor: String
-}
-
 type ObservabilityWebhookEdge {
   node: ObservabilityWebhook
   cursor: String
@@ -19028,11 +19075,6 @@ type QueuedPromptEdge {
 
 type WorkbenchJobActivityEdge {
   node: WorkbenchJobActivity
-  cursor: String
-}
-
-type WorkbenchJobEdge {
-  node: WorkbenchJob
   cursor: String
 }
 
