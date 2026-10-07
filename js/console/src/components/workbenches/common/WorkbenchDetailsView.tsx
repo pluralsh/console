@@ -20,6 +20,9 @@ import { BoardTitleSC } from './WorkbenchBoard'
 const DETAILS_LIST_WIDTH = 350
 const STATUS_GUTTER_SIZE = 10
 const DETAILS_PANEL_HEADER_HEIGHT = 44
+// tab strip height when the list is the sidebar: its search row (2x16 padding
+// + 32 input) sits above the same border as the details panels
+export const DETAILS_TAB_STRIP_HEIGHT = 64
 
 export type DetailsGutterStatus = 'running' | 'failed' | null
 
@@ -224,20 +227,26 @@ export const DetailsListAgeSC = styled.span({
   whiteSpace: 'nowrap',
 })
 
+// Details panels next to the list, which is rendered as the page sidebar.
 export const DetailsLayoutSC = styled.div<{ $panelCount: number }>(
   ({ theme, $panelCount }) => ({
     display: 'grid',
-    gridTemplateColumns: `${DETAILS_LIST_WIDTH}px repeat(${$panelCount}, minmax(0, 1fr))`,
+    gridTemplateColumns: `repeat(${$panelCount}, minmax(0, 1fr))`,
     flex: 1,
     minHeight: 0,
     borderTop: theme.borders.default,
   })
 )
 
+// Full-height list column, rendered as the workbench page sidebar (like the
+// Monitoring tab), so its search row lines up with the tab strip.
 export const DetailsListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  minWidth: 0,
+  flexShrink: 0,
+  alignSelf: 'stretch',
+  width: DETAILS_LIST_WIDTH,
+  height: '100%',
   minHeight: 0,
   borderRight: theme.borders.default,
 }))

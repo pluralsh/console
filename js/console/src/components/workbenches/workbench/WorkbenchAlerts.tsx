@@ -17,6 +17,7 @@ import {
 } from '../../utils/alerts/AlertsTable'
 import { getAlertName } from 'components/utils/alerts/AlertSourceLink'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import { useWorkbenchAlertsQuery } from 'generated/graphql'
 import { useDeferredValue, useMemo, useState } from 'react'
@@ -26,7 +27,7 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
 import { WorkbenchAlertsBoard } from './WorkbenchAlertsBoard'
-import { WorkbenchAlertsDetails } from './WorkbenchAlertsDetails'
+import { useWorkbenchAlertsDetails } from './WorkbenchAlertsDetails'
 
 const WORKBENCH_ALERTS_VIEW_STORAGE_KEY = 'workbench-alerts-view'
 const WORKBENCH_ALERTS_VIEWS: DisplayView[] = ['list', 'board', 'details']
@@ -79,8 +80,23 @@ export function WorkbenchAlerts() {
     [workbenchId]
   )
 
+  const details = useWorkbenchAlertsDetails({
+    alerts,
+    loading,
+    hasNextPage: !!pageInfo?.hasNextPage,
+    fetchNextPage,
+    fallbackWorkbenchId: workbenchId,
+    searchString,
+    onSearchChange: setSearchString,
+  })
+  const showDetails = view === 'details' && !error
+
   return (
     <WorkbenchPageLayout
+      {...(showDetails && {
+        sidebar: { kind: 'custom', content: details.sidebar },
+        tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
+      })}
       headerActions={
         <DisplayPopover showDot={false}>
           <DisplayViewToggle
@@ -93,16 +109,8 @@ export function WorkbenchAlerts() {
     >
       {error ? (
         <GqlError error={error} />
-      ) : view === 'details' ? (
-        <WorkbenchAlertsDetails
-          alerts={alerts}
-          loading={loading}
-          hasNextPage={!!pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          fallbackWorkbenchId={workbenchId}
-          searchString={searchString}
-          onSearchChange={setSearchString}
-        />
+      ) : showDetails ? (
+        details.content
       ) : (
         <WrapperSC>
           <WorkbenchSearchInput

@@ -66,7 +66,8 @@ type DetailsTab =
   | 'Topology'
   | 'Actions'
 
-export function WorkbenchJobsDetails({
+// Jobs details view: the job list (page sidebar) and the job panels.
+export function useWorkbenchJobsDetails({
   workbenchId,
   jobs,
   loading,
@@ -87,64 +88,59 @@ export function WorkbenchJobsDetails({
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsSelection(jobs)
 
-  if (isEmpty(jobs) && !searchString)
-    return (
-      <BoardLoadingOrEmpty
-        loading={loading}
-        message="No jobs found."
-      />
-    )
-
-  return (
-    <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
-      <DetailsListSC>
-        <DetailsListSearchSC>
-          <WorkbenchSearchInput
-            size="small"
-            value={searchString}
-            onChange={onSearchChange}
-            placeholder="Search jobs"
+  const sidebar = (
+    <DetailsListSC>
+      <DetailsListSearchSC>
+        <WorkbenchSearchInput
+          size="small"
+          value={searchString}
+          onChange={onSearchChange}
+          placeholder="Search jobs"
+        />
+      </DetailsListSearchSC>
+      <DetailsListItemsSC>
+        {isEmpty(jobs) ? (
+          <BoardLoadingOrEmpty
+            loading={loading}
+            message={
+              searchString ? 'No matching jobs found.' : 'No jobs found.'
+            }
           />
-        </DetailsListSearchSC>
-        <DetailsListItemsSC>
-          {isEmpty(jobs) ? (
-            <BoardLoadingOrEmpty
-              loading={loading}
-              message="No matching jobs found."
+        ) : (
+          jobs.map((job) => (
+            <DetailsListItem
+              key={job.id}
+              selected={job.id === selected?.id}
+              onSelect={() => setSelectedId(job.id)}
+              gutter={
+                <DetailsStatusGutter status={getJobGutterStatus(job.status)} />
+              }
+              title={
+                <WorkbenchStoredPromptMarkdown
+                  text={job.prompt ?? ''}
+                  density="listItem"
+                  clampLines={1}
+                />
+              }
+              subtitle={job.user?.name}
+              end={
+                <>
+                  <JobPrIcon job={job} />
+                  <DetailsListAgeSC>
+                    {formatShortAge(job.insertedAt)}
+                  </DetailsListAgeSC>
+                </>
+              }
             />
-          ) : (
-            jobs.map((job) => (
-              <DetailsListItem
-                key={job.id}
-                selected={job.id === selected?.id}
-                onSelect={() => setSelectedId(job.id)}
-                gutter={
-                  <DetailsStatusGutter
-                    status={getJobGutterStatus(job.status)}
-                  />
-                }
-                title={
-                  <WorkbenchStoredPromptMarkdown
-                    text={job.prompt ?? ''}
-                    density="listItem"
-                    clampLines={1}
-                  />
-                }
-                subtitle={job.user?.name}
-                end={
-                  <>
-                    <JobPrIcon job={job} />
-                    <DetailsListAgeSC>
-                      {formatShortAge(job.insertedAt)}
-                    </DetailsListAgeSC>
-                  </>
-                }
-              />
-            ))
-          )}
-          {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
-        </DetailsListItemsSC>
-      </DetailsListSC>
+          ))
+        )}
+        {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+      </DetailsListItemsSC>
+    </DetailsListSC>
+  )
+
+  const content = (
+    <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       {selected && (
         <WorkbenchJobConclusionPanel
           key={`conclusion-${selected.id}`}
@@ -170,6 +166,8 @@ export function WorkbenchJobsDetails({
       )}
     </DetailsLayoutSC>
   )
+
+  return { sidebar, content }
 }
 
 function JobPrIcon({ job }: { job: WorkbenchJobTinyFragment }) {

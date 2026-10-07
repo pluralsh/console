@@ -2,6 +2,7 @@ import { Flex } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
+import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import { GqlError } from 'components/utils/Alert'
 import {
@@ -22,7 +23,7 @@ import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
-import { WorkbenchIssuesDetails } from './WorkbenchIssuesDetails'
+import { useWorkbenchIssuesDetails } from './WorkbenchIssuesDetails'
 import { WorkbenchIssuesDisplayOptions } from './WorkbenchIssuesDisplayOptions'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
@@ -99,9 +100,24 @@ export function WorkbenchIssues() {
     [display, providerCounts]
   )
 
+  const details = useWorkbenchIssuesDetails({
+    issues,
+    loading,
+    hasNextPage: !!pageInfo?.hasNextPage,
+    fetchNextPage,
+    searchString,
+    onSearchChange: setSearchString,
+    fallbackWorkbenchId: workbenchId,
+  })
+  const showDetails = display.view === 'details' && !error && !filterEmptyKind
+
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
+      {...(showDetails && {
+        sidebar: { kind: 'custom', content: details.sidebar },
+        tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
+      })}
       headerActions={
         <>
           <DisplayPopover showDot={hasUncheckedIssueFilters(display)}>
@@ -115,16 +131,8 @@ export function WorkbenchIssues() {
         </>
       }
     >
-      {display.view === 'details' && !error && !filterEmptyKind ? (
-        <WorkbenchIssuesDetails
-          issues={issues}
-          loading={loading}
-          hasNextPage={!!pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          searchString={searchString}
-          onSearchChange={setSearchString}
-          fallbackWorkbenchId={workbenchId}
-        />
+      {showDetails ? (
+        details.content
       ) : (
         <WrapperSC>
           <WorkbenchSearchInput

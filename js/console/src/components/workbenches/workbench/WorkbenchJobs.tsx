@@ -8,6 +8,7 @@ import {
   usePersistedDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
   useWorkbenchJobSearchQuery,
@@ -20,7 +21,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
 import { WorkbenchJobsBoard } from './WorkbenchJobsBoard'
-import { WorkbenchJobsDetails } from './WorkbenchJobsDetails'
+import { useWorkbenchJobsDetails } from './WorkbenchJobsDetails'
 import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
 
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
@@ -73,10 +74,24 @@ export function WorkbenchJobs() {
         fetchNextPage,
       }
   const listError = searching ? search.error : error
+  const details = useWorkbenchJobsDetails({
+    workbenchId,
+    jobs,
+    loading: list.loading,
+    hasNextPage: list.hasNextPage,
+    fetchNextPage: list.fetchNextPage,
+    searchString,
+    onSearchChange: setSearchString,
+  })
+  const showDetails = view === 'details' && !listError
 
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
+      {...(showDetails && {
+        sidebar: { kind: 'custom', content: details.sidebar },
+        tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
+      })}
       headerActions={
         <DisplayPopover showDot={false}>
           <DisplayViewToggle
@@ -87,20 +102,8 @@ export function WorkbenchJobs() {
         </DisplayPopover>
       }
     >
-      {view === 'details' ? (
-        listError ? (
-          <GqlError error={listError} />
-        ) : (
-          <WorkbenchJobsDetails
-            workbenchId={workbenchId}
-            jobs={jobs}
-            loading={list.loading}
-            hasNextPage={list.hasNextPage}
-            fetchNextPage={list.fetchNextPage}
-            searchString={searchString}
-            onSearchChange={setSearchString}
-          />
-        )
+      {showDetails ? (
+        details.content
       ) : (
         <WrapperSC>
           <WorkbenchSearchInput

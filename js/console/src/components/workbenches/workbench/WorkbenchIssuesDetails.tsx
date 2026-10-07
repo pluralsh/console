@@ -31,7 +31,8 @@ import styled from 'styled-components'
 import { formatShortAge } from 'utils/datetime'
 import { WorkbenchJobConclusionPanel } from './WorkbenchJobConclusionPanel'
 
-export function WorkbenchIssuesDetails({
+// Issues details view: the issue list (page sidebar) and the issue panels.
+export function useWorkbenchIssuesDetails({
   issues,
   loading,
   hasNextPage,
@@ -60,65 +61,62 @@ export function WorkbenchIssuesDetails({
     />
   )
 
-  if (isEmpty(issues) && !searchString)
-    return (
-      <BoardLoadingOrEmpty
-        loading={loading}
-        message="No issues found."
-      />
-    )
-
-  return (
-    <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
-      <DetailsListSC>
-        <DetailsListSearchSC>
-          <WorkbenchSearchInput
-            size="small"
-            value={searchString}
-            onChange={onSearchChange}
-            placeholder="Search issues"
+  const sidebar = (
+    <DetailsListSC>
+      <DetailsListSearchSC>
+        <WorkbenchSearchInput
+          size="small"
+          value={searchString}
+          onChange={onSearchChange}
+          placeholder="Search issues"
+        />
+      </DetailsListSearchSC>
+      <DetailsListItemsSC>
+        {isEmpty(issues) ? (
+          <BoardLoadingOrEmpty
+            loading={loading}
+            message={
+              searchString ? 'No matching issues found.' : 'No issues found.'
+            }
           />
-        </DetailsListSearchSC>
-        <DetailsListItemsSC>
-          {isEmpty(issues) ? (
-            <BoardLoadingOrEmpty
-              loading={loading}
-              message="No matching issues found."
+        ) : (
+          issues.map((issue) => (
+            <DetailsListItem
+              key={issue.id}
+              selected={issue.id === selected?.id}
+              onSelect={() => setSelectedId(issue.id)}
+              gutter={
+                <DetailsStatusGutter
+                  status={getJobGutterStatus(issue.workbenchJob?.status)}
+                />
+              }
+              title={
+                <DetailsIconTitleSC>
+                  {cloneElement(getIssueWebhookProviderIcon(issue.provider), {
+                    size: 12,
+                    fullColor: false,
+                  })}
+                  <span>{issue.title}</span>
+                </DetailsIconTitleSC>
+              }
+              end={
+                <>
+                  <IssueStatusIcon status={issue.status} />
+                  <DetailsListAgeSC>
+                    {formatShortAge(issue.insertedAt)}
+                  </DetailsListAgeSC>
+                </>
+              }
             />
-          ) : (
-            issues.map((issue) => (
-              <DetailsListItem
-                key={issue.id}
-                selected={issue.id === selected?.id}
-                onSelect={() => setSelectedId(issue.id)}
-                gutter={
-                  <DetailsStatusGutter
-                    status={getJobGutterStatus(issue.workbenchJob?.status)}
-                  />
-                }
-                title={
-                  <DetailsIconTitleSC>
-                    {cloneElement(getIssueWebhookProviderIcon(issue.provider), {
-                      size: 12,
-                      fullColor: false,
-                    })}
-                    <span>{issue.title}</span>
-                  </DetailsIconTitleSC>
-                }
-                end={
-                  <>
-                    <IssueStatusIcon status={issue.status} />
-                    <DetailsListAgeSC>
-                      {formatShortAge(issue.insertedAt)}
-                    </DetailsListAgeSC>
-                  </>
-                }
-              />
-            ))
-          )}
-          {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
-        </DetailsListItemsSC>
-      </DetailsListSC>
+          ))
+        )}
+        {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+      </DetailsListItemsSC>
+    </DetailsListSC>
+  )
+
+  const content = (
+    <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       {selected &&
         (selectedJob ? (
           <WorkbenchJobConclusionPanel
@@ -151,6 +149,8 @@ export function WorkbenchIssuesDetails({
       )}
     </DetailsLayoutSC>
   )
+
+  return { sidebar, content }
 }
 
 // The issue card spans the full panel width, as in Figma.

@@ -78,7 +78,8 @@ const ALERT_DETAILS_TABS: AlertDetailsTab[] = [
   'All information',
 ]
 
-export function WorkbenchAlertsDetails({
+// Alerts details view: the alert list (page sidebar) and the alert panels.
+export function useWorkbenchAlertsDetails({
   alerts,
   loading,
   hasNextPage,
@@ -119,110 +120,111 @@ export function WorkbenchAlertsDetails({
     useDetailsSelection(visible)
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
 
-  if (isEmpty(alerts) && !searchString)
-    return (
-      <BoardLoadingOrEmpty
-        loading={loading}
-        message="No alerts found."
-      />
-    )
-
-  return (
-    <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
-      <DetailsListSC>
+  const sidebar = (
+    <DetailsListSC>
+      <DetailsListSearchSC>
+        <WorkbenchSearchInput
+          size="small"
+          value={searchString}
+          onChange={onSearchChange}
+          placeholder="Search alerts"
+        />
+      </DetailsListSearchSC>
+      {!isEmpty(alerts) && (
         <DetailsListSearchSC>
-          <WorkbenchSearchInput
-            size="small"
-            value={searchString}
-            onChange={onSearchChange}
-            placeholder="Search alerts"
-          />
+          <SeverityChipsSC>
+            {ALERT_SEVERITY_ORDER.filter(
+              (severity) => severityCounts[severity]
+            ).map((severity) => (
+              <Chip
+                key={severity}
+                clickable
+                size="small"
+                fillLevel={2}
+                severity={alertSeverityToChipSeverity[severity]}
+                inactive={
+                  !isEmpty(activeSeverities) &&
+                  !activeSeverities.includes(severity)
+                }
+                aria-pressed={activeSeverities.includes(severity)}
+                onClick={() =>
+                  setSeverities(toggleListValue(activeSeverities, severity))
+                }
+                rounded
+              >
+                {ALERT_SEVERITY_SHORT_LABELS[severity]} (
+                {severityCounts[severity]})
+              </Chip>
+            ))}
+          </SeverityChipsSC>
         </DetailsListSearchSC>
-        {!isEmpty(alerts) && (
-          <DetailsListSearchSC>
-            <SeverityChipsSC>
-              {ALERT_SEVERITY_ORDER.filter(
-                (severity) => severityCounts[severity]
-              ).map((severity) => (
-                <Chip
-                  key={severity}
-                  clickable
-                  size="small"
-                  fillLevel={2}
-                  severity={alertSeverityToChipSeverity[severity]}
-                  inactive={
-                    !isEmpty(activeSeverities) &&
-                    !activeSeverities.includes(severity)
-                  }
-                  aria-pressed={activeSeverities.includes(severity)}
-                  onClick={() =>
-                    setSeverities(toggleListValue(activeSeverities, severity))
-                  }
-                  rounded
-                >
-                  {ALERT_SEVERITY_SHORT_LABELS[severity]} (
-                  {severityCounts[severity]})
-                </Chip>
-              ))}
-            </SeverityChipsSC>
-          </DetailsListSearchSC>
-        )}
-        <DetailsListItemsSC>
-          {isEmpty(visible) && (
-            <EmptyState message="No alerts match the search or severities.">
+      )}
+      <DetailsListItemsSC>
+        {isEmpty(alerts) ? (
+          <BoardLoadingOrEmpty
+            loading={loading}
+            message={
+              searchString ? 'No matching alerts found.' : 'No alerts found.'
+            }
+          />
+        ) : (
+          isEmpty(visible) && (
+            <EmptyState message="No alerts match the selected severities.">
               <Button
                 small
                 secondary
-                onClick={() => {
-                  setSeverities([])
-                  onSearchChange('')
-                }}
+                onClick={() => setSeverities([])}
               >
                 Reset filters
               </Button>
             </EmptyState>
-          )}
-          {visible.map((alert) => (
-            <DetailsListItem
-              key={alert.id}
-              selected={alert.id === selected?.id}
-              onSelect={() => setSelectedId(alert.id)}
-              gutter={
-                <DetailsStatusGutter
-                  status={getJobGutterStatus(alert.workbenchJob?.status)}
-                />
-              }
-              title={
-                <DetailsIconTitleSC>
-                  <AlertSeverityIcon severity={alert.severity} />
-                  <span>{alert.title}</span>
-                </DetailsIconTitleSC>
-              }
-              end={
-                <>
-                  {alert.state === AlertState.Firing && (
-                    <Tooltip
-                      placement="top"
-                      label="Firing"
-                    >
-                      <FiringIconSC aria-label="Firing">
-                        <ErrorIcon
-                          size={16}
-                          color="icon-danger"
-                        />
-                      </FiringIconSC>
-                    </Tooltip>
-                  )}
-                  <DetailsListAgeSC>
-                    {formatShortAge(alert.updatedAt)}
-                  </DetailsListAgeSC>
-                </>
-              }
-            />
-          ))}
-          {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
-        </DetailsListItemsSC>
-      </DetailsListSC>
+          )
+        )}
+        {visible.map((alert) => (
+          <DetailsListItem
+            key={alert.id}
+            selected={alert.id === selected?.id}
+            onSelect={() => setSelectedId(alert.id)}
+            gutter={
+              <DetailsStatusGutter
+                status={getJobGutterStatus(alert.workbenchJob?.status)}
+              />
+            }
+            title={
+              <DetailsIconTitleSC>
+                <AlertSeverityIcon severity={alert.severity} />
+                <span>{alert.title}</span>
+              </DetailsIconTitleSC>
+            }
+            end={
+              <>
+                {alert.state === AlertState.Firing && (
+                  <Tooltip
+                    placement="top"
+                    label="Firing"
+                  >
+                    <FiringIconSC aria-label="Firing">
+                      <ErrorIcon
+                        size={16}
+                        color="icon-danger"
+                      />
+                    </FiringIconSC>
+                  </Tooltip>
+                )}
+                <DetailsListAgeSC>
+                  {formatShortAge(alert.updatedAt)}
+                </DetailsListAgeSC>
+              </>
+            }
+          />
+        ))}
+        {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+      </DetailsListItemsSC>
+    </DetailsListSC>
+  )
+
+  const content = (
+    <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       {selected && (
         <AlertConclusionPanel
           key={`conclusion-${selected.id}`}
@@ -247,6 +249,8 @@ export function WorkbenchAlertsDetails({
       )}
     </DetailsLayoutSC>
   )
+
+  return { sidebar, content }
 }
 
 function AlertConclusionPanel({
