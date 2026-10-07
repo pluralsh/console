@@ -189,9 +189,7 @@ export function WorkbenchAlerts() {
         </DisplayPopover>
       }
     >
-      {error ? (
-        <GqlError error={error} />
-      ) : showDetails ? (
+      {showDetails ? (
         details.content
       ) : (
         <WrapperSC>
@@ -200,7 +198,9 @@ export function WorkbenchAlerts() {
             onChange={setSearchString}
             placeholder="Search alerts"
           />
-          {filterEmptyKind ? (
+          {error ? (
+            <GqlError error={error} />
+          ) : filterEmptyKind ? (
             <DisplayFilterEmpty
               title={`No ${filterEmptyKind} selected`}
               description={`It looks like there are no ${filterEmptyKind} selected.`}

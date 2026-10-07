@@ -707,6 +707,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       other = insert(:alert, workbench: workbench, title: "unrelated")
       insert(:tag, alert: other, name: "severity", value: "crashloop")
       insert(:alert, project: workbench.project, title: "HighCpuUsage elsewhere")
+      # invalid UTF-8 can't fail the search, and its readable part still matches
+      by_bad_bytes = insert(:alert, workbench: workbench, message: <<0xFF, 0xFE>> <> "OOMKilled pod")
+      by_unicode   = insert(:alert, workbench: workbench, message: "zużycie pamięci")
 
       query = """
         query Workbench($id: ID!, $q: String) {
@@ -718,7 +721,13 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         }
       """
 
-      for {q, expected} <- [{"highcpu", [by_title]}, {"NEARLY", [by_message]}, {"crashloop", [by_tag]}] do
+      for {q, expected} <- [
+        {"highcpu", [by_title]},
+        {"NEARLY", [by_message]},
+        {"crashloop", [by_tag]},
+        {"oomkilled", [by_bad_bytes]},
+        {"pamięci", [by_unicode]}
+      ] do
         {:ok, %{data: %{"workbench" => found}}} =
           run_query(query, %{"id" => workbench.id, "q" => q}, %{current_user: admin_user()})
 

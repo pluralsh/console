@@ -173,11 +173,17 @@ defmodule Console.Schema.Alert do
     from(a in query, group_by: a.severity, select: %{severity: a.severity, count: count(a.id)})
   end
 
+  @doc """
+  Matches the title, the `alertname` tag or the message. The message is a binary column and decoding it
+  (`convert_from`) fails the whole query on invalid UTF-8, so it's matched without decoding: case-insensitively
+  through its escaped ASCII form, and byte-for-byte for anything else (e.g. non-ASCII text).
+  """
   def search(query \\ __MODULE__, q) do
     like = "%#{q}%"
     from(a in query,
       where: ilike(a.title, ^like) or
-        fragment("convert_from(?, 'UTF8') ILIKE ?", a.message, ^like) or
+        fragment("encode(?, 'escape') ILIKE ?", a.message, ^like) or
+        fragment("position(convert_to(?, 'UTF8') in ?) > 0", ^q, a.message) or
         fragment("EXISTS(SELECT 1 FROM tags WHERE alert_id = ? AND name = 'alertname' AND value ILIKE ?)", a.id, ^like)
     )
   end
