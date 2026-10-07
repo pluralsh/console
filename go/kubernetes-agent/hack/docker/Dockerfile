@@ -66,6 +66,19 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
         -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
     -o /binaries/agentk ./cmd/agentk
 
+# Install the fixed tzdata package and prepare distroless package metadata.
+FROM debian:12-slim AS tzdata
+
+ARG TZDATA_VERSION=2026c-0+deb12u1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tzdata="${TZDATA_VERSION}" \
+    && test "$(dpkg-query -W -f='${Version}' tzdata)" = "${TZDATA_VERSION}" \
+    && mkdir -p /var/lib/dpkg/status.d \
+    && awk 'BEGIN { RS=""; ORS="\n\n" } /^Package: tzdata\n/ { print }' /var/lib/dpkg/status > /var/lib/dpkg/status.d/tzdata \
+    && cp /var/lib/dpkg/info/tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums \
+    && rm -rf /var/lib/apt/lists/*
+
 # Final stage - minimal image with all three binaries
 FROM gcr.io/distroless/static-debian12:nonroot AS final
 
@@ -98,6 +111,11 @@ LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
 COPY --from=builder /binaries/api /api
 COPY --from=builder /binaries/kas /kas
 COPY --from=builder /binaries/agentk /agentk
+
+# Copy tzdata zoneinfo and package metadata for vulnerability scanners.
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=tzdata /var/lib/dpkg/status.d/tzdata /var/lib/dpkg/status.d/tzdata
+COPY --from=tzdata /var/lib/dpkg/status.d/tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums
 
 # Create a simple entrypoint script (shell script won't work in distroless)
 # Instead, we'll use kas as the default entrypoint

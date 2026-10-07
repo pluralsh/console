@@ -26,6 +26,19 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o nexus \
     ./cmd/main.go
 
+# Install the fixed tzdata package and prepare distroless package metadata.
+FROM debian:12-slim AS tzdata
+
+ARG TZDATA_VERSION=2026c-0+deb12u1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tzdata="${TZDATA_VERSION}" \
+    && test "$(dpkg-query -W -f='${Version}' tzdata)" = "${TZDATA_VERSION}" \
+    && mkdir -p /var/lib/dpkg/status.d \
+    && awk 'BEGIN { RS=""; ORS="\n\n" } /^Package: tzdata\n/ { print }' /var/lib/dpkg/status > /var/lib/dpkg/status.d/tzdata \
+    && cp /var/lib/dpkg/info/tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums \
+    && rm -rf /var/lib/apt/lists/*
+
 # Runtime stage
 FROM gcr.io/distroless/static-debian12:nonroot
 
@@ -52,6 +65,11 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /build/nexus /app/nexus
+
+# Copy tzdata zoneinfo and package metadata for vulnerability scanners.
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=tzdata /var/lib/dpkg/status.d/tzdata /var/lib/dpkg/status.d/tzdata
+COPY --from=tzdata /var/lib/dpkg/status.d/tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums
 
 # Copy default config (optional)
 COPY --from=builder /build/config/config.yaml /app/config/config.yaml
