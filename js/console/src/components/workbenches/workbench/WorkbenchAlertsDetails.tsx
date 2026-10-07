@@ -3,7 +3,6 @@ import {
   Chip,
   EmptyState,
   ErrorIcon,
-  Flex,
   Tooltip,
 } from '@pluralsh/design-system'
 import {
@@ -21,7 +20,6 @@ import {
   AlertSourceLink,
   getAlertName,
 } from 'components/utils/alerts/AlertSourceLink'
-import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { GqlError } from 'components/utils/Alert'
 import { toggleListValue } from 'components/utils/display/DisplayPanel'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -317,55 +315,41 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
   return (
     <>
       {alert.title && <ExpandablePrompt prompt={alert.title} />}
-      <SummaryCardSC>
-        {summary && (
-          <DetailsField
-            valueSize="caption"
-            label="Alert summary"
-          >
-            {summary}
-          </DetailsField>
-        )}
-        {alert.cluster?.name && (
-          <DetailsField
-            valueSize="caption"
-            label="Plural Cluster"
-          >
-            {alert.cluster.name}
-          </DetailsField>
-        )}
-        <DetailsField
-          valueSize="caption"
-          label="Severity"
-        >
-          <Flex
-            align="center"
-            gap="xxsmall"
-          >
-            <AlertSeverityIcon severity={alert.severity} />
-            {ALERT_SEVERITY_SHORT_LABELS[alert.severity]}
-          </Flex>
-        </DetailsField>
-        <DetailsField
-          valueSize="caption"
-          label="State"
-        >
-          <AlertStateChip state={alert.state} />
-        </DetailsField>
-        {alert.url && (
-          <DetailsField
-            valueSize="caption"
-            label="Source link"
-          >
-            <SmallLinkSC>
-              <AlertSourceLink alert={alert} />
-            </SmallLinkSC>
-          </DetailsField>
-        )}
-      </SummaryCardSC>
+      {/* fields as in Figma; severity and state are shown elsewhere */}
+      {(summary || alert.cluster?.name || alert.url) && (
+        <SummaryCardSC>
+          {summary && (
+            <DetailsField
+              valueSize="caption"
+              label="Alert summary"
+            >
+              {summary}
+            </DetailsField>
+          )}
+          {alert.cluster?.name && (
+            <DetailsField
+              valueSize="caption"
+              label="Plural Cluster"
+            >
+              {alert.cluster.name}
+            </DetailsField>
+          )}
+          {alert.url && (
+            <DetailsField
+              valueSize="caption"
+              label="Source link"
+            >
+              <SmallLinkSC>
+                <AlertSourceLink alert={alert} />
+              </SmallLinkSC>
+            </DetailsField>
+          )}
+        </SummaryCardSC>
+      )}
       <KeyValueSection
         title="Annotations"
         entries={getAlertAnnotations(alert)}
+        valueAlign="right"
       />
       <KeyValueSection
         title="Tags"
@@ -487,9 +471,12 @@ function AlertDetailsPanel({
 function KeyValueSection({
   title,
   entries,
+  valueAlign = 'left',
 }: {
   title: string
   entries: [string, string][]
+  // right: label fills the row and the value sits at its end (annotations)
+  valueAlign?: 'left' | 'right'
 }) {
   if (isEmpty(entries)) return null
 
@@ -502,6 +489,7 @@ function KeyValueSection({
             key={`${label}-${i}`}
             label={label}
             value={value}
+            valueAlign={valueAlign}
           />
         ))}
       </KeyValueCardSC>
@@ -538,16 +526,18 @@ function KeyValueChips({
 function KeyValueRow({
   label,
   value,
+  valueAlign = 'left',
 }: {
   label: string
   value: Nullable<string>
+  valueAlign?: 'left' | 'right'
 }) {
   if (!value) return null
 
   return (
     <KeyValueRowSC>
-      <KeyValueLabelSC>{label}</KeyValueLabelSC>
-      <KeyValueValueSC>{value}</KeyValueValueSC>
+      <KeyValueLabelSC $fill={valueAlign === 'right'}>{label}</KeyValueLabelSC>
+      <KeyValueValueSC $align={valueAlign}>{value}</KeyValueValueSC>
     </KeyValueRowSC>
   )
 }
@@ -608,21 +598,24 @@ const KeyValueRowSC = styled.div(({ theme }) => ({
   '&:last-child': { borderBottom: 'none' },
 }))
 
-const KeyValueLabelSC = styled.span(({ theme }) => ({
+const KeyValueLabelSC = styled.span<{ $fill: boolean }>(({ theme, $fill }) => ({
   ...theme.partials.text.caption,
-  flexShrink: 0,
-  width: 150,
   ...TRUNCATE,
+  ...($fill ? { flex: 1, minWidth: 0 } : { flexShrink: 0, width: 150 }),
   color: theme.colors['text-input-disabled'],
 }))
 
-const KeyValueValueSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.body2,
-  flex: 1,
-  minWidth: 0,
-  wordBreak: 'break-word',
-  color: theme.colors.text,
-}))
+const KeyValueValueSC = styled.span<{ $align: 'left' | 'right' }>(
+  ({ theme, $align }) => ({
+    ...theme.partials.text.body2,
+    minWidth: 0,
+    wordBreak: 'break-word',
+    color: theme.colors.text,
+    ...($align === 'right'
+      ? { flexShrink: 0, maxWidth: '60%', textAlign: 'right' }
+      : { flex: 1 }),
+  })
+)
 
 const JobResultSC = styled.div(({ theme }) => ({
   paddingTop: theme.spacing.large,

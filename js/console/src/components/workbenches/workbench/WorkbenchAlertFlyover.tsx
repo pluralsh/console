@@ -102,7 +102,11 @@ const HeaderSC = styled.div(({ theme }) => ({
 }))
 
 const HeaderTitleSC = styled.h2(({ theme }) => ({
-  ...theme.partials.text.subtitle1,
+  ...theme.partials.text.mono,
+  fontSize: 20,
+  fontWeight: 500,
+  lineHeight: '24px',
+  letterSpacing: 0,
   ...TRUNCATE,
   margin: 0,
   color: theme.colors.text,

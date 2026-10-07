@@ -144,7 +144,7 @@ export function useWorkbenchIssuesDetails({
         ))}
       {selected && detailsOpen && (
         <DetailsColumnSC key={`details-${selected.id}`}>
-          <DetailsPanelHeader title="Issues">
+          <DetailsPanelHeader title="Issue details">
             <DetailsCollapseButton
               label="Hide issue details"
               onClick={() => setDetailsOpen(false)}
