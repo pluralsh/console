@@ -255,6 +255,7 @@ export function WorkbenchJobActivity({
       <Flex
         direction="column"
         gap="large"
+        marginTop={spacing.small}
       >
         {prompt && (
           <JobActivityPrompt
@@ -312,7 +313,7 @@ export function WorkbenchJobMemoGroup({
       <MemoGroupSC>
         <Flex
           direction="column"
-          gap="xsmall"
+          gap="small"
         >
           {activities.map((activity) => (
             <WorkbenchJobMemo
@@ -328,15 +329,18 @@ export function WorkbenchJobMemoGroup({
   return (
     <MemoGroupSC>
       <SimpleAccordion
-        label={`${activities.length} memos`}
+        label={
+          <MemoLabelSC as="span">{`${activities.length} memos`}</MemoLabelSC>
+        }
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
         hoverCaret
+        triggerWrapperStyles={memoTriggerStyles}
       >
         <Flex
           direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
+          gap="small"
+          marginTop={spacing.small}
         >
           {activities.map((activity) => (
             <WorkbenchJobMemo
@@ -399,11 +403,7 @@ function WorkbenchJobMemo({
       hoverCaret
       isOpen={isExpanded}
       setIsOpen={setIsExpanded}
-      triggerWrapperStyles={{
-        justifyContent: 'flex-start',
-        width: 'fit-content',
-        maxWidth: '100%',
-      }}
+      triggerWrapperStyles={memoTriggerStyles}
       label={
         <Flex
           alignItems="center"
@@ -423,7 +423,7 @@ function WorkbenchJobMemo({
       <Flex
         direction="column"
         gap="small"
-        marginTop={spacing.xsmall}
+        marginTop={spacing.small}
         minWidth={0}
       >
         {result?.error && (
@@ -551,10 +551,19 @@ const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   display: 'block',
   minWidth: 0,
   maxWidth: '100%',
-  overflow: 'hidden',
+  ...clipInlineCss,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  ...trimTextBoxCss,
 }))
+
+// Cap height, so the hover caret overflows instead of growing the row.
+const memoTriggerStyles = {
+  justifyContent: 'flex-start',
+  width: 'fit-content',
+  maxWidth: '100%',
+  height: '1cap',
+} as const
 
 function WorkbenchJobActivityThoughts({
   activityId,
@@ -1207,27 +1216,38 @@ const ActivityStatusIconSC = styled.span({
   height: ACTIVITY_STATUS_ICON_SIZE,
 })
 
+// Trims each line's empty space above the capitals and below the baseline, so
+// row gaps measure from the letters themselves. Browsers without `text-box`
+// keep the normal line spacing.
+const trimTextBoxCss = { textBox: 'trim-both cap alphabetic' } as const
+
+// Horizontal-only clipping keeps ellipsis while letting descenders and the
+// title row's icons extend past the trimmed text.
+const clipInlineCss = { overflowX: 'clip', overflowY: 'visible' } as const
+
 const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
   ({ theme, $hasStatusIcon }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.xxsmall,
+    gap: theme.spacing.small,
     minWidth: 0,
     maxWidth: '100%',
-    overflow: 'hidden',
+    ...clipInlineCss,
     [`&:hover ${ActivityCaretSC}`]: {
       opacity: 1,
     },
     '.type': {
       flexShrink: 0,
+      ...trimTextBoxCss,
     },
     '.summary': {
       display: 'block',
       minWidth: 0,
       maxWidth: '64ch',
-      overflow: 'hidden',
+      ...clipInlineCss,
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
+      ...trimTextBoxCss,
       ...($hasStatusIcon && {
         paddingLeft: ACTIVITY_STATUS_ICON_SIZE + theme.spacing.xsmall,
       }),
@@ -1235,11 +1255,13 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
   })
 )
 
+// Cap height, so taller trailing icons overflow instead of growing the row.
 const ActivityTitleRowSC = styled.span(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
+  height: '1cap',
   minWidth: 0,
   maxWidth: '100%',
-  overflow: 'hidden',
+  ...clipInlineCss,
 }))
