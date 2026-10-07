@@ -21,7 +21,7 @@ import {
   DetailsPanelHeader,
   DetailsStatusGutter,
   getJobGutterStatus,
-  useDetailsSelection,
+  useDetailsViewState,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchIssueCard } from 'components/workbenches/common/WorkbenchIssueCard'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
@@ -65,7 +65,7 @@ export function useWorkbenchIssuesDetails({
     fetchNextPage,
   })
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
-    useDetailsSelection(issues)
+    useDetailsViewState(issues)
 
   // the view isn't shown: skip building the list and panels for every item
   if (!active) return { sidebar: null, content: null }

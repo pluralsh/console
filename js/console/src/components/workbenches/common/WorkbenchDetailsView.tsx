@@ -26,10 +26,10 @@ export const DETAILS_TAB_STRIP_HEIGHT = 64
 
 export type DetailsGutterStatus = 'running' | 'failed' | null
 
-// Selected list item, falling back to the first item while none is selected
-// or the selected one has left the list. Also tracks whether the right-most
-// details panel is open.
-export function useDetailsSelection<T extends { id: string }>(items: T[]) {
+// State shared by the details views: the selected list item, falling back to
+// the first item while none is selected or the selected one has left the list,
+// and whether the right-most details panel is open.
+export function useDetailsViewState<T extends { id: string }>(items: T[]) {
   const [selectedId, setSelectedId] = useState<string>()
   const [detailsOpen, setDetailsOpen] = useState(true)
 

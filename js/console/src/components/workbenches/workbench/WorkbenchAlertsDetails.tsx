@@ -44,7 +44,7 @@ import {
   DetailsTabs,
   DetailsTitleSC,
   getJobGutterStatus,
-  useDetailsSelection,
+  useDetailsViewState,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
@@ -122,7 +122,7 @@ export function useWorkbenchAlertsDetails({
 
   const severityFiltered = !allAlertSeveritiesSelected(severities)
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
-    useDetailsSelection(alerts)
+    useDetailsViewState(alerts)
 
   // the view isn't shown: skip building the list and panels for every item
   if (!active) return { sidebar: null, content: null }
