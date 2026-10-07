@@ -12,7 +12,8 @@ import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
-  BoardLoadingOrEmpty,
+  BoardEmptyList,
+  EmptyListState,
   LoadMoreSentinel,
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
@@ -79,6 +80,8 @@ export function useWorkbenchJobsDetails({
   fetchNextPage,
   searchString,
   onSearchChange,
+  active,
+  emptyState,
 }: {
   workbenchId: string
   jobs: WorkbenchJobTinyFragment[]
@@ -90,6 +93,9 @@ export function useWorkbenchJobsDetails({
   fetchNextPage: () => void
   searchString: string
   onSearchChange: (value: string) => void
+  // the details view is shown
+  active: boolean
+  emptyState: EmptyListState
 }) {
   const loadMore = useBoardLoadMore({
     fetchingMore,
@@ -98,6 +104,9 @@ export function useWorkbenchJobsDetails({
   })
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsSelection(jobs)
+
+  // the view isn't shown: skip building the list and panels for every item
+  if (!active) return { sidebar: null, content: null }
 
   const sidebar = (
     <DetailsListSC>
@@ -111,11 +120,10 @@ export function useWorkbenchJobsDetails({
       </DetailsListSearchSC>
       <DetailsListItemsSC>
         {isEmpty(jobs) ? (
-          <BoardLoadingOrEmpty
+          <BoardEmptyList
+            noun="jobs"
             loading={loading}
-            message={
-              searchString ? 'No matching jobs found.' : 'No jobs found.'
-            }
+            emptyState={emptyState}
           />
         ) : (
           jobs.map((job) => (

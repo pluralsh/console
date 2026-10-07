@@ -4,14 +4,15 @@ import { AlertSourceLink } from 'components/utils/alerts/AlertSourceLink'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import {
   BoardCardGridSC,
-  BoardLoadingOrEmpty,
   BoardSC,
+  BoardEmptyList,
   BoardSectionSC,
   BoardTitle,
   BoardTitleSC,
   CardRaisedSC,
   CardTargetButtonSC,
   clickableCardStyles,
+  EmptyListState,
   LoadMoreSentinel,
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
@@ -31,6 +32,7 @@ export function WorkbenchAlertsBoard({
   fetchNextPage,
   fallbackWorkbenchId,
   totalCount,
+  emptyState,
 }: {
   alerts: WorkbenchAlertFragment[]
   // first load only (spinner); later fetches don't blank the view
@@ -42,6 +44,7 @@ export function WorkbenchAlertsBoard({
   fallbackWorkbenchId: string
   // alerts matching the current search and filters, across all pages
   totalCount?: Nullable<number>
+  emptyState: EmptyListState
 }) {
   const loadMore = useBoardLoadMore({
     fetchingMore,
@@ -61,9 +64,10 @@ export function WorkbenchAlertsBoard({
 
   if (isEmpty(alerts))
     return (
-      <BoardLoadingOrEmpty
+      <BoardEmptyList
+        noun="alerts"
         loading={loading}
-        message="No alerts found."
+        emptyState={emptyState}
       />
     )
 

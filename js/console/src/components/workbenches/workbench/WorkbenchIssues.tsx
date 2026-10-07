@@ -124,6 +124,12 @@ export function WorkbenchIssues() {
   }, [tableSliceActive, setVirtualSlice])
 
   const details = useWorkbenchIssuesDetails({
+    active: display.view === 'details',
+    emptyState: {
+      searching: !!debouncedSearchString,
+      filtered: hasUncheckedIssueFilters(display),
+      onResetFilters: () => updateDisplay(resetIssueFilters(display)),
+    },
     issues,
     loading: !data && loading,
     fetchingMore,

@@ -11,14 +11,17 @@ import {
   DetailsTitleSC,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { useWorkbenchJobQuery, WorkbenchJobStatus } from 'generated/graphql'
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchJobMeta } from './job/WorkbenchJobMeta'
 import { isJobRunning } from './job/WorkbenchJobActivity'
 import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
-import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
+import {
+  useClampOverflow,
+  WorkbenchStoredPromptMarkdown,
+} from './WorkbenchStoredPromptMarkdown'
 
 const PROMPT_CLAMP_LINES = 4
 
@@ -118,31 +121,51 @@ export function WorkbenchJobConclusionPanel({
   )
 }
 
-// Prompt (or other text) clamped to a few lines with Read more / Read less.
-export function ExpandablePrompt({ prompt }: { prompt: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [expanded, setExpanded] = useState(false)
-  const [overflowing, setOverflowing] = useState(false)
+const getSelf = (el: HTMLElement) => el
 
-  useLayoutEffect(() => {
-    if (expanded) return
-    const clamped = ref.current?.querySelector(':scope > div > div')
-    setOverflowing(!!clamped && clamped.scrollHeight > clamped.clientHeight + 1)
-  }, [expanded, prompt])
+// Prompt (or other text) clamped to a few lines with Read more / Read less.
+// `plainText` shows it verbatim, e.g. text from external sources such as alert
+// titles, where markdown or prompt chip syntax isn't meant to be rendered.
+export function ExpandablePrompt({
+  prompt,
+  plainText = false,
+}: {
+  prompt: string
+  plainText?: boolean
+}) {
+  const [expanded, setExpanded] = useState(false)
+  // both keep the last check while clamped: expanded, nothing is cut off
+  const [markdownOverflowing, setMarkdownOverflowing] = useState(false)
+  const plainRef = useRef<HTMLDivElement>(null)
+  const plainOverflowing = useClampOverflow(
+    plainRef,
+    getSelf,
+    prompt,
+    plainText && !expanded
+  )
+  const overflowing = plainText ? plainOverflowing : markdownOverflowing
 
   return (
     <Flex
       direction="column"
       gap="medium"
     >
-      <div ref={ref}>
+      {plainText ? (
+        <PlainPromptSC
+          ref={plainRef}
+          $lines={expanded ? null : PROMPT_CLAMP_LINES}
+        >
+          {prompt}
+        </PlainPromptSC>
+      ) : (
         <WorkbenchStoredPromptMarkdown
           text={prompt}
           density="jobCard"
           clampLines={expanded ? null : PROMPT_CLAMP_LINES}
           promptColor="text-xlight"
+          onOverflowChange={expanded ? undefined : setMarkdownOverflowing}
         />
-      </div>
+      )}
       {(overflowing || expanded) && (
         <ReadMoreSC
           type="button"
@@ -154,6 +177,22 @@ export function ExpandablePrompt({ prompt }: { prompt: string }) {
     </Flex>
   )
 }
+
+const PlainPromptSC = styled.div<{ $lines: number | null }>(
+  ({ theme, $lines }) => ({
+    ...theme.partials.text.body2,
+    color: theme.colors['text-xlight'],
+    minWidth: 0,
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    ...($lines !== null && {
+      display: '-webkit-box',
+      WebkitBoxOrient: 'vertical',
+      WebkitLineClamp: $lines,
+      overflow: 'hidden',
+    }),
+  })
+)
 
 const ReadMoreSC = styled.button(({ theme }) => ({
   all: 'unset',

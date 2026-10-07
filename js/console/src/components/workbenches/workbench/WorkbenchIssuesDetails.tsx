@@ -2,7 +2,8 @@ import { EmptyState } from '@pluralsh/design-system'
 import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhookIcons'
 import { IssueStatusIcon } from 'components/workbenches/common/IssueStatusChip'
 import {
-  BoardLoadingOrEmpty,
+  BoardEmptyList,
+  EmptyListState,
   LoadMoreSentinel,
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
@@ -41,6 +42,8 @@ export function useWorkbenchIssuesDetails({
   searchString,
   onSearchChange,
   fallbackWorkbenchId,
+  active,
+  emptyState,
 }: {
   issues: WorkbenchIssueFragment[]
   // first load only (spinner); later fetches don't blank the view
@@ -52,6 +55,9 @@ export function useWorkbenchIssuesDetails({
   searchString: string
   onSearchChange: (value: string) => void
   fallbackWorkbenchId: string
+  // the details view is shown
+  active: boolean
+  emptyState: EmptyListState
 }) {
   const loadMore = useBoardLoadMore({
     fetchingMore,
@@ -60,6 +66,9 @@ export function useWorkbenchIssuesDetails({
   })
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsSelection(issues)
+
+  // the view isn't shown: skip building the list and panels for every item
+  if (!active) return { sidebar: null, content: null }
   const selectedJob = selected?.workbenchJob
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
   const expandButton = !detailsOpen && (
@@ -81,11 +90,10 @@ export function useWorkbenchIssuesDetails({
       </DetailsListSearchSC>
       <DetailsListItemsSC>
         {isEmpty(issues) ? (
-          <BoardLoadingOrEmpty
+          <BoardEmptyList
+            noun="issues"
             loading={loading}
-            message={
-              searchString ? 'No matching issues found.' : 'No issues found.'
-            }
+            emptyState={emptyState}
           />
         ) : (
           issues.map((issue) => (

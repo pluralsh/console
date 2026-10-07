@@ -1,6 +1,7 @@
 import {
   BoardCardGridSC,
-  BoardLoadingOrEmpty,
+  BoardEmptyList,
+  EmptyListState,
   BoardSC,
   BoardSectionSC,
   BoardTitle,
@@ -23,6 +24,7 @@ export function WorkbenchJobsBoard({
   fetchNextPage,
   recentJobs,
   totalCount,
+  emptyState,
 }: {
   jobs: WorkbenchJobTinyFragment[]
   // first load only (spinner); later fetches don't blank the view
@@ -36,6 +38,7 @@ export function WorkbenchJobsBoard({
   recentJobs?: WorkbenchJobTinyFragment[]
   // jobs matching the current filters, across all pages
   totalCount?: Nullable<number>
+  emptyState: EmptyListState
 }) {
   const loadMore = useBoardLoadMore({
     fetchingMore,
@@ -45,9 +48,10 @@ export function WorkbenchJobsBoard({
 
   if (isEmpty(jobs))
     return (
-      <BoardLoadingOrEmpty
+      <BoardEmptyList
+        noun="jobs"
         loading={loading}
-        message="No jobs found."
+        emptyState={emptyState}
       />
     )
 

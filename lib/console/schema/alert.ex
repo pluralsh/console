@@ -146,10 +146,11 @@ defmodule Console.Schema.Alert do
 
   @doc """
   Orders by `:title` or `:updated_at` (falling back to `inserted_at`) in the given direction, with the id as tiebreaker.
+  Alerts without a title come last either way.
   """
   def sorted(query \\ __MODULE__, field, dir)
   def sorted(query, :title, dir),
-    do: from(a in query, order_by: [{^dir, a.title}, {^dir, a.id}])
+    do: from(a in query, order_by: [{^nulls_last(dir), a.title}, {^dir, a.id}])
   def sorted(query, _, dir),
     do: from(a in query, order_by: [{^dir, coalesce(a.updated_at, a.inserted_at)}, {^dir, a.id}])
 
@@ -179,7 +180,7 @@ defmodule Console.Schema.Alert do
   through its escaped ASCII form, and byte-for-byte for anything else (e.g. non-ASCII text).
   """
   def search(query \\ __MODULE__, q) do
-    like = "%#{q}%"
+    like = "%#{escape_like(q)}%"
     from(a in query,
       where: ilike(a.title, ^like) or
         fragment("encode(?, 'escape') ILIKE ?", a.message, ^like) or
@@ -187,6 +188,12 @@ defmodule Console.Schema.Alert do
         fragment("EXISTS(SELECT 1 FROM tags WHERE alert_id = ? AND name = 'alertname' AND value ILIKE ?)", a.id, ^like)
     )
   end
+
+  defp nulls_last(:asc), do: :asc_nulls_last
+  defp nulls_last(:desc), do: :desc_nulls_last
+
+  # matches `%`, `_` and `\` in the search literally rather than as LIKE wildcards
+  defp escape_like(q), do: String.replace(q, ["\\", "%", "_"], &"\\#{&1}")
 
   @valid ~w(
     type

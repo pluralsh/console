@@ -1,10 +1,4 @@
-import {
-  Button,
-  Chip,
-  EmptyState,
-  ErrorIcon,
-  Tooltip,
-} from '@pluralsh/design-system'
+import { Chip, EmptyState, ErrorIcon, Tooltip } from '@pluralsh/design-system'
 import {
   getAlertAnnotations,
   getAlertSummary,
@@ -24,7 +18,8 @@ import { alertStateLabel } from 'components/utils/alerts/AlertStateChip'
 import { GqlError } from 'components/utils/Alert'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
-  BoardLoadingOrEmpty,
+  BoardEmptyList,
+  EmptyListState,
   LoadMoreSentinel,
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
@@ -67,7 +62,6 @@ import styled from 'styled-components'
 import { formatDateTime, formatShortAge } from 'utils/datetime'
 import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
 import {
-  ALERT_SEVERITY_OPTIONS,
   ALERT_TYPE_LABELS,
   allAlertSeveritiesSelected,
   toggleAlertSeverityChip,
@@ -98,6 +92,8 @@ export function useWorkbenchAlertsDetails({
   severities,
   severityCounts,
   onSeveritiesChange,
+  active,
+  emptyState,
 }: {
   alerts: WorkbenchAlertFragment[]
   // first load only (spinner); later fetches don't blank the view
@@ -114,6 +110,9 @@ export function useWorkbenchAlertsDetails({
   // workbench-wide counts per severity
   severityCounts: Partial<Record<AlertSeverity, number>>
   onSeveritiesChange: (severities: AlertSeverity[]) => void
+  // the details view is shown
+  active: boolean
+  emptyState: EmptyListState
 }) {
   const loadMore = useBoardLoadMore({
     fetchingMore,
@@ -121,9 +120,12 @@ export function useWorkbenchAlertsDetails({
     fetchNextPage,
   })
 
-  const filtered = !allAlertSeveritiesSelected(severities)
+  const severityFiltered = !allAlertSeveritiesSelected(severities)
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsSelection(alerts)
+
+  // the view isn't shown: skip building the list and panels for every item
+  if (!active) return { sidebar: null, content: null }
   const workbenchId = selected?.workbench?.id ?? fallbackWorkbenchId
 
   const sidebar = (
@@ -148,8 +150,8 @@ export function useWorkbenchAlertsDetails({
                 size="small"
                 fillLevel={2}
                 severity={alertSeverityToChipSeverity[severity]}
-                inactive={filtered && !severities.includes(severity)}
-                aria-pressed={filtered && severities.includes(severity)}
+                inactive={severityFiltered && !severities.includes(severity)}
+                aria-pressed={severityFiltered && severities.includes(severity)}
                 onClick={() =>
                   onSeveritiesChange(
                     toggleAlertSeverityChip(severities, severity)
@@ -164,25 +166,13 @@ export function useWorkbenchAlertsDetails({
         </DetailsListSearchSC>
       )}
       <DetailsListItemsSC>
-        {isEmpty(alerts) &&
-          (filtered && !loading ? (
-            <EmptyState message="No alerts match the selected severities.">
-              <Button
-                small
-                secondary
-                onClick={() => onSeveritiesChange(ALERT_SEVERITY_OPTIONS)}
-              >
-                Reset filters
-              </Button>
-            </EmptyState>
-          ) : (
-            <BoardLoadingOrEmpty
-              loading={loading}
-              message={
-                searchString ? 'No matching alerts found.' : 'No alerts found.'
-              }
-            />
-          ))}
+        {isEmpty(alerts) && (
+          <BoardEmptyList
+            noun="alerts"
+            loading={loading}
+            emptyState={emptyState}
+          />
+        )}
         {alerts.map((alert) => (
           <DetailsListItem
             key={alert.id}
@@ -314,7 +304,12 @@ export function AlertInformation({ alert }: { alert: WorkbenchAlertFragment }) {
 
   return (
     <>
-      {alert.title && <ExpandablePrompt prompt={alert.title} />}
+      {alert.title && (
+        <ExpandablePrompt
+          plainText
+          prompt={alert.title}
+        />
+      )}
       {(summary ||
         service ||
         alert.cluster?.name ||

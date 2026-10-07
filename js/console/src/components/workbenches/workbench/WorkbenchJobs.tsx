@@ -193,6 +193,11 @@ export function WorkbenchJobs() {
         fetchNextPage,
       }
   const listError = searching ? search.error : error
+  const emptyState = {
+    searching,
+    filtered: hasUncheckedJobFilters(filters),
+    onResetFilters: () => updateDisplay(resetJobFilters(display)),
+  }
   const details = useWorkbenchJobsDetails({
     workbenchId,
     jobs,
@@ -202,6 +207,8 @@ export function WorkbenchJobs() {
     fetchNextPage: list.fetchNextPage,
     searchString,
     onSearchChange: setSearchString,
+    active: view === 'details',
+    emptyState,
   })
   const showDetails = view === 'details' && !listError && !filterEmptyKind
 
@@ -248,6 +255,7 @@ export function WorkbenchJobs() {
               hasNextPage={list.hasNextPage}
               fetchNextPage={list.fetchNextPage}
               recentJobs={recentJobs}
+              emptyState={emptyState}
               totalCount={
                 searching ? jobs.length : data?.workbench?.runs?.totalCount
               }

@@ -1,4 +1,4 @@
-import { EmptyState, Flex, Spinner } from '@pluralsh/design-system'
+import { Button, EmptyState, Flex, Spinner } from '@pluralsh/design-system'
 import { isNil } from 'lodash'
 import { ReactNode, useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
@@ -46,19 +46,71 @@ export function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
 }
 
 // Spinner on the first load, then an empty state, for a view with no items.
+// Names what emptied a list (the search, the display filters or both), so the
+// message doesn't blame the wrong one.
+export type EmptyListState = {
+  // a (debounced) search is applied
+  searching: boolean
+  // the display filters narrow the list
+  filtered: boolean
+  onResetFilters: () => void
+}
+
+export function emptyListMessage(
+  noun: string,
+  { searching, filtered }: { searching: boolean; filtered: boolean }
+) {
+  if (searching && filtered) return `No ${noun} match your search and filters.`
+  if (searching) return `No matching ${noun} found.`
+  if (filtered) return `No ${noun} match the current filters.`
+  return `No ${noun} found.`
+}
+
+// The empty (or first loading) state of a list, naming what emptied it.
+export function BoardEmptyList({
+  noun,
+  loading,
+  emptyState: { searching, filtered, onResetFilters },
+}: {
+  noun: string
+  loading: boolean
+  emptyState: EmptyListState
+}) {
+  return (
+    <BoardLoadingOrEmpty
+      loading={loading}
+      message={emptyListMessage(noun, { searching, filtered })}
+      onResetFilters={filtered ? onResetFilters : undefined}
+    />
+  )
+}
+
 export function BoardLoadingOrEmpty({
   loading,
   message,
+  onResetFilters,
 }: {
   loading: boolean
   message: string
+  // offers to reset the display filters, when they narrowed the list
+  onResetFilters?: () => void
 }) {
   return loading ? (
     <BoardCenteredSC>
       <Spinner />
     </BoardCenteredSC>
   ) : (
-    <EmptyState message={message} />
+    <EmptyState message={message}>
+      {onResetFilters && (
+        <Button
+          small
+          secondary
+          onClick={onResetFilters}
+        >
+          Reset filters
+        </Button>
+      )}
+    </EmptyState>
   )
 }
 

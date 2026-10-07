@@ -1,7 +1,44 @@
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import type { SemanticColorKey } from '@pluralsh/design-system'
 import { truncateKeepingChips } from 'components/utils/contentEditableChips'
+import { RefObject, useLayoutEffect, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
+
+// Whether the clamped element `getClamped` returns cuts its content off,
+// re-checked whenever `ref`'s element resizes (e.g. a panel opening changes the
+// width, and so the wrapping) or `content` changes.
+export function useClampOverflow(
+  ref: RefObject<HTMLElement | null>,
+  getClamped: (el: HTMLElement) => Element | null,
+  content: unknown,
+  enabled = true
+) {
+  const [overflowing, setOverflowing] = useState(false)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!enabled || !el) return
+
+    const check = () => {
+      const clamped = getClamped(el)
+      setOverflowing(
+        !!clamped && clamped.scrollHeight > clamped.clientHeight + 1
+      )
+    }
+
+    check()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(check)
+    observer.observe(el)
+
+    return () => observer.disconnect()
+  }, [content, enabled, getClamped, ref])
+
+  return overflowing
+}
+
+// the markdown root, which the clamped densities clamp (see `& > div` below)
+const getClampedMarkdown = (wrapper: HTMLElement) => wrapper.firstElementChild
 
 const MarkdownWrapSC = styled.div(({ theme }) => ({
   ...theme.partials.text.body2,
@@ -125,6 +162,7 @@ export function WorkbenchStoredPromptMarkdown({
   density = 'default',
   clampLines = 3,
   promptColor = 'text-light',
+  onOverflowChange,
 }: {
   text: string
   /** When set, trims by visible length without splitting chips (like job previews). */
@@ -134,8 +172,21 @@ export function WorkbenchStoredPromptMarkdown({
   /** Number of lines before truncation for the clamped densities. Default 3; `null` disables clamping. */
   clampLines?: number | null
   promptColor?: SemanticColorKey
+  /** Reports whether the clamp cuts the text off, as the width or text change. */
+  onOverflowChange?: (overflowing: boolean) => void
 }) {
   const clampedDensity = density !== 'default'
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const overflowing = useClampOverflow(
+    wrapperRef,
+    getClampedMarkdown,
+    `${text}:${clampLines}`,
+    !!onOverflowChange && clampedDensity && clampLines !== null
+  )
+
+  useLayoutEffect(() => {
+    onOverflowChange?.(overflowing)
+  }, [onOverflowChange, overflowing])
 
   const trimmed =
     truncateVisibleChars != null && !clampedDensity
@@ -144,7 +195,10 @@ export function WorkbenchStoredPromptMarkdown({
 
   if (density === 'tableCell') {
     return (
-      <TableCellMarkdownWrapSC $lines={clampLines}>
+      <TableCellMarkdownWrapSC
+        ref={wrapperRef}
+        $lines={clampLines}
+      >
         <SimplifiedMarkdown
           text={trimmed}
           rootLayout="block"
@@ -154,7 +208,10 @@ export function WorkbenchStoredPromptMarkdown({
   }
   if (density === 'sidePanel') {
     return (
-      <SidePanelMarkdownWrapSC $lines={clampLines}>
+      <SidePanelMarkdownWrapSC
+        ref={wrapperRef}
+        $lines={clampLines}
+      >
         <SimplifiedMarkdown
           text={trimmed}
           rootLayout="block"
@@ -165,6 +222,7 @@ export function WorkbenchStoredPromptMarkdown({
   if (density === 'jobCard') {
     return (
       <JobCardMarkdownWrapSC
+        ref={wrapperRef}
         $lines={clampLines}
         $promptColor={promptColor}
       >

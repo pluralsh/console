@@ -158,7 +158,14 @@ export function WorkbenchAlerts() {
     if (!tableSliceActive) setVirtualSlice(undefined)
   }, [tableSliceActive, setVirtualSlice])
 
+  const emptyState = {
+    searching: !!debouncedSearchString,
+    filtered: hasUncheckedAlertFilters(display),
+    onResetFilters: () => updateDisplay(resetAlertFilters(display)),
+  }
   const details = useWorkbenchAlertsDetails({
+    active: view === 'details',
+    emptyState,
     alerts,
     loading: !data && loading,
     fetchingMore,
@@ -211,6 +218,7 @@ export function WorkbenchAlerts() {
           ) : view === 'board' ? (
             <WorkbenchAlertsBoard
               totalCount={totalCount}
+              emptyState={emptyState}
               alerts={alerts}
               loading={!data && loading}
               fetchingMore={fetchingMore}

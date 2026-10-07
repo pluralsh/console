@@ -52,6 +52,7 @@ defmodule Console.Deployments.Observability.Webhook.Grafana do
 
   defp format_value(v) when is_float(v) and v == trunc(v), do: Integer.to_string(trunc(v))
   defp format_value(v) when is_float(v), do: Float.to_string(v)
+  defp format_value(v) when is_map(v) or is_list(v), do: Jason.encode!(v)
   defp format_value(v), do: to_string(v)
 
   def title(%{"title" => title}, _) when is_binary(title), do: title

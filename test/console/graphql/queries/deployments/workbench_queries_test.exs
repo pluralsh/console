@@ -710,6 +710,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       # invalid UTF-8 can't fail the search, and its readable part still matches
       by_bad_bytes = insert(:alert, workbench: workbench, message: <<0xFF, 0xFE>> <> "OOMKilled pod")
       by_unicode   = insert(:alert, workbench: workbench, message: "zużycie pamięci")
+      # LIKE wildcards in the search match literally
+      by_percent    = insert(:alert, workbench: workbench, title: "cpu at 100% usage")
+      insert(:alert, workbench: workbench, title: "cpu at 1000 usage")
+      by_underscore = insert(:alert, workbench: workbench, title: "disk_full")
+      insert(:alert, workbench: workbench, title: "diskXfull")
 
       query = """
         query Workbench($id: ID!, $q: String) {
@@ -726,7 +731,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         {"NEARLY", [by_message]},
         {"crashloop", [by_tag]},
         {"oomkilled", [by_bad_bytes]},
-        {"pamięci", [by_unicode]}
+        {"pamięci", [by_unicode]},
+        {"100%", [by_percent]},
+        {"disk_full", [by_underscore]}
       ] do
         {:ok, %{data: %{"workbench" => found}}} =
           run_query(query, %{"id" => workbench.id, "q" => q}, %{current_user: admin_user()})
@@ -793,6 +800,31 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       ] do
         {:ok, %{data: %{"workbench" => found}}} =
           run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})
+
+        assert from_connection(found["alerts"])
+               |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
+      end
+    end
+
+    test "it sorts workbench alerts without a title last" do
+      workbench = insert(:workbench)
+      untitled = insert(:alert, workbench: workbench, title: nil)
+      alpha    = insert(:alert, workbench: workbench, title: "Alpha")
+      zulu     = insert(:alert, workbench: workbench, title: "Zulu")
+
+      query = """
+        query Workbench($id: ID!, $direction: SortDirection) {
+          workbench(id: $id) {
+            alerts(first: 10, sort: TITLE, direction: $direction) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {direction, expected} <- [{"ASC", [alpha, zulu, untitled]}, {"DESC", [zulu, alpha, untitled]}] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, %{"id" => workbench.id, "direction" => direction}, %{current_user: admin_user()})
 
         assert from_connection(found["alerts"])
                |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
@@ -867,12 +899,14 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
           "silenceURL" => "https://grafana/silence/fp-1"
         },
         %{"fingerprint" => "fp-2", "valueString" => "[ var='A' value=3 ]"},
-        %{"fingerprint" => "fp-dd", "values" => %{"A" => 1.0}, "silenceURL" => "https://grafana/silence/fp-dd"}
+        %{"fingerprint" => "fp-dd", "values" => %{"A" => 1.0}, "silenceURL" => "https://grafana/silence/fp-dd"},
+        %{"fingerprint" => "fp-nested", "values" => %{"A" => %{"x" => 1}, "B" => [1, 2]}}
       ]}
 
       grafana  = insert(:alert, workbench: workbench, service: service, fingerprint: "fp-1", payload: payload)
       fallback = insert(:alert, workbench: workbench, fingerprint: "fp-2", payload: payload)
       datadog  = insert(:alert, workbench: workbench, type: :datadog, fingerprint: "fp-dd", payload: payload)
+      nested   = insert(:alert, workbench: workbench, fingerprint: "fp-nested", payload: payload)
 
       {:ok, %{data: %{"workbench" => found}}} = run_query("""
         query Workbench($id: ID!) {
@@ -899,6 +933,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       refute by_id[datadog.id]["value"]
       refute by_id[datadog.id]["silenceUrl"]
+
+      # values that aren't numbers are shown as json rather than failing the field
+      assert by_id[nested.id]["value"] == ~s(A={"x":1}, B=[1,2])
     end
 
     test "it can fetch workbench issues" do
