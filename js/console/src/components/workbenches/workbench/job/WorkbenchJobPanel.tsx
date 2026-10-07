@@ -170,17 +170,22 @@ export type WorkbenchJobTabsData = ReturnType<typeof useWorkbenchJobTabsData>
 
 // Job data behind the job tabs, shared by the job side panel and the Jobs tab
 // details view. On the job page, polling is handled by the page itself (which
-// keeps the cache up to date); views without that pass `pollActivities` to
-// refresh activities (draft PRs) while the job runs.
+// keeps the cache up to date). The details view passes `inDetailsView`: its
+// conclusion panel already fetches and polls the job, so the job is read from
+// the cache, and activities (draft PRs) and actions are polled only while the
+// job runs.
 export function useWorkbenchJobTabsData(
   jobId: string,
-  { pollActivities = false }: { pollActivities?: boolean } = {}
+  { inDetailsView = false }: { inDetailsView?: boolean } = {}
 ) {
   const { data, loading } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: inDetailsView ? 'cache-first' : 'cache-and-network',
   })
+  const job = data?.workbenchJob
+  const isLoading = loading && !job
+  const running = isJobRunning(job?.status)
   const {
     data: activitiesData,
     startPolling,
@@ -188,16 +193,14 @@ export function useWorkbenchJobTabsData(
   } = useWorkbenchJobActivitiesQuery({
     skip: !jobId,
     variables: { id: jobId },
-    fetchPolicy: pollActivities ? 'cache-and-network' : 'cache-first',
+    fetchPolicy: inDetailsView ? 'cache-and-network' : 'cache-first',
   })
   const {
     hasActions,
     hasActionsAwaitingApproval,
     isLoading: areActionsLoading,
-  } = useWorkbenchJobActionSummary(jobId)
-  const job = data?.workbenchJob
-  const isLoading = loading && !job
-  const pollingActivities = pollActivities && isJobRunning(job?.status)
+  } = useWorkbenchJobActionSummary(jobId, { poll: !inDetailsView || running })
+  const pollingActivities = inDetailsView && running
 
   useEffect(() => {
     if (!pollingActivities) return

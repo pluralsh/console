@@ -262,6 +262,11 @@ export function DisplayRadioGroup(props: ComponentProps<typeof RadioGroup>) {
   return <RadioGroupSC {...props} />
 }
 
+// The only sort field, as plain text where there's nothing to choose.
+export function DisplaySortField({ children }: { children: ReactNode }) {
+  return <SortFieldSC>{children}</SortFieldSC>
+}
+
 export function DisplayFilterEmpty({
   title,
   description,
@@ -453,6 +458,13 @@ const CountSC = styled.span(({ theme }) => ({
 const RadioGroupSC = styled(RadioGroup)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  paddingTop: theme.spacing.xxsmall,
+  paddingBottom: theme.spacing.medium,
+}))
+
+const SortFieldSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-light'],
   paddingTop: theme.spacing.xxsmall,
   paddingBottom: theme.spacing.medium,
 }))

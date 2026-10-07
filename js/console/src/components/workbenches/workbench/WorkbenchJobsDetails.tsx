@@ -45,6 +45,7 @@ import { ComponentProps, useMemo } from 'react'
 import styled from 'styled-components'
 import { formatShortAge, fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
+import { ensureURLValidity } from 'utils/url'
 import {
   useSelectedJobTab,
   useWorkbenchJobTabsData,
@@ -202,8 +203,7 @@ function WorkbenchJobDetailsPanel({
   jobId: string
   onCollapse: () => void
 }) {
-  // the job page's activity stream isn't mounted here, so poll for draft PRs
-  const data = useWorkbenchJobTabsData(jobId, { pollActivities: true })
+  const data = useWorkbenchJobTabsData(jobId, { inDetailsView: true })
   const { job, isLoading } = data
   const tabs = useMemo(() => getDetailsTabs(data), [data])
   const [selectedTab, setSelectedTab] = useSelectedJobTab<DetailsTab>(
@@ -308,7 +308,7 @@ function WorkbenchJobDetailsTabContent({
 function PrRow({ pr }: { pr: PullRequestBasicFragment }) {
   return (
     <DetailsLinkRowSC
-      href={pr.url}
+      href={ensureURLValidity(pr.url) || undefined}
       target="_blank"
       rel="noopener noreferrer"
     >

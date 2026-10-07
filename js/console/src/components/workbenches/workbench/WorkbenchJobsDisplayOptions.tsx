@@ -1,10 +1,9 @@
-import { Radio } from '@pluralsh/design-system'
 import {
   DisplayFilterRow,
   DisplayFilterRows,
-  DisplayRadioGroup,
   DisplaySection,
   DisplaySectionHeader,
+  DisplaySortField,
   DisplaySortHeader,
   DisplayViewToggle,
   toggleListValue,
@@ -92,18 +91,8 @@ export function WorkbenchJobsDisplayOptions({
             })
           }
         />
-        {/* jobs only sort by creation date; the radio mirrors the other tabs */}
-        <DisplayRadioGroup
-          value="insertedAt"
-          onChange={() => {}}
-        >
-          <Radio
-            small
-            value="insertedAt"
-          >
-            Date created
-          </Radio>
-        </DisplayRadioGroup>
+        {/* jobs only sort by creation date */}
+        <DisplaySortField>Date created</DisplaySortField>
       </DisplaySection>
     </>
   )
