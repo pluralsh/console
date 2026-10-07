@@ -10,8 +10,7 @@ import {
 import { TRUNCATE } from 'components/utils/truncate'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import { WorkbenchJobStatus } from 'generated/graphql'
-import { ReactNode, useCallback, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { ReactNode, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { BoardTitleSC } from './WorkbenchBoard'
 
@@ -27,27 +26,12 @@ export const DETAILS_TAB_STRIP_HEIGHT = 64
 
 export type DetailsGutterStatus = 'running' | 'failed' | null
 
-export const DETAILS_SELECTED_PARAM = 'selected'
-
-// Selected list item, kept in the URL (`?selected=<id>`) so it survives a
-// reload, going back from a job page and switching views. Falls back to the
-// first item. Also tracks whether the right-most details panel is open.
+// Selected list item, falling back to the first item while none is selected
+// or the selected one has left the list. Also tracks whether the right-most
+// details panel is open.
 export function useDetailsSelection<T extends { id: string }>(items: T[]) {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const selectedId = searchParams.get(DETAILS_SELECTED_PARAM)
+  const [selectedId, setSelectedId] = useState<string>()
   const [detailsOpen, setDetailsOpen] = useState(true)
-
-  const setSelectedId = useCallback(
-    (id: string) =>
-      setSearchParams(
-        (params) => {
-          params.set(DETAILS_SELECTED_PARAM, id)
-          return params
-        },
-        { replace: true }
-      ),
-    [setSearchParams]
-  )
 
   return {
     selected: items.find(({ id }) => id === selectedId) ?? items[0],
