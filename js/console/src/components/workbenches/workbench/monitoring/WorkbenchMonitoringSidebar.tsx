@@ -64,6 +64,7 @@ export function WorkbenchMonitoringSidebar({
     {
       queryHook: useWorkbenchDashboardsQuery,
       keyPath: ['workbench', 'workbenchDashboards'],
+      keepLoadedPages: true,
     },
     { id: workbenchId, q: trimmedFilter || undefined }
   )
@@ -71,6 +72,7 @@ export function WorkbenchMonitoringSidebar({
     {
       queryHook: useWorkbenchMonitorsQuery,
       keyPath: ['workbench', 'monitors'],
+      keepLoadedPages: true,
     },
     { id: workbenchId, q: trimmedFilter || undefined }
   )
