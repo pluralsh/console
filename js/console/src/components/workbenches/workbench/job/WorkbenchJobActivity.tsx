@@ -207,7 +207,8 @@ export function WorkbenchJobActivity({
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
         gap: 10,
-        padding: '0',
+        // 2px above and 1px below so the summary-to-title gap matches the 33px under the prompt.
+        padding: '2px 0 1px',
         width: 'fit-content',
         maxWidth: '100%',
       }}
@@ -544,8 +545,8 @@ const MemoGroupSC = styled.div(({ theme }) => ({
   width: '100%',
   minWidth: 0,
   borderRadius: theme.borderRadiuses.medium,
-  // Keeps the notes-to-title gap at 33px after the activity padding was removed.
-  marginBottom: 5,
+  // Keeps the notes-to-title gap at 33px alongside the activity title padding.
+  marginBottom: 3,
 }))
 
 const MemoLabelSC = styled(Body2P)(({ theme }) => ({
