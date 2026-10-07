@@ -1346,8 +1346,9 @@ export enum AlertSeverity {
 }
 
 export enum AlertSort {
-  InsertedAt = 'INSERTED_AT',
-  Title = 'TITLE'
+  Title = 'TITLE',
+  /** last update, falling back to creation for alerts never updated */
+  UpdatedAt = 'UPDATED_AT'
 }
 
 export enum AlertState {
@@ -23506,6 +23507,13 @@ export type RecentWorkbenchJobsQueryVariables = Exact<{
 
 export type RecentWorkbenchJobsQuery = { __typename?: 'RootQueryType', recentWorkbenchJobs?: Array<{ __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, error?: string | null, insertedAt?: string | null, queuedPromptCount: number, queuedPromptSummary: { __typename?: 'QueuedPromptSummary', readyCount: number, pendingCount: number, nextAt?: string | null }, usage?: { __typename?: 'WorkbenchJobUsage', cachedTokens?: number | null, inputTokens?: number | null, outputTokens?: number | null, totalCost?: number | null, totalTokens?: number | null } | null, modes?: { __typename?: 'WorkbenchJobModes', budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null> | null };
 
+export type WorkbenchAlertCountsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchAlertCountsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, alertCounts?: { __typename?: 'WorkbenchAlertCounts', types?: Array<{ __typename?: 'AlertCountByType', type: ObservabilityWebhookType, count: number } | null> | null, severities?: Array<{ __typename?: 'AlertCountBySeverity', severity: AlertSeverity, count: number } | null> | null } | null } | null };
+
 export type WorkbenchAlertsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -23518,7 +23526,7 @@ export type WorkbenchAlertsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchAlertsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, alertCounts?: { __typename?: 'WorkbenchAlertCounts', types?: Array<{ __typename?: 'AlertCountByType', type: ObservabilityWebhookType, count: number } | null> | null, severities?: Array<{ __typename?: 'AlertCountBySeverity', severity: AlertSeverity, count: number } | null> | null } | null, alerts?: { __typename?: 'AlertConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, value?: string | null, silenceUrl?: string | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, error?: string | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchAlertsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, alerts?: { __typename?: 'AlertConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null, type: ObservabilityWebhookType, severity: AlertSeverity, state: AlertState, fingerprint?: string | null, url?: string | null, annotations?: Record<string, unknown> | null, value?: string | null, silenceUrl?: string | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'Tag', id: string, name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, resolution?: { __typename?: 'AlertResolution', resolution: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, error?: string | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchesIssuesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -48506,8 +48514,8 @@ export type RecentWorkbenchJobsQueryHookResult = ReturnType<typeof useRecentWork
 export type RecentWorkbenchJobsLazyQueryHookResult = ReturnType<typeof useRecentWorkbenchJobsLazyQuery>;
 export type RecentWorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useRecentWorkbenchJobsSuspenseQuery>;
 export type RecentWorkbenchJobsQueryResult = Apollo.QueryResult<RecentWorkbenchJobsQuery, RecentWorkbenchJobsQueryVariables>;
-export const WorkbenchAlertsDocument = gql`
-    query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String, $q: String, $types: [ObservabilityWebhookType], $severities: [AlertSeverity], $sort: AlertSort, $direction: SortDirection) {
+export const WorkbenchAlertCountsDocument = gql`
+    query WorkbenchAlertCounts($id: ID!) {
   workbench(id: $id) {
     id
     alertCounts {
@@ -48520,6 +48528,49 @@ export const WorkbenchAlertsDocument = gql`
         count
       }
     }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchAlertCountsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchAlertCountsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchAlertCountsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchAlertCountsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchAlertCountsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables> & ({ variables: WorkbenchAlertCountsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>(WorkbenchAlertCountsDocument, options);
+      }
+export function useWorkbenchAlertCountsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>(WorkbenchAlertCountsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchAlertCountsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>;
+export function useWorkbenchAlertCountsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchAlertCountsQuery | undefined, WorkbenchAlertCountsQueryVariables>;
+export function useWorkbenchAlertCountsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>(WorkbenchAlertCountsDocument, options);
+        }
+export type WorkbenchAlertCountsQueryHookResult = ReturnType<typeof useWorkbenchAlertCountsQuery>;
+export type WorkbenchAlertCountsLazyQueryHookResult = ReturnType<typeof useWorkbenchAlertCountsLazyQuery>;
+export type WorkbenchAlertCountsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchAlertCountsSuspenseQuery>;
+export type WorkbenchAlertCountsQueryResult = Apollo.QueryResult<WorkbenchAlertCountsQuery, WorkbenchAlertCountsQueryVariables>;
+export const WorkbenchAlertsDocument = gql`
+    query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String, $q: String, $types: [ObservabilityWebhookType], $severities: [AlertSeverity], $sort: AlertSort, $direction: SortDirection) {
+  workbench(id: $id) {
+    id
     alerts(
       first: $first
       after: $after
@@ -52574,6 +52625,7 @@ export const namedOperations = {
     WorkbenchJobSearch: 'WorkbenchJobSearch',
     WorkbenchEvals: 'WorkbenchEvals',
     RecentWorkbenchJobs: 'RecentWorkbenchJobs',
+    WorkbenchAlertCounts: 'WorkbenchAlertCounts',
     WorkbenchAlerts: 'WorkbenchAlerts',
     WorkbenchesIssues: 'WorkbenchesIssues',
     WorkbenchIssues: 'WorkbenchIssues',

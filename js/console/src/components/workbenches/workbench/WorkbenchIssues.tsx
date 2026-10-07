@@ -37,6 +37,7 @@ import {
 } from './workbenchIssuesDisplay'
 
 const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
+const PAGE_SIZE = 50
 
 const noop = () => {}
 
@@ -72,7 +73,11 @@ export function WorkbenchIssues() {
     setVirtualSlice,
     fetchingMore,
   } = useFetchPaginatedData(
-    { queryHook: useWorkbenchIssuesQuery, keyPath: ['workbench', 'issues'] },
+    {
+      queryHook: useWorkbenchIssuesQuery,
+      keyPath: ['workbench', 'issues'],
+      pageSize: PAGE_SIZE,
+    },
     {
       id: workbenchId,
       q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,

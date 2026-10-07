@@ -144,6 +144,15 @@ defmodule Console.Schema.Alert do
   end
   def ordered(query, order), do: from(a in query, order_by: ^order)
 
+  @doc """
+  Orders by `:title` or `:updated_at` (falling back to `inserted_at`) in the given direction, with the id as tiebreaker.
+  """
+  def sorted(query \\ __MODULE__, field, dir)
+  def sorted(query, :title, dir),
+    do: from(a in query, order_by: [{^dir, a.title}, {^dir, a.id}])
+  def sorted(query, _, dir),
+    do: from(a in query, order_by: [{^dir, coalesce(a.updated_at, a.inserted_at)}, {^dir, a.id}])
+
   def for_state(query \\ __MODULE__, state) do
     from(a in query, where: a.state == ^state)
   end

@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash'
 import styled from 'styled-components'
 import { WorkbenchJobCard } from './WorkbenchJobCard'
 
-const RECENT_JOBS_COUNT = 4
+export const RECENT_JOBS_COUNT = 4
 
 export function WorkbenchJobsBoard({
   jobs,
@@ -21,7 +21,7 @@ export function WorkbenchJobsBoard({
   fetchingMore,
   hasNextPage,
   fetchNextPage,
-  showRecent = true,
+  recentJobs,
   totalCount,
 }: {
   jobs: WorkbenchJobTinyFragment[]
@@ -31,8 +31,9 @@ export function WorkbenchJobsBoard({
   fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
-  // off while searching: "recent" means nothing for search results
-  showRecent?: boolean
+  // the most recent jobs, whatever the sort; none while searching, where
+  // "recent" means nothing for search results
+  recentJobs?: WorkbenchJobTinyFragment[]
   // jobs matching the current filters, across all pages
   totalCount?: Nullable<number>
 }) {
@@ -52,11 +53,11 @@ export function WorkbenchJobsBoard({
 
   return (
     <BoardSC>
-      {showRecent && (
+      {!isEmpty(recentJobs) && (
         <BoardSectionSC>
           <BoardTitleSC>Recent jobs</BoardTitleSC>
           <RecentGridSC>
-            {jobs.slice(0, RECENT_JOBS_COUNT).map((job) => (
+            {recentJobs?.map((job) => (
               <WorkbenchJobCard
                 key={job.id}
                 job={job}
@@ -67,7 +68,7 @@ export function WorkbenchJobsBoard({
       )}
       <BoardSectionSC>
         <BoardTitle count={totalCount}>
-          {showRecent ? 'All jobs' : 'Matching jobs'}
+          {recentJobs ? 'All jobs' : 'Matching jobs'}
         </BoardTitle>
         <BoardCardGridSC>
           {jobs.map((job) => (

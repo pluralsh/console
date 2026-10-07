@@ -1056,16 +1056,7 @@ query RecentWorkbenchJobs($count: Int) {
   }
 }
 
-query WorkbenchAlerts(
-  $id: ID!
-  $first: Int = 100
-  $after: String
-  $q: String
-  $types: [ObservabilityWebhookType]
-  $severities: [AlertSeverity]
-  $sort: AlertSort
-  $direction: SortDirection
-) {
+query WorkbenchAlertCounts($id: ID!) {
   workbench(id: $id) {
     id
     alertCounts {
@@ -1078,6 +1069,21 @@ query WorkbenchAlerts(
         count
       }
     }
+  }
+}
+
+query WorkbenchAlerts(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $q: String
+  $types: [ObservabilityWebhookType]
+  $severities: [AlertSeverity]
+  $sort: AlertSort
+  $direction: SortDirection
+) {
+  workbench(id: $id) {
+    id
     alerts(
       first: $first
       after: $after

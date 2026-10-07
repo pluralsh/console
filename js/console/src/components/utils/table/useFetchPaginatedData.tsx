@@ -9,12 +9,12 @@ import {
 import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
+  extendNestedConnection,
   reduceNestedData,
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
 import { PageInfoFragment } from 'generated/graphql'
 import { Dispatch, useCallback, useMemo, useState } from 'react'
-import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
 export const DEFAULT_PAGE_SIZE = 100
 
@@ -117,24 +117,11 @@ export function useFetchPaginatedData<
     if (pageInfo?.hasNextPage) {
       fetchMore({
         variables: { after: pageInfo?.endCursor },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          const newConnection = extendConnection(
-            reduceNestedData(options.keyPath, prev),
-            reduceNestedData(options.keyPath, fetchMoreResult)[queryKey],
-            queryKey
-          )
-
-          return updateNestedConnection(options.keyPath, prev, newConnection)
-        },
+        updateQuery: (prev, { fetchMoreResult }) =>
+          extendNestedConnection(options.keyPath, prev, fetchMoreResult),
       })
     }
-  }, [
-    pageInfo?.hasNextPage,
-    pageInfo?.endCursor,
-    fetchMore,
-    options.keyPath,
-    queryKey,
-  ])
+  }, [pageInfo?.hasNextPage, pageInfo?.endCursor, fetchMore, options.keyPath])
 
   return {
     data,

@@ -101,9 +101,9 @@ export function WorkbenchAlertsDisplayOptions({
         >
           <Radio
             small
-            value={AlertSort.InsertedAt}
+            value={AlertSort.UpdatedAt}
           >
-            Date created
+            Last updated
           </Radio>
           <Radio
             small

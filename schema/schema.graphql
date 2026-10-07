@@ -8927,7 +8927,9 @@ type KubernetesControllerMetrics {
 }
 
 enum AlertSort {
-  INSERTED_AT
+  "last update, falling back to creation for alerts never updated"
+  UPDATED_AT
+
   TITLE
 }
 

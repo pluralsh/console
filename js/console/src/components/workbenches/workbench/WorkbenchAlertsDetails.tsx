@@ -67,6 +67,7 @@ import { formatDateTime, formatShortAge } from 'utils/datetime'
 import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
 import {
   ALERT_SEVERITY_OPTIONS,
+  ALERT_TYPE_LABELS,
   allAlertSeveritiesSelected,
   toggleAlertSeverityChip,
 } from './workbenchAlertsDisplay'
@@ -378,7 +379,10 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
               label="Silence link"
             >
               <SmallLinkSC>
-                <AlertSourceLink alert={{ ...alert, url: alert.silenceUrl }} />
+                <AlertSourceLink
+                  alert={{ ...alert, url: alert.silenceUrl }}
+                  label={`Silence in ${ALERT_TYPE_LABELS[alert.type]}`}
+                />
               </SmallLinkSC>
             </DetailsField>
           )}

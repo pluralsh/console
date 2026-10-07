@@ -120,17 +120,10 @@ export function useFetchSlice<
     () =>
       fetchMore({
         variables: { after, first },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          const newConnection = extendConnection(
-            reduceNestedData(keyPath, prev),
-            reduceNestedData(keyPath, fetchMoreResult)[queryKey],
-            queryKey
-          )
-
-          return updateNestedConnection(keyPath, prev, newConnection)
-        },
+        updateQuery: (prev, { fetchMoreResult }) =>
+          extendNestedConnection(keyPath, prev, fetchMoreResult),
       }),
-    [fetchMore, after, first, keyPath, queryKey]
+    [fetchMore, after, first, keyPath]
   )
 }
 
@@ -162,15 +155,18 @@ function useRefetchLoaded<
       fetchMore({
         variables: { first: polledCount, after: null },
         updateQuery: (prev, { fetchMoreResult }) => {
-          const next = reduceNestedData(keyPath, fetchMoreResult)?.[queryKey]
+          const nextParent = reduceNestedData(keyPath, fetchMoreResult)
+          const next = nextParent?.[queryKey]
           if (!next) return prev
           const prevParent = reduceNestedData(keyPath, prev)
           const prevConnection = prevParent?.[queryKey]
           const prevEdges: any[] = prevConnection?.edges ?? []
+          // fields next to the connection (e.g. counts) come from the poll
+          const parent = { ...prevParent, ...nextParent }
 
           if (prevEdges.length <= polledCount)
             return updateNestedConnection(keyPath, prev, {
-              ...prevParent,
+              ...parent,
               [queryKey]: next,
             })
 
@@ -187,10 +183,13 @@ function useRefetchLoaded<
             .slice(lastPolled >= 0 ? lastPolled + 1 : polledCount)
             .filter((edge) => !polledIds.has(edge?.node?.id))
 
+          // fresh connection fields (e.g. totalCount), but the loaded cursor
           return updateNestedConnection(keyPath, prev, {
-            ...prevParent,
+            ...parent,
             [queryKey]: {
               ...prevConnection,
+              ...next,
+              pageInfo: prevConnection?.pageInfo,
               edges: [...(next.edges ?? []), ...tail],
             },
           })
@@ -204,3 +203,26 @@ function useRefetchLoaded<
 
 export const reduceNestedData = (path: string[], data: any) =>
   path.slice(0, -1).reduce((acc, key) => acc?.[key], data)
+
+// Appends a fetched page to the loaded connection. Fields next to the
+// connection (e.g. counts) and on it (e.g. totalCount) come from the newer
+// response, so they stay current as pages load.
+export function extendNestedConnection<TData>(
+  keyPath: string[],
+  prev: TData,
+  fetchMoreResult: Nullable<TData>
+): TData {
+  const queryKey = keyPath[keyPath.length - 1]
+  const prevParent = reduceNestedData(keyPath, prev)
+  const nextParent = reduceNestedData(keyPath, fetchMoreResult)
+
+  return updateNestedConnection(
+    keyPath,
+    prev,
+    extendConnection(
+      { ...prevParent, ...nextParent, [queryKey]: prevParent?.[queryKey] },
+      nextParent?.[queryKey],
+      queryKey
+    )
+  )
+}

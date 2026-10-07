@@ -761,8 +761,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
     test "it can sort workbench alerts" do
       workbench = insert(:workbench)
-      zulu  = insert(:alert, workbench: workbench, title: "Zulu", inserted_at: Timex.now() |> Timex.shift(days: -1))
-      alpha = insert(:alert, workbench: workbench, title: "Alpha")
+      # zulu was created first but updated last
+      zulu  = insert(:alert, workbench: workbench, title: "Zulu", inserted_at: Timex.now() |> Timex.shift(days: -3), updated_at: Timex.now() |> Timex.shift(hours: -1))
+      alpha = insert(:alert, workbench: workbench, title: "Alpha", inserted_at: Timex.now() |> Timex.shift(days: -1), updated_at: Timex.now() |> Timex.shift(days: -1))
 
       query = """
         query Workbench($id: ID!, $sort: AlertSort, $direction: SortDirection) {
@@ -777,8 +778,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       for {vars, expected} <- [
         {%{"sort" => "TITLE", "direction" => "ASC"}, [alpha, zulu]},
         {%{"sort" => "TITLE", "direction" => "DESC"}, [zulu, alpha]},
-        {%{"sort" => "INSERTED_AT", "direction" => "ASC"}, [zulu, alpha]},
-        {%{"sort" => "INSERTED_AT"}, [alpha, zulu]}
+        {%{"sort" => "UPDATED_AT", "direction" => "ASC"}, [alpha, zulu]},
+        {%{"sort" => "UPDATED_AT"}, [zulu, alpha]},
+        {%{"direction" => "ASC"}, [alpha, zulu]}
       ] do
         {:ok, %{data: %{"workbench" => found}}} =
           run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})

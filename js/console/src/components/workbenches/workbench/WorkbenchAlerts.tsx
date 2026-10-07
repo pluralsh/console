@@ -1,5 +1,6 @@
 import { Flex } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayFilterEmpty,
@@ -21,6 +22,7 @@ import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSea
 import {
   AlertSeverity,
   ObservabilityWebhookType,
+  useWorkbenchAlertCountsQuery,
   useWorkbenchAlertsQuery,
 } from 'generated/graphql'
 import { compact, fromPairs, isEmpty, omit } from 'lodash'
@@ -45,6 +47,7 @@ import {
 } from './workbenchAlertsDisplay'
 
 const WORKBENCH_ALERTS_VIEW_STORAGE_KEY = 'workbench-alerts-view'
+const PAGE_SIZE = 50
 
 const noop = () => {}
 
@@ -79,32 +82,42 @@ export function WorkbenchAlerts() {
     setVirtualSlice,
     fetchingMore,
   } = useFetchPaginatedData(
-    { queryHook: useWorkbenchAlertsQuery, keyPath: ['workbench', 'alerts'] },
+    {
+      queryHook: useWorkbenchAlertsQuery,
+      keyPath: ['workbench', 'alerts'],
+      pageSize: PAGE_SIZE,
+    },
     {
       id: workbenchId,
       q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
       ...filterVars,
     }
   )
+  // polled on their own, so they stay current however many pages are loaded
+  const { data: countsData } = useWorkbenchAlertCountsQuery({
+    variables: { id: workbenchId },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
   const typeCounts = useMemo(
     () =>
       fromPairs(
-        compact(data?.workbench?.alertCounts?.types).map((entry) => [
+        compact(countsData?.workbench?.alertCounts?.types).map((entry) => [
           entry.type,
           entry.count,
         ])
       ) as Partial<Record<ObservabilityWebhookType, number>>,
-    [data]
+    [countsData]
   )
   const severityCounts = useMemo(
     () =>
       fromPairs(
-        compact(data?.workbench?.alertCounts?.severities).map((entry) => [
+        compact(countsData?.workbench?.alertCounts?.severities).map((entry) => [
           entry.severity,
           entry.count,
         ])
       ) as Partial<Record<AlertSeverity, number>>,
-    [data]
+    [countsData]
   )
   const filterEmptyKind = useMemo(
     () => getAlertFilterEmptyKind(display, visibleAlertTypes(typeCounts)),

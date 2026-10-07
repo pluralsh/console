@@ -722,7 +722,7 @@ defmodule Console.GraphQl.Deployments.Observability do
   end
 
   enum :alert_sort do
-    value :inserted_at
+    value :updated_at, description: "last update, falling back to creation for alerts never updated"
     value :title
   end
 

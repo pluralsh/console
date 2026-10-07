@@ -25,7 +25,7 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
-import { WorkbenchJobsBoard } from './WorkbenchJobsBoard'
+import { RECENT_JOBS_COUNT, WorkbenchJobsBoard } from './WorkbenchJobsBoard'
 import { useWorkbenchJobsDetails } from './WorkbenchJobsDetails'
 import { WorkbenchJobsDisplayOptions } from './WorkbenchJobsDisplayOptions'
 import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
@@ -41,6 +41,7 @@ import {
 
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
 const SEARCH_LIMIT = 50
+const PAGE_SIZE = 50
 const noop = () => {}
 
 export function WorkbenchJobs() {
@@ -77,7 +78,11 @@ export function WorkbenchJobs() {
     setVirtualSlice,
     fetchingMore,
   } = useFetchPaginatedData(
-    { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
+    {
+      queryHook: useWorkbenchJobsQuery,
+      keyPath: ['workbench', 'runs'],
+      pageSize: PAGE_SIZE,
+    },
     {
       id: workbenchId,
       withTotal: true,
@@ -91,8 +96,8 @@ export function WorkbenchJobs() {
   const search = useWorkbenchJobSearchQuery({
     variables: { workbenchId, q: query, limit: SEARCH_LIMIT, ...filterVars },
     skip: !searching,
+    // not polled: every search runs a vector store (embedding) lookup
     fetchPolicy: 'network-only',
-    pollInterval: POLL_INTERVAL,
   })
   const { data: countsData } = useWorkbenchJobCountsQuery({
     variables: { id: workbenchId },
@@ -134,6 +139,25 @@ export function WorkbenchJobs() {
         ? (search.data?.workbenchJobSearch ?? []).filter(isNonNullable)
         : mapExistingNodes(data?.workbench?.runs),
     [data, search.data, searching]
+  )
+  // newest first, the list already starts with the recent jobs; otherwise
+  // they're fetched on their own for the board
+  const fetchRecent =
+    view === 'board' && !searching && filters.direction !== SortDirection.Desc
+  const { data: recentData } = useWorkbenchJobsQuery({
+    variables: { id: workbenchId, first: RECENT_JOBS_COUNT, ...filterVars },
+    skip: !fetchRecent,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+  const recentJobs = useMemo(
+    () =>
+      searching
+        ? undefined
+        : fetchRecent
+          ? mapExistingNodes(recentData?.workbench?.runs)
+          : jobs.slice(0, RECENT_JOBS_COUNT),
+    [fetchRecent, jobs, recentData, searching]
   )
   const list = searching
     ? {
@@ -205,7 +229,7 @@ export function WorkbenchJobs() {
               fetchingMore={list.fetchingMore}
               hasNextPage={list.hasNextPage}
               fetchNextPage={list.fetchNextPage}
-              showRecent={!searching}
+              recentJobs={recentJobs}
               totalCount={
                 searching ? jobs.length : data?.workbench?.runs?.totalCount
               }

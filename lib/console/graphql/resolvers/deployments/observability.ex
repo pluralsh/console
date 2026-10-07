@@ -71,15 +71,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   end
 
   # without an explicit sort keep the default most-recently-updated ordering
-  defp alert_order(query, args) when is_map_key(args, :sort) or is_map_key(args, :direction) do
-    field = alert_sort_field(Map.get(args, :sort))
-    dir = Map.get(args, :direction) || :desc
-    Alert.ordered(query, [{dir, field}, {dir, :id}])
-  end
+  defp alert_order(query, args) when is_map_key(args, :sort) or is_map_key(args, :direction),
+    do: Alert.sorted(query, Map.get(args, :sort) || :updated_at, Map.get(args, :direction) || :desc)
   defp alert_order(query, _), do: Alert.ordered(query)
-
-  defp alert_sort_field(:title), do: :title
-  defp alert_sort_field(_), do: :inserted_at
 
   def upsert_observability_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.upsert_provider(attrs, user)

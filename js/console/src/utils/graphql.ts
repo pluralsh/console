@@ -40,7 +40,9 @@ export function extendConnection<
   return {
     ...prev,
     [key]: {
+      // newer connection fields (e.g. totalCount) win
       ...prev[key],
+      ...next,
       pageInfo,
       edges: uniq,
     },
@@ -94,7 +96,9 @@ export function updateConnection<
   return {
     ...prev,
     [key]: {
+      // newer connection fields (e.g. totalCount) win
       ...prev[key],
+      ...next,
       pageInfo,
       edges: uniq,
     },

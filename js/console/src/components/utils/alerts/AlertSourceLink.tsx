@@ -15,11 +15,14 @@ export function getAlertName(alert: Pick<AlertFragment, 'title' | 'tags'>) {
   )
 }
 
-// Link to the alert in its source (e.g. Grafana): source icon + alert name.
+// Link to the alert in its source (e.g. Grafana): source icon + alert name,
+// or `label` instead of the name.
 export function AlertSourceLink({
   alert,
+  label,
 }: {
   alert: Pick<AlertFragment, 'title' | 'tags' | 'type' | 'url'>
+  label?: string
 }) {
   const href = ensureURLValidity(alert.url)
   const icon = (
@@ -29,7 +32,7 @@ export function AlertSourceLink({
       })}
     </IconSC>
   )
-  const name = <NameSC>{getAlertName(alert)}</NameSC>
+  const name = <NameSC>{label ?? getAlertName(alert)}</NameSC>
 
   if (isEmpty(href))
     return (

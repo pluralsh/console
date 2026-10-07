@@ -45,7 +45,7 @@ export const DEFAULT_WORKBENCH_ALERTS_DISPLAY: WorkbenchAlertsDisplayState = {
   view: 'list',
   types: ALL_ALERT_TYPES,
   severities: ALERT_SEVERITY_OPTIONS,
-  sort: AlertSort.InsertedAt,
+  sort: AlertSort.UpdatedAt,
   direction: SortDirection.Desc,
 }
 
@@ -129,7 +129,7 @@ export function toAlertFilterVariables({
   return {
     types: allAlertTypesSelected(types) ? undefined : types,
     severities: allAlertSeveritiesSelected(severities) ? undefined : severities,
-    // always sent: without a sort the API orders by last update instead
+    // always sent, so the sort direction applies to the default order too
     sort,
     direction,
   }

@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useSlicePolling } from './tableFetchHelpers'
+import { extendNestedConnection, useSlicePolling } from './tableFetchHelpers'
 
 const INTERVAL = 1000
 const PAGE_SIZE = 2
@@ -141,11 +141,60 @@ describe('useSlicePolling', () => {
     ).toEqual([...polledHead.edges, ...loaded.edges.slice(7)])
   })
 
+  it('takes counts and totals from the poll when keeping older items', () => {
+    const result = queryResult(8)
+    poll(result)
+
+    const { updateQuery } = result.fetchMore.mock.calls[0][0]
+    const loaded = connection(8)
+    const prev = {
+      workbench: { id: 'wb', counts: 1, runs: { ...loaded, totalCount: 8 } },
+    }
+    const polledHead = { ...connection(6), totalCount: 9 }
+    const polled = { workbench: { id: 'wb', counts: 2, runs: polledHead } }
+    const next = updateQuery(prev, { fetchMoreResult: polled }).workbench
+
+    expect(next.counts).toBe(2)
+    expect(next.runs.totalCount).toBe(9)
+    expect(next.runs.pageInfo).toEqual(loaded.pageInfo)
+  })
+
   it('keeps refetching the first page for virtualized tables at the top', () => {
     const result = queryResult(5)
     poll(result, { start: { index: 0 }, end: { index: 10 } })
 
     expect(result.refetch).toHaveBeenCalledTimes(1)
     expect(result.fetchMore).not.toHaveBeenCalled()
+  })
+})
+
+describe('extendNestedConnection', () => {
+  it('appends the page and takes counts and totals from it', () => {
+    const prev = {
+      workbench: {
+        id: 'wb',
+        counts: 1,
+        runs: { ...connection(2), totalCount: 4 },
+      },
+    }
+    const page = {
+      workbench: {
+        id: 'wb',
+        counts: 2,
+        runs: { ...connection(2, 2), totalCount: 5 },
+      },
+    }
+
+    expect(extendNestedConnection(KEY_PATH, prev, page)).toEqual({
+      workbench: {
+        id: 'wb',
+        counts: 2,
+        runs: {
+          totalCount: 5,
+          pageInfo: page.workbench.runs.pageInfo,
+          edges: [...prev.workbench.runs.edges, ...page.workbench.runs.edges],
+        },
+      },
+    })
   })
 })

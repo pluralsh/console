@@ -31,7 +31,7 @@ describe('workbenchAlertsDisplay', () => {
     expect(toAlertFilterVariables(DEFAULT_WORKBENCH_ALERTS_DISPLAY)).toEqual({
       types: undefined,
       severities: undefined,
-      sort: AlertSort.InsertedAt,
+      sort: AlertSort.UpdatedAt,
       direction: SortDirection.Desc,
     })
     expect(hasUncheckedAlertFilters(DEFAULT_WORKBENCH_ALERTS_DISPLAY)).toBe(
