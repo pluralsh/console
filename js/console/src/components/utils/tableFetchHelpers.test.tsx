@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   extendNestedConnection,
+  isStaleResponse,
   MAX_POLLED_ITEMS,
   useSlicePolling,
 } from './tableFetchHelpers'
@@ -26,6 +27,7 @@ function queryResult(loadedCount: number) {
     loading: false,
     data: { runs: connection(loadedCount) },
     variables: { first: PAGE_SIZE },
+    observable: { variables: { id: 'wb', first: PAGE_SIZE } },
     refetch: vi.fn(),
     fetchMore: vi.fn(),
   } as any
@@ -102,8 +104,48 @@ describe('useSlicePolling', () => {
       workbench: { id: 'wb', counts: 2, runs: connection(4, 1) },
     }
 
-    expect(updateQuery(prev, { fetchMoreResult: polled })).toBe(polled)
-    expect(updateQuery(prev, { fetchMoreResult: undefined })).toBe(prev)
+    const sent = { id: 'wb', first: 5, after: null }
+
+    expect(
+      updateQuery(prev, { fetchMoreResult: polled, variables: sent })
+    ).toBe(polled)
+    expect(
+      updateQuery(prev, { fetchMoreResult: undefined, variables: sent })
+    ).toBe(prev)
+  })
+
+  it('drops a poll sent before the list variables changed', () => {
+    const result = queryResult(5)
+    poll(result, { keepLoadedPages: true })
+
+    const { updateQuery } = result.fetchMore.mock.calls[0][0]
+    const prev = { workbench: { id: 'wb', runs: connection(5) } }
+    const polled = { workbench: { id: 'wb', runs: connection(5, 1) } }
+    // e.g. a search was typed while the poll was in flight
+    result.observable.variables = { id: 'wb', first: PAGE_SIZE, q: 'x' }
+
+    expect(
+      updateQuery(prev, {
+        fetchMoreResult: polled,
+        variables: { id: 'wb', first: 5, after: null },
+      })
+    ).toBe(prev)
+  })
+
+  it('skips a poll when a page loaded while it was in flight', () => {
+    const result = queryResult(5)
+    poll(result, { keepLoadedPages: true })
+
+    const { updateQuery } = result.fetchMore.mock.calls[0][0]
+    const prev = { workbench: { id: 'wb', runs: connection(7) } }
+    const polled = { workbench: { id: 'wb', runs: connection(5) } }
+
+    expect(
+      updateQuery(prev, {
+        fetchMoreResult: polled,
+        variables: { id: 'wb', first: 5, after: null },
+      })
+    ).toBe(prev)
   })
 
   it('pauses past the polled items ceiling', () => {
@@ -154,5 +196,22 @@ describe('extendNestedConnection', () => {
         },
       },
     })
+  })
+})
+
+describe('isStaleResponse', () => {
+  const observable = { variables: { id: 'wb', first: 50, q: undefined } }
+
+  it('ignores page variables and unset ones', () => {
+    expect(
+      isStaleResponse(observable, { id: 'wb', first: 120, after: null })
+    ).toBe(false)
+  })
+
+  it('flags responses sent for other list variables', () => {
+    expect(isStaleResponse(observable, { id: 'wb', first: 50, q: 'x' })).toBe(
+      true
+    )
+    expect(isStaleResponse(observable, { id: 'other', first: 50 })).toBe(true)
   })
 })

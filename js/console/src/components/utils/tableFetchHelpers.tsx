@@ -2,6 +2,7 @@ import { QueryResult } from '@apollo/client'
 import { usePrevious } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { InputMaybe } from 'generated/graphql'
+import { isEqual, isUndefined, omit, omitBy } from 'lodash'
 
 import {
   useCallback,
@@ -121,16 +122,18 @@ export function useFetchSlice<
     virtualSlice?.start?.index,
   ])
 
-  const { fetchMore } = queryResult
+  const { fetchMore, observable } = queryResult
 
   return useCallback(
     () =>
       fetchMore({
         variables: { after, first },
-        updateQuery: (prev, { fetchMoreResult }) =>
-          extendNestedConnection(keyPath, prev, fetchMoreResult),
+        updateQuery: (prev, { fetchMoreResult, variables: sent }) =>
+          isStaleResponse(observable, sent)
+            ? prev
+            : extendNestedConnection(keyPath, prev, fetchMoreResult),
       }),
-    [fetchMore, after, first, keyPath]
+    [fetchMore, after, first, keyPath, observable]
   )
 }
 
@@ -152,18 +155,43 @@ function useRefetchLoaded<
 ) {
   const queryKey = keyPath[keyPath.length - 1]
   const loadedCount: number = queryResult?.data?.[queryKey]?.edges?.length ?? 0
-  const { fetchMore } = queryResult
+  const { fetchMore, observable } = queryResult
 
   const refetchLoaded = useCallback(
     () =>
       fetchMore({
         variables: { first: loadedCount, after: null },
-        updateQuery: (prev, { fetchMoreResult }) => fetchMoreResult ?? prev,
+        updateQuery: (prev, { fetchMoreResult, variables: sent }) =>
+          // a page loaded meanwhile would be dropped, so this poll is skipped
+          // and the next one covers it
+          isStaleResponse(observable, sent) ||
+          (reduceNestedData(keyPath, prev)?.[queryKey]?.edges?.length ?? 0) >
+            loadedCount
+            ? prev
+            : (fetchMoreResult ?? prev),
       }),
-    [fetchMore, loadedCount]
+    [fetchMore, keyPath, loadedCount, queryKey, observable]
   )
 
   return { refetchLoaded, loadedCount }
+}
+
+const PAGE_VARIABLES = ['first', 'after']
+
+// fetchMore writes its response into the list of the query's variables when
+// the response arrives. One sent for other variables (e.g. before the search or
+// filters changed) belongs to another list and mustn't land in this one.
+export function isStaleResponse(
+  observable: Nullable<Pick<QueryResult<any, any>['observable'], 'variables'>>,
+  sent: Nullable<Record<string, unknown>>
+): boolean {
+  const current = observable?.variables
+  if (!current || !sent) return false
+
+  const listVariables = (vars: Record<string, unknown>) =>
+    omitBy(omit(vars, PAGE_VARIABLES), isUndefined)
+
+  return !isEqual(listVariables(sent), listVariables(current))
 }
 
 export const reduceNestedData = (path: string[], data: any) =>

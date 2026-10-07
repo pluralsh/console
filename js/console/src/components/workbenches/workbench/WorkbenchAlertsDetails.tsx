@@ -53,7 +53,7 @@ import {
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
-  AlertFragment,
+  WorkbenchAlertFragment,
   AlertSeverity,
   AlertState,
   WorkbenchJobStatus,
@@ -99,7 +99,7 @@ export function useWorkbenchAlertsDetails({
   severityCounts,
   onSeveritiesChange,
 }: {
-  alerts: AlertFragment[]
+  alerts: WorkbenchAlertFragment[]
   // first load only (spinner); later fetches don't blank the view
   loading: boolean
   // a page or poll in flight, to pace loading more
@@ -264,7 +264,7 @@ function AlertConclusionPanel({
   workbenchId,
   headerActions,
 }: {
-  alert: AlertFragment
+  alert: WorkbenchAlertFragment
   workbenchId: string
   headerActions?: ReactNode
 }) {
@@ -308,7 +308,7 @@ function AlertConclusionPanel({
 
 // Alert title, summary fields, annotations and tags; shared by the details
 // view and the board's quick view.
-export function AlertInformation({ alert }: { alert: AlertFragment }) {
+export function AlertInformation({ alert }: { alert: WorkbenchAlertFragment }) {
   const summary = getAlertSummary(alert)
   const service = alert.serviceDeployment
 
@@ -429,7 +429,7 @@ function AlertDetailsPanel({
   alert,
   onCollapse,
 }: {
-  alert: AlertFragment
+  alert: WorkbenchAlertFragment
   onCollapse: () => void
 }) {
   const [tab, setTab] = useState<AlertDetailsTab>('Annotations')

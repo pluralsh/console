@@ -15,7 +15,7 @@ import {
   LoadMoreSentinel,
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
-import { AlertFragment, AlertState } from 'generated/graphql'
+import { WorkbenchAlertFragment, AlertState } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { DetailsCaptionSC } from 'components/workbenches/common/WorkbenchDetailsView'
@@ -32,7 +32,7 @@ export function WorkbenchAlertsBoard({
   fallbackWorkbenchId,
   totalCount,
 }: {
-  alerts: AlertFragment[]
+  alerts: WorkbenchAlertFragment[]
   // first load only (spinner); later fetches don't blank the view
   loading: boolean
   // a page or poll in flight, to pace loading more
@@ -115,7 +115,7 @@ function WorkbenchAlertCard({
   alert,
   onOpen,
 }: {
-  alert: AlertFragment
+  alert: WorkbenchAlertFragment
   onOpen: () => void
 }) {
   return (

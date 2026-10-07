@@ -88,6 +88,10 @@ export function WorkbenchJobs() {
       keyPath: RUNS_KEY_PATH,
       pageSize: WORKBENCH_JOBS_PAGE_SIZE,
       keepLoadedPages: true,
+      // a filter with nothing selected matches nothing, so there's no query;
+      // while searching the list is hidden, so it isn't polled
+      skip: !!filterEmptyKind,
+      pollInterval: searching ? 0 : undefined,
     },
     {
       id: workbenchId,
@@ -101,14 +105,15 @@ export function WorkbenchJobs() {
   )
   const search = useWorkbenchJobSearchQuery({
     variables: { workbenchId, q: query, limit: SEARCH_LIMIT, ...filterVars },
-    skip: !searching,
+    skip: !searching || !!filterEmptyKind,
     // not polled: every search runs a vector store (embedding) lookup
     fetchPolicy: 'network-only',
   })
   const { data: countsData } = useWorkbenchJobCountsQuery({
     variables: { id: workbenchId },
+    // not polled here: the workbench layout already polls these counts for
+    // its in-progress dot, keeping this cached result current
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
   })
   const statusCounts = useMemo(
     () =>
@@ -149,7 +154,10 @@ export function WorkbenchJobs() {
   // newest first, the list already starts with the recent jobs; otherwise
   // they're fetched on their own for the board
   const fetchRecent =
-    view === 'board' && !searching && filters.direction !== SortDirection.Desc
+    view === 'board' &&
+    !searching &&
+    !filterEmptyKind &&
+    filters.direction !== SortDirection.Desc
   const { data: recentData } = useWorkbenchJobsQuery({
     variables: {
       id: workbenchId,

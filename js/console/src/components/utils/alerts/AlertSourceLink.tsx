@@ -5,7 +5,7 @@ import { isEmpty } from 'lodash'
 import { cloneElement } from 'react'
 import styled from 'styled-components'
 import { TRUNCATE } from 'components/utils/truncate'
-import { ensureURLValidity } from 'utils/url'
+import { toHttpURL } from 'utils/url'
 
 // The alert's `alertname` tag (as sent by Grafana and Prometheus-style
 // sources), falling back to the alert title.
@@ -24,7 +24,7 @@ export function AlertSourceLink({
   alert: Pick<AlertFragment, 'title' | 'tags' | 'type' | 'url'>
   label?: string
 }) {
-  const href = ensureURLValidity(alert.url)
+  const href = toHttpURL(alert.url)
   const icon = (
     <IconSC>
       {cloneElement(getObservabilityWebhookTypeIcon(alert.type), {
@@ -70,6 +70,8 @@ const LinkSC = styled.a(({ theme }) => ({
   color: theme.colors['action-link-inline'],
   textDecoration: 'none',
   'a&:hover': { textDecoration: 'underline' },
+  // without a usable URL it's plain text, so it shouldn't look clickable
+  'span&': { color: theme.colors.text },
 }))
 
 const IconSC = styled.span({

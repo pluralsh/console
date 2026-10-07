@@ -25,21 +25,7 @@ fragment Alert on Alert {
   workbenchJob {
     id
     status
-    error
   }
-  cluster {
-    id
-    name
-  }
-  serviceDeployment {
-    id
-    name
-    cluster {
-      id
-    }
-  }
-  value
-  silenceUrl
   updatedAt
 }
 

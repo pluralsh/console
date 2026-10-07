@@ -6,7 +6,7 @@ import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { TRUNCATE } from 'components/utils/truncate'
 import { DetailsField } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
-import { AlertFragment, WorkbenchJobStatus } from 'generated/graphql'
+import { WorkbenchAlertFragment, WorkbenchJobStatus } from 'generated/graphql'
 import { upperFirst } from 'lodash'
 import { cloneElement } from 'react'
 import styled from 'styled-components'
@@ -27,7 +27,7 @@ export function WorkbenchAlertFlyover({
   fallbackWorkbenchId,
   onClose,
 }: {
-  alert: Nullable<AlertFragment>
+  alert: Nullable<WorkbenchAlertFragment>
   fallbackWorkbenchId: string
   onClose: () => void
 }) {

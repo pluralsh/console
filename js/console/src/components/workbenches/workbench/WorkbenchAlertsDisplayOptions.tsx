@@ -109,7 +109,7 @@ export function WorkbenchAlertsDisplayOptions({
             small
             value={AlertSort.Title}
           >
-            Alert name
+            Title
           </Radio>
         </DisplayRadioGroup>
       </DisplaySection>

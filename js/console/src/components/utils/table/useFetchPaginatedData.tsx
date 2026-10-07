@@ -10,6 +10,7 @@ import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   extendNestedConnection,
+  isStaleResponse,
   reduceNestedData,
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
@@ -59,7 +60,11 @@ export type FetchPaginatedDataResult<TQueryType> = {
   fetchNextPage: Dispatch<void>
   // `undefined` clears it, e.g. when the table is no longer shown
   setVirtualSlice: (slice: VirtualSlice | undefined) => void
-  /** True while a fetchMore request is in flight; false during poll/refetch. */
+  /**
+   * True while a fetchMore request is in flight. That includes the polls of
+   * lists with `keepLoadedPages` or a scrolled virtual slice, which poll
+   * through fetchMore; first-page polls and refetches leave it false.
+   */
   fetchingMore: boolean
 }
 
@@ -96,6 +101,7 @@ export function useFetchPaginatedData<
     error,
     fetchMore,
     networkStatus,
+    observable,
   } = queryResult
 
   const data = currentData || previousData
@@ -122,11 +128,19 @@ export function useFetchPaginatedData<
     if (pageInfo?.hasNextPage) {
       fetchMore({
         variables: { after: pageInfo?.endCursor },
-        updateQuery: (prev, { fetchMoreResult }) =>
-          extendNestedConnection(options.keyPath, prev, fetchMoreResult),
+        updateQuery: (prev, { fetchMoreResult, variables: sent }) =>
+          isStaleResponse(observable, sent)
+            ? prev
+            : extendNestedConnection(options.keyPath, prev, fetchMoreResult),
       })
     }
-  }, [pageInfo?.hasNextPage, pageInfo?.endCursor, fetchMore, options.keyPath])
+  }, [
+    pageInfo?.hasNextPage,
+    pageInfo?.endCursor,
+    fetchMore,
+    options.keyPath,
+    observable,
+  ])
 
   return {
     data,
