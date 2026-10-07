@@ -315,7 +315,6 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
   return (
     <>
       {alert.title && <ExpandablePrompt prompt={alert.title} />}
-      {/* fields as in Figma; severity and state are shown elsewhere */}
       {(summary || alert.cluster?.name || alert.url) && (
         <SummaryCardSC>
           {summary && (

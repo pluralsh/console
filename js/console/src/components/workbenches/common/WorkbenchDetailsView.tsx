@@ -10,7 +10,8 @@ import {
 import { TRUNCATE } from 'components/utils/truncate'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import { WorkbenchJobStatus } from 'generated/graphql'
-import { ReactNode, useRef, useState } from 'react'
+import { ReactNode, useCallback, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { BoardTitleSC } from './WorkbenchBoard'
 
@@ -26,11 +27,27 @@ export const DETAILS_TAB_STRIP_HEIGHT = 64
 
 export type DetailsGutterStatus = 'running' | 'failed' | null
 
-// Selected list item (falls back to the first one) and whether the right-most
-// details panel is open.
+export const DETAILS_SELECTED_PARAM = 'selected'
+
+// Selected list item, kept in the URL (`?selected=<id>`) so it survives a
+// reload, going back from a job page and switching views. Falls back to the
+// first item. Also tracks whether the right-most details panel is open.
 export function useDetailsSelection<T extends { id: string }>(items: T[]) {
-  const [selectedId, setSelectedId] = useState<string>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedId = searchParams.get(DETAILS_SELECTED_PARAM)
   const [detailsOpen, setDetailsOpen] = useState(true)
+
+  const setSelectedId = useCallback(
+    (id: string) =>
+      setSearchParams(
+        (params) => {
+          params.set(DETAILS_SELECTED_PARAM, id)
+          return params
+        },
+        { replace: true }
+      ),
+    [setSearchParams]
+  )
 
   return {
     selected: items.find(({ id }) => id === selectedId) ?? items[0],
@@ -114,7 +131,7 @@ export function DetailsPanelHeader({
   )
 }
 
-// Hides the right-most details panel (menu-collapse icon, as in Evals).
+// Hides the right-most details panel.
 export function DetailsCollapseButton({
   label,
   onClick,
@@ -174,7 +191,7 @@ export function DetailsErrorBanner({
   )
 }
 
-// Underline tabs under a details panel header, as in Figma.
+// Underline tabs under a details panel header.
 export function DetailsTabs<T extends string>({
   tabs,
   selected,
@@ -276,8 +293,8 @@ export const DetailsLayoutSC = styled.div<{ $panelCount: number }>(
   })
 )
 
-// Full-height list column, rendered as the workbench page sidebar (like the
-// Monitoring tab), so its search row lines up with the tab strip.
+// Full-height list column, rendered as the workbench page sidebar, so its
+// search row lines up with the tab strip.
 export const DetailsListSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',

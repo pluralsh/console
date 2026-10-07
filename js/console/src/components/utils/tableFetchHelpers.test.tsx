@@ -87,6 +87,60 @@ describe('useSlicePolling', () => {
     expect(updateQuery(prev, { fetchMoreResult: undefined })).toBe(prev)
   })
 
+  it('caps the polled items at 3 pages', () => {
+    const result = queryResult(8)
+    poll(result)
+
+    expect(result.fetchMore.mock.calls[0][0].variables).toEqual({
+      first: 3 * PAGE_SIZE,
+      after: null,
+    })
+  })
+
+  it('keeps items beyond the cap and the cursor for loading more', () => {
+    const result = queryResult(8)
+    poll(result)
+
+    const { updateQuery } = result.fetchMore.mock.calls[0][0]
+    const loaded = connection(8)
+    const prev = { workbench: { id: 'wb', runs: loaded } }
+    // a new job arrived at the top, so job-5 drops out of the polled head
+    const polledHead = {
+      pageInfo: { hasNextPage: true, endCursor: 'cursor-polled' },
+      edges: [{ node: { id: 'job-new' } }, ...loaded.edges.slice(0, 5)],
+    }
+    const polled = { workbench: { id: 'wb', runs: polledHead } }
+
+    expect(updateQuery(prev, { fetchMoreResult: polled })).toEqual({
+      workbench: {
+        id: 'wb',
+        runs: {
+          pageInfo: loaded.pageInfo,
+          edges: [...polledHead.edges, ...loaded.edges.slice(5)],
+        },
+      },
+    })
+  })
+
+  it('drops items removed from the polled head', () => {
+    const result = queryResult(8)
+    poll(result)
+
+    const { updateQuery } = result.fetchMore.mock.calls[0][0]
+    const loaded = connection(8)
+    const prev = { workbench: { id: 'wb', runs: loaded } }
+    // job-2 was deleted, so the polled head reaches job-6
+    const polledHead = {
+      pageInfo: { hasNextPage: true, endCursor: 'cursor-polled' },
+      edges: loaded.edges.filter(({ node }) => node.id !== 'job-2').slice(0, 6),
+    }
+    const polled = { workbench: { id: 'wb', runs: polledHead } }
+
+    expect(
+      updateQuery(prev, { fetchMoreResult: polled }).workbench.runs.edges
+    ).toEqual([...polledHead.edges, ...loaded.edges.slice(7)])
+  })
+
   it('keeps refetching the first page for virtualized tables at the top', () => {
     const result = queryResult(5)
     poll(result, { start: { index: 0 }, end: { index: 10 } })

@@ -161,7 +161,7 @@ export function useWorkbenchIssuesDetails({
   return { sidebar, content }
 }
 
-// The issue card spans the full panel width, as in Figma.
+// The issue card spans the full panel width.
 const IssueBodySC = styled.div({
   flex: 1,
   minHeight: 0,

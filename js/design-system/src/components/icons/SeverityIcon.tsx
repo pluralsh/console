@@ -38,9 +38,8 @@ function SeverityIcon({
   size = 16,
   color,
   secondaryColor = 'border-fill-two',
-  fullColor: _fullColor,
   ...props
-}: IconProps & {
+}: Omit<IconProps, 'fullColor'> & {
   severity?: SeverityIconSeverity
   level?: SeverityIconLevel
 }) {
