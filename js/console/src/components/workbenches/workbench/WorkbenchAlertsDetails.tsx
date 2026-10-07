@@ -60,6 +60,7 @@ import {
 import { compact, isEmpty } from 'lodash'
 import { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime, formatShortAge } from 'utils/datetime'
@@ -305,11 +306,17 @@ function AlertConclusionPanel({
 // view and the board's quick view.
 export function AlertInformation({ alert }: { alert: AlertFragment }) {
   const summary = getAlertSummary(alert)
+  const service = alert.serviceDeployment
 
   return (
     <>
       {alert.title && <ExpandablePrompt prompt={alert.title} />}
-      {(summary || alert.cluster?.name || alert.url) && (
+      {(summary ||
+        service ||
+        alert.cluster?.name ||
+        alert.value ||
+        alert.url ||
+        alert.silenceUrl) && (
         <SummaryCardSC>
           {summary && (
             <DetailsField
@@ -317,6 +324,26 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
               label="Alert summary"
             >
               {summary}
+            </DetailsField>
+          )}
+          {service && (
+            <DetailsField
+              valueSize="caption"
+              label="Plural Service"
+            >
+              {service.cluster?.id ? (
+                <DetailsLinkSC
+                  as={Link}
+                  to={getServiceDetailsPath({
+                    clusterId: service.cluster.id,
+                    serviceId: service.id,
+                  })}
+                >
+                  {service.name}
+                </DetailsLinkSC>
+              ) : (
+                service.name
+              )}
             </DetailsField>
           )}
           {alert.cluster?.name && (
@@ -327,6 +354,14 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
               {alert.cluster.name}
             </DetailsField>
           )}
+          {alert.value && (
+            <DetailsField
+              valueSize="caption"
+              label="Value"
+            >
+              {alert.value}
+            </DetailsField>
+          )}
           {alert.url && (
             <DetailsField
               valueSize="caption"
@@ -334,6 +369,16 @@ export function AlertInformation({ alert }: { alert: AlertFragment }) {
             >
               <SmallLinkSC>
                 <AlertSourceLink alert={alert} />
+              </SmallLinkSC>
+            </DetailsField>
+          )}
+          {alert.silenceUrl && (
+            <DetailsField
+              valueSize="caption"
+              label="Silence link"
+            >
+              <SmallLinkSC>
+                <AlertSourceLink alert={{ ...alert, url: alert.silenceUrl }} />
               </SmallLinkSC>
             </DetailsField>
           )}

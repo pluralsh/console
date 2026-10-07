@@ -8831,7 +8831,16 @@ type Alert {
   cluster: Cluster
 
   "The service this alert was associated with"
-  service: Service
+  service: Service @deprecated(reason: "typed as a kubernetes service but holds a plural service deployment, use serviceDeployment instead")
+
+  "The Plural service this alert was associated with"
+  serviceDeployment: ServiceDeployment
+
+  "The evaluated values that triggered this alert, e.g. A=1018071, B=1 (grafana only)"
+  value: String
+
+  "Link to silence this alert in its provider (grafana only)"
+  silenceUrl: String
 
   "The project this alert was associated with"
   project: Project

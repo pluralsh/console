@@ -843,6 +843,53 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["failedRuns"]["totalCount"] == 2
     end
 
+    test "it exposes the plural service, value and silence url of workbench alerts" do
+      workbench = insert(:workbench)
+      service = insert(:service)
+
+      payload = %{"alerts" => [
+        %{"fingerprint" => "other", "values" => %{"A" => 5.0}, "silenceURL" => "https://grafana/silence/other"},
+        %{
+          "fingerprint" => "fp-1",
+          "values" => %{"B" => 1.0, "A" => 1018071.0, "C" => 0.25},
+          "valueString" => "[ var='A' value=1.018071e+06 ]",
+          "silenceURL" => "https://grafana/silence/fp-1"
+        },
+        %{"fingerprint" => "fp-2", "valueString" => "[ var='A' value=3 ]"},
+        %{"fingerprint" => "fp-dd", "values" => %{"A" => 1.0}, "silenceURL" => "https://grafana/silence/fp-dd"}
+      ]}
+
+      grafana  = insert(:alert, workbench: workbench, service: service, fingerprint: "fp-1", payload: payload)
+      fallback = insert(:alert, workbench: workbench, fingerprint: "fp-2", payload: payload)
+      datadog  = insert(:alert, workbench: workbench, type: :datadog, fingerprint: "fp-dd", payload: payload)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            alerts(first: 10) {
+              edges { node { id value silenceUrl serviceDeployment { id name } } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      by_id = Map.new(from_connection(found["alerts"]), &{&1["id"], &1})
+
+      assert by_id[grafana.id] == %{
+        "id" => grafana.id,
+        "value" => "A=1018071, B=1, C=0.25",
+        "silenceUrl" => "https://grafana/silence/fp-1",
+        "serviceDeployment" => %{"id" => service.id, "name" => service.name}
+      }
+
+      assert by_id[fallback.id]["value"] == "[ var='A' value=3 ]"
+      refute by_id[fallback.id]["silenceUrl"]
+      refute by_id[fallback.id]["serviceDeployment"]
+
+      refute by_id[datadog.id]["value"]
+      refute by_id[datadog.id]["silenceUrl"]
+    end
+
     test "it can fetch workbench issues" do
       workbench = insert(:workbench)
       issues = insert_list(3, :issue, workbench: workbench)

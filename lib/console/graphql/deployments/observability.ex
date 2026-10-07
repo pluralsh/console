@@ -621,7 +621,20 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :service, :service,
       resolve: dataloader(Deployments),
+      deprecate: "typed as a kubernetes service but holds a plural service deployment, use serviceDeployment instead",
       description: "The service this alert was associated with"
+
+    field :service_deployment, :service_deployment,
+      resolve: dataloader(Deployments, :service),
+      description: "The Plural service this alert was associated with"
+
+    field :value, :string,
+      resolve: &Deployments.alert_value/3,
+      description: "The evaluated values that triggered this alert, e.g. A=1018071, B=1 (grafana only)"
+
+    field :silence_url, :string,
+      resolve: &Deployments.alert_silence_url/3,
+      description: "Link to silence this alert in its provider (grafana only)"
 
     field :project, :project,
       resolve: dataloader(Deployments),

@@ -16,6 +16,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   }
   alias Console.Deployments.{Settings, Observability, Services}
   alias Console.Deployments.Observability.Dashboard, as: DashboardRuntime
+  alias Console.Deployments.Observability.Webhook.Grafana
   alias Console.Services.Observability, as: ObsSvc
 
   @default_offset 30 * 60
@@ -45,6 +46,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     |> alert_order(args)
     |> paginate_with_total(args)
   end
+
+  def alert_value(%Alert{type: :grafana} = alert, _, _), do: {:ok, Grafana.value(alert)}
+  def alert_value(_, _, _), do: {:ok, nil}
+
+  def alert_silence_url(%Alert{type: :grafana} = alert, _, _), do: {:ok, Grafana.silence_url(alert)}
+  def alert_silence_url(_, _, _), do: {:ok, nil}
 
   def alert_counts(%Workbench{id: id}, _, _) do
     alerts = Alert.for_workbench(id)
