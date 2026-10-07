@@ -8,6 +8,7 @@ import {
   PrIcon,
   PrMergedIcon,
 } from '@pluralsh/design-system'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
@@ -57,7 +58,6 @@ import { WorkbenchJobTriggerAlert } from './job/WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './job/WorkbenchJobTriggerIssue'
 import { WorkbenchJobUsage } from './job/WorkbenchJobUsage'
 import { WorkbenchJobConclusionPanel } from './WorkbenchJobConclusionPanel'
-import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 
 type DetailsTab =
   | 'Pull requests'
@@ -126,13 +126,9 @@ export function useWorkbenchJobsDetails({
               gutter={
                 <DetailsStatusGutter status={getJobGutterStatus(job.status)} />
               }
-              title={
-                <WorkbenchStoredPromptMarkdown
-                  text={job.prompt ?? ''}
-                  density="listItem"
-                  clampLines={1}
-                />
-              }
+              // plain text: rendered markdown links and resource chips
+              // would navigate away from inside the row's button
+              title={prettifyPrompt(job.prompt ?? '')}
               subtitle={job.user?.name}
               end={
                 <>

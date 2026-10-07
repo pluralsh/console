@@ -92,14 +92,12 @@ const jobCardClampStyles = ({
   theme,
   lines = 3,
   promptColor = 'text-light',
-  partial = 'body2',
 }: {
   theme: any
   lines?: number | null
   promptColor?: SemanticColorKey
-  partial?: 'body2' | 'body2LooseLineHeight'
 }) => css`
-  ${theme.partials.text[partial]};
+  ${theme.partials.text.body2};
   color: ${theme.colors[promptColor]};
   min-width: 0;
   overflow: hidden;
@@ -112,15 +110,9 @@ const jobCardClampStyles = ({
 const JobCardMarkdownWrapSC = styled(MarkdownWrapSC)<{
   $lines: number | null
   $promptColor?: SemanticColorKey
-  $partial?: 'body2' | 'body2LooseLineHeight'
 }>`
-  ${({ theme, $lines, $promptColor = 'text-light', $partial }) =>
-    jobCardClampStyles({
-      theme,
-      lines: $lines,
-      promptColor: $promptColor,
-      partial: $partial,
-    })}
+  ${({ theme, $lines, $promptColor = 'text-light' }) =>
+    jobCardClampStyles({ theme, lines: $lines, promptColor: $promptColor })}
 `
 
 /**
@@ -137,8 +129,8 @@ export function WorkbenchStoredPromptMarkdown({
   text: string
   /** When set, trims by visible length without splitting chips (like job previews). */
   truncateVisibleChars?: number
-  /** `tableCell`: caption + `text-light` + ~3-line max height (cron table). `sidePanel`: caption + `text-xlight` + same clamp (workbench sidebar crons). `jobCard`: body2 + `text-light` + same clamp (home recent jobs). `listItem`: like `jobCard` with the looser list line height (workbench details lists). */
-  density?: 'default' | 'tableCell' | 'sidePanel' | 'jobCard' | 'listItem'
+  /** `tableCell`: caption + `text-light` + ~3-line max height (cron table). `sidePanel`: caption + `text-xlight` + same clamp (workbench sidebar crons). `jobCard`: body2 + `text-light` + same clamp (home recent jobs). */
+  density?: 'default' | 'tableCell' | 'sidePanel' | 'jobCard'
   /** Number of lines before truncation for the clamped densities. Default 3; `null` disables clamping. */
   clampLines?: number | null
   promptColor?: SemanticColorKey
@@ -170,12 +162,11 @@ export function WorkbenchStoredPromptMarkdown({
       </SidePanelMarkdownWrapSC>
     )
   }
-  if (density === 'jobCard' || density === 'listItem') {
+  if (density === 'jobCard') {
     return (
       <JobCardMarkdownWrapSC
         $lines={clampLines}
         $promptColor={promptColor}
-        $partial={density === 'listItem' ? 'body2LooseLineHeight' : 'body2'}
       >
         <SimplifiedMarkdown
           text={trimmed}
