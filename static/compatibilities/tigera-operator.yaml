@@ -9,7 +9,17 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["No concrete feature changes were provided in the pasted notes for\
+        \ v3.33.0 vs v3.32.0\u2014only the presence of standard release artifacts\
+        \ (images/bundles, Windows package, Helm chart, CRD charts, OpenShift bundle).",
+      'The release continues to publish tigera-operator as a Helm 3 chart and CRDs
+        as separate charts, implying the same deployment model as prior releases.']
+    breaking_changes: [No breaking changes were listed in the pasted notes; must review
+        the actual GitHub release notes/changelog for v3.33.0 and the tigera-operator
+        chart CHANGELOG/values.yaml diff to confirm.]
   chart_version: 3.33.0
   images: ['quay.io/tigera/operator:v1.44.0']
 - version: 3.32.0
