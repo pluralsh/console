@@ -27,7 +27,7 @@ import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 import { isActivityTerminal } from './workbenchJobActivityCollapse'
 
-/** 24px between rows. Each title's 4px padding makes the total gap 32px. */
+/** 24px between rows. Activity titles add 1px of padding so a summary-to-title gap matches the prompt. */
 export const ACTIVITY_GAP = 'large' as const
 
 export function WorkbenchJobActivities({
