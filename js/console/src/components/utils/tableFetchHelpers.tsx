@@ -2,7 +2,6 @@ import { QueryResult } from '@apollo/client'
 import { usePrevious } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { InputMaybe } from 'generated/graphql'
-import { findLastIndex } from 'lodash'
 
 import {
   useCallback,
@@ -31,8 +30,13 @@ export function useSlicePolling<
   {
     interval = POLL_INTERVAL,
     skip = false,
+    keepLoadedPages = false,
     ...fetchSliceOpts
-  }: { interval?: number; skip?: boolean } & FetchSliceOptions
+  }: {
+    interval?: number
+    skip?: boolean
+    keepLoadedPages?: boolean
+  } & FetchSliceOptions
 ) {
   const { loading, refetch: originalRefetch } = queryResult
   const { virtualSlice, pageSize } = fetchSliceOpts
@@ -42,26 +46,29 @@ export function useSlicePolling<
     queryResult,
     fetchSliceOpts
   )
-  // Virtualized tables report the visible slice and only poll that. Lists
-  // that don't (boards, card grids) poll everything loaded so far, since a
-  // plain refetch returns just the first page and drops the rest.
+  // Virtualized tables report the visible slice and only poll that. Other
+  // lists poll the first page, which drops any further loaded pages, unless
+  // they opt into keeping them: then everything loaded is polled.
+  const pollsLoaded = keepLoadedPages && !virtualSlice
   const refetch = virtualSlice?.start?.index
     ? fetchSlice
-    : !virtualSlice && loadedCount > pageSize
+    : pollsLoaded && loadedCount > pageSize
       ? refetchLoaded
       : originalRefetch
+  // past the ceiling, polling pauses until the list resets (e.g. new filters)
+  const paused = pollsLoaded && loadedCount > MAX_POLLED_ITEMS
 
   const poll = useEffectEvent(() => {
     refetch()
   })
 
   useEffect(() => {
-    if (interval === 0 || skip || loading) return
+    if (interval === 0 || skip || loading || paused) return
 
     const intervalId = setInterval(() => poll(), interval)
 
     return () => clearInterval(intervalId)
-  }, [interval, loading, skip])
+  }, [interval, loading, paused, skip])
 
   return useMemo(() => ({ refetch }), [refetch])
 }
@@ -127,14 +134,12 @@ export function useFetchSlice<
   )
 }
 
-// Most pages one poll re-fetches for lists without a virtual slice.
-const MAX_POLLED_PAGES = 3
+// Most loaded items that lists keeping their loaded pages still poll.
+export const MAX_POLLED_ITEMS = 500
 
-// Re-fetches loaded items from the start, up to MAX_POLLED_PAGES pages. With
-// at most that many loaded, the polled connection replaces the loaded one, so
-// updates, additions and removals all come through. Beyond that, the polled
-// head replaces the start of the list and the older items are kept as they
-// are, together with the existing cursor for loading more.
+// Re-fetches every loaded item from the start and replaces the loaded list
+// with the result, so updates, additions, removals, counts and the cursor for
+// loading more all stay exact.
 function useRefetchLoaded<
   QData,
   QVariables extends {
@@ -143,59 +148,19 @@ function useRefetchLoaded<
   },
 >(
   queryResult: QueryResult<QData, QVariables>,
-  { keyPath, pageSize }: Pick<FetchSliceOptions, 'keyPath' | 'pageSize'>
+  { keyPath }: Pick<FetchSliceOptions, 'keyPath'>
 ) {
   const queryKey = keyPath[keyPath.length - 1]
   const loadedCount: number = queryResult?.data?.[queryKey]?.edges?.length ?? 0
-  const polledCount = Math.min(loadedCount, pageSize * MAX_POLLED_PAGES)
   const { fetchMore } = queryResult
 
   const refetchLoaded = useCallback(
     () =>
       fetchMore({
-        variables: { first: polledCount, after: null },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          const nextParent = reduceNestedData(keyPath, fetchMoreResult)
-          const next = nextParent?.[queryKey]
-          if (!next) return prev
-          const prevParent = reduceNestedData(keyPath, prev)
-          const prevConnection = prevParent?.[queryKey]
-          const prevEdges: any[] = prevConnection?.edges ?? []
-          // fields next to the connection (e.g. counts) come from the poll
-          const parent = { ...prevParent, ...nextParent }
-
-          if (prevEdges.length <= polledCount)
-            return updateNestedConnection(keyPath, prev, {
-              ...parent,
-              [queryKey]: next,
-            })
-
-          // keep what follows the last loaded item that is still in the
-          // polled head, so items shifted out of it (new ones on top) aren't
-          // lost and ones removed from it don't come back
-          const polledIds = new Set(
-            (next.edges ?? []).map((edge) => edge?.node?.id)
-          )
-          const lastPolled = findLastIndex(prevEdges, (edge) =>
-            polledIds.has(edge?.node?.id)
-          )
-          const tail = prevEdges
-            .slice(lastPolled >= 0 ? lastPolled + 1 : polledCount)
-            .filter((edge) => !polledIds.has(edge?.node?.id))
-
-          // fresh connection fields (e.g. totalCount), but the loaded cursor
-          return updateNestedConnection(keyPath, prev, {
-            ...parent,
-            [queryKey]: {
-              ...prevConnection,
-              ...next,
-              pageInfo: prevConnection?.pageInfo,
-              edges: [...(next.edges ?? []), ...tail],
-            },
-          })
-        },
+        variables: { first: loadedCount, after: null },
+        updateQuery: (prev, { fetchMoreResult }) => fetchMoreResult ?? prev,
       }),
-    [fetchMore, keyPath, polledCount, queryKey]
+    [fetchMore, loadedCount]
   )
 
   return { refetchLoaded, loadedCount }

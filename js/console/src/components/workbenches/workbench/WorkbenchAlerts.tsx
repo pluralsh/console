@@ -86,6 +86,7 @@ export function WorkbenchAlerts() {
       queryHook: useWorkbenchAlertsQuery,
       keyPath: ['workbench', 'alerts'],
       pageSize: PAGE_SIZE,
+      keepLoadedPages: true,
     },
     {
       id: workbenchId,

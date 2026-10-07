@@ -82,6 +82,7 @@ export function WorkbenchJobs() {
       queryHook: useWorkbenchJobsQuery,
       keyPath: ['workbench', 'runs'],
       pageSize: PAGE_SIZE,
+      keepLoadedPages: true,
     },
     {
       id: workbenchId,

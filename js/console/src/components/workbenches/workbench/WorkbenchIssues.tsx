@@ -77,6 +77,7 @@ export function WorkbenchIssues() {
       queryHook: useWorkbenchIssuesQuery,
       keyPath: ['workbench', 'issues'],
       pageSize: PAGE_SIZE,
+      keepLoadedPages: true,
     },
     {
       id: workbenchId,

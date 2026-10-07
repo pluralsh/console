@@ -39,6 +39,10 @@ export type FetchPaginatedDataOptions<
   errorPolicy?: ErrorPolicy
   fetchPolicy?: WatchQueryFetchPolicy
   skip?: boolean
+  // Lists that don't report a virtual slice (boards, card lists) normally
+  // poll only the first page, dropping further loaded pages. With this set
+  // they poll every loaded item instead, pausing past `MAX_POLLED_ITEMS`.
+  keepLoadedPages?: boolean
 }
 
 // could also export this directly from DS
@@ -111,6 +115,7 @@ export function useFetchPaginatedData<
     interval: options.pollInterval ?? POLL_INTERVAL,
     keyPath: options.keyPath,
     skip: options.skip,
+    keepLoadedPages: options.keepLoadedPages,
   })
 
   const fetchNextPage = useCallback(() => {

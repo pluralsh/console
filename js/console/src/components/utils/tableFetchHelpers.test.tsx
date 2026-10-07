@@ -1,7 +1,11 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { extendNestedConnection, useSlicePolling } from './tableFetchHelpers'
+import {
+  extendNestedConnection,
+  MAX_POLLED_ITEMS,
+  useSlicePolling,
+} from './tableFetchHelpers'
 
 const INTERVAL = 1000
 const PAGE_SIZE = 2
@@ -29,7 +33,13 @@ function queryResult(loadedCount: number) {
 
 function poll(
   result: ReturnType<typeof queryResult>,
-  virtualSlice?: { start?: { index: number }; end?: { index: number } }
+  {
+    virtualSlice,
+    keepLoadedPages = false,
+  }: {
+    virtualSlice?: { start?: { index: number }; end?: { index: number } }
+    keepLoadedPages?: boolean
+  } = {}
 ) {
   renderHook(() =>
     useSlicePolling(result, {
@@ -37,6 +47,7 @@ function poll(
       keyPath: KEY_PATH,
       pageSize: PAGE_SIZE,
       virtualSlice: virtualSlice as any,
+      keepLoadedPages,
     })
   )
   act(() => {
@@ -53,17 +64,25 @@ describe('useSlicePolling', () => {
     vi.useRealTimers()
   })
 
-  it('refetches the first page when only one page is loaded', () => {
-    const result = queryResult(PAGE_SIZE)
+  it("refetches the first page of lists that don't keep loaded pages", () => {
+    const result = queryResult(5)
     poll(result)
 
     expect(result.refetch).toHaveBeenCalledTimes(1)
     expect(result.fetchMore).not.toHaveBeenCalled()
   })
 
-  it('polls all loaded items for lists without a virtual slice', () => {
+  it('refetches the first page when only one page is loaded', () => {
+    const result = queryResult(PAGE_SIZE)
+    poll(result, { keepLoadedPages: true })
+
+    expect(result.refetch).toHaveBeenCalledTimes(1)
+    expect(result.fetchMore).not.toHaveBeenCalled()
+  })
+
+  it('polls every loaded item for lists keeping loaded pages', () => {
     const result = queryResult(5)
-    poll(result)
+    poll(result, { keepLoadedPages: true })
 
     expect(result.refetch).not.toHaveBeenCalled()
     expect(result.fetchMore).toHaveBeenCalledTimes(1)
@@ -73,95 +92,34 @@ describe('useSlicePolling', () => {
     })
   })
 
-  it('replaces the loaded connection with the polled one', () => {
+  it('replaces the loaded data with the polled one', () => {
     const result = queryResult(5)
-    poll(result)
+    poll(result, { keepLoadedPages: true })
 
     const { updateQuery } = result.fetchMore.mock.calls[0][0]
-    const prev = { workbench: { id: 'wb', runs: connection(5) } }
-    const polled = { workbench: { id: 'wb', runs: connection(5, 1) } }
+    const prev = { workbench: { id: 'wb', counts: 1, runs: connection(5) } }
+    const polled = {
+      workbench: { id: 'wb', counts: 2, runs: connection(4, 1) },
+    }
 
-    expect(updateQuery(prev, { fetchMoreResult: polled })).toEqual({
-      workbench: { id: 'wb', runs: connection(5, 1) },
-    })
+    expect(updateQuery(prev, { fetchMoreResult: polled })).toBe(polled)
     expect(updateQuery(prev, { fetchMoreResult: undefined })).toBe(prev)
   })
 
-  it('caps the polled items at 3 pages', () => {
-    const result = queryResult(8)
-    poll(result)
+  it('pauses past the polled items ceiling', () => {
+    const result = queryResult(MAX_POLLED_ITEMS + 1)
+    poll(result, { keepLoadedPages: true })
 
-    expect(result.fetchMore.mock.calls[0][0].variables).toEqual({
-      first: 3 * PAGE_SIZE,
-      after: null,
+    expect(result.refetch).not.toHaveBeenCalled()
+    expect(result.fetchMore).not.toHaveBeenCalled()
+  })
+
+  it('keeps polling the visible slice of virtualized tables', () => {
+    const result = queryResult(MAX_POLLED_ITEMS + 1)
+    poll(result, {
+      keepLoadedPages: true,
+      virtualSlice: { start: { index: 0 }, end: { index: 10 } },
     })
-  })
-
-  it('keeps items beyond the cap and the cursor for loading more', () => {
-    const result = queryResult(8)
-    poll(result)
-
-    const { updateQuery } = result.fetchMore.mock.calls[0][0]
-    const loaded = connection(8)
-    const prev = { workbench: { id: 'wb', runs: loaded } }
-    // a new job arrived at the top, so job-5 drops out of the polled head
-    const polledHead = {
-      pageInfo: { hasNextPage: true, endCursor: 'cursor-polled' },
-      edges: [{ node: { id: 'job-new' } }, ...loaded.edges.slice(0, 5)],
-    }
-    const polled = { workbench: { id: 'wb', runs: polledHead } }
-
-    expect(updateQuery(prev, { fetchMoreResult: polled })).toEqual({
-      workbench: {
-        id: 'wb',
-        runs: {
-          pageInfo: loaded.pageInfo,
-          edges: [...polledHead.edges, ...loaded.edges.slice(5)],
-        },
-      },
-    })
-  })
-
-  it('drops items removed from the polled head', () => {
-    const result = queryResult(8)
-    poll(result)
-
-    const { updateQuery } = result.fetchMore.mock.calls[0][0]
-    const loaded = connection(8)
-    const prev = { workbench: { id: 'wb', runs: loaded } }
-    // job-2 was deleted, so the polled head reaches job-6
-    const polledHead = {
-      pageInfo: { hasNextPage: true, endCursor: 'cursor-polled' },
-      edges: loaded.edges.filter(({ node }) => node.id !== 'job-2').slice(0, 6),
-    }
-    const polled = { workbench: { id: 'wb', runs: polledHead } }
-
-    expect(
-      updateQuery(prev, { fetchMoreResult: polled }).workbench.runs.edges
-    ).toEqual([...polledHead.edges, ...loaded.edges.slice(7)])
-  })
-
-  it('takes counts and totals from the poll when keeping older items', () => {
-    const result = queryResult(8)
-    poll(result)
-
-    const { updateQuery } = result.fetchMore.mock.calls[0][0]
-    const loaded = connection(8)
-    const prev = {
-      workbench: { id: 'wb', counts: 1, runs: { ...loaded, totalCount: 8 } },
-    }
-    const polledHead = { ...connection(6), totalCount: 9 }
-    const polled = { workbench: { id: 'wb', counts: 2, runs: polledHead } }
-    const next = updateQuery(prev, { fetchMoreResult: polled }).workbench
-
-    expect(next.counts).toBe(2)
-    expect(next.runs.totalCount).toBe(9)
-    expect(next.runs.pageInfo).toEqual(loaded.pageInfo)
-  })
-
-  it('keeps refetching the first page for virtualized tables at the top', () => {
-    const result = queryResult(5)
-    poll(result, { start: { index: 0 }, end: { index: 10 } })
 
     expect(result.refetch).toHaveBeenCalledTimes(1)
     expect(result.fetchMore).not.toHaveBeenCalled()
