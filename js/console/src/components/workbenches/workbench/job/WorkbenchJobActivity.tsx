@@ -535,6 +535,15 @@ function WorkbenchJobActivityResult({
   )
 }
 
+// Trims each line's empty space above the capitals and below the baseline, so
+// row gaps measure from the letters themselves. Browsers without `text-box`
+// keep the normal line spacing.
+const trimTextBoxCss = { textBox: 'trim-both cap alphabetic' } as const
+
+// Horizontal-only clipping keeps ellipsis while letting ascenders, descenders,
+// and the title row's icons extend past the trimmed text.
+const clipInlineCss = { overflowX: 'clip', overflowY: 'visible' } as const
+
 // children that render null leave an empty box that still takes a gap slot in the parent
 const CollapseWhenEmptySC = styled(Flex)({
   '&:empty': { display: 'none' },
@@ -557,12 +566,15 @@ const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   ...trimTextBoxCss,
 }))
 
-// Cap height, so the hover caret overflows instead of growing the row.
+// Cap height, so the hover caret overflows instead of growing the row. The
+// label wrapper clips sideways only, or it would cut off ascenders and
+// descenders that extend past the trimmed text.
 const memoTriggerStyles = {
   justifyContent: 'flex-start',
   width: 'fit-content',
   maxWidth: '100%',
   height: '1cap',
+  '& > span': clipInlineCss,
 } as const
 
 function WorkbenchJobActivityThoughts({
@@ -1215,15 +1227,6 @@ const ActivityStatusIconSC = styled.span({
   width: ACTIVITY_STATUS_ICON_SIZE,
   height: ACTIVITY_STATUS_ICON_SIZE,
 })
-
-// Trims each line's empty space above the capitals and below the baseline, so
-// row gaps measure from the letters themselves. Browsers without `text-box`
-// keep the normal line spacing.
-const trimTextBoxCss = { textBox: 'trim-both cap alphabetic' } as const
-
-// Horizontal-only clipping keeps ellipsis while letting descenders and the
-// title row's icons extend past the trimmed text.
-const clipInlineCss = { overflowX: 'clip', overflowY: 'visible' } as const
 
 const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
   ({ theme, $hasStatusIcon }) => ({
