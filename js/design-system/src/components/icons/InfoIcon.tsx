@@ -11,7 +11,9 @@ export default createIcon(({ size, color, secondaryColor = 'transparent' }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g transform={`translate(8 8) scale(${OPTICAL_INSET_SCALE}) translate(-8 -8)`}>
+    <g
+      transform={`translate(8 8) scale(${OPTICAL_INSET_SCALE}) translate(-8 -8)`}
+    >
       <circle
         cx="8"
         cy="8"
