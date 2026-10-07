@@ -1,30 +1,31 @@
 import { EmptyState, Flex, Spinner } from '@pluralsh/design-system'
 import { isNil } from 'lodash'
 import { useCallback, useEffect, useRef } from 'react'
-import styled from 'styled-components'
+import { Link } from 'react-router-dom'
+import styled, { DefaultTheme } from 'styled-components'
 
 // Shared building blocks for the workbench Board views (issues, jobs, alerts).
 
 export function useBoardLoadMore({
-  loading,
+  fetchingMore,
   hasNextPage,
   fetchNextPage,
 }: {
-  loading: boolean
+  fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
 }) {
   const fetchingRef = useRef(false)
 
   useEffect(() => {
-    if (!loading) fetchingRef.current = false
-  }, [loading])
+    if (!fetchingMore) fetchingRef.current = false
+  }, [fetchingMore])
 
   return useCallback(() => {
-    if (fetchingRef.current || loading || !hasNextPage) return
+    if (fetchingRef.current || fetchingMore || !hasNextPage) return
     fetchingRef.current = true
     fetchNextPage()
-  }, [fetchNextPage, hasNextPage, loading])
+  }, [fetchNextPage, fetchingMore, hasNextPage])
 }
 
 export function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
@@ -94,6 +95,49 @@ export const BoardTitleSC = styled.h2(({ theme }) => ({
   margin: 0,
   color: theme.colors.text,
 }))
+
+// Whole-card click target without nesting the card's own links and buttons
+// inside a link or button: an invisible full-size target sits under the
+// content, and interactive parts are raised above it with `CardRaisedSC`.
+export const clickableCardStyles = (theme: DefaultTheme) =>
+  ({
+    position: 'relative',
+    cursor: 'pointer',
+    '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
+    // hovering a control inside the card (not the card target, which is a
+    // direct child) shouldn't highlight the whole card
+    '&:has(> :not(a, button) :is(a, button, [data-clickable="true"]):hover)': {
+      backgroundColor: theme.colors['fill-one'],
+    },
+  }) as const
+
+const cardTargetStyles = (theme: DefaultTheme) =>
+  ({
+    position: 'absolute',
+    inset: 0,
+    zIndex: 0,
+    borderRadius: 'inherit',
+    '&:focus-visible': { outline: theme.borders['outline-focused'] },
+  }) as const
+
+export const CardTargetLinkSC = styled(Link)(({ theme }) =>
+  cardTargetStyles(theme)
+)
+
+export const CardTargetButtonSC = styled.button(({ theme }) => ({
+  all: 'unset',
+  cursor: 'pointer',
+  ...cardTargetStyles(theme),
+}))
+
+// Raised above the card target; only its direct children take clicks, so the
+// gaps between them still open the card.
+export const CardRaisedSC = styled.div({
+  position: 'relative',
+  zIndex: 1,
+  pointerEvents: 'none',
+  '& > *': { pointerEvents: 'auto' },
+})
 
 const LoadMoreSentinelSC = styled.div({
   height: 1,

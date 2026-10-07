@@ -83,6 +83,7 @@ const ALERT_DETAILS_TABS: AlertDetailsTab[] = [
 export function useWorkbenchAlertsDetails({
   alerts,
   loading,
+  fetchingMore,
   hasNextPage,
   fetchNextPage,
   fallbackWorkbenchId,
@@ -90,7 +91,10 @@ export function useWorkbenchAlertsDetails({
   onSearchChange,
 }: {
   alerts: AlertFragment[]
+  // first load only (spinner); later fetches don't blank the view
   loading: boolean
+  // a page or poll in flight, to pace loading more
+  fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
   fallbackWorkbenchId: string
@@ -98,7 +102,11 @@ export function useWorkbenchAlertsDetails({
   onSearchChange: (value: string) => void
 }) {
   const [severities, setSeverities] = useState<AlertSeverity[]>([])
-  const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
+  const loadMore = useBoardLoadMore({
+    fetchingMore,
+    hasNextPage,
+    fetchNextPage,
+  })
 
   const severityCounts = useMemo(
     () => countBy(alerts, ({ severity }) => severity),

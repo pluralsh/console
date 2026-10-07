@@ -71,6 +71,7 @@ export function useWorkbenchJobsDetails({
   workbenchId,
   jobs,
   loading,
+  fetchingMore,
   hasNextPage,
   fetchNextPage,
   searchString,
@@ -78,13 +79,20 @@ export function useWorkbenchJobsDetails({
 }: {
   workbenchId: string
   jobs: WorkbenchJobTinyFragment[]
+  // first load only (spinner); later fetches don't blank the view
   loading: boolean
+  // a page or poll in flight, to pace loading more
+  fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
   searchString: string
   onSearchChange: (value: string) => void
 }) {
-  const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
+  const loadMore = useBoardLoadMore({
+    fetchingMore,
+    hasNextPage,
+    fetchNextPage,
+  })
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsSelection(jobs)
 

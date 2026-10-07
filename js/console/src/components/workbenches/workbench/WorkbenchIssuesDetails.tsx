@@ -35,6 +35,7 @@ import { WorkbenchJobConclusionPanel } from './WorkbenchJobConclusionPanel'
 export function useWorkbenchIssuesDetails({
   issues,
   loading,
+  fetchingMore,
   hasNextPage,
   fetchNextPage,
   searchString,
@@ -42,14 +43,21 @@ export function useWorkbenchIssuesDetails({
   fallbackWorkbenchId,
 }: {
   issues: WorkbenchIssueFragment[]
+  // first load only (spinner); later fetches don't blank the view
   loading: boolean
+  // a page or poll in flight, to pace loading more
+  fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
   searchString: string
   onSearchChange: (value: string) => void
   fallbackWorkbenchId: string
 }) {
-  const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
+  const loadMore = useBoardLoadMore({
+    fetchingMore,
+    hasNextPage,
+    fetchNextPage,
+  })
   const { selected, setSelectedId, detailsOpen, setDetailsOpen } =
     useDetailsSelection(issues)
   const selectedJob = selected?.workbenchJob

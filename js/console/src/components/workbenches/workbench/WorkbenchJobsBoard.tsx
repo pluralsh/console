@@ -17,18 +17,26 @@ const RECENT_JOBS_COUNT = 3
 export function WorkbenchJobsBoard({
   jobs,
   loading,
+  fetchingMore,
   hasNextPage,
   fetchNextPage,
   showRecent = true,
 }: {
   jobs: WorkbenchJobTinyFragment[]
+  // first load only (spinner); later fetches don't blank the view
   loading: boolean
+  // a page or poll in flight, to pace loading more
+  fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
   // off while searching: "recent" means nothing for search results
   showRecent?: boolean
 }) {
-  const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
+  const loadMore = useBoardLoadMore({
+    fetchingMore,
+    hasNextPage,
+    fetchNextPage,
+  })
 
   if (isEmpty(jobs))
     return (

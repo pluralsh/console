@@ -3,10 +3,14 @@ import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
+import {
+  CardRaisedSC,
+  CardTargetLinkSC,
+  clickableCardStyles,
+} from 'components/workbenches/common/WorkbenchBoard'
 import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsageChips'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import { WorkbenchJobTinyFragment } from 'generated/graphql'
-import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
@@ -17,11 +21,11 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
   if (!workbench) return null
 
   return (
-    <JobCardSC
-      clickable
-      forwardedAs={Link}
-      to={getWorkbenchJobAbsPath({ workbenchId: workbench.id, jobId: id })}
-    >
+    <JobCardSC>
+      <CardTargetLinkSC
+        to={getWorkbenchJobAbsPath({ workbenchId: workbench.id, jobId: id })}
+        aria-label="Open job"
+      />
       <StretchedFlex>
         {user ? (
           <CaptionP
@@ -49,7 +53,7 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
         density="jobCard"
         clampLines={2}
       />
-      <UsageRowSC>
+      <UsageRowSC as={CardRaisedSC}>
         <WorkbenchUsageChips
           usage={job.usage}
           budget={job.modes?.budget}
@@ -58,7 +62,7 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
       </UsageRowSC>
       <BottomSectionSC>
         <DividerSC />
-        <CardActionsRowSC>
+        <CardActionsRowSC as={CardRaisedSC}>
           <WorkbenchJobActionsRow
             job={job}
             chipFillLevel={2}
@@ -87,11 +91,8 @@ const JobCardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   padding: theme.spacing.medium,
-  textDecoration: 'none',
   minHeight: 140,
-  '&&:has(button:hover, [data-clickable="true"]:hover):hover': {
-    backgroundColor: theme.colors['fill-one'],
-  },
+  ...clickableCardStyles(theme),
 }))
 
 const UsageRowSC = styled.div(({ theme }) => ({

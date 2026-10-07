@@ -24,19 +24,27 @@ export function WorkbenchIssuesBoard({
   issues,
   statuses,
   loading,
+  fetchingMore,
   hasNextPage,
   fetchNextPage,
   fallbackWorkbenchId,
 }: {
   issues: WorkbenchIssueFragment[]
   statuses: IssueStatus[]
+  // first load only (spinner); later fetches don't blank the view
   loading: boolean
+  // a page or poll in flight, to pace loading more
+  fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
   fallbackWorkbenchId?: string
 }) {
   const grouped = useMemo(() => groupIssuesByStatus(issues), [issues])
-  const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
+  const loadMore = useBoardLoadMore({
+    fetchingMore,
+    hasNextPage,
+    fetchNextPage,
+  })
 
   const visibleStatuses = useMemo(
     () => ISSUE_STATUS_OPTIONS.filter((status) => includes(statuses, status)),

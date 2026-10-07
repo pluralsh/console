@@ -7,6 +7,9 @@ import {
   BoardSC,
   BoardSectionSC,
   BoardTitleSC,
+  CardRaisedSC,
+  CardTargetButtonSC,
+  clickableCardStyles,
   LoadMoreSentinel,
   useBoardLoadMore,
 } from 'components/workbenches/common/WorkbenchBoard'
@@ -21,20 +24,31 @@ import { WorkbenchJobCardGridSC } from './WorkbenchJobCard'
 export function WorkbenchAlertsBoard({
   alerts,
   loading,
+  fetchingMore,
   hasNextPage,
   fetchNextPage,
   fallbackWorkbenchId,
 }: {
   alerts: AlertFragment[]
+  // first load only (spinner); later fetches don't blank the view
   loading: boolean
+  // a page or poll in flight, to pace loading more
+  fetchingMore: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
   fallbackWorkbenchId: string
 }) {
-  const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
+  const loadMore = useBoardLoadMore({
+    fetchingMore,
+    hasNextPage,
+    fetchNextPage,
+  })
   // by id, so the quick view follows polled updates of the alert
   const [openAlertId, setOpenAlertId] = useState<string>()
   const openAlert = alerts.find(({ id }) => id === openAlertId)
+
+  // forget an alert that left the list, so it can't reopen on a later poll
+  if (openAlertId && !openAlert) setOpenAlertId(undefined)
   const firing = useMemo(
     () => alerts.filter(({ state }) => state === AlertState.Firing),
     [alerts]
@@ -100,20 +114,12 @@ function WorkbenchAlertCard({
   onOpen: () => void
 }) {
   return (
-    <CardSC
-      fillLevel={1}
-      clickable
-      role="button"
-      tabIndex={0}
-      aria-label={`Show details of ${alert.title ?? 'alert'}`}
-      onClick={onOpen}
-      onKeyDown={(e) => {
-        if (e.target !== e.currentTarget) return
-        if (e.key !== 'Enter' && e.key !== ' ') return
-        e.preventDefault()
-        onOpen()
-      }}
-    >
+    <CardSC fillLevel={1}>
+      <CardTargetButtonSC
+        type="button"
+        aria-label={`Show details of ${alert.title ?? 'alert'}`}
+        onClick={onOpen}
+      />
       <Flex
         align="center"
         justify="space-between"
@@ -138,7 +144,9 @@ function WorkbenchAlertCard({
         gap="xsmall"
         minWidth={0}
       >
-        <AlertSourceLink alert={alert} />
+        <CardRaisedSC css={{ display: 'flex', minWidth: 0 }}>
+          <AlertSourceLink alert={alert} />
+        </CardRaisedSC>
         <AlertStateChip
           state={alert.state}
           css={{ flexShrink: 0 }}
@@ -160,6 +168,7 @@ const CardSC = styled(Card)(({ theme }) => ({
   gap: theme.spacing.xsmall,
   padding: theme.spacing.medium,
   minWidth: 0,
+  ...clickableCardStyles(theme),
 }))
 
 const AgeSC = styled.span(({ theme }) => ({

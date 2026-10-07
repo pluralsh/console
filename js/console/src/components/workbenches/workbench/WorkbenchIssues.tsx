@@ -17,7 +17,7 @@ import {
   useWorkbenchIssuesQuery,
 } from 'generated/graphql'
 import { compact, fromPairs, isEmpty, isNil, omit } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -37,6 +37,8 @@ import {
 } from './workbenchIssuesDisplay'
 
 const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
+
+const noop = () => {}
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -61,15 +63,22 @@ export function WorkbenchIssues() {
     setView(nextView)
   }
 
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useWorkbenchIssuesQuery, keyPath: ['workbench', 'issues'] },
-      {
-        id: workbenchId,
-        q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
-        ...filterVars,
-      }
-    )
+  const {
+    data,
+    loading,
+    error,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+    fetchingMore,
+  } = useFetchPaginatedData(
+    { queryHook: useWorkbenchIssuesQuery, keyPath: ['workbench', 'issues'] },
+    {
+      id: workbenchId,
+      q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
+      ...filterVars,
+    }
+  )
   const issues = useMemo(
     () => mapExistingNodes(data?.workbench?.issues),
     [data]
@@ -100,9 +109,17 @@ export function WorkbenchIssues() {
     [display, providerCounts]
   )
 
+  // only the table reports its visible slice; drop it in other views so
+  // polling keeps every page loaded in Board/Details
+  const tableSliceActive = display.view === 'list'
+  useEffect(() => {
+    if (!tableSliceActive) setVirtualSlice(undefined)
+  }, [tableSliceActive, setVirtualSlice])
+
   const details = useWorkbenchIssuesDetails({
     issues,
-    loading,
+    loading: !data && loading,
+    fetchingMore,
     hasNextPage: !!pageInfo?.hasNextPage,
     fetchNextPage,
     searchString,
@@ -152,7 +169,8 @@ export function WorkbenchIssues() {
             <WorkbenchIssuesBoard
               issues={issues}
               statuses={display.statuses}
-              loading={loading}
+              loading={!data && loading}
+              fetchingMore={fetchingMore}
               hasNextPage={!!pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
               fallbackWorkbenchId={workbenchId}
@@ -163,7 +181,7 @@ export function WorkbenchIssues() {
               loading={isNil(data) && loading}
               hasNextPage={pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
-              setVirtualSlice={setVirtualSlice}
+              setVirtualSlice={tableSliceActive ? setVirtualSlice : noop}
               fallbackWorkbenchId={workbenchId}
             />
           )}

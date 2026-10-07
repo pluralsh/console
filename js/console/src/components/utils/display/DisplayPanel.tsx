@@ -118,24 +118,16 @@ export function DisplayPopover({
     open,
     onOpenChange: setOpen,
   })
-  // Escape is handled below instead, so it can be stopped from also reaching
-  // global handlers (e.g. one clearing a tab's search).
+  // dismisses on outside press and on Escape wherever focus is (e.g. after
+  // clicking plain text in the panel); focus then returns to the button
   const { getReferenceProps, getFloatingProps } = useInteractions([
-    useDismiss(floating.context, { escapeKey: false }),
+    useDismiss(floating.context),
   ])
 
   return (
-    // React events bubble through the portal, so this also covers the panel.
     <div
       ref={triggerRef}
-      {...getReferenceProps({
-        onKeyDown: (e) => {
-          if (e.key !== 'Escape' || !open) return
-          e.stopPropagation()
-          setOpen(false)
-          ref.current?.querySelector('button')?.focus()
-        },
-      })}
+      {...getReferenceProps()}
     >
       <DisplayButton
         showDot={showDot}

@@ -53,7 +53,8 @@ export type FetchPaginatedDataResult<TQueryType> = {
   refetch: () => Promise<any>
   pageInfo: PageInfoFragment
   fetchNextPage: Dispatch<void>
-  setVirtualSlice: (slice: VirtualSlice) => void
+  // `undefined` clears it, e.g. when the table is no longer shown
+  setVirtualSlice: (slice: VirtualSlice | undefined) => void
   /** True while a fetchMore request is in flight; false during poll/refetch. */
   fetchingMore: boolean
 }

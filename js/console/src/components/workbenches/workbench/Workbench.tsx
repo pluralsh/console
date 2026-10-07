@@ -396,6 +396,16 @@ export function Workbench() {
       },
     })
 
+  // tabs set breadcrumbs through WorkbenchPageLayout; the not-found and error
+  // states below render without it, so set them here instead
+  const notFound = !id || !!error?.message?.includes('could not find resource')
+  useSetBreadcrumbs(
+    useMemo(
+      () => (notFound || error ? getWorkbenchBreadcrumbs(null) : undefined),
+      [error, notFound]
+    )
+  )
+
   const outletContext = useMemo<WorkbenchOutletContext>(
     () => ({
       workbenchId: id ?? '',
@@ -407,7 +417,7 @@ export function Workbench() {
     [id, isLoading, workbench, openToolsEdit, openDelete]
   )
 
-  if (!id || error?.message?.includes('could not find resource'))
+  if (notFound)
     return (
       <EmptyState message="Workbench not found.">
         <Button

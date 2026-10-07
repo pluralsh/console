@@ -1,5 +1,6 @@
 import { Flex } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayPopover,
@@ -14,7 +15,7 @@ import {
   useWorkbenchJobSearchQuery,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -41,16 +42,31 @@ export function WorkbenchJobs() {
   const query = useDebounce(searchString, 200).trim()
   const searching = !!query
 
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
-      { id: workbenchId }
-    )
+  const {
+    data,
+    loading,
+    error,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+    fetchingMore,
+  } = useFetchPaginatedData(
+    { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
+    { id: workbenchId }
+  )
   const search = useWorkbenchJobSearchQuery({
     variables: { workbenchId, q: query, limit: SEARCH_LIMIT },
     skip: !searching,
     fetchPolicy: 'network-only',
+    pollInterval: POLL_INTERVAL,
   })
+
+  // only the table reports its visible slice (and only for the runs list);
+  // drop it otherwise so polling keeps every page loaded in Board/Details
+  const tableSliceActive = view === 'list' && !searching
+  useEffect(() => {
+    if (!tableSliceActive) setVirtualSlice(undefined)
+  }, [tableSliceActive, setVirtualSlice])
 
   // searching shows the (unpaginated) search results in every view
   const jobs = useMemo(
@@ -64,12 +80,14 @@ export function WorkbenchJobs() {
     ? {
         loading: search.loading,
         loaded: !!search.data,
+        fetchingMore: false,
         hasNextPage: false,
         fetchNextPage: noop,
       }
     : {
         loading,
         loaded: !!data,
+        fetchingMore,
         hasNextPage: !!pageInfo?.hasNextPage,
         fetchNextPage,
       }
@@ -77,7 +95,8 @@ export function WorkbenchJobs() {
   const details = useWorkbenchJobsDetails({
     workbenchId,
     jobs,
-    loading: list.loading,
+    loading: !list.loaded && list.loading,
+    fetchingMore: list.fetchingMore,
     hasNextPage: list.hasNextPage,
     fetchNextPage: list.fetchNextPage,
     searchString,
@@ -116,7 +135,8 @@ export function WorkbenchJobs() {
           ) : view === 'board' ? (
             <WorkbenchJobsBoard
               jobs={jobs}
-              loading={list.loading}
+              loading={!list.loaded && list.loading}
+              fetchingMore={list.fetchingMore}
               hasNextPage={list.hasNextPage}
               fetchNextPage={list.fetchNextPage}
               showRecent={!searching}
@@ -129,7 +149,7 @@ export function WorkbenchJobs() {
                 loaded={list.loaded}
                 pageInfo={searching ? undefined : pageInfo}
                 fetchNextPage={list.fetchNextPage}
-                setVirtualSlice={setVirtualSlice}
+                setVirtualSlice={tableSliceActive ? setVirtualSlice : noop}
               />
             </TableContainerSC>
           )}
