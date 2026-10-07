@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import {
   getAlertAnnotations,
+  getAlertSummary,
   getAlertTagEntries,
 } from 'components/utils/alerts/alertDetails'
 import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
@@ -272,11 +273,6 @@ function AlertConclusionPanel({
       View job
     </DetailsLinkSC>
   )
-  const summary =
-    typeof alert.annotations?.summary === 'string'
-      ? alert.annotations.summary
-      : null
-
   return (
     <DetailsColumnSC>
       <DetailsPanelHeader title="Conclusion">
@@ -289,50 +285,10 @@ function AlertConclusionPanel({
             Workbench job reported an error.
           </DetailsErrorBanner>
         )}
-        <Flex
-          direction="column"
-          gap="medium"
-        >
-          <DetailsTitleSC>{summary || getAlertName(alert)}</DetailsTitleSC>
-          {alert.title && <ExpandablePrompt prompt={alert.title} />}
-        </Flex>
-        <SummaryCardSC>
-          {summary && (
-            <SummaryField label="Alert summary">{summary}</SummaryField>
-          )}
-          {alert.cluster?.name && (
-            <SummaryField label="Plural Cluster">
-              {alert.cluster.name}
-            </SummaryField>
-          )}
-          <SummaryField label="Severity">
-            <Flex
-              align="center"
-              gap="xxsmall"
-            >
-              <AlertSeverityIcon severity={alert.severity} />
-              {ALERT_SEVERITY_SHORT_LABELS[alert.severity]}
-            </Flex>
-          </SummaryField>
-          <SummaryField label="State">
-            <AlertStateChip state={alert.state} />
-          </SummaryField>
-          {alert.url && (
-            <SummaryField label="Source link">
-              <SmallLinkSC>
-                <AlertSourceLink alert={alert} />
-              </SmallLinkSC>
-            </SummaryField>
-          )}
-        </SummaryCardSC>
-        <KeyValueSection
-          title="Annotations"
-          entries={getAlertAnnotations(alert)}
-        />
-        <KeyValueSection
-          title="Tags"
-          entries={getAlertTagEntries(alert)}
-        />
+        <DetailsTitleSC>
+          {getAlertSummary(alert) || getAlertName(alert)}
+        </DetailsTitleSC>
+        <AlertInformation alert={alert} />
         {job && (
           <AlertJobResult
             jobId={job.id}
@@ -341,6 +297,55 @@ function AlertConclusionPanel({
         )}
       </DetailsPanelBodySC>
     </DetailsColumnSC>
+  )
+}
+
+// Alert title, summary fields, annotations and tags; shared by the details
+// view and the board's quick view.
+export function AlertInformation({ alert }: { alert: AlertFragment }) {
+  const summary = getAlertSummary(alert)
+
+  return (
+    <>
+      {alert.title && <ExpandablePrompt prompt={alert.title} />}
+      <SummaryCardSC>
+        {summary && (
+          <SummaryField label="Alert summary">{summary}</SummaryField>
+        )}
+        {alert.cluster?.name && (
+          <SummaryField label="Plural Cluster">
+            {alert.cluster.name}
+          </SummaryField>
+        )}
+        <SummaryField label="Severity">
+          <Flex
+            align="center"
+            gap="xxsmall"
+          >
+            <AlertSeverityIcon severity={alert.severity} />
+            {ALERT_SEVERITY_SHORT_LABELS[alert.severity]}
+          </Flex>
+        </SummaryField>
+        <SummaryField label="State">
+          <AlertStateChip state={alert.state} />
+        </SummaryField>
+        {alert.url && (
+          <SummaryField label="Source link">
+            <SmallLinkSC>
+              <AlertSourceLink alert={alert} />
+            </SmallLinkSC>
+          </SummaryField>
+        )}
+      </SummaryCardSC>
+      <KeyValueSection
+        title="Annotations"
+        entries={getAlertAnnotations(alert)}
+      />
+      <KeyValueSection
+        title="Tags"
+        entries={getAlertTagEntries(alert)}
+      />
+    </>
   )
 }
 

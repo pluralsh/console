@@ -12,9 +12,10 @@ import {
 } from 'components/workbenches/common/WorkbenchBoard'
 import { AlertFragment, AlertState } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
+import { WorkbenchAlertFlyover } from './WorkbenchAlertFlyover'
 import { WorkbenchJobCardGridSC } from './WorkbenchJobCard'
 
 export function WorkbenchAlertsBoard({
@@ -22,13 +23,18 @@ export function WorkbenchAlertsBoard({
   loading,
   hasNextPage,
   fetchNextPage,
+  fallbackWorkbenchId,
 }: {
   alerts: AlertFragment[]
   loading: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
+  fallbackWorkbenchId: string
 }) {
   const loadMore = useBoardLoadMore({ loading, hasNextPage, fetchNextPage })
+  // by id, so the quick view follows polled updates of the alert
+  const [openAlertId, setOpenAlertId] = useState<string>()
+  const openAlert = alerts.find(({ id }) => id === openAlertId)
   const firing = useMemo(
     () => alerts.filter(({ state }) => state === AlertState.Firing),
     [alerts]
@@ -58,6 +64,7 @@ export function WorkbenchAlertsBoard({
               <WorkbenchAlertCard
                 key={alert.id}
                 alert={alert}
+                onOpen={() => setOpenAlertId(alert.id)}
               />
             ))}
           </WorkbenchJobCardGridSC>
@@ -70,18 +77,43 @@ export function WorkbenchAlertsBoard({
             <WorkbenchAlertCard
               key={alert.id}
               alert={alert}
+              onOpen={() => setOpenAlertId(alert.id)}
             />
           ))}
         </WorkbenchJobCardGridSC>
       </BoardSectionSC>
       {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+      <WorkbenchAlertFlyover
+        alert={openAlert}
+        fallbackWorkbenchId={fallbackWorkbenchId}
+        onClose={() => setOpenAlertId(undefined)}
+      />
     </BoardSC>
   )
 }
 
-function WorkbenchAlertCard({ alert }: { alert: AlertFragment }) {
+function WorkbenchAlertCard({
+  alert,
+  onOpen,
+}: {
+  alert: AlertFragment
+  onOpen: () => void
+}) {
   return (
-    <CardSC fillLevel={1}>
+    <CardSC
+      fillLevel={1}
+      clickable
+      role="button"
+      tabIndex={0}
+      aria-label={`Show details of ${alert.title ?? 'alert'}`}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return
+        if (e.key !== 'Enter' && e.key !== ' ') return
+        e.preventDefault()
+        onOpen()
+      }}
+    >
       <Flex
         align="center"
         justify="space-between"

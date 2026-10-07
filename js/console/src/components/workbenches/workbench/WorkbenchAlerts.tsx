@@ -124,6 +124,7 @@ export function WorkbenchAlerts() {
               loading={loading}
               hasNextPage={!!pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
+              fallbackWorkbenchId={workbenchId}
             />
           ) : (
             <TableContainerSC>

@@ -20,3 +20,11 @@ export function getAlertTagEntries(
 ): [string, string][] {
   return getAlertTags(alert).map(({ name, value }) => [name, value])
 }
+
+// The `summary` annotation (Grafana, Prometheus), if present.
+export function getAlertSummary(
+  alert: Pick<AlertFragment, 'annotations'>
+): Nullable<string> {
+  const summary = alert.annotations?.summary
+  return typeof summary === 'string' && summary ? summary : null
+}
