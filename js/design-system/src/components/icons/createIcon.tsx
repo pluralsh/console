@@ -14,7 +14,7 @@ type IconBaseProps = {
 
 export type IconProps = IconLayoutProps & IconBaseProps
 
-function resolveThemeColor(
+export function resolveThemeColor(
   color: string | undefined,
   colors: DefaultTheme['colors']
 ) {

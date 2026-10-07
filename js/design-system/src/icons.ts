@@ -270,10 +270,11 @@ export { default as SendMessageIcon } from './components/icons/SendMessageIcon'
 export { default as SentinelIcon } from './components/icons/SentinelIcon'
 export { default as SentryLogoIcon } from './components/icons/SentryLogoIcon'
 export { default as ServersIcon } from './components/icons/ServersIcon'
-export { default as SeverityCriticalIcon } from './components/icons/SeverityCriticalIcon'
-export { default as SeverityLowIcon } from './components/icons/SeverityLowIcon'
-export { default as SeverityMediumIcon } from './components/icons/SeverityMediumIcon'
-export { default as SeverityUndefinedIcon } from './components/icons/SeverityUndefinedIcon'
+export {
+  default as SeverityIcon,
+  type SeverityIconLevel,
+  type SeverityIconSeverity,
+} from './components/icons/SeverityIcon'
 export { default as ShareIcon } from './components/icons/ShareIcon'
 export { default as ShieldLockIcon } from './components/icons/ShieldLockIcon'
 export { default as ShieldOutlineIcon } from './components/icons/ShieldOutlineIcon'
