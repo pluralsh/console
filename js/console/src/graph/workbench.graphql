@@ -965,10 +965,23 @@ query WorkbenchEvalSettings($id: ID!) {
   }
 }
 
-query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchJobs(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $statuses: [WorkbenchJobStatus]
+  $prStates: [WorkbenchJobPrState]
+  $direction: SortDirection
+) {
   workbench(id: $id) {
     id
-    runs(first: $first, after: $after) {
+    runs(
+      first: $first
+      after: $after
+      statuses: $statuses
+      prStates: $prStates
+      direction: $direction
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -981,12 +994,40 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query WorkbenchJobCounts($id: ID!) {
+  workbench(id: $id) {
+    id
+    runCounts {
+      statuses {
+        status
+        count
+      }
+      pullRequests {
+        state
+        count
+      }
+    }
+  }
+}
+
 fragment WorkbenchJobSearchRow on WorkbenchJob {
   ...WorkbenchJobTiny
 }
 
-query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {
-  workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {
+query WorkbenchJobSearch(
+  $workbenchId: ID!
+  $q: String!
+  $limit: Int
+  $statuses: [WorkbenchJobStatus]
+  $prStates: [WorkbenchJobPrState]
+) {
+  workbenchJobSearch(
+    workbenchId: $workbenchId
+    q: $q
+    limit: $limit
+    statuses: $statuses
+    prStates: $prStates
+  ) {
     ...WorkbenchJobSearchRow
   }
 }
@@ -1013,10 +1054,10 @@ query RecentWorkbenchJobs($count: Int) {
   }
 }
 
-query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String, $q: String) {
   workbench(id: $id) {
     id
-    alerts(first: $first, after: $after) {
+    alerts(first: $first, after: $after, q: $q) {
       pageInfo {
         ...PageInfo
       }

@@ -156,6 +156,15 @@ defmodule Console.Schema.Alert do
     from(a in query, where: a.severity in ^severities)
   end
 
+  def search(query \\ __MODULE__, q) do
+    like = "%#{q}%"
+    from(a in query,
+      where: ilike(a.title, ^like) or
+        fragment("convert_from(?, 'UTF8') ILIKE ?", a.message, ^like) or
+        fragment("EXISTS(SELECT 1 FROM tags WHERE alert_id = ? AND name = 'alertname' AND value ILIKE ?)", a.id, ^like)
+    )
+  end
+
   @valid ~w(
     type
     severity

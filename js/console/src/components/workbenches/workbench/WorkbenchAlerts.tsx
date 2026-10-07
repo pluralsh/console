@@ -1,4 +1,5 @@
 import { Flex } from '@pluralsh/design-system'
+import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayPopover,
@@ -15,12 +16,12 @@ import {
   ColAlertTitle,
   getColAlertViewJob,
 } from '../../utils/alerts/AlertsTable'
-import { getAlertName } from 'components/utils/alerts/AlertSourceLink'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import { useWorkbenchAlertsQuery } from 'generated/graphql'
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { isEmpty } from 'lodash'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -42,6 +43,8 @@ export function WorkbenchAlerts() {
     WORKBENCH_ALERTS_VIEWS,
     DEFAULT_WORKBENCH_ALERTS_VIEW
   )
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const {
     data,
     loading,
@@ -52,21 +55,14 @@ export function WorkbenchAlerts() {
     fetchingMore,
   } = useFetchPaginatedData(
     { queryHook: useWorkbenchAlertsQuery, keyPath: ['workbench', 'alerts'] },
-    { id: workbenchId }
+    {
+      id: workbenchId,
+      q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
+    }
   )
-  const [searchString, setSearchString] = useState('')
-  const query = useDeferredValue(searchString.trim().toLowerCase())
-  // the workbench alerts query can't search, so this filters loaded alerts
   const alerts = useMemo(
-    () =>
-      mapExistingNodes(data?.workbench?.alerts).filter(
-        (alert) =>
-          !query ||
-          [alert.title, getAlertName(alert)].some((text) =>
-            text?.toLowerCase().includes(query)
-          )
-      ),
-    [data, query]
+    () => mapExistingNodes(data?.workbench?.alerts),
+    [data]
   )
 
   const columns = useMemo(
@@ -91,7 +87,7 @@ export function WorkbenchAlerts() {
 
   // only the table reports its visible slice; drop it in other views so
   // polling keeps every page loaded in Board/Details
-  const tableSliceActive = view === 'list' && !query
+  const tableSliceActive = view === 'list'
   useEffect(() => {
     if (!tableSliceActive) setVirtualSlice(undefined)
   }, [tableSliceActive, setVirtualSlice])

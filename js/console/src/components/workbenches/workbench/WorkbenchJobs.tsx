@@ -3,18 +3,22 @@ import { useDebounce } from '@react-hooks-library/core'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import {
+  DisplayFilterEmpty,
   DisplayPopover,
-  DisplayView,
-  DisplayViewToggle,
   usePersistedDisplayView,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
+  SortDirection,
+  useWorkbenchJobCountsQuery,
   useWorkbenchJobSearchQuery,
   useWorkbenchJobsQuery,
+  WorkbenchJobPrState,
+  WorkbenchJobStatus,
 } from 'generated/graphql'
+import { compact, fromPairs, omit } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
@@ -23,21 +27,43 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
 import { WorkbenchJobsBoard } from './WorkbenchJobsBoard'
 import { useWorkbenchJobsDetails } from './WorkbenchJobsDetails'
+import { WorkbenchJobsDisplayOptions } from './WorkbenchJobsDisplayOptions'
 import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
+import {
+  DEFAULT_WORKBENCH_JOBS_DISPLAY,
+  getJobFilterEmptyKind,
+  hasUncheckedJobFilters,
+  resetJobFilters,
+  toJobFilterVariables,
+  WORKBENCH_JOBS_VIEWS,
+  WorkbenchJobsDisplayState,
+} from './workbenchJobsDisplay'
 
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
-const WORKBENCH_JOBS_VIEWS: DisplayView[] = ['list', 'board', 'details']
-const DEFAULT_WORKBENCH_JOBS_VIEW: DisplayView = 'list'
 const SEARCH_LIMIT = 50
 const noop = () => {}
 
 export function WorkbenchJobs() {
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
+  // the view is remembered per user, filters and sort only for the visit
   const [view, setView] = usePersistedDisplayView(
     WORKBENCH_JOBS_VIEW_STORAGE_KEY,
     WORKBENCH_JOBS_VIEWS,
-    DEFAULT_WORKBENCH_JOBS_VIEW
+    DEFAULT_WORKBENCH_JOBS_DISPLAY.view
   )
+  const [filters, setFilters] = useState(() =>
+    omit(DEFAULT_WORKBENCH_JOBS_DISPLAY, 'view')
+  )
+  const display = useMemo(() => ({ ...filters, view }), [filters, view])
+  const updateDisplay = ({
+    view: nextView,
+    ...nextFilters
+  }: WorkbenchJobsDisplayState) => {
+    setFilters(nextFilters)
+    setView(nextView)
+  }
+  const filterVars = useMemo(() => toJobFilterVariables(filters), [filters])
+  const filterEmptyKind = getJobFilterEmptyKind(filters)
   const [searchString, setSearchString] = useState('')
   const query = useDebounce(searchString, 200).trim()
   const searching = !!query
@@ -52,14 +78,46 @@ export function WorkbenchJobs() {
     fetchingMore,
   } = useFetchPaginatedData(
     { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
-    { id: workbenchId }
+    {
+      id: workbenchId,
+      ...filterVars,
+      direction:
+        filters.direction === SortDirection.Desc
+          ? undefined
+          : filters.direction,
+    }
   )
   const search = useWorkbenchJobSearchQuery({
-    variables: { workbenchId, q: query, limit: SEARCH_LIMIT },
+    variables: { workbenchId, q: query, limit: SEARCH_LIMIT, ...filterVars },
     skip: !searching,
     fetchPolicy: 'network-only',
     pollInterval: POLL_INTERVAL,
   })
+  const { data: countsData } = useWorkbenchJobCountsQuery({
+    variables: { id: workbenchId },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+  const statusCounts = useMemo(
+    () =>
+      fromPairs(
+        compact(countsData?.workbench?.runCounts?.statuses).map((entry) => [
+          entry.status,
+          entry.count,
+        ])
+      ) as Partial<Record<WorkbenchJobStatus, number>>,
+    [countsData]
+  )
+  const prStateCounts = useMemo(
+    () =>
+      fromPairs(
+        compact(countsData?.workbench?.runCounts?.pullRequests).map((entry) => [
+          entry.state,
+          entry.count,
+        ])
+      ) as Partial<Record<WorkbenchJobPrState, number>>,
+    [countsData]
+  )
 
   // only the table reports its visible slice (and only for the runs list);
   // drop it otherwise so polling keeps every page loaded in Board/Details
@@ -102,7 +160,7 @@ export function WorkbenchJobs() {
     searchString,
     onSearchChange: setSearchString,
   })
-  const showDetails = view === 'details' && !listError
+  const showDetails = view === 'details' && !listError && !filterEmptyKind
 
   return (
     <WorkbenchPageLayout
@@ -112,11 +170,12 @@ export function WorkbenchJobs() {
         tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
-        <DisplayPopover showDot={false}>
-          <DisplayViewToggle
-            view={view}
-            views={WORKBENCH_JOBS_VIEWS}
-            onChange={setView}
+        <DisplayPopover showDot={hasUncheckedJobFilters(filters)}>
+          <WorkbenchJobsDisplayOptions
+            state={display}
+            onChange={updateDisplay}
+            statusCounts={statusCounts}
+            prStateCounts={prStateCounts}
           />
         </DisplayPopover>
       }
@@ -132,6 +191,12 @@ export function WorkbenchJobs() {
           />
           {listError ? (
             <GqlError error={listError} />
+          ) : filterEmptyKind ? (
+            <DisplayFilterEmpty
+              title={`No ${filterEmptyKind} selected`}
+              description={`It looks like there are no ${filterEmptyKind} selected.`}
+              onReset={() => updateDisplay(resetJobFilters(display))}
+            />
           ) : view === 'board' ? (
             <WorkbenchJobsBoard
               jobs={jobs}

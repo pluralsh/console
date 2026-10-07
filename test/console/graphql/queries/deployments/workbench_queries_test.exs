@@ -585,6 +585,98 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal(runs)
     end
 
+    test "it can filter workbench runs by status and pull request state" do
+      workbench = insert(:workbench)
+      open_failed = insert(:workbench_job, workbench: workbench, status: :failed)
+      insert(:pull_request, workbench_job: open_failed, status: :open)
+      insert(:pull_request, workbench_job: open_failed, status: :closed)
+      merged = insert(:workbench_job, workbench: workbench, status: :successful)
+      insert(:pull_request, workbench_job: merged, status: :merged)
+      no_pr = insert(:workbench_job, workbench: workbench, status: :running)
+      insert(:workbench_job, status: :failed)
+
+      query = """
+        query Workbench($id: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+          workbench(id: $id) {
+            runs(first: 10, statuses: $statuses, prStates: $prStates) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {vars, expected} <- [
+        {%{"statuses" => ["FAILED", "RUNNING"]}, [open_failed, no_pr]},
+        {%{"prStates" => ["CLOSED"]}, [open_failed]},
+        {%{"prStates" => ["MERGED", "NONE"]}, [merged, no_pr]},
+        {%{"prStates" => ["NONE"], "statuses" => ["FAILED"]}, []},
+        {%{"statuses" => []}, []}
+      ] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})
+
+        assert from_connection(found["runs"])
+               |> ids_equal(expected)
+      end
+    end
+
+    test "it can sort workbench runs by creation date" do
+      workbench = insert(:workbench)
+      older = insert(:workbench_job, workbench: workbench, inserted_at: Timex.now() |> Timex.shift(days: -1))
+      newer = insert(:workbench_job, workbench: workbench)
+
+      query = """
+        query Workbench($id: ID!, $direction: SortDirection) {
+          workbench(id: $id) {
+            runs(first: 10, direction: $direction) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {direction, expected} <- [{nil, [newer, older]}, {"ASC", [older, newer]}] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, %{"id" => workbench.id, "direction" => direction}, %{current_user: admin_user()})
+
+        assert from_connection(found["runs"])
+               |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
+      end
+    end
+
+    test "it can fetch workbench run counts" do
+      workbench = insert(:workbench)
+      failed = insert(:workbench_job, workbench: workbench, status: :failed)
+      insert(:pull_request, workbench_job: failed, status: :open)
+      insert(:pull_request, workbench_job: failed, status: :open)
+      insert(:pull_request, workbench_job: failed, status: :merged)
+      insert(:workbench_job, workbench: workbench, status: :failed)
+      insert(:workbench_job, workbench: workbench, status: :successful)
+      insert(:workbench_job, status: :running)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            runCounts {
+              statuses { status count }
+              pullRequests { state count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert Enum.sort_by(found["runCounts"]["statuses"], & &1["status"]) == [
+        %{"status" => "FAILED", "count" => 2},
+        %{"status" => "SUCCESSFUL", "count" => 1}
+      ]
+
+      assert Enum.sort_by(found["runCounts"]["pullRequests"], & &1["state"]) == [
+        %{"state" => "MERGED", "count" => 1},
+        %{"state" => "NONE", "count" => 2},
+        %{"state" => "OPEN", "count" => 1}
+      ]
+    end
+
     test "it can fetch workbench alerts" do
       workbench = insert(:workbench)
       alerts = insert_list(3, :alert, workbench: workbench, project: workbench.project)
@@ -604,6 +696,35 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == workbench.id
       assert from_connection(found["alerts"])
              |> ids_equal(alerts)
+    end
+
+    test "it can search workbench alerts by title, alertname tag or message" do
+      workbench = insert(:workbench)
+      by_title   = insert(:alert, workbench: workbench, title: "HighCpuUsage firing")
+      by_message = insert(:alert, workbench: workbench, message: "disk is nearly full")
+      by_tag     = insert(:alert, workbench: workbench, title: "Alertmanager Alert")
+      insert(:tag, alert: by_tag, name: "alertname", value: "PodCrashLooping")
+      other = insert(:alert, workbench: workbench, title: "unrelated")
+      insert(:tag, alert: other, name: "severity", value: "crashloop")
+      insert(:alert, project: workbench.project, title: "HighCpuUsage elsewhere")
+
+      query = """
+        query Workbench($id: ID!, $q: String) {
+          workbench(id: $id) {
+            alerts(first: 10, q: $q) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {q, expected} <- [{"highcpu", [by_title]}, {"NEARLY", [by_message]}, {"crashloop", [by_tag]}] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, %{"id" => workbench.id, "q" => q}, %{current_user: admin_user()})
+
+        assert from_connection(found["alerts"])
+               |> ids_equal(expected)
+      end
     end
 
     test "it can fetch workbench issues" do
@@ -2043,6 +2164,56 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["pullRequests"] == [
         %{"title" => pr.title, "url" => pr.url}
       ]
+    end
+
+    test "it applies status and pull request filters to search results" do
+      import ElasticsearchUtils
+
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings()
+          }
+        }
+      )
+
+      workbench = insert(:workbench)
+      failed = insert(:workbench_job, workbench: workbench, status: :failed)
+      successful = insert(:workbench_job, workbench: workbench, status: :successful)
+      insert(:pull_request, workbench_job: successful, status: :merged)
+      insert(:workbench_job, workbench: workbench, status: :successful)
+
+      expect(Console.AI.VectorStore, :fetch, 2, fn "outage", _ ->
+        {:ok, Enum.map([failed, successful], fn job ->
+          %Console.AI.VectorStore.Response{
+            type: :workbench,
+            workbench_job: %Console.Schema.WorkbenchJob.Mini{id: job.id}
+          }
+        end)}
+      end)
+
+      query = """
+        query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+          workbenchJobSearch(q: "outage", workbenchId: $workbenchId, statuses: $statuses, prStates: $prStates) {
+            id
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id, "statuses" => ["FAILED"]}, %{current_user: admin_user()})
+
+      assert ids_equal(found, [failed])
+
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id, "prStates" => ["MERGED"]}, %{current_user: admin_user()})
+
+      assert ids_equal(found, [successful])
     end
 
     test "it errors when the vector store is not enabled" do

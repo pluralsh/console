@@ -155,6 +155,42 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.status == ^status)
   end
 
+  def for_statuses(query \\ __MODULE__, statuses) do
+    from(j in query, where: j.status in ^statuses)
+  end
+
+  @doc """
+  Jobs with at least one pull request in one of the given states, `:none` matching jobs without any pull requests.
+  """
+  def for_pr_states(query \\ __MODULE__, states) do
+    {none, statuses} = Enum.split_with(states, &(&1 == :none))
+    with_prs = from(pr in PullRequest, where: pr.status in ^statuses, select: pr.workbench_job_id)
+    matches = dynamic([j], j.id in subquery(with_prs))
+    matches = if none != [], do: dynamic([j], ^matches or j.id not in subquery(pr_job_ids())), else: matches
+    from(j in query, where: ^matches)
+  end
+
+  def without_pull_requests(query \\ __MODULE__) do
+    from(j in query, where: j.id not in subquery(pr_job_ids()))
+  end
+
+  defp pr_job_ids() do
+    from(pr in PullRequest, where: not is_nil(pr.workbench_job_id), select: pr.workbench_job_id)
+  end
+
+  def count_by_status(query \\ __MODULE__) do
+    from(j in query, group_by: j.status, select: %{status: j.status, count: count(j.id)})
+  end
+
+  def count_by_pr_state(query \\ __MODULE__) do
+    from(j in query,
+      join: pr in PullRequest,
+        on: pr.workbench_job_id == j.id,
+      group_by: pr.status,
+      select: %{state: pr.status, count: count(j.id, :distinct)}
+    )
+  end
+
   def for_monitor(query \\ __MODULE__, monitor_id) do
     from(j in query,
       join: a in assoc(j, :alert),

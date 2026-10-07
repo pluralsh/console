@@ -40,6 +40,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def list_alerts(parent, args, _) do
     for_parent(parent)
+    |> maybe_search(Alert, args)
     |> Alert.ordered()
     |> paginate(args)
   end

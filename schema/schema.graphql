@@ -635,6 +635,12 @@ type RootQueryType {
 
     "max results to return (defaults to 5)"
     limit: Int
+
+    "filter results by status"
+    statuses: [WorkbenchJobStatus]
+
+    "filter results by the state of their pull requests"
+    prStates: [WorkbenchJobPrState]
   ): [WorkbenchJob]
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
@@ -3075,6 +3081,17 @@ enum WorkbenchBudgetUnit {
   TOKEN
 }
 
+enum WorkbenchJobPrState {
+  OPEN
+
+  MERGED
+
+  CLOSED
+
+  "jobs without any pull requests"
+  NONE
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -4016,6 +4033,23 @@ input QueuedPromptAttributes {
   modes: WorkbenchJobModesAttributes
 }
 
+type WorkbenchJobCounts {
+  statuses: [WorkbenchJobCountByStatus]
+
+  "jobs with at least one pull request in each state (a job can count towards several)"
+  pullRequests: [WorkbenchJobCountByPrState]
+}
+
+type WorkbenchJobCountByStatus {
+  status: WorkbenchJobStatus!
+  count: Int!
+}
+
+type WorkbenchJobCountByPrState {
+  state: WorkbenchJobPrState!
+  count: Int!
+}
+
 type QueuedPromptSummary {
   "unconsumed prompts that are eligible to dequeue"
   readyCount: Int!
@@ -4092,7 +4126,18 @@ type Workbench {
 
     "show runs spawned from a specific monitor"
     monitorId: ID
+
+    "filter runs by status"
+    statuses: [WorkbenchJobStatus]
+
+    "filter runs by the state of their pull requests"
+    prStates: [WorkbenchJobPrState]
+
+    "creation date sort direction"
+    direction: SortDirection
   ): WorkbenchJobConnection
+
+  runCounts: WorkbenchJobCounts
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
 
@@ -4137,7 +4182,18 @@ type Workbench {
 
   chatbots(after: String, first: Int, before: String, last: Int): WorkbenchChatbotConnection
 
-  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+  alerts(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search alerts by title, alertname tag or message"
+    q: String
+  ): AlertConnection
 
   issues(
     after: String

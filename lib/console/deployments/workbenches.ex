@@ -135,6 +135,7 @@ defmodule Console.Deployments.Workbenches do
   def workbench_job_search(q, %User{} = user, opts \\ []) do
     count = Keyword.get(opts, :limit, 5)
     workbench_id = Keyword.get(opts, :workbench_id)
+    filter = Keyword.get(opts, :filter, & &1)
     user = Console.Services.Rbac.preload(user)
 
     with {:ok, results} <- VectorStore.fetch(q, [
@@ -150,6 +151,7 @@ defmodule Console.Deployments.Workbenches do
       |> Enum.reject(&is_nil/1)
       |> Enum.uniq()
       |> WorkbenchJob.for_ids()
+      |> filter.()
       |> Repo.all()
       |> ok()
     end

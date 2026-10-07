@@ -65,10 +65,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   @max_recent_workbench_jobs 20
 
   def list_workbench_runs(workbench, args, _) do
+    dir = Map.get(args, :direction) || :desc
+
     WorkbenchJob.for_workbench(workbench.id)
     |> workbench_job_filters(args)
-    |> WorkbenchJob.ordered()
+    |> WorkbenchJob.ordered([{dir, :inserted_at}, {dir, :id}])
     |> paginate(args)
+  end
+
+  def run_counts(%Workbench{id: id}, _, _) do
+    jobs = WorkbenchJob.for_workbench(id)
+    none = Repo.aggregate(WorkbenchJob.without_pull_requests(jobs), :count)
+
+    {:ok, %{
+      statuses: Repo.all(WorkbenchJob.count_by_status(jobs)),
+      pull_requests: Repo.all(WorkbenchJob.count_by_pr_state(jobs)) ++ [%{state: :none, count: none}]
+    }}
   end
 
   def accessible_users(workbench, _args, _) do
@@ -94,7 +106,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     with {:ok, _} <- Workbenches.get_workbench!(workbench_id) |> allow(actor(ctx), :read) do
       Workbenches.workbench_job_search(q, actor(ctx),
         limit: Map.get(args, :limit, 5),
-        workbench_id: workbench_id
+        workbench_id: workbench_id,
+        filter: &workbench_job_filters(&1, args)
       )
     end
   end
@@ -511,6 +524,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
       {:alert, true}, q -> WorkbenchJob.with_alert(q)
       {:issue, true}, q -> WorkbenchJob.with_issue(q)
       {:monitor_id, id}, q when is_binary(id) -> WorkbenchJob.for_monitor(q, id)
+      {:statuses, s}, q when is_list(s) -> WorkbenchJob.for_statuses(q, s)
+      {:pr_states, s}, q when is_list(s) -> WorkbenchJob.for_pr_states(q, s)
       _, q -> q
     end)
   end
