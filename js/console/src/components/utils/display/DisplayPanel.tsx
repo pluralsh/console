@@ -111,6 +111,8 @@ export function DisplayPopover({
     placement: 'bottom-end',
     width: DISPLAY_POPOVER_WIDTH,
     minWidth: DISPLAY_POPOVER_WIDTH,
+    // no minimum: the panel is as tall as its options
+    minHeight: 0,
     maxHeight: '80vh',
     sizeToContent: true,
     open,
@@ -312,6 +314,7 @@ function ViewChip({
   return (
     <Chip
       clickable
+      rounded
       icon={icon}
       fillLevel={selected ? 3 : 1}
       aria-pressed={selected}
@@ -399,6 +402,9 @@ const ViewToggleSC = styled.div<{ $count: number }>(({ theme, $count }) => ({
   gridTemplateColumns: `repeat(${$count}, 1fr)`,
   gap: theme.spacing.xxsmall,
   padding: `${theme.spacing.medium}px 0 ${theme.spacing.xsmall}px`,
+  // the switch alone in the panel gets even top/bottom padding; otherwise
+  // the next section header adds its own top padding
+  '&:last-child': { paddingBottom: theme.spacing.medium },
 }))
 
 const SectionSC = styled.div(({ theme }) => ({
