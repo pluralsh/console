@@ -16,7 +16,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import {
-  useWorkbenchJobsQuery,
+  useWorkbenchJobCountsQuery,
   WorkbenchJobStatus,
   useDeleteWorkbenchMutation,
   useWorkbenchQuery,
@@ -29,7 +29,6 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { SubTabs } from 'components/utils/SubTabs'
 import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
-import { mapExistingNodes } from 'utils/graphql'
 import {
   Link,
   Outlet,
@@ -318,21 +317,26 @@ export function WorkbenchPageLayout({
   )
 }
 
+// reads the status counts rather than a page of jobs, so this poll never
+// overwrites the paginated jobs list in the cache
 function useWorkbenchHasInProgressJobs(workbenchId: string) {
-  const { data } = useWorkbenchJobsQuery({
-    variables: { id: workbenchId, first: 50 },
+  const { data } = useWorkbenchJobCountsQuery({
+    variables: { id: workbenchId },
     skip: !workbenchId,
     pollInterval: 5_000,
     fetchPolicy: 'cache-and-network',
   })
 
-  return useMemo(() => {
-    return mapExistingNodes(data?.workbench?.runs).some(
-      (job) =>
-        job.status === WorkbenchJobStatus.Pending ||
-        job.status === WorkbenchJobStatus.Running
-    )
-  }, [data])
+  return useMemo(
+    () =>
+      (data?.workbench?.runCounts?.statuses ?? []).some(
+        (entry) =>
+          !!entry?.count &&
+          (entry.status === WorkbenchJobStatus.Pending ||
+            entry.status === WorkbenchJobStatus.Running)
+      ),
+    [data]
+  )
 }
 
 const InProgressDotSC = styled.span(({ theme }) => ({

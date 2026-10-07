@@ -35,13 +35,13 @@ import {
   hasUncheckedJobFilters,
   resetJobFilters,
   toJobFilterVariables,
+  WORKBENCH_JOBS_PAGE_SIZE,
   WORKBENCH_JOBS_VIEWS,
   WorkbenchJobsDisplayState,
 } from './workbenchJobsDisplay'
 
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
 const SEARCH_LIMIT = 50
-const PAGE_SIZE = 50
 const noop = () => {}
 
 export function WorkbenchJobs() {
@@ -81,7 +81,7 @@ export function WorkbenchJobs() {
     {
       queryHook: useWorkbenchJobsQuery,
       keyPath: ['workbench', 'runs'],
-      pageSize: PAGE_SIZE,
+      pageSize: WORKBENCH_JOBS_PAGE_SIZE,
       keepLoadedPages: true,
     },
     {
