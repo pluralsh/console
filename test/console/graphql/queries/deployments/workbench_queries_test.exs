@@ -2390,6 +2390,57 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert ids_equal(found, [successful])
     end
 
+    test "filtered searches fetch more candidates and keep relevance order" do
+      import ElasticsearchUtils
+
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings()
+          }
+        }
+      )
+
+      workbench = insert(:workbench)
+      [first_failed, second_failed, third_failed] = insert_list(3, :workbench_job, workbench: workbench, status: :failed)
+      [first_ok, second_ok] = insert_list(2, :workbench_job, workbench: workbench, status: :successful)
+      ranked = [first_ok, second_failed, second_ok, first_failed, third_failed]
+
+      expect(Console.AI.VectorStore, :fetch, 2, fn "outage", opts ->
+        {:ok, ranked
+              |> Enum.take(opts[:count])
+              |> Enum.map(&%Console.AI.VectorStore.Response{
+                type: :workbench,
+                workbench_job: %Console.Schema.WorkbenchJob.Mini{id: &1.id}
+              })}
+      end)
+
+      query = """
+        query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus]) {
+          workbenchJobSearch(q: "outage", workbenchId: $workbenchId, limit: 2, statuses: $statuses) {
+            id
+          }
+        }
+      """
+
+      # 4 candidates for a limit of 2: the failed ones among them, most relevant first
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id, "statuses" => ["FAILED"]}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == [second_failed.id, first_failed.id]
+
+      # unfiltered searches fetch just the limit, in relevance order
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == [first_ok.id, second_failed.id]
+    end
+
     test "it errors when the vector store is not enabled" do
       deployment_settings(
         ai: %{

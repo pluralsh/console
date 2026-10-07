@@ -107,9 +107,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
       Workbenches.workbench_job_search(q, actor(ctx),
         limit: Map.get(args, :limit, 5),
         workbench_id: workbench_id,
-        filter: &workbench_job_filters(&1, args)
+        filter: job_search_filter(args)
       )
     end
+  end
+
+  defp job_search_filter(args) do
+    if Enum.any?([:statuses, :pr_states], &is_list(Map.get(args, &1))),
+      do: &workbench_job_filters(&1, args)
   end
 
   def list_workbench_jobs_for_flow(%{id: flow_id}, args, _) do
