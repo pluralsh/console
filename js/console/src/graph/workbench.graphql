@@ -1012,10 +1012,6 @@ query WorkbenchJobCounts($id: ID!) {
   }
 }
 
-fragment WorkbenchJobSearchRow on WorkbenchJob {
-  ...WorkbenchJobTiny
-}
-
 query WorkbenchJobSearch(
   $workbenchId: ID!
   $q: String!
@@ -1030,7 +1026,7 @@ query WorkbenchJobSearch(
     statuses: $statuses
     prStates: $prStates
   ) {
-    ...WorkbenchJobSearchRow
+    ...WorkbenchJobTiny
   }
 }
 

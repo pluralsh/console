@@ -96,7 +96,13 @@ export function DetailsStatusGutter({
         variant="cursorEq"
       />
     )
-  if (status === 'failed') return <FailedDotSC aria-label="Failed" />
+  if (status === 'failed')
+    return (
+      <FailedDotSC
+        role="img"
+        aria-label="Failed"
+      />
+    )
   return null
 }
 
@@ -167,7 +173,10 @@ export function DetailsErrorBanner({
   return (
     <ErrorBannerSC role="alert">
       <ErrorBannerTextSC>
-        <FailedDotSC $size={10} />
+        <FailedDotSC
+          $size={10}
+          aria-hidden
+        />
         <span>{children}</span>
       </ErrorBannerTextSC>
       {action}

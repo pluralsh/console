@@ -49,7 +49,8 @@ import {
 const WORKBENCH_ALERTS_VIEW_STORAGE_KEY = 'workbench-alerts-view'
 const PAGE_SIZE = 50
 
-const noop = () => {}
+// stable, so the paginated data callbacks don't change every render
+const ALERTS_KEY_PATH = ['workbench', 'alerts']
 
 export function WorkbenchAlerts() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -84,7 +85,7 @@ export function WorkbenchAlerts() {
   } = useFetchPaginatedData(
     {
       queryHook: useWorkbenchAlertsQuery,
-      keyPath: ['workbench', 'alerts'],
+      keyPath: ALERTS_KEY_PATH,
       pageSize: PAGE_SIZE,
       keepLoadedPages: true,
     },
@@ -225,7 +226,7 @@ export function WorkbenchAlerts() {
                 error={null}
                 hasNextPage={pageInfo?.hasNextPage}
                 fetchNextPage={fetchNextPage}
-                setVirtualSlice={tableSliceActive ? setVirtualSlice : noop}
+                setVirtualSlice={setVirtualSlice}
                 hideHeader
                 columns={columns}
                 fillLevel={0}

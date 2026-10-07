@@ -14,12 +14,11 @@ export const ALERT_SEVERITY_ORDER = [
   AlertSeverity.Low,
 ]
 
-// Short labels, as used in the workbench alert details views.
-export const ALERT_SEVERITY_SHORT_LABELS: Record<AlertSeverity, string> = {
+export const ALERT_SEVERITY_LABELS: Record<AlertSeverity, string> = {
   [AlertSeverity.Undefined]: 'Undefined',
   [AlertSeverity.Critical]: 'Critical',
   [AlertSeverity.High]: 'High',
-  [AlertSeverity.Medium]: 'Med',
+  [AlertSeverity.Medium]: 'Medium',
   [AlertSeverity.Low]: 'Low',
 }
 
@@ -39,7 +38,7 @@ export function AlertSeverityIcon({
   severity: AlertSeverity
   size?: number
 }) {
-  const label = `${ALERT_SEVERITY_SHORT_LABELS[severity]} severity`
+  const label = `${ALERT_SEVERITY_LABELS[severity]} severity`
 
   return (
     <Tooltip
@@ -48,6 +47,7 @@ export function AlertSeverityIcon({
     >
       <IconWrapSC
         $size={size}
+        role="img"
         aria-label={label}
       >
         <SeverityIcon

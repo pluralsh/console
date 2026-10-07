@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchJobCard } from './WorkbenchJobCard'
 
-const RECENT_JOBS_COUNT = 3
+const LAUNCH_RECENT_JOBS_COUNT = 3
 
 export function WorkbenchLaunchRecentJobs({
   workbenchId,
@@ -18,7 +18,7 @@ export function WorkbenchLaunchRecentJobs({
   workbenchId: string
 }) {
   const { data, loading, error } = useWorkbenchJobsQuery({
-    variables: { id: workbenchId, first: RECENT_JOBS_COUNT },
+    variables: { id: workbenchId, first: LAUNCH_RECENT_JOBS_COUNT },
     skip: !workbenchId,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -34,7 +34,7 @@ export function WorkbenchLaunchRecentJobs({
       <Subtitle2H1>Recent jobs</Subtitle2H1>
       <BoardCardGridSC>
         {isEmpty(jobs)
-          ? Array.from({ length: RECENT_JOBS_COUNT }).map((_, i) => (
+          ? Array.from({ length: LAUNCH_RECENT_JOBS_COUNT }).map((_, i) => (
               <RectangleSkeleton
                 key={i}
                 $height={140}

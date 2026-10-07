@@ -39,7 +39,8 @@ import {
 const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
 const PAGE_SIZE = 50
 
-const noop = () => {}
+// stable, so the paginated data callbacks don't change every render
+const ISSUES_KEY_PATH = ['workbench', 'issues']
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -75,7 +76,7 @@ export function WorkbenchIssues() {
   } = useFetchPaginatedData(
     {
       queryHook: useWorkbenchIssuesQuery,
-      keyPath: ['workbench', 'issues'],
+      keyPath: ISSUES_KEY_PATH,
       pageSize: PAGE_SIZE,
       keepLoadedPages: true,
     },
@@ -187,7 +188,7 @@ export function WorkbenchIssues() {
               loading={isNil(data) && loading}
               hasNextPage={pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
-              setVirtualSlice={tableSliceActive ? setVirtualSlice : noop}
+              setVirtualSlice={setVirtualSlice}
               fallbackWorkbenchId={workbenchId}
             />
           )}

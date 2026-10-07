@@ -9,13 +9,13 @@ import {
   DisplayViewToggle,
   toggleListValue,
 } from 'components/utils/display/DisplayPanel'
+import { ALERT_SEVERITY_LABELS } from 'components/utils/alerts/AlertSeverityIcon'
 import {
   AlertSeverity,
   AlertSort,
   ObservabilityWebhookType,
   SortDirection,
 } from 'generated/graphql'
-import { startCase } from 'lodash'
 import {
   ALERT_SEVERITY_OPTIONS,
   ALERT_TYPE_LABELS,
@@ -69,7 +69,7 @@ export function WorkbenchAlertsDisplayOptions({
           {ALERT_SEVERITY_OPTIONS.map((severity) => (
             <DisplayFilterRow
               key={severity}
-              label={startCase(severity.toLowerCase())}
+              label={ALERT_SEVERITY_LABELS[severity]}
               count={severityCounts[severity] ?? 0}
               checked={state.severities.includes(severity)}
               onChange={() =>

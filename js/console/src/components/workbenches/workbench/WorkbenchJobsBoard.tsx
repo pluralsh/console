@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash'
 import styled from 'styled-components'
 import { WorkbenchJobCard } from './WorkbenchJobCard'
 
-export const RECENT_JOBS_COUNT = 4
+export const BOARD_RECENT_JOBS_COUNT = 4
 
 export function WorkbenchJobsBoard({
   jobs,
@@ -86,7 +86,7 @@ export function WorkbenchJobsBoard({
 
 // one row of 4 on wide screens, 2x2 below the desktop breakpoint
 const RecentGridSC = styled(BoardCardGridSC)(({ theme }) => ({
-  gridTemplateColumns: `repeat(${RECENT_JOBS_COUNT}, minmax(0, 1fr))`,
+  gridTemplateColumns: `repeat(${BOARD_RECENT_JOBS_COUNT}, minmax(0, 1fr))`,
   [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   },

@@ -1,5 +1,6 @@
 import { Card, CaretRightIcon } from '@pluralsh/design-system'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -11,6 +12,7 @@ import {
 import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsageChips'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import { WorkbenchJobTinyFragment } from 'generated/graphql'
+import { truncate } from 'lodash'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
@@ -24,7 +26,7 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
     <JobCardSC>
       <CardTargetLinkSC
         to={getWorkbenchJobAbsPath({ workbenchId: workbench.id, jobId: id })}
-        aria-label="Open job"
+        aria-label={`Open job: ${truncate(prettifyPrompt(prompt ?? ''), { length: 80 })}`}
       />
       <StretchedFlex>
         {user ? (

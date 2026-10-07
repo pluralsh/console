@@ -25,7 +25,10 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
-import { RECENT_JOBS_COUNT, WorkbenchJobsBoard } from './WorkbenchJobsBoard'
+import {
+  BOARD_RECENT_JOBS_COUNT,
+  WorkbenchJobsBoard,
+} from './WorkbenchJobsBoard'
 import { useWorkbenchJobsDetails } from './WorkbenchJobsDetails'
 import { WorkbenchJobsDisplayOptions } from './WorkbenchJobsDisplayOptions'
 import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
@@ -43,6 +46,8 @@ import {
 const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
 const SEARCH_LIMIT = 50
 const noop = () => {}
+// stable, so the paginated data callbacks don't change every render
+const RUNS_KEY_PATH = ['workbench', 'runs']
 
 export function WorkbenchJobs() {
   const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
@@ -80,7 +85,7 @@ export function WorkbenchJobs() {
   } = useFetchPaginatedData(
     {
       queryHook: useWorkbenchJobsQuery,
-      keyPath: ['workbench', 'runs'],
+      keyPath: RUNS_KEY_PATH,
       pageSize: WORKBENCH_JOBS_PAGE_SIZE,
       keepLoadedPages: true,
     },
@@ -146,7 +151,11 @@ export function WorkbenchJobs() {
   const fetchRecent =
     view === 'board' && !searching && filters.direction !== SortDirection.Desc
   const { data: recentData } = useWorkbenchJobsQuery({
-    variables: { id: workbenchId, first: RECENT_JOBS_COUNT, ...filterVars },
+    variables: {
+      id: workbenchId,
+      first: BOARD_RECENT_JOBS_COUNT,
+      ...filterVars,
+    },
     skip: !fetchRecent,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -157,7 +166,7 @@ export function WorkbenchJobs() {
         ? undefined
         : fetchRecent
           ? mapExistingNodes(recentData?.workbench?.runs)
-          : jobs.slice(0, RECENT_JOBS_COUNT),
+          : jobs.slice(0, BOARD_RECENT_JOBS_COUNT),
     [fetchRecent, jobs, recentData, searching]
   )
   const list = searching

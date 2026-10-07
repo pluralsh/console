@@ -13,13 +13,14 @@ import {
 import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
 import {
   ALERT_SEVERITY_ORDER,
-  ALERT_SEVERITY_SHORT_LABELS,
+  ALERT_SEVERITY_LABELS,
   AlertSeverityIcon,
 } from 'components/utils/alerts/AlertSeverityIcon'
 import {
   AlertSourceLink,
   getAlertName,
 } from 'components/utils/alerts/AlertSourceLink'
+import { alertStateLabel } from 'components/utils/alerts/AlertStateChip'
 import { GqlError } from 'components/utils/Alert'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
@@ -156,8 +157,7 @@ export function useWorkbenchAlertsDetails({
                 }
                 rounded
               >
-                {ALERT_SEVERITY_SHORT_LABELS[severity]} (
-                {severityCounts[severity]})
+                {ALERT_SEVERITY_LABELS[severity]} ({severityCounts[severity]})
               </Chip>
             ))}
           </SeverityChipsSC>
@@ -206,7 +206,10 @@ export function useWorkbenchAlertsDetails({
                     placement="top"
                     label="Firing"
                   >
-                    <FiringIconSC aria-label="Firing">
+                    <FiringIconSC
+                      role="img"
+                      aria-label="Firing"
+                    >
                       <ErrorIcon
                         size={16}
                         color="icon-danger"
@@ -469,15 +472,15 @@ function AlertDetailsPanel({
             />
             <KeyValueRow
               label="Source"
-              value={alert.type}
+              value={ALERT_TYPE_LABELS[alert.type]}
             />
             <KeyValueRow
               label="Severity"
-              value={ALERT_SEVERITY_SHORT_LABELS[alert.severity]}
+              value={ALERT_SEVERITY_LABELS[alert.severity]}
             />
             <KeyValueRow
               label="State"
-              value={alert.state}
+              value={alertStateLabel(alert.state)}
             />
             <KeyValueRow
               label="Cluster"
