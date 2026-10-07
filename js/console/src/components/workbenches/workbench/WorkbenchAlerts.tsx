@@ -142,6 +142,7 @@ export function WorkbenchAlerts() {
 const WrapperSC = styled(Flex)(({ theme }) => ({
   flexDirection: 'column',
   flex: 1,
+  gap: theme.spacing.medium,
   minHeight: 160,
   overflow: 'hidden',
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
