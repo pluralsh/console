@@ -186,30 +186,28 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      <div>
-        {timestamp && (
-          <CaptionP $color="text-long-form">
-            {formatDateTime(timestamp, 'h:mmA')}
-          </CaptionP>
-        )}
-        <IconFrame
-          clickable
-          as="div"
-          tooltip="Copy to clipboard"
-          type="tertiary"
-          onClick={(e) => {
-            e.stopPropagation()
-            handleCopy()
-          }}
-          icon={
-            copied ? (
-              <CheckIcon color="icon-success" />
-            ) : (
-              <CopyIcon color="icon-xlight" />
-            )
-          }
-        />
-      </div>
+      {timestamp && (
+        <CaptionP $color="text-long-form">
+          {formatDateTime(timestamp, 'h:mmA')}
+        </CaptionP>
+      )}
+      <IconFrame
+        clickable
+        as="div"
+        tooltip="Copy to clipboard"
+        type="tertiary"
+        onClick={(e) => {
+          e.stopPropagation()
+          handleCopy()
+        }}
+        icon={
+          copied ? (
+            <CheckIcon color="icon-success" />
+          ) : (
+            <CopyIcon color="icon-xlight" />
+          )
+        }
+      />
     </PromptActionsSC>
   )
 }
@@ -958,28 +956,23 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     flexDirection: 'column',
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
-    marginTop: theme.spacing.small,
-    marginBottom: theme.spacing.xsmall,
+    // The 32px copy row stands in for the list gap under the card.
+    marginBottom: -theme.spacing.xlarge,
   })
 )
 
+// Always takes its height so hovering doesn't shift the transcript. The row is
+// the prompt's bottom spacing: the icon frame's own padding sits the icon 8px
+// below the card.
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'grid',
-  gridTemplateRows: $show ? '1fr' : '0fr',
-  justifyItems: 'end',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.xxsmall,
   width: '100%',
   opacity: $show ? 1 : 0,
-  transition: 'grid-template-rows 0.25s ease, opacity 0.25s ease',
+  transition: 'opacity 0.15s ease',
   pointerEvents: $show ? 'auto' : 'none',
-  '> div': {
-    overflow: 'hidden',
-    minHeight: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: theme.spacing.xxsmall,
-    paddingTop: 6,
-  },
 }))
 
 const PromptCardSC = styled(Card)<{
