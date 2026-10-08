@@ -125,7 +125,7 @@ export function WorkbenchEvals() {
         ),
       }}
       headerActions={
-        <Flex gap="small">
+        <>
           <Button
             secondary
             onClick={() =>
@@ -139,7 +139,7 @@ export function WorkbenchEvals() {
             evalResultId={selectedEvalResultIdForSkill}
             workbenchId={workbenchId}
           />
-        </Flex>
+        </>
       }
     >
       {error ? (

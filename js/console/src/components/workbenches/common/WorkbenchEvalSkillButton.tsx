@@ -80,7 +80,11 @@ export function WorkbenchEvalSkillButton({
   return (
     <div
       ref={ref}
-      css={{ position: 'relative', zIndex: theme.zIndexes.modal }}
+      css={{
+        position: 'relative',
+        flexShrink: 0,
+        zIndex: theme.zIndexes.modal,
+      }}
     >
       <Button
         disabled={disabled || !evalResultId}
