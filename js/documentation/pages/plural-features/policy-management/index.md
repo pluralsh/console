@@ -9,12 +9,13 @@ Use policy enforcement to:
 
 - Allow or deny workbench tool calls based on the actor, tool, and arguments
 - Automatically approve known-safe workbench operations
+- Deny stack runs before they are created, such as during a freeze window
 - Approve or reject stack runs from the contents of an infrastructure plan
 - Apply policies consistently to matching workbenches or stacks
 - Test proposed policy changes against inputs captured from live evaluations
 
 {% callout severity="info" %}
-Policies only add constraints or automate an existing approval step. They do not grant access that the actor or workbench does not already have through Plural RBAC and tool permissions.
+Policies only add constraints or automate an existing approval step. They can also prevent a stack run from being created. They do not grant access that the actor or workbench does not already have through Plural RBAC and tool permissions.
 {% /callout %}
 
 ## Policy types
@@ -22,7 +23,7 @@ Policies only add constraints or automate an existing approval step. They do not
 | Type | Rego package | Purpose |
 |---|---|---|
 | Workbench | `plrl.workbench` | Deny tool calls or automatically approve operations that require approval |
-| Stack | `plrl.stack` | Approve or reject stack runs from plan, stack, commit, and actor data |
+| Stack | `plrl.stack` | Deny a run before it is created, or approve or reject a plan at approval |
 | Binding | `plrl.binding` | Select which workbenches or stacks receive another policy |
 
 Workbench and stack policies return decisions. Binding policies return a `bind` decision and connect those enforcement policies to matching resources. This separation lets you reuse one guardrail across many workbenches or stacks without attaching it to each resource manually.
@@ -44,7 +45,8 @@ approve[{"reason": "explain why the operation is safe"}] if {
 A denial takes precedence over an approval. When no rule produces a decision:
 
 - A workbench tool call continues through its normal authorization and approval path.
-- A stack run continues to its configured human or AI approval path.
+- A run-stage stack policy allows the run to be created.
+- An approval-stage stack run continues to its configured human or AI approval path.
 
 
 ## Managing policies

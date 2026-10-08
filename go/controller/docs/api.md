@@ -485,6 +485,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `workbench` _[WorkbenchBindingPolicyMatches](#workbenchbindingpolicymatches)_ | Workbench defines match criteria for workbench-type binding policies. |  | Optional: \{\} <br /> |
+| `stack` _[StackBindingPolicyMatches](#stackbindingpolicymatches)_ | Stack defines match criteria for stack-type binding policies, including the evaluation stage. |  | Optional: \{\} <br /> |
 
 
 #### BindingPolicySpec
@@ -5685,6 +5686,22 @@ _Appears in:_
 | `metadata` _string_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: \{\} <br /> |
 | `bindings` _[BindingsTemplate](#bindingstemplate)_ | Bindings contain read and write policies of this cluster |  | Optional: \{\} <br /> |
 | `nodePools` _string_ | NodePools contains specs of node pools managed by this cluster. |  | Optional: \{\} <br /> |
+
+
+#### StackBindingPolicyMatches
+
+
+
+StackBindingPolicyMatches defines the stack policy evaluation stage attached by a BindingPolicy.
+
+
+
+_Appears in:_
+- [BindingPolicyMatches](#bindingpolicymatches)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[StackPolicyType](#stackpolicytype)_ | Type is the stack policy evaluation stage. Valid values: APPROVAL, RUN.<br />APPROVAL evaluates after the plan. RUN evaluates before a run is created. |  | Optional: \{\} <br /> |
 
 
 #### StackConfiguration

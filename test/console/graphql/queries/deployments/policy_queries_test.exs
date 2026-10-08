@@ -761,7 +761,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
         query Policy($id: ID!) {
           policy(id: $id) {
             stackPolicies(first: 5) {
-              edges { node { id policy { id } stack { id } } }
+              edges { node { id type policy { id } stack { id } } }
             }
             workbenchPolicies(first: 5) {
               edges { node { id policy { id } workbench { id } } }

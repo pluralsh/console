@@ -1,25 +1,42 @@
 ---
 title: Stack policies
-description: Enforce and automate infrastructure stack approvals with Rego
+description: Block stack runs before they start, or approve and reject infrastructure plans with Rego
 ---
 
-Stack policies evaluate infrastructure plans before an approval-gated stack run proceeds. They can reject a run that violates a guardrail, automatically approve a known-safe plan, or leave the run undecided so it continues to the configured human or AI approval flow.
+Stack policies use the `plrl.stack` Rego package. They evaluate at one of two stages:
 
-Stack policies use the `plrl.stack` Rego package.
+| Stage | When it runs | Effect of `deny` | Effect of `approve` |
+|---|---|---|---|
+| Run | Before a stack run is created | The run is not created | Ignored |
+| Approval | After plan, when the run is waiting for approval | The run is rejected | The run is approved |
 
-## Supported input
+Attach the same policy at both stages when you want both behaviors. Use `input.stage` (`run` or `approval`) so each rule applies to the intended evaluation.
 
-Plural evaluates a stack policy with the following top-level input:
+## Run stage
+
+Run-stage policies decide whether Plural should create a stack run at all. Typical uses are release windows, blocked committers, and required variables, environment, or files.
+
+A denial is the only decision that changes behavior. If the policy produces no denial, the run is created and later approval-stage policies still apply.
+
+When a git or pull-request poll is denied, Plural does not consume the detected SHA, so the same commit is retried after the window reopens. Cron denials still stamp the last-run time. Manual and restart denials return the policy message to the caller.
+
+If policy compilation or evaluation fails, run creation continues. Treat that as fail-open: a broken policy will not freeze every stack.
+
+### Run-stage input
 
 | Field | Description |
 |---|---|
-| `input.plan` | A reduced Terraform plan containing `terraform_version` and `resource_changes` |
-| `input.run_type` | The run operation: `plan`, `apply`, or `destroy` |
-| `input.stack` | Stack metadata, including its name, project, and Git configuration |
-| `input.commit` | Metadata for the commit associated with the run |
+| `input.stage` | Always `run` |
+| `input.now` | Current time as an RFC 3339 timestamp, for freeze windows |
+| `input.trigger.source` | Why the run was requested: `git`, `pr`, `cron`, `manual`, `restart`, `destroy`, or `custom` |
 | `input.actor` | The initiating user, including identity, service-account status, roles, and groups |
-| `input.costs` | Infracost resources reported for the run, or an empty array when no cost data is available |
-| `input.violations` | Vulnerability and misconfiguration findings reported for the run, or an empty array when none are available |
+| `input.stack` | Stack metadata, including its name, project, Git configuration, and variables |
+| `input.commit` | Commit SHA, message, and committer for the proposed run |
+| `input.run` | Intended run flags: `dry_run`, `destroy`, and `pull_request` |
+| `input.variables` | Stack variables |
+| `input.environment` | Stack environment variables. Secret values are omitted; only `name` and `secret: true` are present |
+| `input.files` | Stack file paths. File contents are omitted |
+| `input.changes` | Paths changed in git since the last run, when the trigger supplies them |
 
 The `input.actor` object contains:
 
@@ -31,6 +48,73 @@ The `input.actor` object contains:
 | `service_account` | boolean | Whether the actor is a service account |
 | `roles.admin` | boolean | Whether the actor is a Plural administrator |
 | `groups` | string array | Names of the groups the actor belongs to |
+
+### Run-stage examples
+
+Deny production applies during a weekend freeze:
+
+```rego
+package plrl.stack
+
+deny[{"msg": "production stacks cannot run during the weekend freeze"}] if {
+	input.stage == "run"
+	not input.run.destroy
+	not input.run.dry_run
+	frozen
+}
+
+frozen if {
+	ns := time.parse_rfc3339_ns(input.now)
+	dow := time.weekday(ns)
+	dow in {0, 6}
+}
+```
+
+Block automated committers from spawning runs:
+
+```rego
+package plrl.stack
+
+blocked_committers := {"dependabot[bot]", "renovate[bot]"}
+
+deny[{"msg": sprintf("committer %s is not allowed to spawn stack runs", [input.commit.committer])}] if {
+	input.stage == "run"
+	blocked_committers[input.commit.committer]
+}
+```
+
+Require a variable before a run is created:
+
+```rego
+package plrl.stack
+
+deny[{"msg": "cluster_name must be set"}] if {
+	input.stage == "run"
+	not input.variables.cluster_name
+}
+```
+
+## Approval stage
+
+Approval-stage policies evaluate infrastructure plans before an approval-gated stack run proceeds. They can reject a run that violates a guardrail, automatically approve a known-safe plan, or leave the run undecided so it continues to the configured human or AI approval flow.
+
+### Approval-stage input
+
+| Field | Description |
+|---|---|
+| `input.stage` | Always `approval` |
+| `input.now` | Current time as an RFC 3339 timestamp |
+| `input.plan` | A reduced Terraform plan containing `terraform_version` and `resource_changes` |
+| `input.run_type` | The run operation: `plan`, `apply`, or `destroy` |
+| `input.stack` | Stack metadata, including its name, project, Git configuration, and variables |
+| `input.commit` | Metadata for the commit associated with the run |
+| `input.actor` | The initiating user, including identity, service-account status, roles, and groups |
+| `input.costs` | Infracost resources reported for the run, or an empty array when no cost data is available |
+| `input.violations` | Vulnerability and misconfiguration findings reported for the run, or an empty array when none are available |
+| `input.run` | Run flags: `dry_run`, `destroy`, and `pull_request` |
+| `input.variables` | Stack or run variables |
+| `input.environment` | Run environment variables. Secret values are omitted |
+| `input.files` | Run file paths. File contents are omitted |
 
 Each entry in `input.plan.resource_changes` contains:
 
@@ -111,15 +195,15 @@ Cost and vulnerability data is only available when the stack runner reports it b
 
 A stack policy can produce:
 
-- `deny[{"msg": "..."}]`: reject the stack run
-- `approve[{"reason": "..."}]`: approve the stack run
-- `defer`: leave the decision to the next configured approval step
+- `deny[{"msg": "..."}]`: reject the proposed run (run stage) or reject the planned run (approval stage)
+- `approve[{"reason": "..."}]`: approve the stack run at the approval stage. Ignored at the run stage
+- `defer`: leave the approval-stage decision to the next configured approval step
 
-If a policy produces neither a denial nor an approval, Plural also continues to the configured approval flow. This is useful for policies that only auto-approve a narrowly defined set of safe plans.
+If a run-stage policy produces no denial, Plural creates the run. If an approval-stage policy produces neither a denial nor an approval, Plural continues to the configured approval flow. This is useful for policies that only auto-approve a narrowly defined set of safe plans.
 
 ## Full example
 
-The following policy denies destructive EKS changes and control-plane upgrades that skip more than one Kubernetes minor version. Plans without destructive changes or any version update are automatically approved, while single-minor upgrades continue to review:
+The following approval-stage policy denies destructive EKS changes and control-plane upgrades that skip more than one Kubernetes minor version. Plans without destructive changes or any version update are automatically approved, while single-minor upgrades continue to review:
 
 ```rego
 package plrl.stack
@@ -161,14 +245,17 @@ cluster_version_skips_minor if {
 }
 
 deny[{"msg": "destroying or replacing EKS clusters and node groups is not allowed"}] if {
+	input.stage == "approval"
 	destructive_eks_change
 }
 
 deny[{"msg": "EKS control-plane upgrades cannot skip Kubernetes minor versions"}] if {
+	input.stage == "approval"
 	cluster_version_skips_minor
 }
 
 approve[{"reason": "no destructive EKS cluster or node group changes and no cluster version update"}] if {
+	input.stage == "approval"
 	not destructive_eks_change
 	not cluster_version_update
 }
@@ -181,7 +268,7 @@ The `deny` rules reject prohibited plans and record a specific explanation. A on
 You can attach a stack policy in either of two ways:
 
 1. Open **Security → Policies**, select the stack policy, and use the **Attachments** tab to attach it to a stack.
-2. Create a binding policy that selects stacks dynamically, then connect the binding policy to the stack policy.
+2. Create a binding policy that selects stacks dynamically, then connect the binding policy to the stack policy. Set the evaluation stage to **Run** or **Approval** (the default).
 
 A binding policy uses `plrl.binding` and returns `bind`:
 
@@ -193,7 +280,7 @@ bind if {
 }
 ```
 
-Plural evaluates binding policies when matching resources change and on their configured interval. A `true` result attaches the enforcement policy; a `false` result removes an attachment previously managed by that binding.
+Plural evaluates binding policies when matching resources change and on their configured interval. A `true` result attaches the enforcement policy at the configured stage; a `false` result removes an attachment previously managed by that binding. The same stack policy can be attached as both `RUN` and `APPROVAL` by two binding policies.
 
 The same configuration can be managed with Terraform:
 
@@ -220,6 +307,25 @@ resource "plural_binding_policy" "eks_guardrails_for_clusters" {
   type           = "STACK"
   interval       = "6h"
 }
+```
+
+Or with a `BindingPolicy` CRD. Set `spec.matches.stack.type` to `RUN` or `APPROVAL`:
+
+```yaml
+apiVersion: deployments.plural.sh/v1alpha1
+kind: BindingPolicy
+metadata:
+  name: freeze-window-for-clusters
+spec:
+  type: STACK
+  interval: 6h
+  policyRef:
+    name: weekend-freeze
+  bindPolicyRef:
+    name: cluster-stacks
+  matches:
+    stack:
+      type: RUN
 ```
 
 See the [complete stack example](https://github.com/pluralsh/policy-examples/tree/main/policies/stack) for its tests and deployment configuration.

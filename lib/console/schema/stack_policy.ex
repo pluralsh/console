@@ -22,6 +22,14 @@ defmodule Console.Schema.StackPolicy do
     from(p in query, where: p.policy_id == ^policy_id)
   end
 
+  def for_binding(query \\ __MODULE__, binding_id) do
+    from(p in query, where: p.binding_policy_id == ^binding_id)
+  end
+
+  def for_type(query \\ __MODULE__, type) do
+    from(p in query, where: p.type == ^type)
+  end
+
   def counts_for_policies([]), do: %{}
   def counts_for_policies(policy_ids) do
     from(p in __MODULE__,
@@ -42,7 +50,7 @@ defmodule Console.Schema.StackPolicy do
     |> foreign_key_constraint(:policy_id)
     |> foreign_key_constraint(:stack_id)
     |> foreign_key_constraint(:binding_policy_id)
-    |> unique_constraint([:policy_id, :stack_id])
+    |> unique_constraint([:policy_id, :stack_id, :type])
     |> validate_required(@required)
   end
 end

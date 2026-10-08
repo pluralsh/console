@@ -292,24 +292,101 @@ defmodule Console.Deployments.Policy do
     end
   end
 
-  defp attach_binding(%BindingPolicy{} = binding, target, user) do
+  defp attach_binding(binding, target, user) do
     case fetch_attachment(binding, target) do
       %{} -> :ok
       _ -> reconcile_target(:attach, binding, target, user)
     end
+
+    Enum.each(owned_attachments(binding, target), &drop_stale_attachment(&1, binding, target, user))
   end
 
-  defp detach_binding(%BindingPolicy{id: id} = binding, target, user) do
-    case fetch_attachment(binding, target) do
-      %{binding_policy_id: ^id} -> reconcile_target(:detach, binding, target, user)
-      _ -> :ok
-    end
+  defp detach_binding(binding, target, user) do
+    Enum.each(owned_attachments(binding, target), &release_attachment(&1, binding, target, user))
   end
 
   defp fetch_attachment(%BindingPolicy{policy_id: id}, %Workbench{id: wid}),
     do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
-  defp fetch_attachment(%BindingPolicy{policy_id: id}, %Stack{id: sid}),
-    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid)
+  defp fetch_attachment(%BindingPolicy{policy_id: id} = binding, %Stack{id: sid}),
+    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid, type: stack_policy_type(binding))
+
+  defp owned_attachments(%BindingPolicy{id: id}, %Workbench{id: wid}) do
+    case Repo.get_by(WorkbenchPolicy, binding_policy_id: id, workbench_id: wid) do
+      nil -> []
+      attachment -> [attachment]
+    end
+  end
+  defp owned_attachments(%BindingPolicy{id: id}, %Stack{id: sid}) do
+    StackPolicy.for_stack(sid)
+    |> StackPolicy.for_binding(id)
+    |> Repo.all()
+  end
+
+  defp drop_stale_attachment(%StackPolicy{type: type} = attachment, binding, target, user) do
+    drop_stale_attachment(type, stack_policy_type(binding), attachment, binding, target, user)
+  end
+  defp drop_stale_attachment(_, _, _, _), do: :ok
+
+  defp drop_stale_attachment(type, type, _, _, _, _), do: :ok
+  defp drop_stale_attachment(_, _, attachment, binding, target, user),
+    do: release_attachment(attachment, binding, target, user)
+
+  defp release_attachment(%WorkbenchPolicy{}, binding, target, user),
+    do: reconcile_target(:detach, binding, target, user)
+  defp release_attachment(%StackPolicy{} = attachment, binding, stack, user) do
+    binding
+    |> sibling_stack_bindings()
+    |> Enum.map(&stack_attachment_claim(&1, stack, attachment.type))
+    |> transfer_or_delete_stack_attachment(attachment, user)
+  end
+
+  defp sibling_stack_bindings(%BindingPolicy{id: id, policy_id: policy_id}) do
+    BindingPolicy.for_policy(policy_id)
+    |> BindingPolicy.for_type(:stack)
+    |> BindingPolicy.excluding(id)
+    |> Repo.all()
+    |> Repo.preload(:bind_policy)
+  end
+
+  defp stack_attachment_claim(%BindingPolicy{} = binding, stack, type) do
+    stack_attachment_claim(stack_policy_type(binding), type, binding, stack)
+  end
+  defp stack_attachment_claim(type, type, binding, stack),
+    do: {binding, stack_bound?(binding, stack)}
+  defp stack_attachment_claim(_, _, _, _), do: {nil, :unbound}
+
+  defp stack_bound?(%{bind_policy: policy, bind_policy_id: id} = binding, stack) do
+    policy
+    |> evaluate_policy(Input.binding(stack), [id])
+    |> shared_binding_match?(binding)
+  end
+
+  defp shared_binding_match?({:ok, %{"bind" => true}}, _), do: :bound
+  defp shared_binding_match?({:ok, %{"bind" => false}}, _), do: :unbound
+  defp shared_binding_match?(error, %{id: id}) do
+    Logger.error("Failed to evaluate binding policy #{id}: #{inspect(error)}")
+    :unknown
+  end
+
+  defp transfer_or_delete_stack_attachment(claims, attachment, user) do
+    claims
+    |> bound_binding()
+    |> keep_or_release_stack_attachment(unknown_claim?(claims), attachment, user)
+  end
+
+  defp bound_binding([{binding, :bound} | _]), do: binding
+  defp bound_binding([_ | rest]), do: bound_binding(rest)
+  defp bound_binding([]), do: nil
+
+  defp unknown_claim?([{_, :unknown} | _]), do: true
+  defp unknown_claim?([_ | rest]), do: unknown_claim?(rest)
+  defp unknown_claim?([]), do: false
+
+  defp keep_or_release_stack_attachment(%{id: id}, _, attachment, user),
+    do: Stacks.update_stack_policy(%{binding_policy_id: id}, attachment.id, user)
+  defp keep_or_release_stack_attachment(_, true, _, _), do: :ok
+  defp keep_or_release_stack_attachment(_, false, attachment, user),
+    do: Stacks.delete_stack_policy(attachment.id, user)
 
   defp reconcile_target(:attach, %BindingPolicy{id: binding_id, policy_id: id} = binding, %Workbench{} = wb, user),
     do: Workbenches.create_workbench_policy(%{
@@ -321,8 +398,6 @@ defmodule Console.Deployments.Policy do
     do: Stacks.create_stack_policy(stack_policy_attrs(binding), stack.id, user)
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Workbench{} = wb, user),
     do: Workbenches.delete_workbench_policy(id, wb.id, user)
-  defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
-    do: Stacks.delete_stack_policy(id, stack.id, user)
 
   defp authorize_project_change(%Ecto.Changeset{} = cs, user),
     do: authorize_project_change(Ecto.Changeset.get_change(cs, :project_id), cs, user)
@@ -336,10 +411,11 @@ defmodule Console.Deployments.Policy do
 
   defp bot(), do: Users.admin_bot()
 
-  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id, matches: %{stack: %{type: t}}})
-    when not is_nil(t), do: %{policy_id: id, binding_policy_id: binding_id, type: t}
-  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id}),
-    do: %{policy_id: id, binding_policy_id: binding_id, type: :approval}
+  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id} = binding),
+    do: %{policy_id: id, binding_policy_id: binding_id, type: stack_policy_type(binding)}
+
+  defp stack_policy_type(%BindingPolicy{matches: %{stack: %{type: t}}}) when not is_nil(t), do: t
+  defp stack_policy_type(_), do: :approval
 
   defp maybe_sample({:ok, %{"sample" => s}} = res, input, ids) when is_list(ids) do
     if :rand.uniform() <= Console.clamp(s, 0, 0.5) && !Enum.empty?(ids) do

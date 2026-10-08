@@ -1906,10 +1906,12 @@ export type BindingPolicyEdge = {
 
 export type BindingPolicyMatches = {
   __typename?: 'BindingPolicyMatches';
+  stack?: Maybe<StackPolicyMatches>;
   workbench?: Maybe<WorkbenchPolicyMatches>;
 };
 
 export type BindingPolicyMatchesAttributes = {
+  stack?: InputMaybe<StackPolicyMatchesAttributes>;
   workbench?: InputMaybe<WorkbenchPolicyMatchesAttributes>;
 };
 
@@ -15642,12 +15644,16 @@ export type StackPolicy = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   policy?: Maybe<Policy>;
   stack?: Maybe<InfrastructureStack>;
+  /** when this policy is evaluated: approval (after plan) or run (before a run is created) */
+  type: StackPolicyType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type StackPolicyAttributes = {
   /** the policy to associate with this stack */
   policyId: Scalars['ID']['input'];
+  /** when this policy is evaluated: approval (after plan) or run (before a run is created). Defaults to APPROVAL */
+  type?: InputMaybe<StackPolicyType>;
 };
 
 export type StackPolicyConnection = {
@@ -15661,6 +15667,22 @@ export type StackPolicyEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<StackPolicy>;
 };
+
+export type StackPolicyMatches = {
+  __typename?: 'StackPolicyMatches';
+  /** stack policy evaluation stage attached by this binding */
+  type?: Maybe<StackPolicyType>;
+};
+
+export type StackPolicyMatchesAttributes = {
+  /** stack policy evaluation stage to attach: approval (after plan) or run (before a run is created). Defaults to APPROVAL */
+  type?: InputMaybe<StackPolicyType>;
+};
+
+export enum StackPolicyType {
+  Approval = 'APPROVAL',
+  Run = 'RUN'
+}
 
 export type StackPolicyViolation = {
   __typename?: 'StackPolicyViolation';
@@ -22628,7 +22650,7 @@ export type PolicyStackAttachmentsQueryVariables = Exact<{
 }>;
 
 
-export type PolicyStackAttachmentsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, stackPolicies?: { __typename?: 'StackPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackPolicyEdge', node?: { __typename?: 'StackPolicy', id: string, updatedAt?: string | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null } | null } | null> | null } | null } | null };
+export type PolicyStackAttachmentsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, stackPolicies?: { __typename?: 'StackPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackPolicyEdge', node?: { __typename?: 'StackPolicy', id: string, type: StackPolicyType, updatedAt?: string | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null } | null } | null> | null } | null } | null };
 
 export type PolicyEvaluationFragment = { __typename?: 'PolicyEvaluation', id: string, policyIds: Array<string>, input: Record<string, unknown>, output: Record<string, unknown>, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -22691,14 +22713,14 @@ export type DeleteBindingPolicyMutationVariables = Exact<{
 
 export type DeleteBindingPolicyMutation = { __typename?: 'RootMutationType', deleteBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
 
-export type BindingPolicyFragment = { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+export type BindingPolicyFragment = { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, stack?: { __typename?: 'StackPolicyMatches', type?: StackPolicyType | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
 
 export type BindingPolicyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type BindingPolicyQuery = { __typename?: 'RootQueryType', bindingPolicy?: { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+export type BindingPolicyQuery = { __typename?: 'RootQueryType', bindingPolicy?: { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, stack?: { __typename?: 'StackPolicyMatches', type?: StackPolicyType | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
 
 export type CreateBindingPolicyMutationVariables = Exact<{
   attributes: BindingPolicyAttributes;
@@ -28877,6 +28899,9 @@ export const BindingPolicyFragmentDoc = gql`
   matches {
     workbench {
       regexes
+    }
+    stack {
+      type
     }
   }
 }
@@ -44900,6 +44925,7 @@ export const PolicyStackAttachmentsDocument = gql`
       edges {
         node {
           id
+          type
           stack {
             id
             name

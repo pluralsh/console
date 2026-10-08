@@ -7,7 +7,7 @@ import { AttachmentRulesTable } from './AttachmentRulesTable'
 import { PoliciesTabLayout } from './PoliciesTabLayout'
 
 export const ATTACHMENT_RULES_DESCRIPTION =
-  "Rules that decide which workbenches and stacks a policy attaches to. Each rule evaluates one bind policy against the target object — matching targets inherit the policy, narrowed by the rule's tool regexes."
+  'Rules that decide which workbenches and stacks a policy attaches to. Each rule evaluates one bind policy against the target — matching targets inherit the policy, optionally narrowed by workbench tool regexes or stack evaluation stage.'
 
 export function AttachmentRules() {
   const navigate = useNavigate()

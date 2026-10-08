@@ -13,7 +13,6 @@ defmodule Console.Deployments.Stacks do
   alias Console.AI.{Provider, Tools.ApproveStack}
   alias Console.Deployments.Policy, as: PolicyEngine
   alias Console.Deployments.Policy.Input, as: PolicyInput
-  alias Console.Deployments.Stacks.Plan
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
     User,
@@ -34,6 +33,10 @@ defmodule Console.Deployments.Stacks do
   }
 
   @preloads [:environment, :files, :observable_metrics, :cron, :tags, :read_bindings, :write_bindings]
+  @poll_preloads ~w(repository environment files)a
+  @run_preloads [:definition, :project, :repository, :environment, :files, actor: :groups, stack_policies: :policy]
+  @policy_run_attrs [:trigger, :changes, :policy_actor]
+  @run_policy_denied_prefix "denied by stack policy: "
 
   @type error :: Console.error
   @type stack_resp :: {:ok, Stack.t} | error
@@ -175,6 +178,7 @@ defmodule Console.Deployments.Stacks do
     |> add_operation(:run, fn
       %{stack: %Stack{runnable: true} = stack} ->
         trigger_run(stack.id, user)
+        |> ignore_run_policy_deny()
       _ -> {:ok, nil}
     end)
     |> add_operation(:refetch, fn _ ->
@@ -301,9 +305,9 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc "Deletes the specified policy association from a stack. Requires stack write access."
-  @spec delete_stack_policy(binary, binary, User.t) :: stack_policy_resp
-  def delete_stack_policy(policy_id, stack_id, %User{} = user) do
-    Repo.get_by!(StackPolicy, policy_id: policy_id, stack_id: stack_id)
+  @spec delete_stack_policy(binary, binary, atom, User.t) :: stack_policy_resp
+  def delete_stack_policy(policy_id, stack_id, type, %User{} = user) do
+    Repo.get_by!(StackPolicy, policy_id: policy_id, stack_id: stack_id, type: type)
     |> allow(user, :write)
     |> when_ok(:delete)
   end
@@ -388,7 +392,7 @@ defmodule Console.Deployments.Stacks do
     with {:ok, run} <- allow(run, user, :write) do
       case Repo.preload(run, [:stack]) do
         %{stack: %Stack{sha: ^ref} = stack} ->
-          create_run(stack, ref, %{message: msg})
+          create_run(stack, ref, %{message: msg, trigger: %{source: :restart}, policy_actor: user})
         _ -> {:error, "you can only restart the latest run for this stack"}
       end
     end
@@ -597,6 +601,8 @@ defmodule Console.Deployments.Stacks do
       :state,
       :repository,
       :infracost_resources,
+      :environment,
+      :files,
       actor: :groups,
       violations: :causes,
       stack: [:project, :repository, stack_policies: :policy]
@@ -619,7 +625,7 @@ defmodule Console.Deployments.Stacks do
     |> case do
       [_ | _] = policies ->
         with {:ok, engine, path} <- PolicyEngine.compile_policies(:stack, policies),
-             {:ok, result} <- PolicyEngine.eval_policy(engine, stack_policy_input(run), Enum.map(policies, & &1.id), path) do
+             {:ok, result} <- PolicyEngine.eval_policy(engine, PolicyInput.stack_approval(run), Enum.map(policies, & &1.id), path) do
           case result do
             %{"deny" => [_ | _] = denials} ->
               {:decide, %{result: :rejected, reason: PolicyEngine.policy_reason(denials, "denied by stack policy")}}
@@ -632,22 +638,6 @@ defmodule Console.Deployments.Stacks do
     end
   end
   defp maybe_policy_approval(_), do: :continue
-
-  defp stack_policy_input(%StackRun{} = run) do
-    %{
-      "plan" => stack_plan(run),
-      "actor" => PolicyInput.actor(run.actor),
-      "run_type" => Plan.run_type(run),
-      "stack" => PolicyInput.stack(run.stack),
-      "commit" => PolicyInput.commit(run),
-      "costs" => PolicyInput.costs(run.infracost_resources),
-      "violations" => PolicyInput.violations(run.violations)
-    }
-  end
-
-  defp stack_plan(%StackRun{state: %StackState{plan_json: plan}}) when is_map(plan),
-    do: Plan.convert(plan)
-  defp stack_plan(_), do: Plan.convert(nil)
 
   defp maybe_ai_approval(%StackRun{
     type: :terraform,
@@ -759,8 +749,6 @@ defmodule Console.Deployments.Stacks do
     res
   end
 
-  @poll_preloads ~w(repository environment files)a
-
   @doc """
   Polls a stack's git repo and creates a run if there's a new commit
   """
@@ -773,8 +761,13 @@ defmodule Console.Deployments.Stacks do
       %{repository: repo} = stack = Repo.preload(stack, @poll_preloads)
       on_new_sha(repo, git.ref, sha, ps, fn new_sha ->
         case new_changes(repo, git, sha, new_sha) do
-          {:ok, new_sha, msg, email} ->
-           create_run(stack, new_sha, %{message: msg, committer: email})
+          {:ok, new_sha, msg, email, changes} ->
+           create_run(stack, new_sha, %{
+             message: msg,
+             committer: email,
+             changes: changes,
+             trigger: %{source: :git}
+           })
           err ->
             add_polled_sha(stack, new_sha)
             err
@@ -788,10 +781,17 @@ defmodule Console.Deployments.Stacks do
     %{stack: %{repository: repo} = stack} = pr = Repo.preload(pr, [stack: @poll_preloads])
     on_new_sha(repo, ref, sha, ps, fn new_sha ->
       case new_changes(repo, stack.git, sha, new_sha) do
-        {:ok, new_sha, msg, email} ->
+        {:ok, new_sha, msg, email, changes} ->
           start_transaction()
           |> add_operation(:run, fn _ ->
-            create_run(stack, new_sha, %{pull_request_id: pr.id, message: msg, committer: email, dry_run: true})
+            create_run(stack, new_sha, %{
+              pull_request_id: pr.id,
+              message: msg,
+              committer: email,
+              dry_run: true,
+              changes: changes,
+              trigger: %{source: :pr}
+            })
           end)
           |> add_operation(:pr, fn _ ->
             Ecto.Changeset.change(pr, %{sha: new_sha})
@@ -832,8 +832,8 @@ defmodule Console.Deployments.Stacks do
 
   defp new_changes(repo, %{folder: folder}, sha1, sha2) do
     case Discovery.changes(repo, sha1, sha2, folder) do
-      {:ok, [_ | _], msg, email} -> {:ok, sha2, msg, email}
-      {:ok, :pass, msg, email} -> {:ok, sha2, msg, email}
+      {:ok, [_ | _] = files, msg, email} -> {:ok, sha2, msg, email, files}
+      {:ok, :pass, msg, email} -> {:ok, sha2, msg, email, []}
       _ -> {:error, "no changes within #{folder}"}
     end
   end
@@ -842,21 +842,30 @@ defmodule Console.Deployments.Stacks do
   Spawns a new run in response to a stack cron being executable
   """
   @spec spawn_cron(StackCron.t) :: run_resp
-  def spawn_cron(%StackCron{auto_approve: approve, track_ref: track_ref} = cron) do
+  def spawn_cron(%StackCron{auto_approve: approve} = cron) do
     %{stack: stack} = Repo.preload(cron, [stack: @poll_preloads])
+    attrs = maybe_merge_overrides(%{
+      message: "cron run for #{stack.name}",
+      approval: stack.approval || approve,
+      trigger: %{source: :cron}
+    }, cron)
+
     start_transaction()
     |> add_operation(:run, fn _ ->
-      ref = (if track_ref, do: stack.git.ref, else: stack.sha)
-      create_run(stack, ref, maybe_merge_overrides(%{
-        message: "cron run for #{stack.name}",
-        approval: stack.approval || approve
-      }, cron))
+      create_run(stack, cron_ref(cron, stack), attrs)
+      |> ok_or_policy_deny()
     end)
-    |> add_operation(:cron, fn _ ->
-      StackCron.changeset(cron, %{last_run_at: Timex.now()})
-      |> Repo.update()
-    end)
+    |> add_operation(:cron, fn _ -> stamp_cron(cron) end)
     |> execute(extract: :run)
+    |> unwrap_policy_deny()
+  end
+
+  defp cron_ref(%StackCron{track_ref: true}, %Stack{git: %{ref: ref}}), do: ref
+  defp cron_ref(_, %Stack{sha: sha}), do: sha
+
+  defp stamp_cron(%StackCron{} = cron) do
+    StackCron.changeset(cron, %{last_run_at: Timex.now()})
+    |> Repo.update()
   end
 
   defp maybe_merge_overrides(attrs, %StackCron{overrides: %StackCron.ConfigurationOverrides{} = overrides}) do
@@ -876,14 +885,26 @@ defmodule Console.Deployments.Stacks do
       Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: infer_stage(&1), status: :pending, name: "cmd #{&2}"}))
       |> template_cmds(ctx)
 
-    %StackRun{stack_id: id, status: :queued}
-    |> StackRun.changeset(
-      stack_attrs(stack, sha)
-      |> Map.put(:message, name || @default_run_name)
-      |> Map.put(:steps, steps)
-    )
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:stack, fn _ ->
+      stack
+      |> Repo.preload(@run_preloads)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:run, fn %{stack: stack} ->
+      after_run_policy(stack, sha, custom_run_policy_attrs(user, name), fn ->
+        %StackRun{stack_id: id, status: :queued}
+        |> StackRun.changeset(
+          stack_attrs(stack, sha)
+          |> Map.put(:message, name || @default_run_name)
+          |> Map.put(:steps, steps)
+        )
+        |> Repo.insert()
+      end)
+      |> ok_or_policy_deny()
+    end)
+    |> execute(extract: :run)
+    |> unwrap_policy_deny()
     |> notify(:create)
   end
   def create_custom_run(stack_id, commands, name, ctx, user) when is_binary(stack_id) do
@@ -921,13 +942,15 @@ defmodule Console.Deployments.Stacks do
     |> add_operation(:run, fn %{stack: stack} ->
       case latest_run(stack.id) do
         %StackRun{git: %{ref: sha}, destroy: true} ->
-          create_run(stack, sha, %{message: "Manually triggered run for commit #{sha}"})
+          create_run(stack, sha, manual_run_attrs(user, "Manually triggered run for commit #{sha}"))
         %StackRun{git: %{ref: sha}, message: msg} ->
-          create_run(stack, sha, %{message: msg})
+          create_run(stack, sha, manual_run_attrs(user, msg))
         _ -> poll(stack)
       end
+      |> ok_or_policy_deny()
     end)
     |> execute(extract: :run)
+    |> unwrap_policy_deny()
   end
 
   @doc """
@@ -935,7 +958,25 @@ defmodule Console.Deployments.Stacks do
   """
   @spec create_run(Stack.t, binary) :: run_resp
   def create_run(%Stack{} = stack, sha, attrs \\ %{}) do
-    stack = Repo.preload(stack, [:definition])
+    stack = Repo.preload(stack, @run_preloads)
+    after_run_policy(stack, sha, attrs, fn -> insert_run(stack, sha, attrs) end)
+  end
+
+  defp after_run_policy(stack, sha, attrs, fun) do
+    stack
+    |> maybe_policy_run(sha, attrs)
+    |> after_run_policy_result(stack, fun)
+  end
+
+  defp after_run_policy_result(:continue, _, fun), do: fun.()
+  defp after_run_policy_result({:deny, reason}, _, _),
+    do: {:error, "#{@run_policy_denied_prefix}#{reason}"}
+  defp after_run_policy_result({:error, err}, stack, fun) do
+    Logger.error("Failed to evaluate stack run policies for stack #{stack.id}: #{inspect(err)}")
+    fun.()
+  end
+
+  defp insert_run(%Stack{} = stack, sha, attrs) do
     start_transaction()
     |> add_operation(:run, fn _ ->
       %StackRun{stack_id: stack.id, status: :queued}
@@ -943,7 +984,7 @@ defmodule Console.Deployments.Stacks do
         stack_attrs(stack, sha)
         |> Map.put(:destroy, not is_nil(stack.deleted_at))
         |> Map.put(:steps, commands(stack, !!attrs[:dry_run]))
-        |> DeepMerge.deep_merge(attrs)
+        |> DeepMerge.deep_merge(Map.drop(attrs, @policy_run_attrs))
       )
       |> Repo.insert()
     end)
@@ -955,6 +996,57 @@ defmodule Console.Deployments.Stacks do
     |> execute(extract: :run)
     |> notify(:create)
   end
+
+  defp maybe_policy_run(%Stack{stack_policies: policies} = stack, sha, attrs)
+       when is_list(policies) do
+    run_policies(policies)
+    |> eval_run_policies(stack, sha, attrs)
+  end
+  defp maybe_policy_run(_, _, _), do: :continue
+
+  defp run_policies(policies) do
+    Enum.flat_map(policies, fn
+      %{type: :run, policy: policy} when not is_nil(policy) -> [policy]
+      _ -> []
+    end)
+  end
+
+  defp eval_run_policies([], _, _, _), do: :continue
+  defp eval_run_policies(policies, stack, sha, attrs) do
+    with {:ok, engine, path} <- PolicyEngine.compile_policies(:stack, policies),
+         {:ok, result} <- PolicyEngine.eval_policy(
+           engine,
+           PolicyInput.stack_run(stack, sha, attrs, policy_actor(attrs, stack)),
+           Enum.map(policies, & &1.id),
+           path
+         ) do
+      deny_run_result(result)
+    end
+  end
+
+  defp deny_run_result(%{"deny" => [_ | _] = denials}),
+    do: {:deny, PolicyEngine.policy_reason(denials, "denied by stack policy")}
+  defp deny_run_result(_), do: :continue
+
+  defp policy_actor(%{policy_actor: %User{} = user}, _), do: Repo.preload(user, :groups)
+  defp policy_actor(_, %Stack{actor: actor}), do: actor
+
+  defp manual_run_attrs(%User{} = user, message) do
+    %{message: message, trigger: %{source: :manual}, policy_actor: user}
+  end
+
+  defp custom_run_policy_attrs(%User{} = user, name) do
+    %{message: name || @default_run_name, trigger: %{source: :custom}, policy_actor: user}
+  end
+
+  defp ignore_run_policy_deny({:error, @run_policy_denied_prefix <> _}), do: {:ok, nil}
+  defp ignore_run_policy_deny(res), do: res
+
+  defp ok_or_policy_deny({:error, @run_policy_denied_prefix <> _} = err), do: {:ok, err}
+  defp ok_or_policy_deny(res), do: res
+
+  defp unwrap_policy_deny({:ok, {:error, @run_policy_denied_prefix <> _} = err}), do: err
+  defp unwrap_policy_deny(res), do: res
 
   @run_attrs ~w(approval variables actor_id workdir manage_state dry_run configuration type environment files job_spec policy_engine repository_id cluster_id)a
 

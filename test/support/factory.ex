@@ -551,7 +551,8 @@ defmodule Console.Factory do
   def stack_policy_factory do
     %Schema.StackPolicy{
       policy: build(:policy),
-      stack: build(:stack)
+      stack: build(:stack),
+      type: :approval
     }
   end
 

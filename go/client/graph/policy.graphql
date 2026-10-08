@@ -25,6 +25,9 @@ fragment BindingPolicyFragment on BindingPolicy {
         workbench {
             regexes
         }
+        stack {
+            type
+        }
     }
     policy {
         ...TinyPolicyFragment
