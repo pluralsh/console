@@ -14,19 +14,21 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
-import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
+import { truncateKeepingChips } from 'components/utils/contentEditableChips'
+import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { WorkbenchUsageSummaryChip } from 'components/workbenches/common/WorkbenchUsageChips'
 import { PageInfoFragment, WorkbenchJobTinyFragment } from 'generated/graphql'
+import { memo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchEvalResultAbsPath,
   getWorkbenchJobAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ActivityModalIcon } from './job/WorkbenchJobActivityResults'
 import {
@@ -34,6 +36,7 @@ import {
   chatProviderConnectionLabel,
 } from './chatbots/utils'
 
+// rows are fixed-height (see RowHeightSC), so the virtualizer needn't measure
 const WORKBENCH_JOB_ROW_HEIGHT = 52
 const getWorkbenchJobRowHeight = () => WORKBENCH_JOB_ROW_HEIGHT
 
@@ -58,40 +61,52 @@ export function WorkbenchJobsTableContent({
   columns?: ColumnDef<WorkbenchJobTinyFragment, any>[]
 }) {
   return (
-    <Table
-      hideHeader
-      fullHeightWrap
-      virtualizeRows
-      lockColumnsOnScroll={false}
-      reactVirtualOptions={{
-        estimateSize: getWorkbenchJobRowHeight,
-        measureElement: getWorkbenchJobRowHeight,
-      }}
-      overflowX="hidden"
-      data={jobs}
-      columns={
-        columns ?? [userColumn, promptColumn, usageColumn, ...actionColumns]
-      }
-      loading={!loaded && loading}
-      hasNextPage={pageInfo?.hasNextPage}
-      fetchNextPage={fetchNextPage}
-      isFetchingNextPage={fetchingMore}
-      onVirtualSliceChange={setVirtualSlice}
-      emptyStateProps={{ message: 'No jobs found.' }}
-      getRowLink={({ original }) => {
-        const { id: jobId, workbench } = original as WorkbenchJobTinyFragment
-        return (
-          <Link
-            to={getWorkbenchJobAbsPath({
-              workbenchId: workbench?.id ?? '',
-              jobId,
-            })}
-          />
-        )
-      }}
-    />
+    <RowHeightSC>
+      <Table
+        hideHeader
+        fullHeightWrap
+        virtualizeRows
+        lockColumnsOnScroll={false}
+        reactVirtualOptions={{
+          estimateSize: getWorkbenchJobRowHeight,
+          measureElement: getWorkbenchJobRowHeight,
+        }}
+        overflowX="hidden"
+        data={jobs}
+        columns={
+          columns ?? [userColumn, promptColumn, usageColumn, ...actionColumns]
+        }
+        loading={!loaded && loading}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={fetchingMore}
+        onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{ message: 'No jobs found.' }}
+        getRowLink={({ original }) => {
+          const { id: jobId, workbench } = original as WorkbenchJobTinyFragment
+          return (
+            <Link
+              to={getWorkbenchJobAbsPath({
+                workbenchId: workbench?.id ?? '',
+                jobId,
+              })}
+            />
+          )
+        }}
+      />
+    </RowHeightSC>
   )
 }
+
+// pins every row to the height the virtualizer assumes, so a taller cell can't
+// shift the rows below it; the virtualizer's filler rows set their own height.
+// no overflow clipping: the row link's cell is 0 wide and overflows by design
+const RowHeightSC = styled.div({
+  height: '100%',
+  '& td:not([aria-hidden])': {
+    height: WORKBENCH_JOB_ROW_HEIGHT,
+  },
+})
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
 
@@ -126,17 +141,26 @@ export const promptColumn = columnHelper.accessor(
   {
     id: 'prompt',
     meta: { gridTemplate: 'minmax(0, 1fr)' },
-    cell: ({ getValue }) => (
-      <div css={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
-        <WorkbenchStoredPromptMarkdown
-          text={getValue()}
-          density="tableCell"
-          clampLines={1}
-        />
-      </div>
-    ),
+    cell: ({ getValue }) => <PromptCell text={getValue()} />,
   }
 )
+
+// a single line is shown, so there's no need to parse more than fits in it
+const PROMPT_CELL_MAX_CHARS = 300
+
+// memoized: rows re-render on every poll, and markdown parsing is the costly
+// part of rendering a row
+const PromptCell = memo(function PromptCell({ text }: { text: string }) {
+  return (
+    <div css={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
+      <WorkbenchStoredPromptMarkdown
+        text={truncateKeepingChips(text, PROMPT_CELL_MAX_CHARS)}
+        density="tableCell"
+        clampLines={1}
+      />
+    </div>
+  )
+})
 
 export const workbenchColumn = columnHelper.accessor(
   ({ workbench }) => workbench?.name,
@@ -350,7 +374,8 @@ function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
 
 export const actionsColumn = columnHelper.display({
   id: 'actions',
-  meta: { gridTemplate: 'fit-content(220px)' },
+  // fixed, as fit-content would resize with whichever rows are rendered
+  meta: { gridTemplate: '220px' },
   cell: ({ row: { original } }) => <JobActionsCell job={original} />,
 })
 
