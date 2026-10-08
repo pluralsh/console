@@ -13,6 +13,7 @@ import { isEmpty } from 'lodash'
 import styled from 'styled-components'
 import { WorkbenchJobCard } from './WorkbenchJobCard'
 
+// one full row of the jobs grid on wide screens
 export const BOARD_RECENT_JOBS_COUNT = 4
 
 export function WorkbenchJobsBoard({
@@ -53,28 +54,28 @@ export function WorkbenchJobsBoard({
       {!isEmpty(recentJobs) && (
         <BoardSectionSC>
           <BoardTitleSC>Recent jobs</BoardTitleSC>
-          <RecentGridSC>
+          <JobsGridSC>
             {recentJobs?.map((job) => (
               <WorkbenchJobCard
                 key={job.id}
                 job={job}
               />
             ))}
-          </RecentGridSC>
+          </JobsGridSC>
         </BoardSectionSC>
       )}
       <BoardSectionSC>
         <BoardTitle count={totalCount}>
           {recentJobs ? 'All jobs' : 'Matching jobs'}
         </BoardTitle>
-        <BoardCardGridSC>
+        <JobsGridSC>
           {jobs.map((job) => (
             <WorkbenchJobCard
               key={job.id}
               job={job}
             />
           ))}
-        </BoardCardGridSC>
+        </JobsGridSC>
       </BoardSectionSC>
       <LoadMoreSentinel
         fetchingMore={fetchingMore}
@@ -85,8 +86,9 @@ export function WorkbenchJobsBoard({
   )
 }
 
-// one row of 4 on wide screens, 2x2 below the desktop breakpoint
-const RecentGridSC = styled(BoardCardGridSC)(({ theme }) => ({
+// shared by the recent and all jobs sections, so their columns line up: 4 on
+// wide screens, 2 below the desktop breakpoint (recent jobs then show as 2x2)
+const JobsGridSC = styled(BoardCardGridSC)(({ theme }) => ({
   gridTemplateColumns: `repeat(${BOARD_RECENT_JOBS_COUNT}, minmax(0, 1fr))`,
   [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
