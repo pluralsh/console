@@ -8,7 +8,7 @@ import (
 )
 
 // Generated inputs omit nil and empty fields, and Console keeps the stored value of omitted fields.
-// Monitor and dashboard inputs describe the full desired state, so they send every field instead:
+// These inputs describe the full desired state, so they send every field instead:
 // nil pointers as null and nil lists as [] (Console rejects null for embedded lists).
 
 // MarshalJSON sends all fields of the monitor attributes, see above.
@@ -19,6 +19,32 @@ func (in MonitorAttributes) MarshalJSON() ([]byte, error) {
 // MarshalJSON sends all fields of the dashboard attributes, see above.
 func (in DashboardAttributes) MarshalJSON() ([]byte, error) {
 	return marshalFullInput(reflect.ValueOf(in))
+}
+
+// MarshalJSON keeps omitempty for most helm fields (sending null for nested
+// objects like "set"/"git"/"repository" is rejected by Console), but always
+// includes the lua/python script fields so CR updates can clear them (e.g.
+// dropping luaFile when switching to pythonFile).
+func (in HelmConfigAttributes) MarshalJSON() ([]byte, error) {
+	type alias HelmConfigAttributes
+	encoded, err := json.Marshal(alias(in))
+	if err != nil {
+		return nil, err
+	}
+
+	fields := map[string]any{}
+	if err := json.Unmarshal(encoded, &fields); err != nil {
+		return nil, err
+	}
+
+	fields["luaScript"] = in.LuaScript
+	fields["luaFile"] = in.LuaFile
+	fields["luaFolder"] = in.LuaFolder
+	fields["pythonScript"] = in.PythonScript
+	fields["pythonFile"] = in.PythonFile
+	fields["pythonFolder"] = in.PythonFolder
+
+	return json.Marshal(fields)
 }
 
 // marshalFullInput encodes a value without omitting fields. It walks structs directly,
