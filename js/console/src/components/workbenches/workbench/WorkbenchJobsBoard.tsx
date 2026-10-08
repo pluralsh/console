@@ -10,6 +10,7 @@ import {
 } from 'components/workbenches/common/WorkbenchBoard'
 import { WorkbenchJobTinyFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useMemo } from 'react'
 import styled from 'styled-components'
 import { WorkbenchJobCard } from './WorkbenchJobCard'
 
@@ -40,6 +41,14 @@ export function WorkbenchJobsBoard({
   totalCount?: Nullable<number>
   emptyState: EmptyListState
 }) {
+  // the recent jobs are shown above, so they're left out of the jobs below
+  const otherJobs = useMemo(() => {
+    if (isEmpty(recentJobs)) return jobs
+    const recentIds = new Set(recentJobs?.map(({ id }) => id))
+
+    return jobs.filter(({ id }) => !recentIds.has(id))
+  }, [jobs, recentJobs])
+
   if (isEmpty(jobs))
     return (
       <BoardEmptyList
@@ -64,19 +73,21 @@ export function WorkbenchJobsBoard({
           </JobsGridSC>
         </BoardSectionSC>
       )}
-      <BoardSectionSC>
-        <BoardTitle count={totalCount}>
-          {recentJobs ? 'All jobs' : 'Matching jobs'}
-        </BoardTitle>
-        <JobsGridSC>
-          {jobs.map((job) => (
-            <WorkbenchJobCard
-              key={job.id}
-              job={job}
-            />
-          ))}
-        </JobsGridSC>
-      </BoardSectionSC>
+      {!isEmpty(otherJobs) && (
+        <BoardSectionSC>
+          <BoardTitle count={totalCount}>
+            {recentJobs ? 'All jobs' : 'Matching jobs'}
+          </BoardTitle>
+          <JobsGridSC>
+            {otherJobs.map((job) => (
+              <WorkbenchJobCard
+                key={job.id}
+                job={job}
+              />
+            ))}
+          </JobsGridSC>
+        </BoardSectionSC>
+      )}
       <LoadMoreSentinel
         fetchingMore={fetchingMore}
         hasNextPage={hasNextPage}
