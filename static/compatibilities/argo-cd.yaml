@@ -4,18 +4,22 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.5.3
+- version: 3.5.4
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: []
-    breaking_changes: []
-  chart_version: 10.9.6
+    features: ['Adds server logging of the username on login attempts, improving auditability/troubleshooting.']
+    breaking_changes: ['Kustomize builds that render Helm charts no longer honor `helmGlobals.configHome`;
+        if you relied on Helm plugins registered from that directory during Kustomize+Helm
+        rendering, those builds may fail (ordinary http/https/oci chart repos still
+        work).', OCI manifests larger than 4 MiB are now rejected; workloads depending
+        on oversized OCI manifests may fail to fetch/render.]
+  chart_version: 10.10.0
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-    'quay.io/argoproj/argocd:v3.5.3']
+    'quay.io/argoproj/argocd:v3.5.4']
 - version: 3.5.1
   kube: ['1.37', '1.36', '1.35']
   requirements: []
