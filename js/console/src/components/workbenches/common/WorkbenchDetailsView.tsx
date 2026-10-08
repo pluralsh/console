@@ -279,6 +279,7 @@ export const DetailsListSC = styled.div(({ theme }) => ({
   width: DETAILS_LIST_WIDTH,
   height: '100%',
   minHeight: 0,
+  backgroundColor: theme.colors['fill-zero-selected'],
   borderRight: theme.borders.default,
 }))
 
@@ -362,11 +363,12 @@ const ListItemSC = styled.button<{ $selected: boolean }>(
     width: '100%',
     padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.medium}px`,
     cursor: 'pointer',
-    backgroundColor: $selected ? theme.colors['fill-one-selected'] : undefined,
+    // on the list's lighter background, as the Monitoring sidebar's rows
+    backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
     '&:hover': {
       backgroundColor: $selected
-        ? theme.colors['fill-one-selected']
-        : theme.colors['fill-zero-hover'],
+        ? theme.colors['fill-two-selected']
+        : theme.colors['fill-one-hover'],
     },
     '&:focus-visible': {
       outline: theme.borders['outline-focused'],
