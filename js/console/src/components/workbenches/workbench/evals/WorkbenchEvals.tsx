@@ -31,6 +31,7 @@ import {
   WorkbenchEvalResultRowFragment,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
+import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
 import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
@@ -106,6 +107,7 @@ export function WorkbenchEvals() {
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
+      tabStripHeight={DETAILS_TAB_STRIP_HEIGHT}
       sidebar={{
         kind: 'custom',
         content: (

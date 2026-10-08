@@ -136,10 +136,10 @@ export function WorkbenchMonitoringSidebar({
           showClearButton
           size="small"
           startIcon={<SearchIcon />}
-          placeholder="Filter dashboards and monitors"
+          placeholder="Search dashboards and monitors"
           value={filter}
           onChange={(e) => setFilter(e.currentTarget.value)}
-          aria-label="Filter dashboards and monitors"
+          aria-label="Search dashboards and monitors"
         />
       </FilterSC>
       <GroupsSC>
@@ -500,9 +500,9 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   overflow: 'hidden',
-  width: 280,
-  maxWidth: 280,
-  minWidth: 280,
+  width: 300,
+  maxWidth: 300,
+  minWidth: 300,
 }))
 
 const FilterSC = styled.div(({ theme }) => ({
