@@ -91,7 +91,7 @@ export function WorkbenchEvalSkillButton({
         onClick={toggle}
         {...props}
       >
-        Create skills from eval
+        Apply eval
       </Button>
       {transitions((styles) => (
         <AnimatedWrapperSC style={styles}>
@@ -162,7 +162,7 @@ function WorkbenchEvalSkillPanel({
           $color="text-light"
           css={{ flexGrow: 1 }}
         >
-          Update workbench skills
+          Update workbench skills with eval
         </Body1P>
         <IconFrame
           clickable
