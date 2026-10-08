@@ -6,6 +6,7 @@ import {
   SidecarItem,
 } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
+import { type CSSProperties as ReactCSSProperties } from 'react'
 import styled, {
   CSSObject,
   CSSProperties,
@@ -16,13 +17,13 @@ import { CSSPseudos } from 'styled-components/dist/types'
 
 const shimmerKeyframes = keyframes`
   0% {
-    stop-color: #2D3037;
+    stop-color: var(--skeleton-from);
   }
   50% {
-    stop-color: #393C44;
+    stop-color: var(--skeleton-to);
   }
   100% {
-    stop-color: #2D3037;
+    stop-color: var(--skeleton-from);
   }
 `
 const LinearGradient = styled.linearGradient`
@@ -30,6 +31,15 @@ const LinearGradient = styled.linearGradient`
     animation: ${shimmerKeyframes} 1.5s linear infinite;
   }
 `
+
+function skeletonCssVars(
+  theme: ReturnType<typeof useTheme>
+): ReactCSSProperties {
+  return {
+    '--skeleton-from': theme.colors['fill-two'],
+    '--skeleton-to': theme.colors['fill-three'],
+  }
+}
 
 // pretty much deprecated in favor of "loading" prop on tables
 export function TableSkeleton({
@@ -70,6 +80,7 @@ export function TableSkeleton({
         viewBox={`0 0 ${width + theme.spacing.large * (numColumns - 1)} ${height}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        style={skeletonCssVars(theme)}
       >
         {Array.from({ length: numRows * numColumns }, (_, i) => (
           <rect
@@ -95,11 +106,11 @@ export function TableSkeleton({
             >
               <stop
                 offset="0%"
-                stopColor="#2D3037"
+                stopColor={theme.colors['fill-two']}
               />
               <stop
                 offset="100%"
-                stopColor="#393C44"
+                stopColor={theme.colors['fill-three']}
               />
             </LinearGradient>
           ))}
@@ -110,12 +121,15 @@ export function TableSkeleton({
 }
 
 export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
+  const theme = useTheme()
+
   return (
     <svg
       width={`${276 * scale}`}
       height={`${276 * scale}`}
       viewBox="0 0 276 276"
       xmlns="http://www.w3.org/2000/svg"
+      style={skeletonCssVars(theme)}
     >
       <path
         d="M0 138C0 61.7847 61.7848 0 138 0C214.215 0 276 61.7847 276 138C276 214.215 214.215 276 138 276C61.7847 276 0 214.215 0 138ZM253.202 138C253.202 74.3755 201.625 22.7976 138 22.7976C74.3755 22.7976 22.7976 74.3755 22.7976 138C22.7976 201.625 74.3755 253.202 138 253.202C201.625 253.202 253.202 201.625 253.202 138Z"
@@ -139,11 +153,11 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
         >
           <stop
             offset="0%"
-            stopColor="#2D3037"
+            stopColor={theme.colors['fill-two']}
           />
           <stop
             offset="100%"
-            stopColor="#393C44"
+            stopColor={theme.colors['fill-three']}
           />
         </LinearGradient>
         <LinearGradient
@@ -155,11 +169,11 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
         >
           <stop
             offset="0%"
-            stopColor="#2D3037"
+            stopColor={theme.colors['fill-two']}
           />
           <stop
             offset="100%"
-            stopColor="#393C44"
+            stopColor={theme.colors['fill-three']}
           />
         </LinearGradient>
       </defs>
