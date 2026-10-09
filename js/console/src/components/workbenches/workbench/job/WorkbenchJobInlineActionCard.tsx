@@ -9,6 +9,7 @@ import {
   StatusOkIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { StatusAccentFrameSC } from 'components/utils/StatusAccentFrame'
 import { StackedText } from 'components/utils/table/StackedText'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
@@ -88,167 +89,172 @@ export function WorkbenchJobInlineActionCard({
     })
 
   return (
-    <CardSC $status={activity.status}>
-      <HeaderBlockSC>
-        <HeaderSC>
-          <Flex
-            align="center"
-            gap="small"
-            css={{ minWidth: 0, flex: 1 }}
-          >
-            <IconFrame
-              circle
-              size="medium"
-              type="secondary"
-              icon={icon ?? <KubernetesIcon size={16} />}
-              css={{
-                flexShrink: 0,
-                border: theme.borders.default,
-                backgroundColor: 'transparent',
-              }}
-            />
-            <StackedText
-              first={getActionTitle(activity)}
-              firstPartialType="body2Bold"
-              firstColor="text-light"
-              second={getActionSubtitle(activity)}
-              secondColor="text-xlight"
-              truncate
-              css={{ flex: 1, minWidth: 0 }}
-            />
-          </Flex>
-          <HeaderActionsSC>
-            <WorkbenchJobKubeActionChips
-              type={activity.type}
-              method={kubeRequest?.method}
-              drain={!!kubeDrain}
-              statusChip={<InlineActionStatus activity={activity} />}
-            />
-            <ExpandButtonSC
-              type="button"
-              aria-label={expanded ? 'Collapse action' : 'Expand action'}
-              aria-expanded={expanded}
-              onClick={() => setExpanded((value) => !value)}
-              $expanded={expanded}
+    <StatusAccentFrameSC
+      $accent={getActionStatusBorderColor(theme, activity.status)}
+      css={{ marginBottom: theme.spacing.small }}
+    >
+      <CardSC>
+        <HeaderBlockSC>
+          <HeaderSC>
+            <Flex
+              align="center"
+              gap="small"
+              css={{ minWidth: 0, flex: 1 }}
             >
-              <CaretDownIcon size={12} />
-            </ExpandButtonSC>
-          </HeaderActionsSC>
-        </HeaderSC>
-        <WorkbenchJobActionDetails activity={activity} />
-      </HeaderBlockSC>
+              <IconFrame
+                circle
+                size="medium"
+                type="secondary"
+                icon={icon ?? <KubernetesIcon size={16} />}
+                css={{
+                  flexShrink: 0,
+                  border: theme.borders.default,
+                  backgroundColor: 'transparent',
+                }}
+              />
+              <StackedText
+                first={getActionTitle(activity)}
+                firstPartialType="body2Bold"
+                firstColor="text-light"
+                second={getActionSubtitle(activity)}
+                secondColor="text-xlight"
+                truncate
+                css={{ flex: 1, minWidth: 0 }}
+              />
+            </Flex>
+            <HeaderActionsSC>
+              <WorkbenchJobKubeActionChips
+                type={activity.type}
+                method={kubeRequest?.method}
+                drain={!!kubeDrain}
+                statusChip={<InlineActionStatus activity={activity} />}
+              />
+              <ExpandButtonSC
+                type="button"
+                aria-label={expanded ? 'Collapse action' : 'Expand action'}
+                aria-expanded={expanded}
+                onClick={() => setExpanded((value) => !value)}
+                $expanded={expanded}
+              >
+                <CaretDownIcon size={12} />
+              </ExpandButtonSC>
+            </HeaderActionsSC>
+          </HeaderSC>
+          <WorkbenchJobActionDetails activity={activity} />
+        </HeaderBlockSC>
 
-      {expanded && (
-        <>
-          {error && <GqlError error={error} />}
-          {!!(
-            activity.result?.explanation?.trim() ??
-            activity.result?.kubeExec?.explanation?.trim()
-          ) && (
-            <ActionData>
-              <CaptionP $color="text-xlight">EXPLANATION</CaptionP>
-              <CaptionP $color="text-light">
-                {activity.result?.explanation ??
-                  activity.result?.kubeExec?.explanation}
+        {expanded && (
+          <>
+            {error && <GqlError error={error} />}
+            {!!(
+              activity.result?.explanation?.trim() ??
+              activity.result?.kubeExec?.explanation?.trim()
+            ) && (
+              <ActionData>
+                <CaptionP $color="text-xlight">EXPLANATION</CaptionP>
+                <CaptionP $color="text-light">
+                  {activity.result?.explanation ??
+                    activity.result?.kubeExec?.explanation}
+                </CaptionP>
+              </ActionData>
+            )}
+            {!isKubernetes && (
+              <CaptionP $color="text-xlight">
+                {getActionDescription(activity)}
               </CaptionP>
-            </ActionData>
-          )}
-          {!isKubernetes && (
-            <CaptionP $color="text-xlight">
-              {getActionDescription(activity)}
-            </CaptionP>
-          )}
-          {isKubeDrain ? (
-            <WorkbenchJobKubeDrainDetails node={kubeDrain?.node} />
-          ) : isKubeDiff ? (
-            <WorkbenchJobKubeUpdateDiff
-              activityId={activity.id}
-              kubeRequest={activity.result?.kubeRequest}
-              enabled={expanded}
-            />
-          ) : isExec ? (
-            <>
-              <WorkbenchJobExecDetails
-                activity={activity}
+            )}
+            {isKubeDrain ? (
+              <WorkbenchJobKubeDrainDetails node={kubeDrain?.node} />
+            ) : isKubeDiff ? (
+              <WorkbenchJobKubeUpdateDiff
+                activityId={activity.id}
+                kubeRequest={activity.result?.kubeRequest}
                 enabled={expanded}
               />
-              {!!resultJson &&
-                activity.status === WorkbenchJobActivityStatus.Failed && (
+            ) : isExec ? (
+              <>
+                <WorkbenchJobExecDetails
+                  activity={activity}
+                  enabled={expanded}
+                />
+                {!!resultJson &&
+                  activity.status === WorkbenchJobActivityStatus.Failed && (
+                    <ActionData>
+                      <CaptionP $color="text-xlight">ERROR</CaptionP>
+                      <Code
+                        language={resultLanguage}
+                        showHeader={false}
+                        css={{ borderColor: theme.colors['border-danger'] }}
+                      >
+                        {resultJson}
+                      </Code>
+                    </ActionData>
+                  )}
+              </>
+            ) : (
+              <>
+                {!!inputJson && (
                   <ActionData>
-                    <CaptionP $color="text-xlight">ERROR</CaptionP>
+                    <CaptionP $color="text-xlight">INPUT</CaptionP>
+                    <Code
+                      language="json"
+                      showHeader={false}
+                    >
+                      {inputJson}
+                    </Code>
+                  </ActionData>
+                )}
+                {!!resultJson && (
+                  <ActionData>
+                    <CaptionP $color="text-xlight">RESULT</CaptionP>
                     <Code
                       language={resultLanguage}
                       showHeader={false}
-                      css={{ borderColor: theme.colors['border-danger'] }}
+                      css={
+                        activity.status === WorkbenchJobActivityStatus.Failed
+                          ? { borderColor: theme.colors['border-danger'] }
+                          : undefined
+                      }
                     >
                       {resultJson}
                     </Code>
                   </ActionData>
                 )}
-            </>
-          ) : (
-            <>
-              {!!inputJson && (
-                <ActionData>
-                  <CaptionP $color="text-xlight">INPUT</CaptionP>
-                  <Code
-                    language="json"
-                    showHeader={false}
-                  >
-                    {inputJson}
-                  </Code>
-                </ActionData>
-              )}
-              {!!resultJson && (
-                <ActionData>
-                  <CaptionP $color="text-xlight">RESULT</CaptionP>
-                  <Code
-                    language={resultLanguage}
-                    showHeader={false}
-                    css={
-                      activity.status === WorkbenchJobActivityStatus.Failed
-                        ? { borderColor: theme.colors['border-danger'] }
-                        : undefined
-                    }
-                  >
-                    {resultJson}
-                  </Code>
-                </ActionData>
-              )}
-            </>
-          )}
-          <WorkbenchJobActionDenialResult activity={activity} />
-          {needsApproval && (
-            <ApprovalActionsSC>
-              <WorkbenchJobActionDenyButton
-                disabled={approving}
-                rejecting={rejecting}
-                rejectError={rejectError}
-                onDeny={(reason) =>
-                  reject({
-                    variables: {
-                      id: activity.id,
-                      reason: reason || undefined,
-                    },
-                  })
-                }
-              />
-              <Button
-                small
-                loading={approving}
-                disabled={approving || rejecting}
-                onClick={() => {
-                  setError(null)
-                  approve()
-                }}
-              >
-                Approve
-              </Button>
-            </ApprovalActionsSC>
-          )}
-        </>
-      )}
-    </CardSC>
+              </>
+            )}
+            <WorkbenchJobActionDenialResult activity={activity} />
+            {needsApproval && (
+              <ApprovalActionsSC>
+                <WorkbenchJobActionDenyButton
+                  disabled={approving}
+                  rejecting={rejecting}
+                  rejectError={rejectError}
+                  onDeny={(reason) =>
+                    reject({
+                      variables: {
+                        id: activity.id,
+                        reason: reason || undefined,
+                      },
+                    })
+                  }
+                />
+                <Button
+                  small
+                  loading={approving}
+                  disabled={approving || rejecting}
+                  onClick={() => {
+                    setError(null)
+                    approve()
+                  }}
+                >
+                  Approve
+                </Button>
+              </ApprovalActionsSC>
+            )}
+          </>
+        )}
+      </CardSC>
+    </StatusAccentFrameSC>
   )
 }
 
@@ -275,22 +281,22 @@ function InlineActionStatus({
   return <WorkbenchJobActionStatusChip status={activity.status} />
 }
 
-const CardSC = styled.div<{ $status: WorkbenchJobActivityStatus }>(
-  ({ theme, $status }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.medium,
-    width: '100%',
-    minWidth: 0,
-    padding: theme.spacing.medium,
-    border: theme.borders.default,
-    borderLeft: `${theme.borderRadiuses.large / 2}px solid ${getActionStatusBorderColor(theme, $status)}`,
-    borderRadius: theme.borderRadiuses.large,
-    background: theme.colors['fill-zero'],
-    overflow: 'hidden',
-    marginBottom: theme.spacing.small,
-  })
-)
+const CardSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  width: '100%',
+  minWidth: 0,
+  padding: theme.spacing.medium,
+  borderTop: theme.borders.default,
+  borderRight: theme.borders.default,
+  borderBottom: theme.borders.default,
+  borderTopRightRadius: theme.borderRadiuses.medium,
+  borderBottomRightRadius: theme.borderRadiuses.medium,
+  background: theme.colors['fill-zero'],
+  overflow: 'hidden',
+}))
 
 const HeaderSC = styled.div({
   display: 'flex',

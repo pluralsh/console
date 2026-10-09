@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { AgentTodosTimeline } from 'components/ai/common/AgentTodosTimeline'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
+import { StatusAccentFrameSC } from 'components/utils/StatusAccentFrame'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
@@ -95,113 +96,125 @@ function AgentRunStatusCallout({
     !!workbenchJob?.id && !!workbench?.id && !!workbench.name
 
   return (
-    <Card
-      fillLevel={1}
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        padding: theme.spacing.medium,
-        width: '100%',
-        borderLeft: `3px solid ${theme.colors[statusToBorderColor[run.status]]}`,
-      }}
+    <StatusAccentFrameSC
+      $accent={theme.colors[statusToBorderColor[run.status]]}
     >
-      <StretchedFlex
-        align="start"
-        gap="medium"
+      <Card
+        fillLevel={1}
+        cornerSize="medium"
+        css={{
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'column',
+          gap: theme.spacing.small,
+          minWidth: 0,
+          padding: theme.spacing.medium,
+          width: '100%',
+          borderLeft: 'none',
+          borderTopLeftRadius: 0,
+          borderBottomLeftRadius: 0,
+        }}
       >
-        <StackedText
-          truncate
-          first={title}
-          firstPartialType="body2Bold"
-          firstColor="text-light"
-          second={pullRequest?.title ? agentRunStatusTitle(run.status) : null}
-          secondColor="text-xlight"
-          icon={
-            <IconFrame
-              circle
-              size="large"
-              type="secondary"
-              icon={
-                <PrIcon
-                  size="small"
-                  color="icon-light"
-                />
-              }
-              css={{ flexShrink: 0 }}
-            />
-          }
-          css={{ flex: 1, minWidth: 0 }}
-        />
-      </StretchedFlex>
-      {summary && (
-        <Body2P
-          $color="text-light"
-          css={{
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {summary}
-        </Body2P>
-      )}
-      {(hasPatch || pullRequest?.url || isApprovable || showWorkbenchChip) && (
         <StretchedFlex
-          align="center"
-          gap="small"
+          align="start"
+          gap="medium"
         >
-          {showWorkbenchChip && (
-            <WorkbenchLinkChip
-              workbenchId={workbench.id}
-              workbenchName={workbench.name}
-              workbenchJobId={workbenchJob.id}
-              css={{ flexShrink: 0 }}
-            />
-          )}
-          {(hasPatch || pullRequest?.url || isApprovable) && (
-            <Flex
-              gap="small"
-              css={{ marginLeft: 'auto' }}
-            >
-              {hasPatch ? (
-                <Button
-                  small
-                  secondary
-                  onClick={onViewDiff}
-                >
-                  View diff
-                </Button>
-              ) : (
-                pullRequest?.url && (
+          <StackedText
+            truncate
+            first={title}
+            firstPartialType="body2Bold"
+            firstColor="text-light"
+            second={pullRequest?.title ? agentRunStatusTitle(run.status) : null}
+            secondColor="text-xlight"
+            icon={
+              <IconFrame
+                circle
+                size="large"
+                type="secondary"
+                icon={
+                  <PrIcon
+                    size="small"
+                    color="icon-light"
+                  />
+                }
+                css={{ flexShrink: 0 }}
+              />
+            }
+            css={{ flex: 1, minWidth: 0 }}
+          />
+        </StretchedFlex>
+        {summary && (
+          <Body2P
+            $color="text-light"
+            css={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {summary}
+          </Body2P>
+        )}
+        {(hasPatch ||
+          pullRequest?.url ||
+          isApprovable ||
+          showWorkbenchChip) && (
+          <StretchedFlex
+            align="center"
+            gap="small"
+          >
+            {showWorkbenchChip && (
+              <WorkbenchLinkChip
+                workbenchId={workbench.id}
+                workbenchName={workbench.name}
+                workbenchJobId={workbenchJob.id}
+                css={{ flexShrink: 0 }}
+              />
+            )}
+            {(hasPatch || pullRequest?.url || isApprovable) && (
+              <Flex
+                gap="small"
+                css={{ marginLeft: 'auto' }}
+              >
+                {hasPatch ? (
                   <Button
                     small
                     secondary
-                    as="a"
-                    href={pullRequest.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    endIcon={<ArrowTopRightIcon size={12} />}
+                    onClick={onViewDiff}
                   >
-                    View PR
+                    View diff
                   </Button>
-                )
-              )}
-              {isApprovable && (
-                <Button
-                  small
-                  onClick={onApprove}
-                  loading={approving}
-                >
-                  Approve & create PR
-                </Button>
-              )}
-            </Flex>
-          )}
-        </StretchedFlex>
-      )}
-    </Card>
+                ) : (
+                  pullRequest?.url && (
+                    <Button
+                      small
+                      secondary
+                      as="a"
+                      href={pullRequest.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      endIcon={<ArrowTopRightIcon size={12} />}
+                    >
+                      View PR
+                    </Button>
+                  )
+                )}
+                {isApprovable && (
+                  <Button
+                    small
+                    onClick={onApprove}
+                    loading={approving}
+                  >
+                    Approve & create PR
+                  </Button>
+                )}
+              </Flex>
+            )}
+          </StretchedFlex>
+        )}
+      </Card>
+    </StatusAccentFrameSC>
   )
 }
 
