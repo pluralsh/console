@@ -1,11 +1,9 @@
 import {
-  Button,
   EmptyState,
   ExpandIcon,
   Flex,
   HamburgerMenuCollapsedIcon,
   IconFrame,
-  PeopleIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -19,7 +17,6 @@ import {
   WorkbenchDashboardInput,
   WorkbenchMonitoringDashboardQueryResult,
 } from 'generated/graphql'
-import { omit } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
@@ -49,7 +46,7 @@ import {
   WorkbenchDashboardFilters,
 } from './WorkbenchDashboardFilters'
 import { WorkbenchDashboardPanels } from './WorkbenchDashboardPanels'
-import { ShareDashboardModal } from './ShareDashboardModal'
+import { DashboardPublicShare } from './DashboardPublicShare'
 import { AuthenticatedGraphSource, toPanelGraph } from './DashboardGraphSource'
 
 export function DashboardDetail({
@@ -153,14 +150,6 @@ function DashboardDetailView({
     for (const input of rangeInputs) out[input.name] = rangeDuration
     return out
   }, [filters, rangeInputs, rangeDuration])
-  const shareVariables = useMemo(
-    () =>
-      omit(
-        variables,
-        rangeInputs.map((input) => input.name)
-      ),
-    [variables, rangeInputs]
-  )
   const onInputReadyChange = useCallback((name: string, ready: boolean) => {
     setReadyInputs((current) =>
       current[name] === ready ? current : { ...current, [name]: ready }
@@ -192,7 +181,6 @@ function DashboardDetailView({
   const hasFilters = inputs.length > 0
   const [definitionOpen, setDefinitionOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
-  const [shareOpen, setShareOpen] = useState(false)
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
   const containerRef = useDefinitionPanelContainer()
   const definitionYaml = useMemo(
@@ -233,17 +221,13 @@ function DashboardDetailView({
             <WorkbenchMonitoringSharePopover
               kind="dashboard"
               pathname={pathname}
-              range={range}
-              variables={shareVariables}
-            />
-            <Button
-              small
-              secondary
-              startIcon={<PeopleIcon />}
-              onClick={() => setShareOpen(true)}
+              active={!!dashboard.publicId}
             >
-              Share publicly
-            </Button>
+              <DashboardPublicShare
+                dashboardId={dashboard.id}
+                publicId={dashboard.publicId}
+              />
+            </WorkbenchMonitoringSharePopover>
             <IconFrame
               ref={fullscreenTriggerRef}
               clickable
@@ -346,12 +330,6 @@ function DashboardDetailView({
       }
     >
       {fullscreen ? createPortal(main, document.body) : main}
-      <ShareDashboardModal
-        open={shareOpen}
-        onClose={() => setShareOpen(false)}
-        dashboardId={dashboard.id}
-        publicId={dashboard.publicId}
-      />
     </DefinitionPanelShell>
   )
 }
