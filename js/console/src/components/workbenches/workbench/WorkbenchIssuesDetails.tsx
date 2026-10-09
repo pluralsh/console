@@ -22,6 +22,7 @@ import {
   useDetailsViewState,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchIssueCard } from 'components/workbenches/common/WorkbenchIssueCard'
+import { WorkbenchJobPrIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import { WorkbenchIssueFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
@@ -111,6 +112,9 @@ export function useWorkbenchIssuesDetails({
               }
               end={
                 <>
+                  <WorkbenchJobPrIcon
+                    pullRequests={issue.workbenchJob?.pullRequests}
+                  />
                   <IssueStatusIcon status={issue.status} />
                   <DetailsListAgeSC>
                     {formatShortAge(issue.insertedAt)}

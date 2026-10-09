@@ -692,6 +692,9 @@ fragment WorkbenchIssue on Issue {
   workbenchJob {
     id
     status
+    pullRequests {
+      ...PullRequestBasic
+    }
   }
 }
 
@@ -1074,6 +1077,9 @@ fragment WorkbenchAlert on Alert {
   ...Alert
   workbenchJob {
     error
+    pullRequests {
+      ...PullRequestBasic
+    }
   }
   cluster {
     id

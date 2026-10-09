@@ -23,7 +23,7 @@ export type WorkbenchAlertsDisplayState = {
 export const ALL_ALERT_TYPES = Object.values(ObservabilityWebhookType)
 
 export const DEFAULT_WORKBENCH_ALERTS_DISPLAY: WorkbenchAlertsDisplayState = {
-  view: 'list',
+  view: 'details',
   types: ALL_ALERT_TYPES,
   severities: ALERT_SEVERITY_ORDER,
   sort: AlertSort.UpdatedAt,

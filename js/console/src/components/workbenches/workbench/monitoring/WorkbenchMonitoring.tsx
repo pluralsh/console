@@ -67,7 +67,6 @@ export function WorkbenchMonitoring() {
   return (
     <WorkbenchPageLayout
       contentBackground="fill-accent"
-      tabStripBackground="fill-zero-selected"
       tabStripHeight={65}
       showEditWorkbenchButton={!updateTarget}
       sidebar={{

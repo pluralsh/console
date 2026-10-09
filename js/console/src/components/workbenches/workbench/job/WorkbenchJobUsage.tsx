@@ -51,48 +51,46 @@ export function WorkbenchJobUsage({
   }
 
   return (
-    <>
+    <Flex
+      direction="column"
+      gap="medium"
+    >
       <Body1P $color="text-long-form">
         Token consumption and estimated cost for this job.
       </Body1P>
-      <Flex
-        direction="column"
-        gap="large"
+      <div
+        css={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(auto-fit, minmax(160px, 1fr))`,
+          gap: theme.spacing.medium,
+        }}
       >
-        <div
-          css={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(auto-fit, minmax(160px, 1fr))`,
-            gap: theme.spacing.medium,
-          }}
-        >
-          <UsageMetricCard
-            label="Input tokens"
-            value={formatTokenCount(usage?.inputTokens)}
-            footer={
-              usage?.inputTokens
-                ? new Intl.NumberFormat('en-US').format(usage.inputTokens)
-                : undefined
-            }
-          />
-          <UsageMetricCard
-            label="Output tokens"
-            value={formatTokenCount(usage?.outputTokens)}
-            footer={
-              usage?.outputTokens
-                ? new Intl.NumberFormat('en-US').format(usage.outputTokens)
-                : undefined
-            }
-          />
-          <UsageMetricCard
-            label="Est cost"
-            value={formatTokenCost(usage?.totalCost)}
-          />
-        </div>
-        <TokenBreakdown usage={usage} />
-        <CostBreakdown usage={usage} />
-      </Flex>
-    </>
+        <UsageMetricCard
+          label="Input tokens"
+          value={formatTokenCount(usage?.inputTokens)}
+          footer={
+            usage?.inputTokens
+              ? new Intl.NumberFormat('en-US').format(usage.inputTokens)
+              : undefined
+          }
+        />
+        <UsageMetricCard
+          label="Output tokens"
+          value={formatTokenCount(usage?.outputTokens)}
+          footer={
+            usage?.outputTokens
+              ? new Intl.NumberFormat('en-US').format(usage.outputTokens)
+              : undefined
+          }
+        />
+        <UsageMetricCard
+          label="Est cost"
+          value={formatTokenCost(usage?.totalCost)}
+        />
+      </div>
+      <TokenBreakdown usage={usage} />
+      <CostBreakdown usage={usage} />
+    </Flex>
   )
 }
 

@@ -227,8 +227,7 @@ export function WorkbenchPageLayout({
           align="center"
           gap="small"
           css={{
-            backgroundColor:
-              tabStripBackground && theme.colors[tabStripBackground],
+            backgroundColor: theme.colors[tabStripBackground ?? 'fill-accent'],
             ...(tabStripHeight
               ? {
                   height: tabStripHeight,

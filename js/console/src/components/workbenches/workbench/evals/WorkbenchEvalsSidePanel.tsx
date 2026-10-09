@@ -83,7 +83,7 @@ export function WorkbenchEvalsSidePanel({
       overflow="hidden"
       height="100%"
       css={{
-        backgroundColor: theme.colors['fill-zero-selected'],
+        backgroundColor: theme.colors['fill-accent'],
         borderRight: theme.borders.default,
         minWidth: 350,
         maxWidth: 350,

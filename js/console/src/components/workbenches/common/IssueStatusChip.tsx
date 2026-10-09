@@ -76,7 +76,7 @@ export function IssueStatusIcon({ status }: { status: IssueStatus }) {
   return (
     <IconFrame
       type="tertiary"
-      size="medium"
+      size="small"
       textValue={ISSUE_STATUS_LABELS[status]}
       tooltip={ISSUE_STATUS_LABELS[status]}
       icon={statusToIcon[status]}
