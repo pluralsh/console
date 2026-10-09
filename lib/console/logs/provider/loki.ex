@@ -40,8 +40,8 @@ defmodule Console.Logs.Provider.Loki do
 
   @spec aggregate(t(), Query.t) :: {:ok, [AggregationBucket.t]} | Console.error
   def aggregate(%__MODULE__{connection: %Connection{host: host} = conn}, %Query{} = q) when is_binary(host) do
-    {start, stop} = range(q)
     step = Time.to_seconds(q.bucket_size, 60)
+    {start, stop} = range(q, step)
 
     get(conn, "/loki/api/v1/query_range", %{
       "query" => "sum(count_over_time(#{build_query(conn, q)} [#{step}s]))",
@@ -157,6 +157,12 @@ defmodule Console.Logs.Provider.Loki do
 
   defp range(%Query{time: time}) do
     {start, stop} = Time.range(time)
+    {Time.to_unix_nano(start), Time.to_unix_nano(stop)}
+  end
+
+  defp range(%Query{time: time}, step) do
+    {start, stop} = Time.range(time)
+    {start, stop} = Console.TimeRange.align_range(start, stop, step)
     {Time.to_unix_nano(start), Time.to_unix_nano(stop)}
   end
 

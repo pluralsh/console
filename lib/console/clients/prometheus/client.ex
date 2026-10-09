@@ -47,6 +47,7 @@ defmodule Prometheus.Client do
 
   def query(client \\ nil, query, start, end_t, step, variables) do
     query = variable_subst(query, variables)
+    {start, end_t} = Console.TimeRange.align_range(start, end_t, step)
     Logger.info "Issuing prometheus query: #{query}"
     Req.post(
       Path.join(host(client), "/api/v1/query_range"),

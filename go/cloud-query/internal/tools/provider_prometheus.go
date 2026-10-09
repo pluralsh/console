@@ -62,10 +62,15 @@ func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.Metr
 	if err != nil {
 		return nil, err
 	}
+	start, end := normalizeRange(
+		input.GetRange().GetStart().AsTime(),
+		input.GetRange().GetEnd().AsTime(),
+		step,
+	)
 
 	value, _, err := client.QueryRange(ctx, input.Query, v1.Range{
-		Start: input.GetRange().GetStart().AsTime(),
-		End:   input.GetRange().GetEnd().AsTime(),
+		Start: start,
+		End:   end,
 		Step:  step,
 	})
 	if err != nil {
@@ -160,12 +165,40 @@ func (in *PrometheusProvider) toStep(input *toolquery.MetricsQueryInput) (time.D
 		return step, nil
 	}
 
-	parsed, err := time.ParseDuration(input.GetStep())
+	parsed, err := model.ParseDuration(input.GetStep())
 	if err != nil {
 		return time.Duration(0), fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, input.GetStep())
 	}
 
-	return parsed, nil
+	return time.Duration(parsed), nil
+}
+
+func normalizeRange(start, end time.Time, step time.Duration) (time.Time, time.Time) {
+	if step <= 0 {
+		return start, end
+	}
+	return floorTime(start, step), ceilTime(end, step)
+}
+
+func floorTime(timestamp time.Time, step time.Duration) time.Time {
+	nanos := timestamp.UnixNano()
+	remainder := nanos % step.Nanoseconds()
+	if remainder < 0 {
+		remainder += step.Nanoseconds()
+	}
+	return time.Unix(0, nanos-remainder).UTC()
+}
+
+func ceilTime(timestamp time.Time, step time.Duration) time.Time {
+	nanos := timestamp.UnixNano()
+	remainder := nanos % step.Nanoseconds()
+	if remainder < 0 {
+		remainder += step.Nanoseconds()
+	}
+	if remainder == 0 {
+		return timestamp.UTC()
+	}
+	return time.Unix(0, nanos+step.Nanoseconds()-remainder).UTC()
 }
 
 func (in *PrometheusProvider) toMetricsQueryOutput(value model.Value) (*toolquery.MetricsQueryOutput, error) {
