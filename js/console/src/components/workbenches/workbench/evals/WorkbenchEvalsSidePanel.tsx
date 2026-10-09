@@ -8,6 +8,7 @@ import {
   EvalGradeCategory,
 } from 'components/workbenches/common/evalGrade'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
+import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { VirtualList } from 'components/utils/VirtualList'
 import { formatDateTime } from 'utils/datetime'
 import { WorkbenchEvalResultRowFragment } from 'generated/graphql'
@@ -82,8 +83,8 @@ export function WorkbenchEvalsSidePanel({
       overflow="hidden"
       height="100%"
       css={{
-        backgroundColor: theme.colors['fill-accent'],
-        borderRight: theme.borders.hairline,
+        backgroundColor: theme.colors['fill-zero-selected'],
+        borderRight: theme.borders.default,
         minWidth: 350,
         maxWidth: 350,
       }}
@@ -91,10 +92,12 @@ export function WorkbenchEvalsSidePanel({
       <Flex
         alignItems="center"
         gap="xsmall"
-        height={73}
+        // the tab strip's height plus this row's bottom border, so the border
+        // lines up with the one under the tab strip
+        height={DETAILS_TAB_STRIP_HEIGHT + 1}
         padding="medium"
         wrap="wrap"
-        css={{ borderBottom: theme.borders.hairline }}
+        css={{ borderBottom: theme.borders.default }}
       >
         {filterOptions.map(({ key, count, severity }) => (
           <EvalFilterChip
@@ -190,7 +193,7 @@ function EvalFilterChip({
       onClick={hasItems ? onClick : undefined}
       css={{
         borderRadius: 12,
-        backgroundColor: active ? theme.colors['fill-one-selected'] : undefined,
+        backgroundColor: active ? theme.colors['fill-two-selected'] : undefined,
         height: 'fit-content',
       }}
     >
@@ -210,10 +213,13 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     width: '100%',
     padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
     textAlign: 'left',
-    backgroundColor: $active ? theme.colors['fill-two'] : undefined,
+    // on the panel's lighter background, as the Monitoring sidebar's rows
+    backgroundColor: $active ? theme.colors['fill-two-selected'] : undefined,
 
     '&:hover': {
-      backgroundColor: theme.colors['fill-two'],
+      backgroundColor: $active
+        ? theme.colors['fill-two-selected']
+        : theme.colors['fill-one-hover'],
     },
   })
 )

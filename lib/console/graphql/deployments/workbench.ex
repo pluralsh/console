@@ -15,6 +15,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_chatbot_message_behavior, Console.Schema.WorkbenchChatbot.MessageBehavior
   ecto_enum :workbench_budget_unit, Console.Schema.Workbench.BudgetUnit
 
+  enum :workbench_job_pr_state do
+    value :open
+    value :merged
+    value :closed
+    value :none, description: "jobs without any pull requests"
+  end
+
   enum :eval_results_period do
     value :day
     value :week
@@ -503,6 +510,21 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :modes,        :workbench_job_modes_attributes, description: "mode-specific overrides to apply when this prompt is dequeued"
   end
 
+  object :workbench_job_counts do
+    field :statuses,      list_of(:workbench_job_count_by_status)
+    field :pull_requests, list_of(:workbench_job_count_by_pr_state), description: "jobs with at least one pull request in each state (a job can count towards several)"
+  end
+
+  object :workbench_job_count_by_status do
+    field :status, non_null(:workbench_job_status)
+    field :count,  non_null(:integer)
+  end
+
+  object :workbench_job_count_by_pr_state do
+    field :state, non_null(:workbench_job_pr_state)
+    field :count, non_null(:integer)
+  end
+
   object :queued_prompt_summary do
     field :ready_count,   non_null(:integer), description: "unconsumed prompts that are eligible to dequeue"
     field :pending_count, non_null(:integer), description: "unconsumed prompts waiting for dequeable_at"
@@ -541,8 +563,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :alert, :boolean, description: "show runs spawned from alerts"
       arg :issue, :boolean, description: "show runs spawned from issues"
       arg :monitor_id, :id, description: "show runs spawned from a specific monitor"
+      arg :statuses, list_of(:workbench_job_status), description: "filter runs by status"
+      arg :pr_states, list_of(:workbench_job_pr_state), description: "filter runs by the state of their pull requests"
+      arg :direction, :sort_direction, description: "creation date sort direction"
 
       resolve &Deployments.list_workbench_runs/3
+    end
+
+    field :run_counts, :workbench_job_counts do
+      middleware Nested, check: true, msg: "workbench run counts cannot be fetched through a policy"
+      resolve &Deployments.run_counts/3
     end
 
     connection field :crons, node_type: :workbench_cron do
@@ -599,7 +629,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :alerts, node_type: :alert do
       middleware Nested, check: true, msg: "workbench alerts cannot be fetched through a policy"
+      arg :q, :string, description: "search alerts by title, alertname tag or message"
+      arg :types, list_of(:observability_webhook_type), description: "filter alerts by source"
+      arg :severities, list_of(:alert_severity), description: "filter alerts by severity"
+      arg :sort, :alert_sort, description: "field to sort alerts by (defaults to most recently updated)"
+      arg :direction, :sort_direction, description: "sort direction"
+
       resolve &Deployments.list_alerts/3
+    end
+
+    field :alert_counts, :workbench_alert_counts do
+      middleware Nested, check: true, msg: "workbench alert counts cannot be fetched through a policy"
+      resolve &Deployments.alert_counts/3
     end
 
     connection field :issues, node_type: :issue do
@@ -1526,7 +1567,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench
   connection node_type: :workbench_tool
   connection node_type: :workbench_policy
-  connection node_type: :workbench_job
+  connection node_type: :workbench_job do
+    field :total_count, :integer,
+      description: "total number of jobs matching the query's filters (counted only when selected)",
+      resolve: &Console.GraphQl.Resolvers.Base.total_count/3
+
+    edge do
+    end
+  end
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
   connection node_type: :queued_prompt
@@ -1638,6 +1686,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :q,             non_null(:string)
       arg :workbench_id,  non_null(:id), description: "scope search to this workbench"
       arg :limit,         :integer, description: "max results to return (defaults to 5)"
+      arg :statuses,      list_of(:workbench_job_status), description: "filter results by status"
+      arg :pr_states,     list_of(:workbench_job_pr_state), description: "filter results by the state of their pull requests"
 
       resolve &Deployments.workbench_job_search/2
     end

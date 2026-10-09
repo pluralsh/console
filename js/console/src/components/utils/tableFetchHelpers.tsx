@@ -2,6 +2,7 @@ import { QueryResult } from '@apollo/client'
 import { usePrevious } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { InputMaybe } from 'generated/graphql'
+import { isEqual, isUndefined, omit, omitBy } from 'lodash'
 
 import {
   useCallback,
@@ -30,27 +31,45 @@ export function useSlicePolling<
   {
     interval = POLL_INTERVAL,
     skip = false,
+    keepLoadedPages = false,
     ...fetchSliceOpts
-  }: { interval?: number; skip?: boolean } & FetchSliceOptions
+  }: {
+    interval?: number
+    skip?: boolean
+    keepLoadedPages?: boolean
+  } & FetchSliceOptions
 ) {
   const { loading, refetch: originalRefetch } = queryResult
+  const { virtualSlice, pageSize } = fetchSliceOpts
 
   const fetchSlice = useFetchSlice(queryResult, fetchSliceOpts)
-  const refetch = !fetchSliceOpts?.virtualSlice?.start?.index
-    ? originalRefetch
-    : fetchSlice
+  const { refetchLoaded, loadedCount } = useRefetchLoaded(
+    queryResult,
+    fetchSliceOpts
+  )
+  // Virtualized tables report the visible slice and only poll that. Other
+  // lists poll the first page, which drops any further loaded pages, unless
+  // they opt into keeping them: then everything loaded is polled.
+  const pollsLoaded = keepLoadedPages && !virtualSlice
+  const refetch = virtualSlice?.start?.index
+    ? fetchSlice
+    : pollsLoaded && loadedCount > pageSize
+      ? refetchLoaded
+      : originalRefetch
+  // past the ceiling, polling pauses until the list resets (e.g. new filters)
+  const paused = pollsLoaded && loadedCount > MAX_POLLED_ITEMS
 
   const poll = useEffectEvent(() => {
     refetch()
   })
 
   useEffect(() => {
-    if (interval === 0 || skip || loading) return
+    if (interval === 0 || skip || loading || paused) return
 
     const intervalId = setInterval(() => poll(), interval)
 
     return () => clearInterval(intervalId)
-  }, [interval, loading, skip])
+  }, [interval, loading, paused, skip])
 
   return useMemo(() => ({ refetch }), [refetch])
 }
@@ -103,25 +122,118 @@ export function useFetchSlice<
     virtualSlice?.start?.index,
   ])
 
-  const { fetchMore } = queryResult
+  const { fetchMore, observable } = queryResult
 
   return useCallback(
     () =>
       fetchMore({
         variables: { after, first },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          const newConnection = extendConnection(
-            reduceNestedData(keyPath, prev),
-            reduceNestedData(keyPath, fetchMoreResult)[queryKey],
-            queryKey
-          )
-
-          return updateNestedConnection(keyPath, prev, newConnection)
-        },
+        updateQuery: appendPage(keyPath, observable),
       }),
-    [fetchMore, after, first, keyPath, queryKey]
+    [fetchMore, after, first, keyPath, observable]
   )
+}
+
+// Most loaded items that lists keeping their loaded pages still poll.
+export const MAX_POLLED_ITEMS = 500
+
+// Re-fetches every loaded item from the start and replaces the loaded list
+// with the result, so updates, additions, removals, counts and the cursor for
+// loading more all stay exact.
+function useRefetchLoaded<
+  QData,
+  QVariables extends {
+    first?: InputMaybe<number> | undefined
+    after?: InputMaybe<string> | undefined
+  },
+>(
+  queryResult: QueryResult<QData, QVariables>,
+  { keyPath }: Pick<FetchSliceOptions, 'keyPath'>
+) {
+  const queryKey = keyPath[keyPath.length - 1]
+  const loadedCount: number = queryResult?.data?.[queryKey]?.edges?.length ?? 0
+  const { fetchMore, observable } = queryResult
+
+  const refetchLoaded = useCallback(
+    () =>
+      fetchMore({
+        variables: { first: loadedCount, after: null },
+        updateQuery: (prev, { fetchMoreResult, variables: sent }) =>
+          // a page loaded meanwhile would be dropped, so this poll is skipped
+          // and the next one covers it
+          isStaleResponse(observable, sent) ||
+          (reduceNestedData(keyPath, prev)?.[queryKey]?.edges?.length ?? 0) >
+            loadedCount
+            ? prev
+            : (fetchMoreResult ?? prev),
+      }),
+    [fetchMore, keyPath, loadedCount, queryKey, observable]
+  )
+
+  return { refetchLoaded, loadedCount }
+}
+
+const PAGE_VARIABLES = ['first', 'after']
+
+// fetchMore writes its response into the list of the query's variables when
+// the response arrives. One sent for other variables (e.g. before the search or
+// filters changed) belongs to another list and mustn't land in this one.
+export function isStaleResponse(
+  observable: Nullable<Pick<QueryResult<any, any>['observable'], 'variables'>>,
+  sent: Nullable<Record<string, unknown>>
+): boolean {
+  const current = observable?.variables
+  if (!current || !sent) return false
+
+  const listVariables = (vars: Record<string, unknown>) =>
+    omitBy(omit(vars, PAGE_VARIABLES), isUndefined)
+
+  return !isEqual(listVariables(sent), listVariables(current))
+}
+
+// fetchMore's updateQuery appending the fetched page, unless it's stale
+export function appendPage<TData>(
+  keyPath: string[],
+  observable: Parameters<typeof isStaleResponse>[0]
+) {
+  return (
+    prev: TData,
+    {
+      fetchMoreResult,
+      variables,
+    }: { fetchMoreResult: unknown; variables?: Record<string, unknown> }
+  ): TData =>
+    isStaleResponse(observable, variables)
+      ? prev
+      : extendNestedConnection(
+          keyPath,
+          prev,
+          fetchMoreResult as Nullable<TData>
+        )
 }
 
 export const reduceNestedData = (path: string[], data: any) =>
   path.slice(0, -1).reduce((acc, key) => acc?.[key], data)
+
+// Appends a fetched page to the loaded connection. Fields next to the
+// connection (e.g. counts) and on it (e.g. totalCount) come from the newer
+// response, so they stay current as pages load.
+export function extendNestedConnection<TData>(
+  keyPath: string[],
+  prev: TData,
+  fetchMoreResult: Nullable<TData>
+): TData {
+  const queryKey = keyPath[keyPath.length - 1]
+  const prevParent = reduceNestedData(keyPath, prev)
+  const nextParent = reduceNestedData(keyPath, fetchMoreResult)
+
+  return updateNestedConnection(
+    keyPath,
+    prev,
+    extendConnection(
+      { ...prevParent, ...nextParent, [queryKey]: prevParent?.[queryKey] },
+      nextParent?.[queryKey],
+      queryKey
+    )
+  )
+}

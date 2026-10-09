@@ -6,6 +6,7 @@ import {
   MegaphoneIcon,
   Prop,
 } from '@pluralsh/design-system'
+import { ALERT_SEVERITY_LABELS } from 'components/utils/alerts/AlertSeverityIcon'
 import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { Body2BoldP, CaptionP, InlineA } from 'components/utils/typography/Text'
@@ -16,9 +17,9 @@ import {
   TriggerPropsRowSC,
 } from 'components/workbenches/common/WorkbenchTriggerCard'
 import { AlertFragment } from 'generated/graphql'
-import { startCase } from 'lodash'
 import styled from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
+import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
 
 export function WorkbenchJobTriggerAlert({
   alert,
@@ -88,7 +89,7 @@ export function WorkbenchJobTriggerAlert({
                   size="small"
                   severity={alertSeverityToChipSeverity[alert.severity]}
                 >
-                  {startCase(alert.severity.toLowerCase())}
+                  {ALERT_SEVERITY_LABELS[alert.severity]}
                 </Chip>
               </Prop>
               <Prop
@@ -101,7 +102,7 @@ export function WorkbenchJobTriggerAlert({
                 title="Provider"
                 margin={0}
               >
-                {startCase(alert.type.toLowerCase())}
+                {humanizeObservabilityWebhookType(alert.type)}
               </Prop>
             </TriggerPropsRowSC>
           </TriggerContentSC>

@@ -621,7 +621,20 @@ defmodule Console.GraphQl.Deployments.Observability do
 
     field :service, :service,
       resolve: dataloader(Deployments),
+      deprecate: "typed as a kubernetes service but holds a plural service deployment, use serviceDeployment instead",
       description: "The service this alert was associated with"
+
+    field :service_deployment, :service_deployment,
+      resolve: dataloader(Deployments, :service),
+      description: "The Plural service this alert was associated with"
+
+    field :value, :string,
+      resolve: &Deployments.alert_value/3,
+      description: "The evaluated values that triggered this alert, e.g. A=1018071, B=1 (grafana only)"
+
+    field :silence_url, :string,
+      resolve: &Deployments.alert_silence_url/3,
+      description: "Link to silence this alert in its provider (grafana only)"
 
     field :project, :project,
       resolve: dataloader(Deployments),
@@ -708,6 +721,26 @@ defmodule Console.GraphQl.Deployments.Observability do
       description: "Memory limits for pods managed by this controller"
   end
 
+  enum :alert_sort do
+    value :updated_at, description: "last update, falling back to creation for alerts never updated"
+    value :title
+  end
+
+  object :workbench_alert_counts do
+    field :types,      list_of(:alert_count_by_type)
+    field :severities, list_of(:alert_count_by_severity)
+  end
+
+  object :alert_count_by_type do
+    field :type,  non_null(:observability_webhook_type)
+    field :count, non_null(:integer)
+  end
+
+  object :alert_count_by_severity do
+    field :severity, non_null(:alert_severity)
+    field :count,    non_null(:integer)
+  end
+
   @desc "Time series data associated with an alert evaluation"
   object :alert_timeseries do
     field :threshold, :float,
@@ -719,7 +752,14 @@ defmodule Console.GraphQl.Deployments.Observability do
 
   connection node_type: :observability_provider
   connection node_type: :observability_webhook
-  connection node_type: :alert
+  connection node_type: :alert do
+    field :total_count, :integer,
+      description: "total number of alerts matching the query's filters (counted only when selected)",
+      resolve: &Console.GraphQl.Resolvers.Base.total_count/3
+
+    edge do
+    end
+  end
   connection node_type: :monitor
   connection node_type: :workbench_dashboard
 

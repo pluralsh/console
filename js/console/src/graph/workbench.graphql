@@ -795,6 +795,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
 
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
+  updatedAt
   usage {
     ...WorkbenchJobUsage
   }
@@ -964,10 +965,25 @@ query WorkbenchEvalSettings($id: ID!) {
   }
 }
 
-query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchJobs(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $statuses: [WorkbenchJobStatus]
+  $prStates: [WorkbenchJobPrState]
+  $direction: SortDirection
+  $withTotal: Boolean = false
+) {
   workbench(id: $id) {
     id
-    runs(first: $first, after: $after) {
+    runs(
+      first: $first
+      after: $after
+      statuses: $statuses
+      prStates: $prStates
+      direction: $direction
+    ) {
+      totalCount @include(if: $withTotal)
       pageInfo {
         ...PageInfo
       }
@@ -980,22 +996,37 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-fragment WorkbenchJobSearchRow on WorkbenchJob {
-  id
-  prompt
-  status
-  result {
+query WorkbenchJobCounts($id: ID!) {
+  workbench(id: $id) {
     id
-    conclusion
-  }
-  pullRequests {
-    ...PullRequestBasic
+    runCounts {
+      statuses {
+        status
+        count
+      }
+      pullRequests {
+        state
+        count
+      }
+    }
   }
 }
 
-query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {
-  workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {
-    ...WorkbenchJobSearchRow
+query WorkbenchJobSearch(
+  $workbenchId: ID!
+  $q: String!
+  $limit: Int
+  $statuses: [WorkbenchJobStatus]
+  $prStates: [WorkbenchJobPrState]
+) {
+  workbenchJobSearch(
+    workbenchId: $workbenchId
+    q: $q
+    limit: $limit
+    statuses: $statuses
+    prStates: $prStates
+  ) {
+    ...WorkbenchJobTiny
   }
 }
 
@@ -1021,16 +1052,72 @@ query RecentWorkbenchJobs($count: Int) {
   }
 }
 
-query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchAlertCounts($id: ID!) {
   workbench(id: $id) {
     id
-    alerts(first: $first, after: $after) {
+    alertCounts {
+      types {
+        type
+        count
+      }
+      severities {
+        severity
+        count
+      }
+    }
+  }
+}
+
+# the fields only the workbench alert views show, kept out of the shared Alert
+# fragment so other alert lists don't fetch them
+fragment WorkbenchAlert on Alert {
+  ...Alert
+  workbenchJob {
+    error
+  }
+  cluster {
+    id
+    name
+  }
+  serviceDeployment {
+    id
+    name
+    cluster {
+      id
+    }
+  }
+  value
+  silenceUrl
+}
+
+query WorkbenchAlerts(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $q: String
+  $types: [ObservabilityWebhookType]
+  $severities: [AlertSeverity]
+  $sort: AlertSort
+  $direction: SortDirection
+) {
+  workbench(id: $id) {
+    id
+    alerts(
+      first: $first
+      after: $after
+      q: $q
+      types: $types
+      severities: $severities
+      sort: $sort
+      direction: $direction
+    ) {
+      totalCount
       pageInfo {
         ...PageInfo
       }
       edges {
         node {
-          ...Alert
+          ...WorkbenchAlert
         }
       }
     }

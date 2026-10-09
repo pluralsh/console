@@ -6,9 +6,16 @@ import {
   WorkbenchJobsDocument,
   WorkbenchJobsQuery,
 } from 'generated/graphql'
-import { appendConnection, updateCache } from 'utils/graphql'
+import { appendConnection } from 'utils/graphql'
+import { WORKBENCH_JOBS_PAGE_SIZE } from './workbenchJobsDisplay'
+import { LAUNCH_RECENT_JOBS_COUNT } from './WorkbenchLaunchRecentJobs'
 
-const WORKBENCH_JOBS_FIRST_VALUES = [3, 50, 100] as const
+// the launch tab's recent jobs and budget warning, and the jobs tab's
+// unfiltered, newest-first list (its first page size)
+const WORKBENCH_JOBS_FIRST_VALUES = [
+  LAUNCH_RECENT_JOBS_COUNT,
+  WORKBENCH_JOBS_PAGE_SIZE,
+] as const
 
 export function useWorkbenchJobsDelta(workbenchId: Nullable<string>) {
   useWorkbenchJobDeltaSubscription({
@@ -31,17 +38,27 @@ function prependJobToCachedWorkbenchJobsQueries(
   payload: WorkbenchJobTinyFragment
 ) {
   for (const first of WORKBENCH_JOBS_FIRST_VALUES) {
-    updateCache<WorkbenchJobsQuery>(cache, {
-      query: WorkbenchJobsDocument,
-      variables: { id: workbenchId, first },
-      update: (prev) => {
-        if (!prev.workbench?.runs) return prev
+    // the jobs tab also selects totalCount: update the entry with it when it's
+    // there, as writing it back without the count would drop it
+    for (const withTotal of [true, false]) {
+      const variables = { id: workbenchId, first, withTotal }
+      const prev = cache.readQuery<WorkbenchJobsQuery>({
+        query: WorkbenchJobsDocument,
+        variables,
+      })
 
-        const workbench = prependJobToWorkbench(prev.workbench, payload, first)
+      if (!prev?.workbench?.runs) continue
 
-        return { ...prev, workbench }
-      },
-    })
+      cache.writeQuery<WorkbenchJobsQuery>({
+        query: WorkbenchJobsDocument,
+        variables,
+        data: {
+          ...prev,
+          workbench: prependJobToWorkbench(prev.workbench, payload, first),
+        },
+      })
+      break
+    }
   }
 }
 
@@ -50,16 +67,24 @@ function prependJobToWorkbench(
   payload: WorkbenchJobTinyFragment,
   first: number
 ) {
+  const loaded = workbench.runs?.edges?.length ?? 0
   const next = appendConnection(workbench, payload, 'runs')
-  const edges = next.runs?.edges ?? []
 
-  if (edges.length <= first) return next
+  if (next === workbench) return workbench
 
-  return {
-    ...next,
-    runs: {
-      ...next.runs!,
-      edges: edges.slice(0, first),
-    },
+  const runs = {
+    ...next.runs!,
+    ...(next.runs?.totalCount != null && {
+      totalCount: next.runs.totalCount + 1,
+    }),
   }
+
+  // a single page keeps its size, so its end cursor still points past its
+  // last job. With further pages loaded, trimming would leave that cursor
+  // beyond the kept jobs and skip the dropped ones on the next page load, so
+  // they're kept: the job pushed onto the next page is deduped when it loads.
+  if (loaded > first || (runs.edges?.length ?? 0) <= first)
+    return { ...next, runs }
+
+  return { ...next, runs: { ...runs, edges: runs.edges?.slice(0, first) } }
 }

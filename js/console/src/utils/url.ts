@@ -86,6 +86,24 @@ export function ensureURLValidity(url: Nullable<string>): string {
   return url
 }
 
+// An http(s) URL to link to as is, or '' for anything else, so no other scheme
+// (e.g. `javascript:`) ends up in an href. Unlike `ensureURLValidity` it allows
+// hosts without a TLD and private IPs (e.g. `http://grafana:3000`), as links
+// from self-hosted tools commonly use them.
+export function toHttpURL(url: Nullable<string>): string {
+  if (!url) return ''
+
+  try {
+    const { href, protocol } = new URL(
+      /^[a-z][a-z\d+.-]*:\/\//i.test(url) ? url : `https://${url}`
+    )
+
+    return protocol === 'http:' || protocol === 'https:' ? href : ''
+  } catch {
+    return ''
+  }
+}
+
 export function getURLPath(url: Nullable<string>) {
   const validUrl = ensureURLValidity(url)
 

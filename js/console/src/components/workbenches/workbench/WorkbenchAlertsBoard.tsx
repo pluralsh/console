@@ -1,0 +1,194 @@
+import { Card, ErrorIcon, Flex } from '@pluralsh/design-system'
+import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import {
+  AlertSourceLink,
+  getAlertTitle,
+} from 'components/utils/alerts/AlertSourceLink'
+import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
+import {
+  BoardCardGridSC,
+  BoardSC,
+  BoardEmptyList,
+  BoardSectionSC,
+  BoardTitle,
+  BoardTitleSC,
+  CardRaisedSC,
+  CardTargetButtonSC,
+  clickableCardStyles,
+  EmptyListState,
+  LoadMoreSentinel,
+} from 'components/workbenches/common/WorkbenchBoard'
+import { WorkbenchAlertFragment, AlertState } from 'generated/graphql'
+import { isEmpty } from 'lodash'
+import { useMemo, useState } from 'react'
+import { DetailsCaptionSC } from 'components/workbenches/common/WorkbenchDetailsView'
+import styled from 'styled-components'
+import { fromNow } from 'utils/datetime'
+import { WorkbenchAlertFlyover } from './WorkbenchAlertFlyover'
+
+export function WorkbenchAlertsBoard({
+  alerts,
+  loading,
+  fetchingMore,
+  hasNextPage,
+  fetchNextPage,
+  workbenchId,
+  totalCount,
+  emptyState,
+}: {
+  alerts: WorkbenchAlertFragment[]
+  // first load only (spinner); later fetches don't blank the view
+  loading: boolean
+  // a page or poll in flight, to pace loading more
+  fetchingMore: boolean
+  hasNextPage: boolean
+  fetchNextPage: () => void
+  workbenchId: string
+  // alerts matching the current search and filters, across all pages
+  totalCount?: Nullable<number>
+  emptyState: EmptyListState
+}) {
+  // by id, so the quick view follows polled updates of the alert
+  const [openAlertId, setOpenAlertId] = useState<string>()
+  const openAlert = alerts.find(({ id }) => id === openAlertId)
+
+  // forget an alert that left the list, so it can't reopen on a later poll
+  if (openAlertId && !openAlert) setOpenAlertId(undefined)
+  const firing = useMemo(
+    () => alerts.filter(({ state }) => state === AlertState.Firing),
+    [alerts]
+  )
+
+  if (isEmpty(alerts))
+    return (
+      <BoardEmptyList
+        noun="alerts"
+        loading={loading}
+        emptyState={emptyState}
+      />
+    )
+
+  return (
+    <BoardSC>
+      {!isEmpty(firing) && (
+        <BoardSectionSC>
+          <SectionTitleSC>
+            <ErrorIcon
+              size={16}
+              color="icon-danger"
+            />
+            <BoardTitleSC>Firing</BoardTitleSC>
+          </SectionTitleSC>
+          <BoardCardGridSC>
+            {firing.map((alert) => (
+              <WorkbenchAlertCard
+                key={alert.id}
+                alert={alert}
+                onOpen={() => setOpenAlertId(alert.id)}
+              />
+            ))}
+          </BoardCardGridSC>
+        </BoardSectionSC>
+      )}
+      <BoardSectionSC>
+        <BoardTitle count={totalCount}>All alerts</BoardTitle>
+        <BoardCardGridSC>
+          {alerts.map((alert) => (
+            <WorkbenchAlertCard
+              key={alert.id}
+              alert={alert}
+              onOpen={() => setOpenAlertId(alert.id)}
+            />
+          ))}
+        </BoardCardGridSC>
+      </BoardSectionSC>
+      <LoadMoreSentinel
+        fetchingMore={fetchingMore}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+      />
+      <WorkbenchAlertFlyover
+        alert={openAlert}
+        workbenchId={workbenchId}
+        onClose={() => setOpenAlertId(undefined)}
+      />
+    </BoardSC>
+  )
+}
+
+function WorkbenchAlertCard({
+  alert,
+  onOpen,
+}: {
+  alert: WorkbenchAlertFragment
+  onOpen: () => void
+}) {
+  return (
+    <CardSC fillLevel={1}>
+      <CardTargetButtonSC
+        type="button"
+        aria-label={`Show details of ${getAlertTitle(alert)}`}
+        onClick={onOpen}
+      />
+      <Flex
+        align="center"
+        justify="space-between"
+        gap="xsmall"
+        minHeight={16}
+      >
+        {alert.workbenchJob ? (
+          <RunStatusIcon
+            fullColor
+            size="medium"
+            status={alert.workbenchJob.status}
+          />
+        ) : (
+          <span />
+        )}
+        <DetailsCaptionSC>{fromNow(alert.updatedAt)}</DetailsCaptionSC>
+      </Flex>
+      <TitleSC>{getAlertTitle(alert)}</TitleSC>
+      <Flex
+        align="center"
+        justify="space-between"
+        gap="xsmall"
+        minWidth={0}
+      >
+        <CardRaisedSC css={{ display: 'flex', minWidth: 0 }}>
+          <AlertSourceLink alert={alert} />
+        </CardRaisedSC>
+        <AlertStateChip
+          state={alert.state}
+          css={{ flexShrink: 0 }}
+        />
+      </Flex>
+    </CardSC>
+  )
+}
+
+const SectionTitleSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.medium,
+}))
+
+const CardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  padding: theme.spacing.medium,
+  minWidth: 0,
+  ...clickableCardStyles(theme),
+}))
+
+const TitleSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2LooseLineHeight,
+  margin: 0,
+  height: 44,
+  overflow: 'hidden',
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  wordBreak: 'break-word',
+  color: theme.colors['text-light'],
+}))

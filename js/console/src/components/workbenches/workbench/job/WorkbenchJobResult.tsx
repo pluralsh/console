@@ -57,9 +57,6 @@ export function WorkbenchJobResult({
   loading: boolean
 }) {
   const { spacing } = useTheme()
-  const resultText = getWorkbenchJobResultText(job)
-  const hasConclusion =
-    !isJobRunning(job?.status) && !!job?.result?.conclusion?.trim()
 
   if (loading)
     return (
@@ -80,6 +77,25 @@ export function WorkbenchJobResult({
     >
       <WorkbenchJobTriggerAlert alert={job?.alert} />
       <WorkbenchJobTriggerIssue issue={job?.issue} />
+      <WorkbenchJobResultContent job={job} />
+    </Flex>
+  )
+}
+
+// Chatbot trigger, result text and todos, without trigger cards or its own
+// scroll area, for views that show the alert/issue elsewhere and scroll the
+// result together with other content.
+export function WorkbenchJobResultContent({
+  job,
+}: {
+  job: Nullable<WorkbenchJobFragment>
+}) {
+  const resultText = getWorkbenchJobResultText(job)
+  const hasConclusion =
+    !isJobRunning(job?.status) && !!job?.result?.conclusion?.trim()
+
+  return (
+    <>
       <WorkbenchJobTriggerChatbot job={job} />
       {resultText && (
         <Flex
@@ -91,11 +107,11 @@ export function WorkbenchJobResult({
       )}
       {!isEmpty(getWorkbenchJobTodos(job?.result)) && !hasConclusion && (
         <WorkbenchJobTodos
-          loading={loading}
+          loading={false}
           result={job?.result}
         />
       )}
-    </Flex>
+    </>
   )
 }
 

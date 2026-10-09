@@ -9,12 +9,12 @@ import {
 import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
+  appendPage,
   reduceNestedData,
   useSlicePolling,
 } from 'components/utils/tableFetchHelpers'
 import { PageInfoFragment } from 'generated/graphql'
 import { Dispatch, useCallback, useMemo, useState } from 'react'
-import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
 export const DEFAULT_PAGE_SIZE = 100
 
@@ -39,6 +39,10 @@ export type FetchPaginatedDataOptions<
   errorPolicy?: ErrorPolicy
   fetchPolicy?: WatchQueryFetchPolicy
   skip?: boolean
+  // Lists that don't report a virtual slice (boards, card lists) normally
+  // poll only the first page, dropping further loaded pages. With this set
+  // they poll every loaded item instead, pausing past `MAX_POLLED_ITEMS`.
+  keepLoadedPages?: boolean
 }
 
 // could also export this directly from DS
@@ -53,8 +57,13 @@ export type FetchPaginatedDataResult<TQueryType> = {
   refetch: () => Promise<any>
   pageInfo: PageInfoFragment
   fetchNextPage: Dispatch<void>
-  setVirtualSlice: (slice: VirtualSlice) => void
-  /** True while a fetchMore request is in flight; false during poll/refetch. */
+  // `undefined` clears it, e.g. when the table is no longer shown
+  setVirtualSlice: (slice: VirtualSlice | undefined) => void
+  /**
+   * True while a fetchMore request is in flight. That includes the polls of
+   * lists with `keepLoadedPages` or a scrolled virtual slice, which poll
+   * through fetchMore; first-page polls and refetches leave it false.
+   */
   fetchingMore: boolean
 }
 
@@ -91,6 +100,7 @@ export function useFetchPaginatedData<
     error,
     fetchMore,
     networkStatus,
+    observable,
   } = queryResult
 
   const data = currentData || previousData
@@ -110,21 +120,14 @@ export function useFetchPaginatedData<
     interval: options.pollInterval ?? POLL_INTERVAL,
     keyPath: options.keyPath,
     skip: options.skip,
+    keepLoadedPages: options.keepLoadedPages,
   })
 
   const fetchNextPage = useCallback(() => {
     if (pageInfo?.hasNextPage) {
       fetchMore({
         variables: { after: pageInfo?.endCursor },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          const newConnection = extendConnection(
-            reduceNestedData(options.keyPath, prev),
-            reduceNestedData(options.keyPath, fetchMoreResult)[queryKey],
-            queryKey
-          )
-
-          return updateNestedConnection(options.keyPath, prev, newConnection)
-        },
+        updateQuery: appendPage(options.keyPath, observable),
       })
     }
   }, [
@@ -132,7 +135,7 @@ export function useFetchPaginatedData<
     pageInfo?.endCursor,
     fetchMore,
     options.keyPath,
-    queryKey,
+    observable,
   ])
 
   return {

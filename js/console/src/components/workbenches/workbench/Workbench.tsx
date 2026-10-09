@@ -16,7 +16,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import {
-  useWorkbenchJobsQuery,
+  useWorkbenchJobCountsQuery,
   WorkbenchJobStatus,
   useDeleteWorkbenchMutation,
   useWorkbenchQuery,
@@ -29,11 +29,9 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { SubTabs } from 'components/utils/SubTabs'
 import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
-import { mapExistingNodes } from 'utils/graphql'
 import {
   Link,
   Outlet,
-  useLocation,
   useMatch,
   useNavigate,
   useOutletContext,
@@ -88,10 +86,9 @@ export enum WorkbenchMoreMenuKey {
   Delete = 'delete',
 }
 
+// `tools`: tools, webhooks, chatbots and crons, only relevant when launching
 export type WorkbenchSidebar =
-  | { kind: 'default' }
-  | { kind: 'none' }
-  | { kind: 'custom'; content: ReactNode }
+  { kind: 'tools' } | { kind: 'none' } | { kind: 'custom'; content: ReactNode }
 
 export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
@@ -104,7 +101,7 @@ export type WorkbenchPageLayoutProps = {
 }
 
 export function WorkbenchPageLayout({
-  sidebar = { kind: 'default' },
+  sidebar = { kind: 'none' },
   showEditWorkbenchButton = true,
   headerActions,
   contentBackground,
@@ -116,6 +113,12 @@ export function WorkbenchPageLayout({
   const navigate = useNavigate()
   const { workbenchId, workbench, openToolsEdit, openDelete } =
     useOutletContext<WorkbenchOutletContext>()
+
+  // set by the tab layout rather than the parent route, so pages without it
+  // (e.g. a job) can set their own, deeper breadcrumbs
+  useSetBreadcrumbs(
+    useMemo(() => getWorkbenchBreadcrumbs(workbench), [workbench])
+  )
 
   const { tab = '' } =
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
@@ -314,21 +317,26 @@ export function WorkbenchPageLayout({
   )
 }
 
+// reads the status counts rather than a page of jobs, so this poll never
+// overwrites the paginated jobs list in the cache
 function useWorkbenchHasInProgressJobs(workbenchId: string) {
-  const { data } = useWorkbenchJobsQuery({
-    variables: { id: workbenchId, first: 50 },
+  const { data } = useWorkbenchJobCountsQuery({
+    variables: { id: workbenchId },
     skip: !workbenchId,
     pollInterval: 5_000,
     fetchPolicy: 'cache-and-network',
   })
 
-  return useMemo(() => {
-    return mapExistingNodes(data?.workbench?.runs).some(
-      (job) =>
-        job.status === WorkbenchJobStatus.Pending ||
-        job.status === WorkbenchJobStatus.Running
-    )
-  }, [data])
+  return useMemo(
+    () =>
+      (data?.workbench?.runCounts?.statuses ?? []).some(
+        (entry) =>
+          !!entry?.count &&
+          (entry.status === WorkbenchJobStatus.Pending ||
+            entry.status === WorkbenchJobStatus.Running)
+      ),
+    [data]
+  )
 }
 
 const InProgressDotSC = styled.span(({ theme }) => ({
@@ -347,7 +355,7 @@ function renderWorkbenchSidebar(
   switch (sidebar.kind) {
     case 'none':
       return null
-    case 'default':
+    case 'tools':
       return (
         <WorkbenchSidePanel
           workbenchId={workbenchId}
@@ -361,7 +369,6 @@ function renderWorkbenchSidebar(
 
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
-  const { pathname } = useLocation()
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -393,11 +400,14 @@ export function Workbench() {
       },
     })
 
+  // tabs set breadcrumbs through WorkbenchPageLayout; the not-found and error
+  // states below render without it, so set them here instead
+  const notFound = !id || !!error?.message?.includes('could not find resource')
   useSetBreadcrumbs(
-    useMemo(() => {
-      void pathname
-      return getWorkbenchBreadcrumbs(workbench)
-    }, [pathname, workbench])
+    useMemo(
+      () => (notFound || error ? getWorkbenchBreadcrumbs(null) : undefined),
+      [error, notFound]
+    )
   )
 
   const outletContext = useMemo<WorkbenchOutletContext>(
@@ -411,7 +421,7 @@ export function Workbench() {
     [id, isLoading, workbench, openToolsEdit, openDelete]
   )
 
-  if (!id || error?.message?.includes('could not find resource'))
+  if (notFound)
     return (
       <EmptyState message="Workbench not found.">
         <Button

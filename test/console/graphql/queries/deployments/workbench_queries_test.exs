@@ -585,6 +585,98 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal(runs)
     end
 
+    test "it can filter workbench runs by status and pull request state" do
+      workbench = insert(:workbench)
+      open_failed = insert(:workbench_job, workbench: workbench, status: :failed)
+      insert(:pull_request, workbench_job: open_failed, status: :open)
+      insert(:pull_request, workbench_job: open_failed, status: :closed)
+      merged = insert(:workbench_job, workbench: workbench, status: :successful)
+      insert(:pull_request, workbench_job: merged, status: :merged)
+      no_pr = insert(:workbench_job, workbench: workbench, status: :running)
+      insert(:workbench_job, status: :failed)
+
+      query = """
+        query Workbench($id: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+          workbench(id: $id) {
+            runs(first: 10, statuses: $statuses, prStates: $prStates) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {vars, expected} <- [
+        {%{"statuses" => ["FAILED", "RUNNING"]}, [open_failed, no_pr]},
+        {%{"prStates" => ["CLOSED"]}, [open_failed]},
+        {%{"prStates" => ["MERGED", "NONE"]}, [merged, no_pr]},
+        {%{"prStates" => ["NONE"], "statuses" => ["FAILED"]}, []},
+        {%{"statuses" => []}, []}
+      ] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})
+
+        assert from_connection(found["runs"])
+               |> ids_equal(expected)
+      end
+    end
+
+    test "it can sort workbench runs by creation date" do
+      workbench = insert(:workbench)
+      older = insert(:workbench_job, workbench: workbench, inserted_at: Timex.now() |> Timex.shift(days: -1))
+      newer = insert(:workbench_job, workbench: workbench)
+
+      query = """
+        query Workbench($id: ID!, $direction: SortDirection) {
+          workbench(id: $id) {
+            runs(first: 10, direction: $direction) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {direction, expected} <- [{nil, [newer, older]}, {"ASC", [older, newer]}] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, %{"id" => workbench.id, "direction" => direction}, %{current_user: admin_user()})
+
+        assert from_connection(found["runs"])
+               |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
+      end
+    end
+
+    test "it can fetch workbench run counts" do
+      workbench = insert(:workbench)
+      failed = insert(:workbench_job, workbench: workbench, status: :failed)
+      insert(:pull_request, workbench_job: failed, status: :open)
+      insert(:pull_request, workbench_job: failed, status: :open)
+      insert(:pull_request, workbench_job: failed, status: :merged)
+      insert(:workbench_job, workbench: workbench, status: :failed)
+      insert(:workbench_job, workbench: workbench, status: :successful)
+      insert(:workbench_job, status: :running)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            runCounts {
+              statuses { status count }
+              pullRequests { state count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert Enum.sort_by(found["runCounts"]["statuses"], & &1["status"]) == [
+        %{"status" => "FAILED", "count" => 2},
+        %{"status" => "SUCCESSFUL", "count" => 1}
+      ]
+
+      assert Enum.sort_by(found["runCounts"]["pullRequests"], & &1["state"]) == [
+        %{"state" => "MERGED", "count" => 1},
+        %{"state" => "NONE", "count" => 2},
+        %{"state" => "OPEN", "count" => 1}
+      ]
+    end
+
     test "it can fetch workbench alerts" do
       workbench = insert(:workbench)
       alerts = insert_list(3, :alert, workbench: workbench, project: workbench.project)
@@ -604,6 +696,222 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == workbench.id
       assert from_connection(found["alerts"])
              |> ids_equal(alerts)
+    end
+
+    test "it can search workbench alerts by title, alertname tag or message" do
+      workbench = insert(:workbench)
+      by_title   = insert(:alert, workbench: workbench, title: "HighCpuUsage firing")
+      by_message = insert(:alert, workbench: workbench, message: "disk is nearly full")
+      by_tag     = insert(:alert, workbench: workbench, title: "Alertmanager Alert")
+      insert(:tag, alert: by_tag, name: "alertname", value: "PodCrashLooping")
+      other = insert(:alert, workbench: workbench, title: "unrelated")
+      insert(:tag, alert: other, name: "severity", value: "crashloop")
+      insert(:alert, project: workbench.project, title: "HighCpuUsage elsewhere")
+      # invalid UTF-8 can't fail the search, and its readable part still matches
+      by_bad_bytes = insert(:alert, workbench: workbench, message: <<0xFF, 0xFE>> <> "OOMKilled pod")
+      by_unicode   = insert(:alert, workbench: workbench, message: "zużycie pamięci")
+      # LIKE wildcards in the search match literally
+      by_percent    = insert(:alert, workbench: workbench, title: "cpu at 100% usage")
+      insert(:alert, workbench: workbench, title: "cpu at 1000 usage")
+      by_underscore = insert(:alert, workbench: workbench, title: "disk_full")
+      insert(:alert, workbench: workbench, title: "diskXfull")
+
+      query = """
+        query Workbench($id: ID!, $q: String) {
+          workbench(id: $id) {
+            alerts(first: 10, q: $q) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {q, expected} <- [
+        {"highcpu", [by_title]},
+        {"NEARLY", [by_message]},
+        {"crashloop", [by_tag]},
+        {"oomkilled", [by_bad_bytes]},
+        {"pamięci", [by_unicode]},
+        {"100%", [by_percent]},
+        {"disk_full", [by_underscore]}
+      ] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, %{"id" => workbench.id, "q" => q}, %{current_user: admin_user()})
+
+        assert from_connection(found["alerts"])
+               |> ids_equal(expected)
+      end
+    end
+
+    test "it can filter workbench alerts by source and severity" do
+      workbench = insert(:workbench)
+      match = insert(:alert, workbench: workbench, type: :datadog, severity: :high)
+      insert(:alert, workbench: workbench, type: :grafana, severity: :high)
+      insert(:alert, workbench: workbench, type: :datadog, severity: :low)
+      insert(:alert, project: workbench.project, type: :datadog, severity: :high)
+
+      query = """
+        query Workbench($id: ID!, $types: [ObservabilityWebhookType], $severities: [AlertSeverity]) {
+          workbench(id: $id) {
+            alerts(first: 10, types: $types, severities: $severities) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query(query, %{
+        "id" => workbench.id,
+        "types" => ["DATADOG"],
+        "severities" => ["HIGH", "CRITICAL"]
+      }, %{current_user: admin_user()})
+
+      assert from_connection(found["alerts"])
+             |> ids_equal([match])
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "types" => []}, %{current_user: admin_user()})
+
+      assert from_connection(found["alerts"]) == []
+    end
+
+    test "it can sort workbench alerts" do
+      workbench = insert(:workbench)
+      # zulu was created first but updated last, and alerts without a title sort last by title
+      zulu     = insert(:alert, workbench: workbench, title: "Zulu", inserted_at: Timex.now() |> Timex.shift(days: -3), updated_at: Timex.now() |> Timex.shift(hours: -1))
+      alpha    = insert(:alert, workbench: workbench, title: "Alpha", inserted_at: Timex.now() |> Timex.shift(days: -1), updated_at: Timex.now() |> Timex.shift(days: -1))
+      untitled = insert(:alert, workbench: workbench, title: nil, inserted_at: Timex.now() |> Timex.shift(days: -2), updated_at: Timex.now() |> Timex.shift(days: -2))
+
+      query = """
+        query Workbench($id: ID!, $sort: AlertSort, $direction: SortDirection) {
+          workbench(id: $id) {
+            alerts(first: 10, sort: $sort, direction: $direction) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {vars, expected} <- [
+        {%{"sort" => "TITLE", "direction" => "ASC"}, [alpha, zulu, untitled]},
+        {%{"sort" => "TITLE", "direction" => "DESC"}, [zulu, alpha, untitled]},
+        {%{"sort" => "UPDATED_AT", "direction" => "ASC"}, [untitled, alpha, zulu]},
+        {%{"sort" => "UPDATED_AT"}, [zulu, alpha, untitled]},
+        {%{"direction" => "ASC"}, [untitled, alpha, zulu]}
+      ] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})
+
+        assert from_connection(found["alerts"])
+               |> Enum.map(& &1["id"]) == Enum.map(expected, & &1.id)
+      end
+    end
+
+    test "it can fetch workbench alert counts" do
+      workbench = insert(:workbench)
+      insert(:alert, workbench: workbench, type: :grafana, severity: :high)
+      insert(:alert, workbench: workbench, type: :grafana, severity: :low)
+      insert(:alert, workbench: workbench, type: :datadog, severity: :high)
+      insert(:alert, project: workbench.project, type: :sentry, severity: :critical)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            alertCounts {
+              types { type count }
+              severities { severity count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert Enum.sort_by(found["alertCounts"]["types"], & &1["type"]) == [
+        %{"type" => "DATADOG", "count" => 1},
+        %{"type" => "GRAFANA", "count" => 2}
+      ]
+
+      assert Enum.sort_by(found["alertCounts"]["severities"], & &1["severity"]) == [
+        %{"severity" => "HIGH", "count" => 2},
+        %{"severity" => "LOW", "count" => 1}
+      ]
+    end
+
+    test "workbench alert and run connections report filtered total counts" do
+      workbench = insert(:workbench)
+      insert_list(3, :alert, workbench: workbench, severity: :high)
+      insert(:alert, workbench: workbench, severity: :low)
+      insert(:alert, project: workbench.project, severity: :high)
+      insert_list(2, :workbench_job, workbench: workbench, status: :failed)
+      insert(:workbench_job, workbench: workbench, status: :successful)
+      insert(:workbench_job, status: :failed)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            alerts(first: 1) { totalCount }
+            highAlerts: alerts(first: 1, severities: [HIGH]) { totalCount }
+            runs(first: 1) { totalCount }
+            failedRuns: runs(first: 1, statuses: [FAILED]) { totalCount }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["alerts"]["totalCount"] == 4
+      assert found["highAlerts"]["totalCount"] == 3
+      assert found["runs"]["totalCount"] == 3
+      assert found["failedRuns"]["totalCount"] == 2
+    end
+
+    test "it exposes the plural service, value and silence url of workbench alerts" do
+      workbench = insert(:workbench)
+      service = insert(:service)
+
+      payload = %{"alerts" => [
+        %{"fingerprint" => "other", "values" => %{"A" => 5.0}, "silenceURL" => "https://grafana/silence/other"},
+        %{
+          "fingerprint" => "fp-1",
+          "values" => %{"B" => 1.0, "A" => 1018071.0, "C" => 0.25},
+          "valueString" => "[ var='A' value=1.018071e+06 ]",
+          "silenceURL" => "https://grafana/silence/fp-1"
+        },
+        %{"fingerprint" => "fp-2", "valueString" => "[ var='A' value=3 ]"},
+        %{"fingerprint" => "fp-dd", "values" => %{"A" => 1.0}, "silenceURL" => "https://grafana/silence/fp-dd"},
+        %{"fingerprint" => "fp-nested", "values" => %{"A" => %{"x" => 1}, "B" => [1, 2]}}
+      ]}
+
+      grafana  = insert(:alert, workbench: workbench, service: service, fingerprint: "fp-1", payload: payload)
+      fallback = insert(:alert, workbench: workbench, fingerprint: "fp-2", payload: payload)
+      datadog  = insert(:alert, workbench: workbench, type: :datadog, fingerprint: "fp-dd", payload: payload)
+      nested   = insert(:alert, workbench: workbench, fingerprint: "fp-nested", payload: payload)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            alerts(first: 10) {
+              edges { node { id value silenceUrl serviceDeployment { id name } } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      by_id = Map.new(from_connection(found["alerts"]), &{&1["id"], &1})
+
+      assert by_id[grafana.id] == %{
+        "id" => grafana.id,
+        "value" => "A=1018071, B=1, C=0.25",
+        "silenceUrl" => "https://grafana/silence/fp-1",
+        "serviceDeployment" => %{"id" => service.id, "name" => service.name}
+      }
+
+      assert by_id[fallback.id]["value"] == "[ var='A' value=3 ]"
+      refute by_id[fallback.id]["silenceUrl"]
+      refute by_id[fallback.id]["serviceDeployment"]
+
+      refute by_id[datadog.id]["value"]
+      refute by_id[datadog.id]["silenceUrl"]
+
+      # values that aren't numbers are shown as json rather than failing the field
+      assert by_id[nested.id]["value"] == ~s(A={"x":1}, B=[1,2])
     end
 
     test "it can fetch workbench issues" do
@@ -1980,20 +2288,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
   describe "workbenchJobSearch" do
     test "it can search vector-indexed workbench jobs" do
-      import ElasticsearchUtils
-
-      deployment_settings(
-        ai: %{
-          enabled: true,
-          provider: :openai,
-          openai: %{access_token: "key"},
-          vector_store: %{
-            enabled: true,
-            store: :elastic,
-            elastic: es_vector_settings()
-          }
-        }
-      )
+      enable_vector_store()
 
       workbench = insert(:workbench)
 
@@ -2043,6 +2338,50 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["pullRequests"] == [
         %{"title" => pr.title, "url" => pr.url}
       ]
+    end
+
+    test "it filters search results by status and pull request state in relevance order" do
+      enable_vector_store()
+
+      workbench = insert(:workbench)
+      [first_failed, second_failed, third_failed] = insert_list(3, :workbench_job, workbench: workbench, status: :failed)
+      [first_ok, second_ok] = insert_list(2, :workbench_job, workbench: workbench, status: :successful)
+      insert(:pull_request, workbench_job: second_ok, status: :merged)
+      ranked = [first_ok, second_failed, second_ok, first_failed, third_failed]
+
+      expect(Console.AI.VectorStore, :fetch, 3, fn "outage", opts ->
+        {:ok, ranked
+              |> Enum.take(opts[:count])
+              |> Enum.map(&%Console.AI.VectorStore.Response{
+                type: :workbench,
+                workbench_job: %Console.Schema.WorkbenchJob.Mini{id: &1.id}
+              })}
+      end)
+
+      query = """
+        query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+          workbenchJobSearch(q: "outage", workbenchId: $workbenchId, limit: 2, statuses: $statuses, prStates: $prStates) {
+            id
+          }
+        }
+      """
+
+      # 4 candidates for a limit of 2: the matching ones among them, most relevant first
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id, "statuses" => ["FAILED"]}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == [second_failed.id, first_failed.id]
+
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id, "prStates" => ["MERGED"]}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == [second_ok.id]
+
+      # unfiltered searches fetch just the limit, in relevance order
+      {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+        run_query(query, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
+
+      assert Enum.map(found, & &1["id"]) == [first_ok.id, second_failed.id]
     end
 
     test "it errors when the vector store is not enabled" do
@@ -2512,5 +2851,22 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert row["merge_rate"] == 1.0
       assert row["timestamp"]
     end
+  end
+
+  defp enable_vector_store() do
+    import ElasticsearchUtils
+
+    deployment_settings(
+      ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{access_token: "key"},
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: es_vector_settings()
+        }
+      }
+    )
   end
 end

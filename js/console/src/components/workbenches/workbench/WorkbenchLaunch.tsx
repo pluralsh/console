@@ -9,7 +9,7 @@ export function WorkbenchLaunch() {
   const { workbenchId, isLoading } = useOutletContext<WorkbenchOutletContext>()
 
   return (
-    <WorkbenchPageLayout>
+    <WorkbenchPageLayout sidebar={{ kind: 'tools' }}>
       <WrapperSC>
         <WorkbenchJobCreateInput
           workbenchId={workbenchId}
