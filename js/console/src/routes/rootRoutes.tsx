@@ -10,6 +10,8 @@ import { LinkLogin } from 'components/login/LinkLogin'
 import Login from 'components/login/Login'
 import { OAuthCallback } from 'components/login/OauthCallback'
 import { OAuthConsent } from '../components/login/OAuthConsent.tsx'
+import { PublicWorkbenchDashboard } from 'components/workbenches/public/PublicWorkbenchDashboard'
+import { PUBLIC_DASHBOARD_PATH } from 'components/workbenches/workbench/monitoring/shareDashboardUrl'
 import { consoleRoutes } from './consoleRoutes'
 
 const Sandbox =
@@ -34,6 +36,10 @@ export const rootRoutes = [
       {
         path: 'login',
         element: <Login />,
+      },
+      {
+        path: `${PUBLIC_DASHBOARD_PATH}/:publicId`,
+        element: <PublicWorkbenchDashboard />,
       },
       {
         path: 'quick-login/:key',

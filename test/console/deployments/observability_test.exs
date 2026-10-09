@@ -741,4 +741,52 @@ defmodule Console.Deployments.ObservabilityTest do
                "Monitor cpu-high back to firing for #{service.name}"
     end
   end
+
+  describe "#share_dashboard/3" do
+    test "writers can share, and resharing keeps the id" do
+      user = insert(:user)
+      dashboard = insert(:dashboard, workbench: insert(:workbench, write_bindings: [%{user_id: user.id}]))
+
+      {:ok, shared} = Observability.share_dashboard(dashboard.id, true, user)
+      assert is_binary(shared.public_id) and byte_size(shared.public_id) >= 43
+      assert_receive {:event, %PubSub.DashboardUpdated{item: %{id: id}}} when id == dashboard.id
+
+      {:ok, again} = Observability.share_dashboard(dashboard.id, true, user)
+      assert again.public_id == shared.public_id
+    end
+
+    test "unsharing wipes the id and resharing issues a new one" do
+      user = insert(:user)
+      dashboard = insert(:dashboard, workbench: insert(:workbench, write_bindings: [%{user_id: user.id}]))
+
+      {:ok, shared} = Observability.share_dashboard(dashboard.id, true, user)
+      {:ok, unshared} = Observability.share_dashboard(dashboard.id, false, user)
+      assert unshared.public_id == nil
+
+      {:ok, reshared} = Observability.share_dashboard(dashboard.id, true, user)
+      refute reshared.public_id in [nil, shared.public_id]
+    end
+
+    test "non-writers cannot share" do
+      dashboard = insert(:dashboard)
+
+      {:error, _} = Observability.share_dashboard(dashboard.id, true, insert(:user))
+    end
+
+    test "changeset/2 cannot set public_id" do
+      cs = Console.Schema.Dashboard.changeset(%Console.Schema.Dashboard{}, %{public_id: "x", name: "n"})
+
+      assert Ecto.Changeset.get_change(cs, :public_id) == nil
+    end
+  end
+
+  describe "#get_dashboard_by_public_id/1" do
+    test "finds shared dashboards and returns nil otherwise" do
+      shared = insert(:dashboard, public_id: "abc123")
+      insert(:dashboard)
+
+      assert Observability.get_dashboard_by_public_id("abc123").id == shared.id
+      refute Observability.get_dashboard_by_public_id("missing")
+    end
+  end
 end

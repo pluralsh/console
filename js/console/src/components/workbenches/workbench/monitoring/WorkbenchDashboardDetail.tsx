@@ -1,9 +1,11 @@
 import {
+  Button,
   EmptyState,
   ExpandIcon,
   Flex,
   HamburgerMenuCollapsedIcon,
   IconFrame,
+  PeopleIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -47,6 +49,8 @@ import {
   WorkbenchDashboardFilters,
 } from './WorkbenchDashboardFilters'
 import { WorkbenchDashboardPanels } from './WorkbenchDashboardPanels'
+import { ShareDashboardModal } from './ShareDashboardModal'
+import { AuthenticatedGraphSource, toPanelGraph } from './DashboardGraphSource'
 
 export function DashboardDetail({
   dashboardId,
@@ -93,7 +97,7 @@ function DashboardDetailView({
 }) {
   const { pathname, search } = useLocation()
   const graphs = useMemo(
-    () => dashboard.graphs?.filter(isNonNullable) ?? [],
+    () => dashboard.graphs?.filter(isNonNullable).map(toPanelGraph) ?? [],
     [dashboard.graphs]
   )
   const allInputs = useMemo(
@@ -188,6 +192,7 @@ function DashboardDetailView({
   const hasFilters = inputs.length > 0
   const [definitionOpen, setDefinitionOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
   const containerRef = useDefinitionPanelContainer()
   const definitionYaml = useMemo(
@@ -231,6 +236,14 @@ function DashboardDetailView({
               range={range}
               variables={shareVariables}
             />
+            <Button
+              small
+              secondary
+              startIcon={<PeopleIcon />}
+              onClick={() => setShareOpen(true)}
+            >
+              Share publicly
+            </Button>
             <IconFrame
               ref={fullscreenTriggerRef}
               clickable
@@ -301,16 +314,17 @@ function DashboardDetailView({
             />
           </ToolbarSC>
           <PanelsSC>
-            <WorkbenchDashboardPanels
-              dashboardId={dashboard.id}
-              graphs={graphs}
-              variables={variables}
-              timeRange={timeRange}
-              rangeRevision={rangeRevision}
-              queriesEnabled={dashboardReady}
-              onRangeSelect={onRangeSelect}
-              onUpdate={onUpdate}
-            />
+            <AuthenticatedGraphSource dashboardId={dashboard.id}>
+              <WorkbenchDashboardPanels
+                graphs={graphs}
+                variables={variables}
+                timeRange={timeRange}
+                rangeRevision={rangeRevision}
+                queriesEnabled={dashboardReady}
+                onRangeSelect={onRangeSelect}
+                onUpdate={onUpdate}
+              />
+            </AuthenticatedGraphSource>
           </PanelsSC>
         </BodySC>
       </ScrollSC>
@@ -332,6 +346,12 @@ function DashboardDetailView({
       }
     >
       {fullscreen ? createPortal(main, document.body) : main}
+      <ShareDashboardModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        dashboardId={dashboard.id}
+        publicId={dashboard.publicId}
+      />
     </DefinitionPanelShell>
   )
 }

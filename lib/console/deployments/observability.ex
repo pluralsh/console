@@ -143,6 +143,26 @@ defmodule Console.Deployments.Observability do
     end)
   end
 
+  @spec get_dashboard_by_public_id(binary) :: Dashboard.t | nil
+  def get_dashboard_by_public_id(public_id), do: Repo.get_by(Dashboard, public_id: public_id)
+
+  @doc "Enables or disables public sharing of a dashboard, wiping the public id on unshare"
+  @spec share_dashboard(binary, boolean, User.t()) :: dashboard_resp
+  def share_dashboard(id, shared, %User{} = user) do
+    dashboard = get_dashboard!(id)
+
+    with {:ok, dashboard} <- allow(dashboard, user, :write) do
+      case {shared, dashboard.public_id} do
+        {true, id} when is_binary(id) -> {:ok, dashboard}
+        _ ->
+          dashboard
+          |> Dashboard.share_changeset(if(shared, do: Console.rand_str(32)))
+          |> Repo.update()
+          |> notify(:update)
+      end
+    end
+  end
+
   @spec delete_dashboard(binary, User.t()) :: dashboard_resp
   def delete_dashboard(id, %User{} = user) do
     get_dashboard!(id)
