@@ -1,4 +1,4 @@
-FROM golang:1.27.1 AS builder
+FROM golang:1.27.2 AS builder
 
 WORKDIR /workspace
 
@@ -16,7 +16,7 @@ COPY internal/ internal/
 # Build the cloud-query binary
 RUN CGO_ENABLED=0 go build -o bin/cloud-query cmd/*.go
 
-FROM cgr.dev/chainguard/wolfi-base:latest AS final
+FROM cgr.dev/chainguard/wolfi-base@sha256:006a848b7f11895fd2c37ee2e39c5f14474ab2e29bc34e1ddf2d6aa16cf40d37 AS final
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -43,7 +43,8 @@ COPY --from=builder /workspace/bin/cloud-query /usr/local/bin/cloud-query
 USER root
 
 EXPOSE 8080
-RUN apk add --no-cache curl
+RUN apk info -e glibc=2.44-r8 libcrypt1=2.44-r8 glibc-locale-posix=2.44-r8 ld-linux=2.44-r8 \
+    && apk add --no-cache curl
 USER nonroot
 CMD ["/usr/local/bin/cloud-query"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:8080/healthz"]
