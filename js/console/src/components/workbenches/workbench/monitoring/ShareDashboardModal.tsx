@@ -1,4 +1,10 @@
-import { Button, Input, Modal, useCopyText } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  Input,
+  Modal,
+  useCopyText,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useShareWorkbenchDashboardMutation } from 'generated/graphql'
 import { useState } from 'react'
@@ -45,7 +51,7 @@ export function ShareDashboardModal({
       actions={
         publicId ? (
           confirming ? (
-            <>
+            <Flex gap="medium">
               <Button
                 secondary
                 onClick={() => setConfirming(false)}
@@ -59,9 +65,9 @@ export function ShareDashboardModal({
               >
                 Stop sharing
               </Button>
-            </>
+            </Flex>
           ) : (
-            <>
+            <Flex gap="medium">
               <Button
                 secondary
                 onClick={handleCopy}
@@ -74,7 +80,7 @@ export function ShareDashboardModal({
               >
                 Stop sharing
               </Button>
-            </>
+            </Flex>
           )
         ) : (
           <Button
