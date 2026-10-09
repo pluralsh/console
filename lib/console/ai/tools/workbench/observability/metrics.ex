@@ -60,15 +60,19 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   end
 
   @metric_limit 500
+  @non_finite_values [:nan, :infinity, :negative_infinity]
 
   def implement(%__MODULE__{} = tool) do
     tool = TimeRange.ensure(tool)
     with :ok <- TimeRange.safe(tool.time_range),
          {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
-         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()),
-         {:ok, content} <- Protobuf.JSON.encode(output) do
-      {:ok, %{content: Output.truncate(content), metrics: Enum.map(Enum.take(output.metrics, @metric_limit), &mapify/1)}}
+         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()) do
+      metrics = finite_metrics(output.metrics)
+
+      with {:ok, content} <- Protobuf.JSON.encode(%{output | metrics: metrics}) do
+        {:ok, %{content: Output.truncate(content), metrics: Enum.map(Enum.take(metrics, @metric_limit), &mapify/1)}}
+      end
     end
   end
 
@@ -76,9 +80,12 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()) do
-      {:ok, Enum.map(output.metrics, &mapify/1)}
+      {:ok, output.metrics |> finite_metrics() |> Enum.map(&mapify/1)}
     end
   end
+
+  defp finite_metrics(metrics),
+    do: Enum.reject(metrics, &(&1.value in @non_finite_values))
 
   defp mapify(%MetricPoint{} = metric) do
     %{

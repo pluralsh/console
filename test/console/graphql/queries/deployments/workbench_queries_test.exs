@@ -1569,6 +1569,24 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              %MetricPoint{
                timestamp: Google.Protobuf.from_datetime(now),
                name: "http_requests_total",
+               value: :nan,
+               labels: %{"service" => "api"}
+             },
+             %MetricPoint{
+               timestamp: Google.Protobuf.from_datetime(now),
+               name: "http_requests_total",
+               value: :infinity,
+               labels: %{"service" => "api"}
+             },
+             %MetricPoint{
+               timestamp: Google.Protobuf.from_datetime(now),
+               name: "http_requests_total",
+               value: :negative_infinity,
+               labels: %{"service" => "api"}
+             },
+             %MetricPoint{
+               timestamp: Google.Protobuf.from_datetime(now),
+               name: "http_requests_total",
                value: 42.5,
                labels: %{"service" => "api", "method" => "GET"}
              }

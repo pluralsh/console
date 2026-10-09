@@ -439,7 +439,9 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
       inset: 0,
       position: 'fixed',
       width: '100%',
-      zIndex: theme.zIndexes.modal,
+      // Keep page fullscreen below actual dialogs so graph fullscreen and
+      // query modals opened from within it remain visible.
+      zIndex: theme.zIndexes.modal - 1,
     }),
   })
 )

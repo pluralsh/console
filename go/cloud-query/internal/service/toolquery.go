@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"regexp"
 	"strings"
 	"time"
 
@@ -133,8 +134,8 @@ func (in *ToolQueryService) LogAggregate(ctx context.Context, input *toolquery.L
 	if err := in.validateLogsInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
 		return nil, err
 	}
-	if bucketSize, err := time.ParseDuration(input.GetBucketSize()); err != nil || bucketSize <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "bucket_size must be a positive duration")
+	if err := validateBucketSize(input.GetBucketSize()); err != nil {
+		return nil, err
 	}
 
 	provider, err := tools.NewProvider(input.GetConnection())
@@ -257,6 +258,45 @@ func (in *ToolQueryService) validateLogsInput(connection *toolquery.ToolConnecti
 	}
 
 	return in.validateTimeRange(timeRange)
+}
+
+var goDurationSyntax = regexp.MustCompile(`^[+-]?(?:(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:ns|us|µs|μs|ms|s|m|h))+$`)
+
+const maxGoDuration = time.Duration(1<<63 - 1)
+
+func validateBucketSize(value string) error {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return status.Error(codes.InvalidArgument, "bucket_size is required")
+	}
+
+	bucketSize, err := time.ParseDuration(value)
+	if err != nil {
+		if goDurationSyntax.MatchString(value) {
+			return status.Errorf(
+				codes.InvalidArgument,
+				"bucket_size exceeds this endpoint's maximum duration of %s; got %q",
+				maxGoDuration,
+				value,
+			)
+		}
+
+		return status.Errorf(
+			codes.InvalidArgument,
+			"bucket_size must use Go duration syntax (for example 30s, 5m, or 2h; supported units are ns, us, µs/μs, ms, s, m, and h); got %q: %v",
+			value,
+			err,
+		)
+	}
+	if bucketSize <= 0 {
+		return status.Errorf(
+			codes.InvalidArgument,
+			"bucket_size must be greater than zero; got %q",
+			value,
+		)
+	}
+
+	return nil
 }
 
 func (in *ToolQueryService) validateSearchInput(connection *toolquery.ToolConnection) error {
