@@ -17,7 +17,12 @@ defmodule Loki.Client do
 
     host(client)
     |> Path.join("/loki/api/v1/query_range?#{query}")
-    |> Req.get(headers: Enum.uniq_by(headers() ++ auth(client), &elem(&1, 0)), decode_body: false, retry: false)
+    |> Req.get(
+      headers: Enum.uniq_by(headers() ++ auth(client), &elem(&1, 0)),
+      compressed: true,
+      decode_body: false,
+      retry: false
+    )
     |> case do
       {:ok, %{body: body, status: 200}} ->
         {:ok, body

@@ -7,7 +7,13 @@ defmodule Prometheus.Client do
   @query_timeout :timer.seconds(30)
   # range queries over grouped/joined usage metrics can run long; matches prometheus' default 2m -query.timeout
   @range_query_timeout :timer.minutes(2)
-  @timeouts [connect_options: [timeout: :timer.seconds(30)], receive_timeout: @query_timeout, decode_body: false, retry: false]
+  @timeouts [
+    connect_options: [timeout: :timer.seconds(30)],
+    receive_timeout: @query_timeout,
+    compressed: true,
+    decode_body: false,
+    retry: false
+  ]
   @range_timeouts Keyword.put(@timeouts, :receive_timeout, @range_query_timeout)
 
   @doc "upper bound on a single instant query, for callers awaiting it in a task"
