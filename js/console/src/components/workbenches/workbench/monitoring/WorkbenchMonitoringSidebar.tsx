@@ -1,14 +1,13 @@
 import {
   AddIcon,
+  Button,
   CheckIcon,
   CloseIcon,
-  DashboardIcon,
   EmptyState,
   Flex,
   IconFrame,
   Input,
   SearchIcon,
-  SirenIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -150,18 +149,24 @@ export function WorkbenchMonitoringSidebar({
             <GroupSC $first>
               <GroupHeaderSC>
                 <span>Dashboards</span>
-                <IconFrame
-                  clickable
-                  size="small"
-                  icon={<AddIcon />}
-                  tooltip="New dashboard"
-                  aria-label="New dashboard"
-                  onClick={() =>
-                    navigate(
-                      getWorkbenchMonitoringDashboardCreateAbsPath(workbenchId)
-                    )
-                  }
-                />
+                {(dashboardsLoading ||
+                  hasFilter ||
+                  dashboardNodes.length > 0) && (
+                  <IconFrame
+                    clickable
+                    size="small"
+                    icon={<AddIcon />}
+                    tooltip="New dashboard"
+                    aria-label="New dashboard"
+                    onClick={() =>
+                      navigate(
+                        getWorkbenchMonitoringDashboardCreateAbsPath(
+                          workbenchId
+                        )
+                      )
+                    }
+                  />
+                )}
               </GroupHeaderSC>
               {dashboards.error && (
                 <PaddedSC>
@@ -181,14 +186,26 @@ export function WorkbenchMonitoringSidebar({
                   <PaddedSC>
                     <MonitoringListSkeleton count={3} />
                   </PaddedSC>
-                ) : dashboardNodes.length === 0 ? (
-                  <PaddedSC>
-                    <CaptionP $color="text-xlight">
-                      {hasFilter
-                        ? 'No dashboards match this filter.'
-                        : 'No dashboards yet.'}
-                    </CaptionP>
-                  </PaddedSC>
+                ) : dashboardNodes.length === 0 && !dashboards.error ? (
+                  hasFilter ? (
+                    <PaddedSC>
+                      <CaptionP $color="text-xlight">
+                        No dashboards match this filter.
+                      </CaptionP>
+                    </PaddedSC>
+                  ) : (
+                    <EmptyAddButton
+                      onClick={() =>
+                        navigate(
+                          getWorkbenchMonitoringDashboardCreateAbsPath(
+                            workbenchId
+                          )
+                        )
+                      }
+                    >
+                      Add dashboard
+                    </EmptyAddButton>
+                  )
                 ) : (
                   <>
                     {dashboardNodes.map((dashboard) => (
@@ -210,18 +227,20 @@ export function WorkbenchMonitoringSidebar({
             <GroupSC>
               <GroupHeaderSC>
                 <span>Monitors</span>
-                <IconFrame
-                  clickable
-                  size="small"
-                  icon={<AddIcon />}
-                  tooltip="New monitor"
-                  aria-label="New monitor"
-                  onClick={() =>
-                    navigate(
-                      getWorkbenchMonitoringMonitorCreateAbsPath(workbenchId)
-                    )
-                  }
-                />
+                {(monitorsLoading || hasFilter || monitorNodes.length > 0) && (
+                  <IconFrame
+                    clickable
+                    size="small"
+                    icon={<AddIcon />}
+                    tooltip="New monitor"
+                    aria-label="New monitor"
+                    onClick={() =>
+                      navigate(
+                        getWorkbenchMonitoringMonitorCreateAbsPath(workbenchId)
+                      )
+                    }
+                  />
+                )}
               </GroupHeaderSC>
               {monitors.error && (
                 <PaddedSC>
@@ -241,14 +260,26 @@ export function WorkbenchMonitoringSidebar({
                   <PaddedSC>
                     <MonitoringListSkeleton count={3} />
                   </PaddedSC>
-                ) : monitorNodes.length === 0 ? (
-                  <PaddedSC>
-                    <CaptionP $color="text-xlight">
-                      {hasFilter
-                        ? 'No monitors match this filter.'
-                        : 'No monitors yet.'}
-                    </CaptionP>
-                  </PaddedSC>
+                ) : monitorNodes.length === 0 && !monitors.error ? (
+                  hasFilter ? (
+                    <PaddedSC>
+                      <CaptionP $color="text-xlight">
+                        No monitors match this filter.
+                      </CaptionP>
+                    </PaddedSC>
+                  ) : (
+                    <EmptyAddButton
+                      onClick={() =>
+                        navigate(
+                          getWorkbenchMonitoringMonitorCreateAbsPath(
+                            workbenchId
+                          )
+                        )
+                      }
+                    >
+                      Add monitor
+                    </EmptyAddButton>
+                  )
                 ) : (
                   <>
                     {monitorNodes.map((monitor) => (
@@ -274,6 +305,27 @@ export function WorkbenchMonitoringSidebar({
   )
 }
 
+function EmptyAddButton({
+  children,
+  onClick,
+}: {
+  children: string
+  onClick: () => void
+}) {
+  return (
+    <PaddedSC>
+      <EmptyAddButtonSC
+        small
+        tertiary
+        startIcon={<AddIcon size={12} />}
+        onClick={onClick}
+      >
+        {children}
+      </EmptyAddButtonSC>
+    </PaddedSC>
+  )
+}
+
 function MonitoringListSkeleton({ count }: { count: number }) {
   return (
     <Flex
@@ -283,28 +335,17 @@ function MonitoringListSkeleton({ count }: { count: number }) {
       {times(count, (i) => (
         <Flex
           key={i}
-          gap="medium"
-          align="center"
+          direction="column"
+          gap="xsmall"
         >
           <RectangleSkeleton
-            $height={40}
-            $width={40}
-            css={{ flexShrink: 0 }}
+            $height="xsmall"
+            $width="70%"
           />
-          <Flex
-            direction="column"
-            gap="xsmall"
-            flex={1}
-          >
-            <RectangleSkeleton
-              $height="xsmall"
-              $width="70%"
-            />
-            <RectangleSkeleton
-              $height="xsmall"
-              $width="45%"
-            />
-          </Flex>
+          <RectangleSkeleton
+            $height="xsmall"
+            $width="45%"
+          />
         </Flex>
       ))}
     </Flex>
@@ -344,12 +385,6 @@ function DashboardRow({
         })}
         aria-label={`Dashboard ${dashboard.name}`}
       >
-        <RowIconSC
-          aria-hidden="true"
-          size="large"
-          type="secondary"
-          icon={<DashboardIcon />}
-        />
         <RowTextSC>
           <RowTitleSC>{dashboard.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -421,18 +456,17 @@ function MonitorRow({
   return (
     <RowSC $selected={selectedId === monitor.id}>
       <RowLinkSC
+        className={
+          monitor.state === AlertState.Firing && !confirming
+            ? 'has-firing-dot'
+            : undefined
+        }
         to={getWorkbenchMonitoringMonitorAbsPath({
           workbenchId,
           monitorId: monitor.id,
         })}
         aria-label={`Monitor ${monitor.name}`}
       >
-        <RowIconSC
-          aria-hidden="true"
-          size="large"
-          type="secondary"
-          icon={<SirenIcon />}
-        />
         <RowTextSC>
           <RowTitleSC>{monitor.name}</RowTitleSC>
           <RowSubtitleSC>
@@ -442,46 +476,44 @@ function MonitorRow({
           </RowSubtitleSC>
         </RowTextSC>
       </RowLinkSC>
-      <RowActionsSC>
-        {monitor.state === AlertState.Firing && !confirming && (
-          <FiringDotSC
-            className="firing-dot"
-            role="img"
-            aria-label="Firing"
+      {monitor.state === AlertState.Firing && !confirming && (
+        <FiringDotSC
+          className="firing-dot"
+          role="img"
+          aria-label="Firing"
+        />
+      )}
+      {confirming ? (
+        <InlineConfirmSC className="inline-confirm">
+          <IconFrame
+            clickable
+            size="small"
+            icon={<CheckIcon color="icon-success" />}
+            tooltip="Confirm delete"
+            aria-label={`Confirm delete ${monitor.name}`}
+            onClick={() => deleteMonitor()}
           />
-        )}
-        {confirming ? (
-          <InlineConfirmSC className="inline-confirm">
-            <IconFrame
-              clickable
-              size="small"
-              icon={<CheckIcon color="icon-success" />}
-              tooltip="Confirm delete"
-              aria-label={`Confirm delete ${monitor.name}`}
-              onClick={() => deleteMonitor()}
-            />
-            <IconFrame
-              clickable
-              size="small"
-              icon={<CloseIcon />}
-              tooltip="Cancel"
-              aria-label="Cancel delete"
-              onClick={() => setConfirming(false)}
-            />
-          </InlineConfirmSC>
-        ) : (
-          <DeleteSC className="delete-action">
-            <IconFrame
-              clickable
-              size="small"
-              icon={<TrashCanIcon color="icon-danger" />}
-              tooltip="Delete monitor"
-              aria-label={`Delete ${monitor.name}`}
-              onClick={() => setConfirming(true)}
-            />
-          </DeleteSC>
-        )}
-      </RowActionsSC>
+          <IconFrame
+            clickable
+            size="small"
+            icon={<CloseIcon />}
+            tooltip="Cancel"
+            aria-label="Cancel delete"
+            onClick={() => setConfirming(false)}
+          />
+        </InlineConfirmSC>
+      ) : (
+        <DeleteSC className="delete-action">
+          <IconFrame
+            clickable
+            size="small"
+            icon={<TrashCanIcon color="icon-danger" />}
+            tooltip="Delete monitor"
+            aria-label={`Delete ${monitor.name}`}
+            onClick={() => setConfirming(true)}
+          />
+        </DeleteSC>
+      )}
     </RowSC>
   )
 }
@@ -535,6 +567,21 @@ const PaddedSC = styled.div(({ theme }) => ({
   padding: `0 ${theme.spacing.medium}px`,
 }))
 
+// Same treatment as the workbench side panel empty add button.
+const EmptyAddButtonSC = styled(Button)(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.caption,
+  alignSelf: 'start',
+  color: theme.colors['text-xlight'],
+  padding: 0,
+
+  '&:hover': {
+    ...theme.partials.reset.button,
+    ...theme.partials.text.caption,
+    color: theme.colors['text-light'],
+  },
+}))
+
 const GroupHeaderSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
   alignItems: 'center',
@@ -554,56 +601,83 @@ const GroupListSC = styled.div(() => ({
   overflowY: 'auto',
 }))
 
-// IconFrame small (24) + gap + IconFrame small; matches inline confirm.
-const ROW_ACTION_WIDTH = 52
+const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
+  const selectedColor = theme.colors['fill-two-selected']
+  const hoverColor = theme.colors['fill-one-hover']
+  const actionFade = (color: string) =>
+    `linear-gradient(to right, transparent, ${color} ${theme.spacing.large}px)`
 
-const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => ({
-  alignItems: 'center',
-  // Note: Figma fill tokens predate the DS rename; these current tokens
-  // match the Figma rendered hexes (selected #2A2E37, hover #252932).
-  backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
-  display: 'flex',
-  gap: theme.spacing.xsmall,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  '&:hover': {
-    backgroundColor: $selected
-      ? theme.colors['fill-two-selected']
-      : theme.colors['fill-one-hover'],
-  },
-  '& .delete-action': {
-    opacity: 0,
-    pointerEvents: 'none',
-  },
-  '&:hover .delete-action, &:focus-within .delete-action': {
-    opacity: 1,
-    pointerEvents: 'auto',
-  },
-  '&:hover .firing-dot, &:focus-within .firing-dot': {
-    opacity: 0,
-  },
-}))
+  return {
+    alignItems: 'center',
+    // Note: Figma fill tokens predate the DS rename; these current tokens
+    // match the Figma rendered hexes (selected #2A2E37, hover #252932).
+    backgroundColor: $selected ? selectedColor : undefined,
+    display: 'flex',
+    gap: theme.spacing.xsmall,
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    position: 'relative',
+    // Delete sits over the title so the name can use the full row.
+    '& > .delete-action, & > .inline-confirm': {
+      alignItems: 'center',
+      backgroundImage: actionFade(
+        $selected ? selectedColor : theme.colors['fill-zero-selected']
+      ),
+      bottom: 0,
+      display: 'flex',
+      paddingLeft: theme.spacing.large,
+      position: 'absolute',
+      right: theme.spacing.medium,
+      top: 0,
+      zIndex: 1,
+    },
+    '&:hover': {
+      backgroundColor: $selected ? selectedColor : hoverColor,
+    },
+    '&:hover > .delete-action, &:focus-within > .delete-action, &:hover > .inline-confirm, &:focus-within > .inline-confirm':
+      {
+        backgroundImage: actionFade($selected ? selectedColor : hoverColor),
+      },
+    '& .delete-action': {
+      opacity: 0,
+      pointerEvents: 'none',
+    },
+    '&:hover .delete-action, &:focus-within .delete-action': {
+      opacity: 1,
+      pointerEvents: 'auto',
+    },
+    '&:hover .firing-dot, &:focus-within .firing-dot': {
+      opacity: 0,
+    },
+    // 8px dot centered on the 24px section plus. Plus inset is spacing.medium.
+    '& > .firing-dot': {
+      position: 'absolute',
+      right: theme.spacing.large,
+      top: '50%',
+      transform: 'translateY(-50%)',
+    },
+    // Keep the name clear of the dot until hover, when the dot hides.
+    '&:not(:hover):not(:focus-within) > .has-firing-dot': {
+      paddingRight: theme.spacing.large,
+    },
+  }
+})
 
 const RowLinkSC = styled(Link)({
   alignItems: 'center',
   display: 'flex',
   flex: 1,
-  gap: 16,
   minWidth: 0,
   textDecoration: 'none',
 })
 
-const RowIconSC = styled(IconFrame)({
-  flexShrink: 0,
-})
-
-const RowTextSC = styled.div({
+const RowTextSC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
-  gap: 4,
+  gap: theme.spacing.xxsmall,
   justifyContent: 'center',
   minWidth: 0,
-})
+}))
 
 const RowTitleSC = styled.span(({ theme }) => ({
   ...TRUNCATE,
@@ -617,22 +691,11 @@ const RowSubtitleSC = styled.span(({ theme }) => ({
   color: theme.colors['text-light'],
 }))
 
-const RowActionsSC = styled.div({
-  alignItems: 'center',
-  display: 'grid',
-  flexShrink: 0,
-  justifyItems: 'end',
-  width: ROW_ACTION_WIDTH,
-  '& > *': {
-    gridArea: '1 / 1',
-  },
-})
-
 const FiringDotSC = styled.span(({ theme }) => ({
   backgroundColor: theme.colors['icon-danger'],
-  borderRadius: 5,
-  height: 10,
-  width: 10,
+  borderRadius: '50%',
+  height: theme.spacing.xsmall,
+  width: theme.spacing.xsmall,
 }))
 
 const DeleteSC = styled.span({
@@ -641,7 +704,6 @@ const DeleteSC = styled.span({
   flexShrink: 0,
   justifyContent: 'flex-end',
   transition: 'opacity 0.15s ease',
-  width: ROW_ACTION_WIDTH,
 })
 
 const InlineConfirmSC = styled.span(({ theme }) => ({
@@ -650,5 +712,5 @@ const InlineConfirmSC = styled.span(({ theme }) => ({
   flexShrink: 0,
   gap: theme.spacing.xxsmall,
   justifyContent: 'flex-end',
-  width: ROW_ACTION_WIDTH,
+  justifySelf: 'end',
 }))
