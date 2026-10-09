@@ -535,13 +535,7 @@ function WorkbenchJobActivityResult({
   )
 }
 
-// Trims each line's empty space above the capitals and below the baseline, so
-// row gaps measure from the letters themselves. Browsers without `text-box`
-// keep the normal line spacing.
-const trimTextBoxCss = { textBox: 'trim-both cap alphabetic' } as const
-
-// Horizontal-only clipping keeps ellipsis while letting ascenders, descenders,
-// and the title row's icons extend past the trimmed text.
+// Keep ellipsis horizontal so glyphs and icons are not clipped vertically.
 const clipInlineCss = { overflowX: 'clip', overflowY: 'visible' } as const
 
 // children that render null leave an empty box that still takes a gap slot in the parent
@@ -563,17 +557,12 @@ const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   ...clipInlineCss,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  ...trimTextBoxCss,
 }))
 
-// Cap height, so the hover caret overflows instead of growing the row. The
-// label wrapper clips sideways only, or it would cut off ascenders and
-// descenders that extend past the trimmed text.
 const memoTriggerStyles = {
   justifyContent: 'flex-start',
   width: 'fit-content',
   maxWidth: '100%',
-  height: '1cap',
   '& > span': clipInlineCss,
 } as const
 
@@ -1217,7 +1206,6 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
     },
     '.type': {
       flexShrink: 0,
-      ...trimTextBoxCss,
     },
     '.summary': {
       display: 'block',
@@ -1226,7 +1214,6 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
       ...clipInlineCss,
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
-      ...trimTextBoxCss,
       ...($hasStatusIcon && {
         paddingLeft: ACTIVITY_STATUS_ICON_SIZE + theme.spacing.xsmall,
       }),
@@ -1234,12 +1221,10 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
   })
 )
 
-// Cap height, so taller trailing icons overflow instead of growing the row.
 const ActivityTitleRowSC = styled.span(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
-  height: '1cap',
   minWidth: 0,
   maxWidth: '100%',
   ...clipInlineCss,
