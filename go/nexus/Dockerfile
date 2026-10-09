@@ -26,6 +26,16 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o nexus \
     ./cmd/main.go
 
+# Install and verify the timezone data outside the distroless runtime image.
+FROM debian:12.15-slim@sha256:3783cc01769c7b2b1b83a5c5ad96c815348e28ed7da68e2e3687004faa906251 AS tzdata
+
+ARG TZDATA_VERSION=2026c-0+deb12u1
+
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata="${TZDATA_VERSION}" \
+ && dpkg-query -W -f='${Version}\n' tzdata | grep -Fx "${TZDATA_VERSION}" \
+ && rm -rf /var/lib/apt/lists/*
+
 # Runtime stage
 FROM gcr.io/distroless/static-debian12:nonroot
 
@@ -52,6 +62,9 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /build/nexus /app/nexus
+
+# Copy only the verified timezone data into the distroless runtime.
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Copy default config (optional)
 COPY --from=builder /build/config/config.yaml /app/config/config.yaml
