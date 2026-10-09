@@ -5,6 +5,24 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 92.2.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+    '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Bumps Grafana image tag from `v13.3.0` to `v13.4.0` (renovate
+        PR #7358).']
+    features: ['Grafana is upgraded to v13.4.0 (from v13.3.0), bringing whatever upstream
+        Grafana improvements and fixes are included in that patch/minor bump.']
+    breaking_changes: []
+  chart_version: 92.2.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+    'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 92.1.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25']
