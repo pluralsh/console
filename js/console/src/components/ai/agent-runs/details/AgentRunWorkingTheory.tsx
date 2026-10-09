@@ -156,7 +156,10 @@ function AgentRunStatusCallout({
             {summary}
           </Body2P>
         )}
-        {(hasPatch || pullRequest?.url || isApprovable || showWorkbenchChip) && (
+        {(hasPatch ||
+          pullRequest?.url ||
+          isApprovable ||
+          showWorkbenchChip) && (
           <StretchedFlex
             align="center"
             gap="small"
