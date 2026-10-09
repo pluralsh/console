@@ -217,11 +217,13 @@ export function WorkbenchPageLayout({
         minHeight={0}
         minWidth={0}
         overflow="auto"
-        css={
-          contentBackground
-            ? { backgroundColor: theme.colors[contentBackground] }
-            : undefined
-        }
+        css={{
+          backgroundColor: contentBackground
+            ? theme.colors[contentBackground]
+            : theme.mode === 'light'
+              ? theme.colors['page-background']
+              : theme.colors['fill-zero'],
+        }}
       >
         <Flex
           align="center"

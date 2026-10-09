@@ -334,7 +334,7 @@ export const DetailsPanelBodySC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
   backgroundColor:
     theme.mode === 'light'
-      ? theme.colors['fill-zero']
+      ? theme.colors['page-background']
       : theme.colors['fill-accent'],
 }))
 
