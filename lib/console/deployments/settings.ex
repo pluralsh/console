@@ -257,6 +257,18 @@ defmodule Console.Deployments.Settings do
   end
 
   @doc """
+  Writes the generated FerroTunnel CA, server certificate, and shared token.
+  This is not part of the user-facing settings changeset.
+  """
+  @spec put_ferrotunnel(DeploymentSettings.t, map) :: settings_resp
+  @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
+  def put_ferrotunnel(%DeploymentSettings{} = settings, attrs) do
+    settings
+    |> DeploymentSettings.ferrotunnel_changeset(%{ferrotunnel: attrs})
+    |> Repo.update()
+  end
+
+  @doc """
   Updates global deployment settings and busts cache
   """
   @spec vector_store_initialized() :: settings_resp

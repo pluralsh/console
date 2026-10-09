@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27
+          ports:
+            - name: http
+              containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+    app: nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: TunnelClient
+metadata:
+  labels:
+    app.kubernetes.io/part-of: deployment-operator
+    app.kubernetes.io/created-by: deployment-operator
+  name: nginx
+  namespace: monitoring
+spec:
+  tunnelId: nginx
+  upstream:
+    host: nginx.monitoring.svc
+    port: 80
