@@ -26,6 +26,18 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o nexus \
     ./cmd/main.go
 
+# Install and verify the patched timezone data outside the distroless runtime image.
+FROM debian:12-slim AS tzdata
+
+ARG TZDATA_VERSION=2026c-0+deb12u1
+
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata="${TZDATA_VERSION}" \
+ && dpkg-query -W -f='${Version}\n' tzdata | grep -Fx "${TZDATA_VERSION}" \
+ && awk 'BEGIN { RS="" } $1 == "Package:" && $2 == "tzdata" { print }' /var/lib/dpkg/status > /tzdata-status \
+ && cp /var/lib/dpkg/info/tzdata.md5sums /tzdata.md5sums \
+ && rm -rf /var/lib/apt/lists/*
+
 # Runtime stage
 FROM gcr.io/distroless/static-debian12:nonroot
 
@@ -49,6 +61,11 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
 
 WORKDIR /app
+
+# Copy the verified timezone data into the distroless runtime.
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=tzdata /tzdata-status /var/lib/dpkg/status.d/tzdata
+COPY --from=tzdata /tzdata.md5sums /var/lib/dpkg/status.d/tzdata.md5sums
 
 # Copy binary from builder
 COPY --from=builder /build/nexus /app/nexus
