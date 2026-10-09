@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { type SeverityExt, sanitizeSeverity } from '../types'
 
 import { SemanticColorKey } from '../theme/colors'
+import { blue, green, red, yellow } from '../theme/colors-base'
 import { FillLevelProvider } from './contexts/FillLevelContext'
 import IconFrame from './IconFrame'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
@@ -42,12 +43,20 @@ const severityToIconColorKey: Readonly<
   success: 'icon-success',
 }
 
-const severityToBorderColorKey: Record<BannerSeverity, SemanticColorKey> = {
-  info: 'border-info',
-  danger: 'border-danger',
-  warning: 'border-warning',
-  success: 'border-success',
-}
+const severityToPalette = {
+  info: blue,
+  danger: red,
+  warning: yellow,
+  success: green,
+} as const satisfies Record<
+  BannerSeverity,
+  {
+    readonly 50: string
+    readonly 200: string
+    readonly 800: string
+    readonly 850: string
+  }
+>
 
 const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
   info: InfoIcon,
@@ -56,41 +65,66 @@ const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
   success: CheckRoundedIcon,
 }
 
+const TOAST_SHADOW =
+  '2px 3px 6px 0px rgba(14, 16, 21, 0.35), 2px 3px 24px 0px rgba(14, 16, 21, 0.6)'
+
 const BannerOuter = styled(Flex)<{
-  $borderColorKey: SemanticColorKey
+  $severity: BannerSeverity
   $fullWidth?: boolean
-}>(({ $borderColorKey, $fullWidth, theme }) => ({
-  display: 'inline-flex',
-  alignItems: 'flex-start',
-  padding: theme.spacing.medium,
-  backgroundColor:
-    theme.mode === 'light'
-      ? theme.colors['fill-zero']
-      : theme.colors['fill-three'],
-  borderRadius: theme.borderRadiuses.medium,
-  borderTop: `3px solid ${theme.colors[$borderColorKey]}`,
-  maxWidth: $fullWidth ? undefined : 480,
-  width: $fullWidth ? '100%' : undefined,
-  boxShadow: theme.boxShadows.moderate,
+  $compact: boolean
+}>(({ $severity, $fullWidth, $compact, theme }) => {
+  const palette = severityToPalette[$severity]
+  const light = theme.mode === 'light'
+
+  return {
+    display: 'inline-flex',
+    alignItems: $compact ? 'center' : 'flex-start',
+    gap: theme.spacing.medium,
+    padding: $compact
+      ? `${theme.spacing.small}px ${theme.spacing.large}px`
+      : theme.spacing.medium,
+    backgroundColor: light ? palette[50] : palette[850],
+    border: `1.5px solid ${light ? palette[200] : palette[800]}`,
+    borderRadius: 8,
+    color: theme.colors.text,
+    maxWidth: $fullWidth ? undefined : 480,
+    width: $fullWidth ? '100%' : 'fit-content',
+    boxShadow: TOAST_SHADOW,
+  }
+})
+
+const BannerInner = styled.div<{ $compact: boolean }>(
+  ({ $compact, theme }) => ({
+    display: 'flex',
+    alignItems: $compact ? 'center' : 'flex-start',
+    gap: $compact ? theme.spacing.small : theme.spacing.medium,
+    flex: '1 1 auto',
+    minWidth: 0,
+  })
+)
+
+const IconWrap = styled.div<{ $compact: boolean }>(({ $compact }) => ({
+  display: 'flex',
+  flexShrink: 0,
+  alignItems: 'center',
+  paddingTop: $compact ? 0 : 2,
 }))
 
-const BannerInner = styled.div(({ theme }) => ({
+const Copy = styled.div(({ theme }) => ({
   display: 'flex',
-  paddingTop: theme.spacing.xxsmall,
-  paddingBottom: theme.spacing.xxsmall,
+  flexDirection: 'column',
   alignItems: 'flex-start',
-}))
-
-const IconWrap = styled.div((_) => ({
-  display: 'flex',
-  paddingTop: 2,
-  paddingBottom: 2,
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
 }))
 
 const Heading = styled.div<{ $bold: boolean }>(({ $bold, theme }) => ({
   ...theme.partials.text.body1,
   ...($bold ? theme.partials.text.bodyBold : {}),
   color: theme.colors.text,
+  '& a, & a:any-link': {
+    ...theme.partials.text.inlineLink,
+  },
 }))
 
 const BannerAction = styled.span(({ theme }) => ({
@@ -101,20 +135,17 @@ const BannerAction = styled.span(({ theme }) => ({
   },
 }))
 
-const Content = styled.p<{ $hasHeading: boolean }>(
-  ({ $hasHeading: $heading, theme }) => ({
-    ...theme.partials.text.body2LooseLineHeight,
-    marginTop: $heading ? theme.spacing.xxsmall : theme.spacing.xxxsmall,
-    marginBottom: 0,
-    color: theme.colors['text-light'],
-    '& a, & a:any-link': {
-      ...theme.partials.text.inlineLink,
-    },
-  })
-)
+const Content = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2,
+  margin: 0,
+  color: theme.colors['text-light'],
+  '& a, & a:any-link': {
+    ...theme.partials.text.inlineLink,
+  },
+}))
 
-const CloseButton = styled(IconFrame)(({ theme }) => ({
-  marginLeft: theme.spacing.medium,
+const CloseButton = styled(IconFrame)(() => ({
+  flexShrink: 0,
 }))
 
 function Banner({
@@ -134,45 +165,48 @@ function Banner({
 
   const BannerIcon = severityToIcon[finalSeverity]
   const iconColorKey = severityToIconColorKey[finalSeverity]
-  const borderColorKey = severityToBorderColorKey[finalSeverity]
+  const compact = !(heading && children)
+  const title = heading || children
 
-  const content = (
-    <BannerOuter
-      $borderColorKey={borderColorKey}
-      $fullWidth={fullWidth}
-      {...props}
-    >
-      <BannerInner>
-        <IconWrap>
-          <BannerIcon
-            size={20}
-            color={iconColorKey}
-            marginRight="medium"
+  return (
+    <FillLevelProvider value={3}>
+      <BannerOuter
+        $severity={finalSeverity}
+        $fullWidth={fullWidth}
+        $compact={compact}
+        {...props}
+      >
+        <BannerInner $compact={compact}>
+          <IconWrap $compact={compact}>
+            <BannerIcon
+              size={20}
+              color={iconColorKey}
+            />
+          </IconWrap>
+          <Copy>
+            {title && (
+              <Heading $bold={!compact}>
+                {title}
+                {action && (
+                  <BannerAction {...actionProps}>{action}</BannerAction>
+                )}
+              </Heading>
+            )}
+            {!compact && children && <Content>{children}</Content>}
+          </Copy>
+        </BannerInner>
+        {typeof onClose === 'function' && (
+          <CloseButton
+            size="medium"
+            clickable
+            textValue="Dismiss"
+            icon={<CloseIcon />}
+            onClick={onClose}
           />
-        </IconWrap>
-        <div>
-          {heading && (
-            <Heading $bold={!!children}>
-              {heading}
-              {action && <BannerAction {...actionProps}>{action}</BannerAction>}
-            </Heading>
-          )}
-          {children && <Content $hasHeading={!!heading}>{children}</Content>}
-        </div>
-      </BannerInner>
-      <div css={{ flexGrow: 1 }} />
-      {typeof onClose === 'function' && (
-        <CloseButton
-          size="medium"
-          clickable
-          icon={<CloseIcon />}
-          onClick={onClose}
-        />
-      )}
-    </BannerOuter>
+        )}
+      </BannerOuter>
+    </FillLevelProvider>
   )
-
-  return <FillLevelProvider value={3}>{content}</FillLevelProvider>
 }
 
 export default Banner
