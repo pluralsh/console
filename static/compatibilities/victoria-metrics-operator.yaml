@@ -5,7 +5,7 @@ readme_url: https://github.com/VictoriaMetrics/operator/blob/master/README.md
 icon: https://dashboard.snapcraft.io/site_media/appmedia/2020/11/output-onlinepngtools.png
 versions:
 - version: 0.75.0
-  kube: ['1.37', '1.36', '1.35']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -48,22 +48,8 @@ versions:
         value is removed; per-application state is now in `status.conditions`.']
   chart_version: 0.68.1
   images: ['victoriametrics/operator:v0.75.0']
-- version: 0.74.1
-  kube: ['1.37', '1.36', '1.35']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [v0.74.1 adds a validation webhook for the new `VLDistributed`
-        custom resource (VictoriaLogs distributed) to prevent invalid specs from being
-        accepted.]
-    features: [VLDistributed now has a validation webhook to catch invalid resources
-        earlier (admission time) instead of failing later during reconciliation.]
-    breaking_changes: []
-  chart_version: 0.67.3
-  images: ['victoriametrics/operator:v0.74.1']
 - version: 0.74.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -102,7 +88,7 @@ versions:
   chart_version: 0.67.2
   images: ['victoriametrics/operator:v0.74.0']
 - version: 0.73.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -134,7 +120,7 @@ versions:
   chart_version: 0.66.1
   images: ['victoriametrics/operator:v0.73.0']
 - version: 0.72.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -174,7 +160,7 @@ versions:
   chart_version: 0.65.1
   images: ['victoriametrics/operator:v0.72.0']
 - version: 0.71.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -211,7 +197,7 @@ versions:
   chart_version: 0.64.1
   images: ['victoriametrics/operator:v0.71.0']
 - version: 0.70.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -247,7 +233,7 @@ versions:
   chart_version: 0.63.0
   images: ['victoriametrics/operator:v0.70.0']
 - version: 0.69.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -294,7 +280,7 @@ versions:
   chart_version: 0.62.1
   images: ['victoriametrics/operator:v0.69.0']
 - version: 0.68.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -330,7 +316,7 @@ versions:
   chart_version: 0.59.0
   images: ['victoriametrics/operator:v0.68.0']
 - version: 0.67.0
-  kube: ['1.35', '1.34', '1.33']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -356,28 +342,8 @@ versions:
         manifests using them will fail validation/reconciliation."]
   chart_version: 0.58.1
   images: ['victoriametrics/operator:v0.67.0']
-- version: 0.66.1
-  kube: ['1.35', '1.34', '1.33']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['v0.66.0 adds `spec.managedMetadata` support for VMUser (including
-        Secrets), an `incident.io` receiver in VMAlertmanagerConfig, HTTPRoute support
-        for VMAuthorization, an IPv6 mode toggle via `VM_ENABLETCP6`, and config-reloader
-        now defaults its image tag to the operator version.', v0.66.0 updates default
-        bundled VictoriaMetrics app versions to v1.131.0 and VictoriaTraces defaults
-        to v0.5.0., 'v0.66.1 is primarily a patch/security release: Go builder updated
-        to 1.25.5 plus bugfixes for RBAC cleanup and VMAnomaly config parsing/robustness.']
-    breaking_changes: [v0.66.0 removes deprecated labels/annotations inheritance;
-        you must move required metadata to `spec.managedMetadata` fields., 'v0.66.0
-        removes deprecated status fields: `VMCluster.status.clusterStatus` and `VMSingle.status.singleStatus`
-        (may break dashboards/scripts that read them).']
-  chart_version: 0.57.1
-  images: ['victoriametrics/operator:v0.66.1']
 - version: 0.66.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -400,7 +366,7 @@ versions:
   chart_version: 0.57.0
   images: ['victoriametrics/operator:v0.66.0']
 - version: 0.65.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -416,7 +382,7 @@ versions:
   chart_version: 0.56.4
   images: ['victoriametrics/operator:v0.65.0']
 - version: 0.64.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -456,7 +422,7 @@ versions:
   chart_version: 0.55.2
   images: ['victoriametrics/operator:v0.64.0']
 - version: 0.63.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -481,7 +447,7 @@ versions:
   chart_version: 0.54.1
   images: ['victoriametrics/operator:v0.63.0']
 - version: 0.62.0
-  kube: ['1.34', '1.33', '1.32']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -498,7 +464,7 @@ versions:
   chart_version: 0.52.1
   images: ['victoriametrics/operator:v0.62.0']
 - version: 0.61.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -541,7 +507,7 @@ versions:
   chart_version: 0.51.2
   images: ['victoriametrics/operator:v0.61.0']
 - version: 0.60.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -563,7 +529,7 @@ versions:
   chart_version: 0.52.0
   images: ['victoriametrics/operator:v0.60.0']
 - version: 0.59.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -599,7 +565,7 @@ versions:
   chart_version: 0.49.0-rc1
   images: ['victoriametrics/operator:v0.59.0']
 - version: 0.58.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -616,7 +582,7 @@ versions:
   chart_version: 0.47.0
   images: ['victoriametrics/operator:v0.58.0']
 - version: 0.57.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -639,7 +605,7 @@ versions:
   chart_version: 0.46.0
   images: ['victoriametrics/operator:v0.57.0']
 - version: 0.56.0
-  kube: ['1.33', '1.32', '1.31']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -665,7 +631,7 @@ versions:
   chart_version: 0.45.0
   images: ['victoriametrics/operator:v0.56.0']
 - version: 0.55.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -698,7 +664,7 @@ versions:
   chart_version: 0.44.0
   images: ['victoriametrics/operator:v0.55.0']
 - version: 0.54.1
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -711,7 +677,7 @@ versions:
   chart_version: 0.43.1
   images: ['victoriametrics/operator:v0.54.1']
 - version: 0.53.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -726,7 +692,7 @@ versions:
   chart_version: 0.42.5
   images: ['victoriametrics/operator:v0.53.0']
 - version: 0.52.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -756,7 +722,7 @@ versions:
   chart_version: 0.41.2
   images: ['victoriametrics/operator:v0.52.0']
 - version: 0.51.1
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -808,7 +774,7 @@ versions:
   chart_version: 0.40.1
   images: ['victoriametrics/operator:v0.51.1']
 - version: 0.50.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -836,7 +802,7 @@ versions:
   chart_version: 0.39.1
   images: ['victoriametrics/operator:v0.50.0']
 - version: 0.49.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -869,7 +835,7 @@ versions:
   chart_version: 0.37.0
   images: ['victoriametrics/operator:v0.49.0']
 - version: 0.48.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -907,7 +873,7 @@ versions:
   chart_version: 0.35.0
   images: ['victoriametrics/operator:v0.48.0']
 - version: 0.47.0
-  kube: ['1.31', '1.30', '1.29']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -959,50 +925,8 @@ versions:
         which can change alert delivery until you set an explicit receiver.']
   chart_version: 0.34.0
   images: ['victoriametrics/operator:v0.47.0']
-- version: 0.46.4
-  kube: ['1.31', '1.30', '1.29']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [Operator base image switched from distroless to scratch (v0.46.4);
-        this can affect debugging/exec tooling and image scanning expectations., Operator
-        manifests no longer set an explicit `runAsUser`; it must be defined via image
-        defaults or pod security context/profile (v0.46.4)., Config-reloader container
-        no longer specifies `command`; it is defined in the image now (v0.46.4).,
-      'OperatorHub bundle change: `VMAgent` deployment `ServiceAccount vmagent` is
-        no longer shipped; operator will recreate a new SA with required permissions
-        after removal (v0.46.4).', 'OperatorHub manifests: `webhook.enable` is properly
-        wired for OperatorHub deployments (v0.46.4).', "kubebuilder upgrade v2 \u2192\
-        \ v4 (v0.46.0) and Kubernetes code-generator upgrade v0.27.11 \u2192 v0.30.0\
-        \ (v0.46.0) \u2014 implies regenerated CRDs/webhooks and potential RBAC/manager\
-        \ flag changes.", "cert-manager API upgrade `certificates.cert-manager.io/v1alpha2`\
-        \ \u2192 `certificates.cert-manager.io/v1` (v0.46.0).", 'Selector behavior
-        fix: `xxNamespaceSelector` and `xxSelector` were previously inverted and are
-        corrected (v0.46.0).', 'VMNodeScrape scrape_config generation fix: de-dup
-        `series_limit` / `sample_limit` fields (v0.46.0).']
-    features: [VMUser service discovery can now be configured to use HTTPS via a TLS
-        flag check in `AsURL` (v0.46.0)., 'VMRule supports syncing group attributes
-        `eval_offset`, `eval_delay`, and `eval_alignment` from upstream vmalert group
-        settings (v0.46.0).', VMAlertmanagerConfig reconcile loop now includes a `handleReconcileErr`
-        callback to better handle errors and deregister objects (v0.46.0).]
-    breaking_changes: ["Operator flag deprecations: `--metrics-addr` \u2192 `--metrics-bind-address`,\
-        \ `--enable-leader-election` \u2192 `--leader-elect`, `--http.readyListenAddr`\
-        \ \u2192 `--health-probe-bind-address` (v0.46.0).", 'Remote write multitenancy
-        change: when using `remoteWriteSettings.useMultiTenantMode`, `remoteWrite.url`
-        must include `/insert/multitenant/<suffix>` because upstream vmagent deprecated
-        `-remoteWrite.multitenantURL` (v0.46.0).', "OperatorHub VMAgent deployment\
-        \ change: remove the `vmagent` ServiceAccount since it\u2019s no longer shipped;\
-        \ operator will create a new SA with needed permissions (v0.46.4).", Manifests
-        no longer pin `runAsUser`; you must set user at image or security context/profile
-        level if required by your policies (v0.46.4)., 'Container entrypoints changed:
-        operator base image is now `scratch` and config-reloader no longer sets `command`
-        explicitly; any assumptions about shell/tools/command overrides may break
-        (v0.46.4).']
-  chart_version: 0.33.6
-  images: ['victoriametrics/operator:v0.46.4']
 - version: 0.46.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -1043,7 +967,7 @@ versions:
   chart_version: 0.33.1
   images: ['victoriametrics/operator:v0.46.0']
 - version: 0.45.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -1084,7 +1008,7 @@ versions:
   chart_version: 0.32.3
   images: ['victoriametrics/operator:v0.45.0']
 - version: 0.44.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -1107,7 +1031,7 @@ versions:
   chart_version: 0.31.2
   images: ['victoriametrics/operator:v0.44.0']
 - version: 0.43.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -1152,43 +1076,8 @@ versions:
         need updates (DNS/discovery/load-balancing behavior changes).]
   chart_version: 0.30.0
   images: ['victoriametrics/operator:v0.43.0']
-- version: 0.42.4
-  kube: ['1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: [Improved operator log messages for better debugging and context., Updated
-        bundled VictoriaMetrics image tags to v1.99.0., Added support for comma-separated
-        WATCH_NAMESPACE to watch multiple namespaces without cluster-wide permissions
-        (requires per-namespace RBAC)., Added status.updateStatus field on pod-owning
-        CRs to better track rollouts/updates., Added operator.victoriametrics/last-applied-spec
-        annotation on pod-owning CRs to track spec changes and enable future cleanup
-        logic., 'vmagent: added stream aggregation option flush_on_shutdown.', 'vmagent:
-        added experimental spec.ingestOnlyMode to run without scrape config/config-reloaders
-        (currently disables some TLS/auth for remoteWrite).', 'vmalertmanager: default
-        router now blackhole when no config is provided (instead of dummy webhook).',
-      'vmalertmanager: fixed template path handling when configured both in config
-        file and spec.templates.', 'vmauth: added spec.configSecret to load external
-        config from a Secret key config.yaml (can be watched via configCheckInterval
-        or reloader).', 'vmcluster/vmstorage: changed pvc resize-disable check to
-        be at StatefulSet storage spec level via operator.victoriametrics.com/pvc-allow-volume-expansion;
-        enables adding PVC autoscaler.', 'APIs: added missing static config relabeling
-        config + tests.']
-    breaking_changes: [WATCH_NAMESPACE behavior may change if you start using comma-separated
-        values; ensure RBAC is updated to include permissions in each watched namespace.,
-      vmstorage PVC resize disable logic changed from per-PVC to storage spec level;
-        existing annotations/expectations around resizing may need validation after
-        upgrade., vmalertmanager default routing behavior changed to blackhole when
-        no config is provided; alerts may be dropped if you relied on previous dummy
-        webhook behavior., "vmagent ingestOnlyMode is experimental and currently disables\
-        \ TLS/auth options for remoteWrites; don\u2019t enable it in production unless\
-        \ you accept these limitations."]
-  chart_version: 0.29.6
-  images: ['victoriametrics/operator:v0.42.4']
 - version: 0.42.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -1236,7 +1125,7 @@ versions:
   chart_version: 0.29.0
   images: ['victoriametrics/operator:v0.42.0']
 - version: 0.41.1
-  kube: ['1.29', '1.28', '1.27']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -1256,7 +1145,7 @@ versions:
   chart_version: 0.28.0
   images: ['victoriametrics/operator:v0.41.1']
 - version: 0.40.0
-  kube: ['1.29', '1.28', '1.27']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:
@@ -1282,29 +1171,8 @@ versions:
         and should be revalidated after upgrade.']
   chart_version: 0.27.10
   images: ['victoriametrics/operator:v0.40.0']
-- version: 0.39.4
-  kube: ['1.29', '1.28', '1.27']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: [Bumps bundled VictoriaMetrics component image tags to **v1.96.0**.,
-      'Extends `VMAlertmanagerConfig` (OpsGenie) schema with new fields: `entity`,
-        `actions`, `update_alerts`.', "Removes vmoperator \u201Cvmalert notifier is\
-        \ null\u201D guard; `-notifier.url` is treated as optional and only required\
-        \ when alerting rules are present."]
-    features: [Operator-managed VictoriaMetrics images are updated to VictoriaMetrics
-        **v1.96.0**., 'OpsGenie integration in `VMAlertmanagerConfig` now supports
-        `entity`, `actions`, and `update_alerts` fields (aligning with Prometheus
-        `opsgenie_config`).']
-    breaking_changes: ['Potential behavior change in vmalert notifier handling: vmoperator
-        no longer performs a null check; ensure your vmalert deployments either omit
-        notifier settings when not using alerting rules, or set `-notifier.url` when
-        alerting rules are configured.']
-  chart_version: 0.27.9
-  images: ['victoriametrics/operator:v0.39.3']
 - version: 0.39.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: []
   requirements: []
   incompatibilities: []
   summary:

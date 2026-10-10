@@ -4,23 +4,26 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.1.4
+- version: 4.1.5
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [No concrete feature details are included in the provided release notes;
-        both v4.1.0 and v4.1.4 sections point to external blog/changelog for 'What's
-        New'., v4.1.4 provides updated install manifests and refreshed CLI binaries
-        for multiple platforms compared to v4.1.0.]
-    breaking_changes: [No breaking changes are enumerated in the provided notes; they
-        direct readers to the upgrading guide and GitHub issues for breaking changes/known
-        issues.]
-  chart_version: 2.0.11
-  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
-    'quay.io/argoproj/workflow-controller:v4.1.4']
+    features: ['Controller tracing fixes and more deterministic span/trace IDs, improving
+        observability stability.', Improved workflow resubmit/memoization behavior
+        (reuse retry reset logic; resolve node ID collisions)., 'More robust controller
+        operations: retry failed artifact GC attempts; scope sync-queue GC deletes
+        to owning controller.', Better handling of workflow termination for suspended
+        workflows., Database/query and Postgres connectivity improvements (queries
+        respect caller context; sslmode honored when configured)., Security/dependency
+        refreshes (moment v2.31.0; golang.org/x/net v0.60.0) and build fix to drop
+        deprecated http2.Transport.]
+    breaking_changes: []
+  chart_version: 2.0.12
+  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.5', 'quay.io/argoproj/argocli:v4.1.5',
+    'quay.io/argoproj/workflow-controller:v4.1.5']
 - version: 4.1.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
