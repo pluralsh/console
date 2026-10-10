@@ -1,9 +1,9 @@
 defmodule Console.Deployments.ObservabilityTest do
-  use Console.DataCase, async: true
+  use Console.DataCase, async: false
   use Mimic
   alias Console.Deployments.{Observability, Observability.Webhook}
   alias Console.PubSub
-  alias Console.Schema.{WorkbenchWebhook, Monitor}
+  alias Console.Schema.{WorkbenchWebhook, Monitor, Dashboard}
   alias Console.Logs.AggregationBucket
   alias Console.Deployments.Observability.Monitor, as: MonitorImpl
   alias CloudQuery.Client
@@ -773,10 +773,67 @@ defmodule Console.Deployments.ObservabilityTest do
       {:error, _} = Observability.share_dashboard(dashboard.id, true, insert(:user))
     end
 
+    test "concurrent sharers receive the persisted public id" do
+      Ecto.Adapters.SQL.Sandbox.unboxed_run(Repo, fn ->
+        user = insert(:user)
+        dashboard = insert(:dashboard, workbench: insert(:workbench, write_bindings: [%{user_id: user.id}]))
+        parent = self()
+        tasks = Enum.map(1..2, &share_dashboard_task(dashboard.id, user, parent))
+
+        assert_receive :share_dashboard_ready
+        assert_receive :share_dashboard_ready
+
+        Repo.transaction(fn ->
+          Repo.get!(Dashboard.with_lock(), dashboard.id)
+          Enum.each(tasks, &send(&1.pid, :share_dashboard))
+          wait_for_dashboard_lockers()
+        end)
+
+        public_ids =
+          tasks
+          |> Enum.map(&Task.await(&1, :timer.seconds(5)))
+          |> Enum.map(fn {:ok, dashboard} -> dashboard.public_id end)
+
+        assert [public_id, public_id] = Enum.sort(public_ids)
+        assert Repo.get!(Dashboard, dashboard.id).public_id == public_id
+      end)
+    end
+
     test "changeset/2 cannot set public_id" do
       cs = Console.Schema.Dashboard.changeset(%Console.Schema.Dashboard{}, %{public_id: "x", name: "n"})
 
       assert Ecto.Changeset.get_change(cs, :public_id) == nil
+    end
+  end
+
+  defp share_dashboard_task(dashboard_id, user, parent) do
+    Task.async(fn ->
+      :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
+      send(parent, :share_dashboard_ready)
+
+      receive do
+        :share_dashboard -> Observability.share_dashboard(dashboard_id, true, user)
+      end
+    after
+      Ecto.Adapters.SQL.Sandbox.checkin(Repo)
+    end)
+  end
+
+  defp wait_for_dashboard_lockers(attempts \\ 50)
+  defp wait_for_dashboard_lockers(0), do: flunk("concurrent dashboard sharers did not block on the row lock")
+  defp wait_for_dashboard_lockers(attempts) do
+    case Repo.query!("""
+           SELECT count(*)
+           FROM pg_stat_activity
+           WHERE datname = current_database()
+             AND pid != pg_backend_pid()
+             AND wait_event_type = 'Lock'
+             AND query LIKE '%dashboards%'
+           """).rows do
+      [[2]] -> :ok
+      _ ->
+        Process.sleep(10)
+        wait_for_dashboard_lockers(attempts - 1)
     end
   end
 
