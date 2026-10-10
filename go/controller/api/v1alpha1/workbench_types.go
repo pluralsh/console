@@ -213,6 +213,10 @@ func (c *WorkbenchCodingConfig) Attributes() *console.WorkbenchCodingAttributes 
 
 // WorkbenchInfrastructureConfig defines infrastructure capabilities.
 type WorkbenchInfrastructureConfig struct {
+	// SelfService enables the self-service subagent for catalog and PR automation workflows.
+	// +kubebuilder:validation:Optional
+	SelfService *bool `json:"selfService,omitempty"`
+
 	// Services enables the services capability.
 	// +kubebuilder:validation:Optional
 	Services *bool `json:"services,omitempty"`
@@ -232,9 +236,10 @@ func (c *WorkbenchInfrastructureConfig) Attributes() *console.WorkbenchInfrastru
 	}
 
 	return &console.WorkbenchInfrastructureAttributes{
-		Services:   c.Services,
-		Stacks:     c.Stacks,
-		Kubernetes: c.Kubernetes,
+		SelfService: c.SelfService,
+		Services:    c.Services,
+		Stacks:      c.Stacks,
+		Kubernetes:  c.Kubernetes,
 	}
 }
 

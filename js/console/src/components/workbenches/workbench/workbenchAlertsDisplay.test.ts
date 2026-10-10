@@ -18,6 +18,10 @@ import {
 } from './workbenchAlertsDisplay'
 
 describe('workbenchAlertsDisplay', () => {
+  it('defaults to the details view', () => {
+    expect(DEFAULT_WORKBENCH_ALERTS_DISPLAY.view).toBe('details')
+  })
+
   it('offers every API severity', () => {
     expect([...ALERT_SEVERITY_ORDER].sort()).toEqual(
       Object.values(AlertSeverity).sort()

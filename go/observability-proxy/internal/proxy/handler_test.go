@@ -40,6 +40,120 @@ func TestElasticRouteValidation(t *testing.T) {
 	}
 }
 
+func TestElasticBulkUsesLokiHostWhenConfigured(t *testing.T) {
+	var gotPath string
+	var gotAuth string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotAuth = r.Header.Get("Authorization")
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer upstream.Close()
+
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			ElasticHost: "http://unused.example.com",
+			LokiHost:    upstream.URL + "/logs/write/ns/tenant-a",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second, nil)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	req := httptest.NewRequest(http.MethodPost, "/ext/v1/ingest/elastic/_bulk", strings.NewReader("{}\n"))
+	req.Header.Set("Authorization", "Bearer test-token")
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusOK)
+	}
+	if gotPath != "/logs/write/ns/tenant-a/elasticsearch/_bulk" {
+		t.Fatalf("unexpected upstream path: got %q", gotPath)
+	}
+	if gotAuth != "Bearer test-token" {
+		t.Fatalf("unexpected authorization header: got %q", gotAuth)
+	}
+}
+
+func TestElasticCompatibilityEndpointsWhenOnlyLokiIsConfigured(t *testing.T) {
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			LokiHost: "http://logs.example.com/write/ns/tenant-a",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second, nil)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	tests := []struct {
+		path         string
+		bodyContains string
+	}{
+		{path: "/ext/v1/ingest/elastic/", bodyContains: `"number":"8.11.0"`},
+		{path: "/ext/v1/ingest/elastic/_license", bodyContains: `"type":"basic"`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, test.path, nil)
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusOK)
+			}
+			if got := rec.Header().Get("X-Elastic-Product"); got != "Elasticsearch" {
+				t.Fatalf("unexpected product header: got %q", got)
+			}
+			if got := rec.Header().Get("Content-Type"); got != "application/json" {
+				t.Fatalf("unexpected content type: got %q", got)
+			}
+			if body := rec.Body.String(); !strings.Contains(body, test.bodyContains) {
+				t.Fatalf("unexpected response body: got %q", body)
+			}
+		})
+	}
+}
+
+func TestLokiPushForwardsExpectedUpstreamPath(t *testing.T) {
+	var gotPath string
+	var gotContentType string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotContentType = r.Header.Get("Content-Type")
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer upstream.Close()
+
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			LokiHost: upstream.URL + "/logs/write/ns/tenant-a",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second, nil)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	req := httptest.NewRequest(http.MethodPost, "/ext/v1/ingest/loki/api/v1/push", strings.NewReader(`{"streams":[]}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusNoContent)
+	}
+	if gotPath != "/logs/write/ns/tenant-a/loki/api/v1/push" {
+		t.Fatalf("unexpected upstream path: got %q", gotPath)
+	}
+	if gotContentType != "application/json" {
+		t.Fatalf("unexpected content type: got %q", gotContentType)
+	}
+}
+
 func TestPrometheusIngestForwardsExpectedUpstreamPath(t *testing.T) {
 	var gotPath string
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

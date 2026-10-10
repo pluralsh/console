@@ -439,7 +439,9 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
       inset: 0,
       position: 'fixed',
       width: '100%',
-      zIndex: theme.zIndexes.modal,
+      // Keep page fullscreen below actual dialogs so graph fullscreen and
+      // query modals opened from within it remain visible.
+      zIndex: theme.zIndexes.modal - 1,
     }),
   })
 )
@@ -447,8 +449,7 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  // fill-one-selected matches Figma fill/one #21242C (pre-rename tokens).
-  backgroundColor: theme.colors['fill-one-selected'],
+  backgroundColor: theme.colors['fill-one'],
   borderBottom: theme.borders.default,
   borderTop: theme.borders.default,
   display: 'flex',

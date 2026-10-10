@@ -370,6 +370,126 @@ defmodule Console.Deployments.InitTest do
     end
   end
 
+  describe "plural telemetry" do
+    alias Console.Schema.WorkbenchTool
+    alias Console.Deployments.Workbenches
+
+    setup do
+      stub(Console, :conf, fn
+        :cloud -> true
+        :cloud_instance -> "test"
+        :plural_o11y -> true
+        :telemetry_url -> "https://telemetry.example.com"
+        :es_url -> "http://test.es.com"
+        :es_password -> "secret"
+        key -> Application.get_env(:console, key, nil)
+      end)
+      :ok
+    end
+
+    test "setup/0 configures settings and the service context against telemetry" do
+      expect(Console, :byok?, fn -> true end)
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      {:ok, res} = Init.setup()
+
+      assert res.settings.prometheus_connection.host == "https://telemetry.example.com/metrics/read/ns/test"
+      assert res.settings.prometheus_connection.user == "plrl"
+      assert res.settings.prometheus_connection.password == "secret"
+
+      assert res.settings.logging.enabled
+      assert res.settings.logging.driver == :loki
+      assert res.settings.logging.loki.host == "https://telemetry.example.com/logs/read/ns/test"
+      assert res.settings.logging.loki.user == "plrl"
+      assert res.settings.logging.loki.password == "secret"
+
+      assert res.settings.ai.vector_store.elastic.host == "http://test.es.com"
+
+      context = Services.get_context_by_name!("plrl/cloud/observability")
+      assert context.configuration["elastic"]["user"] == "plrl"
+      assert context.configuration["vmetrics"]["user"] == "plrl"
+      assert context.configuration["loki"]["url"] == "https://my.plural.console/ext/v1/ingest/loki/api/v1/push"
+      assert context.configuration["loki"]["query_url"] == "https://telemetry.example.com/logs/read/ns/test"
+      assert context.configuration["tempo"]["url"] == "https://telemetry.example.com/traces/write/ns/test"
+      assert context.configuration["tempo"]["query_url"] == "https://telemetry.example.com/traces/read/ns/test"
+      assert context.configuration["tempo"]["password"] == "secret"
+    end
+
+    test "setup_workbench/0 creates telemetry backed tools" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      {:ok, res} = Init.setup_workbench()
+
+      refute res[:es]
+      assert res.prometheus.configuration.prometheus.url == "https://telemetry.example.com/metrics/read/ns/test"
+      assert res.prometheus.configuration.prometheus.username == "plrl"
+      assert res.loki.tool == :loki
+      assert res.loki.configuration.loki.url == "https://telemetry.example.com/logs/read/ns/test"
+      assert res.tempo.tool == :tempo
+      assert res.tempo.configuration.tempo.url == "https://telemetry.example.com/traces/read/ns/test"
+      assert res.tempo.configuration.tempo.password == "secret"
+      assert res.bench.name == "plural"
+    end
+
+    test "migrate_plural_telemetry/0 repoints an elastic/vmetrics install at telemetry" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:deployment_settings,
+        prometheus_connection: %DeploymentSettings.Connection{host: "http://vm/select/t/prometheus", user: "plrl-test"},
+        logging: %DeploymentSettings.Logging{
+          enabled: true,
+          driver: :elastic,
+          elastic: %DeploymentSettings.Elastic{host: "http://test.es.com", index: "plrl-test-logs-*"}
+        }
+      )
+      insert(:service_context, name: "plrl/cloud/observability", configuration: %{"elastic" => %{"user" => "plrl-test"}})
+      prom = insert(:workbench_tool,
+        name: "plrl_prometheus",
+        tool: :prometheus,
+        configuration: %WorkbenchTool.Configuration{
+          prometheus: %WorkbenchTool.Configuration.PrometheusConnection{url: "http://vm/select/t/prometheus"}
+        }
+      )
+
+      {:ok, res} = Init.migrate_plural_telemetry()
+
+      assert res.settings.prometheus_connection.host == "https://telemetry.example.com/metrics/read/ns/test"
+      assert res.settings.prometheus_connection.user == "plrl"
+      assert res.settings.logging.driver == :loki
+      assert res.settings.logging.loki.host == "https://telemetry.example.com/logs/read/ns/test"
+
+      context = Services.get_context_by_name!("plrl/cloud/observability")
+      assert context.configuration["elastic"]["user"] == "plrl"
+      assert context.configuration["loki"]["query_url"] == "https://telemetry.example.com/logs/read/ns/test"
+      assert context.configuration["tempo"]["url"] == "https://telemetry.example.com/traces/write/ns/test"
+
+      assert res.prometheus.id == prom.id
+      assert res.prometheus.configuration.prometheus.url == "https://telemetry.example.com/metrics/read/ns/test"
+      assert res.prometheus.configuration.prometheus.username == "plrl"
+      assert res.prometheus.configuration.prometheus.password == "secret"
+
+      loki = Workbenches.get_workbench_tool_by_name!("plrl_loki_logs")
+      assert loki.tool == :loki
+      assert loki.configuration.loki.url == "https://telemetry.example.com/logs/read/ns/test"
+
+      tempo = Workbenches.get_workbench_tool_by_name!("plrl_tempo_traces")
+      assert tempo.tool == :tempo
+      assert tempo.configuration.tempo.username == "plrl"
+    end
+
+    test "migrate_plural_telemetry/0 errors without a telemetry url" do
+      stub(Console, :conf, fn
+        :cloud -> true
+        :cloud_instance -> "test"
+        :plural_o11y -> true
+        :es_url -> "http://test.es.com"
+        :es_password -> "secret"
+        key -> Application.get_env(:console, key, nil)
+      end)
+
+      assert {:error, _} = Init.migrate_plural_telemetry()
+    end
+  end
+
   describe "#setup_groups/0" do
     test "it will setup the sre group" do
       user = insert(:user)

@@ -139,6 +139,9 @@ message ObservabilityConfig {
   optional string elasticIndex = 5;
   optional string elasticHost = 6;
   optional string prometheusHost = 7;
+  // Base write URL for a Loki-compatible logs service. For Plural Telemetry
+  // this is the namespace URL ending in /write/ns/{namespace}.
+  optional string lokiHost = 8;
 }
 
 message MeterMetricsRequest {

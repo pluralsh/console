@@ -131,6 +131,10 @@ spec:
                       kubernetes:
                         description: Kubernetes enables the Kubernetes capability.
                         type: boolean
+                      selfService:
+                        description: SelfService enables the self-service subagent
+                          for catalog and PR automation workflows.
+                        type: boolean
                       services:
                         description: Services enables the services capability.
                         type: boolean

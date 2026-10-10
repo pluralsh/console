@@ -7,7 +7,7 @@ defmodule Console.AI.MCP.Agent do
   """
   use GenServer, restart: :temporary
   alias Console.Repo
-  alias Console.Schema.{ChatThread, McpServer, Flow, WorkbenchTool, WorkbenchJob}
+  alias Console.Schema.{ChatThread, McpServer, Flow}
   alias Console.AI.MCP.{State, ClientSupervisor, Tool}
   require Logger
 
@@ -110,10 +110,6 @@ defmodule Console.AI.MCP.Agent do
     end
   end
 
-  def name(:client, %WorkbenchTool{id: id}, %WorkbenchJob{id: jid}),
-    do: {:via, Registry, {registry(), {:client, id, jid}}}
-  def name(:transport, %WorkbenchTool{id: id}, %WorkbenchJob{id: jid}),
-    do: {:via, Registry, {registry(), {:transport, id, jid}}}
   def name(:client, %ChatThread{id: id}, %McpServer{id: mip}),
     do: {:via, Registry, {registry(), {:client, id, mip}}}
   def name(:transport, %ChatThread{id: id}, %McpServer{id: mip}),

@@ -522,8 +522,7 @@ function MonitorRow({
 
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
-  // Figma renders the sidebar one step lighter than the main panel (#171A21).
-  backgroundColor: theme.colors['fill-zero-selected'],
+  backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders.default,
   boxSizing: 'border-box',
   display: 'flex',
@@ -622,7 +621,7 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
     '& > .delete-action, & > .inline-confirm': {
       alignItems: 'center',
       backgroundImage: actionFade(
-        $selected ? selectedColor : theme.colors['fill-zero-selected']
+        $selected ? selectedColor : theme.colors['fill-accent']
       ),
       bottom: 0,
       display: 'flex',

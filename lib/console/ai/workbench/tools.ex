@@ -177,6 +177,8 @@ defmodule Console.AI.Workbench.Tools do
   @doc "Expands MCP-backed workbench tools (generic MCP, Linear, Atlassian, Exa) for a job."
   @spec mcp_tools(Workbench.t | [WorkbenchTool.t] | map, WorkbenchJob.t | nil) :: [struct]
   def mcp_tools(_, nil), do: []
+  # unsaved jobs back ad hoc queries like dashboards, which never call MCP tools, so don't start clients for them
+  def mcp_tools(_, %WorkbenchJob{id: nil}), do: []
   def mcp_tools(%Workbench{tools: tools}, %WorkbenchJob{} = job), do: mcp_tools(tools, job)
   def mcp_tools(tools, %WorkbenchJob{} = job), do: MCP.expand_tools(tools, job)
   def mcp_tools(_, _), do: []

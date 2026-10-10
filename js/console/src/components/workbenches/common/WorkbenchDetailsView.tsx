@@ -250,11 +250,11 @@ export const DetailsCaptionSC = styled.span(({ theme }) => ({
   whiteSpace: 'nowrap',
 }))
 
-// Fixed-width, right-aligned age (e.g. "40d 22h") so the icons before it
-// line up across rows.
 export const DetailsListAgeSC = styled.span({
-  minWidth: 52,
-  textAlign: 'right',
+  width: '4ch',
+  textAlign: 'left',
+  fontVariantNumeric: 'tabular-nums',
+  flexShrink: 0,
   whiteSpace: 'nowrap',
 })
 
@@ -279,7 +279,7 @@ export const DetailsListSC = styled.div(({ theme }) => ({
   width: DETAILS_LIST_WIDTH,
   height: '100%',
   minHeight: 0,
-  backgroundColor: theme.colors['fill-zero-selected'],
+  backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders.default,
 }))
 
@@ -289,15 +289,14 @@ export const DetailsListSearchSC = styled.div(({ theme }) => ({
   borderBottom: theme.borders.default,
 }))
 
-export const DetailsListItemsSC = styled.div(({ theme }) => ({
+export const DetailsListItemsSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
   flex: 1,
   minHeight: 0,
   overflowY: 'auto',
   overflowX: 'hidden',
-}))
+})
 
 export const DetailsColumnSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -335,7 +334,7 @@ export const DetailsPanelBodySC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
   backgroundColor:
     theme.mode === 'light'
-      ? theme.colors['fill-zero']
+      ? theme.colors['page-background']
       : theme.colors['fill-accent'],
 }))
 
@@ -359,9 +358,9 @@ const ListItemSC = styled.button<{ $selected: boolean }>(
     boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing.medium,
+    gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.small}px`,
     cursor: 'pointer',
     // on the list's lighter background, as the Monitoring sidebar's rows
     backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,

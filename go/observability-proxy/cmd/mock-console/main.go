@@ -23,10 +23,12 @@ const (
 	envMockConsoleAddr    = "MOCK_CONSOLE_ADDR"
 	envMockPrometheusHost = "MOCK_PROMETHEUS_HOST"
 	envMockElasticHost    = "MOCK_ELASTIC_HOST"
+	envMockLokiHost       = "MOCK_LOKI_HOST"
 
 	defaultMockConsoleAddr    = ":50051"
 	defaultMockPrometheusHost = "http://mock-prometheus:19090/select/default/prometheus"
 	defaultMockElasticHost    = "http://mock-elastic:19200"
+	defaultMockLokiHost       = "http://mock-loki:3100/write/ns/default"
 )
 
 func main() {
@@ -74,16 +76,17 @@ func (s *server) ProxyAuthentication(context.Context, *pb.ProxyAuthenticationReq
 
 func (s *server) GetObservabilityConfig(context.Context, *pb.ObservabilityConfigRequest) (*pb.ObservabilityConfig, error) {
 	promHost := envOrDefault(envMockPrometheusHost, defaultMockPrometheusHost)
-
 	elasticHost := envOrDefault(envMockElasticHost, defaultMockElasticHost)
+	lokiHost := envOrDefault(envMockLokiHost, defaultMockLokiHost)
 
-	if promHost == "" || elasticHost == "" {
+	if promHost == "" || elasticHost == "" || lokiHost == "" {
 		return nil, status.Error(codes.FailedPrecondition, "mock hosts not configured")
 	}
 
 	return &pb.ObservabilityConfig{
 		PrometheusHost: &promHost,
 		ElasticHost:    &elasticHost,
+		LokiHost:       &lokiHost,
 	}, nil
 }
 

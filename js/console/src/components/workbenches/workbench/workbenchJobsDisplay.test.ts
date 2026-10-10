@@ -11,6 +11,10 @@ import {
 } from './workbenchJobsDisplay'
 
 describe('workbenchJobsDisplay', () => {
+  it('defaults to the details view', () => {
+    expect(DEFAULT_WORKBENCH_JOBS_DISPLAY.view).toBe('details')
+  })
+
   it('sends no filters when everything is selected', () => {
     expect(toJobFilterVariables(DEFAULT_WORKBENCH_JOBS_DISPLAY)).toEqual({
       statuses: undefined,

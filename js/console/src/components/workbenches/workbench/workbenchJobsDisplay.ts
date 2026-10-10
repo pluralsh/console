@@ -47,7 +47,7 @@ export const JOB_PR_STATE_OPTIONS = Object.keys(
 export const WORKBENCH_JOBS_PAGE_SIZE = 50
 
 export const DEFAULT_WORKBENCH_JOBS_DISPLAY: WorkbenchJobsDisplayState = {
-  view: 'list',
+  view: 'details',
   statuses: JOB_STATUS_OPTIONS,
   prStates: JOB_PR_STATE_OPTIONS,
   direction: SortDirection.Desc,

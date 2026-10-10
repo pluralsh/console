@@ -272,6 +272,7 @@ defmodule Plrl.ObservabilityConfig do
   field :elasticIndex, 5, proto3_optional: true, type: :string
   field :elasticHost, 6, proto3_optional: true, type: :string
   field :prometheusHost, 7, proto3_optional: true, type: :string
+  field :lokiHost, 8, proto3_optional: true, type: :string
 end
 
 defmodule Plrl.MeterMetricsRequest do

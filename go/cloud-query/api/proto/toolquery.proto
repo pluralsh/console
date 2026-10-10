@@ -263,6 +263,7 @@ message MetricsLabelSearchInput {
   optional string label = 4;
   optional int64 limit = 5;
   optional MetricsLabelSearchOptions options = 6;
+  optional TimeRange range = 7;
 }
 
 message MetricsLabelSearchOptions {

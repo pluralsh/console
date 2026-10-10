@@ -21,6 +21,7 @@ type ObservabilityConfig struct {
 	ElasticUsername    string
 	ElasticPassword    string
 	ElasticIndex       string
+	LokiHost           string
 }
 
 // ConfigProvider serves cached ObservabilityConfig values backed by Console gRPC.
@@ -139,6 +140,7 @@ func (p *CachingProvider) fromProto(resp *pb.ObservabilityConfig) (*Observabilit
 	klog.V(logging.LevelDebug).InfoS("received observability config",
 		"prometheusHost", resp.GetPrometheusHost(),
 		"elasticHost", resp.GetElasticHost(),
+		"lokiHost", resp.GetLokiHost(),
 	)
 
 	cfg := &ObservabilityConfig{
@@ -149,9 +151,10 @@ func (p *CachingProvider) fromProto(resp *pb.ObservabilityConfig) (*Observabilit
 		ElasticUsername:    resp.GetElasticUsername(),
 		ElasticPassword:    resp.GetElasticPassword(),
 		ElasticIndex:       resp.GetElasticIndex(),
+		LokiHost:           resp.GetLokiHost(),
 	}
 
-	if len(cfg.PrometheusHost) == 0 && len(cfg.ElasticHost) == 0 {
+	if len(cfg.PrometheusHost) == 0 && len(cfg.ElasticHost) == 0 && len(cfg.LokiHost) == 0 {
 		return nil, fmt.Errorf("missing observability config")
 	}
 

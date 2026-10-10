@@ -3,10 +3,7 @@ import {
   Chip,
   EmptyState,
   Flex,
-  IconFrame,
   prettifyRepoUrl,
-  PrIcon,
-  PrMergedIcon,
 } from '@pluralsh/design-system'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -34,6 +31,7 @@ import {
   getJobGutterStatus,
   useDetailsViewState,
 } from 'components/workbenches/common/WorkbenchDetailsView'
+import { WorkbenchJobPrIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
   PrStatus,
@@ -44,7 +42,6 @@ import { isEmpty } from 'lodash'
 import { ComponentProps, useMemo } from 'react'
 import styled from 'styled-components'
 import { formatShortAge, fromNow } from 'utils/datetime'
-import { isNonNullable } from 'utils/isNonNullable'
 import { ensureURLValidity } from 'utils/url'
 import {
   useSelectedJobTab,
@@ -133,7 +130,7 @@ export function useWorkbenchJobsDetails({
               subtitle={job.user?.name}
               end={
                 <>
-                  <JobPrIcon job={job} />
+                  <WorkbenchJobPrIcon pullRequests={job.pullRequests} />
                   <DetailsListAgeSC>
                     {formatShortAge(job.insertedAt)}
                   </DetailsListAgeSC>
@@ -181,21 +178,6 @@ export function useWorkbenchJobsDetails({
   )
 
   return { sidebar, content }
-}
-
-function JobPrIcon({ job }: { job: WorkbenchJobTinyFragment }) {
-  const prs = job.pullRequests?.filter(isNonNullable) ?? []
-  if (isEmpty(prs)) return null
-  const merged = prs.some(({ status }) => status === PrStatus.Merged)
-
-  return (
-    <IconFrame
-      type="tertiary"
-      size="medium"
-      textValue={merged ? 'Merged pull request' : 'Pull request'}
-      icon={merged ? <PrMergedIcon /> : <PrIcon />}
-    />
-  )
 }
 
 function WorkbenchJobDetailsPanel({

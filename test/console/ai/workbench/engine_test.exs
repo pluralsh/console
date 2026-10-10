@@ -66,8 +66,7 @@ defmodule Console.AI.Workbench.EngineTest do
         found = Enum.find(tools, & &1.id == tool.id)
         assert found
         assert found_job.id == job.id
-        name = Console.AI.MCP.Agent.name(:client, found, found_job)
-        assert is_pid(GenServer.whereis(name))
+        assert is_pid(GenServer.whereis(Console.AI.Workbench.MCP.Clients.name(found)))
         []
       end)
 

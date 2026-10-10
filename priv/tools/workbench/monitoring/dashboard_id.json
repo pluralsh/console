@@ -3,6 +3,7 @@
   "properties": {
     "dashboard_id": {
       "type": "string",
+      "format": "uuid",
       "description": "ID of a dashboard belonging to this workbench"
     }
   },

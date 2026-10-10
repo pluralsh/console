@@ -2,6 +2,9 @@ defmodule Console.Schema.Dashboard do
   use Console.Schema.Base
   alias Console.Schema.Workbench
 
+  @name_max 255
+  @description_max 10_000
+
   defmodule Datasource do
     use Console.Schema.Base
 
@@ -158,6 +161,8 @@ defmodule Console.Schema.Dashboard do
     |> foreign_key_constraint(:workbench_id)
     |> unique_constraint([:workbench_id, :name])
     |> validate_required([:name, :workbench_id])
+    |> validate_length(:name, max: @name_max)
+    |> validate_length(:description, max: @description_max)
     |> validate_unique_graph_identifiers()
     |> validate_graph_sections()
     |> validate_graph_intersections()

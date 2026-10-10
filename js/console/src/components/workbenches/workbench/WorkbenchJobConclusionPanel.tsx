@@ -5,15 +5,13 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   DetailsColumnSC,
   DetailsErrorBanner,
-  DetailsLinkSC,
   DetailsPanelBodySC,
   DetailsPanelHeader,
   DetailsTitleSC,
 } from 'components/workbenches/common/WorkbenchDetailsView'
+import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { useWorkbenchJobQuery, WorkbenchJobStatus } from 'generated/graphql'
 import { ReactNode, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchJobMeta } from './job/WorkbenchJobMeta'
 import { isJobRunning } from './job/WorkbenchJobActivity'
@@ -63,15 +61,11 @@ export function WorkbenchJobConclusionPanel({
   const { data, loading, error } = usePolledWorkbenchJob(jobId, jobStatus)
   const job = data?.workbenchJob
   const viewJobLink = (
-    <DetailsLinkSC
-      as={Link}
-      to={getWorkbenchJobAbsPath({
-        workbenchId: job?.workbench?.id ?? workbenchId,
-        jobId,
-      })}
-    >
-      View job
-    </DetailsLinkSC>
+    <WorkbenchViewJobChip
+      workbenchId={job?.workbench?.id ?? workbenchId}
+      jobId={jobId}
+      status={job?.status ?? jobStatus}
+    />
   )
 
   return (

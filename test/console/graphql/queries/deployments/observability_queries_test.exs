@@ -416,6 +416,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         assert opts[:timeout] == :timer.seconds(30)
         assert input.metric == "kube_pod_info"
         assert input.label == "namespace"
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 
         {:ok,
          %MetricsLabelSearchOutput{
@@ -952,7 +954,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
       assert [%{"message" => "request failed"}] = found["graph"]["logs"]
     end
 
-    test "graph hides policy-governed and missing panels behind a fixed error" do
+    test "graph runs persisted datasources without actor policies and hides missing panels" do
       workbench = insert(:workbench)
       tool = insert(:workbench_tool,
         project: workbench.project,
@@ -978,17 +980,39 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
               identifier: "errors",
               type: :logs,
               layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 2, h: 2},
-              datasource: %Dashboard.Datasource{type: :logs, tool: "workbench_observability_logs_loki", input: %{}}
+              datasource: %Dashboard.Datasource{
+                type: :logs,
+                tool: "workbench_observability_logs_loki",
+                input: %{"query" => "{app=\"public-dashboard\"}"}
+              }
             }
           ]
         )
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :logs, fn :mock_conn, input, _opts ->
+        assert input.query == "{app=\"public-dashboard\"}"
+
+        {:ok,
+         %LogsQueryOutput{
+           logs: [
+             %LogEntry{
+               timestamp: Google.Protobuf.from_datetime(~U[2026-09-07 22:00:00Z]),
+               message: "public result",
+               labels: %{}
+             }
+           ]
+         }}
+      end)
 
       vars = %{
         "publicId" => dashboard.public_id,
         "timeRange" => %{"start" => "2026-09-07T21:00:00Z", "end" => "2026-09-07T22:00:00Z"}
       }
 
-      {:ok, %{errors: [%{message: "not available on public dashboards"}]}} = run_query(@graph_query, vars, %{})
+      {:ok, %{data: %{"publicWorkbenchDashboard" => found}}} = run_query(@graph_query, vars, %{})
+      assert [%{"message" => "public result"}] = found["graph"]["logs"]
 
       {:ok, %{errors: [%{message: "not available on public dashboards"}]}} =
         run_query(String.replace(@graph_query, ~s("errors"), ~s("missing")), vars, %{})

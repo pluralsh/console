@@ -1,4 +1,4 @@
-import { Chip, EmptyState, ErrorIcon, Tooltip } from '@pluralsh/design-system'
+import { Chip, EmptyState } from '@pluralsh/design-system'
 import {
   getAlertAnnotations,
   getAlertSummary,
@@ -16,7 +16,10 @@ import {
   getAlertName,
   getAlertTitle,
 } from 'components/utils/alerts/AlertSourceLink'
-import { alertStateLabel } from 'components/utils/alerts/AlertStateChip'
+import {
+  AlertStateIcon,
+  alertStateLabel,
+} from 'components/utils/alerts/AlertStateChip'
 import { GqlError } from 'components/utils/Alert'
 import { TRUNCATE } from 'components/utils/truncate'
 import {
@@ -46,18 +49,18 @@ import {
   getJobGutterStatus,
   useDetailsViewState,
 } from 'components/workbenches/common/WorkbenchDetailsView'
+import { WorkbenchJobPrIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
+import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import {
   WorkbenchAlertFragment,
   AlertSeverity,
-  AlertState,
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime, formatShortAge } from 'utils/datetime'
 import { humanizeObservabilityWebhookType } from 'utils/webhookLabels'
@@ -185,20 +188,10 @@ export function useWorkbenchAlertsDetails({
             }
             end={
               <>
-                {alert.state === AlertState.Firing && (
-                  <Tooltip
-                    placement="top"
-                    label="Firing"
-                  >
-                    <ErrorIcon
-                      size={16}
-                      color="icon-danger"
-                      role="img"
-                      aria-label="Firing"
-                      flexShrink={0}
-                    />
-                  </Tooltip>
-                )}
+                <WorkbenchJobPrIcon
+                  pullRequests={alert.workbenchJob?.pullRequests}
+                />
+                <AlertStateIcon state={alert.state} />
                 <DetailsListAgeSC>
                   {formatShortAge(alert.updatedAt)}
                 </DetailsListAgeSC>
@@ -257,12 +250,11 @@ function AlertConclusionPanel({
 }) {
   const job = alert.workbenchJob
   const viewJobLink = job && (
-    <DetailsLinkSC
-      as={Link}
-      to={getWorkbenchJobAbsPath({ workbenchId, jobId: job.id })}
-    >
-      View job
-    </DetailsLinkSC>
+    <WorkbenchViewJobChip
+      workbenchId={workbenchId}
+      jobId={job.id}
+      status={job.status}
+    />
   )
   return (
     <DetailsColumnSC>

@@ -165,7 +165,7 @@ defmodule Console.Deployments.Observability.DashboardTest do
       {:ok, workbench: workbench, dashboard: dashboard}
     end
 
-    test "fails closed when a workbench policy matches the tool", %{workbench: workbench, dashboard: dashboard} do
+    test "skips workbench policies that match the tool", %{workbench: workbench, dashboard: dashboard} do
       policy = insert(:policy, project: workbench.project, policy: "package plrl.workbench\n\nsample := 0\n")
       insert(:workbench_policy,
         workbench: workbench,
@@ -174,9 +174,13 @@ defmodule Console.Deployments.Observability.DashboardTest do
       )
       range = %{start: ~U[2026-10-09 10:00:00Z], end: ~U[2026-10-09 12:00:00Z]}
 
-      assert {:error, msg} = Dashboard.public_graph(dashboard, "errors", range)
-      assert msg =~ "governed by workbench policies"
-      assert {:error, ^msg} = Dashboard.graph(dashboard, "errors", %{}, range, nil)
+      expect(Client, :connect, 2, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :logs, 2, fn :mock_conn, _input, _opts ->
+        {:ok, %LogsQueryOutput{logs: [%LogEntry{message: "hi", labels: %{}}]}}
+      end)
+
+      assert {:ok, %{logs: [_ | _]}} = Dashboard.public_graph(dashboard, "errors", range)
+      assert {:ok, %{logs: [_ | _]}} = Dashboard.graph(dashboard, "errors", %{}, range, nil)
     end
 
     test "still executes when no policy matches the tool", %{workbench: workbench, dashboard: dashboard} do

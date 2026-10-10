@@ -2,10 +2,7 @@ import { EmptyState, Flex } from '@pluralsh/design-system'
 import { TimeRangeControl } from 'components/utils/timerange/TimeRangeControl'
 import {
   DEFAULT_TIME_RANGE,
-  rangeWindow,
-  startOfCurrentMinute,
   TIME_RANGE_PRESETS,
-  type TimeRange,
 } from 'components/utils/timerange/timeRange'
 import { useTimeRange } from 'components/utils/timerange/useTimeRange'
 import {
@@ -27,13 +24,6 @@ const PUBLIC_PRESETS = TIME_RANGE_PRESETS.filter(
   (preset) => preset.durationMs <= MAX_PUBLIC_RANGE_MS
 )
 const NO_VARIABLES: Record<string, string> = {}
-
-// every viewer shares one rate limit per dashboard, so the public page never
-// ticks live: relative ranges are pinned to a fixed window when picked
-const toFixedRange = (range: TimeRange): TimeRange =>
-  range.live
-    ? { live: false, ...rangeWindow(range, startOfCurrentMinute()) }
-    : range
 
 export function PublicWorkbenchDashboard() {
   const { publicId = '' } = useParams()
@@ -81,7 +71,7 @@ function PublicDashboardView({
     revision: rangeRevision,
     setRange,
     selectWindow: onRangeSelect,
-  } = useTimeRange(() => toFixedRange(DEFAULT_TIME_RANGE))
+  } = useTimeRange(DEFAULT_TIME_RANGE)
   const timeRange = useMemo<DashboardTimeRangeAttributes>(
     () => ({
       start: timeWindow.start.toISOString(),
@@ -118,8 +108,7 @@ function PublicDashboardView({
           value={range}
           now={now}
           presets={PUBLIC_PRESETS}
-          showLiveToggle={false}
-          onChange={(next) => setRange(toFixedRange(next))}
+          onChange={setRange}
         />
       </HeaderSC>
       <PanelsSC>
