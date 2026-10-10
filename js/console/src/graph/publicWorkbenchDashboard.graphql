@@ -1,0 +1,48 @@
+fragment PublicWorkbenchDashboardGraph on PublicWorkbenchDashboardGraph {
+  identifier
+  title
+  description
+  type
+  unit
+  sectionId
+  markdown
+  options
+  layout {
+    x
+    y
+    w
+    h
+  }
+  hasDatasource
+}
+
+query PublicWorkbenchDashboard($publicId: String!) {
+  publicWorkbenchDashboard(publicId: $publicId) {
+    name
+    description
+    graphs {
+      ...PublicWorkbenchDashboardGraph
+    }
+  }
+}
+
+query PublicWorkbenchDashboardGraph(
+  $publicId: String!
+  $identifier: String!
+  $timeRange: DashboardTimeRangeAttributes!
+) {
+  publicWorkbenchDashboard(publicId: $publicId) {
+    name
+    graph(identifier: $identifier, timeRange: $timeRange) {
+      metrics {
+        ...WorkbenchJobActivityMetric
+      }
+      logs {
+        ...WorkbenchJobActivityLog
+      }
+      traces {
+        ...WorkbenchJobActivityTrace
+      }
+    }
+  }
+}

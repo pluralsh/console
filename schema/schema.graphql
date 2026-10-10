@@ -516,6 +516,11 @@ type RootQueryType {
     id: ID!
   ): WorkbenchDashboard
 
+  publicWorkbenchDashboard(
+    "Fetch a publicly shared dashboard by its public id, no authentication required"
+    publicId: String!
+  ): PublicWorkbenchDashboard
+
   deploymentSettings: DeploymentSettings
 
   "The model defaults for each configurable provider"
@@ -1364,6 +1369,14 @@ type RootMutationType {
     id: ID!
 
     attributes: DashboardAttributes!
+  ): WorkbenchDashboard
+
+  shareWorkbenchDashboard(
+    "Enable or disable public sharing of a dashboard"
+    id: ID!
+
+    "Whether the dashboard should be publicly viewable"
+    shared: Boolean!
   ): WorkbenchDashboard
 
   deleteDashboard(
@@ -8565,6 +8578,9 @@ type WorkbenchDashboard {
   "Optional dashboard description"
   description: String
 
+  "Unguessable id of the public share link, null when the dashboard is not shared"
+  publicId: String
+
   "Graphs arranged on the dashboard grid"
   graphs: [WorkbenchDashboardGraph]
 
@@ -8598,6 +8614,58 @@ type WorkbenchDashboard {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A publicly shared dashboard, exposing only what is needed to render it"
+type PublicWorkbenchDashboard {
+  "Dashboard name"
+  name: String!
+
+  "Optional dashboard description"
+  description: String
+
+  "Graphs arranged on the dashboard grid"
+  graphs: [PublicWorkbenchDashboardGraph]
+
+  graph(
+    "Identifier of the graph to query"
+    identifier: String!
+
+    "Time range applied to the datasource query, capped at 30 days"
+    timeRange: DashboardTimeRangeAttributes!
+  ): WorkbenchDashboardGraphResult
+}
+
+type PublicWorkbenchDashboardGraph {
+  "Stable identifier unique within the dashboard"
+  identifier: String!
+
+  "Graph title"
+  title: String
+
+  "Optional graph description"
+  description: String
+
+  "Graph visualization type"
+  type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
+
+  "Identifier of the section graph containing this graph"
+  sectionId: String
+
+  "Markdown content for markdown graphs"
+  markdown: String
+
+  "Visualization-specific display options; sections may set collapsed"
+  options: Map
+
+  "Grid position and size"
+  layout: WorkbenchDashboardGraphLayout!
+
+  "Whether this graph fetches data from a datasource"
+  hasDatasource: Boolean!
 }
 
 type WorkbenchDashboardGraphResult {

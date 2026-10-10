@@ -9567,6 +9567,49 @@ export type ProviderCredentialAttributes = {
   namespace?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A publicly shared dashboard, exposing only what is needed to render it */
+export type PublicWorkbenchDashboard = {
+  __typename?: 'PublicWorkbenchDashboard';
+  /** Optional dashboard description */
+  description?: Maybe<Scalars['String']['output']>;
+  graph?: Maybe<WorkbenchDashboardGraphResult>;
+  /** Graphs arranged on the dashboard grid */
+  graphs?: Maybe<Array<Maybe<PublicWorkbenchDashboardGraph>>>;
+  /** Dashboard name */
+  name: Scalars['String']['output'];
+};
+
+
+/** A publicly shared dashboard, exposing only what is needed to render it */
+export type PublicWorkbenchDashboardGraphArgs = {
+  identifier: Scalars['String']['input'];
+  timeRange: DashboardTimeRangeAttributes;
+};
+
+export type PublicWorkbenchDashboardGraph = {
+  __typename?: 'PublicWorkbenchDashboardGraph';
+  /** Optional graph description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Whether this graph fetches data from a datasource */
+  hasDatasource: Scalars['Boolean']['output'];
+  /** Stable identifier unique within the dashboard */
+  identifier: Scalars['String']['output'];
+  /** Grid position and size */
+  layout: WorkbenchDashboardGraphLayout;
+  /** Markdown content for markdown graphs */
+  markdown?: Maybe<Scalars['String']['output']>;
+  /** Visualization-specific display options; sections may set collapsed */
+  options?: Maybe<Scalars['Map']['output']>;
+  /** Identifier of the section graph containing this graph */
+  sectionId?: Maybe<Scalars['String']['output']>;
+  /** Graph title */
+  title?: Maybe<Scalars['String']['output']>;
+  /** Graph visualization type */
+  type: DashboardGraphType;
+  /** Unit of the plotted values, used to format axes and tooltips */
+  unit?: Maybe<DashboardGraphUnit>;
+};
+
 /** A reference to a pull request for your kubernetes related IaC */
 export type PullRequest = {
   __typename?: 'PullRequest';
@@ -10242,6 +10285,7 @@ export type RootMutationType = {
   shareAgentRun?: Maybe<AgentRun>;
   /** Shares a one-time-viewable secret to a list of eligible users */
   shareSecret?: Maybe<SharedSecret>;
+  shareWorkbenchDashboard?: Maybe<WorkbenchDashboard>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   suggestScalingRecommendation?: Maybe<Scalars['String']['output']>;
@@ -11478,6 +11522,12 @@ export type RootMutationTypeShareSecretArgs = {
 };
 
 
+export type RootMutationTypeShareWorkbenchDashboardArgs = {
+  id: Scalars['ID']['input'];
+  shared: Scalars['Boolean']['input'];
+};
+
+
 export type RootMutationTypeSignInArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -12175,6 +12225,7 @@ export type RootQueryType = {
   project?: Maybe<Project>;
   projectUsageHistory?: Maybe<ProjectUsageHistoryConnection>;
   projects?: Maybe<ProjectConnection>;
+  publicWorkbenchDashboard?: Maybe<PublicWorkbenchDashboard>;
   pullRequests?: Maybe<PullRequestConnection>;
   /** Lists recent workbench jobs across all workbenches the user can read. Max 20. */
   recentWorkbenchJobs?: Maybe<Array<Maybe<WorkbenchJob>>>;
@@ -13348,6 +13399,11 @@ export type RootQueryTypeProjectsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypePublicWorkbenchDashboardArgs = {
+  publicId: Scalars['String']['input'];
 };
 
 
@@ -17307,6 +17363,8 @@ export type WorkbenchDashboard = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Dashboard name */
   name: Scalars['String']['output'];
+  /** Unguessable id of the public share link, null when the dashboard is not shared */
+  publicId?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   workbench?: Maybe<Workbench>;
 };
@@ -22856,6 +22914,24 @@ export type DeleteProjectMutationVariables = Exact<{
 
 export type DeleteProjectMutation = { __typename?: 'RootMutationType', deleteProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, disableInsights?: boolean | null } | null };
 
+export type PublicWorkbenchDashboardGraphFragment = { __typename?: 'PublicWorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, hasDatasource: boolean, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number } };
+
+export type PublicWorkbenchDashboardQueryVariables = Exact<{
+  publicId: Scalars['String']['input'];
+}>;
+
+
+export type PublicWorkbenchDashboardQuery = { __typename?: 'RootQueryType', publicWorkbenchDashboard?: { __typename?: 'PublicWorkbenchDashboard', name: string, description?: string | null, graphs?: Array<{ __typename?: 'PublicWorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, hasDatasource: boolean, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number } } | null> | null } | null };
+
+export type PublicWorkbenchDashboardGraphQueryVariables = Exact<{
+  publicId: Scalars['String']['input'];
+  identifier: Scalars['String']['input'];
+  timeRange: DashboardTimeRangeAttributes;
+}>;
+
+
+export type PublicWorkbenchDashboardGraphQuery = { __typename?: 'RootQueryType', publicWorkbenchDashboard?: { __typename?: 'PublicWorkbenchDashboard', name: string, graph?: { __typename?: 'WorkbenchDashboardGraphResult', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null };
+
 export type UpdateRbacMutationVariables = Exact<{
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
@@ -24127,11 +24203,11 @@ export type WorkbenchLinkCardPendingAgentRunsQueryVariables = Exact<{
 
 export type WorkbenchLinkCardPendingAgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, workbenchJob?: { __typename?: 'WorkbenchJob', workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null } | null> | null } | null };
 
-export type WorkbenchDashboardSummaryFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null };
+export type WorkbenchDashboardSummaryFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, publicId?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
 export type WorkbenchDashboardDatasourceFragment = { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> };
 
-export type WorkbenchDashboardDetailsFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null };
+export type WorkbenchDashboardDetailsFragment = { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, publicId?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null };
 
 export type WorkbenchMonitorSummaryFragment = { __typename?: 'Monitor', id: string, name: string, description?: string | null, type: MonitorType, state?: AlertState | null, severity: AlertSeverity, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -24143,7 +24219,7 @@ export type WorkbenchDashboardDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type WorkbenchDashboardDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchDashboardDelta?: { __typename?: 'WorkbenchDashboardDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null } | null };
+export type WorkbenchDashboardDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchDashboardDelta?: { __typename?: 'WorkbenchDashboardDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, publicId?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null } | null };
 
 export type WorkbenchMonitorDeltaSubscriptionVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -24161,7 +24237,7 @@ export type WorkbenchDashboardsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchDashboardsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, workbenchDashboards?: { __typename?: 'WorkbenchDashboardConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchDashboardEdge', node?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+export type WorkbenchDashboardsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, workbenchDashboards?: { __typename?: 'WorkbenchDashboardConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchDashboardEdge', node?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, publicId?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchMonitorsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24178,7 +24254,7 @@ export type WorkbenchMonitoringDashboardQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchMonitoringDashboardQuery = { __typename?: 'RootQueryType', workbenchDashboard?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null };
+export type WorkbenchMonitoringDashboardQuery = { __typename?: 'RootQueryType', workbenchDashboard?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, publicId?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null };
 
 export type WorkbenchDashboardGraphQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24230,6 +24306,14 @@ export type DeleteWorkbenchDashboardMutationVariables = Exact<{
 
 
 export type DeleteWorkbenchDashboardMutation = { __typename?: 'RootMutationType', deleteDashboard?: { __typename?: 'WorkbenchDashboard', id: string } | null };
+
+export type ShareWorkbenchDashboardMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  shared: Scalars['Boolean']['input'];
+}>;
+
+
+export type ShareWorkbenchDashboardMutation = { __typename?: 'RootMutationType', shareWorkbenchDashboard?: { __typename?: 'WorkbenchDashboard', id: string, name: string, description?: string | null, publicId?: string | null, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, graphs?: Array<{ __typename?: 'WorkbenchDashboardGraph', identifier: string, title?: string | null, description?: string | null, type: DashboardGraphType, unit?: DashboardGraphUnit | null, sectionId?: string | null, toolId?: string | null, markdown?: string | null, options?: Record<string, unknown> | null, workbenchTool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null, layout: { __typename?: 'WorkbenchDashboardGraphLayout', x: number, y: number, w: number, h: number }, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null, inputs?: Array<{ __typename?: 'WorkbenchDashboardInput', name: string, label?: string | null, description?: string | null, type: DashboardInputType, default?: string | null, options?: Array<string | null> | null, required?: boolean | null, datasource?: { __typename?: 'WorkbenchDashboardDatasource', type: DashboardDatasourceType, tool: string, input: Record<string, unknown> } | null } | null> | null } | null };
 
 export type UpdateWorkbenchMonitorMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -29003,6 +29087,25 @@ export const ProjectBindingsFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
+export const PublicWorkbenchDashboardGraphFragmentDoc = gql`
+    fragment PublicWorkbenchDashboardGraph on PublicWorkbenchDashboardGraph {
+  identifier
+  title
+  description
+  type
+  unit
+  sectionId
+  markdown
+  options
+  layout {
+    x
+    y
+    w
+    h
+  }
+  hasDatasource
+}
+    `;
 export const StackInfracostResourceFragmentDoc = gql`
     fragment StackInfracostResource on StackInfracostResource {
   id
@@ -30611,6 +30714,7 @@ export const WorkbenchDashboardSummaryFragmentDoc = gql`
   id
   name
   description
+  publicId
   insertedAt
   updatedAt
 }
@@ -45752,6 +45856,111 @@ export function useDeleteProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteProjectMutationHookResult = ReturnType<typeof useDeleteProjectMutation>;
 export type DeleteProjectMutationResult = Apollo.MutationResult<DeleteProjectMutation>;
 export type DeleteProjectMutationOptions = Apollo.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const PublicWorkbenchDashboardDocument = gql`
+    query PublicWorkbenchDashboard($publicId: String!) {
+  publicWorkbenchDashboard(publicId: $publicId) {
+    name
+    description
+    graphs {
+      ...PublicWorkbenchDashboardGraph
+    }
+  }
+}
+    ${PublicWorkbenchDashboardGraphFragmentDoc}`;
+
+/**
+ * __usePublicWorkbenchDashboardQuery__
+ *
+ * To run a query within a React component, call `usePublicWorkbenchDashboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePublicWorkbenchDashboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePublicWorkbenchDashboardQuery({
+ *   variables: {
+ *      publicId: // value for 'publicId'
+ *   },
+ * });
+ */
+export function usePublicWorkbenchDashboardQuery(baseOptions: Apollo.QueryHookOptions<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables> & ({ variables: PublicWorkbenchDashboardQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>(PublicWorkbenchDashboardDocument, options);
+      }
+export function usePublicWorkbenchDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>(PublicWorkbenchDashboardDocument, options);
+        }
+// @ts-ignore
+export function usePublicWorkbenchDashboardSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>): Apollo.UseSuspenseQueryResult<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>;
+export function usePublicWorkbenchDashboardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>): Apollo.UseSuspenseQueryResult<PublicWorkbenchDashboardQuery | undefined, PublicWorkbenchDashboardQueryVariables>;
+export function usePublicWorkbenchDashboardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>(PublicWorkbenchDashboardDocument, options);
+        }
+export type PublicWorkbenchDashboardQueryHookResult = ReturnType<typeof usePublicWorkbenchDashboardQuery>;
+export type PublicWorkbenchDashboardLazyQueryHookResult = ReturnType<typeof usePublicWorkbenchDashboardLazyQuery>;
+export type PublicWorkbenchDashboardSuspenseQueryHookResult = ReturnType<typeof usePublicWorkbenchDashboardSuspenseQuery>;
+export type PublicWorkbenchDashboardQueryResult = Apollo.QueryResult<PublicWorkbenchDashboardQuery, PublicWorkbenchDashboardQueryVariables>;
+export const PublicWorkbenchDashboardGraphDocument = gql`
+    query PublicWorkbenchDashboardGraph($publicId: String!, $identifier: String!, $timeRange: DashboardTimeRangeAttributes!) {
+  publicWorkbenchDashboard(publicId: $publicId) {
+    name
+    graph(identifier: $identifier, timeRange: $timeRange) {
+      metrics {
+        ...WorkbenchJobActivityMetric
+      }
+      logs {
+        ...WorkbenchJobActivityLog
+      }
+      traces {
+        ...WorkbenchJobActivityTrace
+      }
+    }
+  }
+}
+    ${WorkbenchJobActivityMetricFragmentDoc}
+${WorkbenchJobActivityLogFragmentDoc}
+${WorkbenchJobActivityTraceFragmentDoc}`;
+
+/**
+ * __usePublicWorkbenchDashboardGraphQuery__
+ *
+ * To run a query within a React component, call `usePublicWorkbenchDashboardGraphQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePublicWorkbenchDashboardGraphQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePublicWorkbenchDashboardGraphQuery({
+ *   variables: {
+ *      publicId: // value for 'publicId'
+ *      identifier: // value for 'identifier'
+ *      timeRange: // value for 'timeRange'
+ *   },
+ * });
+ */
+export function usePublicWorkbenchDashboardGraphQuery(baseOptions: Apollo.QueryHookOptions<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables> & ({ variables: PublicWorkbenchDashboardGraphQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>(PublicWorkbenchDashboardGraphDocument, options);
+      }
+export function usePublicWorkbenchDashboardGraphLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>(PublicWorkbenchDashboardGraphDocument, options);
+        }
+// @ts-ignore
+export function usePublicWorkbenchDashboardGraphSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>): Apollo.UseSuspenseQueryResult<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>;
+export function usePublicWorkbenchDashboardGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>): Apollo.UseSuspenseQueryResult<PublicWorkbenchDashboardGraphQuery | undefined, PublicWorkbenchDashboardGraphQueryVariables>;
+export function usePublicWorkbenchDashboardGraphSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>(PublicWorkbenchDashboardGraphDocument, options);
+        }
+export type PublicWorkbenchDashboardGraphQueryHookResult = ReturnType<typeof usePublicWorkbenchDashboardGraphQuery>;
+export type PublicWorkbenchDashboardGraphLazyQueryHookResult = ReturnType<typeof usePublicWorkbenchDashboardGraphLazyQuery>;
+export type PublicWorkbenchDashboardGraphSuspenseQueryHookResult = ReturnType<typeof usePublicWorkbenchDashboardGraphSuspenseQuery>;
+export type PublicWorkbenchDashboardGraphQueryResult = Apollo.QueryResult<PublicWorkbenchDashboardGraphQuery, PublicWorkbenchDashboardGraphQueryVariables>;
 export const UpdateRbacDocument = gql`
     mutation UpdateRbac($serviceId: ID, $clusterId: ID, $pipelineId: ID, $stackId: ID, $projectId: ID, $flowId: ID, $serverId: ID, $rbac: RbacAttributes!) {
   updateRbac(
@@ -52351,6 +52560,40 @@ export function useDeleteWorkbenchDashboardMutation(baseOptions?: Apollo.Mutatio
 export type DeleteWorkbenchDashboardMutationHookResult = ReturnType<typeof useDeleteWorkbenchDashboardMutation>;
 export type DeleteWorkbenchDashboardMutationResult = Apollo.MutationResult<DeleteWorkbenchDashboardMutation>;
 export type DeleteWorkbenchDashboardMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchDashboardMutation, DeleteWorkbenchDashboardMutationVariables>;
+export const ShareWorkbenchDashboardDocument = gql`
+    mutation ShareWorkbenchDashboard($id: ID!, $shared: Boolean!) {
+  shareWorkbenchDashboard(id: $id, shared: $shared) {
+    ...WorkbenchDashboardDetails
+  }
+}
+    ${WorkbenchDashboardDetailsFragmentDoc}`;
+export type ShareWorkbenchDashboardMutationFn = Apollo.MutationFunction<ShareWorkbenchDashboardMutation, ShareWorkbenchDashboardMutationVariables>;
+
+/**
+ * __useShareWorkbenchDashboardMutation__
+ *
+ * To run a mutation, you first call `useShareWorkbenchDashboardMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useShareWorkbenchDashboardMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [shareWorkbenchDashboardMutation, { data, loading, error }] = useShareWorkbenchDashboardMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      shared: // value for 'shared'
+ *   },
+ * });
+ */
+export function useShareWorkbenchDashboardMutation(baseOptions?: Apollo.MutationHookOptions<ShareWorkbenchDashboardMutation, ShareWorkbenchDashboardMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ShareWorkbenchDashboardMutation, ShareWorkbenchDashboardMutationVariables>(ShareWorkbenchDashboardDocument, options);
+      }
+export type ShareWorkbenchDashboardMutationHookResult = ReturnType<typeof useShareWorkbenchDashboardMutation>;
+export type ShareWorkbenchDashboardMutationResult = Apollo.MutationResult<ShareWorkbenchDashboardMutation>;
+export type ShareWorkbenchDashboardMutationOptions = Apollo.BaseMutationOptions<ShareWorkbenchDashboardMutation, ShareWorkbenchDashboardMutationVariables>;
 export const UpdateWorkbenchMonitorDocument = gql`
     mutation UpdateWorkbenchMonitor($id: ID!, $attributes: MonitorAttributes!) {
   updateMonitor(id: $id, attributes: $attributes) {
@@ -52590,6 +52833,8 @@ export const namedOperations = {
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
     ProjectBindings: 'ProjectBindings',
+    PublicWorkbenchDashboard: 'PublicWorkbenchDashboard',
+    PublicWorkbenchDashboardGraph: 'PublicWorkbenchDashboardGraph',
     ServiceAccounts: 'ServiceAccounts',
     StackPrs: 'StackPrs',
     Stacks: 'Stacks',
@@ -52871,6 +53116,7 @@ export const namedOperations = {
     UpdateIssueWebhook: 'UpdateIssueWebhook',
     DeleteIssueWebhook: 'DeleteIssueWebhook',
     DeleteWorkbenchDashboard: 'DeleteWorkbenchDashboard',
+    ShareWorkbenchDashboard: 'ShareWorkbenchDashboard',
     UpdateWorkbenchMonitor: 'UpdateWorkbenchMonitor'
   },
   Subscription: {
@@ -53150,6 +53396,7 @@ export const namedOperations = {
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
     ProjectBindings: 'ProjectBindings',
+    PublicWorkbenchDashboardGraph: 'PublicWorkbenchDashboardGraph',
     StackPolicyViolation: 'StackPolicyViolation',
     StackMinimal: 'StackMinimal',
     StackTiny: 'StackTiny',

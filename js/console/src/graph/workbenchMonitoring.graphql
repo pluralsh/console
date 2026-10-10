@@ -2,6 +2,7 @@ fragment WorkbenchDashboardSummary on WorkbenchDashboard {
   id
   name
   description
+  publicId
   insertedAt
   updatedAt
 }
@@ -258,6 +259,12 @@ query WorkbenchMonitorJobs(
 mutation DeleteWorkbenchDashboard($id: ID!) {
   deleteDashboard(id: $id) {
     id
+  }
+}
+
+mutation ShareWorkbenchDashboard($id: ID!, $shared: Boolean!) {
+  shareWorkbenchDashboard(id: $id, shared: $shared) {
+    ...WorkbenchDashboardDetails
   }
 }
 

@@ -17,7 +17,6 @@ import {
   WorkbenchDashboardInput,
   WorkbenchMonitoringDashboardQueryResult,
 } from 'generated/graphql'
-import { omit } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
@@ -47,6 +46,8 @@ import {
   WorkbenchDashboardFilters,
 } from './WorkbenchDashboardFilters'
 import { WorkbenchDashboardPanels } from './WorkbenchDashboardPanels'
+import { DashboardPublicShare } from './DashboardPublicShare'
+import { AuthenticatedGraphSource, toPanelGraph } from './DashboardGraphSource'
 
 export function DashboardDetail({
   dashboardId,
@@ -93,7 +94,7 @@ function DashboardDetailView({
 }) {
   const { pathname, search } = useLocation()
   const graphs = useMemo(
-    () => dashboard.graphs?.filter(isNonNullable) ?? [],
+    () => dashboard.graphs?.filter(isNonNullable).map(toPanelGraph) ?? [],
     [dashboard.graphs]
   )
   const allInputs = useMemo(
@@ -149,14 +150,6 @@ function DashboardDetailView({
     for (const input of rangeInputs) out[input.name] = rangeDuration
     return out
   }, [filters, rangeInputs, rangeDuration])
-  const shareVariables = useMemo(
-    () =>
-      omit(
-        variables,
-        rangeInputs.map((input) => input.name)
-      ),
-    [variables, rangeInputs]
-  )
   const onInputReadyChange = useCallback((name: string, ready: boolean) => {
     setReadyInputs((current) =>
       current[name] === ready ? current : { ...current, [name]: ready }
@@ -228,9 +221,13 @@ function DashboardDetailView({
             <WorkbenchMonitoringSharePopover
               kind="dashboard"
               pathname={pathname}
-              range={range}
-              variables={shareVariables}
-            />
+              active={!!dashboard.publicId}
+            >
+              <DashboardPublicShare
+                dashboardId={dashboard.id}
+                publicId={dashboard.publicId}
+              />
+            </WorkbenchMonitoringSharePopover>
             <IconFrame
               ref={fullscreenTriggerRef}
               clickable
@@ -301,16 +298,17 @@ function DashboardDetailView({
             />
           </ToolbarSC>
           <PanelsSC>
-            <WorkbenchDashboardPanels
-              dashboardId={dashboard.id}
-              graphs={graphs}
-              variables={variables}
-              timeRange={timeRange}
-              rangeRevision={rangeRevision}
-              queriesEnabled={dashboardReady}
-              onRangeSelect={onRangeSelect}
-              onUpdate={onUpdate}
-            />
+            <AuthenticatedGraphSource dashboardId={dashboard.id}>
+              <WorkbenchDashboardPanels
+                graphs={graphs}
+                variables={variables}
+                timeRange={timeRange}
+                rangeRevision={rangeRevision}
+                queriesEnabled={dashboardReady}
+                onRangeSelect={onRangeSelect}
+                onUpdate={onUpdate}
+              />
+            </AuthenticatedGraphSource>
           </PanelsSC>
         </BodySC>
       </ScrollSC>

@@ -1,5 +1,10 @@
-import { DashboardGraphType } from 'generated/graphql'
+import {
+  DashboardDatasourceType,
+  DashboardGraphType,
+  WorkbenchDashboardDetailsFragment,
+} from 'generated/graphql'
 import { describe, expect, it } from 'vitest'
+import { toPanelGraph } from './DashboardGraphSource'
 import {
   dashboardGraphNeedsFetch,
   dashboardPanelIsWaitingForData,
@@ -64,5 +69,40 @@ describe('dashboard panel loading', () => {
         dataRevision: 1,
       })
     ).toBe('new')
+  })
+})
+
+describe('dashboard panel graph source', () => {
+  const graph: NonNullable<
+    NonNullable<WorkbenchDashboardDetailsFragment['graphs']>[number]
+  > = {
+    identifier: 'cpu',
+    title: 'CPU',
+    type: DashboardGraphType.Timeseries,
+    layout: { x: 0, y: 0, w: 1, h: 1 },
+    datasource: {
+      type: DashboardDatasourceType.Metrics,
+      tool: 'prometheus',
+      input: { query: 'up' },
+    },
+  }
+
+  it('only fetches data panels with a datasource once queries are enabled', () => {
+    expect(
+      dashboardGraphNeedsFetch(DashboardGraphType.Markdown, true, true)
+    ).toBe(false)
+    expect(
+      dashboardGraphNeedsFetch(DashboardGraphType.Timeseries, false, true)
+    ).toBe(false)
+    expect(
+      dashboardGraphNeedsFetch(DashboardGraphType.Timeseries, true, true)
+    ).toBe(true)
+  })
+
+  it('derives hasDatasource from the authenticated datasource', () => {
+    expect(toPanelGraph({ ...graph, datasource: null }).hasDatasource).toBe(
+      false
+    )
+    expect(toPanelGraph(graph).hasDatasource).toBe(true)
   })
 })

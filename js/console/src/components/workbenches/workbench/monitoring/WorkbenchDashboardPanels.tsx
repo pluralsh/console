@@ -21,8 +21,6 @@ import {
   DashboardGraphType,
   DashboardGraphUnit,
   DashboardTimeRangeAttributes,
-  useWorkbenchDashboardGraphQuery,
-  WorkbenchDashboardDetailsFragment,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityTraceFragment,
@@ -38,14 +36,14 @@ import {
 } from '../job/WorkbenchJobActivityResults'
 import { getMetricSeries, metricSeriesId } from '../job/workbenchJobMetrics'
 import { TraceWaterfall } from '../job/WorkbenchJobTraces'
+import {
+  DashboardPanelGraph,
+  useDashboardGraphSource,
+} from './DashboardGraphSource'
 import { DashboardTimeseriesChart } from './DashboardTimeseriesChart'
 import { DashboardToolIcon } from './dashboardToolIcon'
 import { formatUnitValue } from './dashboardUnits'
 import { QueryDefinitionModal } from './QueryDefinitionModal'
-
-type DashboardGraph = NonNullable<
-  NonNullable<WorkbenchDashboardDetailsFragment['graphs']>[number]
->
 
 function datasourceQuery(input: unknown): string | null {
   const value = typeof input === 'string' ? parseJson(input) : input
@@ -67,8 +65,7 @@ const CHART_HEIGHT_PX = 238
 const PIE_HEIGHT_PX = 200
 
 type DashboardPanelsProps = {
-  dashboardId: string
-  graphs: DashboardGraph[]
+  graphs: DashboardPanelGraph[]
   variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
   rangeRevision: number
@@ -136,7 +133,7 @@ export function WorkbenchDashboardPanels(props: DashboardPanelsProps) {
 function DashboardSection({
   section,
   ...props
-}: DashboardPanelsProps & { section: DashboardGraph }) {
+}: DashboardPanelsProps & { section: DashboardPanelGraph }) {
   return (
     <MetricsSection
       title={section.title || section.identifier}
@@ -153,7 +150,6 @@ function DashboardSection({
 }
 
 function DashboardGraphGrid({
-  dashboardId,
   graphs,
   variables,
   timeRange,
@@ -198,7 +194,6 @@ function DashboardGraphGrid({
               $w={graph.layout?.w ?? columns}
             >
               <DashboardPanel
-                dashboardId={dashboardId}
                 graph={graph}
                 variables={variables}
                 timeRange={timeRange}
@@ -228,8 +223,7 @@ function isDefaultCollapsed(options: unknown) {
 }
 
 type DashboardPanelProps = {
-  dashboardId: string
-  graph: DashboardGraph
+  graph: DashboardPanelGraph
   variables: Record<string, string>
   timeRange: DashboardTimeRangeAttributes
   rangeRevision: number
@@ -255,7 +249,6 @@ function DashboardPanel(props: DashboardPanelProps) {
 }
 
 function DataDashboardPanel({
-  dashboardId,
   graph,
   variables,
   timeRange,
@@ -265,9 +258,10 @@ function DataDashboardPanel({
   onUpdate,
   reserveDescription = false,
 }: DashboardPanelProps) {
+  const { useGraphData, readOnly } = useDashboardGraphSource()
   const needsFetch = dashboardGraphNeedsFetch(
     graph.type,
-    !!graph.datasource,
+    graph.hasDatasource,
     queriesEnabled
   )
   const {
@@ -275,15 +269,11 @@ function DataDashboardPanel({
     previousData,
     loading,
     error,
-  } = useWorkbenchDashboardGraphQuery({
-    variables: {
-      id: dashboardId,
-      identifier: graph.identifier,
-      input: JSON.stringify(variables),
-      timeRange,
-    },
+  } = useGraphData({
+    identifier: graph.identifier,
+    variables,
+    timeRange,
     skip: !needsFetch,
-    fetchPolicy: 'cache-and-network',
   })
   const [dataRevision, setDataRevision] = useState(rangeRevision)
   if (currentData && dataRevision !== rangeRevision)
@@ -295,15 +285,14 @@ function DataDashboardPanel({
     dataRevision,
   })
 
-  const query = datasourceQuery(graph.datasource?.input)
+  const query = readOnly ? null : datasourceQuery(graph.datasource?.input)
   const [queryOpen, setQueryOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
-  const result = data?.workbenchDashboard?.graph
-  const metrics = result?.metrics?.filter(isNonNullable) ?? []
-  const logs = result?.logs?.filter(isNonNullable) ?? []
-  const traces = result?.traces?.filter(isNonNullable) ?? []
+  const metrics = data?.metrics?.filter(isNonNullable) ?? []
+  const logs = data?.logs?.filter(isNonNullable) ?? []
+  const traces = data?.traces?.filter(isNonNullable) ?? []
   const tool = graph.datasource?.tool
   const toolType = graph.workbenchTool?.tool ?? tool
 
@@ -389,7 +378,7 @@ function DataDashboardPanel({
         </PanelActionsSC>
       </PanelHeaderSC>
       <PanelBodySC aria-busy={loading}>
-        {!graph.datasource ? (
+        {!graph.hasDatasource ? (
           <EmptyState message="This panel has no data source." />
         ) : dashboardPanelIsWaitingForData({
             queriesEnabled,
@@ -398,10 +387,15 @@ function DataDashboardPanel({
           }) ? (
           <DashboardPanelSkeleton fullscreen={fullscreen} />
         ) : error && !data ? (
-          <GqlError
-            error={error}
-            css={{ wordBreak: 'break-word' }}
-          />
+          readOnly &&
+          /not available on public dashboards/i.test(error.message) ? (
+            <EmptyState message="Not available on public dashboards" />
+          ) : (
+            <GqlError
+              error={error}
+              css={{ wordBreak: 'break-word' }}
+            />
+          )
         ) : (
           <PanelContent
             type={graph.type}

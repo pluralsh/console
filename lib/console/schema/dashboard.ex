@@ -126,6 +126,7 @@ defmodule Console.Schema.Dashboard do
   schema "dashboards" do
     field :name,        :string
     field :description, :string
+    field :public_id,   :string
 
     embeds_many :graphs, Graph, on_replace: :delete
     embeds_many :inputs, Input, on_replace: :delete
@@ -160,6 +161,12 @@ defmodule Console.Schema.Dashboard do
     |> validate_unique_graph_identifiers()
     |> validate_graph_sections()
     |> validate_graph_intersections()
+  end
+
+  def share_changeset(model, public_id) do
+    model
+    |> cast(%{public_id: public_id}, [:public_id])
+    |> unique_constraint(:public_id)
   end
 
   defp validate_unique_graph_identifiers(changeset) do

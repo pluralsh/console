@@ -392,6 +392,7 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :id, non_null(:id), description: "Stable identifier for this dashboard"
     field :name, non_null(:string), description: "Dashboard name"
     field :description, :string, description: "Optional dashboard description"
+    field :public_id, :string, description: "Unguessable id of the public share link, null when the dashboard is not shared"
     field :graphs, list_of(:workbench_dashboard_graph), description: "Graphs arranged on the dashboard grid"
     field :inputs, list_of(:workbench_dashboard_input), description: "User-configurable dashboard variables"
     field :workbench, :workbench, resolve: dataloader(Deployments)
@@ -413,6 +414,41 @@ defmodule Console.GraphQl.Deployments.Observability do
     end
 
     timestamps()
+  end
+
+  @desc "A publicly shared dashboard, exposing only what is needed to render it"
+  object :public_workbench_dashboard do
+    field :name, non_null(:string), description: "Dashboard name"
+    field :description, :string, description: "Optional dashboard description"
+    field :graphs, list_of(:public_workbench_dashboard_graph), description: "Graphs arranged on the dashboard grid"
+
+    field :graph, :workbench_dashboard_graph_result do
+      arg :identifier, non_null(:string), description: "Identifier of the graph to query"
+      arg :time_range, non_null(:dashboard_time_range_attributes), description: "Time range applied to the datasource query, capped at 30 days"
+
+      # each call queries the customer's observability backend, so cap aliased calls per request
+      complexity 100
+      resolve &Deployments.public_dashboard_graph/3
+    end
+  end
+
+  object :public_workbench_dashboard_graph do
+    field :identifier, non_null(:string), description: "Stable identifier unique within the dashboard"
+    field :title, :string, description: "Graph title"
+    field :description, :string, description: "Optional graph description"
+    field :type, non_null(:dashboard_graph_type), description: "Graph visualization type"
+    field :unit, :dashboard_graph_unit,
+      description: "Unit of the plotted values, used to format axes and tooltips"
+    field :section_id, :string,
+      description: "Identifier of the section graph containing this graph"
+
+    field :markdown, :string, description: "Markdown content for markdown graphs"
+    field :options, :map,
+      description: "Visualization-specific display options; sections may set collapsed"
+    field :layout, non_null(:workbench_dashboard_graph_layout), description: "Grid position and size"
+    field :has_datasource, non_null(:boolean),
+      description: "Whether this graph fetches data from a datasource",
+      resolve: fn %{datasource: ds}, _, _ -> {:ok, not is_nil(ds)} end
   end
 
   object :workbench_dashboard_graph_result do
@@ -816,6 +852,13 @@ defmodule Console.GraphQl.Deployments.Observability do
 
       resolve &Deployments.get_dashboard/2
     end
+
+    field :public_workbench_dashboard, :public_workbench_dashboard do
+      @desc "Fetch a publicly shared dashboard by its public id, no authentication required"
+      arg :public_id, non_null(:string), description: "Public id of the shared dashboard"
+
+      resolve &Deployments.public_dashboard/2
+    end
   end
 
   @desc "Mutations for managing observability providers, webhooks, alerts, and monitors"
@@ -915,6 +958,16 @@ defmodule Console.GraphQl.Deployments.Observability do
       arg :attributes, non_null(:dashboard_attributes)
 
       resolve &Deployments.update_dashboard/2
+    end
+
+    field :share_workbench_dashboard, :workbench_dashboard do
+      @desc "Enable or disable public sharing of a dashboard"
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :id, non_null(:id)
+      arg :shared, non_null(:boolean), description: "Whether the dashboard should be publicly viewable"
+
+      resolve &Deployments.share_dashboard/2
     end
 
     field :delete_dashboard, :workbench_dashboard do

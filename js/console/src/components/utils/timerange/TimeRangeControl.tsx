@@ -17,13 +17,14 @@ type EditState = { draft: string; initial: string; highlighted: number }
 
 /**
  * Editable time range field (type `4h` or an explicit `start – end`) with a
- * preset menu and a live/paused toggle.
+ * preset menu and a live/paused toggle (hidden with `showLiveToggle={false}`).
  */
 export function TimeRangeControl({
   value,
   now,
   onChange,
   presets = TIME_RANGE_PRESETS,
+  showLiveToggle = true,
   width = 340,
   className,
 }: {
@@ -31,6 +32,7 @@ export function TimeRangeControl({
   now: Date
   onChange: (range: TimeRange) => void
   presets?: TimeRangePreset[]
+  showLiveToggle?: boolean
   width?: number | string
   className?: string
 }) {
@@ -175,16 +177,18 @@ export function TimeRangeControl({
           </MenuSC>
         )}
       </FieldSC>
-      <LiveButtonSC
-        type="button"
-        $live={value.live}
-        aria-pressed={value.live}
-        title={value.live ? 'Pause live updates' : 'Resume live updates'}
-        onClick={toggleLive}
-      >
-        {value.live ? <PauseIcon size={12} /> : <PlayIcon size={12} />}
-        {value.live ? 'Live' : 'Paused'}
-      </LiveButtonSC>
+      {showLiveToggle && (
+        <LiveButtonSC
+          type="button"
+          $live={value.live}
+          aria-pressed={value.live}
+          title={value.live ? 'Pause live updates' : 'Resume live updates'}
+          onClick={toggleLive}
+        >
+          {value.live ? <PauseIcon size={12} /> : <PlayIcon size={12} />}
+          {value.live ? 'Live' : 'Paused'}
+        </LiveButtonSC>
+      )}
     </ControlSC>
   )
 }

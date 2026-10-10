@@ -557,3 +557,5 @@ config :opensearch,
   aws_secret_access_key: "test-secret-key",
   aws_session_token: "test-session-token",
   aws_region: "us-east-1"
+
+config :console, public_dashboard_rate_limit: 3

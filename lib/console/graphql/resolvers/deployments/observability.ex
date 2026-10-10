@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   use Console.GraphQl.Resolvers.Deployments.Base
+  require Logger
   import Console.GraphQl.Resolvers.Observability, only: [prom_args: 1]
   alias Console.Schema.{
     Alert,
@@ -236,6 +237,48 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
       ),
       do: DashboardRuntime.input(dashboard, identifier, input, time_range, user)
 
+  def public_dashboard(%{public_id: public_id}, _) do
+    case Observability.get_dashboard_by_public_id(public_id) do
+      %Dashboard{} = dashboard -> {:ok, dashboard}
+      nil -> {:error, "not found"}
+    end
+  end
+
+  def public_dashboard_graph(
+        %Dashboard{public_id: public_id} = dashboard,
+        %{identifier: identifier, time_range: time_range},
+        _
+      ) do
+    limit = Application.get_env(:console, :public_dashboard_rate_limit, 300)
+
+    # rate limit errors are treated as a deny so a broken backend can't be used to bypass the limit
+    case Hammer.check_rate("public_dashboard:#{public_id}", 60_000, limit) do
+      {:allow, _} -> run_public_graph(dashboard, identifier, time_range)
+      _ -> {:error, "rate limited"}
+    end
+  end
+
+  defp run_public_graph(dashboard, identifier, time_range) do
+    case DashboardRuntime.public_graph(dashboard, identifier, time_range) do
+      {:error, error} ->
+        Logger.warning("public dashboard #{dashboard.id} graph #{identifier} failed: #{inspect(error)}")
+        {:error, public_graph_error(error)}
+      result -> result
+    end
+  end
+
+  @public_range_errors ["invalid time range", "time range end must be after start", "time range cannot exceed 30 days"]
+
+  # anonymous viewers only get a fixed error vocabulary, since tool and upstream errors can leak
+  # internal tool names, datasource queries or backend hosts
+  defp public_graph_error(error) when error in @public_range_errors, do: error
+  defp public_graph_error(error) when is_binary(error) do
+    if error =~ ~r/^(tool .+ (not found|is governed by workbench policies)|graph .+ (not found|does not have a datasource))/,
+      do: "not available on public dashboards",
+      else: "failed to load data"
+  end
+  defp public_graph_error(_), do: "failed to load data"
+
   def list_dashboards(%Workbench{id: workbench_id}, args, _) do
     Dashboard.for_workbench(workbench_id)
     |> maybe_search(Dashboard, args)
@@ -248,6 +291,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def update_dashboard(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.update_dashboard(attrs, id, user)
+
+  def share_dashboard(%{id: id, shared: shared}, %{context: %{current_user: user}}),
+    do: Observability.share_dashboard(id, shared, user)
 
   def delete_dashboard(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.delete_dashboard(id, user)
