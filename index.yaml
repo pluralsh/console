@@ -6144,6 +6144,32 @@ entries:
     version: 0.1.1
   console-rapid:
   - apiVersion: v2
+    appVersion: 0.12.50
+    created: "2026-10-10T23:37:59.586515938Z"
+    dependencies:
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.217
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.34.0
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 66bd4e695573fa9bdad35d0fc34170e286e9f7aa9553d8ee7b897933d6d4b738
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.4.53/console-rapid-0.4.53.tgz
+    version: 0.4.53
+  - apiVersion: v2
     appVersion: 0.12.49
     created: "2026-10-04T14:09:25.660762414Z"
     dependencies:
@@ -11052,6 +11078,16 @@ entries:
     version: 0.3.40
   controller:
   - apiVersion: v2
+    appVersion: 0.12.50
+    created: "2026-10-10T23:37:59.795599681Z"
+    description: deploys the deployment operator for plural cd
+    digest: 2ebd69890b4500a6fee851c6478810005db27b162a92cf5c67a17dab9edfeb6b
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.217/controller-0.0.217.tgz
+    version: 0.0.217
+  - apiVersion: v2
     appVersion: 0.12.49
     created: "2026-10-04T14:09:25.880094598Z"
     description: deploys the deployment operator for plural cd
@@ -14388,4 +14424,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-04T18:15:41.787382215Z"
+generated: "2026-10-10T23:37:59.796954392Z"
