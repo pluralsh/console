@@ -159,7 +159,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
       {:ok, _engine} = Engine.new(job)
 
       assert {:ok, _} = wait(
-        fn -> MCP.list_tools(tool, job) end,
+        fn -> MCP.list_tools(tool) end,
         &match?({:ok, [_ | _]}, &1)
       )
 

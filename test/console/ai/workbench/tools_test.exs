@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.ToolsTest do
   use Mimic
 
   alias Console.AI.Workbench.{Tools, Environment, MCP}
+  alias Console.Schema.WorkbenchJob
   alias Console.AI.MCP.Tool, as: MCPToolSpec
   alias Console.AI.Tools.Workbench.{Http, FunctionCall}
   alias Console.AI.Tools.Workbench.MCP, as: MCPTool
@@ -192,6 +193,19 @@ defmodule Console.AI.Workbench.ToolsTest do
       assert_indexed(index, "mcp_example_echo", MCPTool, tool)
       {MCPTool, found} = Tools.get(index, "mcp_example_echo")
       assert found.id == tool.id
+    end
+
+    test "skips MCP expansion for unsaved jobs" do
+      server = insert(:mcp_server, name: "example", url: "http://localhost:3001/mcp")
+      workbench = insert(:workbench)
+      insert_associated_tool(workbench, :mcp, "example", [:integration], %{}, mcp_server: server)
+      workbench = Repo.preload(workbench, :tools)
+
+      reject(&MCP.expand_tools/2)
+
+      index = Tools.index(workbench, %WorkbenchJob{workbench_id: workbench.id, workbench: workbench})
+
+      refute Enum.any?(Map.keys(index), &String.starts_with?(&1, "mcp_"))
     end
 
     test "indexes environment tools including functions" do
