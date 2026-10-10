@@ -4,11 +4,12 @@ defmodule Console.Deployments.Init do
   """
   use Console.Services.Base
   alias Console.Services.Users
-  alias Console.Schema.{AccessToken, Cluster, DeploymentSettings, Group, User, Workbench}
+  alias Console.Schema.{AccessToken, Cluster, DeploymentSettings, Group, User, Workbench, WorkbenchTool}
   alias Kube.Utils
   alias Console.Deployments.{Clusters, Git, Settings, Services, Workbenches}
 
   @secret_name "console-auth-token"
+  @context_name "plrl/cloud/observability"
 
   def setup() do
     bot = console_bot()
@@ -174,41 +175,42 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  @doc """
+  Migrates an existing cloud instance onto the plural telemetry stack.  Repoints the global
+  prometheus/logging settings, the shared observability service context, and the plural
+  workbench tools at telemetry, creating the loki and tempo tools if they don't exist yet.
+  """
+  @spec migrate_plural_telemetry() :: {:ok, map} | Console.error()
+  def migrate_plural_telemetry() do
+    with true <- Console.plural_o11y?(),
+         true <- Console.cloud?(),
+         inst when is_binary(inst) <- Console.cloud_instance(),
+         {:ok, _, pass} <- Console.es_creds(),
+         {:ok, settings} <- telemetry_settings(pass),
+         {:ok, context} <- context_configuration(inst, pass),
+         {:ok, tools} <- telemetry_tools(pass) do
+      bot = console_bot()
+      start_transaction()
+      |> add_operation(:settings, fn _ -> Settings.update(settings) end)
+      |> add_operation(:context, fn _ ->
+        Services.save_context(%{configuration: context}, @context_name, bot)
+      end)
+      |> add_tools(tools, &upsert_tool(&1, bot))
+      |> execute()
+    else
+      _ -> {:error, "plural telemetry is not fully configured"}
+    end
+  end
+
   @spec setup_workbench() :: {:ok, %{bench: Workbench.t()}} | Console.error()
   def setup_workbench() do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
          {:ok, url, pass} <- Console.es_creds(),
-         {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
+         {:ok, tools} <- workbench_tools(inst, url, pass) do
       bot = console_bot()
       start_transaction()
-      |> add_operation(:es, fn _ ->
-        Workbenches.create_tool(%{
-          name: "plrl_elastic_logs",
-          tool: :elastic,
-          configuration: %{
-            elastic: %{
-              url: url,
-              username: "plrl-#{inst}",
-              password: pass,
-              index: "plrl-#{inst}-logs-*"
-            }
-          }
-        }, bot)
-      end)
-      |> add_operation(:prometheus, fn _ ->
-        Workbenches.create_tool(%{
-          name: "plrl_prometheus",
-          tool: :prometheus,
-          configuration: %{
-            prometheus: %{
-              url: "#{vurl}/select/#{vtenant}/prometheus",
-              username: "plrl-#{inst}",
-              password: pass
-            }
-          }
-        }, bot)
-      end)
+      |> add_tools(tools, &Workbenches.create_tool(&1, bot))
       |> add_operation(:exa, fn _ ->
         Workbenches.create_tool(%{
           name: "exa",
@@ -233,11 +235,74 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  defp workbench_tools(inst, url, pass) do
+    case Console.plural_o11y?() do
+      true -> telemetry_tools(pass)
+      false -> elastic_tools(inst, url, pass)
+    end
+  end
+
+  defp elastic_tools(inst, url, pass) do
+    with {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
+      {:ok, [
+        es: %{
+          name: "plrl_elastic_logs",
+          tool: :elastic,
+          configuration: %{
+            elastic: %{
+              url: url,
+              username: "plrl-#{inst}",
+              password: pass,
+              index: "plrl-#{inst}-logs-*"
+            }
+          }
+        },
+        prometheus: %{
+          name: "plrl_prometheus",
+          tool: :prometheus,
+          configuration: %{
+            prometheus: %{
+              url: "#{vurl}/select/#{vtenant}/prometheus",
+              username: "plrl-#{inst}",
+              password: pass
+            }
+          }
+        }
+      ]}
+    end
+  end
+
+  defp telemetry_tools(pass) do
+    with {:ok, murl} <- Console.telemetry_url(:metrics, :read),
+         {:ok, lurl} <- Console.telemetry_url(:logs, :read),
+         {:ok, turl} <- Console.telemetry_url(:traces, :read) do
+      auth = %{username: Console.telemetry_user(), password: pass}
+      {:ok, [
+        prometheus: %{name: "plrl_prometheus", tool: :prometheus, configuration: %{prometheus: Map.put(auth, :url, murl)}},
+        loki: %{name: "plrl_loki_logs", tool: :loki, configuration: %{loki: Map.put(auth, :url, lurl)}},
+        tempo: %{name: "plrl_tempo_traces", tool: :tempo, configuration: %{tempo: Map.put(auth, :url, turl)}}
+      ]}
+    end
+  end
+
+  defp add_tools(xact, tools, fun) do
+    Enum.reduce(tools, xact, fn {key, attrs}, xact ->
+      add_operation(xact, key, fn _ -> fun.(attrs) end)
+    end)
+  end
+
+  defp upsert_tool(%{name: name} = attrs, bot) do
+    case Workbenches.get_workbench_tool_by_name(name) do
+      %WorkbenchTool{id: id} -> Workbenches.update_tool(attrs, id, bot)
+      nil -> Workbenches.create_tool(attrs, bot)
+    end
+  end
+
   defp maybe_observability(attrs) do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
          {:ok, url, pass} <- Console.es_creds(),
-         {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
+         {:ok, o11y} <- observability_settings(inst, url, pass) do
         es_creds = %{
           host: url,
           user: "plrl-#{inst}",
@@ -246,16 +311,7 @@ defmodule Console.Deployments.Init do
         }
 
         attrs
-        |> Map.put(:logging, %{
-          enabled: true,
-          driver: :elastic,
-          elastic: es_creds
-        })
-        |> Map.put(:prometheus_connection, %{
-          host: "#{vurl}/select/#{vtenant}/prometheus",
-          user: "plrl-#{inst}",
-          password: pass
-        })
+        |> Map.merge(o11y)
         |> put_in([:ai, :vector_store], %{
           enabled: true,
           vector_store: :elastic,
@@ -271,33 +327,105 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  defp observability_settings(inst, url, pass) do
+    case Console.plural_o11y?() do
+      true -> telemetry_settings(pass)
+      false -> elastic_settings(inst, url, pass)
+    end
+  end
+
+  defp elastic_settings(inst, url, pass) do
+    with {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
+      {:ok, %{
+        logging: %{
+          enabled: true,
+          driver: :elastic,
+          elastic: %{host: url, user: "plrl-#{inst}", password: pass, index: "plrl-#{inst}-logs-*"}
+        },
+        prometheus_connection: %{
+          host: "#{vurl}/select/#{vtenant}/prometheus",
+          user: "plrl-#{inst}",
+          password: pass
+        }
+      }}
+    end
+  end
+
+  defp telemetry_settings(pass) do
+    with {:ok, murl} <- Console.telemetry_url(:metrics, :read),
+         {:ok, lurl} <- Console.telemetry_url(:logs, :read) do
+      user = Console.telemetry_user()
+      {:ok, %{
+        logging: %{enabled: true, driver: :loki, loki: %{host: lurl, user: user, password: pass}},
+        prometheus_connection: %{host: murl, user: user, password: pass}
+      }}
+    end
+  end
+
   defp maybe_setup_context(bot) do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
          {:ok, _url, pass} <- Console.es_creds(),
-         {:ok, _vurl, _vtenant} <- Console.vmetrics_creds() do
-      elastic_url = Console.url("/ext/v1/ingest/elastic")
-                    |> ensure_port()
-      Services.save_context(%{
-        configuration: %{
-          elastic: %{
-            url: elastic_url,
-            user: "plrl-#{inst}",
-            password: pass,
-            # Logstash write target (ILM rollover alias). Query pattern stays plrl-#{inst}-logs-*.
-            index: "plrl-#{inst}-logs-write"
-          },
-          vmetrics: %{
-            query_url: Console.url("/ext/v1/query/prometheus"),
-            url: Console.url("/ext/v1/ingest/prometheus"),
-            user: "plrl-#{inst}",
-            password: pass
-          }
-        }
-      }, "plrl/cloud/observability", bot)
+         {:ok, configuration} <- context_configuration(inst, pass) do
+      Services.save_context(%{configuration: configuration}, @context_name, bot)
     else
       _ -> {:ok, %{}}
     end
+  end
+
+  defp context_configuration(inst, pass) do
+    case Console.plural_o11y?() do
+      true -> telemetry_context(inst, pass)
+      false -> elastic_context(inst, pass)
+    end
+  end
+
+  defp elastic_context(inst, pass) do
+    with {:ok, _vurl, _vtenant} <- Console.vmetrics_creds() do
+      {:ok, %{
+        elastic: elastic_ingest(inst, "plrl-#{inst}", pass),
+        vmetrics: vmetrics_ingest("plrl-#{inst}", pass)
+      }}
+    end
+  end
+
+  defp telemetry_context(inst, pass) do
+    with {:ok, lurl} <- Console.telemetry_url(:logs, :read),
+         {:ok, twrite} <- Console.telemetry_url(:traces, :write),
+         {:ok, tread} <- Console.telemetry_url(:traces, :read) do
+      user = Console.telemetry_user()
+      {:ok, %{
+        elastic: elastic_ingest(inst, user, pass),
+        vmetrics: vmetrics_ingest(user, pass),
+        loki: %{
+          url: Console.url("/ext/v1/ingest/loki/api/v1/push"),
+          query_url: lurl,
+          user: user,
+          password: pass
+        },
+        # OTLP/HTTP base; exporters append /v1/traces
+        tempo: %{url: twrite, query_url: tread, user: user, password: pass}
+      }}
+    end
+  end
+
+  defp elastic_ingest(inst, user, pass) do
+    %{
+      url: ensure_port(Console.url("/ext/v1/ingest/elastic")),
+      user: user,
+      password: pass,
+      # Logstash write target (ILM rollover alias). Query pattern stays plrl-#{inst}-logs-*.
+      index: "plrl-#{inst}-logs-write"
+    }
+  end
+
+  defp vmetrics_ingest(user, pass) do
+    %{
+      query_url: Console.url("/ext/v1/query/prometheus"),
+      url: Console.url("/ext/v1/ingest/prometheus"),
+      user: user,
+      password: pass
+    }
   end
 
   defp ensure_port(url) do

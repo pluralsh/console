@@ -77,6 +77,25 @@ defmodule Console do
     end
   end
 
+  def plural_o11y?(), do: !!Console.conf(:plural_o11y)
+
+  def telemetry_user(), do: "plrl"
+
+  @doc """
+  Namespace-scoped url for a plural telemetry product api, eg `telemetry_url(:logs, :read)`
+  resolves to `{telemetry_url}/logs/read/ns/{cloud_instance}`.
+  """
+  @spec telemetry_url(:metrics | :logs | :traces, :read | :write) :: {:ok, binary} | :error
+  def telemetry_url(product, mode) when product in ~w(metrics logs traces)a and mode in ~w(read write)a do
+    with true <- plural_o11y?(),
+         url when is_binary(url) <- Console.conf(:telemetry_url),
+         ns when is_binary(ns) <- cloud_instance() do
+      {:ok, Path.join(url, "#{product}/#{mode}/ns/#{ns}")}
+    else
+      _ -> :error
+    end
+  end
+
   def truncate(str, len, suffix \\ "...")
   def truncate(str, len, suffix) when byte_size(str) > len,
     do: "#{String.slice(str, 0, len - byte_size(suffix))}#{suffix}"

@@ -179,6 +179,22 @@ func TestRefreshBypassesCacheTTL(t *testing.T) {
 	}
 }
 
+func TestLokiOnlyConfigIsValid(t *testing.T) {
+	lokiHost := "http://logs/write/ns/tenant-a"
+	client := &fakeConfigClient{
+		resp: &pb.ObservabilityConfig{LokiHost: &lokiHost},
+	}
+	provider := NewCachingProvider(client, time.Minute)
+
+	cfg, err := provider.GetConfig(context.Background())
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	if cfg.LokiHost != lokiHost {
+		t.Fatalf("unexpected loki host: got %q want %q", cfg.LokiHost, lokiHost)
+	}
+}
+
 func observabilityProto(promHost, elasticHost string) *pb.ObservabilityConfig {
 	return &pb.ObservabilityConfig{
 		PrometheusHost: &promHost,

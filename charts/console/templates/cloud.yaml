@@ -1,4 +1,4 @@
-{{ if and .Values.cloud.enabled .Values.cloud.o11y.enabled }}
+{{ if and .Values.cloud.enabled .Values.cloud.o11y.enabled (not .Values.cloud.o11y.plural) }}
 apiVersion: v1
 kind: Secret
 metadata:
