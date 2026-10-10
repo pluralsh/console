@@ -88,6 +88,11 @@ func (in *ToolQueryService) MetricsLabelSearch(ctx context.Context, input *toolq
 	if err := in.validateSearchInput(input.GetConnection()); err != nil {
 		return nil, err
 	}
+	if input.GetRange() != nil {
+		if err := in.validateTimeRange(input.GetRange()); err != nil {
+			return nil, err
+		}
+	}
 	if strings.TrimSpace(input.GetMetric()) == "" {
 		return nil, status.Error(codes.InvalidArgument, "metric is required")
 	}

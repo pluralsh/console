@@ -17,6 +17,20 @@
             "type": "integer",
             "description": "The maximum number of dimension names or values to return."
         },
+        "time_range": {
+            "type": "object",
+            "description": "Optional time range used to restrict dimension discovery.",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time in ISO8601 format."
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time in ISO8601 format."
+                }
+            }
+        },
         "options": {
             "type": "object",
             "description": "Provider-specific Azure metric label search options.",

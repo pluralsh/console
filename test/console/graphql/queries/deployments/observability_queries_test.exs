@@ -416,6 +416,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         assert opts[:timeout] == :timer.seconds(30)
         assert input.metric == "kube_pod_info"
         assert input.label == "namespace"
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 
         {:ok,
          %MetricsLabelSearchOutput{

@@ -128,8 +128,7 @@ func (in *PrometheusProvider) MetricsLabelSearch(ctx context.Context, input *too
 		return nil, err
 	}
 
-	end := time.Now()
-	start := end.Add(-24 * time.Hour)
+	start, end := metricsLabelSearchRange(input)
 	limit := metricsLabelSearchLimit(input.GetLimit())
 	matches := []string{fmt.Sprintf(`{__name__=%q}`, strings.TrimSpace(input.GetMetric()))}
 

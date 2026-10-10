@@ -15,14 +15,14 @@ defmodule Console.AI.Tools.Workbench.Monitoring.MonitorUpsert do
     @evaluation_cron_max 255
 
     embedded_schema do
-      field :name, :string
-      field :description, :string
-      field :alert_template, :binary
-      field :severity, Alert.Severity
-      field :type, Monitor.Type
+      field :name,            :string
+      field :description,     :string
+      field :alert_template,  :binary
+      field :severity,        Alert.Severity
+      field :type,            Monitor.Type
       field :evaluation_cron, :string
-      field :service_id, :binary_id
-      field :prompt, :string
+      field :service_id,      :string
+      field :prompt,          :string
 
       embeds_one :modes, Modes
       embeds_one :query, Monitor.Query
@@ -66,9 +66,9 @@ defmodule Console.AI.Tools.Workbench.Monitoring.MonitorUpsert do
   end
 
   embedded_schema do
-    field :job, :map, virtual: true
-    field :user, :map, virtual: true
-    field :monitor_id, :binary_id
+    field :job,        :map, virtual: true
+    field :user,       :map, virtual: true
+    field :monitor_id, :string
     embeds_one :attributes, Attributes
   end
 

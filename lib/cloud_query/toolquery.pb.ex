@@ -529,6 +529,7 @@ defmodule Toolquery.MetricsLabelSearchInput do
   field :label, 4, proto3_optional: true, type: :string
   field :limit, 5, proto3_optional: true, type: :int64
   field :options, 6, proto3_optional: true, type: Toolquery.MetricsLabelSearchOptions
+  field :range, 7, proto3_optional: true, type: Toolquery.TimeRange
 end
 
 defmodule Toolquery.MetricsLabelSearchOptions do
