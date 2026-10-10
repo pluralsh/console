@@ -101,6 +101,7 @@ RUN set -eux; \
            curl \
            gnupg \
            git \
+           gzip \
            jq \
            make \
            tar; then \
