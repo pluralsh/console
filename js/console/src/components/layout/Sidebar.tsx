@@ -315,13 +315,14 @@ export function Sidebar() {
               e.stopPropagation()
               setIsExpanded((x: boolean) => !x)
             }}
-            aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-label={isExpanded ? undefined : 'Expand sidebar'}
           >
             {isExpanded ? (
               <MenuCollapseIcon color="icon-xlight" />
             ) : (
               <MenuOpenIcon color="icon-xlight" />
             )}
+            {isExpanded ? 'Collapse sidebar' : null}
           </ToggleSidebarButtonSC>
         </WrapWithIf>
       </div>
@@ -368,9 +369,11 @@ const ToggleSidebarButtonSC = styled.button<{
   height: '100%',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: $isExpanded ? 'flex-end' : 'center',
-  padding: theme.spacing.small,
-  color: theme.colors['icon-xlight'],
+  justifyContent: $isExpanded ? 'flex-start' : 'center',
+  gap: theme.spacing.xsmall,
+  padding: $isExpanded ? `0 ${theme.spacing.medium}px` : theme.spacing.small,
+  whiteSpace: 'nowrap',
+  color: theme.colors['text-xlight'],
   cursor: 'pointer',
   '&:hover': {
     background: theme.colors['fill-zero-hover'],

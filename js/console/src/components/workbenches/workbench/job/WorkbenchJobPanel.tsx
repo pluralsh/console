@@ -397,7 +397,7 @@ const PanelSubTabSC = styled(SubTab)(({ theme }) => ({
   minWidth: 'max-content',
   outline: 'none',
   boxShadow: 'none',
-  borderRadius: 20,
+  borderRadius: theme.borderRadiuses.medium,
   backgroundColor: 'transparent',
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
   display: 'inline-flex',

@@ -43,6 +43,10 @@ import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { WorkbenchModelSelector } from './WorkbenchModelSelector'
+import {
+  WorkbenchPromptOptionsGroup,
+  WorkbenchPromptSubmitButton,
+} from './WorkbenchPromptControls'
 import { useTransientWorkbenchPrompt } from './useTransientWorkbenchPrompt'
 import {
   WorkbenchPromptOptionPills,
@@ -220,13 +224,15 @@ export function WorkbenchJobCreateInput({
           workbenchId={workbenchId}
           workbenchRepositorySource={data?.workbench}
           flowId={flowId}
+          submitButton={
+            <WorkbenchPromptSubmitButton
+              loading={loading}
+              disabled={!prompt.trim() || !workbenchId || disabled || loading}
+              onClick={() => handleSubmitPrompt()}
+            />
+          }
           options={
-            <Flex
-              align="center"
-              gap="xsmall"
-              wrap="wrap"
-              css={{ minHeight: 32, minWidth: 0 }}
-            >
+            <WorkbenchPromptOptionsGroup>
               <WorkbenchPromptOptionsSelector
                 workbenchId={workbenchId}
                 value={promptModes}
@@ -260,7 +266,7 @@ export function WorkbenchJobCreateInput({
                   workbenchOptions={workbenchOptions}
                 />
               )}
-            </Flex>
+            </WorkbenchPromptOptionsGroup>
           }
           wrapperStyles={{ maxWidth: MAX_WIDTH, ...wrapperStyles }}
           bgColor={bgColor}
@@ -572,7 +578,6 @@ const InputWrapperSC = styled.div({
   position: 'relative',
   width: '100%',
 })
-
 const SavedPromptTooltipPromptSC = styled.div(({ theme }) => ({
   backgroundColor:
     theme.mode === 'light'

@@ -154,7 +154,6 @@ export function WorkbenchPromptOptionsSelector({
           width: PANEL_WIDTH,
           minWidth: PANEL_WIDTH,
           maxWidth: PANEL_WIDTH,
-          clipPath: 'none',
         }}
       >
         <Card

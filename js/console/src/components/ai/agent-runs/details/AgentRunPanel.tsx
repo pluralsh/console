@@ -514,7 +514,7 @@ const TabListWrapperSC = styled.div({
 
 const TabSkeletonSC = styled(RectangleSkeleton).attrs({ $height: 16 })(
   ({ theme }) => ({
-    borderRadius: 20,
+    borderRadius: theme.borderRadiuses.medium,
     flexShrink: 0,
     padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
     display: 'inline-flex',
@@ -530,7 +530,7 @@ const panelTabStyles = ({ theme }: { theme: any; active?: boolean }) => ({
   minWidth: 'max-content',
   outline: 'none',
   boxShadow: 'none',
-  borderRadius: 20,
+  borderRadius: theme.borderRadiuses.medium,
   backgroundColor: 'transparent',
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
   display: 'inline-flex',
