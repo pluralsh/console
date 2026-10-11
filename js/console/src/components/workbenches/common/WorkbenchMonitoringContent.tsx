@@ -20,6 +20,7 @@ export function WorkbenchMonitoringContent({
   filterEmptyKind,
   onResetFilters,
   minHeight = 160,
+  compactTop = false,
   children,
 }: {
   search?: SearchProps
@@ -28,10 +29,15 @@ export function WorkbenchMonitoringContent({
   filterEmptyKind: Nullable<string>
   onResetFilters: () => void
   minHeight?: number
+  // less space above views that start with their own header, e.g. grouped lists
+  compactTop?: boolean
   children: ReactNode
 }) {
   return (
-    <WrapperSC $minHeight={minHeight}>
+    <WrapperSC
+      $minHeight={minHeight}
+      $compactTop={compactTop}
+    >
       {search && (
         <WorkbenchSearchInput
           value={search.searchString}
@@ -54,13 +60,14 @@ export function WorkbenchMonitoringContent({
   )
 }
 
-const WrapperSC = styled(Flex)<{ $minHeight: number }>(
-  ({ theme, $minHeight }) => ({
+const WrapperSC = styled(Flex)<{ $minHeight: number; $compactTop: boolean }>(
+  ({ theme, $minHeight, $compactTop }) => ({
     flexDirection: 'column',
     flex: 1,
     gap: theme.spacing.medium,
     minHeight: $minHeight,
     overflow: 'hidden',
     padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+    ...($compactTop && { paddingTop: theme.spacing.xxsmall }),
   })
 )

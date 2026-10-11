@@ -5,29 +5,16 @@ import styled, { useTheme } from 'styled-components'
 
 const CONTROL_SIZE = 32
 
-export const WorkbenchPromptOptionsGroup = styled.div(({ theme }) => {
-  const radius = theme.borderRadiuses.medium
-
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    rowGap: theme.spacing.xsmall,
-    minHeight: CONTROL_SIZE,
-    minWidth: 0,
-    '& > *:not(:first-child)': { marginLeft: -1 },
-    '& > *:hover, & > *:focus-within': { position: 'relative', zIndex: 1 },
-    '&&& .chatOptionPill': { borderRadius: 0 },
-    '&&& > .chatOptionPill:first-child, &&& > :first-child .chatOptionPill': {
-      borderTopLeftRadius: radius,
-      borderBottomLeftRadius: radius,
-    },
-    '&&& > .chatOptionPill:last-child, &&& > :last-child .chatOptionPill': {
-      borderTopRightRadius: radius,
-      borderBottomRightRadius: radius,
-    },
-  }
-})
+export const WorkbenchPromptOptionsGroup = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  columnGap: 6,
+  rowGap: theme.spacing.xsmall,
+  minHeight: CONTROL_SIZE,
+  minWidth: 0,
+  '&&& .chatOptionPill': { borderRadius: theme.borderRadiuses.medium },
+}))
 
 export function WorkbenchPromptSubmitButton({
   loading = false,

@@ -1,9 +1,10 @@
-import { CaretDownIcon, Spinner } from '@pluralsh/design-system'
+import { CaretDownIcon, PlusIcon, Spinner } from '@pluralsh/design-system'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { toCounts } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { IssueLink } from 'components/workbenches/common/IssueLink'
+import { WorkbenchJobPrChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import {
   IssueSort,
@@ -14,22 +15,36 @@ import {
   useWorkbenchIssueStatusCountsQuery,
   WorkbenchIssueFragment,
 } from 'generated/graphql'
+import chroma from 'chroma-js'
 import { includes } from 'lodash'
-import { cloneElement, memo, useMemo, useRef, useState } from 'react'
+import { memo, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { ensureURLValidity } from 'utils/url'
-import { ISSUE_STATUS_ICONS } from './IssueStatusChip'
-import { ISSUE_STATUS_LABELS, ISSUE_STATUS_OPTIONS } from './issueStatus'
+import { ISSUE_STATUS_COLORS, IssueStatusGlyph } from './IssueStatusGlyph'
+import { ISSUE_STATUS_LABELS } from './issueStatus'
 import {
   BoardEmptyList,
   EmptyListState,
-  LoadMoreSentinel,
   useScrollMargin,
 } from './WorkbenchBoard'
 
 const PAGE_SIZE = 50
+
+// active work first, unlike the board's left-to-right flow
+const GROUP_ORDER = [
+  IssueStatus.InProgress,
+  IssueStatus.Open,
+  IssueStatus.Completed,
+  IssueStatus.Cancelled,
+]
+
+// closed groups start collapsed (and so unloaded)
+const DEFAULT_COLLAPSED: Partial<Record<IssueStatus, boolean>> = {
+  [IssueStatus.Completed]: true,
+  [IssueStatus.Cancelled]: true,
+}
 const ROW_HEIGHT = 44
 
 // stable, so the paginated data callbacks don't change every render
@@ -56,9 +71,8 @@ export function WorkbenchIssuesGroupedList({
   emptyState: EmptyListState
 }) {
   const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null)
-  const [collapsed, setCollapsed] = useState<
-    Partial<Record<IssueStatus, boolean>>
-  >({})
+  const [collapsed, setCollapsed] =
+    useState<Partial<Record<IssueStatus, boolean>>>(DEFAULT_COLLAPSED)
 
   const { data, previousData, loading } = useWorkbenchIssueStatusCountsQuery({
     variables: { id: workbenchId, q: filters.q, providers: filters.providers },
@@ -71,7 +85,7 @@ export function WorkbenchIssuesGroupedList({
       toCounts(countsData?.workbench?.issueCounts?.statuses, (e) => e.status),
     [countsData]
   )
-  const groups = ISSUE_STATUS_OPTIONS.filter(
+  const groups = GROUP_ORDER.filter(
     (status) => includes(statuses, status) && (counts[status] ?? 0) > 0
   )
 
@@ -143,6 +157,7 @@ function IssueStatusGroup({
     <GroupSC>
       <GroupHeaderSC
         type="button"
+        $color={ISSUE_STATUS_COLORS[status]}
         onClick={onToggle}
         aria-expanded={!collapsed}
       >
@@ -154,7 +169,7 @@ function IssueStatusGroup({
             transition: 'transform 0.15s ease',
           }}
         />
-        {cloneElement(ISSUE_STATUS_ICONS[status], { size: 14 })}
+        <IssueStatusGlyph status={status} />
         <span>{ISSUE_STATUS_LABELS[status]}</span>
         <GroupCountSC>{count}</GroupCountSC>
       </GroupHeaderSC>
@@ -170,14 +185,49 @@ function IssueStatusGroup({
               scrollEl={scrollEl}
               fallbackWorkbenchId={workbenchId}
             />
-            <LoadMoreSentinel
-              fetchingMore={fetchingMore}
-              hasNextPage={!!pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-            />
+            {pageInfo?.hasNextPage && (
+              <ViewMoreButton
+                remaining={Math.max(count - issues.length, 0)}
+                endCursor={pageInfo.endCursor}
+                fetchingMore={fetchingMore}
+                fetchNextPage={fetchNextPage}
+              />
+            )}
           </>
         ))}
     </GroupSC>
+  )
+}
+
+// Loads a group's next page on demand. Polls also show as `fetchingMore`, so
+// it only spins for a page requested from the cursor it's still on.
+function ViewMoreButton({
+  remaining,
+  endCursor,
+  fetchingMore,
+  fetchNextPage,
+}: {
+  remaining: number
+  endCursor: Nullable<string>
+  fetchingMore: boolean
+  fetchNextPage: () => void
+}) {
+  const [requestedFrom, setRequestedFrom] = useState<Nullable<string>>()
+  const loadingMore = fetchingMore && requestedFrom === endCursor
+
+  return (
+    <ViewMoreSC
+      type="button"
+      disabled={loadingMore}
+      onClick={() => {
+        setRequestedFrom(endCursor)
+        fetchNextPage()
+      }}
+    >
+      {loadingMore ? <Spinner size={14} /> : <PlusIcon size={14} />}
+      View more
+      {remaining > 0 && <GroupCountSC>{remaining}</GroupCountSC>}
+    </ViewMoreSC>
   )
 }
 
@@ -197,6 +247,9 @@ function VirtualIssueRows({
     count: issues.length,
     getScrollElement: () => scrollEl,
     estimateSize: () => ROW_HEIGHT,
+    // it scrolls its element to this on mount, which would jump the shared list
+    // to the top whenever a group is expanded
+    initialOffset: () => scrollEl?.scrollTop ?? 0,
     overscan: 10,
     scrollMargin,
   })
@@ -252,10 +305,14 @@ const IssueRow = memo(function IssueRow({
           aria-label={issue.title}
         />
       )}
-      {issue.status &&
-        cloneElement(ISSUE_STATUS_ICONS[issue.status], { size: 14 })}
+      {issue.status && <IssueStatusGlyph status={issue.status} />}
       <RowTitleSC>{issue.title}</RowTitleSC>
       <RowRaisedSC>
+        <IssueLink
+          url={issue.url}
+          provider={issue.provider}
+        />
+        <WorkbenchJobPrChip pullRequests={issue.workbenchJob?.pullRequests} />
         {workbenchJobId && (
           <WorkbenchViewJobChip
             workbenchId={workbenchId}
@@ -263,10 +320,6 @@ const IssueRow = memo(function IssueRow({
             status={issue.workbenchJob?.status}
           />
         )}
-        <IssueLink
-          url={issue.url}
-          provider={issue.provider}
-        />
       </RowRaisedSC>
       <RowDateSC>
         {issue.insertedAt ? formatDateTime(issue.insertedAt, 'MMM D') : ''}
@@ -293,25 +346,50 @@ const GroupSC = styled.div({
   flexShrink: 0,
 })
 
-const GroupHeaderSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  ...theme.partials.text.body2Bold,
-  position: 'sticky',
-  top: 0,
-  zIndex: 2,
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  height: 36,
-  flexShrink: 0,
-  padding: `0 ${theme.spacing.medium}px`,
-  color: theme.colors.text,
-  backgroundColor: theme.colors['fill-one'],
-  borderRadius: theme.borderRadiuses.medium,
-  cursor: 'pointer',
-  '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
-  '&:focus-visible': { outline: theme.borders['outline-focused'] },
-}))
+// tinted with its status color, but opaque, so the rows scroll under it unseen.
+// Light mode's zero fill is white on a near-white page, so it steps up there.
+const GroupHeaderSC = styled.button<{ $color: IssueStatusColor }>(
+  ({ theme, $color }) => {
+    const light = theme.mode === 'light'
+    const fill = theme.colors[light ? 'fill-two' : 'fill-zero']
+    const hoverFill = theme.colors[light ? 'fill-two-hover' : 'fill-zero-hover']
+
+    return {
+      ...theme.partials.reset.button,
+      ...theme.partials.text.body2Bold,
+      position: 'sticky',
+      top: 0,
+      zIndex: 2,
+      display: 'flex',
+      alignItems: 'center',
+      gap: theme.spacing.small,
+      height: 36,
+      flexShrink: 0,
+      marginBottom: theme.spacing.xxsmall,
+      padding: `0 ${theme.spacing.medium}px`,
+      color: theme.colors.text,
+      backgroundColor: statusTint(fill, theme.colors[$color]),
+      borderRadius: theme.borderRadiuses.large,
+      cursor: 'pointer',
+      '&:hover': {
+        backgroundColor: statusTint(hoverFill, theme.colors[$color]),
+      },
+      // only for keyboard focus, not after a click
+      '&:focus': { outline: 'none' },
+      '&:focus-visible': { outline: theme.borders['outline-focused'] },
+    }
+  }
+)
+
+type IssueStatusColor = (typeof ISSUE_STATUS_COLORS)[IssueStatus]
+
+function statusTint(fill: string, color: string) {
+  try {
+    return chroma.mix(fill, color, 0.04, 'rgb').hex()
+  } catch {
+    return fill
+  }
+}
 
 const GroupCountSC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
@@ -331,9 +409,31 @@ const RowSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   height: ROW_HEIGHT,
   padding: `0 ${theme.spacing.medium}px`,
-  borderRadius: theme.borderRadiuses.medium,
+  borderRadius: theme.borderRadiuses.large,
   // the row's own target, not a link or chip in it
   '&:has(> a:hover)': { backgroundColor: theme.colors['fill-zero-hover'] },
+}))
+
+// laid out like a row, its icon in the rows' status icon column
+const ViewMoreSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.body2,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  height: 36,
+  flexShrink: 0,
+  marginBottom: theme.spacing.small,
+  padding: `0 ${theme.spacing.medium}px`,
+  borderRadius: theme.borderRadiuses.large,
+  color: theme.colors['text-light'],
+  cursor: 'pointer',
+  '&:hover:not(:disabled)': {
+    backgroundColor: theme.colors['fill-zero-hover'],
+    color: theme.colors.text,
+  },
+  '&:disabled': { cursor: 'default' },
+  '&:focus-visible': { outline: theme.borders['outline-focused'] },
 }))
 
 // the whole row opens the issue, under the row's own links

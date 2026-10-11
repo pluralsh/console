@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ReactNode, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 const DURATION = 200
@@ -35,7 +35,10 @@ export function WorkbenchSidebarSlot({ children }: { children: ReactNode }) {
     )
   })
 
-  useEffect(
+  // a layout cleanup, as it has to run before the next tab's slot records its
+  // width (a passive one runs after, wiping it), but after that slot has read
+  // this one's while rendering
+  useLayoutEffect(
     () => () => {
       shownSidebarWidth = 0
     },
