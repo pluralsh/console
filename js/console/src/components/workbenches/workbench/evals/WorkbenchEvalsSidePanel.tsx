@@ -192,7 +192,7 @@ function EvalFilterChip({
       inactive={!hasItems}
       onClick={hasItems ? onClick : undefined}
       css={{
-        borderRadius: 12,
+        borderRadius: theme.borderRadiuses.medium,
         backgroundColor: active ? theme.colors['fill-two-selected'] : undefined,
         height: 'fit-content',
       }}

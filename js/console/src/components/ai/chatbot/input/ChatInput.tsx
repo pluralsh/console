@@ -274,8 +274,9 @@ export function ChatInputSimple({
 
 export function ChatSubmitButton({
   bgColor = 'fill-primary',
+  icon = <ArrowUpIcon />,
   ...props
-}: { bgColor?: SemanticColorKey } & Omit<
+}: { bgColor?: SemanticColorKey; icon?: ReactNode } & Omit<
   ComponentPropsWithRef<typeof ChatSubmitButtonSC>,
   'children' | '$bgColor'
 >) {
@@ -284,7 +285,7 @@ export function ChatSubmitButton({
       $bgColor={bgColor}
       {...props}
     >
-      <ArrowUpIcon />
+      {icon}
     </ChatSubmitButtonSC>
   )
 }
@@ -299,15 +300,16 @@ export function ChatOptionPill({
   textType?: SemanticPartialType
   showArrow?: boolean
 } & ComponentPropsWithRef<typeof Chip>) {
-  const { partials, colors } = useTheme()
+  const { partials, colors, borderRadiuses } = useTheme()
   return (
     <Chip
       clickable
       fillLevel={2}
       size="large"
       {...props}
+      className={['chatOptionPill', props.className].filter(Boolean).join(' ')}
       css={{
-        borderRadius: 12,
+        borderRadius: borderRadiuses.medium,
         ...(typeof props.css === 'object' && props.css ? props.css : {}),
       }}
     >

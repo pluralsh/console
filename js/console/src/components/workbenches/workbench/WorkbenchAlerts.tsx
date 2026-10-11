@@ -180,9 +180,11 @@ export function WorkbenchAlerts() {
         details.content
       ) : (
         <WorkbenchMonitoringContent
-          searchString={searchString}
-          onSearchChange={setSearchString}
-          searchPlaceholder="Search alerts"
+          search={{
+            searchString,
+            onSearchChange: setSearchString,
+            searchPlaceholder: 'Search alerts',
+          }}
           error={error}
           filterEmptyKind={filterEmptyKind}
           onResetFilters={emptyState.onResetFilters}

@@ -1,13 +1,30 @@
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
-import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
+import {
+  useLoadingDeploymentSettings,
+  useMetricsEnabled,
+} from 'components/contexts/DeploymentSettingsContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubTabs } from 'components/utils/SubTabs'
 import { ReactNode, useMemo, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import styled from 'styled-components'
 import { useServiceSubPageBreadcrumbs } from './ServiceDetails'
 import { useServiceContext } from './ServiceDetailsContext'
 import { SERVICE_OBSERVABILITY_REL_PATH } from 'routes/cdRoutesConsts'
+
+export function ServiceObservabilityIndex() {
+  const metricsEnabled = useMetricsEnabled()
+  const loading = useLoadingDeploymentSettings()
+
+  if (loading) return null
+
+  return (
+    <Navigate
+      replace
+      to={metricsEnabled ? 'metrics' : 'alerts'}
+    />
+  )
+}
 
 export function ServiceObservability() {
   const ctx = useServiceContext()
@@ -16,8 +33,8 @@ export function ServiceObservability() {
 
   const directory = useMemo(
     () => [
-      { path: 'alerts', label: 'Alerts' },
       ...(metricsEnabled ? [{ path: 'metrics', label: 'Metrics' }] : []),
+      { path: 'alerts', label: 'Alerts' },
       { path: 'monitors', label: 'Monitors' },
     ],
     [metricsEnabled]

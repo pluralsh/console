@@ -1054,6 +1054,31 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert statuses == %{"OPEN" => 2, "COMPLETED" => 1}
     end
 
+    test "it can filter workbench issue counts by search and provider" do
+      workbench = insert(:workbench)
+      insert(:issue, workbench: workbench, status: :open, provider: :github, title: "fix the scraper")
+      insert(:issue, workbench: workbench, status: :completed, provider: :github, title: "scraper is slow")
+      insert(:issue, workbench: workbench, status: :open, provider: :linear, title: "scraper on linear")
+      insert(:issue, workbench: workbench, status: :open, provider: :github, title: "something else")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $q: String, $providers: [IssueWebhookProvider]) {
+          workbench(id: $id) {
+            issueCounts(q: $q, providers: $providers) {
+              providers { provider count }
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "q" => "scraper", "providers" => ["GITHUB"]}, %{current_user: admin_user()})
+
+      providers = Map.new(found["issueCounts"]["providers"], & {&1["provider"], &1["count"]})
+      statuses  = Map.new(found["issueCounts"]["statuses"], & {&1["status"], &1["count"]})
+
+      assert providers == %{"GITHUB" => 2}
+      assert statuses == %{"OPEN" => 1, "COMPLETED" => 1}
+    end
+
     test "users field returns users from user and group policy bindings on the workbench" do
       user_direct = insert(:user)
       group = insert(:group)
@@ -2305,16 +2330,14 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   end
 
   describe "workbenchJobSearch" do
-    test "it can search vector-indexed workbench jobs" do
-      enable_vector_store()
-
+    test "it can search workbench jobs by prompt substring" do
       workbench = insert(:workbench)
 
       job =
         insert(:workbench_job,
           workbench: workbench,
           status: :successful,
-          prompt: "investigate database outage",
+          prompt: "investigate the Database Outage in prod",
           result: build(:workbench_job_result, conclusion: "root cause was connection pool exhaustion")
         )
 
@@ -2324,20 +2347,10 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         url: "https://github.com/org/repo/pull/1"
       )
 
-      expect(Console.AI.VectorStore, :fetch, fn "database outage", opts ->
-        assert opts[:count] == 2
-        assert opts[:filters] == [datatype: {:raw, :workbench_job}, workbench_id: workbench.id]
-        assert %{__struct__: Console.Schema.User} = opts[:user]
+      insert(:workbench_job, workbench: workbench, prompt: "upgrade the cluster")
+      insert(:workbench_job, prompt: "another database outage")
 
-        {:ok, [
-          %Console.AI.VectorStore.Response{
-            type: :workbench,
-            workbench_job: %Console.Schema.WorkbenchJob.Mini{id: job.id}
-          }
-        ]}
-      end)
-
-      {:ok, %{data: %{"workbenchJobSearch" => [found | _]}}} = run_query("""
+      {:ok, %{data: %{"workbenchJobSearch" => [found]}}} = run_query("""
         query WorkbenchJobSearch($workbenchId: ID!) {
           workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
             id
@@ -2351,30 +2364,31 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == job.id
       assert found["status"] == "SUCCESSFUL"
-      assert found["prompt"] == "investigate database outage"
+      assert found["prompt"] == "investigate the Database Outage in prod"
       assert found["result"]["conclusion"] == "root cause was connection pool exhaustion"
       assert found["pullRequests"] == [
         %{"title" => pr.title, "url" => pr.url}
       ]
     end
 
-    test "it filters search results by status and pull request state in relevance order" do
-      enable_vector_store()
-
+    test "it filters search results by status and pull request state, newest first" do
       workbench = insert(:workbench)
-      [first_failed, second_failed, third_failed] = insert_list(3, :workbench_job, workbench: workbench, status: :failed)
-      [first_ok, second_ok] = insert_list(2, :workbench_job, workbench: workbench, status: :successful)
-      insert(:pull_request, workbench_job: second_ok, status: :merged)
-      ranked = [first_ok, second_failed, second_ok, first_failed, third_failed]
+      job = fn status, minutes_ago ->
+        insert(:workbench_job,
+          workbench: workbench,
+          status: status,
+          prompt: "fix the outage",
+          inserted_at: Timex.now() |> Timex.shift(minutes: -minutes_ago)
+        )
+      end
 
-      expect(Console.AI.VectorStore, :fetch, 3, fn "outage", opts ->
-        {:ok, ranked
-              |> Enum.take(opts[:count])
-              |> Enum.map(&%Console.AI.VectorStore.Response{
-                type: :workbench,
-                workbench_job: %Console.Schema.WorkbenchJob.Mini{id: &1.id}
-              })}
-      end)
+      first_ok = job.(:successful, 1)
+      second_failed = job.(:failed, 2)
+      second_ok = job.(:successful, 3)
+      first_failed = job.(:failed, 4)
+      job.(:failed, 5)
+      insert(:workbench_job, workbench: workbench, status: :failed, prompt: "unrelated")
+      insert(:pull_request, workbench_job: second_ok, status: :merged)
 
       query = """
         query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
@@ -2384,7 +2398,6 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         }
       """
 
-      # 4 candidates for a limit of 2: the matching ones among them, most relevant first
       {:ok, %{data: %{"workbenchJobSearch" => found}}} =
         run_query(query, %{"workbenchId" => workbench.id, "statuses" => ["FAILED"]}, %{current_user: admin_user()})
 
@@ -2395,36 +2408,33 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert Enum.map(found, & &1["id"]) == [second_ok.id]
 
-      # unfiltered searches fetch just the limit, in relevance order
       {:ok, %{data: %{"workbenchJobSearch" => found}}} =
         run_query(query, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
 
       assert Enum.map(found, & &1["id"]) == [first_ok.id, second_failed.id]
     end
 
-    test "it errors when the vector store is not enabled" do
-      deployment_settings(
-        ai: %{
-          enabled: true,
-          provider: :openai,
-          openai: %{access_token: "key"},
-          vector_store: %{enabled: false}
-        }
-      )
-
+    test "it matches like wildcards literally, without the vector store" do
       reject(&Console.AI.VectorStore.fetch/2)
 
       workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, prompt: "raise cpu to 100% on node_pool")
+      insert(:workbench_job, workbench: workbench, prompt: "raise cpu to 1000 on nodeXpool")
 
-      assert {:ok, %{errors: [%{message: message} | _]}} = run_query("""
-        query WorkbenchJobSearch($workbenchId: ID!) {
-          workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
+      query = """
+        query WorkbenchJobSearch($workbenchId: ID!, $q: String!) {
+          workbenchJobSearch(q: $q, workbenchId: $workbenchId, limit: 5) {
             id
           }
         }
-      """, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
+      """
 
-      assert message == "Vector store is not enabled, cannot query"
+      for q <- ["100%", "node_pool"] do
+        {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+          run_query(query, %{"workbenchId" => workbench.id, "q" => q}, %{current_user: admin_user()})
+
+        assert Enum.map(found, & &1["id"]) == [job.id]
+      end
     end
   end
 
@@ -2869,22 +2879,5 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert row["merge_rate"] == 1.0
       assert row["timestamp"]
     end
-  end
-
-  defp enable_vector_store() do
-    import ElasticsearchUtils
-
-    deployment_settings(
-      ai: %{
-        enabled: true,
-        provider: :openai,
-        openai: %{access_token: "key"},
-        vector_store: %{
-          enabled: true,
-          store: :elastic,
-          elastic: es_vector_settings()
-        }
-      }
-    )
   end
 end

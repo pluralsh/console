@@ -43,6 +43,7 @@ import {
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
+import { WORKBENCH_SIDEBAR_WIDTH } from '../WorkbenchSidePanel'
 
 function isNearBottom(el: HTMLElement) {
   return el.scrollHeight - el.scrollTop - el.clientHeight < 200
@@ -531,9 +532,9 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   overflow: 'hidden',
-  width: 300,
-  maxWidth: 300,
-  minWidth: 300,
+  width: WORKBENCH_SIDEBAR_WIDTH,
+  maxWidth: WORKBENCH_SIDEBAR_WIDTH,
+  minWidth: WORKBENCH_SIDEBAR_WIDTH,
 }))
 
 const FilterSC = styled.div(({ theme }) => ({

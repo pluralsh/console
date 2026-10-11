@@ -12294,7 +12294,7 @@ export type RootQueryType = {
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchJobActivities?: Maybe<WorkbenchJobActivityConnection>;
   workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
-  /** Semantic search over vector-indexed workbench jobs */
+  /** Case-insensitive substring search over a workbench's job prompts, newest first */
   workbenchJobSearch?: Maybe<Array<Maybe<WorkbenchJob>>>;
   workbenchPrMergeRates?: Maybe<Array<Maybe<WorkbenchPrMergeRateEntry>>>;
   workbenchPrMergeRatesByWorkbench?: Maybe<Array<Maybe<WorkbenchPrMergeRateByWorkbenchEntry>>>;
@@ -16970,6 +16970,12 @@ export type WorkbenchEvalResultsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchIssueCountsArgs = {
+  providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>>>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -23625,6 +23631,29 @@ export type WorkbenchIssuesQueryVariables = Exact<{
 
 
 export type WorkbenchIssuesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issueCounts?: { __typename?: 'WorkbenchIssueCounts', providers?: Array<{ __typename?: 'IssueCountByProvider', provider: IssueWebhookProvider, count: number } | null> | null, statuses?: Array<{ __typename?: 'IssueCountByStatus', status: IssueStatus, count: number } | null> | null } | null, issues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchIssueStatusCountsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  q?: InputMaybe<Scalars['String']['input']>;
+  providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>> | InputMaybe<IssueWebhookProvider>>;
+}>;
+
+
+export type WorkbenchIssueStatusCountsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issueCounts?: { __typename?: 'WorkbenchIssueCounts', statuses?: Array<{ __typename?: 'IssueCountByStatus', status: IssueStatus, count: number } | null> | null } | null } | null };
+
+export type WorkbenchIssuesForStatusQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  status: IssueStatus;
+  q?: InputMaybe<Scalars['String']['input']>;
+  providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>> | InputMaybe<IssueWebhookProvider>>;
+  sort?: InputMaybe<IssueSort>;
+  direction?: InputMaybe<SortDirection>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchIssuesForStatusQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null> | null } | null } | null };
 
 export type GetWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -48986,6 +49015,126 @@ export type WorkbenchIssuesQueryHookResult = ReturnType<typeof useWorkbenchIssue
 export type WorkbenchIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenchIssuesLazyQuery>;
 export type WorkbenchIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchIssuesSuspenseQuery>;
 export type WorkbenchIssuesQueryResult = Apollo.QueryResult<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>;
+export const WorkbenchIssueStatusCountsDocument = gql`
+    query WorkbenchIssueStatusCounts($id: ID!, $q: String, $providers: [IssueWebhookProvider]) {
+  workbench(id: $id) {
+    id
+    issueCounts(q: $q, providers: $providers) {
+      statuses {
+        status
+        count
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchIssueStatusCountsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchIssueStatusCountsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchIssueStatusCountsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchIssueStatusCountsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      q: // value for 'q'
+ *      providers: // value for 'providers'
+ *   },
+ * });
+ */
+export function useWorkbenchIssueStatusCountsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables> & ({ variables: WorkbenchIssueStatusCountsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>(WorkbenchIssueStatusCountsDocument, options);
+      }
+export function useWorkbenchIssueStatusCountsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>(WorkbenchIssueStatusCountsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchIssueStatusCountsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>;
+export function useWorkbenchIssueStatusCountsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchIssueStatusCountsQuery | undefined, WorkbenchIssueStatusCountsQueryVariables>;
+export function useWorkbenchIssueStatusCountsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>(WorkbenchIssueStatusCountsDocument, options);
+        }
+export type WorkbenchIssueStatusCountsQueryHookResult = ReturnType<typeof useWorkbenchIssueStatusCountsQuery>;
+export type WorkbenchIssueStatusCountsLazyQueryHookResult = ReturnType<typeof useWorkbenchIssueStatusCountsLazyQuery>;
+export type WorkbenchIssueStatusCountsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchIssueStatusCountsSuspenseQuery>;
+export type WorkbenchIssueStatusCountsQueryResult = Apollo.QueryResult<WorkbenchIssueStatusCountsQuery, WorkbenchIssueStatusCountsQueryVariables>;
+export const WorkbenchIssuesForStatusDocument = gql`
+    query WorkbenchIssuesForStatus($id: ID!, $status: IssueStatus!, $q: String, $providers: [IssueWebhookProvider], $sort: IssueSort, $direction: SortDirection, $first: Int = 50, $after: String) {
+  workbench(id: $id) {
+    id
+    issues(
+      q: $q
+      providers: $providers
+      statuses: [$status]
+      sort: $sort
+      direction: $direction
+      first: $first
+      after: $after
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchIssueFragmentDoc}`;
+
+/**
+ * __useWorkbenchIssuesForStatusQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchIssuesForStatusQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchIssuesForStatusQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchIssuesForStatusQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      status: // value for 'status'
+ *      q: // value for 'q'
+ *      providers: // value for 'providers'
+ *      sort: // value for 'sort'
+ *      direction: // value for 'direction'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchIssuesForStatusQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables> & ({ variables: WorkbenchIssuesForStatusQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>(WorkbenchIssuesForStatusDocument, options);
+      }
+export function useWorkbenchIssuesForStatusLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>(WorkbenchIssuesForStatusDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchIssuesForStatusSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>;
+export function useWorkbenchIssuesForStatusSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchIssuesForStatusQuery | undefined, WorkbenchIssuesForStatusQueryVariables>;
+export function useWorkbenchIssuesForStatusSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>(WorkbenchIssuesForStatusDocument, options);
+        }
+export type WorkbenchIssuesForStatusQueryHookResult = ReturnType<typeof useWorkbenchIssuesForStatusQuery>;
+export type WorkbenchIssuesForStatusLazyQueryHookResult = ReturnType<typeof useWorkbenchIssuesForStatusLazyQuery>;
+export type WorkbenchIssuesForStatusSuspenseQueryHookResult = ReturnType<typeof useWorkbenchIssuesForStatusSuspenseQuery>;
+export type WorkbenchIssuesForStatusQueryResult = Apollo.QueryResult<WorkbenchIssuesForStatusQuery, WorkbenchIssuesForStatusQueryVariables>;
 export const GetWorkbenchCronDocument = gql`
     mutation GetWorkbenchCron($id: ID!) {
   workbenchCron(id: $id) {
@@ -52883,6 +53032,8 @@ export const namedOperations = {
     WorkbenchAlerts: 'WorkbenchAlerts',
     WorkbenchesIssues: 'WorkbenchesIssues',
     WorkbenchIssues: 'WorkbenchIssues',
+    WorkbenchIssueStatusCounts: 'WorkbenchIssueStatusCounts',
+    WorkbenchIssuesForStatus: 'WorkbenchIssuesForStatus',
     WorkbenchCrons: 'WorkbenchCrons',
     WorkbenchSkills: 'WorkbenchSkills',
     WorkbenchPrompts: 'WorkbenchPrompts',

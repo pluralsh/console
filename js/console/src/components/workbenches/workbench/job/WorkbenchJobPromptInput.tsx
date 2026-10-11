@@ -9,7 +9,7 @@ import {
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
 
-import { Flex, Tooltip } from '@pluralsh/design-system'
+import { Tooltip } from '@pluralsh/design-system'
 import {
   ChatInputSimple,
   ChatInputSimpleRef,
@@ -22,6 +22,11 @@ import {
   WorkbenchJobPromptQueue,
 } from './WorkbenchJobPromptQueue'
 import { WorkbenchModelSelector } from '../WorkbenchModelSelector'
+import {
+  WorkbenchPromptCancelButton,
+  WorkbenchPromptOptionsGroup,
+  WorkbenchPromptSubmitButton,
+} from '../WorkbenchPromptControls'
 import {
   WorkbenchPromptOptionPills,
   WorkbenchPromptOptionsSelector,
@@ -138,12 +143,7 @@ export function WorkbenchJobPromptInput({
           workbenchId={job?.workbench?.id}
           workbenchRepositorySource={job?.workbench}
           options={
-            <Flex
-              align="center"
-              gap="small"
-              wrap="wrap"
-              css={{ minHeight: 32, minWidth: 0 }}
-            >
+            <WorkbenchPromptOptionsGroup>
               <WorkbenchPromptOptionsSelector
                 workbenchId={workbenchId}
                 value={effectivePromptModes}
@@ -160,19 +160,22 @@ export function WorkbenchJobPromptInput({
                 value={effectivePromptModes}
                 onChange={setPromptModes}
               />
-            </Flex>
+            </WorkbenchPromptOptionsGroup>
           }
           submitButton={
             canCancel ? (
               <Tooltip label="Cancel job">
-                <CancelSquareButtonSC
-                  type="button"
+                <WorkbenchPromptCancelButton
                   onClick={() => setCancelModalOpen(true)}
-                >
-                  <CancelSquareIconSC />
-                </CancelSquareButtonSC>
+                />
               </Tooltip>
-            ) : undefined
+            ) : (
+              <WorkbenchPromptSubmitButton
+                loading={submitLoading}
+                disabled={!job || !newMessage || submitLoading}
+                onClick={submitJob}
+              />
+            )
           }
         />
       </PromptComposerSC>
@@ -206,29 +209,3 @@ const PromptComposerSC = styled.div<{ $hasQueue: boolean }>(
       : {}),
   })
 )
-
-const CancelSquareButtonSC = styled.button(({ theme }) => ({
-  position: 'absolute',
-  bottom: theme.spacing.small,
-  right: theme.spacing.small,
-  padding: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: 28,
-  width: 28,
-  minHeight: 0,
-  borderRadius: 25,
-  border: 'none',
-  background: theme.colors['fill-two'],
-  cursor: 'pointer',
-  '&:hover': { background: theme.colors['fill-three'] },
-}))
-
-const CancelSquareIconSC = styled.div(({ theme }) => ({
-  height: 10,
-  width: 10,
-  borderRadius: 2,
-  background: theme.colors['icon-light'],
-  flexShrink: 0,
-}))

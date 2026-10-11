@@ -1,11 +1,11 @@
 import { AnimatedDiv, Card } from '@pluralsh/design-system'
 import { useSpring } from '@react-spring/web'
-import { CSSProperties, ReactNode, useRef } from 'react'
+import { CSSProperties, Fragment, ReactNode, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import styled, { useTheme } from 'styled-components'
 
 import { useCursorPosition } from './CursorPosition'
-import { LineSeries, PointTooltipProps } from '@nivo/line'
+import { LineSeries, PointTooltipProps, SliceTooltipProps } from '@nivo/line'
 
 const TooltipSC = styled.div.attrs(() => ({}))((_) => ({
   width: '0',
@@ -44,7 +44,7 @@ function TooltipWrapper({
   tooltipStyles,
   children,
 }: {
-  color: string
+  color?: string
   tooltipStyles?: CSSProperties
   children: ReactNode
 }) {
@@ -69,7 +69,7 @@ function TooltipWrapper({
       }}
     >
       <TooltipContentSC style={tooltipStyles}>
-        <TooltipSwatchSC $color={color} />
+        {color && <TooltipSwatchSC $color={color} />}
         {children}
       </TooltipContentSC>
     </AnimatedDiv>
@@ -96,6 +96,43 @@ export function ChartTooltip({
     <TooltipWrapper {...props}>
       <div>
         {label}: <b>{value}</b>
+      </div>
+    </TooltipWrapper>
+  )
+}
+
+const SERIES_TOOLTIP_ROWS = 10
+
+const SeriesRowsSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'auto minmax(0, 1fr) auto',
+  alignItems: 'center',
+  columnGap: theme.spacing.xsmall,
+  rowGap: theme.spacing.xxxsmall,
+  maxWidth: 360,
+}))
+
+/** Every series' value at the hovered time, largest first. */
+export function SeriesSliceTooltip({ slice }: SliceTooltipProps<LineSeries>) {
+  const points = [...slice.points].sort(
+    (a, b) => Number(b.data.y) - Number(a.data.y)
+  )
+  const hidden = points.length - SERIES_TOOLTIP_ROWS
+
+  return (
+    <TooltipWrapper>
+      <div>
+        {points[0]?.data.xFormatted}
+        <SeriesRowsSC>
+          {points.slice(0, SERIES_TOOLTIP_ROWS).map((point) => (
+            <Fragment key={point.id}>
+              <TooltipSwatchSC $color={point.seriesColor} />
+              <span>{point.seriesId}</span>
+              <b>{point.data.yFormatted}</b>
+            </Fragment>
+          ))}
+        </SeriesRowsSC>
+        {hidden > 0 && <div>+{hidden} more</div>}
       </div>
     </TooltipWrapper>
   )

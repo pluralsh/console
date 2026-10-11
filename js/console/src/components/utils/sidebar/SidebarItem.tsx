@@ -1,5 +1,5 @@
 import { ComponentPropsWithRef, ReactNode, use } from 'react'
-import styled from 'styled-components'
+import styled, { DefaultTheme } from 'styled-components'
 import chroma from 'chroma-js'
 
 import { Tooltip, WrapWithIf } from '@pluralsh/design-system'
@@ -19,6 +19,25 @@ export function navInteractionFill(fillAccent: string, amount: number) {
   } catch {
     return fillAccent
   }
+}
+
+// Expanded items stretch across their section, bleeding into its padding, so
+// every icon sits the same distance from the sidebar edge (as the collapse
+// toggle's) whatever wraps the item. Collapsed ones are centered squares.
+export function sidebarItemLayout(theme: DefaultTheme, isExpanded: boolean) {
+  return {
+    flexShrink: 0,
+    flexGrow: 0,
+    height: 40,
+    padding: theme.spacing.small,
+    ...(isExpanded
+      ? {
+          alignSelf: 'stretch',
+          width: 'auto',
+          margin: `0 -${theme.spacing.xsmall}px`,
+        }
+      : { alignSelf: 'center', width: 40 }),
+  } as const
 }
 
 export function SidebarItem({
@@ -72,11 +91,8 @@ const ItemSC = styled.button<{
     gap: theme.spacing.xsmall,
     textDecoration: 'none',
     whiteSpace: 'nowrap',
-    width: $isExpanded ? 'calc(100% + 16px)' : 40,
-    height: 40,
-    flexGrow: 0,
-    padding: theme.spacing.small,
-    borderRadius: '3px',
+    ...sidebarItemLayout(theme, $isExpanded),
+    borderRadius: theme.borderRadiuses.medium,
     overflow: 'hidden',
     color: theme.colors['icon-light'],
     background: $active

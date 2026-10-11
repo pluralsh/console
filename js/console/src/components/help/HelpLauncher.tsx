@@ -3,20 +3,18 @@ import { use, useRef, useState } from 'react'
 import {
   ArrowTopRightIcon,
   Button,
-  Divider,
   DocumentIcon,
   GitHubLogoIcon,
   HelpIcon,
   IconFrame,
-  SearchDocsIcon,
 } from '@pluralsh/design-system'
 import { CommandPaletteContext } from 'components/commandpalette/CommandPaletteContext'
-import CommandPaletteShortcuts from 'components/commandpalette/CommandPaletteShortcuts'
 import { DocSearch } from './DocSearch'
 
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { SidebarContext } from 'components/layout/Sidebar'
+import { SidebarItem } from 'components/utils/sidebar/SidebarItem'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -32,32 +30,29 @@ export function HelpLauncher() {
     <>
       <div
         ref={menuBtnRef}
-        css={{ position: 'relative' }}
+        css={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          alignSelf: 'stretch',
+        }}
       >
         {isExpanded ? (
-          <Button
-            small
-            tertiary
-            justifyContent="flex-start"
+          <SidebarItem
+            type="button"
+            expandedLabel="Help and docs"
             onClick={(e) => {
               e.stopPropagation()
               setIsMenuOpen((open) => !open)
             }}
-            css={{
-              width: '100%',
-              fontWeight: 'normal',
-              '&&, &&:hover, &&:active, &&:focus-visible': {
-                color: theme.colors['text-xlight'],
-              },
-            }}
-            innerFlexProps={{ gap: 'xsmall' }}
+            css={{ color: theme.colors['text-xlight'] }}
             aria-haspopup="menu"
             aria-expanded={isMenuOpen}
             aria-label="Open help menu"
           >
             <HelpIcon color="icon-xlight" />
-            <span>Help and docs</span>
-          </Button>
+          </SidebarItem>
         ) : (
           <IconFrame
             clickable
@@ -77,26 +72,6 @@ export function HelpLauncher() {
           setIsOpen={setIsMenuOpen}
           type="sidebar"
         >
-          <Button
-            small
-            tertiary
-            justifyContent="flex-start"
-            endIcon={<CommandPaletteShortcuts shortcuts={['shift D']} />}
-            onClick={() => {
-              setIsMenuOpen(false)
-              setDocsSearchOpen(true)
-            }}
-            innerFlexProps={{ gap: 'xsmall' }}
-          >
-            <SearchDocsIcon />
-            <span>Search docs</span>
-          </Button>
-          <Divider
-            backgroundColor="border-fill-two"
-            css={{
-              padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-            }}
-          />
           <Button
             small
             tertiary

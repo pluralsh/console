@@ -8,7 +8,7 @@ import {
   DashboardGraphUnit,
   WorkbenchJobActivityMetricFragment,
 } from 'generated/graphql'
-import { type ComponentProps, useMemo } from 'react'
+import { type ComponentProps, memo, useMemo } from 'react'
 import {
   JobActivityMetricsChart,
   METRICS_CHART_MARGIN,
@@ -21,7 +21,7 @@ import {
 } from './dashboardUnits'
 
 /** Metrics chart pinned to the dashboard window, with drag-to-zoom. */
-export function DashboardTimeseriesChart({
+export const DashboardTimeseriesChart = memo(function DashboardTimeseriesChart({
   metrics,
   timeWindow,
   unit,
@@ -80,4 +80,4 @@ export function DashboardTimeseriesChart({
       />
     </ChartRangeSelect>
   )
-}
+})

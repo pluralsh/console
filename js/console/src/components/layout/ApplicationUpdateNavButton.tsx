@@ -1,9 +1,5 @@
-import {
-  Button,
-  Tooltip,
-  UpdatesIcon,
-  WrapWithIf,
-} from '@pluralsh/design-system'
+import { Tooltip, UpdatesIcon, WrapWithIf } from '@pluralsh/design-system'
+import { sidebarItemLayout } from 'components/utils/sidebar/SidebarItem'
 import { use } from 'react'
 import styled from 'styled-components'
 
@@ -13,41 +9,34 @@ import {
 } from './applicationUpdate'
 import { SidebarContext } from './Sidebar'
 
-const UPDATE_BUTTON_RADIUS_PX = 12
-
-const SidebarUpdateWrapSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%',
-  padding: `0 ${theme.spacing.xsmall}px`,
-  marginBottom: theme.spacing.xxsmall,
-}))
-
-const CollapsedUpdateSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  width: 32,
-  height: 32,
-  flexShrink: 0,
-  borderRadius: '50%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: theme.colors['action-primary'],
-  border: '1px solid transparent',
-  cursor: 'pointer',
-  '&:hover': {
-    backgroundColor: theme.colors['action-primary-hover'],
-  },
-  '&:focus-visible': {
-    outline: 'none',
-    borderColor: theme.colors['border-outline-focused'],
-  },
-}))
-
-const ExpandedUpdateButtonSC = styled(Button)({
-  width: 'auto',
-  borderRadius: UPDATE_BUTTON_RADIUS_PX,
-})
+// laid out like the other sidebar items, so its icon lines up with theirs
+const UpdateButtonSC = styled.button<{ $isExpanded: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    ...theme.partials.reset.button,
+    ...theme.partials.text.body2Bold,
+    boxSizing: 'border-box',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: $isExpanded ? 'flex-start' : 'center',
+    gap: theme.spacing.xsmall,
+    whiteSpace: 'nowrap',
+    ...sidebarItemLayout(theme, $isExpanded),
+    height: 32,
+    ...(!$isExpanded && { width: 32, padding: 0 }),
+    paddingTop: 0,
+    paddingBottom: 0,
+    borderRadius: theme.borderRadiuses.medium,
+    color: theme.colors['text-always-white'],
+    backgroundColor: theme.colors['action-primary'],
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: theme.colors['action-primary-hover'],
+    },
+    '&:focus-visible': {
+      outline: theme.borders['outline-focused'],
+    },
+  })
+)
 
 export function ApplicationUpdateNavButton() {
   const { isExpanded } = use(SidebarContext)
@@ -57,47 +46,31 @@ export function ApplicationUpdateNavButton() {
     return null
   }
 
-  const reload = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation()
-    reloadApplicationUpdate()
-  }
-
   return (
-    <SidebarUpdateWrapSC>
-      {isExpanded ? (
-        <ExpandedUpdateButtonSC
-          primary
-          small
-          justifyContent="center"
-          innerFlexProps={{ gap: 'xsmall' }}
-          onClick={reload}
-          aria-label="Update console"
-        >
-          <UpdatesIcon color="text-always-white" />
-          Update
-        </ExpandedUpdateButtonSC>
-      ) : (
-        <WrapWithIf
-          condition
-          wrapper={
-            <Tooltip
-              label="A new console version is available. Reload to update."
-              placement="right"
-            />
-          }
-        >
-          <CollapsedUpdateSC
-            type="button"
-            onClick={reload}
-            aria-label="Update console"
-          >
-            <UpdatesIcon
-              size={16}
-              color="text-always-white"
-            />
-          </CollapsedUpdateSC>
-        </WrapWithIf>
-      )}
-    </SidebarUpdateWrapSC>
+    <WrapWithIf
+      condition={!isExpanded}
+      wrapper={
+        <Tooltip
+          label="A new console version is available. Reload to update."
+          placement="right"
+        />
+      }
+    >
+      <UpdateButtonSC
+        type="button"
+        $isExpanded={isExpanded}
+        onClick={(e) => {
+          e.stopPropagation()
+          reloadApplicationUpdate()
+        }}
+        aria-label="Update console"
+      >
+        <UpdatesIcon
+          size={16}
+          color="text-always-white"
+        />
+        {isExpanded && 'Update'}
+      </UpdateButtonSC>
+    </WrapWithIf>
   )
 }

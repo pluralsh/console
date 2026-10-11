@@ -36,7 +36,7 @@ defmodule Console.Deployments.Workbenches do
     Service,
     QueuedPrompt
   }
-  alias Console.AI.{Provider, VectorStore}
+  alias Console.AI.Provider
   alias Console.AI.Tools.Workbench.{FunctionCall, KubeDrain, KubeRequest, SavedPrompt, KubeShell}
   alias Console.Services.Users
   alias Console.Deployments.Settings
@@ -128,58 +128,22 @@ defmodule Console.Deployments.Workbenches do
     |> Repo.all()
   end
 
-  # filtered searches ask the vector store for more candidates, since the filters
-  # (job status, pull request state) aren't indexed and apply only afterwards
-  @search_overfetch 2
-  @max_search_candidates 200
-
   @doc """
-  Executes a semantic search for workbench jobs indexed in the vector store, most relevant first.
-  A `:filter` narrows the matching jobs, after fetching up to twice the limit to make up for the ones it drops.
+  Searches a workbench's jobs for a case-insensitive substring of their prompt, newest first.
+  A `:filter` further narrows the matching jobs.
   """
-  @spec workbench_job_search(binary, User.t(), keyword) :: {:ok, [WorkbenchJob.t()]} | error
-  def workbench_job_search(q, %User{} = user, opts \\ []) do
-    count = Keyword.get(opts, :limit, 5)
-    workbench_id = Keyword.get(opts, :workbench_id)
-    filter = Keyword.get(opts, :filter)
-    user = Console.Services.Rbac.preload(user)
+  @spec workbench_job_search(binary, binary, keyword) :: {:ok, [WorkbenchJob.t()]}
+  def workbench_job_search(q, workbench_id, opts \\ []) do
+    filter = Keyword.get(opts, :filter) || & &1
 
-    with {:ok, results} <- VectorStore.fetch(q, [
-           count: search_candidates(count, filter),
-           filters: search_filters(workbench_id),
-           user: user
-         ]) do
-      ids =
-        results
-        |> Enum.map(fn
-          %VectorStore.Response{workbench_job: %{id: id}} when is_binary(id) -> id
-          _ -> nil
-        end)
-        |> Enum.reject(&is_nil/1)
-        |> Enum.uniq()
-
-      jobs =
-        WorkbenchJob.for_ids(ids)
-        |> then(&if(filter, do: filter.(&1), else: &1))
-        |> Repo.all()
-        |> Map.new(&{&1.id, &1})
-
-      # keep the vector store's relevance order
-      ids
-      |> Enum.map(&Map.get(jobs, &1))
-      |> Enum.reject(&is_nil/1)
-      |> Enum.take(count)
-      |> ok()
-    end
+    WorkbenchJob.for_workbench(workbench_id)
+    |> WorkbenchJob.search(q)
+    |> filter.()
+    |> WorkbenchJob.ordered([desc: :inserted_at, desc: :id])
+    |> WorkbenchJob.with_limit(Keyword.get(opts, :limit, 5))
+    |> Repo.all()
+    |> ok()
   end
-
-  defp search_candidates(count, nil), do: count
-  defp search_candidates(count, _), do: max(count, min(count * @search_overfetch, @max_search_candidates))
-
-  defp search_filters(workbench_id) when is_binary(workbench_id) do
-    [datatype: {:raw, :workbench_job}, workbench_id: workbench_id]
-  end
-  defp search_filters(_), do: [datatype: {:raw, :workbench_job}]
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.

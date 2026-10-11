@@ -1,34 +1,11 @@
-import {
-  CancelledFilledIcon,
-  CheckOutlineIcon,
-  Chip,
-  ChipProps,
-  CircleDashIcon,
-  Flex,
-  IconFrame,
-} from '@pluralsh/design-system'
+import { Chip, ChipProps, Flex, IconFrame } from '@pluralsh/design-system'
 import { IssueStatus } from 'generated/graphql'
 import { includes } from 'lodash'
-import { ReactElement, ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 import { ISSUE_STATUS_LABELS } from './issueStatus'
+import { IssueStatusGlyph } from './IssueStatusGlyph'
 
 const COMPLETED_STATUSES = [IssueStatus.Completed, IssueStatus.Cancelled]
-
-const statusToChipIcon: Partial<Record<IssueStatus, ReactNode>> = {
-  [IssueStatus.InProgress]: (
-    <CircleDashIcon
-      size={12}
-      color="icon-light"
-    />
-  ),
-  [IssueStatus.Cancelled]: (
-    <CancelledFilledIcon
-      size={12}
-      color="icon-xlight"
-    />
-  ),
-}
 
 export function IssueStatusChip({
   status,
@@ -48,7 +25,10 @@ export function IssueStatusChip({
         gap="xsmall"
         align="center"
       >
-        {statusToChipIcon[status]}
+        <IssueStatusGlyph
+          status={status}
+          size={12}
+        />
         <span
           css={{
             whiteSpace: 'nowrap',
@@ -64,13 +44,6 @@ export function IssueStatusChip({
   )
 }
 
-const statusToIcon: Record<IssueStatus, ReactElement> = {
-  [IssueStatus.Open]: <CircleDashIcon color="icon-xlight" />,
-  [IssueStatus.InProgress]: <CircleDashIcon color="icon-light" />,
-  [IssueStatus.Completed]: <CheckOutlineIcon color="icon-light" />,
-  [IssueStatus.Cancelled]: <CancelledFilledIcon color="icon-xlight" />,
-}
-
 // Status as a bare icon with a tooltip, for dense lists.
 export function IssueStatusIcon({ status }: { status: IssueStatus }) {
   return (
@@ -79,7 +52,7 @@ export function IssueStatusIcon({ status }: { status: IssueStatus }) {
       size="small"
       textValue={ISSUE_STATUS_LABELS[status]}
       tooltip={ISSUE_STATUS_LABELS[status]}
-      icon={statusToIcon[status]}
+      icon={<IssueStatusGlyph status={status} />}
     />
   )
 }

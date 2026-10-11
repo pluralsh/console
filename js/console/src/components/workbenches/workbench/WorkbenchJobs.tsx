@@ -8,6 +8,7 @@ import {
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
+import { WorkbenchHeaderSearch } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
   SortDirection,
   useWorkbenchJobCountsQuery,
@@ -87,7 +88,7 @@ export function WorkbenchJobs() {
   const search = useWorkbenchJobSearchQuery({
     variables: { workbenchId, q: query, limit: SEARCH_LIMIT, ...filterVars },
     skip: !searching || !!filterEmptyKind,
-    // not polled: every search runs a vector store (embedding) lookup
+    // not polled: results only change as the (debounced) search does
     fetchPolicy: 'network-only',
   })
   const { data: countsData } = useWorkbenchJobCountsQuery({
@@ -192,24 +193,30 @@ export function WorkbenchJobs() {
         tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
-        <DisplayPopover showDot={filtered}>
-          <WorkbenchJobsDisplayOptions
-            state={display}
-            onChange={updateDisplay}
-            statusCounts={statusCounts}
-            prStateCounts={prStateCounts}
-            searching={searching}
-          />
-        </DisplayPopover>
+        <>
+          {!showDetails && (
+            <WorkbenchHeaderSearch
+              value={searchString}
+              onChange={setSearchString}
+              placeholder="Search jobs"
+            />
+          )}
+          <DisplayPopover showDot={filtered}>
+            <WorkbenchJobsDisplayOptions
+              state={display}
+              onChange={updateDisplay}
+              statusCounts={statusCounts}
+              prStateCounts={prStateCounts}
+              searching={searching}
+            />
+          </DisplayPopover>
+        </>
       }
     >
       {showDetails ? (
         details.content
       ) : (
         <WorkbenchMonitoringContent
-          searchString={searchString}
-          onSearchChange={setSearchString}
-          searchPlaceholder="Search jobs"
           error={listError}
           filterEmptyKind={filterEmptyKind}
           onResetFilters={emptyState.onResetFilters}

@@ -631,7 +631,7 @@ type RootQueryType {
     count: Int
   ): [WorkbenchJob]
 
-  "Semantic search over vector-indexed workbench jobs"
+  "Case-insensitive substring search over a workbench's job prompts, newest first"
   workbenchJobSearch(
     q: String!
 
@@ -4247,7 +4247,13 @@ type Workbench {
     direction: SortDirection
   ): IssueConnection
 
-  issueCounts: WorkbenchIssueCounts
+  issueCounts(
+    "only count issues matching this title or external id search"
+    q: String
+
+    "only count issues from these providers"
+    providers: [IssueWebhookProvider]
+  ): WorkbenchIssueCounts
 
   "users that have read or write access to this workbench"
   users: [User]

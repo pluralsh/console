@@ -1,6 +1,14 @@
 import { Button, EmptyState, Flex, Spinner } from '@pluralsh/design-system'
 import { isNil } from 'lodash'
-import { ReactNode, useCallback, useEffect, useRef } from 'react'
+import {
+  ReactNode,
+  RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Link } from 'react-router-dom'
 import styled, { DefaultTheme } from 'styled-components'
 
@@ -13,22 +21,30 @@ type LoadMoreProps = {
   fetchNextPage: () => void
 }
 
+// `loadingMore` is only set for pages requested here, not for polls, which
+// also show as `fetchingMore`. A failed request leaves it set, until retried.
 function useBoardLoadMore({
   fetchingMore,
   hasNextPage,
   fetchNextPage,
 }: LoadMoreProps) {
   const fetchingRef = useRef(false)
+  // the page fetcher a page was requested with; a new page's cursor replaces it
+  const [requestedWith, setRequestedWith] = useState<() => void>()
 
+  // a new page (or a fetch that never showed as in flight) changes these
   useEffect(() => {
     if (!fetchingMore) fetchingRef.current = false
-  }, [fetchingMore])
+  }, [fetchingMore, fetchNextPage, hasNextPage])
 
-  return useCallback(() => {
+  const onVisible = useCallback(() => {
     if (fetchingRef.current || fetchingMore || !hasNextPage) return
     fetchingRef.current = true
+    setRequestedWith(() => fetchNextPage)
     fetchNextPage()
   }, [fetchNextPage, fetchingMore, hasNextPage])
+
+  return { onVisible, loadingMore: requestedWith === fetchNextPage }
 }
 
 // Loads the next page once scrolled into view, while there is one.
@@ -39,21 +55,76 @@ export function LoadMoreSentinel(props: LoadMoreProps) {
 }
 
 function LoadMoreSentinelInner(props: LoadMoreProps) {
-  const onVisible = useBoardLoadMore(props)
+  const { onVisible, loadingMore } = useBoardLoadMore(props)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const element = ref.current
     if (isNil(element)) return
 
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting) onVisible()
-    })
+    // observed against its scroll container, so the margin loads the next
+    // page a bit before the end (the viewport root ignores ancestor clipping)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) onVisible()
+      },
+      { root: scrollParent(element), rootMargin: '0px 0px 300px 0px' }
+    )
     observer.observe(element)
     return () => observer.disconnect()
   }, [onVisible])
 
-  return <LoadMoreSentinelSC ref={ref} />
+  return (
+    <>
+      <LoadMoreSentinelSC ref={ref} />
+      {loadingMore && (
+        <LoadingMoreSC>
+          <Spinner />
+        </LoadingMoreSC>
+      )}
+    </>
+  )
+}
+
+// A virtualized list's offset within its scroll container, for the
+// virtualizer's `scrollMargin`. Content above it can grow or resize, but only
+// the container's direct children are observed for that.
+export function useScrollMargin(
+  listRef: RefObject<HTMLDivElement | null>,
+  scroller: HTMLDivElement | null
+) {
+  const [margin, setMargin] = useState(0)
+  const measure = useCallback(() => {
+    const list = listRef.current
+    if (!list || !scroller) return
+
+    setMargin(
+      list.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top +
+        scroller.scrollTop
+    )
+  }, [listRef, scroller])
+
+  // sections above can appear (e.g. recent jobs loading) on any render
+  useLayoutEffect(measure)
+
+  // ...or resize, e.g. on a narrower window
+  useLayoutEffect(() => {
+    if (!scroller) return
+    const observer = new ResizeObserver(measure)
+
+    Array.from(scroller.children).forEach((child) => observer.observe(child))
+    return () => observer.disconnect()
+  }, [measure, scroller])
+
+  return margin
+}
+
+function scrollParent(element: HTMLElement): HTMLElement | null {
+  for (let el = element.parentElement; el; el = el.parentElement) {
+    if (/auto|scroll/.test(getComputedStyle(el).overflowY)) return el
+  }
+  return null
 }
 
 // Spinner on the first load, then an empty state, for a view with no items.
@@ -216,6 +287,15 @@ export const CardRaisedSC = styled.div({
   '& > *': { pointerEvents: 'auto' },
 })
 
+// a flex child that would otherwise shrink to 0px in an overflowing column
 const LoadMoreSentinelSC = styled.div({
   height: 1,
+  flexShrink: 0,
 })
+
+const LoadingMoreSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexShrink: 0,
+  justifyContent: 'center',
+  padding: `${theme.spacing.small}px 0 ${theme.spacing.large}px`,
+}))

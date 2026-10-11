@@ -25,7 +25,7 @@ import {
 } from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
-import { SliceTooltip } from 'components/utils/ChartTooltip'
+import { SeriesSliceTooltip, SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { GraphLegend } from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -243,6 +243,9 @@ export function JobActivityLogs({
 }
 
 const CANVAS_THRESHOLD = 1000
+// tool results are large and stored on the shared job entity, so caching them
+// makes each response re-diff every other tool result on the page
+const TOOL_RESULT_FETCH_POLICY = 'no-cache'
 
 export type WorkbenchMetricsToolQueryInput = Pick<
   WorkbenchToolQueryData,
@@ -285,6 +288,7 @@ export function JobActivityLogsFromTool({
         : undefined,
     },
     skip: !shouldRunQuery,
+    fetchPolicy: TOOL_RESULT_FETCH_POLICY,
   })
 
   if (!hasWorkbenchMetricsToolQuery(logsQuery)) return null
@@ -405,7 +409,10 @@ export function JobActivityMetricsChart({
             width={size.width}
             height={size.height}
             {...sharedProps}
-            useMesh
+            // one hover target per timestamp rather than a Delaunay mesh over
+            // every point of every series
+            enableSlices="x"
+            sliceTooltip={SeriesSliceTooltip}
             {...lineProps}
           />
         ))}
@@ -562,6 +569,7 @@ export function JobActivityMetrics({
         : undefined,
     },
     skip: !shouldRunQuery,
+    fetchPolicy: TOOL_RESULT_FETCH_POLICY,
   })
 
   if (!hasWorkbenchMetricsToolQuery(metricsQuery)) return null
@@ -729,6 +737,7 @@ export function JobActivityTraces({
         : undefined,
     },
     skip: !shouldRunQuery,
+    fetchPolicy: TOOL_RESULT_FETCH_POLICY,
   })
 
   if (isEmpty(directTraces) && !hasWorkbenchMetricsToolQuery(tracesQuery))
