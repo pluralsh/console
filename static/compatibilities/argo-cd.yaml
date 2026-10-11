@@ -17,7 +17,7 @@ versions:
         rendering, those builds may fail (ordinary http/https/oci chart repos still
         work).', OCI manifests larger than 4 MiB are now rejected; workloads depending
         on oversized OCI manifests may fail to fetch/render.]
-  chart_version: 10.10.1
+  chart_version: 10.10.2
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.0',
     'quay.io/argoproj/argocd:v3.5.4']
 - version: 3.5.1

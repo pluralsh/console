@@ -4,23 +4,28 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.1.4
+- version: 4.1.5
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [No concrete feature details are included in the provided release notes;
-        both v4.1.0 and v4.1.4 sections point to external blog/changelog for 'What's
-        New'., v4.1.4 provides updated install manifests and refreshed CLI binaries
-        for multiple platforms compared to v4.1.0.]
-    breaking_changes: [No breaking changes are enumerated in the provided notes; they
-        direct readers to the upgrading guide and GitHub issues for breaking changes/known
-        issues.]
-  chart_version: 2.0.11
-  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
-    'quay.io/argoproj/workflow-controller:v4.1.4']
+    features: ['Improved controller reliability and observability: fixes for tracing
+        span handling and deterministic span/trace IDs to reduce telemetry noise and
+        inconsistencies.', 'More robust workflow resubmission behavior: memoized resubmit
+        now reuses retry-reset logic and includes a fix for node ID collisions.',
+      'Improved operational stability: controller now retries failed artifact GC attempts
+        and scopes sync-queue GC deletes to the owning controller to avoid cross-controller
+        interference.', 'Better correctness in edge cases: fixes termination of suspended
+        workflows and correct parsing of custom headers containing a colon.', 'Database
+        and security hardening: database queries now honor caller context, PostgreSQL
+        respects `sslmode` when configured, and dependencies (moment, golang.org/x/net)
+        were bumped for security fixes.']
+    breaking_changes: []
+  chart_version: 2.0.12
+  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.5', 'quay.io/argoproj/argocli:v4.1.5',
+    'quay.io/argoproj/workflow-controller:v4.1.5']
 - version: 4.1.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
