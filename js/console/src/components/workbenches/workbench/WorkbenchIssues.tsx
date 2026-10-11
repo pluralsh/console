@@ -28,7 +28,8 @@ import {
   visibleIssueProviders,
 } from './workbenchIssuesDisplay'
 
-const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
+// renamed when the grouped list replaced the table, so saved views reset to it
+const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view-v2'
 const PAGE_SIZE = 50
 
 // stable, so the paginated data callbacks don't change every render
@@ -144,6 +145,7 @@ export function WorkbenchIssues() {
           error={error}
           filterEmptyKind={filterEmptyKind}
           onResetFilters={onResetFilters}
+          compactTop={display.view === 'list'}
         >
           {display.view === 'board' ? (
             <WorkbenchIssuesBoard
