@@ -1,15 +1,23 @@
 import {
   Chip,
+  ChipProps,
   Flex,
   IconFrame,
+  Modal,
   PrClosedIcon,
   PrMergedIcon,
   PrOpenIcon,
-  Tooltip,
-  WrapWithIf,
+  Table,
 } from '@pluralsh/design-system'
-import { PrStatus } from 'generated/graphql'
+import {
+  ColInsertedAt,
+  ColLinkout,
+  ColStatus,
+  ColTitle,
+} from 'components/self-service/pr/queue/PrQueueColumns'
+import { PrStatus, PullRequestBasicFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -20,13 +28,7 @@ const PR_STATUS_LABEL: Record<PrStatus, string> = {
 }
 
 type PullRequests = Nullable<
-  ReadonlyArray<
-    Nullable<{
-      status?: Nullable<PrStatus>
-      url?: Nullable<string>
-      title?: Nullable<string>
-    }>
-  >
+  ReadonlyArray<Nullable<{ status?: Nullable<PrStatus> }>>
 >
 
 // the most advanced status among a job's PRs
@@ -87,13 +89,18 @@ export function WorkbenchJobPrIcon({
   )
 }
 
+const PR_TABLE_COLUMNS = [ColTitle, ColStatus, ColInsertedAt, ColLinkout]
+
 // A job's PRs as a chip: a single one by its number, opening it; several by
-// their count, titled in a tooltip. Nothing renders without any.
+// their count, listed in a modal. Nothing renders without any.
 export function WorkbenchJobPrChip({
   pullRequests,
+  fillLevel,
 }: {
-  pullRequests?: PullRequests
+  pullRequests?: Nullable<ReadonlyArray<Nullable<PullRequestBasicFragment>>>
+  fillLevel?: ChipProps['fillLevel']
 }) {
+  const [modalOpen, setModalOpen] = useState(false)
   const prs = pullRequests?.filter(isNonNullable) ?? []
   if (isEmpty(prs)) return null
 
@@ -108,24 +115,18 @@ export function WorkbenchJobPrChip({
     : `${prs.length} PRs`
 
   return (
-    <WrapWithIf
-      condition={!single?.url}
-      wrapper={
-        <Tooltip
-          placement="top"
-          label={prs.map((pr) => pr.title || pr.url).join(', ')}
-        />
-      }
-    >
+    <>
       <Chip
         size="small"
-        clickable={!!single?.url}
-        {...(single?.url && {
-          onClick: (e) => {
-            e.stopPropagation()
-            window.open(single.url ?? '', '_blank', 'noopener,noreferrer')
-          },
-        })}
+        clickable
+        fillLevel={fillLevel}
+        tooltip={single ? single.title || single.url : 'View pull requests'}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          if (single) window.open(single.url, '_blank', 'noopener,noreferrer')
+          else setModalOpen(true)
+        }}
       >
         <Flex
           gap="xsmall"
@@ -138,6 +139,19 @@ export function WorkbenchJobPrChip({
           <span css={{ whiteSpace: 'nowrap' }}>{label}</span>
         </Flex>
       </Chip>
-    </WrapWithIf>
+      {!single && (
+        <Modal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          header="Pull requests"
+          size="auto"
+        >
+          <Table
+            data={prs.map((pr) => ({ node: pr }))}
+            columns={PR_TABLE_COLUMNS}
+          />
+        </Modal>
+      )}
+    </>
   )
 }

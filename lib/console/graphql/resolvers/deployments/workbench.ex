@@ -68,13 +68,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     dir = Map.get(args, :direction) || :desc
 
     WorkbenchJob.for_workbench(workbench.id)
+    |> maybe_job_search(args)
     |> workbench_job_filters(args)
     |> WorkbenchJob.ordered([{dir, :inserted_at}, {dir, :id}])
     |> paginate_with_total(args)
   end
 
-  def run_counts(%Workbench{id: id}, _, _) do
-    jobs = WorkbenchJob.for_workbench(id)
+  def run_counts(%Workbench{id: id}, args, _) do
+    jobs =
+      WorkbenchJob.for_workbench(id)
+      |> maybe_job_search(args)
+      |> workbench_job_filters(Map.take(args, [:pr_states]))
     none = Repo.aggregate(WorkbenchJob.without_pull_requests(jobs), :count)
 
     {:ok, %{
@@ -522,6 +526,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
       _, q -> q
     end)
   end
+
+  defp maybe_job_search(query, %{q: q}) when is_binary(q) and byte_size(q) > 0,
+    do: WorkbenchJob.search(query, q)
+  defp maybe_job_search(query, _), do: query
 
   defp workbench_job_filters(query, args) do
     Enum.reduce(args, query, fn

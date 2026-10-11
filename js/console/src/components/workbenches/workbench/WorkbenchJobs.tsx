@@ -15,9 +15,8 @@ import {
   useWorkbenchJobSearchQuery,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
@@ -27,7 +26,7 @@ import {
 } from './WorkbenchJobsBoard'
 import { useWorkbenchJobsDetails } from './WorkbenchJobsDetails'
 import { WorkbenchJobsDisplayOptions } from './WorkbenchJobsDisplayOptions'
-import { WorkbenchJobsTableContent } from './WorkbenchJobsTable'
+import { WorkbenchJobsGroupedList } from './WorkbenchJobsGroupedList'
 import {
   DEFAULT_WORKBENCH_JOBS_DISPLAY,
   getJobFilterEmptyKind,
@@ -56,38 +55,36 @@ export function WorkbenchJobs() {
   const query = useDebounce(searchString, 200).trim()
   const searching = !!query
 
-  const {
-    data,
-    loading,
-    error,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-    fetchingMore,
-  } = useFetchPaginatedData(
-    {
-      queryHook: useWorkbenchJobsQuery,
-      keyPath: RUNS_KEY_PATH,
-      pageSize: WORKBENCH_JOBS_PAGE_SIZE,
-      keepLoadedPages: true,
-      // a filter with nothing selected matches nothing, so there's no query;
-      // while searching the list is hidden, so it isn't polled
-      skip: !!filterEmptyKind,
-      pollInterval: searching ? 0 : undefined,
-    },
-    {
-      id: workbenchId,
-      withTotal: true,
-      ...filterVars,
-      direction:
-        filters.direction === SortDirection.Desc
-          ? undefined
-          : filters.direction,
-    }
+  const direction =
+    filters.direction === SortDirection.Desc ? undefined : filters.direction
+  // the List view groups by status itself, one query per group
+  const grouped = view === 'list'
+  const groupFilters = useMemo(
+    () => ({
+      q: query || undefined,
+      prStates: filterVars.prStates,
+      direction,
+    }),
+    [query, filterVars, direction]
   )
+
+  const { data, loading, error, pageInfo, fetchNextPage, fetchingMore } =
+    useFetchPaginatedData(
+      {
+        queryHook: useWorkbenchJobsQuery,
+        keyPath: RUNS_KEY_PATH,
+        pageSize: WORKBENCH_JOBS_PAGE_SIZE,
+        keepLoadedPages: true,
+        // a filter with nothing selected matches nothing, so there's no query;
+        // while searching the list is hidden, so it isn't polled
+        skip: !!filterEmptyKind || grouped,
+        pollInterval: searching ? 0 : undefined,
+      },
+      { id: workbenchId, withTotal: true, ...filterVars, direction }
+    )
   const search = useWorkbenchJobSearchQuery({
     variables: { workbenchId, q: query, limit: SEARCH_LIMIT, ...filterVars },
-    skip: !searching || !!filterEmptyKind,
+    skip: !searching || !!filterEmptyKind || grouped,
     // not polled: results only change as the (debounced) search does
     fetchPolicy: 'network-only',
   })
@@ -106,13 +103,6 @@ export function WorkbenchJobs() {
       toCounts(countsData?.workbench?.runCounts?.pullRequests, (e) => e.state),
     [countsData]
   )
-
-  // only the table reports its visible slice (and only for the runs list);
-  // drop it otherwise so polling keeps every page loaded in Board/Details
-  const tableSliceActive = view === 'list' && !searching
-  useEffect(() => {
-    if (!tableSliceActive) setVirtualSlice(undefined)
-  }, [tableSliceActive, setVirtualSlice])
 
   // searching shows the (unpaginated) search results in every view
   const jobs = useMemo(
@@ -221,8 +211,16 @@ export function WorkbenchJobs() {
           filterEmptyKind={filterEmptyKind}
           onResetFilters={emptyState.onResetFilters}
           minHeight={400}
+          compactTop={grouped}
         >
-          {view === 'board' ? (
+          {grouped ? (
+            <WorkbenchJobsGroupedList
+              workbenchId={workbenchId}
+              statuses={display.statuses}
+              filters={groupFilters}
+              emptyState={emptyState}
+            />
+          ) : (
             <WorkbenchJobsBoard
               {...listProps}
               recentJobs={recentJobs}
@@ -230,26 +228,9 @@ export function WorkbenchJobs() {
                 searching ? jobs.length : data?.workbench?.runs?.totalCount
               }
             />
-          ) : (
-            <TableContainerSC>
-              <WorkbenchJobsTableContent
-                jobs={jobs}
-                loading={list.loading}
-                loaded={list.loaded}
-                fetchingMore={list.fetchingMore}
-                pageInfo={searching ? undefined : pageInfo}
-                fetchNextPage={list.fetchNextPage}
-                setVirtualSlice={tableSliceActive ? setVirtualSlice : noop}
-              />
-            </TableContainerSC>
           )}
         </WorkbenchMonitoringContent>
       )}
     </WorkbenchPageLayout>
   )
 }
-
-const TableContainerSC = styled.div({
-  flex: 1,
-  minHeight: 0,
-})

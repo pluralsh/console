@@ -677,6 +677,46 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       ]
     end
 
+    test "it can filter workbench run counts by search and pr state" do
+      workbench = insert(:workbench)
+      with_pr = insert(:workbench_job, workbench: workbench, status: :failed, prompt: "fix the Scraper")
+      insert(:pull_request, workbench_job: with_pr, status: :open)
+      insert(:workbench_job, workbench: workbench, status: :successful, prompt: "scraper is slow")
+      other = insert(:workbench_job, workbench: workbench, status: :failed, prompt: "something else")
+      insert(:pull_request, workbench_job: other, status: :open)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $q: String, $prStates: [WorkbenchJobPrState]) {
+          workbench(id: $id) {
+            runCounts(q: $q, prStates: $prStates) {
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "q" => "scraper", "prStates" => ["OPEN"]}, %{current_user: admin_user()})
+
+      assert found["runCounts"]["statuses"] == [%{"status" => "FAILED", "count" => 1}]
+    end
+
+    test "it can search workbench runs by prompt" do
+      workbench = insert(:workbench)
+      match = insert(:workbench_job, workbench: workbench, status: :running, prompt: "fix the Scraper")
+      insert(:workbench_job, workbench: workbench, status: :successful, prompt: "scraper is slow")
+      insert(:workbench_job, workbench: workbench, status: :running, prompt: "something else")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $q: String, $statuses: [WorkbenchJobStatus]) {
+          workbench(id: $id) {
+            runs(first: 10, q: $q, statuses: $statuses) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "q" => "scraper", "statuses" => ["RUNNING"]}, %{current_user: admin_user()})
+
+      assert from_connection(found["runs"]) |> Enum.map(& &1["id"]) == [match.id]
+    end
+
     test "it can fetch workbench alerts" do
       workbench = insert(:workbench)
       alerts = insert_list(3, :alert, workbench: workbench, project: workbench.project)

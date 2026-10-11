@@ -12,7 +12,7 @@ import {
 import { WorkbenchQueuedPromptChip } from 'components/workbenches/common/WorkbenchQueuedPromptChip'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
-import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
+import { WorkbenchJobPrChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -328,9 +328,9 @@ export function WorkbenchJobActionsRow({
         job={job}
         fillLevel={chipFillLevel}
       />
-      <PRsModalIcon
-        prs={prs}
-        type="tertiary"
+      <WorkbenchJobPrChip
+        pullRequests={prs}
+        fillLevel={chipFillLevel}
       />
       <JobEvalBadge job={job} />
       <JobConclusionIcon result={job.result} />

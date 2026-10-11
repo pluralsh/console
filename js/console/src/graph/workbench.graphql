@@ -1015,6 +1015,53 @@ query WorkbenchJobCounts($id: ID!) {
   }
 }
 
+query WorkbenchJobStatusCounts(
+  $id: ID!
+  $q: String
+  $prStates: [WorkbenchJobPrState]
+) {
+  workbench(id: $id) {
+    id
+    runCounts(q: $q, prStates: $prStates) {
+      statuses {
+        status
+        count
+      }
+    }
+  }
+}
+
+query WorkbenchJobsForStatus(
+  $id: ID!
+  $status: WorkbenchJobStatus!
+  $q: String
+  $prStates: [WorkbenchJobPrState]
+  $direction: SortDirection
+  $first: Int = 50
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    runs(
+      first: $first
+      after: $after
+      q: $q
+      statuses: [$status]
+      prStates: $prStates
+      direction: $direction
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
 query WorkbenchJobSearch(
   $workbenchId: ID!
   $q: String!

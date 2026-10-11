@@ -2027,6 +2027,16 @@
          "name": "WorkbenchJobCounts",
          "body": "query WorkbenchJobCounts($id: ID!) {\n  workbench(id: $id) {\n    id\n    runCounts {\n      statuses {\n        status\n        count\n        __typename\n      }\n      pullRequests {\n        state\n        count\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"
       },
+      "sha256:c9ab844d0554d7ae3b67248088cd247a7ae89242995981c61bd5a88b410db451": {
+         "type": "query",
+         "name": "WorkbenchJobStatusCounts",
+         "body": "query WorkbenchJobStatusCounts($id: ID!, $q: String, $prStates: [WorkbenchJobPrState]) {\n  workbench(id: $id) {\n    id\n    runCounts(q: $q, prStates: $prStates) {\n      statuses {\n        status\n        count\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"
+      },
+      "sha256:42005c22713b4653003369106e71941864b494ca33cc34812b8b1c024e0cf1a2": {
+         "type": "query",
+         "name": "WorkbenchJobsForStatus",
+         "body": "query WorkbenchJobsForStatus($id: ID!, $status: WorkbenchJobStatus!, $q: String, $prStates: [WorkbenchJobPrState], $direction: SortDirection, $first: Int = 50, $after: String) {\n  workbench(id: $id) {\n    id\n    runs(\n      first: $first\n      after: $after\n      q: $q\n      statuses: [$status]\n      prStates: $prStates\n      direction: $direction\n    ) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchJobTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchJobTiny on WorkbenchJob {\n  id\n  prompt\n  status\n  error\n  insertedAt\n  queuedPromptCount\n  queuedPromptSummary {\n    readyCount\n    pendingCount\n    nextAt\n    __typename\n  }\n  usage {\n    ...WorkbenchJobUsageTiny\n    __typename\n  }\n  modes {\n    budget {\n      cost\n      tokens\n      __typename\n    }\n    __typename\n  }\n  user {\n    id\n    name\n    profile\n    __typename\n  }\n  workbench {\n    id\n    name\n    __typename\n  }\n  alert {\n    id\n    state\n    url\n    __typename\n  }\n  issue {\n    id\n    status\n    url\n    __typename\n  }\n  pullRequests {\n    ...WorkbenchJobPullRequest\n    __typename\n  }\n  result {\n    id\n    conclusion\n    __typename\n  }\n  evalResult {\n    id\n    grade\n    __typename\n  }\n  chatbotMessage {\n    id\n    channel\n    message\n    chatConnection {\n      id\n      name\n      type\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchJobUsageTiny on WorkbenchJobUsage {\n  cachedTokens\n  inputTokens\n  outputTokens\n  totalCost\n  totalTokens\n  __typename\n}\n\nfragment WorkbenchJobPullRequest on PullRequest {\n  ...PullRequestBasic\n  patch\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:cd39ab7de7b67a52b42609be3d50bae241c3aea5079e6a8821198d0d1a56f160": {
          "type": "query",
          "name": "WorkbenchJobSearch",
