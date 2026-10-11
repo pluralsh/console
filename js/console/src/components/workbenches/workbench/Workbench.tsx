@@ -54,6 +54,7 @@ import {
   WORKBENCHES_MONITORING_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { WorkbenchSidebarSlot } from './WorkbenchSidebarSlot'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
 import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
 import { useWorkbenchJobsDelta } from './useWorkbenchJobsDelta'
@@ -129,7 +130,6 @@ export function WorkbenchPageLayout({
     workbenchId,
     openToolsEdit
   )
-
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
   const jobsTabPath = `${workbenchBasePath}/${WORKBENCH_JOBS_REL_PATH}`
   const hasInProgressJobs = useWorkbenchHasInProgressJobs(workbenchId)
@@ -210,7 +210,7 @@ export function WorkbenchPageLayout({
       minHeight={0}
       overflow="hidden"
     >
-      {sidebarNode}
+      <WorkbenchSidebarSlot>{sidebarNode}</WorkbenchSidebarSlot>
       <Flex
         direction="column"
         flex={1}

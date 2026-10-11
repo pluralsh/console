@@ -220,7 +220,7 @@ function KindChip({ kind }: { kind: WebhookListItem['kind'] }) {
     <Chip
       size="small"
       fillLevel={1}
-      css={{ borderRadius: 20, display: 'flex' }}
+      css={{ display: 'flex' }}
       icon={icon}
     >
       <span

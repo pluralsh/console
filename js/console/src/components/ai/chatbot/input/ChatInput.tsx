@@ -300,7 +300,7 @@ export function ChatOptionPill({
   textType?: SemanticPartialType
   showArrow?: boolean
 } & ComponentPropsWithRef<typeof Chip>) {
-  const { partials, colors } = useTheme()
+  const { partials, colors, borderRadiuses } = useTheme()
   return (
     <Chip
       clickable
@@ -309,7 +309,7 @@ export function ChatOptionPill({
       {...props}
       className={['chatOptionPill', props.className].filter(Boolean).join(' ')}
       css={{
-        borderRadius: 12,
+        borderRadius: borderRadiuses.medium,
         ...(typeof props.css === 'object' && props.css ? props.css : {}),
       }}
     >

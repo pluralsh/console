@@ -656,6 +656,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :issue_counts, :workbench_issue_counts do
       middleware Nested, check: true, msg: "workbench issue counts cannot be fetched through a policy"
+      arg :q, :string, description: "only count issues matching this title or external id search"
+      arg :providers, list_of(:issue_webhook_provider), description: "only count issues from these providers"
+
       resolve &Deployments.issue_counts/3
     end
 
@@ -1676,13 +1679,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.recent_workbench_jobs/2
     end
 
-    @desc "Semantic search over vector-indexed workbench jobs"
+    @desc "Case-insensitive substring search over a workbench's job prompts, newest first"
     field :workbench_job_search, list_of(:workbench_job) do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
         action: :read
-      middleware VectorStoreEnabled
       arg :q,             non_null(:string)
       arg :workbench_id,  non_null(:id), description: "scope search to this workbench"
       arg :limit,         :integer, description: "max results to return (defaults to 5)"

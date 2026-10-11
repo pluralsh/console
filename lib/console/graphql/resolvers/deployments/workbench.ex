@@ -104,9 +104,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def workbench_job_search(%{q: q, workbench_id: workbench_id} = args, ctx) do
     with {:ok, _} <- Workbenches.get_workbench!(workbench_id) |> allow(actor(ctx), :read) do
-      Workbenches.workbench_job_search(q, actor(ctx),
+      Workbenches.workbench_job_search(q, workbench_id,
         limit: Map.get(args, :limit, 5),
-        workbench_id: workbench_id,
         filter: job_search_filter(args)
       )
     end

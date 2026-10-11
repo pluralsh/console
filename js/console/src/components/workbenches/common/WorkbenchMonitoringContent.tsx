@@ -5,21 +5,24 @@ import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { WorkbenchSearchInput } from './WorkbenchSearchInput'
 
+type SearchProps = {
+  searchString: string
+  onSearchChange: (value: string) => void
+  searchPlaceholder: string
+}
+
 // The List and Board views of the workbench Jobs, Issues and Alerts tabs: the
-// search field above the view, or an error or the empty filter state instead.
+// view (with a search field above it, unless searched from the header), or an
+// error or the empty filter state instead.
 export function WorkbenchMonitoringContent({
-  searchString,
-  onSearchChange,
-  searchPlaceholder,
+  search,
   error,
   filterEmptyKind,
   onResetFilters,
   minHeight = 160,
   children,
 }: {
-  searchString: string
-  onSearchChange: (value: string) => void
-  searchPlaceholder: string
+  search?: SearchProps
   error: Nullable<GqlErrorType>
   // the filter with nothing selected, if any
   filterEmptyKind: Nullable<string>
@@ -29,11 +32,13 @@ export function WorkbenchMonitoringContent({
 }) {
   return (
     <WrapperSC $minHeight={minHeight}>
-      <WorkbenchSearchInput
-        value={searchString}
-        onChange={onSearchChange}
-        placeholder={searchPlaceholder}
-      />
+      {search && (
+        <WorkbenchSearchInput
+          value={search.searchString}
+          onChange={search.onSearchChange}
+          placeholder={search.searchPlaceholder}
+        />
+      )}
       {error ? (
         <GqlError error={error} />
       ) : filterEmptyKind ? (

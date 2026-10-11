@@ -1186,6 +1186,55 @@ query WorkbenchIssues(
   }
 }
 
+query WorkbenchIssueStatusCounts(
+  $id: ID!
+  $q: String
+  $providers: [IssueWebhookProvider]
+) {
+  workbench(id: $id) {
+    id
+    issueCounts(q: $q, providers: $providers) {
+      statuses {
+        status
+        count
+      }
+    }
+  }
+}
+
+query WorkbenchIssuesForStatus(
+  $id: ID!
+  $status: IssueStatus!
+  $q: String
+  $providers: [IssueWebhookProvider]
+  $sort: IssueSort
+  $direction: SortDirection
+  $first: Int = 50
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    issues(
+      q: $q
+      providers: $providers
+      statuses: [$status]
+      sort: $sort
+      direction: $direction
+      first: $first
+      after: $after
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
+      }
+    }
+  }
+}
+
 mutation GetWorkbenchCron($id: ID!) {
   workbenchCron(id: $id) {
     ...WorkbenchCron

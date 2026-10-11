@@ -64,7 +64,7 @@ export function IssueStatusChip({
   )
 }
 
-const statusToIcon: Record<IssueStatus, ReactElement> = {
+export const ISSUE_STATUS_ICONS: Record<IssueStatus, ReactElement> = {
   [IssueStatus.Open]: <CircleDashIcon color="icon-xlight" />,
   [IssueStatus.InProgress]: <CircleDashIcon color="icon-light" />,
   [IssueStatus.Completed]: <CheckOutlineIcon color="icon-light" />,
@@ -79,7 +79,7 @@ export function IssueStatusIcon({ status }: { status: IssueStatus }) {
       size="small"
       textValue={ISSUE_STATUS_LABELS[status]}
       tooltip={ISSUE_STATUS_LABELS[status]}
-      icon={statusToIcon[status]}
+      icon={ISSUE_STATUS_ICONS[status]}
     />
   )
 }

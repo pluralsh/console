@@ -322,7 +322,7 @@ export function Sidebar() {
             ) : (
               <MenuOpenIcon color="icon-xlight" />
             )}
-            {isExpanded ? 'Collapse sidebar' : null}
+            {isExpanded ? 'Collapse' : null}
           </ToggleSidebarButtonSC>
         </WrapWithIf>
       </div>
@@ -337,21 +337,30 @@ function ConsoleVersion({ version }: { version: string }) {
       condition={!isExpanded}
       wrapper={<Tooltip label={`Console version: v${version}`} />}
     >
-      <ConsoleVersionSC>
+      <ConsoleVersionSC $isExpanded={isExpanded}>
         {isExpanded ? 'Console version: ' : 'v'}
         {version}
       </ConsoleVersionSC>
     </WrapWithIf>
   )
 }
-const ConsoleVersionSC = styled.span(({ theme }) => ({
-  ...TRUNCATE,
-  color: theme.colors['text-xlight'],
-  fontSize: 10,
-  letterSpacing: '-0.35px',
-  margin: theme.spacing.xsmall,
-  textAlign: 'center',
-}))
+// expanded, it starts where the item icons do (see `sidebarItemLayout`)
+const ConsoleVersionSC = styled.span<{ $isExpanded: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    ...TRUNCATE,
+    color: theme.colors['text-xlight'],
+    fontSize: 10,
+    letterSpacing: '-0.35px',
+    margin: theme.spacing.xsmall,
+    textAlign: 'center',
+    ...($isExpanded && {
+      alignSelf: 'stretch',
+      margin: `${theme.spacing.xsmall}px 0`,
+      paddingLeft: theme.spacing.small - theme.spacing.xsmall,
+      textAlign: 'left',
+    }),
+  })
+)
 
 const SidebarLogoSC = styled.img({
   width: 24,
