@@ -51,6 +51,10 @@ export type GraphDataArgs = {
   skip: boolean
 }
 
+// time-windowed series rarely hit the cache, and caching every panel's points
+// on the shared dashboard entity makes each response re-diff the others
+const GRAPH_FETCH_POLICY = 'no-cache'
+
 type DashboardGraphSource = {
   useGraphData: (args: GraphDataArgs) => GraphDataResult
   readOnly: boolean
@@ -110,7 +114,7 @@ export function AuthenticatedGraphSource({
               timeRange,
             },
             skip,
-            fetchPolicy: 'cache-and-network',
+            fetchPolicy: GRAPH_FETCH_POLICY,
           })
         return {
           data: data?.workbenchDashboard?.graph ?? undefined,
@@ -152,7 +156,7 @@ export function PublicGraphSource({
             client: authlessClient,
             variables: { publicId, identifier, timeRange },
             skip,
-            fetchPolicy: 'cache-and-network',
+            fetchPolicy: GRAPH_FETCH_POLICY,
           })
         return {
           data: data?.publicWorkbenchDashboard?.graph ?? undefined,

@@ -261,7 +261,9 @@ function ClusterMetricGraphCard({
       ...usageFieldVariables(graph.fields),
     },
     skip: !metricsEnabled || !clusterId,
-    fetchPolicy: 'cache-and-network',
+    // every graph selects different fields of one un-normalized object, so
+    // caching makes each response re-diff every other graph's series
+    fetchPolicy: 'no-cache',
   })
   const data = useRangeQueryData(
     { data: currentData, previousData },
