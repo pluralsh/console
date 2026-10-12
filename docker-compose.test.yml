@@ -95,7 +95,7 @@ services:
     command: ["mb", "--ignore-existing", "local/console-test"]
     restart: on-failure
   pseudofs:
-    # keep in sync with pseudofs.image.tag in charts/console/values.yaml
+    # keep in sync with PSEUDOFS_VERSION in .github/workflows/pseudofs-vendor.yaml
     image: ghcr.io/pluralsh/pseudofs:0.2.11
     restart: always
     command: ["--config", "/etc/pseudofs/pseudofs.yaml"]

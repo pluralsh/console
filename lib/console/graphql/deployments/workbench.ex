@@ -687,7 +687,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_skills/3
     end
 
-    connection field :workbench_knowledge, node_type: :workbench_knowledge do
+    connection field :workbench_knowledge, node_type: :workbench_knowledge,
+      deprecate: "superseded by /knowledge in the workbench filesystem when filesystemEnabled" do
       middleware Nested, check: true, msg: "workbench knowledge cannot be fetched through a policy"
       resolve &Deployments.list_workbench_knowledge/3
     end
@@ -2159,7 +2160,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     @desc "Updates saved workbench knowledge. Requires write access to the workbench."
-    field :update_workbench_knowledge, :workbench_knowledge do
+    field :update_workbench_knowledge, :workbench_knowledge,
+      deprecate: "superseded by writeWorkbenchFile under /knowledge when the workbench filesystem is enabled" do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
@@ -2171,7 +2173,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     @desc "Deletes saved workbench knowledge. Requires write access to the workbench."
-    field :delete_workbench_knowledge, :workbench_knowledge do
+    field :delete_workbench_knowledge, :workbench_knowledge,
+      deprecate: "superseded by deleteWorkbenchFile under /knowledge when the workbench filesystem is enabled" do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,

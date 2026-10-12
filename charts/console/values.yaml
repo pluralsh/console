@@ -447,8 +447,8 @@ pseudofs:
     # registry defaults to global.registry when empty
     registry: ""
     repository: fs
-    # tag pins the vendored pseudofs release, see "Workbench filesystem" in the chart README for how to bump it
-    tag: 0.2.11
+    # tag defaults to image.tag, then the chart appVersion, since fs is vendored under the console's tags
+    tag: ~
     pullPolicy: IfNotPresent
   imagePullSecrets: []
   service:

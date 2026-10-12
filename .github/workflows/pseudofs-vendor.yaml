@@ -1,20 +1,20 @@
 name: CD / Vendor pseudofs
 
-# Mirrors the pinned pseudofs release (pseudofs.image.tag in charts/console/values.yaml) from the
-# telemetry repo's ghcr image into every registry the console is published to.
+# Mirrors the pinned upstream pseudofs release from the telemetry repo's ghcr image to pluralsh/fs,
+# tagged exactly like the console image of the calling run (sha-<sha> and pr-<n>/<branch> from CI,
+# <version> from a release) so the chart can default its tag to the console's.
 on:
   workflow_call:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - .github/workflows/pseudofs-vendor.yaml
-      - charts/console/values.yaml
 
 permissions:
   contents: read
 
 env:
   SOURCE_IMAGE: ghcr.io/pluralsh/pseudofs
+  # bump alongside the pseudofs images in docker-compose.yml and docker-compose.test.yml
+  PSEUDOFS_VERSION: 0.2.11
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:
   vendor:
@@ -26,13 +26,19 @@ jobs:
       id-token: write
       packages: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Read pinned version
-        id: version
-        uses: mikefarah/yq@v4
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
         with:
-          cmd: yq '.pseudofs.image.tag' charts/console/values.yaml
+          images: |
+            ghcr.io/pluralsh/fs
+            gcr.io/pluralsh/fs
+            docker.io/pluralsh/fs
+          tags: |
+            type=sha
+            type=ref,event=pr
+            type=ref,event=branch
+            type=semver,pattern={{version}}
       - uses: google-github-actions/auth@v3
         id: gcp
         with:
@@ -50,12 +56,12 @@ jobs:
           echo "$DOCKER_TOKEN" | skopeo login docker.io -u mjgpluralsh --password-stdin
       - name: Copy image
         env:
-          VERSION: ${{ steps.version.outputs.result }}
+          TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           set -euo pipefail
-          test -n "$VERSION" && test "$VERSION" != "null"
-          for dest in ghcr.io/pluralsh/fs gcr.io/pluralsh/fs docker.io/pluralsh/fs; do
+          while read -r dest; do
+            [ -n "$dest" ] || continue
             skopeo copy --all --preserve-digests --retry-times 3 \
-              "docker://${SOURCE_IMAGE}:${VERSION}" \
-              "docker://${dest}:${VERSION}"
-          done
+              "docker://${SOURCE_IMAGE}:${PSEUDOFS_VERSION}" \
+              "docker://${dest}"
+          done <<< "$TAGS"

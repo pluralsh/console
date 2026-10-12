@@ -22,7 +22,6 @@ defmodule Console.Schema.WorkbenchKnowledge do
   def for_workbench(query \\ __MODULE__, workbench_id) do
     from(k in query, where: k.workbench_id == ^workbench_id)
   end
-
   @valid ~w(name description knowledge labels usages last_used_at workbench_id)a
 
   def changeset(model, attrs \\ %{}) do

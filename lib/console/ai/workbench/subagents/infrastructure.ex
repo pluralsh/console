@@ -137,9 +137,11 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp manifests_tools(_, _, _, _), do: []
 
   defp build_codemode(tools, job, policies) do
-    case Enum.split_with(tools, &codemode?/1) do
-      {[_ | _] = codemode, regular} ->
+    case {Enum.split_with(tools, &codemode?/1), Console.PseudoFS.enabled?()} do
+      {{[_ | _] = codemode, regular}, _} ->
         [%Codemode{tools: codemode, policies: policies, workbench_id: job.workbench_id} | regular]
+      # the sandbox is also how the subagent reaches the workbench filesystem its prompt points it to
+      {_, true} -> [%Codemode{tools: [], policies: policies, workbench_id: job.workbench_id} | tools]
       _ -> tools
     end
   end

@@ -81,6 +81,7 @@ fragment WorkbenchWebhookTiny on WorkbenchWebhook {
 fragment Workbench on Workbench {
   ...WorkbenchTiny
   systemPrompt
+  filesystemEnabled
   agentRuntime {
     id
     name
