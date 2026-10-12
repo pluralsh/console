@@ -29,11 +29,11 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "lint": "run-p lint:format lint:js",
-    "lint:format": "biome format ./src",
+    "lint": "run-p lint:biome lint:js",
+    "lint:biome": "biome check ./src",
     "lint:js": "eslint ./src --cache",
-    "fix": "run-s fix:format fix:js",
-    "fix:format": "biome format --write ./src",
+    "fix": "run-s fix:biome fix:js",
+    "fix:biome": "biome check --write ./src",
     "fix:js": "eslint ./src --fix",
     "prepublishOnly": "npm run build",
     "analyze": "vite-bundle-visualizer -o stats.html"
@@ -80,7 +80,6 @@
   "devDependencies": {
     "@apollo/client": "3.14.1",
     "@biomejs/biome": "2.5.8",
-    "@pluralsh/eslint-config-pluralsh": "workspace:*",
     "@react-stately/form": "3.3.1",
     "@react-types/listbox": "3.8.0",
     "@react-types/select": "3.13.0",
@@ -95,12 +94,13 @@
     "@types/d3": "7.4.3",
     "@types/lodash-es": "4.17.12",
     "@types/react-transition-group": "4.4.12",
+    "@typescript-eslint/parser": "8.70.0",
     "@vitejs/plugin-react": "5.2.0",
     "@vitest/ui": "5.0.1",
     "babel-plugin-styled-components": "2.3.0",
     "chromatic": "18.5.0",
     "eslint": "9.39.5",
-    "eslint-plugin-storybook": "10.6.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "fuse.js": "6.6.2",
     "http-server": "14.1.1",
     "jsdom": "29.1.1",
@@ -125,6 +125,6 @@
     "styled-components": ">=6.2.0"
   },
   "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx}": "biome format --write --no-errors-on-unmatched"
+    "./src/**/*.{js,jsx,ts,tsx}": "biome check --write --no-errors-on-unmatched"
   }
 }

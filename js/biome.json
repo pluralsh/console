@@ -22,7 +22,104 @@
       "semicolons": "asNeeded"
     }
   },
-  "css": { "formatter": { "quoteStyle": "single" } },
-  "linter": { "enabled": false },
-  "assist": { "enabled": false }
+  "css": {
+    "formatter": { "quoteStyle": "single" },
+    "linter": { "enabled": false }
+  },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "complexity": {
+        "noArguments": "error",
+        "noUselessTypeConstraint": "error"
+      },
+      "correctness": {
+        "noChildrenProp": "error",
+        "noReactPropAssignments": "error",
+        "noRenderReturnValue": "error",
+        "noUnusedVariables": "error"
+      },
+      "security": {
+        "noBlankTarget": "error",
+        "noDangerouslySetInnerHtmlWithChildren": "error"
+      },
+      "style": {
+        "noCommonJs": "error",
+        "noNamespace": "error",
+        "useArrayLiterals": "error",
+        "useAsConstAssertion": "error",
+        "useConst": "error",
+        "useExportType": "error",
+        "useSpreadOverApply": "error"
+      },
+      "suspicious": {
+        "noCommentText": "error",
+        "noDuplicateEnumValues": "error",
+        "noDuplicateJsxProps": "error",
+        "noExtraNonNullAssertion": "error",
+        "noMisleadingInstantiator": "error",
+        "noNonNullAssertedOptionalChain": "error",
+        "noUnknownAttribute": {
+          "level": "error",
+          "options": { "ignore": ["css"] }
+        },
+        "noUnsafeDeclarationMerging": "error",
+        "noVar": "error",
+        "useNamespaceKeyword": "error"
+      }
+    }
+  },
+  "assist": { "enabled": false },
+  "overrides": [
+    {
+      "includes": ["design-system/src/**/*.stories.{ts,tsx}"],
+      "linter": { "enabled": false }
+    },
+    {
+      "includes": ["stylelint-config/**"],
+      "linter": { "rules": { "style": { "noCommonJs": "off" } } }
+    },
+    {
+      "includes": ["documentation/**"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "preset": "recommended",
+            "noLabelWithoutControl": {
+              "level": "error",
+              "options": {
+                "labelComponents": ["Label"],
+                "inputComponents": ["Input"]
+              }
+            }
+          },
+          "style": {
+            "useImportType": "error"
+          }
+        }
+      },
+      "assist": {
+        "enabled": true,
+        "actions": {
+          "source": {
+            "organizeImports": {
+              "level": "on",
+              "options": {
+                "groups": [
+                  ":NODE:",
+                  ["react", "react/**"],
+                  ":BLANK_LINE:",
+                  ["next", "next/**", "@pluralsh/design-system"],
+                  ":BLANK_LINE:",
+                  [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:", "!@src/**"],
+                  ":BLANK_LINE:",
+                  ["@src/**", ":ALIAS:", ":PATH:"]
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

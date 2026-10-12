@@ -7,7 +7,6 @@ import { useIsomorphicLayoutEffect } from 'usehooks-ts'
 
 import { DISCORD_LINK } from '@src/consts'
 import { useRestNav } from '@src/contexts/RestNavContext'
-
 import { FullNav, NavButtons, type NavContextValue } from './FullNav'
 import GithubStars from './GithubStars'
 import useScrollLock from './hooks/useScrollLock'

@@ -1,5 +1,9 @@
 # eslint-config-pluralsh
 
+> **Deprecated.** Console no longer uses this package: it lints with Biome plus a
+> minimal ESLint config for the React Compiler rules (see `js/biome.json` and
+> `js/eslint.config.mjs`). This package is no longer maintained.
+
 Plural's shared ESLint flat config for type-checked TypeScript, React, React Hooks,
 and imports. It contains the common configuration used by the Console and Plural
 web applications. Formatting is left to a dedicated formatter (Console uses

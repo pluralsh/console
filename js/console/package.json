@@ -19,13 +19,13 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "design-system:test": "yarn workspace @pluralsh/design-system test",
-    "lint": "run-p lint:format lint:js lint:css design-system:lint",
-    "lint:format": "biome format ./src",
+    "lint": "run-p lint:biome lint:js lint:css design-system:lint",
+    "lint:biome": "biome check ./src",
     "lint:js": "eslint ./src --cache",
     "lint:css": "stylelint src/**/*.css",
     "design-system:lint": "yarn workspace @pluralsh/design-system lint",
-    "fix": "run-s fix:format fix:js fix:css",
-    "fix:format": "biome format --write ./src",
+    "fix": "run-s fix:biome fix:js fix:css",
+    "fix:biome": "biome check --write ./src",
     "fix:js": "eslint ./src --fix",
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
@@ -127,7 +127,6 @@
     "@graphql-codegen/typescript-operations": "5.1.0",
     "@graphql-codegen/typescript-react-apollo": "4.4.2",
     "@hey-api/openapi-ts": "0.99.0",
-    "@pluralsh/eslint-config-pluralsh": "workspace:*",
     "@pluralsh/stylelint-config": "workspace:*",
     "@react-types/shared": "3.36.1",
     "@replit/graphql-codegen-persisted-queries": "0.1.2",
@@ -139,11 +138,13 @@
     "@types/node": "24.10.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@typescript-eslint/parser": "8.70.0",
     "@vitejs/plugin-basic-ssl": "2.3.0",
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/ui": "5.0.1",
     "babel-plugin-styled-components": "2.3.0",
     "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "7.1.1",
     "graphql-tag": "2.12.7",
     "jsdom": "30.0.1",
     "jwt-decode": "4.0.0",
@@ -157,6 +158,6 @@
     "vitest": "5.0.1"
   },
   "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx,graphql,json,css}": "biome format --write --no-errors-on-unmatched"
+    "./src/**/*.{js,jsx,ts,tsx,graphql,json,css}": "biome check --write --no-errors-on-unmatched"
   }
 }

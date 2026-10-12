@@ -1,8 +1,8 @@
 import {
   type ComponentProps,
   type ComponentType,
-  Suspense,
   forwardRef,
+  Suspense,
   useEffect,
   useMemo,
   useState,
@@ -24,6 +24,8 @@ import { until } from '@open-draft/until'
 import { SSRProvider } from '@react-aria/ssr'
 import '@src/highlight'
 import '@src/styles/globals.css'
+
+import type { MarkdocNextJsPageProps } from '@markdoc/next.js'
 import styled, { ThemeProvider as StyledThemeProvider } from 'styled-components'
 import { SWRConfig } from 'swr'
 
@@ -59,8 +61,6 @@ import { NavDataProvider } from '@src/contexts/NavDataContext'
 import { RestNavProvider } from '@src/contexts/RestNavContext'
 import { collectHeadings } from '@src/markdoc/utils/parseHeadings'
 import { getNavData } from '@src/NavData'
-
-import type { MarkdocNextJsPageProps } from '@markdoc/next.js'
 
 /** Page component type; some pages opt into a full-width custom layout (e.g. REST API reference). */
 type PageComponentWithLayout = ComponentType<MyPageProps> & {

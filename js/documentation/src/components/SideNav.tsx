@@ -1,12 +1,12 @@
 import {
   type ComponentProps,
+  createContext,
   type Dispatch,
+  forwardRef,
   type Key,
   type MutableRefObject,
   type ReactElement,
   type SetStateAction,
-  createContext,
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -28,10 +28,9 @@ import classNames from 'classnames'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 
+import type { MenuId, NavItem, NavMenu } from '../NavData'
 import scrollIntoContainerView from '../utils/scrollIntoContainerView'
 import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
-
-import type { MenuId, NavItem, NavMenu } from '../NavData'
 
 export type SideNavProps = {
   navData: NavMenu
