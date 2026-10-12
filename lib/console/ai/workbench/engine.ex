@@ -14,7 +14,7 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.AI.Provider.Base, as: ProviderBase
-  alias Console.Deployments.Workbenches
+  alias Console.Deployments.{Workbenches, Attachments}
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage, User}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
@@ -465,14 +465,19 @@ defmodule Console.AI.Workbench.Engine do
        }) do
     activities
     |> Enum.reverse()
-    |> Enum.map(&Message.to_message/1)
-    |> then(&ProviderBase.reqllm_messages([{:user, job.prompt} | &1]))
+    |> Enum.map(&context_message/1)
+    |> then(&ProviderBase.reqllm_messages([{:user, Attachments.prompt_content(job.prompt, job.attachments)} | &1]))
   end
+
+  defp context_message(%WorkbenchJobActivity{type: :user, prompt: prompt, attachments: [_ | _] = attachments}),
+    do: {:user, Attachments.prompt_content(prompt, attachments)}
+  defp context_message(activity), do: Message.to_message(activity)
 
   defp list_activities(%WorkbenchJob{id: id}) do
     WorkbenchJobActivity.ordered()
     |> WorkbenchJobActivity.for_workbench_job(id)
     |> Repo.all()
+    |> Repo.preload(:attachments)
     |> Enum.reverse()
   end
 
@@ -501,7 +506,7 @@ defmodule Console.AI.Workbench.Engine do
       },
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
-      %Codemode{tools: []},
+      %Codemode{tools: [], workbench_id: job.workbench_id},
       Notes,
       %Complete{job: job, user: env.user},
     ] ++ type_tools(job)
@@ -556,7 +561,7 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp backfill_chat(tools, _), do: tools
 
-  @preloads [:result, :flow, :pull_requests, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
+  @preloads [:result, :flow, :pull_requests, :attachments, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
   defp verifiable(
          %__MODULE__{

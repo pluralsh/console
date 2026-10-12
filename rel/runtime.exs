@@ -466,6 +466,10 @@ if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
     access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
 end
 
+if is_set("CONSOLE_PSEUDOFS_ADDR") do
+  config :console, pseudofs: get_env("CONSOLE_PSEUDOFS_ADDR")
+end
+
 if is_set("CONSOLE_INSTANCE_DETAILS") do
   case JSON.decode(get_env("CONSOLE_INSTANCE_DETAILS")) do
     {:ok, %{} = details} -> config :console, :details, details

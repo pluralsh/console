@@ -359,6 +359,8 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :prompt, non_null(:string), description: "the prompt to give this agent run"
     field :seq,    non_null(:integer), description: "the sequence number of the prompt"
 
+    field :attachments, list_of(:attachment), resolve: dataloader(Deployments), description: "files attached to this prompt"
+
     timestamps()
   end
 
@@ -604,8 +606,9 @@ defmodule Console.GraphQl.Deployments.Agent do
       middleware Scope,
         resource: :agent,
         action: :write
-      arg :id,     non_null(:id)
-      arg :prompt, non_null(:string)
+      arg :id,          non_null(:id)
+      arg :prompt,      non_null(:string)
+      arg :attachments, list_of(:upload), description: "files to attach to this prompt, only supported for agent runs spawned by a workbench"
 
       resolve &Deployments.create_agent_run_prompt/2
     end

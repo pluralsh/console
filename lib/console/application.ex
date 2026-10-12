@@ -53,7 +53,7 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
-    ] ++ cloud_query_client(@env) ++ [
+    ] ++ cloud_query_client(@env) ++ pseudofs_client(@env) ++ [
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,
         port: 50051,
@@ -108,6 +108,20 @@ defmodule Console.Application do
       }
     ]
   end
+
+  @doc false
+  def pseudofs_client(env, target \\ Console.conf(:pseudofs))
+  def pseudofs_client(:test, _), do: []
+  def pseudofs_client(_, target) when is_binary(target) do
+    [
+      {GRPC.Client.Connection,
+        name: Console.PseudoFS.Client,
+        target: target,
+        adapter: Console.PseudoFS.Client.adapter()
+      }
+    ]
+  end
+  def pseudofs_client(_, _), do: []
 
   defp consumers(), do: Console.conf(:consumers) || []
 

@@ -3,7 +3,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   import Absinthe.Resolution.Helpers, only: [batch: 3]
   alias Console.Repo
   alias Kube.Utils, as: KUtils
-  alias Console.Deployments.{Clusters, Workbenches}
+  alias Console.Deployments.{Clusters, Workbenches, WorkbenchFiles}
   alias Console.AI.Workbench.{Toolchain, Skills}
   alias Console.AI.Tools.Workbench.Infrastructure.KubeGet
   alias Console.Schema.{
@@ -381,6 +381,38 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def whimsey_text(%WorkbenchJob{} = job, _, _), do: Workbenches.whimsey_text(job)
   def whimsey_text(%WorkbenchJobActivity{} = activity, _, _), do: Workbenches.whimsey_text(activity)
+
+  def list_workbench_files(workbench, args, _), do: WorkbenchFiles.list(workbench, Map.get(args, :path, "/"))
+
+  def workbench_file(workbench, %{path: path}, _), do: WorkbenchFiles.stat(workbench, path)
+
+  def workbench_file_contents(workbench, %{path: path}, _), do: WorkbenchFiles.read_text(workbench, path)
+
+  def glob_workbench_files(workbench, %{pattern: pattern} = args, _),
+    do: WorkbenchFiles.glob(workbench, pattern, args[:max_results])
+
+  def grep_workbench_files(workbench, %{pattern: pattern} = args, _),
+    do: WorkbenchFiles.grep(workbench, pattern, args)
+
+  def workbench_file_download_url(%{kind: :file, workbench_id: id, path: path}, _, %{context: %{current_user: user}}),
+    do: {:ok, WorkbenchFiles.download_url(id, path, user)}
+  def workbench_file_download_url(_, _, _), do: {:ok, nil}
+
+  def attachment_download_url(%{workbench_id: id, path: path}, _, %{context: %{current_user: user}}),
+    do: {:ok, WorkbenchFiles.download_url(id, path, user)}
+  def attachment_download_url(_, _, _), do: {:ok, nil}
+
+  def write_workbench_file(%{workbench_id: id} = args, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.write_file(args, id, user)
+
+  def create_workbench_directory(%{workbench_id: id, path: path}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.create_directory(path, id, user)
+
+  def move_workbench_file(%{workbench_id: id, source: source, target: target}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.move_file(source, target, id, user)
+
+  def delete_workbench_file(%{workbench_id: id, path: path}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.delete_file(path, id, user)
 
   def create_workbench(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench(attrs, user)

@@ -7,7 +7,7 @@ defmodule Console.Deployments.Agents do
   import Console.Schema.AgentRun, only: [is_terminal: 1]
   alias Console.Deployments.Pr.Review
   alias Console.Services.Users
-  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches}
+  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches, Attachments}
   alias Console.AI.Tool
   alias Console.PubSub
   alias Kazan.Apis.Core.V1, as: CoreV1
@@ -23,6 +23,7 @@ defmodule Console.Deployments.Agents do
     PullRequest,
     AgentMessage,
     AgentRunRepository,
+    WorkbenchJob,
     WorkbenchJobActivity,
     AgentRunUpload
   }
@@ -373,8 +374,8 @@ defmodule Console.Deployments.Agents do
   @doc """
   Creates a new prompt for this agent run
   """
-  @spec create_prompt(binary, binary, User.t) :: prompt_resp
-  def create_prompt(prompt, run_id, %User{} = user) do
+  @spec create_prompt(binary, binary, User.t, [Plug.Upload.t]) :: prompt_resp
+  def create_prompt(prompt, run_id, %User{} = user, attachments \\ []) do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_agent_run!(run_id)
@@ -395,7 +396,19 @@ defmodule Console.Deployments.Agents do
       |> AgentMessage.changeset(%{role: :user, message: prompt, agent_run_id: run_id})
       |> Repo.insert()
     end)
+    |> add_operation(:attachments, fn %{run: run, agent_prompt: agent_prompt} ->
+      create_prompt_attachments(attachments, run, agent_prompt)
+    end)
     |> execute(extract: :prompt)
+  end
+
+  defp create_prompt_attachments(empty, _, _) when empty in [nil, []], do: {:ok, []}
+  defp create_prompt_attachments(attachments, run, agent_prompt) do
+    case Repo.preload(run, :workbench_job) do
+      %AgentRun{workbench_job: %WorkbenchJob{workbench_id: wid}} ->
+        Attachments.create(attachments, wid, %{agent_prompt_id: agent_prompt.id, agent_run_id: run.id})
+      _ -> {:error, "file attachments are only supported for agent runs spawned by a workbench"}
+    end
   end
 
   @doc """
