@@ -34,13 +34,14 @@ import {
   DisplayFilterEmpty,
   DisplayMainSC,
   DisplayToolbarSC,
+  toCounts,
   toggleListValue,
 } from 'components/utils/display/DisplayPanel'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
-import { ServiceDeploymentStatus, useFlowsQuery } from 'generated/graphql'
-import { compact, isEmpty } from 'lodash'
+import { useFlowsQuery } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
@@ -102,13 +103,7 @@ export function Flows() {
 
   const flows = useMemo(() => mapExistingNodes(data?.flows), [data])
   const statusCounts = useMemo(
-    () =>
-      Object.fromEntries(
-        compact(data?.flowServiceCounts).map((entry) => [
-          entry.status,
-          entry.count,
-        ])
-      ) as Partial<Record<ServiceDeploymentStatus, number>>,
+    () => toCounts(data?.flowServiceCounts, (entry) => entry.status),
     [data]
   )
   const hasActiveSearch = !!debouncedSearchString

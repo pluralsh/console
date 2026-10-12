@@ -82,6 +82,10 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: pr.status == ^status)
   end
 
+  def for_statuses(query \\ __MODULE__, statuses) do
+    from(pr in query, where: pr.status in ^statuses)
+  end
+
   def pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
     stale = Timex.shift(now, days: -7)
@@ -198,6 +202,10 @@ defmodule Console.Schema.PullRequest do
       },
       order_by: [desc: 2]
     )
+  end
+
+  def workbench_job_ids(query \\ __MODULE__) do
+    from(pr in query, select: pr.workbench_job_id)
   end
 
   def for_workbench_jobs(query \\ __MODULE__) do

@@ -956,8 +956,9 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     flexDirection: 'column',
     alignItems: $fullWidth ? 'stretch' : 'flex-end',
     width: '100%',
-    // The 32px copy row stands in for the list gap under the card.
-    marginBottom: -theme.spacing.xlarge,
+    // Cancel the compact list gap; the 32px action row remains as dedicated
+    // space under both the initial prompt and later user-message activities.
+    marginBottom: -theme.spacing.small,
   })
 )
 

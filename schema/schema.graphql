@@ -516,6 +516,11 @@ type RootQueryType {
     id: ID!
   ): WorkbenchDashboard
 
+  publicWorkbenchDashboard(
+    "Fetch a publicly shared dashboard by its public id, no authentication required"
+    publicId: String!
+  ): PublicWorkbenchDashboard
+
   deploymentSettings: DeploymentSettings
 
   "The model defaults for each configurable provider"
@@ -635,6 +640,12 @@ type RootQueryType {
 
     "max results to return (defaults to 5)"
     limit: Int
+
+    "filter results by status"
+    statuses: [WorkbenchJobStatus]
+
+    "filter results by the state of their pull requests"
+    prStates: [WorkbenchJobPrState]
   ): [WorkbenchJob]
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
@@ -1358,6 +1369,14 @@ type RootMutationType {
     id: ID!
 
     attributes: DashboardAttributes!
+  ): WorkbenchDashboard
+
+  shareWorkbenchDashboard(
+    "Enable or disable public sharing of a dashboard"
+    id: ID!
+
+    "Whether the dashboard should be publicly viewable"
+    shared: Boolean!
   ): WorkbenchDashboard
 
   deleteDashboard(
@@ -3075,6 +3094,17 @@ enum WorkbenchBudgetUnit {
   TOKEN
 }
 
+enum WorkbenchJobPrState {
+  OPEN
+
+  MERGED
+
+  CLOSED
+
+  "jobs without any pull requests"
+  NONE
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -3217,9 +3247,6 @@ input WorkbenchAttributes {
 }
 
 input WorkbenchConfigurationAttributes {
-  "enable the self-service subagent for catalog and PR automation workflows"
-  selfService: Boolean
-
   "infrastructure capabilities (services, stacks, kubernetes)"
   infrastructure: WorkbenchInfrastructureAttributes
 
@@ -3231,6 +3258,9 @@ input WorkbenchConfigurationAttributes {
 }
 
 input WorkbenchInfrastructureAttributes {
+  "enable the self-service subagent for catalog and PR automation workflows"
+  selfService: Boolean
+
   "enable services capability"
   services: Boolean
 
@@ -4016,6 +4046,23 @@ input QueuedPromptAttributes {
   modes: WorkbenchJobModesAttributes
 }
 
+type WorkbenchJobCounts {
+  statuses: [WorkbenchJobCountByStatus]
+
+  "jobs with at least one pull request in each state (a job can count towards several)"
+  pullRequests: [WorkbenchJobCountByPrState]
+}
+
+type WorkbenchJobCountByStatus {
+  status: WorkbenchJobStatus!
+  count: Int!
+}
+
+type WorkbenchJobCountByPrState {
+  state: WorkbenchJobPrState!
+  count: Int!
+}
+
 type QueuedPromptSummary {
   "unconsumed prompts that are eligible to dequeue"
   readyCount: Int!
@@ -4092,7 +4139,18 @@ type Workbench {
 
     "show runs spawned from a specific monitor"
     monitorId: ID
+
+    "filter runs by status"
+    statuses: [WorkbenchJobStatus]
+
+    "filter runs by the state of their pull requests"
+    prStates: [WorkbenchJobPrState]
+
+    "creation date sort direction"
+    direction: SortDirection
   ): WorkbenchJobConnection
+
+  runCounts: WorkbenchJobCounts
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
 
@@ -4137,7 +4195,32 @@ type Workbench {
 
   chatbots(after: String, first: Int, before: String, last: Int): WorkbenchChatbotConnection
 
-  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+  alerts(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search alerts by title, alertname tag or message"
+    q: String
+
+    "filter alerts by source"
+    types: [ObservabilityWebhookType]
+
+    "filter alerts by severity"
+    severities: [AlertSeverity]
+
+    "field to sort alerts by (defaults to most recently updated)"
+    sort: AlertSort
+
+    "sort direction"
+    direction: SortDirection
+  ): AlertConnection
+
+  alertCounts: WorkbenchAlertCounts
 
   issues(
     after: String
@@ -4773,9 +4856,6 @@ type WorkbenchJobResultTodo {
 }
 
 type WorkbenchConfiguration {
-  "self-service subagent capability enabled"
-  selfService: Boolean
-
   "infrastructure capabilities"
   infrastructure: WorkbenchInfrastructure
 
@@ -4787,6 +4867,9 @@ type WorkbenchConfiguration {
 }
 
 type WorkbenchInfrastructure {
+  "self-service subagent capability enabled"
+  selfService: Boolean
+
   "services capability enabled"
   services: Boolean
 
@@ -5713,9 +5796,18 @@ type WorkbenchPolicyConnection {
   edges: [WorkbenchPolicyEdge]
 }
 
+type WorkbenchJobEdge {
+  node: WorkbenchJob
+  cursor: String
+}
+
 type WorkbenchJobConnection {
   pageInfo: PageInfo!
+
   edges: [WorkbenchJobEdge]
+
+  "total number of jobs matching the query's filters (counted only when selected)"
+  totalCount: Int
 }
 
 type WorkbenchJobActivityConnection {
@@ -8486,6 +8578,9 @@ type WorkbenchDashboard {
   "Optional dashboard description"
   description: String
 
+  "Unguessable id of the public share link, null when the dashboard is not shared"
+  publicId: String
+
   "Graphs arranged on the dashboard grid"
   graphs: [WorkbenchDashboardGraph]
 
@@ -8519,6 +8614,58 @@ type WorkbenchDashboard {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A publicly shared dashboard, exposing only what is needed to render it"
+type PublicWorkbenchDashboard {
+  "Dashboard name"
+  name: String!
+
+  "Optional dashboard description"
+  description: String
+
+  "Graphs arranged on the dashboard grid"
+  graphs: [PublicWorkbenchDashboardGraph]
+
+  graph(
+    "Identifier of the graph to query"
+    identifier: String!
+
+    "Time range applied to the datasource query, capped at 30 days"
+    timeRange: DashboardTimeRangeAttributes!
+  ): WorkbenchDashboardGraphResult
+}
+
+type PublicWorkbenchDashboardGraph {
+  "Stable identifier unique within the dashboard"
+  identifier: String!
+
+  "Graph title"
+  title: String
+
+  "Optional graph description"
+  description: String
+
+  "Graph visualization type"
+  type: DashboardGraphType!
+
+  "Unit of the plotted values, used to format axes and tooltips"
+  unit: DashboardGraphUnit
+
+  "Identifier of the section graph containing this graph"
+  sectionId: String
+
+  "Markdown content for markdown graphs"
+  markdown: String
+
+  "Visualization-specific display options; sections may set collapsed"
+  options: Map
+
+  "Grid position and size"
+  layout: WorkbenchDashboardGraphLayout!
+
+  "Whether this graph fetches data from a datasource"
+  hasDatasource: Boolean!
 }
 
 type WorkbenchDashboardGraphResult {
@@ -8752,7 +8899,16 @@ type Alert {
   cluster: Cluster
 
   "The service this alert was associated with"
-  service: Service
+  service: Service @deprecated(reason: "typed as a kubernetes service but holds a plural service deployment, use serviceDeployment instead")
+
+  "The Plural service this alert was associated with"
+  serviceDeployment: ServiceDeployment
+
+  "The evaluated values that triggered this alert, e.g. A=1018071, B=1 (grafana only)"
+  value: String
+
+  "Link to silence this alert in its provider (grafana only)"
+  silenceUrl: String
 
   "The project this alert was associated with"
   project: Project
@@ -8838,6 +8994,28 @@ type KubernetesControllerMetrics {
   podMemLimits: [MetricResponse]
 }
 
+enum AlertSort {
+  "last update, falling back to creation for alerts never updated"
+  UPDATED_AT
+
+  TITLE
+}
+
+type WorkbenchAlertCounts {
+  types: [AlertCountByType]
+  severities: [AlertCountBySeverity]
+}
+
+type AlertCountByType {
+  type: ObservabilityWebhookType!
+  count: Int!
+}
+
+type AlertCountBySeverity {
+  severity: AlertSeverity!
+  count: Int!
+}
+
 "Time series data associated with an alert evaluation"
 type AlertTimeseries {
   "Threshold value used when evaluating this alert over time"
@@ -8857,9 +9035,18 @@ type ObservabilityWebhookConnection {
   edges: [ObservabilityWebhookEdge]
 }
 
+type AlertEdge {
+  node: Alert
+  cursor: String
+}
+
 type AlertConnection {
   pageInfo: PageInfo!
+
   edges: [AlertEdge]
+
+  "total number of alerts matching the query's filters (counted only when selected)"
+  totalCount: Int
 }
 
 type MonitorConnection {
@@ -18872,11 +19059,6 @@ type MonitorEdge {
   cursor: String
 }
 
-type AlertEdge {
-  node: Alert
-  cursor: String
-}
-
 type ObservabilityWebhookEdge {
   node: ObservabilityWebhook
   cursor: String
@@ -18984,11 +19166,6 @@ type QueuedPromptEdge {
 
 type WorkbenchJobActivityEdge {
   node: WorkbenchJobActivity
-  cursor: String
-}
-
-type WorkbenchJobEdge {
-  node: WorkbenchJob
   cursor: String
 }
 

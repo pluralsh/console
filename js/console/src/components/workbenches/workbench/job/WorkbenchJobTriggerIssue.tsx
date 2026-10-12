@@ -20,7 +20,7 @@ import {
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { Body2BoldP, CaptionP, InlineA } from 'components/utils/typography/Text'
 import { IssueWebhookProvider, WorkbenchJobFragment } from 'generated/graphql'
-import { startCase } from 'lodash'
+import { humanizeIssueWebhookProvider } from 'utils/webhookLabels'
 import { ComponentType } from 'react'
 import styled from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
@@ -117,7 +117,7 @@ export function WorkbenchJobTriggerIssue({
                       fullColor
                     />
                   ) : null}
-                  {startCase(issue.provider.toLowerCase())}
+                  {humanizeIssueWebhookProvider(issue.provider)}
                 </Flex>
               </Prop>
             </TriggerPropsRowSC>

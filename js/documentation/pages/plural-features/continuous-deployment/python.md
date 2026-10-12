@@ -3,7 +3,7 @@ title: Dynamic Helm Configuration with Python Scripts
 description: Enhance Helm deployments with dynamic configuration by using sandboxed Python scripts
 ---
 
-Helm services can compute `values` and `valuesFiles` at render time with a Python script, as an alternative or a complement to [Lua scripts](lua.md). The script mutates two pre-defined globals, and the deployment agent merges the result into the Helm release:
+Helm services can compute `values` and `valuesFiles` at render time with a Python script, as an alternative to [Lua scripts](lua.md). Lua and Python are mutually exclusive: when any Python field is set, Python runs and Lua is skipped. The script mutates two pre-defined globals, and the deployment agent merges the result into the Helm release:
 
 ```json
 {
@@ -146,19 +146,15 @@ These are plain globals, not modules, so call them directly without an `import`.
 
 ## Value Merge Order
 
-Lua and Python run in the same render, Lua first. Their results are layered over the service's other value sources in this order, where later layers win:
+Lua and Python values scripts are mutually exclusive. If any Python field is set (`pythonScript`, `pythonFile`, or `pythonFolder`), only Python runs. Otherwise Lua runs when configured. Their results are layered over the service's other value sources in this order, where later layers win:
 
 1. The chart's own `values.yaml`
 2. `values.yaml.liquid` at the service root, if present, after Liquid rendering
 3. Each file in `helm.valuesFiles`, in order
-4. Each file appended to `valuesFiles` by Lua, in order
-5. Each file appended to `valuesFiles` by Python, in order
-6. The inline `helm.values`
-7. `values.yaml.static` at the service root, if present
-8. The `values` dictionary produced by Lua
-9. The `values` dictionary produced by Python
-
-Python's `values` is the final layer and overrides everything else, including Lua.
+4. Each file appended to `valuesFiles` by the active script (Lua or Python), in order
+5. The inline `helm.values`
+6. `values.yaml.static` at the service root, if present
+7. The `values` dictionary produced by the active script
 
 Each layer is deep-merged into the one below it:
 
@@ -494,4 +490,4 @@ if start:
 | `warn(message)` | `warn(message)` |
 | `error("message")` / `pcall` | `raise ValueError(...)` / `try` / `except` |
 
-A service can set both Lua and Python fields. Both run on every render, and Python's output takes precedence, as described in [Value Merge Order](#value-merge-order).
+Lua and Python are mutually exclusive. If any Python field is set, Python runs and Lua fields are ignored (including a leftover `luaFile` after migration). Clear the Lua fields when you cut over so Console state matches the service. See [Value Merge Order](#value-merge-order).

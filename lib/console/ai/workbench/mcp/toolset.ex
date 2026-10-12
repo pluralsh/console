@@ -8,7 +8,7 @@ defmodule Console.AI.Workbench.MCP.Toolset do
 
   Deliberately omits subagent machinery (results, skills, scratchpads, codemode, history),
   function tools, which are only safe behind `FunctionCall`'s approval flow, MCP-proxied tools,
-  which need a live client bound to a job, and anything whose authorization scope derives from
+  whose clients are started by the agent loop, and anything whose authorization scope derives from
   a job's flow.
   """
   import Console.AI.Workbench.Subagents.Base, only: [if_vector_store_enabled: 1]

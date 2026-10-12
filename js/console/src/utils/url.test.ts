@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import { ensureURLValidity, isValidURL, getURLPath } from './url'
+import { ensureURLValidity, isValidURL, getURLPath, toHttpURL } from './url'
 
 describe('URL utils', () => {
   describe('isValidURL', () => {
@@ -94,6 +94,32 @@ describe('URL utils', () => {
       expect(getURLPath('')).toBe('')
       expect(getURLPath(null)).toBe('')
       expect(getURLPath(undefined)).toBe('')
+    })
+  })
+
+  describe('toHttpURL', () => {
+    it('should keep http(s) URLs, including internal hosts', () => {
+      expect(toHttpURL('https://example.com/a?b=1')).toBe(
+        'https://example.com/a?b=1'
+      )
+      expect(toHttpURL('http://grafana:3000/alerting/1')).toBe(
+        'http://grafana:3000/alerting/1'
+      )
+      expect(toHttpURL('http://10.0.0.5:3000/a')).toBe('http://10.0.0.5:3000/a')
+      expect(toHttpURL('http://localhost:3000')).toBe('http://localhost:3000/')
+    })
+
+    it('should add https:// to URLs without a protocol', () => {
+      expect(toHttpURL('example.com/path')).toBe('https://example.com/path')
+    })
+
+    it('should reject other schemes and invalid URLs', () => {
+      expect(toHttpURL('javascript:alert(1)')).toBe('')
+      expect(toHttpURL('ftp://example.com')).toBe('')
+      expect(toHttpURL('data:text/html,hi')).toBe('')
+      expect(toHttpURL('not a url')).toBe('')
+      expect(toHttpURL('')).toBe('')
+      expect(toHttpURL(null)).toBe('')
     })
   })
 })

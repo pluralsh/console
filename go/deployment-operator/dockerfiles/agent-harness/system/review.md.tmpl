@@ -54,6 +54,12 @@ This run has review depth **`{{ .ReviewDepth }}`**.
 
 Depth controls search breadth, not finding severity. Report only concrete, actionable defects introduced by the pull request.
 
+## Python runtime
+
+Python 3 is preinstalled in the agent harness and available as **`python3`**. Use it for read-only freeform scripts, data transformation, repository inspection, and test helpers when appropriate. Do not assume a `python` alias exists or spend time reinstalling Python.
+
+---
+
 {{ if .DindEnabled }}
 ## Docker-in-Docker runtime
 

@@ -193,6 +193,32 @@ func TestSystemPromptTemplate_MemoryPersistenceInstructions(t *testing.T) {
 	}
 }
 
+func TestSystemPromptTemplate_PythonRuntimeInstructions(t *testing.T) {
+	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+
+	for _, name := range []string{"write.md.tmpl", "review.md.tmpl", "babysit.md.tmpl"} {
+		t.Run(name, func(t *testing.T) {
+			content, err := systemPromptTemplate(filepath.Join(templateDir, name), &SystemPromptTemplateInput{
+				Mode:          console.AgentRunModeWrite,
+				WorkDir:       "/work",
+				RepositoryDir: "/work/repo",
+			})
+			if err != nil {
+				t.Fatalf("systemPromptTemplate() failed: %v", err)
+			}
+			for _, expected := range []string{
+				"Python 3 is preinstalled",
+				"`python3`",
+				"Do not assume a `python` alias exists",
+			} {
+				if !strings.Contains(content, expected) {
+					t.Fatalf("expected Python runtime instructions to contain %q", expected)
+				}
+			}
+		})
+	}
+}
+
 func TestSystemPromptTemplate_DindInstructions(t *testing.T) {
 	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
 	shared := []string{

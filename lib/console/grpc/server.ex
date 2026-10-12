@@ -21,6 +21,7 @@ defmodule Console.GRPC.Server do
     %Plrl.ObservabilityConfig{}
     |> add_prometheus_configs(inst)
     |> add_elastic_configs(inst)
+    |> add_loki_configs()
   end
 
   def proxy_authentication(%Plrl.ProxyAuthenticationRequest{token: token}, _) do
@@ -49,7 +50,20 @@ defmodule Console.GRPC.Server do
   def verify_cluster(_, _),
     do: raise(GRPC.RPCError, status: :unauthenticated, message: "invalid cluster access token")
 
-  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst),
+    do: add_prometheus_configs(pb, inst, Console.plural_o11y?())
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
+
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, _inst, true) do
+    with {:ok, _, pass} <- Console.es_creds(),
+         {:ok, url} <- Console.telemetry_url(:metrics, :read) do
+      %Plrl.ObservabilityConfig{pb | prometheusUsername: Console.telemetry_user(), prometheusPassword: pass, prometheusHost: url}
+    else
+      _ -> pb
+    end
+  end
+
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst, _) do
     with {:ok, _, pass} <- Console.es_creds(),
          {:ok, url, vtenant} <- Console.vmetrics_creds() do
       %Plrl.ObservabilityConfig{pb | prometheusUsername: "plrl-#{inst}", prometheusPassword: pass, prometheusHost: "#{url}/select/#{vtenant}/prometheus"}
@@ -57,7 +71,6 @@ defmodule Console.GRPC.Server do
       _ -> pb
     end
   end
-  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
 
   defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
     case Console.es_creds() do
@@ -68,6 +81,13 @@ defmodule Console.GRPC.Server do
     end
   end
   defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
+
+  defp add_loki_configs(%Plrl.ObservabilityConfig{} = pb) do
+    case Console.telemetry_url(:logs, :write) do
+      {:ok, url} -> %Plrl.ObservabilityConfig{pb | lokiHost: url}
+      _ -> pb
+    end
+  end
 
   defp to_pb(%DeploymentSettings{ai: %{enabled: true} = ai}) do
     %Plrl.AiConfig{

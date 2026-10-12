@@ -144,6 +144,16 @@ defmodule Console.Schema.Alert do
   end
   def ordered(query, order), do: from(a in query, order_by: ^order)
 
+  @doc """
+  Orders by `:title` or `:updated_at` (falling back to `inserted_at`) in the given direction, with the id as tiebreaker.
+  Alerts without a title come last either way.
+  """
+  def sorted(query \\ __MODULE__, field, dir)
+  def sorted(query, :title, dir),
+    do: from(a in query, order_by: [{^nulls_last(dir), a.title}, {^dir, a.id}])
+  def sorted(query, _, dir),
+    do: from(a in query, order_by: [{^dir, coalesce(a.updated_at, a.inserted_at)}, {^dir, a.id}])
+
   def for_state(query \\ __MODULE__, state) do
     from(a in query, where: a.state == ^state)
   end
@@ -155,6 +165,35 @@ defmodule Console.Schema.Alert do
   def for_severities(query \\ __MODULE__, severities) do
     from(a in query, where: a.severity in ^severities)
   end
+
+  def count_by_type(query \\ __MODULE__) do
+    from(a in query, group_by: a.type, select: %{type: a.type, count: count(a.id)})
+  end
+
+  def count_by_severity(query \\ __MODULE__) do
+    from(a in query, group_by: a.severity, select: %{severity: a.severity, count: count(a.id)})
+  end
+
+  @doc """
+  Matches the title, the `alertname` tag or the message. The message is a binary column and decoding it
+  (`convert_from`) fails the whole query on invalid UTF-8, so it's matched without decoding: case-insensitively
+  through its escaped ASCII form, and byte-for-byte for anything else (e.g. non-ASCII text).
+  """
+  def search(query \\ __MODULE__, q) do
+    like = "%#{escape_like(q)}%"
+    from(a in query,
+      where: ilike(a.title, ^like) or
+        fragment("encode(?, 'escape') ILIKE ?", a.message, ^like) or
+        fragment("position(convert_to(?, 'UTF8') in ?) > 0", ^q, a.message) or
+        fragment("EXISTS(SELECT 1 FROM tags WHERE alert_id = ? AND name = 'alertname' AND value ILIKE ?)", a.id, ^like)
+    )
+  end
+
+  defp nulls_last(:asc), do: :asc_nulls_last
+  defp nulls_last(:desc), do: :desc_nulls_last
+
+  # matches `%`, `_` and `\` in the search literally rather than as LIKE wildcards
+  defp escape_like(q), do: String.replace(q, ["\\", "%", "_"], &"\\#{&1}")
 
   @valid ~w(
     type

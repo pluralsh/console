@@ -17,7 +17,7 @@ defmodule Console.AI.Workbench.Subagents.SelfServiceTest do
       })
 
       user = insert(:user)
-      workbench = insert(:workbench, configuration: %{self_service: true})
+      workbench = insert(:workbench, configuration: %{infrastructure: %{self_service: true}})
       job = insert(:workbench_job, workbench: workbench, user: user, prompt: "Provision postgres")
       activity = insert(:workbench_job_activity, workbench_job: job, type: :self_service, prompt: "Find and invoke the postgres automation")
       catalog = insert(:catalog, name: "databases", read_bindings: [%{user_id: user.id}])

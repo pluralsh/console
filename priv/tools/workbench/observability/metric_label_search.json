@@ -16,6 +16,20 @@
         "limit": {
             "type": "integer",
             "description": "The maximum number of label names or values to return."
+        },
+        "time_range": {
+            "type": "object",
+            "description": "Optional time range used to restrict label discovery.",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time in ISO8601 format."
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time in ISO8601 format."
+                }
+            }
         }
     },
     "required": ["metric"]

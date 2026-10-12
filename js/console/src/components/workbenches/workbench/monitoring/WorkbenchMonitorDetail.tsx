@@ -1101,7 +1101,7 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  backgroundColor: theme.colors['fill-one-selected'],
+  backgroundColor: theme.colors['fill-one'],
   borderBottom: theme.borders.default,
   borderTop: theme.borders.default,
   display: 'flex',

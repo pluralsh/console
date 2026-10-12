@@ -28,7 +28,7 @@ import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 import { isActivityTerminal } from './workbenchJobActivityCollapse'
 
 /** The only space between top-level rows. Rows add no vertical padding of their own. */
-export const ACTIVITY_GAP = 'xlarge' as const
+export const ACTIVITY_GAP = 'small' as const
 
 export function WorkbenchJobActivities({
   jobId,

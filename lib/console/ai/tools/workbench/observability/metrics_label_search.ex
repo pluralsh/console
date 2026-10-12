@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Observability.MetricsLabelSearch do
   use Console.AI.Tools.Workbench.Base
   import Console.AI.Tools.Workbench.Observability.Metrics, only: [azure_prom_url: 1, resource_id: 1, azure_opts: 1]
+  alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{MetricsLabelSearchInput, MetricsLabelSearchOutput, MetricsLabelSearchOptions, AzureMetricsLabelSearchOptions}
@@ -13,6 +14,8 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsLabelSearch do
     field :query, :string
     field :label, :string
     field :limit, :integer
+
+    embeds_one :time_range, TimeRange, on_replace: :update
 
     embeds_one :options, Options, on_replace: :update, primary_key: false do
       embeds_one :azure, Azure, on_replace: :update, primary_key: false do
@@ -42,6 +45,7 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsLabelSearch do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:options)
+    |> cast_embed(:time_range)
     |> validate_required([:metric])
   end
 
@@ -62,7 +66,15 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsLabelSearch do
     end
   end
 
-  defp input(%__MODULE__{tool: tool, metric: m, query: q, label: label, limit: l, options: options}) do
+  defp input(%__MODULE__{
+         tool: tool,
+         metric: m,
+         query: q,
+         label: label,
+         limit: l,
+         options: options,
+         time_range: time_range
+       }) do
     with {:ok, connection} <- Conversion.to_proto(tool) do
       {:ok, %MetricsLabelSearchInput{
         connection: connection,
@@ -70,7 +82,8 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsLabelSearch do
         query: q,
         label: label,
         limit: l || 200,
-        options: metrics_label_search_options(tool, options)
+        options: metrics_label_search_options(tool, options),
+        range: TimeRange.to_proto(time_range)
       }}
     end
   end

@@ -24,6 +24,6 @@ defmodule Console.AI.Tools.Workbench.MCP do
     |> validate_required([:input])
   end
 
-  def implement(%__MODULE__{tool: t, mcp_tool: %Tool{name: name}, job: j, input: input}),
-    do: MCP.invoke(t, j, name, input)
+  def implement(%__MODULE__{tool: t, mcp_tool: %Tool{name: name}, input: input}),
+    do: MCP.invoke(t, name, input)
 end

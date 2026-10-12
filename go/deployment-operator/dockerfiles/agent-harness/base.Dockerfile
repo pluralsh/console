@@ -1,5 +1,6 @@
 ARG TERRAFORM_VERSION=1.16.4
 ARG HELM_VERSION=4.3.0
+ARG PYTHON_VERSION=3.13
 
 FROM golang:1.27.1-bookworm AS builder
 
@@ -81,7 +82,7 @@ RUN set -eux; \
 FROM hashicorp/terraform:${TERRAFORM_VERSION} AS terraform
 FROM alpine/helm:${HELM_VERSION} AS helm
 
-FROM dhi.io/debian-base:trixie-dev
+FROM dhi.io/python:${PYTHON_VERSION}-debian13-dev
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -100,6 +101,7 @@ RUN set -eux; \
            curl \
            gnupg \
            git \
+           gzip \
            jq \
            make \
            tar; then \
@@ -195,7 +197,7 @@ COPY --from=builder /agent-bootstrap /agent-bootstrap
 COPY --from=fcp /opt/fcp/bin/fcp /usr/local/bin/fcp
 COPY --from=terraform /bin/terraform /usr/local/bin/terraform
 COPY --from=helm /usr/bin/helm /usr/local/bin/helm
-RUN terraform version && helm version
+RUN python3 --version && python3 -m pip --version && terraform version && helm version
 
 # Pin mise in the base agent image. The harness looks it up on PATH and does
 # not download an installer at runtime. See https://mise.jdx.dev/bootstrap.html

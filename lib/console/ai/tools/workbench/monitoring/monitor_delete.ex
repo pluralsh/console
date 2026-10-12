@@ -1,11 +1,12 @@
 defmodule Console.AI.Tools.Workbench.Monitoring.MonitorDelete do
   use Console.AI.Tools.Workbench.Base
+  import Console.AI.Tools.Agent.Base, only: [check_uuid: 2]
   alias Console.AI.Tools.Workbench.Monitoring
 
   embedded_schema do
     field :job, :map, virtual: true
     field :user, :map, virtual: true
-    field :monitor_id, :string
+    field :monitor_id, :binary_id
   end
 
   @json_schema Console.priv_file!("tools/workbench/monitoring/monitor_id.json") |> Jason.decode!()
@@ -17,6 +18,7 @@ defmodule Console.AI.Tools.Workbench.Monitoring.MonitorDelete do
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:monitor_id])
+    |> check_uuid(:monitor_id)
     |> validate_required([:monitor_id])
   end
 
