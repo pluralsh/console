@@ -30,8 +30,8 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "biome format . && eslint . --cache",
-    "fix": "biome format --write . && eslint . --fix"
+    "lint": "eslint . --cache",
+    "fix": "eslint . --fix"
   },
   "engines": {
     "node": ">=20.9.0"
@@ -39,6 +39,7 @@
   "dependencies": {
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-prettier": "5.5.6",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.7.0",
@@ -46,12 +47,13 @@
   },
   "peerDependencies": {
     "eslint": ">=9.17.0 <10.0.0",
+    "prettier": ">=3.0.0 <4.0.0",
     "typescript": ">=5.6.0 <6.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.8",
     "conventional-changelog-conventionalcommits": "10.2.1",
     "eslint": "9.39.5",
+    "prettier": "3.9.5",
     "typescript": "6.0.3"
   }
 }

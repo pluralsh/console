@@ -73,7 +73,7 @@
     "zod": "3.24.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.8",
+    "@biomejs/biome": "2.5.15",
     "@graphql-codegen/cli": "4.0.1",
     "@graphql-codegen/client-preset": "4.0.0",
     "@pluralsh/stylelint-config": "workspace:*",

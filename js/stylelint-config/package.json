@@ -45,7 +45,7 @@
     "stylelint": ">= 14.9.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.8",
+    "@biomejs/biome": "2.5.15",
     "conventional-changelog-conventionalcommits": "10.2.1",
     "typescript": "6.0.3"
   }
