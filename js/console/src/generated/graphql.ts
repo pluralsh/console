@@ -24927,7 +24927,6 @@ export const PrAutomationFragmentDoc = gql`
     name
   }
   role
-  documentation
   connection {
     ...ScmConnection
   }
@@ -25914,7 +25913,6 @@ export const ClustersRowFragmentDoc = gql`
     namespace
     supportedVersions
   }
-  self
   service {
     id
     repository {
@@ -25927,7 +25925,6 @@ export const ClustersRowFragmentDoc = gql`
     name
     value
   }
-  distro
   upgradePlan {
     ...ClusterUpgradePlan
   }

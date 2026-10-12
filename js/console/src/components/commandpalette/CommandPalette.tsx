@@ -269,9 +269,8 @@ function CommandPaletteCommands({
           ))}
         </Command.Group>
         {i <
-          (items?.filter((item) => item.commands?.length > 0)).length - 1 && (
-          <Command.Separator />
-        )}
+          (items?.filter((item) => item.commands?.length > 0).length ?? 0) -
+            1 && <Command.Separator />}
       </div>
     ))
   )

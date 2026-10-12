@@ -13,7 +13,7 @@ export default function MarkdocComponent({
 }: {
   markdoc: MarkdocPage
 }) {
-  const { children = [], ...rest } = markdoc?.content as any
+  const { children = [], ...rest } = (markdoc?.content ?? {}) as any
 
   // render a smaller visible chunk right away
   const [content, setContent] = useState<Tag>(() => ({

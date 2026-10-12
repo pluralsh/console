@@ -1,7 +1,7 @@
 import {
   type ComponentProps,
   type ComponentType,
-  forwardRef,
+  type Ref,
   Suspense,
   useEffect,
   useMemo,
@@ -104,14 +104,16 @@ const usePathname = () => {
   return router.basePath + (router.asPath.split(/[?#]/)[0] || router.pathname)
 }
 
-const Link = forwardRef<HTMLAnchorElement, ComponentProps<'a'>>(
-  ({ href, ...props }, ref) => (
-    <NextLink
-      ref={ref}
-      href={href ?? ''}
-      {...props}
-    />
-  )
+const Link = ({
+  href,
+  ref,
+  ...props
+}: ComponentProps<'a'> & { ref?: Ref<HTMLAnchorElement> }) => (
+  <NextLink
+    ref={ref}
+    href={href ?? ''}
+    {...props}
+  />
 )
 
 function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
