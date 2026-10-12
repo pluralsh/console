@@ -3,7 +3,12 @@ import type { MetricResponseFragment } from 'generated/graphql'
 import { Prometheus } from 'utils/prometheus'
 
 export type MetricFormat =
-  'cpu' | 'memory' | 'bytesRate' | 'percent' | 'rate' | 'count'
+  | 'cpu'
+  | 'memory'
+  | 'bytesRate'
+  | 'percent'
+  | 'rate'
+  | 'count'
 
 const BYTE_SUFFIXES = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
 

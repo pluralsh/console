@@ -30,10 +30,10 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "lint": "run-p lint:format lint:js",
-    "lint:format": "prettier --check ./src",
+    "lint:format": "biome format ./src",
     "lint:js": "eslint ./src --cache",
     "fix": "run-s fix:format fix:js",
-    "fix:format": "prettier --write --no-error-on-unmatched-pattern ./src",
+    "fix:format": "biome format --write ./src",
     "fix:js": "eslint ./src --fix",
     "prepublishOnly": "npm run build",
     "analyze": "vite-bundle-visualizer -o stats.html"
@@ -79,6 +79,7 @@
   },
   "devDependencies": {
     "@apollo/client": "3.14.1",
+    "@biomejs/biome": "2.5.8",
     "@pluralsh/eslint-config-pluralsh": "workspace:*",
     "@react-stately/form": "3.3.1",
     "@react-types/listbox": "3.8.0",
@@ -106,7 +107,6 @@
     "lint-staged": "16.4.0",
     "monaco-editor": "0.55.1",
     "npm-run-all": "4.1.5",
-    "prettier": "3.9.5",
     "react-transition-group": "4.4.5",
     "rimraf": "5.0.10",
     "storybook": "10.6.0",
@@ -125,6 +125,6 @@
     "styled-components": ">=6.2.0"
   },
   "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
+    "./src/**/*.{js,jsx,ts,tsx}": "biome format --write --no-errors-on-unmatched"
   }
 }

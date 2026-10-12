@@ -29,8 +29,8 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "eslint . --cache",
-    "fix": "eslint . --fix"
+    "lint": "biome format . && eslint . --cache",
+    "fix": "biome format --write . && eslint . --fix"
   },
   "engines": {
     "node": ">=20.9.0"
@@ -45,11 +45,11 @@
     "stylelint": ">= 14.9.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.8",
     "@pluralsh/eslint-config-pluralsh": "workspace:*",
     "conventional-changelog-conventionalcommits": "10.2.1",
     "eslint": "9.39.5",
     "globals": "17.7.0",
-    "prettier": "3.9.5",
     "typescript": "6.0.3"
   }
 }

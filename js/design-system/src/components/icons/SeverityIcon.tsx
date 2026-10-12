@@ -5,7 +5,11 @@ import { type IconProps, resolveThemeColor } from './createIcon'
 import Icon from '../Icon'
 
 export type SeverityIconSeverity =
-  'critical' | 'high' | 'medium' | 'low' | 'undefined'
+  | 'critical'
+  | 'high'
+  | 'medium'
+  | 'low'
+  | 'undefined'
 
 // Default bars and color per severity. There is no separate "high" mark:
 // high and critical are both fully filled, critical in the stronger color.

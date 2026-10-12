@@ -393,7 +393,8 @@ function PluralSkillForm({
   const selectedSubagents = useMemo(
     () =>
       (draft.subagents?.filter(isNonNullable) as
-        WorkbenchSkillSubagent[] | undefined) ?? [],
+        | WorkbenchSkillSubagent[]
+        | undefined) ?? [],
     [draft.subagents]
   )
 

@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true, "root": ".." },
+  "files": {
+    "includes": [
+      "**",
+      "!**/src/generated",
+      "!documentation/src/routes/docs.generated.ts",
+      "!documentation/src/routing/navigation.ts"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "attributePosition": "multiline"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "es5",
+      "semicolons": "asNeeded"
+    }
+  },
+  "css": { "formatter": { "quoteStyle": "single" } },
+  "linter": { "enabled": false },
+  "assist": { "enabled": false }
+}

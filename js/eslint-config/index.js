@@ -1,5 +1,5 @@
 import importPlugin from 'eslint-plugin-import'
-import prettier from 'eslint-plugin-prettier/recommended'
+import prettierConfig from 'eslint-config-prettier'
 import react from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
 import globals from 'globals'
@@ -16,7 +16,7 @@ export const createConfig = ({
   react.configs.flat['jsx-runtime'],
   reactHooksPlugin.configs.flat['recommended-latest'],
   importPlugin.flatConfigs.recommended,
-  prettier,
+  prettierConfig,
   {
     files,
     languageOptions: {
@@ -82,9 +82,6 @@ export const createConfig = ({
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/set-state-in-render': 'warn',
       'react-hooks/purity': 'warn',
-
-      // Prettier
-      'prettier/prettier': 'error',
 
       // Import
       'import/no-unresolved': 'off',

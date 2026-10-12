@@ -88,7 +88,9 @@ export enum WorkbenchMoreMenuKey {
 
 // `tools`: tools, webhooks, chatbots and crons, only relevant when launching
 export type WorkbenchSidebar =
-  { kind: 'tools' } | { kind: 'none' } | { kind: 'custom'; content: ReactNode }
+  | { kind: 'tools' }
+  | { kind: 'none' }
+  | { kind: 'custom'; content: ReactNode }
 
 export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar

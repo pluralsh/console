@@ -1,16 +1,17 @@
 # eslint-config-pluralsh
 
 Plural's shared ESLint flat config for type-checked TypeScript, React, React Hooks,
-imports, and Prettier. It contains the common configuration used by the Console
-and Plural web applications.
+and imports. It contains the common configuration used by the Console and Plural
+web applications. Formatting is left to a dedicated formatter (Console uses
+Biome); conflicting stylistic rules are disabled via `eslint-config-prettier`.
 
 ## Installation
 
 ```sh
-yarn add -D @pluralsh/eslint-config-pluralsh eslint prettier typescript
+yarn add -D @pluralsh/eslint-config-pluralsh eslint typescript
 ```
 
-ESLint 9.17 or newer, Prettier 3, and TypeScript 5.6 through 6.0 are supported.
+ESLint 9.17 or newer and TypeScript 5.6 through 6.0 are supported.
 
 ## Usage
 
