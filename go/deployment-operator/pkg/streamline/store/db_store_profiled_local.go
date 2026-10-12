@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 	"time"
 
 	"github.com/pluralsh/console/go/client"
@@ -151,6 +152,19 @@ func (p *ProfiledStoreLocal) GetServiceComponents(serviceID string, onlyApplied 
 	)
 	_ = traceLocal(context.Background(), "GetServiceComponents", func() error {
 		res, err = p.inner.GetServiceComponents(serviceID, onlyApplied)
+		return err
+	})
+	return res, err
+}
+
+// GetFailingRoots wraps Store.GetFailingRoots with tracing.
+func (p *ProfiledStoreLocal) GetFailingRoots() ([]insights.Root, error) {
+	var (
+		res []insights.Root
+		err error
+	)
+	_ = traceLocal(context.Background(), "GetFailingRoots", func() error {
+		res, err = p.inner.GetFailingRoots()
 		return err
 	})
 	return res, err

@@ -4,7 +4,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.Stream
   alias Console.AI.{Service, Provider, Fixer, Research}
-  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession, InfraResearch, ResearchAssociation}
+  alias Console.Schema.{Chat, ChatThread, AiPin, AiInsightEvidence, AgentSession, InfraResearch, ResearchAssociation, ServiceComponent}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
@@ -206,6 +206,20 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def fix_research_diagram(%{id: id, error: error}, %{context: %{current_user: user}}),
     do: Research.fix_diagram(error, id, user)
+
+  @doc """
+  A component managed by a service has no insight of its own, the one generated for the service is reused.
+  """
+  def component_service_insight(%{service_id: sid, group: g, version: v, kind: k, namespace: ns, name: n}) do
+    ServiceComponent.for_service(sid)
+    |> ServiceComponent.for_identifier({g, v, k, ns, n})
+    |> ServiceComponent.with_insight()
+    |> Console.Repo.one()
+    |> case do
+      %ServiceComponent{insight: insight} -> {:ok, insight}
+      _ -> {:ok, nil}
+    end
+  end
 
   def raw_resource(%{version: v, kind: k, name: n, group: g} = comp, _, _) do
     %{cluster: cluster} = comp = Console.Repo.preload(comp, [:cluster])

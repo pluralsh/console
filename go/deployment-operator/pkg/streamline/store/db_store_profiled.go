@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 	"time"
 
 	"github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
@@ -285,6 +286,19 @@ func (p *ProfiledStore) GetHookComponents(serviceID string) ([]smcommon.HookComp
 	)
 	_ = trace(context.Background(), "GetHookComponents", func() error {
 		res, err = p.inner.GetHookComponents(serviceID)
+		return err
+	})
+	return res, err
+}
+
+// GetFailingRoots wraps Store.GetFailingRoots with tracing.
+func (p *ProfiledStore) GetFailingRoots() ([]insights.Root, error) {
+	var (
+		res []insights.Root
+		err error
+	)
+	_ = trace(context.Background(), "GetFailingRoots", func() error {
+		res, err = p.inner.GetFailingRoots()
 		return err
 	})
 	return res, err

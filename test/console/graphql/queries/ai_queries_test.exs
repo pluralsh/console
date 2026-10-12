@@ -238,6 +238,46 @@ defmodule Console.GraphQl.AiQueriesAsyncTest do
       assert found["insight"]["id"] == insight.id
     end
 
+    test "a component managed by a service shows the insight of the service" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      svc = insert(:service, cluster: cluster)
+      insight = insert(:ai_insight)
+
+      insert(:service_component,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "default",
+        name: "api",
+        insight: insight
+      )
+
+      comp = insert(:cluster_insight_component,
+        cluster: cluster,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "default",
+        name: "api"
+      )
+
+      {:ok, %{data: %{"clusterInsightComponent" => found}}} = run_query("""
+        query Comp($id: ID!) {
+          clusterInsightComponent(id: $id) {
+            id
+            service { id }
+            insight { id }
+          }
+        }
+      """, %{"id" => comp.id}, %{current_user: user})
+
+      assert found["service"]["id"] == svc.id
+      assert found["insight"]["id"] == insight.id
+    end
+
     test "it cannot fetch w/o access" do
       user = insert(:user)
       cluster = insert(:cluster)

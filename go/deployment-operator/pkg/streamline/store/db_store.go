@@ -25,6 +25,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/api"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 )
 
 const (
@@ -35,6 +36,9 @@ const (
 	defaultPoolSize = 10
 
 	defaultQueryTimeout = 10 * time.Second
+
+	// schemaVersion is stored in the database as PRAGMA user_version. Bump it whenever the component table changes.
+	schemaVersion = 2
 )
 
 // Option represents a function that configures the database store.
@@ -131,29 +135,36 @@ func (in *DatabaseStore) init() error {
 		cancelFunc()
 	}()
 
-	if err := sqlitex.ExecuteScript(conn, createTables, nil); err != nil {
+	if err := in.migrate(conn); err != nil {
 		return err
 	}
 
-	return in.ensureLabelsColumn(conn)
+	return sqlitex.ExecuteScript(conn, createTables, nil)
 }
 
-func (in *DatabaseStore) ensureLabelsColumn(conn *sqlite.Conn) error {
-	hasLabels := false
-	err := sqlitex.ExecuteTransient(conn, `SELECT 1 FROM pragma_table_info('component') WHERE name = 'labels'`, &sqlitex.ExecOptions{
-		ResultFunc: func(_ *sqlite.Stmt) error {
-			hasLabels = true
+// migrate rebuilds the component table when the schema of an existing database is outdated.
+// The store is a cache of the cluster state that is repopulated by the synchronizers, so there is no point in migrating it in place.
+func (in *DatabaseStore) migrate(conn *sqlite.Conn) error {
+	var version int
+	err := sqlitex.ExecuteTransient(conn, `PRAGMA user_version`, &sqlitex.ExecOptions{
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			version = stmt.ColumnInt(0)
 			return nil
 		},
 	})
 	if err != nil {
 		return err
 	}
-	if hasLabels {
+	if version == schemaVersion {
 		return nil
 	}
 
-	return sqlitex.Execute(conn, `ALTER TABLE component ADD COLUMN labels TEXT`, nil)
+	klog.V(log.LogLevelDefault).InfoS("rebuilding component table", "from", version, "to", schemaVersion)
+	if err := sqlitex.ExecuteTransient(conn, `DROP TABLE IF EXISTS component`, nil); err != nil {
+		return err
+	}
+
+	return sqlitex.ExecuteTransient(conn, fmt.Sprintf(`PRAGMA user_version = %d`, schemaVersion), nil)
 }
 
 func (in *DatabaseStore) take() (*sqlite.Conn, context.CancelFunc, error) {
@@ -235,7 +246,7 @@ func (in *DatabaseStore) GetResourceHealth(resources []unstructured.Unstructured
 
 func (in *DatabaseStore) SaveComponent(obj unstructured.Unstructured) error {
 	gvk := obj.GroupVersionKind()
-	status := common.ToStatus(&obj)
+	status, message := common.ToStatusWithMessage(&obj)
 	state := NewComponentState(status)
 	serviceID := smcommon.GetOwningInventory(obj)
 
@@ -282,10 +293,11 @@ func (in *DatabaseStore) SaveComponent(obj unstructured.Unstructured) error {
 
 	in.maybeSaveHookComponent(conn, obj, lo.FromPtr(status), serviceID)
 
-	return in.upsertAppliedComponent(conn, obj, lo.FromPtr(ownerRef), nodeName, serviceID, serverSHA)
+	facts := insights.Extract(&obj, state == ComponentStateRunning, state == ComponentStateFailed, message, time.Now())
+	return in.upsertAppliedComponent(conn, obj, lo.FromPtr(ownerRef), nodeName, serviceID, serverSHA, state, facts)
 }
 
-func (in *DatabaseStore) upsertAppliedComponent(conn *sqlite.Conn, obj unstructured.Unstructured, ownerRef, nodeName, serviceID, serverSHA string) error {
+func (in *DatabaseStore) upsertAppliedComponent(conn *sqlite.Conn, obj unstructured.Unstructured, ownerRef, nodeName, serviceID, serverSHA string, state ComponentState, facts insights.Facts) error {
 	labels, err := encodeComponentLabels(obj)
 	if err != nil {
 		return err
@@ -301,7 +313,7 @@ func (in *DatabaseStore) upsertAppliedComponent(conn *sqlite.Conn, obj unstructu
 			gvk.Kind,
 			obj.GetNamespace(),
 			obj.GetName(),
-			NewComponentState(common.ToStatus(&obj)),
+			state,
 			nodeName,
 			obj.GetCreationTimestamp().Unix(),
 			serviceID,
@@ -309,6 +321,14 @@ func (in *DatabaseStore) upsertAppliedComponent(conn *sqlite.Conn, obj unstructu
 			serverSHA,
 			true,
 			labels,
+			nullableCriticality(facts),
+			facts.CriticalityReason,
+			facts.PriorityClass,
+			facts.FailingSince,
+			nullableInt(facts.DesiredReplicas),
+			nullableInt(facts.ReadyReplicas),
+			facts.PriorityAnnotation,
+			facts.HealthMessage,
 		},
 	})
 }
@@ -349,7 +369,15 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 		  delete_phase,
 		  server_sha,
 		  applied,
-		  labels
+		  labels,
+		  criticality,
+		  criticality_reason,
+		  priority_class,
+		  failing_since,
+		  desired_replicas,
+		  ready_replicas,
+		  priority_annotation,
+		  health_message
 		) VALUES `)
 
 	valueStrings := make([]string, 0, len(objects))
@@ -358,7 +386,8 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 		var nodeName string
 		gvk := obj.GroupVersionKind()
 		serviceID := smcommon.GetOwningInventory(obj)
-		state := NewComponentState(common.ToStatus(&obj))
+		status, message := common.ToStatusWithMessage(&obj)
+		state := NewComponentState(status)
 
 		if gvk.Group == "" && gvk.Kind == common.PodKind {
 			if nodeName, _, _ = unstructured.NestedString(obj.Object, "spec", "nodeName"); len(nodeName) == 0 {
@@ -397,7 +426,9 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			continue
 		}
 
-		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1, '%s')",
+		facts := insights.Extract(&obj, state == ComponentStateRunning, state == ComponentStateFailed, message, now)
+
+		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1, '%s', %s,'%s','%s',%d,%s,%s,'%s','%s')",
 			obj.GetUID(),
 			lo.FromPtr(ownerRef),
 			gvk.Group,
@@ -412,6 +443,14 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			smcommon.GetDeletePhase(obj),
 			serverSHA,
 			escapeSQLString(labels),
+			sqlCriticality(facts),
+			escapeSQLString(facts.CriticalityReason),
+			escapeSQLString(facts.PriorityClass),
+			facts.FailingSince,
+			sqlInt(facts.DesiredReplicas),
+			sqlInt(facts.ReadyReplicas),
+			escapeSQLString(facts.PriorityAnnotation),
+			escapeSQLString(facts.HealthMessage),
 		))
 	}
 
@@ -422,15 +461,15 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 	sb.WriteString(strings.Join(valueStrings, ","))
 	sb.WriteString(` ON CONFLICT("group", version, kind, namespace, name) DO UPDATE SET
 	  uid = excluded.uid,
-	  parent_uid = excluded.parent_uid,
+	  ` + ownershipUpsert + `
 	  health = excluded.health,
 	  node = excluded.node,
 	  created_at = excluded.created_at,
-	  service_id = excluded.service_id,
       delete_phase = excluded.delete_phase,
 	  server_sha = excluded.server_sha,
 	  applied = excluded.applied,
-	  labels = excluded.labels
+	  labels = excluded.labels,
+	  ` + factsUpsert + `
 	`)
 
 	in.maybeSaveHookComponents(conn, objects)
@@ -541,8 +580,18 @@ func (in *DatabaseStore) SaveComponentAttributes(obj client.ComponentChildAttrib
 		args = []any{nil, nil, nil}
 	}
 
+	state := NewComponentState(obj.State)
+	var criticality insights.Criticality
+	if state != ComponentStateRunning || insights.IsRootKind(obj.Kind) {
+		criticality = insights.Classify(obj.Kind, lo.FromPtr(obj.Namespace), obj.Name, "")
+	}
+	var failingSince int64
+	if state == ComponentStateFailed {
+		failingSince = time.Now().Unix()
+	}
+
 	return sqlitex.ExecuteTransient(conn, setComponent, &sqlitex.ExecOptions{
-		Args: append([]interface{}{
+		Args: append(append([]interface{}{
 			obj.UID,
 			lo.FromPtr(obj.ParentUID),
 			lo.FromPtr(obj.Group),
@@ -550,9 +599,9 @@ func (in *DatabaseStore) SaveComponentAttributes(obj client.ComponentChildAttrib
 			obj.Kind,
 			lo.FromPtr(obj.Namespace),
 			obj.Name,
-			NewComponentState(obj.State),
+			state,
 			true,
-		}, args...),
+		}, args...), nullableCriticality(insights.Facts{Criticality: criticality.Score}), criticality.Reason, failingSince),
 	})
 }
 
@@ -1080,34 +1129,113 @@ func (in *DatabaseStore) GetServiceComponentsWithChildren(serviceID string, only
 	return result, nil
 }
 
-func (in *DatabaseStore) GetComponentInsights() (result []client.ClusterInsightComponentAttributes, err error) {
+// GetFailingRoots returns the roots of all failures in the cluster, see failingRoots.
+func (in *DatabaseStore) GetFailingRoots() (result []insights.Root, err error) {
 	conn, cancelFunc, err := in.take()
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	defer func() {
 		in.pool.Put(conn)
 		cancelFunc()
 	}()
 
-	err = sqlitex.ExecuteTransient(conn, failedComponents, &sqlitex.ExecOptions{
-		ResultFunc: func(stmt *sqlite.Stmt) error {
-			name := stmt.ColumnText(5)
-			namespace := stmt.ColumnText(4)
-			kind := stmt.ColumnText(3)
-			result = append(result, client.ClusterInsightComponentAttributes{
-				Group:     lo.ToPtr(stmt.ColumnText(1)),
-				Version:   stmt.ColumnText(2),
-				Kind:      kind,
-				Namespace: lo.EmptyableToPtr(namespace),
-				Name:      name,
-				Priority:  InsightComponentPriority(name, namespace, kind),
-			})
-			return nil
-		},
+	// both statements must see the same state of the store
+	err = withReadTransaction(conn, func() error {
+		err := sqlitex.ExecuteTransient(conn, failingRoots, &sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				root, err := scanRoot(stmt)
+				if err != nil {
+					return err
+				}
+				result = append(result, root)
+				return nil
+			},
+		})
+		if err != nil || len(result) == 0 {
+			return err
+		}
+
+		byUID := make(map[string]*insights.Root, len(result))
+		for i := range result {
+			byUID[result[i].UID] = &result[i]
+		}
+
+		return sqlitex.ExecuteTransient(conn, failingRootsDescendants, &sqlitex.ExecOptions{
+			ResultFunc: func(stmt *sqlite.Stmt) error {
+				root, ok := byUID[stmt.ColumnText(0)]
+				if !ok {
+					return nil
+				}
+				if root.Descendants == nil {
+					root.Descendants = make(map[string]insights.Descendants)
+				}
+				root.Descendants[stmt.ColumnText(1)] = insights.Descendants{
+					Failed:  int(stmt.ColumnInt64(2)),
+					Pending: int(stmt.ColumnInt64(3)),
+				}
+				return nil
+			},
+		})
 	})
 
 	return result, err
+}
+
+func scanRoot(stmt *sqlite.Stmt) (insights.Root, error) {
+	labels, err := decodeComponentLabels(stmt.ColumnText(16))
+	if err != nil {
+		return insights.Root{}, fmt.Errorf("failed to decode labels of %s: %w", stmt.ColumnText(5), err)
+	}
+
+	root := insights.Root{
+		UID:                stmt.ColumnText(0),
+		Group:              stmt.ColumnText(1),
+		Version:            stmt.ColumnText(2),
+		Kind:               stmt.ColumnText(3),
+		Namespace:          stmt.ColumnText(4),
+		Name:               stmt.ColumnText(5),
+		ServiceID:          stmt.ColumnText(6),
+		PriorityClass:      stmt.ColumnText(7),
+		HealthMessage:      stmt.ColumnText(8),
+		CreatedAt:          unixTime(stmt.ColumnInt64(11)),
+		FailingSince:       unixTime(stmt.ColumnInt64(12)),
+		Criticality:        int(stmt.ColumnInt64(13)),
+		CriticalityReason:  stmt.ColumnText(14),
+		PriorityAnnotation: stmt.ColumnText(15),
+		Labels:             labels,
+		State:              strings.ToLower(ComponentState(stmt.ColumnInt32(17)).String()),
+	}
+	if root.Criticality == 0 {
+		// Only failing objects and root kinds are classified when they are written. The top-most owner of a failure can be
+		// a healthy object of any other kind, like a ReplicaSet owned by a Rollout.
+		c := insights.Classify(root.Kind, root.Namespace, root.Name, root.PriorityClass)
+		root.Criticality, root.CriticalityReason = c.Score, c.Reason
+	}
+	if stmt.ColumnType(9) != sqlite.TypeNull {
+		root.DesiredReplicas = new(stmt.ColumnInt64(9))
+	}
+	if stmt.ColumnType(10) != sqlite.TypeNull {
+		root.ReadyReplicas = new(stmt.ColumnInt64(10))
+	}
+	return root, nil
+}
+
+func unixTime(sec int64) time.Time {
+	if sec <= 0 {
+		return time.Time{}
+	}
+	return time.Unix(sec, 0)
+}
+
+// GetComponentInsights returns the failing roots with their built-in priorities.
+func (in *DatabaseStore) GetComponentInsights() ([]client.ClusterInsightComponentAttributes, error) {
+	roots, err := in.GetFailingRoots()
+	if err != nil {
+		return nil, err
+	}
+
+	return insights.Attributes(insights.Summarize(roots, nil, time.Now()).Entries), nil
 }
 
 func (in *DatabaseStore) GetComponentCounts() (nodeCount, namespaceCount int64, err error) {
@@ -1155,24 +1283,14 @@ func (in *DatabaseStore) GetNodeStatistics() ([]*client.NodeStatisticAttributes,
 	return result, err
 }
 
+// GetHealthScore returns the health score computed from the failing roots with their built-in priorities.
 func (in *DatabaseStore) GetHealthScore() (int64, error) {
-	conn, cancelFunc, err := in.take()
+	roots, err := in.GetFailingRoots()
 	if err != nil {
 		return 0, err
 	}
-	defer func() {
-		in.pool.Put(conn)
-		cancelFunc()
-	}()
 
-	var ratio int64
-	err = sqlitex.ExecuteTransient(conn, clusterHealthScore, &sqlitex.ExecOptions{
-		ResultFunc: func(stmt *sqlite.Stmt) error {
-			ratio = stmt.ColumnInt64(0)
-			return nil
-		},
-	})
-	return ratio, err
+	return insights.Summarize(roots, nil, time.Now()).HealthScore, nil
 }
 
 func (in *DatabaseStore) UpdateComponentSHA(obj unstructured.Unstructured, shaType SHAType) error {

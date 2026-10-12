@@ -146,6 +146,13 @@ fragment ClusterInsightComponent on ClusterInsightComponent {
   group
   version
   priority
+  service {
+    id
+    name
+    cluster {
+      id
+    }
+  }
   insight {
     ...AiInsight
   }

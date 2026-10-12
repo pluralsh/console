@@ -2345,8 +2345,11 @@ type ClusterInsightComponent struct {
 	Namespace *string                   `json:"namespace,omitempty"`
 	Name      string                    `json:"name"`
 	Priority  *InsightComponentPriority `json:"priority,omitempty"`
-	Cluster   *Cluster                  `json:"cluster,omitempty"`
-	Insight   *AiInsight                `json:"insight,omitempty"`
+	// the plural service managing this component, if any
+	Service *ServiceDeployment `json:"service,omitempty"`
+	Cluster *Cluster           `json:"cluster,omitempty"`
+	// the insight of this component, or the one of the service managing it, which is reused instead of generating a second one
+	Insight *AiInsight `json:"insight,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }
@@ -2358,6 +2361,8 @@ type ClusterInsightComponentAttributes struct {
 	Namespace *string                   `json:"namespace,omitempty"`
 	Name      string                    `json:"name"`
 	Priority  *InsightComponentPriority `json:"priority,omitempty"`
+	// the plural service that manages this component, if any
+	ServiceID *string `json:"serviceId,omitempty"`
 }
 
 // A reference to a built ISO image to be used for flashing new edge clusters

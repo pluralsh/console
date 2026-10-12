@@ -1,4 +1,5 @@
 import { Code, Divider, Flex, Switch } from '@pluralsh/design-system'
+import { Link } from 'react-router-dom'
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay.tsx'
 import { SendInsightToWorkbenchButton } from 'components/ai/insights/SendInsightToWorkbench'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -9,6 +10,7 @@ import { useMatch } from 'react-router-dom'
 import {
   CLUSTER_ABS_PATH,
   CLUSTER_INSIGHTS_PATH,
+  getServiceDetailsPath,
 } from 'routes/cdRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
 import { stringify } from 'yaml'
@@ -76,6 +78,24 @@ export function ClusterInsightComponent() {
   return (
     <>
       <Divider backgroundColor={theme.colors.border} />
+      {component?.service && (
+        <div
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-light'],
+          }}
+        >
+          Managed by service{' '}
+          <Link
+            to={getServiceDetailsPath({
+              clusterId: component.service.cluster?.id,
+              serviceId: component.service.id,
+            })}
+          >
+            {component.service.name}
+          </Link>
+        </div>
+      )}
       <div
         css={{
           display: 'flex',

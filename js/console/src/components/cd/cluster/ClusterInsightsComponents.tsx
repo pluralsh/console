@@ -152,6 +152,14 @@ export function ClusterInsightsComponents() {
                 gap="xsmall"
                 align="center"
               >
+                {component.service && (
+                  <Chip
+                    size="small"
+                    severity="info"
+                  >
+                    {component.service.name}
+                  </Chip>
+                )}
                 {component.priority && (
                   <Chip
                     size="small"

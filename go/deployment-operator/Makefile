@@ -59,9 +59,16 @@ genmock: TOOL = mockery
 genmock: --tool ## generates mocks before running tests
 	$(MOCKERY)
 
+# The chart lives in the pluralsh/deployment-operator repository, point this at the crds directory of a checkout of it.
+CHART_CRDS_DIR ?= ../../charts/deployment-operator/crds
+
 .PHONY: codegen-chart-crds
-codegen-chart-crds: ## copy CRDs to the helm chart
-	@cp -a ./config/crd/bases/. ../../charts/deployment-operator/crds
+codegen-chart-crds: ## copy CRDs to the helm chart, set CHART_CRDS_DIR to the crds directory of the chart
+	@if [ -d "$(CHART_CRDS_DIR)" ]; then \
+		cp -a ./config/crd/bases/. "$(CHART_CRDS_DIR)"; \
+	else \
+		echo "skipping chart CRDs, $(CHART_CRDS_DIR) does not exist, set CHART_CRDS_DIR to the crds directory of the chart"; \
+	fi
 
 .PHONY: velero-crds
 velero-crds: ## download velero CRDs

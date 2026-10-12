@@ -1778,6 +1778,39 @@ func TestComponentCache_SetServiceChildren(t *testing.T) {
 		require.Equal(t, componentBefore.ServiceID, "abc")
 		require.Equal(t, componentBefore.ParentUID, "123")
 	})
+
+	t.Run("should keep service ownership when a watch event updates the component", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
+		require.NoError(t, err)
+		defer func(storeInstance store.Store) {
+			require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+		}(storeInstance)
+
+		// Objects rendered by a Flux HelmRelease carry neither the owning inventory annotation
+		// nor an owner reference to the HelmRelease. Ownership comes only from SetServiceChildren.
+		obj := createUnstructuredResource("apps", "v1", "Deployment", "default", "helm-release-child")
+		require.NoError(t, storeInstance.SaveComponents([]unstructured.Unstructured{obj}))
+
+		updated, err := storeInstance.SetServiceChildren("abc", "123", []common.StoreKey{
+			{
+				GVK:       obj.GroupVersionKind(),
+				Namespace: obj.GetNamespace(),
+				Name:      obj.GetName(),
+			},
+		})
+		require.NoError(t, err)
+		require.Equal(t, 1, updated)
+
+		// A status change, i.e. a pod restart, triggers a watch event for the same object
+		obj.Object["status"] = map[string]any{"observedGeneration": int64(2)}
+		require.NoError(t, storeInstance.SaveComponent(obj))
+
+		component, err := storeInstance.GetAppliedComponent(obj)
+		require.NoError(t, err)
+		require.NotNil(t, component)
+		assert.Equal(t, "abc", component.ServiceID, "Watch event should not drop the service ownership set by SetServiceChildren")
+		assert.Equal(t, "123", component.ParentUID, "Watch event should not drop the parent set by SetServiceChildren")
+	})
 }
 
 func TestComponentCache_GetComponentAttributes(t *testing.T) {

@@ -135,6 +135,10 @@ export const docsStructure: DocSection[] = [
                 path: 'custom-health',
                 title: 'CustomHealth Lua authoring',
               },
+              {
+                path: 'insight-priority',
+                title: 'Insight priority and health score',
+              },
             ],
           },
           { path: 'git-service', title: 'Git-sourced services' },

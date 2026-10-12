@@ -75,6 +75,10 @@ type Supervisor struct {
 	synchronizers          cmap.ConcurrentMap[schema.GroupVersionResource, Synchronizer]
 	restartAttemptsLeftMap cmap.ConcurrentMap[schema.GroupVersionResource, int]
 
+	// failedStarts holds resources whose synchronizer failed to load them at least once. Their data is missing from
+	// the store, which waiting does not fix, so they do not hold back WaitUntilSynced.
+	failedStarts cmap.ConcurrentMap[schema.GroupVersionResource, struct{}]
+
 	eventSubscribers cmap.ConcurrentMap[schema.GroupVersionResource, []EventSubscriber]
 
 	dequeueJitter                 time.Duration
@@ -99,6 +103,7 @@ func NewSupervisor(client dynamic.Interface, store store.Store, statusSynchroniz
 		componentQueue:                workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
 		synchronizers:                 cmap.NewStringer[schema.GroupVersionResource, Synchronizer](),
 		restartAttemptsLeftMap:        cmap.NewStringer[schema.GroupVersionResource, int](),
+		failedStarts:                  cmap.NewStringer[schema.GroupVersionResource, struct{}](),
 		eventSubscribers:              cmap.NewStringer[schema.GroupVersionResource, []EventSubscriber](),
 		maxNotFoundRetries:            3,
 		restartDelay:                  1 * time.Second,
@@ -140,6 +145,36 @@ func (in *Supervisor) WaitForCacheSync(ctx context.Context) error {
 			}
 		}
 	}
+}
+
+// WaitUntilSynced blocks until every synchronizer has loaded its resources into the store, or gave up trying to,
+// and returns early only when the context is done. Unlike WaitForCacheSync it has no timeout, as a consumer that
+// reports on the whole cluster has nothing correct to report from a partially loaded store.
+func (in *Supervisor) WaitUntilSynced(ctx context.Context) error {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	for {
+		if in.synced() {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+		}
+	}
+}
+
+func (in *Supervisor) synced() bool {
+	for gvr, s := range in.synchronizers.Items() {
+		if !s.Started() && !in.failedStarts.Has(gvr) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (in *Supervisor) MaybeRegister(gvr schema.GroupVersionResource) {
@@ -190,6 +225,7 @@ func (in *Supervisor) Unregister(gvr schema.GroupVersionResource) {
 		in.synchronizers.Remove(gvr)
 	}
 
+	in.failedStarts.Remove(gvr)
 	in.clearAttempts(gvr)
 }
 
@@ -274,6 +310,10 @@ func (in *Supervisor) startSynchronizer(ctx context.Context, gvr schema.GroupVer
 	metrics.Record().ResourceCacheWatchEnd(gvr.String())
 
 	in.synchronizers.Remove(gvr)
+
+	if err != nil && !syn.Started() {
+		in.failedStarts.Set(gvr, struct{}{})
+	}
 
 	if err == nil {
 		klog.V(log.LogLevelVerbose).InfoS("synchronizer stopped", "gvr", gvr.String())
