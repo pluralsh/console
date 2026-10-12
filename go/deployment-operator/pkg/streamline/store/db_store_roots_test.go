@@ -200,6 +200,88 @@ func TestFailingRootDescendants(t *testing.T) {
 	}, roots[0].Descendants)
 }
 
+func TestFailingRootDescendantsServedUnderSeveralVersions(t *testing.T) {
+	s := newTestStore(t)
+	require.NoError(t, s.SaveComponent(deploymentExceedingDeadline("api", time.Now(), nil)))
+
+	// the same objects are watched through two API versions, and so are stored twice
+	for _, version := range []string{"v1", "v2"} {
+		for _, name := range []string{"api-rs", "api-pod"} {
+			parent, kind := "api", "ReplicaSet"
+			if name == "api-pod" {
+				parent, kind = "api-rs", "Pod"
+			}
+			require.NoError(t, s.SaveComponentAttributes(client.ComponentChildAttributes{
+				UID: name, ParentUID: new(parent), Group: new("example.com"), Version: version, Kind: kind,
+				Namespace: new(testNamespace), Name: name, State: new(client.ComponentStateFailed),
+			}))
+		}
+	}
+
+	roots, err := s.GetFailingRoots()
+	require.NoError(t, err)
+	require.Len(t, roots, 1)
+	assert.Equal(t, map[string]insights.Descendants{
+		"ReplicaSet": {Failed: 1},
+		"Pod":        {Failed: 1},
+	}, roots[0].Descendants)
+}
+
+func TestFailingRootDescendantsWithVersionsOwnedSeparately(t *testing.T) {
+	s := newTestStore(t)
+	require.NoError(t, s.SaveComponent(deploymentExceedingDeadline("api", time.Now(), nil)))
+
+	// only the v2 row of the pod is attached to its owner, the v1 row has no parent
+	for _, c := range []struct{ version, parent string }{{"v1", ""}, {"v2", "api"}} {
+		attrs := client.ComponentChildAttributes{
+			UID: "api-pod", Group: new("example.com"), Version: c.version, Kind: "Pod",
+			Namespace: new(testNamespace), Name: "api-pod", State: new(client.ComponentStateFailed),
+		}
+		if c.parent != "" {
+			attrs.ParentUID = new(c.parent)
+		}
+		require.NoError(t, s.SaveComponentAttributes(attrs))
+	}
+
+	roots, err := s.GetFailingRoots()
+	require.NoError(t, err)
+	require.NotEmpty(t, roots)
+	for _, r := range roots {
+		if r.Name == "api" {
+			assert.Equal(t, map[string]insights.Descendants{"Pod": {Failed: 1}}, r.Descendants)
+			return
+		}
+	}
+	t.Fatal("the deployment is not reported as a root")
+}
+
+func TestFailingRootState(t *testing.T) {
+	t.Run("a healthy owner of a failed object is pending", func(t *testing.T) {
+		s := newTestStore(t)
+		require.NoError(t, s.SaveComponentAttributes(createComponentAttributes("api", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateRunning), WithAttributesName("api"))))
+		require.NoError(t, s.SaveComponentAttributes(createComponentAttributes("api-pod", new("api"), WithAttributesKind("Pod"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("api-pod"))))
+
+		roots, err := s.GetFailingRoots()
+		require.NoError(t, err)
+		require.Len(t, roots, 1)
+		assert.Equal(t, "pending", roots[0].State)
+	})
+}
+
+func TestPriorityAnnotationLookup(t *testing.T) {
+	s := newTestStore(t)
+	require.NoError(t, s.SaveComponent(deploymentExceedingDeadline("api", time.Now(), map[string]any{insights.AnnotationPriority: "ignore"})))
+
+	annotation, found, err := s.GetPriorityAnnotation("api")
+	require.NoError(t, err)
+	assert.True(t, found)
+	assert.Equal(t, "IGNORE", annotation)
+
+	_, found, err = s.GetPriorityAnnotation("missing")
+	require.NoError(t, err)
+	assert.False(t, found)
+}
+
 func deploymentExceedingDeadline(name string, since time.Time, annotations map[string]any) unstructured.Unstructured {
 	meta := map[string]any{"name": name, "namespace": testNamespace, "uid": name, "generation": int64(1)}
 	if annotations != nil {

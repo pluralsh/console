@@ -14,6 +14,8 @@ import (
 
 // Result is the outcome of the last evaluation of a script.
 type Result struct {
+	// Generation of the script that produced the result, a result of another generation is not recorded.
+	Generation int64
 	Time       time.Time
 	Matched    int
 	Overridden int
@@ -37,13 +39,16 @@ type Registry struct {
 	mu      sync.RWMutex
 	scripts map[types.NamespacedName]Script
 	results map[types.NamespacedName]Result
-	events  chan event.GenericEvent
+	// unsent are the scripts whose result changed and whose event did not fit in the channel, they are sent again.
+	unsent map[types.NamespacedName]struct{}
+	events chan event.GenericEvent
 }
 
 func NewRegistry() *Registry {
 	return &Registry{
 		scripts: make(map[types.NamespacedName]Script),
 		results: make(map[types.NamespacedName]Result),
+		unsent:  make(map[types.NamespacedName]struct{}),
 		events:  make(chan event.GenericEvent, 128),
 	}
 }
@@ -69,6 +74,7 @@ func (r *Registry) Remove(key types.NamespacedName) {
 	defer r.mu.Unlock()
 	delete(r.scripts, key)
 	delete(r.results, key)
+	delete(r.unsent, key)
 }
 
 // Scripts returns the registered scripts, the ones that own contested objects first.
@@ -102,12 +108,14 @@ func (r *Registry) Result(key types.NamespacedName) (Result, bool) {
 }
 
 // record stores the results of an evaluation round and tells the controller about the ones that changed.
+// A result of a script that was replaced while it was evaluated is dropped, the next round evaluates the new one.
 func (r *Registry) record(results map[types.NamespacedName]Result) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	for key, result := range results {
-		if _, registered := r.scripts[key]; !registered {
+		script, registered := r.scripts[key]
+		if !registered || script.Generation != result.Generation {
 			continue
 		}
 
@@ -119,11 +127,23 @@ func (r *Registry) record(results map[types.NamespacedName]Result) {
 		}
 
 		r.results[key] = result
+		r.unsent[key] = struct{}{}
+	}
+
+	r.flush()
+}
+
+// flush sends the events that are pending, the ones that do not fit stay pending for the next round.
+// The controller reads the latest result from the registry, so one event per script is all it needs.
+func (r *Registry) flush() {
+	for key := range r.unsent {
 		select {
 		case r.events <- event.GenericEvent{Object: &v1alpha1.CustomInsightPriority{
 			ObjectMeta: metav1.ObjectMeta{Namespace: key.Namespace, Name: key.Name},
 		}}:
-		default: // the controller is behind, it reads the latest result from the registry anyway
+			delete(r.unsent, key)
+		default:
+			return // the controller is behind, the channel is full for everything else too
 		}
 	}
 }

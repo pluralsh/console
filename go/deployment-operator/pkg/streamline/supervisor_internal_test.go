@@ -9,7 +9,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/util/workqueue"
 
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 )
@@ -28,6 +30,13 @@ type failingDiscovery struct{ discoverycache.Cache }
 
 func (failingDiscovery) KindFor(schema.GroupVersionResource) (schema.GroupVersionKind, error) {
 	return schema.GroupVersionKind{}, errors.New("unknown resource")
+}
+
+// knownDiscovery makes startSynchronizer restart the synchronizer after a failed start.
+type knownDiscovery struct{ discoverycache.Cache }
+
+func (knownDiscovery) KindFor(gvr schema.GroupVersionResource) (schema.GroupVersionKind, error) {
+	return schema.GroupVersionKind{Version: gvr.Version, Kind: "Pod"}, nil
 }
 
 var (
@@ -61,21 +70,86 @@ func TestSupervisorWaitUntilSynced(t *testing.T) {
 		}
 	})
 
-	t.Run("does not wait for a resource that failed to load", func(t *testing.T) {
-		s := NewSupervisor(nil, nil, StatusSynchronizer{}, nil, nil)
+	t.Run("waits for a resource that is still being retried", func(t *testing.T) {
+		s := NewSupervisor(nil, nil, StatusSynchronizer{}, nil, nil,
+			WithRestartDelay(10*time.Millisecond), WithMaxRestartBackoff(40*time.Millisecond))
 		s.synchronizers.Set(podsGVR, &fakeSynchronizer{})
-		s.failedStarts.Set(podsGVR, struct{}{})
+		s.registerQueue.AddRateLimited(podsGVR)
+
+		assert.False(t, s.synced())
+	})
+
+	t.Run("does not wait for a resource that keeps failing", func(t *testing.T) {
+		s := NewSupervisor(nil, nil, StatusSynchronizer{}, nil, nil,
+			WithRestartDelay(10*time.Millisecond), WithMaxRestartBackoff(40*time.Millisecond))
+		s.synchronizers.Set(podsGVR, &fakeSynchronizer{})
+		s.registerQueue.AddRateLimited(podsGVR)
+		s.registerQueue.AddRateLimited(podsGVR)
 
 		require.NoError(t, s.WaitUntilSynced(t.Context()))
 	})
 
-	t.Run("a failed start is recorded by the supervisor", func(t *testing.T) {
-		s := NewSupervisor(nil, nil, StatusSynchronizer{}, failingDiscovery{}, nil)
+	t.Run("a failed start is retried with a growing delay", func(t *testing.T) {
+		s := NewSupervisor(nil, nil, StatusSynchronizer{}, knownDiscovery{}, nil,
+			WithRestartDelay(time.Hour), WithRestartJitter(0))
+		s.synchronizers.Set(podsGVR, &fakeSynchronizer{err: errors.New("forbidden")})
+
+		s.startSynchronizer(t.Context(), podsGVR)
+		assert.Equal(t, 1, s.registerQueue.NumRequeues(podsGVR))
+		assert.True(t, s.synchronizers.Has(podsGVR), "the resource is registered again")
+
+		s.synchronizers.Set(podsGVR, &fakeSynchronizer{err: errors.New("forbidden")})
+		s.startSynchronizer(t.Context(), podsGVR)
+		assert.Equal(t, 2, s.registerQueue.NumRequeues(podsGVR))
+	})
+
+	t.Run("a started synchronizer resets the failures", func(t *testing.T) {
+		s := NewSupervisor(nil, nil, StatusSynchronizer{}, knownDiscovery{}, nil, WithRestartDelay(time.Hour))
+		s.registerQueue.AddRateLimited(podsGVR)
+		started := &fakeSynchronizer{err: errors.New("watch closed")}
+		started.started.Store(true)
+		s.synchronizers.Set(podsGVR, started)
+
+		s.startSynchronizer(t.Context(), podsGVR)
+
+		assert.Equal(t, 1, s.registerQueue.NumRequeues(podsGVR), "only the restart after the closed watch is counted")
+	})
+
+	t.Run("is broken only once the next restart waits for the cap", func(t *testing.T) {
+		s := NewSupervisor(nil, nil, StatusSynchronizer{}, nil, nil,
+			WithRestartDelay(10*time.Millisecond), WithMaxRestartBackoff(40*time.Millisecond))
+		s.registerQueue.AddRateLimited(podsGVR)
+		assert.False(t, s.broken(podsGVR), "the next restart waits 20ms")
+
+		s.registerQueue.AddRateLimited(podsGVR)
+		assert.True(t, s.broken(podsGVR), "the next restart waits 40ms")
+	})
+
+	t.Run("a resource that is not found is retried until its attempts are used", func(t *testing.T) {
+		s := NewSupervisor(nil, nil, StatusSynchronizer{}, knownDiscovery{}, nil,
+			WithRestartDelay(time.Hour), WithRestartJitter(0), WithMaxNotFoundRetries(2))
+		notFound := apierrors.NewNotFound(schema.GroupResource{Resource: "pods"}, "pods")
+
+		s.synchronizers.Set(podsGVR, &fakeSynchronizer{err: notFound})
+		s.startSynchronizer(t.Context(), podsGVR)
+		assert.Equal(t, 1, s.registerQueue.NumRequeues(podsGVR))
+		assert.True(t, s.synchronizers.Has(podsGVR), "it is waiting for its restart")
+
+		s.synchronizers.Set(podsGVR, &fakeSynchronizer{err: notFound})
+		s.startSynchronizer(t.Context(), podsGVR)
+		assert.Zero(t, s.registerQueue.NumRequeues(podsGVR))
+		assert.False(t, s.synchronizers.Has(podsGVR), "it was given up on")
+	})
+
+	t.Run("a resource that is given up on is forgotten", func(t *testing.T) {
+		s := NewSupervisor(nil, nil, StatusSynchronizer{}, failingDiscovery{}, nil, WithRestartDelay(time.Hour))
+		s.registerQueue.AddRateLimited(podsGVR)
 		s.synchronizers.Set(podsGVR, &fakeSynchronizer{err: errors.New("forbidden")})
 
 		s.startSynchronizer(t.Context(), podsGVR)
 
-		assert.True(t, s.failedStarts.Has(podsGVR))
+		assert.Zero(t, s.registerQueue.NumRequeues(podsGVR))
+		assert.False(t, s.synchronizers.Has(podsGVR))
 	})
 
 	t.Run("returns when the context is done", func(t *testing.T) {
@@ -85,5 +159,38 @@ func TestSupervisorWaitUntilSynced(t *testing.T) {
 		cancel()
 
 		require.ErrorIs(t, s.WaitUntilSynced(ctx), context.Canceled)
+	})
+}
+
+func TestJitteredRateLimiter(t *testing.T) {
+	inner := workqueue.NewTypedItemExponentialFailureRateLimiter[schema.GroupVersionResource](time.Second, time.Minute)
+
+	t.Run("spreads a delay by at most the jitter", func(t *testing.T) {
+		limiter := jitteredRateLimiter{TypedRateLimiter: inner, jitter: 10 * time.Second}
+		for range 50 {
+			inner.Forget(podsGVR)
+			for range 5 {
+				inner.When(podsGVR) // 1s, 2s, 4s, 8s, 16s
+			}
+			delay := limiter.When(podsGVR) // 32s
+			assert.GreaterOrEqual(t, delay, 32*time.Second)
+			assert.Less(t, delay, 42*time.Second)
+		}
+	})
+
+	t.Run("never spreads more than the delay itself", func(t *testing.T) {
+		limiter := jitteredRateLimiter{TypedRateLimiter: inner, jitter: 10 * time.Second}
+		inner.Forget(podsGVR)
+
+		delay := limiter.When(podsGVR) // 1s
+		assert.GreaterOrEqual(t, delay, time.Second)
+		assert.Less(t, delay, 2*time.Second)
+	})
+
+	t.Run("leaves the delay alone without jitter", func(t *testing.T) {
+		limiter := jitteredRateLimiter{TypedRateLimiter: inner}
+		inner.Forget(podsGVR)
+
+		assert.Equal(t, time.Second, limiter.When(podsGVR))
 	})
 }

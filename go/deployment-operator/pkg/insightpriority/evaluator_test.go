@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -275,6 +276,72 @@ func TestEvaluatorOverrides(t *testing.T) {
 
 		evaluator.Overrides(context.Background(), append(roots, root("Deployment", "apps", "b", nil)), insightpriority.Cluster{}, now.Add(4*time.Minute))
 		assert.Len(t, registry.Events(), 1)
+	})
+}
+
+func TestRegistryResults(t *testing.T) {
+	cluster := insightpriority.Cluster{}
+	roots := []insights.Root{root("Deployment", "apps", "a", nil)}
+
+	t.Run("a recovered cluster clears the previous result", func(t *testing.T) {
+		script := newScript(t, "failing", 0, v1alpha1.InsightTarget{}, "failing")
+		evaluator, registry := setup(t, map[string]func(map[string]any) (any, error){
+			"failing": func(map[string]any) (any, error) { return nil, errors.New("boom") },
+		}, script)
+
+		evaluator.Overrides(context.Background(), roots, cluster, now)
+		result, _ := registry.Result(key("failing"))
+		require.NotEmpty(t, result.Err)
+
+		evaluator.Overrides(context.Background(), nil, cluster, now.Add(time.Minute))
+
+		result, ok := registry.Result(key("failing"))
+		require.True(t, ok)
+		assert.Empty(t, result.Err)
+		assert.Zero(t, result.Matched)
+	})
+
+	t.Run("a result of a replaced script is dropped", func(t *testing.T) {
+		script := newScript(t, "edited", 0, v1alpha1.InsightTarget{}, "edited")
+		script.Generation = 1
+		var registry *insightpriority.Registry
+		evaluator, registry := setup(t, map[string]func(map[string]any) (any, error){
+			"edited": func(map[string]any) (any, error) {
+				// the script is edited while it is running
+				replaced := script
+				replaced.Generation = 2
+				registry.Set(replaced)
+				return map[string]any{}, nil
+			},
+		}, script)
+
+		evaluator.Overrides(context.Background(), roots, cluster, now)
+
+		_, ok := registry.Result(key("edited"))
+		assert.False(t, ok, "the old generation must not show up as the result of the new one")
+		assert.Empty(t, registry.Events())
+	})
+
+	t.Run("an event that did not fit is sent in a later round", func(t *testing.T) {
+		const scripts = 130 // more than the events channel holds
+		registered := make([]insightpriority.Script, 0, scripts)
+		for i := range scripts {
+			registered = append(registered, newScript(t, fmt.Sprintf("s%03d", i), 0, v1alpha1.InsightTarget{}, "all"))
+		}
+		evaluator, registry := setup(t, map[string]func(map[string]any) (any, error){
+			"all": func(map[string]any) (any, error) { return map[string]any{}, nil },
+		}, registered...)
+
+		evaluator.Overrides(context.Background(), roots, cluster, now)
+		sent := len(registry.Events())
+		require.Less(t, sent, scripts)
+		for range sent {
+			<-registry.Events()
+		}
+
+		evaluator.Overrides(context.Background(), roots, cluster, now.Add(time.Minute))
+
+		assert.Equal(t, scripts-sent, len(registry.Events()), "the outcomes did not change, only the unsent ones are reported")
 	})
 }
 

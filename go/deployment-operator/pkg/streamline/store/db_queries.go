@@ -10,14 +10,18 @@ const failingSinceUpsert = `CASE
 // ownershipUpsert keeps the parent and service of a component when a watch event carries neither. Objects rendered by
 // Flux from a HelmRelease have no owner reference or inventory annotation, so the values set from the HelmRelease
 // would be lost on every event. A new owner reference or inventory annotation still replaces them.
+// Only the same object keeps them. A replacement that has the same name but another uid does not inherit the owner
+// of the object it replaced, a stored row without a uid is a placeholder of the same object.
 const ownershipUpsert = `parent_uid = CASE
 				WHEN COALESCE(excluded.parent_uid, '') != '' THEN excluded.parent_uid
-				WHEN COALESCE(excluded.service_id, '') = '' AND COALESCE(component.service_id, '') != '' THEN component.parent_uid
+				WHEN COALESCE(excluded.service_id, '') = '' AND COALESCE(component.service_id, '') != ''
+					AND COALESCE(component.uid, '') IN ('', excluded.uid) THEN component.parent_uid
 				ELSE excluded.parent_uid
 			END,
 			service_id = CASE
 				WHEN COALESCE(excluded.service_id, '') != '' THEN excluded.service_id
-				WHEN COALESCE(excluded.parent_uid, '') = '' AND COALESCE(component.parent_uid, '') != '' THEN component.service_id
+				WHEN COALESCE(excluded.parent_uid, '') = '' AND COALESCE(component.parent_uid, '') != ''
+					AND COALESCE(component.uid, '') IN ('', excluded.uid) THEN component.service_id
 				ELSE excluded.service_id
 			END,`
 
@@ -117,6 +121,14 @@ const (
 		SELECT uid, "group", version, kind, namespace, name, health, parent_uid
 		FROM component
 		WHERE uid = ? AND applied = 1
+	`
+
+	getPriorityAnnotation = `
+		SELECT COALESCE(priority_annotation, '')
+		FROM component
+		WHERE uid = ? AND applied = 1
+		ORDER BY id
+		LIMIT 1
 	`
 
 	getAppliedComponentsByGVK = `
@@ -369,6 +381,8 @@ const (
 	`
 
 	// failingRootsDescendants counts the failed and pending objects below every root of failingRoots, by kind.
+	// An object watched through several API versions has a row per version, and each of them can have its own parent,
+	// so every row is walked and the objects are counted once by uid.
 	failingRootsDescendants = failingRootsPrefix + `,
 		down(root_uid, uid, kind, health, depth) AS (
 			SELECT r.root_uid, c.uid, c.kind, c.health, 0
@@ -382,7 +396,9 @@ const (
 			JOIN component ch ON ch.parent_uid = down.uid AND ch.applied = 1
 			WHERE down.uid != '' AND down.depth < 3 AND down.kind != 'Node'
 		)
-		SELECT root_uid, kind, SUM(health = 2), SUM(health = 1)
+		SELECT root_uid, kind,
+			COUNT(DISTINCT CASE WHEN health = 2 THEN uid END),
+			COUNT(DISTINCT CASE WHEN health = 1 THEN uid END)
 		FROM down
 		WHERE depth > 0 AND health IN (1, 2)
 		GROUP BY root_uid, kind

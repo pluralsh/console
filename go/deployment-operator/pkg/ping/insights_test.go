@@ -15,17 +15,16 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 )
 
-// existingStore reports the given UIDs as existing components.
+// existingStore reports the given UIDs as existing components, with the priority annotation they are given in muted.
 type existingStore struct {
 	store.Store
-	uids map[string]struct{}
+	uids  map[string]struct{}
+	muted map[string]string
 }
 
-func (s existingStore) GetAppliedComponentByUID(uid types.UID) (*console.ComponentChildAttributes, error) {
-	if _, ok := s.uids[string(uid)]; ok {
-		return &console.ComponentChildAttributes{UID: string(uid)}, nil
-	}
-	return nil, nil
+func (s existingStore) GetPriorityAnnotation(uid types.UID) (string, bool, error) {
+	_, ok := s.uids[string(uid)]
+	return s.muted[string(uid)], ok, nil
 }
 
 func summaryOf(roots ...insights.Root) insights.Summary {
@@ -92,6 +91,14 @@ func TestGraceWindow(t *testing.T) {
 
 		assert.Empty(t, g.apply(summaryOf(ignored), db, now.Add(time.Minute)))
 		assert.Empty(t, g.apply(summaryOf(), db, now.Add(2*time.Minute)), "and it stays dropped")
+	})
+
+	t.Run("drops a recovered root that was muted since", func(t *testing.T) {
+		muted := existingStore{uids: map[string]struct{}{"api": {}}, muted: map[string]string{"api": insights.Ignore}}
+		g := newGraceWindow(10 * time.Minute)
+		g.apply(summaryOf(failing("api", insights.ScoreHigh)), muted, now)
+
+		assert.Empty(t, g.apply(summaryOf(), muted, now.Add(time.Minute)))
 	})
 
 	t.Run("a zero period disables the window", func(t *testing.T) {

@@ -2,12 +2,12 @@ package store
 
 import (
 	"context"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 	"time"
 
 	"github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 	"github.com/pluralsh/console/go/polly/containers"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -108,6 +108,20 @@ func (p *ProfiledStoreLocal) GetAppliedComponentByUID(uid types.UID) (*client.Co
 		return err
 	})
 	return res, err
+}
+
+// GetPriorityAnnotation wraps Store.GetPriorityAnnotation with tracing.
+func (p *ProfiledStoreLocal) GetPriorityAnnotation(uid types.UID) (string, bool, error) {
+	var (
+		annotation string
+		found      bool
+		err        error
+	)
+	_ = traceLocal(context.Background(), "GetPriorityAnnotation", func() error {
+		annotation, found, err = p.inner.GetPriorityAnnotation(uid)
+		return err
+	})
+	return annotation, found, err
 }
 
 // GetAppliedComponentsByGVK wraps Store.GetAppliedComponentsByGVK with tracing.

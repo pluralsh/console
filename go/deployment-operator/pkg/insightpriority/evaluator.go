@@ -42,7 +42,7 @@ func NewEvaluator(registry *Registry) *Evaluator {
 // built-in priority. The result is the same for the same input, nothing time or state dependent reaches a script.
 func (e *Evaluator) Overrides(ctx context.Context, roots []insights.Root, cluster Cluster, now time.Time) map[string]insights.Override {
 	scripts := e.registry.Scripts()
-	if len(scripts) == 0 || len(roots) == 0 {
+	if len(scripts) == 0 {
 		return nil
 	}
 
@@ -87,6 +87,7 @@ func (e *Evaluator) Overrides(ctx context.Context, roots []insights.Root, cluste
 	for _, script := range scripts {
 		result := e.evaluate(ctx, script, owned[script.Key], failing, cluster, now, overrides)
 		result.Time = now
+		result.Generation = script.Generation
 		for winner := range lostTo[script.Key] {
 			result.LostTo = append(result.LostTo, winner)
 		}

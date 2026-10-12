@@ -39,6 +39,10 @@ type Store interface {
 
 	GetAppliedComponentByUID(uid types.UID) (*client.ComponentChildAttributes, error)
 
+	// GetPriorityAnnotation returns the normalized insight priority annotation of an applied component, and whether
+	// the component is stored at all.
+	GetPriorityAnnotation(uid types.UID) (annotation string, found bool, err error)
+
 	// GetAppliedComponentsByGVK returns all applied components matching provided GVK.
 	GetAppliedComponentsByGVK(gvk schema.GroupVersionKind) ([]smcommon.Component, error)
 

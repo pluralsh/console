@@ -851,6 +851,27 @@ func (in *DatabaseStore) GetAppliedComponentByUID(uid types.UID) (result *client
 	return result, err
 }
 
+func (in *DatabaseStore) GetPriorityAnnotation(uid types.UID) (annotation string, found bool, err error) {
+	conn, cancelFunc, err := in.take()
+	if err != nil {
+		return "", false, err
+	}
+	defer func() {
+		in.pool.Put(conn)
+		cancelFunc()
+	}()
+
+	err = sqlitex.ExecuteTransient(conn, getPriorityAnnotation, &sqlitex.ExecOptions{
+		Args: []interface{}{uid},
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			annotation, found = stmt.ColumnText(0), true
+			return nil
+		},
+	})
+
+	return annotation, found, err
+}
+
 func (in *DatabaseStore) GetAppliedComponentsByGVK(gvk schema.GroupVersionKind) (result []smcommon.Component, err error) {
 	conn, cancelFunc, err := in.take()
 	if err != nil {
@@ -1182,6 +1203,16 @@ func (in *DatabaseStore) GetFailingRoots() (result []insights.Root, err error) {
 	return result, err
 }
 
+// rootState is failed when the root itself is failing, and pending otherwise, as a root is either failing or owns
+// something that is. The stored state of a healthy owner of a failing object must not leak to scripts.
+func rootState(state ComponentState) string {
+	if state == ComponentStateFailed {
+		return "failed"
+	}
+
+	return "pending"
+}
+
 func scanRoot(stmt *sqlite.Stmt) (insights.Root, error) {
 	labels, err := decodeComponentLabels(stmt.ColumnText(16))
 	if err != nil {
@@ -1204,7 +1235,7 @@ func scanRoot(stmt *sqlite.Stmt) (insights.Root, error) {
 		CriticalityReason:  stmt.ColumnText(14),
 		PriorityAnnotation: stmt.ColumnText(15),
 		Labels:             labels,
-		State:              strings.ToLower(ComponentState(stmt.ColumnInt32(17)).String()),
+		State:              rootState(ComponentState(stmt.ColumnInt32(17))),
 	}
 	if root.Criticality == 0 {
 		// Only failing objects and root kinds are classified when they are written. The top-most owner of a failure can be

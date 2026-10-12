@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 	"time"
 
 	"github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 )
 
 // ProfiledStore is a wrapper around a Store that adds Datadog tracing
@@ -113,6 +113,20 @@ func (p *ProfiledStore) GetAppliedComponentByUID(uid types.UID) (*client.Compone
 		return err
 	})
 	return res, err
+}
+
+// GetPriorityAnnotation wraps Store.GetPriorityAnnotation with tracing.
+func (p *ProfiledStore) GetPriorityAnnotation(uid types.UID) (string, bool, error) {
+	var (
+		annotation string
+		found      bool
+		err        error
+	)
+	_ = trace(context.Background(), "GetPriorityAnnotation", func() error {
+		annotation, found, err = p.inner.GetPriorityAnnotation(uid)
+		return err
+	})
+	return annotation, found, err
 }
 
 // GetAppliedComponentsByGVK wraps Store.GetAppliedComponentsByGVK with tracing.

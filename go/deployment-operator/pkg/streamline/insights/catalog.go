@@ -61,9 +61,9 @@ var namespaceTiers = map[string]int{
 
 // kindScores are the criticality of a failing root when nothing more specific applies.
 var kindScores = map[string]int{
-	"StatefulSet":           ScoreHigh,
-	"DaemonSet":             ScoreMedium,
-	"Deployment":            ScoreLow,
+	kindStatefulSet:         ScoreHigh,
+	kindDaemonSet:           ScoreMedium,
+	kindDeployment:          ScoreLow,
 	"Ingress":               ScoreCritical,
 	"Certificate":           ScoreCritical,
 	"Node":                  ScoreHigh,

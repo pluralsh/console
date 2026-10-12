@@ -56,7 +56,7 @@ func (g *graceWindow) apply(summary insights.Summary, db store.Store, now time.T
 			continue
 		}
 
-		if _, ignored := summary.Ignored[uid]; ignored || now.Sub(r.lastSeen) >= g.period || !exists(db, uid) {
+		if _, ignored := summary.Ignored[uid]; ignored || now.Sub(r.lastSeen) >= g.period || !visible(db, uid) {
 			delete(g.recent, uid)
 			continue
 		}
@@ -79,7 +79,9 @@ func (g *graceWindow) apply(summary insights.Summary, db store.Store, now time.T
 	return entries
 }
 
-func exists(db store.Store, uid string) bool {
-	component, err := db.GetAppliedComponentByUID(types.UID(uid))
-	return err == nil && component != nil
+// visible tells whether a recovered root may still be reported: it is stored and it was not muted since.
+// summary.Ignored only knows the roots that are failing, so the annotation of a recovered one is read from the store.
+func visible(db store.Store, uid string) bool {
+	annotation, found, err := db.GetPriorityAnnotation(types.UID(uid))
+	return err == nil && found && insights.Priority(annotation) != insights.PriorityIgnore
 }

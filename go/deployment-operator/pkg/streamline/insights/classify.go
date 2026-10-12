@@ -15,6 +15,12 @@ const (
 	Ignore = "IGNORE"
 )
 
+const (
+	kindDeployment  = "Deployment"
+	kindStatefulSet = "StatefulSet"
+	kindDaemonSet   = "DaemonSet"
+)
+
 var annotationValues = map[string]struct{}{"LOW": {}, "MEDIUM": {}, "HIGH": {}, "CRITICAL": {}, Ignore: {}}
 
 // Criticality is how important a component is to the cluster, independent of how badly it is failing.
@@ -48,7 +54,7 @@ func Classify(kind, namespace, name, priorityClass string) Criticality {
 
 func isWorkload(kind string) bool {
 	switch kind {
-	case "Deployment", "StatefulSet", "DaemonSet":
+	case kindDeployment, kindStatefulSet, kindDaemonSet:
 		return true
 	}
 	return false
@@ -57,7 +63,7 @@ func isWorkload(kind string) bool {
 // IsRootKind reports whether objects of the kind can stand for a failure of the objects they own.
 func IsRootKind(kind string) bool {
 	switch kind {
-	case "Deployment", "StatefulSet", "DaemonSet", "Ingress", "Certificate", "CronJob":
+	case kindDeployment, kindStatefulSet, kindDaemonSet, "Ingress", "Certificate", "CronJob":
 		return true
 	}
 	return false
@@ -138,14 +144,14 @@ func priorityClass(obj *unstructured.Unstructured) string {
 // replicas returns the desired and ready replica counts of workloads, nil when unknown.
 func replicas(obj *unstructured.Unstructured) (desired, ready *int64) {
 	switch obj.GetKind() {
-	case "Deployment", "StatefulSet":
+	case kindDeployment, kindStatefulSet:
 		d := int64(1) // the API default
 		if v, found, _ := unstructured.NestedInt64(obj.Object, "spec", "replicas"); found {
 			d = v
 		}
 		r, _, _ := unstructured.NestedInt64(obj.Object, "status", "readyReplicas")
 		return &d, &r
-	case "DaemonSet":
+	case kindDaemonSet:
 		d, found, _ := unstructured.NestedInt64(obj.Object, "status", "desiredNumberScheduled")
 		if !found {
 			return nil, nil
