@@ -10,6 +10,7 @@ export function deepOmitKey<
 
   const { [key]: _, ...nextObj } = obj
 
+  // biome-ignore lint/suspicious/noForIn: nextObj is a spread copy, so it has only own properties
   for (const k in nextObj) {
     if (nextObj[k] && typeof nextObj[k] === 'object') {
       nextObj[k] = deepOmitKey(nextObj[k], key)

@@ -1,10 +1,16 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true, "root": ".." },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "root": ".."
+  },
   "files": {
     "includes": [
       "**",
       "!**/src/generated",
+      "!documentation/generated",
       "!documentation/src/routes/docs.generated.ts",
       "!documentation/src/routing/navigation.ts"
     ]
@@ -28,6 +34,7 @@
   "linter": {
     "rules": {
       "preset": "none",
+      "nursery": { "useExhaustiveSwitchCases": "error" },
       "complexity": {
         "noArguments": "error",
         "noBannedTypes": "error",
@@ -61,11 +68,16 @@
         "noDuplicateEnumValues": "error",
         "noDuplicateFields": "error",
         "noDuplicateJsxProps": "error",
+        "noDuplicateTestHooks": "error",
+        "noExportsInTest": "error",
         "noExtraNonNullAssertion": "error",
+        "noFocusedTests": "error",
+        "noForIn": "error",
         "noMisleadingInstantiator": "error",
         "noNonNullAssertedOptionalChain": "error",
         "noReactForwardRef": "error",
         "noSelfCompare": "error",
+        "noSkippedTests": "error",
         "noUnknownAttribute": {
           "level": "error",
           "options": { "ignore": ["css"] }
@@ -73,6 +85,7 @@
         "noUnsafeDeclarationMerging": "error",
         "noUnusedExpressions": "error",
         "noVar": "error",
+        "useArraySortCompare": "error",
         "useNamespaceKeyword": "error"
       }
     }

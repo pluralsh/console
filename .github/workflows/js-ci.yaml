@@ -65,7 +65,10 @@ jobs:
         with:
           path: js/*/.eslintcache
           key: ${{ runner.os }}-eslint-v1-${{ hashFiles('js/yarn.lock', 'js/.yarnrc.yml', 'js/**/eslint.config.*', 'js/**/tsconfig*.json') }}
-      - run: yarn workspace console lint
+      - run: yarn workspace console lint:biome --reporter=github
+      - run: yarn workspace @pluralsh/design-system lint:biome --reporter=github
+      - run: yarn workspace console lint:js
+      - run: yarn workspace @pluralsh/design-system lint:js
 
   test:
     needs: [vouch]

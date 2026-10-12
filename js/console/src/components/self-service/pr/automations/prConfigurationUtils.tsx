@@ -113,7 +113,7 @@ export function usePrAutomationForm({
     () =>
       Array.from(
         new Set(prAutomation?.configuration?.map((cfg) => cfg?.page ?? 0))
-      ).sort(),
+      ).sort((a, b) => a - b),
     [prAutomation?.configuration]
   )
   const firstPage = isEmpty(pages) ? 0 : Math.min(...pages)

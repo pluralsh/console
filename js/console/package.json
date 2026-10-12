@@ -145,15 +145,11 @@
     "graphql-tag": "2.12.7",
     "jsdom": "30.0.1",
     "jwt-decode": "4.0.0",
-    "lint-staged": "17.5.1",
     "npm-run-all2": "9.0.3",
     "type-fest": "5.9.0",
     "typescript": "6.0.3",
     "vite": "8.3.0",
     "vite-bundle-visualizer": "1.2.1",
     "vitest": "5.0.1"
-  },
-  "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx,graphql,json,css}": "biome format --write --no-errors-on-unmatched"
   }
 }

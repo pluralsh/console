@@ -63,7 +63,8 @@ jobs:
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
       - run: yarn --immutable
-      - run: yarn workspace @pluralsh/documentation lint
+      - run: yarn workspace @pluralsh/documentation lint:biome --reporter=github
+      - run: yarn workspace @pluralsh/documentation lint:js
 
   sync-docs:
     needs: [vouch]
