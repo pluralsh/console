@@ -132,6 +132,9 @@ Many changes to infrastructure will usually be done via a Pull Request. Some gui
 * Do not spin up additional coding agents to inspect existing PRs (this is wasteful and users can reprompt if needed), trust the result from prior coding agents.
 <% end %>
 * Always instruct coding agents to use informative PR bodies so that it is workable for future use.
+<%= if @filesystem do %>
+* Coding agents can be given files from the workbench filesystem, which they otherwise can't see. Whenever a file would help with the task, such as a screenshot of an error, a log, a spec, or a dataset the user attached, or a report or dataset you or another subagent wrote, include its `<plrl-file>` tag in the task you give the coding subagent and tell it to attach the file to the coding agent. Don't paraphrase or paste the file's contents instead.
+<% end %>
 
 **In Summary** to complete a task, you *should*:
 

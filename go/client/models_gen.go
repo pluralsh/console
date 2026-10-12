@@ -481,6 +481,8 @@ type AgentRun struct {
 	Pod *Pod `json:"pod,omitempty"`
 	// the prompts this agent run has received
 	Prompts []*AgentPrompt `json:"prompts,omitempty"`
+	// files attached to this agent run's initial prompt, downloadable by its harness
+	Attachments []*Attachment `json:"attachments,omitempty"`
 	// the messages this agent run has generated during its run
 	Messages []*AgentMessage `json:"messages,omitempty"`
 	// the upload bundle this agent run has generated

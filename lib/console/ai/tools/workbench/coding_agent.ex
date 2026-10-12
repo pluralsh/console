@@ -4,6 +4,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   alias Console.AI.Tool
   alias Console.Schema.{User, AgentRuntime, AgentRun, Workbench, WorkbenchJob}
   alias Console.Deployments.Agents
+  alias Console.PseudoFS
 
   embedded_schema do
     field :activity,        :map, virtual: true
@@ -19,14 +20,15 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     field :base_branch,     :string
     field :head_branch,     :string
     field :prompt,          :string
+    field :attachments,     {:array, :string}
   end
 
-  @valid ~w(mode repository base_branch head_branch prompt babysit approval followup pr_url)a
+  @valid ~w(mode repository base_branch head_branch prompt babysit approval followup pr_url attachments)a
 
   def changeset(%__MODULE__{workbench: bench, job: job} = model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(@valid -- [:base_branch, :head_branch, :babysit, :approval, :followup, :pr_url])
+    |> validate_required(@valid -- [:base_branch, :head_branch, :babysit, :approval, :followup, :pr_url, :attachments])
     |> fix_mode(bench, job)
     |> AgentRun.validate_followup_mode()
     |> fix_babysit(bench, job)
@@ -34,6 +36,14 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     |> validate_repository(bench)
     |> validate_followup()
     |> validate_review_branch()
+    |> validate_attachments()
+  end
+
+  defp validate_attachments(cs) do
+    case {get_field(cs, :attachments), PseudoFS.enabled?()} do
+      {[_ | _], false} -> add_error(cs, :attachments, "file attachments require the workbench filesystem to be enabled")
+      _ -> cs
+    end
   end
 
   defp fix_mode(cs, bench, job) do
@@ -91,8 +101,16 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
       true -> @review_json_schema
       _ -> @json_schema
     end
+    |> maybe_attachments()
   end
-  def json_schema(_), do: @json_schema
+  def json_schema(_), do: maybe_attachments(@json_schema)
+
+  defp maybe_attachments(schema) do
+    case PseudoFS.enabled?() do
+      true -> schema
+      false -> update_in(schema, ["properties"], &Map.delete(&1, "attachments"))
+    end
+  end
   def name(_), do: "workbench_coding_agent"
   def description(%__MODULE__{job: job}) do
     case WorkbenchJob.coding_review?(job) do
@@ -104,7 +122,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   end
   def description(_), do: "Invokes a coding agent to analyze a repository or make a code change. Only use this once you've gathered enough information to craft an effective prompt."
 
-  @run_attrs ~w(mode repository prompt activity babysit approval followup head_branch)a
+  @run_attrs ~w(mode repository prompt activity babysit approval followup head_branch attachments)a
 
   def implement(%__MODULE__{id: tool} = args) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},

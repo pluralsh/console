@@ -173,6 +173,7 @@ config :console, ConsoleWeb.Endpoint,
   Keyword.merge(
     [
       url: endpoint_url,
+      secret_key_base: Console.secret_key_base(get_env("SECRET_KEY_BASE"), get_env("JWT_SECRET")),
       check_origin: [
         "//#{get_env("HOST")}",
         "//#{get_env("EXT_HOST") || get_env("HOST")}",

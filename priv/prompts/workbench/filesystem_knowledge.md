@@ -16,7 +16,7 @@ I parsed <plrl-file path="/workbench/_plrl_/uploads/8f2c/clusters.csv" descripti
 
 This applies to everything shown in the workbench: your conclusion and criticism in `workbench_complete`, notes, and the results you return as a subagent. In particular:
 
-* **Files the user attached.** The prompt lists them as `<plrl-file>` tags. Reuse those tags verbatim whenever you mention an attachment, rather than its filename or path.
+* **Files the user attached.** The prompt lists them as `<plrl-file>` tags. Reuse those tags verbatim whenever you mention an attachment, rather than its filename or path. Attachments, like any workbench file, can also be handed to coding agents, which download them into their environment, so carry the tags forward when delegating code work.
 * **Files you or a subagent wrote.** Reference every report, dataset, piece of evidence or runbook you created or updated that the user would want to open. Give each a one-line `description` of what it contains.
 * **Subagent results.** Subagents tag the files they mention, so carry those tags into your conclusion unchanged instead of rewriting them as paths.
 

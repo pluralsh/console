@@ -1665,6 +1665,9 @@ type RootMutationType {
 
     "files to attach to this prompt, only supported for agent runs spawned by a workbench"
     attachments: [Upload]
+
+    "sandbox paths (eg \/workbench\/reports\/summary.md) of existing workbench files to attach to this prompt, only supported for agent runs spawned by a workbench"
+    files: [String]
   ): AgentPromptHistory
 
   shareAgentRun(id: ID!, shared: Boolean!): AgentRun
@@ -2672,6 +2675,9 @@ type AgentRun {
 
   "the prompts this agent run has received"
   prompts: [AgentPrompt]
+
+  "files attached to this agent run's initial prompt, downloadable by its harness"
+  attachments: [Attachment]
 
   "the messages this agent run has generated during its run"
   messages: [AgentMessage]
