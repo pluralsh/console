@@ -310,6 +310,8 @@ export function WorkbenchSkillsConfigStep({
   const [subTab, setSubTab] = useState<
     'git-skills' | 'plural-skills' | 'knowledge'
   >('plural-skills')
+  // the workbench filesystem supersedes the knowledge base
+  const showKnowledge = !formState.filesystemEnabled
 
   useEffect(() => {
     setTabs(
@@ -326,16 +328,18 @@ export function WorkbenchSkillsConfigStep({
         >
           Git skills
         </CardTab>
-        <CardTab
-          active={subTab === 'knowledge'}
-          onClick={() => setSubTab('knowledge')}
-        >
-          Knowledge
-        </CardTab>
+        {showKnowledge && (
+          <CardTab
+            active={subTab === 'knowledge'}
+            onClick={() => setSubTab('knowledge')}
+          >
+            Knowledge
+          </CardTab>
+        )}
       </CardTabs>
     )
     return () => setTabs(null)
-  }, [setTabs, subTab])
+  }, [setTabs, subTab, showKnowledge])
 
   if (subTab === 'git-skills') {
     return (
@@ -346,7 +350,7 @@ export function WorkbenchSkillsConfigStep({
     )
   }
 
-  if (subTab === 'knowledge') {
+  if (subTab === 'knowledge' && showKnowledge) {
     return (
       <KnowledgeSubStep
         formState={formState}

@@ -1526,10 +1526,10 @@ type RootMutationType {
   deleteWorkbenchSkill(id: ID!): WorkbenchSkill
 
   "Updates saved workbench knowledge. Requires write access to the workbench."
-  updateWorkbenchKnowledge(id: ID!, attributes: WorkbenchKnowledgeAttributes!): WorkbenchKnowledge
+  updateWorkbenchKnowledge(id: ID!, attributes: WorkbenchKnowledgeAttributes!): WorkbenchKnowledge @deprecated(reason: "superseded by writeWorkbenchFile under \/knowledge when the workbench filesystem is enabled")
 
   "Deletes saved workbench knowledge. Requires write access to the workbench."
-  deleteWorkbenchKnowledge(id: ID!): WorkbenchKnowledge
+  deleteWorkbenchKnowledge(id: ID!): WorkbenchKnowledge @deprecated(reason: "superseded by deleteWorkbenchFile under \/knowledge when the workbench filesystem is enabled")
 
   "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."
   createWorkbenchEval(
@@ -4317,7 +4317,7 @@ type Workbench {
 
   workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
 
-  workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection
+  workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection @deprecated(reason: "superseded by \/knowledge in the workbench filesystem when filesystemEnabled")
 
   workbenchDashboards(
     after: String

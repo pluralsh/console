@@ -20,12 +20,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "pseudofs.labels" -}}
 helm.sh/chart: {{ include "console.chart" . }}
 {{ include "pseudofs.selectorLabels" . }}
-app.kubernetes.io/version: {{ .Values.pseudofs.image.tag | quote }}
+app.kubernetes.io/version: {{ include "pseudofs.tag" . | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
+{{/*
+The fs image is vendored under the console's own tags, so it follows the console image unless pinned.
+*/}}
+{{- define "pseudofs.tag" -}}
+{{- .Values.pseudofs.image.tag | default .Values.image.tag | default .Chart.AppVersion | toString -}}
+{{- end -}}
+
 {{- define "pseudofs.image" -}}
-{{- printf "%s/%s:%s" (.Values.pseudofs.image.registry | default .Values.global.registry) .Values.pseudofs.image.repository (toString .Values.pseudofs.image.tag) -}}
+{{- printf "%s/%s:%s" (.Values.pseudofs.image.registry | default .Values.global.registry) .Values.pseudofs.image.repository (include "pseudofs.tag" .) -}}
 {{- end -}}
 
 {{- define "pseudofs.address" -}}

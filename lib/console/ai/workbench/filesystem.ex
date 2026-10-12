@@ -26,6 +26,18 @@ defmodule Console.AI.Workbench.Filesystem do
   def enabled?(nil), do: false
   def enabled?(_), do: PseudoFS.enabled?()
 
+  @external_resource Console.priv_filename("prompts/workbench/filesystem_knowledge.md")
+  @knowledge_prompt Console.priv_file!("prompts/workbench/filesystem_knowledge.md")
+
+  @doc "system prompt guidance on using the filesystem as the workbench's knowledge base, empty when it isn't configured"
+  @spec knowledge_prompt() :: binary
+  def knowledge_prompt() do
+    case PseudoFS.enabled?() do
+      true -> @knowledge_prompt
+      false -> ""
+    end
+  end
+
   @doc "the pseudofs tenant for a workbench"
   @spec tenant(Workbench.t | binary) :: binary
   def tenant(%Workbench{id: id}), do: id

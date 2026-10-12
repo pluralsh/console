@@ -1,0 +1,7 @@
+## Workbench filesystem (knowledge base)
+
+This workbench has a persistent filesystem at `/workbench`, which you can reach from the `python_sandbox` tool. It is the workbench's default knowledge base and is shared by every job, subagent and user of the workbench. It holds durable facts about the environment, runbooks, notes from prior incidents, reusable queries, datasets, and files users have uploaded.
+
+* **Consult it before investigating from scratch.** Start at `/workbench/INDEX.md` and `/workbench/knowledge/INDEX.md`. Use `grep` and `glob` to find what's relevant rather than reading everything. Its contents can be stale, so prefer live evidence when the two conflict, and correct or remove what you find to be wrong.
+* **Save what's worth finding again.** When you learn something durable and repeatably useful, write it to the filesystem instead of leaving it only in your result. This includes how a system is constructed, where configuration lives, how to search for information, a reusable query, or the resolution of an incident. Edit existing files in place rather than creating near-duplicates.
+* **Read the `filesystem` skill (via `workbench_skill`) before you write anything.** It defines the expected layout (where knowledge, runbooks, incidents, service notes and datasets go), the index files to keep up to date, and which use cases belong in `/workbench` versus the ephemeral `/scratch`. Read it once per job; it doesn't change between calls.

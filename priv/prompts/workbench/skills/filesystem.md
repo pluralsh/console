@@ -56,6 +56,14 @@ Files attached to prompts are uploaded to `/workbench/_plrl_/uploads/<id>/<filen
 - Read from it freely, but don't write, move or delete anything there unless the user asks.
 - If an upload should become part of the workbench's library, copy what matters into a well-named location elsewhere and reference the original path.
 
+## Knowledge
+
+`/workbench/knowledge/` holds short, durable facts about the environment, such as how a system is constructed, where its configuration lives, or how to find information in it. Each topic gets one markdown file (for example `knowledge/checkout-api-deployment.md`), and `knowledge/INDEX.md` gives a one-line description of each.
+
+- Check the index before investigating from scratch. Treat what you find as potentially stale, and prefer live evidence when the two conflict.
+- When you learn something repeatably useful, edit the related file in place, or add a new one only when nothing fits. Update `INDEX.md` in the same sandbox call.
+- Fix or delete entries you find to be wrong. Keep longer material (runbooks, incident write-ups, datasets) in its own directory and link to it from the knowledge file.
+
 ## Laying out the filesystem
 
 Before writing, look at what already exists (`iterdir` on the root, read any `INDEX.md` or `README.md`) and extend the existing structure rather than inventing a parallel one.
@@ -72,6 +80,9 @@ A typical layout might look like:
 ```text
 /workbench
 ├── INDEX.md                      # what lives where, one line per top-level directory
+├── knowledge/
+│   ├── INDEX.md                  # one line per fact file
+│   └── checkout-api-deployment.md
 ├── runbooks/
 │   ├── INDEX.md
 │   └── payments/stuck-refunds.md

@@ -17,7 +17,8 @@ spec:
     metadata:
       labels:
         {{- include "pseudofs.selectorLabels" . | nindent 8 }}
-        {{- with $values.podLabels }}
+        {{- /* console podLabels carry identity bindings like azure.workload.identity/use for the shared service account */}}
+        {{- with merge (deepCopy ($values.podLabels | default dict)) (.Values.podLabels | default dict) }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:

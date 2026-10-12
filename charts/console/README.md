@@ -86,9 +86,14 @@ annotations under `serviceAccount.annotations` (IRSA, EKS Pod Identity, Azure
 workload identity) also grant it bucket access. When static keys are set in
 `console.config.objectStore.s3` or `console.config.objectStore.azure`, they are
 copied into a `console-pseudofs-env` secret. Other credentials can be supplied
-with `pseudofs.extraEnv` or `pseudofs.extraEnvFrom`, and pod labels required by
-your identity provider (for example `azure.workload.identity/use: "true"`) with
-`pseudofs.podLabels`.
+with `pseudofs.extraEnv` or `pseudofs.extraEnvFrom`. The pod inherits the
+Console's `podLabels` (eg `azure.workload.identity/use: "true"`), and
+`pseudofs.podLabels` adds more.
+
+On Azure, leaving `console.config.objectStore.azure.accessKey` unset makes both
+the Console and PseudoFS authenticate with workload identity. The identity needs
+`Storage Blob Data Contributor` on the container (or account), which also lets
+the Console issue the user delegation SAS urls it hands out for downloads.
 
 S3-compatible endpoints reuse `console.config.objectStore.s3.endpoint`; an
 `http://` endpoint enables plaintext connections, and
@@ -100,13 +105,13 @@ tuning maps directly onto the PseudoFS configuration through
 
 ### Bumping PseudoFS
 
-The PseudoFS image is vendored from `ghcr.io/pluralsh/pseudofs` (published by
-the telemetry repo) as `pluralsh/fs` in each registry the Console is published
-to, at a fixed version. The chart pulls `<global.registry>/fs`, so a custom
-`global.registry` must also mirror `fs`. To bump it:
+A pinned release of `ghcr.io/pluralsh/pseudofs` (published by the telemetry
+repo) is vendored as `pluralsh/fs` under the same tags as the Console image, so
+`<global.registry>/fs` defaults to `image.tag`, then the chart `appVersion`. A
+custom `global.registry` must also mirror `fs`. To bump it:
 
-1. Pick a published telemetry release and set `pseudofs.image.tag` in
-   `charts/console/values.yaml` to its version, without a leading `v`.
+1. Pick a published telemetry release and set `PSEUDOFS_VERSION` in
+   `.github/workflows/pseudofs-vendor.yaml` to its version, without a leading `v`.
 2. Check the release's chart (`chart/pseudofs` in the telemetry repo) for new or
    renamed `config.filesystem` fields and mirror them under `pseudofs.config`.
 3. If `proto/pseudofs.proto` changed upstream, copy it into this repo's
@@ -115,10 +120,12 @@ to, at a fixed version. The chart pulls `<global.registry>/fs`, so a custom
    to the same tag so the live tests (`PSEUDOFS_TEST_ADDR=localhost:9093 mix test
    --only pseudofs` after `make testup`) exercise the new release.
 
-`.github/workflows/pseudofs-vendor.yaml` uses `skopeo copy --all` to mirror the
-pinned tag to `ghcr.io/pluralsh/fs`, `gcr.io/pluralsh/fs` and
-`docker.io/pluralsh/fs`. It runs on every Console release, on pull requests that
-touch `charts/console/values.yaml`, and can be dispatched manually.
+`.github/workflows/pseudofs-vendor.yaml` uses `skopeo copy --all` to copy the
+pinned release to `ghcr.io/pluralsh/fs`, `gcr.io/pluralsh/fs` and
+`docker.io/pluralsh/fs`, tagged with the same `docker/metadata-action` rules as
+the Console image. CI (`test.yaml`) runs it on every pull request and master
+push, which produces `sha-<sha>` and `pr-<n>`/`<branch>` tags. Releases
+(`publish.yaml`) produce `<version>` tags.
 
 ## Values
 
