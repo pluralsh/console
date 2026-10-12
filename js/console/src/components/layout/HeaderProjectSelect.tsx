@@ -53,6 +53,7 @@ export function HeaderProjectSelect() {
         onSelectionChange={(id) => setProjectId(id as string)}
         onInputChange={(value) => setQuery(value)}
         startIcon={<SearchIcon size={12} />}
+        arrowSize="small"
         dropdownFooter={
           !data && loading ? (
             <ListBoxFooter>

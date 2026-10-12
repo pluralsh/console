@@ -76,6 +76,7 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
 
 type ComboBoxInputProps = {
   showArrow?: boolean
+  arrowSize?: 'small' | 'medium'
   isOpen?: boolean
   outerInputProps?: InputPropsFull
   onInputClick?: MouseEventHandler
@@ -108,10 +109,12 @@ const OpenButtonSC = styled.div(({ theme }) => ({
 function OpenButton({
   buttonRef,
   buttonProps = {},
+  arrowSize = 'medium',
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
   buttonRef?: RefObject<HTMLDivElement | null>
   buttonProps?: AriaButtonProps
+  arrowSize?: ComboBoxInputProps['arrowSize']
 }) {
   const fallbackRef = useRef<HTMLDivElement | null>(null)
   const resolvedButtonRef = buttonRef ?? fallbackRef
@@ -126,7 +129,7 @@ function OpenButton({
       {...props}
       {...useButtonProps}
     >
-      <CaretDownIcon />
+      <CaretDownIcon size={arrowSize === 'small' ? 12 : 16} />
     </OpenButtonSC>
   )
 }
@@ -157,6 +160,7 @@ function ComboBoxInput({
   buttonRef,
   buttonProps,
   showArrow = true,
+  arrowSize,
   hasChips = false,
   onInputClick,
   loading,
@@ -188,6 +192,7 @@ function ComboBoxInput({
           <OpenButton
             buttonRef={buttonRef}
             buttonProps={buttonProps}
+            arrowSize={arrowSize}
           />
         ) : undefined
       }
@@ -224,6 +229,7 @@ function ComboBox({
   onHeaderClick,
   onFooterClick,
   showArrow,
+  arrowSize,
   startIcon,
   endIcon,
   placement,
@@ -523,6 +529,7 @@ function ComboBox({
         buttonRef={buttonRef}
         buttonProps={buttonProps}
         showArrow={showArrow}
+        arrowSize={arrowSize}
         isOpen={state.isOpen}
         suffix={suffix}
         prefix={prefix}
