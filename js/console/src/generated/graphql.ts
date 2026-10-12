@@ -463,6 +463,8 @@ export type AgentPrReviewFileAttributes = {
 
 export type AgentPrompt = {
   __typename?: 'AgentPrompt';
+  /** files attached to this prompt */
+  attachments?: Maybe<Array<Maybe<Attachment>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the prompt to give this agent run */
@@ -1548,6 +1550,23 @@ export type ArgoStrategyStep = {
   experiment?: Maybe<ArgoExperiment>;
   pause?: Maybe<CanaryPause>;
   setWeight?: Maybe<Scalars['Int']['output']>;
+};
+
+export type Attachment = {
+  __typename?: 'Attachment';
+  /** a short-lived, pre-signed url to download this file */
+  downloadUrl?: Maybe<Scalars['String']['output']>;
+  /** the name of the uploaded file */
+  filename: Scalars['String']['output'];
+  /** the media type of the uploaded file */
+  filetype?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** where this file is stored in the workbench filesystem */
+  path: Scalars['String']['output'];
+  /** size in bytes */
+  size?: Maybe<Scalars['Int']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type Audit = {
@@ -9733,6 +9752,8 @@ export type PulumiConfigurationAttributes = {
 
 export type QueuedPrompt = {
   __typename?: 'QueuedPrompt';
+  /** files attached to this prompt */
+  attachments?: Maybe<Array<Maybe<Attachment>>>;
   /** when this prompt was consumed */
   consumedAt?: Maybe<Scalars['DateTime']['output']>;
   /** when this prompt becomes eligible to dequeue */
@@ -9754,6 +9775,8 @@ export type QueuedPrompt = {
 };
 
 export type QueuedPromptAttributes = {
+  /** files to attach to the prompt, which are uploaded to the workbench filesystem immediately */
+  attachments?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>>>;
   /** when this prompt becomes eligible to dequeue */
   dequeableAt: Scalars['DateTime']['input'];
   /** mode-specific overrides to apply when this prompt is dequeued */
@@ -10120,6 +10143,7 @@ export type RootMutationType = {
   createWorkbench?: Maybe<Workbench>;
   createWorkbenchChatbot?: Maybe<WorkbenchChatbot>;
   createWorkbenchCron?: Maybe<WorkbenchCron>;
+  createWorkbenchDirectory?: Maybe<WorkbenchFile>;
   /** Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench. */
   createWorkbenchEval?: Maybe<WorkbenchEval>;
   /** Creates a new workbench job. Requires read access to the workbench. */
@@ -10203,6 +10227,7 @@ export type RootMutationType = {
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Deletes the eval configuration for a workbench. Requires write access to the workbench. */
   deleteWorkbenchEval?: Maybe<WorkbenchEval>;
+  deleteWorkbenchFile?: Maybe<WorkbenchFile>;
   /** Deletes saved workbench knowledge. Requires write access to the workbench. */
   deleteWorkbenchKnowledge?: Maybe<WorkbenchKnowledge>;
   deleteWorkbenchPolicy?: Maybe<WorkbenchPolicy>;
@@ -10243,6 +10268,7 @@ export type RootMutationType = {
   markRead?: Maybe<User>;
   /** merges configuration for a service */
   mergeService?: Maybe<ServiceDeployment>;
+  moveWorkbenchFile?: Maybe<WorkbenchFile>;
   oauthCallback?: Maybe<User>;
   oauthConsent?: Maybe<OauthResponse>;
   /** Creates a custom run, with the given command list, to execute w/in the stack's environment */
@@ -10386,6 +10412,7 @@ export type RootMutationType = {
   workbenchCron?: Maybe<WorkbenchCron>;
   workbenchEvalSkill?: Maybe<WorkbenchJob>;
   workbenchPrFollowup?: Maybe<WorkbenchJobActivity>;
+  writeWorkbenchFile?: Maybe<WorkbenchFile>;
 };
 
 
@@ -10554,6 +10581,7 @@ export type RootMutationTypeCreateAgentRunArgs = {
 
 
 export type RootMutationTypeCreateAgentRunPromptArgs = {
+  attachments?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>>>;
   id: Scalars['ID']['input'];
   prompt: Scalars['String']['input'];
 };
@@ -10847,6 +10875,12 @@ export type RootMutationTypeCreateWorkbenchChatbotArgs = {
 
 export type RootMutationTypeCreateWorkbenchCronArgs = {
   attributes: WorkbenchCronAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateWorkbenchDirectoryArgs = {
+  path: Scalars['String']['input'];
   workbenchId: Scalars['ID']['input'];
 };
 
@@ -11230,6 +11264,12 @@ export type RootMutationTypeDeleteWorkbenchEvalArgs = {
 };
 
 
+export type RootMutationTypeDeleteWorkbenchFileArgs = {
+  path: Scalars['String']['input'];
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteWorkbenchKnowledgeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -11362,6 +11402,13 @@ export type RootMutationTypeMarkReadArgs = {
 export type RootMutationTypeMergeServiceArgs = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeMoveWorkbenchFileArgs = {
+  source: Scalars['String']['input'];
+  target: Scalars['String']['input'];
+  workbenchId: Scalars['ID']['input'];
 };
 
 
@@ -12037,6 +12084,14 @@ export type RootMutationTypeWorkbenchEvalSkillArgs = {
 export type RootMutationTypeWorkbenchPrFollowupArgs = {
   attributes: WorkbenchMessageAttributes;
   url: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeWriteWorkbenchFileArgs = {
+  content?: InputMaybe<Scalars['String']['input']>;
+  file?: InputMaybe<Scalars['Upload']['input']>;
+  path: Scalars['String']['input'];
+  workbenchId: Scalars['ID']['input'];
 };
 
 export type RootQueryType = {
@@ -16898,6 +16953,18 @@ export type Workbench = {
   /** eval configuration for this workbench (at most one; null if none configured) */
   eval?: Maybe<WorkbenchEval>;
   evalResults?: Maybe<WorkbenchEvalResultConnection>;
+  /** a single file or directory in this workbench's filesystem */
+  file?: Maybe<WorkbenchFile>;
+  /** the text contents of a file, for previewing (use the download url for binary or large files) */
+  fileContents?: Maybe<Scalars['String']['output']>;
+  /** the files and directories directly beneath a directory in this workbench's filesystem */
+  files?: Maybe<Array<Maybe<WorkbenchFile>>>;
+  /** whether this workbench has a filesystem, which requires an object store to be configured */
+  filesystemEnabled?: Maybe<Scalars['Boolean']['output']>;
+  /** files matching a glob pattern, supporting `*`, `?`, `**` and `{a,b}` */
+  globFiles?: Maybe<Array<Maybe<WorkbenchFile>>>;
+  /** lines matching a regex within a file, directory or glob pattern */
+  grepFiles?: Maybe<Array<Maybe<WorkbenchGrepMatch>>>;
   /** the id of the workbench */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -16970,6 +17037,44 @@ export type WorkbenchEvalResultsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchFileArgs = {
+  path: Scalars['String']['input'];
+};
+
+
+export type WorkbenchFileContentsArgs = {
+  path: Scalars['String']['input'];
+};
+
+
+export type WorkbenchFilesArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type WorkbenchGlobFilesArgs = {
+  maxResults?: InputMaybe<Scalars['Int']['input']>;
+  pattern: Scalars['String']['input'];
+};
+
+
+export type WorkbenchGrepFilesArgs = {
+  afterContext?: InputMaybe<Scalars['Int']['input']>;
+  beforeContext?: InputMaybe<Scalars['Int']['input']>;
+  caseInsensitive?: InputMaybe<Scalars['Boolean']['input']>;
+  fixedString?: InputMaybe<Scalars['Boolean']['input']>;
+  maxMatches?: InputMaybe<Scalars['Int']['input']>;
+  path?: InputMaybe<Scalars['String']['input']>;
+  pattern: Scalars['String']['input'];
+};
+
+
+export type WorkbenchIssueCountsArgs = {
+  providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>>>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -17590,6 +17695,46 @@ export type WorkbenchEvalResultsWorkbenchAverage = {
   workbench?: Maybe<Workbench>;
 };
 
+export type WorkbenchFile = {
+  __typename?: 'WorkbenchFile';
+  /** a short-lived, pre-signed url to download this file, supporting range requests */
+  downloadUrl?: Maybe<Scalars['String']['output']>;
+  kind: WorkbenchFileKind;
+  /** last modification time (only populated when the file is fetched directly) */
+  modifiedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the base name of this file */
+  name: Scalars['String']['output'];
+  /** absolute path of this file within the workbench filesystem */
+  path: Scalars['String']['output'];
+  /** where this file is located within the agent's python sandbox */
+  sandboxPath: Scalars['String']['output'];
+  /** size in bytes (only populated when the file is fetched directly) */
+  size?: Maybe<Scalars['Int']['output']>;
+};
+
+export enum WorkbenchFileKind {
+  Directory = 'DIRECTORY',
+  File = 'FILE'
+}
+
+export type WorkbenchGrepLine = {
+  __typename?: 'WorkbenchGrepLine';
+  lineNumber: Scalars['Int']['output'];
+  text: Scalars['String']['output'];
+};
+
+export type WorkbenchGrepMatch = {
+  __typename?: 'WorkbenchGrepMatch';
+  /** context lines following the match */
+  after?: Maybe<Array<Maybe<WorkbenchGrepLine>>>;
+  /** context lines preceding the match */
+  before?: Maybe<Array<Maybe<WorkbenchGrepLine>>>;
+  line: Scalars['String']['output'];
+  lineNumber: Scalars['Int']['output'];
+  /** the file containing this match */
+  path: Scalars['String']['output'];
+};
+
 export type WorkbenchInfrastructure = {
   __typename?: 'WorkbenchInfrastructure';
   /** kubernetes capability enabled */
@@ -17638,6 +17783,8 @@ export type WorkbenchJob = {
   alert?: Maybe<Alert>;
   /** dashboards and monitors associated with this workbench job */
   associations?: Maybe<Array<Maybe<WorkbenchJobAssociation>>>;
+  /** files attached to the initial prompt of this job */
+  attachments?: Maybe<Array<Maybe<Attachment>>>;
   /** chatbot integration metadata for this job, when present */
   chatbotMessage?: Maybe<ChatbotMessage>;
   /** when the run completed */
@@ -17732,6 +17879,8 @@ export type WorkbenchJobActivity = {
   agentRun?: Maybe<AgentRun>;
   /** all agent runs associated with this activity (sideloadable) */
   agentRuns?: Maybe<Array<Maybe<AgentRun>>>;
+  /** files attached to this activity's prompt */
+  attachments?: Maybe<Array<Maybe<Attachment>>>;
   /** the id of the activity */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -17952,6 +18101,8 @@ export type WorkbenchJobAssociation = {
 };
 
 export type WorkbenchJobAttributes = {
+  /** files to attach to the prompt, which are uploaded to the workbench filesystem */
+  attachments?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>>>;
   /** the flow this job is associated with */
   flowId?: InputMaybe<Scalars['ID']['input']>;
   /** mode-specific options for this job */
@@ -18298,6 +18449,8 @@ export type WorkbenchKnowledgeEdge = {
 };
 
 export type WorkbenchMessageAttributes = {
+  /** files to attach to the prompt, which are uploaded to the workbench filesystem */
+  attachments?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>>>;
   /** the prompt for the message */
   prompt: Scalars['String']['input'];
 };

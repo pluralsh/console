@@ -119,6 +119,7 @@ defmodule Console.Schema.WorkbenchJob do
     has_many :monitors,        through: [:associations, :monitor]
     has_many :pull_requests,   PullRequest, on_replace: :delete
     has_many :queued_prompts,  QueuedPrompt, on_replace: :delete
+    has_many :attachments,     Console.Schema.Attachment, where: [workbench_job_activity_id: nil]
 
     timestamps()
   end

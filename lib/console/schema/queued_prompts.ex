@@ -12,6 +12,8 @@ defmodule Console.Schema.QueuedPrompt do
     belongs_to :workbench_job, WorkbenchJob
     belongs_to :user,          User
 
+    has_many :attachments, Console.Schema.Attachment
+
     timestamps()
   end
 

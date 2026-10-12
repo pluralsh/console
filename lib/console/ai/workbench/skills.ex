@@ -11,6 +11,7 @@ end
 defmodule Console.AI.Workbench.Skills.Builtins do
   alias Console.AI.Workbench.Skill
   @canvas File.read!(Console.priv_filename(["prompts", "workbench", "skills", "canvas.md"]))
+  @filesystem File.read!(Console.priv_filename(["prompts", "workbench", "skills", "filesystem.md"]))
 
   def builtins() do
     [
@@ -20,7 +21,20 @@ defmodule Console.AI.Workbench.Skills.Builtins do
         contents: @canvas,
         subagents: [:canvas, :orchestrator]
       }
-    ]
+    ] ++ filesystem()
+  end
+
+  defp filesystem() do
+    case Console.PseudoFS.enabled?() do
+      true ->
+        [%Skill{
+          name: "filesystem",
+          description: "how to read, write and search the persistent workbench filesystem from the python sandbox, and how to organize files in it",
+          contents: @filesystem,
+          subagents: [:orchestrator, :infrastructure, :observability, :monitoring]
+        }]
+      false -> []
+    end
   end
 end
 

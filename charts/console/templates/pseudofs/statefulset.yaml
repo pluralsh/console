@@ -1,0 +1,182 @@
+{{- if include "pseudofs.enabled" . }}
+{{- $values := .Values.pseudofs }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "pseudofs.fullname" . }}
+  labels:
+    {{- include "pseudofs.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "pseudofs.fullname" . }}
+  # a single replica owns the local WAL and blob staging area, concurrent processes must not share the store
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pseudofs.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "pseudofs.selectorLabels" . | nindent 8 }}
+        {{- with $values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/pseudofs/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/pseudofs/secret.yaml") . | sha256sum }}
+        {{- with $values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: console
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ $values.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml $values.podSecurityContext | nindent 8 }}
+      {{- with ($values.imagePullSecrets | default .Values.imagePullSecrets) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with $values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: pseudofs
+          image: {{ include "pseudofs.image" . | quote }}
+          imagePullPolicy: {{ $values.image.pullPolicy }}
+          args: ["--config", "/etc/pseudofs/pseudofs.yaml"]
+          securityContext:
+            {{- toYaml $values.securityContext | nindent 12 }}
+          ports:
+            - name: grpc
+              containerPort: {{ $values.service.port }}
+              protocol: TCP
+          {{- if $values.probes.liveness.enabled }}
+          livenessProbe:
+            grpc:
+              port: {{ $values.service.port }}
+            initialDelaySeconds: {{ $values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ $values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ $values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ $values.probes.liveness.failureThreshold }}
+          {{- end }}
+          {{- if $values.probes.readiness.enabled }}
+          readinessProbe:
+            grpc:
+              port: {{ $values.service.port }}
+            initialDelaySeconds: {{ $values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ $values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ $values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ $values.probes.readiness.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml $values.resources | nindent 12 }}
+          {{- with $values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "pseudofs.fullname" . }}-env
+            {{- with $values.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/pseudofs
+              readOnly: true
+            - name: data
+              mountPath: {{ $values.persistence.mountPath }}
+            - name: cache
+              mountPath: {{ $values.cache.mountPath }}
+            {{- with $values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "pseudofs.fullname" . }}
+        {{- if not $values.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else if $values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ $values.persistence.existingClaim }}
+        {{- end }}
+        {{- if not $values.cache.persistence.enabled }}
+        - name: cache
+          {{- if or $values.cache.emptyDir.medium $values.cache.emptyDir.sizeLimit }}
+          emptyDir:
+            {{- with $values.cache.emptyDir.medium }}
+            medium: {{ . | quote }}
+            {{- end }}
+            {{- with $values.cache.emptyDir.sizeLimit }}
+            sizeLimit: {{ . }}
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- else if $values.cache.persistence.existingClaim }}
+        - name: cache
+          persistentVolumeClaim:
+            claimName: {{ $values.cache.persistence.existingClaim }}
+        {{- end }}
+        {{- with $values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+  {{- $dataClaim := and $values.persistence.enabled (not $values.persistence.existingClaim) }}
+  {{- $cacheClaim := and $values.cache.persistence.enabled (not $values.cache.persistence.existingClaim) }}
+  {{- if or $dataClaim $cacheClaim }}
+  volumeClaimTemplates:
+    {{- if $dataClaim }}
+    - metadata:
+        name: data
+        {{- with $values.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          {{- toYaml $values.persistence.accessModes | nindent 10 }}
+        {{- with $values.persistence.storageClass }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $values.persistence.size }}
+    {{- end }}
+    {{- if $cacheClaim }}
+    - metadata:
+        name: cache
+        {{- with $values.cache.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          {{- toYaml $values.cache.persistence.accessModes | nindent 10 }}
+        {{- with $values.cache.persistence.storageClass }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $values.cache.persistence.size }}
+    {{- end }}
+  {{- end }}
+{{- end }}

@@ -1436,6 +1436,30 @@ type RootMutationType {
 
   runSentinel(id: ID, name: String, overrides: SentinelRunOverrides): SentinelRun
 
+  writeWorkbenchFile(
+    workbenchId: ID!
+
+    "the absolute path of the file, missing parent directories are created"
+    path: String!
+
+    "text contents of the file"
+    content: String
+
+    "an uploaded file, used instead of content"
+    file: Upload
+  ): WorkbenchFile
+
+  createWorkbenchDirectory(workbenchId: ID!, path: String!): WorkbenchFile
+
+  moveWorkbenchFile(workbenchId: ID!, source: String!, target: String!): WorkbenchFile
+
+  deleteWorkbenchFile(
+    workbenchId: ID!
+
+    "a file, or a directory which will be deleted recursively"
+    path: String!
+  ): WorkbenchFile
+
   createWorkbench(attributes: WorkbenchAttributes): Workbench
 
   updateWorkbench(id: ID!, attributes: WorkbenchAttributes): Workbench
@@ -1634,7 +1658,14 @@ type RootMutationType {
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
 
-  createAgentRunPrompt(id: ID!, prompt: String!): AgentPromptHistory
+  createAgentRunPrompt(
+    id: ID!
+
+    prompt: String!
+
+    "files to attach to this prompt, only supported for agent runs spawned by a workbench"
+    attachments: [Upload]
+  ): AgentPromptHistory
 
   shareAgentRun(id: ID!, shared: Boolean!): AgentRun
 
@@ -2808,6 +2839,9 @@ type AgentPrompt {
   "the sequence number of the prompt"
   seq: Int!
 
+  "files attached to this prompt"
+  attachments: [Attachment]
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -3111,6 +3145,11 @@ enum EvalResultsPeriod {
   MONTH
 }
 
+enum WorkbenchFileKind {
+  FILE
+  DIRECTORY
+}
+
 input WorkbenchJobAttributes {
   "the prompt for this job"
   prompt: String
@@ -3120,6 +3159,9 @@ input WorkbenchJobAttributes {
 
   "mode-specific options for this job"
   modes: WorkbenchJobModesAttributes
+
+  "files to attach to the prompt, which are uploaded to the workbench filesystem"
+  attachments: [Upload]
 }
 
 input WorkbenchJobModesAttributes {
@@ -4033,6 +4075,9 @@ input WorkbenchToolHttpHeaderAttributes {
 input WorkbenchMessageAttributes {
   "the prompt for the message"
   prompt: String!
+
+  "files to attach to the prompt, which are uploaded to the workbench filesystem"
+  attachments: [Upload]
 }
 
 input QueuedPromptAttributes {
@@ -4044,6 +4089,9 @@ input QueuedPromptAttributes {
 
   "mode-specific overrides to apply when this prompt is dequeued"
   modes: WorkbenchJobModesAttributes
+
+  "files to attach to the prompt, which are uploaded to the workbench filesystem immediately"
+  attachments: [Upload]
 }
 
 type WorkbenchJobCounts {
@@ -4072,6 +4120,71 @@ type QueuedPromptSummary {
 
   "earliest future dequeable_at among pending prompts"
   nextAt: DateTime
+}
+
+type WorkbenchFile {
+  "absolute path of this file within the workbench filesystem"
+  path: String!
+
+  "the base name of this file"
+  name: String!
+
+  kind: WorkbenchFileKind!
+
+  "size in bytes (only populated when the file is fetched directly)"
+  size: Int
+
+  "last modification time (only populated when the file is fetched directly)"
+  modifiedAt: DateTime
+
+  "where this file is located within the agent's python sandbox"
+  sandboxPath: String!
+
+  "a short-lived, pre-signed url to download this file, supporting range requests"
+  downloadUrl: String
+}
+
+type Attachment {
+  id: ID!
+
+  "the name of the uploaded file"
+  filename: String!
+
+  "the media type of the uploaded file"
+  filetype: String
+
+  "where this file is stored in the workbench filesystem"
+  path: String!
+
+  "size in bytes"
+  size: Int
+
+  "a short-lived, pre-signed url to download this file"
+  downloadUrl: String
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchGrepLine {
+  lineNumber: Int!
+  text: String!
+}
+
+type WorkbenchGrepMatch {
+  "the file containing this match"
+  path: String!
+
+  lineNumber: Int!
+
+  line: String!
+
+  "context lines preceding the match"
+  before: [WorkbenchGrepLine]
+
+  "context lines following the match"
+  after: [WorkbenchGrepLine]
 }
 
 type Workbench {
@@ -4121,6 +4234,43 @@ type Workbench {
   writeBindings: [PolicyBinding]
 
   workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
+
+  "whether this workbench has a filesystem, which requires an object store to be configured"
+  filesystemEnabled: Boolean
+
+  "the files and directories directly beneath a directory in this workbench's filesystem"
+  files(
+    "the directory to list, defaults to the root"
+    path: String
+  ): [WorkbenchFile]
+
+  "a single file or directory in this workbench's filesystem"
+  file(path: String!): WorkbenchFile
+
+  "the text contents of a file, for previewing (use the download url for binary or large files)"
+  fileContents(path: String!): String
+
+  "files matching a glob pattern, supporting `*`, `?`, `**` and `{a,b}`"
+  globFiles(pattern: String!, maxResults: Int): [WorkbenchFile]
+
+  "lines matching a regex within a file, directory or glob pattern"
+  grepFiles(
+    pattern: String!
+
+    "a file, directory or glob to search, defaults to the root"
+    path: String
+
+    "treat the pattern as a literal string"
+    fixedString: Boolean
+
+    caseInsensitive: Boolean
+
+    beforeContext: Int
+
+    afterContext: Int
+
+    maxMatches: Int
+  ): [WorkbenchGrepMatch]
 
   runs(
     after: String
@@ -4335,6 +4485,9 @@ type WorkbenchJob {
   "dashboards and monitors associated with this workbench job"
   associations: [WorkbenchJobAssociation]
 
+  "files attached to the initial prompt of this job"
+  attachments: [Attachment]
+
   "the alert this run was spawned from"
   alert: Alert
 
@@ -4538,6 +4691,9 @@ type WorkbenchJobActivity {
 
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
+
+  "files attached to this activity's prompt"
+  attachments: [Attachment]
 
   "the user who created, approved, or denied this activity"
   user: User
@@ -4987,6 +5143,9 @@ type QueuedPrompt {
 
   "the job this prompt will be sent to"
   workbenchJob: WorkbenchJob
+
+  "files attached to this prompt"
+  attachments: [Attachment]
 
   "the user who queued this prompt"
   user: User

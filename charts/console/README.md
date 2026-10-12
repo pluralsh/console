@@ -57,6 +57,69 @@ independent of the Console chart version. The default 8Gi memory limit and
 approximately five-minute startup probe budget allow time for the baked model
 to load on CPU nodes.
 
+## Workbench filesystem
+
+Workbenches get a persistent filesystem backed by
+[PseudoFS](https://github.com/pluralsh/telemetry), a single-replica gRPC server
+that stores files in the same object store configured in
+`console.config.objectStore`. It is installed automatically when an S3 bucket
+or Azure storage account is configured there, and can be disabled with
+`pseudofs.enabled: false`. Each workbench is a separate tenant, and the Console
+connects to the in-namespace `console-pseudofs` service.
+
+Agents see a workbench's filesystem at `/workbench` in their Python sandbox,
+and users can browse, upload, edit and download its files through the
+workbench GraphQL API. Files attached to workbench, queued and agent run prompts
+are uploaded to `/_plrl_/uploads/<attachment-id>/<filename>` in the workbench's
+filesystem; the `_plrl_` prefix is reserved for files Plural manages.
+
+Data is stored beneath `<console.config.objectStore.path>/fs` (the path
+defaults to `plrl`, and the `fs` suffix is `pseudofs.objectStore.subpath`):
+
+```text
+s3://<bucket>/<path>/fs/metastore/  SlateDB metastore
+s3://<bucket>/<path>/fs/blobs/      file content blobs
+```
+
+The StatefulSet runs as the `console` service account, so workload identity
+annotations under `serviceAccount.annotations` (IRSA, EKS Pod Identity, Azure
+workload identity) also grant it bucket access. When static keys are set in
+`console.config.objectStore.s3` or `console.config.objectStore.azure`, they are
+copied into a `console-pseudofs-env` secret. Other credentials can be supplied
+with `pseudofs.extraEnv` or `pseudofs.extraEnvFrom`, and pod labels required by
+your identity provider (for example `azure.workload.identity/use: "true"`) with
+`pseudofs.podLabels`.
+
+S3-compatible endpoints reuse `console.config.objectStore.s3.endpoint`; an
+`http://` endpoint enables plaintext connections, and
+`pseudofs.objectStore.s3.virtualHostedStyle` switches from path-style requests.
+The metastore WAL and blobs awaiting upload live on the
+`pseudofs.persistence` volume, so keep it enabled for durable writes. Further
+tuning maps directly onto the PseudoFS configuration through
+`pseudofs.config.filesystem` and `pseudofs.config.search`.
+
+### Bumping PseudoFS
+
+The PseudoFS image is vendored from `ghcr.io/pluralsh/pseudofs` (published by
+the telemetry repo) as `pluralsh/fs` in each registry the Console is published
+to, at a fixed version. The chart pulls `<global.registry>/fs`, so a custom
+`global.registry` must also mirror `fs`. To bump it:
+
+1. Pick a published telemetry release and set `pseudofs.image.tag` in
+   `charts/console/values.yaml` to its version, without a leading `v`.
+2. Check the release's chart (`chart/pseudofs` in the telemetry repo) for new or
+   renamed `config.filesystem` fields and mirror them under `pseudofs.config`.
+3. If `proto/pseudofs.proto` changed upstream, copy it into this repo's
+   `proto/` directory and run `make proto` to regenerate the Elixir client.
+4. Bump the `pseudofs` image in `docker-compose.yml` and `docker-compose.test.yml`
+   to the same tag so the live tests (`PSEUDOFS_TEST_ADDR=localhost:9093 mix test
+   --only pseudofs` after `make testup`) exercise the new release.
+
+`.github/workflows/pseudofs-vendor.yaml` uses `skopeo copy --all` to mirror the
+pinned tag to `ghcr.io/pluralsh/fs`, `gcr.io/pluralsh/fs` and
+`docker.io/pluralsh/fs`. It runs on every Console release, on pull requests that
+touch `charts/console/values.yaml`, and can be dispatched manually.
+
 ## Values
 
 | Key | Type | Default | Description |
