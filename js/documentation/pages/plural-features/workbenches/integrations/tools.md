@@ -38,8 +38,8 @@ All native integrations respect your existing RBAC — enabling a capability her
 | **[Datadog](/plural-features/workbenches/integrations/tools/datadog)** | Query metrics, logs, and traces from the Datadog API |
 | **[Loki](/plural-features/workbenches/integrations/tools/loki)** | Query log streams from a Loki-compatible endpoint |
 | **[Elastic](/plural-features/workbenches/integrations/tools/elastic)** | Query and search indices in an Elasticsearch cluster |
-| **[Tempo](/plural-features/workbenches/integrations/tools/tempo)** | Query distributed traces from a Grafana Tempo endpoint |
-| **[Jaeger](/plural-features/workbenches/integrations/tools/jaeger)** | Query distributed traces from a Jaeger backend |
+| **[Tempo](/plural-features/workbenches/integrations/tools/tempo)** | Query distributed trace spans from a Grafana Tempo endpoint |
+| **[Jaeger](/plural-features/workbenches/integrations/tools/jaeger)** | Query distributed trace spans from a Jaeger backend with filters for service, operation, duration, and attributes |
 
 ### Source control
 
