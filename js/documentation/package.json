@@ -8,7 +8,7 @@
     "dev": "run-s generate:route-index && concurrently \"next dev -p 3004\" \"yarn graphql:codegen:watch\"",
     "dev:watch": "concurrently \"next dev -p 3004\" \"yarn graphql:codegen:watch\"",
     "build": "run-s generate:route-index build:next",
-    "build:next": "next build",
+    "build:next": "biome check --vcs-enabled=false ./src ./pages && next build",
     "start": "next start -p 3000",
     "lint": "run-p lint:biome lint:js lint:css",
     "lint:biome": "biome check ./src ./pages",
@@ -95,6 +95,6 @@
     "typescript": "5.8.2"
   },
   "lint-staged": {
-    "./{src,pages}/**/*.{js,jsx,ts,tsx,graphql,css}": "biome check --write --no-errors-on-unmatched"
+    "./{src,pages}/**/*.{js,jsx,ts,tsx,graphql,css}": "biome format --write --no-errors-on-unmatched"
   }
 }

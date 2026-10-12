@@ -158,6 +158,6 @@
     "vitest": "5.0.1"
   },
   "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx,graphql,json,css}": "biome check --write --no-errors-on-unmatched"
+    "./src/**/*.{js,jsx,ts,tsx,graphql,json,css}": "biome format --write --no-errors-on-unmatched"
   }
 }

@@ -2,6 +2,7 @@
 .idea/
 /.vscode/**/*
 !/.vscode/settings.json
+!/.vscode/extensions.json
 !/.vscode/markdown.code-snippets
 
 # System

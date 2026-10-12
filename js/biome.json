@@ -31,12 +31,16 @@
       "preset": "none",
       "complexity": {
         "noArguments": "error",
+        "noBannedTypes": "error",
+        "noUselessThisAlias": "error",
         "noUselessTypeConstraint": "error"
       },
       "correctness": {
         "noChildrenProp": "error",
         "noReactPropAssignments": "error",
         "noRenderReturnValue": "error",
+        "noUnusedFunctionParameters": "error",
+        "noUnusedImports": "error",
         "noUnusedVariables": "error"
       },
       "security": {
@@ -64,6 +68,7 @@
           "options": { "ignore": ["css"] }
         },
         "noUnsafeDeclarationMerging": "error",
+        "noUnusedExpressions": "error",
         "noVar": "error",
         "useNamespaceKeyword": "error"
       }

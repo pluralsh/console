@@ -125,6 +125,6 @@
     "styled-components": ">=6.2.0"
   },
   "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx}": "biome check --write --no-errors-on-unmatched"
+    "./src/**/*.{js,jsx,ts,tsx}": "biome format --write --no-errors-on-unmatched"
   }
 }
