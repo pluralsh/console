@@ -308,13 +308,7 @@ defmodule Console.GraphQl.AI do
 
     field :service, :service_deployment, resolve: dataloader(Deployments), description: "the plural service managing this component, if any"
     field :cluster, :cluster,    resolve: dataloader(Deployments)
-    field :insight, :ai_insight do
-      description "the insight of this component, or the one of the service managing it, which is reused instead of generating a second one"
-      resolve fn
-        %{insight_id: nil, service_id: sid} = comp, _, _ when is_binary(sid) -> AI.component_service_insight(comp)
-        comp, args, res -> dataloader(AI).(comp, args, res)
-      end
-    end
+    field :insight, :ai_insight, resolve: dataloader(AI)
 
     @desc "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
     field :resource, :kubernetes_unstructured do

@@ -16,7 +16,7 @@ The operator reports one **root** per failure rather than one row per failing po
 - A failure that is more than four levels below the nearest owner is ignored.
 - A CronJob is a failure only while its newest job failed, and a node only after it has been failing for five minutes.
 
-Failures of workloads deployed by a Plural service are reported too. They carry the service that manages them, and Console links the component to that service and reuses the insight it already generated for it, instead of generating a second one.
+Failures of workloads deployed by a Plural service are reported too. They carry the service that manages them, taken from the object or its nearest owner, and Console links the component to that service.
 
 ## How the priority is decided
 

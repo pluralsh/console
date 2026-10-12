@@ -2348,8 +2348,7 @@ type ClusterInsightComponent struct {
 	// the plural service managing this component, if any
 	Service *ServiceDeployment `json:"service,omitempty"`
 	Cluster *Cluster           `json:"cluster,omitempty"`
-	// the insight of this component, or the one of the service managing it, which is reused instead of generating a second one
-	Insight *AiInsight `json:"insight,omitempty"`
+	Insight *AiInsight         `json:"insight,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }

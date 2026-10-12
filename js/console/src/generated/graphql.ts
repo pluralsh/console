@@ -2934,7 +2934,6 @@ export type ClusterInsightComponent = {
   cluster?: Maybe<Cluster>;
   group?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  /** the insight of this component, or the one of the service managing it, which is reused instead of generating a second one */
   insight?: Maybe<AiInsight>;
   kind: Scalars['String']['output'];
   name: Scalars['String']['output'];

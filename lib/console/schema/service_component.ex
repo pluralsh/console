@@ -31,10 +31,6 @@ defmodule Console.Schema.ServiceComponent do
     |> for_name(n)
   end
 
-  def with_insight(query \\ __MODULE__) do
-    from(sc in query, where: not is_nil(sc.insight_id), preload: [insight: :evidence], limit: 1)
-  end
-
   def for_states(query \\ __MODULE__, states) do
     vals = Enum.map(states, fn s ->
       {:ok, s} = State.dump(s)
