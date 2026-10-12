@@ -1,6 +1,7 @@
 import {
   createContext,
   type Dispatch,
+  type ReactNode,
   type SetStateAction,
   useEffect,
   useMemo,
@@ -111,8 +112,8 @@ export function FullNav({
   }, [thisPath, previousPath, setIsOpen])
 
   const showNavButton = !desktop
-  let rightNavButton
-  let leftNavButton
+  let rightNavButton: ReactNode
+  let leftNavButton: ReactNode
 
   if (!desktop) {
     if (menuId === 'plural') {

@@ -44,7 +44,6 @@ export default function Notifications() {
 
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${NOTIFICATIONS_ABS_PATH}/:tab*`)
-  // @ts-ignore
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 

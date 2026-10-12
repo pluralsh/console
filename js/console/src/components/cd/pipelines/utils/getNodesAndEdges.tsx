@@ -80,7 +80,7 @@ function getGateNodes(pipeEdges: PipelineStageEdgeFragment[]) {
     let edge = e
 
     if (PIPELINE_DEBUG_MODE) {
-      // @ts-ignore
+      // @ts-expect-error
       edge = { ...edge, gates: DEMO_GATES }
     }
     if (edge && isEmpty(edge?.gates)) {

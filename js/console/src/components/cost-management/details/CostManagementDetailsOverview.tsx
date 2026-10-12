@@ -8,6 +8,7 @@ import {
   DeltaUpIcon,
   Flex,
   RamIcon,
+  SemanticColorKey,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -121,8 +122,8 @@ function CostCard({
   deltaTimeframe: string
 }) {
   const theme = useTheme()
-  let deltaIcon
-  let deltaColor
+  let deltaIcon: ReactNode
+  let deltaColor: SemanticColorKey
   if (delta) {
     deltaIcon = delta > 0 ? <DeltaUpIcon /> : <DeltaDownIcon />
     deltaColor = delta > 0 ? 'text-danger-light' : 'text-success-light'

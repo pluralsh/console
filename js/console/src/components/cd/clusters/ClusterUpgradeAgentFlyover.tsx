@@ -106,7 +106,7 @@ export function ClusterUpgradeAgentFlyover({
               fillLevel={2}
               severity={statusToChipSeverity[clusterUpgrade.status]}
               loading={
-                clusterUpgrade.status == ClusterUpgradeStatus.InProgress ||
+                clusterUpgrade.status === ClusterUpgradeStatus.InProgress ||
                 clusterUpgrade.status === ClusterUpgradeStatus.Pending
               }
             >

@@ -48,7 +48,8 @@
         "noUnusedFunctionParameters": "error",
         "noUnsafeOptionalChaining": "error",
         "noUnusedImports": "error",
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "useParseIntRadix": "error"
       },
       "security": {
         "noBlankTarget": "error",
@@ -68,16 +69,21 @@
         "noDuplicateEnumValues": "error",
         "noDuplicateFields": "error",
         "noDuplicateJsxProps": "error",
+        "noDoubleEquals": "error",
         "noDuplicateTestHooks": "error",
+        "noEvolvingTypes": "error",
         "noExportsInTest": "error",
         "noExtraNonNullAssertion": "error",
         "noFocusedTests": "error",
         "noForIn": "error",
+        "noGlobalIsNan": "error",
+        "noImplicitAnyLet": "error",
         "noMisleadingInstantiator": "error",
         "noNonNullAssertedOptionalChain": "error",
         "noReactForwardRef": "error",
         "noSelfCompare": "error",
         "noSkippedTests": "error",
+        "noTsIgnore": "error",
         "noUnknownAttribute": {
           "level": "error",
           "options": { "ignore": ["css"] }
