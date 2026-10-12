@@ -98,7 +98,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     do: Agents.create_agent_run(attrs, id, user)
 
   def create_agent_run_prompt(%{id: id, prompt: prompt} = args, %{context: %{current_user: user}}) do
-    Agents.create_prompt(prompt, id, user, args[:attachments])
+    Agents.create_prompt(prompt, id, user, args[:attachments], args[:files])
   end
 
   def agent_pull_request(%{run_id: id, attributes: attrs}, %{context: %{current_user: user}}),

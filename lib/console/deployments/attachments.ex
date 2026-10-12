@@ -8,6 +8,7 @@ defmodule Console.Deployments.Attachments do
   alias Console.PseudoFS
   alias Console.AI.Workbench.Filesystem
   alias Console.Schema.Attachment
+  alias Pseudofs.V1.StatResponse
   alias ReqLLM.Message.ContentPart
   require Logger
 
@@ -26,6 +27,64 @@ defmodule Console.Deployments.Attachments do
     case PseudoFS.enabled?() do
       true -> upload_all(uploads, workbench_id, assocs)
       false -> {:error, "file attachments require an object store to be configured"}
+    end
+  end
+
+  @doc """
+  Records files already in the workbench filesystem (given as sandbox paths, eg `/workbench/reports/a.md`)
+  as attachments, without copying them.  Like `create/3`, run this inside the transaction creating the prompt.
+  """
+  @spec link([binary] | nil, binary, map) :: {:ok, [Attachment.t]} | {:error, term}
+  def link(empty, _, _) when empty in [nil, []], do: {:ok, []}
+  def link(paths, workbench_id, assocs) when is_list(paths) do
+    case PseudoFS.enabled?() do
+      true -> link_all(Enum.uniq(paths), workbench_id, assocs)
+      false -> {:error, "file attachments require an object store to be configured"}
+    end
+  end
+
+  defp link_all(paths, wid, assocs) do
+    Enum.reduce_while(paths, {:ok, []}, fn path, {:ok, acc} ->
+      case link_one(path, wid, assocs) do
+        {:ok, att} -> {:cont, {:ok, [att | acc]}}
+        err -> {:halt, err}
+      end
+    end)
+    |> case do
+      {:ok, atts} -> {:ok, Enum.reverse(atts)}
+      err -> err
+    end
+  end
+
+  defp link_one(path, wid, assocs) do
+    with {:ok, fspath} <- Filesystem.tenant_path(path),
+         {:ok, %StatResponse{size: size} = stat} <- stat(wid, fspath, path),
+         :file <- PseudoFS.kind(stat.kind) do
+      name = Path.basename(fspath)
+
+      %Attachment{}
+      |> Attachment.changeset(Map.merge(assocs, %{
+        filename: name,
+        filetype: MIME.from_path(name),
+        path: fspath,
+        size: size,
+        workbench_id: wid
+      }))
+      |> Repo.insert()
+    else
+      :directory -> {:error, "#{path} is a directory, only files can be attached"}
+      err -> err
+    end
+  end
+
+  defp stat(wid, fspath, path) do
+    case PseudoFS.stat(wid, fspath) do
+      {:ok, stat} -> {:ok, stat}
+      {:error, err} ->
+        case PseudoFS.error_kind(err) do
+          :not_found -> {:error, "cannot attach #{path}, no such file in the workbench filesystem"}
+          _ -> {:error, "cannot attach #{path}: #{PseudoFS.error_message(err)}"}
+        end
     end
   end
 

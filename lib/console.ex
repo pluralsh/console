@@ -193,6 +193,18 @@ defmodule Console do
     end
   end
 
+  @doc """
+  The endpoint's secret_key_base, which signs Phoenix tokens (eg file download links) and session cookies.
+  Uses SECRET_KEY_BASE if given, otherwise derives one from the install's JWT secret so it's never a public default.
+  """
+  @spec secret_key_base(binary | nil, binary | nil) :: binary
+  def secret_key_base(base, _) when is_binary(base) and byte_size(base) >= 64, do: base
+  def secret_key_base(base, _) when is_binary(base) and byte_size(base) > 0,
+    do: raise(ArgumentError, "SECRET_KEY_BASE must be at least 64 bytes")
+  def secret_key_base(_, jwt) when is_binary(jwt) and byte_size(jwt) > 0,
+    do: :crypto.mac(:hmac, :sha512, jwt, "console-secret-key-base") |> Base.encode64()
+  def secret_key_base(_, _), do: raise(ArgumentError, "one of SECRET_KEY_BASE or JWT_SECRET must be set")
+
   def identity(v), do: v
 
   def dedupe(attrs, key, val) do

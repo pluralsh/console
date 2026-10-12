@@ -50,6 +50,15 @@ defmodule Console.AI.Workbench.Filesystem do
   def virtual("/"), do: @root
   def virtual("/" <> _ = path), do: @root <> path
 
+  @doc "converts a sandbox path (absolute under `/workbench`, or relative to it) to a tenant path"
+  @spec tenant_path(binary) :: {:ok, binary} | {:error, binary}
+  def tenant_path(path) when is_binary(path) do
+    case resolve(path) do
+      {:ok, _, fspath} -> {:ok, fspath}
+      {:error, _, msg} -> {:error, msg}
+    end
+  end
+
   @doc "monty os callbacks backed by the workbench's pseudofs tenant"
   @spec os(binary) :: %{atom => function}
   def os(tenant) do

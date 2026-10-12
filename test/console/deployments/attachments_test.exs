@@ -5,6 +5,7 @@ defmodule Console.Deployments.AttachmentsTest do
   alias Console.Deployments.{Agents, Attachments, Workbenches}
   alias Console.Schema.{Attachment, WorkbenchJobActivityAgentRun}
   alias ReqLLM.Message.ContentPart
+  alias Pseudofs.V1.StatResponse
 
   setup do
     path = Path.join(System.tmp_dir!(), "attachment-#{Ecto.UUID.generate()}.png")
@@ -123,12 +124,131 @@ defmodule Console.Deployments.AttachmentsTest do
       assert attachment.workbench_id == activity.workbench_job.workbench_id
     end
 
+    test "it links existing workbench files to prompts" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+      activity = insert(:workbench_job_activity)
+      %WorkbenchJobActivityAgentRun{}
+      |> WorkbenchJobActivityAgentRun.changeset(%{workbench_job_activity_id: activity.id, agent_run_id: run.id})
+      |> Console.Repo.insert!()
+      expect(PseudoFS, :enabled?, fn -> true end)
+      expect(PseudoFS, :stat, fn _, "/data.csv" -> {:ok, %StatResponse{kind: :FILE, size: 3}} end)
+
+      {:ok, _} = Agents.create_prompt("with a file", run.id, user, [], ["/workbench/data.csv"])
+
+      [attachment] = Console.Repo.all(Attachment)
+      assert attachment.path == "/data.csv"
+      assert attachment.agent_prompt_id
+      assert Console.Repo.preload(run, :attachments).attachments == []
+    end
+
     test "it rejects attachments for agent runs outside a workbench", %{upload: upload} do
       user = insert(:user)
       run = insert(:agent_run, user: user)
 
       {:error, "file attachments are only supported for agent runs spawned by a workbench"} =
         Agents.create_prompt("with a file", run.id, user, [upload])
+    end
+  end
+
+  describe "link/3" do
+    test "it attaches existing workbench files without reuploading them" do
+      workbench = insert(:workbench)
+      wid = workbench.id
+      expect(PseudoFS, :enabled?, fn -> true end)
+      expect(PseudoFS, :stat, 2, fn
+        ^wid, "/reports/summary.md" -> {:ok, %StatResponse{kind: :FILE, size: 42}}
+        ^wid, "/_plrl_/uploads/1/a.png" -> {:ok, %StatResponse{kind: :FILE, size: 5}}
+      end)
+      reject(PseudoFS, :upload, 3)
+
+      {:ok, [md, png]} = Attachments.link(
+        ["/workbench/reports/summary.md", "_plrl_/uploads/1/a.png", "/workbench/reports/summary.md"],
+        wid,
+        %{}
+      )
+
+      assert md.path == "/reports/summary.md"
+      assert md.filename == "summary.md"
+      assert md.filetype == "text/markdown"
+      assert md.size == 42
+      assert md.workbench_id == wid
+      assert png.path == "/_plrl_/uploads/1/a.png"
+      assert png.filetype == "image/png"
+    end
+
+    test "it rejects missing files and directories" do
+      workbench = insert(:workbench)
+      expect(PseudoFS, :enabled?, 2, fn -> true end)
+      expect(PseudoFS, :stat, fn _, "/missing.txt" -> {:error, %GRPC.RPCError{status: 5, message: "not found"}} end)
+      expect(PseudoFS, :stat, fn _, "/reports" -> {:ok, %StatResponse{kind: :DIRECTORY}} end)
+
+      {:error, "cannot attach /workbench/missing.txt, no such file in the workbench filesystem"} =
+        Attachments.link(["/workbench/missing.txt"], workbench.id, %{})
+      {:error, "/workbench/reports is a directory, only files can be attached"} =
+        Attachments.link(["/workbench/reports"], workbench.id, %{})
+
+      refute Console.Repo.exists?(Attachment)
+    end
+
+    test "it rejects paths outside the workbench filesystem" do
+      expect(PseudoFS, :enabled?, fn -> true end)
+      {:error, _} = Attachments.link(["/etc/passwd"], insert(:workbench).id, %{})
+    end
+  end
+
+  describe "Agents.create_agent_run/3" do
+    test "it links workbench files to runs spawned by a workbench" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      activity = insert(:workbench_job_activity)
+      expect(PseudoFS, :enabled?, fn -> true end)
+      expect(PseudoFS, :stat, fn _, "/reports/summary.md" -> {:ok, %StatResponse{kind: :FILE, size: 42}} end)
+
+      {:ok, run} = Agents.create_agent_run(%{
+        repository: "https://github.com/pluralsh/console.git",
+        prompt: "fix it",
+        mode: :write,
+        activity: activity,
+        attachments: ["/workbench/reports/summary.md"]
+      }, runtime.id, user)
+
+      %{attachments: [attachment]} = Console.Repo.preload(run, :attachments)
+      assert attachment.path == "/reports/summary.md"
+      assert attachment.agent_run_id == run.id
+      refute attachment.agent_prompt_id
+      assert attachment.workbench_id == activity.workbench_job.workbench_id
+    end
+
+    test "it rolls back the run if a file can't be linked" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      activity = insert(:workbench_job_activity)
+      expect(PseudoFS, :enabled?, fn -> true end)
+      expect(PseudoFS, :stat, fn _, _ -> {:error, %GRPC.RPCError{status: 5, message: "not found"}} end)
+
+      {:error, _} = Agents.create_agent_run(%{
+        repository: "https://github.com/pluralsh/console.git",
+        prompt: "fix it",
+        mode: :write,
+        activity: activity,
+        attachments: ["/workbench/nope.md"]
+      }, runtime.id, user)
+
+      refute Console.Repo.exists?(Console.Schema.AgentRun)
+    end
+
+    test "it rejects files for runs outside a workbench" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+
+      {:error, "file attachments are only supported for agent runs spawned by a workbench"} =
+        Agents.create_agent_run(%{
+          repository: "https://github.com/pluralsh/console.git",
+          prompt: "fix it",
+          mode: :write,
+          attachments: ["/workbench/reports/summary.md"]
+        }, runtime.id, user)
     end
   end
 

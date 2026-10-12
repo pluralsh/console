@@ -265,6 +265,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     end
 
     field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
+    field :attachments, list_of(:attachment), resolve: dataloader(Deployments), description: "files attached to this agent run's initial prompt, downloadable by its harness"
     field :messages, list_of(:agent_message), resolve: dataloader(Deployments), description: "the messages this agent run has generated during its run"
     field :upload,   :agent_run_upload, resolve: dataloader(Deployments), description: "the upload bundle this agent run has generated"
     field :runtime,  :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
@@ -609,6 +610,7 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :id,          non_null(:id)
       arg :prompt,      non_null(:string)
       arg :attachments, list_of(:upload), description: "files to attach to this prompt, only supported for agent runs spawned by a workbench"
+      arg :files,       list_of(:string), description: "sandbox paths (eg /workbench/reports/summary.md) of existing workbench files to attach to this prompt, only supported for agent runs spawned by a workbench"
 
       resolve &Deployments.create_agent_run_prompt/2
     end

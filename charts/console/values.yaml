@@ -239,6 +239,9 @@ secrets:
   cluster_name: test
   # jwt is used to set JWT_SECRET if not null
   jwt: REPLACEME
+  # secret_key_base is used to set SECRET_KEY_BASE if not null, which signs file download links and session cookies.
+  # Must be at least 64 characters (eg `openssl rand -base64 64`).  If unset, the console derives one from the jwt secret
+  secret_key_base:
   # erlang is used to set ERLANG_COOKIE if not null
   erlang: REPLACEME
   # admin_name is used to set ADMIN_NAME

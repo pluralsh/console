@@ -107,8 +107,9 @@ defmodule Console.Deployments.WorkbenchFiles do
   end
 
   @doc "a short-lived token granting download access to a single file, for use where headers can't be set (eg `<video>` tags)"
-  @spec download_token(binary, binary, User.t) :: binary
-  def download_token(id, path, %User{id: user_id}),
+  @spec download_token(binary, binary, User.t | binary) :: binary
+  def download_token(id, path, %User{id: user_id}), do: download_token(id, path, user_id)
+  def download_token(id, path, user_id) when is_binary(user_id),
     do: Phoenix.Token.sign(ConsoleWeb.Endpoint, @token_salt, %{w: id, p: path, u: user_id})
 
   @spec verify_download_token(binary) :: {:ok, {binary, binary, binary}} | {:error, term}
@@ -117,9 +118,9 @@ defmodule Console.Deployments.WorkbenchFiles do
       do: {:ok, {id, path, user_id}}
   end
 
-  @doc "the download url for a file, signed for the given user"
-  @spec download_url(binary, binary, User.t) :: binary
-  def download_url(id, path, %User{} = user) do
+  @doc "the download url for a file, signed for the given user (or user id)"
+  @spec download_url(binary, binary, User.t | binary) :: binary
+  def download_url(id, path, user) do
     query = URI.encode_query(%{token: download_token(id, path, user)})
     Path.join(Console.url("/v1/workbenches/files/download"), "?#{query}")
     |> String.replace("/?", "?")

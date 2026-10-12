@@ -23,7 +23,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     tools(activity, environment)
     |> MemoryEngine.new(20,
       engine_opts(environment) ++ [
-        system_prompt: String.trim(system_prompt(review: WorkbenchJob.coding_review?(job))),
+        system_prompt: String.trim(system_prompt(review: WorkbenchJob.coding_review?(job), filesystem: Console.PseudoFS.enabled?())),
         acc: %{},
         callback: &callback(activity, environment, &1),
         continue_msg: cont_msg()
