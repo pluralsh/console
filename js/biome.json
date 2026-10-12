@@ -23,8 +23,7 @@
     }
   },
   "css": {
-    "formatter": { "quoteStyle": "single" },
-    "linter": { "enabled": false }
+    "formatter": { "quoteStyle": "single" }
   },
   "linter": {
     "rules": {
@@ -85,8 +84,18 @@
       "linter": { "enabled": false }
     },
     {
-      "includes": ["stylelint-config/**"],
-      "linter": { "rules": { "style": { "noCommonJs": "off" } } }
+      "includes": ["**/*.css", "!**/logo-animation.css"],
+      "linter": {
+        "rules": {
+          "preset": "recommended",
+          "complexity": { "noImportantStyles": "off" },
+          "style": { "noDescendingSpecificity": "error" }
+        }
+      },
+      "assist": {
+        "enabled": true,
+        "actions": { "source": { "useSortedProperties": "on" } }
+      }
     },
     {
       "includes": ["documentation/**"],
