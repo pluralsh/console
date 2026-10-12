@@ -850,6 +850,31 @@ func TestGetAgentRunPodCompletion(t *testing.T) {
 			wantOK:     true,
 		},
 		{
+			name: "prefers eviction message over container exit",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase:   corev1.PodFailed,
+					Reason:  "Evicted",
+					Message: "The node was low on resource: memory.",
+					ContainerStatuses: []corev1.ContainerStatus{
+						{
+							Name: defaultContainer,
+							State: corev1.ContainerState{
+								Terminated: &corev1.ContainerStateTerminated{
+									ExitCode: 137,
+									Message:  "agent run failed: signal: killed",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "The node was low on resource: memory.",
+			wantOK:     true,
+		},
+		{
 			name: "falls back to pod message when no container failed",
 			pod: &corev1.Pod{
 				Status: corev1.PodStatus{

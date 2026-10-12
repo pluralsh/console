@@ -360,6 +360,9 @@ func isAgentRunPodFailed(pod *corev1.Pod) (bool, string) {
 	if pod == nil {
 		return false, ""
 	}
+	if reason, evicted := podEvictionReason(pod); evicted {
+		return true, reason
+	}
 	for _, status := range pod.Status.InitContainerStatuses {
 		if reason, failed := containerFailureReason("init container", status); failed {
 			return true, reason
@@ -380,6 +383,16 @@ func isAgentRunPodFailed(pod *corev1.Pod) (bool, string) {
 		return true, "agent run pod failed"
 	}
 	return false, ""
+}
+
+func podEvictionReason(pod *corev1.Pod) (string, bool) {
+	if pod.Status.Phase != corev1.PodFailed || pod.Status.Reason != "Evicted" {
+		return "", false
+	}
+	if pod.Status.Message != "" {
+		return pod.Status.Message, true
+	}
+	return pod.Status.Reason, true
 }
 
 func containerFailureReason(kind string, status corev1.ContainerStatus) (string, bool) {
