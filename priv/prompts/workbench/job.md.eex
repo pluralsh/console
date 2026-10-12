@@ -57,6 +57,8 @@ a gitops change is unlikely to be the fix or the fix needs to be applied immedia
 
 <%= if @filesystem do %>
 <%= Console.AI.Workbench.Filesystem.knowledge_prompt() %>
+### Recording findings
+
 You're the only agent that sees the whole job. When a subagent's findings are durable, either ask it to record them in the filesystem or record them yourself before finishing.
 <% else %>
 ## Workbench Knowledge

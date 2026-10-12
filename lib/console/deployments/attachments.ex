@@ -67,11 +67,24 @@ defmodule Console.Deployments.Attachments do
 
     attachments
     |> Enum.map(fn att ->
-      details = Enum.reject([att.filetype, size(att.size), MapSet.member?(inlined, att.path) && "included inline"], &(!&1))
-      "- `#{Filesystem.virtual(att.path)}` (#{Enum.join(details, ", ")})"
+      description = Enum.reject([att.filetype, size(att.size)], &is_nil/1) |> Enum.join(", ")
+      note = if MapSet.member?(inlined, att.path), do: " (included inline)", else: ""
+      "- #{file_tag(Filesystem.virtual(att.path), description)}#{note}"
     end)
     |> Enum.join("\n")
-    |> then(&"\n\nThe user attached the following files, which can be read from the python sandbox:\n#{&1}")
+    |> then(&"\n\nThe user attached the following files, which can be read from the python sandbox. When you mention one, reuse its tag exactly as written here:\n#{&1}")
+  end
+
+  # the same <plrl-file> chip agents are asked to use when referencing files in their output
+  defp file_tag(path, description),
+    do: ~s(<plrl-file path="#{escape_attr(path)}" description="#{escape_attr(description)}"></plrl-file>)
+
+  defp escape_attr(value) do
+    value
+    |> String.replace("&", "&amp;")
+    |> String.replace("\"", "&quot;")
+    |> String.replace("<", "&lt;")
+    |> String.replace(">", "&gt;")
   end
 
   defp size(n) when is_integer(n) and n >= 1024 * 1024, do: "#{Float.round(n / (1024 * 1024), 1)} MB"

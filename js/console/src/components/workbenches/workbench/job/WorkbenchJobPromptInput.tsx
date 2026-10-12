@@ -14,6 +14,7 @@ import {
   ChatInputSimple,
   ChatInputSimpleRef,
 } from 'components/ai/chatbot/input/ChatInput'
+import { withAttachmentHint } from 'components/ai/chatbot/input/ChatAttachments'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import styled from 'styled-components'
@@ -44,6 +45,7 @@ export function WorkbenchJobPromptInput({
   job: Nullable<WorkbenchJobActivitiesQuery['workbenchJob']>
 }) {
   const [newMessage, setNewMessage] = useState('')
+  const [attachments, setAttachments] = useState<File[]>([])
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
@@ -56,6 +58,7 @@ export function WorkbenchJobPromptInput({
     variables: { id: workbenchId },
     skip: !workbenchId,
   })
+  const filesystemEnabled = !!workbenchData?.workbench?.filesystemEnabled
   const effectivePromptModes =
     promptModes ??
     modesAttributes(modesFormValue(job?.modes)) ??
@@ -69,7 +72,10 @@ export function WorkbenchJobPromptInput({
     createQueuedPrompt,
     { loading: createQueuedLoading, error: createQueuedError },
   ] = useCreateQueuedPromptMutation({
-    onCompleted: () => chatInputRef.current?.resetInput?.(),
+    onCompleted: () => {
+      chatInputRef.current?.resetInput?.()
+      setAttachments([])
+    },
     refetchQueries: QUEUE_REFETCH_QUERIES,
   })
 
@@ -105,6 +111,9 @@ export function WorkbenchJobPromptInput({
           prompt: newMessage,
           dequeableAt: new Date().toISOString(),
           ...(modes ? { modes } : {}),
+          ...(filesystemEnabled && attachments.length > 0
+            ? { attachments }
+            : {}),
         },
       },
     })
@@ -120,7 +129,11 @@ export function WorkbenchJobPromptInput({
         <ChatInputSimple
           ref={chatInputRef}
           disabled={!job}
-          placeholder="Send an additional message to this job"
+          placeholder={
+            filesystemEnabled
+              ? withAttachmentHint('Send an additional message to this job')
+              : 'Send an additional message to this job'
+          }
           loading={submitLoading}
           setValue={setNewMessage}
           onSubmit={submitJob}
@@ -137,6 +150,8 @@ export function WorkbenchJobPromptInput({
           enableAutoComplete
           workbenchId={job?.workbench?.id}
           workbenchRepositorySource={job?.workbench}
+          attachments={attachments}
+          onAttachmentsChange={filesystemEnabled ? setAttachments : undefined}
           options={
             <Flex
               align="center"
@@ -150,6 +165,11 @@ export function WorkbenchJobPromptInput({
                 onChange={setPromptModes}
                 disabled={!job || submitLoading}
                 workbenchModes={workbenchData?.workbench?.modes}
+                onAttachFiles={
+                  filesystemEnabled
+                    ? () => chatInputRef.current?.openFilePicker()
+                    : undefined
+                }
               />
               <WorkbenchModelSelector
                 value={selectedModel}

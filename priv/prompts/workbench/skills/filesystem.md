@@ -33,18 +33,15 @@ with open("/workbench/incidents/2026-10-11-checkout-latency/timeline.md", "a") a
 (root / "tmp").rmdir()  # directories must be empty to remove
 ```
 
-Two extra functions cover what `pathlib` can't do in the sandbox:
-
-- `glob(pattern, max_results=1000)` matches an absolute pattern supporting `*`, `?`, `[abc]`, `**` (any depth) and `{a,b}`. It returns dicts with `path`, `name` and `kind` (`"file"` or `"directory"`).
-- `grep(pattern, path="/workbench", fixed_string=False, case_insensitive=False, before_context=0, after_context=0, max_matches=200)` searches a file, a directory (recursively) or a glob for a regex. It returns dicts with `path`, `line_number`, `line`, `before` and `after`.
+Builtin functions cover what `pathlib` and the sandbox's standard library can't: `glob` and `grep` for finding files, `read_csv`/`write_csv` and `read_yaml` for structured data, and `extract_archive` for zip and tar uploads. Read the `sandbox-builtins` skill for their signatures and results. Use them instead of walking directories or splitting csv lines by hand:
 
 ```python
 # find every runbook mentioning a service, with a line of context
 hits = grep("checkout-api", path="/workbench/runbooks/**/*.md", case_insensitive=True, before_context=1, after_context=1)
 [(h["path"], h["line_number"], h["line"]) for h in hits]
 
-# locate files by shape rather than reading directories one at a time
-[f["path"] for f in glob("/workbench/incidents/2026-*/summary.md")]
+# an uploaded spreadsheet export, keyed by its header row
+rows = read_csv("/workbench/_plrl_/uploads/<id>/clusters.csv")["rows"]
 ```
 
 The sandbox's final expression is its result and must be JSON encodable, so return paths and short excerpts rather than whole files. Read large files selectively, for example by using `grep` to find the relevant lines first.
@@ -53,8 +50,22 @@ The sandbox's final expression is its result and must be JSON encodable, so retu
 
 Files attached to prompts are uploaded to `/workbench/_plrl_/uploads/<id>/<filename>`, and the prompt lists their exact paths. Everything under `/workbench/_plrl_` is managed by Plural:
 
-- Read from it freely, but don't write, move or delete anything there unless the user asks.
+- Read from it freely, but don't write, move or delete anything there unless the user asks. The exception is `extract_archive`, which unpacks an uploaded archive next to it by default.
 - If an upload should become part of the workbench's library, copy what matters into a well-named location elsewhere and reference the original path.
+
+## Referencing files in your output
+
+Users can browse the filesystem from the workbench's Files tab. When your result, conclusion or a message mentions a file they'd want to open or download, reference it with a `<plrl-file>` tag instead of a bare path:
+
+```text
+The full breakdown is in <plrl-file path="/workbench/incidents/2026-10-11-checkout-latency/summary.md" description="Root cause, timeline and remediation for the checkout latency incident"></plrl-file>, with raw measurements in <plrl-file path="/workbench/incidents/2026-10-11-checkout-latency/evidence/p99-latency-by-region.csv" description="p99 latency per region, 5 minute buckets"></plrl-file>.
+```
+
+- `path` is the absolute sandbox path (starting with `/workbench`). `description` is a one-line summary shown when the user hovers the file. Escape any double quotes in it as `&quot;`.
+- Always write an explicit closing tag (`></plrl-file>`). A self-closing `<plrl-file ... />` swallows the text after it.
+- Only reference files that exist. Write the file first, in an earlier sandbox call.
+- Use the tag in prose, not inside code blocks, where it won't render.
+- Reference the handful of files that matter, such as a report, a dataset, key evidence or a runbook you updated, rather than every file you touched.
 
 ## Knowledge
 

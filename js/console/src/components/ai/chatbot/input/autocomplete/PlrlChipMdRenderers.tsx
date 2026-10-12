@@ -45,20 +45,19 @@ type ChipBodyProps = {
   children: ReactNode
 } & ComponentPropsWithoutRef<typeof ChipBodySC>
 
-const ChipBody = forwardRef<HTMLSpanElement, ChipBodyProps>(function ChipBody(
-  { icon, children, ...rest },
-  ref
-) {
-  return (
-    <ChipBodySC
-      ref={ref}
-      {...rest}
-    >
-      {icon}
-      <span>{children}</span>
-    </ChipBodySC>
-  )
-})
+export const ChipBody = forwardRef<HTMLSpanElement, ChipBodyProps>(
+  function ChipBody({ icon, children, ...rest }, ref) {
+    return (
+      <ChipBodySC
+        ref={ref}
+        {...rest}
+      >
+        {icon}
+        <span>{children}</span>
+      </ChipBodySC>
+    )
+  }
+)
 
 // react-markdown picks the component by tag name and spreads only the XML
 // attributes — so `kind` isn't on the rendered props (it's the tag itself)
@@ -318,7 +317,7 @@ const ChipBodySC = styled.span(({ theme }) => ({
   margin: 1,
 }))
 
-const ChipLinkSC = styled(Link)(({ theme }) => ({
+export const ChipLinkSC = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
   '&:hover > *': { background: theme.colors['fill-two-hover'] },
 }))

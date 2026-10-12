@@ -1,8 +1,27 @@
-import { Code, Markdown, getLastStringChild } from '@pluralsh/design-system'
+import {
+  Code,
+  Markdown,
+  getLastStringChild,
+  markdownSanitizeSchema,
+} from '@pluralsh/design-system'
 import { ComponentProps, HTMLAttributes, ReactElement, ReactNode } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
+import {
+  PLRL_FILE_ATTRIBUTES,
+  PLRL_FILE_TAG,
+  plrlFileChipComponents,
+} from './PlrlFileChip'
 
 type ChatMarkdownProps = ComponentProps<typeof Markdown>
+
+const chatSanitizeSchema = {
+  ...markdownSanitizeSchema,
+  tagNames: [...(markdownSanitizeSchema.tagNames ?? []), PLRL_FILE_TAG],
+  attributes: {
+    ...markdownSanitizeSchema.attributes,
+    [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
+  },
+}
 
 /**
  * Conversational markdown for chat / workbench.
@@ -20,9 +39,11 @@ export function ChatMarkdown({
   return (
     <ChatMarkdownSC>
       <Markdown
+        sanitizeSchema={chatSanitizeSchema}
         {...props}
         text={text}
         components={{
+          ...plrlFileChipComponents,
           h1: ChatH1,
           h2: ChatH2,
           h3: ChatH3,

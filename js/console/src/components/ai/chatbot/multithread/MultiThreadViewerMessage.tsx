@@ -41,16 +41,23 @@ import {
   PLRL_CHIP_TAG_NAMES,
 } from '../input/autocomplete/mentionTypes'
 import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
+import {
+  PLRL_FILE_ATTRIBUTES,
+  PLRL_FILE_TAG,
+  plrlFileChipComponents,
+} from '../PlrlFileChip'
 
 const chipSanitizeSchema = {
   ...markdownSanitizeSchema,
   tagNames: [
     ...(markdownSanitizeSchema.tagNames ?? []),
     ...PLRL_CHIP_TAG_NAMES,
+    PLRL_FILE_TAG,
   ],
   attributes: {
     ...markdownSanitizeSchema.attributes,
     ...CHIP_ATTRIBUTE_SCHEMA,
+    [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
   },
 }
 
@@ -773,3 +780,65 @@ const TdSC = styled.td(({ theme }) => ({
     wordBreak: 'break-word',
   },
 }))
+
+const REMARK_PLUGINS: ComponentProps<typeof ReactMarkdown>['remarkPlugins'] = [
+  remarkGfm,
+]
+
+// module-level, so the renderers keep their identity and React doesn't remount
+// the rendered markdown on every render
+const SIMPLIFIED_MARKDOWN_COMPONENTS: ComponentProps<
+  typeof ReactMarkdown
+>['components'] = {
+  ...plrlChipComponents,
+  ...plrlFileChipComponents,
+  ...simpleHeadingComponents,
+  // Fenced code — inline, no language chrome (header was redundant).
+  pre: ({ children }) => {
+    // Extract language from the code element inside pre
+    const codeChild = children as ReactElement<{
+      className?: string
+      children?: ReactNode
+    }>
+    const className = codeChild?.props?.className ?? ''
+    const langMatch = /language-(\w+)/.exec(className)
+    const language = langMatch?.[1]?.toLowerCase()
+    const content = getLastStringChild(children) || ''
+
+    return (
+      <CodeBlockLabel
+        language={language}
+        content={content}
+      />
+    )
+  },
+  // Inline code renders simply
+  code: ({ children, className }) => {
+    // If it has a language class, it's inside a pre tag and handled above
+    if (className) return <>{children}</>
+    return <InlineCodeSC>{children}</InlineCodeSC>
+  },
+  p: ({ children }) => <ParagraphSC>{children}</ParagraphSC>,
+  strong: ({ children }) => <strong>{children}</strong>,
+  em: ({ children }) => <span>{children}</span>,
+  a: ({ children, href }) => (
+    <InlineA
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {children}
+    </InlineA>
+  ),
+  ul: ({ children }) => <ListSC>{children}</ListSC>,
+  ol: ({ children }) => <ListSC as="ol">{children}</ListSC>,
+  li: ({ children }) => <li>{children}</li>,
+  hr: () => <HrSC />,
+  table: ({ children }) => (
+    <TableWrapperSC>
+      <TableSC>{children}</TableSC>
+    </TableWrapperSC>
+  ),
+  th: ({ children }) => <ThSC>{children}</ThSC>,
+  td: ({ children }) => <TdSC>{children}</TdSC>,
+}

@@ -142,8 +142,16 @@ defmodule Console.Deployments.AttachmentsTest do
         Attachments.prompt_content("prompt", [image, pdf])
 
       assert text =~ "prompt"
-      assert text =~ "`/workbench/_plrl_/uploads/1/a.png` (image/png, 5 B, included inline)"
-      assert text =~ "`/workbench/_plrl_/uploads/2/b.pdf` (application/pdf, 2.0 KB)"
+      assert text =~ ~s(- <plrl-file path="/workbench/_plrl_/uploads/1/a.png" description="image/png, 5 B"></plrl-file> \(included inline\))
+      assert text =~ ~s(- <plrl-file path="/workbench/_plrl_/uploads/2/b.pdf" description="application/pdf, 2.0 KB"></plrl-file>)
+    end
+
+    test "it escapes file references" do
+      txt = build(:attachment, filename: ~s(a"<b>.txt), filetype: "text/plain", size: 1, path: ~s(/_plrl_/uploads/1/a"<b>.txt))
+
+      [%ContentPart{text: text}] = Attachments.prompt_content("prompt", [txt])
+
+      assert text =~ ~s(<plrl-file path="/workbench/_plrl_/uploads/1/a&quot;&lt;b&gt;.txt" description="text/plain, 1 B"></plrl-file>)
     end
 
     test "it leaves prompts without attachments alone" do

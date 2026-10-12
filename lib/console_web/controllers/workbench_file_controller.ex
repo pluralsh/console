@@ -14,11 +14,14 @@ defmodule ConsoleWeb.WorkbenchFileController do
     with {:ok, id, path, user} <- authorize(conn, params),
          {:ok, bench} <- WorkbenchFiles.authorize(id, user, :read),
          {:ok, %{kind: :file, size: size} = file} <- WorkbenchFiles.stat(bench, path) do
+      {mime, disposition} = presentation(params, file.name)
+
       conn
       |> put_resp_header("accept-ranges", "bytes")
       |> put_resp_header("cache-control", "private, max-age=0")
-      |> put_resp_content_type(MIME.from_path(file.name), nil)
-      |> put_resp_header("content-disposition", disposition(params, file.name))
+      |> put_resp_header("x-content-type-options", "nosniff")
+      |> put_resp_content_type(mime, if(mime == "text/plain", do: "utf-8"))
+      |> put_resp_header("content-disposition", "#{disposition}; #{filename(file.name)}")
       |> respond(id, file.path, size, range(conn, size))
     else
       {:ok, %{kind: :directory}} -> send_resp(conn, 400, "cannot download a directory")
@@ -115,8 +118,32 @@ defmodule ConsoleWeb.WorkbenchFileController do
 
   defp authorize(_, _), do: {:error, "a token, or an id and path are required"}
 
-  defp disposition(%{"download" => "true"}, name), do: "attachment; #{filename(name)}"
-  defp disposition(_, name), do: "inline; #{filename(name)}"
+  # files are agent or user authored and served from the console's origin, so only types browsers
+  # can't execute script from are rendered inline (eg html or svg would otherwise be stored xss).
+  # Data formats like yaml, json and csv are relabelled as plain text so browsers display them.
+  defp presentation(%{"download" => "true"}, name), do: {MIME.from_path(name), "attachment"}
+  defp presentation(_, name) do
+    mime = MIME.from_path(name)
+    cond do
+      inline_safe?(mime) -> {mime, "inline"}
+      plain_text?(mime, name) -> {"text/plain", "inline"}
+      true -> {mime, "attachment"}
+    end
+  end
+
+  defp inline_safe?("image/svg+xml"), do: false
+  defp inline_safe?("image/" <> _), do: true
+  defp inline_safe?("video/" <> _), do: true
+  defp inline_safe?("audio/" <> _), do: true
+  defp inline_safe?("application/pdf"), do: true
+  defp inline_safe?("text/plain"), do: true
+  defp inline_safe?(_), do: false
+
+  @plain_text_types ~w(application/json text/csv text/markdown text/xml application/xml)
+  @plain_text_extensions ~w(.yaml .yml .jsonl .ndjson .tsv .log .toml .tf .hcl .ini .conf .env .tpl)
+
+  defp plain_text?(mime, _) when mime in @plain_text_types, do: true
+  defp plain_text?(_, name), do: String.downcase(Path.extname(name)) in @plain_text_extensions
 
   defp filename(name) do
     ascii = String.replace(name, ~r/[^\x20-\x7E]|["\\]/, "_")

@@ -1,10 +1,11 @@
 defmodule Console.AI.Workbench.Filesystem do
   @moduledoc """
   Exposes a workbench's pseudofs tenant to the python sandbox.  The tenant root is mounted at
-  `/workbench`, implementing the os callbacks monty uses for `pathlib` and `open`, alongside `glob`
-  and `grep` functions monty doesn't natively support.
+  `/workbench`, implementing the os callbacks monty uses for `pathlib` and `open`, alongside `glob`,
+  `grep`, csv/yaml parsers and archive extraction, which monty doesn't natively support.
   """
   alias Console.PseudoFS
+  alias Console.AI.Workbench.Filesystem.{Archives, Formats}
   alias Console.Schema.Workbench
   alias Pseudofs.V1.StatResponse
 
@@ -12,6 +13,7 @@ defmodule Console.AI.Workbench.Filesystem do
   @uploads "/_plrl_/uploads"
   @glob_limit 1000
   @grep_limit 200
+  @csv_limit 10_000
 
   @s_ifreg 0o100_000
   @s_ifdir 0o040_000
@@ -56,12 +58,16 @@ defmodule Console.AI.Workbench.Filesystem do
     |> Map.new(fn fun -> {fun, fn args, kwargs -> handle(tenant, fun, args, kwargs) end} end)
   end
 
-  @doc "sandbox functions for searching the workbench filesystem"
+  @doc "sandbox functions for searching the workbench filesystem and parsing structured files"
   @spec functions(binary) :: %{binary => function}
   def functions(tenant) do
     %{
       "glob" => fn args, kwargs -> glob(tenant, args, kwargs) end,
-      "grep" => fn args, kwargs -> grep(tenant, args, kwargs) end
+      "grep" => fn args, kwargs -> grep(tenant, args, kwargs) end,
+      "read_csv" => fn args, kwargs -> read_csv(tenant, args, kwargs) end,
+      "write_csv" => fn args, kwargs -> write_csv(tenant, args, kwargs) end,
+      "read_yaml" => fn args, kwargs -> read_yaml(tenant, args, kwargs) end,
+      "extract_archive" => fn args, kwargs -> extract_archive(tenant, args, kwargs) end
     }
   end
 
@@ -166,6 +172,101 @@ defmodule Console.AI.Workbench.Filesystem do
       {:ok, Enum.map(matches, &grep_match/1)}
     end
   end
+
+  @read_csv_args [
+    {"path", :optional},
+    {"text", :optional},
+    {"delimiter", :optional},
+    {"header", true},
+    {"max_rows", @csv_limit}
+  ]
+
+  defp read_csv(tenant, args, kwargs) do
+    with {:ok, [path, text, delim, header, max]} <- arguments(args, kwargs, @read_csv_args),
+         {:ok, text} <- source(tenant, "read_csv", path, text) do
+      Formats.parse_csv(text,
+        delimiter: present(delim) || Formats.delimiter(present(path) && extract(path)),
+        header: header != false,
+        max_rows: present(max)
+      )
+    end
+  end
+
+  defp write_csv(tenant, args, kwargs) do
+    with {:ok, [path, rows, columns, delim]} <- arguments(args, kwargs, [{"path", nil}, {"rows", nil}, {"columns", :optional}, {"delimiter", :optional}]),
+         {:ok, vpath, fspath} <- resolve(path),
+         {:ok, csv} <- Formats.encode_csv(rows, present(columns), present(delim) || Formats.delimiter(vpath)),
+         {:ok, _} <- PseudoFS.write_text(tenant, fspath, csv) |> result(vpath),
+      do: {:ok, vpath}
+  end
+
+  defp read_yaml(tenant, args, kwargs) do
+    with {:ok, [path, text]} <- arguments(args, kwargs, [{"path", :optional}, {"text", :optional}]),
+         {:ok, text} <- source(tenant, "read_yaml", path, text),
+      do: Formats.parse_yaml(text)
+  end
+
+  defp extract_archive(tenant, args, kwargs) do
+    with {:ok, [path, dest]} <- arguments(args, kwargs, [{"path", nil}, {"destination", :optional}]),
+         {:ok, vpath, fspath} <- resolve(path),
+         {:ok, vdest, fsdest} <- resolve(present(dest) || archive_destination(vpath)),
+         {:ok, %StatResponse{size: size}} <- PseudoFS.stat(tenant, fspath) |> result(vpath),
+         :ok <- archive_size(size),
+         {:ok, data} <- PseudoFS.read_bytes(tenant, fspath) |> result(vpath),
+         {:ok, files} <- Archives.extract(vpath, data),
+         {:ok, written} <- write_entries(tenant, fsdest, vdest, files) do
+      {:ok, %{
+        "destination" => vdest,
+        "files" => written,
+        "file_count" => length(written),
+        "total_bytes" => Enum.sum_by(files, &byte_size(elem(&1, 1)))
+      }}
+    end
+  end
+
+  defp archive_destination(vpath) do
+    base = Path.basename(vpath)
+    name = Regex.replace(~r/\.(zip|tar)$/i, base, "")
+    Path.join(Path.dirname(vpath), if(name in ["", base], do: "#{base}-extracted", else: name))
+  end
+
+  defp archive_size(size) do
+    case size > Archives.max_bytes() do
+      true -> {:error, :value_error, "archives larger than #{div(Archives.max_bytes(), 1024 * 1024)}MB can't be extracted"}
+      false -> :ok
+    end
+  end
+
+  defp write_entries(tenant, fsdest, vdest, files) do
+    files
+    |> Task.async_stream(fn {path, data} ->
+      PseudoFS.write_bytes(tenant, Path.join(fsdest, path), data)
+      |> result(Path.join(vdest, path))
+    end, max_concurrency: 8, timeout: :timer.seconds(30), ordered: true)
+    |> Enum.zip(files)
+    |> Enum.reduce_while({:ok, []}, fn
+      {{:ok, {:ok, _}}, {path, _}}, {:ok, acc} -> {:cont, {:ok, [Path.join(vdest, path) | acc]}}
+      {{:ok, {:error, _, _} = err}, _}, _ -> {:halt, err}
+      {{:exit, reason}, {path, _}}, _ -> {:halt, {:error, :os_error, "failed to write #{Path.join(vdest, path)}: #{inspect(reason)}"}}
+    end)
+    |> case do
+      {:ok, written} -> {:ok, Enum.reverse(written)}
+      err -> err
+    end
+  end
+
+  defp source(tenant, fun, path, text) do
+    case {present(path), present(text)} do
+      {nil, text} when is_binary(text) -> {:ok, text}
+      {nil, _} -> {:error, :type_error, "#{fun}() requires a path or text argument"}
+      {path, _} ->
+        with {:ok, vpath, fspath} <- resolve(path),
+          do: PseudoFS.read_text(tenant, fspath) |> result(vpath)
+    end
+  end
+
+  defp present(:optional), do: nil
+  defp present(v), do: v
 
   defp arguments(args, kwargs, spec) do
     {values, _} =
