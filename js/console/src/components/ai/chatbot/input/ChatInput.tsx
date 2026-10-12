@@ -37,6 +37,13 @@ import type { WorkbenchRepositorySource } from './autocomplete/useMentionDataSou
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { ChatInputRuntimeSelect } from './ChatInputRuntimeSelect.tsx'
+import { useDropzone } from 'react-dropzone'
+import {
+  AttachmentShelf,
+  DropOverlay,
+  mergeAttachments,
+  usePendingAttachmentItems,
+} from './ChatAttachments.tsx'
 
 export function ChatInput({
   currentThread,
@@ -150,7 +157,10 @@ export function ChatInput({
   )
 }
 
-export type ChatInputSimpleRef = { resetInput: () => void } & HTMLElement
+export type ChatInputSimpleRef = {
+  resetInput: () => void
+  openFilePicker: () => void
+} & HTMLElement
 
 export function ChatInputSimple({
   ref,
@@ -168,6 +178,8 @@ export function ChatInputSimple({
   submitOnEnter = true,
   showSubmitButton = true,
   submitButton,
+  attachments,
+  onAttachmentsChange,
   onKeyDown: onKeyDownProp,
   setValue: setValueProp,
   ...props
@@ -187,7 +199,13 @@ export function ChatInputSimple({
   submitOnEnter?: boolean
   showSubmitButton?: boolean
   submitButton?: ReactNode
-} & Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>) {
+  /** Files to upload with the prompt. Drag-and-drop, paste and the attach button are enabled when `onAttachmentsChange` is set. */
+  attachments?: File[]
+  onAttachmentsChange?: (files: File[]) => void
+} & Omit<
+  ComponentPropsWithoutRef<typeof EditableDiv>,
+  'onEnter' | 'onPasteFiles'
+>) {
   const { mode, spacing } = useTheme()
   const resolvedBgColor =
     bgColor ?? (mode === 'light' ? 'fill-zero' : 'fill-zero-selected')
@@ -202,6 +220,24 @@ export function ChatInputSimple({
     enabled: enableAutoComplete,
   })
 
+  const attachEnabled = !!onAttachmentsChange
+  const pendingAttachments = attachments ?? EMPTY_FILES
+  const addAttachments = useCallback(
+    (files: File[]) =>
+      onAttachmentsChange?.(mergeAttachments(pendingAttachments, files)),
+    [onAttachmentsChange, pendingAttachments]
+  )
+  const attachmentItems = usePendingAttachmentItems(
+    pendingAttachments,
+    onAttachmentsChange ?? noop
+  )
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+    onDrop: addAttachments,
+    noClick: true,
+    noKeyboard: true,
+    disabled: !attachEnabled || loading || disabled,
+  })
+
   useImperativeHandle(ref, () => {
     const node = divRef.current
     if (node)
@@ -211,6 +247,7 @@ export function ChatInputSimple({
           // notify React state so callers don't have to also reset state locally
           node.dispatchEvent(new InputEvent('input', { bubbles: true }))
         },
+        openFilePicker: open,
       })
   })
 
@@ -226,10 +263,19 @@ export function ChatInputSimple({
     <EditableContentWrapperSC
       $bgColor={resolvedBgColor}
       css={{ position: 'relative', minHeight: 130, ...wrapperStyles }}
+      {...(attachEnabled ? getRootProps() : {})}
     >
+      {attachEnabled && (
+        <>
+          <input {...getInputProps()} />
+          {isDragActive && <DropOverlay />}
+          <AttachmentShelf items={attachmentItems} />
+        </>
+      )}
       <EditableDiv
         ref={divRef}
         {...props}
+        onPasteFiles={attachEnabled ? addAttachments : undefined}
         onEnter={submitOnEnter ? handleSubmit : undefined}
         onKeyDown={onKeyDown}
         setValue={(value) => {
@@ -271,6 +317,9 @@ export function ChatInputSimple({
     </EditableContentWrapperSC>
   )
 }
+
+const EMPTY_FILES: File[] = []
+const noop = () => {}
 
 export function ChatSubmitButton({
   bgColor = 'fill-primary',

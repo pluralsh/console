@@ -12,6 +12,7 @@ defmodule Console.AI.Workbench.Skills.Builtins do
   alias Console.AI.Workbench.Skill
   @canvas File.read!(Console.priv_filename(["prompts", "workbench", "skills", "canvas.md"]))
   @filesystem File.read!(Console.priv_filename(["prompts", "workbench", "skills", "filesystem.md"]))
+  @sandbox_builtins File.read!(Console.priv_filename(["prompts", "workbench", "skills", "sandbox-builtins.md"]))
 
   def builtins() do
     [
@@ -31,6 +32,11 @@ defmodule Console.AI.Workbench.Skills.Builtins do
           name: "filesystem",
           description: "how to read, write and search the persistent workbench filesystem from the python sandbox, and how to organize files in it",
           contents: @filesystem,
+          subagents: [:orchestrator, :infrastructure, :observability, :monitoring]
+        }, %Skill{
+          name: "sandbox-builtins",
+          description: "reference for the python sandbox's builtin functions: glob, grep, read_csv, write_csv, read_yaml and extract_archive",
+          contents: @sandbox_builtins,
           subagents: [:orchestrator, :infrastructure, :observability, :monitoring]
         }]
       false -> []

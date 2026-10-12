@@ -41,16 +41,23 @@ import {
   PLRL_CHIP_TAG_NAMES,
 } from '../input/autocomplete/mentionTypes'
 import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
+import {
+  PLRL_FILE_ATTRIBUTES,
+  PLRL_FILE_TAG,
+  plrlFileChipComponents,
+} from '../PlrlFileChip'
 
 const chipSanitizeSchema = {
   ...markdownSanitizeSchema,
   tagNames: [
     ...(markdownSanitizeSchema.tagNames ?? []),
     ...PLRL_CHIP_TAG_NAMES,
+    PLRL_FILE_TAG,
   ],
   attributes: {
     ...markdownSanitizeSchema.attributes,
     ...CHIP_ATTRIBUTE_SCHEMA,
+    [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
   },
 }
 
@@ -734,6 +741,7 @@ const SIMPLIFIED_MARKDOWN_COMPONENTS: ComponentProps<
   typeof ReactMarkdown
 >['components'] = {
   ...plrlChipComponents,
+  ...plrlFileChipComponents,
   ...simpleHeadingComponents,
   // Fenced code — inline, no language chrome (header was redundant).
   pre: ({ children }) => {

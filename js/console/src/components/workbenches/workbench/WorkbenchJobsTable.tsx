@@ -1,11 +1,8 @@
 import {
   AppIcon,
-  Card,
   CaretRightIcon,
   Chip,
   Flex,
-  Markdown,
-  PaperCheckIcon,
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
@@ -30,7 +27,6 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { ActivityModalIcon } from './job/WorkbenchJobActivityResults'
 import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
@@ -243,30 +239,6 @@ function JobSourceChips({
   )
 }
 
-export function JobConclusionIcon({
-  result,
-}: {
-  result: WorkbenchJobTinyFragment['result']
-}) {
-  const theme = useTheme()
-
-  if (!result?.conclusion) return null
-
-  return (
-    <ActivityModalIcon
-      icon={PaperCheckIcon}
-      tooltip="View conclusion"
-      modalHeader="Conclusion"
-      modalContent={
-        <Card css={{ padding: theme.spacing.large, overflow: 'auto' }}>
-          <Markdown text={result.conclusion} />
-        </Card>
-      }
-      size={16}
-    />
-  )
-}
-
 function JobEvalBadge({ job }: { job: WorkbenchJobTinyFragment }) {
   const navigate = useNavigate()
   const { evalResult, workbench } = job
@@ -308,7 +280,6 @@ export function WorkbenchJobActionsRow({
     !!job.chatbotMessage ||
     prs.length > 0 ||
     job.evalResult?.grade != null ||
-    !!job.result?.conclusion ||
     (job.queuedPromptCount ?? 0) > 0
 
   if (!hasActions) return null
@@ -333,7 +304,6 @@ export function WorkbenchJobActionsRow({
         fillLevel={chipFillLevel}
       />
       <JobEvalBadge job={job} />
-      <JobConclusionIcon result={job.result} />
       <WorkbenchQueuedPromptChip
         count={job.queuedPromptCount}
         summary={job.queuedPromptSummary}

@@ -35,6 +35,57 @@ defmodule ConsoleWeb.WorkbenchFileControllerTest do
       assert disposition =~ "inline"
     end
 
+    test "scriptable types are always served as attachments", %{conn: conn} do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      stub(PseudoFS, :stat, fn _, _ -> {:ok, %StatResponse{kind: :FILE, size: byte_size(@content)}} end)
+      stub(PseudoFS, :stream_file, fn _, _, offset, length -> {:ok, [binary_part(@content, offset, length)]} end)
+
+      for path <- ["/reports/page.html", "/images/logo.svg"] do
+        conn =
+          conn
+          |> recycle()
+          |> add_auth_headers(user)
+          |> get("/v1/workbenches/files/download", %{"id" => workbench.id, "path" => path})
+
+        assert response(conn, 200) == @content
+        assert get_resp_header(conn, "x-content-type-options") == ["nosniff"]
+        assert [disposition] = get_resp_header(conn, "content-disposition")
+        assert disposition =~ "attachment"
+      end
+    end
+
+    test "data formats are displayed inline as plain text unless downloaded", %{conn: conn} do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      stub(PseudoFS, :stat, fn _, _ -> {:ok, %StatResponse{kind: :FILE, size: byte_size(@content)}} end)
+      stub(PseudoFS, :stream_file, fn _, _, offset, length -> {:ok, [binary_part(@content, offset, length)]} end)
+
+      for path <- ["/values.yaml", "/data/report.json", "/data/clusters.csv"] do
+        conn =
+          conn
+          |> recycle()
+          |> add_auth_headers(user)
+          |> get("/v1/workbenches/files/download", %{"id" => workbench.id, "path" => path})
+
+        assert response(conn, 200) == @content
+        assert get_resp_header(conn, "content-type") == ["text/plain; charset=utf-8"]
+        assert [disposition] = get_resp_header(conn, "content-disposition")
+        assert disposition =~ "inline"
+      end
+
+      conn =
+        conn
+        |> recycle()
+        |> add_auth_headers(user)
+        |> get("/v1/workbenches/files/download", %{"id" => workbench.id, "path" => "/data/report.json", "download" => "true"})
+
+      assert [ct] = get_resp_header(conn, "content-type")
+      assert ct =~ "application/json"
+      assert [disposition] = get_resp_header(conn, "content-disposition")
+      assert disposition =~ "attachment"
+    end
+
     test "it serves byte ranges", %{conn: conn} do
       user = insert(:user)
       workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])

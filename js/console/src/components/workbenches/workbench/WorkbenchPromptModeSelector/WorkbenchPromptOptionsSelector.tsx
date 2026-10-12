@@ -9,6 +9,7 @@ import {
   DiscoverIcon,
   Flex,
   KubernetesIcon,
+  PaperclipIcon,
   ListIcon,
   PrOpenIcon,
   SmallNodeIcon,
@@ -72,12 +73,15 @@ export function WorkbenchPromptOptionsSelector({
   onChange,
   disabled = false,
   workbenchModes,
+  onAttachFiles,
 }: {
   workbenchId?: Nullable<string>
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   disabled?: boolean
   workbenchModes?: WorkbenchJobModes | null
+  /** Shows an attach files entry when set */
+  onAttachFiles?: () => void
 }) {
   const theme = useTheme()
   const { panelBackground, panelBorder } = workbenchPromptPanelSurfaces(theme)
@@ -283,6 +287,22 @@ export function WorkbenchPromptOptionsSelector({
                   />
                 </>
               )}
+              {onAttachFiles && (
+                <>
+                  <Divider />
+                  <PromptOptionRow
+                    label="Attach files"
+                    hint="Or drag and drop files onto the prompt"
+                    icon={<PaperclipIcon size={12} />}
+                    showCaret={false}
+                    onOpen={() => {
+                      setIsOpen(false)
+                      setSidePanel(null)
+                      onAttachFiles()
+                    }}
+                  />
+                </>
+              )}
             </div>
             <SidePanelContainer
               onBack={() => setSidePanel(null)}
@@ -443,11 +463,13 @@ function PromptOptionRow({
   hint,
   icon,
   onOpen,
+  showCaret = true,
 }: {
   label: string
   hint: string
   icon: ReactNode
   onOpen: () => void
+  showCaret?: boolean
 }) {
   const theme = useTheme()
   const { modeItemBackground } = workbenchPromptPanelSurfaces(theme)
@@ -485,11 +507,13 @@ function PromptOptionRow({
         </Flex>
         <CaptionP $color="text-xlight">{hint}</CaptionP>
       </Flex>
-      <CaretRightIcon
-        size={12}
-        color="icon-light"
-        css={{ alignSelf: 'center', flexShrink: 0 }}
-      />
+      {showCaret && (
+        <CaretRightIcon
+          size={12}
+          color="icon-light"
+          css={{ alignSelf: 'center', flexShrink: 0 }}
+        />
+      )}
     </button>
   )
 }

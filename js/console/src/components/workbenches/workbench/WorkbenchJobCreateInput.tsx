@@ -9,6 +9,7 @@ import {
   WorkbenchIcon,
 } from '@pluralsh/design-system'
 import type { ChatInputSimpleRef } from 'components/ai/chatbot/input/ChatInput'
+import { withAttachmentHint } from 'components/ai/chatbot/input/ChatAttachments'
 import {
   ChatInputSimple,
   ChatOptionPill,
@@ -92,6 +93,7 @@ export function WorkbenchJobCreateInput({
     useTransientWorkbenchPrompt()
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
+  const [attachments, setAttachments] = useState<File[]>([])
   const [selectedModelState, setSelectedModelState] = useState<{
     workbenchId: Nullable<string>
     model: Nullable<WorkbenchJobModelAttributes>
@@ -148,6 +150,7 @@ export function WorkbenchJobCreateInput({
     useCreateWorkbenchJobMutation({
       onCompleted: ({ createWorkbenchJob }) => {
         if (!createWorkbenchJob?.id) return
+        setAttachments([])
         if (onCreated) {
           inputRef.current?.resetInput()
           setPrompt('')
@@ -166,6 +169,8 @@ export function WorkbenchJobCreateInput({
       refetchQueries: ['WorkbenchJobs', 'RecentWorkbenchJobs'],
       awaitRefetchQueries: true,
     })
+
+  const filesystemEnabled = !!data?.workbench?.filesystemEnabled
 
   const handleSelectSavedPrompt = (nextPrompt: string) => {
     setPrompt(nextPrompt)
@@ -191,6 +196,9 @@ export function WorkbenchJobCreateInput({
           prompt: trimmedPrompt,
           ...(flowId ? { flowId } : {}),
           ...(modes ? { modes } : {}),
+          ...(filesystemEnabled && !isEmpty(attachments)
+            ? { attachments }
+            : {}),
         },
       },
     })
@@ -213,7 +221,9 @@ export function WorkbenchJobCreateInput({
           key={`workbench-job-create-prompt-${promptSyncKey}`}
           ref={inputRef}
           disabled={disabled}
-          placeholder={placeholder}
+          placeholder={
+            filesystemEnabled ? withAttachmentHint(placeholder) : placeholder
+          }
           initialValue={prompt}
           deserializePlrlInitialValue
           setValue={setPrompt}
@@ -224,6 +234,8 @@ export function WorkbenchJobCreateInput({
           workbenchId={workbenchId}
           workbenchRepositorySource={data?.workbench}
           flowId={flowId}
+          attachments={attachments}
+          onAttachmentsChange={filesystemEnabled ? setAttachments : undefined}
           submitButton={
             <WorkbenchPromptSubmitButton
               loading={loading}
@@ -239,6 +251,11 @@ export function WorkbenchJobCreateInput({
                 onChange={setPromptModes}
                 disabled={disabled || loading}
                 workbenchModes={data?.workbench?.modes}
+                onAttachFiles={
+                  filesystemEnabled
+                    ? () => inputRef.current?.openFilePicker()
+                    : undefined
+                }
               />
               <WorkbenchModelSelector
                 value={selectedModel}

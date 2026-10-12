@@ -23,6 +23,7 @@ import {
   WorkbenchQuery,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
+import { WorkbenchFileContext } from 'components/ai/chatbot/PlrlFileChip'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -50,6 +51,7 @@ import {
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_EVALS_REL_PATH,
+  WORKBENCHES_FILES_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_MONITORING_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
@@ -161,12 +163,25 @@ export function WorkbenchPageLayout({
         label: 'Alerts',
         path: `${workbenchBasePath}/${WORKBENCHES_ALERTS_REL_PATH}`,
       },
+      ...(workbench?.filesystemEnabled
+        ? [
+            {
+              label: 'Files',
+              path: `${workbenchBasePath}/${WORKBENCHES_FILES_REL_PATH}`,
+            },
+          ]
+        : []),
       {
         label: 'Evals',
         path: `${workbenchBasePath}/${WORKBENCHES_EVALS_REL_PATH}`,
       },
     ],
-    [workbenchBasePath, jobsTabPath, hasInProgressJobs]
+    [
+      workbenchBasePath,
+      jobsTabPath,
+      hasInProgressJobs,
+      workbench?.filesystemEnabled,
+    ]
   )
 
   const handleMoreMenuSelection = useCallback(
@@ -444,7 +459,11 @@ export function Workbench() {
 
   return (
     <>
-      <Outlet context={outletContext} />
+      <WorkbenchFileContext.Provider
+        value={workbench?.filesystemEnabled ? (id ?? null) : null}
+      >
+        <Outlet context={outletContext} />
+      </WorkbenchFileContext.Provider>
       <Confirm
         open={deleteModalOpen}
         close={() => setDeleteModalOpen(false)}

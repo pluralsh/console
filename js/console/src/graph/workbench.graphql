@@ -552,6 +552,9 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  attachments {
+    ...Attachment
+  }
   user {
     ...UserTiny
   }
@@ -1515,6 +1518,9 @@ query WorkbenchJobActivities($id: ID!) {
     status
     prompt
     insertedAt
+    attachments {
+      ...Attachment
+    }
     modes {
       ...WorkbenchJobModesFields
     }
@@ -2098,5 +2104,55 @@ subscription WorkbenchExecStream($activityId: ID!) {
     activityId
     text
     seq
+  }
+}
+
+fragment Attachment on Attachment {
+  id
+  filename
+  filetype
+  path
+  size
+  downloadUrl
+}
+
+fragment WorkbenchFile on WorkbenchFile {
+  path
+  name
+  kind
+  size
+  modifiedAt
+  sandboxPath
+}
+
+query WorkbenchFiles($id: ID!, $path: String) {
+  workbench(id: $id) {
+    id
+    files(path: $path) {
+      ...WorkbenchFile
+    }
+  }
+}
+
+query WorkbenchFile($id: ID!, $path: String!) {
+  workbench(id: $id) {
+    id
+    file(path: $path) {
+      ...WorkbenchFile
+      downloadUrl
+    }
+  }
+}
+
+query WorkbenchFileContents($id: ID!, $path: String!) {
+  workbench(id: $id) {
+    id
+    fileContents(path: $path)
+  }
+}
+
+mutation DeleteWorkbenchFile($workbenchId: ID!, $path: String!) {
+  deleteWorkbenchFile(workbenchId: $workbenchId, path: $path) {
+    ...WorkbenchFile
   }
 }

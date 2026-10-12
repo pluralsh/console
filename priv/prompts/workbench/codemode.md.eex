@@ -16,26 +16,15 @@ This workbench has a persistent filesystem mounted at `<%= @fs_root %>`. Unlike 
 
 - Use `pathlib` and `open()` with absolute paths under `<%= @fs_root %>`; relative paths resolve against `<%= @fs_root %>`. Supported operations: `Path.exists/is_file/is_dir/iterdir/stat/mkdir/unlink/rmdir/rename/read_text/read_bytes/write_text/write_bytes`, and `open()` in `r`, `w`, `a` (and binary) modes.
 - Writes create missing parent directories as needed, but `mkdir(parents=True, exist_ok=True)` is safe to call. Paths outside `<%= @fs_root %>` and `/scratch` are not accessible.
-- Files attached to user prompts are uploaded under `<%= @uploads %>`. Treat that directory as user owned: read from it freely, but don't write into it or delete from it unless asked.
-- Two additional functions search the filesystem, since `glob` and recursive directory walks are not available natively:
+- Files attached to user prompts are uploaded under `<%= @uploads %>`. Treat that directory as user owned: read from it freely, but don't write into it or delete from it unless asked. The one exception is `extract_archive`, which unpacks an upload next to it by default.
+- The sandbox lacks `glob`, recursive directory walks, and the `csv`, `yaml`, `zipfile` and `tarfile` modules, so these builtin functions cover them:
+  - `glob(pattern, max_results=1000)` finds files and directories by an absolute pattern, like `"<%= @fs_root %>/reports/**/*.md"`.
+  - `grep(pattern, path="<%= @fs_root %>", ...)` searches a file, directory or glob for a regex.
+  - `read_csv(path=None, text=None, ...)` and `write_csv(path, rows, ...)` parse and write csv/tsv.
+  - `read_yaml(path=None, text=None)` returns a list of yaml documents.
+  - `extract_archive(path, destination=None)` unpacks a zip or tar archive into the filesystem.
 
-### `glob(pattern, max_results=1000)`
-
-Matches an absolute glob pattern under `<%= @fs_root %>`, supporting `*`, `?`, `[abc]`, `**` (any number of directories) and `{a,b}` alternation. Returns a list of dicts with `path`, `name` and `kind` (`"file"` or `"directory"`) keys.
-
-```python
-glob("<%= @fs_root %>/reports/**/*.md")
-```
-
-### `grep(pattern, path="<%= @fs_root %>", fixed_string=False, case_insensitive=False, before_context=0, after_context=0, max_matches=200)`
-
-Searches files for a regular expression (Rust regex syntax, or a literal string with `fixed_string=True`). `path` may be a file, a directory (searched recursively) or a glob pattern. Binary and very large files are skipped. Returns a list of dicts with `path`, `line_number`, `line`, and `before`/`after` lists of `{"line_number", "text"}` context lines.
-
-```python
-[(m["path"], m["line_number"]) for m in grep("OOMKilled", path="<%= @fs_root %>/incidents", case_insensitive=True)]
-```
-
-Prefer `glob` and `grep` over reading many files when you only need to locate something. Read the built-in `filesystem` skill for guidance on organizing files.
+Read the built-in `sandbox-builtins` skill for their full signatures and return values before relying on optional arguments or result fields, and the `filesystem` skill for guidance on organizing files.
 <% end %>
 ## Result and output
 
