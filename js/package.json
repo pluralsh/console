@@ -5,7 +5,6 @@
     "console",
     "design-system",
     "documentation",
-    "eslint-config",
     "stylelint-config"
   ],
   "scripts": {
