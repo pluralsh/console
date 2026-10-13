@@ -25,7 +25,6 @@
     "@apollo/client": "3.14.1",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@graphql-codegen/add": "5.0.0",
     "@graphql-codegen/cli": "4.0.1",
     "@graphql-codegen/introspection": "4.0.0",
     "@graphql-codegen/typescript": "4.0.0",

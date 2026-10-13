@@ -1880,30 +1880,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/add@npm:5.0.0":
-  version: 5.0.0
-  resolution: "@graphql-codegen/add@npm:5.0.0"
-  dependencies:
-    "@graphql-codegen/plugin-helpers": "npm:^5.0.0"
-    tslib: "npm:~2.5.0"
-  peerDependencies:
-    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 10/0bc9b6cb63702defa5c1318cbee33b28a4eee6727d95f276c15fb49d295154debf1941dbf46f92146301e9d27245b1a142b4ce98fc489022f49f3819c193b9dc
-  languageName: node
-  linkType: hard
-
-"@graphql-codegen/add@npm:7.1.0":
-  version: 7.1.0
-  resolution: "@graphql-codegen/add@npm:7.1.0"
-  dependencies:
-    "@graphql-codegen/plugin-helpers": "npm:^7.1.0"
-    tslib: "npm:^2.8.0"
-  peerDependencies:
-    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 10/2afb2db21554ccc18772f598901685bc54ecf0f35dded305f0a5b4952ddb02e2abbf7d20fbf542f692eb6f5ef0c64a97395774e0fd08ae8009563ea633db6946
-  languageName: node
-  linkType: hard
-
 "@graphql-codegen/add@npm:^5.0.0":
   version: 5.0.3
   resolution: "@graphql-codegen/add@npm:5.0.3"
@@ -5392,7 +5368,6 @@ __metadata:
     "@biomejs/biome": "npm:2.5.15"
     "@emotion/react": "npm:11.14.0"
     "@emotion/styled": "npm:11.14.1"
-    "@graphql-codegen/add": "npm:5.0.0"
     "@graphql-codegen/cli": "npm:4.0.1"
     "@graphql-codegen/client-preset": "npm:4.0.0"
     "@graphql-codegen/introspection": "npm:4.0.0"
@@ -9549,7 +9524,6 @@ __metadata:
     "@emotion/react": "npm:11.14.0"
     "@emotion/styled": "npm:11.14.1"
     "@floating-ui/react": "npm:0.27.20"
-    "@graphql-codegen/add": "npm:7.1.0"
     "@graphql-codegen/cli": "npm:6.3.1"
     "@graphql-codegen/fragment-matcher": "npm:7.1.0"
     "@graphql-codegen/named-operations-object": "npm:4.0.1"

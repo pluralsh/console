@@ -7,8 +7,6 @@ generates:
       - 'typescript'
       - 'typescript-operations'
       - 'typescript-react-apollo'
-      - add:
-          content: '/* eslint-disable */'
 config:
   scalars:
     Map: Map<string, unknown>
