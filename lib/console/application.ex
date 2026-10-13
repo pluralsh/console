@@ -104,6 +104,7 @@ defmodule Console.Application do
         name: CloudQuery.Client,
         target: Console.conf(:cloudquery_host),
         adapter: CloudQuery.Client.adapter(),
+        adapter_opts: CloudQuery.Client.adapter_opts(),
         interceptors: CloudQuery.Client.interceptors()
       }
     ]
@@ -117,7 +118,8 @@ defmodule Console.Application do
       {GRPC.Client.Connection,
         name: Console.PseudoFS.Client,
         target: target,
-        adapter: Console.PseudoFS.Client.adapter()
+        adapter: Console.PseudoFS.Client.adapter(),
+        adapter_opts: Console.PseudoFS.Client.adapter_opts()
       }
     ]
   end
