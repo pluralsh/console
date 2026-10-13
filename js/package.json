@@ -28,5 +28,11 @@
     "shell-quote": "1.10.0",
     "lodash": "4.18.1",
     "lodash-es": "4.18.1"
+  },
+  "devDependencies": {
+    "lint-staged": "17.6.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,graphql}": "biome format --write --no-errors-on-unmatched"
   }
 }

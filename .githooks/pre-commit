@@ -70,12 +70,4 @@ function ensure::client {
 echo Executing pre-commit hook
 check "$(get::commit)"
 
-BIOME="${ROOT_DIR}/js/node_modules/.bin/biome"
-if git diff --quiet -- "${ROOT_DIR}/js"; then
-  # Format staged JS files and re-stage them.
-  (cd "${ROOT_DIR}/js" && "${BIOME}" format --staged --write --no-errors-on-unmatched)
-  git update-index --again
-else
-  # Unstaged changes in js/: only check, as re-staging would also commit those changes.
-  (cd "${ROOT_DIR}/js" && "${BIOME}" format --staged --no-errors-on-unmatched)
-fi
+node "${ROOT_DIR}/js/.yarn/releases/yarn-4.17.1.cjs" --cwd "${ROOT_DIR}/js" lint-staged
