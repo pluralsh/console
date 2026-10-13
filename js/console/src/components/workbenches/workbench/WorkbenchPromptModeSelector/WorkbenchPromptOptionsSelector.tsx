@@ -293,7 +293,7 @@ export function WorkbenchPromptOptionsSelector({
                   <Divider />
                   <PromptOptionRow
                     label="Attach files"
-                    hint="Or drag and drop files onto the prompt"
+                    hint="Drag and drop or paste onto the prompt"
                     icon={<PaperclipIcon size={12} />}
                     showCaret={false}
                     onOpen={() => {

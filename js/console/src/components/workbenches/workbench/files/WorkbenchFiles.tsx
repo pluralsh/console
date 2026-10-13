@@ -1,9 +1,10 @@
-import { EmptyState } from '@pluralsh/design-system'
+import { EmptyState, FileIcon, Flex } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { WorkbenchFileFragment } from 'generated/graphql'
 import { useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import { WORKBENCH_FILES_PATH_QUERY_PARAM } from 'routes/workbenchesRoutesConsts'
+import styled from 'styled-components'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import {
   WORKBENCH_FILES_HEADER_HEIGHT,
@@ -40,10 +41,13 @@ export function WorkbenchFiles() {
   if (!isLoading && workbench && !workbench.filesystemEnabled)
     return (
       <WorkbenchPageLayout>
-        <EmptyState
-          message="The workbench filesystem isn't enabled"
-          description="Configure an object store for the console to give workbenches a filesystem."
-        />
+        <CenteredSC>
+          <EmptyState
+            icon={<FileIcon size={40} />}
+            message="Filesystem isn't enabled"
+            description="Configure an object store for the console to give workbenches a shared filesystem."
+          />
+        </CenteredSC>
       </WorkbenchPageLayout>
     )
 
@@ -76,10 +80,13 @@ export function WorkbenchFiles() {
           onDelete={setToDelete}
         />
       ) : (
-        <EmptyState
-          message="Select a file to view it"
-          description="Files written by agents and attached to prompts are stored here."
-        />
+        <CenteredSC>
+          <EmptyState
+            icon={<FileIcon size={40} />}
+            message="Select a file to view it"
+            description="Files written by agents and attached to prompts are stored here."
+          />
+        </CenteredSC>
       )}
       <DeleteWorkbenchFileModal
         workbenchId={workbenchId}
@@ -90,3 +97,10 @@ export function WorkbenchFiles() {
     </WorkbenchPageLayout>
   )
 }
+
+const CenteredSC = styled(Flex)({
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: 0,
+})

@@ -3,6 +3,7 @@ import {
   Code,
   DownloadIcon,
   EmptyState,
+  FileIcon,
   Flex,
   IconFrame,
   CopyIcon,
@@ -79,25 +80,39 @@ export function WorkbenchFileViewer({
     )
   if (!file)
     return (
-      <EmptyState
-        message="File not found"
-        description={path}
-      />
+      <CenteredSC>
+        <EmptyState
+          icon={<FileIcon size={40} />}
+          message="File not found"
+          description={path}
+        />
+      </CenteredSC>
     )
   if (file.kind === WorkbenchFileKind.Directory)
-    return <EmptyState message="Select a file to view it" />
+    return (
+      <CenteredSC>
+        <EmptyState
+          icon={<FileIcon size={40} />}
+          message="Select a file to view it"
+        />
+      </CenteredSC>
+    )
 
   const downloadUrl = workbenchFileDownloadUrl(file.downloadUrl)
   const unavailable = (description: string) => (
-    <EmptyState
-      message="Preview unavailable"
-      description={description}
-    >
-      {downloadUrl && <DownloadButton href={downloadUrl} />}
-    </EmptyState>
+    <CenteredSC>
+      <EmptyState
+        icon={<FileIcon size={40} />}
+        message="Preview unavailable"
+        description={description}
+      >
+        {downloadUrl && <DownloadButton href={downloadUrl} />}
+      </EmptyState>
+    </CenteredSC>
   )
 
   let body: ReactNode
+  let flush = false
   if (isText) {
     if (tooLarge) body = unavailable('This file is too large to preview.')
     else if (contentsError && contents == null)
@@ -115,7 +130,8 @@ export function WorkbenchFileViewer({
           <Markdown text={contents ?? ''} />
         </MarkdownSC>
       )
-    else
+    else {
+      flush = true
       body = (
         <Code
           height="100%"
@@ -126,6 +142,7 @@ export function WorkbenchFileViewer({
           {contents ?? ''}
         </Code>
       )
+    }
   } else if (!file.downloadUrl) body = unavailable('No download url available.')
   else if (viewerKind === 'image')
     body = (
@@ -154,14 +171,22 @@ export function WorkbenchFileViewer({
         />
       </MediaSC>
     )
-  else if (viewerKind === 'pdf')
+  else if (viewerKind === 'pdf') {
+    flush = true
     body = (
       <PdfSC
         src={file.downloadUrl}
         title={name}
       />
     )
-  else body = unavailable("This file type can't be previewed.")
+  } else body = unavailable("This file type can't be previewed.")
+
+  const meta = [
+    formatFileSize(file.size),
+    file.modifiedAt && formatDateTime(file.modifiedAt),
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
     <ViewerSC>
@@ -174,6 +199,7 @@ export function WorkbenchFileViewer({
           direction="column"
           minWidth={0}
           flex={1}
+          gap="xxxsmall"
         >
           <Body2BoldP
             css={{
@@ -184,27 +210,41 @@ export function WorkbenchFileViewer({
           >
             {name}
           </Body2BoldP>
-          <CaptionP $color="text-xlight">
-            {[
-              file.sandboxPath,
-              formatFileSize(file.size),
-              file.modifiedAt && formatDateTime(file.modifiedAt),
-            ]
-              .filter(Boolean)
-              .join(' · ')}
+          <CaptionP
+            $color="text-xlight"
+            css={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {[file.sandboxPath, meta].filter(Boolean).join(' · ')}
           </CaptionP>
         </Flex>
-        <CopyPathButton path={file.sandboxPath} />
-        <IconFrame
-          clickable
-          type="tertiary"
-          tooltip="Delete file"
-          icon={<TrashCanIcon color="icon-danger" />}
-          onClick={() => onDelete(file)}
-        />
-        {downloadUrl && <DownloadButton href={downloadUrl} />}
+        <HeaderActionsSC>
+          <CopyPathButton path={file.sandboxPath} />
+          {downloadUrl && (
+            <IconFrame
+              clickable
+              type="tertiary"
+              tooltip="Download"
+              aria-label={`Download ${name}`}
+              icon={<DownloadIcon />}
+              as="a"
+              href={downloadUrl}
+            />
+          )}
+          <IconFrame
+            clickable
+            type="tertiary"
+            tooltip="Delete file"
+            aria-label={`Delete ${name}`}
+            icon={<TrashCanIcon color="icon-danger" />}
+            onClick={() => onDelete(file)}
+          />
+        </HeaderActionsSC>
       </ViewerHeaderSC>
-      <ViewerBodySC>{body}</ViewerBodySC>
+      <ViewerBodySC $flush={flush}>{body}</ViewerBodySC>
     </ViewerSC>
   )
 }
@@ -231,6 +271,7 @@ function CopyPathButton({ path }: { path: string }) {
       clickable
       type="tertiary"
       tooltip={copied ? 'Copied' : 'Copy sandbox path'}
+      aria-label="Copy sandbox path"
       icon={<CopyIcon />}
       onClick={handleCopy}
     />
@@ -255,31 +296,57 @@ const ViewerHeaderSC = styled.div(({ theme }) => ({
   flexShrink: 0,
 }))
 
-const ViewerBodySC = styled.div(({ theme }) => ({
-  flex: 1,
-  minHeight: 0,
-  overflow: 'auto',
-  padding: theme.spacing.large,
+const HeaderActionsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  flexShrink: 0,
+  marginLeft: 'auto',
 }))
+
+const ViewerBodySC = styled.div<{ $flush?: boolean }>(
+  ({ theme, $flush }) => ({
+    flex: 1,
+    minHeight: 0,
+    overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    ...($flush ? {} : { padding: theme.spacing.large }),
+  })
+)
+
+const CenteredSC = styled.div({
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: 0,
+})
 
 const MarkdownSC = styled.div({
   maxWidth: 900,
+  width: '100%',
 })
 
-const MediaSC = styled.div({
+const MediaSC = styled.div(({ theme }) => ({
   display: 'flex',
+  flex: 1,
+  alignItems: 'center',
   justifyContent: 'center',
+  minHeight: 0,
   'img, video': {
     maxWidth: '100%',
     maxHeight: '100%',
     objectFit: 'contain',
+    borderRadius: theme.borderRadiuses.medium,
   },
   audio: { width: '100%', maxWidth: 600 },
-})
+}))
 
 const PdfSC = styled.iframe(({ theme }) => ({
   width: '100%',
   height: '100%',
-  border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.medium,
+  minHeight: 0,
+  border: 'none',
+  background: theme.colors['fill-zero'],
 }))

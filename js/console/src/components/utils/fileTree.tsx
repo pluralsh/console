@@ -47,14 +47,14 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
 
   [`& .${treeItemClasses.groupTransition}`]: {
     paddingLeft:
-      'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
-    borderLeft: `1px solid ${theme.colors['border']}`,
+      'calc(var(--TreeView-itemChildrenIndentation) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
+    borderLeft: `1px solid ${theme.colors.border}`,
     margin: `2px 0 2px 14px`,
   },
 
   [`& .${treeItemClasses.root}.parent-of-selected > .${treeItemClasses.groupTransition}:has(.${treeItemClasses.root}.file-selected)`]:
     {
-      borderLeftColor: theme.colors.grey[600],
+      borderLeftColor: theme.colors['border-fill-two'],
     },
 }))
 
@@ -138,14 +138,18 @@ function FileTypeTextIcon({
       css={{
         width: size,
         height: size,
-        color: theme.colors['text-success'],
-        fontFamily: 'Inter',
+        color: theme.colors['text-xlight'],
+        fontFamily: theme.fontFamilies.sans,
         fontWeight: 600,
-        fontSize: Math.round(size / 2),
+        fontSize: Math.max(8, Math.round(size / 2.25)),
+        lineHeight: 1,
+        letterSpacing: '-0.02em',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
+        borderRadius: theme.borderRadiuses.medium,
+        background: theme.colors['fill-two'],
       }}
     >
       {extension.toLowerCase().slice(0, 3)}

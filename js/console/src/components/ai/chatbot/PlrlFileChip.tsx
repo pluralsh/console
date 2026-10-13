@@ -155,11 +155,21 @@ function FileTooltipContent({
     <Flex
       direction="column"
       gap="xsmall"
-      css={{ padding: 2 }}
+      css={{ padding: 2, minWidth: 200 }}
     >
-      <Body2BoldP css={{ overflowWrap: 'anywhere' }}>
-        {file?.name ?? basename(path)}
-      </Body2BoldP>
+      <Flex
+        align="center"
+        gap="xsmall"
+        minWidth={0}
+      >
+        <FileTypeIcon
+          fileName={file?.name ?? basename(path)}
+          size={16}
+        />
+        <Body2BoldP css={{ overflowWrap: 'anywhere', minWidth: 0 }}>
+          {file?.name ?? basename(path)}
+        </Body2BoldP>
+      </Flex>
       {description && <TooltipTextSC>{description}</TooltipTextSC>}
       <CaptionP
         $color="text-xlight"
@@ -169,7 +179,13 @@ function FileTooltipContent({
       </CaptionP>
       {workbenchId &&
         (!file && loading ? (
-          <Spinner size={12} />
+          <Flex
+            align="center"
+            gap="xsmall"
+          >
+            <Spinner size={12} />
+            <CaptionP $color="text-xlight">Loading details…</CaptionP>
+          </Flex>
         ) : error && !file ? (
           <CaptionP $color="text-danger-light">
             This file is no longer available.
@@ -180,7 +196,7 @@ function FileTooltipContent({
             justify="space-between"
             gap="small"
           >
-            <CaptionP $color="text-xlight">{details.join(' · ')}</CaptionP>
+            <CaptionP $color="text-xlight">{details.join(' · ') || '—'}</CaptionP>
             {downloadUrl && (
               <Button
                 small
@@ -188,6 +204,7 @@ function FileTooltipContent({
                 as="a"
                 href={downloadUrl}
                 startIcon={<DownloadIcon />}
+                onClick={(e) => e.stopPropagation()}
               >
                 Download
               </Button>
