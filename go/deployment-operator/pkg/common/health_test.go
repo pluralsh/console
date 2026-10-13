@@ -156,5 +156,46 @@ var _ = Describe("Health Test", Ordered, func() {
 			}
 		})
 
+		DescribeTable("should get HPA status from conditions",
+			func(conditions []interface{}, expected common.HealthStatus) {
+				for _, apiVersion := range []string{"autoscaling/v2", "autoscaling/v2beta2"} {
+					obj := &unstructured.Unstructured{
+						Object: map[string]interface{}{
+							"apiVersion": apiVersion,
+							"kind":       common.HorizontalPodAutoscalerKind,
+							"status":     map[string]interface{}{"conditions": conditions},
+						},
+					}
+
+					status, err := common.GetResourceHealth(obj)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(status).To(Not(BeNil()))
+					Expect(*status).To(Equal(expected))
+				}
+			},
+			Entry("degraded when metrics can not be read although AbleToScale is true",
+				[]interface{}{
+					map[string]interface{}{"type": "AbleToScale", "status": "True", "reason": "SucceededGetScale", "message": "scaled"},
+					map[string]interface{}{"type": "ScalingActive", "status": "False", "reason": "FailedGetResourceMetric", "message": "no metrics"},
+				},
+				common.HealthStatus{Status: common.HealthStatusDegraded, Message: "no metrics"}),
+			Entry("degraded when the scale target can not be read",
+				[]interface{}{
+					map[string]interface{}{"type": "AbleToScale", "status": "False", "reason": "FailedGetScale", "message": "not found"},
+				},
+				common.HealthStatus{Status: common.HealthStatusDegraded, Message: "not found"}),
+			Entry("healthy when only healthy conditions are present",
+				[]interface{}{
+					map[string]interface{}{"type": "AbleToScale", "status": "True", "reason": "SucceededGetScale", "message": "scaled"},
+					map[string]interface{}{"type": "ScalingActive", "status": "True", "reason": "ValidMetricFound", "message": "ok"},
+				},
+				common.HealthStatus{Status: common.HealthStatusHealthy, Message: "scaled"}),
+			Entry("progressing when no condition is known yet",
+				[]interface{}{
+					map[string]interface{}{"type": "ScalingActive", "status": "True", "reason": "ValidMetricFound", "message": "ok"},
+				},
+				common.HealthStatus{Status: common.HealthStatusProgressing, Message: "Waiting to Autoscale"}),
+		)
+
 	})
 })
