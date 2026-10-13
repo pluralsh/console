@@ -7907,6 +7907,40 @@ type ProviderCredentialAttributes struct {
 	Kind      *string `json:"kind,omitempty"`
 }
 
+// A publicly shared dashboard, exposing only what is needed to render it
+type PublicWorkbenchDashboard struct {
+	// Dashboard name
+	Name string `json:"name"`
+	// Optional dashboard description
+	Description *string `json:"description,omitempty"`
+	// Graphs arranged on the dashboard grid
+	Graphs []*PublicWorkbenchDashboardGraph `json:"graphs,omitempty"`
+	Graph  *WorkbenchDashboardGraphResult   `json:"graph,omitempty"`
+}
+
+type PublicWorkbenchDashboardGraph struct {
+	// Stable identifier unique within the dashboard
+	Identifier string `json:"identifier"`
+	// Graph title
+	Title *string `json:"title,omitempty"`
+	// Optional graph description
+	Description *string `json:"description,omitempty"`
+	// Graph visualization type
+	Type DashboardGraphType `json:"type"`
+	// Unit of the plotted values, used to format axes and tooltips
+	Unit *DashboardGraphUnit `json:"unit,omitempty"`
+	// Identifier of the section graph containing this graph
+	SectionID *string `json:"sectionId,omitempty"`
+	// Markdown content for markdown graphs
+	Markdown *string `json:"markdown,omitempty"`
+	// Visualization-specific display options; sections may set collapsed
+	Options map[string]any `json:"options,omitempty"`
+	// Grid position and size
+	Layout WorkbenchDashboardGraphLayout `json:"layout"`
+	// Whether this graph fetches data from a datasource
+	HasDatasource bool `json:"hasDatasource"`
+}
+
 // A reference to a pull request for your kubernetes related IaC
 type PullRequest struct {
 	ID      string    `json:"id"`
@@ -10993,8 +11027,6 @@ type WorkbenchCodingAttributes struct {
 }
 
 type WorkbenchConfiguration struct {
-	// self-service subagent capability enabled
-	SelfService *bool `json:"selfService,omitempty"`
 	// infrastructure capabilities
 	Infrastructure *WorkbenchInfrastructure `json:"infrastructure,omitempty"`
 	// coding capabilities
@@ -11004,8 +11036,6 @@ type WorkbenchConfiguration struct {
 }
 
 type WorkbenchConfigurationAttributes struct {
-	// enable the self-service subagent for catalog and PR automation workflows
-	SelfService *bool `json:"selfService,omitempty"`
 	// infrastructure capabilities (services, stacks, kubernetes)
 	Infrastructure *WorkbenchInfrastructureAttributes `json:"infrastructure,omitempty"`
 	// coding capabilities (mode, repositories, babysitting)
@@ -11069,6 +11099,8 @@ type WorkbenchDashboard struct {
 	Name string `json:"name"`
 	// Optional dashboard description
 	Description *string `json:"description,omitempty"`
+	// Unguessable id of the public share link, null when the dashboard is not shared
+	PublicID *string `json:"publicId,omitempty"`
 	// Graphs arranged on the dashboard grid
 	Graphs []*WorkbenchDashboardGraph `json:"graphs,omitempty"`
 	// User-configurable dashboard variables
@@ -11273,6 +11305,8 @@ type WorkbenchEvalResultsWorkbenchAverage struct {
 }
 
 type WorkbenchInfrastructure struct {
+	// self-service subagent capability enabled
+	SelfService *bool `json:"selfService,omitempty"`
 	// services capability enabled
 	Services *bool `json:"services,omitempty"`
 	// stacks capability enabled
@@ -11288,6 +11322,8 @@ type WorkbenchInfrastructure struct {
 }
 
 type WorkbenchInfrastructureAttributes struct {
+	// enable the self-service subagent for catalog and PR automation workflows
+	SelfService *bool `json:"selfService,omitempty"`
 	// enable services capability
 	Services *bool `json:"services,omitempty"`
 	// enable stacks capability

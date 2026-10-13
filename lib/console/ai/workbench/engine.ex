@@ -21,7 +21,7 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.AI.Workbench.{
     Environment,
     Message,
-    Supervisor,
+    MCP,
     Heartbeat,
     Canvas,
     Activity,
@@ -64,14 +64,13 @@ defmodule Console.AI.Workbench.Engine do
 
     # MCP clients must be up before Environment.new/3 indexes tools via tools/list.
     with {:ok, _} <- Heartbeat.start_link(job),
-         {:ok, _} <- Supervisor.start_link(tools, job),
+         {:ok, _} <- MCP.start_clients(tools),
          {:ok, skills} <- load_skills(workbench) do
       env = Environment.new(job, tools, skills)
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
     else
       {:error, {:already_started, _}} = err -> err
-      {:error, {:shutdown, {:failed_to_start_child, _, {:already_started, _}}}} = err -> err
       {:error, _} = err ->
         Workbenches.fail_job("Error loading workbench environment: #{inspect(err)}", job)
         err

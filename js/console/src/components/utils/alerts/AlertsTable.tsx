@@ -22,6 +22,7 @@ import { isEmpty, upperFirst } from 'lodash'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
+import { toHttpURL } from 'utils/url'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { AiInsightSummaryIcon } from '../AiInsights'
 import { GqlError } from '../Alert'
@@ -29,6 +30,7 @@ import { StackedText } from '../table/StackedText'
 import { VirtualSlice } from '../table/useFetchPaginatedData'
 import { InlineA } from '../typography/Text'
 import { AlertResolutionModal } from './AlertResolutionModal'
+import { AlertSourceLink } from './AlertSourceLink'
 import { AlertsTableExpander } from './AlertsTableExpander'
 import { AlertStateChip } from './AlertStateChip'
 import { TRUNCATE } from '../truncate'
@@ -105,6 +107,7 @@ export function AlertsTable({
 
 function UrlCell({ getValue }: CellContext<AlertFragment, unknown>) {
   const { url, insight } = getValue() as AlertFragment
+  const href = toHttpURL(url)
 
   return (
     <Flex
@@ -123,17 +126,21 @@ function UrlCell({ getValue }: CellContext<AlertFragment, unknown>) {
           placement="top"
           label={url}
         >
-          <InlineA
-            href={url}
-            style={{
-              ...TRUNCATE,
-              minWidth: 0,
-            }}
-          >
-            {url ?? ''}
-          </InlineA>
+          {href ? (
+            <InlineA
+              href={href}
+              style={{
+                ...TRUNCATE,
+                minWidth: 0,
+              }}
+            >
+              {url}
+            </InlineA>
+          ) : (
+            <span css={{ ...TRUNCATE, minWidth: 0 }}>{url ?? ''}</span>
+          )}
         </Tooltip>
-        {!!url && (
+        {!!href && (
           <ArrowTopRightIcon
             size={16}
             color="text"
@@ -238,6 +245,32 @@ export const ColAlertUrl = columnHelper.accessor((alert) => alert, {
   // truncates, so it can give up width before the table outgrows narrow containers
   meta: { gridTemplate: 'minmax(120px, 2fr)', truncate: true },
   cell: UrlCell,
+})
+
+// Source icon + alert name linking to the alert source, instead of the raw URL.
+export const ColAlertSourceLink = columnHelper.accessor((alert) => alert, {
+  id: 'sourceLink',
+  header: 'Source',
+  meta: { gridTemplate: 'minmax(120px, 1.5fr)', truncate: true },
+  cell: function Cell({ getValue }) {
+    const alert = getValue()
+
+    return (
+      <Flex
+        gap="small"
+        align="center"
+        justify="space-between"
+        width="100%"
+        minWidth={0}
+      >
+        <AlertSourceLink alert={alert} />
+        <AiInsightSummaryIcon
+          insight={alert.insight}
+          navPath={`insight/${alert.insight?.id}`}
+        />
+      </Flex>
+    )
+  },
 })
 
 export const ColAlertState = columnHelper.accessor((alert) => alert.state, {

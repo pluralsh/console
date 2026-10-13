@@ -36,7 +36,42 @@ func TestLogAggregateValidation(t *testing.T) {
 
 	_, err = service.LogAggregate(context.Background(), input)
 	require.Equal(t, codes.InvalidArgument, status.Code(err))
-	require.Contains(t, err.Error(), "bucket_size")
+	require.Contains(t, status.Convert(err).Message(), "bucket_size must use Go duration syntax")
+}
+
+func TestValidateBucketSize(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		value   string
+		message string
+	}{
+		{name: "missing", message: "bucket_size is required"},
+		{name: "blank", value: " \t", message: "bucket_size is required"},
+		{name: "malformed", value: "invalid", message: "bucket_size must use Go duration syntax"},
+		{name: "missing unit", value: "5", message: "bucket_size must use Go duration syntax"},
+		{name: "unsupported unit", value: "1d", message: "supported units are ns, us, µs/μs, ms, s, m, and h"},
+		{name: "zero", value: "0s", message: "bucket_size must be greater than zero"},
+		{name: "negative", value: "-1m", message: "bucket_size must be greater than zero"},
+		{name: "overflow", value: "2562048h", message: "bucket_size exceeds this endpoint's maximum duration of 2562047h47m16.854775807s"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			err := validateBucketSize(test.value)
+			require.Equal(t, codes.InvalidArgument, status.Code(err))
+			require.Contains(t, status.Convert(err).Message(), test.message)
+		})
+	}
+
+	for _, value := range []string{
+		"1ns",
+		"500ms",
+		"1.5h",
+		"1h30m",
+		"2562047h47m16.854775807s",
+	} {
+		t.Run("valid "+value, func(t *testing.T) {
+			require.NoError(t, validateBucketSize(value))
+		})
+	}
 }
 
 func TestEmptyLogQueryValidation(t *testing.T) {

@@ -4,6 +4,11 @@ addons:
   release_url: https://github.com/kubevirt/kubevirt/releases/tag/v{vsn}
   readme_url: https://github.com/kubevirt/sig-release/blob/main/releases/k8s-support-matrix.md
   versions:
+  - version: 1.9.1
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 1.9.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -53,7 +58,7 @@ addons:
           performance improvements (less pod listing) and safer handling to prevent
           panics.']
       breaking_changes: []
-    chart_version: 2.43.5
+    chart_version: 2.43.6
     images: ['quay.io/argoproj/argo-rollouts:v1.10.0']
   - version: 1.9.1
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -227,6 +232,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.67.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.67.0
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.13.0-eksbuild.1', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.1',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.1', 'public.ecr.aws/csi-components/csi-resizer:v2.3.0-eksbuild.1',
+      'public.ecr.aws/csi-components/livenessprobe:v2.20.0-eksbuild.1', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.67.0',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260817-81577dc432-master']
   - version: 1.66.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -17875,6 +17891,37 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.12.0
+    kube: ['1.36']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / chart behavior changes (2.11.0 \u2192 2.12.0)\n\
+        - **New toggle:** `rbac.leaderElection.create` (chart) to control creation\
+        \ of RBAC resources needed for leader election.\n  - If you run **replicas\
+        \ > 1**, ensure leader election is enabled and the needed RBAC exists (either\
+        \ let the chart create it, or provide your own).\n- **New chart warning:**\
+        \ chart will **warn when `replicas > 1` without leader election** configured.\n\
+        - **Template behavior:** chart templates no longer hard-`fail` in some scenarios\
+        \ (\u201CRemove fail from templates\u201D), so upgrades may proceed where\
+        \ they previously stopped; review rendered manifests if you relied on that\
+        \ fail-fast behavior.\n- **Image registry config:** a prior breaking change\
+        \ around `imageRegistry` was **reverted** in 2.12.0. If you changed image\
+        \ registry settings during 2.11.x testing, re-validate your `global.imageRegistry`\
+        \ / image settings still behave as expected.\n"
+      chart_updates: [Reverted a breaking change related to `imageRegistry` handling
+          to restore previous behavior., Removed `fail` directives from Helm templates
+          to avoid hard failures during rendering., Added `rbac.leaderElection.create`
+          value to optionally manage leader-election RBAC resources., Added a chart
+          warning when `replicas` is set to more than 1 without leader election enabled/configured.]
+      features: [Password generator supports configuring a prefix and suffix., 'Conjur
+          provider: added support for Cloud Authenticators.', 'Helm chart: can now
+          toggle creation of leader election RBAC via `rbac.leaderElection.create`.',
+        Helm chart emits a warning when scaling above 1 replica without leader election
+          to prevent split-brain behavior.]
+      breaking_changes: []
+    chart_version: 2.12.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.12.0']
   - version: 2.11.0
     kube: ['1.36']
     requirements: []
@@ -19960,7 +20007,7 @@ addons:
   helm_values: settings.clusterName=example
   versions:
   - version: 1.13.0
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -19985,7 +20032,7 @@ addons:
     chart_version: 1.13.0
     images: ['public.ecr.aws/karpenter/controller:1.13.0@sha256:ea731b0cd813add8b2947a76bfe861c38069d85922b01d0c1647d1466279b7fe']
   - version: 1.9.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -20031,7 +20078,7 @@ addons:
     chart_version: 1.8.0
     images: ['public.ecr.aws/karpenter/controller:1.8.0@sha256:f913075cdd31cfcdfaa9726ca7a0b264832fc42e8a48eb573a2a0f454b38b112']
   - version: 1.6.0
-    kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
+    kube: ['1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -20069,7 +20116,7 @@ addons:
     chart_version: 1.6.0
     images: ['public.ecr.aws/karpenter/controller:1.6.0@sha256:37c761a3a0b485fd34db1390317ef6149141f532c5a699c528b98fb8f9cc722a']
   - version: 1.5.0
-    kube: ['1.33', '1.32', '1.31', '1.30']
+    kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -20102,7 +20149,7 @@ addons:
     chart_version: 1.5.0
     images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
   - version: 1.2.0
-    kube: ['1.32', '1.31', '1.30']
+    kube: ['1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -20116,7 +20163,7 @@ addons:
     chart_version: 1.2.0
     images: ['public.ecr.aws/karpenter/controller:1.2.0@sha256:24b8fe57f02b70fc4ab3cd6d5aa0d73a6f3d0c62ca5d23d7ffc8853eac01e324']
   - version: 1.0.5
-    kube: ['1.31', '1.30']
+    kube: ['1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -20432,6 +20479,83 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 92.3.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [CI workflow dependency updates (no chart behavior change expected).,
+        Grafana image tag bumped from v13.4.0 (in 92.2.0) to v13.5.0 (in 92.3.0).]
+      features: [Grafana updated to v13.5.0 (brings upstream Grafana fixes/improvements).]
+      breaking_changes: []
+    chart_version: 92.3.0
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+  - version: 92.2.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Bumps Grafana image tag from `v13.3.0` to `v13.4.0` (renovate
+          PR #7358).']
+      features: ['Grafana is upgraded to v13.4.0 (from v13.3.0), bringing whatever
+          upstream Grafana improvements and fixes are included in that patch/minor
+          bump.']
+      breaking_changes: []
+    chart_version: 92.2.0
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+  - version: 92.1.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Grafana image tag bumped to `13.3.0` (Renovate PR #7348).']
+      features: ['Grafana component will run the `grafana/grafana:13.3.0` image by
+          default after the chart upgrade.']
+      breaking_changes: []
+    chart_version: 92.1.0
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.13.1',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+  - version: 92.0.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Default Linux-only workloads to `kubernetes.io/os: linux` (adds/standardizes
+          nodeSelector on applicable workloads).', 'CI/dependency maintenance: helm-unittest
+          bumped to v1.2.1; GitHub workflow dependency updates (major).', Dependency
+          refresh via renovate (non-major) already occurred in 91.9.0; 92.0.0 mainly
+          carries CI and scheduling default changes.]
+      features: ['Linux-only components now default to scheduling on Linux nodes using
+          the `kubernetes.io/os: linux` nodeSelector, reducing accidental placement
+          on Windows nodes in mixed clusters.']
+      breaking_changes: ['In mixed OS clusters, workloads that previously could schedule
+          onto non-Linux nodes (or relied on custom scheduling) may now be constrained
+          to Linux unless you override nodeSelector/tolerations in values.']
+    chart_version: 92.0.0
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.3-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.11.2',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 91.9.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -24396,6 +24520,53 @@ addons:
   release_url: https://github.com/rook/rook/releases/tag/v{vsn}
   helm_repository_url: https://charts.rook.io/release
   versions:
+  - version: 1.21.0
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '## Helm values / packaging changes to plan for
+
+        - **OCI chart tags drop the `v` prefix**: if you pull charts by tag (OCI or
+        scripts), use `1.21.0` instead of `v1.21.0`.
+
+        - **msgrv2 required by default**: if you must disable it, set `cephClusterSpec.network.connections.requireMsgr2:
+        false` in Helm values.
+
+        - **rook-ceph-cluster chart can create `CephObjectStoreUser`** resources via
+        new value `cephObjectStoreUsers`.
+
+        - **Toolbox chart behavior change**: toolbox manifests/deployments now auto-reload
+        keyring and `ceph.conf` after CephX rotation/mon failover/config overrides.
+
+        - **Default CSI driver images no longer set by Rook**: after upgrade the configmap
+        `rook-csi-operator-image-set-configmap` contains empty values so the ceph-csi-operator
+        uses its defaults; ensure any custom CSI image overrides are still present.'
+      chart_updates: ['Helm/OCI packaging: chart tags no longer include `v` prefix.',
+        rook-ceph-cluster chart supports templating `CephObjectStoreUser` via `cephObjectStoreUsers`.,
+        Toolbox deployment templates updated to auto-reload keyring and `ceph.conf`
+          after relevant changes., CSI image-set configmap behavior updated (empties
+          by default; ceph-csi-operator defaults take over).]
+      features: [Ceph Umbrella (v21) becomes a supported Ceph version once v21.2.0
+          is released., RBD QoS can be configured using `VolumeAttributesClass` with
+          krbd + cgroup v2 `io.max`., Automated OSD replacement via annotating an
+          OSD deployment; preserves CRUSH position for later reuse (host-based OSDs
+          only; PVC-based not supported)., Helm chart can create `CephObjectStoreUser`
+          resources using `cephObjectStoreUsers`., 'Toolbox auto-reloads keyring and
+          `ceph.conf` after CephX key rotation, mon failover, or config override changes.',
+        Dashboard TLS cert can be sourced from a same-namespace TLS Secret via `spec.dashboard.sslCertificateRef`
+          and reconciled on updates., '`CephObjectStoreUser` supports `spec.defaultPlacement`
+          and `spec.defaultStorageClass` and reports effective values in status.',
+        CSI driver images defaulting is delegated to ceph-csi-operator built-ins;
+          Rook no longer pins defaults.]
+      breaking_changes: [Helm OCI chart tags no longer include the `v` prefix; update
+          any automation that references `v1.21.0`., 'Ceph msgrv2 is required by default
+          and needs kernel 5.11+; set `network.connections.requireMsgr2: false` if
+          you must run without msgrv2.', New NFS installs must explicitly define a
+          CephBlockPool for the `.nfs` pool; Rook no longer auto-creates it (upgrades
+          unaffected if `.nfs` already exists).]
+    chart_version: 1.21.0
+    images: []
   - version: 1.20.0
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -24854,25 +25025,133 @@ addons:
   helm_repository_url: https://strimzi.io/charts
   chart_name: strimzi-kafka-operator
   versions:
+  - version: 1.3.0
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [(Early Access) Configurable internal cluster security to enable encryption/authentication
+          on internal Kafka broker connections., 'Kafka version support updated/expanded:
+          adds support for Kafka 4.2.2 (and continues to ship multiple Kafka 4.2/4.3
+          images).', Kafka Exporter updated to 1.10.0., Projected service account
+          token mounting is supported for Strimzi-managed pods., '`UseConnectBuildWithBuildah`
+          feature gate is now GA, enabled by default, and can no longer be disabled
+          (Kaniko removed).', '`UseBackgroundPodDeletion` feature gate moves to beta
+          and is enabled by default, but can be disabled via Cluster Operator feature
+          gates config.', (Early Access) cert-manager integration for issuing certificates
+          (not recommended for production while EA)., HTTP Bridge updated to 1.2.0.,
+        'Example Grafana dashboards updated with fenced brokers, offline replicas,
+          and ISR shrink/expand/failed update panels.']
+      breaking_changes: ['Kubernetes compatibility: Strimzi 1.3.0 supports only Kubernetes
+          1.32+; Kubernetes 1.30 and 1.31 are no longer supported.', 'Connect image
+          builds: Kaniko has been removed; Buildah is now the only supported tool.
+          If you depended on Kaniko images/settings, you must migrate.', 'Certificate
+          handling direction change: PKCS12 certificates are deprecated and the default
+          keystore generation behavior will change in a future release (plan migration
+          away from PKCS12).']
+    chart_version: 1.3.0
+    images: ['quay.io/strimzi/operator:1.3.0']
   - version: 1.2.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "## Helm chart / values changes to review\n- **Pod security context\
+        \ defaults changed**: The Cluster Operator Helm chart now sets a default container\
+        \ `securityContext` aligned with the **Restricted** Kubernetes Pod Security\
+        \ Standard. If your cluster/workloads need different settings (e.g., running\
+        \ as root, extra capabilities, different seccomp), override via the chart\u2019\
+        s `securityContext` values.\n- **ServiceAccount token handling changed**:\
+        \ Operator-managed Pods stop auto-mounting ServiceAccount tokens; tokens are\
+        \ mounted via an explicit volume instead. If you relied on `automountServiceAccountToken:\
+        \ true` behavior or specific token paths, validate any custom sidecars/initContainers.\n\
+        \n_No other explicit Helm values changes were called out in the provided notes._"
+      chart_updates: [Cluster Operator Helm chart now uses default container security
+          context matching the Restricted Kubernetes Pod Security Standard (overridable
+          via `securityContext`)., Operator-managed Pods no longer auto-mount ServiceAccount
+          tokens; token is mounted through a volume instead., '`ServerSideApplyPhase1`
+          feature gate is now GA and permanently enabled (impacts how resources are
+          applied/managed).']
+      features: [Adds support for Apache Kafka **4.3.1**., 'Supports **templated (per-pod)
+          additional volumes**, enabling pod-specific volume definitions.', 'KafkaConnect
+          connectors that request `stopped`/`paused` via `.spec.state` are now **created
+          directly in that state**, avoiding an initial start.', Adds support for
+          **configuring Maven mirrors** for Kafka Connect Build., Supports **broker
+          cordoning during auto-rebalancing on scale-down** for Kafka 4.3+.]
+      breaking_changes: ['`ServerSideApplyPhase1` is now permanently enabled (GA).
+          If you previously depended on legacy apply behavior or had tooling that
+          expected different managedFields behavior, validate reconciliation/patch
+          flows.', Default pod/container security posture is stricter (Restricted
+          PSS). Clusters with permissive assumptions may fail admission unless you
+          override `securityContext` or adjust namespace Pod Security settings., ServiceAccount
+          tokens are no longer auto-mounted; workloads or scripts expecting default
+          token mounts/paths should be validated.]
     chart_version: 1.2.0
     images: ['quay.io/strimzi/operator:1.2.0']
   - version: 1.1.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Kafka: adds support for Apache Kafka 4.3.0 and 4.2.1; removes support
+          for Kafka 4.1.x (clusters pinned to 4.1.x must be upgraded).', 'KafkaConnectors:
+          operators can stop failed connectors and will reject pausing failed connectors
+          (Kafka Connect limitation).', 'Networking: adds Gateway API-based `type:
+          tlsroute` listener support.', 'Connect Build: adds Maven artifact dependency-scope
+          configuration for Kafka Connect Build.', 'Kafka listeners: supports per-broker
+          listener annotation/label templates for more granular metadata control.',
+        'TLS/PKI: new `STRIMZI_PKCS12_KEYSTORE_GENERATION` option to disable PKCS12
+          generation in CA and KafkaUser Secrets; KafkaBridge and MirrorMaker2 switch
+          to PEM files sourced directly from Secrets via KubernetesSecretConfigProvider;
+          per-KafkaUser mTLS `validityDays` and `renewalDays` now configurable.',
+        'Ops/rolling updates: new alpha feature gate `UseBackgroundPodDeletion` (disabled
+          by default) to use background deletion propagation during rolling updates.',
+        'Reconciliation order: Cruise Control reconciled before Entity Operator when
+          both are enabled.', 'Bundled components: Strimzi Drain Cleaner updated to
+          1.6.0; Strimzi Access Operator updated to 0.3.0.']
+      breaking_changes: ['Kafka version support change: Kafka 4.1.x is no longer supported
+          in Strimzi 1.1.0; ensure Kafka clusters are on a supported version (4.2.1/4.3.0
+          etc.) before or during the upgrade.', 'TLS material format change for clients:
+          KafkaBridge and KafkaMirrorMaker2 now use PEM instead of P12/JKS for TLS
+          auth/truststores; any custom configuration or mounted secrets relying on
+          P12/JKS must be updated accordingly.', 'CRD API reminder: only `v1` CRDs
+          are supported (already required since 1.0.0); verify all installed CRDs
+          and custom resources are `v1` before upgrading.']
     chart_version: 1.1.0
     images: ['quay.io/strimzi/operator:1.1.0']
   - version: 1.0.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Strimzi 1.0.0 removes support for non-`v1` CRD APIs; Helm-based
+          installs must upgrade CRDs and ensure all custom resources are converted
+          to `apiVersion: kafka.strimzi.io/v1` before upgrading the chart/operator.',
+        Strimzi 0.51.0 requires Kubernetes v1.30+; ensure the cluster version meets
+          this before proceeding with the upgrade path to 1.0.0., '`ingress` listener
+          type is deprecated (0.51.0); plan migration away from it if currently used.']
+      features: ['Kafka version support changes: 0.51.0 adds Kafka 4.2.0 and drops
+          4.0.0/4.0.1; 1.0.0 adds Kafka 4.1.2.', 'Listener enhancements: per-listener
+          extra Kafka connection options (0.51.0) and `advertisedPortTemplate` for
+          more flexible advertised ports (1.0.0).', 'Operational/security features:
+          TLS on HTTP Bridge (1.0.0), force-renewal of KafkaUser certificates via
+          `strimzi.io/force-renew` annotation (1.0.0), and rack awareness via environment
+          variables without needing ClusterRoleBindings (1.0.0).', 'Feature gates:
+          `ServerSideApplyPhase1` becomes beta and enabled by default in 0.51.0; `UseConnectBuildWithBuildah`
+          becomes beta and enabled by default in 1.0.0.']
+      breaking_changes: ['CRD/API breaking change in 1.0.0: only `v1` CRD API is supported;
+          `v1beta2`, `v1beta1`, and `v1alpha1` are removed. All Strimzi custom resources
+          must be converted and CRDs upgraded before upgrading the operator/chart.',
+        "Platform breaking change in 0.51.0: Kubernetes versions 1.27\u20131.29 are\
+          \ no longer supported; Strimzi 0.51+ requires Kubernetes 1.30+.", "Potential\
+          \ breaking/deprecation impact: `ingress` listener type is deprecated starting\
+          \ 0.51.0; while not immediately removed, it\u2019s effectively end-of-life\
+          \ and should be replaced to avoid future breakage."]
     chart_version: 1.0.0
     images: ['quay.io/strimzi/operator:1.0.0']
   - version: 0.51.0
@@ -25140,36 +25419,30 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.7.13
+  - version: 3.7.14
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Kubernetes ingress-nginx provider gained broad NGINX annotation
-          compatibility (rate limiting, rewrites, auth, buffering, canary, redirects,
-          timeouts, headers, allow/whitelists) and now generates its dynamic config
-          via a metamodel.', Gateway API improvements include support for multiple
-          certificateRefs per listener and secret-based CA refs for BackendTLSPolicy.,
-        'New routing/traffic features: provider routing precedence configuration,
-          wildcard host support in Host/HostSNI matchers, and service-level middleware
-          plus response-status-based failover.', 'Observability and ops enhancements
-          include richer Kubernetes access log fields, OTLP + stdout access log support,
-          and a global option to disable X-Forwarded-For appending.', 'Security/TLS
-          and middleware enhancements include encodedCharacters middleware, retry
-          enhancements based on status codes/timeouts/non-idempotent methods, and
-          a new ACME CertificateTimeout option.']
-      breaking_changes: [ForwardAuth.TrustForwardHeader was deprecated; plan to migrate
-          away from it and validate forward-auth header trust behavior after the upgrade.,
-        Behavior around rejecting/sanitizing suspicious encoded characters was tightened
-          and made opt-in via new options; validate any apps relying on unusual URL
-          encoding or underscores in untrusted headers., Ingress-NGINX provider refactors
-          and behavior fixes (notably SSL redirect/rewrite-target handling) may change
-          request/redirect behavior compared to earlier 3.7.x expectations; validate
-          ingress annotations in staging.]
-    chart_version: 41.6.1
-    images: ['docker.io/traefik:v3.7.13']
+      features: ['Major v3.7 line brings expanded Kubernetes and middleware capabilities:
+          broad ingress-nginx annotation compatibility, Gateway API enhancements (multiple
+          certificateRefs, BackendTLSPolicy CA secret support), CRD additions (ingressClassName,
+          TraefikService failover, ServersTransport cipher suites), and new middleware
+          features (encodedCharacters, enhanced retries, forwardAuth authSignInURL,
+          global X-Forwarded-For disable).', 'v3.7.14 primarily focuses on security
+          and stability: multiple CVE advisories fixed, dependency bumps (ACME lego
+          v5.5.x, Docker CLI, OpenTelemetry, x/crypto), and targeted fixes in Gateway
+          API, ingress-nginx provider behavior, load balancing/sticky transport handling,
+          NTLM/Kerberos connection isolation, and UDP buffering.']
+      breaking_changes: [ForwardAuth.TrustForwardHeader is deprecated in v3.7.0; plan
+          to migrate away from it as it may be removed in a future release., Behavioral
+          change around encoded/suspicious characters rejection became opt-in and
+          includes new warnings; review entryPoint/server encoded characters settings
+          to avoid unexpected 4xx/rejections after upgrade.]
+    chart_version: 41.7.1
+    images: ['docker.io/traefik:v3.7.14']
   - version: 3.7.0
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
@@ -26976,7 +27249,17 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["No concrete feature changes were provided in the pasted notes for\
+          \ v3.33.0 vs v3.32.0\u2014only the presence of standard release artifacts\
+          \ (images/bundles, Windows package, Helm chart, CRD charts, OpenShift bundle).",
+        'The release continues to publish tigera-operator as a Helm 3 chart and CRDs
+          as separate charts, implying the same deployment model as prior releases.']
+      breaking_changes: [No breaking changes were listed in the pasted notes; must
+          review the actual GitHub release notes/changelog for v3.33.0 and the tigera-operator
+          chart CHANGELOG/values.yaml diff to confirm.]
     chart_version: 3.33.0
     images: ['quay.io/tigera/operator:v1.44.0']
   - version: 3.32.0
@@ -27153,18 +27436,20 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.5.3
+  - version: 3.5.5
     kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: []
+      features: ['No user-facing features called out between v3.5.1 and v3.5.5 in
+          the provided notes; changes are primarily reliability, caching, and security/UX
+          bug fixes plus dependency bumps.']
       breaking_changes: []
-    chart_version: 10.9.6
-    images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.5.3']
+    chart_version: 10.10.3
+    images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.0',
+      'quay.io/argoproj/argocd:v3.5.5']
   - version: 3.5.1
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -27724,23 +28009,28 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.1.4
+  - version: 4.1.5
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [No concrete feature details are included in the provided release
-          notes; both v4.1.0 and v4.1.4 sections point to external blog/changelog
-          for 'What's New'., v4.1.4 provides updated install manifests and refreshed
-          CLI binaries for multiple platforms compared to v4.1.0.]
-      breaking_changes: [No breaking changes are enumerated in the provided notes;
-          they direct readers to the upgrading guide and GitHub issues for breaking
-          changes/known issues.]
-    chart_version: 2.0.11
-    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.4', 'quay.io/argoproj/argocli:v4.1.4',
-      'quay.io/argoproj/workflow-controller:v4.1.4']
+      features: ['Improved controller reliability and observability: fixes for tracing
+          span handling and deterministic span/trace IDs to reduce telemetry noise
+          and inconsistencies.', 'More robust workflow resubmission behavior: memoized
+          resubmit now reuses retry-reset logic and includes a fix for node ID collisions.',
+        'Improved operational stability: controller now retries failed artifact GC
+          attempts and scopes sync-queue GC deletes to the owning controller to avoid
+          cross-controller interference.', 'Better correctness in edge cases: fixes
+          termination of suspended workflows and correct parsing of custom headers
+          containing a colon.', 'Database and security hardening: database queries
+          now honor caller context, PostgreSQL respects `sslmode` when configured,
+          and dependencies (moment, golang.org/x/net) were bumped for security fixes.']
+      breaking_changes: []
+    chart_version: 2.0.12
+    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.5', 'quay.io/argoproj/argocli:v4.1.5',
+      'quay.io/argoproj/workflow-controller:v4.1.5']
   - version: 4.1.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -27990,6 +28280,22 @@ addons:
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
   helm_repository_url: https://helm.vector.dev/
   versions:
+  - version: 0.59.0
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details were provided in the supplied v0.59.0 notes (they
+          only list assets). Treat this as a routine version bump unless you find
+          the full upstream release notes diff.]
+      breaking_changes: ['No breaking-change details were provided in the supplied
+          v0.59.0 notes (they only list assets). Before upgrading in production, review
+          the full v0.59.0 release notes/CHANGELOG for config/schema changes and deprecated
+          components.']
+    chart_version: 0.59.0
+    images: ['docker.io/timberio/vector:0.59.0-distroless-libc']
   - version: 0.58.0
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -31037,13 +31343,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
-  - version: 9.5.4
+  - version: 9.5.5
     kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 9.5.4
-    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+    chart_version: 9.5.5
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.5.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -32132,74 +32438,48 @@ addons:
   helm_repository_url: https://kubescape.github.io/helm-charts
   helm_values: clusterName=example,account=example
   versions:
-  - version: 1.40.4
+  - version: 1.40.5
     kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "### Helm values / configuration changes to review\n\n- **`kubescape.submit`\
-        \ removed from docs**: the README no longer references `kubescape.submit`\
-        \ (it was dead). If you still have this value in your `values.yaml`, it is\
-        \ likely ignored and can be removed.\n\n- **New: expose `defaultFrameworks`**\n\
-        \  - The chart now exposes a `defaultFrameworks` value for **kubescape-operator\
-        \ posture scans**.\n  - Operator now **honors install-time `defaultFrameworks`**\
-        \ for posture scans.\n  - Action: if you want to control which frameworks\
-        \ are scanned by default, set `defaultFrameworks` explicitly; otherwise behavior\
-        \ should remain the chart default.\n\n- **New: opt-in RBAC for runtime posture**\n\
-        \  - Chart adds **optional RBAC** to support \u201Cagent runtime posture\u201D\
-        .\n  - Action: if you enable the runtime posture feature, ensure you also\
-        \ enable/accept the new RBAC toggle(s) and verify they align with your cluster\u2019\
-        s RBAC policies.\n\n- **New: storage APIServer host networking option**\n\
-        \  - Storage can now be configured to run its APIServer **on the host network**\
-        \ (opt-in).\n  - Action: only enable if required; validate network policy/firewalling\
-        \ and port conflicts.\n\n- **New: disable exec + open tracing options**\n\
-        \  - Adds chart options to disable **exec tracing** and **open tracing**.\n\
-        \  - Action: if you have security/compliance concerns, consider disabling;\
-        \ otherwise defaults likely keep prior behavior.\n\n- **Autoupdater: pod metadata\
-        \ overrides**\n  - Autoupdater supports overriding pod metadata (labels/annotations).\n\
-        \  - Action: if you rely on standardized labels/annotations for policy/monitoring,\
-        \ consider using these overrides.\n\n- **Node-agent config refactor**\n  -\
-        \ \u201CExtra\u201D node-agent configuration moved under an `extra` section.\n\
-        \  - Action: if you currently set node-agent \u201Cextra\u201D config keys,\
-        \ confirm the new path and adjust `values.yaml` accordingly.\n\n- **RBAC tightening\
-        \ (may affect custom workflows)**\n  - **Node-agent**: dropped RBAC for `pods/delete`.\n\
-        \  - **Workload container securityContexts** now drop **all Linux capabilities**.\n\
-        \  - Action: if you had workloads/sidecars depending on additional capabilities\
-        \ or node-agent deleting pods, confirm your flows still work.\n"
-      chart_updates: ['Updated component images/versions: operator bumped to v0.2.162
-          (Bottlerocket detection support); storage image bumped to v0.0.298 (chart
-          note) and upstream storage includes additional fixes/features in this release
-          train.', 'Node-agent behavior update: auto-set `super_t` on Bottlerocket
-          node groups; Prometheus OTEL exporter enabled; malware detection changed
-          (ClamAV removed, moved to hash sensor).', 'Security hardening in templates:
-          drop all Linux capabilities in workload container securityContexts; pin
-          `runAsGroup` wherever `runAsUser` is pinned.', "Reliability/compat fixes:\
-          \ mount CA certs into sbom-scanner sidecar; mount `config.json` as a file\
-          \ (avoid masking policy dir); don\u2019t mask baked policy library when\
-          \ downloads are off.", 'CRD/template polish: omit empty annotations key
-          on seccompprofiles CRD when empty; align SecurityException vulnerability
-          schema with kubevuln types.']
-      features: [Configurable `defaultFrameworks` for operator posture scans; operator
-          honors the install-time setting for default frameworks., Opt-in RBAC support
-          for agent runtime posture (feature gated)., Storage APIServer can be run
-          on the host network (opt-in)., Autoupdater supports pod metadata overrides
-          (labels/annotations)., 'Bottlerocket node groups: node-agent can auto-detect
-          and auto-set `super_t` to work correctly on Bottlerocket.', Options added
-          to disable exec tracing and open tracing.]
-      breaking_changes: ['Node-agent malware detection change: **ClamAV removed**
-          and malware detection moved to the **hash sensor**. If you depended on ClamAV-specific
-          behavior/artifacts, validate the new detection path.', 'Node-agent RBAC
-          reduced: **pods/delete permission removed**. If you had automation relying
-          on node-agent deleting pods, it will no longer be allowed by default.',
-        "Node-agent values structure change: some \u201Cextra node-agent configuration\u201D\
-          \ moved under an `extra` section; existing `values.yaml` may need path updates.",
-        'SecurityContext hardening: workloads now **drop all Linux capabilities**
-          by default and `runAsGroup` is pinned alongside `runAsUser`; if any container
-          required extra capabilities or different group IDs, you must override explicitly.']
-    chart_version: 1.40.4
-    images: ['quay.io/kubescape/http-request:v0.2.23', 'quay.io/kubescape/kubescape:v4.0.13',
+      helm_changes: ''
+      chart_updates: [No release-note details were provided for kubescape-operator
+          chart version 1.40.4 or 1.40.5; 1.40.5 is marked pre-release with no 'What's
+          Changed' section in the supplied notes., 'From 1.40.3 notes (the only detailed
+          set provided): chart now scopes OTEL config to node-agent via `otelUrl`
+          and drops the bundled OpenTelemetry collector.', Kubernetes minimum version
+          is enforced as >= 1.28 via a Helm `kubeVersion` guard., Operator enables
+          CEL admission rules; SecurityException CRDs gain CEL validation; one orphan/uninstallable
+          SecurityException CRD is removed upstream (from kubescape app notes)., Prometheus
+          exporter ServiceMonitor is decoupled from kubescape ServiceMonitor., 'Synchronizer
+          now syncs additional resources (ServiceAccounts, ContainerProfiles, AISandboxHeartbeats
+          endpoint registration).', 'Node-agent autoscaling/affinity changes: targets
+          label-less nodes via DoesNotExist affinity; autoscaler mount guard aligned;
+          GKE Autopilot allowlist default bumped to 1.40-v2 and allowlist synchronizer
+          installed when enabled.', 'Storage: storage pod restarts when storage config
+          changes.']
+      features: [Configurable `proxyRegistryMap` for kubevuln cluster config to support
+          proxy/registry mapping., 'New kubevuln knobs: `cveMatchingMode` and `trustedVendors`
+          for improved CVE matching behavior.', 'Opt-in remediation capability (`capabilities.remediation`)
+          with gated mutating RBAC; operator action/remediate workflows expanded upstream
+          (annotate, dry-run, quarantine).', 'Node-agent: alert deduplication bypass
+          exposed and a master switch added; expanded OpenTelemetry traces/logs/metrics
+          support upstream.', 'Synchronizer: can sync ContainerProfiles and additional
+          resource types to backend; adds Kafka backend upstream (synchronizer component).',
+        'Storage: IPv6-only cluster support via configurable bind address upstream;
+          ContainerProfile consolidation/compaction improvements upstream.']
+      breaking_changes: [Kubernetes >= 1.28 is now required (Helm will block install/upgrade
+          on older clusters)., "Bundled OpenTelemetry collector is dropped; OTEL is\
+          \ now scoped to node-agent via `otelUrl`\u2014clusters relying on the chart-provided\
+          \ collector must deploy their own collector and update values accordingly.",
+        CEL validation/admission features may require Kubernetes/CRD compatibility
+          (and can cause previously-accepted custom resources to be rejected if they
+          fail new CEL rules).]
+    chart_version: 1.40.5
+    images: ['quay.io/kubescape/http-request:v0.2.23', 'quay.io/kubescape/kubescape:v4.0.14',
       'quay.io/kubescape/kubevuln:v0.3.430', 'quay.io/kubescape/node-agent:v0.3.219',
-      'quay.io/kubescape/operator:v0.2.169', 'quay.io/kubescape/storage:v0.0.331']
+      'quay.io/kubescape/operator:v0.2.172', 'quay.io/kubescape/storage:v0.0.348']
   - version: 1.40.3
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -33042,12 +33322,18 @@ addons:
   helm_values: wizApiToken.secret.create=false,imagePullSecret.username=dummy,imagePullSecret.password=dummy
   chart_name: wiz-sensor
   versions:
-  - version: 1.0.12402
+  - version: 1.0.12603
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
-    summary: null
-    chart_version: 1.0.12447
+    summary:
+      helm_changes: ''
+      chart_updates: ["Release notes provided only include tag/repo/publish metadata\
+          \ and asset; no chart changelog details were included, so chart changes\
+          \ can\u2019t be derived."]
+      features: []
+      breaking_changes: []
+    chart_version: 1.0.12603
     images: ['wizio.azurecr.io/sensor:v1']
   - version: 1.0.3999
     kube: ['1.37', '1.36', '1.35', '1.34']

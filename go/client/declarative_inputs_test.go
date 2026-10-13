@@ -158,8 +158,32 @@ func TestDashboardAttributesSendAllFields(t *testing.T) {
 	expectField(t, input, "datasource", nil)
 }
 
+func TestHelmConfigAttributesClearOmittedScriptFields(t *testing.T) {
+	pythonFile := "values.py"
+	attrs := encodeVariables(t, ServiceUpdateAttributes{
+		Helm: &HelmConfigAttributes{
+			PythonFile: &pythonFile,
+		},
+	})
+
+	helm := expectObject(t, attrs, "helm")
+	expectField(t, helm, "pythonFile", pythonFile)
+	for _, key := range []string{
+		"luaScript", "luaFile", "luaFolder",
+		"pythonScript", "pythonFolder",
+	} {
+		expectField(t, helm, key, nil)
+	}
+	// Nested objects must stay omitted when unset; null triggers "set is invalid".
+	for _, key := range []string{"set", "git", "repository", "values", "chart"} {
+		if _, ok := helm[key]; ok {
+			t.Fatalf("expected field %q to be omitted, got %#v", key, helm[key])
+		}
+	}
+}
+
 func TestOtherInputsStillOmitEmptyFields(t *testing.T) {
-	// Only monitor and dashboard attributes send the full state, other inputs keep the generated behavior.
+	// Monitor, dashboard, and helm config attributes send full state; other inputs keep omitempty.
 	attrs := encodeVariables(t, WorkbenchJobModesAttributes{})
 	if len(attrs) != 0 {
 		t.Fatalf("expected empty fields to be omitted, got %v", attrs)

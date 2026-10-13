@@ -11,6 +11,10 @@ cloud:
   enabled: false
   o11y:
     enabled: false
+    # whether to use the plural observability stack for observability
+    plural: false
+    # base url of the plural telemetry ingress, products are served beneath /metrics, /logs and /traces
+    telemetryUrl: ~
     # ilm is the Elasticsearch index lifecycle policy bodies applied to cloud log indices.
     # Override phases per policy; both default to warm after 1d and delete after 7d.
     ilm:

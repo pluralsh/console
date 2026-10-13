@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-const queryPrefix = "/ext/v1/query/prometheus"
+const (
+	queryPrefix  = "/ext/v1/query/prometheus"
+	lokiPushPath = "/loki/api/v1/push"
+)
 
 func BuildPrometheusQueryTarget(prometheusHost, incomingPath string) (*url.URL, error) {
 	base, err := url.Parse(prometheusHost)
@@ -32,15 +35,18 @@ func BuildPrometheusIngestTarget(prometheusHost string) (*url.URL, error) {
 
 	segments := splitPath(base.Path)
 	for i := 0; i+2 < len(segments); i++ {
-		if segments[i] == "select" && segments[i+2] == "prometheus" {
-			tenant := segments[i+1]
-			prefix := append([]string{}, segments[:i]...)
-			base.Path = "/" + strings.Join(append(prefix, "insert", tenant, "prometheus", "api", "v1", "write"), "/")
+		prefix := append([]string{}, segments[:i]...)
+		switch {
+		case segments[i] == "select" && segments[i+2] == "prometheus":
+			base.Path = "/" + strings.Join(append(prefix, "insert", segments[i+1], "prometheus", "api", "v1", "write"), "/")
+			return base, nil
+		case segments[i] == "read" && segments[i+1] == "ns" && i+3 == len(segments):
+			base.Path = "/" + strings.Join(append(prefix, "write", "ns", segments[i+2], "api", "v1", "write"), "/")
 			return base, nil
 		}
 	}
 
-	return nil, fmt.Errorf("prometheus host %q does not contain /select/{tenant}/prometheus", prometheusHost)
+	return nil, fmt.Errorf("prometheus host %q does not contain /select/{tenant}/prometheus or /read/ns/{namespace}", prometheusHost)
 }
 
 func BuildElasticTarget(elasticHost, suffix string) (*url.URL, error) {
@@ -49,6 +55,27 @@ func BuildElasticTarget(elasticHost, suffix string) (*url.URL, error) {
 		return nil, fmt.Errorf("parse elastic host: %w", err)
 	}
 
+	base.Path = joinPath(base.Path, suffix)
+	return base, nil
+}
+
+func BuildLokiPushTarget(lokiHost string) (*url.URL, error) {
+	base, err := url.Parse(lokiHost)
+	if err != nil {
+		return nil, fmt.Errorf("parse loki host: %w", err)
+	}
+
+	base.Path = joinPath(base.Path, lokiPushPath)
+	return base, nil
+}
+
+func BuildLokiElasticTarget(lokiHost, suffix string) (*url.URL, error) {
+	base, err := url.Parse(lokiHost)
+	if err != nil {
+		return nil, fmt.Errorf("parse loki host: %w", err)
+	}
+
+	base.Path = joinPath(base.Path, "/elasticsearch")
 	base.Path = joinPath(base.Path, suffix)
 	return base, nil
 }

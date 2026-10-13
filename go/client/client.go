@@ -15757,9 +15757,10 @@ func (t *WorkbenchFragment_Configuration_Coding) GetRepositories() []*string {
 }
 
 type WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -15767,6 +15768,12 @@ func (t *WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
 		t = &WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -36954,9 +36961,10 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Coding)
 }
 
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -36964,6 +36972,12 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrast
 		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -38046,9 +38060,10 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Coding)
 }
 
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -38056,6 +38071,12 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrast
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -39138,9 +39159,10 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Coding)
 }
 
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -39148,6 +39170,12 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrast
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -43076,9 +43104,10 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_
 }
 
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -43086,6 +43115,12 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -44197,9 +44232,10 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Coding) GetRepos
 }
 
 type GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -44207,6 +44243,12 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) 
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -74849,6 +74891,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -75150,6 +75193,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -75452,6 +75496,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -76488,6 +76533,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -76797,6 +76843,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes

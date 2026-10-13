@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/prometheus/common/model"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
@@ -59,11 +60,20 @@ func (in *LokiProvider) LogAggregate(ctx context.Context, input *toolquery.LogAg
 	defer lokiClient.Close()
 
 	query := lokiQueryWithFacets(input.Query, input.GetFacets())
+	step, err := model.ParseDuration(input.GetBucketSize())
+	if err != nil {
+		return nil, fmt.Errorf("%w: invalid bucket size: %s", ErrInvalidArgument, input.GetBucketSize())
+	}
+	start, end := normalizeRange(
+		input.GetRange().GetStart().AsTime(),
+		input.GetRange().GetEnd().AsTime(),
+		time.Duration(step),
+	)
 	resp, err := lokiClient.LogAggregate(
 		ctx,
 		fmt.Sprintf("sum(count_over_time(%s[%s]))", query, input.GetBucketSize()),
-		strconv.FormatInt(input.GetRange().GetStart().AsTime().UnixNano(), 10),
-		strconv.FormatInt(input.GetRange().GetEnd().AsTime().UnixNano(), 10),
+		strconv.FormatInt(start.UnixNano(), 10),
+		strconv.FormatInt(end.UnixNano(), 10),
 		input.GetBucketSize())
 	if err != nil {
 		return nil, err

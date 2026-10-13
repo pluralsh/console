@@ -46,6 +46,7 @@ export function FlowWorkbenches() {
     pageInfo: jobsPageInfo,
     fetchNextPage: fetchNextJobsPage,
     setVirtualSlice: setJobsVirtualSlice,
+    fetchingMore: fetchingMoreJobs,
   } = useFetchPaginatedData(
     {
       queryHook: useFlowWorkbenchJobsQuery,
@@ -108,6 +109,7 @@ export function FlowWorkbenches() {
             jobs={jobs}
             loading={jobsLoading}
             loaded={!!jobsData}
+            fetchingMore={fetchingMoreJobs}
             pageInfo={jobsPageInfo}
             fetchNextPage={fetchNextJobsPage}
             setVirtualSlice={setJobsVirtualSlice}

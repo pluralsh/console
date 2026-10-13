@@ -112,7 +112,7 @@ export function WorkbenchJobActivity({
     return (
       <div
         css={{
-          padding: `${spacing.small}px ${spacing.medium}px 0 0`,
+          paddingRight: spacing.medium,
         }}
       >
         <WorkbenchJobActivityResult
@@ -207,7 +207,7 @@ export function WorkbenchJobActivity({
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
         gap: 10,
-        padding: `${spacing.xxsmall}px 0`,
+        padding: 0,
         width: 'fit-content',
         maxWidth: '100%',
       }}
@@ -255,6 +255,7 @@ export function WorkbenchJobActivity({
       <Flex
         direction="column"
         gap="large"
+        marginTop={spacing.small}
       >
         {prompt && (
           <JobActivityPrompt
@@ -312,7 +313,7 @@ export function WorkbenchJobMemoGroup({
       <MemoGroupSC>
         <Flex
           direction="column"
-          gap="xsmall"
+          gap="small"
         >
           {activities.map((activity) => (
             <WorkbenchJobMemo
@@ -328,15 +329,18 @@ export function WorkbenchJobMemoGroup({
   return (
     <MemoGroupSC>
       <SimpleAccordion
-        label={`${activities.length} memos`}
+        label={
+          <MemoLabelSC as="span">{`${activities.length} memos`}</MemoLabelSC>
+        }
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
         hoverCaret
+        triggerWrapperStyles={memoTriggerStyles}
       >
         <Flex
           direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
+          gap="small"
+          marginTop={spacing.small}
         >
           {activities.map((activity) => (
             <WorkbenchJobMemo
@@ -399,11 +403,7 @@ function WorkbenchJobMemo({
       hoverCaret
       isOpen={isExpanded}
       setIsOpen={setIsExpanded}
-      triggerWrapperStyles={{
-        justifyContent: 'flex-start',
-        width: 'fit-content',
-        maxWidth: '100%',
-      }}
+      triggerWrapperStyles={memoTriggerStyles}
       label={
         <Flex
           alignItems="center"
@@ -423,7 +423,7 @@ function WorkbenchJobMemo({
       <Flex
         direction="column"
         gap="small"
-        marginTop={spacing.xsmall}
+        marginTop={spacing.small}
         minWidth={0}
       >
         {result?.error && (
@@ -535,6 +535,9 @@ function WorkbenchJobActivityResult({
   )
 }
 
+// Keep ellipsis horizontal so glyphs and icons are not clipped vertically.
+const clipInlineCss = { overflowX: 'clip', overflowY: 'visible' } as const
+
 // children that render null leave an empty box that still takes a gap slot in the parent
 const CollapseWhenEmptySC = styled(Flex)({
   '&:empty': { display: 'none' },
@@ -551,10 +554,17 @@ const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   display: 'block',
   minWidth: 0,
   maxWidth: '100%',
-  overflow: 'hidden',
+  ...clipInlineCss,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 }))
+
+const memoTriggerStyles = {
+  justifyContent: 'flex-start',
+  width: 'fit-content',
+  maxWidth: '100%',
+  '& > span': clipInlineCss,
+} as const
 
 function WorkbenchJobActivityThoughts({
   activityId,
@@ -574,7 +584,6 @@ function WorkbenchJobActivityThoughts({
   })
   const isLoading = !data && loading
   const activity = data?.workbenchJobActivity
-  const shimmer = isJobRunning(activity?.status)
 
   const { thoughts, lastThought, header } = useMemo(() => {
     const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
@@ -620,20 +629,18 @@ function WorkbenchJobActivityThoughts({
           <WorkbenchToolCallSummary
             toolCounts={toolCounts}
             textParts={textParts}
-            shimmer={shimmer}
           />
         ) : (
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
           >
             {textParts.join(', ') ||
               `${thoughts.length} tool ${pluralize('call', thoughts.length)}`}
           </Body2P>
         ),
     }
-  }, [activity?.thoughts, shimmer])
+  }, [activity?.thoughts])
 
   if (isEmpty(thoughts) && !isLoading) return null
   if (error)
@@ -667,17 +674,13 @@ function WorkbenchJobActivityThoughts({
             <WorkbenchJobActivityThought
               key={i}
               thought={thought}
-              shimmer={shimmer}
             />
           ))}
         </Flex>
       </SimpleAccordion>
       {!isExpanded && lastThought && isJobRunning(activity?.status) && (
         <EaseIn currentKey={lastThought.id}>
-          <WorkbenchJobActivityThought
-            thought={lastThought}
-            shimmer={shimmer}
-          />
+          <WorkbenchJobActivityThought thought={lastThought} />
         </EaseIn>
       )}
     </Flex>
@@ -686,10 +689,8 @@ function WorkbenchJobActivityThoughts({
 
 function WorkbenchJobActivityThought({
   thought,
-  shimmer = false,
 }: {
   thought: WorkbenchJobThoughtFragment
-  shimmer?: boolean
 }) {
   const { id, content, toolName, toolArgs, attributes, tool } = thought
   const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
@@ -712,14 +713,12 @@ function WorkbenchJobActivityThought({
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
       customTitle={title}
       leadingIcon={toolIcon}
-      shimmer={shimmer}
       {...(metricSeriesCount != null && {
         customLabel: (
           <WorkbenchObservabilityToolLabel
             icon={toolIcon}
             title={`fetch metrics (${metricSeriesCount})`}
             query={query}
-            shimmer={shimmer}
           />
         ),
         ...(metricSeriesCount > 0 && {
@@ -733,7 +732,6 @@ function WorkbenchJobActivityThought({
                 icon={toolIcon}
                 title="no logs"
                 query={query}
-                shimmer={shimmer}
               />
             ),
             customResultBody: <EmptyToolResult message="No logs" />,
@@ -744,14 +742,12 @@ function WorkbenchJobActivityThought({
                 icon={toolIcon}
                 title={title ?? 'fetch logs'}
                 query={query}
-                shimmer={shimmer}
               />
             ),
             customResultBody: (
               <PreviewablePanel
                 contentKey={`logs:${id}:${logs.length}`}
                 subtle
-                shimmer={shimmer}
               >
                 <JobActivityLogs logs={logs} />
               </PreviewablePanel>
@@ -815,12 +811,10 @@ function WorkbenchObservabilityToolLabel({
   icon,
   title,
   query,
-  shimmer = false,
 }: {
   icon?: ReactNode
   title: string
   query: string
-  shimmer?: boolean
 }) {
   return (
     <Flex
@@ -833,7 +827,6 @@ function WorkbenchObservabilityToolLabel({
       <Body2P
         as="span"
         $color="text-xlight"
-        $shimmer={shimmer}
         css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
       >
         {title}
@@ -842,7 +835,6 @@ function WorkbenchObservabilityToolLabel({
         <Body2P
           as="span"
           $color="text-disabled"
-          $shimmer={shimmer}
           css={{
             minWidth: 0,
             overflow: 'hidden',
@@ -860,11 +852,9 @@ function WorkbenchObservabilityToolLabel({
 function WorkbenchToolCallSummary({
   toolCounts,
   textParts,
-  shimmer = false,
 }: {
   toolCounts: Array<{ count: number; tool: WorkbenchToolTinyFragment }>
   textParts: string[]
-  shimmer?: boolean
 }) {
   const { spacing } = useTheme()
 
@@ -881,7 +871,6 @@ function WorkbenchToolCallSummary({
           key={part}
           as="span"
           $color="text-xlight"
-          $shimmer={shimmer}
           css={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -917,7 +906,6 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
             css={{ marginRight: spacing.xxsmall }}
           >
             {count}
@@ -925,7 +913,6 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
           >
             {getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)}
           </Body2P>
@@ -957,7 +944,6 @@ function ActivityLatestTool({
       <Body2P
         as="span"
         $color="text-disabled"
-        $shimmer
         css={{
           minWidth: 0,
           overflow: 'hidden',
@@ -1211,10 +1197,10 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
   ({ theme, $hasStatusIcon }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.xxsmall,
+    gap: theme.spacing.small,
     minWidth: 0,
     maxWidth: '100%',
-    overflow: 'hidden',
+    ...clipInlineCss,
     [`&:hover ${ActivityCaretSC}`]: {
       opacity: 1,
     },
@@ -1225,7 +1211,7 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
       display: 'block',
       minWidth: 0,
       maxWidth: '64ch',
-      overflow: 'hidden',
+      ...clipInlineCss,
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       ...($hasStatusIcon && {
@@ -1241,5 +1227,5 @@ const ActivityTitleRowSC = styled.span(({ theme }) => ({
   gap: theme.spacing.xsmall,
   minWidth: 0,
   maxWidth: '100%',
-  overflow: 'hidden',
+  ...clipInlineCss,
 }))

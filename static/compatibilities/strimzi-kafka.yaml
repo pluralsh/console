@@ -4,25 +4,133 @@ release_url: https://github.com/strimzi/strimzi-kafka-operator/releases/tag/{vsn
 helm_repository_url: https://strimzi.io/charts
 chart_name: strimzi-kafka-operator
 versions:
+- version: 1.3.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [(Early Access) Configurable internal cluster security to enable encryption/authentication
+        on internal Kafka broker connections., 'Kafka version support updated/expanded:
+        adds support for Kafka 4.2.2 (and continues to ship multiple Kafka 4.2/4.3
+        images).', Kafka Exporter updated to 1.10.0., Projected service account token
+        mounting is supported for Strimzi-managed pods., '`UseConnectBuildWithBuildah`
+        feature gate is now GA, enabled by default, and can no longer be disabled
+        (Kaniko removed).', '`UseBackgroundPodDeletion` feature gate moves to beta
+        and is enabled by default, but can be disabled via Cluster Operator feature
+        gates config.', (Early Access) cert-manager integration for issuing certificates
+        (not recommended for production while EA)., HTTP Bridge updated to 1.2.0.,
+      'Example Grafana dashboards updated with fenced brokers, offline replicas, and
+        ISR shrink/expand/failed update panels.']
+    breaking_changes: ['Kubernetes compatibility: Strimzi 1.3.0 supports only Kubernetes
+        1.32+; Kubernetes 1.30 and 1.31 are no longer supported.', 'Connect image
+        builds: Kaniko has been removed; Buildah is now the only supported tool. If
+        you depended on Kaniko images/settings, you must migrate.', 'Certificate handling
+        direction change: PKCS12 certificates are deprecated and the default keystore
+        generation behavior will change in a future release (plan migration away from
+        PKCS12).']
+  chart_version: 1.3.0
+  images: ['quay.io/strimzi/operator:1.3.0']
 - version: 1.2.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "## Helm chart / values changes to review\n- **Pod security context\
+      \ defaults changed**: The Cluster Operator Helm chart now sets a default container\
+      \ `securityContext` aligned with the **Restricted** Kubernetes Pod Security\
+      \ Standard. If your cluster/workloads need different settings (e.g., running\
+      \ as root, extra capabilities, different seccomp), override via the chart\u2019\
+      s `securityContext` values.\n- **ServiceAccount token handling changed**: Operator-managed\
+      \ Pods stop auto-mounting ServiceAccount tokens; tokens are mounted via an explicit\
+      \ volume instead. If you relied on `automountServiceAccountToken: true` behavior\
+      \ or specific token paths, validate any custom sidecars/initContainers.\n\n\
+      _No other explicit Helm values changes were called out in the provided notes._"
+    chart_updates: [Cluster Operator Helm chart now uses default container security
+        context matching the Restricted Kubernetes Pod Security Standard (overridable
+        via `securityContext`)., Operator-managed Pods no longer auto-mount ServiceAccount
+        tokens; token is mounted through a volume instead., '`ServerSideApplyPhase1`
+        feature gate is now GA and permanently enabled (impacts how resources are
+        applied/managed).']
+    features: [Adds support for Apache Kafka **4.3.1**., 'Supports **templated (per-pod)
+        additional volumes**, enabling pod-specific volume definitions.', 'KafkaConnect
+        connectors that request `stopped`/`paused` via `.spec.state` are now **created
+        directly in that state**, avoiding an initial start.', Adds support for **configuring
+        Maven mirrors** for Kafka Connect Build., Supports **broker cordoning during
+        auto-rebalancing on scale-down** for Kafka 4.3+.]
+    breaking_changes: ['`ServerSideApplyPhase1` is now permanently enabled (GA). If
+        you previously depended on legacy apply behavior or had tooling that expected
+        different managedFields behavior, validate reconciliation/patch flows.', Default
+        pod/container security posture is stricter (Restricted PSS). Clusters with
+        permissive assumptions may fail admission unless you override `securityContext`
+        or adjust namespace Pod Security settings., ServiceAccount tokens are no longer
+        auto-mounted; workloads or scripts expecting default token mounts/paths should
+        be validated.]
   chart_version: 1.2.0
   images: ['quay.io/strimzi/operator:1.2.0']
 - version: 1.1.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Kafka: adds support for Apache Kafka 4.3.0 and 4.2.1; removes support
+        for Kafka 4.1.x (clusters pinned to 4.1.x must be upgraded).', 'KafkaConnectors:
+        operators can stop failed connectors and will reject pausing failed connectors
+        (Kafka Connect limitation).', 'Networking: adds Gateway API-based `type: tlsroute`
+        listener support.', 'Connect Build: adds Maven artifact dependency-scope configuration
+        for Kafka Connect Build.', 'Kafka listeners: supports per-broker listener
+        annotation/label templates for more granular metadata control.', 'TLS/PKI:
+        new `STRIMZI_PKCS12_KEYSTORE_GENERATION` option to disable PKCS12 generation
+        in CA and KafkaUser Secrets; KafkaBridge and MirrorMaker2 switch to PEM files
+        sourced directly from Secrets via KubernetesSecretConfigProvider; per-KafkaUser
+        mTLS `validityDays` and `renewalDays` now configurable.', 'Ops/rolling updates:
+        new alpha feature gate `UseBackgroundPodDeletion` (disabled by default) to
+        use background deletion propagation during rolling updates.', 'Reconciliation
+        order: Cruise Control reconciled before Entity Operator when both are enabled.',
+      'Bundled components: Strimzi Drain Cleaner updated to 1.6.0; Strimzi Access
+        Operator updated to 0.3.0.']
+    breaking_changes: ['Kafka version support change: Kafka 4.1.x is no longer supported
+        in Strimzi 1.1.0; ensure Kafka clusters are on a supported version (4.2.1/4.3.0
+        etc.) before or during the upgrade.', 'TLS material format change for clients:
+        KafkaBridge and KafkaMirrorMaker2 now use PEM instead of P12/JKS for TLS auth/truststores;
+        any custom configuration or mounted secrets relying on P12/JKS must be updated
+        accordingly.', 'CRD API reminder: only `v1` CRDs are supported (already required
+        since 1.0.0); verify all installed CRDs and custom resources are `v1` before
+        upgrading.']
   chart_version: 1.1.0
   images: ['quay.io/strimzi/operator:1.1.0']
 - version: 1.0.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Strimzi 1.0.0 removes support for non-`v1` CRD APIs; Helm-based
+        installs must upgrade CRDs and ensure all custom resources are converted to
+        `apiVersion: kafka.strimzi.io/v1` before upgrading the chart/operator.', Strimzi
+        0.51.0 requires Kubernetes v1.30+; ensure the cluster version meets this before
+        proceeding with the upgrade path to 1.0.0., '`ingress` listener type is deprecated
+        (0.51.0); plan migration away from it if currently used.']
+    features: ['Kafka version support changes: 0.51.0 adds Kafka 4.2.0 and drops 4.0.0/4.0.1;
+        1.0.0 adds Kafka 4.1.2.', 'Listener enhancements: per-listener extra Kafka
+        connection options (0.51.0) and `advertisedPortTemplate` for more flexible
+        advertised ports (1.0.0).', 'Operational/security features: TLS on HTTP Bridge
+        (1.0.0), force-renewal of KafkaUser certificates via `strimzi.io/force-renew`
+        annotation (1.0.0), and rack awareness via environment variables without needing
+        ClusterRoleBindings (1.0.0).', 'Feature gates: `ServerSideApplyPhase1` becomes
+        beta and enabled by default in 0.51.0; `UseConnectBuildWithBuildah` becomes
+        beta and enabled by default in 1.0.0.']
+    breaking_changes: ['CRD/API breaking change in 1.0.0: only `v1` CRD API is supported;
+        `v1beta2`, `v1beta1`, and `v1alpha1` are removed. All Strimzi custom resources
+        must be converted and CRDs upgraded before upgrading the operator/chart.',
+      "Platform breaking change in 0.51.0: Kubernetes versions 1.27\u20131.29 are\
+        \ no longer supported; Strimzi 0.51+ requires Kubernetes 1.30+.", "Potential\
+        \ breaking/deprecation impact: `ingress` listener type is deprecated starting\
+        \ 0.51.0; while not immediately removed, it\u2019s effectively end-of-life\
+        \ and should be replaced to avoid future breakage."]
   chart_version: 1.0.0
   images: ['quay.io/strimzi/operator:1.0.0']
 - version: 0.51.0

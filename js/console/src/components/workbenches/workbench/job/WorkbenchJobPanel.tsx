@@ -10,7 +10,9 @@ import {
   PrIcon,
   SubTab,
   TabList,
+  usePrevious,
 } from '@pluralsh/design-system'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   PanelHeaderSC,
   SidePanelContent,
@@ -78,106 +80,10 @@ export function WorkbenchJobPanelContent() {
     ] ?? ''
   const { setOpen } = useWorkbenchJobPanel()
   const tabStateRef = useRef<any>(null)
-  const [selectedTab, setSelectedTab] = useState<JobPanelTab>('Result')
-
-  // polling handled by WorkbenchJob.tsx which should also update the cache
-  const { data, loading } = useWorkbenchJobQuery({
-    skip: !jobId,
-    variables: { id: jobId },
-    fetchPolicy: 'cache-and-network',
-  })
-  const { data: activitiesData } = useWorkbenchJobActivitiesQuery({
-    skip: !jobId,
-    variables: { id: jobId },
-    fetchPolicy: 'cache-first',
-  })
-  const {
-    hasActions,
-    hasActionsAwaitingApproval,
-    isLoading: areActionsLoading,
-  } = useWorkbenchJobActionSummary(jobId)
-  const job = data?.workbenchJob
-  const isLoading = loading && !job
-  const activities = useMemo(
-    () =>
-      activitiesData?.workbenchJob?.activities?.edges
-        ?.map((edge) => edge?.node)
-        .filter(isNonNullable) ?? [],
-    [activitiesData]
-  )
-  const pullRequests = job?.pullRequests?.filter(isNonNullable) ?? []
-  const generatedPrs = useMemo(
-    () =>
-      pullRequests.filter(
-        (pr): pr is PullRequestBasicFragment =>
-          isNonNullable(pr) && pr.url !== PATCH_PR_URL
-      ),
-    [pullRequests]
-  )
-  const draftPrs = useMemo((): WorkbenchJobDraftPr[] => {
-    const agentRuns = uniqBy(
-      activities
-        .flatMap((activity) =>
-          [activity.agentRun, ...(activity.agentRuns ?? [])].filter(
-            isNonNullable
-          )
-        )
-        .filter(isNonNullable),
-      'id'
-    ).filter(
-      (run) =>
-        run.status === AgentRunStatus.PendingApproval &&
-        !run.approvedAt &&
-        !!run.upload?.patch
-    )
-
-    const agentRunDrafts: WorkbenchJobDraftPr[] = agentRuns.map((agentRun) => ({
-      type: 'agentRun',
-      agentRun,
-    }))
-
-    const linkedPrIds = new Set(
-      agentRuns.flatMap(
-        (run) =>
-          run.pullRequests?.map((pr) => pr?.id).filter(isNonNullable) ?? []
-      )
-    )
-
-    const patchPrDrafts: WorkbenchJobDraftPr[] = pullRequests
-      .filter(
-        (pr): pr is PullRequestBasicFragment =>
-          isNonNullable(pr) && pr.url === PATCH_PR_URL
-      )
-      .filter((pr) => !linkedPrIds.has(pr.id))
-      .map((pullRequest) => ({ type: 'patchPr', pullRequest }))
-
-    return [...agentRunDrafts, ...patchPrDrafts]
-  }, [activities, pullRequests])
-  const hasDraftPrsAwaitingApproval = draftPrs.length > 0
-
-  const tabs = useMemo(
-    () =>
-      getPanelTabs(
-        job,
-        hasDraftPrsAwaitingApproval,
-        hasActions,
-        hasActionsAwaitingApproval,
-        isLoading
-      ),
-    [
-      hasActions,
-      hasActionsAwaitingApproval,
-      hasDraftPrsAwaitingApproval,
-      isLoading,
-      job,
-    ]
-  )
-
-  useEffect(() => {
-    if (tabs.some(({ label }) => label === selectedTab)) return
-
-    if (tabs[0]) setSelectedTab(tabs[0].label)
-  }, [selectedTab, tabs])
+  const data = useWorkbenchJobTabsData(jobId)
+  const { job, isLoading, areActionsLoading } = data
+  const tabs = useMemo(() => getPanelTabs(data), [data])
+  const [selectedTab, setSelectedTab] = useSelectedJobTab(tabs, 'Result')
 
   useEffect(() => {
     if (isLoading || areActionsLoading) return
@@ -239,37 +145,209 @@ export function WorkbenchJobPanelContent() {
                 loading={isLoading}
               />
             )}
-          {selectedTab === 'Dashboard' && job?.id && (
-            <WorkbenchJobCanvas
-              jobId={job.id}
-              canvas={job?.result?.canvas}
-            />
-          )}
-          {selectedTab === 'Topology' && (
-            <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
-          )}
           {selectedTab === 'Pull requests' && job?.id && (
             <WorkbenchJobPrs
-              generatedPrs={generatedPrs}
-              draftPrs={draftPrs}
+              generatedPrs={data.generatedPrs}
+              draftPrs={data.draftPrs}
               workbenchId={job.workbench?.id ?? ''}
               workbenchName={job.workbench?.name ?? ''}
               jobId={job.id}
             />
           )}
-          {selectedTab === 'Eval' && job?.evalResult && (
-            <WorkbenchJobEval job={job} />
-          )}
           {selectedTab === 'Usage' && job?.usage && (
-            <WorkbenchJobUsage usage={job?.usage} />
+            <WorkbenchJobUsage usage={job.usage} />
           )}
-          {selectedTab === 'Actions' && job?.id && (
-            <WorkbenchJobActions jobId={job.id} />
-          )}
+          <WorkbenchJobCommonTabContent
+            tab={selectedTab}
+            job={job}
+          />
         </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
   )
+}
+
+export type WorkbenchJobTabsData = ReturnType<typeof useWorkbenchJobTabsData>
+
+// Job data behind the job tabs, shared by the job side panel and the Jobs tab
+// details view. On the job page, polling is handled by the page itself (which
+// keeps the cache up to date). The details view passes `inDetailsView`: its
+// conclusion panel already fetches and polls the job, so the job is read from
+// the cache, and activities (draft PRs) and actions are polled only while the
+// job runs, plus once more when it stops so the final ones aren't missed.
+export function useWorkbenchJobTabsData(
+  jobId: string,
+  { inDetailsView = false }: { inDetailsView?: boolean } = {}
+) {
+  const { data, loading } = useWorkbenchJobQuery({
+    skip: !jobId,
+    variables: { id: jobId },
+    fetchPolicy: inDetailsView ? 'cache-first' : 'cache-and-network',
+  })
+  const job = data?.workbenchJob
+  const isLoading = loading && !job
+  const running = isJobRunning(job?.status)
+  const {
+    data: activitiesData,
+    startPolling,
+    stopPolling,
+    refetch: refetchActivities,
+  } = useWorkbenchJobActivitiesQuery({
+    skip: !jobId,
+    variables: { id: jobId },
+    fetchPolicy: inDetailsView ? 'cache-and-network' : 'cache-first',
+  })
+  const {
+    hasActions,
+    hasActionsAwaitingApproval,
+    isLoading: areActionsLoading,
+    refetch: refetchActions,
+  } = useWorkbenchJobActionSummary(jobId, { poll: !inDetailsView || running })
+  const pollingActivities = inDetailsView && running
+  const wasPollingActivities = usePrevious(pollingActivities)
+
+  useEffect(() => {
+    if (!pollingActivities) return
+    startPolling(POLL_INTERVAL)
+    return () => stopPolling()
+  }, [pollingActivities, startPolling, stopPolling])
+
+  // the last poll may predate the job's final activities and actions
+  useEffect(() => {
+    if (!wasPollingActivities || pollingActivities) return
+    refetchActivities()
+    refetchActions()
+  }, [
+    pollingActivities,
+    refetchActions,
+    refetchActivities,
+    wasPollingActivities,
+  ])
+
+  const activities = useMemo(
+    () =>
+      activitiesData?.workbenchJob?.activities?.edges
+        ?.map((edge) => edge?.node)
+        .filter(isNonNullable) ?? [],
+    [activitiesData]
+  )
+  const pullRequests = useMemo(
+    () => job?.pullRequests?.filter(isNonNullable) ?? [],
+    [job?.pullRequests]
+  )
+  const generatedPrs = useMemo(
+    () =>
+      pullRequests.filter(
+        (pr): pr is PullRequestBasicFragment =>
+          isNonNullable(pr) && pr.url !== PATCH_PR_URL
+      ),
+    [pullRequests]
+  )
+  const draftPrs = useMemo((): WorkbenchJobDraftPr[] => {
+    const agentRuns = uniqBy(
+      activities
+        .flatMap((activity) =>
+          [activity.agentRun, ...(activity.agentRuns ?? [])].filter(
+            isNonNullable
+          )
+        )
+        .filter(isNonNullable),
+      'id'
+    ).filter(
+      (run) =>
+        run.status === AgentRunStatus.PendingApproval &&
+        !run.approvedAt &&
+        !!run.upload?.patch
+    )
+
+    const agentRunDrafts: WorkbenchJobDraftPr[] = agentRuns.map((agentRun) => ({
+      type: 'agentRun',
+      agentRun,
+    }))
+
+    const linkedPrIds = new Set(
+      agentRuns.flatMap(
+        (run) =>
+          run.pullRequests?.map((pr) => pr?.id).filter(isNonNullable) ?? []
+      )
+    )
+
+    const patchPrDrafts: WorkbenchJobDraftPr[] = pullRequests
+      .filter(
+        (pr): pr is PullRequestBasicFragment =>
+          isNonNullable(pr) && pr.url === PATCH_PR_URL
+      )
+      .filter((pr) => !linkedPrIds.has(pr.id))
+      .map((pullRequest) => ({ type: 'patchPr', pullRequest }))
+
+    return [...agentRunDrafts, ...patchPrDrafts]
+  }, [activities, pullRequests])
+
+  return useMemo(
+    () => ({
+      job,
+      isLoading,
+      areActionsLoading,
+      generatedPrs,
+      draftPrs,
+      hasActions,
+      hasActionsAwaitingApproval,
+    }),
+    [
+      areActionsLoading,
+      draftPrs,
+      generatedPrs,
+      hasActions,
+      hasActionsAwaitingApproval,
+      isLoading,
+      job,
+    ]
+  )
+}
+
+// Keeps the selection on an available tab as tabs appear and disappear.
+export function useSelectedJobTab<T extends string>(
+  tabs: { label: T }[],
+  initial: T
+) {
+  const [selectedTab, setSelectedTab] = useState<T>(initial)
+
+  useEffect(() => {
+    if (tabs.some(({ label }) => label === selectedTab)) return
+
+    if (tabs[0]) setSelectedTab(tabs[0].label)
+  }, [selectedTab, tabs])
+
+  return [selectedTab, setSelectedTab] as const
+}
+
+// Tab content that renders the same in the job side panel and the details view.
+export function WorkbenchJobCommonTabContent({
+  tab,
+  job,
+}: {
+  tab: string
+  job: Nullable<WorkbenchJobFragment>
+}) {
+  if (!job?.id) return null
+
+  switch (tab) {
+    case 'Dashboard':
+      return (
+        <WorkbenchJobCanvas
+          jobId={job.id}
+          canvas={job.result?.canvas}
+        />
+      )
+    case 'Topology':
+      return <WorkbenchJobTopology topology={job.result?.topology ?? ''} />
+    case 'Eval':
+      return job.evalResult ? <WorkbenchJobEval job={job} /> : null
+    case 'Actions':
+      return <WorkbenchJobActions jobId={job.id} />
+    default:
+      return null
+  }
 }
 
 export function useWorkbenchJobPanel(autoOpen?: Nullable<boolean>) {
@@ -345,13 +423,13 @@ const PanelSubTabSC = styled(SubTab)(({ theme }) => ({
   },
 }))
 
-const getPanelTabs = (
-  job: Nullable<WorkbenchJobFragment>,
-  hasDraftPrsAwaitingApproval: boolean,
-  hasActions: boolean,
-  hasActionsAwaitingApproval: boolean,
-  isLoading: boolean
-) =>
+const getPanelTabs = ({
+  job,
+  isLoading,
+  draftPrs,
+  hasActions,
+  hasActionsAwaitingApproval,
+}: WorkbenchJobTabsData) =>
   [
     (isLoading || hasWorkbenchJobResultContent(job)) && {
       label: 'Result',
@@ -365,10 +443,10 @@ const getPanelTabs = (
       label: 'Topology',
       icon: <GraphIcon size={12} />,
     },
-    (!isEmpty(job?.pullRequests) || hasDraftPrsAwaitingApproval) && {
+    (!isEmpty(job?.pullRequests) || !isEmpty(draftPrs)) && {
       label: 'Pull requests',
       icon: <PrIcon size={12} />,
-      showDot: hasDraftPrsAwaitingApproval,
+      showDot: !isEmpty(draftPrs),
     },
     job?.evalResult && {
       label: 'Eval',

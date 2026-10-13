@@ -3,6 +3,7 @@
   "properties": {
     "dashboard_name": {
       "type": "string",
+      "maxLength": 255,
       "description": "Unique dashboard name. A dashboard with this name is updated, otherwise it is created."
     },
     "graphs": {
@@ -67,9 +68,10 @@
       "properties": {
         "name": {
           "type": "string",
+          "maxLength": 255,
           "description": "Optional new dashboard name"
         },
-        "description": { "type": "string" },
+        "description": { "type": "string", "maxLength": 10000 },
         "inputs": {
           "type": "array",
           "items": {
