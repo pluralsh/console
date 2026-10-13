@@ -24,7 +24,6 @@ defmodule Console.AI.Memoizer do
   regenerating it. A service component only adopts the insight of a cluster component when it has no fresh one itself.
   """
   @spec adopt(struct) :: struct
-  def adopt(%ClusterInsightComponent{insight: %AiInsight{force: true}} = model), do: model
   def adopt(%ClusterInsightComponent{insight: own} = model) do
     case find_peer(model) do
       %{insight: %AiInsight{} = shared} ->
@@ -33,7 +32,9 @@ defmodule Console.AI.Memoizer do
 
         cond do
           fresh? and own_id != shared.id -> link(model, shared)
-          fresh? -> model
+          fresh? -> %{model | insight: shared}
+          # a forced row is most likely owned by a service refresh, so it is detached instead of overwritten
+          match?(%AiInsight{force: true}, own) -> link(model, nil)
           own_id == shared.id -> link(model, nil)
           true -> model
         end
