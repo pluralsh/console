@@ -108,7 +108,7 @@
     "rimraf": "5.0.10",
     "storybook": "10.6.0",
     "type-fest": "4.41.0",
-    "typescript": "5.8.2",
+    "typescript": "6.0.3",
     "vite": "7.3.6",
     "vite-bundle-visualizer": "1.2.1",
     "vite-plugin-dts": "5.0.3",
