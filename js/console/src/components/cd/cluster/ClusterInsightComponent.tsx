@@ -72,12 +72,6 @@ export function ClusterInsightComponent() {
         }
   }, [service, serviceComponentId])
 
-  console.log(service)
-  console.log(serviceData)
-  console.log(component)
-  console.log(serviceComponentId)
-  console.log(serviceLink)
-
   useSetNavigationContent(
     useMemo(
       () => (
