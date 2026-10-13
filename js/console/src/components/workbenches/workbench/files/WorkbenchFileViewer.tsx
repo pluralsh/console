@@ -1,22 +1,20 @@
 import {
   Button,
+  CheckIcon,
   Code,
   DownloadIcon,
-  Flex,
-  IconFrame,
   CopyIcon,
   Markdown,
-  TrashCanIcon,
+  Tooltip,
   useCopyText,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { FileTypeIcon } from 'components/utils/fileTree'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   useWorkbenchFileContentsQuery,
   useWorkbenchFileQuery,
-  WorkbenchFileFragment,
   WorkbenchFileKind,
 } from 'generated/graphql'
 import { ReactNode } from 'react'
@@ -37,11 +35,9 @@ const PREVIEW_LIMIT = 1024 * 1024
 export function WorkbenchFileViewer({
   workbenchId,
   path,
-  onDelete,
 }: {
   workbenchId: string
   path: string
-  onDelete: (file: WorkbenchFileFragment) => void
 }) {
   const { data, loading, error } = useWorkbenchFileQuery({
     variables: { id: workbenchId, path },
@@ -93,6 +89,9 @@ export function WorkbenchFileViewer({
     )
 
   const downloadUrl = workbenchFileDownloadUrl(file.downloadUrl)
+  // code, pdfs and loading fill the panel edge to edge; empty states, markdown
+  // and media keep padding, matching the inset empty cards elsewhere in the console
+  let flush = false
   const unavailable = (description: string) => (
     <WorkbenchEmptyState
       inset={false}
@@ -108,30 +107,35 @@ export function WorkbenchFileViewer({
     if (tooLarge) body = unavailable('This file is too large to preview.')
     else if (contentsError && contents == null)
       body = unavailable("This file couldn't be read as text.")
-    else if (contents == null && contentsLoading)
+    else if (contents == null && contentsLoading) {
+      flush = true
       body = (
         <RectangleSkeleton
           $height="100%"
           $width="100%"
         />
       )
-    else if (viewerKind === 'markdown')
+    } else if (viewerKind === 'markdown')
       body = (
         <MarkdownSC>
           <Markdown text={contents ?? ''} />
         </MarkdownSC>
       )
-    else
+    else {
+      flush = true
       body = (
-        <Code
-          height="100%"
-          language={getLanguageFromFileName(name) ?? 'text'}
-          showHeader={false}
-          showLineNumbers
-        >
-          {contents ?? ''}
-        </Code>
+        <FlushCodeSC>
+          <Code
+            height="100%"
+            language={getLanguageFromFileName(name) ?? 'text'}
+            showHeader={false}
+            showLineNumbers
+          >
+            {contents ?? ''}
+          </Code>
+        </FlushCodeSC>
       )
+    }
   } else if (!file.downloadUrl) body = unavailable('No download url available.')
   else if (viewerKind === 'image')
     body = (
@@ -160,14 +164,20 @@ export function WorkbenchFileViewer({
         />
       </MediaSC>
     )
-  else if (viewerKind === 'pdf')
+  else if (viewerKind === 'pdf') {
+    flush = true
     body = (
       <PdfSC
         src={file.downloadUrl}
         title={name}
       />
     )
-  else body = unavailable("This file type can't be previewed.")
+  } else body = unavailable("This file type can't be previewed.")
+
+  const meta = [
+    formatFileSize(file.size),
+    file.modifiedAt && formatDateTime(file.modifiedAt),
+  ].filter(Boolean)
 
   return (
     <ViewerSC>
@@ -176,44 +186,19 @@ export function WorkbenchFileViewer({
           fileName={name}
           size={20}
         />
-        <Flex
-          direction="column"
-          minWidth={0}
-          flex={1}
-        >
-          <Body2BoldP
-            css={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {name}
-          </Body2BoldP>
-          <CaptionP $color="text-xlight">
-            {[
-              file.sandboxPath,
-              formatFileSize(file.size),
-              file.modifiedAt && formatDateTime(file.modifiedAt),
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </CaptionP>
-        </Flex>
-        <CopyPathButton path={file.sandboxPath} />
-        <IconFrame
-          clickable
-          size="small"
-          type="tertiary"
-          tooltip="Delete file"
-          icon={<TrashCanIcon color="icon-danger" />}
-          onClick={() => onDelete(file)}
-        />
-        {downloadUrl && <DownloadButton href={downloadUrl} />}
+        <PathBreadcrumb path={file.sandboxPath} />
+        <HeaderActionsSC>
+          {meta.length > 0 && (
+            <MetaSC>
+              {meta.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </MetaSC>
+          )}
+          {downloadUrl && <DownloadButton href={downloadUrl} />}
+        </HeaderActionsSC>
       </ViewerHeaderSC>
-      <ViewerBodySC>
-        <ViewerContentSC>{body}</ViewerContentSC>
-      </ViewerBodySC>
+      <ViewerBodySC $flush={flush}>{body}</ViewerBodySC>
     </ViewerSC>
   )
 }
@@ -232,18 +217,44 @@ function DownloadButton({ href }: { href: string }) {
   )
 }
 
-function CopyPathButton({ path }: { path: string }) {
+// the sandbox path doubles as the header: folders lead to the bolded file name,
+// and the whole breadcrumb copies the path agents use to reference the file
+function PathBreadcrumb({ path }: { path: string }) {
   const { copied, handleCopy } = useCopyText(path, 2000)
+  const segments = path.split('/').filter(Boolean)
+  const fileName = segments.pop()
 
   return (
-    <IconFrame
-      clickable
-      size="small"
-      type="tertiary"
-      tooltip={copied ? 'Copied' : 'Copy sandbox path'}
-      icon={<CopyIcon />}
-      onClick={handleCopy}
-    />
+    <Tooltip
+      label={copied ? 'Copied' : 'Copy path'}
+      placement="bottom-start"
+    >
+      <BreadcrumbSC
+        type="button"
+        onClick={handleCopy}
+        aria-label={`Copy path ${path}`}
+      >
+        <span className="segments">
+          {segments.map((segment, i) => (
+            <span key={i}>
+              <span className="folder">{segment}</span>
+              <span className="separator">/</span>
+            </span>
+          ))}
+          <span className="file">{fileName}</span>
+        </span>
+        <span className="icon">
+          {copied ? (
+            <CheckIcon
+              size={12}
+              color="icon-success"
+            />
+          ) : (
+            <CopyIcon size={12} />
+          )}
+        </span>
+      </BreadcrumbSC>
+    </Tooltip>
   )
 }
 
@@ -259,44 +270,100 @@ const ViewerHeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.small,
   boxSizing: 'border-box',
-  minHeight: WORKBENCH_FILES_HEADER_HEIGHT,
-  padding: `${theme.spacing.small} ${theme.spacing.large}`,
+  height: WORKBENCH_FILES_HEADER_HEIGHT,
+  padding: `0 ${theme.spacing.large}`,
   borderBottom: theme.borders.hairline,
   flexShrink: 0,
 }))
 
-const ViewerBodySC = styled.div(({ theme }) => ({
+const BreadcrumbSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.body2,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  flex: '0 1 auto',
+  minWidth: 0,
+  cursor: 'pointer',
+  borderRadius: theme.borderRadiuses.medium,
+  // long paths drop leading folders first so the file name stays visible
+  '.segments': { ...TRUNCATE_LEFT, minWidth: 0 },
+  '.folder': { color: theme.colors['text-xlight'] },
+  '.separator': {
+    color: theme.colors['text-xlight'],
+    margin: `0 ${theme.spacing.xxsmall}`,
+  },
+  '.file': { ...theme.partials.text.body2Bold, color: theme.colors.text },
+  '.icon': {
+    display: 'flex',
+    flexShrink: 0,
+    color: theme.colors['icon-xlight'],
+  },
+  '&:hover': {
+    '.folder': { color: theme.colors['text-light'] },
+    '.icon': { color: theme.colors['icon-default'] },
+  },
+  '&:focus-visible': { outline: theme.borders['outline-focused'] },
+}))
+
+const MetaSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  display: 'flex',
+  gap: theme.spacing.small,
+  color: theme.colors['text-xlight'],
+  whiteSpace: 'nowrap',
+  marginRight: theme.spacing.xsmall,
+}))
+
+const HeaderActionsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  flexShrink: 0,
+  marginLeft: 'auto',
+}))
+
+const ViewerBodySC = styled.div<{ $flush?: boolean }>(({ theme, $flush }) => ({
   flex: 1,
   minHeight: 0,
   overflow: 'auto',
-  padding: theme.spacing.large,
+  display: 'flex',
+  flexDirection: 'column',
+  ...(!$flush && { padding: theme.spacing.large }),
 }))
 
-const ViewerContentSC = styled.div({
-  height: '100%',
-  maxWidth: 1000,
-  margin: '0 auto',
+// the code card's own border and rounding double up against the panel edges
+const FlushCodeSC = styled.div({
+  flex: 1,
+  minHeight: 0,
+  '& > *': { border: 'none', borderRadius: 0 },
 })
 
 const MarkdownSC = styled.div({
-  maxWidth: 800,
+  maxWidth: '56.25rem',
+  width: '100%',
   margin: '0 auto',
 })
 
-const MediaSC = styled.div({
+const MediaSC = styled.div(({ theme }) => ({
   display: 'flex',
+  flex: 1,
+  alignItems: 'center',
   justifyContent: 'center',
+  minHeight: 0,
   'img, video': {
     maxWidth: '100%',
     maxHeight: '100%',
     objectFit: 'contain',
+    borderRadius: theme.borderRadiuses.medium,
   },
   audio: { width: '100%', maxWidth: 600 },
-})
+}))
 
 const PdfSC = styled.iframe(({ theme }) => ({
   width: '100%',
   height: '100%',
-  border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.medium,
+  minHeight: 0,
+  border: 'none',
+  background: theme.colors['fill-zero'],
 }))

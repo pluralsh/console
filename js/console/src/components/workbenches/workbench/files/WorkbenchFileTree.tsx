@@ -17,7 +17,7 @@ import {
   TreeItemIcon,
   TreeItemText,
 } from 'components/utils/fileTree'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   useWorkbenchFilesQuery,
   WorkbenchFileFragment,
@@ -93,6 +93,7 @@ export function WorkbenchFileTree({
           size="small"
           type="tertiary"
           tooltip="Refresh"
+          aria-label="Refresh files"
           icon={refreshing ? <Spinner size={12} /> : <ReloadIcon />}
           onClick={refresh}
         />
@@ -119,6 +120,7 @@ export function WorkbenchFileTree({
               expanded={expanded}
               selectedPath={selectedPath}
               onDelete={onDelete}
+              onRefresh={refresh}
             />
           </StyledTreeView>
         </MuiThemeProvider>
@@ -140,13 +142,16 @@ function DirectoryEntries({
   expanded,
   selectedPath,
   onDelete,
+  onRefresh,
 }: {
   workbenchId: string
   path: string
   expanded: string[]
   selectedPath: Nullable<string>
   onDelete: (file: WorkbenchFileFragment) => void
+  onRefresh: () => void
 }) {
+  const isRoot = path === '/'
   const { data, loading, error } = useWorkbenchFilesQuery({
     variables: { id: workbenchId, path },
     fetchPolicy: 'cache-and-network',
@@ -159,20 +164,30 @@ function DirectoryEntries({
         path={path}
         label={
           <>
-            <Spinner size={12} /> Loading
+            <Spinner size={12} /> Loading…
           </>
         }
       />
     )
   if (error && !files)
-    return (
+    return isRoot ? (
+      <TreeEmptySC>
+        <CaptionP $color="text-danger-light">Couldn’t load files</CaptionP>
+        <RetryButtonSC
+          type="button"
+          onClick={onRefresh}
+        >
+          Try again
+        </RetryButtonSC>
+      </TreeEmptySC>
+    ) : (
       <StatusItem
         path={path}
-        label="Failed to load"
+        label="Couldn’t load"
       />
     )
   if (!files?.length)
-    return path === '/' ? (
+    return isRoot ? (
       <WorkbenchEmptyText>
         No files yet. Attachments and agent outputs will show up here.
       </WorkbenchEmptyText>
@@ -200,6 +215,7 @@ function DirectoryEntries({
             name={file.name}
             icon={<FolderIcon size={14} />}
             onDelete={() => onDelete(file)}
+            deleteLabel={`Delete folder ${file.name}`}
           />
         }
       >
@@ -210,6 +226,7 @@ function DirectoryEntries({
             expanded={expanded}
             selectedPath={selectedPath}
             onDelete={onDelete}
+            onRefresh={onRefresh}
           />
         ) : (
           // keeps the expand affordance until the directory is listed
@@ -229,6 +246,7 @@ function DirectoryEntries({
             name={file.name}
             icon={<FileTypeIcon fileName={file.name} />}
             onDelete={() => onDelete(file)}
+            deleteLabel={`Delete ${file.name}`}
           />
         }
       />
@@ -240,28 +258,20 @@ function EntryLabel({
   name,
   icon,
   onDelete,
+  deleteLabel,
 }: {
   name: string
   icon: ReactNode
   onDelete: () => void
+  deleteLabel: string
 }) {
   return (
     <EntryLabelSC>
-      <Tooltip
-        label={name}
-        css={{ marginLeft: '0.375rem' }}
-      >
-        <div
-          css={{
-            display: 'flex',
-            alignItems: 'center',
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
+      <Tooltip label={name}>
+        <EntryNameSC>
           <TreeItemIcon>{icon}</TreeItemIcon>
           <TreeItemText>{name}</TreeItemText>
-        </div>
+        </EntryNameSC>
       </Tooltip>
       <IconFrame
         className="delete"
@@ -269,6 +279,7 @@ function EntryLabel({
         size="xsmall"
         type="tertiary"
         tooltip="Delete"
+        aria-label={deleteLabel}
         icon={<TrashCanIcon color="icon-danger" />}
         // keeps the tree from selecting or toggling the row
         onMouseDown={(e) => e.stopPropagation()}
@@ -287,12 +298,12 @@ function StatusItem({ path, label }: { path: string; label: ReactNode }) {
       itemId={`${STATUS_PREFIX}${path}`}
       disabled
       label={
-        <CaptionP
+        <Body2P
           $color="text-xlight"
           css={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}
         >
           {label}
-        </CaptionP>
+        </Body2P>
       }
     />
   )
@@ -303,8 +314,17 @@ const EntryLabelSC = styled.div({
   alignItems: 'center',
   width: '100%',
   minWidth: 0,
+  gap: 4,
   '.delete': { opacity: 0, flexShrink: 0 },
   '&:hover .delete, .delete:focus-visible': { opacity: 1 },
+})
+
+const EntryNameSC = styled.div({
+  display: 'flex',
+  marginLeft: '0.375rem',
+  alignItems: 'center',
+  flex: 1,
+  minWidth: 0,
 })
 
 const WrapperSC = styled.div(({ theme }) => ({
@@ -337,4 +357,20 @@ const TreeScrollSC = styled.div(({ theme }) => ({
   minHeight: 0,
   overflow: 'auto',
   padding: theme.spacing.small,
+}))
+
+const TreeEmptySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: theme.spacing.xsmall,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.xxsmall}`,
+}))
+
+const RetryButtonSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.caption,
+  color: theme.colors['text-light'],
+  padding: 0,
+  '&:hover': { color: theme.colors.text },
 }))
