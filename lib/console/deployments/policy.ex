@@ -293,16 +293,16 @@ defmodule Console.Deployments.Policy do
   end
 
   defp attach_binding(binding, target, user) do
+    drop_stale_attachment(owned_attachment(binding, target), binding, target, user)
+
     case fetch_attachment(binding, target) do
       %{} -> :ok
       _ -> reconcile_target(:attach, binding, target, user)
     end
-
-    Enum.each(owned_attachments(binding, target), &drop_stale_attachment(&1, binding, target, user))
   end
 
   defp detach_binding(binding, target, user) do
-    Enum.each(owned_attachments(binding, target), &release_attachment(&1, binding, target, user))
+    release_attachment(owned_attachment(binding, target), binding, target, user)
   end
 
   defp fetch_attachment(%BindingPolicy{policy_id: id}, %Workbench{id: wid}),
@@ -310,17 +310,10 @@ defmodule Console.Deployments.Policy do
   defp fetch_attachment(%BindingPolicy{policy_id: id} = binding, %Stack{id: sid}),
     do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid, type: stack_policy_type(binding))
 
-  defp owned_attachments(%BindingPolicy{id: id}, %Workbench{id: wid}) do
-    case Repo.get_by(WorkbenchPolicy, binding_policy_id: id, workbench_id: wid) do
-      nil -> []
-      attachment -> [attachment]
-    end
-  end
-  defp owned_attachments(%BindingPolicy{id: id}, %Stack{id: sid}) do
-    StackPolicy.for_stack(sid)
-    |> StackPolicy.for_binding(id)
-    |> Repo.all()
-  end
+  defp owned_attachment(%BindingPolicy{id: id}, %Workbench{id: wid}),
+    do: Repo.get_by(WorkbenchPolicy, binding_policy_id: id, workbench_id: wid)
+  defp owned_attachment(%BindingPolicy{id: id}, %Stack{id: sid}),
+    do: Repo.get_by(StackPolicy, binding_policy_id: id, stack_id: sid)
 
   defp drop_stale_attachment(%StackPolicy{type: type} = attachment, binding, target, user) do
     drop_stale_attachment(type, stack_policy_type(binding), attachment, binding, target, user)
@@ -331,6 +324,7 @@ defmodule Console.Deployments.Policy do
   defp drop_stale_attachment(_, _, attachment, binding, target, user),
     do: release_attachment(attachment, binding, target, user)
 
+  defp release_attachment(nil, _, _, _), do: :ok
   defp release_attachment(%WorkbenchPolicy{}, binding, target, user),
     do: reconcile_target(:detach, binding, target, user)
   defp release_attachment(%StackPolicy{} = attachment, binding, stack, user) do
