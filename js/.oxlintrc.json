@@ -2,7 +2,7 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   // Biome (biome.json) handles formatting and most lint rules. oxlint only runs
   // the React hooks / React Compiler rules, which Biome can't reliably check yet.
-  "plugins": ["react"],
+  "plugins": ["react", "typescript"],
   "categories": { "correctness": "off" },
   "ignorePatterns": [
     "**/src/generated/**",
@@ -26,6 +26,15 @@
     "react/refs": "warn",
     "react/set-state-in-effect": "warn",
     "react/set-state-in-render": "warn",
-    "react/purity": "warn"
+    "react/purity": "warn",
+
+    // Type-aware rules (need `--type-aware`), restoring typescript-eslint checks.
+    "typescript/await-thenable": "error",
+    "typescript/no-array-delete": "error",
+    "typescript/no-for-in-array": "error",
+    "typescript/no-implied-eval": "error",
+    "typescript/no-unsafe-unary-minus": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/restrict-plus-operands": "error"
   }
 }

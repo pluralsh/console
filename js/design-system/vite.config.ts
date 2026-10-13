@@ -2,6 +2,7 @@ import { resolve } from 'path'
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import dts from 'vite-plugin-dts'
 
 export default defineConfig({
@@ -28,12 +29,10 @@ export default defineConfig({
     },
   },
   plugins: [
-    react({
-      babel: {
-        plugins: ['styled-components'],
-        babelrc: false,
-        configFile: false,
-      },
+    react(),
+    babel({
+      plugins: ['styled-components'],
+      exclude: [/[/\\]node_modules[/\\]/],
     }),
     dts({
       insertTypesEntry: true,
@@ -45,10 +44,4 @@ export default defineConfig({
       }),
     }),
   ],
-  optimizeDeps: {
-    esbuildOptions: {
-      target: 'esnext',
-      format: 'esm',
-    },
-  },
 })
