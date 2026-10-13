@@ -1,7 +1,7 @@
 /** Union of primitives to skip with deep omit utilities. */
 type Primitive =
   | string
-  // biome-ignore lint/complexity/noBannedTypes: any callable should be skipped
+  // oxlint-disable-next-line typescript/no-unsafe-function-type -- any callable should be skipped
   | Function
   | number
   | boolean

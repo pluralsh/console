@@ -9,6 +9,7 @@ on:
       - "js/.yarnrc.yml"
       - "js/console/**"
       - "js/design-system/**"
+      - "js/documentation/**"
       - "js/biome.json"
       - "js/.oxlintrc.json"
       - "js/package.json"
@@ -21,6 +22,7 @@ on:
       - "js/.yarnrc.yml"
       - "js/console/**"
       - "js/design-system/**"
+      - "js/documentation/**"
       - "js/biome.json"
       - "js/.oxlintrc.json"
       - "js/package.json"
@@ -56,14 +58,10 @@ jobs:
           cache: yarn
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
-      - run: >-
-          YARN_ENABLE_IMMUTABLE_INSTALLS=true
-          yarn workspaces focus
-          console @pluralsh/design-system
-      - run: yarn workspace console lint:biome --reporter=github
-      - run: yarn workspace @pluralsh/design-system lint:biome --reporter=github
-      - run: yarn workspace console lint:js
-      - run: yarn workspace @pluralsh/design-system lint:js
+      # Full install: type-aware oxlint rules need every app's dependencies.
+      - run: yarn install --immutable
+      - run: yarn lint:biome --reporter=github
+      - run: yarn lint:oxlint --format=github
 
   test:
     needs: [vouch]

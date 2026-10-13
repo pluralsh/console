@@ -34,65 +34,12 @@
   "linter": {
     "rules": {
       "preset": "none",
-      "nursery": { "useExhaustiveSwitchCases": "error" },
-      "complexity": {
-        "noArguments": "error",
-        "noBannedTypes": "error",
-        "noUselessThisAlias": "error",
-        "noUselessTypeConstraint": "error"
-      },
-      "correctness": {
-        "noChildrenProp": "error",
-        "noReactPropAssignments": "error",
-        "noRenderReturnValue": "error",
-        "noUnusedFunctionParameters": "error",
-        "noUnsafeOptionalChaining": "error",
-        "noUnusedImports": "error",
-        "noUnusedVariables": "error",
-        "useParseIntRadix": "error"
-      },
-      "security": {
-        "noBlankTarget": "error",
-        "noDangerouslySetInnerHtmlWithChildren": "error"
-      },
-      "style": {
-        "noCommonJs": "error",
-        "noNamespace": "error",
-        "useArrayLiterals": "error",
-        "useAsConstAssertion": "error",
-        "useConst": "error",
-        "useExportType": "error",
-        "useSpreadOverApply": "error"
-      },
+      "correctness": { "noReactPropAssignments": "error" },
       "suspicious": {
-        "noCommentText": "error",
-        "noDuplicateEnumValues": "error",
         "noDuplicateFields": "error",
-        "noDuplicateJsxProps": "error",
-        "noDoubleEquals": "error",
-        "noDuplicateTestHooks": "error",
         "noEvolvingTypes": "error",
-        "noExportsInTest": "error",
-        "noExtraNonNullAssertion": "error",
-        "noFocusedTests": "error",
-        "noForIn": "error",
-        "noGlobalIsNan": "error",
         "noImplicitAnyLet": "error",
-        "noMisleadingInstantiator": "error",
-        "noNonNullAssertedOptionalChain": "error",
-        "noReactForwardRef": "error",
-        "noSelfCompare": "error",
-        "noSkippedTests": "error",
-        "noTsIgnore": "error",
-        "noUnknownAttribute": {
-          "level": "error",
-          "options": { "ignore": ["css"] }
-        },
-        "noUnsafeDeclarationMerging": "error",
-        "noUnusedExpressions": "error",
-        "noVar": "error",
-        "useArraySortCompare": "error",
-        "useNamespaceKeyword": "error"
+        "noReactForwardRef": "error"
       }
     }
   },
@@ -118,23 +65,6 @@
     },
     {
       "includes": ["documentation/**"],
-      "linter": {
-        "rules": {
-          "a11y": {
-            "preset": "recommended",
-            "noLabelWithoutControl": {
-              "level": "error",
-              "options": {
-                "labelComponents": ["Label"],
-                "inputComponents": ["Input"]
-              }
-            }
-          },
-          "style": {
-            "useImportType": "error"
-          }
-        }
-      },
       "assist": {
         "enabled": true,
         "actions": {

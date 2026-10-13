@@ -9327,7 +9327,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "console-workspace@workspace:."
   dependencies:
+    "@biomejs/biome": "npm:2.5.15"
     lint-staged: "npm:17.6.0"
+    oxlint: "npm:1.87.0"
+    oxlint-tsgolint: "npm:7.0.2004"
   languageName: unknown
   linkType: soft
 

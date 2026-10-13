@@ -24,6 +24,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import ModalAlt from '../ModalAlt'
 import { ProviderTabSelector } from '../clusters/create/ProviderTabSelector'
+import { ProviderCloud } from '../clusters/create/types'
 
 import {
   AwsSettings,
@@ -74,7 +75,7 @@ export function CreateProviderModal({
   let disabled = !name || !selectedCloud
 
   switch (selectedCloud) {
-    case 'aws':
+    case ProviderCloud.AWS:
       disabled =
         disabled ||
         !(
@@ -82,10 +83,10 @@ export function CreateProviderModal({
           providerSettings.aws?.secretAccessKey
         )
       break
-    case 'gcp':
+    case ProviderCloud.GCP:
       disabled = disabled || !providerSettings.gcp?.applicationCredentials
       break
-    case 'azure':
+    case ProviderCloud.Azure:
       disabled =
         disabled ||
         !(
@@ -94,6 +95,8 @@ export function CreateProviderModal({
           providerSettings.azure?.tenantId &&
           providerSettings.azure?.subscriptionId
         )
+      break
+    case '':
       break
   }
 
@@ -135,7 +138,7 @@ export function CreateProviderModal({
   )
 
   switch (selectedCloud) {
-    case 'aws':
+    case ProviderCloud.AWS:
       settings = (
         <AwsSettings
           settings={providerSettings.aws}
@@ -145,7 +148,7 @@ export function CreateProviderModal({
         />
       )
       break
-    case 'gcp':
+    case ProviderCloud.GCP:
       settings = (
         <GcpSettings
           settings={providerSettings.gcp}
@@ -155,7 +158,7 @@ export function CreateProviderModal({
         />
       )
       break
-    case 'azure':
+    case ProviderCloud.Azure:
       settings = (
         <AzureSettings
           settings={providerSettings.azure}
@@ -164,6 +167,8 @@ export function CreateProviderModal({
           }
         />
       )
+      break
+    case '':
       break
   }
 

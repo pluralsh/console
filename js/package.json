@@ -7,8 +7,10 @@
     "documentation"
   ],
   "scripts": {
-    "lint": "yarn workspace console lint && yarn workspace @pluralsh/documentation lint",
-    "fix": "yarn workspace console fix && yarn workspace @pluralsh/design-system fix && yarn workspace @pluralsh/documentation fix",
+    "lint": "biome check console/src design-system/src documentation/src documentation/pages && oxlint --type-aware console/src design-system/src documentation/src documentation/pages",
+    "lint:biome": "biome check console/src design-system/src documentation/src documentation/pages",
+    "lint:oxlint": "oxlint --type-aware console/src design-system/src documentation/src documentation/pages",
+    "fix": "yarn lint:biome --write && yarn lint:oxlint --fix",
     "test": "yarn workspace console test && yarn workspace @pluralsh/design-system test"
   },
   "engines": {
@@ -30,7 +32,10 @@
     "lodash-es": "4.18.1"
   },
   "devDependencies": {
-    "lint-staged": "17.6.0"
+    "@biomejs/biome": "2.5.15",
+    "lint-staged": "17.6.0",
+    "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2004"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,graphql}": "biome format --write --no-errors-on-unmatched"

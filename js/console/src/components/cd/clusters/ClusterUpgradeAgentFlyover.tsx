@@ -283,6 +283,9 @@ function AgentRunLinkButton({
           tooltip="View agent run details"
         />
       )
+    case AgentRunStatus.Babysitting:
+    case AgentRunStatus.PendingApproval:
+      return null
   }
 }
 
