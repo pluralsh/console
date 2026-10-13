@@ -1,9 +1,11 @@
 package store
 
-// failingSinceUpsert keeps the earliest known failing time while a component keeps failing, and resets it once the component recovers.
+// failingSinceUpsert keeps the earliest known failing time while the same object keeps failing, and resets it once the
+// component recovers. A replacement with the same name but another uid starts its own failing time.
 const failingSinceUpsert = `CASE
 				WHEN excluded.health != 2 THEN 0
-				WHEN COALESCE(component.failing_since, 0) > 0 AND component.health = 2 THEN MIN(component.failing_since, excluded.failing_since)
+				WHEN COALESCE(component.failing_since, 0) > 0 AND component.health = 2
+				AND COALESCE(component.uid, '') IN ('', excluded.uid) THEN MIN(component.failing_since, excluded.failing_since)
 				ELSE excluded.failing_since
 			END`
 

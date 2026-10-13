@@ -24,6 +24,7 @@ defmodule Console.AI.Memoizer do
   regenerating it. A service component only adopts the insight of a cluster component when it has no fresh one itself.
   """
   @spec adopt(struct) :: struct
+  def adopt(%ClusterInsightComponent{insight: %AiInsight{force: true}} = model), do: model
   def adopt(%ClusterInsightComponent{insight: own} = model) do
     case find_peer(model) do
       %{insight: %AiInsight{} = shared} ->
@@ -40,9 +41,14 @@ defmodule Console.AI.Memoizer do
     end
   end
   def adopt(model) do
-    case AiInsight.memoized?(Evidence.insight(model), nil) do
-      true -> model
-      false -> find_peer(model) |> adopt(model)
+    case Evidence.insight(model) do
+      # a forced refresh must regenerate, not fall back to a peer's existing diagnosis
+      %AiInsight{force: true} -> model
+      insight ->
+        case AiInsight.memoized?(insight, nil) do
+          true -> model
+          false -> find_peer(model) |> adopt(model)
+        end
     end
   end
 
