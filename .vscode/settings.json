@@ -1,9 +1,5 @@
 {
-  "eslint.workingDirectories": [
-    { "directory": "./js/console", "changeProcessCWD": true },
-    { "directory": "./js/design-system", "changeProcessCWD": true },
-    { "directory": "./js/documentation", "changeProcessCWD": true }
-  ],
+  "oxc.configPath": "./js/.oxlintrc.json",
   "files.associations": {
     "**/src/archive/**/*": "plaintext",
     "*.ejs": "handlebars",

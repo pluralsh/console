@@ -15,7 +15,6 @@ node_modules/
 !/js/.yarn/releases/**
 .pnp.*
 *.tsbuildinfo
-.eslintcache
 
 # Binaries for programs and plugins
 *.exe

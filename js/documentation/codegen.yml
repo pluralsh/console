@@ -15,6 +15,3 @@ config:
     UploadOrUrl: string
     DateTime: Date
     Yaml: unknown
-hooks:
-  afterAllFileWrite:
-    - eslint --fix

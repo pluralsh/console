@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Biome (biome.json) handles formatting and most lint rules. oxlint only runs
+  // the React hooks / React Compiler rules, which Biome can't reliably check yet.
+  "plugins": ["react"],
+  "categories": { "correctness": "off" },
+  "ignorePatterns": [
+    "**/src/generated/**",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "documentation/src/routing/navigation.ts"
+  ],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "react/static-components": "error",
+    "react/use-memo": "error",
+    "react/void-use-memo": "error",
+    "react/globals": "error",
+    "react/error-boundaries": "error",
+    "react/incompatible-library": "warn",
+    "react/unsupported-syntax": "warn",
+    // React Compiler rules are warnings until both applications are compliant.
+    "react/preserve-manual-memoization": "warn",
+    "react/immutability": "warn",
+    "react/refs": "warn",
+    "react/set-state-in-effect": "warn",
+    "react/set-state-in-render": "warn",
+    "react/purity": "warn"
+  }
+}

@@ -12,10 +12,10 @@
     "start": "next start -p 3000",
     "lint": "run-p lint:biome lint:js",
     "lint:biome": "biome check ./src ./pages",
-    "lint:js": "eslint src pages --cache",
+    "lint:js": "oxlint -c ../.oxlintrc.json src pages",
     "fix": "run-s fix:biome fix:js",
     "fix:biome": "biome check --write ./src ./pages",
-    "fix:js": "eslint --fix src pages",
+    "fix:js": "oxlint -c ../.oxlintrc.json --fix src pages",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "graphql:codegen:watch": "graphql-codegen --watch --config codegen.yml",
     "generate:route-index": "ts-node scripts/index-routes.ts"
@@ -78,13 +78,11 @@
     "@types/node": "20.4.2",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "@typescript-eslint/parser": "8.70.0",
     "chokidar": "4.0.3",
     "concurrently": "8.2.0",
-    "eslint": "10.12.0",
-    "eslint-plugin-react-hooks": "7.1.1",
     "npm-run-all2": "9.0.3",
     "openapi-types": "12.1.3",
+    "oxlint": "1.87.0",
     "ts-node": "10.9.2",
     "typescript": "5.8.2"
   }

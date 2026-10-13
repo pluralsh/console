@@ -10,7 +10,7 @@ on:
       - "js/console/**"
       - "js/design-system/**"
       - "js/biome.json"
-      - "js/eslint.config.mjs"
+      - "js/.oxlintrc.json"
       - "js/package.json"
       - "js/yarn.lock"
   pull_request:
@@ -22,7 +22,7 @@ on:
       - "js/console/**"
       - "js/design-system/**"
       - "js/biome.json"
-      - "js/eslint.config.mjs"
+      - "js/.oxlintrc.json"
       - "js/package.json"
       - "js/yarn.lock"
 
@@ -60,11 +60,6 @@ jobs:
           YARN_ENABLE_IMMUTABLE_INSTALLS=true
           yarn workspaces focus
           console @pluralsh/design-system
-      - name: Restore ESLint cache
-        uses: actions/cache@v6
-        with:
-          path: js/*/.eslintcache
-          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('js/yarn.lock', 'js/.yarnrc.yml', 'js/**/eslint.config.*', 'js/**/tsconfig*.json') }}
       - run: yarn workspace console lint:biome --reporter=github
       - run: yarn workspace @pluralsh/design-system lint:biome --reporter=github
       - run: yarn workspace console lint:js

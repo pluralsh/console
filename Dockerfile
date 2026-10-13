@@ -15,7 +15,7 @@ COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
 COPY js/documentation/package.json ./documentation/package.json
 
-# Focus skips documentation, Storybook, and ESLint. Vite bundles
+# Focus skips documentation and Storybook. Vite bundles
 # the design system from source, so the image only needs those two workspaces.
 # Immutable installs match `yarn install --immutable` (CI is unset in Docker).
 RUN corepack enable \
