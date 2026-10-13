@@ -165,6 +165,21 @@ fragment ClusterInsightComponentDetail on ClusterInsightComponent {
   }
 }
 
+# the components of a service by identity, to find the one that is a cluster insight component
+query ServiceComponentIdentities($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    components {
+      id
+      group
+      version
+      kind
+      namespace
+      name
+    }
+  }
+}
+
 query AiInsight($id: ID!) {
   aiInsight(id: $id) {
     ...AiInsight

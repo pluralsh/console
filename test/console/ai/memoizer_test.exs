@@ -123,12 +123,25 @@ defmodule Console.AI.MemoizerTest do
       assert Memoizer.adopt(comp).insight_id == nil
     end
 
-    test "a fresh insight of its own is kept" do
+    test "a cluster component switches to the fresh insight of its service component even if it has one of its own" do
       cluster = insert(:cluster)
       svc = insert(:service, cluster: cluster)
-      service_comp(svc, insight: insert(:ai_insight, text: "the service insight"))
+      shared = insert(:ai_insight, text: "the service insight")
+      service_comp(svc, insight: shared)
+      comp = cluster_comp(cluster, insight: insert(:ai_insight, text: "its own insight"))
+
+      adopted = Memoizer.adopt(comp)
+
+      assert adopted.insight_id == shared.id
+      assert refetch(comp).insight_id == shared.id
+    end
+
+    test "a service component keeps a fresh insight of its own" do
+      cluster = insert(:cluster)
+      svc = insert(:service, cluster: cluster)
+      cluster_comp(cluster, insight: insert(:ai_insight, text: "the cluster insight"))
       own = insert(:ai_insight, text: "its own insight")
-      comp = cluster_comp(cluster, insight: own)
+      comp = service_comp(svc, insight: own)
 
       assert Memoizer.adopt(comp).insight_id == own.id
     end

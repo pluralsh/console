@@ -19930,6 +19930,13 @@ export type ClusterInsightComponentFragment = { __typename?: 'ClusterInsightComp
 
 export type ClusterInsightComponentDetailFragment = { __typename?: 'ClusterInsightComponent', id: string, kind: string, name: string, namespace?: string | null, group?: string | null, version: string, priority?: InsightComponentPriority | null, resource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
+export type ServiceComponentIdentitiesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceComponentIdentitiesQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, components?: Array<{ __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, namespace?: string | null, name: string } | null> | null } | null };
+
 export type AiInsightQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -32641,6 +32648,57 @@ export function useFixResearchDiagramMutation(baseOptions?: Apollo.MutationHookO
 export type FixResearchDiagramMutationHookResult = ReturnType<typeof useFixResearchDiagramMutation>;
 export type FixResearchDiagramMutationResult = Apollo.MutationResult<FixResearchDiagramMutation>;
 export type FixResearchDiagramMutationOptions = Apollo.BaseMutationOptions<FixResearchDiagramMutation, FixResearchDiagramMutationVariables>;
+export const ServiceComponentIdentitiesDocument = gql`
+    query ServiceComponentIdentities($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    components {
+      id
+      group
+      version
+      kind
+      namespace
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useServiceComponentIdentitiesQuery__
+ *
+ * To run a query within a React component, call `useServiceComponentIdentitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceComponentIdentitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceComponentIdentitiesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceComponentIdentitiesQuery(baseOptions: Apollo.QueryHookOptions<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables> & ({ variables: ServiceComponentIdentitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>(ServiceComponentIdentitiesDocument, options);
+      }
+export function useServiceComponentIdentitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>(ServiceComponentIdentitiesDocument, options);
+        }
+// @ts-ignore
+export function useServiceComponentIdentitiesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>;
+export function useServiceComponentIdentitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceComponentIdentitiesQuery | undefined, ServiceComponentIdentitiesQueryVariables>;
+export function useServiceComponentIdentitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>(ServiceComponentIdentitiesDocument, options);
+        }
+export type ServiceComponentIdentitiesQueryHookResult = ReturnType<typeof useServiceComponentIdentitiesQuery>;
+export type ServiceComponentIdentitiesLazyQueryHookResult = ReturnType<typeof useServiceComponentIdentitiesLazyQuery>;
+export type ServiceComponentIdentitiesSuspenseQueryHookResult = ReturnType<typeof useServiceComponentIdentitiesSuspenseQuery>;
+export type ServiceComponentIdentitiesQueryResult = Apollo.QueryResult<ServiceComponentIdentitiesQuery, ServiceComponentIdentitiesQueryVariables>;
 export const AiInsightDocument = gql`
     query AiInsight($id: ID!) {
   aiInsight(id: $id) {
@@ -52665,6 +52723,7 @@ export const namedOperations = {
     CloudConnection: 'CloudConnection',
     InfraResearch: 'InfraResearch',
     InfraResearches: 'InfraResearches',
+    ServiceComponentIdentities: 'ServiceComponentIdentities',
     AiInsight: 'AiInsight',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',

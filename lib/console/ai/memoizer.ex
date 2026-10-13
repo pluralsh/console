@@ -17,13 +17,28 @@ defmodule Console.AI.Memoizer do
 
   @doc """
   The same kubernetes object can be a component of a service and a component of its cluster, and each of them has an
-  insight of its own. A component that has no fresh insight adopts the fresh one of the other, so the object is paid
-  for once and both point at one row, which is also what keeps what they show from drifting apart.
+  insight of its own. They are made to share one row, so the object is paid for once and what they show cannot drift apart.
 
-  A cluster component that still points at a stale row of a service component is detached from it instead of
-  regenerating it, as the service component has the richer context and owns refreshing it.
+  The service component has the richer context, so it owns the row: a cluster component always points at the fresh
+  insight of its service component, even when it has a fresh one of its own, and is detached from a stale one instead of
+  regenerating it. A service component only adopts the insight of a cluster component when it has no fresh one itself.
   """
   @spec adopt(struct) :: struct
+  def adopt(%ClusterInsightComponent{insight: own} = model) do
+    case find_peer(model) do
+      %{insight: %AiInsight{} = shared} ->
+        own_id = with %AiInsight{id: id} <- own, do: id
+        fresh? = AiInsight.memoized?(shared, nil)
+
+        cond do
+          fresh? and own_id != shared.id -> link(model, shared)
+          fresh? -> model
+          own_id == shared.id -> link(model, nil)
+          true -> model
+        end
+      _ -> model
+    end
+  end
   def adopt(model) do
     case AiInsight.memoized?(Evidence.insight(model), nil) do
       true -> model
