@@ -35,6 +35,26 @@ defmodule Console.Schema.ClusterInsightComponent do
     from(cic in query, where: cic.cluster_id == ^cluster_id)
   end
 
+  # the core group and cluster scoped objects are stored as either nil or an empty string depending on who reported them
+  def for_object(query \\ __MODULE__, {g, v, k, ns, n}) do
+    from(cic in query,
+      where: coalesce(cic.group, "") == ^(g || "")
+         and cic.version == ^v
+         and cic.kind == ^k
+         and coalesce(cic.namespace, "") == ^(ns || "")
+         and cic.name == ^n
+    )
+  end
+
+  def with_insight(query \\ __MODULE__) do
+    from(cic in query,
+      where: not is_nil(cic.insight_id),
+      order_by: [desc: coalesce(cic.updated_at, cic.inserted_at)],
+      preload: [insight: :evidence],
+      limit: 1
+    )
+  end
+
   @valid ~w(group version kind namespace name priority cluster_id service_id)a
 
   def changeset(model, attrs \\ %{}) do

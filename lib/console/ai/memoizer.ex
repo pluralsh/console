@@ -5,13 +5,65 @@ defmodule Console.AI.Memoizer do
 
   @spec generate(struct) :: {:ok, AiInsight.t} | {:error, binary}
   def generate(model) do
-    model   = Evidence.preload(model)
+    model   = model |> Evidence.preload() |> adopt()
     insight = Evidence.insight(model)
     case AiInsight.memoized?(insight, nil) do
       true ->
         bump_poll(model)
         {:ok, insight}
       false -> try_generate(model, insight)
+    end
+  end
+
+  @doc """
+  The same kubernetes object can be a component of a service and a component of its cluster, and each of them has an
+  insight of its own. A component that has no fresh insight adopts the fresh one of the other, so the object is paid
+  for once and both point at one row, which is also what keeps what they show from drifting apart.
+
+  A cluster component that still points at a stale row of a service component is detached from it instead of
+  regenerating it, as the service component has the richer context and owns refreshing it.
+  """
+  @spec adopt(struct) :: struct
+  def adopt(model) do
+    case AiInsight.memoized?(Evidence.insight(model), nil) do
+      true -> model
+      false -> find_peer(model) |> adopt(model)
+    end
+  end
+
+  defp find_peer(%ClusterInsightComponent{cluster_id: cid, group: g, version: v, kind: k, namespace: ns, name: n}) do
+    ServiceComponent.for_cluster(cid)
+    |> ServiceComponent.for_object({g, v, k, ns, n})
+    |> ServiceComponent.with_insight()
+    |> Repo.one()
+  end
+  defp find_peer(%ServiceComponent{group: g, version: v, kind: k, namespace: ns, name: n, service: %{cluster_id: cid}}) do
+    ClusterInsightComponent.for_cluster(cid)
+    |> ClusterInsightComponent.for_object({g, v, k, ns, n})
+    |> ClusterInsightComponent.with_insight()
+    |> Repo.one()
+  end
+  defp find_peer(_), do: nil
+
+  defp adopt(%{insight: %AiInsight{} = shared}, model) do
+    cond do
+      AiInsight.memoized?(shared, nil) -> link(model, shared)
+      detach?(model, shared) -> link(model, nil)
+      true -> model
+    end
+  end
+  defp adopt(_, model), do: model
+
+  defp detach?(%ClusterInsightComponent{insight: %AiInsight{id: id}}, %AiInsight{id: id}), do: true
+  defp detach?(_, _), do: false
+
+  defp link(%{} = model, insight) do
+    model
+    |> Ecto.Changeset.change(insight_id: insight && insight.id)
+    |> Repo.update(allow_stale: true)
+    |> case do
+      {:ok, updated} -> %{updated | insight: insight}
+      _ -> model
     end
   end
 
