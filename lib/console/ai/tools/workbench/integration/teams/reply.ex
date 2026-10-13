@@ -33,8 +33,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Teams.Reply do
   end
 
   def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{teams: %TeamsConnection{} = conn}}, text: text}) do
-    with %ChatbotMessage{service_url: url, conversation_id: cid} when is_binary(url) and is_binary(cid) <- reply_context(),
-         {:ok, resp} <- Connector.reply(conn, url, cid, text) do
+    with %ChatbotMessage{service_url: url, conversation_id: cid, activity_id: activity_id}
+           when is_binary(url) and is_binary(cid) <- reply_context(),
+         {:ok, resp} <- Connector.reply(conn, url, cid, text, activity_id) do
       Jason.encode(resp)
     else
       {:error, _} = err -> err
