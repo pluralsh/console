@@ -232,13 +232,6 @@ export function WorkbenchJobCreateInput({
           flowId={flowId}
           attachments={attachments}
           onAttachmentsChange={filesystemEnabled ? setAttachments : undefined}
-          submitButton={
-            <WorkbenchPromptSubmitButton
-              loading={loading}
-              disabled={!prompt.trim() || !workbenchId || disabled || loading}
-              onClick={() => handleSubmitPrompt()}
-            />
-          }
           options={
             <Flex
               align="center"
