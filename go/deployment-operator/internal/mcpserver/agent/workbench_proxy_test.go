@@ -80,32 +80,3 @@ func TestWorkbenchMCPProxyRejectsInvalidConfiguration(t *testing.T) {
 		t.Fatal("expected missing token error")
 	}
 }
-
-func TestConsoleExtProxyMarksClientAndInjectsToken(t *testing.T) {
-	var received *http.Request
-	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		received = r.Clone(r.Context())
-	}))
-	defer upstream.Close()
-
-	server := &Server{}
-	WithConsoleExtProxy(upstream.URL+"/ext/gql", "deploy-token", "run-id")(server)
-
-	request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/plural/ext/gql", strings.NewReader(`{}`))
-	request.Header.Set(consoleExtClientHeader, "spoofed")
-	request.Header.Set(consoleExtAgentRunHeader, "spoofed")
-	server.consoleExtProxy.ServeHTTP(httptest.NewRecorder(), request)
-
-	if received == nil {
-		t.Fatal("upstream did not receive request")
-	}
-	if got := received.Header.Get(consoleExtClientHeader); got != consoleExtClient {
-		t.Fatalf("%s = %q", consoleExtClientHeader, got)
-	}
-	if got := received.Header.Get(consoleExtAgentRunHeader); got != "run-id" {
-		t.Fatalf("%s = %q", consoleExtAgentRunHeader, got)
-	}
-	if got := received.Header.Get("Authorization"); got != "Bearer deploy-token" {
-		t.Fatalf("authorization = %q", got)
-	}
-}

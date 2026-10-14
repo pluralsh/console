@@ -51,7 +51,7 @@ type Server struct {
 	// user credential with the coding-agent container.
 	workbenchMCPProxy http.Handler
 
-	// consoleExtProxy forwards the harness's Console ext calls, adding the deploy token.
+	// consoleExtProxy forwards the harness's allowlisted Console ext calls, adding the deploy token.
 	consoleExtProxy http.Handler
 }
 
