@@ -371,15 +371,20 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Creates a new prompt for this agent run
+  Creates a new prompt for this agent run.
+
+  For terminal runs, requeues the run to pending with followup enabled so the
+  harness can restore the uploaded session and continue from prior history.
   """
   @spec create_prompt(binary, binary, User.t) :: prompt_resp
   def create_prompt(prompt, run_id, %User{} = user) do
     start_transaction()
     |> add_operation(:run, fn _ ->
-      get_agent_run!(run_id)
-      |> allow(user, :update)
+      with {:ok, run} <- get_agent_run!(run_id) |> Repo.preload([:upload]) |> allow(user, :update) do
+        validate_terminal_reprompt(run)
+      end
     end)
+    |> add_operation(:requeue, fn %{run: run} -> requeue_terminal_run(run) end)
     |> add_operation(:prompt, fn _ ->
       %AgentPromptHistory{}
       |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
@@ -395,8 +400,58 @@ defmodule Console.Deployments.Agents do
       |> AgentMessage.changeset(%{role: :user, message: prompt, agent_run_id: run_id})
       |> Repo.insert()
     end)
-    |> execute(extract: :prompt)
+    |> execute()
+    |> case do
+      {:ok, %{prompt: history, requeue: {:requeued, run}}} ->
+        notify({:ok, run}, :update)
+        {:ok, history}
+      {:ok, %{prompt: history}} ->
+        {:ok, history}
+      err -> err
+    end
   end
+
+  defp validate_terminal_reprompt(%AgentRun{status: status, mode: :review}) when is_terminal(status),
+    do: {:error, "review mode agent runs cannot be reprompted"}
+  defp validate_terminal_reprompt(%AgentRun{status: status} = run) when is_terminal(status) do
+    cond do
+      Console.conf(:object_store) != true ->
+        {:error, "object store is not enabled for this instance, agent run reprompting requires session uploads"}
+      !has_session_upload?(run) ->
+        {:error, "agent run has no uploaded session to restore"}
+      true ->
+        {:ok, run}
+    end
+  end
+  defp validate_terminal_reprompt(%AgentRun{} = run), do: {:ok, run}
+
+  defp has_session_upload?(%AgentRun{upload: %AgentRunUpload{session: session}})
+       when is_binary(session) and byte_size(session) > 0,
+    do: true
+  defp has_session_upload?(%AgentRun{upload: %AgentRunUpload{session: %{file_name: name}}})
+       when is_binary(name) and byte_size(name) > 0,
+    do: true
+  defp has_session_upload?(_), do: false
+
+  defp requeue_terminal_run(%AgentRun{status: status, id: run_id} = run) when is_terminal(status) do
+    AgentPrompt.for_run(run_id)
+    |> Repo.delete_all()
+
+    run
+    |> AgentRun.changeset(%{
+      status: :pending,
+      followup: true,
+      error: nil,
+      pod_reference: nil,
+      approved_at: nil
+    })
+    |> Repo.update()
+    |> case do
+      {:ok, updated} -> {:ok, {:requeued, updated}}
+      err -> err
+    end
+  end
+  defp requeue_terminal_run(%AgentRun{} = run), do: {:ok, {:noop, run}}
 
   @doc """
   Creates a pull request for an agent run, can only be performed by the user who initiated it

@@ -2593,6 +2593,15 @@ export type RedirectToUrl = {
   url?: Maybe<Scalars['String']['output']>;
 };
 
+export type RefreshToken = {
+  __typename?: 'RefreshToken';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the token to use to request a refresh */
+  token: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 /** The release status of a repository, defaults to ALPHA, GA if it is ready for general consumption */
 export enum ReleaseStatus {
   Alpha = 'ALPHA',
@@ -2981,6 +2990,7 @@ export type RootMutationType = {
   linkPublisher?: Maybe<Publisher>;
   login?: Maybe<User>;
   loginToken?: Maybe<User>;
+  logout?: Maybe<User>;
   oauthCallback?: Maybe<User>;
   oauthConsent?: Maybe<OauthResponse>;
   passwordlessLogin?: Maybe<User>;
@@ -3910,6 +3920,7 @@ export type RootQueryType = {
   publishers?: Maybe<PublisherConnection>;
   recipe?: Maybe<Recipe>;
   recipes?: Maybe<RecipeConnection>;
+  refresh?: Maybe<User>;
   repositories?: Maybe<RepositoryConnection>;
   /** Get an application by its ID or name. */
   repository?: Maybe<Repository>;
@@ -4310,6 +4321,11 @@ export type RootQueryTypeRecipesArgs = {
   provider?: InputMaybe<Provider>;
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   repositoryName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeRefreshArgs = {
+  token: Scalars['String']['input'];
 };
 
 
@@ -5127,6 +5143,7 @@ export type User = {
   phone?: Maybe<Scalars['String']['output']>;
   provider?: Maybe<Provider>;
   publisher?: Maybe<Publisher>;
+  refreshToken?: Maybe<RefreshToken>;
   roles?: Maybe<Roles>;
   serviceAccount?: Maybe<Scalars['Boolean']['output']>;
   trustRelationships?: Maybe<Array<Maybe<OidcTrustRelationship>>>;

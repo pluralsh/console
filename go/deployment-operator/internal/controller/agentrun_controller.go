@@ -215,6 +215,18 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
+	// A terminal run can be requeued to pending (follow-up reprompt). Replace any
+	// finished pod so a fresh harness boots instead of treating the old pod as
+	// the run result.
+	if apiAgentRun.Status == console.AgentRunStatusPending && isAgentRunPodTerminal(pod) {
+		logger.V(2).Info("recreating agent run pod for pending follow-up", "pod", pod.Name)
+		if err := r.Delete(ctx, pod); err != nil && !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		run.Status.PodRef = nil
+		return jitterRequeue(requeueAfterAgentRun, jitter), nil
+	}
+
 	if completion, ok, delay := getAgentRunPodCompletion(pod, agentRunMaxLifetimeForRuntime(agentRuntime)); ok {
 		run.Status.Phase = completion.phase
 		run.Status.Error = completion.reason
@@ -336,6 +348,13 @@ func agentRunMaxLifetimeForRuntime(runtime *v1alpha1.AgentRuntime) time.Duration
 	return agentRunMaxLifetime
 }
 
+func isAgentRunPodTerminal(pod *corev1.Pod) bool {
+	if pod == nil {
+		return false
+	}
+	return pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed
+}
+
 func isAgentRunPodTimedOut(pod *corev1.Pod, ttl time.Duration) bool {
 	if pod == nil {
 		return false
@@ -344,7 +363,7 @@ func isAgentRunPodTimedOut(pod *corev1.Pod, ttl time.Duration) bool {
 		ttl = agentRunMaxLifetime
 	}
 	// Don't time out pods that have already reached a terminal phase.
-	if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed {
+	if isAgentRunPodTerminal(pod) {
 		return false
 	}
 	if !pod.Status.StartTime.IsZero() {

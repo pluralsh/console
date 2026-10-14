@@ -22,6 +22,7 @@ func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 	description := "Helps update README files"
 	followup := true
 	followupPrURL := "https://github.com/pluralsh/console/pull/1"
+	sessionURL := "https://example.com/session.tar.gz"
 	run := new(AgentRun).FromAgentRunFragment(&console.AgentRunFragment{
 		ID:            "run-123",
 		Prompt:        "update the readme",
@@ -30,6 +31,9 @@ func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 		Status:        console.AgentRunStatusPending,
 		Followup:      &followup,
 		FollowupPrURL: &followupPrURL,
+		Upload: &console.AgentRunUploadFragment{
+			Session: &sessionURL,
+		},
 		Skills: []*console.AgentRunFragment_Skills{
 			{
 				Name:        "readme-helper",
@@ -57,6 +61,9 @@ func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 	}
 	if run.PRURL != followupPrURL {
 		t.Fatalf("expected PR URL copied, got %q", run.PRURL)
+	}
+	if run.SessionURL != sessionURL {
+		t.Fatalf("expected session URL copied, got %q", run.SessionURL)
 	}
 }
 
