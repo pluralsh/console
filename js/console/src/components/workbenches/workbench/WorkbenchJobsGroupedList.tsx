@@ -231,7 +231,10 @@ const JobRow = memo(function JobRow({
         />
       </PromptSC>
       <ChipsColumnSC>
-        <WorkbenchJobActionsRow job={job} />
+        <WorkbenchJobActionsRow
+          job={job}
+          showUsage
+        />
       </ChipsColumnSC>
       <CreatorSC>
         {job.user && (
@@ -257,7 +260,7 @@ const JobRow = memo(function JobRow({
 
 // fixed width, so every row's prompt ends at the same point whatever its chips
 const ChipsColumnSC = styled(GroupRowRaisedSC)({
-  width: 280,
+  width: 420,
   justifyContent: 'flex-end',
 })
 

@@ -268,17 +268,22 @@ function JobEvalBadge({ job }: { job: WorkbenchJobTinyFragment }) {
 export function WorkbenchJobActionsRow({
   job,
   chipFillLevel = 1,
+  showUsage = false,
 }: {
   job: WorkbenchJobTinyFragment
   chipFillLevel?: 1 | 2 | 3
+  // for layouts without a separate usage column
+  showUsage?: boolean
 }) {
   const theme = useTheme()
   const prs = job.pullRequests?.filter(isNonNullable) ?? []
+  const usage = showUsage ? job.usage : null
   const hasActions =
     !!job.issue ||
     !!job.alert ||
     !!job.chatbotMessage ||
     prs.length > 0 ||
+    !!usage ||
     job.evalResult?.grade != null ||
     (job.queuedPromptCount ?? 0) > 0
 
@@ -303,6 +308,14 @@ export function WorkbenchJobActionsRow({
         pullRequests={prs}
         fillLevel={chipFillLevel}
       />
+      {usage && (
+        <WorkbenchUsageSummaryChip
+          usage={usage}
+          budget={job.modes?.budget}
+          error={job.error}
+          fillLevel={chipFillLevel}
+        />
+      )}
       <JobEvalBadge job={job} />
       <WorkbenchQueuedPromptChip
         count={job.queuedPromptCount}
