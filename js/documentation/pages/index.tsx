@@ -1,9 +1,9 @@
 import {
   type ComponentProps,
+  cloneElement,
   type PropsWithChildren,
   type ReactElement,
   type ReactNode,
-  cloneElement,
 } from 'react'
 
 import {
@@ -12,9 +12,9 @@ import {
   IconFrame,
   ListIcon,
   MagicWandIcon,
+  markdocComponents,
   ProtectedClusterIcon,
   ShieldLockIcon,
-  markdocComponents,
 } from '@pluralsh/design-system'
 import Link, { type LinkProps } from 'next/link'
 

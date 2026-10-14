@@ -479,7 +479,10 @@ function Input({
   })
   const fieldPad = {
     $padStart: (!inputContent ? inputPadStart : 'xsmall') as
-      'xsmall' | 'small' | 'medium' | null,
+      | 'xsmall'
+      | 'small'
+      | 'medium'
+      | null,
     $padEnd: inputPadEnd,
   }
   const nativeFieldProps = {

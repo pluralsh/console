@@ -103,12 +103,12 @@ export function AIAgentRun() {
     return () => setApproval(null)
   }, [id, approving, setApproval, approveAgentRun])
   const isRunning =
-    run?.status == AgentRunStatus.Running ||
-    run?.status == AgentRunStatus.Pending
+    run?.status === AgentRunStatus.Running ||
+    run?.status === AgentRunStatus.Pending
 
   const isCancellable =
     isRunning ||
-    run?.status == AgentRunStatus.Babysitting ||
+    run?.status === AgentRunStatus.Babysitting ||
     (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt)
   const isPromptConsuming =
     (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt) ||

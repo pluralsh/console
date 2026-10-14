@@ -106,7 +106,7 @@ export default function ServicesTable() {
           onVirtualSliceChange={setVirtualSlice}
           emptyStateProps={{
             message:
-              statusCounts.ALL || 0 > 0
+              (statusCounts.ALL || 0) > 0
                 ? 'No service deployments match your query.'
                 : "Looks like you don't have any service deployments yet.",
           }}

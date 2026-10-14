@@ -72,10 +72,8 @@ interface ServerError {
   message?: string
 }
 
-interface DeleteResourceModalProps extends Pick<
-  ConfirmProps,
-  'confirmationEnabled' | 'confirmationText'
-> {
+interface DeleteResourceModalProps
+  extends Pick<ConfirmProps, 'confirmationEnabled' | 'confirmationText'> {
   open: boolean
   setOpen: (open: boolean) => void
   resource: Resource

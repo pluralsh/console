@@ -84,7 +84,7 @@ export function GlobalSettingsSMTP() {
             onChange={(e) =>
               setForm({
                 ...form,
-                port: parseInt(e.target.value),
+                port: parseInt(e.target.value, 10),
               })
             }
           />

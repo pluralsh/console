@@ -1,7 +1,8 @@
 import { dayjsExtended as dayjs, getMetricQueryStep } from 'utils/datetime'
 
 export type TimeRange =
-  { live: true; durationMs: number } | { live: false; start: Date; end: Date }
+  | { live: true; durationMs: number }
+  | { live: false; start: Date; end: Date }
 
 export type TimeWindow = { start: Date; end: Date }
 

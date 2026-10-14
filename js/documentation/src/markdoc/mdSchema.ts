@@ -1,13 +1,12 @@
 import { getRuntimeSchema } from '@pluralsh/design-system'
 
+import type { MarkdocNextJsPageProps } from '@markdoc/next.js'
 import merge from 'lodash/merge'
 
 import * as config from './config'
 import { functions } from './functions'
 import { nodes } from './nodes'
 import { tags } from './tags'
-
-import type { MarkdocNextJsPageProps } from '@markdoc/next.js'
 
 const baseSchema = merge(
   {

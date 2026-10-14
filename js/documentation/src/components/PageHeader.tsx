@@ -9,7 +9,6 @@ import styled from 'styled-components'
 
 import { DISCORD_LINK } from '@src/consts'
 import { getBarePathFromPath } from '@src/utils/text'
-
 import { BreakpointIsGreaterOrEqual, mqs, useBreakpoint } from './Breakpoints'
 import { DocsSearch } from './DocsSearch'
 import GithubStars from './GithubStars'

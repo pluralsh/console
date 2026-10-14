@@ -48,7 +48,7 @@ function MarkdownPreformatted({
   isStreaming?: boolean
 }) {
   const theme = useTheme()
-  let lang
+  let lang: string | undefined
 
   const className = (children as ReactElement<any, any>)?.props?.className ?? ''
 

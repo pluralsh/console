@@ -48,7 +48,8 @@ const CHIP_ATTR_KEY = 'data-chip-key' as const
 
 type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   children:
-    ReactElement<ListBoxItemBaseProps> | ReactElement<ListBoxItemBaseProps>[]
+    | ReactElement<ListBoxItemBaseProps>
+    | ReactElement<ListBoxItemBaseProps>[]
   dropdownHeaderFixed?: ReactNode
   dropdownFooterFixed?: ReactNode
   dropdownHeader?: ReactElement<any>

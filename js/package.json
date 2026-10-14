@@ -4,15 +4,14 @@
   "workspaces": [
     "console",
     "design-system",
-    "documentation",
-    "eslint-config",
-    "stylelint-config"
+    "documentation"
   ],
   "scripts": {
-    "lint": "yarn workspace @pluralsh/eslint-config-pluralsh lint && yarn workspace @pluralsh/stylelint-config lint && yarn workspace console lint && yarn workspace @pluralsh/documentation lint",
-    "fix": "yarn workspace @pluralsh/eslint-config-pluralsh fix && yarn workspace @pluralsh/stylelint-config fix && yarn workspace console fix && yarn workspace @pluralsh/design-system fix && yarn workspace @pluralsh/documentation fix",
-    "test": "yarn workspace console test && yarn workspace @pluralsh/design-system test",
-    "lint-staged": "yarn workspace console lint-staged && yarn workspace @pluralsh/design-system lint-staged && yarn workspace @pluralsh/documentation lint-staged"
+    "lint": "biome check console/src design-system/src documentation/src documentation/pages && oxlint console/src design-system/src documentation/src documentation/pages",
+    "lint:biome": "biome check console/src design-system/src documentation/src documentation/pages",
+    "lint:oxlint": "oxlint console/src design-system/src documentation/src documentation/pages",
+    "fix": "yarn lint:oxlint --fix && yarn lint:biome --write",
+    "test": "yarn workspace console test && yarn workspace @pluralsh/design-system test"
   },
   "engines": {
     "node": "24.11.1"
@@ -31,5 +30,14 @@
     "shell-quote": "1.10.0",
     "lodash": "4.18.1",
     "lodash-es": "4.18.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "lint-staged": "17.6.0",
+    "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2004"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,graphql}": "biome format --write --no-errors-on-unmatched"
   }
 }

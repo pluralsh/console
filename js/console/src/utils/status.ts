@@ -25,7 +25,12 @@ export const phaseToSeverity = {
 } as const satisfies Record<PhaseT, ComponentProps<typeof Chip>['severity']>
 
 type ReadinessI =
-  'Ready' | 'InProgress' | 'Failed' | 'Complete' | 'Completed' | 'Running'
+  | 'Ready'
+  | 'InProgress'
+  | 'Failed'
+  | 'Complete'
+  | 'Completed'
+  | 'Running'
 
 export const Readiness = {
   Ready: 'Ready',

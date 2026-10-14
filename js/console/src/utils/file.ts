@@ -84,7 +84,13 @@ export function getLanguageFromFileName(fileName: string): string | undefined {
 }
 
 export type FileViewerKind =
-  'markdown' | 'image' | 'video' | 'audio' | 'pdf' | 'text' | 'binary'
+  | 'markdown'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'pdf'
+  | 'text'
+  | 'binary'
 
 const IMAGE_EXTENSIONS = new Set([
   'png',

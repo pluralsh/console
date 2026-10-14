@@ -111,7 +111,7 @@ export function ServicesTree() {
           </ReactFlowProvider>
         ) : (
           <div css={{ height: '100%' }}>
-            {statusCounts.ALL || 0 > 0 ? (
+            {(statusCounts.ALL || 0) > 0 ? (
               <EmptyState message="No services match your query." />
             ) : (
               <EmptyState message="Looks like you don't have any services yet." />

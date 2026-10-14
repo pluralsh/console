@@ -140,7 +140,9 @@ export function ComponentKindSelect({
   setSelectedKinds: (kinds: Set<string>) => void
   kinds: string[]
 }) {
-  const sortedSelectedKinds = Array.from(selectedKinds).sort()
+  const sortedSelectedKinds = Array.from(selectedKinds).sort((a, b) =>
+    a.localeCompare(b)
+  )
   const typeTriggerLabel =
     sortedSelectedKinds.length === 0 ? 'Type' : sortedSelectedKinds.join(', ')
 

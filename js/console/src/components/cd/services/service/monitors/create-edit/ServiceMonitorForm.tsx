@@ -150,13 +150,13 @@ export function ServiceMonitorForm({
             <Input
               placeholder="Enter numeric value"
               value={state.threshold.value}
-              error={isNaN(state.threshold.value)}
+              error={Number.isNaN(state.threshold.value)}
               onChange={(e) => {
                 const val = Number(e.target.value)
                 update({
                   threshold: {
                     ...state.threshold,
-                    value: isNaN(val) ? 0 : val,
+                    value: Number.isNaN(val) ? 0 : val,
                   },
                 })
               }}

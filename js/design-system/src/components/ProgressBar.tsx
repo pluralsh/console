@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react'
 import styled, { keyframes, useTheme } from 'styled-components'
 
 export type Props = {
@@ -152,7 +153,7 @@ export default function ProgressBar({
       ? theme.colors['border-fill-two']
       : theme.colors['fill-three']
   const pct = Math.min(Math.max(progress ?? 0, 0), 1)
-  let fill
+  let fill: ReactNode
 
   if (mode !== 'determinate') {
     fill = (

@@ -11,9 +11,8 @@ import NextLink from 'next/link'
 import isEmpty from 'lodash/isEmpty'
 import styled from 'styled-components'
 
-import { MethodBadge } from './MethodBadge'
-
 import type { ApiSection, Endpoint } from '@src/lib/openapi-rest'
+import { MethodBadge } from './MethodBadge'
 
 const Sidebar = styled.aside<{ $overlay?: boolean }>(({ $overlay }) => ({
   display: 'flex',

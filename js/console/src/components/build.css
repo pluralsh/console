@@ -1,12 +1,12 @@
 .log {
-  background-color: #222;
-  color: #d6d6d6;
+  margin: 0;
+  overflow: auto !important;
   font-family: Monaco, monospace;
   font-size: 12px;
   font-weight: 400;
-  margin: 0;
-  outline: none;
-  overflow: auto !important;
+  color: #d6d6d6;
   white-space: pre;
+  outline: none;
+  background-color: #222;
   will-change: initial;
 }

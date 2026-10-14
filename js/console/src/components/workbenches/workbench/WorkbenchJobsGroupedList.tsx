@@ -125,13 +125,15 @@ export function WorkbenchJobsGroupedList({
 
     return GROUP_ORDER.filter(
       (status) => includes(statuses, status) && (counts[status] ?? 0) > 0
-    ).map((status): ListGroup<WorkbenchJobStatus> => ({
-      key: status,
-      label: startCase(status.toLowerCase()),
-      icon: <JobStatusIcon status={status} />,
-      color: JOB_STATUS_COLORS[status],
-      count: counts[status] ?? 0,
-    }))
+    ).map(
+      (status): ListGroup<WorkbenchJobStatus> => ({
+        key: status,
+        label: startCase(status.toLowerCase()),
+        icon: <JobStatusIcon status={status} />,
+        color: JOB_STATUS_COLORS[status],
+        count: counts[status] ?? 0,
+      })
+    )
   }, [countsData, statuses])
 
   return (

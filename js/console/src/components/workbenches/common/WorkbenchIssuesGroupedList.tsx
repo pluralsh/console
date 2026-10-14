@@ -84,13 +84,15 @@ export function WorkbenchIssuesGroupedList({
 
     return GROUP_ORDER.filter(
       (status) => includes(statuses, status) && (counts[status] ?? 0) > 0
-    ).map((status): ListGroup<IssueStatus> => ({
-      key: status,
-      label: ISSUE_STATUS_LABELS[status],
-      icon: <IssueStatusGlyph status={status} />,
-      color: ISSUE_STATUS_COLORS[status],
-      count: counts[status] ?? 0,
-    }))
+    ).map(
+      (status): ListGroup<IssueStatus> => ({
+        key: status,
+        label: ISSUE_STATUS_LABELS[status],
+        icon: <IssueStatusGlyph status={status} />,
+        color: ISSUE_STATUS_COLORS[status],
+        count: counts[status] ?? 0,
+      })
+    )
   }, [countsData, statuses])
 
   return (
