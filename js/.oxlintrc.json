@@ -110,7 +110,10 @@
     {
       "files": ["documentation/**"],
       "rules": {
-        "typescript/consistent-type-imports": "error",
+        "typescript/consistent-type-imports": [
+          "error",
+          { "fixStyle": "inline-type-imports" }
+        ],
         "jsx-a11y/alt-text": "error",
         "jsx-a11y/anchor-has-content": "error",
         "jsx-a11y/anchor-is-valid": "error",

@@ -13,7 +13,7 @@
     "lint": "run-p lint:biome lint:js",
     "lint:biome": "biome check ./src ./pages",
     "lint:js": "oxlint -c ../.oxlintrc.json src pages",
-    "fix": "run-s fix:biome fix:js",
+    "fix": "run-s fix:js fix:biome",
     "fix:biome": "biome check --write ./src ./pages",
     "fix:js": "oxlint -c ../.oxlintrc.json --fix src pages",
     "graphql:codegen": "graphql-codegen --config codegen.yml",

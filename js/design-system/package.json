@@ -32,7 +32,7 @@
     "lint": "run-p lint:biome lint:js",
     "lint:biome": "biome check ./src",
     "lint:js": "oxlint -c ../.oxlintrc.json ./src",
-    "fix": "run-s fix:biome fix:js",
+    "fix": "run-s fix:js fix:biome",
     "fix:biome": "biome check --write ./src",
     "fix:js": "oxlint -c ../.oxlintrc.json --fix ./src",
     "prepublishOnly": "npm run build",

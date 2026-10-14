@@ -10,7 +10,7 @@
     "lint": "biome check console/src design-system/src documentation/src documentation/pages && oxlint console/src design-system/src documentation/src documentation/pages",
     "lint:biome": "biome check console/src design-system/src documentation/src documentation/pages",
     "lint:oxlint": "oxlint console/src design-system/src documentation/src documentation/pages",
-    "fix": "yarn lint:biome --write && yarn lint:oxlint --fix",
+    "fix": "yarn lint:oxlint --fix && yarn lint:biome --write",
     "test": "yarn workspace console test && yarn workspace @pluralsh/design-system test"
   },
   "engines": {

@@ -22,7 +22,7 @@
     "lint:biome": "biome check ./src",
     "lint:js": "oxlint -c ../.oxlintrc.json ./src",
     "design-system:lint": "yarn workspace @pluralsh/design-system lint",
-    "fix": "run-s fix:biome fix:js",
+    "fix": "run-s fix:js fix:biome",
     "fix:biome": "biome check --write ./src",
     "fix:js": "oxlint -c ../.oxlintrc.json --fix ./src",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
