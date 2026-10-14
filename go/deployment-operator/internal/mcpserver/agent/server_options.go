@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"net/http"
+
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/openaiproxy"
@@ -65,14 +67,25 @@ func WithWorkbenchMCPProxy(upstreamURL string, token func() string) Option {
 	}
 }
 
+const (
+	consoleExtClientHeader   = "Plural-Client"
+	consoleExtClient         = "agent-harness"
+	consoleExtAgentRunHeader = "Plural-Agent-Run"
+)
+
 // WithConsoleExtProxy registers a local reverse proxy to the Console ext API
 // that authenticates with the deploy token, so the harness container never holds it.
-func WithConsoleExtProxy(upstreamURL, token string) Option {
+func WithConsoleExtProxy(upstreamURL, token, agentRunID string) Option {
 	return func(s *Server) {
 		handler, err := newBearerTokenProxy(upstreamURL, func() string { return token })
 		if err != nil {
 			klog.Fatalf("could not configure console ext proxy: %v", err)
 		}
-		s.consoleExtProxy = handler
+		s.consoleExtProxy = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Overwrite any caller values so Console can tell these calls came through the sidecar.
+			r.Header.Set(consoleExtClientHeader, consoleExtClient)
+			r.Header.Set(consoleExtAgentRunHeader, agentRunID)
+			handler.ServeHTTP(w, r)
+		})
 	}
 }
