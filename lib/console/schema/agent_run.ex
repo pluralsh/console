@@ -98,6 +98,10 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, where: ar.session_id == ^session_id)
   end
 
+  def with_lock(query \\ __MODULE__) do
+    from(ar in query, lock: "FOR UPDATE")
+  end
+
   def for_status(query \\ __MODULE__, status) do
     from(ar in query, where: ar.status == ^status)
   end

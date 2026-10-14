@@ -380,7 +380,12 @@ defmodule Console.Deployments.Agents do
   def create_prompt(prompt, run_id, %User{} = user) do
     start_transaction()
     |> add_operation(:run, fn _ ->
-      with {:ok, run} <- get_agent_run!(run_id) |> Repo.preload([:upload]) |> allow(user, :update) do
+      run =
+        AgentRun.with_lock()
+        |> Repo.get!(run_id)
+        |> Repo.preload([:upload])
+
+      with {:ok, run} <- allow(run, user, :update) do
         validate_terminal_reprompt(run)
       end
     end)

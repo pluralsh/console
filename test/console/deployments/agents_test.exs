@@ -880,6 +880,26 @@ defmodule Console.Deployments.AgentsTest do
       {:error, "review mode agent runs cannot be reprompted"} =
         Agents.create_prompt("continue", run.id, user)
     end
+
+    test "prompts queued after requeue are preserved" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, status: :successful)
+      insert(:agent_run_upload, agent_run: run)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:ok, _} = Agents.create_prompt("first follow-up", run.id, user)
+      {:ok, _} = Agents.create_prompt("second follow-up", run.id, user)
+
+      prompts =
+        AgentPrompt.for_run(run.id)
+        |> Repo.all()
+        |> Enum.sort_by(& &1.seq)
+
+      assert Enum.map(prompts, & &1.prompt) == ["first follow-up", "second follow-up"]
+      assert refetch(run).status == :pending
+      assert refetch(run).followup
+    end
   end
 
   describe "share_agent_run/3" do

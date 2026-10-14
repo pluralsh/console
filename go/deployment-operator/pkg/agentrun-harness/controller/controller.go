@@ -109,7 +109,7 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 	if !resumeFollowup {
 		// Mark prompts present at boot as already consumed so only newly
 		// queued prompts are dispatched mid-run. Follow-up boot claims the
-		// latest pending prompt itself and advances lastPromptSeq.
+		// oldest pending prompt itself and advances lastPromptSeq.
 		in.initializePromptCursor()
 	}
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{

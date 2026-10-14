@@ -9,29 +9,18 @@ import (
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 )
 
-func TestLatestPendingPrompt(t *testing.T) {
-	prompts := []*gqlclient.AgentPromptFragment{
-		{Prompt: "first", Seq: 1},
-		{Prompt: "third", Seq: 3},
-		{Prompt: "second", Seq: 2},
-		nil,
-		{Prompt: "   ", Seq: 4},
-	}
-
-	got := latestPendingPrompt(prompts)
-	if got == nil || got.Prompt != "third" || got.Seq != 3 {
-		t.Fatalf("latestPendingPrompt() = %#v, want seq 3", got)
-	}
-}
-
-func TestApplyFollowupBootPrompt(t *testing.T) {
+func TestApplyFollowupBootPromptUsesOldestPending(t *testing.T) {
 	in := &agentRunController{
 		agentRunID: "run-1",
 		agentRun: &agentrunv1.AgentRun{
 			Followup: true,
 			Prompt:   "original",
 			Prompts: []*gqlclient.AgentPromptFragment{
-				{Prompt: "continue here", Seq: 7},
+				{Prompt: "first", Seq: 1},
+				{Prompt: "third", Seq: 3},
+				{Prompt: "second", Seq: 2},
+				nil,
+				{Prompt: "   ", Seq: 4},
 			},
 		},
 	}
@@ -39,11 +28,11 @@ func TestApplyFollowupBootPrompt(t *testing.T) {
 	if !in.applyFollowupBootPrompt() {
 		t.Fatal("expected follow-up boot prompt to apply")
 	}
-	if in.agentRun.Prompt != "continue here" {
-		t.Fatalf("prompt = %q", in.agentRun.Prompt)
+	if in.agentRun.Prompt != "first" {
+		t.Fatalf("prompt = %q, want first", in.agentRun.Prompt)
 	}
-	if in.lastPromptSeq != 7 {
-		t.Fatalf("lastPromptSeq = %d", in.lastPromptSeq)
+	if in.lastPromptSeq != 1 {
+		t.Fatalf("lastPromptSeq = %d, want 1 so later prompts remain dispatchable", in.lastPromptSeq)
 	}
 }
 
@@ -65,7 +54,7 @@ func TestApplyFollowupBootPromptSkipsRegularRuns(t *testing.T) {
 	}
 }
 
-func TestRestoreFollowupSessionRequiresURL(t *testing.T) {
+func TestRestoreFollowupSessionSkipsWhenURLEmpty(t *testing.T) {
 	in := &agentRunController{
 		agentRunID: "run-1",
 		agentRun: &agentrunv1.AgentRun{
@@ -73,9 +62,8 @@ func TestRestoreFollowupSessionRequiresURL(t *testing.T) {
 		},
 	}
 
-	err := in.restoreFollowupSession(context.Background())
-	if err == nil {
-		t.Fatal("expected error when follow-up session URL is empty")
+	if err := in.restoreFollowupSession(context.Background()); err != nil {
+		t.Fatalf("expected empty session URL to skip restore for PR follow-ups: %v", err)
 	}
 }
 

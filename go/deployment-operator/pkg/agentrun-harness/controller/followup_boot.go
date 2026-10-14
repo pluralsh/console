@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -21,7 +20,9 @@ func (in *agentRunController) applyFollowupBootPrompt() bool {
 		return false
 	}
 
-	prompt := latestPendingPrompt(in.agentRun.Prompts)
+	// Oldest pending prompt first so prompts queued while the run is still
+	// pending remain available for later dispatch via nextPrompt.
+	prompt := nextPrompt(in.agentRun.Prompts, 0)
 	if prompt == nil {
 		return false
 	}
@@ -38,6 +39,10 @@ func (in *agentRunController) applyFollowupBootPrompt() bool {
 
 // restoreFollowupSession downloads and restores the uploaded session archive
 // when this run is a follow-up with a session URL.
+//
+// Workbench PR follow-ups create new runs with Followup=true but no prior
+// session upload; those cold-start without restore. Terminal reprompts already
+// validate a session exists server-side before requeueing.
 func (in *agentRunController) restoreFollowupSession(ctx context.Context) error {
 	if in.agentRun == nil || !in.agentRun.Followup {
 		return nil
@@ -45,7 +50,11 @@ func (in *agentRunController) restoreFollowupSession(ctx context.Context) error 
 
 	url := strings.TrimSpace(in.agentRun.SessionURL)
 	if url == "" {
-		return fmt.Errorf("follow-up agent run %s has no session URL to restore", in.agentRunID)
+		klog.V(log.LogLevelInfo).InfoS(
+			"follow-up agent run has no session URL; starting without session restore",
+			"id", in.agentRunID,
+		)
+		return nil
 	}
 
 	sessionID, err := in.tool.RestoreSession(ctx, url)
@@ -58,17 +67,4 @@ func (in *agentRunController) restoreFollowupSession(ctx context.Context) error 
 		"sessionID", sessionID,
 	)
 	return nil
-}
-
-func latestPendingPrompt(prompts []*gqlclient.AgentPromptFragment) *gqlclient.AgentPromptFragment {
-	var latest *gqlclient.AgentPromptFragment
-	for _, prompt := range prompts {
-		if prompt == nil || strings.TrimSpace(prompt.Prompt) == "" {
-			continue
-		}
-		if latest == nil || prompt.Seq > latest.Seq {
-			latest = prompt
-		}
-	}
-	return latest
 }
