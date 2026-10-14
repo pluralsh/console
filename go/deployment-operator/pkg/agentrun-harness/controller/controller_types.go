@@ -29,9 +29,6 @@ type agentRunController struct {
 	// consoleClient is the client for Console API
 	consoleClient console.Client
 
-	// deployToken is the token used to access the Console External API
-	deployToken string
-
 	// consoleURl is needed for MCP Server
 	consoleUrl string
 

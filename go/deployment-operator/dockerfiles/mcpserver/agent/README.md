@@ -30,7 +30,8 @@ docker compose down -v
 
 ## Notes
 
-- `PLRL_CONSOLE_URL`, `PLRL_DEPLOY_TOKEN`, and `PLRL_AGENT_RUN_ID` are required for bootstrap + harness.
+- `PLRL_CONSOLE_URL` and `PLRL_AGENT_RUN_ID` are required for bootstrap + harness.
+- `PLRL_DEPLOY_TOKEN` is required for bootstrap + mcpserver only; the harness reaches the Console through the mcpserver proxy and never sees it.
 - `PLRL_CONSOLE_TOKEN` and `GIT_ACCESS_TOKEN` are required for mcpserver sidecar.
 - Shared workspace volume is mounted at `/plural/shared` in all services.
 - `PLRL_AGENT_PROVIDER` selects the harness Dockerfile: one of `opencode`, `codex`, `claude`, `gemini` (default: `opencode`).

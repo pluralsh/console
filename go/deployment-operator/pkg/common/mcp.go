@@ -15,6 +15,10 @@ const (
 	AgentOpenAIResponsesURL        = "http://127.0.0.1:8080/v1/responses"
 	AgentOpenAIBaseURL             = "http://127.0.0.1:8080/v1"
 
+	// AgentConsoleExtGQLPath proxies the harness's Console ext API calls; the sidecar injects the deploy token.
+	AgentConsoleExtGQLPath = "/plural/ext/gql"
+	AgentConsoleExtGQLURL  = "http://127.0.0.1:8080/plural/ext/gql"
+
 	AgentMCPGRPCPort          = 8081
 	AgentMCPGRPCServerAddress = ":8081"
 	AgentMCPGRPCAddress       = "127.0.0.1:8081"

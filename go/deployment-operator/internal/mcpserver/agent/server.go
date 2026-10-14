@@ -50,6 +50,9 @@ type Server struct {
 	// workbenchMCPProxy exposes the originating workbench without sharing its
 	// user credential with the coding-agent container.
 	workbenchMCPProxy http.Handler
+
+	// consoleExtProxy forwards the harness's Console ext calls, adding the deploy token.
+	consoleExtProxy http.Handler
 }
 
 // Start starts the MCP server with streamable HTTP transport
@@ -91,6 +94,10 @@ func (in *Server) init() *Server {
 	if in.workbenchMCPProxy != nil {
 		mux.Handle(common.AgentWorkbenchMCPPath, in.workbenchMCPProxy)
 		klog.V(log.LogLevelDefault).InfoS("registered workbench mcp proxy", "path", common.AgentWorkbenchMCPPath)
+	}
+	if in.consoleExtProxy != nil {
+		mux.Handle(common.AgentConsoleExtGQLPath, in.consoleExtProxy)
+		klog.V(log.LogLevelDefault).InfoS("registered console ext proxy", "path", common.AgentConsoleExtGQLPath)
 	}
 	if in.openaiProxy != nil {
 		mux.Handle(common.AgentOpenAIChatCompletionsPath, in.openaiProxy)

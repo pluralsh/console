@@ -202,6 +202,8 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 
 	pod.Spec.Containers = ensureDefaultContainer(pod.Spec.Containers, run, runtime)
 	pod.Spec.RestartPolicy = corev1.RestartPolicyNever
+	// A shared PID namespace would expose the sidecar's environ (deploy token) via /proc.
+	pod.Spec.ShareProcessNamespace = lo.ToPtr(false)
 	if pod.Spec.TerminationGracePeriodSeconds == nil {
 		pod.Spec.TerminationGracePeriodSeconds = lo.ToPtr(defaultPodTerminationGracePeriodSeconds)
 	}
@@ -352,6 +354,15 @@ func getDefaultContainerImage(image string, agentRuntimeType console.AgentRuntim
 	return fmt.Sprintf("%s:%s", common.GetConfigurationManager().SwapBaseRegistry(defaultContainerImage), tag)
 }
 
+// pluralSecretName is the per-run secret holding the deploy token; only bootstrap and mcpserver may load it.
+func pluralSecretName(runName string) string {
+	return runName + "-plural"
+}
+
+func getPrivilegedContainerEnvFrom(runName string) []corev1.EnvFromSource {
+	return append(getDefaultContainerEnvFrom(runName), getDefaultContainerEnvFrom(pluralSecretName(runName))...)
+}
+
 func getDefaultContainerEnvFrom(secretName string) []corev1.EnvFromSource {
 	return []corev1.EnvFromSource{{
 		SecretRef: &corev1.SecretEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: secretName}},
@@ -448,7 +459,7 @@ func enableAgentBootstrap(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime
 	}
 
 	pod.Spec.InitContainers[index].SecurityContext = ensureAgentBootstrapSecurityContext(pod.Spec.InitContainers[index].SecurityContext)
-	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
+	pod.Spec.InitContainers[index].EnvFrom = getPrivilegedContainerEnvFrom(run.Name)
 	pod.Spec.InitContainers[index].Env = ensureAgentBootstrapEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
 	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
 
@@ -465,7 +476,7 @@ func getAgentBootstrapContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentR
 		Name:            agentBootstrapContainerName,
 		Image:           image,
 		SecurityContext: ensureAgentBootstrapSecurityContext(nil),
-		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
+		EnvFrom:         getPrivilegedContainerEnvFrom(run.Name),
 		Env:             getAgentBootstrapEnvVars(run, runtime),
 		Command:         []string{"/agent-bootstrap"},
 		Args:            []string{"--working-dir", common.AgentRunSharedWorkDir},
@@ -520,7 +531,7 @@ func enableMCPServer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, pod
 	}
 
 	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext, false)
-	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
+	pod.Spec.InitContainers[index].EnvFrom = getPrivilegedContainerEnvFrom(run.Name)
 	pod.Spec.InitContainers[index].Env = ensureMCPServerEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
 	pod.Spec.InitContainers[index].Env = ensureWorkbenchMCPProxyEnvVar(pod.Spec.InitContainers[index].Env, run, runtime)
 	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
@@ -544,7 +555,7 @@ func getMCPServerContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntim
 		Name:            mcpServerContainerName,
 		Image:           image,
 		SecurityContext: ensureDefaultContainerSecurityContext(nil, false),
-		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
+		EnvFrom:         getPrivilegedContainerEnvFrom(run.Name),
 		Env:             ensureWorkbenchMCPProxyEnvVar(getMCPServerEnvVars(run, runtime), run, runtime),
 		Command:         []string{"/agent-mcpserver"},
 		Args: []string{

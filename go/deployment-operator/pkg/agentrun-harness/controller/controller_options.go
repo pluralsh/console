@@ -22,12 +22,6 @@ func WithWorkingDir(dir string) Option {
 	}
 }
 
-func WithDeployToken(token string) Option {
-	return func(s *agentRunController) {
-		s.deployToken = token
-	}
-}
-
 func WithConsoleUrl(url string) Option {
 	return func(s *agentRunController) {
 		s.consoleUrl = url

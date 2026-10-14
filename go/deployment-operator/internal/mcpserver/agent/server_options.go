@@ -57,10 +57,22 @@ func WithOpenAIProxy(chatCompletionsURL, responsesURL string) Option {
 // the originating workbench with the agent run's short-lived user token.
 func WithWorkbenchMCPProxy(upstreamURL string, token func() string) Option {
 	return func(s *Server) {
-		handler, err := newWorkbenchMCPProxy(upstreamURL, token)
+		handler, err := newBearerTokenProxy(upstreamURL, token)
 		if err != nil {
 			klog.Fatalf("could not configure workbench mcp proxy: %v", err)
 		}
 		s.workbenchMCPProxy = handler
+	}
+}
+
+// WithConsoleExtProxy registers a local reverse proxy to the Console ext API
+// that authenticates with the deploy token, so the harness container never holds it.
+func WithConsoleExtProxy(upstreamURL, token string) Option {
+	return func(s *Server) {
+		handler, err := newBearerTokenProxy(upstreamURL, func() string { return token })
+		if err != nil {
+			klog.Fatalf("could not configure console ext proxy: %v", err)
+		}
+		s.consoleExtProxy = handler
 	}
 }

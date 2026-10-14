@@ -11,6 +11,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	agentsignals "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/signals"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/signals"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -19,7 +20,7 @@ import (
 func main() {
 	klog.V(log.LogLevelDefault).InfoS("starting agent harness", "version", environment.Version)
 
-	consoleClient := client.New(args.ConsoleAPIUrl(), args.DeployToken())
+	consoleClient := client.New(common.AgentConsoleExtGQLURL, "")
 	ctx := signals.NewCancelableContext(
 		signals.SetupSignalHandler(signals.ExitCodeTerminated),
 		agentsignals.NewConsoleSignal(consoleClient, args.AgentRunID()),
@@ -29,7 +30,6 @@ func main() {
 		controller.WithAgentRun(args.AgentRunID()),
 		controller.WithConsoleClient(consoleClient),
 		controller.WithConsoleUrl(args.ConsoleUrl()),
-		controller.WithDeployToken(args.DeployToken()),
 		controller.WithWorkingDir(args.WorkingDir()),
 	}
 

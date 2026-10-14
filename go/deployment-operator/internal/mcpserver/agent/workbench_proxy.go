@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-func newWorkbenchMCPProxy(upstreamURL string, token func() string) (http.Handler, error) {
+func newBearerTokenProxy(upstreamURL string, token func() string) (http.Handler, error) {
 	target, err := url.Parse(upstreamURL)
 	if err != nil || target.Scheme == "" || target.Host == "" {
-		return nil, fmt.Errorf("invalid workbench MCP URL %q", upstreamURL)
+		return nil, fmt.Errorf("invalid upstream URL %q", upstreamURL)
 	}
 	if token == nil || strings.TrimSpace(token()) == "" {
-		return nil, fmt.Errorf("workbench MCP proxy requires a bearer token")
+		return nil, fmt.Errorf("bearer token proxy requires a token")
 	}
 
 	proxy := &httputil.ReverseProxy{

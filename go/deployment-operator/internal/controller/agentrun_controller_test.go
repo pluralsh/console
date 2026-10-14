@@ -156,8 +156,12 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			secret := &corev1.Secret{}
 			Expect(kClient.Get(ctx, runNamespacedName, secret)).NotTo(HaveOccurred())
 			Expect(string(secret.Data[EnvConsoleURL])).Should(Equal(consoleURL))
-			Expect(string(secret.Data[EnvDeployToken])).Should(Equal(deployToken))
+			Expect(secret.Data).ShouldNot(HaveKey(EnvDeployToken))
 			Expect(string(secret.Data[EnvAgentRunID])).Should(Equal(runID))
+
+			pluralSecret := &corev1.Secret{}
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: pluralSecretName(runName), Namespace: runNamespacedName.Namespace}, pluralSecret)).NotTo(HaveOccurred())
+			Expect(string(pluralSecret.Data[EnvDeployToken])).Should(Equal(deployToken))
 
 			// Verify pod was created
 			pod := &corev1.Pod{}
@@ -720,9 +724,9 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			run.Status.ID = lo.ToPtr("run-456")
 
 			data := reconciler.getSecretData(run, nil, console.AgentRuntimeTypeClaude, nil, nil, nil)
-			Expect(data).Should(HaveLen(3))
+			Expect(data).Should(HaveLen(2))
 			Expect(data[EnvConsoleURL]).Should(Equal("https://console.test.com"))
-			Expect(data[EnvDeployToken]).Should(Equal("test-token-123"))
+			Expect(data).ShouldNot(HaveKey(EnvDeployToken))
 			Expect(data[EnvAgentRunID]).Should(Equal("run-456"))
 		})
 
@@ -757,6 +761,12 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				EnvAgentRunID:  []byte("wrong-run-id"),
 			}
 			Expect(reconciler.hasSecretData(wrongRunIDData, run)).Should(BeFalse())
+
+			// Token is no longer required in this secret
+			Expect(reconciler.hasSecretData(map[string][]byte{
+				EnvConsoleURL: []byte("https://console.test.com"),
+				EnvAgentRunID: []byte("run-789"),
+			}, run)).Should(BeTrue())
 		})
 
 		It("should include Claude config in secret data", func() {
