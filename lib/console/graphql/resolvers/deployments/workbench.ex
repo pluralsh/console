@@ -1,9 +1,9 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
-  import Absinthe.Resolution.Helpers, only: [batch: 3]
+  import Absinthe.Resolution.Helpers, only: [batch: 3, on_load: 2]
   alias Console.Repo
   alias Kube.Utils, as: KUtils
-  alias Console.Deployments.{Clusters, Workbenches}
+  alias Console.Deployments.{Clusters, Workbenches, WorkbenchFiles}
   alias Console.AI.Workbench.{Toolchain, Skills}
   alias Console.AI.Tools.Workbench.Infrastructure.KubeGet
   alias Console.Schema.{
@@ -378,6 +378,57 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def whimsey_text(%WorkbenchJob{} = job, _, _), do: Workbenches.whimsey_text(job)
   def whimsey_text(%WorkbenchJobActivity{} = activity, _, _), do: Workbenches.whimsey_text(activity)
+
+  def list_workbench_files(workbench, args, _), do: WorkbenchFiles.list(workbench, Map.get(args, :path, "/"))
+
+  def workbench_file(workbench, %{path: path}, _), do: WorkbenchFiles.stat(workbench, path)
+
+  def workbench_file_contents(workbench, %{path: path}, _), do: WorkbenchFiles.read_text(workbench, path)
+
+  def glob_workbench_files(workbench, %{pattern: pattern} = args, _),
+    do: WorkbenchFiles.glob(workbench, pattern, args[:max_results])
+
+  def grep_workbench_files(workbench, %{pattern: pattern} = args, _),
+    do: WorkbenchFiles.grep(workbench, pattern, args)
+
+  def workbench_file_download_url(%{kind: :file, workbench_id: id, path: path}, _, %{context: %{current_user: user}}),
+    do: {:ok, WorkbenchFiles.download_url(id, path, user)}
+  def workbench_file_download_url(_, _, _), do: {:ok, nil}
+
+  def attachment_download_url(%{workbench_id: id, path: path}, _, %{context: %{current_user: %Console.Schema.User{} = user}}),
+    do: {:ok, WorkbenchFiles.download_url(id, path, user)}
+  # agent run harnesses authenticate as their cluster, so downloads are signed for the user who started the run,
+  # once the run's runtime is confirmed to belong to that cluster.  runs and runtimes are batch loaded across attachments
+  def attachment_download_url(%{agent_run_id: run_id} = att, _, %{context: %{cluster: %Cluster{id: cluster_id}, loader: loader}})
+      when is_binary(run_id) do
+    loader
+    |> Dataloader.load(Console.GraphQl.Resolvers.Deployments, :agent_run, att)
+    |> on_load(fn loader ->
+      run = Dataloader.get(loader, Console.GraphQl.Resolvers.Deployments, :agent_run, att)
+      loader
+      |> Dataloader.load(Console.GraphQl.Resolvers.Deployments, :runtime, run)
+      |> on_load(fn loader ->
+        case Dataloader.get(loader, Console.GraphQl.Resolvers.Deployments, :runtime, run) do
+          %Console.Schema.AgentRuntime{cluster_id: ^cluster_id} ->
+            {:ok, WorkbenchFiles.download_url(att.workbench_id, att.path, run.user_id)}
+          _ -> {:ok, nil}
+        end
+      end)
+    end)
+  end
+  def attachment_download_url(_, _, _), do: {:ok, nil}
+
+  def write_workbench_file(%{workbench_id: id} = args, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.write_file(args, id, user)
+
+  def create_workbench_directory(%{workbench_id: id, path: path}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.create_directory(path, id, user)
+
+  def move_workbench_file(%{workbench_id: id, source: source, target: target}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.move_file(source, target, id, user)
+
+  def delete_workbench_file(%{workbench_id: id, path: path}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.delete_file(path, id, user)
 
   def create_workbench(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench(attrs, user)

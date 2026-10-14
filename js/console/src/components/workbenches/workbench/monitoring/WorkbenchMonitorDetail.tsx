@@ -1,5 +1,4 @@
 import {
-  Button,
   Card,
   Chip,
   ChipSeverity,
@@ -11,9 +10,6 @@ import {
   GearTrainIcon,
   HamburgerMenuCollapsedIcon,
   IconFrame,
-  Markdown,
-  Modal,
-  PaperCheckIcon,
   PrClosedIcon,
   PrIcon,
   Tooltip,
@@ -908,9 +904,6 @@ function MonitorJobFooter({ job }: { job: WorkbenchJobTinyFragment }) {
         e.stopPropagation()
       }}
     >
-      {job.result?.conclusion && (
-        <ConclusionButton conclusion={job.result.conclusion} />
-      )}
       {singlePr && (
         <IconFrame
           clickable
@@ -983,47 +976,6 @@ function MonitorJobFooter({ job }: { job: WorkbenchJobTinyFragment }) {
         />
       )}
     </JobFooterSC>
-  )
-}
-
-function ConclusionButton({ conclusion }: { conclusion: string }) {
-  const theme = useTheme()
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <IconFrame
-        clickable
-        size="medium"
-        type="tertiary"
-        tooltip="View conclusion"
-        textValue="View conclusion"
-        icon={<PaperCheckIcon color="icon-xlight" />}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          setOpen(true)
-        }}
-      />
-      <Modal
-        header="Conclusion"
-        size="large"
-        open={open}
-        onClose={() => setOpen(false)}
-        actions={
-          <Button
-            secondary
-            onClick={() => setOpen(false)}
-          >
-            Close
-          </Button>
-        }
-      >
-        <Card css={{ padding: theme.spacing.large, overflow: 'auto' }}>
-          <Markdown text={conclusion} />
-        </Card>
-      </Modal>
-    </>
   )
 }
 

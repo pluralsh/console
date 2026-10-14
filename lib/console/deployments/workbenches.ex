@@ -5,6 +5,7 @@ defmodule Console.Deployments.Workbenches do
   import Console.AI.Workbench.Mentions
   import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
   alias Console.AI.Workbench.Toolchain
+  alias Console.Deployments.Attachments
   alias Console.Schema.{
     User,
     Workbench,
@@ -878,6 +879,9 @@ defmodule Console.Deployments.Workbenches do
       |> allow(user, :read)
       |> when_ok(:insert)
     end)
+    |> add_operation(:attachments, fn %{job: job} ->
+      Attachments.create(attrs[:attachments], job.workbench_id, %{workbench_job_id: job.id})
+    end)
     |> execute(extract: :job)
     |> notify(:create, user)
   end
@@ -1110,6 +1114,12 @@ defmodule Console.Deployments.Workbenches do
       |> WorkbenchJobActivity.changeset(attrs)
       |> Repo.insert()
     end)
+    |> add_operation(:attachments, fn %{job: job, activity: activity} ->
+      Attachments.create(attrs[:attachments], job.workbench_id, %{
+        workbench_job_id: job.id,
+        workbench_job_activity_id: activity.id
+      })
+    end)
     |> execute(extract: :activity)
     |> notify(:create, user)
   end
@@ -1124,11 +1134,18 @@ defmodule Console.Deployments.Workbenches do
   Requires read/prompt access to the target job.
   """
   @spec create_queued_prompt(map, binary | WorkbenchJob.t(), User.t()) :: queued_prompt_resp
-  def create_queued_prompt(attrs, %WorkbenchJob{id: job_id}, %User{id: user_id} = user) do
-    %QueuedPrompt{workbench_job_id: job_id, user_id: user_id}
-    |> QueuedPrompt.changeset(attrs)
-    |> allow(user, :read)
-    |> when_ok(:insert)
+  def create_queued_prompt(attrs, %WorkbenchJob{id: job_id, workbench_id: wid}, %User{id: user_id} = user) do
+    start_transaction()
+    |> add_operation(:prompt, fn _ ->
+      %QueuedPrompt{workbench_job_id: job_id, user_id: user_id}
+      |> QueuedPrompt.changeset(attrs)
+      |> allow(user, :read)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:attachments, fn %{prompt: prompt} ->
+      Attachments.create(attrs[:attachments], wid, %{queued_prompt_id: prompt.id})
+    end)
+    |> execute(extract: :prompt)
     |> notify(:create, user)
   end
 
@@ -1163,6 +1180,9 @@ defmodule Console.Deployments.Workbenches do
         prompt: prompt.prompt,
         modes: prompt.modes
       }, job, user)
+    end)
+    |> add_operation(:attachments, fn %{job: activity} ->
+      Attachments.move_queued(prompt.id, activity)
     end)
     |> execute(extract: :job)
   end

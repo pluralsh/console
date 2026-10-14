@@ -12,6 +12,7 @@ import (
 	acpsdk "github.com/coder/acp-go-sdk"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/attachments"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -343,7 +344,7 @@ func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioP
 	if err != nil {
 		return nil, fmt.Errorf("open acp working directory: %w", err)
 	}
-	readOnlyRoots, err := openFileSystemRoots(prebake.ExtraReadDirs())
+	readOnlyRoots, err := openFileSystemRoots(append(prebake.ExtraReadDirs(), attachments.ReadDirs()...))
 	if err != nil {
 		_ = root.Close()
 		return nil, err

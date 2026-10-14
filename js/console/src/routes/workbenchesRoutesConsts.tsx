@@ -244,3 +244,16 @@ export const getWorkbenchMonitoringMonitorSettingsAbsPath = ({
   monitorId: Nullable<string>
 }) =>
   `${getWorkbenchMonitoringMonitorAbsPath({ workbenchId, monitorId })}/${WORKBENCH_MONITORING_MONITOR_SETTINGS_REL_PATH}`
+
+export const WORKBENCHES_FILES_REL_PATH = 'files'
+export const WORKBENCH_FILES_PATH_QUERY_PARAM = 'path'
+
+export const getWorkbenchFilesAbsPath = (
+  workbenchId: Nullable<string>,
+  path?: Nullable<string>
+) =>
+  `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_FILES_REL_PATH}${
+    path
+      ? `?${new URLSearchParams({ [WORKBENCH_FILES_PATH_QUERY_PARAM]: path })}`
+      : ''
+  }`

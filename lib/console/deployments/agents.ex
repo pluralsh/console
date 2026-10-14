@@ -7,7 +7,7 @@ defmodule Console.Deployments.Agents do
   import Console.Schema.AgentRun, only: [is_terminal: 1]
   alias Console.Deployments.Pr.Review
   alias Console.Services.Users
-  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches}
+  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches, Attachments}
   alias Console.AI.Tool
   alias Console.PubSub
   alias Kazan.Apis.Core.V1, as: CoreV1
@@ -23,6 +23,7 @@ defmodule Console.Deployments.Agents do
     PullRequest,
     AgentMessage,
     AgentRunRepository,
+    WorkbenchJob,
     WorkbenchJobActivity,
     AgentRunUpload
   }
@@ -156,7 +157,8 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Creates an agent run, initiated by an ordinary user with create bindings against the runtime
+  Creates an agent run, initiated by an ordinary user with create bindings against the runtime.  Runs spawned
+  by a workbench can pass `attachments`, sandbox paths of existing workbench files the harness will download.
   """
   @spec create_agent_run(map, binary, User.t) :: agent_run_resp
   def create_agent_run(attrs, runtime_id, %User{id: user_id} = user) do
@@ -184,6 +186,9 @@ defmodule Console.Deployments.Agents do
         true -> {:ok, run}
         false -> {:error, "repository is not allowed for this runtime, allowed repositories: #{inspect(runtime.allowed_repositories || [])}"}
       end
+    end)
+    |> add_operation(:attachments, fn %{run: run} ->
+      run_attachments(run, %{agent_run_id: run.id}, &Attachments.link(attrs[:attachments], &1, &2), attrs[:attachments])
     end)
     |> execute(extract: :run)
     |> notify(:create)
@@ -373,8 +378,8 @@ defmodule Console.Deployments.Agents do
   @doc """
   Creates a new prompt for this agent run
   """
-  @spec create_prompt(binary, binary, User.t) :: prompt_resp
-  def create_prompt(prompt, run_id, %User{} = user) do
+  @spec create_prompt(binary, binary, User.t, [Plug.Upload.t], [binary]) :: prompt_resp
+  def create_prompt(prompt, run_id, %User{} = user, attachments \\ [], files \\ []) do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_agent_run!(run_id)
@@ -395,7 +400,24 @@ defmodule Console.Deployments.Agents do
       |> AgentMessage.changeset(%{role: :user, message: prompt, agent_run_id: run_id})
       |> Repo.insert()
     end)
+    |> add_operation(:attachments, fn %{run: run, agent_prompt: agent_prompt} ->
+      assocs = %{agent_prompt_id: agent_prompt.id, agent_run_id: run.id}
+      run_attachments(run, assocs, &Attachments.create(attachments, &1, &2), attachments)
+    end)
+    |> add_operation(:files, fn %{run: run, agent_prompt: agent_prompt} ->
+      assocs = %{agent_prompt_id: agent_prompt.id, agent_run_id: run.id}
+      run_attachments(run, assocs, &Attachments.link(files, &1, &2), files)
+    end)
     |> execute(extract: :prompt)
+  end
+
+  # attachments live in a workbench's filesystem, so only runs spawned by a workbench can have them
+  defp run_attachments(_, _, _, empty) when empty in [nil, []], do: {:ok, []}
+  defp run_attachments(run, assocs, fun, _) do
+    case Repo.preload(run, :workbench_job, force: true) do
+      %AgentRun{workbench_job: %WorkbenchJob{workbench_id: wid}} -> fun.(wid, assocs)
+      _ -> {:error, "file attachments are only supported for agent runs spawned by a workbench"}
+    end
   end
 
   @doc """

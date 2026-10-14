@@ -128,6 +128,7 @@ export function WorkbenchJobActivity({
       <ExpandableUserPrompt
         prompt={activity.prompt}
         timestamp={activity.insertedAt}
+        attachments={activity.attachments}
       />
     )
 

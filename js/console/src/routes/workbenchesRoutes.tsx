@@ -28,6 +28,7 @@ import { WorkbenchEvalSettings } from 'components/workbenches/workbench/evals/Wo
 import { WorkbenchEvals } from 'components/workbenches/workbench/evals/WorkbenchEvals'
 import { WorkbenchMonitoring } from 'components/workbenches/workbench/monitoring/WorkbenchMonitoring'
 import { WorkbenchMonitorSettings } from 'components/workbenches/workbench/monitoring/WorkbenchMonitorSettings'
+import { WorkbenchFiles } from 'components/workbenches/workbench/files/WorkbenchFiles'
 import { Navigate, Route } from 'react-router-dom'
 import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from './settingsRoutesConst'
 import {
@@ -46,6 +47,7 @@ import {
   WORKBENCHES_CREATE_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_EVALS_REL_PATH,
+  WORKBENCHES_FILES_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_MONITORING_REL_PATH,
   WORKBENCHES_TOOLS_ADD_ABS_PATH,
@@ -165,6 +167,10 @@ export const workbenchesRoutes = [
     <Route
       path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/:${WORKBENCH_MONITORING_MONITOR_PARAM_ID}`}
       element={<WorkbenchMonitoring />}
+    />
+    <Route
+      path={WORKBENCHES_FILES_REL_PATH}
+      element={<WorkbenchFiles />}
     />
   </Route>,
   <Route
