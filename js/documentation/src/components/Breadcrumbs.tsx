@@ -4,9 +4,8 @@ import { Breadcrumbs as BreadcrumbsComponent } from '@pluralsh/design-system'
 import { useRouter } from 'next/router'
 
 import { useNavMenu } from '../contexts/NavDataContext'
-import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
-
 import type { NavItem } from '../NavData'
+import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
 
 function findCrumbs(path, sections: NavItem[]) {
   path = removeTrailingSlashes(path)

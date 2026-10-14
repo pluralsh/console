@@ -42,9 +42,11 @@ function ModalWrapper({
           style={overlayStyles}
         >
           <WrapWithIf
-            condition={// band-aid for firefox not letting our select component open inside a modal
-            // see https://github.com/radix-ui/primitives/issues/2544
-            navigator?.userAgent.toLowerCase().includes('firefox')}
+            condition={
+              // band-aid for firefox not letting our select component open inside a modal
+              // see https://github.com/radix-ui/primitives/issues/2544
+              navigator?.userAgent.toLowerCase().includes('firefox')
+            }
             wrapper={
               <FocusScope
                 trapped={false}

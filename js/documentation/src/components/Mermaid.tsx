@@ -2,8 +2,8 @@
 // since we can't currently upgrade this repo to the latest version
 
 import {
-  type ComponentPropsWithRef,
   type ComponentPropsWithoutRef,
+  type ComponentPropsWithRef,
   type Dispatch,
   type ReactNode,
   type Ref,

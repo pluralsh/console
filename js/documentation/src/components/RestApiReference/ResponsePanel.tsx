@@ -17,10 +17,8 @@ import isEmpty from 'lodash/isEmpty'
 import styled, { useTheme } from 'styled-components'
 
 import { useCopyText } from '@src/hooks/useCopyText'
-
-import { StatusDot, StatusTab, StatusTabs, getStatusColor } from './shared'
-
 import type { EndpointDetail, ResponseSample } from '@src/lib/openapi-rest'
+import { getStatusColor, StatusDot, StatusTab, StatusTabs } from './shared'
 
 const Panel = styled.div(({ theme }) => ({
   marginBottom: theme.spacing.large,

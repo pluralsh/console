@@ -1,0 +1,92 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "root": ".."
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/src/generated",
+      "!documentation/generated",
+      "!documentation/src/routes/docs.generated.ts",
+      "!documentation/src/routing/navigation.ts"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "attributePosition": "multiline"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "es5",
+      "semicolons": "asNeeded"
+    }
+  },
+  "css": {
+    "formatter": { "quoteStyle": "single" }
+  },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "correctness": { "noReactPropAssignments": "error" },
+      "suspicious": {
+        "noDuplicateFields": "error",
+        "noEvolvingTypes": "error",
+        "noImplicitAnyLet": "error",
+        "noReactForwardRef": "error"
+      }
+    }
+  },
+  "assist": { "enabled": false },
+  "overrides": [
+    {
+      "includes": ["design-system/src/**/*.stories.{ts,tsx}"],
+      "linter": { "enabled": false }
+    },
+    {
+      "includes": ["**/*.css", "!**/logo-animation.css"],
+      "linter": {
+        "rules": {
+          "preset": "recommended",
+          "complexity": { "noImportantStyles": "off" },
+          "style": { "noDescendingSpecificity": "error" }
+        }
+      },
+      "assist": {
+        "enabled": true,
+        "actions": { "source": { "useSortedProperties": "on" } }
+      }
+    },
+    {
+      "includes": ["documentation/**"],
+      "assist": {
+        "enabled": true,
+        "actions": {
+          "source": {
+            "organizeImports": {
+              "level": "on",
+              "options": {
+                "groups": [
+                  ":NODE:",
+                  ["react", "react/**"],
+                  ":BLANK_LINE:",
+                  ["next", "next/**", "@pluralsh/design-system"],
+                  ":BLANK_LINE:",
+                  [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:", "!@src/**"],
+                  ":BLANK_LINE:",
+                  ["@src/**", ":ALIAS:", ":PATH:"]
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

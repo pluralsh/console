@@ -1,6 +1,5 @@
 import { type RefObject, useCallback } from 'react'
 import { useIsomorphicLayoutEffect } from '@react-spring/web'
-import ResizeObserver from 'resize-observer-polyfill'
 
 const useResizeObserver = (
   ref: RefObject<HTMLElement | null>,

@@ -71,7 +71,6 @@ function Container({ container }: ContainerProps) {
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Commands">
           {container.commands ? (
-            // @ts-ignore
             <Code
               css={{
                 pre: {

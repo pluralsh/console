@@ -6,7 +6,11 @@
  */
 
 export type TerraformPlanAction =
-  'create' | 'update' | 'delete' | 'no-op' | 'read'
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'no-op'
+  | 'read'
 
 export type PolicyResourceChange = {
   address?: string
