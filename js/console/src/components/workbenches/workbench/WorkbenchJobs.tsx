@@ -1,12 +1,13 @@
 import { useDebounce } from '@react-hooks-library/core'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
-  DisplayPopover,
+  DisplayButton,
+  DisplayPanel,
   toCounts,
+  useDisplaySidecar,
   useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import { WorkbenchHeaderSearch } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
@@ -155,6 +156,7 @@ export function WorkbenchJobs() {
       }
   const listError = searching ? search.error : error
   const filtered = hasUncheckedJobFilters(filters)
+  const displaySidecar = useDisplaySidecar(grouped)
   const emptyState = {
     searching,
     filtered,
@@ -177,10 +179,22 @@ export function WorkbenchJobs() {
 
   return (
     <WorkbenchPageLayout
+      sidecar={
+        displaySidecar.isOpen && (
+          <DisplayPanel>
+            <WorkbenchJobsDisplayOptions
+              state={display}
+              onChange={updateDisplay}
+              statusCounts={statusCounts}
+              prStateCounts={prStateCounts}
+              searching={searching}
+            />
+          </DisplayPanel>
+        )
+      }
       showEditWorkbenchButton={false}
       {...(showDetails && {
         sidebar: { kind: 'custom', content: details.sidebar },
-        tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
         <>
@@ -191,15 +205,11 @@ export function WorkbenchJobs() {
               placeholder="Search jobs"
             />
           )}
-          <DisplayPopover showDot={filtered}>
-            <WorkbenchJobsDisplayOptions
-              state={display}
-              onChange={updateDisplay}
-              statusCounts={statusCounts}
-              prStateCounts={prStateCounts}
-              searching={searching}
-            />
-          </DisplayPopover>
+          <DisplayButton
+            showDot={filtered}
+            expanded={displaySidecar.isOpen}
+            onClick={displaySidecar.toggle}
+          />
         </>
       }
     >
@@ -211,7 +221,6 @@ export function WorkbenchJobs() {
           filterEmptyKind={filterEmptyKind}
           onResetFilters={emptyState.onResetFilters}
           minHeight={400}
-          compactTop={grouped}
         >
           {grouped ? (
             <WorkbenchJobsGroupedList

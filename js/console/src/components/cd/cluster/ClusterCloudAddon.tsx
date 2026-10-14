@@ -81,6 +81,7 @@ export default function ClusterCloudAddon() {
                 >
                   <SubTab
                     key={path}
+                    size="small"
                     textValue={label}
                   >
                     {label}

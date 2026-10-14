@@ -1,4 +1,5 @@
 import {
+  Breadcrumb,
   BookmarkIcon,
   BotIcon,
   Button,
@@ -28,7 +29,11 @@ import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
-import { SubTabs } from 'components/utils/SubTabs'
+import { CrumbSelect } from 'components/layout/CrumbSelect'
+import { PageWithSidecar } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
+import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
+import { getTabCrumb } from 'utils/getTabCrumb'
 import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   Link,
@@ -63,12 +68,47 @@ import { useWorkbenchJobsDelta } from './useWorkbenchJobsDelta'
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
-) => [
+): Breadcrumb[] => [
   { label: 'workbenches', url: WORKBENCHES_ABS_PATH },
   ...(workbench
-    ? [{ label: workbench.name, url: getWorkbenchAbsPath(workbench?.id) }]
+    ? [
+        {
+          label: <WorkbenchCrumbSelect workbench={workbench} />,
+          textValue: workbench.name,
+        },
+      ]
     : []),
 ]
+
+// the workbench crumb, switching to another workbench in place
+function WorkbenchCrumbSelect({
+  workbench,
+}: {
+  workbench: WorkbenchTinyFragment
+}) {
+  const navigate = useNavigate()
+  const { workbenches } = useWorkbenchOptions()
+
+  return (
+    <CrumbSelect
+      ariaLabel="Workbench"
+      label={workbench.name}
+      selectedKey={workbench.id}
+      onSelectionChange={(id) => navigate(getWorkbenchAbsPath(id))}
+    >
+      {(workbenches.some(({ id }) => id === workbench.id)
+        ? workbenches
+        : [workbench, ...workbenches]
+      ).map(({ id, name }) => (
+        <ListBoxItem
+          key={id}
+          label={name}
+          textValue={name}
+        />
+      ))}
+    </CrumbSelect>
+  )
+}
 
 export type WorkbenchOutletContext = {
   workbenchId: string
@@ -98,8 +138,8 @@ export type WorkbenchPageLayoutProps = {
   showEditWorkbenchButton?: boolean
   headerActions?: ReactNode
   contentBackground?: SemanticColorKey
-  tabStripBackground?: SemanticColorKey
-  tabStripHeight?: number
+  // docked to the right of the content, e.g. display options
+  sidecar?: ReactNode
   children?: ReactNode
 }
 
@@ -108,8 +148,7 @@ export function WorkbenchPageLayout({
   showEditWorkbenchButton = true,
   headerActions,
   contentBackground,
-  tabStripBackground,
-  tabStripHeight,
+  sidecar,
   children,
 }: WorkbenchPageLayoutProps) {
   const theme = useTheme()
@@ -117,15 +156,25 @@ export function WorkbenchPageLayout({
   const { workbenchId, workbench, openToolsEdit, openDelete } =
     useOutletContext<WorkbenchOutletContext>()
 
-  // set by the tab layout rather than the parent route, so pages without it
-  // (e.g. a job) can set their own, deeper breadcrumbs
-  useSetBreadcrumbs(
-    useMemo(() => getWorkbenchBreadcrumbs(workbench), [workbench])
-  )
-
   const { tab = '' } =
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
       ?.params ?? {}
+
+  // set by the tab layout rather than the parent route, so pages without it
+  // (e.g. a job) can set their own, deeper breadcrumbs
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getWorkbenchBreadcrumbs(workbench),
+        ...(!workbench
+          ? []
+          : tab
+            ? getTabCrumb(getWorkbenchAbsPath(workbench.id), tab)
+            : [{ label: 'launch', url: getWorkbenchAbsPath(workbench.id) }]),
+      ],
+      [workbench, tab]
+    )
+  )
 
   const sidebarNode = renderWorkbenchSidebar(
     sidebar,
@@ -240,35 +289,18 @@ export function WorkbenchPageLayout({
               : theme.colors['fill-zero'],
         }}
       >
-        <Flex
-          align="center"
-          gap="small"
-          css={{
-            backgroundColor: theme.colors[tabStripBackground ?? 'fill-accent'],
-            ...(tabStripHeight
-              ? {
-                  height: tabStripHeight,
-                  padding: `0 ${theme.spacing.large}px`,
-                }
-              : {
-                  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-                }),
-            position: 'relative',
-            zIndex: 1,
+        <PageToolbar
+          tabs={subTabDirectory}
+          activeFn={(path) => {
+            if (path === workbenchBasePath) return !tab
+            if (path === jobsTabPath) return tab === WORKBENCH_JOBS_REL_PATH
+            return path === `${workbenchBasePath}/${tab}`
           }}
         >
-          <SubTabs
-            directory={subTabDirectory}
-            activeFn={(path) => {
-              if (path === workbenchBasePath) return !tab
-              if (path === jobsTabPath) return tab === WORKBENCH_JOBS_REL_PATH
-              return path === `${workbenchBasePath}/${tab}`
-            }}
-          />
-          <Flex grow={1} />
           {showEditWorkbenchButton && (
             <Button
               secondary
+              small
               as={Link}
               to={`${workbenchBasePath}/${WORKBENCHES_EDIT_REL_PATH}`}
             >
@@ -279,7 +311,7 @@ export function WorkbenchPageLayout({
           <MoreMenu
             disabled={!workbench}
             maxHeight="min(80vh, 520px)"
-            triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
+            triggerProps={{ iconFrameType: 'secondary', size: 'medium' }}
             onSelectionChange={handleMoreMenuSelection}
           >
             {!showEditWorkbenchButton && (
@@ -326,8 +358,12 @@ export function WorkbenchPageLayout({
               label="Delete workbench"
             />
           </MoreMenu>
-        </Flex>
-        {children}
+        </PageToolbar>
+        {sidecar ? (
+          <PageWithSidecar sidecar={sidecar}>{children}</PageWithSidecar>
+        ) : (
+          children
+        )}
       </Flex>
     </Flex>
   )

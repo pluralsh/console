@@ -1,7 +1,8 @@
-import { Accordion } from '@pluralsh/design-system'
+import {
+  DisplayFilterSection,
+  DisplayPanel,
+} from 'components/utils/display/DisplayPanel'
 import { Dispatch, SetStateAction } from 'react'
-import { CatalogsFiltersGroup } from './CatalogsFiltersGroup.tsx'
-import { useTheme } from 'styled-components'
 
 export type CatalogsFilter = {
   key: string
@@ -23,31 +24,43 @@ export function CatalogsFilters({
   categoryFilters: string[]
   setCategoryFilters: Dispatch<SetStateAction<string[]>>
 }) {
-  const theme = useTheme()
-
   return (
-    <div
-      css={{
-        overflowY: 'auto',
-        paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and card.
-        width: 220,
-      }}
-    >
-      <Accordion type="multiple">
-        <CatalogsFiltersGroup
-          label="Authors"
-          filters={authors}
-          activeFilters={authorFilters}
-          setActiveFilters={setAuthorFilters}
-        />
-        <CatalogsFiltersGroup
-          label="Categories"
-          last
-          filters={categories}
-          activeFilters={categoryFilters}
-          setActiveFilters={setCategoryFilters}
-        />
-      </Accordion>
-    </div>
+    <DisplayPanel>
+      <CatalogsFilterSection
+        title="Authors"
+        filters={authors}
+        selected={authorFilters}
+        onChange={setAuthorFilters}
+      />
+      <CatalogsFilterSection
+        title="Categories"
+        filters={categories}
+        selected={categoryFilters}
+        onChange={setCategoryFilters}
+      />
+    </DisplayPanel>
+  )
+}
+
+function CatalogsFilterSection({
+  title,
+  filters,
+  selected,
+  onChange,
+}: {
+  title: string
+  filters: CatalogsFilter[]
+  selected: string[]
+  onChange: (selected: string[]) => void
+}) {
+  return (
+    <DisplayFilterSection
+      title={title}
+      options={filters.map(({ key }) => key)}
+      selected={selected}
+      counts={Object.fromEntries(filters.map(({ key, items }) => [key, items]))}
+      getLabel={(key) => key}
+      onChange={onChange}
+    />
   )
 }

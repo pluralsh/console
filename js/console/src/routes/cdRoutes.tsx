@@ -697,9 +697,6 @@ export const cdRoutes = [
 
 export const MaxWidthWrapperSC = styled.div({
   overflow: 'hidden',
-  maxWidth: 1440,
-  marginLeft: 'auto',
-  marginRight: 'auto',
   height: '100%',
   width: '100%',
 })

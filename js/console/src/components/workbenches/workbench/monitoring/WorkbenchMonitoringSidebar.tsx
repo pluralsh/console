@@ -40,6 +40,7 @@ import {
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
   WORKBENCH_MONITORING_MONITOR_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
+import { PageSidebarHeaderSC } from 'components/layout/PageLayout'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
@@ -524,7 +525,7 @@ function MonitorRow({
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders.hairline,
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
@@ -537,10 +538,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   minWidth: WORKBENCH_SIDEBAR_WIDTH,
 }))
 
-const FilterSC = styled.div(({ theme }) => ({
-  borderBottom: theme.borders.default,
-  padding: theme.spacing.medium,
-}))
+const FilterSC = styled(PageSidebarHeaderSC)({})
 
 const GroupsSC = styled.div({
   display: 'flex',

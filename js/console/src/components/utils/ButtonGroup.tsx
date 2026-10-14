@@ -144,13 +144,18 @@ const SubTabSC = styled(SubTab)<{
   $label: string
   $directory: ButtonGroupDirectory
   $fillLevel: number
-}>(({ theme, $active, $idx, $directory, $label, $fillLevel }) => {
+}>(({ theme, $active, $idx, $directory, $label, $fillLevel, size }) => {
   return {
     flex: 1,
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
     gap: theme.spacing.small,
-    padding: !$label ? theme.spacing.small : undefined,
+    padding: !$label
+      ? size === 'small'
+        ? theme.spacing.xsmall - 2
+        : theme.spacing.small
+      : undefined,
     color: $active ? theme.colors['text'] : theme.colors['text-primary'],
     borderRight:
       $idx === $directory.length - 1 || $active

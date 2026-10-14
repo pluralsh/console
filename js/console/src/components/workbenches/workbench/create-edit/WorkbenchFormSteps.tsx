@@ -993,7 +993,6 @@ export function WorkbenchAttachToolsStep({
                       />
                     </Flex>
                     <IconFrame
-                      circle
                       clickable
                       icon={<CloseIcon />}
                       tooltip="Remove from selection"

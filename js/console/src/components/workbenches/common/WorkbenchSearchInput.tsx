@@ -1,8 +1,6 @@
 import { Input, SearchIcon } from '@pluralsh/design-system'
-import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 import { ComponentProps } from 'react'
-
-const HEADER_SEARCH_WIDTH = 360
 
 // Search field for the workbench Alerts tab, full width above the List and
 // Board views, and for the (small) Details list column.
@@ -30,7 +28,7 @@ export function WorkbenchSearchInput({
   )
 }
 
-// A search icon button in the tab header that expands into the search field.
+// The search field in the workbench tab toolbar.
 export function WorkbenchHeaderSearch({
   value,
   onChange,
@@ -41,19 +39,10 @@ export function WorkbenchHeaderSearch({
   placeholder: string
 }) {
   return (
-    <IconExpander
-      tooltip={placeholder}
-      icon={<SearchIcon />}
-      active={!!value}
-      startOpen={!!value}
-      onClear={() => onChange('')}
-    >
-      <ExpandedInput
-        width={HEADER_SEARCH_WIDTH}
-        inputValue={value}
-        onChange={onChange}
-        placeholder={placeholder}
-      />
-    </IconExpander>
+    <ToolbarSearchInput
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+    />
   )
 }

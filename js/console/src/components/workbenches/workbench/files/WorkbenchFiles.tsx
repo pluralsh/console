@@ -5,10 +5,7 @@ import { useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import { WORKBENCH_FILES_PATH_QUERY_PARAM } from 'routes/workbenchesRoutesConsts'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
-import {
-  WORKBENCH_FILES_HEADER_HEIGHT,
-  WorkbenchFileTree,
-} from './WorkbenchFileTree'
+import { WorkbenchFileTree } from './WorkbenchFileTree'
 import { WorkbenchFileViewer } from './WorkbenchFileViewer'
 import { DeleteWorkbenchFileModal } from './DeleteWorkbenchFileModal'
 import { toWorkbenchPath } from './workbenchFilePaths'
@@ -50,7 +47,6 @@ export function WorkbenchFiles() {
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
-      tabStripHeight={WORKBENCH_FILES_HEADER_HEIGHT}
       sidebar={{
         kind: 'custom',
         content: (

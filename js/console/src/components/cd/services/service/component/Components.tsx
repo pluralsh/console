@@ -24,7 +24,7 @@ const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
 const FILTER_SELECT_WIDTH = 205
 
 const FilterSelectSC = styled.div({
-  width: FILTER_SELECT_WIDTH,
+  width: 140,
   flexShrink: 0,
   minWidth: 0,
   overflow: 'hidden',
@@ -160,6 +160,7 @@ export function ComponentKindSelect({
           <FilterTrigger
             $border
             showArrow
+            size="small"
             title={typeTriggerLabel}
           >
             {typeTriggerLabel}
@@ -209,6 +210,7 @@ export function ComponentStateFilter({
           <FilterTrigger
             $border
             showArrow
+            size="small"
             title={stateTriggerLabel}
           >
             {stateTriggerLabel}

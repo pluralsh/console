@@ -2,14 +2,12 @@ import {
   Breadcrumb,
   Button,
   EmptyState,
-  Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { StackedTextSC } from 'components/utils/table/StackedText'
 import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
 import { McpServerCreateForm } from 'components/workbenches/tools/mcp-server/McpServerCreateForm'
 import {
@@ -25,12 +23,10 @@ import {
   AI_SETTINGS_MCP_SERVER_ID_PARAM_ID,
   getAiSettingsMcpServerEditAbsPath,
 } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
-import { SETTINGS_BREADCRUMBS } from '../../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsDescription } from '../../Settings'
 
 export function McpServerEditSettings() {
   const navigate = useNavigate()
-  const theme = useTheme()
   const params = useParams()
   const mcpServerId = params[AI_SETTINGS_MCP_SERVER_ID_PARAM_ID]
   const { data, loading, error } = useMcpServerQuery({
@@ -60,40 +56,6 @@ export function McpServerEditSettings() {
       [editPath]
     )
   )
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Flex justifyContent="space-between">
-          <StackedTextSC>
-            <span
-              css={{
-                ...theme.partials.text.body2,
-                color: theme.colors['text-light'],
-              }}
-            >
-              Edit MCP server details and access policy.
-            </span>
-          </StackedTextSC>
-          {!isOpen && !!markdownPath && (
-            <Button
-              secondary
-              startIcon={<SidePanelOpenIcon />}
-              onClick={() =>
-                openSetupGuidePanel({
-                  documentationUrl,
-                  markdownPath,
-                })
-              }
-              css={{ whiteSpace: 'nowrap' }}
-            >
-              Setup guide
-            </Button>
-          )}
-        </Flex>
-      ),
-      [documentationUrl, isOpen, markdownPath, openSetupGuidePanel, theme]
-    )
-  )
 
   const openedGuide = useRef(false)
   const openGuide = useEffectEvent(() => {
@@ -114,22 +76,47 @@ export function McpServerEditSettings() {
   })
   useEffect(() => () => onUnmount(), [])
 
-  if (error) return <GqlError error={error} />
-  if (loading && !server) return <LoadingIndicator />
-
-  return server ? (
-    <McpServerCreateForm
-      key={server.id}
-      existingServer={server}
-      backPath={AI_SETTINGS_MCP_SERVERS_ABS_PATH}
-      onSaved={() => navigate(AI_SETTINGS_MCP_SERVERS_ABS_PATH)}
-      showSetupGuideButton={false}
-    />
-  ) : (
-    <EmptyState message="MCP server not found.">
-      <Button onClick={() => navigate(AI_SETTINGS_MCP_SERVERS_ABS_PATH)}>
-        Back to all MCP servers
-      </Button>
-    </EmptyState>
+  return (
+    <>
+      <SettingsDescription>
+        Edit MCP server details and access policy.
+      </SettingsDescription>
+      {!isOpen && !!markdownPath && (
+        <PageToolbarPortal>
+          <Button
+            secondary
+            small
+            startIcon={<SidePanelOpenIcon />}
+            onClick={() =>
+              openSetupGuidePanel({
+                documentationUrl,
+                markdownPath,
+              })
+            }
+          >
+            Setup guide
+          </Button>
+        </PageToolbarPortal>
+      )}
+      {error ? (
+        <GqlError error={error} />
+      ) : loading && !server ? (
+        <LoadingIndicator />
+      ) : server ? (
+        <McpServerCreateForm
+          key={server.id}
+          existingServer={server}
+          backPath={AI_SETTINGS_MCP_SERVERS_ABS_PATH}
+          onSaved={() => navigate(AI_SETTINGS_MCP_SERVERS_ABS_PATH)}
+          showSetupGuideButton={false}
+        />
+      ) : (
+        <EmptyState message="MCP server not found.">
+          <Button onClick={() => navigate(AI_SETTINGS_MCP_SERVERS_ABS_PATH)}>
+            Back to all MCP servers
+          </Button>
+        </EmptyState>
+      )}
+    </>
   )
 }

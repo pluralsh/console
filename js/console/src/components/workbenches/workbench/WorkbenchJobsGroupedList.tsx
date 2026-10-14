@@ -1,10 +1,12 @@
 import {
+  AppIcon,
   CancelledFilledIcon,
   CheckOutlineIcon,
   ClockIcon,
   FailedFilledIcon,
   PauseIcon,
   SpinnerAlt,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { truncateKeepingChips } from 'components/utils/contentEditableChips'
@@ -229,6 +231,21 @@ const JobRow = memo(function JobRow({
       <ChipsColumnSC>
         <WorkbenchJobActionsRow job={job} />
       </ChipsColumnSC>
+      <CreatorSC>
+        {job.user && (
+          <Tooltip
+            placement="top"
+            label={job.user.name}
+          >
+            <AppIcon
+              url={job.user.profile ?? undefined}
+              name={job.user.name}
+              size="xxxsmall"
+              spacing={job.user.profile ? 'none' : undefined}
+            />
+          </Tooltip>
+        )}
+      </CreatorSC>
       <GroupRowDateSC>
         {job.insertedAt ? formatDateTime(job.insertedAt, 'MMM D') : ''}
       </GroupRowDateSC>
@@ -240,6 +257,12 @@ const JobRow = memo(function JobRow({
 const ChipsColumnSC = styled(GroupRowRaisedSC)({
   width: 280,
   justifyContent: 'flex-end',
+})
+
+// always rendered, so rows without a creator keep the same columns
+const CreatorSC = styled(GroupRowRaisedSC)({
+  width: 24,
+  justifyContent: 'center',
 })
 
 const PromptSC = styled.div({

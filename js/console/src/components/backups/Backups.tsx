@@ -1,17 +1,15 @@
+import { PageColumnSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { Outlet, useMatch } from 'react-router-dom'
 
-import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
-import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-
-import { useTheme } from 'styled-components'
+import { ReactNode, Suspense, useMemo, useState } from 'react'
 
 import {
   BACKUPS_ABS_PATH,
   CLUSTERS_REL_PATH,
   OBJECT_STORES_REL_PATH,
 } from '../../routes/backupRoutesConsts'
-import { LinkTabWrap } from '../utils/Tabs'
 import { PluralErrorBoundary } from '../cd/PluralErrorBoundary'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import {
@@ -19,13 +17,12 @@ import {
   PageScrollableContext,
 } from '../cd/ContinuousDeployment'
 
-const directory = [
+const tabs = [
   { path: OBJECT_STORES_REL_PATH, label: 'Object Store Credentials' },
   { path: CLUSTERS_REL_PATH, label: 'Clusters' },
-] as const
+].map(({ path, label }) => ({ label, path: `${BACKUPS_ABS_PATH}/${path}` }))
 
 export default function Backups() {
-  const theme = useTheme()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [scrollable, setScrollable] = useState(false)
 
@@ -42,56 +39,19 @@ export default function Backups() {
     []
   )
 
-  const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${BACKUPS_ABS_PATH}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={scrollable}
-      headingContent={
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.large,
-            flexGrow: 1,
-            width: '100%',
-            justifyContent: 'space-between',
-          }}
-        >
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-          >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${BACKUPS_ABS_PATH}/${path}`}
-              >
-                <SubTab
-                  key={path}
-                  textValue={label}
-                >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-          {headerContent}
-        </div>
-      }
-    >
-      <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
-        >
+    <PageColumnSC>
+      <PageToolbar
+        tabs={tabs}
+        activeFn={(path) => path === `${BACKUPS_ABS_PATH}/${tab}`}
+      >
+        {headerContent}
+      </PageToolbar>
+      <ResponsivePageFullWidth scrollable={scrollable}>
+        <PluralErrorBoundary>
           <PageHeaderContext.Provider value={pageHeaderContext}>
             <PageScrollableContext.Provider value={pageScrollableContext}>
               <Suspense fallback={<LoadingIndicator />}>
@@ -99,8 +59,8 @@ export default function Backups() {
               </Suspense>
             </PageScrollableContext.Provider>
           </PageHeaderContext.Provider>
-        </TabPanel>
-      </PluralErrorBoundary>
-    </ResponsivePageFullWidth>
+        </PluralErrorBoundary>
+      </ResponsivePageFullWidth>
+    </PageColumnSC>
   )
 }

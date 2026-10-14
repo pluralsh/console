@@ -1,92 +1,53 @@
-import {
-  CloseIcon,
-  ComboBox,
-  ListBoxFooter,
-  ListBoxFooterPlus,
-  ListBoxItem,
-  SearchIcon,
-  Spinner,
-  Toast,
-} from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import { ListBoxItem, Toast } from '@pluralsh/design-system'
 
-import { useThrottle } from 'components/hooks/useThrottle'
 import { useProjectsTinyQuery } from 'generated/graphql'
-import { isEmpty } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useSelectedProjectContext } from '../contexts/ProjectsContext'
+import { CrumbSelect } from './CrumbSelect'
+
+const ALL_PROJECTS_KEY = '__all__'
 
 export function HeaderProjectSelect() {
-  const theme = useTheme()
   const { projectId, setProjectId } = useSelectedProjectContext()
-  const [query, setQuery] = useState('')
-  const debouncedQuery = useThrottle(query, 300)
 
-  const { data, loading, error } = useProjectsTinyQuery({
+  const { data, error } = useProjectsTinyQuery({
     pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
-    variables: { q: debouncedQuery || undefined }, // undefined preferred over empty string
   })
 
   const projects = useMemo(
     () => mapExistingNodes(data?.projects),
     [data?.projects]
   )
+  const selected = projects.find(({ id }) => id === projectId)
 
   return (
-    <div
-      css={{
-        width: 280,
-        borderRadius: theme.borderRadiuses.medium,
-      }}
-      style={{
-        border: projectId
-          ? theme.borders['outline-focused']
-          : theme.borders.input,
-      }}
-    >
-      <ComboBox
-        aria-label="project"
-        label="Project"
-        selectedKey={projectId}
-        onSelectionChange={(id) => setProjectId(id as string)}
-        onInputChange={(value) => setQuery(value)}
-        startIcon={<SearchIcon size={12} />}
-        arrowSize="small"
-        dropdownFooter={
-          !data && loading ? (
-            <ListBoxFooter>
-              <Spinner />
-            </ListBoxFooter>
-          ) : isEmpty(projects) ? (
-            <ListBoxFooter>No results</ListBoxFooter>
-          ) : undefined
+    <>
+      <CrumbSelect
+        ariaLabel="Project"
+        label={selected?.name ?? 'all projects'}
+        selectedKey={projectId || ALL_PROJECTS_KEY}
+        onSelectionChange={(key) =>
+          setProjectId(key === ALL_PROJECTS_KEY ? '' : key)
         }
-        dropdownFooterFixed={
-          projectId && (
-            <ListBoxFooterPlus
-              onClick={() => setProjectId('')}
-              leftContent={<CloseIcon color="icon-info" />}
-            >
-              Clear selection
-            </ListBoxFooterPlus>
-          )
-        }
-        inputProps={{
-          placeholder: 'All projects',
-          style: { border: 'none', minHeight: 30 },
-        }}
       >
-        {projects.map((p) => (
+        {[
           <ListBoxItem
-            key={p.id}
-            label={p.name}
-            textValue={p.name}
-            description={p.description}
-          />
-        ))}
-      </ComboBox>
+            key={ALL_PROJECTS_KEY}
+            label="all projects"
+            textValue="all projects"
+          />,
+          ...projects.map((p) => (
+            <ListBoxItem
+              key={p.id}
+              label={p.name}
+              textValue={p.name}
+              description={p.description}
+            />
+          )),
+        ]}
+      </CrumbSelect>
       {error && (
         <Toast
           heading="Error loading projects"
@@ -98,6 +59,6 @@ export function HeaderProjectSelect() {
           {error.message}
         </Toast>
       )}
-    </div>
+    </>
   )
 }

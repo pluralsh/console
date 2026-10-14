@@ -124,12 +124,14 @@ export function ClusterMetrics({
   const viewToggle = useMemo(
     () => (
       <ButtonGroup
+        // matches the time range select inline, the small toolbar inputs otherwise
+        size={inlineToggle ? 'medium' : 'small'}
         directory={METRICS_DIRECTORY}
         tab={currentTab}
         toPath={(path) => `${metricsPath}/${path}`}
       />
     ),
-    [metricsPath, currentTab]
+    [metricsPath, currentTab, inlineToggle]
   )
 
   useSetPageHeaderContent(inlineToggle ? undefined : viewToggle)

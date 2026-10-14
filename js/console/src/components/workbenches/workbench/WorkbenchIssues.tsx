@@ -1,12 +1,13 @@
 import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesGroupedList } from 'components/workbenches/common/WorkbenchIssuesGroupedList'
-import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import { WorkbenchHeaderSearch } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
-  DisplayPopover,
+  DisplayButton,
+  DisplayPanel,
   toCounts,
+  useDisplaySidecar,
   useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -78,6 +79,7 @@ export function WorkbenchIssues() {
   )
 
   const filtered = hasUncheckedIssueFilters(display)
+  const displaySidecar = useDisplaySidecar(display.view === 'list')
   const onResetFilters = () => updateDisplay(resetIssueFilters(display))
   const emptyState = {
     searching: !!debouncedSearchString,
@@ -113,10 +115,21 @@ export function WorkbenchIssues() {
 
   return (
     <WorkbenchPageLayout
+      sidecar={
+        displaySidecar.isOpen && (
+          <DisplayPanel>
+            <WorkbenchIssuesDisplayOptions
+              state={display}
+              onChange={updateDisplay}
+              providerCounts={providerCounts}
+              statusCounts={statusCounts}
+            />
+          </DisplayPanel>
+        )
+      }
       showEditWorkbenchButton={false}
       {...(showDetails && {
         sidebar: { kind: 'custom', content: details.sidebar },
-        tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
       })}
       headerActions={
         <>
@@ -127,14 +140,11 @@ export function WorkbenchIssues() {
               placeholder="Search issues"
             />
           )}
-          <DisplayPopover showDot={filtered}>
-            <WorkbenchIssuesDisplayOptions
-              state={display}
-              onChange={updateDisplay}
-              providerCounts={providerCounts}
-              statusCounts={statusCounts}
-            />
-          </DisplayPopover>
+          <DisplayButton
+            showDot={filtered}
+            expanded={displaySidecar.isOpen}
+            onClick={displaySidecar.toggle}
+          />
         </>
       }
     >
@@ -145,7 +155,6 @@ export function WorkbenchIssues() {
           error={error}
           filterEmptyKind={filterEmptyKind}
           onResetFilters={onResetFilters}
-          compactTop={display.view === 'list'}
         >
           {display.view === 'board' ? (
             <WorkbenchIssuesBoard

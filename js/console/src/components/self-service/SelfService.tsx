@@ -1,8 +1,18 @@
-import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { useLogin } from 'components/contexts'
-import { SubTabs, SubtabDirectory } from 'components/utils/SubTabs'
+import {
+  PageColumnSC,
+  PageRowSC,
+  PageSidecarSlotContext,
+  PageSidecarSlotSC,
+} from 'components/layout/PageLayout'
+import {
+  PageToolbar,
+  PageToolbarSlotContext,
+} from 'components/layout/PageToolbar'
+import { SubtabDirectory } from 'components/utils/SubTabs'
 import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import {
@@ -61,38 +71,57 @@ export function SelfService() {
     return { directory, breadcrumbs: getSelfServiceBreadcrumbs(tabName) }
   }, [prsEnabled, pathname])
 
+  const tabs = useMemo(
+    () =>
+      directory.map((entry) => ({
+        ...entry,
+        path: `${SELF_SERVICE_ABS_PATH}/${entry.path}`,
+      })),
+    [directory]
+  )
   useSetBreadcrumbs(breadcrumbs)
 
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const ctx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
+  const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
+  const [sidecarSlot, setSidecarSlot] = useState<HTMLDivElement | null>(null)
 
   return (
-    <PageWrapperSC>
-      <Flex
-        gap="medium"
-        width="100%"
-        justify="space-between"
-        minHeight="fit-content"
-        overflowX="auto"
+    <PageColumnSC>
+      <PageToolbar
+        tabs={tabs}
+        slotRef={setToolbarSlot}
       >
-        <SubTabs directory={directory} />
-        <div>{headerContent}</div>
-      </Flex>
-      <PageHeaderContext value={ctx}>
-        <Outlet />
-      </PageHeaderContext>
-    </PageWrapperSC>
+        {headerContent}
+      </PageToolbar>
+      <PageRowSC>
+        <PageWrapperSC>
+          <PageHeaderContext value={ctx}>
+            <PageToolbarSlotContext value={toolbarSlot}>
+              <PageSidecarSlotContext value={sidecarSlot}>
+                <Outlet />
+              </PageSidecarSlotContext>
+            </PageToolbarSlotContext>
+          </PageHeaderContext>
+        </PageWrapperSC>
+        <PageSidecarSlotSC ref={setSidecarSlot} />
+      </PageRowSC>
+    </PageColumnSC>
   )
 }
 
 const PageWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  alignSelf: 'center',
   gap: theme.spacing.medium,
+  flex: 1,
+  minWidth: 0,
   height: '100%',
-  width: '100%',
   overflow: 'auto',
   padding: theme.spacing.large,
-  maxWidth: theme.breakpoints.desktopLarge,
+  '& > *': {
+    width: '100%',
+    maxWidth: theme.breakpoints.desktopLarge,
+    alignSelf: 'center',
+  },
 }))

@@ -78,6 +78,7 @@ export function ServiceMetrics() {
     useMemo(
       () => (
         <ButtonGroup
+          size="small"
           directory={METRICS_DIRECTORY}
           tab={currentTab}
           toPath={(path) => `metrics/${path}`}

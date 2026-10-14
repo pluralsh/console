@@ -4,16 +4,16 @@ import {
   Card,
   EmptyState,
   Flex,
-  Input,
-  SearchIcon,
 } from '@pluralsh/design-system'
 import * as DesignSystem from '@pluralsh/design-system'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
+import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import {
   CardGrid,
   CardGridSkeleton,
 } from 'components/self-service/catalog/CatalogsGrid'
 import { useThrottle } from 'components/hooks/useThrottle'
-import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { GqlError } from 'components/utils/Alert'
 import { MetadataIcons } from 'components/utils/MetadataIcons'
@@ -35,6 +35,7 @@ import {
   ComponentType,
   isValidElement,
   ReactElement,
+  useMemo,
   useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -70,19 +71,25 @@ export function WorkbenchesList() {
   const hasActiveSearch = !!debouncedSearchString
   const showSearchEmptyState = hasActiveSearch && workbenches.length === 0
 
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <ToolbarSearchInput
+          placeholder="Search workbenches"
+          value={searchString}
+          onChange={setSearchString}
+        />
+      ),
+      [searchString]
+    )
+  )
+
   return (
     <WrapperSC>
       <WorkbenchTabHeader
         title="Workbenches"
         icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
         description="Build-your-own agents for common DevOps tasks. Each workbench bundles tools and skills, and orchestrates subagents tailored to observability, infra analysis, and coding tasks."
-      />
-      <Input
-        showClearButton
-        placeholder="Search workbenches"
-        startIcon={<SearchIcon />}
-        value={searchString}
-        onChange={(e) => setSearchString(e.currentTarget.value)}
       />
       {error && <GqlError error={error} />}
       {!data && loading ? (

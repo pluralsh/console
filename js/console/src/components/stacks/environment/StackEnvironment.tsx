@@ -3,8 +3,6 @@ import {
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
-  Input,
-  SearchIcon,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -14,6 +12,10 @@ import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
 import CopyButton from 'components/utils/CopyButton'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
 
 import { StackEnvironment as StackEnvironmentT } from '../../../generated/graphql'
@@ -119,7 +121,6 @@ function EnvironmentActions({ env }: { env: StackEnvironmentT }) {
 }
 
 export default function StackEnvironment() {
-  const theme = useTheme()
   const { stack } = useOutletContext() as StackOutletContextT
   const [createOpen, setCreateOpen] = useState(false)
   const [filterString, setFilterString] = useState('')
@@ -133,52 +134,36 @@ export default function StackEnvironment() {
   )
 
   return (
-    <div css={{ overflow: 'hidden' }}>
+    <div css={{ overflow: 'hidden', height: '100%' }}>
       <ModalMountTransition open={createOpen}>
         <StackEnvironmentApplyModal
           open={createOpen}
           onClose={() => setCreateOpen(false)}
         />
       </ModalMountTransition>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.medium,
-          height: '100%',
-        }}
-      >
-        <div
-          css={{
-            display: 'flex',
-            columnGap: theme.spacing.medium,
-            flexShrink: 0,
-          }}
-        >
-          <Input
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={filterString}
-            onChange={(e) => setFilterString(e.currentTarget.value)}
-            css={{ flexGrow: 1 }}
-          />
-          <Button
-            secondary
-            onClick={() => setCreateOpen(true)}
-          >
-            Add environment variable
-          </Button>
-        </div>
-        <Table
-          fullHeightWrap
-          data={stack.environment || []}
-          columns={columns}
-          reactTableOptions={{
-            state: { globalFilter: debouncedFilterString },
-          }}
-          emptyStateProps={{ message: 'No environment variables set.' }}
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search environment"
+          value={filterString}
+          onChange={setFilterString}
         />
-      </div>
+        <Button
+          secondary
+          small
+          onClick={() => setCreateOpen(true)}
+        >
+          Add
+        </Button>
+      </PageToolbarPortal>
+      <Table
+        fullHeightWrap
+        data={stack.environment || []}
+        columns={columns}
+        reactTableOptions={{
+          state: { globalFilter: debouncedFilterString },
+        }}
+        emptyStateProps={{ message: 'No environment variables set.' }}
+      />
     </div>
   )
 }

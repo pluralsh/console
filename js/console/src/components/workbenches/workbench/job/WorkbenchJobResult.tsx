@@ -159,7 +159,6 @@ export function WorkbenchJobPrs({
           <StackedText
             icon={
               <IconFrame
-                circle
                 type="secondary"
                 icon={<PrIcon />}
               />
@@ -210,7 +209,6 @@ export function WorkbenchJobPrs({
           <StackedText
             icon={
               <IconFrame
-                circle
                 type="secondary"
                 icon={<PrOpenIcon />}
               />

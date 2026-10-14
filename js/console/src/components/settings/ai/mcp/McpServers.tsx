@@ -8,16 +8,17 @@ import {
   Toast,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
+import { SettingsDescription } from 'components/settings/Settings'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Body1P } from 'components/utils/typography/Text'
 import {
   useGenerateMcpTokenLazyQuery,
   useMcpServersQuery,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import {
   ColActions,
@@ -29,7 +30,6 @@ import {
 export const MCP_DOCS_URL = 'http://docs.plural.sh/plural-features/flows/mcp'
 
 export function McpServers() {
-  const { spacing } = useTheme()
   const [showJwtModal, setShowJwtModal] = useState(false)
   const [showToast, setShowToast] = useState(false)
 
@@ -55,41 +55,45 @@ export function McpServers() {
   })
 
   const mcpServers = useMemo(() => mapExistingNodes(data?.mcpServers), [data])
-  if (error) return <GqlError error={error} />
+
+  const toolbarActions = (
+    <PageToolbarPortal>
+      <Button
+        secondary
+        small
+        as={Link}
+        to={MCP_DOCS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        endIcon={<ArrowTopRightIcon />}
+      >
+        Add via CRD
+      </Button>
+      <Button
+        small
+        loading={generatingToken}
+        onClick={() => generateToken()}
+      >
+        Generate JWT
+      </Button>
+    </PageToolbarPortal>
+  )
+
+  if (error)
+    return (
+      <>
+        {toolbarActions}
+        <GqlError error={error} />
+      </>
+    )
 
   return (
     <WrapperSC>
+      {toolbarActions}
+      <SettingsDescription>
+        Add and manage MCP servers to be connected to Flows and AI chats.
+      </SettingsDescription>
       {tokenError && <GqlError error={tokenError} />}
-      <Flex
-        align="center"
-        gap="small"
-      >
-        <Body1P
-          $color="text-light"
-          css={{ flex: 1, textWrap: 'pretty', marginRight: spacing.medium }}
-        >
-          Add and manage MCP servers to be connected to Flows and AI chats.
-        </Body1P>
-        <Button
-          secondary
-          as={Link}
-          to={MCP_DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          endIcon={<ArrowTopRightIcon />}
-          style={{ flexShrink: 0, width: 200 }}
-        >
-          Add via CRD
-        </Button>
-        <Button
-          floating
-          loading={generatingToken}
-          onClick={() => generateToken()}
-          style={{ flexShrink: 0 }}
-        >
-          Generate JWT
-        </Button>
-      </Flex>
       <Table
         loose
         hideHeader

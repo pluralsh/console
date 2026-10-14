@@ -24,6 +24,7 @@ import {
 } from 'generated/graphql'
 import { uniq } from 'lodash'
 import { ReactNode, useState } from 'react'
+import { PAGE_TOOLBAR_HEIGHT } from 'components/layout/PageToolbar'
 import styled from 'styled-components'
 import { WORKBENCH_SIDEBAR_WIDTH } from '../WorkbenchSidePanel'
 import { ancestorDirectories } from './workbenchFilePaths'
@@ -33,7 +34,7 @@ const DIR_PREFIX = 'dir:'
 const STATUS_PREFIX = 'status:'
 const dirItemId = (path: string) => `${DIR_PREFIX}${path}`
 
-export const WORKBENCH_FILES_HEADER_HEIGHT = 65
+export const WORKBENCH_FILES_HEADER_HEIGHT = PAGE_TOOLBAR_HEIGHT
 
 export function WorkbenchFileTree({
   workbenchId,
@@ -286,7 +287,7 @@ const EntryLabelSC = styled.div({
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders.hairline,
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
@@ -307,7 +308,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   height: WORKBENCH_FILES_HEADER_HEIGHT,
   flexShrink: 0,
   padding: `0 ${theme.spacing.medium}px`,
-  borderBottom: theme.borders.default,
+  borderBottom: theme.borders.hairline,
 }))
 
 const TreeScrollSC = styled.div(({ theme }) => ({

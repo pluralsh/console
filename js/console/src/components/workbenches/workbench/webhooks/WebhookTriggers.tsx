@@ -234,7 +234,6 @@ function getColumns({
         return (
           <IconFrame
             type="secondary"
-            css={{ borderRadius: '50%' }}
             icon={webhookTypeIcon(webhook)}
             tooltip={webhookTypeLabel(webhook)}
           />

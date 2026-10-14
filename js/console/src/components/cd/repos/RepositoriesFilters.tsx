@@ -1,17 +1,10 @@
-import {
-  Chip,
-  Input,
-  SearchIcon,
-  SubTab,
-  TabList,
-} from '@pluralsh/design-system'
-import { useDebounce } from '@react-hooks-library/core'
+import { Chip, SubTab, TabList } from '@pluralsh/design-system'
 import {
   FluxHelmRepositoryFragment,
   GitHealth,
   PullabilityStatistic,
 } from 'generated/graphql'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 import { capitalize } from 'lodash'
@@ -81,38 +74,19 @@ export function RepositoriesFilters({
   statusCounts,
   statusFilterKey,
   setStatusFilterKey,
-  setFilterString: setFilterStringProp,
 }: {
   statusCounts: Record<RepoStatusFilterKey, number>
   statusFilterKey: RepoStatusFilterKey
   setStatusFilterKey: (key: RepoStatusFilterKey) => void
-  setFilterString: (filterString: string) => void
 }) {
   const tabStateRef = useRef<any>(null)
-  const [filterString, setFilterString] = useState('')
-  const debouncedFilterString = useDebounce(filterString, 100)
 
-  useEffect(() => {
-    setFilterStringProp(debouncedFilterString)
-  }, [debouncedFilterString, setFilterStringProp])
   useEffect(() => {
     setStatusFilterKey(statusFilterKey)
   }, [statusFilterKey, setStatusFilterKey])
 
   return (
     <GitRepositoryFiltersSC>
-      <Input
-        placeholder="Search"
-        startIcon={
-          <SearchIcon
-            border={undefined}
-            size={undefined}
-          />
-        }
-        value={filterString}
-        onChange={(e) => setFilterString(e.currentTarget.value)}
-        css={{ flexGrow: 1 }}
-      />
       <TabList
         scrollable
         stateRef={tabStateRef}
@@ -126,6 +100,7 @@ export function RepositoriesFilters({
         {Object.values(RepoStatusFilterKey).map((key) => (
           <SubTab
             key={key}
+            size="small"
             textValue={capitalize(key)}
             className="statusTab"
           >
