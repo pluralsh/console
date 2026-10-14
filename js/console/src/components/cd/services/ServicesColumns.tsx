@@ -29,6 +29,7 @@ import {
   getClusterIconUrl,
   getProviderIconUrl,
 } from 'components/utils/Provider'
+import { UnstyledLink } from 'components/utils/Link'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -115,34 +116,55 @@ export const ColCluster = columnHelper.accessor(
     cell: ({ row: { original } }) => {
       const cluster = original?.node?.cluster
       if (!cluster) return null
-      return <ClusterNameAndIcon cluster={cluster} />
+      return (
+        <ClusterNameAndIcon
+          cluster={cluster}
+          // the tooltip trigger captures clicks meant for the row link, so it has to link too
+          to={getServiceDetailsPath({
+            clusterId: cluster.id,
+            serviceId: original?.node?.id,
+          })}
+        />
+      )
     },
   }
 )
 
 export function ClusterNameAndIcon({
   cluster,
+  to,
 }: {
   cluster: Nullable<ClusterMinimalFragment>
+  to?: string
 }) {
   const theme = useTheme()
   if (!cluster) return null
+  const content = (
+    <ColWithIcon
+      css={{ width: 'max-content' }}
+      icon={getClusterIconUrl({
+        cluster,
+        mode: theme.mode,
+      })}
+    >
+      {cluster.name}
+    </ColWithIcon>
+  )
   return (
     <Tooltip
       placement="top-start"
       label={cluster.name}
     >
-      <div>
-        <ColWithIcon
-          css={{ width: 'max-content' }}
-          icon={getClusterIconUrl({
-            cluster,
-            mode: theme.mode,
-          })}
+      {to ? (
+        <UnstyledLink
+          to={to}
+          $extendStyle={{ color: 'inherit', display: 'block' }}
         >
-          {cluster.name}
-        </ColWithIcon>
-      </div>
+          {content}
+        </UnstyledLink>
+      ) : (
+        <div>{content}</div>
+      )}
     </Tooltip>
   )
 }
