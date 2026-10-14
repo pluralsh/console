@@ -55,8 +55,11 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
       assert Map.has_key?(props, "service_id")
     end
 
-    test "logs_query accepts default time range" do
-      assert %{time: %{after: %DateTime{}, before: %DateTime{}}} =
+    test "logs_query preserves authorization scope and default time range" do
+      assert %{service_id: "svc-1", time: %{after: %DateTime{}, before: %DateTime{}}} =
+               Logs.logs_query(%Logs{service_id: "svc-1"})
+
+      assert %{cluster_id: "cluster-1", time: %{after: %DateTime{}, before: %DateTime{}}} =
                Logs.logs_query(%Logs{cluster_id: "cluster-1"})
     end
   end
