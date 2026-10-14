@@ -60,6 +60,7 @@ jobs:
       - run: corepack enable
       # Full install: type-aware oxlint rules need every app's dependencies.
       - run: yarn install --immutable
+      - run: yarn dedupe --check
       - run: yarn lint:biome --reporter=github
       - run: yarn lint:oxlint --format=github
 
@@ -103,5 +104,4 @@ jobs:
       - run: >-
           YARN_ENABLE_IMMUTABLE_INSTALLS=true
           yarn workspaces focus console @pluralsh/design-system
-      - run: yarn workspace @pluralsh/design-system build
       - run: yarn workspace console typecheck
