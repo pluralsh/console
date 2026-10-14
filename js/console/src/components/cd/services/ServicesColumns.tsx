@@ -111,7 +111,7 @@ export const ColCluster = columnHelper.accessor(
   {
     id: 'clusterName',
     header: 'Cluster',
-    meta: { gridTemplate: '180px', truncate: true },
+    meta: { gridTemplate: 'minmax(180px, 220px)', truncate: true },
     cell: ({ row: { original } }) => {
       const cluster = original?.node?.cluster
       if (!cluster) return null
@@ -128,15 +128,22 @@ export function ClusterNameAndIcon({
   const theme = useTheme()
   if (!cluster) return null
   return (
-    <ColWithIcon
-      css={{ width: 'max-content' }}
-      icon={getClusterIconUrl({
-        cluster,
-        mode: theme.mode,
-      })}
+    <Tooltip
+      placement="top-start"
+      label={cluster.name}
     >
-      {cluster.name}
-    </ColWithIcon>
+      <div>
+        <ColWithIcon
+          css={{ width: 'max-content' }}
+          icon={getClusterIconUrl({
+            cluster,
+            mode: theme.mode,
+          })}
+        >
+          {cluster.name}
+        </ColWithIcon>
+      </div>
+    </Tooltip>
   )
 }
 
