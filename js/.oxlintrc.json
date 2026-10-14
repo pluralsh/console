@@ -14,6 +14,7 @@
     "jsx-a11y"
   ],
   "categories": { "correctness": "off" },
+  "options": { "typeAware": true },
   "ignorePatterns": [
     "**/src/generated/**",
     "**/*.stories.ts",
@@ -38,7 +39,7 @@
     "react/set-state-in-render": "warn",
     "react/purity": "warn",
 
-    // Type-aware rules (need `--type-aware`).
+    // Type-aware rules (enabled by options.typeAware above).
     "typescript/await-thenable": "error",
     "typescript/consistent-type-exports": "error",
     "typescript/no-array-delete": "error",

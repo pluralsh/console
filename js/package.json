@@ -7,9 +7,9 @@
     "documentation"
   ],
   "scripts": {
-    "lint": "biome check console/src design-system/src documentation/src documentation/pages && oxlint --type-aware console/src design-system/src documentation/src documentation/pages",
+    "lint": "biome check console/src design-system/src documentation/src documentation/pages && oxlint console/src design-system/src documentation/src documentation/pages",
     "lint:biome": "biome check console/src design-system/src documentation/src documentation/pages",
-    "lint:oxlint": "oxlint --type-aware console/src design-system/src documentation/src documentation/pages",
+    "lint:oxlint": "oxlint console/src design-system/src documentation/src documentation/pages",
     "fix": "yarn lint:biome --write && yarn lint:oxlint --fix",
     "test": "yarn workspace console test && yarn workspace @pluralsh/design-system test"
   },

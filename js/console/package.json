@@ -20,11 +20,11 @@
     "design-system:test": "yarn workspace @pluralsh/design-system test",
     "lint": "run-p lint:biome lint:js design-system:lint",
     "lint:biome": "biome check ./src",
-    "lint:js": "oxlint -c ../.oxlintrc.json --type-aware ./src",
+    "lint:js": "oxlint -c ../.oxlintrc.json ./src",
     "design-system:lint": "yarn workspace @pluralsh/design-system lint",
     "fix": "run-s fix:biome fix:js",
     "fix:biome": "biome check --write ./src",
-    "fix:js": "oxlint -c ../.oxlintrc.json --type-aware --fix ./src",
+    "fix:js": "oxlint -c ../.oxlintrc.json --fix ./src",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "openapi:codegen": "openapi-ts -i ../../go/kubernetes-agent/api/schema/swagger.json -o ./src/generated/kubernetes -c @hey-api/client-axios -p @tanstack/react-query",
     "analyze": "vite-bundle-visualizer -o stats.html"

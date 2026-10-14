@@ -31,10 +31,10 @@
     "test:ui": "vitest --ui",
     "lint": "run-p lint:biome lint:js",
     "lint:biome": "biome check ./src",
-    "lint:js": "oxlint -c ../.oxlintrc.json --type-aware ./src",
+    "lint:js": "oxlint -c ../.oxlintrc.json ./src",
     "fix": "run-s fix:biome fix:js",
     "fix:biome": "biome check --write ./src",
-    "fix:js": "oxlint -c ../.oxlintrc.json --type-aware --fix ./src",
+    "fix:js": "oxlint -c ../.oxlintrc.json --fix ./src",
     "prepublishOnly": "npm run build",
     "analyze": "vite-bundle-visualizer -o stats.html"
   },

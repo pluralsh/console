@@ -1,5 +1,6 @@
 {
-  "oxc.configPath": "./js/.oxlintrc.json",
+  "oxc.configPath": "${workspaceFolder}/js/.oxlintrc.json",
+  "oxc.path.oxlint": "${workspaceFolder}/js/node_modules/.bin/oxlint",
   "files.associations": {
     "**/src/archive/**/*": "plaintext",
     "*.ejs": "handlebars",
