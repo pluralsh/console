@@ -8,7 +8,6 @@
 
 import SwaggerParser from '@apidevtools/swagger-parser'
 import isEmpty from 'lodash/isEmpty'
-
 import type { OpenAPIV3, OpenAPIV3_1 as OpenApiV31 } from 'openapi-types'
 
 const DEFAULT_OPENAPI_URL =

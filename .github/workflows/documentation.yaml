@@ -9,6 +9,7 @@ on:
       - "js/.yarnrc.yml"
       - "js/design-system/**"
       - "js/documentation/**"
+      - "js/biome.json"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"
       - "go/polly/docs/**"
@@ -22,6 +23,7 @@ on:
       - "js/.yarnrc.yml"
       - "js/design-system/**"
       - "js/documentation/**"
+      - "js/biome.json"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"
       - "go/polly/docs/**"
@@ -41,25 +43,6 @@ jobs:
     uses: ./.github/workflows/vouch-gate.yml
     permissions:
       contents: read
-
-  lint:
-    needs: [vouch]
-    name: Lint
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: js
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24.11.1
-          cache: yarn
-          cache-dependency-path: js/yarn.lock
-      - run: corepack enable
-      - run: yarn --immutable
-      - run: yarn workspace @pluralsh/documentation lint
 
   sync-docs:
     needs: [vouch]

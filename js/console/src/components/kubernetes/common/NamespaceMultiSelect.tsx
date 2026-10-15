@@ -15,7 +15,9 @@ export function NamespaceMultiSelect({
 }) {
   const allSelected =
     Array.from(selectedNamespaces).length >= allNamespaces.length
-  const sortedSelectedNamespaces = Array.from(selectedNamespaces).sort()
+  const sortedSelectedNamespaces = Array.from(selectedNamespaces).sort((a, b) =>
+    a.localeCompare(b)
+  )
 
   return (
     <Select

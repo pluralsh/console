@@ -194,7 +194,6 @@ fragment ClustersRow on Cluster {
     namespace
     supportedVersions
   }
-  self
   service {
     id
     repository {
@@ -207,7 +206,6 @@ fragment ClustersRow on Cluster {
     name
     value
   }
-  distro
   upgradePlan {
     ...ClusterUpgradePlan
   }

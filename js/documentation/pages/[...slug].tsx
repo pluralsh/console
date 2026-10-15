@@ -1,13 +1,12 @@
 import fs from 'fs'
 import path from 'path'
-import { type ParsedUrlQuery } from 'querystring'
+import type { ParsedUrlQuery } from 'querystring'
 
-import { type GetStaticPaths, type GetStaticProps } from 'next'
+import type { GetStaticPaths, GetStaticProps } from 'next'
 
 import MarkdocComponent from '@src/components/MarkdocContent'
 import { readMdFileCached } from '@src/markdoc/mdParser'
-import { type MarkdocPage } from '@src/markdoc/mdSchema'
-
+import type { MarkdocPage } from '@src/markdoc/mdSchema'
 import routes from '../generated/routes.json'
 
 interface Params extends ParsedUrlQuery {

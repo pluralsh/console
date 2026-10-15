@@ -90,6 +90,12 @@ function CreatePrModalBase({
             return
           case 'review':
             createPr()
+            return
+          case 'selectType':
+          case 'selectPrAutomation':
+          case 'preview':
+          case 'success':
+            return
         }
       }}
       size="large"

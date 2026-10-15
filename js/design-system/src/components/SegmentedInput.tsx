@@ -123,8 +123,8 @@ export default function SegmentedInput({
 
       // only validate against min/max when the segment is fully filled
       if (validatedValue.length === length) {
-        const numValue = parseInt(validatedValue)
-        if (!isNaN(numValue))
+        const numValue = parseInt(validatedValue, 10)
+        if (!Number.isNaN(numValue))
           validatedValue = clamp(numValue, min, max).toString()
       }
 
@@ -163,7 +163,7 @@ export default function SegmentedInput({
       // handle arrow up/down keys
       if (key === 'ArrowUp' || key === 'ArrowDown') {
         const segValNum = curSegVal === '' ? min : parseInt(curSegVal, 10)
-        if (isNaN(segValNum)) return
+        if (Number.isNaN(segValNum)) return
         newVal = `${clamp(segValNum + (key === 'ArrowUp' ? 1 : -1), min, max)}`
       }
       // handle numeric kesy

@@ -3,7 +3,10 @@ import { countBy, startCase, sumBy, truncate } from 'lodash'
 import pluralize from 'pluralize'
 
 export type ToolArguments =
-  Record<string, unknown> | unknown[] | null | undefined
+  | Record<string, unknown>
+  | unknown[]
+  | null
+  | undefined
 
 /** Canonical tool kinds used for labels, accordions, and batch group headers. */
 export type ToolCallKind =

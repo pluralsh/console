@@ -109,7 +109,7 @@ export default function SaveObjectStoreModal({
   let settings: ReactNode
 
   switch (cloud) {
-    case 's3':
+    case ObjectStoreCloud.S3:
       settings = (
         <S3Settings
           settings={cloudSettings.s3}
@@ -117,7 +117,7 @@ export default function SaveObjectStoreModal({
         />
       )
       break
-    case 'azure':
+    case ObjectStoreCloud.Azure:
       settings = (
         <AzureSettings
           settings={cloudSettings.azure}
@@ -127,7 +127,7 @@ export default function SaveObjectStoreModal({
         />
       )
       break
-    case 'gcs':
+    case ObjectStoreCloud.GCS:
       settings = (
         <GcsSettings
           settings={cloudSettings.gcs}

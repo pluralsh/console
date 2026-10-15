@@ -8,10 +8,6 @@ generates:
       - 'typescript-operations'
       - 'typescript-react-apollo'
       - 'named-operations-object'
-      - add:
-          content:
-            - '/* eslint-disable */'
-            - '/* prettier-ignore */'
   src/generated/persisted-queries/client.json:
     schema: '../../schema/schema.graphql'
     documents:
@@ -35,10 +31,6 @@ generates:
       - 'typescript-operations'
       - 'typescript-react-apollo'
       - 'named-operations-object'
-      - add:
-          content:
-            - '/* eslint-disable */'
-            - '/* prettier-ignore */'
 config:
   scalars:
     Map: Record<string, unknown>

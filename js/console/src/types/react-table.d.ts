@@ -4,7 +4,6 @@ import type { OperationVariables } from '@apollo/client/core'
 import { TooltipProps } from '@pluralsh/design-system'
 
 declare module '@tanstack/table-core' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     truncate?: boolean
     gridTemplate?: string
@@ -14,7 +13,6 @@ declare module '@tanstack/table-core' {
     tooltip?: ReactNode
     tooltipProps?: Omit<TooltipProps, 'label' | 'children'>
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
     refetch?:
       | Nullable<

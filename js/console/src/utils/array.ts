@@ -5,10 +5,9 @@ export function* reverse<T>(array: T[], mapper: (val: T) => T = (i) => i) {
 }
 
 export function* chunk<T>(array: T[], chunkSize: number) {
-  let i
   const len = array.length
 
-  for (i = 0; i < len; i += chunkSize) {
+  for (let i = 0; i < len; i += chunkSize) {
     yield array.slice(i, i + chunkSize)
   }
 }

@@ -56,7 +56,7 @@ export function sanitizeSeverity<T extends SeverityExt>(
 export type Severity = (typeof SEVERITIES)[number]
 export type SeverityExt = (typeof SEVERITIES)[number]
 
-export { type CSSObject } from 'styled-components'
+export type { CSSObject } from 'styled-components'
 
 export type PolymorphicComponentProps<E extends ElementType, P> = P &
   Omit<ComponentPropsWithRef<E>, keyof P> & {

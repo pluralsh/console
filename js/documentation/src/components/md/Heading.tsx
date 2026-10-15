@@ -1,14 +1,14 @@
 import { LinksIcon } from '@pluralsh/design-system'
 import Link from 'next/link'
 
-import styled, { useTheme } from 'styled-components'
+import styled, { type CSSObject, useTheme } from 'styled-components'
 
 type HTag = 'h1' | 'h2' | 'h3' | 'h5' | 'h6'
 
 const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
   $level: number
 }>(({ theme, $level }) => {
-  let style
+  let style: CSSObject | undefined
 
   switch ($level) {
     case 1:
