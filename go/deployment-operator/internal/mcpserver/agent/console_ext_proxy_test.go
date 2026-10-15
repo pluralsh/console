@@ -27,7 +27,8 @@ type receivedConsoleExtRequest struct {
 }
 
 // newConsoleExtTestSidecar serves the sidecar's Console ext proxy and records what reaches upstream.
-func newConsoleExtTestSidecar(t *testing.T) (*httptest.Server, *[]receivedConsoleExtRequest) {
+// received stops upstream, waiting for in-flight handlers, and returns what reached it.
+func newConsoleExtTestSidecar(t *testing.T) (*httptest.Server, func() []receivedConsoleExtRequest) {
 	t.Helper()
 	var received []receivedConsoleExtRequest
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +61,10 @@ func newConsoleExtTestSidecar(t *testing.T) (*httptest.Server, *[]receivedConsol
 	WithConsoleExtProxy(upstream.URL+"/ext/gql", func() string { return "deploy-token" }, testAgentRunID)(server)
 	sidecar := httptest.NewServer(server.consoleExtProxy)
 	t.Cleanup(sidecar.Close)
-	return sidecar, &received
+	return sidecar, func() []receivedConsoleExtRequest {
+		upstream.Close()
+		return received
+	}
 }
 
 func newConsoleExtTestClient(url string) client.ConsoleClient {
@@ -75,10 +79,11 @@ func TestConsoleExtProxyAllowsHarnessOperations(t *testing.T) {
 	patch := &graphql.Upload{File: strings.NewReader("diff"), Filename: "patch.diff", ContentType: "text/plain"}
 	_, _ = console.CreateAgentRunUpload(context.Background(), testAgentRunID, nil, nil, patch)
 
-	if len(*received) != 2 {
-		t.Fatalf("upstream received %d requests, want 2", len(*received))
+	requests := received()
+	if len(requests) != 2 {
+		t.Fatalf("upstream received %d requests, want 2", len(requests))
 	}
-	get, upload := (*received)[0], (*received)[1]
+	get, upload := requests[0], requests[1]
 	if get.parseErr != nil || get.documentID != client.HashQuery(client.GetAgentRunDocument) {
 		t.Fatalf("GetAgentRun reached upstream as %+v", get)
 	}
@@ -176,8 +181,8 @@ func TestConsoleExtProxyRejectsOtherOperations(t *testing.T) {
 			}
 		})
 	}
-	if len(*received) != 0 {
-		t.Fatalf("upstream received %d requests, want 0", len(*received))
+	if requests := received(); len(requests) != 0 {
+		t.Fatalf("upstream received %d requests, want 0", len(requests))
 	}
 }
 
@@ -197,10 +202,11 @@ func TestConsoleExtProxyDropsSmuggledDocumentIDs(t *testing.T) {
 	}
 	_ = response.Body.Close()
 
-	if len(*received) != 1 {
-		t.Fatalf("upstream received %d requests, want 1", len(*received))
+	requests := received()
+	if len(requests) != 1 {
+		t.Fatalf("upstream received %d requests, want 1", len(requests))
 	}
-	got := (*received)[0]
+	got := requests[0]
 	if got.query != "documentId="+strings.ReplaceAll(client.HashQuery(client.GetAgentRunDocument), ":", "%3A") {
 		t.Fatalf("upstream URL query = %q", got.query)
 	}
@@ -212,39 +218,35 @@ func TestConsoleExtProxyDropsSmuggledDocumentIDs(t *testing.T) {
 }
 
 func TestConsoleExtProxyRejectsUnexpectedMultipartParts(t *testing.T) {
-	sidecar, received := newConsoleExtTestSidecar(t)
 	operations, _ := json.Marshal(map[string]any{
 		"query":     client.CreateAgentRunUploadDocument,
 		"variables": map[string]any{"runId": testAgentRunID, "patch": nil},
 	})
 
-	build := func(parts func(*multipart.Writer)) *http.Request {
-		body := &bytes.Buffer{}
-		writer := multipart.NewWriter(body)
-		_ = writer.WriteField("operations", string(operations))
-		parts(writer)
-		_ = writer.Close()
-		r, _ := http.NewRequest(http.MethodPost, sidecar.URL, body)
-		r.Header.Set("Content-Type", writer.FormDataContentType())
-		return r
-	}
-
-	cases := map[string]*http.Request{
-		"map targets a non-upload variable": build(func(w *multipart.Writer) {
+	cases := map[string]func(*multipart.Writer){
+		"map targets a non-upload variable": func(w *multipart.Writer) {
 			_ = w.WriteField("map", `{"0":["variables.runId"]}`)
-		}),
-		"map uses a named part": build(func(w *multipart.Writer) {
+		},
+		"map uses a named part": func(w *multipart.Writer) {
 			_ = w.WriteField("map", `{"documentId":["variables.patch"]}`)
-		}),
-		"extra field after the map": build(func(w *multipart.Writer) {
+		},
+		"extra field after the map": func(w *multipart.Writer) {
 			_ = w.WriteField("map", `{"0":["variables.patch"]}`)
 			_ = w.WriteField("documentId", client.HashQuery(client.GetAgentRuntimeDocument))
-		}),
+		},
 	}
 
-	for name, request := range cases {
+	for name, parts := range cases {
 		t.Run(name, func(t *testing.T) {
-			before := len(*received)
+			sidecar, received := newConsoleExtTestSidecar(t)
+			body := &bytes.Buffer{}
+			writer := multipart.NewWriter(body)
+			_ = writer.WriteField("operations", string(operations))
+			parts(writer)
+			_ = writer.Close()
+			request, _ := http.NewRequest(http.MethodPost, sidecar.URL, body)
+			request.Header.Set("Content-Type", writer.FormDataContentType())
+
 			response, err := http.DefaultClient.Do(request)
 			if err != nil {
 				t.Fatal(err)
@@ -254,7 +256,7 @@ func TestConsoleExtProxyRejectsUnexpectedMultipartParts(t *testing.T) {
 				t.Fatalf("status = 200, want a rejection")
 			}
 			// A part found mid-stream aborts the upstream body, so Console can't parse or run it.
-			for _, got := range (*received)[before:] {
+			for _, got := range received() {
 				if got.parseErr == nil {
 					t.Fatalf("upstream parsed the request: %+v", got)
 				}
