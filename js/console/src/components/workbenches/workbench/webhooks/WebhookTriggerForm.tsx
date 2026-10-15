@@ -3,7 +3,6 @@ import {
   Button,
   Checkbox,
   Chip,
-  EmptyState,
   Flex,
   FormField,
   Input,
@@ -17,6 +16,7 @@ import {
   VisualInspectionIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -333,8 +333,12 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
 
   if (mode === 'edit' && !fetchWorkbenchWebhookState.loading && !webhook)
     return (
-      <EmptyState message="Webhook trigger not found">
+      <WorkbenchEmptyState
+        message="Webhook trigger not found"
+        description="It may have been removed from this workbench."
+      >
         <Button
+          small
           startIcon={<ReturnIcon />}
           onClick={() =>
             navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
@@ -342,7 +346,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
         >
           Back to all webhooks
         </Button>
-      </EmptyState>
+      </WorkbenchEmptyState>
     )
 
   const isLoading =

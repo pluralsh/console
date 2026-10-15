@@ -9,6 +9,7 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
   FileTypeIcon,
   fileTreeMuiTheme,
@@ -153,10 +154,14 @@ function DirectoryEntries({
       />
     )
   if (!files?.length)
-    return (
+    return path === '/' ? (
+      <WorkbenchEmptyText>
+        No files yet. Attachments and agent outputs will show up here.
+      </WorkbenchEmptyText>
+    ) : (
       <StatusItem
         path={path}
-        label="Empty"
+        label="Empty folder"
       />
     )
 

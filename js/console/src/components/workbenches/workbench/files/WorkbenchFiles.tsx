@@ -1,4 +1,3 @@
-import { EmptyState } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { WorkbenchFileFragment } from 'generated/graphql'
 import { useState } from 'react'
@@ -7,6 +6,7 @@ import { WORKBENCH_FILES_PATH_QUERY_PARAM } from 'routes/workbenchesRoutesConsts
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import { WorkbenchFileTree } from './WorkbenchFileTree'
 import { WorkbenchFileViewer } from './WorkbenchFileViewer'
+import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
 import { DeleteWorkbenchFileModal } from './DeleteWorkbenchFileModal'
 import { toWorkbenchPath } from './workbenchFilePaths'
 
@@ -37,9 +37,9 @@ export function WorkbenchFiles() {
   if (!isLoading && workbench && !workbench.filesystemEnabled)
     return (
       <WorkbenchPageLayout>
-        <EmptyState
-          message="The workbench filesystem isn't enabled"
-          description="Configure an object store for the console to give workbenches a filesystem."
+        <WorkbenchEmptyState
+          message="Filesystem isn't enabled"
+          description="Configure an object store for the console to give workbenches a shared filesystem."
         />
       </WorkbenchPageLayout>
     )
@@ -72,9 +72,9 @@ export function WorkbenchFiles() {
           onDelete={setToDelete}
         />
       ) : (
-        <EmptyState
-          message="Select a file to view it"
-          description="Files written by agents and attached to prompts are stored here."
+        <WorkbenchEmptyState
+          message="No files yet"
+          description="Outputs will show here when agents output artifacts."
         />
       )}
       <DeleteWorkbenchFileModal

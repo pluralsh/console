@@ -2,7 +2,6 @@ import {
   Button,
   Code,
   DownloadIcon,
-  EmptyState,
   Flex,
   IconFrame,
   CopyIcon,
@@ -30,6 +29,7 @@ import {
 } from 'utils/file'
 import { WORKBENCH_FILES_HEADER_HEIGHT } from './WorkbenchFileTree'
 import { basename, workbenchFileDownloadUrl } from './workbenchFilePaths'
+import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
 
 // text previews come back through graphql, so anything larger is download-only
 const PREVIEW_LIMIT = 1024 * 1024
@@ -79,22 +79,28 @@ export function WorkbenchFileViewer({
     )
   if (!file)
     return (
-      <EmptyState
+      <WorkbenchEmptyState
         message="File not found"
         description={path}
       />
     )
   if (file.kind === WorkbenchFileKind.Directory)
-    return <EmptyState message="Select a file to view it" />
+    return (
+      <WorkbenchEmptyState
+        message="No file selected"
+        description="Select a file from the list to view it."
+      />
+    )
 
   const downloadUrl = workbenchFileDownloadUrl(file.downloadUrl)
   const unavailable = (description: string) => (
-    <EmptyState
+    <WorkbenchEmptyState
+      inset={false}
       message="Preview unavailable"
       description={description}
     >
       {downloadUrl && <DownloadButton href={downloadUrl} />}
-    </EmptyState>
+    </WorkbenchEmptyState>
   )
 
   let body: ReactNode
