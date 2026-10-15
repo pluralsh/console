@@ -23,14 +23,19 @@ export type AccordionProps = ComponentProps<typeof RadixAccordion.Root> &
   ComponentProps<typeof Card>
 
 export type AccordionCaret =
-  'none' | 'left' | 'right' | 'right-quarter' | 'right-quarter-mirror'
+  | 'none'
+  | 'left'
+  | 'right'
+  | 'right-quarter'
+  | 'right-quarter-mirror'
 
 function Accordion({
   children,
   ...props
 }: {
   children?:
-    ReactElement<typeof AccordionItem> | ReactElement<typeof AccordionItem>[]
+    | ReactElement<typeof AccordionItem>
+    | ReactElement<typeof AccordionItem>[]
   collapsible?: boolean
 } & AccordionProps) {
   return (

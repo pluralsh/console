@@ -6234,6 +6234,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `selfService` _boolean_ | SelfService enables the self-service subagent for catalog and PR automation workflows. |  | Optional: \{\} <br /> |
 | `services` _boolean_ | Services enables the services capability. |  | Optional: \{\} <br /> |
 | `stacks` _boolean_ | Stacks enables the stacks capability. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables the Kubernetes capability. |  | Optional: \{\} <br /> |

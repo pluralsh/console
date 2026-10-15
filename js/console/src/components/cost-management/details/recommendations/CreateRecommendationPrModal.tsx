@@ -172,6 +172,10 @@ function CreateRecommendationPrModalBase({
           case 'review':
             createPraPr()
             return
+          case 'selectPrAutomation':
+          case 'success':
+          case 'workbench':
+            return
         }
       }}
       size="auto"

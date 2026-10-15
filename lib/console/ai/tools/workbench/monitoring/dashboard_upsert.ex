@@ -6,6 +6,9 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardUpsert do
     use Console.AI.Tools.Workbench.Base
     alias Console.Schema.Dashboard
 
+    @name_max 255
+    @description_max 10_000
+
     embedded_schema do
       field :name, :string
       field :description, :string
@@ -16,8 +19,12 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardUpsert do
       model
       |> cast(attrs, [:name, :description])
       |> cast_embed(:inputs)
+      |> validate_length(:name, max: @name_max)
+      |> validate_length(:description, max: @description_max)
     end
   end
+
+  @name_max 255
 
   embedded_schema do
     field :job, :map, virtual: true
@@ -44,6 +51,7 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardUpsert do
     |> cast_embed(:graphs, required: true)
     |> cast_embed(:settings)
     |> validate_required([:dashboard_name])
+    |> validate_length(:dashboard_name, max: @name_max)
     |> validate_length(:graphs, min: 1)
     |> validate_unique_graph_identifiers()
   end

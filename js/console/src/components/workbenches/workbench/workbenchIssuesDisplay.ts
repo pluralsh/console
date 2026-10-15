@@ -1,24 +1,26 @@
-import { DisplayView } from 'components/utils/display/DisplayPanel'
+import {
+  allSelected,
+  DisplayView,
+  filterVariable,
+} from 'components/utils/display/DisplayPanel'
 import {
   IssueSort,
   SortDirection,
   IssueStatus,
   IssueWebhookProvider,
 } from 'generated/graphql'
-import { intersection, isEmpty, xor } from 'lodash'
+import { intersection, isEmpty } from 'lodash'
 import { ISSUE_STATUS_OPTIONS } from 'components/workbenches/common/issueStatus'
 
-export type WorkbenchIssuesView = DisplayView
-
 export type WorkbenchIssuesDisplayState = {
-  view: WorkbenchIssuesView
+  view: DisplayView
   providers: IssueWebhookProvider[]
   statuses: IssueStatus[]
   sort: IssueSort
   direction: SortDirection
 }
 
-export const ALL_ISSUE_PROVIDERS = Object.values(IssueWebhookProvider)
+const ALL_ISSUE_PROVIDERS = Object.values(IssueWebhookProvider)
 
 export const DEFAULT_WORKBENCH_ISSUES_DISPLAY: WorkbenchIssuesDisplayState = {
   view: 'list',
@@ -34,26 +36,17 @@ export function visibleIssueProviders(
   return ALL_ISSUE_PROVIDERS.filter((provider) => (counts[provider] ?? 0) > 0)
 }
 
-export function allIssueProvidersSelected(
-  providers: IssueWebhookProvider[]
-): boolean {
-  return isEmpty(xor(providers, ALL_ISSUE_PROVIDERS))
-}
-
-export function allIssueStatusesSelected(statuses: IssueStatus[]): boolean {
-  return isEmpty(xor(statuses, ISSUE_STATUS_OPTIONS))
-}
-
 export function hasUncheckedIssueFilters({
   providers,
   statuses,
 }: Pick<WorkbenchIssuesDisplayState, 'providers' | 'statuses'>): boolean {
   return (
-    !allIssueProvidersSelected(providers) || !allIssueStatusesSelected(statuses)
+    !allSelected(providers, ALL_ISSUE_PROVIDERS) ||
+    !allSelected(statuses, ISSUE_STATUS_OPTIONS)
   )
 }
 
-export type IssueFilterEmptyKind = 'sources' | 'statuses'
+type IssueFilterEmptyKind = 'sources' | 'statuses'
 
 export function getIssueFilterEmptyKind(
   {
@@ -97,8 +90,8 @@ export function toIssueFilterVariables({
     sort === IssueSort.InsertedAt && direction === SortDirection.Desc
 
   return {
-    providers: allIssueProvidersSelected(providers) ? undefined : providers,
-    statuses: allIssueStatusesSelected(statuses) ? undefined : statuses,
+    providers: filterVariable(providers, ALL_ISSUE_PROVIDERS),
+    statuses: filterVariable(statuses, ISSUE_STATUS_OPTIONS),
     sort: defaultSort ? undefined : sort,
     direction: defaultSort ? undefined : direction,
   }

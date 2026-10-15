@@ -211,7 +211,10 @@ defmodule Console.AI.Workbench.Environment do
   end
   defp infra_agents(_), do: []
 
-  defp self_service_agents(%Workbench{configuration: %{self_service: true}}), do: [:self_service]
+  defp self_service_agents(%Workbench{
+         configuration: %{infrastructure: %{self_service: true}}
+       }),
+       do: [:self_service]
   defp self_service_agents(_), do: []
 
   defp type_subagents(%WorkbenchJob{type: :skill}), do: [:history, :skill]

@@ -1,4 +1,4 @@
-// basically the internal part of mergeRefs, but makes react-compiler eslint happy
+// basically the internal part of mergeRefs, but satisfies the React Compiler lint rules
 import { Ref } from 'react'
 
 export function applyNodeToRefs(

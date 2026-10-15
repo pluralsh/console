@@ -5,7 +5,7 @@ defmodule Console.AI.Workbench.MCP.Atlassian do
 
   @base_url "https://mcp.atlassian.com/v1"
 
-  def transport(%WorkbenchTool{tool: :atlassian, configuration: %{atlassian: atlassian}}, _),
+  def transport(%WorkbenchTool{tool: :atlassian, configuration: %{atlassian: atlassian}}),
     do: {:streamable_http, [base_url: @base_url, headers: headers(atlassian), enable_sse: true]}
 
   defp headers(%AtlassianConnection{service_account: sa}) when is_binary(sa), do: %{"Authorization" => "Bearer #{sa}"}

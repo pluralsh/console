@@ -201,8 +201,7 @@ func (in *AzureProvider) metricsLabelSearchValues(ctx context.Context, input *to
 		return nil, fmt.Errorf("%w: azure metrics label value search requires metrics_namespace", ErrInvalidArgument)
 	}
 
-	end := time.Now().UTC()
-	start := end.Add(-24 * time.Hour)
+	start, end := metricsLabelSearchRange(input)
 	resp, err := in.client.Metrics(
 		ctx,
 		strings.TrimSpace(opts.GetMetricsEndpoint()),

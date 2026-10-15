@@ -243,6 +243,7 @@ const publishedToLabel = (published: Nullable<boolean>) => {
     case true:
       return 'Published research'
     case false:
+    case null:
     case undefined:
       return 'My research'
   }

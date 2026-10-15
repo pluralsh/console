@@ -1,7 +1,7 @@
 defmodule Console.AI.MCP.ClientSupervisor do
   use Supervisor
 
-  alias Console.Schema.{ChatThread, McpServer, User, WorkbenchJob, WorkbenchTool}
+  alias Console.Schema.{ChatThread, McpServer, User}
   alias Console.Schema.DeploymentSettings.OauthToken
   alias Console.AI.Provider.TokenExchange
   alias Console.AI.MCP.Agent
@@ -61,9 +61,6 @@ defmodule Console.AI.MCP.ClientSupervisor do
 
   def client_name(%ChatThread{id: thread_id}, %McpServer{id: server_id}),
     do: "Plural-#{thread_id}-#{server_id}"
-
-  def client_name(%WorkbenchTool{id: tool_id}, %WorkbenchJob{id: job_id}),
-    do: "Plural-#{tool_id}-#{job_id}"
 
   defp auth_headers(
          _,

@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   use Console.GraphQl.Resolvers.Deployments.Base
+  require Logger
   import Console.GraphQl.Resolvers.Observability, only: [prom_args: 1]
   alias Console.Schema.{
     Alert,
@@ -16,6 +17,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   }
   alias Console.Deployments.{Settings, Observability, Services}
   alias Console.Deployments.Observability.Dashboard, as: DashboardRuntime
+  alias Console.Deployments.Observability.Webhook.Grafana
   alias Console.Services.Observability, as: ObsSvc
 
   @default_offset 30 * 60
@@ -40,9 +42,36 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def list_alerts(parent, args, _) do
     for_parent(parent)
-    |> Alert.ordered()
-    |> paginate(args)
+    |> maybe_search(Alert, args)
+    |> alert_filters(args)
+    |> alert_order(args)
+    |> paginate_with_total(args)
   end
+
+  def alert_value(%Alert{type: :grafana} = alert, _, _), do: {:ok, Grafana.value(alert)}
+  def alert_value(_, _, _), do: {:ok, nil}
+
+  def alert_silence_url(%Alert{type: :grafana} = alert, _, _), do: {:ok, Grafana.silence_url(alert)}
+  def alert_silence_url(_, _, _), do: {:ok, nil}
+
+  def alert_counts(%Workbench{id: id}, _, _) do
+    alerts = Alert.for_workbench(id)
+
+    {:ok, %{
+      types: Console.Repo.all(Alert.count_by_type(alerts)),
+      severities: Console.Repo.all(Alert.count_by_severity(alerts))
+    }}
+  end
+
+  defp alert_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:types, t}, q when is_list(t) -> Alert.for_types(q, t)
+      {:severities, s}, q when is_list(s) -> Alert.for_severities(q, s)
+      _, q -> q
+    end)
+  end
+
+  defp alert_order(query, args), do: Alert.sorted(query, Map.get(args, :sort), Map.get(args, :direction) || :desc)
 
   def upsert_observability_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.upsert_provider(attrs, user)
@@ -208,6 +237,48 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
       ),
       do: DashboardRuntime.input(dashboard, identifier, input, time_range, user)
 
+  def public_dashboard(%{public_id: public_id}, _) do
+    case Observability.get_dashboard_by_public_id(public_id) do
+      %Dashboard{} = dashboard -> {:ok, dashboard}
+      nil -> {:error, "not found"}
+    end
+  end
+
+  def public_dashboard_graph(
+        %Dashboard{public_id: public_id} = dashboard,
+        %{identifier: identifier, time_range: time_range},
+        _
+      ) do
+    limit = Application.get_env(:console, :public_dashboard_rate_limit, 300)
+
+    # rate limit errors are treated as a deny so a broken backend can't be used to bypass the limit
+    case Hammer.check_rate("public_dashboard:#{public_id}", 60_000, limit) do
+      {:allow, _} -> run_public_graph(dashboard, identifier, time_range)
+      _ -> {:error, "rate limited"}
+    end
+  end
+
+  defp run_public_graph(dashboard, identifier, time_range) do
+    case DashboardRuntime.public_graph(dashboard, identifier, time_range) do
+      {:error, error} ->
+        Logger.warning("public dashboard #{dashboard.id} graph #{identifier} failed: #{inspect(error)}")
+        {:error, public_graph_error(error)}
+      result -> result
+    end
+  end
+
+  @public_range_errors ["invalid time range", "time range end must be after start", "time range cannot exceed 30 days"]
+
+  # anonymous viewers only get a fixed error vocabulary, since tool and upstream errors can leak
+  # internal tool names, datasource queries or backend hosts
+  defp public_graph_error(error) when error in @public_range_errors, do: error
+  defp public_graph_error(error) when is_binary(error) do
+    if error =~ ~r/^(tool .+ (not found|is governed by workbench policies)|graph .+ (not found|does not have a datasource))/,
+      do: "not available on public dashboards",
+      else: "failed to load data"
+  end
+  defp public_graph_error(_), do: "failed to load data"
+
   def list_dashboards(%Workbench{id: workbench_id}, args, _) do
     Dashboard.for_workbench(workbench_id)
     |> maybe_search(Dashboard, args)
@@ -220,6 +291,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def update_dashboard(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.update_dashboard(attrs, id, user)
+
+  def share_dashboard(%{id: id, shared: shared}, %{context: %{current_user: user}}),
+    do: Observability.share_dashboard(id, shared, user)
 
   def delete_dashboard(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.delete_dashboard(id, user)

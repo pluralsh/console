@@ -24,7 +24,12 @@ export function useFloatingDropdown({
   sizeToContent = false,
   flipFallbackStrategy = 'initialPlacement',
   flipBeforeSize = false,
+  open,
+  onOpenChange,
 }: Pick<SelectProps, 'placement' | 'width' | 'maxHeight'> & {
+  /** Open state, for floating-ui interactions (`useDismiss`, `FloatingFocusManager`). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   minHeight?: string | number
   minWidth?: string | number
   /** Grow with content up to maxHeight instead of filling available height. */
@@ -94,6 +99,8 @@ export function useFloatingDropdown({
   })
 
   const floating = useFloating({
+    open,
+    onOpenChange,
     placement: `bottom-${placement === 'left' ? 'start' : 'end'}`,
     strategy: 'fixed',
     middleware: [

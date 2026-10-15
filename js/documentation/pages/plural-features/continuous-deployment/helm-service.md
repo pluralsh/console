@@ -92,7 +92,7 @@ spec:
           warn("kube-system namespace not found in the agent cache, observeClusterId will not be set")
 ```
 
-Python can also be loaded from a file with `pythonFile`, or from a folder of helper modules with `pythonFolder`. For the supported language subset, available modules, script concatenation order, and how Python values merge with Lua and other value sources, see [Dynamic Helm Configuration with Python Scripts](python.md).
+Python can also be loaded from a file with `pythonFile`, or from a folder of helper modules with `pythonFolder`. Lua and Python are mutually exclusive: when any Python field is set, Python runs and Lua is skipped. For the supported language subset, available modules, script concatenation order, and value merge order, see [Dynamic Helm Configuration with Python Scripts](python.md).
 
 The Lua equivalent of `k8s_object_meta` is documented in [Dynamic Helm Configuration with Lua Scripts](lua.md#kubernetes-object-metadata).
 

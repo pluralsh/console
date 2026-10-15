@@ -78,8 +78,9 @@ export function statusFilterKeyToGitHealth(
       return GitHealth.Pullable
     case RepoStatusFilterKey.Failed:
       return GitHealth.Failed
+    case RepoStatusFilterKey.All:
+      return undefined
   }
-  return undefined
 }
 
 const helmRepoColumns = [

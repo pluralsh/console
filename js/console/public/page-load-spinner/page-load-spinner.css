@@ -42,9 +42,11 @@ html[data-theme-mode='light'] {
 .plural-logo-skeleton-shimmer {
   width: 128px;
   height: 128px;
-  -webkit-mask: url('/page-load-spinner/plural-logomark-only-white.svg') 0 0 /
-    contain no-repeat;
-  mask: url('/page-load-spinner/plural-logomark-only-white.svg') 0 0 / contain
+  -webkit-mask:
+    url('/page-load-spinner/plural-logomark-only-white.svg') 0 0 / contain
+    no-repeat;
+  mask:
+    url('/page-load-spinner/plural-logomark-only-white.svg') 0 0 / contain
     no-repeat;
   background: linear-gradient(
     130deg,

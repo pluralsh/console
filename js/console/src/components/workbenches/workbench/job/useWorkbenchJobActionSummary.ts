@@ -1,12 +1,16 @@
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useWorkbenchJobActionSummaryQuery } from 'generated/graphql'
 
-export function useWorkbenchJobActionSummary(jobId: string) {
-  const { data, loading } = useWorkbenchJobActionSummaryQuery({
+// `poll: false` fetches once, e.g. for a finished job whose actions won't change
+export function useWorkbenchJobActionSummary(
+  jobId: string,
+  { poll = true }: { poll?: boolean } = {}
+) {
+  const { data, loading, refetch } = useWorkbenchJobActionSummaryQuery({
     skip: !jobId,
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: poll ? POLL_INTERVAL : 0,
   })
   const job = data?.workbenchJob
 
@@ -19,5 +23,6 @@ export function useWorkbenchJobActionSummary(jobId: string) {
       (edge) => !!edge?.node?.id
     ),
     isLoading: loading && !data,
+    refetch,
   }
 }

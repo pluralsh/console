@@ -14,7 +14,7 @@ import {
   Children,
   MouseEvent,
   ReactNode,
-  forwardRef,
+  Ref,
   useCallback,
   useEffect,
   useRef,
@@ -249,14 +249,17 @@ export function MembershipExpandPanel({
   )
 }
 
-export const MembershipUserRow = forwardRef<
-  HTMLDivElement,
-  {
-    name?: string | null
-    email?: string | null
-    avatar?: string | null
-  }
->(function MembershipUserRow({ name, email, avatar }, ref) {
+export const MembershipUserRow = function MembershipUserRow({
+  name,
+  email,
+  avatar,
+  ref,
+}: {
+  name?: string | null
+  email?: string | null
+  avatar?: string | null
+  ref?: Ref<HTMLDivElement>
+}) {
   return (
     <MembershipListRowSC ref={ref}>
       <Flex
@@ -289,7 +292,7 @@ export const MembershipUserRow = forwardRef<
       )}
     </MembershipListRowSC>
   )
-})
+}
 
 export function HoverActions({ children }: { children: ReactNode }) {
   return (

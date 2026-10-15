@@ -1,6 +1,27 @@
 package tools
 
-import "testing"
+import (
+	"testing"
+	"time"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
+
+func TestMetricsLabelSearchRangeUsesRequestedRange(t *testing.T) {
+	wantStart := time.Date(2026, 10, 9, 12, 0, 0, 0, time.UTC)
+	wantEnd := wantStart.Add(15 * time.Minute)
+	start, end := metricsLabelSearchRange(&toolquery.MetricsLabelSearchInput{
+		Range: &toolquery.TimeRange{
+			Start: timestamppb.New(wantStart),
+			End:   timestamppb.New(wantEnd),
+		},
+	})
+
+	if !start.Equal(wantStart) || !end.Equal(wantEnd) {
+		t.Fatalf("range = (%s, %s), want (%s, %s)", start, end, wantStart, wantEnd)
+	}
+}
 
 func TestNewMetricsLabelSearchOutputFiltersDedupesSortsAndLimits(t *testing.T) {
 	output := newMetricsLabelSearchOutput([]string{

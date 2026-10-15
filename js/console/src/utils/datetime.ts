@@ -179,6 +179,15 @@ export const fromNow = (date: DateParam) => {
   return dayjs(date).fromNow()
 }
 
+// Single-unit age for dense lists, e.g. "now", "40m", "2h", "3d".
+export const formatShortAge = (date: DateParam) => {
+  const then = dayjs(date)
+  if (!date || !then.isValid()) return ''
+  const ms = dayjs().diff(then)
+  if (ms < MINUTE_TO_SECONDS * SECOND_TO_MILLISECONDS) return 'now'
+  return prettyMilliseconds(ms, { unitCount: 1, hideSeconds: true })
+}
+
 export const duration = (
   startDate: DateParam,
   endDate: DateParam,
