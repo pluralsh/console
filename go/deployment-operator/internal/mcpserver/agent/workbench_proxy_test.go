@@ -28,6 +28,7 @@ func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
 	handler, err := newBearerTokenProxy(
 		upstream.URL+"/mcp/workbench/id?categories=metrics%2Clogs",
 		func() string { return token },
+		nil,
 	)
 	if err != nil {
 		t.Fatalf("newBearerTokenProxy() error = %v", err)
@@ -75,10 +76,10 @@ func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
 }
 
 func TestWorkbenchMCPProxyRejectsInvalidConfiguration(t *testing.T) {
-	if _, err := newBearerTokenProxy("not-a-url", func() string { return "token" }); err == nil {
+	if _, err := newBearerTokenProxy("not-a-url", func() string { return "token" }, nil); err == nil {
 		t.Fatal("expected invalid URL error")
 	}
-	if _, err := newBearerTokenProxy("https://console.example/mcp", func() string { return "" }); err == nil {
+	if _, err := newBearerTokenProxy("https://console.example/mcp", func() string { return "" }, nil); err == nil {
 		t.Fatal("expected missing token error")
 	}
 }

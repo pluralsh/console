@@ -73,7 +73,7 @@ func WithConsoleAIProxy(upstreamURL string, token func() string) Option {
 // the originating workbench with the agent run's short-lived user token.
 func WithWorkbenchMCPProxy(upstreamURL string, token func() string) Option {
 	return func(s *Server) {
-		handler, err := newBearerTokenProxy(upstreamURL, token)
+		handler, err := newBearerTokenProxy(upstreamURL, token, nil)
 		if err != nil {
 			klog.Fatalf("could not configure workbench mcp proxy: %v", err)
 		}
@@ -97,7 +97,7 @@ const (
 // Only the harness's own operations on this agent run are let through.
 func WithConsoleExtProxy(upstreamURL, token, agentRunID string) Option {
 	return func(s *Server) {
-		handler, err := newBearerTokenProxy(upstreamURL, func() string { return token })
+		handler, err := newBearerTokenProxy(upstreamURL, func() string { return token }, nil)
 		if err != nil {
 			klog.Fatalf("could not configure console ext proxy: %v", err)
 		}

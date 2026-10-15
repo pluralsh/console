@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	consoleTokenEnv    = "PLRL_CONSOLE_TOKEN"
 	openAIAPIKeyEnv    = "OPENAI_API_KEY"
 	anthropicAPIKeyEnv = "ANTHROPIC_API_KEY"
 	azureAPIKeyEnv     = "AZURE_OPENAI_API_KEY"
@@ -30,7 +29,6 @@ func (agent *Agent) env(config toolv1.Config) []string {
 
 	env := []string{
 		fmt.Sprintf("PI_CODING_AGENT_DIR=%s", agent.piHome(config)),
-		fmt.Sprintf("%s=%s", consoleTokenEnv, common.AgentAIProxyAPIKey),
 		fmt.Sprintf("%s=%s", openAIAPIKeyEnv, apiKey),
 	}
 	switch strings.ToLower(agent.resolvedProvider(config)) {

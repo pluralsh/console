@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-func newBearerTokenProxy(upstreamURL string, token func() string) (http.Handler, error) {
+// newBearerTokenProxy forwards requests to upstreamURL with token instead of the caller's credentials.
+// subpath, when set, returns the part of the request path appended to upstreamURL's path; otherwise
+// every request goes to upstreamURL's path.
+func newBearerTokenProxy(upstreamURL string, token func() string, subpath func(*http.Request) string) (http.Handler, error) {
 	target, err := url.Parse(upstreamURL)
 	if err != nil || target.Scheme == "" || target.Host == "" {
 		return nil, fmt.Errorf("invalid upstream URL %q", upstreamURL)
@@ -16,6 +19,7 @@ func newBearerTokenProxy(upstreamURL string, token func() string) (http.Handler,
 	if token == nil || strings.TrimSpace(token()) == "" {
 		return nil, fmt.Errorf("bearer token proxy requires a token")
 	}
+	base := strings.TrimSuffix(target.Path, "/")
 
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(request *httputil.ProxyRequest) {
@@ -23,6 +27,10 @@ func newBearerTokenProxy(upstreamURL string, token func() string) (http.Handler,
 			request.SetXForwarded()
 			request.Out.URL.Path = target.Path
 			request.Out.URL.RawPath = target.RawPath
+			if subpath != nil {
+				request.Out.URL.Path = base + "/" + subpath(request.In)
+				request.Out.URL.RawPath = ""
+			}
 			request.Out.Host = target.Host
 			setBearerToken(request.Out.Header, token())
 		},
