@@ -35,32 +35,20 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ListComments do
   end
 
   def implement(%__MODULE__{} = model) do
-    with {:ok, offset} <- cursor(model.cursor),
+    with {:ok, offset} <- Client.parse_cursor(model.cursor),
          {:ok, client} <- Client.build(model.tool),
          {:ok, sys_id} <- Client.resolve_sys_id(client, model.table, model.record_id),
          {:ok, response} <-
            Client.get(client, "/table/sys_journal_field", %{
              sysparm_query:
-               "element_id=#{sys_id}^name=#{model.table}^elementINcomments,work_notes^ORDERBYDESCsys_created_on",
+               "element_id=#{sys_id}^elementINcomments,work_notes^ORDERBYDESCsys_created_on",
              sysparm_fields: Enum.join(@journal_fields, ","),
              sysparm_limit: model.limit,
              sysparm_offset: offset
            }) do
-      count = response["result"] |> List.wrap() |> length()
-      next_cursor = if count >= model.limit, do: Integer.to_string(offset + count)
-
       response
-      |> Map.put("nextCursor", next_cursor)
+      |> Client.put_next_cursor(offset, model.limit)
       |> Jason.encode()
     end
   end
-
-  defp cursor(value) when nonempty_string(value) do
-    case Integer.parse(value) do
-      {offset, ""} when offset >= 0 -> {:ok, offset}
-      _ -> {:error, "ServiceNow cursor must be a non-negative integer offset."}
-    end
-  end
-
-  defp cursor(_), do: {:ok, 0}
 end

@@ -37,6 +37,16 @@ ServiceNow can issue tokens with the client credentials grant:
   the agent has no delete operation. Turn it on only if the integration user
   is allowed to delete records and you want agents to do so.
 
+## Limitations
+
+- Only `incident`, `change_request`, `problem` and `sc_task` are supported.
+- The agent can set any field the integration user can write, so give it the
+  narrowest role that works.
+- Paging is offset based and a full page always returns a next cursor, so the
+  last page of an exact multiple is empty.
+- State values can be customized per instance. Have the agent read raw values
+  before updating `state`.
+
 ## 4) Check access
 
 Ask a workbench to list open incidents. A 401 means the credentials are wrong;

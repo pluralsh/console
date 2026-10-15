@@ -47,7 +47,17 @@ Plural accepts either of two headers:
 
 If `x-plural-signature` is present it must be valid. Plural does not fall back to the shared secret. Requests with neither header are rejected with 403.
 
-Plural does not check timestamps, so a captured request could be replayed. Rotate the secret if you suspect it leaked.
+Business Rules can't compute an HMAC easily, so most setups send the secret header. That is safe only over HTTPS. Never use a plain `http://` endpoint, and rotate the secret if it may have leaked, since it travels with every request.
+
+Plural does not check timestamps, so a captured request could be replayed.
+
+## Limitations
+
+* **Four tables only.** Records from any other table are acknowledged and ignored.
+* **Links must be http(s).** A `url` or `instance_url` with any other scheme is dropped, and the issue is created without a link.
+* **Custom states map by label.** Send `state` as a `{value, display_value}` pair. A custom label that Plural does not recognize shows the ticket as open.
+* **Delivery is one-shot.** `executeAsync` does not retry, so a failed request is not redelivered. Use a scheduled job in ServiceNow if you need reconciliation.
+* **No deletes.** A deleted ticket is not removed from Plural.
 
 ## Set up the webhook
 

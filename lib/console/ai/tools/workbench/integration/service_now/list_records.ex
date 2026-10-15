@@ -36,12 +36,12 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ListRecords do
   end
 
   def implement(%__MODULE__{} = model) do
-    with {:ok, offset} <- cursor(model.cursor),
+    with {:ok, offset} <- Client.parse_cursor(model.cursor),
          {:ok, client} <- Client.build(model.tool),
          {:ok, path} <- Client.table_path(model.table),
          {:ok, response} <- Client.get(client, path, query(model, offset)) do
       response
-      |> normalize_cursor(offset, model.limit)
+      |> Client.put_next_cursor(offset, model.limit)
       |> Jason.encode()
     end
   end
@@ -55,22 +55,6 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ListRecords do
     }
     |> maybe_put(:sysparm_query, model.query)
     |> maybe_put(:sysparm_fields, model.fields)
-  end
-
-  defp cursor(value) when nonempty_string(value) do
-    case Integer.parse(value) do
-      {offset, ""} when offset >= 0 -> {:ok, offset}
-      _ -> {:error, "ServiceNow cursor must be a non-negative integer offset."}
-    end
-  end
-
-  defp cursor(_), do: {:ok, 0}
-
-  defp normalize_cursor(%{} = response, offset, limit) do
-    count = response["result"] |> List.wrap() |> length()
-    next_cursor = if count >= limit, do: Integer.to_string(offset + count)
-
-    Map.put(response, "nextCursor", next_cursor)
   end
 
   defp maybe_put(query, key, value) when nonempty_string(value), do: Map.put(query, key, value)

@@ -115,6 +115,30 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   @spec delete(t, String.t()) :: {:ok, term()} | {:error, String.t()}
   def delete(client, path), do: request(client, :delete, path, [])
 
+  @doc """
+  Parses an offset cursor, where a missing or blank cursor means the first page.
+  """
+  @spec parse_cursor(String.t() | nil) :: {:ok, non_neg_integer()} | {:error, String.t()}
+  def parse_cursor(value) when is_binary(value) and byte_size(value) > 0 do
+    case Integer.parse(value) do
+      {offset, ""} when offset >= 0 -> {:ok, offset}
+      _ -> {:error, "ServiceNow cursor must be a non-negative integer offset."}
+    end
+  end
+  def parse_cursor(_), do: {:ok, 0}
+
+  @doc """
+  Adds a `nextCursor` offset to a Table API list response. It is `nil` when the page
+  came back short, meaning there is nothing further to read.
+  """
+  @spec put_next_cursor(map(), non_neg_integer(), pos_integer()) :: map()
+  def put_next_cursor(%{} = response, offset, limit) do
+    count = response["result"] |> List.wrap() |> length()
+    next_cursor = if count >= limit, do: Integer.to_string(offset + count)
+
+    Map.put(response, "nextCursor", next_cursor)
+  end
+
   @doc false
   def segment(value), do: value |> to_string() |> URI.encode_www_form()
 

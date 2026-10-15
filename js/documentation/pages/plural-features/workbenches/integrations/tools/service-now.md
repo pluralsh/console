@@ -15,6 +15,8 @@ For the complete list of integrations and general tool behavior, see [Workbench 
 
 ### Create an integration user
 
+Use a dedicated service account with the narrowest role that works. The agent can set any field the account can write, including `assigned_to` and `caller_id`, so its permissions are the limit on what a prompt can change.
+
 1. In ServiceNow, open **User Administration → Users** and create a dedicated user, for example `plural.agent`.
 2. Check **Web service access only** so the account cannot sign in to the UI.
 3. Set a password.
@@ -54,6 +56,16 @@ Reads return display values (labels such as `In Progress`) by default. The agent
 3. Enter the integration user's **Username** and **Password**, or turn on OAuth token exchange and enter `https://<instance>.service-now.com/oauth_token.do` as the token URL together with the client ID and secret.
 4. Leave **Allow agents to permanently delete tickets** off unless agents should be able to delete records. Closing or cancelling a ticket through `update_record` is usually enough.
 5. Set the access policy and attach the tool to a new or existing workbench.
+
+## Limitations
+
+* **Four tables only.** `incident`, `change_request`, `problem`, and `sc_task`. Other tables, including custom ones and child tables such as `change_task`, are rejected.
+* **Paging uses offsets.** `list_records` and `list_comments` return a `nextCursor` whenever a page is full, so reading an exact multiple of the page size ends with one empty page. Page size is capped at 100.
+* **Comment history needs an ACL.** `list_comments` reads `sys_journal_field`, which base instances restrict. Without read access the call returns a 403 or an empty list.
+* **Custom states.** State values and labels can differ per instance. Have the agent read a ticket with raw values before updating `state`.
+* **Deletes are permanent.** `delete_record` is only registered when deletion is enabled on the tool, and ServiceNow does not keep the record.
+* **No attachments or approvals.** The tool does not read or write attachments, approvals, or SLA records.
+* **Basic auth or client credentials only.** Authorization code and JWT grants are not supported.
 
 ## Using it from a workbench
 

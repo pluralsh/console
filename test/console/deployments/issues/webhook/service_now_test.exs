@@ -78,4 +78,26 @@ defmodule Console.Deployments.Issues.Webhook.ServiceNowTest do
     assert ServiceNow.external_id(rec) == "abc"
     assert ServiceNow.body(rec) == "{empty}"
   end
+
+  test "drops links that are not http(s)" do
+    {:ok, rec} =
+      ServiceNow.record(%{
+        "table" => "incident",
+        "sys_id" => "abc",
+        "url" => "javascript:alert(1)",
+        "instance_url" => "data:text/html,x"
+      })
+
+    assert ServiceNow.url(rec) == nil
+
+    {:ok, rec} =
+      ServiceNow.record(%{
+        "table" => "incident",
+        "sys_id" => "abc",
+        "url" => "javascript:alert(1)",
+        "instance_url" => "https://example.service-now.com"
+      })
+
+    assert ServiceNow.url(rec) == "https://example.service-now.com/nav_to.do?uri=incident.do%3Fsys_id%3Dabc"
+  end
 end

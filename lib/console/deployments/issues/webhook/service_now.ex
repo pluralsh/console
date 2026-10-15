@@ -51,13 +51,30 @@ defmodule Console.Deployments.Issues.Webhook.ServiceNow do
   def title(%{"short_description" => title}) when is_binary(title), do: title
   def title(_), do: nil
 
-  def url(%{"url" => url}) when is_binary(url) and byte_size(url) > 0, do: url
+  # Links are rendered in the UI, so only http(s) URLs are kept.
+  def url(%{"url" => url} = rec) when is_binary(url) and byte_size(url) > 0 do
+    case web_url?(url) do
+      true -> url
+      false -> url(Map.delete(rec, "url"))
+    end
+  end
   def url(%{"instance_url" => base, "table" => table, "sys_id" => id})
       when is_binary(base) and is_binary(id) do
-    target = URI.encode_www_form("#{table}.do?sys_id=#{id}")
-    "#{String.trim_trailing(base, "/")}/nav_to.do?uri=#{target}"
+    case web_url?(base) do
+      true ->
+        target = URI.encode_www_form("#{table}.do?sys_id=#{id}")
+        "#{String.trim_trailing(base, "/")}/nav_to.do?uri=#{target}"
+      false -> nil
+    end
   end
   def url(_), do: nil
+
+  defp web_url?(url) do
+    case URI.parse(String.trim(url)) do
+      %URI{scheme: scheme, host: host} when scheme in ["http", "https"] and is_binary(host) and host != "" -> true
+      _ -> false
+    end
+  end
 
   def status(%{"table" => table, "state" => state} = rec) do
     with nil <- state_code(table, code(state)),

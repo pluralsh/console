@@ -170,7 +170,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
       assert uri.path == "/api/now/table/sys_journal_field"
 
       assert URI.decode_query(uri.query)["sysparm_query"] ==
-               "element_id=#{@sys_id}^name=sc_task^elementINcomments,work_notes^ORDERBYDESCsys_created_on"
+               "element_id=#{@sys_id}^elementINcomments,work_notes^ORDERBYDESCsys_created_on"
 
       {:ok, %Req.Response{status: 200, body: ~s({"result":[{"value":"hi"}]})}}
     end)

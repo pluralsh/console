@@ -87,3 +87,12 @@ are mapped from their label (for example "In Progress", "Resolved",
 
 Plural does not check timestamps, so a captured request could be replayed.
 Rotate the secret if you suspect it leaked.
+
+## Limitations
+
+- Only `incident`, `change_request`, `problem` and `sc_task` are handled;
+  other tables are acknowledged and ignored.
+- Links that are not `http(s)` are dropped.
+- The secret header is only safe over HTTPS. Use the signature option if you
+  cannot guarantee that.
+- Delivery is not retried and deleted tickets are not removed from Plural.

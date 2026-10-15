@@ -1296,7 +1296,7 @@ func (c *WorkbenchToolServiceNowConfig) Attributes(ctx context.Context, cl clien
 		if err != nil {
 			return nil, err
 		}
-		attr.Password = lo.ToPtr(password)
+		attr.Password = new(password)
 	}
 
 	return attr, nil
