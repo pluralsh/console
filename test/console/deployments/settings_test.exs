@@ -602,6 +602,62 @@ defmodule Console.Deployments.SettingsTest do
 
       {:error, "no federated credential" <> _} = Settings.exchange_token(token, user.email)
     end
+
+    test "it will exchange a kubernetes service account token" do
+      user = insert(:user)
+      issuer = "https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
+      sub = "system:serviceaccount:crossplane-system:provider-plural"
+
+      insert(:federated_credential,
+        issuer: issuer,
+        user: user,
+        claims_like: %{"sub" => "^#{sub}$", "aud" => "^plural$"}
+      )
+
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(%{"iss" => issuer, "sub" => sub, "aud" => ["plural"]}, signer)
+
+      {:ok, conf} =
+        Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), Settings.issuer_quirks())
+
+      expect(Console.OIDC.ProviderConfiguration, :fetch, fn ^issuer, _ ->
+        {:ok, {conf, JOSE.JWK.generate_key({:oct, 16})}}
+      end)
+
+      expect(Oidcc.Token, :validate_jwt, fn _, %{client_id: "plural"}, _ ->
+        {:ok, %{"iss" => issuer, "sub" => sub, "aud" => ["plural"]}}
+      end)
+
+      {:ok, token} = Settings.exchange_token(token, user.email)
+
+      assert is_binary(token)
+    end
+  end
+
+  describe "#issuer_quirks/0" do
+    test "it lets kubernetes discovery documents, which omit scopes_supported, decode" do
+      issuer = "https://kubernetes.default.svc.cluster.local"
+
+      {:error, _} = Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), %{})
+
+      {:ok, conf} =
+        Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), Settings.issuer_quirks())
+
+      assert conf.jwks_uri == "#{issuer}/openid/v1/jwks"
+    end
+  end
+
+  # what the kubernetes apiserver serves at /.well-known/openid-configuration
+  defp k8s_discovery(issuer) do
+    %{
+      "issuer" => issuer,
+      "jwks_uri" => "#{issuer}/openid/v1/jwks",
+      "response_types_supported" => ["id_token"],
+      "subject_types_supported" => ["public"],
+      "id_token_signing_alg_values_supported" => ["RS256"]
+    }
   end
 
   defp model_fields(),
