@@ -7,6 +7,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/openaiproxy"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 // Option is a function that configures an MCP server instance
@@ -34,15 +35,16 @@ func WithVersion(version string) Option {
 }
 
 // WithOpenAIProxy registers local OpenAI chat completion and responses endpoints
-// that convert streaming client requests into non-streaming upstream calls.
-func WithOpenAIProxy(chatCompletionsURL, responsesURL string) Option {
+// that convert streaming client requests into non-streaming upstream calls,
+// authenticating with the run's Plural token instead of the caller's.
+func WithOpenAIProxy(chatCompletionsURL, responsesURL string, token func() string) Option {
 	return func(s *Server) {
 		if chatCompletionsURL != "" {
 			handler, err := openaiproxy.NewHandler(openaiproxy.Config{UpstreamURL: chatCompletionsURL})
 			if err != nil {
 				klog.Fatalf("could not configure openai chat completion proxy: %v", err)
 			}
-			s.openaiProxy = handler
+			s.openaiProxy = withBearerToken(token, handler)
 		}
 
 		if responsesURL != "" {
@@ -50,8 +52,20 @@ func WithOpenAIProxy(chatCompletionsURL, responsesURL string) Option {
 			if err != nil {
 				klog.Fatalf("could not configure openai responses proxy: %v", err)
 			}
-			s.openaiResponsesProxy = handler
+			s.openaiResponsesProxy = withBearerToken(token, handler)
 		}
+	}
+}
+
+// WithConsoleAIProxy registers a local reverse proxy to the Console AI proxy
+// that authenticates with the run's Plural token, so the agent never holds it.
+func WithConsoleAIProxy(upstreamURL string, token func() string) Option {
+	return func(s *Server) {
+		handler, err := newConsoleAIProxy(common.AgentConsoleAIPath, upstreamURL, token)
+		if err != nil {
+			klog.Fatalf("could not configure console ai proxy: %v", err)
+		}
+		s.consoleAIProxy = handler
 	}
 }
 

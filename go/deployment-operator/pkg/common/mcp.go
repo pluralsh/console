@@ -19,6 +19,13 @@ const (
 	AgentConsoleExtGQLPath = "/plural/ext/gql"
 	AgentConsoleExtGQLURL  = "http://127.0.0.1:8080/plural/ext/gql"
 
+	// AgentConsoleProxyURL stands in for the Console URL in agent AI provider config. The sidecar
+	// forwards AgentConsoleAIPath to the Console AI proxy and injects the run's Plural token.
+	AgentConsoleProxyURL = "http://127.0.0.1:8080/plural"
+	AgentConsoleAIPath   = "/plural/ext/ai/"
+	// AgentAIProxyAPIKey is the placeholder API key agents send to the sidecar, which replaces it.
+	AgentAIProxyAPIKey = "plural-sidecar"
+
 	AgentMCPGRPCPort          = 8081
 	AgentMCPGRPCServerAddress = ":8081"
 	AgentMCPGRPCAddress       = "127.0.0.1:8081"

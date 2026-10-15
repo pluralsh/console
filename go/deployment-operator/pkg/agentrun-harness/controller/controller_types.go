@@ -29,9 +29,6 @@ type agentRunController struct {
 	// consoleClient is the client for Console API
 	consoleClient console.Client
 
-	// consoleURl is needed for MCP Server
-	consoleUrl string
-
 	// tool is the agent run tool that is being executed
 	tool v1.Tool
 

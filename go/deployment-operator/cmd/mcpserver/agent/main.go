@@ -182,7 +182,10 @@ func createServerOptions(
 	}
 
 	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
-		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL()))
+		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL(), credentials.PluralToken))
+	}
+	if new(v1.AgentRun).FromAgentRunFragment(agentRun).IsProxyEnabled() {
+		opts = append(opts, agent.WithConsoleAIProxy(args.ConsoleURL()+"/ext/ai", credentials.PluralToken))
 	}
 	if token := args.DeployToken(); token != "" {
 		opts = append(opts, agent.WithConsoleExtProxy(args.ConsoleExtApiURL(), token, args.AgentRunID()))

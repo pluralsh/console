@@ -8,7 +8,6 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/openaiproxy"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
@@ -42,10 +41,10 @@ type Server struct {
 	tools []tool.Tool
 
 	// openaiProxy optionally exposes a local OpenAI chat completion endpoint
-	openaiProxy *openaiproxy.Handler
+	openaiProxy http.Handler
 
 	// openaiResponsesProxy optionally exposes a local OpenAI responses endpoint
-	openaiResponsesProxy *openaiproxy.ResponsesHandler
+	openaiResponsesProxy http.Handler
 
 	// workbenchMCPProxy exposes the originating workbench without sharing its
 	// user credential with the coding-agent container.
@@ -53,6 +52,9 @@ type Server struct {
 
 	// consoleExtProxy forwards the harness's allowlisted Console ext calls, adding the deploy token.
 	consoleExtProxy http.Handler
+
+	// consoleAIProxy forwards the agent's model calls to the Console AI proxy, adding the run's Plural token.
+	consoleAIProxy http.Handler
 }
 
 // Start starts the MCP server with streamable HTTP transport
@@ -98,6 +100,10 @@ func (in *Server) init() *Server {
 	if in.consoleExtProxy != nil {
 		mux.Handle(common.AgentConsoleExtGQLPath, in.consoleExtProxy)
 		klog.V(log.LogLevelDefault).InfoS("registered console ext proxy", "path", common.AgentConsoleExtGQLPath)
+	}
+	if in.consoleAIProxy != nil {
+		mux.Handle(common.AgentConsoleAIPath, in.consoleAIProxy)
+		klog.V(log.LogLevelDefault).InfoS("registered console ai proxy", "path", common.AgentConsoleAIPath)
 	}
 	if in.openaiProxy != nil {
 		mux.Handle(common.AgentOpenAIChatCompletionsPath, in.openaiProxy)

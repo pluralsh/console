@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/samber/lo"
-
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 // These paths keep Codex's native state, prompt, and skills inside the
@@ -33,11 +32,8 @@ var _ toolv1.Agent = (*Agent)(nil)
 
 // NewAgent creates a Codex Agent for one agent run.
 func NewAgent(config toolv1.Config) *Agent {
-	agent := &Agent{config: config}
-	if config.Run != nil && config.Run.PluralCreds != nil {
-		agent.consoleToken = lo.FromPtr(config.Run.PluralCreds.Token)
-	}
-	return agent
+	// The sidecar replaces this placeholder with the run's Plural token.
+	return &Agent{config: config, consoleToken: common.AgentAIProxyAPIKey}
 }
 
 // Type identifies the Console runtime implemented by Agent.

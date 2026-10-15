@@ -21,9 +21,3 @@ func WithWorkingDir(dir string) Option {
 		s.dir = dir
 	}
 }
-
-func WithConsoleUrl(url string) Option {
-	return func(s *agentRunController) {
-		s.consoleUrl = url
-	}
-}

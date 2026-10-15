@@ -29,7 +29,6 @@ func main() {
 	opts := []controller.Option{
 		controller.WithAgentRun(args.AgentRunID()),
 		controller.WithConsoleClient(consoleClient),
-		controller.WithConsoleUrl(args.ConsoleUrl()),
 		controller.WithWorkingDir(args.WorkingDir()),
 	}
 
