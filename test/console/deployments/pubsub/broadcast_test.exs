@@ -123,4 +123,14 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
       Broadcast.handle_event(event)
     end
   end
+
+  describe "AgentRunUpdated" do
+    test "it will push an agent.run.event so pending follow-ups are kicked immediately" do
+      %{runtime: %{cluster_id: cluster_id}, id: id} = run = insert(:agent_run, status: :pending, followup: true)
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^cluster_id, "agent.run.event", %{"id" => ^id} -> :ok end)
+
+      event = %PubSub.AgentRunUpdated{item: run}
+      Broadcast.handle_event(event)
+    end
+  end
 end

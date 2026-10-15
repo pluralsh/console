@@ -217,14 +217,15 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 
 	// A terminal run can be requeued to pending (follow-up reprompt). Replace any
 	// finished pod so a fresh harness boots instead of treating the old pod as
-	// the run result.
+	// the run result. Requeue quickly so the next turn starts without waiting
+	// for the long agent-run poll interval.
 	if apiAgentRun.Status == console.AgentRunStatusPending && isAgentRunPodTerminal(pod) {
 		logger.V(2).Info("recreating agent run pod for pending follow-up", "pod", pod.Name)
 		if err := r.Delete(ctx, pod); err != nil && !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
 		run.Status.PodRef = nil
-		return jitterRequeue(requeueAfterAgentRun, jitter), nil
+		return jitterRequeue(requeueWaitForResources, jitter), nil
 	}
 
 	if completion, ok, delay := getAgentRunPodCompletion(pod, agentRunMaxLifetimeForRuntime(agentRuntime)); ok {

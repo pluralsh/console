@@ -31,8 +31,11 @@ import (
 )
 
 const (
-	AgentRuntimeFinalizer       = "deployments.plural.sh/agent-runtime-protection"
-	requeueAfterAgentRuntime    = 2 * time.Minute
+	AgentRuntimeFinalizer = "deployments.plural.sh/agent-runtime-protection"
+	// Poll pending runs often enough that terminal reprompts do not sit idle
+	// for minutes if the websocket kick is missed. Websocket AgentRunUpdated
+	// remains the fast path.
+	requeueAfterAgentRuntime    = 30 * time.Second
 	pendingAgentRunFetchRetries = 3
 )
 

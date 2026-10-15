@@ -58,7 +58,10 @@ defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.StackRunC
   def message(%{item: %{cluster_id: cid, id: id}}), do: {"cluster:#{cid}", "stack.run.event", %{"id" => id}}
 end
 
-defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.AgentRunCreated] do
+defimpl Console.Deployments.PubSub.Broadcastable, for: [
+  Console.PubSub.AgentRunCreated,
+  Console.PubSub.AgentRunUpdated
+] do
   alias Console.Schema.AgentRun
 
   def message(%{item: %AgentRun{} = run}) do
