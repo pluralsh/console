@@ -391,6 +391,10 @@
     "relPath": "/plural-features/workbenches/integrations/tools/linear.md",
     "lastmod": "2026-10-05T13:57:24.000Z"
   },
+  "/plural-features/workbenches/integrations/tools/service-now": {
+    "relPath": "/plural-features/workbenches/integrations/tools/service-now.md",
+    "lastmod": "2026-10-15T13:03:27.000Z"
+  },
   "/plural-features/workbenches/integrations/tools/azure-devops": {
     "relPath": "/plural-features/workbenches/integrations/tools/azure-devops.md",
     "lastmod": "2026-10-05T13:57:24.000Z"
@@ -490,6 +494,10 @@
   "/plural-features/workbenches/integrations/webhooks/linear": {
     "relPath": "/plural-features/workbenches/integrations/webhooks/linear.md",
     "lastmod": "2026-10-05T13:57:24.000Z"
+  },
+  "/plural-features/workbenches/integrations/webhooks/service-now": {
+    "relPath": "/plural-features/workbenches/integrations/webhooks/service-now.md",
+    "lastmod": "2026-10-15T13:03:27.000Z"
   },
   "/plural-features/workbenches/integrations/chatbots": {
     "relPath": "/plural-features/workbenches/integrations/chatbots.md",
