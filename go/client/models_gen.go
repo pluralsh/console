@@ -1020,12 +1020,6 @@ type Alert struct {
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// The service this alert was associated with
 	Service *Service `json:"service,omitempty"`
-	// The Plural service this alert was associated with
-	ServiceDeployment *ServiceDeployment `json:"serviceDeployment,omitempty"`
-	// The evaluated values that triggered this alert, e.g. A=1018071, B=1 (grafana only)
-	Value *string `json:"value,omitempty"`
-	// Link to silence this alert in its provider (grafana only)
-	SilenceURL *string `json:"silenceUrl,omitempty"`
 	// The project this alert was associated with
 	Project *Project `json:"project,omitempty"`
 	// The flow this alert was associated with
@@ -1043,18 +1037,6 @@ type Alert struct {
 type AlertConnection struct {
 	PageInfo PageInfo     `json:"pageInfo"`
 	Edges    []*AlertEdge `json:"edges,omitempty"`
-	// total number of alerts matching the query's filters (counted only when selected)
-	TotalCount *int64 `json:"totalCount,omitempty"`
-}
-
-type AlertCountBySeverity struct {
-	Severity AlertSeverity `json:"severity"`
-	Count    int64         `json:"count"`
-}
-
-type AlertCountByType struct {
-	Type  ObservabilityWebhookType `json:"type"`
-	Count int64                    `json:"count"`
 }
 
 type AlertEdge struct {
@@ -10828,7 +10810,6 @@ type Workbench struct {
 	WriteBindings       []*PolicyBinding              `json:"writeBindings,omitempty"`
 	WorkbenchPolicies   *WorkbenchPolicyConnection    `json:"workbenchPolicies,omitempty"`
 	Runs                *WorkbenchJobConnection       `json:"runs,omitempty"`
-	RunCounts           *WorkbenchJobCounts           `json:"runCounts,omitempty"`
 	Crons               *WorkbenchCronConnection      `json:"crons,omitempty"`
 	Prompts             *WorkbenchPromptConnection    `json:"prompts,omitempty"`
 	WorkbenchSkills     *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
@@ -10841,7 +10822,6 @@ type Workbench struct {
 	Webhooks    *WorkbenchWebhookConnection    `json:"webhooks,omitempty"`
 	Chatbots    *WorkbenchChatbotConnection    `json:"chatbots,omitempty"`
 	Alerts      *AlertConnection               `json:"alerts,omitempty"`
-	AlertCounts *WorkbenchAlertCounts          `json:"alertCounts,omitempty"`
 	Issues      *IssueConnection               `json:"issues,omitempty"`
 	IssueCounts *WorkbenchIssueCounts          `json:"issueCounts,omitempty"`
 	// users that have read or write access to this workbench
@@ -10858,11 +10838,6 @@ type WorkbenchAggregates struct {
 	PullRequestMergeRate *float64 `json:"pullRequestMergeRate,omitempty"`
 	// average eval grade across workbench eval results
 	EvalResults *float64 `json:"evalResults,omitempty"`
-}
-
-type WorkbenchAlertCounts struct {
-	Types      []*AlertCountByType     `json:"types,omitempty"`
-	Severities []*AlertCountBySeverity `json:"severities,omitempty"`
 }
 
 type WorkbenchAttributes struct {
@@ -11632,24 +11607,6 @@ type WorkbenchJobCodingModesAttributes struct {
 type WorkbenchJobConnection struct {
 	PageInfo PageInfo            `json:"pageInfo"`
 	Edges    []*WorkbenchJobEdge `json:"edges,omitempty"`
-	// total number of jobs matching the query's filters (counted only when selected)
-	TotalCount *int64 `json:"totalCount,omitempty"`
-}
-
-type WorkbenchJobCountByPrState struct {
-	State WorkbenchJobPrState `json:"state"`
-	Count int64               `json:"count"`
-}
-
-type WorkbenchJobCountByStatus struct {
-	Status WorkbenchJobStatus `json:"status"`
-	Count  int64              `json:"count"`
-}
-
-type WorkbenchJobCounts struct {
-	Statuses []*WorkbenchJobCountByStatus `json:"statuses,omitempty"`
-	// jobs with at least one pull request in each state (a job can count towards several)
-	PullRequests []*WorkbenchJobCountByPrState `json:"pullRequests,omitempty"`
 }
 
 type WorkbenchJobDelta struct {
@@ -13708,62 +13665,6 @@ func (e *AlertSeverity) UnmarshalJSON(b []byte) error {
 }
 
 func (e AlertSeverity) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
-type AlertSort string
-
-const (
-	// last update, falling back to creation for alerts never updated
-	AlertSortUpdatedAt AlertSort = "UPDATED_AT"
-	AlertSortTitle     AlertSort = "TITLE"
-)
-
-var AllAlertSort = []AlertSort{
-	AlertSortUpdatedAt,
-	AlertSortTitle,
-}
-
-func (e AlertSort) IsValid() bool {
-	switch e {
-	case AlertSortUpdatedAt, AlertSortTitle:
-		return true
-	}
-	return false
-}
-
-func (e AlertSort) String() string {
-	return string(e)
-}
-
-func (e *AlertSort) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = AlertSort(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid AlertSort", str)
-	}
-	return nil
-}
-
-func (e AlertSort) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *AlertSort) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e AlertSort) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -20296,66 +20197,6 @@ func (e *WorkbenchJobActivityType) UnmarshalJSON(b []byte) error {
 }
 
 func (e WorkbenchJobActivityType) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
-type WorkbenchJobPrState string
-
-const (
-	WorkbenchJobPrStateOpen   WorkbenchJobPrState = "OPEN"
-	WorkbenchJobPrStateMerged WorkbenchJobPrState = "MERGED"
-	WorkbenchJobPrStateClosed WorkbenchJobPrState = "CLOSED"
-	// jobs without any pull requests
-	WorkbenchJobPrStateNone WorkbenchJobPrState = "NONE"
-)
-
-var AllWorkbenchJobPrState = []WorkbenchJobPrState{
-	WorkbenchJobPrStateOpen,
-	WorkbenchJobPrStateMerged,
-	WorkbenchJobPrStateClosed,
-	WorkbenchJobPrStateNone,
-}
-
-func (e WorkbenchJobPrState) IsValid() bool {
-	switch e {
-	case WorkbenchJobPrStateOpen, WorkbenchJobPrStateMerged, WorkbenchJobPrStateClosed, WorkbenchJobPrStateNone:
-		return true
-	}
-	return false
-}
-
-func (e WorkbenchJobPrState) String() string {
-	return string(e)
-}
-
-func (e *WorkbenchJobPrState) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = WorkbenchJobPrState(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid WorkbenchJobPrState", str)
-	}
-	return nil
-}
-
-func (e WorkbenchJobPrState) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *WorkbenchJobPrState) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e WorkbenchJobPrState) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

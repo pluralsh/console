@@ -24,10 +24,16 @@ func newBearerTokenProxy(upstreamURL string, token func() string) (http.Handler,
 			request.Out.URL.Path = target.Path
 			request.Out.URL.RawPath = target.RawPath
 			request.Out.Host = target.Host
-			request.Out.Header.Del("Cookie")
-			request.Out.Header.Del("Proxy-Authorization")
-			request.Out.Header.Set("Authorization", "Bearer "+token())
+			setBearerToken(request.Out.Header, token())
 		},
 	}
 	return proxy, nil
+}
+
+// setBearerToken drops every credential the caller sent and authenticates with token instead.
+func setBearerToken(header http.Header, token string) {
+	header.Del("Cookie")
+	header.Del("Proxy-Authorization")
+	header.Del("X-Api-Key")
+	header.Set("Authorization", "Bearer "+token)
 }

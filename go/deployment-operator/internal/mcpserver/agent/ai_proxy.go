@@ -28,10 +28,7 @@ func newConsoleAIProxy(prefix, upstreamURL string, token func() string) (http.Ha
 			request.Out.URL.Path = base + "/" + rest
 			request.Out.URL.RawPath = ""
 			request.Out.Host = target.Host
-			request.Out.Header.Del("Cookie")
-			request.Out.Header.Del("Proxy-Authorization")
-			request.Out.Header.Del("X-Api-Key")
-			request.Out.Header.Set("Authorization", "Bearer "+token())
+			setBearerToken(request.Out.Header, token())
 		},
 	}
 
@@ -57,8 +54,7 @@ func hasDotSegment(path string) bool {
 // withBearerToken replaces the caller's credentials with the run's Plural token before calling next.
 func withBearerToken(token func() string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.Header.Del("X-Api-Key")
-		r.Header.Set("Authorization", "Bearer "+token())
+		setBearerToken(r.Header, token())
 		next.ServeHTTP(w, r)
 	})
 }
