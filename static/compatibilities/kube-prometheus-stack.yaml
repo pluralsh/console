@@ -5,28 +5,23 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 92.3.1
+- version: 92.7.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "No Helm values changes are called out in the provided release notes\
-      \ for 92.3.0 \u2192 92.3.1.\n\n- 92.3.0 updated the **Grafana image tag** to\
-      \ **v13.5.0** (verify you don\u2019t pin an older image tag in `values.yaml`\
-      \ that would prevent this from taking effect).\n- 92.3.1 is a **dependency-only\
-      \ non-major update**; review any pinned subchart versions if you override them\
-      \ via `kube-prometheus-stack` dependencies/`Chart.lock` behavior in your workflow."
-    chart_updates: ['92.3.0: CI workflow dependency updates (no runtime impact expected).',
-      '92.3.0: Grafana Docker image tag bumped to v13.5.0.', '92.3.1: Updated kube-prometheus-stack
-        chart dependencies (non-major updates via Renovate).']
-    features: [Grafana image updated to v13.5.0 (may include upstream Grafana fixes/changes).,
-      Dependency refresh in 92.3.1 may pull in patch/minor updates to bundled subcharts
-        without changing major versions.]
+    helm_changes: ''
+    chart_updates: [Grafana image tag bumped from v13.5.0 (chart 92.3.0) to v13.6.0
+        (chart 92.7.0)., "No other chart-facing changes were noted in the provided\
+        \ release notes; intermediate versions (92.4.0\u201392.6.x) were not included,\
+        \ so validate diffs if you\u2019re upgrading across them."]
+    features: ['Grafana updated to 13.6.0, which may include upstream fixes and minor
+        enhancements from Grafana.']
     breaking_changes: []
-  chart_version: 92.3.1
+  chart_version: 92.7.0
   images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.4-distroless',
-    'ghcr.io/jkroepke/kube-webhook-certgen:1.8.9', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
     'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
