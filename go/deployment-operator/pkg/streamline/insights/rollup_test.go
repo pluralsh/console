@@ -34,6 +34,17 @@ func TestScore(t *testing.T) {
 		{name: "failing for a day", root: failingFor(root("a", insights.ScoreLow), 25*time.Hour), want: insights.ScoreLow + 5},
 		{name: "failing for minutes", root: failingFor(root("a", insights.ScoreLow), 5*time.Minute), want: insights.ScoreLow},
 		{name: "capped at 100", root: failingFor(withReplicas(root("a", 95), 1, 0), 48*time.Hour), want: 100},
+
+		// apps never reach HIGH on their own, however bad the failure is
+		{name: "an app with a high base is capped below HIGH", root: withReplicas(root("a", insights.ScoreMedium), 1, 0), want: insights.ThresholdHigh - 1},
+		{name: "an app failing for days is capped below HIGH", root: failingFor(withReplicas(root("a", insights.ScoreMedium), 2, 0), 72*time.Hour), want: insights.ThresholdHigh - 1},
+		{name: "a total app outage is MEDIUM", root: withReplicas(root("a", insights.ScoreLow), 2, 0), want: insights.ScoreLow + insights.SeverityMax},
+
+		// core components are HIGH when partly down and CRITICAL when most of them are down
+		{name: "core partial outage stays HIGH", root: withReplicas(root("a", insights.ScoreCore), 2, 1), want: insights.ScoreCore + 10},
+		{name: "core three quarters down is CRITICAL", root: withReplicas(root("a", insights.ScoreCore), 4, 1), want: insights.ThresholdCritical},
+		{name: "core full outage is CRITICAL", root: withReplicas(root("a", insights.ScoreCore), 2, 0), want: insights.ScoreCore + insights.SeverityMax},
+		{name: "core half down for a day is CRITICAL", root: failingFor(withReplicas(root("a", insights.ScoreCore), 2, 1), 25*time.Hour), want: insights.ThresholdCritical},
 	}
 
 	for _, tt := range tests {
@@ -51,11 +62,11 @@ func TestBucket(t *testing.T) {
 	assert.Equal(t, insights.PriorityCritical, insights.Bucket(insights.ThresholdCritical))
 	assert.Equal(t, insights.PriorityCritical, insights.Bucket(100))
 
-	// a full outage lifts a failure by exactly one bucket, never two
+	// a full outage lifts a failure by exactly one bucket, never two. Apps are additionally capped below HIGH in Score.
 	for _, c := range []struct{ base, want insights.Priority }{
 		{insights.Bucket(insights.ScoreLow + insights.SeverityMax), insights.PriorityMedium},
 		{insights.Bucket(insights.ScoreMedium + insights.SeverityMax), insights.PriorityHigh},
-		{insights.Bucket(insights.ScoreHigh + insights.SeverityMax), insights.PriorityCritical},
+		{insights.Bucket(insights.ScoreCore + insights.SeverityMax), insights.PriorityCritical},
 	} {
 		assert.Equal(t, c.want, c.base)
 	}
@@ -97,6 +108,15 @@ func TestSummarize(t *testing.T) {
 		return roots
 	}
 
+	t.Run("third party failures can not take the score below 60", func(t *testing.T) {
+		roots := append(many(20, insights.ScoreLow), many(20, insights.ScoreMedium)...)
+
+		s := insights.Summarize(roots, nil, now)
+
+		assert.Equal(t, int64(60), s.HealthScore, "LOW cap 10 plus MEDIUM cap 30")
+		assert.Len(t, s.Entries, 40, "the list is not capped")
+	})
+
 	t.Run("a healthy cluster scores 100", func(t *testing.T) {
 		s := insights.Summarize(nil, nil, now)
 		assert.Equal(t, int64(100), s.HealthScore)
@@ -106,8 +126,8 @@ func TestSummarize(t *testing.T) {
 	t.Run("one penalty per root by priority", func(t *testing.T) {
 		assert.Equal(t, int64(98), insights.Summarize(many(1, insights.ScoreLow), nil, now).HealthScore)
 		assert.Equal(t, int64(92), insights.Summarize(many(1, insights.ScoreMedium), nil, now).HealthScore)
-		assert.Equal(t, int64(75), insights.Summarize(many(1, insights.ScoreHigh), nil, now).HealthScore)
-		assert.Equal(t, int64(50), insights.Summarize(many(1, insights.ScoreCritical), nil, now).HealthScore)
+		assert.Equal(t, int64(75), insights.Summarize(many(1, insights.ScoreCore), nil, now).HealthScore)
+		assert.Equal(t, int64(50), insights.Summarize(many(1, insights.ThresholdCritical), nil, now).HealthScore)
 	})
 
 	t.Run("low failures can not leave the green band", func(t *testing.T) {
@@ -121,12 +141,12 @@ func TestSummarize(t *testing.T) {
 	})
 
 	t.Run("high and critical failures are not capped", func(t *testing.T) {
-		assert.Equal(t, int64(0), insights.Summarize(many(10, insights.ScoreHigh), nil, now).HealthScore)
-		assert.Equal(t, int64(0), insights.Summarize(many(3, insights.ScoreCritical), nil, now).HealthScore)
+		assert.Equal(t, int64(0), insights.Summarize(many(10, insights.ScoreCore), nil, now).HealthScore)
+		assert.Equal(t, int64(0), insights.Summarize(many(3, insights.ThresholdCritical), nil, now).HealthScore)
 	})
 
 	t.Run("ignored roots are in neither the list nor the score", func(t *testing.T) {
-		roots := many(2, insights.ScoreCritical)
+		roots := many(2, insights.ThresholdCritical)
 		roots[0].PriorityAnnotation = "IGNORE"
 
 		s := insights.Summarize(roots, nil, now)
@@ -149,7 +169,7 @@ func TestSummarize(t *testing.T) {
 		pinned := root("pinned", insights.ScoreLow)
 		pinned.PriorityAnnotation = "CRITICAL"
 		b, a := root("b", insights.ScoreMedium), root("a", insights.ScoreMedium)
-		critical := root("critical", insights.ScoreCritical)
+		critical := root("critical", insights.ThresholdCritical)
 
 		s := insights.Summarize([]insights.Root{b, a, pinned, critical}, nil, now)
 

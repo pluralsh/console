@@ -49,7 +49,7 @@ func TestGraceWindow(t *testing.T) {
 
 	t.Run("keeps a recovered root with its last priority until the period ends", func(t *testing.T) {
 		g := newGraceWindow(10 * time.Minute)
-		g.apply(summaryOf(failing("api", insights.ScoreCritical)), db, now)
+		g.apply(summaryOf(failing("api", insights.ThresholdCritical)), db, now)
 
 		entries := g.apply(summaryOf(), db, now.Add(5*time.Minute))
 
@@ -60,8 +60,8 @@ func TestGraceWindow(t *testing.T) {
 
 	t.Run("restarts the period while the root keeps failing", func(t *testing.T) {
 		g := newGraceWindow(10 * time.Minute)
-		g.apply(summaryOf(failing("api", insights.ScoreHigh)), db, now)
-		g.apply(summaryOf(failing("api", insights.ScoreHigh)), db, now.Add(8*time.Minute))
+		g.apply(summaryOf(failing("api", insights.ScoreCore)), db, now)
+		g.apply(summaryOf(failing("api", insights.ScoreCore)), db, now.Add(8*time.Minute))
 
 		assert.Equal(t, []string{"api"}, names(g.apply(summaryOf(), db, now.Add(15*time.Minute))))
 	})
@@ -69,24 +69,24 @@ func TestGraceWindow(t *testing.T) {
 	t.Run("reports a failing root once", func(t *testing.T) {
 		g := newGraceWindow(10 * time.Minute)
 
-		entries := g.apply(summaryOf(failing("api", insights.ScoreHigh)), db, now)
-		entries = g.apply(summaryOf(failing("api", insights.ScoreHigh)), db, now.Add(time.Minute))
+		entries := g.apply(summaryOf(failing("api", insights.ScoreCore)), db, now)
+		entries = g.apply(summaryOf(failing("api", insights.ScoreCore)), db, now.Add(time.Minute))
 
 		assert.Equal(t, []string{"api"}, names(entries))
 	})
 
 	t.Run("drops a deleted root at once", func(t *testing.T) {
 		g := newGraceWindow(10 * time.Minute)
-		g.apply(summaryOf(failing("gone", insights.ScoreHigh)), db, now)
+		g.apply(summaryOf(failing("gone", insights.ScoreCore)), db, now)
 
 		assert.Empty(t, g.apply(summaryOf(), db, now.Add(time.Minute)))
 	})
 
 	t.Run("drops a root that became ignored at once", func(t *testing.T) {
 		g := newGraceWindow(10 * time.Minute)
-		g.apply(summaryOf(failing("api", insights.ScoreHigh)), db, now)
+		g.apply(summaryOf(failing("api", insights.ScoreCore)), db, now)
 
-		ignored := failing("api", insights.ScoreHigh)
+		ignored := failing("api", insights.ScoreCore)
 		ignored.PriorityAnnotation = insights.Ignore
 
 		assert.Empty(t, g.apply(summaryOf(ignored), db, now.Add(time.Minute)))
@@ -96,14 +96,14 @@ func TestGraceWindow(t *testing.T) {
 	t.Run("drops a recovered root that was muted since", func(t *testing.T) {
 		muted := existingStore{uids: map[string]struct{}{"api": {}}, muted: map[string]string{"api": insights.Ignore}}
 		g := newGraceWindow(10 * time.Minute)
-		g.apply(summaryOf(failing("api", insights.ScoreHigh)), muted, now)
+		g.apply(summaryOf(failing("api", insights.ScoreCore)), muted, now)
 
 		assert.Empty(t, g.apply(summaryOf(), muted, now.Add(time.Minute)))
 	})
 
 	t.Run("a zero period disables the window", func(t *testing.T) {
 		g := newGraceWindow(0)
-		g.apply(summaryOf(failing("api", insights.ScoreHigh)), db, now)
+		g.apply(summaryOf(failing("api", insights.ScoreCore)), db, now)
 
 		assert.Empty(t, g.apply(summaryOf(), db, now.Add(time.Second)))
 	})

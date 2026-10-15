@@ -95,6 +95,10 @@ type Summary struct {
 
 // Score is the built-in score of a root: its criticality plus how severe the failure is.
 // Severity grows with the share of replicas that are not ready and with how long the root has been failing.
+//
+// A criticality below ThresholdHigh marks an app, whose score is capped below HIGH however bad the
+// failure is. Only core components, which start at ScoreCore, can be HIGH or CRITICAL on their own.
+// The annotation and CustomInsightPriority scripts are applied in Resolve and are not subject to the cap.
 func Score(r Root, now time.Time) int {
 	criticality := r.Criticality
 	if criticality == 0 {
@@ -114,6 +118,10 @@ func Score(r Root, now time.Time) int {
 		case age >= hour:
 			score += 3
 		}
+	}
+
+	if criticality < ThresholdHigh {
+		score = min(score, ThresholdHigh-1)
 	}
 
 	return min(score, maxScore)

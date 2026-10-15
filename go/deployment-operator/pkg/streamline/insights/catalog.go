@@ -1,13 +1,18 @@
 package insights
 
 // Priority scores. A root failure is scored as criticality + severity and bucketed with the
-// thresholds below. Criticality sits mid-bucket so that severity (a full outage adds up to
-// SeverityMax) can lift a failure one bucket, but never two.
+// thresholds below.
+//
+// There are two classes of objects. Core components of the cluster start at ScoreCore, which is
+// HIGH: a partial failure stays HIGH and only a failure that takes most of the component down
+// (SeverityMax lifts it past ThresholdCritical) is CRITICAL. Everything else is an app, it starts
+// at ScoreLow or ScoreMedium and is capped below ThresholdHigh, so a third-party workload can
+// never be more than MEDIUM on its own. Users raise their own apps with the priority annotation
+// or a CustomInsightPriority script, which do not go through that cap.
 const (
-	ScoreLow      = 10
-	ScoreMedium   = 35
-	ScoreHigh     = 60
-	ScoreCritical = 85
+	ScoreLow    = 10
+	ScoreMedium = 35
+	ScoreCore   = 60
 
 	// ThresholdMedium, ThresholdHigh and ThresholdCritical are the lowest scores of their buckets.
 	ThresholdMedium   = 25
@@ -28,45 +33,50 @@ type catalogEntry struct {
 }
 
 var catalog = []catalogEntry{
-	{name: "dns", score: ScoreCritical, keys: []string{"coredns", "kubedns"}},
-	{name: "kube-proxy", score: ScoreCritical, keys: []string{"kubeproxy"}},
-	{name: "cni", score: ScoreCritical, keys: []string{
+	{name: "dns", score: ScoreCore, keys: []string{"coredns", "kubedns"}},
+	{name: "kube-proxy", score: ScoreCore, keys: []string{"kubeproxy"}},
+	{name: "cni", score: ScoreCore, keys: []string{
 		"awsnode", "amazonvpccni", "awscni", "cilium", "calico", "calicotypha", "flannel", "kubeflannel", "canal", "antrea", "weavenet",
 	}},
-	{name: "csi", score: ScoreCritical, keys: []string{
+	{name: "csi", score: ScoreCore, keys: []string{
 		"csinode", "csicontroller", "ebscsi", "efscsi", "gcepdcsi", "azurediskcsi", "azurefilecsi",
 	}},
-	{name: "service mesh", score: ScoreCritical, keys: []string{"istiod", "istio", "linkerd"}},
-	{name: "cert-manager", score: ScoreCritical, keys: []string{"certmanager"}},
-	{name: "ingress controller", score: ScoreCritical, keys: []string{
+	{name: "service mesh", score: ScoreCore, keys: []string{"istiod", "istio", "linkerd"}},
+	{name: "cert-manager", score: ScoreCore, keys: []string{"certmanager"}},
+	{name: "ingress controller", score: ScoreCore, keys: []string{
 		"ingressnginx", "nginxingress", "traefik", "haproxyingress", "contour", "emissaryingress", "ambassador", "envoygateway",
 	}},
-	{name: "metrics-server", score: ScoreHigh, keys: []string{"metricsserver"}},
-	{name: "node-exporter", score: ScoreHigh, keys: []string{"nodeexporter"}},
-	{name: "autoscaler", score: ScoreHigh, keys: []string{"clusterautoscaler", "karpenter"}},
+	{name: "metrics-server", score: ScoreCore, keys: []string{"metricsserver"}},
+	{name: "autoscaler", score: ScoreCore, keys: []string{"clusterautoscaler", "karpenter"}},
 }
 
-// namespaceTiers hold namespaces by their separator-less, lowercase token runs.
+// namespaceTiers hold the namespaces of core components by their separator-less, lowercase token runs.
 var namespaceTiers = map[string]int{
-	"kubesystem":     ScoreHigh,
-	"istiosystem":    ScoreCritical,
-	"linkerd":        ScoreCritical,
-	"certmanager":    ScoreCritical,
-	"ingressnginx":   ScoreCritical,
-	"traefik":        ScoreCritical,
-	"calicosystem":   ScoreCritical,
-	"tigeraoperator": ScoreCritical,
-	"cilium":         ScoreCritical,
+	"kubesystem":     ScoreCore,
+	"istiosystem":    ScoreCore,
+	"linkerd":        ScoreCore,
+	"certmanager":    ScoreCore,
+	"ingressnginx":   ScoreCore,
+	"traefik":        ScoreCore,
+	"calicosystem":   ScoreCore,
+	"tigeraoperator": ScoreCore,
+	"cilium":         ScoreCore,
+
+	// Plural itself: the Console and the agent that reports every cluster
+	"plrlconsole":        ScoreCore,
+	"plrldeployoperator": ScoreCore,
 }
 
-// kindScores are the criticality of a failing root when nothing more specific applies.
+// kindScores are the criticality of a failing root when nothing more specific applies. Only a node
+// is core by kind, every workload and its Ingress or Certificate is an app unless it is classified
+// as core by name, namespace or priority class.
 var kindScores = map[string]int{
-	kindStatefulSet:         ScoreHigh,
-	kindDaemonSet:           ScoreMedium,
+	kindStatefulSet:         ScoreLow,
+	kindDaemonSet:           ScoreLow,
 	kindDeployment:          ScoreLow,
-	"Ingress":               ScoreCritical,
-	"Certificate":           ScoreCritical,
-	"Node":                  ScoreHigh,
+	"Ingress":               ScoreMedium,
+	"Certificate":           ScoreMedium,
+	"Node":                  ScoreCore,
 	"PersistentVolumeClaim": ScoreMedium,
 	"PersistentVolume":      ScoreMedium,
 }

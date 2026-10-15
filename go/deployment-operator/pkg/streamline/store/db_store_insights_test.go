@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
@@ -189,31 +190,30 @@ func TestComponentInsights(t *testing.T) {
 
 		// Define test components with various kinds to test priority assignment
 		testComponents := []client.ComponentChildAttributes{
-			// Critical priority resources
+			// Apps are never above MEDIUM on their own: an app's Ingress or Certificate is MEDIUM
 			createComponentAttributes("ingress-1", nil, WithAttributesKind("Ingress"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("ingress-1")),
 			createComponentAttributes("certificate-1", nil, WithAttributesKind("Certificate"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("certificate-1")),
 			createComponentAttributes("cert-manager-1", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("cert-manager-webhook"), WithAttributesNamespace("cert-manager")),
 			createComponentAttributes("coredns-1", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("coredns")),
 
-			// High priority resources
+			// Core components, without replica counts a failure is HIGH. A mostly down one is CRITICAL
 			createComponentAttributes("statefulset-1", nil, WithAttributesKind("StatefulSet"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("statefulset-1")),
 			createComponentAttributes("node-exporter", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("node-exporter")),
 
-			// Medium priority resources
+			// Third party workloads, whatever their kind
 			createComponentAttributes("daemonset-1", nil, WithAttributesKind("DaemonSet"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("daemonset-1")),
 
-			// Low priority resources (default)
 			createComponentAttributes("deployment-1", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("deployment-1")),
 		}
 
 		expectedComponentPriorityMap := map[string]client.InsightComponentPriority{
-			"ingress-1":            client.InsightComponentPriorityCritical,
-			"certificate-1":        client.InsightComponentPriorityCritical,
-			"cert-manager-webhook": client.InsightComponentPriorityCritical,
-			"coredns":              client.InsightComponentPriorityCritical,
-			"statefulset-1":        client.InsightComponentPriorityHigh,
-			"node-exporter":        client.InsightComponentPriorityHigh,
-			"daemonset-1":          client.InsightComponentPriorityMedium,
+			"ingress-1":            client.InsightComponentPriorityMedium,
+			"certificate-1":        client.InsightComponentPriorityMedium,
+			"cert-manager-webhook": client.InsightComponentPriorityHigh,
+			"coredns":              client.InsightComponentPriorityHigh,
+			"statefulset-1":        client.InsightComponentPriorityLow,
+			"node-exporter":        client.InsightComponentPriorityLow,
+			"daemonset-1":          client.InsightComponentPriorityLow,
 			"deployment-1":         client.InsightComponentPriorityLow,
 		}
 
@@ -270,13 +270,14 @@ func TestComponentInsights(t *testing.T) {
 		}
 
 		expectedComponentPriorityMap := map[string]client.InsightComponentPriority{
-			"cert-manager":             client.InsightComponentPriorityCritical,
-			"core-dns":                 client.InsightComponentPriorityCritical,
-			"istio-ingressgateway":     client.InsightComponentPriorityCritical,
-			"linkerd-proxy":            client.InsightComponentPriorityCritical,
-			"ebs-csi-node":             client.InsightComponentPriorityCritical,
-			"gce-pd-csi-controller-sa": client.InsightComponentPriorityCritical,
-			"app-in-sensitive-ns-1":    client.InsightComponentPriorityCritical,
+			// everything that belongs to a core component or namespace is HIGH without replica counts
+			"cert-manager":             client.InsightComponentPriorityHigh,
+			"core-dns":                 client.InsightComponentPriorityHigh,
+			"istio-ingressgateway":     client.InsightComponentPriorityHigh,
+			"linkerd-proxy":            client.InsightComponentPriorityHigh,
+			"ebs-csi-node":             client.InsightComponentPriorityHigh,
+			"gce-pd-csi-controller-sa": client.InsightComponentPriorityHigh,
+			"app-in-sensitive-ns-1":    client.InsightComponentPriorityHigh,
 			"app-in-sensitive-ns-2":    client.InsightComponentPriorityHigh,
 			"node-metrics-exporter":    client.InsightComponentPriorityLow,
 			"iso-ist-app":              client.InsightComponentPriorityLow,
@@ -536,7 +537,7 @@ func TestComponentInsights(t *testing.T) {
 		}
 	})
 
-	t.Run("should assign critical priority to cluster networking components", func(t *testing.T) {
+	t.Run("should assign high priority to cluster networking components", func(t *testing.T) {
 		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
 		assert.NoError(t, err)
 		defer func() {
@@ -545,7 +546,8 @@ func TestComponentInsights(t *testing.T) {
 			}
 		}()
 
-		// When any of these is down, pod networking or all ingress traffic is down for the whole cluster
+		// When any of these is down, pod networking or all ingress traffic is down for the whole cluster.
+		// Without replica counts the failure is HIGH, the tests below cover a component that is mostly down.
 		testComponents := []client.ComponentChildAttributes{
 			// AWS VPC CNI
 			createComponentAttributes("aws-node", nil, WithAttributesKind("DaemonSet"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("aws-node"), WithAttributesNamespace("kube-system")),
@@ -568,8 +570,49 @@ func TestComponentInsights(t *testing.T) {
 		}
 
 		for _, tc := range testComponents {
-			assert.Equal(t, client.InsightComponentPriorityCritical, priorityMap[tc.Name], "Priority for %s should be %s", tc.Name, client.InsightComponentPriorityCritical)
+			assert.Equal(t, client.InsightComponentPriorityHigh, priorityMap[tc.Name], "Priority for %s should be %s", tc.Name, client.InsightComponentPriorityHigh)
 		}
+	})
+
+	t.Run("should only make core components critical and only when most of them are down", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
+		assert.NoError(t, err)
+		defer func() {
+			if err := storeInstance.Shutdown(); err != nil {
+				t.Fatalf("Failed to close component cache: %v", err)
+			}
+		}()
+
+		// Running pods without a service are not stored, so every workload has one stored failed pod and only the
+		// desired and ready replica counts of the Deployment tell how much of it is down.
+		for _, w := range []struct {
+			name           string
+			desired, ready int64
+		}{
+			{name: "coredns", desired: 2, ready: 0},                  // core, fully down
+			{name: "ingress-nginx-controller", desired: 4, ready: 1}, // core, three quarters down
+			{name: "cert-manager-webhook", desired: 2, ready: 1},     // core, half down
+			{name: "orders-api", desired: 3, ready: 0},               // app, fully down
+			{name: "orders-worker", desired: 3, ready: 2},            // app, partly down
+		} {
+			saveProgressingDeployment(t, storeInstance, w.name, w.desired, w.ready)
+			require.NoError(t, storeInstance.SaveComponentAttributes(createComponentAttributes(w.name+"-rs", new(w.name), WithAttributesKind("ReplicaSet"), WithAttributesState(client.ComponentStatePending), WithAttributesName(w.name+"-rs"))))
+			require.NoError(t, storeInstance.SaveComponentAttributes(createComponentAttributes(w.name+"-pod", new(w.name+"-rs"), WithAttributesKind("Pod"), WithAttributesState(client.ComponentStateFailed), WithAttributesName(w.name+"-pod"))))
+		}
+
+		insights, err := storeInstance.GetComponentInsights()
+		require.NoError(t, err, "Failed to get component insights")
+
+		priorityMap := make(map[string]client.InsightComponentPriority)
+		for _, insight := range insights {
+			priorityMap[insight.Name] = *insight.Priority
+		}
+
+		assert.Equal(t, client.InsightComponentPriorityCritical, priorityMap["coredns"])
+		assert.Equal(t, client.InsightComponentPriorityCritical, priorityMap["ingress-nginx-controller"])
+		assert.Equal(t, client.InsightComponentPriorityHigh, priorityMap["cert-manager-webhook"])
+		assert.Equal(t, client.InsightComponentPriorityMedium, priorityMap["orders-api"], "an app is at most MEDIUM, even fully down")
+		assert.Equal(t, client.InsightComponentPriorityLow, priorityMap["orders-worker"])
 	})
 
 	t.Run("should rank a full outage above a partial degradation of the same workload", func(t *testing.T) {
@@ -625,6 +668,28 @@ func saveProgressingDeployment(t *testing.T, storeInstance store.Store, name str
 	require.NoError(t, storeInstance.SaveComponent(deployment), "Failed to add deployment %s to cache", name)
 }
 
+// saveFailingDeployment stores a Deployment that exceeded its progress deadline with the given desired and ready
+// replicas, so it is a failing root by itself.
+func saveFailingDeployment(t *testing.T, storeInstance store.Store, namespace, name string, desired, ready int64) {
+	t.Helper()
+	deployment := unstructured.Unstructured{Object: map[string]any{
+		"apiVersion": "apps/v1",
+		"kind":       "Deployment",
+		"metadata":   map[string]any{"name": name, "namespace": namespace, "uid": namespace + "/" + name, "generation": int64(1)},
+		"spec":       map[string]any{"replicas": desired},
+		"status": map[string]any{
+			"observedGeneration": int64(1),
+			"replicas":           desired,
+			"readyReplicas":      ready,
+			"conditions": []any{map[string]any{
+				"type": "Progressing", "status": "False", "reason": "ProgressDeadlineExceeded",
+				"lastTransitionTime": time.Now().UTC().Format(time.RFC3339),
+			}},
+		},
+	}}
+	require.NoError(t, storeInstance.SaveComponent(deployment), "Failed to add deployment %s/%s to cache", namespace, name)
+}
+
 func priorityRank(priority client.InsightComponentPriority) int {
 	return lo.IndexOf(client.AllInsightComponentPriority, priority)
 }
@@ -671,21 +736,15 @@ func TestClusterHealthScore(t *testing.T) {
 		assert.Equal(t, threeNodes, tenNodes, "The same failure should score the same on a 3-node and a 10-node cluster")
 	})
 
-	t.Run("should apply the critical deduction to cluster critical components", func(t *testing.T) {
+	t.Run("should apply the critical deduction when a core component is mostly down", func(t *testing.T) {
 		// The critical deduction is 50 points, so with an otherwise healthy cluster the score must not exceed 50.
-		// A single failed row without pods models a rollout blocked by unschedulable pods: the workload turns
-		// failed (progress deadline or progressing cutoff) and pods without a node are not stored.
-		const maxScore = 50
-
 		cases := []struct {
 			name      string
-			kind      string
 			namespace string
 		}{
-			{name: "coredns", kind: "Deployment", namespace: "kube-system"},
-			{name: "coredns", kind: "Deployment", namespace: "dns"},
-			{name: "aws-node", kind: "DaemonSet", namespace: "kube-system"},
-			{name: "istiod", kind: "Deployment", namespace: "istio-system"},
+			{name: "coredns", namespace: "kube-system"},
+			{name: "coredns", namespace: "dns"},
+			{name: "istiod", namespace: "istio-system"},
 		}
 
 		for _, tc := range cases {
@@ -699,13 +758,48 @@ func TestClusterHealthScore(t *testing.T) {
 				}()
 
 				saveHealthyComponents(t, storeInstance, 100)
-				err = storeInstance.SaveComponentAttributes(createComponentAttributes(tc.name, nil, WithAttributesKind(tc.kind), WithAttributesState(client.ComponentStateFailed), WithAttributesName(tc.name), WithAttributesNamespace(tc.namespace)))
-				require.NoError(t, err)
+				saveFailingDeployment(t, storeInstance, tc.namespace, tc.name, 2, 0)
 
 				score, err := storeInstance.GetHealthScore()
 				require.NoError(t, err)
-				assert.LessOrEqual(t, score, int64(maxScore), "Failed %s in %s should take the critical deduction", tc.name, tc.namespace)
+				assert.Equal(t, int64(50), score, "%s in %s is fully down and should take the critical deduction", tc.name, tc.namespace)
 			})
 		}
+	})
+
+	t.Run("should apply the high deduction when a core component is partly down", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
+		assert.NoError(t, err)
+		defer func() {
+			if err := storeInstance.Shutdown(); err != nil {
+				t.Fatalf("Failed to close component cache: %v", err)
+			}
+		}()
+
+		saveHealthyComponents(t, storeInstance, 100)
+		saveFailingDeployment(t, storeInstance, "kube-system", "coredns", 2, 1)
+
+		score, err := storeInstance.GetHealthScore()
+		require.NoError(t, err)
+		assert.Equal(t, int64(75), score, "one of two coredns replicas down is HIGH, 25 points")
+	})
+
+	t.Run("should not take the score below 60 for third party failures", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
+		assert.NoError(t, err)
+		defer func() {
+			if err := storeInstance.Shutdown(); err != nil {
+				t.Fatalf("Failed to close component cache: %v", err)
+			}
+		}()
+
+		saveHealthyComponents(t, storeInstance, 100)
+		for i := range 15 {
+			saveFailingDeployment(t, storeInstance, "shop", fmt.Sprintf("app-%d", i), 3, 0)
+		}
+
+		score, err := storeInstance.GetHealthScore()
+		require.NoError(t, err)
+		assert.Equal(t, int64(70), score, "total outages of apps are MEDIUM, capped at 30 points")
 	})
 }

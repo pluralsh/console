@@ -37,8 +37,10 @@ const (
 
 	defaultQueryTimeout = 10 * time.Second
 
-	// schemaVersion is stored in the database as PRAGMA user_version. Bump it whenever the component table changes.
-	schemaVersion = 2
+	// schemaVersion is stored in the database as PRAGMA user_version. Bump it whenever the component table changes
+	// or the meaning of a stored column does: version 3 changed what the stored criticality stands for, core
+	// components start at 60 and apps are capped below HIGH.
+	schemaVersion = 3
 )
 
 // Option represents a function that configures the database store.

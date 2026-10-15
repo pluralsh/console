@@ -37,19 +37,31 @@ The score is the criticality of the component plus the severity of its failure, 
 | 50 to 74 | `HIGH` |
 | 75 and above | `CRITICAL` |
 
-**Criticality** says how much depends on the component. The first rule that matches decides:
+Every failing object is either a **core component** of the cluster or an **app**, and that decides the range it can reach on its own:
 
-1. A `system-*` priority class, such as `system-cluster-critical`, is `CRITICAL` (85).
-2. A well-known cluster component is matched by name. DNS (`coredns`, `kube-dns`), `kube-proxy`, CNI plugins (`aws-node`, `cilium`, `calico`, `flannel` and others), CSI drivers, service mesh control planes (`istio`, `linkerd`), `cert-manager` and ingress controllers are `CRITICAL`. `metrics-server`, `node-exporter`, the cluster autoscaler and Karpenter are `HIGH` (60).
-3. A system namespace: `kube-system` is `HIGH`, namespaces such as `istio-system`, `cert-manager`, `ingress-nginx` and `calico-system` are `CRITICAL`.
-4. The kind: a StatefulSet is `HIGH` (60), a DaemonSet `MEDIUM` (35), a Deployment `LOW` (10), and Ingresses and Certificates are `CRITICAL`.
+| Class | Starts at | Highest it can get | Typical result |
+| ----- | --------- | ------------------ | -------------- |
+| App | 10, or 35 for Ingresses, Certificates and persistent volumes | `MEDIUM` | partly down is `LOW`, down or with a broken Ingress or Certificate is `MEDIUM` |
+| Core | 60 | `CRITICAL` | partly down is `HIGH`, mostly down is `CRITICAL` |
+
+`HIGH` and `CRITICAL` are therefore reserved for what keeps the cluster and the apps running, and a broken third-party workload never turns the cluster red on its own. To treat one of your own apps as important, pin its priority with an [annotation](#annotations) or a [script](#custominsightpriority), neither is limited by this.
+
+**Criticality** says whether the component is core. The first rule that matches decides:
+
+1. A `system-*` priority class, such as `system-cluster-critical`, is core.
+2. A well-known cluster component is matched by name and is core. These are DNS (`coredns`, `kube-dns`), `kube-proxy`, CNI plugins (`aws-node`, `cilium`, `calico`, `flannel` and others), CSI drivers, service mesh control planes (`istio`, `linkerd`), `cert-manager`, ingress controllers, `metrics-server`, the cluster autoscaler and Karpenter.
+3. A system namespace is core: `kube-system`, `istio-system`, `linkerd`, `cert-manager`, `ingress-nginx`, `traefik`, `calico-system`, `tigera-operator`, `cilium`, `plrl-console` and `plrl-deploy-operator`.
+4. A node is core.
+5. Everything else is an app. A Deployment, StatefulSet, DaemonSet, Job or CronJob starts at 10. An Ingress, Certificate or persistent volume starts at 35.
 
 Names are matched on whole words only. The name is split on `-`, `_` and `.`, and any run of consecutive words, joined together, can match a known component, so `core-dns` and `rke2-ingress-nginx-controller` match, while `concert-manager` and `core-banking-dns-proxy` do not.
 
 **Severity** says how bad the failure is, and adds to the criticality:
 
-- Up to 20 points for the share of replicas that are not ready. A Deployment with none of its three replicas ready adds the full 20, one with two of three ready adds 7. A full outage therefore raises a failure by one level.
+- Up to 20 points for the share of replicas that are not ready. A Deployment with none of its three replicas ready adds the full 20, one with two of three ready adds 7. A core component with three quarters of its replicas down is `CRITICAL`.
 - 3 points when the failure has lasted an hour, 5 points when it has lasted a day.
+
+The score of an app stops at 49 however severe the failure is.
 
 ## Annotations
 
@@ -66,6 +78,8 @@ metadata:
 ## CustomInsightPriority
 
 A `CustomInsightPriority` runs a Python script over the failing objects it targets and lets it set their priority. Like [CustomHealth](/plural-features/continuous-deployment/deployment-operator/custom-health), it is a deployment-operator API, so apply it to each cluster where it should be used, or distribute it with a [GlobalService](/plural-features/continuous-deployment/global-service).
+
+The built-in rules rank a third-party workload at most `MEDIUM`, because the operator cannot know which of your apps matter. A script is how you tell it. The example below treats the StatefulSets labelled `tier: core` in two namespaces as important and raises them to `CRITICAL` when none of their replicas is ready:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -135,8 +149,8 @@ The script defines `evaluate(input)` and returns a dictionary from the `uid` of 
       "desired_replicas": 3, "ready_replicas": 0,
       "descendants": { "Pod": { "failed": 3, "pending": 0 } },
       "created_at": "2026-10-01T08:00:00Z", "failing_since": "2026-10-09T11:00:00Z",
-      "criticality": 60, "builtin_score": 80,
-      "builtin_priority": "CRITICAL", "builtin_reason": "kind default: StatefulSet"
+      "criticality": 10, "builtin_score": 30,
+      "builtin_priority": "MEDIUM", "builtin_reason": "kind default: StatefulSet"
     }
   ]
 }

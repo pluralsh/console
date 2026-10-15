@@ -33,7 +33,7 @@ type Criticality struct {
 // system-* priority class, catalog, system namespace tier, kind default.
 func Classify(kind, namespace, name, priorityClass string) Criticality {
 	if strings.HasPrefix(priorityClass, "system-") {
-		return Criticality{Score: ScoreCritical, Reason: "priority class " + priorityClass}
+		return Criticality{Score: ScoreCore, Reason: "priority class " + priorityClass}
 	}
 
 	if isWorkload(kind) {

@@ -146,7 +146,7 @@ func TestFailingRootsEdgeCases(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, roots, 1)
 		assert.Equal(t, "etcd-node-1", roots[0].Name)
-		assert.Equal(t, insights.ScoreHigh, roots[0].Criticality, "classified by its namespace even though the pod was running when it was stored")
+		assert.Equal(t, insights.ScoreCore, roots[0].Criticality, "classified by its namespace even though the pod was running when it was stored")
 	})
 
 	t.Run("a healthy owner of any kind can be pinned by annotation", func(t *testing.T) {

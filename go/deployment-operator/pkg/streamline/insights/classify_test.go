@@ -19,17 +19,17 @@ func TestClassify(t *testing.T) {
 		priorityClass string
 		want          int
 	}{
-		{name: "coredns", kind: "Deployment", workload: "coredns", want: insights.ScoreCritical},
-		{name: "core-dns", kind: "Deployment", workload: "core-dns", want: insights.ScoreCritical},
-		{name: "kube-dns alias", kind: "Deployment", workload: "kube-dns", want: insights.ScoreCritical},
-		{name: "aws-node", kind: "DaemonSet", namespace: "kube-system", workload: "aws-node", want: insights.ScoreCritical},
-		{name: "amazon-vpc-cni alias", kind: "DaemonSet", workload: "amazon-vpc-cni", want: insights.ScoreCritical},
-		{name: "ebs-csi-node", kind: "DaemonSet", workload: "ebs-csi-node", want: insights.ScoreCritical},
-		{name: "gce-pd-csi-controller", kind: "Deployment", workload: "gce-pd-csi-controller-sa", want: insights.ScoreCritical},
-		{name: "cert-manager-webhook", kind: "Deployment", workload: "cert-manager-webhook", want: insights.ScoreCritical},
-		{name: "ingress-nginx-controller", kind: "Deployment", workload: "ingress-nginx-controller", want: insights.ScoreCritical},
-		{name: "rke2 ingress alias keeps working through runs", kind: "DaemonSet", workload: "rke2-ingress-nginx-controller", want: insights.ScoreCritical},
-		{name: "metrics-server", kind: "Deployment", workload: "metrics-server", want: insights.ScoreHigh},
+		{name: "coredns", kind: "Deployment", workload: "coredns", want: insights.ScoreCore},
+		{name: "core-dns", kind: "Deployment", workload: "core-dns", want: insights.ScoreCore},
+		{name: "kube-dns alias", kind: "Deployment", workload: "kube-dns", want: insights.ScoreCore},
+		{name: "aws-node", kind: "DaemonSet", namespace: "kube-system", workload: "aws-node", want: insights.ScoreCore},
+		{name: "amazon-vpc-cni alias", kind: "DaemonSet", workload: "amazon-vpc-cni", want: insights.ScoreCore},
+		{name: "ebs-csi-node", kind: "DaemonSet", workload: "ebs-csi-node", want: insights.ScoreCore},
+		{name: "gce-pd-csi-controller", kind: "Deployment", workload: "gce-pd-csi-controller-sa", want: insights.ScoreCore},
+		{name: "cert-manager-webhook", kind: "Deployment", workload: "cert-manager-webhook", want: insights.ScoreCore},
+		{name: "ingress-nginx-controller", kind: "Deployment", workload: "ingress-nginx-controller", want: insights.ScoreCore},
+		{name: "rke2 ingress alias keeps working through runs", kind: "DaemonSet", workload: "rke2-ingress-nginx-controller", want: insights.ScoreCore},
+		{name: "metrics-server", kind: "Deployment", workload: "metrics-server", want: insights.ScoreCore},
 
 		// letters in the right order are not a match
 		{name: "concert-manager", kind: "Deployment", namespace: "events", workload: "concert-manager", want: insights.ScoreLow},
@@ -37,20 +37,29 @@ func TestClassify(t *testing.T) {
 		{name: "kubernetes-proxy-docs", kind: "Deployment", namespace: "docs", workload: "kubernetes-proxy-docs", want: insights.ScoreLow},
 		{name: "node-metrics-exporter", kind: "Deployment", workload: "node-metrics-exporter", want: insights.ScoreLow},
 
+		// monitoring agents are apps, not part of the cluster itself
+		{name: "node-exporter", kind: "DaemonSet", namespace: "monitoring", workload: "prometheus-node-exporter", want: insights.ScoreLow},
+
 		// priority class wins over everything
-		{name: "system priority class", kind: "Deployment", workload: "payments", priorityClass: "system-cluster-critical", want: insights.ScoreCritical},
+		{name: "system priority class", kind: "Deployment", workload: "payments", priorityClass: "system-cluster-critical", want: insights.ScoreCore},
 		{name: "custom priority class is ignored", kind: "Deployment", workload: "payments", priorityClass: "high", want: insights.ScoreLow},
 
 		// namespace tier beats kind default, but not the catalog
-		{name: "kube-system workload", kind: "Deployment", namespace: "kube-system", workload: "foo", want: insights.ScoreHigh},
-		{name: "istio-system workload", kind: "Deployment", namespace: "istio-system", workload: "foo", want: insights.ScoreCritical},
+		{name: "kube-system workload", kind: "Deployment", namespace: "kube-system", workload: "foo", want: insights.ScoreCore},
+		{name: "istio-system workload", kind: "Deployment", namespace: "istio-system", workload: "foo", want: insights.ScoreCore},
+		{name: "plrl-console workload", kind: "Deployment", namespace: "plrl-console", workload: "console", want: insights.ScoreCore},
+		{name: "plrl-deploy-operator workload", kind: "Deployment", namespace: "plrl-deploy-operator", workload: "deployment-operator", want: insights.ScoreCore},
+		{name: "other plrl namespaces are apps", kind: "Deployment", namespace: "plrl-core", workload: "foo", want: insights.ScoreLow},
+		{name: "a namespace that only shares a word is an app", kind: "Deployment", namespace: "console-banking", workload: "foo", want: insights.ScoreLow},
 
 		// kind defaults
-		{name: "statefulset", kind: "StatefulSet", workload: "db", want: insights.ScoreHigh},
-		{name: "daemonset", kind: "DaemonSet", workload: "agent", want: insights.ScoreMedium},
+		{name: "statefulset", kind: "StatefulSet", workload: "db", want: insights.ScoreLow},
+		{name: "daemonset", kind: "DaemonSet", workload: "agent", want: insights.ScoreLow},
 		{name: "deployment", kind: "Deployment", workload: "api", want: insights.ScoreLow},
-		{name: "ingress", kind: "Ingress", workload: "web", want: insights.ScoreCritical},
-		{name: "certificate", kind: "Certificate", workload: "web-tls", want: insights.ScoreCritical},
+		{name: "ingress", kind: "Ingress", workload: "web", want: insights.ScoreMedium},
+		{name: "certificate", kind: "Certificate", workload: "web-tls", want: insights.ScoreMedium},
+		{name: "node", kind: "Node", workload: "worker-1", want: insights.ScoreCore},
+		{name: "pvc", kind: "PersistentVolumeClaim", workload: "data", want: insights.ScoreMedium},
 		{name: "non-workload named like a catalog entry is not special", kind: "ConfigMap", workload: "coredns", want: insights.ScoreLow},
 	}
 
@@ -89,7 +98,7 @@ func TestExtract(t *testing.T) {
 		assert.Equal(t, int64(1), *facts.ReadyReplicas)
 		assert.Equal(t, "system-node-critical", facts.PriorityClass)
 		assert.Equal(t, "HIGH", facts.PriorityAnnotation)
-		assert.Equal(t, insights.ScoreCritical, facts.Criticality)
+		assert.Equal(t, insights.ScoreCore, facts.Criticality)
 		assert.Equal(t, "exceeded progress deadline", facts.HealthMessage)
 		assert.Equal(t, now.Unix(), facts.FailingSince)
 	})
@@ -144,6 +153,6 @@ func TestExtract(t *testing.T) {
 	t.Run("failing non-root objects are classified", func(t *testing.T) {
 		node := &unstructured.Unstructured{Object: map[string]any{"apiVersion": "v1", "kind": "Node", "metadata": map[string]any{"name": "n1"}}}
 
-		assert.Equal(t, insights.ScoreHigh, insights.Extract(node, false, true, "", now).Criticality)
+		assert.Equal(t, insights.ScoreCore, insights.Extract(node, false, true, "", now).Criticality)
 	})
 }
