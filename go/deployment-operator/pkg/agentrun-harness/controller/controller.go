@@ -104,18 +104,30 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 	if err := environment.ConfigurePrebakeGitSafeDirectories(); err != nil {
 		return fmt.Errorf("configure prebake git safe directories: %w", err)
 	}
+
+	resumeFollowup := in.applyFollowupBootPrompt()
+	if !resumeFollowup {
+		// Mark prompts present at boot as already consumed so only newly
+		// queued prompts are dispatched mid-run. Follow-up boot claims the
+		// oldest pending prompt itself and advances lastPromptSeq.
+		in.initializePromptCursor()
+	}
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
-		WorkDir:       in.dir,
-		RepositoryDir: repositoryDir,
-		FinishedChan:  in.done,
-		ErrorChan:     in.errChan,
-		Run:           in.agentRun,
-		Usage:         in.usage,
+		WorkDir:        in.dir,
+		RepositoryDir:  repositoryDir,
+		FinishedChan:   in.done,
+		ErrorChan:      in.errChan,
+		Run:            in.agentRun,
+		Usage:          in.usage,
+		ResumeFollowup: resumeFollowup,
 	}); err != nil {
 		klog.Fatal(err)
 	}
 
-	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token)
+	if err := in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token); err != nil {
+		return err
+	}
+	return in.restoreFollowupSession(ctx)
 }
 
 // completeAgentRun updates the agent run status in the Console API
@@ -163,7 +175,6 @@ func (in *agentRunController) init() (Controller, error) {
 
 	// Convert console fragment to harness type
 	in.agentRun = (&agentrunv1.AgentRun{}).FromAgentRunFragment(agentRunFragment)
-	in.initializePromptCursor()
 	in.usage = usage.New(in.agentRun.Usage)
 
 	klog.V(log.LogLevelInfo).InfoS("found agent run",

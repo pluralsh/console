@@ -18639,6 +18639,9 @@ type ConsoleConfiguration {
 
   sentryEnabled: Boolean
 
+  "whether object store is configured for session uploads and agent run reprompting"
+  objectStoreEnabled: Boolean
+
   "whether at least one cluster has been installed, false if a user hasn't fully onboarded"
   installed: Boolean
 

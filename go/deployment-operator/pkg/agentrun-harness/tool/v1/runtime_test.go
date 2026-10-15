@@ -77,6 +77,13 @@ func (agent *runtimeTestAgent) Export(_ context.Context, request ExportRequest) 
 	}}, nil
 }
 
+func (agent *runtimeTestAgent) Import(_ context.Context, request ImportRequest) (string, error) {
+	if request.Manifest == nil {
+		return "", nil
+	}
+	return request.Manifest.Session.ID, nil
+}
+
 type runtimeTestTurn struct {
 	kind      TurnKind
 	prompt    string

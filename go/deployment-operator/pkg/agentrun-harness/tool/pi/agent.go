@@ -143,6 +143,27 @@ func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (t
 	}}, nil
 }
 
+func (agent *Agent) Import(ctx context.Context, request toolv1.ImportRequest) (string, error) {
+	if err := agent.contextError(ctx); err != nil {
+		return "", err
+	}
+	if request.Manifest == nil {
+		return "", errors.New("pi session manifest is not set")
+	}
+	config, err := agent.configWithPi()
+	if err != nil {
+		return "", err
+	}
+	archivePath := request.Manifest.Session.ArchivePath
+	if archivePath == "" {
+		archivePath = piSessionsDir
+	}
+	if err := artifacts.RestoreArchiveTree(ctx, request.ExtractDir, archivePath, agent.sessionsPath(config)); err != nil {
+		return "", fmt.Errorf("import pi session: %w", err)
+	}
+	return request.Manifest.Session.ID, nil
+}
+
 func (agent *Agent) configWithPi() (toolv1.Config, error) {
 	if agent.config.WorkDir == "" {
 		return toolv1.Config{}, errors.New("work directory is not set")

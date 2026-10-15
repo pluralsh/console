@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"strings"
 	"time"
 
 	"github.com/samber/lo"
@@ -60,6 +61,9 @@ type AgentRun struct {
 	ApprovedAt      *string
 	Followup        bool
 	PRURL           string
+	// SessionURL is the signed download URL for the uploaded agent session
+	// archive, when object-store uploads are enabled.
+	SessionURL string
 }
 
 // AgentUser is the Console user who initiated the agent run. Git commits
@@ -210,6 +214,9 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 	}
 	if fragment.FollowupPrURL != nil {
 		run.PRURL = *fragment.FollowupPrURL
+	}
+	if fragment.Upload != nil && fragment.Upload.Session != nil {
+		run.SessionURL = strings.TrimSpace(*fragment.Upload.Session)
 	}
 
 	return run
