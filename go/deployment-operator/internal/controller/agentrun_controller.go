@@ -572,6 +572,8 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 
 	if !r.hasSecretData(secret.Data, run) {
 		logger.V(2).Info("updating secret", "namespace", secret.Namespace, "name", secret.Name)
+		// StringData is merged into Data, so clear Data to drop keys that no longer belong here.
+		secret.Data = nil
 		secret.StringData = r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection, mcpServers)
 		if err := r.Update(ctx, secret); err != nil {
 			logger.Error(err, "unable to update secret")
@@ -739,7 +741,6 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 }
 
 // reconcilePluralSecret keeps the deploy token in a separate secret that is never mounted into the default container.
-// Runs created before this split keep the (stale) token in their original secret, as their pods only reference that one.
 func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1alpha1.AgentRun) (*corev1.Secret, error) {
 	secret := &corev1.Secret{}
 	if err := r.Get(ctx, types.NamespacedName{Name: pluralSecretName(run.Name), Namespace: run.Namespace}, secret); err != nil {
@@ -770,6 +771,8 @@ func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1a
 func (r *AgentRunReconciler) hasSecretData(data map[string][]byte, run *v1alpha1.AgentRun) bool {
 	url, hasUrl := data[EnvConsoleURL]
 	id, hasID := data[EnvAgentRunID]
-	return hasUrl && hasID &&
+	// Secrets created before the deploy token moved to the plural secret must be rewritten without it.
+	_, hasDeployToken := data[EnvDeployToken]
+	return hasUrl && hasID && !hasDeployToken &&
 		string(url) == r.ConsoleURL && string(id) == run.Status.GetID()
 }

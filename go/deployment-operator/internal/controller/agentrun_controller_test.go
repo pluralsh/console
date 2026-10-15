@@ -739,34 +739,32 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			run.Status.ID = lo.ToPtr("run-789")
 
 			secretData := map[string][]byte{
-				EnvConsoleURL:  []byte("https://console.test.com"),
-				EnvDeployToken: []byte("test-token-123"),
-				EnvAgentRunID:  []byte("run-789"),
+				EnvConsoleURL: []byte("https://console.test.com"),
+				EnvAgentRunID: []byte("run-789"),
 			}
 
 			Expect(reconciler.hasSecretData(secretData, run)).Should(BeTrue())
 
 			// Wrong URL
 			wrongSecretData := map[string][]byte{
-				EnvConsoleURL:  []byte("https://wrong.url.com"),
-				EnvDeployToken: []byte("test-token-123"),
-				EnvAgentRunID:  []byte("run-789"),
+				EnvConsoleURL: []byte("https://wrong.url.com"),
+				EnvAgentRunID: []byte("run-789"),
 			}
 			Expect(reconciler.hasSecretData(wrongSecretData, run)).Should(BeFalse())
 
 			// Wrong run ID
 			wrongRunIDData := map[string][]byte{
-				EnvConsoleURL:  []byte("https://console.test.com"),
-				EnvDeployToken: []byte("test-token-123"),
-				EnvAgentRunID:  []byte("wrong-run-id"),
+				EnvConsoleURL: []byte("https://console.test.com"),
+				EnvAgentRunID: []byte("wrong-run-id"),
 			}
 			Expect(reconciler.hasSecretData(wrongRunIDData, run)).Should(BeFalse())
 
-			// Token is no longer required in this secret
+			// A deploy token left over from before the plural secret split needs a rewrite
 			Expect(reconciler.hasSecretData(map[string][]byte{
-				EnvConsoleURL: []byte("https://console.test.com"),
-				EnvAgentRunID: []byte("run-789"),
-			}, run)).Should(BeTrue())
+				EnvConsoleURL:  []byte("https://console.test.com"),
+				EnvDeployToken: []byte("test-token-123"),
+				EnvAgentRunID:  []byte("run-789"),
+			}, run)).Should(BeFalse())
 		})
 
 		It("should include Claude config in secret data", func() {
