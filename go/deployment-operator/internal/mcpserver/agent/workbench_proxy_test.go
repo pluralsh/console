@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
@@ -78,5 +80,29 @@ func TestWorkbenchMCPProxyRejectsInvalidConfiguration(t *testing.T) {
 	}
 	if _, err := newBearerTokenProxy("https://console.example/mcp", func() string { return "" }); err == nil {
 		t.Fatal("expected missing token error")
+	}
+}
+
+func TestWorkbenchMCPProxyKeepsOperatorToolFilter(t *testing.T) {
+	var query string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		query = r.URL.RawQuery
+	}))
+	defer upstream.Close()
+
+	srv := NewServer(nil, WithWorkbenchMCPProxy(
+		upstream.URL+"/mcp/workbench/id?categories=metrics%2Clogs",
+		func() string { return "user-token" },
+	))
+
+	for _, target := range []string{"", "?tools=raw_kube_get", "?categories=infrastructure"} {
+		srv.httpServer.Handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(
+			http.MethodPost,
+			common.AgentWorkbenchMCPPath+target,
+			strings.NewReader(`{"jsonrpc":"2.0"}`),
+		))
+		if query != "categories=metrics%2Clogs" {
+			t.Fatalf("%q: upstream query = %q", target, query)
+		}
 	}
 }

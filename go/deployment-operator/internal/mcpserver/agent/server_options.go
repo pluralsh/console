@@ -77,7 +77,12 @@ func WithWorkbenchMCPProxy(upstreamURL string, token func() string) Option {
 		if err != nil {
 			klog.Fatalf("could not configure workbench mcp proxy: %v", err)
 		}
-		s.workbenchMCPProxy = handler
+		s.workbenchMCPProxy = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// The upstream URL's query carries the operator's tool filter, and the proxy would append
+			// the caller's query after it, letting the agent pick tools outside that filter.
+			r.URL.RawQuery = ""
+			handler.ServeHTTP(w, r)
+		})
 	}
 }
 
