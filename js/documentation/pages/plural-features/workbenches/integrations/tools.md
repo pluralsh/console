@@ -41,6 +41,13 @@ All native integrations respect your existing RBAC — enabling a capability her
 | **[Tempo](/plural-features/workbenches/integrations/tools/tempo)** | Query distributed trace spans from a Grafana Tempo endpoint |
 | **[Jaeger](/plural-features/workbenches/integrations/tools/jaeger)** | Query distributed trace spans from a Jaeger backend with filters for service, operation, duration, and attributes |
 
+### Incident & error management
+
+| Tool | What the agent can do |
+|---|---|
+| **[PagerDuty](/plural-features/workbenches/integrations/tools/pagerduty)** | Read incident details, notes, and log entries from the PagerDuty REST API |
+| **[Sentry](/plural-features/workbenches/integrations/tools/sentry)** | Read issues, events, and stack traces from the Sentry API |
+
 ### Source control
 
 | Tool | What the agent can do |
