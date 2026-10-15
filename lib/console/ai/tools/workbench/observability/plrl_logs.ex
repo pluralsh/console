@@ -72,6 +72,8 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
 
   def logs_query(%{query: q, limit: l, facets: f, time_range: tr, operator: op} = logs) do
     Query.new(
+      service_id: Map.get(logs, :service_id),
+      cluster_id: Map.get(logs, :cluster_id),
       query: q,
       limit: l,
       operator: op,

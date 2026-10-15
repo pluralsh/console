@@ -1,5 +1,3 @@
-/* eslint-disable */
-/* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
@@ -24938,7 +24936,6 @@ export const PrAutomationFragmentDoc = gql`
     name
   }
   role
-  documentation
   connection {
     ...ScmConnection
   }
@@ -25932,7 +25929,6 @@ export const ClustersRowFragmentDoc = gql`
     namespace
     supportedVersions
   }
-  self
   service {
     id
     repository {
@@ -25945,7 +25941,6 @@ export const ClustersRowFragmentDoc = gql`
     name
     value
   }
-  distro
   upgradePlan {
     ...ClusterUpgradePlan
   }

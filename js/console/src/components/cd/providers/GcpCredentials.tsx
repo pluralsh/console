@@ -36,7 +36,7 @@ function GcpCredentials({
         return
       }
       const content = await file?.text()
-      let credentials
+      let credentials: { project_id?: unknown } | undefined
 
       try {
         credentials = JSON.parse(content)

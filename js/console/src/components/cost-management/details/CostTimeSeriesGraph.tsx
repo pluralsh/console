@@ -25,7 +25,7 @@ export function CostTimeSeriesGraph({
   return (
     <GraphWrapperSC>
       <ResponsiveLine
-        // @ts-ignore, best for this to just be a fixed size
+        // @ts-expect-error, best for this to just be a fixed size
         height={GRAPH_CARD_MAX_HEIGHT}
         theme={graphTheme}
         data={data}

@@ -65,7 +65,7 @@ export default function ClusterAddOns() {
   )
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
-  const isCloudAddon = currentTab?.path == CLUSTER_CLOUD_ADDONS_REL_PATH
+  const isCloudAddon = currentTab?.path === CLUSTER_CLOUD_ADDONS_REL_PATH
 
   const { data, loading, error } = useRuntimeServicesQuery({
     variables: { kubeVersion, hasKubeVersion: !!kubeVersion, id: clusterId },

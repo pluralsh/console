@@ -6,9 +6,8 @@ import { useRouter } from 'next/router'
 import styled from 'styled-components'
 
 import { useNavMenu } from '../contexts/NavDataContext'
-import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
-
 import type { NavItem } from '../NavData'
+import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
 
 function findArticlesIn(
   routerPathname,

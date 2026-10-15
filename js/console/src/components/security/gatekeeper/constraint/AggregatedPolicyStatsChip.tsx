@@ -1,4 +1,4 @@
-import { Chip } from '@pluralsh/design-system'
+import { Chip, ChipProps } from '@pluralsh/design-system'
 import { ViolationStatisticsQuery } from 'generated/graphql'
 import { ViolationFilter } from '../Gatekeeper'
 
@@ -11,7 +11,7 @@ export function AggregatedPolicyStatsChip({
   kindsData?: ViolationStatisticsQuery
   namespacesData?: ViolationStatisticsQuery
 }) {
-  let severity
+  let severity: ChipProps['severity']
   let total = 0
   if (violationFilter === ViolationFilter.Violated) {
     severity = 'danger'

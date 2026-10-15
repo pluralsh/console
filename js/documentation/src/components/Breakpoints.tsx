@@ -1,6 +1,6 @@
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   useContext,
   useEffect,
   useMemo,
@@ -8,7 +8,12 @@ import {
 } from 'react'
 
 type Breakpoint =
-  '' | 'md' | 'twoColumn' | 'fullHeader' | 'threeColumn' | 'maxWidth'
+  | ''
+  | 'md'
+  | 'twoColumn'
+  | 'fullHeader'
+  | 'threeColumn'
+  | 'maxWidth'
 
 export const breakpoints: Record<Breakpoint, number> = {
   '': 0,

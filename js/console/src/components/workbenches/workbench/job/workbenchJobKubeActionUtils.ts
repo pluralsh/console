@@ -3,7 +3,11 @@ import { startCase } from 'lodash'
 import pluralize from 'pluralize'
 
 export type KubeActionVariant =
-  'create' | 'update' | 'delete' | 'drain' | 'other'
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'drain'
+  | 'other'
 
 const YAML_DUMP_OPTS = { lineWidth: -1, noRefs: true } as const
 
