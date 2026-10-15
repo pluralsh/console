@@ -14,6 +14,22 @@ func nullableCriticality(facts insights.Facts) any {
 	return facts.Criticality
 }
 
+// nullableUnix returns nil for an unknown time, so the column stays NULL.
+func nullableUnix(v int64) any {
+	if v == 0 {
+		return nil
+	}
+	return v
+}
+
+// sqlUnix renders an optional unix time as an SQL literal.
+func sqlUnix(v int64) string {
+	if v == 0 {
+		return "NULL"
+	}
+	return strconv.FormatInt(v, 10)
+}
+
 func nullableInt(v *int64) any {
 	if v == nil {
 		return nil

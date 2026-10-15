@@ -80,6 +80,9 @@ type Facts struct {
 	HealthMessage      string
 	// FailingSince is a unix time, zero when the object is not failing.
 	FailingSince int64
+	// LastSuccessfulTime is the unix time of the last successful run of a CronJob, zero when it has none or the
+	// object is not a CronJob. A retained failed job that is older than it is not a failure of the CronJob.
+	LastSuccessfulTime int64
 }
 
 // Extract derives Facts from an object. Criticality is only classified for root kinds and objects that
@@ -105,6 +108,7 @@ func Extract(obj *unstructured.Unstructured, running, failed bool, message strin
 
 	facts.PriorityClass = priorityClass(obj)
 	facts.DesiredReplicas, facts.ReadyReplicas = replicas(obj)
+	facts.LastSuccessfulTime = lastSuccessfulTime(obj)
 
 	c := Classify(kind, obj.GetNamespace(), obj.GetName(), facts.PriorityClass)
 	facts.Criticality, facts.CriticalityReason = c.Score, c.Reason
@@ -139,6 +143,19 @@ func priorityClass(obj *unstructured.Unstructured) string {
 		}
 	}
 	return ""
+}
+
+// lastSuccessfulTime returns the unix time of the last successful run of a CronJob, zero when unknown.
+func lastSuccessfulTime(obj *unstructured.Unstructured) int64 {
+	if obj.GetKind() != "CronJob" {
+		return 0
+	}
+	raw, _, _ := unstructured.NestedString(obj.Object, "status", "lastSuccessfulTime")
+	t, err := time.Parse(time.RFC3339, raw)
+	if err != nil {
+		return 0
+	}
+	return t.Unix()
 }
 
 // replicas returns the desired and ready replica counts of workloads, nil when unknown.

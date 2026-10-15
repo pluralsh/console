@@ -35,7 +35,8 @@ const factsUpsert = `criticality = excluded.criticality,
 			desired_replicas = excluded.desired_replicas,
 			ready_replicas = excluded.ready_replicas,
 			priority_annotation = excluded.priority_annotation,
-			health_message = excluded.health_message`
+			health_message = excluded.health_message,
+			last_success = excluded.last_success`
 
 const (
 	createTables = `
@@ -68,7 +69,8 @@ const (
 			desired_replicas INT, -- NULL when unknown
 			ready_replicas INT, -- NULL when unknown
 			priority_annotation TEXT, -- normalized value of the insight priority annotation
-			health_message TEXT
+			health_message TEXT,
+			last_success INT -- unix time of the last successful run of a CronJob, NULL when unknown
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_component ON component("group", version, kind, namespace, name);
 		CREATE INDEX IF NOT EXISTS idx_parent ON component(parent_uid);
@@ -163,7 +165,8 @@ const (
 		    desired_replicas,
 		    ready_replicas,
 		    priority_annotation,
-		    health_message
+		    health_message,
+		    last_success
 		) VALUES (
 			?,
 			?,
@@ -174,6 +177,7 @@ const (
 			?,
 			?,
 			?,
+		    ?,
 		    ?,
 		    ?,
 		    ?,
@@ -375,11 +379,14 @@ const (
 		FROM roots r
 		JOIN component c ON c.id = (SELECT MIN(x.id) FROM component x WHERE x.uid = r.root_uid AND x.applied = 1)
 		WHERE (c.kind != 'Node' OR (COALESCE(r.failing_since, 0) > 0 AND r.failing_since <= CAST(strftime('%s', 'now') AS INTEGER) - 300))
-		  AND (c.kind != 'CronJob' OR (
-			  SELECT j.health FROM component j
-			  WHERE j.parent_uid = c.uid AND j.kind = 'Job' AND j.applied = 1
-			  ORDER BY j.created_at DESC LIMIT 1
-		  ) = 2)
+		  AND (c.kind != 'CronJob' OR EXISTS (
+			  SELECT 1 FROM (
+				  SELECT j.health AS health, j.created_at AS created_at FROM component j
+				  WHERE j.parent_uid = c.uid AND j.kind = 'Job' AND j.applied = 1
+				  ORDER BY j.created_at DESC LIMIT 1
+			  ) newest
+			  WHERE newest.health = 2 AND (c.last_success IS NULL OR c.last_success < newest.created_at)
+		  ))
 	`
 
 	// failingRootsDescendants counts the failed and pending objects below every root of failingRoots, by kind.

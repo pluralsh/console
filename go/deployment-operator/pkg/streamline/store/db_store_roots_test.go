@@ -53,6 +53,39 @@ func TestFailingRoots(t *testing.T) {
 		assert.ElementsMatch(t, []string{"nightly"}, rootNames(t, s))
 	})
 
+	t.Run("a cron job is not reported for an old failed job that outlived its successful runs", func(t *testing.T) {
+		// successfulJobsHistoryLimit: 0 deletes successful jobs at once, so the only job left is an old failed one
+		s := newTestStore(t)
+		now := time.Now()
+		cronJob := func(lastSuccess *time.Time) unstructured.Unstructured {
+			status := map[string]any{}
+			if lastSuccess != nil {
+				status["lastSuccessfulTime"] = lastSuccess.UTC().Format(time.RFC3339)
+			}
+			return unstructured.Unstructured{Object: map[string]any{
+				"apiVersion": "batch/v1", "kind": "CronJob",
+				"metadata": map[string]any{"name": "nightly", "namespace": testNamespace, "uid": "nightly", "creationTimestamp": now.Add(-48 * time.Hour).UTC().Format(time.RFC3339)},
+				"status":   status,
+			}}
+		}
+		failedJob := func() {
+			require.NoError(t, s.SaveComponentAttributes(createComponentAttributes("nightly-1", new("nightly"), WithAttributesKind("Job"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("nightly-1")), nil, now.Add(-time.Hour).Unix(), nil))
+		}
+
+		never := cronJob(nil)
+		require.NoError(t, s.SaveComponent(never))
+		failedJob()
+		assert.ElementsMatch(t, []string{"nightly"}, rootNames(t, s), "it never succeeded, so the failed job is its failure")
+
+		afterFailure := now.Add(-30 * time.Minute)
+		require.NoError(t, s.SaveComponent(cronJob(&afterFailure)))
+		assert.Empty(t, rootNames(t, s), "a run succeeded after the retained failed job, which is only history")
+
+		beforeFailure := now.Add(-2 * time.Hour)
+		require.NoError(t, s.SaveComponent(cronJob(&beforeFailure)))
+		assert.ElementsMatch(t, []string{"nightly"}, rootNames(t, s), "the failed job is newer than the last success, so it is a failure again")
+	})
+
 	t.Run("a failed node is reported only after five minutes", func(t *testing.T) {
 		s := newTestStore(t)
 

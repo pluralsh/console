@@ -39,8 +39,8 @@ const (
 
 	// schemaVersion is stored in the database as PRAGMA user_version. Bump it whenever the component table changes
 	// or the meaning of a stored column does: version 3 changed what the stored criticality stands for, core
-	// components start at 60 and apps are capped below HIGH.
-	schemaVersion = 3
+	// components start at 60 and apps are capped below HIGH. Version 4 added the last successful run of a CronJob.
+	schemaVersion = 4
 )
 
 // Option represents a function that configures the database store.
@@ -331,6 +331,7 @@ func (in *DatabaseStore) upsertAppliedComponent(conn *sqlite.Conn, obj unstructu
 			nullableInt(facts.ReadyReplicas),
 			facts.PriorityAnnotation,
 			facts.HealthMessage,
+			nullableUnix(facts.LastSuccessfulTime),
 		},
 	})
 }
@@ -379,7 +380,8 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 		  desired_replicas,
 		  ready_replicas,
 		  priority_annotation,
-		  health_message
+		  health_message,
+		  last_success
 		) VALUES `)
 
 	valueStrings := make([]string, 0, len(objects))
@@ -430,7 +432,7 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 
 		facts := insights.Extract(&obj, state == ComponentStateRunning, state == ComponentStateFailed, message, now)
 
-		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1, '%s', %s,'%s','%s',%d,%s,%s,'%s','%s')",
+		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1, '%s', %s,'%s','%s',%d,%s,%s,'%s','%s',%s)",
 			obj.GetUID(),
 			lo.FromPtr(ownerRef),
 			gvk.Group,
@@ -453,6 +455,7 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			sqlInt(facts.ReadyReplicas),
 			escapeSQLString(facts.PriorityAnnotation),
 			escapeSQLString(facts.HealthMessage),
+			sqlUnix(facts.LastSuccessfulTime),
 		))
 	}
 

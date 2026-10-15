@@ -103,6 +103,19 @@ func TestExtract(t *testing.T) {
 		assert.Equal(t, now.Unix(), facts.FailingSince)
 	})
 
+	t.Run("reads the last successful run of a cron job", func(t *testing.T) {
+		cronJob := &unstructured.Unstructured{Object: map[string]any{
+			"apiVersion": "batch/v1", "kind": "CronJob",
+			"metadata": map[string]any{"name": "nightly", "namespace": "apps"},
+			"status":   map[string]any{"lastSuccessfulTime": "2026-10-09T10:00:00Z"},
+		}}
+
+		facts := insights.Extract(cronJob, false, true, "", now)
+
+		assert.Equal(t, time.Date(2026, 10, 9, 10, 0, 0, 0, time.UTC).Unix(), facts.LastSuccessfulTime)
+		assert.Zero(t, insights.Extract(deployment(map[string]any{}, map[string]any{"lastSuccessfulTime": "2026-10-09T10:00:00Z"}, nil), false, true, "", now).LastSuccessfulTime, "only cron jobs have one")
+	})
+
 	t.Run("defaults desired replicas to one and ready to zero", func(t *testing.T) {
 		facts := insights.Extract(deployment(map[string]any{}, map[string]any{}, nil), false, true, "", now)
 
