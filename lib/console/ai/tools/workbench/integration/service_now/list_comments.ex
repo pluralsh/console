@@ -38,6 +38,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ListComments do
     with {:ok, offset} <- Client.parse_cursor(model.cursor),
          {:ok, client} <- Client.build(model.tool),
          {:ok, sys_id} <- Client.resolve_sys_id(client, model.table, model.record_id),
+         :ok <- ensure_record(client, model.table, sys_id),
          {:ok, response} <-
            Client.get(client, "/table/sys_journal_field", %{
              sysparm_query:
@@ -49,6 +50,18 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ListComments do
       response
       |> Client.put_next_cursor(offset, model.limit)
       |> Jason.encode()
+    end
+  end
+
+  # The journal is filtered by record id only, so a raw sys_id from another table would
+  # otherwise get through. Reading the record via the allowed table proves it belongs there.
+  defp ensure_record(client, table, sys_id) do
+    with {:ok, path} <- Client.table_path(table, sys_id),
+         {:ok, %{"result" => %{"sys_id" => _}}} <- Client.get(client, path, %{sysparm_fields: "sys_id"}) do
+      :ok
+    else
+      {:ok, _} -> {:error, "ServiceNow #{table} record #{sys_id} was not found."}
+      error -> error
     end
   end
 end

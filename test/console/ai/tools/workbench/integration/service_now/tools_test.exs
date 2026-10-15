@@ -166,6 +166,11 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
 
   test "list_comments reads the journal for the record" do
     expect(Req, :request, fn opts ->
+      assert opts[:url] =~ "#{@base}/table/sc_task/#{@sys_id}"
+      {:ok, %Req.Response{status: 200, body: ~s({"result":{"sys_id":"#{@sys_id}"}})}}
+    end)
+
+    expect(Req, :request, fn opts ->
       uri = URI.parse(opts[:url])
       assert uri.path == "/api/now/table/sys_journal_field"
 
@@ -177,6 +182,16 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
 
     assert {:ok, encoded} = run(ListComments, %{"table" => "sc_task", "record_id" => @sys_id})
     assert %{"result" => [%{"value" => "hi"}], "nextCursor" => nil} = Jason.decode!(encoded)
+  end
+
+  test "list_comments rejects a sys_id that is not in the table" do
+    expect(Req, :request, fn opts ->
+      assert opts[:url] =~ "#{@base}/table/incident/#{@sys_id}"
+      {:ok, %Req.Response{status: 404, body: ~s({"error":{"message":"No Record found"}})}}
+    end)
+
+    assert {:error, msg} = run(ListComments, %{"table" => "incident", "record_id" => @sys_id})
+    assert msg =~ "404"
   end
 
   test "delete_record deletes when enabled" do

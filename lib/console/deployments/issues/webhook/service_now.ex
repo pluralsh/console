@@ -44,9 +44,23 @@ defmodule Console.Deployments.Issues.Webhook.ServiceNow do
   def body(%{"description" => body}) when is_binary(body) and byte_size(body) > 0, do: body
   def body(_), do: "{empty}"
 
-  def external_id(%{"number" => number}) when is_binary(number) and byte_size(number) > 0, do: number
-  def external_id(%{"sys_id" => id}) when is_binary(id), do: id
+  # Record numbers and sys_ids are only unique within an instance, and the payload comes from
+  # a user-written Business Rule, so the receiving webhook (one per instance) scopes the key
+  # rather than payload data. The sys_id is preferred as it never changes, unlike the number.
+  def external_id(%{} = rec), do: external_id(nil, rec)
   def external_id(_), do: nil
+
+  @spec external_id(binary | nil, map) :: binary | nil
+  def external_id(scope, %{} = rec) do
+    case record_id(rec) do
+      nil -> nil
+      id -> Enum.join(Enum.reject([scope, table(rec), id], &is_nil/1), ":")
+    end
+  end
+
+  defp record_id(%{"sys_id" => id}) when is_binary(id) and byte_size(id) > 0, do: id
+  defp record_id(%{"number" => number}) when is_binary(number) and byte_size(number) > 0, do: number
+  defp record_id(_), do: nil
 
   def title(%{"short_description" => title}) when is_binary(title), do: title
   def title(_), do: nil

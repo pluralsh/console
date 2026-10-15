@@ -2247,7 +2247,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
       [issue] = Console.Repo.all(Console.Schema.Issue)
       assert issue.provider == :service_now
-      assert issue.external_id == "INC0010001"
+      assert issue.external_id == "#{hook.id}:incident:0123456789abcdef0123456789abcdef"
       assert issue.title == "Checkout is down"
       assert issue.body == "500s from the payments service"
       assert issue.status == :in_progress

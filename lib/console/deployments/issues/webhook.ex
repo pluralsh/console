@@ -207,6 +207,7 @@ defmodule Console.Deployments.Issues.Webhook do
   def payload(%IssueWebhook{provider: :service_now} = webhook, %{} = payload) do
     with {:ok, record} <- ServiceNow.record(payload) do
       build_attributes(ServiceNow, record)
+      |> Map.put(:external_id, ServiceNow.external_id(webhook.id, record))
       |> Map.put(:provider, :service_now)
       |> with_payload(payload)
       |> workbench_association(webhook)

@@ -75,7 +75,7 @@ defmodule Console.Deployments.Issues.Webhook.ServiceNowTest do
       })
 
     assert ServiceNow.url(rec) == "https://example.service-now.com/nav_to.do?uri=sc_task.do%3Fsys_id%3Dabc"
-    assert ServiceNow.external_id(rec) == "abc"
+    assert ServiceNow.external_id("hook", rec) == "hook:sc_task:abc"
     assert ServiceNow.body(rec) == "{empty}"
   end
 
