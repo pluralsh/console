@@ -3,17 +3,117 @@ title: Linear
 description: Receive Linear issue events in Plural
 ---
 
-A Linear webhook delivers issue events from Linear into Plural. Linear generates the signing secret. Paste that secret into Plural, then set the Linear webhook URL to the Plural URL. It does not start a job until a workbench trigger matches the payload.
+A Linear webhook delivers issue lifecycle events from Linear into Plural. After you configure the source once, you can attach it to one or more workbench triggers to start jobs based on issue changes.
+
+This guide uses the Plural Console UI and Linear's webhook settings. For general webhook behavior and trigger configuration, see [Webhooks](/plural-features/workbenches/integrations/webhooks).
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+* A Linear workspace with issues you want to monitor.
+* Permission in Linear to create and manage webhooks (workspace or team administrator).
+* Permission in Plural Console to create a webhook source and configure workbench triggers.
 
 ## Capabilities
 
-* $DOCSTUB: describe the events this source delivers, from the webhook implementation and the setup guide in Setup.
-* $DOCSTUB: leave agent-callable operations off this page. Those belong on the matching tool page when one exists.
+Linear webhooks deliver issue lifecycle events:
 
-## Setup
+* **Issue created** — a new issue is created in the team.
+* **Issue updated** — issue fields such as title, description, status, assignee, priority, labels, or estimates are modified.
+* **Issue status changed** — the issue moves to a different workflow state (for example, from "Backlog" to "In Progress").
+* **Issue completed** — the issue is marked as done or completed.
+* **Issue canceled** — the issue is canceled or archived.
+* **Issue deleted** — an issue is removed from the workspace.
 
-Create the webhook source in Console and follow the inline setup guide for the URL, authentication, and provider settings. That guide is maintained at `js/console/public/setup-guides/webhooks/linear.md`.
+Plural accepts Linear webhook payloads with `type: "Issue"` and extracts issue data from the `data` field. Status mapping recognizes Linear's workflow states: `In Progress` and `In Review` map to in progress; `Canceled` or `Cancelled` map to cancelled; `Done` and `Completed` map to completed; all others default to open.
+
+Inbound events are stored as issues in Plural and do not start a job until a workbench trigger matches the payload content. See [Webhook triggers](/plural-features/workbenches/automation#webhook-triggers) for binding events to workbenches.
+
+## Create the Linear webhook source
+
+### 1. Create the webhook in Linear and copy the signing secret
+
+Linear generates the signing secret, so you must create the Linear webhook first:
+
+1. In Linear (`https://linear.app/`), open **Settings → API → Webhooks**.
+2. Click **Create new webhook** (or **New webhook**).
+3. Enter a **Label** for the webhook, such as `Plural incident issues`.
+4. Enter a temporary placeholder **URL** (for example `https://example.com/placeholder`). You will update this in step 3 after creating the Plural webhook source.
+5. Under **Resource types**, select **Issue** events at minimum. You can also enable other event types if needed, but Plural currently processes only issue events.
+6. Set **Team scope** to the teams whose issues you want to monitor, or select **All teams** if applicable.
+7. Click **Create**.
+8. After creation, Linear displays the webhook details. Copy the **Signing secret** value. You will paste this into Plural in the next step.
+
+### 2. Create the source in Plural
+
+In Plural Console:
+
+1. Open **Workbenches → Integrations**, then click the **Webhooks** tab.
+2. Click **Add webhook source**.
+3. Set **Type** to **Ticketing**.
+4. Set **Provider** to **LINEAR**.
+5. Enter a descriptive **Name** for the source, such as `linear-issues`.
+6. Paste the **Signing secret** from Linear into the **Signing secret** field in Plural.
+7. Click **Create new webhook**.
+
+After creation, Plural displays the webhook URL. Copy this URL; you will use it in the next step.
+
+### 3. Update the Linear webhook URL
+
+Return to Linear webhook settings:
+
+1. Open the webhook you created in step 1.
+2. Edit the **URL** field.
+3. Replace the placeholder with the Plural webhook URL from step 2.
+4. Save the webhook.
+
+### 4. Verify the integration
+
+Create or update a test issue in a Linear team covered by the webhook scope, then confirm in Plural:
+
+* The webhook request is accepted (check **Workbenches → Webhooks** for delivery status).
+* Signature verification succeeds.
+* The event payload is parsed and stored as an issue.
+* Expected issue metadata such as title, URL, description, and status appears correctly.
+
+## Authentication
+
+Linear signs each webhook event with an HMAC-SHA256 signature, sent in the `linear-signature` header. Plural verifies this signature using the signing secret generated by Linear and stored in Plural during setup. Requests with invalid or missing signatures are rejected with a `403` response.
+
+The signing secret is **generated by Linear**, not user-defined. Copy it exactly from the Linear webhook details page when creating the Plural webhook source. If you rotate the secret in Linear, update it in Plural as well.
+
+## Troubleshooting
+
+### Webhook creation fails
+
+* Confirm that you have permission to create webhooks in your Linear workspace.
+* Verify that the webhook URL (after updating in step 3) is reachable over HTTPS from Linear's servers.
+
+### Events are not delivered
+
+* Confirm that the Linear webhook is active. Linear may disable webhooks that fail repeatedly.
+* Verify that the team scope includes the teams whose issues you are creating or updating.
+* Check **Workbenches → Webhooks** in Plural for delivery errors or signature verification failures.
+
+### Signature verification fails
+
+* Ensure the **Signing secret** in Plural exactly matches the secret shown in the Linear webhook details.
+* If you regenerate the signing secret in Linear, update it in Plural immediately.
+* Verify that the Linear webhook is sending the `linear-signature` header with each request.
+
+### Missing field data in Plural
+
+* Confirm that the Linear webhook is configured to send **Issue** events and that the team scope includes the relevant teams.
+* Verify that issue fields (title, description, URL) are populated in Linear before the webhook fires.
+
+### No job starts after an event arrives
+
+* Webhook sources do not start jobs by themselves. Add a workbench trigger that matches the issue title or description content. See [Webhook triggers](/plural-features/workbenches/automation#webhook-triggers).
+* Verify that the trigger's match expression covers the incoming issue payload.
 
 ## Related
 
 * [Webhooks](/plural-features/workbenches/integrations/webhooks)
+* [Automating workbench jobs](/plural-features/workbenches/automation#webhook-triggers)
+* [Linear Developers - Webhooks](https://linear.app/developers/webhooks)
