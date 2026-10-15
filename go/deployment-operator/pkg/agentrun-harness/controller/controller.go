@@ -112,7 +112,7 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 		Run:           in.agentRun,
 		Usage:         in.usage,
 	}); err != nil {
-		klog.Fatal(err)
+		return err
 	}
 
 	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token)
