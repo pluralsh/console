@@ -8,7 +8,7 @@ import (
 // newConsoleAIProxy forwards <prefix><rest> to <upstreamURL>/<rest>, authenticating with token so the
 // agent never holds it. Only paths under upstreamURL are reachable.
 func newConsoleAIProxy(prefix, upstreamURL string, token func() string) (http.Handler, error) {
-	proxy, err := newBearerTokenProxy(upstreamURL, token, func(r *http.Request) string {
+	proxy, err := newTokenProxy(upstreamURL, "Bearer", token, func(r *http.Request) string {
 		return strings.TrimPrefix(r.URL.Path, prefix)
 	})
 	if err != nil {

@@ -8,16 +8,16 @@ import (
 	"strings"
 )
 
-// newBearerTokenProxy forwards requests to upstreamURL with token instead of the caller's credentials.
-// subpath, when set, returns the part of the request path appended to upstreamURL's path; otherwise
+// newTokenProxy forwards requests to upstreamURL with "<scheme> <token>" instead of the caller's
+// credentials, and drops upstream cookies so nothing upstream sets reaches the caller. subpath, when set, returns the part of the request path appended to upstreamURL's path; otherwise
 // every request goes to upstreamURL's path.
-func newBearerTokenProxy(upstreamURL string, token func() string, subpath func(*http.Request) string) (http.Handler, error) {
+func newTokenProxy(upstreamURL, scheme string, token func() string, subpath func(*http.Request) string) (http.Handler, error) {
 	target, err := url.Parse(upstreamURL)
 	if err != nil || target.Scheme == "" || target.Host == "" {
 		return nil, fmt.Errorf("invalid upstream URL %q", upstreamURL)
 	}
 	if token == nil || strings.TrimSpace(token()) == "" {
-		return nil, fmt.Errorf("bearer token proxy requires a token")
+		return nil, fmt.Errorf("token proxy requires a token")
 	}
 	base := strings.TrimSuffix(target.Path, "/")
 
@@ -32,24 +32,28 @@ func newBearerTokenProxy(upstreamURL string, token func() string, subpath func(*
 				request.Out.URL.RawPath = ""
 			}
 			request.Out.Host = target.Host
-			setBearerToken(request.Out.Header, token())
+			setToken(request.Out.Header, scheme, token())
+		},
+		ModifyResponse: func(response *http.Response) error {
+			response.Header.Del("Set-Cookie")
+			return nil
 		},
 	}
 	return proxy, nil
 }
 
-// setBearerToken drops every credential the caller sent and authenticates with token instead.
-func setBearerToken(header http.Header, token string) {
+// setToken drops every credential the caller sent and authenticates with "<scheme> <token>" instead.
+func setToken(header http.Header, scheme, token string) {
 	header.Del("Cookie")
 	header.Del("Proxy-Authorization")
 	header.Del("X-Api-Key")
-	header.Set("Authorization", "Bearer "+token)
+	header.Set("Authorization", scheme+" "+token)
 }
 
 // withBearerToken replaces the caller's credentials with the deploy token before calling next.
 func withBearerToken(token func() string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		setBearerToken(r.Header, token())
+		setToken(r.Header, "Bearer", token())
 		next.ServeHTTP(w, r)
 	})
 }

@@ -25,13 +25,14 @@ func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
 	defer upstream.Close()
 
 	token := "user-token"
-	handler, err := newBearerTokenProxy(
+	handler, err := newTokenProxy(
 		upstream.URL+"/mcp/workbench/id?categories=metrics%2Clogs",
+		"Bearer",
 		func() string { return token },
 		nil,
 	)
 	if err != nil {
-		t.Fatalf("newBearerTokenProxy() error = %v", err)
+		t.Fatalf("newTokenProxy() error = %v", err)
 	}
 
 	request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/workbench/mcp", strings.NewReader(`{"jsonrpc":"2.0"}`))
@@ -76,10 +77,10 @@ func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
 }
 
 func TestWorkbenchMCPProxyRejectsInvalidConfiguration(t *testing.T) {
-	if _, err := newBearerTokenProxy("not-a-url", func() string { return "token" }, nil); err == nil {
+	if _, err := newTokenProxy("not-a-url", "Bearer", func() string { return "token" }, nil); err == nil {
 		t.Fatal("expected invalid URL error")
 	}
-	if _, err := newBearerTokenProxy("https://console.example/mcp", func() string { return "" }, nil); err == nil {
+	if _, err := newTokenProxy("https://console.example/mcp", "Bearer", func() string { return "" }, nil); err == nil {
 		t.Fatal("expected missing token error")
 	}
 }

@@ -48,7 +48,7 @@ func newConsoleExtTestSidecar(t *testing.T) (*httptest.Server, *[]receivedConsol
 		} else {
 			got.parseErr = json.NewDecoder(r.Body).Decode(&got.params)
 		}
-		if r.Header.Get("Authorization") != "Bearer deploy-token" {
+		if r.Header.Get("Authorization") != "Token deploy-token" {
 			t.Errorf("authorization = %q", r.Header.Get("Authorization"))
 		}
 		received = append(received, got)
@@ -99,6 +99,7 @@ func TestConsoleExtProxyMarksClientAndRun(t *testing.T) {
 	var received *http.Request
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		received = r.Clone(r.Context())
+		w.Header().Set("Set-Cookie", "grafana_token=deploy-token")
 	}))
 	defer upstream.Close()
 
@@ -111,8 +112,12 @@ func TestConsoleExtProxyMarksClientAndRun(t *testing.T) {
 	})
 	request.Header.Set(consoleExtClientHeader, "spoofed")
 	request.Header.Set(consoleExtAgentRunHeader, "spoofed")
-	server.consoleExtProxy.ServeHTTP(httptest.NewRecorder(), request)
+	response := httptest.NewRecorder()
+	server.consoleExtProxy.ServeHTTP(response, request)
 
+	if got := response.Header().Get("Set-Cookie"); got != "" {
+		t.Fatalf("Set-Cookie reached the caller: %q", got)
+	}
 	if received == nil {
 		t.Fatal("upstream did not receive request")
 	}
@@ -122,7 +127,7 @@ func TestConsoleExtProxyMarksClientAndRun(t *testing.T) {
 	if got := received.Header.Get(consoleExtAgentRunHeader); got != testAgentRunID {
 		t.Fatalf("%s = %q", consoleExtAgentRunHeader, got)
 	}
-	if got := received.Header.Get("Authorization"); got != "Bearer deploy-token" {
+	if got := received.Header.Get("Authorization"); got != "Token deploy-token" {
 		t.Fatalf("authorization = %q", got)
 	}
 }
