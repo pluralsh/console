@@ -32,7 +32,7 @@ func (agent *Agent) env(config toolv1.Config, model, provider string) ([]string,
 	codex := config.Run.Runtime.Config.Codex
 	credential := codex.ApiKey
 	if config.Run.IsProxyEnabled() {
-		// The sidecar replaces the placeholder key with the run's Plural token.
+		// The sidecar replaces the placeholder key with the deploy token.
 		credential = common.AgentAIProxyAPIKey
 	}
 

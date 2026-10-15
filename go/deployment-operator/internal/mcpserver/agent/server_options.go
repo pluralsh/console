@@ -36,7 +36,7 @@ func WithVersion(version string) Option {
 
 // WithOpenAIProxy registers local OpenAI chat completion and responses endpoints
 // that convert streaming client requests into non-streaming upstream calls,
-// authenticating with the run's Plural token instead of the caller's.
+// authenticating with the deploy token instead of the caller's.
 func WithOpenAIProxy(chatCompletionsURL, responsesURL string, token func() string) Option {
 	return func(s *Server) {
 		if chatCompletionsURL != "" {
@@ -58,7 +58,7 @@ func WithOpenAIProxy(chatCompletionsURL, responsesURL string, token func() strin
 }
 
 // WithConsoleAIProxy registers a local reverse proxy to the Console AI proxy
-// that authenticates with the run's Plural token, so the agent never holds it.
+// that authenticates with the deploy token, so the agent never holds it.
 func WithConsoleAIProxy(upstreamURL string, token func() string) Option {
 	return func(s *Server) {
 		handler, err := newConsoleAIProxy(common.AgentConsoleAIPath, upstreamURL, token)

@@ -24,7 +24,7 @@ func (agent *Agent) env(config toolv1.Config) []string {
 		apiKey = pi.APIKey
 	}
 	if config.Run.IsProxyEnabled() {
-		// The sidecar replaces the placeholder key with the run's Plural token.
+		// The sidecar replaces the placeholder key with the deploy token.
 		apiKey = common.AgentAIProxyAPIKey
 	}
 

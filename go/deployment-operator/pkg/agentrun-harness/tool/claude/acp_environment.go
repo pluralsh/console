@@ -28,7 +28,7 @@ func (agent *Agent) env(config toolv1.Config) []string {
 	}
 
 	if config.Run.IsProxyEnabled() {
-		// The sidecar replaces the placeholder key with the run's Plural token.
+		// The sidecar replaces the placeholder key with the deploy token.
 		return append(env,
 			fmt.Sprintf("%s=%s", anthropicAuthEnv, common.AgentAIProxyAPIKey),
 			fmt.Sprintf("%s=%s/ext/ai/anthropic", anthropicBaseURLEnv, common.AgentConsoleProxyURL),

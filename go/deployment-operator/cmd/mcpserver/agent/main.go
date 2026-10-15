@@ -188,10 +188,11 @@ func createServerOptions(
 	}
 
 	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
-		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL(), credentials.PluralToken))
+		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL(), args.DeployToken))
 	}
+	// The AI proxy accepts the deploy token of a cluster with an agent runtime, which doesn't expire like the user token.
 	if new(v1.AgentRun).FromAgentRunFragment(agentRun).IsProxyEnabled() {
-		opts = append(opts, agent.WithConsoleAIProxy(args.ConsoleURL()+"/ext/ai", credentials.PluralToken))
+		opts = append(opts, agent.WithConsoleAIProxy(args.ConsoleURL()+"/ext/ai", args.DeployToken))
 	}
 	if token := args.DeployToken(); token != "" {
 		opts = append(opts, agent.WithConsoleExtProxy(args.ConsoleExtApiURL(), token, args.AgentRunID()))

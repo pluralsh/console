@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// newConsoleAIProxy forwards <prefix><rest> to <upstreamURL>/<rest>, authenticating with the run's
-// Plural token so the agent never holds it. Only paths under upstreamURL are reachable.
+// newConsoleAIProxy forwards <prefix><rest> to <upstreamURL>/<rest>, authenticating with token so the
+// agent never holds it. Only paths under upstreamURL are reachable.
 func newConsoleAIProxy(prefix, upstreamURL string, token func() string) (http.Handler, error) {
 	target, err := url.Parse(upstreamURL)
 	if err != nil || target.Scheme == "" || target.Host == "" {
@@ -51,7 +51,7 @@ func hasDotSegment(path string) bool {
 	return false
 }
 
-// withBearerToken replaces the caller's credentials with the run's Plural token before calling next.
+// withBearerToken replaces the caller's credentials with the deploy token before calling next.
 func withBearerToken(token func() string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		setBearerToken(r.Header, token())

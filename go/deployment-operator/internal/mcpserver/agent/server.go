@@ -53,7 +53,7 @@ type Server struct {
 	// consoleExtProxy forwards the harness's allowlisted Console ext calls, adding the deploy token.
 	consoleExtProxy http.Handler
 
-	// consoleAIProxy forwards the agent's model calls to the Console AI proxy, adding the run's Plural token.
+	// consoleAIProxy forwards the agent's model calls to the Console AI proxy, adding the deploy token.
 	consoleAIProxy http.Handler
 }
 
