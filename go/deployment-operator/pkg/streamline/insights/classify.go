@@ -167,14 +167,14 @@ func replicas(obj *unstructured.Unstructured) (desired, ready *int64) {
 			d = v
 		}
 		r, _, _ := unstructured.NestedInt64(obj.Object, "status", "readyReplicas")
-		return &d, &r
+		return new(d), new(r)
 	case kindDaemonSet:
 		d, found, _ := unstructured.NestedInt64(obj.Object, "status", "desiredNumberScheduled")
 		if !found {
 			return nil, nil
 		}
 		r, _, _ := unstructured.NestedInt64(obj.Object, "status", "numberReady")
-		return &d, &r
+		return new(d), new(r)
 	}
 	return nil, nil
 }

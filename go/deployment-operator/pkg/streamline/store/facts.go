@@ -1,54 +1,25 @@
 package store
 
-import (
-	"strconv"
+import "strconv"
 
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
-)
+// sqlNull is the SQL literal of a missing value.
+const sqlNull = "NULL"
 
-// nullableCriticality returns nil for components that were not classified, so the column stays NULL.
-func nullableCriticality(facts insights.Facts) any {
-	if facts.Criticality == 0 {
-		return nil
-	}
-	return facts.Criticality
-}
+type integer interface{ ~int | ~int64 }
 
-// nullableUnix returns nil for an unknown time, so the column stays NULL.
-func nullableUnix(v int64) any {
-	if v == 0 {
-		return nil
-	}
-	return v
-}
-
-// sqlUnix renders an optional unix time as an SQL literal.
-func sqlUnix(v int64) string {
-	if v == 0 {
-		return "NULL"
-	}
-	return strconv.FormatInt(v, 10)
-}
-
-func nullableInt(v *int64) any {
+// nullablePtr returns nil for a missing value, so the column stays NULL, and dereferences a present one.
+// The SQL driver does not follow pointers, and a replica count of zero is a known value that must not become NULL.
+func nullablePtr[T any](v *T) any {
 	if v == nil {
 		return nil
 	}
 	return *v
 }
 
-// sqlInt renders an optional integer as an SQL literal for statements built as strings.
-func sqlInt(v *int64) string {
+// sqlPtr renders an optional integer as an SQL literal for statements built as strings, NULL when it is missing.
+func sqlPtr[T integer](v *T) string {
 	if v == nil {
-		return "NULL"
+		return sqlNull
 	}
-	return strconv.FormatInt(*v, 10)
-}
-
-// sqlCriticality renders the criticality as an SQL literal, NULL for components that were not classified.
-func sqlCriticality(facts insights.Facts) string {
-	if facts.Criticality == 0 {
-		return "NULL"
-	}
-	return strconv.Itoa(facts.Criticality)
+	return strconv.FormatInt(int64(*v), 10)
 }

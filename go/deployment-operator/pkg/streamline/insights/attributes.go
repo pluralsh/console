@@ -13,14 +13,13 @@ func Attributes(entries []Entry) []client.ClusterInsightComponentAttributes {
 
 	result := make([]client.ClusterInsightComponentAttributes, 0, len(entries))
 	for _, e := range entries {
-		priority := client.InsightComponentPriority(e.Priority)
 		result = append(result, client.ClusterInsightComponentAttributes{
-			Group:     lo.ToPtr(e.Group),
+			Group:     new(e.Group),
 			Version:   e.Version,
 			Kind:      e.Kind,
 			Namespace: lo.EmptyableToPtr(e.Namespace),
 			Name:      e.Name,
-			Priority:  &priority,
+			Priority:  new(client.InsightComponentPriority(e.Priority)),
 			ServiceID: lo.EmptyableToPtr(e.ServiceID),
 		})
 	}

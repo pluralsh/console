@@ -70,7 +70,7 @@ const (
 			ready_replicas INT, -- NULL when unknown
 			priority_annotation TEXT, -- normalized value of the insight priority annotation
 			health_message TEXT,
-			last_success INT -- unix time of the last successful run of a CronJob, NULL when unknown
+			last_success INT DEFAULT 0 -- unix time of the last successful run of a CronJob, 0 when unknown
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_component ON component("group", version, kind, namespace, name);
 		CREATE INDEX IF NOT EXISTS idx_parent ON component(parent_uid);
@@ -385,7 +385,7 @@ const (
 				  WHERE j.parent_uid = c.uid AND j.kind = 'Job' AND j.applied = 1
 				  ORDER BY j.created_at DESC LIMIT 1
 			  ) newest
-			  WHERE newest.health = 2 AND (c.last_success IS NULL OR c.last_success < newest.created_at)
+			  WHERE newest.health = 2 AND (COALESCE(c.last_success, 0) = 0 OR c.last_success < newest.created_at)
 		  ))
 	`
 

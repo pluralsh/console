@@ -323,15 +323,15 @@ func (in *DatabaseStore) upsertAppliedComponent(conn *sqlite.Conn, obj unstructu
 			serverSHA,
 			true,
 			labels,
-			nullableCriticality(facts),
+			facts.Criticality,
 			facts.CriticalityReason,
 			facts.PriorityClass,
 			facts.FailingSince,
-			nullableInt(facts.DesiredReplicas),
-			nullableInt(facts.ReadyReplicas),
+			nullablePtr(facts.DesiredReplicas),
+			nullablePtr(facts.ReadyReplicas),
 			facts.PriorityAnnotation,
 			facts.HealthMessage,
-			nullableUnix(facts.LastSuccessfulTime),
+			facts.LastSuccessfulTime,
 		},
 	})
 }
@@ -432,7 +432,7 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 
 		facts := insights.Extract(&obj, state == ComponentStateRunning, state == ComponentStateFailed, message, now)
 
-		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1, '%s', %s,'%s','%s',%d,%s,%s,'%s','%s',%s)",
+		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1, '%s', %d,'%s','%s',%d,%s,%s,'%s','%s',%d)",
 			obj.GetUID(),
 			lo.FromPtr(ownerRef),
 			gvk.Group,
@@ -447,15 +447,15 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			smcommon.GetDeletePhase(obj),
 			serverSHA,
 			escapeSQLString(labels),
-			sqlCriticality(facts),
+			facts.Criticality,
 			escapeSQLString(facts.CriticalityReason),
 			escapeSQLString(facts.PriorityClass),
 			facts.FailingSince,
-			sqlInt(facts.DesiredReplicas),
-			sqlInt(facts.ReadyReplicas),
+			sqlPtr(facts.DesiredReplicas),
+			sqlPtr(facts.ReadyReplicas),
 			escapeSQLString(facts.PriorityAnnotation),
 			escapeSQLString(facts.HealthMessage),
-			sqlUnix(facts.LastSuccessfulTime),
+			facts.LastSuccessfulTime,
 		))
 	}
 
@@ -606,7 +606,7 @@ func (in *DatabaseStore) SaveComponentAttributes(obj client.ComponentChildAttrib
 			obj.Name,
 			state,
 			true,
-		}, args...), nullableCriticality(insights.Facts{Criticality: criticality.Score}), criticality.Reason, failingSince),
+		}, args...), criticality.Score, criticality.Reason, failingSince),
 	})
 }
 
