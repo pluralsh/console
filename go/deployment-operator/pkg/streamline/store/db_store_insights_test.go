@@ -190,17 +190,18 @@ func TestComponentInsights(t *testing.T) {
 
 		// Define test components with various kinds to test priority assignment
 		testComponents := []client.ComponentChildAttributes{
-			// Apps are never above MEDIUM on their own: an app's Ingress or Certificate is MEDIUM
+			// An app's Ingress or Certificate is MEDIUM, apps are never above that on their own
 			createComponentAttributes("ingress-1", nil, WithAttributesKind("Ingress"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("ingress-1")),
 			createComponentAttributes("certificate-1", nil, WithAttributesKind("Certificate"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("certificate-1")),
+
+			// Core components by name or namespace. Without replica counts a failure is HIGH, a mostly down one is CRITICAL
 			createComponentAttributes("cert-manager-1", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("cert-manager-webhook"), WithAttributesNamespace("cert-manager")),
 			createComponentAttributes("coredns-1", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("coredns")),
 
-			// Core components, without replica counts a failure is HIGH. A mostly down one is CRITICAL
+			// Third party workloads, whatever their kind, are LOW without replica counts
 			createComponentAttributes("statefulset-1", nil, WithAttributesKind("StatefulSet"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("statefulset-1")),
 			createComponentAttributes("node-exporter", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("node-exporter")),
 
-			// Third party workloads, whatever their kind
 			createComponentAttributes("daemonset-1", nil, WithAttributesKind("DaemonSet"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("daemonset-1")),
 
 			createComponentAttributes("deployment-1", nil, WithAttributesKind("Deployment"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("deployment-1")),
@@ -600,6 +601,16 @@ func TestComponentInsights(t *testing.T) {
 			require.NoError(t, storeInstance.SaveComponentAttributes(createComponentAttributes(w.name+"-pod", new(w.name+"-rs"), WithAttributesKind("Pod"), WithAttributesState(client.ComponentStateFailed), WithAttributesName(w.name+"-pod"))))
 		}
 
+		// A core DaemonSet that is down on every node, its pods are owned by the DaemonSet itself
+		daemonSet := unstructured.Unstructured{Object: map[string]any{
+			"apiVersion": "apps/v1",
+			"kind":       "DaemonSet",
+			"metadata":   map[string]any{"name": "aws-node", "namespace": "kube-system", "uid": "aws-node", "generation": int64(1)},
+			"status":     map[string]any{"desiredNumberScheduled": int64(3), "numberReady": int64(0), "observedGeneration": int64(1)},
+		}}
+		require.NoError(t, storeInstance.SaveComponent(daemonSet))
+		require.NoError(t, storeInstance.SaveComponentAttributes(createComponentAttributes("aws-node-pod", new("aws-node"), WithAttributesKind("Pod"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("aws-node-pod"))))
+
 		insights, err := storeInstance.GetComponentInsights()
 		require.NoError(t, err, "Failed to get component insights")
 
@@ -608,6 +619,7 @@ func TestComponentInsights(t *testing.T) {
 			priorityMap[insight.Name] = *insight.Priority
 		}
 
+		assert.Equal(t, client.InsightComponentPriorityCritical, priorityMap["aws-node"], "a core DaemonSet that is down everywhere is CRITICAL")
 		assert.Equal(t, client.InsightComponentPriorityCritical, priorityMap["coredns"])
 		assert.Equal(t, client.InsightComponentPriorityCritical, priorityMap["ingress-nginx-controller"])
 		assert.Equal(t, client.InsightComponentPriorityHigh, priorityMap["cert-manager-webhook"])

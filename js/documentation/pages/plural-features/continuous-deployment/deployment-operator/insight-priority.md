@@ -44,6 +44,8 @@ Every failing object is either a **core component** of the cluster or an **app**
 | App | 10, or 35 for Ingresses, Certificates and persistent volumes | `MEDIUM` | partly down is `LOW`, down or with a broken Ingress or Certificate is `MEDIUM` |
 | Core | 60 | `CRITICAL` | partly down is `HIGH`, mostly down is `CRITICAL` |
 
+Only workloads with replicas can reach `CRITICAL` on their own, since that comes from the share of replicas that are down. A failed node, or an Ingress or Certificate in a core namespace, is `HIGH`.
+
 `HIGH` and `CRITICAL` are therefore reserved for what keeps the cluster and the apps running, and a broken third-party workload never turns the cluster red on its own. To treat one of your own apps as important, pin its priority with an [annotation](#annotations) or a [script](#custominsightpriority), neither is limited by this.
 
 **Criticality** says whether the component is core. The first rule that matches decides:
