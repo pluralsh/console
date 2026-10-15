@@ -28,7 +28,7 @@ func TestBuildACPEnvironmentUsesSidecarPlaceholder(t *testing.T) {
 				t.Fatalf("buildACPEnvironment() failed: %v", err)
 			}
 			values := testEnvValues(env)
-			if values[consoleTokenEnv] != common.AgentAIProxyAPIKey || values[codexAPIKeyEnv] != common.AgentAIProxyAPIKey {
+			if values[codexAPIKeyEnv] != common.AgentAIProxyAPIKey {
 				t.Fatal("proxy environment did not use the sidecar placeholder")
 			}
 			for key, value := range values {

@@ -33,11 +33,3 @@ func hasDotSegment(path string) bool {
 	}
 	return false
 }
-
-// withBearerToken replaces the caller's credentials with the deploy token before calling next.
-func withBearerToken(token func() string, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		setBearerToken(r.Header, token())
-		next.ServeHTTP(w, r)
-	})
-}

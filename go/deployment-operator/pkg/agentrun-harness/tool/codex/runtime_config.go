@@ -114,7 +114,7 @@ func (agent *Agent) resolveProviderSettings(config toolv1.Config) (string, strin
 		if config.Run.IsStreamingProxyEnabled() {
 			baseURL = common.AgentOpenAIBaseURL
 		}
-		return pluralProvider, baseURL, consoleTokenEnv, wireAPI
+		return pluralProvider, baseURL, codexAPIKeyEnv, wireAPI
 	}
 	if endpoint := config.Run.Runtime.Config.Codex.Endpoint; endpoint != nil {
 		return customProvider, *endpoint, openAIAPIKeyEnv, wireAPI

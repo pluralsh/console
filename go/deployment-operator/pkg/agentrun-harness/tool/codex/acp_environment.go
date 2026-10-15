@@ -11,7 +11,6 @@ import (
 // These names are the environment variables exchanged between the agent-run
 // process and Codex's ACP adapter.
 const (
-	consoleTokenEnv       = "PLRL_CONSOLE_TOKEN"
 	openAIAPIKeyEnv       = "OPENAI_API_KEY"
 	codexAPIKeyEnv        = "CODEX_API_KEY"
 	codexConfigEnv        = "CODEX_CONFIG"
@@ -42,7 +41,6 @@ func (agent *Agent) env(config toolv1.Config, model, provider string) ([]string,
 	}
 
 	env := []string{
-		fmt.Sprintf("%s=%s", consoleTokenEnv, common.AgentAIProxyAPIKey),
 		fmt.Sprintf("%s=%s", codexHomeEnv, agent.codexHome(config)),
 		fmt.Sprintf("%s=%s", codexAPIKeyEnv, credential),
 		fmt.Sprintf("%s=%s", defaultAuthRequestEnv, defaultAuthRequest),

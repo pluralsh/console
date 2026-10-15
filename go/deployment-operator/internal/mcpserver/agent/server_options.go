@@ -95,9 +95,9 @@ const (
 // WithConsoleExtProxy registers a local reverse proxy to the Console ext API
 // that authenticates with the deploy token, so the harness container never holds it.
 // Only the harness's own operations on this agent run are let through.
-func WithConsoleExtProxy(upstreamURL, token, agentRunID string) Option {
+func WithConsoleExtProxy(upstreamURL string, token func() string, agentRunID string) Option {
 	return func(s *Server) {
-		handler, err := newBearerTokenProxy(upstreamURL, func() string { return token }, nil)
+		handler, err := newBearerTokenProxy(upstreamURL, token, nil)
 		if err != nil {
 			klog.Fatalf("could not configure console ext proxy: %v", err)
 		}

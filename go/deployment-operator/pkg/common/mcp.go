@@ -17,7 +17,7 @@ const (
 
 	// AgentConsoleExtGQLPath proxies the harness's Console ext API calls; the sidecar injects the deploy token.
 	AgentConsoleExtGQLPath = "/plural/ext/gql"
-	AgentConsoleExtGQLURL  = "http://127.0.0.1:8080/plural/ext/gql"
+	AgentConsoleExtGQLURL  = AgentConsoleProxyURL + "/ext/gql"
 
 	// AgentConsoleProxyURL stands in for the Console URL in agent AI provider config. The sidecar
 	// forwards AgentConsoleAIPath to the Console AI proxy and injects the deploy token.

@@ -57,7 +57,7 @@ func newConsoleExtTestSidecar(t *testing.T) (*httptest.Server, *[]receivedConsol
 	t.Cleanup(upstream.Close)
 
 	server := &Server{}
-	WithConsoleExtProxy(upstream.URL+"/ext/gql", "deploy-token", testAgentRunID)(server)
+	WithConsoleExtProxy(upstream.URL+"/ext/gql", func() string { return "deploy-token" }, testAgentRunID)(server)
 	sidecar := httptest.NewServer(server.consoleExtProxy)
 	t.Cleanup(sidecar.Close)
 	return sidecar, &received
@@ -103,7 +103,7 @@ func TestConsoleExtProxyMarksClientAndRun(t *testing.T) {
 	defer upstream.Close()
 
 	server := &Server{}
-	WithConsoleExtProxy(upstream.URL+"/ext/gql", "deploy-token", testAgentRunID)(server)
+	WithConsoleExtProxy(upstream.URL+"/ext/gql", func() string { return "deploy-token" }, testAgentRunID)(server)
 
 	request := jsonRequest("http://127.0.0.1/plural/ext/gql", map[string]any{
 		"query":     client.GetAgentRunDocument,

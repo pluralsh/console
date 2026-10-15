@@ -45,3 +45,11 @@ func setBearerToken(header http.Header, token string) {
 	header.Del("X-Api-Key")
 	header.Set("Authorization", "Bearer "+token)
 }
+
+// withBearerToken replaces the caller's credentials with the deploy token before calling next.
+func withBearerToken(token func() string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		setBearerToken(r.Header, token())
+		next.ServeHTTP(w, r)
+	})
+}
