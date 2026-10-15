@@ -293,7 +293,8 @@ const HeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   borderBottom: theme.borders.hairline,
   padding: `0 ${theme.spacing.medium}px`,
-  minHeight: SIDE_PANEL_HEADER_HEIGHT,
+  height: SIDE_PANEL_HEADER_HEIGHT,
+  flexShrink: 0,
 }))
 
 export const ActionItemSC = styled.div(({ theme }) => ({

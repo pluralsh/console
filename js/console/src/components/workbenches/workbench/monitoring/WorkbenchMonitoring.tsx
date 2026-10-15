@@ -62,11 +62,8 @@ export function WorkbenchMonitoring() {
     monitorId,
   ])
 
-  // Tab strip height matches the sidebar filter row:
-  // 2x16 padding + 32 input + 1 border.
   return (
     <WorkbenchPageLayout
-      tabStripHeight={65}
       showEditWorkbenchButton={!updateTarget}
       sidebar={{
         kind: 'custom',

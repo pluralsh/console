@@ -52,7 +52,7 @@ export default function PinnedCustomResourceDefinitions({
       css={{
         display: 'flex',
         gap: theme.spacing.xxsmall,
-        paddingBottom: theme.spacing.xxsmall,
+        minWidth: 0,
         overflowX: 'auto',
         whiteSpace: 'nowrap',
       }}
@@ -63,6 +63,7 @@ export default function PinnedCustomResourceDefinitions({
           <LinkButton
             key={id}
             tertiary
+            small
             onClick={() =>
               navigate(
                 getResourceDetailsAbsPath(

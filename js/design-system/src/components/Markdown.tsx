@@ -20,6 +20,8 @@ type MarkdownProps = {
   gitUrl?: string
   mainBranch?: string
   isStreaming?: boolean
+  /** Extends the GitHub-derived default allowlist, eg for custom tags. Stays sanitized either way. */
+  sanitizeSchema?: SanitizeOptions
 } & ReactMarkdownOptions
 
 export const markdownSanitizeSchema: SanitizeOptions = { ...defaultSchema }
@@ -328,13 +330,14 @@ function Markdown({
   gitUrl,
   mainBranch,
   isStreaming = false,
+  sanitizeSchema = markdownSanitizeSchema,
   ...props
 }: MarkdownProps) {
   return useMemo(
     () => (
       <ReactMarkdown
         {...props}
-        rehypePlugins={[rehypeRaw, [rehypeSanitize, markdownSanitizeSchema]]}
+        rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
         remarkPlugins={[remarkGfm]}
         components={{
           blockquote: (props) => <MdBlockquote {...props} />,
@@ -385,7 +388,7 @@ function Markdown({
         {text}
       </ReactMarkdown>
     ),
-    [props, text, gitUrl, mainBranch, isStreaming]
+    [props, text, gitUrl, mainBranch, isStreaming, sanitizeSchema]
   )
 }
 

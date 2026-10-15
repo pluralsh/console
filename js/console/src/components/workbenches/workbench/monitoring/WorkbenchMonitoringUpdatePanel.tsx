@@ -20,6 +20,7 @@ export function WorkbenchMonitoringUpdateButton({
   return (
     <Button
       primary
+      small
       onClick={onClick}
       aria-label={`Update ${kind} ${name}`}
     >

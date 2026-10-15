@@ -44,7 +44,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
 
   def tools(%Environment{job: %WorkbenchJob{user: user}} = environment), do: tools(environment, user)
   def tools(%Environment{skills: skills, tools: tools, job: job, activities: activities} = environment, user) do
-    skills = Environment.subagent_skills(skills, :observability)
+    skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:observability)
 
     core_tools(job, environment, user)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
@@ -53,7 +53,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %ObservabilityResult{job: job, user: user},
-      %Codemode{tools: []},
+      %Codemode{tools: [], workbench_id: job.workbench_id},
       %History{job: job, activities: activities}
     ])
   end

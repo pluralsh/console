@@ -32,9 +32,11 @@ export const Th = styled.th<{
       borderBottom: highlight
         ? undefined
         : theme.borders[tableFillLevelToHeaderBorder[fillLevel]],
-      color: theme.colors.text,
-      height: 48,
-      minHeight: 48,
+      ...theme.partials.text.caption,
+      fontWeight: 600,
+      color: theme.colors['text-light'],
+      height: 36,
+      minHeight: 36,
       whiteSpace: 'nowrap',
       padding: '0 12px',
       textAlign: 'left',

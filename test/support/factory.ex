@@ -1337,6 +1337,16 @@ defmodule Console.Factory do
     }
   end
 
+  def attachment_factory do
+    %Schema.Attachment{
+      filename: "file.txt",
+      filetype: "text/plain",
+      path: sequence(:attachment_path, &"/_plrl_/uploads/#{&1}/file.txt"),
+      size: 10,
+      workbench: build(:workbench)
+    }
+  end
+
   def queued_prompt_factory do
     %Schema.QueuedPrompt{
       prompt: "queued prompt text",

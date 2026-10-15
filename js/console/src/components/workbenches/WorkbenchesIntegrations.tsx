@@ -1,21 +1,22 @@
 import {
-  Accordion,
-  AccordionItem,
   AddIcon,
   ApiIcon,
   Button,
   Card,
-  Checkbox,
   Chip,
   EmptyState,
-  FiltersIcon,
   Flex,
-  Input,
-  MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
-import { animated, useTransition } from '@react-spring/web'
+import { PageSidecarPortal } from 'components/layout/PageLayout'
+import {
+  DisplayButton,
+  DisplayFilterSection,
+  DisplayPanel,
+} from 'components/utils/display/DisplayPanel'
 import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { StackedText } from 'components/utils/table/StackedText'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import Fuse, { type IFuseOptions } from 'fuse.js'
@@ -39,16 +40,11 @@ const SEARCH_OPTIONS: IFuseOptions<WorkbenchToolCard> = {
   keys: ['label', 'description', 'categoryLabels', 'type', 'provider'],
   threshold: 0.25,
 }
-const CATEGORIES_ACCORDION_VALUE = 'categories'
-
 export function WorkbenchesIntegrations() {
   const theme = useTheme()
   const [query, setQuery] = useState('')
   const [filtersVisible, setFiltersVisible] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [openFilterSections, setOpenFilterSections] = useState<string[]>([
-    CATEGORIES_ACCORDION_VALUE,
-  ])
 
   const categories = useMemo(
     () => getFilterOptions(WORKBENCH_TOOL_CARDS, (card) => card.categoryLabels),
@@ -88,14 +84,25 @@ export function WorkbenchesIntegrations() {
     setSelectedCategories([])
   }
 
-  const panelTransitions = useTransition(filtersVisible ? [true] : [], {
-    from: { opacity: 0, width: 0, marginRight: 0 },
-    enter: { opacity: 1, width: 260, marginRight: theme.spacing.large },
-    leave: { opacity: 0, width: 0, marginRight: 0 },
-    config: filtersVisible
-      ? { mass: 0.6, tension: 280, velocity: 0.02 }
-      : { mass: 0.6, tension: 400, velocity: 0.02, restVelocity: 0.1 },
-  })
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <>
+          <ToolbarSearchInput
+            placeholder="Search workbench connectors"
+            value={query}
+            onChange={setQuery}
+          />
+          <DisplayButton
+            showDot={selectedCategories.length > 0}
+            expanded={filtersVisible}
+            onClick={() => setFiltersVisible((visible) => !visible)}
+          />
+        </>
+      ),
+      [query, filtersVisible, selectedCategories.length]
+    )
+  )
 
   return (
     <WorkbenchTabWrapper>
@@ -104,78 +111,29 @@ export function WorkbenchesIntegrations() {
         title="Integrations"
         description="Integrate your dev stack, including observability, ticketing, MCP, and Cloud services with Plural.  You can create multiple tools for each."
       />
+      {filtersVisible && (
+        <PageSidecarPortal>
+          <DisplayPanel>
+            <DisplayFilterSection
+              title="Categories"
+              options={categories.map(({ key }) => key)}
+              selected={selectedCategories}
+              counts={Object.fromEntries(
+                categories.map(({ key, items }) => [key, items])
+              )}
+              getLabel={(key) => key}
+              onChange={setSelectedCategories}
+            />
+          </DisplayPanel>
+        </PageSidecarPortal>
+      )}
       <FiltersLayoutSC>
-        {panelTransitions((styles) => (
-          <AnimatedFiltersPanelSC style={styles}>
-            <FiltersPanelContentSC>
-              <Accordion
-                type="multiple"
-                value={openFilterSections}
-                onValueChange={(value) =>
-                  setOpenFilterSections(value as string[])
-                }
-              >
-                <AccordionItem
-                  value={CATEGORIES_ACCORDION_VALUE}
-                  trigger={`Categories (${categories.length})`}
-                >
-                  <Flex
-                    direction="column"
-                    gap="xsmall"
-                  >
-                    <FilterOptionsSC>
-                      {categories.map(({ key, items }) => (
-                        <Checkbox
-                          key={key}
-                          small
-                          checked={selectedCategories.includes(key)}
-                          onChange={() =>
-                            setSelectedCategories((current) =>
-                              toggleFilterValue(current, key)
-                            )
-                          }
-                        >
-                          {key} ({items})
-                        </Checkbox>
-                      ))}
-                    </FilterOptionsSC>
-                  </Flex>
-                </AccordionItem>
-              </Accordion>
-            </FiltersPanelContentSC>
-          </AnimatedFiltersPanelSC>
-        ))}
         <Flex
           direction="column"
           gap="medium"
           grow={1}
           minWidth={0}
         >
-          <Flex gap="medium">
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-              showClearButton
-              placeholder="Search workbench connectors"
-              startIcon={<MagnifyingGlassIcon color="icon-light" />}
-              css={{ flexGrow: 1 }}
-            />
-            <Button
-              secondary
-              startIcon={<FiltersIcon />}
-              onClick={() => setFiltersVisible((visible) => !visible)}
-              style={{
-                borderColor:
-                  filtersVisible ||
-                  selectedCategories.length ||
-                  selectedCategories.length
-                    ? theme.colors['border-primary']
-                    : undefined,
-              }}
-            >
-              Filters
-            </Button>
-          </Flex>
           {showEmptyState ? (
             <Card
               css={{
@@ -308,12 +266,6 @@ function normalizeFilterValue(value: string) {
   return value.trim().toLowerCase()
 }
 
-function toggleFilterValue(values: string[], value: string) {
-  return values.includes(value)
-    ? values.filter((v) => v !== value)
-    : [...values, value]
-}
-
 const ToolCardSC = styled(Card)(() => ({
   '&&': {
     display: 'flex',
@@ -331,23 +283,3 @@ const FiltersLayoutSC = styled.div({
   width: '100%',
   minHeight: 0,
 })
-
-const AnimatedFiltersPanelSC = styled(animated.div)({
-  flexShrink: 0,
-  minWidth: 0,
-  overflow: 'hidden',
-})
-
-const FiltersPanelContentSC = styled.div(({ theme }) => ({
-  width: 260,
-  minWidth: 260,
-  maxHeight: '100%',
-  overflowY: 'auto',
-  paddingRight: theme.spacing.xxsmall,
-}))
-
-const FilterOptionsSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  rowGap: theme.spacing.xxsmall,
-}))

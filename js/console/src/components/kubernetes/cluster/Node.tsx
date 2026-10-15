@@ -4,7 +4,6 @@ import {
   Chip,
   ChipList,
   EmptyState,
-  Flex,
   SidecarItem,
   Table,
   useSetBreadcrumbs,
@@ -108,13 +107,11 @@ export default function Node() {
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={
-        <Flex
-          direction={'column'}
-          gap={'medium'}
-        >
+      additionalHeaderContent={
+        <>
           <Button
             destructive
+            small
             onClick={(e) => {
               e.stopPropagation()
               setOpen(true)
@@ -127,22 +124,24 @@ export default function Node() {
             open={open}
             setOpen={setOpen}
           />
-          <MetadataSidecar resource={node}>
-            <SidecarItem heading="Ready">
-              {/* TODO: Fix on the API side? It works in the list view. */}
-              <ResourceReadyChip ready={node?.ready} />
-            </SidecarItem>
-            <SidecarItem heading="Unschedulable">
-              <Chip
-                size="small"
-                severity={node?.unschedulable ? 'danger' : 'success'}
-              >
-                {node?.unschedulable ? 'True' : 'False'}
-              </Chip>
-            </SidecarItem>
-            <SidecarItem heading="Pod CIDR">{node.podCIDR}</SidecarItem>
-          </MetadataSidecar>
-        </Flex>
+        </>
+      }
+      sidecar={
+        <MetadataSidecar resource={node}>
+          <SidecarItem heading="Ready">
+            {/* TODO: Fix on the API side? It works in the list view. */}
+            <ResourceReadyChip ready={node?.ready} />
+          </SidecarItem>
+          <SidecarItem heading="Unschedulable">
+            <Chip
+              size="small"
+              severity={node?.unschedulable ? 'danger' : 'success'}
+            >
+              {node?.unschedulable ? 'True' : 'False'}
+            </Chip>
+          </SidecarItem>
+          <SidecarItem heading="Pod CIDR">{node.podCIDR}</SidecarItem>
+        </MetadataSidecar>
       }
     >
       <Outlet context={node} />

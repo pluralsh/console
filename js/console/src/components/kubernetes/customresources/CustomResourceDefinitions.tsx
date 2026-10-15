@@ -1,7 +1,6 @@
 import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
 import { getCustomResourceDefinitionsInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
@@ -97,7 +96,6 @@ const colPin = columnHelper.accessor((crd) => crd, {
 })
 
 export default function CustomResourceDefinitions() {
-  const theme = useTheme()
   const cluster = useCluster()
   const pinnedResources = usePinnedResources()
 
@@ -135,31 +133,13 @@ export default function CustomResourceDefinitions() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <div
-      css={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-      }}
+    <ResourceList<
+      TypesCustomResourceDefinitionList,
+      TypesCustomResourceDefinition
     >
-      <div
-        css={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          paddingTop: theme.spacing.medium,
-          paddingBottom: theme.spacing.large,
-        }}
-      >
-        <ResourceList<
-          TypesCustomResourceDefinitionList,
-          TypesCustomResourceDefinition
-        >
-          columns={columns}
-          queryOptions={getCustomResourceDefinitionsInfiniteOptions}
-          itemsKey="items"
-        />
-      </div>
-    </div>
+      columns={columns}
+      queryOptions={getCustomResourceDefinitionsInfiniteOptions}
+      itemsKey="items"
+    />
   )
 }

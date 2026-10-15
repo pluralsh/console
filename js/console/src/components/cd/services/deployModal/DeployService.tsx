@@ -480,6 +480,7 @@ export function DeployService({
     <>
       <Button
         primary
+        small
         onClick={() => setIsOpen(true)}
       >
         Deploy Service

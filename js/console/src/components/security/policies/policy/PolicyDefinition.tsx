@@ -459,7 +459,7 @@ function DefinitionActions({
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const WrapperSC = styled.div({
   display: 'grid',
   flex: 1,
   gridTemplateColumns: 'minmax(0, 624px) minmax(0, 1fr)',
@@ -468,8 +468,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   minHeight: 0,
   minWidth: 0,
   overflow: 'hidden',
-  borderTop: theme.borders.default,
-}))
+})
 
 const EditorColumnSC = styled.section(({ theme }) => ({
   borderRight: theme.borders.default,

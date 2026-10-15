@@ -7,6 +7,7 @@ defmodule CloudQuery.Client do
   @lambda_timeout :timer.minutes(5)
 
   def adapter, do: GRPC.Client.Adapters.Gun
+  def adapter_opts, do: Console.PseudoFS.Client.adapter_opts()
   def interceptors, do: [{CloudQuery.Client.Retry, max: 3, pause: 400, backoff: 2}]
 
   def connect() do

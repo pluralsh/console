@@ -18,10 +18,7 @@ import dayjs from 'dayjs'
 import { ClusterUsageHistoryFragment } from 'generated/graphql'
 import { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import {
-  COST_MANAGEMENT_ABS_PATH,
-  COST_MANAGEMENT_REL_PATH,
-} from 'routes/costManagementRoutesConsts'
+import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { CMContextType } from './CostManagementDetails'
 import {
@@ -30,7 +27,7 @@ import {
 } from './CostTimeSeriesGraph'
 
 const getBreadcrumbs = (clusterName: string) => [
-  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: 'cost management', url: COST_MANAGEMENT_ABS_PATH },
   { label: clusterName },
   { label: 'overview' },
 ]

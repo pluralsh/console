@@ -33,7 +33,6 @@ import { QoveScriptLoader } from '../QoveScriptLoader'
 import { SentryInitializer } from '../SentryInitializer'
 import Header from './Header'
 import { Sidebar, SidebarProvider } from './Sidebar'
-import Subheader from './Subheader'
 import {
   TopLevelSidePanel,
   TopLevelSidePanelProviders,
@@ -127,7 +126,6 @@ function ConsoleContent() {
             position="relative"
             css={{ container: 'console / inline-size' }}
           >
-            <Subheader />
             <Suspense fallback={<LoadingIndicator />}>
               <Outlet />
             </Suspense>

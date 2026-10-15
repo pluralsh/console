@@ -7,13 +7,11 @@ import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { EdgeType } from '../../utils/reactflow/edges'
 import { ReactFlowGraph } from '../../utils/reactflow/ReactFlowGraph'
 
+import { Card, EmptyState } from '@pluralsh/design-system'
 import {
-  Card,
-  EmptyState,
-  Flex,
-  Input,
-  SearchIcon,
-} from '@pluralsh/design-system'
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { LayoutOptions } from 'elkjs'
 import Fuse from 'fuse.js'
 import { isEmpty } from 'lodash'
@@ -92,17 +90,14 @@ export function StackStateGraph({ state }: { state: StackState }) {
   )
 
   return (
-    <Flex
-      direction="column"
-      height="100%"
-      gap="medium"
-    >
-      <Input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search resources"
-        startIcon={<SearchIcon color="icon-light" />}
-      />
+    <>
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          value={query}
+          onChange={setQuery}
+          placeholder="Search resources"
+        />
+      </PageToolbarPortal>
       {isEmpty(baseNodes) ? (
         <Card css={{ height: '100%', background: colors['fill-accent'] }}>
           <EmptyState message="No resources found, try a different search query." />
@@ -119,7 +114,7 @@ export function StackStateGraph({ state }: { state: StackState }) {
           />
         </div>
       )}
-    </Flex>
+    </>
   )
 }
 

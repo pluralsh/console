@@ -121,6 +121,7 @@ export type WorkbenchFormState = Omit<
   writeBindings: PolicyBindingFragment[]
   workbenchSkills: WorkbenchFormSkill[]
   workbenchKnowledge: WorkbenchFormKnowledge[]
+  filesystemEnabled: boolean
 }
 
 export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
@@ -494,6 +495,7 @@ function formStateToAttributes(
     modes,
     workbenchSkills,
     workbenchKnowledge: _workbenchKnowledge,
+    filesystemEnabled: _filesystemEnabled,
     ...rest
   } = state
 
@@ -552,6 +554,7 @@ function sanitizeInitialForm({
   budget,
   workbenchSkills,
   workbenchKnowledge,
+  filesystemEnabled,
   tools,
   readBindings,
   writeBindings,
@@ -637,5 +640,6 @@ function sanitizeInitialForm({
       ]) ?? [],
     workbenchSkills: resolvedWorkbenchSkills,
     workbenchKnowledge: resolvedWorkbenchKnowledge,
+    filesystemEnabled: !!filesystemEnabled,
   }
 }

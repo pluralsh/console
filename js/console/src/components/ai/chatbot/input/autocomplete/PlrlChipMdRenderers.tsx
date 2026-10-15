@@ -40,7 +40,7 @@ type ChipBodyProps = {
   children: ReactNode
 } & ComponentPropsWithoutRef<typeof ChipBodySC>
 
-const ChipBody = function ChipBody({
+export const ChipBody = function ChipBody({
   icon,
   children,
   ref,
@@ -315,7 +315,7 @@ const ChipBodySC = styled.span(({ theme }) => ({
   margin: 1,
 }))
 
-const ChipLinkSC = styled(Link)(({ theme }) => ({
+export const ChipLinkSC = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
   '&:hover > *': { background: theme.colors['fill-two-hover'] },
 }))

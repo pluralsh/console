@@ -1,10 +1,6 @@
 import {
-  AppIcon,
   Button,
   EmptyState,
-  Flex,
-  FlowIcon,
-  IconFrame,
   PeopleIcon,
   ReturnIcon,
   useSetBreadcrumbs,
@@ -16,11 +12,12 @@ import {
 } from 'components/cd/utils/PermissionsModal'
 import { useLogin } from 'components/contexts'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
+import { PageWithSidebar } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { hasAccess } from 'components/utils/persona'
-import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
-import { StackedText } from 'components/utils/table/StackedText'
+import { SubtabDirectory } from 'components/utils/SubTabs'
 import {
   FlowBasicWithBindingsFragment,
   PersonaConfigurationFragment,
@@ -66,6 +63,8 @@ function getDirectory(
     },
   ]
 }
+
+const SIDE_PANEL_WIDTH = 250
 
 export type FlowOutletContext = {
   flow: Nullable<FlowBasicWithBindingsFragment>
@@ -116,9 +115,14 @@ export function Flow() {
     [setSidePanelContent]
   )
   const outletCtx: FlowOutletContext = useMemo(() => ({ flow }), [flow])
-  const directory = useMemo(
-    () => getDirectory(personaConfiguration),
-    [personaConfiguration]
+  const flowPath = `${FLOWS_ABS_PATH}/${flowIdOrName}`
+  const tabs = useMemo(
+    () =>
+      getDirectory(personaConfiguration).map((entry) => ({
+        ...entry,
+        path: `${flowPath}/${entry.path}`,
+      })),
+    [personaConfiguration, flowPath]
   )
 
   useSetBreadcrumbs(
@@ -144,63 +148,38 @@ export function Flow() {
   return (
     <PageHeaderContext value={headerCtx}>
       <FlowSidePanelContext value={sidePanelCtx}>
-        <WrapperSC>
-          <BodySC>
+        <PageWithSidebar
+          sidebar={
             <SidePanelWrapSC $open={!!sidePanelContent}>
               <SidePanelInnerSC $open={!!sidePanelContent}>
                 {sidePanelContent}
               </SidePanelInnerSC>
             </SidePanelWrapSC>
-            <ContentSC>
-              <HeaderSC>
-                <IconFrame
-                  icon={<ReturnIcon />}
-                  clickable
-                  as={Link}
-                  size="large"
-                  type="secondary"
-                  to={flowsPath}
-                  tooltip="Return to flows"
-                />
-                <Flex
-                  gap="small"
-                  align="center"
-                  flex={1}
+          }
+          toolbar={
+            <PageToolbar
+              tabs={tabs}
+              activeFn={(path) => path === `${flowPath}/${tab}`}
+            >
+              {headerContent}
+              {permissions && (
+                <Button
+                  secondary
+                  small
+                  startIcon={<PeopleIcon size={12} />}
+                  onClick={() => setShowPermissions(true)}
                 >
-                  <AppIcon
-                    size="xxsmall"
-                    url={flow.icon ?? ''}
-                    icon={<FlowIcon />}
-                  />
-                  <StackedText
-                    first={flow.name}
-                    firstPartialType="body1Bold"
-                    firstColor="text"
-                    second={flow.description}
-                    secondColor="text-xlight"
-                  />
-                </Flex>
-                {permissions && (
-                  <Button
-                    secondary
-                    startIcon={<PeopleIcon />}
-                    onClick={() => setShowPermissions(true)}
-                  >
-                    Permissions
-                  </Button>
-                )}
-                {startWorkbenchJob && <FlowWorkbenchJobLauncher flow={flow} />}
-              </HeaderSC>
-              <Flex justify="space-between">
-                <SubTabs directory={directory} />
-                {headerContent}
-              </Flex>
-              <OutletWrapSC>
-                <Outlet context={outletCtx} />
-              </OutletWrapSC>
-            </ContentSC>
-          </BodySC>
-        </WrapperSC>
+                  Permissions
+                </Button>
+              )}
+              {startWorkbenchJob && <FlowWorkbenchJobLauncher flow={flow} />}
+            </PageToolbar>
+          }
+        >
+          <ContentSC>
+            <Outlet context={outletCtx} />
+          </ContentSC>
+        </PageWithSidebar>
       </FlowSidePanelContext>
       <PermissionsModal
         id={flow.id}
@@ -215,67 +194,30 @@ export function Flow() {
   )
 }
 
-const WrapperSC = styled.div({
+const SidePanelWrapSC = styled.div<{ $open: boolean }>(({ $open }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  height: '100%',
-  width: '100%',
-  minHeight: 0,
-  overflow: 'hidden',
-})
-
-const BodySC = styled.div({
-  display: 'flex',
-  flex: 1,
-  minHeight: 0,
-  minWidth: 0,
-  overflow: 'hidden',
-})
-
-const SidePanelWrapSC = styled.div<{ $open: boolean }>(({ theme, $open }) => ({
-  display: 'flex',
-  width: $open ? 250 : 0,
-  height: '100%',
+  width: $open ? SIDE_PANEL_WIDTH : 0,
   flexShrink: 0,
-  marginRight: $open ? theme.spacing.small : 0,
   minWidth: 0,
   overflow: 'hidden',
-  transition: 'width 0.25s ease, margin-right 0.25s ease',
+  transition: 'width 0.25s ease',
 }))
 
 const SidePanelInnerSC = styled.div<{ $open: boolean }>(({ $open }) => ({
   display: 'flex',
-  width: 250,
-  height: '100%',
+  width: SIDE_PANEL_WIDTH,
   flexShrink: 0,
   opacity: $open ? 1 : 0,
   transform: $open ? 'translateX(0)' : 'translateX(-8px)',
   transition: 'opacity 0.2s ease, transform 0.25s ease',
 }))
 
-const HeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.medium,
-  alignItems: 'center',
-}))
-
 const ContentSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.medium,
-  minHeight: 0,
-  minWidth: 0,
-  overflow: 'hidden',
-  padding: theme.spacing.large,
-}))
-
-const OutletWrapSC = styled.div({
   display: 'block',
   flex: 1,
   minHeight: 0,
   minWidth: 0,
   width: '100%',
   overflow: 'auto',
-})
+  padding: theme.spacing.large,
+}))

@@ -435,6 +435,8 @@ defmodule Console.AI.Chat.MemoryEngine do
 
   defp msg_size(_), do: 0
 
+  # providers bill images by resolution rather than encoded size, topping out around 1.6k tokens
+  defp content_part_size(%{type: :image}), do: 1_600 * 4
   defp content_part_size(part) do
     value_size(Map.get(part, :text)) +
       value_size(Map.get(part, :url)) +

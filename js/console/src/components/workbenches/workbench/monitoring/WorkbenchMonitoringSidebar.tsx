@@ -40,9 +40,11 @@ import {
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
   WORKBENCH_MONITORING_MONITOR_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
+import { PageSidebarHeaderSC } from 'components/layout/PageLayout'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
+import { WORKBENCH_SIDEBAR_WIDTH } from '../WorkbenchSidePanel'
 
 function isNearBottom(el: HTMLElement) {
   return el.scrollHeight - el.scrollTop - el.clientHeight < 200
@@ -523,7 +525,7 @@ function MonitorRow({
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders.hairline,
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
@@ -531,15 +533,12 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   overflow: 'hidden',
-  width: 300,
-  maxWidth: 300,
-  minWidth: 300,
+  width: WORKBENCH_SIDEBAR_WIDTH,
+  maxWidth: WORKBENCH_SIDEBAR_WIDTH,
+  minWidth: WORKBENCH_SIDEBAR_WIDTH,
 }))
 
-const FilterSC = styled.div(({ theme }) => ({
-  borderBottom: theme.borders.default,
-  padding: theme.spacing.medium,
-}))
+const FilterSC = styled(PageSidebarHeaderSC)({})
 
 const GroupsSC = styled.div({
   display: 'flex',

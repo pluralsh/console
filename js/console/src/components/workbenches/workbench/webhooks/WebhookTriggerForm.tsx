@@ -490,7 +490,6 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                                     inactive
                                     icon={<VisualInspectionIcon />}
                                     iconColor="icon-xlight"
-                                    css={{ borderRadius: 11 }}
                                   >
                                     Observability
                                   </Chip>
@@ -510,7 +509,6 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                                     inactive
                                     icon={<TicketIcon />}
                                     iconColor="icon-xlight"
-                                    css={{ borderRadius: 11 }}
                                   >
                                     Ticketing
                                   </Chip>

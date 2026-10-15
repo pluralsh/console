@@ -4,10 +4,8 @@ import {
   Callout,
   FillLevelProvider,
   Flex,
-  Input,
   ListIcon,
   NetworkInterfaceIcon,
-  SearchIcon,
   TreeViewIcon,
 } from '@pluralsh/design-system'
 import { type Key } from '@react-types/shared'
@@ -42,8 +40,14 @@ import { ServiceComponentsContext } from './ServiceComponentsContext'
 import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
-import { useServiceContext } from './ServiceDetailsContext'
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle.tsx'
+import {
+  ServiceToolbarStartPortal,
+  useServiceContext,
+} from './ServiceDetailsContext'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 
 const directory = [
   { path: 'list', icon: <ListIcon />, tooltip: 'Component list view' },
@@ -58,7 +62,6 @@ const directory = [
 const defaultView = 'list'
 
 export function ServiceComponents() {
-  const theme = useTheme()
   const { service } = useServiceContext()
   const { createNewThread, mutationLoading } = useChatbot()
   const [selectedState, setSelectedState] = useState<Key | null>(null)
@@ -90,75 +93,51 @@ export function ServiceComponents() {
 
   return (
     <ServiceComponentsContext value={contextValue}>
+      {headingContent && (
+        <ServiceToolbarStartPortal>{headingContent}</ServiceToolbarStartPortal>
+      )}
+      <PageToolbarPortal>
+        {!filtersHidden && (
+          <>
+            <ToolbarSearchInput
+              placeholder="Search components"
+              value={searchQuery}
+              onChange={setSearchQuery}
+            />
+            <ComponentKindSelect
+              selectedKinds={selectedKinds}
+              setSelectedKinds={setSelectedKinds}
+              kinds={kinds}
+            />
+            <ComponentStateFilter
+              selectedState={selectedState}
+              setSelectedState={setSelectedState}
+            />
+          </>
+        )}
+        <ComponentsViewSwitch
+          tab={view}
+          setTab={(view: string) => setSearchParams({ view })}
+        />
+        {showChatButton && service && (
+          <Button
+            small
+            startIcon={<AiSparkleFilledIcon />}
+            loading={mutationLoading}
+            onClick={() =>
+              createNewThread({
+                serviceId: service.id,
+                summary: `Chat with ${service.name}`,
+              })
+            }
+          >
+            Chat with {service.name}
+          </Button>
+        )}
+      </PageToolbarPortal>
       <ScrollablePage
         noPadding
-        contentStyles={{ paddingTop: theme.spacing.medium }}
         scrollable
-        headingContent={
-          <Flex
-            direction="column"
-            gap="small"
-            flex={1}
-            css={{ minWidth: 0 }}
-          >
-            <Flex
-              gap="small"
-              justifyContent="space-between"
-            >
-              <ConsolePageTitle heading={headingContent ?? 'Components'} />
-              <Flex gap="small">
-                <ComponentsViewSwitch
-                  tab={view}
-                  setTab={(view: string) => setSearchParams({ view })}
-                />
-                {showChatButton && service && (
-                  <Button
-                    startIcon={<AiSparkleFilledIcon />}
-                    loading={mutationLoading}
-                    onClick={() =>
-                      createNewThread({
-                        serviceId: service.id,
-                        summary: `Chat with ${service.name}`,
-                      })
-                    }
-                  >
-                    Chat with {service.name}
-                  </Button>
-                )}
-              </Flex>
-            </Flex>
-            {!filtersHidden && (
-              <Flex
-                gap="xsmall"
-                css={{
-                  marginBottom: theme.spacing.medium,
-                  width: '100%',
-                  flexWrap: 'nowrap',
-                  minWidth: 0,
-                  overflow: theme.mode === 'light' ? 'visible' : 'hidden',
-                }}
-              >
-                <Input
-                  raised
-                  placeholder="Search components"
-                  startIcon={<SearchIcon />}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.currentTarget.value)}
-                  css={{ flex: 1, minWidth: 0 }}
-                />
-                <ComponentKindSelect
-                  selectedKinds={selectedKinds}
-                  setSelectedKinds={setSelectedKinds}
-                  kinds={kinds}
-                />
-                <ComponentStateFilter
-                  selectedState={selectedState}
-                  setSelectedState={setSelectedState}
-                />
-              </Flex>
-            )}
-          </Flex>
-        }
       >
         <>
           {view === 'list' && (
@@ -188,6 +167,7 @@ function ComponentsViewSwitch({ tab, setTab }): ReactNode {
   return (
     <FillLevelProvider value={0}>
       <ButtonGroup
+        size="small"
         directory={directory}
         tab={tab}
         onClick={setTab}

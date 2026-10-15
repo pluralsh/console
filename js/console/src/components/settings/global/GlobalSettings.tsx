@@ -5,15 +5,13 @@ import {
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
 
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
-import { SubTab, TabList, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { LinkTabWrap } from 'components/utils/Tabs'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsToolbarTabs } from '../Settings'
 
 export const getGlobalSettingsBreadcrumbs = (page: string) => [
   ...SETTINGS_BREADCRUMBS,
@@ -31,6 +29,11 @@ const directory = [
   { path: 'smtp', label: 'SMTP' },
 ]
 
+const tabs = directory.map(({ path, label }) => ({
+  label,
+  path: `${GLOBAL_SETTINGS_ABS_PATH}/${path}`,
+}))
+
 type GlobalSettingsContextType = {
   refetch: () => void
   deploymentSettings: DeploymentSettingsFragment
@@ -42,7 +45,6 @@ export const useGlobalSettingsContext = () =>
   useOutletContext<GlobalSettingsContextType>()
 
 export function GlobalSettings() {
-  const tabStateRef = useRef<any>(null)
   const { pathname } = useLocation()
   const { data, refetch } = useDeploymentSettingsQuery({})
 
@@ -67,31 +69,10 @@ export function GlobalSettings() {
     )
   )
 
-  const headerContent = (
-    <TabList
-      scrollable
-      stateRef={tabStateRef}
-      stateProps={{ selectedKey: currentTab?.path }}
-    >
-      {directory.map(({ label, path }) => (
-        <LinkTabWrap
-          subTab
-          key={path}
-          textValue={label}
-          to={`${GLOBAL_SETTINGS_ABS_PATH}/${path}`}
-        >
-          <SubTab
-            key={path}
-            textValue={label}
-          >
-            {label}
-          </SubTab>
-        </LinkTabWrap>
-      ))}
-    </TabList>
+  return (
+    <>
+      <SettingsToolbarTabs directory={tabs} />
+      {data && <Outlet context={outletContext} />}
+    </>
   )
-
-  useSetPageHeaderContent(headerContent)
-
-  return data ? <Outlet context={outletContext} /> : null
 }

@@ -65,7 +65,7 @@ export function GlobalSettingsRepositories() {
   )
 
   return (
-    <ScrollablePage heading="Repositories">
+    <ScrollablePage>
       <form
         css={{
           display: 'flex',

@@ -102,7 +102,6 @@ export function WorkbenchJobInlineActionCard({
               css={{ minWidth: 0, flex: 1 }}
             >
               <IconFrame
-                circle
                 size="medium"
                 type="secondary"
                 icon={icon ?? <KubernetesIcon size={16} />}

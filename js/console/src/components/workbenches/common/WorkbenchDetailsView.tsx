@@ -7,6 +7,7 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
+import { PAGE_TOOLBAR_HEIGHT } from 'components/layout/PageToolbar'
 import { TRUNCATE } from 'components/utils/truncate'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import { WorkbenchJobStatus } from 'generated/graphql'
@@ -20,9 +21,8 @@ import { BoardTitleSC } from './WorkbenchBoard'
 const DETAILS_LIST_WIDTH = 350
 const STATUS_GUTTER_SIZE = 10
 const DETAILS_PANEL_HEADER_HEIGHT = 44
-// tab strip height when the list is the sidebar: its search row (2x16 padding
-// + 32 input) sits above the same border as the details panels
-export const DETAILS_TAB_STRIP_HEIGHT = 64
+// the list's search row, level with the page toolbar beside it
+export const DETAILS_TAB_STRIP_HEIGHT = PAGE_TOOLBAR_HEIGHT
 
 type DetailsGutterStatus = 'running' | 'failed' | null
 
@@ -206,7 +206,7 @@ export function DetailsTabs<T extends string>({
       </TabList>
       <Flex
         flex={1}
-        css={{ borderBottom: theme.borders.default }}
+        css={{ borderBottom: theme.borders.hairline }}
       />
     </Flex>
   )
@@ -280,13 +280,18 @@ export const DetailsListSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders.hairline,
 }))
 
 export const DetailsListSearchSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
   flexShrink: 0,
-  padding: theme.spacing.medium,
-  borderBottom: theme.borders.default,
+  height: DETAILS_TAB_STRIP_HEIGHT,
+  padding: `0 ${theme.spacing.medium}px`,
+  borderBottom: theme.borders.hairline,
+  '& > *': { flex: 1, minWidth: 0 },
 }))
 
 export const DetailsListItemsSC = styled.div({

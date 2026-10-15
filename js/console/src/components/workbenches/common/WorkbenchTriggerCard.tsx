@@ -19,7 +19,7 @@ export const TriggerCardIconWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: '50%',
+  borderRadius: theme.borderRadiuses.medium,
   border: theme.borders.input,
 }))
 

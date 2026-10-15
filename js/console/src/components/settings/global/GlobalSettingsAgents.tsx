@@ -5,8 +5,6 @@ import { useState } from 'react'
 
 import { GridTableWrapper } from 'components/utils/layout/ResponsiveGridLayouts'
 
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
-
 import { ListWrapperSC } from '../usermanagement/users/UsersList'
 
 import { useGlobalSettingsContext } from './GlobalSettings'
@@ -25,7 +23,6 @@ export function GlobalSettingsAgents() {
 
   return (
     <ListWrapperSC>
-      <ConsolePageTitle heading="Manage Agent Configuration" />
       {error && (
         <GqlError
           error={error}
