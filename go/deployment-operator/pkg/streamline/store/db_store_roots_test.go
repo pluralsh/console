@@ -86,6 +86,20 @@ func TestFailingRoots(t *testing.T) {
 		assert.ElementsMatch(t, []string{"nightly"}, rootNames(t, s), "the failed job is newer than the last success, so it is a failure again")
 	})
 
+	t.Run("a cron job saved in bulk keeps its last successful run", func(t *testing.T) {
+		s := newTestStore(t)
+		now := time.Now()
+		cronJob := unstructured.Unstructured{Object: map[string]any{
+			"apiVersion": "batch/v1", "kind": "CronJob",
+			"metadata": map[string]any{"name": "nightly", "namespace": testNamespace, "uid": "nightly"},
+			"status":   map[string]any{"lastSuccessfulTime": now.Add(-30 * time.Minute).UTC().Format(time.RFC3339)},
+		}}
+		require.NoError(t, s.SaveComponents([]unstructured.Unstructured{cronJob}))
+		require.NoError(t, s.SaveComponentAttributes(createComponentAttributes("nightly-1", new("nightly"), WithAttributesKind("Job"), WithAttributesState(client.ComponentStateFailed), WithAttributesName("nightly-1")), nil, now.Add(-time.Hour).Unix(), nil))
+
+		assert.Empty(t, rootNames(t, s), "the last run succeeded after the retained failed job")
+	})
+
 	t.Run("a failed node is reported only after five minutes", func(t *testing.T) {
 		s := newTestStore(t)
 

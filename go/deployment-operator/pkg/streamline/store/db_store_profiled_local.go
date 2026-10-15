@@ -357,7 +357,7 @@ func (p *ProfiledStoreLocal) SetComponentUnsynced(obj unstructured.Unstructured)
 func (p *ProfiledStoreLocal) SaveComponentAttributes(obj client.ComponentChildAttributes, args ...any) error {
 	var err error
 	_ = traceLocal(context.Background(), "SaveComponentAttributes", func() error {
-		err = p.inner.SaveComponentAttributes(obj, args)
+		err = p.inner.SaveComponentAttributes(obj, args...)
 		return err
 	})
 	return err
