@@ -55,10 +55,6 @@ const SubTabBase = styled.button<{
       ? theme.colors[parentFillLevelToActiveBG[parentFillLevel]]
       : 'transparent',
     borderRadius: theme.borderRadiuses.medium,
-    // box-shadow, not outline: TabList zeroes outline on :focus.
-    boxShadow: active
-      ? `inset 0 0 0 ${theme.borderWidths.default}px ${theme.colors.border}`
-      : undefined,
     '&:focus-visible': {
       zIndex: theme.zIndexes.base + 1,
       ...theme.partials.focus.default,

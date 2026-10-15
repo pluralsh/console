@@ -83,7 +83,10 @@ export default function PipelineJobLogs() {
   }
 
   return (
-    <ScrollablePage scrollable={false}>
+    <ScrollablePage
+      scrollable={false}
+      contentStyles={{ paddingTop: 0 }}
+    >
       {(jobGateState === GateState.Running ||
         jobGateState === GateState.Pending) && (
         <PageToolbarPortal>

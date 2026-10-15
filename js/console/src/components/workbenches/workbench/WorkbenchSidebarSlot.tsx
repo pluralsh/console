@@ -16,7 +16,7 @@ export function WorkbenchSidebarSlot({ children }: { children: ReactNode }) {
   const widthRef = useRef(initialWidth)
   const animationRef = useRef<Animation>(null)
 
-  // sidebars set their own (fixed) width, so it's measured from the content
+  // sidebars set their own width, so it's measured from the content
   useLayoutEffect(() => {
     const slot = ref.current
     if (!slot) return
@@ -33,6 +33,20 @@ export function WorkbenchSidebarSlot({ children }: { children: ReactNode }) {
       [{ width: `${from}px` }, { width: `${width}px` }],
       { duration: DURATION, easing: 'ease-out' }
     )
+  })
+
+  // resizable sidebars change width without the slot re-rendering, so track
+  // it to keep the next render from animating from a stale width
+  useLayoutEffect(() => {
+    const sidebar = ref.current?.firstElementChild as Nullable<HTMLElement>
+    if (!sidebar) return
+    const observer = new ResizeObserver(() => {
+      widthRef.current = sidebar.offsetWidth
+      shownSidebarWidth = sidebar.offsetWidth
+    })
+
+    observer.observe(sidebar)
+    return () => observer.disconnect()
   })
 
   // a layout cleanup, as it has to run before the next tab's slot records its

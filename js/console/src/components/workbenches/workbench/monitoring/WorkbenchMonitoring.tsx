@@ -201,5 +201,5 @@ const PaddedSC = styled.div(({ theme }) => ({
   flex: 1,
   minHeight: 0,
   overflow: 'auto',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: theme.spacing.large,
 }))

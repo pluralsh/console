@@ -65,7 +65,7 @@ export function GlobalSettingsRepositories() {
   )
 
   return (
-    <ScrollablePage>
+    <ScrollablePage contentStyles={{ paddingTop: 0 }}>
       <form
         css={{
           display: 'flex',

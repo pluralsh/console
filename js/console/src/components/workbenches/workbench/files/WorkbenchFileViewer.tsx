@@ -210,7 +210,9 @@ export function WorkbenchFileViewer({
         />
         {downloadUrl && <DownloadButton href={downloadUrl} />}
       </ViewerHeaderSC>
-      <ViewerBodySC>{body}</ViewerBodySC>
+      <ViewerBodySC>
+        <ViewerContentSC>{body}</ViewerContentSC>
+      </ViewerBodySC>
     </ViewerSC>
   )
 }
@@ -268,8 +270,15 @@ const ViewerBodySC = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
 }))
 
+const ViewerContentSC = styled.div({
+  height: '100%',
+  maxWidth: 1000,
+  margin: '0 auto',
+})
+
 const MarkdownSC = styled.div({
-  maxWidth: 900,
+  maxWidth: 800,
+  margin: '0 auto',
 })
 
 const MediaSC = styled.div({
