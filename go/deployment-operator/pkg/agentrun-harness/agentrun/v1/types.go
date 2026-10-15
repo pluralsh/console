@@ -139,6 +139,14 @@ type PiConfig struct {
 	Timeout  time.Duration `json:"timeout"`
 }
 
+// WithCredentials sets the run's SCM and Plural credentials, which are fetched
+// separately from the run so only agent-bootstrap and the mcpserver sidecar get them.
+func (ar *AgentRun) WithCredentials(credentials *console.AgentRunCredentialsFragment) *AgentRun {
+	ar.ScmCreds = credentials.GetScmCreds()
+	ar.PluralCreds = credentials.GetPluralCreds()
+	return ar
+}
+
 // FromAgentRunFragment converts Console API fragment to harness type
 func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *AgentRun {
 	run := &AgentRun{
@@ -150,8 +158,6 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		Mode:        fragment.Mode,
 		ReviewDepth: console.AgentReviewDepthMedium,
 		Status:      fragment.Status,
-		ScmCreds:    fragment.ScmCreds,
-		PluralCreds: fragment.PluralCreds,
 		Runtime:     &AgentRuntime{},
 		Prompts:     fragment.Prompts,
 		Usage:       usageFromFragment(fragment.Usage),

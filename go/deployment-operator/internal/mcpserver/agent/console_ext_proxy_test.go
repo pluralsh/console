@@ -136,6 +136,10 @@ func TestConsoleExtProxyRejectsOtherOperations(t *testing.T) {
 			"query":         client.GetAgentRuntimeDocument,
 			"variables":     map[string]any{"id": testAgentRunID},
 		}),
+		"run credentials": jsonRequest(sidecar.URL, map[string]any{
+			"query":     client.GetAgentRunCredentialsDocument,
+			"variables": map[string]any{"id": testAgentRunID},
+		}),
 		"other agent run": jsonRequest(sidecar.URL, map[string]any{
 			"query":     client.GetAgentRunDocument,
 			"variables": map[string]any{"id": "other-run"},

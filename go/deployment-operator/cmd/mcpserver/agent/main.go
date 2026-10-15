@@ -59,22 +59,27 @@ func run() error {
 		return fmt.Errorf("could not get agent run: %w", err)
 	}
 
-	if err = ensureCredentials(agentRun); err != nil {
+	runCredentials, err := extClient.GetAgentRunCredentials(ctx, args.AgentRunID())
+	if err != nil {
+		return fmt.Errorf("could not get agent run credentials: %w", err)
+	}
+
+	if err = ensureCredentials(runCredentials); err != nil {
 		return fmt.Errorf("could not get credentials: %w", err)
 	}
 
-	credentials := newCredentialStore(lo.FromPtr(agentRun.PluralCreds.Token))
-	if err = credentials.updateSCMCredentials(agentRun); err != nil {
+	credentials := newCredentialStore(lo.FromPtr(runCredentials.PluralCreds.Token))
+	if err = credentials.updateSCMCredentials(runCredentials); err != nil {
 		return fmt.Errorf("could not configure SCM credentials: %w", err)
 	}
-	client := console.New(args.ConsoleApiURL(), *agentRun.PluralCreds.Token)
+	client := console.New(args.ConsoleApiURL(), *runCredentials.PluralCreds.Token)
 	mcpServer := agent.NewServer(
 		client,
-		createServerOptions(client, extClient, agentRun, credentials)...,
+		createServerOptions(client, extClient, agentRun, runCredentials.ScmCreds, credentials)...,
 	)
 
 	err = environment.New(
-		environment.WithAgentRun(new(v1.AgentRun).FromAgentRunFragment(agentRun)),
+		environment.WithAgentRun(new(v1.AgentRun).FromAgentRunFragment(agentRun).WithCredentials(runCredentials)),
 		environment.WithWorkingDir(args.WorkingDir()),
 		environment.WithConsoleTokenClient(client),
 	).Setup()
@@ -128,12 +133,12 @@ func run() error {
 	return nil
 }
 
-func ensureCredentials(agentRun *consoleclient.AgentRunFragment) error {
-	if agentRun.ScmCreds == nil || agentRun.ScmCreds.Token == "" {
+func ensureCredentials(runCredentials *consoleclient.AgentRunCredentialsFragment) error {
+	if runCredentials.ScmCreds == nil || runCredentials.ScmCreds.Token == "" {
 		return fmt.Errorf("agent run does not have scm creds")
 	}
 
-	if agentRun.PluralCreds == nil || agentRun.PluralCreds.Token == nil {
+	if runCredentials.PluralCreds == nil || runCredentials.PluralCreds.Token == nil {
 		return fmt.Errorf("agent run does not have plural creds")
 	}
 
@@ -174,6 +179,7 @@ func startMcpServer(server *agent.Server) <-chan error {
 func createServerOptions(
 	client, runtimeClient console.Client,
 	agentRun *consoleclient.AgentRunFragment,
+	scmCreds *consoleclient.ScmCredentialFragment,
 	credentials *credentialStore,
 ) []agent.Option {
 	opts := []agent.Option{
@@ -194,12 +200,13 @@ func createServerOptions(
 		opts = append(opts, agent.WithWorkbenchMCPProxy(upstream, credentials.PluralToken))
 	}
 
-	return append(opts, createServerTools(client, runtimeClient, agentRun, credentials.SCMClient)...)
+	return append(opts, createServerTools(client, runtimeClient, agentRun, scmCreds, credentials.SCMClient)...)
 }
 
 func createServerTools(
 	client, runtimeClient console.Client,
 	agentRun *consoleclient.AgentRunFragment,
+	scmCreds *consoleclient.ScmCredentialFragment,
 	scmClient tool.SCMClientProvider,
 ) []agent.Option {
 	excludedTools, err := args.ExcludeTools()
@@ -221,7 +228,7 @@ func createServerTools(
 		tool.DownloadManifestsTool: tool.NewDownloadManifests(client),
 	}
 
-	if exaConn, enabled := exa.ResolveConnection(helpers.GetPluralEnv(controller.EnvExaConnection, ""), agentRun.ScmCreds); enabled {
+	if exaConn, enabled := exa.ResolveConnection(helpers.GetPluralEnv(controller.EnvExaConnection, ""), scmCreds); enabled {
 		exaClient, err := exa.NewClient(exaConn)
 		if err != nil {
 			klog.Fatalf("could not configure exa client: %v", err)

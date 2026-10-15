@@ -25,7 +25,12 @@ func main() {
 		klog.Fatalf("could not fetch agent run (%s): %v", args.AgentRunID(), err)
 	}
 
-	run := (&agentrunv1.AgentRun{}).FromAgentRunFragment(fragment)
+	credentials, err := consoleClient.GetAgentRunCredentials(context.Background(), args.AgentRunID())
+	if err != nil {
+		klog.Fatalf("could not fetch agent run credentials (%s): %v", args.AgentRunID(), err)
+	}
+
+	run := (&agentrunv1.AgentRun{}).FromAgentRunFragment(fragment).WithCredentials(credentials)
 	if err := agentrunenv.New(
 		agentrunenv.WithAgentRun(run),
 		agentrunenv.WithWorkingDir(args.WorkingDir()),
