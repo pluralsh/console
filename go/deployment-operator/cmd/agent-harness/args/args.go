@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/spf13/pflag"
@@ -15,7 +14,6 @@ import (
 )
 
 const (
-	EnvConsoleUrl = "CONSOLE_URL"
 	EnvAgentRunID = "AGENT_RUN_ID"
 
 	defaultWorkingDir = "agentrun"
@@ -31,7 +29,6 @@ const (
 )
 
 var (
-	argConsoleUrl         = pflag.String("console-url", helpers.GetPluralEnv(EnvConsoleUrl, ""), "URL to the extended Console API, i.e. https://console.onplural.sh/ext/gql")
 	argAgentRunID         = pflag.String("agent-run-id", helpers.GetPluralEnv(EnvAgentRunID, ""), "ID of the Agent Run to execute")
 	argWorkingDir         = pflag.String("working-dir", defaultWorkingDir, "Working directory used to prepare the environment")
 	argTimeout            = pflag.String("timeout", defaultTimeout, "Timeout is the maximum time the agent run can run before it will be cancelled")
@@ -51,20 +48,6 @@ func init() {
 	pflag.Parse()
 
 	klog.V(log.LogLevelMinimal).InfoS("configured log level", "v", LogLevel())
-}
-
-func ConsoleUrl() string {
-	ensureOrDie("console-url", argConsoleUrl)
-
-	if strings.HasSuffix(*argConsoleUrl, "/ext/gql") {
-		return strings.TrimSuffix(*argConsoleUrl, "/ext/gql")
-	}
-
-	if strings.HasSuffix(*argConsoleUrl, "/gql") {
-		return strings.TrimSuffix(*argConsoleUrl, "/gql")
-	}
-
-	return *argConsoleUrl
 }
 
 func AgentRunID() string {
