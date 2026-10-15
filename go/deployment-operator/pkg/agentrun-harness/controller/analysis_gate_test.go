@@ -117,7 +117,7 @@ func (t *recordingTool) ConfigureBabysitRun() error {
 	return nil
 }
 
-func (t *recordingTool) Configure(_, _ string) error { return nil }
+func (t *recordingTool) Configure() error { return nil }
 
 func (t *recordingTool) OnMessage(toolv1.MessageCallback) {}
 

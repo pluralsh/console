@@ -9,7 +9,6 @@ import (
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 // These paths keep Codex's native state, prompt, and skills inside the
@@ -23,17 +22,14 @@ const (
 // Agent owns Codex settings, shared prompt and skills preparation, native
 // configuration, and staging of Codex's native session data.
 type Agent struct {
-	config       toolv1.Config
-	consoleURL   string
-	consoleToken string
+	config toolv1.Config
 }
 
 var _ toolv1.Agent = (*Agent)(nil)
 
 // NewAgent creates a Codex Agent for one agent run.
 func NewAgent(config toolv1.Config) *Agent {
-	// The sidecar replaces this placeholder with the run's Plural token.
-	return &Agent{config: config, consoleToken: common.AgentAIProxyAPIKey}
+	return &Agent{config: config}
 }
 
 // Type identifies the Console runtime implemented by Agent.
@@ -96,11 +92,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	config, err := agent.configWithCodex()
 	if err != nil {
 		return err
-	}
-
-	agent.consoleURL = request.ConsoleURL
-	if request.ConsoleToken != "" {
-		agent.consoleToken = request.ConsoleToken
 	}
 
 	model := agent.resolveModelForSettings(config, request.Settings)

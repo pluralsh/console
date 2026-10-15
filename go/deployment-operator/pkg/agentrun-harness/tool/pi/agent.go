@@ -12,7 +12,6 @@ import (
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 const (
@@ -25,17 +24,14 @@ const (
 // Agent owns Pi's native configuration, shared prompt and skills preparation,
 // and staging of Pi's provider-owned session state.
 type Agent struct {
-	config       toolv1.Config
-	consoleURL   string
-	consoleToken string
+	config toolv1.Config
 }
 
 var _ toolv1.Agent = (*Agent)(nil)
 
 // NewAgent creates a Pi Agent for one agent run.
 func NewAgent(config toolv1.Config) *Agent {
-	// The sidecar replaces this placeholder with the run's Plural token.
-	return &Agent{config: config, consoleToken: common.AgentAIProxyAPIKey}
+	return &Agent{config: config}
 }
 
 // Type identifies the Console runtime implemented by Agent.
@@ -101,11 +97,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	if err != nil {
 		return err
 	}
-	agent.consoleURL = request.ConsoleURL
-	if request.ConsoleToken != "" {
-		agent.consoleToken = request.ConsoleToken
-	}
-
 	return agent.writeNativeConfig(config, request.Settings.Model.Name)
 }
 

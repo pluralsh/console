@@ -115,8 +115,7 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 		klog.Fatal(err)
 	}
 
-	// Agents reach the Console AI proxy through the sidecar, which injects the run's Plural token.
-	return in.tool.Configure(common.AgentConsoleProxyURL, common.AgentAIProxyAPIKey)
+	return in.tool.Configure()
 }
 
 // completeAgentRun updates the agent run status in the Console API

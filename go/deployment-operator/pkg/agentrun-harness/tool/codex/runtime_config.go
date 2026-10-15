@@ -110,7 +110,7 @@ func (agent *Agent) resolveACPProvider(config toolv1.Config) string {
 func (agent *Agent) resolveProviderSettings(config toolv1.Config) (string, string, string, string) {
 	wireAPI := agent.wireAPI(config.Run.Runtime.Config.Codex.Method)
 	if config.Run.IsProxyEnabled() {
-		baseURL := fmt.Sprintf("%s/ext/ai/v1", agent.consoleURL)
+		baseURL := common.AgentConsoleProxyURL + "/ext/ai/v1"
 		if config.Run.IsStreamingProxyEnabled() {
 			baseURL = common.AgentOpenAIBaseURL
 		}
