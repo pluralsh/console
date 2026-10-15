@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -570,7 +571,13 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 		return secret, nil
 	}
 
-	if !r.hasSecretData(secret.Data, run) {
+	// Pods built before the plural secret existed read the deploy token from this secret, so leave it alone.
+	legacyPod, err := r.podPredatesPluralSecret(ctx, run)
+	if err != nil {
+		return nil, err
+	}
+
+	if !legacyPod && !r.hasSecretData(secret.Data, run) {
 		logger.V(2).Info("updating secret", "namespace", secret.Namespace, "name", secret.Name)
 		// StringData is merged into Data, so clear Data to drop keys that no longer belong here.
 		secret.Data = nil
@@ -766,6 +773,26 @@ func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1a
 	}
 
 	return secret, nil
+}
+
+// podPredatesPluralSecret reports whether the run's pod exists and none of its containers load the plural secret.
+func (r *AgentRunReconciler) podPredatesPluralSecret(ctx context.Context, run *v1alpha1.AgentRun) (bool, error) {
+	pod := &corev1.Pod{}
+	if err := r.Get(ctx, client.ObjectKey{Name: run.Name, Namespace: run.Namespace}, pod); err != nil {
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to get pod: %w", err)
+	}
+
+	for _, container := range slices.Concat(pod.Spec.InitContainers, pod.Spec.Containers) {
+		for _, source := range container.EnvFrom {
+			if source.SecretRef != nil && source.SecretRef.Name == pluralSecretName(run.Name) {
+				return false, nil
+			}
+		}
+	}
+	return true, nil
 }
 
 func (r *AgentRunReconciler) hasSecretData(data map[string][]byte, run *v1alpha1.AgentRun) bool {

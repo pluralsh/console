@@ -49,3 +49,40 @@ func TestReconcilePodSecretDropsLegacyDeployToken(t *testing.T) {
 	assert.Equal(t, "run-id", secret.StringData[EnvAgentRunID])
 	assert.Equal(t, "https://console.test.com", secret.StringData[EnvConsoleURL])
 }
+
+func TestReconcilePodSecretKeepsDeployTokenForLegacyPod(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
+
+	legacy := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{Name: "run", Namespace: "ns"},
+		Data: map[string][]byte{
+			EnvConsoleURL:  []byte("https://console.test.com"),
+			EnvAgentRunID:  []byte("run-id"),
+			EnvDeployToken: []byte("deploy-token"),
+		},
+	}
+	// A pod built by the previous operator only loads the run secret.
+	pod := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{Name: "run", Namespace: "ns"},
+		Spec: corev1.PodSpec{Containers: []corev1.Container{{
+			Name:    "default",
+			EnvFrom: getDefaultContainerEnvFrom("run"),
+		}}},
+	}
+	reconciler := &AgentRunReconciler{
+		Client:      fake.NewClientBuilder().WithScheme(scheme).WithObjects(legacy, pod).Build(),
+		Scheme:      scheme,
+		ConsoleURL:  "https://console.test.com",
+		DeployToken: "deploy-token",
+	}
+	run := &v1alpha1.AgentRun{ObjectMeta: metav1.ObjectMeta{Name: "run", Namespace: "ns"}}
+	run.Status.ID = lo.ToPtr("run-id")
+
+	_, err := reconciler.reconcilePodSecret(context.Background(), run, &v1alpha1.AgentRuntime{})
+	require.NoError(t, err)
+
+	secret := &corev1.Secret{}
+	require.NoError(t, reconciler.Get(context.Background(), types.NamespacedName{Name: "run", Namespace: "ns"}, secret))
+	assert.Equal(t, "deploy-token", string(secret.Data[EnvDeployToken]))
+}
