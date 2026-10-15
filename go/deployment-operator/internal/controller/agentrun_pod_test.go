@@ -957,7 +957,7 @@ func TestBuildAgentRunPod_DeployTokenIsolation(t *testing.T) {
 	for _, c := range pod.Spec.Containers {
 		if c.Name == defaultContainer {
 			assert.False(t, hasPlural(c))
-			assert.Equal(t, getDefaultContainerEnvFrom("run"), c.EnvFrom)
+			assert.Equal(t, getDefaultContainerEnvFrom(runSecretName("run")), c.EnvFrom)
 		}
 	}
 	found := 0

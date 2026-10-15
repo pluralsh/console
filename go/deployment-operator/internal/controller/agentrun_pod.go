@@ -235,7 +235,7 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 	}
 
 	if runtime.Spec.Git != nil && runtime.Spec.Git.SigningKeyRef != nil {
-		enableGitSigningKey(run.Name, pod)
+		enableGitSigningKey(runSecretName(run.Name), pod)
 	}
 
 	enableRepositoryPrebake(runtime, pod)
@@ -277,7 +277,7 @@ func ensureDefaultContainer(containers []corev1.Container, run *v1alpha1.AgentRu
 		}
 
 		containers[index].SecurityContext = ensureDefaultContainerSecurityContext(containers[index].SecurityContext, runtimeReadOnlyRootFilesystem(runtime))
-		containers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
+		containers[index].EnvFrom = getDefaultContainerEnvFrom(runSecretName(run.Name))
 		containers[index].VolumeMounts = ensureDefaultVolumeMounts(containers[index].VolumeMounts)
 		containers[index].Env = ensureDefaultEnvVars(containers[index].Env, runtime)
 
@@ -340,7 +340,7 @@ func getDefaultContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime)
 		Image:           getDefaultContainerImage("", runtime.Spec.Type),
 		VolumeMounts:    ensureDefaultVolumeMounts(nil),
 		SecurityContext: ensureDefaultContainerSecurityContext(nil, runtimeReadOnlyRootFilesystem(runtime)),
-		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
+		EnvFrom:         getDefaultContainerEnvFrom(runSecretName(run.Name)),
 		Env:             getDefaultEnvVars(runtime),
 	}
 }
@@ -354,13 +354,19 @@ func getDefaultContainerImage(image string, agentRuntimeType console.AgentRuntim
 	return fmt.Sprintf("%s:%s", common.GetConfigurationManager().SwapBaseRegistry(defaultContainerImage), tag)
 }
 
+// runSecretName is the per-run secret every container loads. Each kind of run secret has its own
+// suffix, so no run's secret name can match another run's.
+func runSecretName(runName string) string {
+	return runName + "-env"
+}
+
 // pluralSecretName is the per-run secret holding the deploy token; only bootstrap and mcpserver may load it.
 func pluralSecretName(runName string) string {
 	return runName + "-plural"
 }
 
 func getPrivilegedContainerEnvFrom(runName string) []corev1.EnvFromSource {
-	return append(getDefaultContainerEnvFrom(runName), getDefaultContainerEnvFrom(pluralSecretName(runName))...)
+	return append(getDefaultContainerEnvFrom(runSecretName(runName)), getDefaultContainerEnvFrom(pluralSecretName(runName))...)
 }
 
 func getDefaultContainerEnvFrom(secretName string) []corev1.EnvFromSource {

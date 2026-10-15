@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -553,13 +552,13 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 	}
 
 	secret := &corev1.Secret{}
-	if err := r.Get(ctx, types.NamespacedName{Name: run.Name, Namespace: run.Namespace}, secret); err != nil {
+	if err := r.Get(ctx, types.NamespacedName{Name: runSecretName(run.Name), Namespace: run.Namespace}, secret); err != nil {
 		if !errors.IsNotFound(err) {
 			return nil, fmt.Errorf("failed to get secret: %w", err)
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: run.Name, Namespace: run.Namespace},
+			ObjectMeta: runSecretMeta(runSecretName(run.Name), run),
 			StringData: r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection, mcpServers),
 		}
 
@@ -571,16 +570,12 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 		return secret, nil
 	}
 
-	// Pods built before the plural secret existed read the deploy token from this secret, so leave it alone.
-	legacyPod, err := r.podPredatesPluralSecret(ctx, run)
-	if err != nil {
+	if err := checkRunSecretOwner(secret, run); err != nil {
 		return nil, err
 	}
 
-	if !legacyPod && !r.hasSecretData(secret.Data, run) {
+	if !r.hasSecretData(secret.Data, run) {
 		logger.V(2).Info("updating secret", "namespace", secret.Namespace, "name", secret.Name)
-		// StringData is merged into Data, so clear Data to drop keys that no longer belong here.
-		secret.Data = nil
 		secret.StringData = r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection, mcpServers)
 		if err := r.Update(ctx, secret); err != nil {
 			logger.Error(err, "unable to update secret")
@@ -756,13 +751,17 @@ func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1a
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: pluralSecretName(run.Name), Namespace: run.Namespace},
+			ObjectMeta: runSecretMeta(pluralSecretName(run.Name), run),
 			StringData: map[string]string{EnvDeployToken: r.DeployToken},
 		}
 		if err = r.Create(ctx, secret); err != nil {
 			return nil, fmt.Errorf("failed to create plural secret: %w", err)
 		}
 		return secret, nil
+	}
+
+	if err := checkRunSecretOwner(secret, run); err != nil {
+		return nil, err
 	}
 
 	if string(secret.Data[EnvDeployToken]) != r.DeployToken {
@@ -775,31 +774,28 @@ func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1a
 	return secret, nil
 }
 
-// podPredatesPluralSecret reports whether the run's pod exists and none of its containers load the plural secret.
-func (r *AgentRunReconciler) podPredatesPluralSecret(ctx context.Context, run *v1alpha1.AgentRun) (bool, error) {
-	pod := &corev1.Pod{}
-	if err := r.Get(ctx, client.ObjectKey{Name: run.Name, Namespace: run.Namespace}, pod); err != nil {
-		if errors.IsNotFound(err) {
-			return false, nil
-		}
-		return false, fmt.Errorf("failed to get pod: %w", err)
-	}
+// agentRunUIDAnnotation records which run a run secret was created for.
+const agentRunUIDAnnotation = "deployments.plural.sh/agent-run-uid"
 
-	for _, container := range slices.Concat(pod.Spec.InitContainers, pod.Spec.Containers) {
-		for _, source := range container.EnvFrom {
-			if source.SecretRef != nil && source.SecretRef.Name == pluralSecretName(run.Name) {
-				return false, nil
-			}
-		}
+func runSecretMeta(name string, run *v1alpha1.AgentRun) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name:        name,
+		Namespace:   run.Namespace,
+		Annotations: map[string]string{agentRunUIDAnnotation: string(run.UID)},
 	}
-	return true, nil
+}
+
+// checkRunSecretOwner refuses a secret this run didn't create, so its data never reaches another run's pod.
+func checkRunSecretOwner(secret *corev1.Secret, run *v1alpha1.AgentRun) error {
+	if uid, ok := secret.Annotations[agentRunUIDAnnotation]; !ok || uid != string(run.UID) {
+		return fmt.Errorf("secret %s/%s was not created for agent run %s", secret.Namespace, secret.Name, run.Name)
+	}
+	return nil
 }
 
 func (r *AgentRunReconciler) hasSecretData(data map[string][]byte, run *v1alpha1.AgentRun) bool {
 	url, hasUrl := data[EnvConsoleURL]
 	id, hasID := data[EnvAgentRunID]
-	// Secrets created before the deploy token moved to the plural secret must be rewritten without it.
-	_, hasDeployToken := data[EnvDeployToken]
-	return hasUrl && hasID && !hasDeployToken &&
+	return hasUrl && hasID &&
 		string(url) == r.ConsoleURL && string(id) == run.Status.GetID()
 }
