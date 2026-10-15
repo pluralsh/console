@@ -323,6 +323,21 @@ func TestFailingSince(t *testing.T) {
 		require.Len(t, roots, 1)
 		assert.WithinDuration(t, time.Now(), roots[0].FailingSince, 5*time.Second, "a new failure starts from its own condition time")
 	})
+
+	t.Run("a replacement with the same name and another uid starts its own failing time", func(t *testing.T) {
+		s := newTestStore(t)
+		since := time.Now().Add(-3 * time.Hour).Truncate(time.Second)
+		require.NoError(t, s.SaveComponent(deploymentExceedingDeadline("api", since, nil)))
+
+		replacement := deploymentExceedingDeadline("api", time.Now(), nil)
+		require.NoError(t, unstructured.SetNestedField(replacement.Object, "api-replacement", "metadata", "uid"))
+		require.NoError(t, s.SaveComponent(replacement))
+
+		roots, err := s.GetFailingRoots()
+		require.NoError(t, err)
+		require.Len(t, roots, 1)
+		assert.WithinDuration(t, time.Now(), roots[0].FailingSince, 5*time.Second, "the replaced object's failing time is not inherited")
+	})
 }
 
 func TestInsightPriorityAnnotation(t *testing.T) {
