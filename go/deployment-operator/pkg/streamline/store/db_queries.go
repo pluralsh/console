@@ -1,5 +1,43 @@
 package store
 
+// failingSinceUpsert keeps the earliest known failing time while the same object keeps failing, and resets it once the
+// component recovers. A replacement with the same name but another uid starts its own failing time.
+const failingSinceUpsert = `CASE
+				WHEN excluded.health != 2 THEN 0
+				WHEN COALESCE(component.failing_since, 0) > 0 AND component.health = 2
+				AND COALESCE(component.uid, '') IN ('', excluded.uid) THEN MIN(component.failing_since, excluded.failing_since)
+				ELSE excluded.failing_since
+			END`
+
+// ownershipUpsert keeps the parent and service of a component when a watch event carries neither. Objects rendered by
+// Flux from a HelmRelease have no owner reference or inventory annotation, so the values set from the HelmRelease
+// would be lost on every event. A new owner reference or inventory annotation still replaces them.
+// Only the same object keeps them. A replacement that has the same name but another uid does not inherit the owner
+// of the object it replaced, a stored row without a uid is a placeholder of the same object.
+const ownershipUpsert = `parent_uid = CASE
+				WHEN COALESCE(excluded.parent_uid, '') != '' THEN excluded.parent_uid
+				WHEN COALESCE(excluded.service_id, '') = '' AND COALESCE(component.service_id, '') != ''
+					AND COALESCE(component.uid, '') IN ('', excluded.uid) THEN component.parent_uid
+				ELSE excluded.parent_uid
+			END,
+			service_id = CASE
+				WHEN COALESCE(excluded.service_id, '') != '' THEN excluded.service_id
+				WHEN COALESCE(excluded.parent_uid, '') = '' AND COALESCE(component.parent_uid, '') != ''
+					AND COALESCE(component.uid, '') IN ('', excluded.uid) THEN component.service_id
+				ELSE excluded.service_id
+			END,`
+
+// factsUpsert refreshes the insight attributes derived from the object.
+const factsUpsert = `criticality = excluded.criticality,
+			criticality_reason = excluded.criticality_reason,
+			priority_class = excluded.priority_class,
+			failing_since = ` + failingSinceUpsert + `,
+			desired_replicas = excluded.desired_replicas,
+			ready_replicas = excluded.ready_replicas,
+			priority_annotation = excluded.priority_annotation,
+			health_message = excluded.health_message,
+			last_success = excluded.last_success`
+
 const (
 	createTables = `
 		CREATE TABLE IF NOT EXISTS component (
@@ -23,7 +61,16 @@ const (
 			server_sha TEXT,
 			manifest BOOLEAN DEFAULT 0, -- Indicates if the component was created from an original manifest set of a service
 			applied BOOLEAN DEFAULT 0, -- Indicates if the component was already applied to the cluster
-			labels TEXT -- JSON object of Kubernetes object labels
+			labels TEXT, -- JSON object of Kubernetes object labels
+			criticality INT, -- built-in criticality score of the component, see the insights package
+			criticality_reason TEXT,
+			priority_class TEXT, -- priority class name of the pod template
+			failing_since INT DEFAULT 0, -- unix time the component started to fail, 0 if it is not failing
+			desired_replicas INT, -- NULL when unknown
+			ready_replicas INT, -- NULL when unknown
+			priority_annotation TEXT, -- normalized value of the insight priority annotation
+			health_message TEXT,
+			last_success INT DEFAULT 0 -- unix time of the last successful run of a CronJob, 0 when unknown
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_component ON component("group", version, kind, namespace, name);
 		CREATE INDEX IF NOT EXISTS idx_parent ON component(parent_uid);
@@ -80,6 +127,14 @@ const (
 		WHERE uid = ? AND applied = 1
 	`
 
+	getPriorityAnnotation = `
+		SELECT COALESCE(priority_annotation, '')
+		FROM component
+		WHERE uid = ? AND applied = 1
+		ORDER BY id
+		LIMIT 1
+	`
+
 	getAppliedComponentsByGVK = `
 		SELECT uid, "group", version, kind, namespace, name, server_sha, delete_phase, manifest
 		FROM component
@@ -102,7 +157,16 @@ const (
 		    delete_phase,
 		    server_sha,
 		    applied,
-		    labels
+		    labels,
+		    criticality,
+		    criticality_reason,
+		    priority_class,
+		    failing_since,
+		    desired_replicas,
+		    ready_replicas,
+		    priority_annotation,
+		    health_message,
+		    last_success
 		) VALUES (
 			?,
 			?,
@@ -118,18 +182,27 @@ const (
 		    ?,
 		    ?,
 		    ?,
+		    ?,
+		    ?,
+		    ?,
+		    ?,
+		    ?,
+		    ?,
+		    ?,
+		    ?,
+		    ?,
 		    ?
 		) ON CONFLICT("group", version, kind, namespace, name) DO UPDATE SET
 			uid = excluded.uid,
-			parent_uid = excluded.parent_uid,
+			` + ownershipUpsert + `
 			health = excluded.health,
 			node = excluded.node,
 			created_at = excluded.created_at,
-			service_id = excluded.service_id,
 			delete_phase = excluded.delete_phase,
 			server_sha = excluded.server_sha,
 		    applied = excluded.applied,
-		    labels = excluded.labels
+		    labels = excluded.labels,
+			` + factsUpsert + `
 	`
 
 	setComponentUnsynced = `
@@ -142,7 +215,8 @@ const (
 		    manifest_sha = '',
 		    transient_manifest_sha = '',
 		    apply_sha = '',
-		    labels = ''
+		    labels = '',
+		    failing_since = 0
 		WHERE "group" = ? AND version = ? AND kind = ? AND namespace = ? AND name = ?
 	`
 
@@ -181,26 +255,6 @@ const (
 		  AND name = ?
 	`
 
-	clusterHealthScore = `
-		WITH base_score AS (
-			SELECT CAST(AVG(CASE WHEN health = 0 THEN 100 ELSE 0 END) as INTEGER) as score
-			FROM component 
-		),
-		deductions AS (
-			SELECT 
-				SUM(CASE
-					WHEN kind = 'Certificate' AND health = 2 THEN 10
-					WHEN namespace = 'kube-system' AND health = 2 THEN 20
-					WHEN kind = 'PersistentVolume' AND health = 2 THEN 10
-					WHEN (namespace = 'istio-system' OR name LIKE '%coredns%' OR name LIKE '%aws-cni%') AND health = 2 THEN 50
-					WHEN (namespace LIKE '%ingress%' OR namespace LIKE '%traefik%') AND kind = 'Service' AND health = 2 THEN 50
-					ELSE 0
-				END) as total_deductions
-			FROM component
-		)
-		SELECT MAX(0, (SELECT score FROM base_score) - (SELECT COALESCE(total_deductions, 0) FROM deductions)) as score
-	`
-
 	nodeStatistics = `
 		SELECT node, COUNT(*)
 		FROM component
@@ -221,7 +275,10 @@ const (
 		    applied,
 		    node,
 		    created_at,
-		    service_id
+		    service_id,
+		    criticality,
+		    criticality_reason,
+		    failing_since
 		) VALUES (
 			?,
 			?,
@@ -234,6 +291,9 @@ const (
 			?,
 		    ?,
 		    ?,
+		    ?,
+		    ?,
+		    ?,
 		    ?
 		) ON CONFLICT("group", version, kind, namespace, name) DO UPDATE SET
 			uid = excluded.uid,
@@ -242,45 +302,115 @@ const (
 			node = excluded.node,
 			created_at = excluded.created_at,
 			service_id = excluded.service_id,
-			applied = excluded.applied
+			applied = excluded.applied,
+			criticality = excluded.criticality,
+			criticality_reason = excluded.criticality_reason,
+			failing_since = ` + failingSinceUpsert + `
 	`
 
-	failedComponents = `
-		WITH RECURSIVE component_chain AS (
-			-- Start with parent components of specified kinds
-			SELECT *, 1 as level, uid as root_uid
-			FROM component 
-			WHERE kind IN ('Deployment', 'StatefulSet', 'Ingress', 'DaemonSet', 'Certificate') AND applied = 1
-			
+	// failingRootsPrefix selects the roots of all failures, see failingRoots.
+	failingRootsPrefix = `
+		WITH RECURSIVE climb(fid, uid, parent_uid, kind, depth) AS (
+			SELECT id, uid, parent_uid, kind, 1
+			FROM component
+			WHERE health = 2 AND applied = 1
+
 			UNION ALL
-			
-			-- Get children of components in the chain, carrying the root component UID
-			SELECT c.*, cc.level + 1, cc.root_uid
-			FROM component c
-			JOIN component_chain cc ON c.parent_uid = cc.uid AND c.parent_uid != ''
-			WHERE cc.level < 4 AND c.applied = 1
+
+			SELECT climb.fid, p.uid, p.parent_uid, p.kind, climb.depth + 1
+			FROM climb
+			JOIN component p ON p.uid = climb.parent_uid AND p.applied = 1 AND p.kind != 'Node'
+			WHERE climb.parent_uid != ''
+			  AND climb.depth < 4
+			  AND climb.kind NOT IN ('Deployment', 'StatefulSet', 'DaemonSet', 'Ingress', 'Certificate', 'CronJob')
 		),
-		-- Find all failed components in the chain
-		failed_roots AS (
-			-- Get root UIDs where any component in the chain is failed
-			SELECT DISTINCT root_uid
-			FROM component_chain
-			WHERE health = 2
+		top AS (
+			SELECT fid, uid AS root_uid
+			FROM climb
+			WHERE kind IN ('Deployment', 'StatefulSet', 'DaemonSet', 'Ingress', 'Certificate', 'CronJob')
+			   OR NOT EXISTS (
+				  SELECT 1 FROM component p
+				  WHERE p.uid = climb.parent_uid AND climb.parent_uid != '' AND p.applied = 1 AND p.kind != 'Node'
+			   )
+		),
+		roots AS (
+			SELECT top.root_uid, MIN(NULLIF(f.failing_since, 0)) AS failing_since
+			FROM top
+			JOIN component f ON f.id = top.fid
+			GROUP BY top.root_uid
+		)`
+
+	// failingRoots returns the objects that represent the failures of the cluster, one row per root.
+	// Every failed component is walked up its owners, at most 4 levels, to the first root kind. A chain that ends
+	// without one is represented by its top-most object, and a chain that is too deep to reach either is ignored.
+	// A root inherits the service of its nearest owner that has one.
+	failingRoots = failingRootsPrefix + `,
+		owner(root_uid, uid, parent_uid, service_id, depth) AS (
+			SELECT r.root_uid, c.uid, c.parent_uid, COALESCE(c.service_id, ''), 1
+			FROM roots r
+			JOIN component c ON c.id = (SELECT MIN(x.id) FROM component x WHERE x.uid = r.root_uid AND x.applied = 1)
+
+			UNION ALL
+
+			SELECT owner.root_uid, p.uid, p.parent_uid, COALESCE(p.service_id, ''), owner.depth + 1
+			FROM owner
+			JOIN component p ON p.uid = owner.parent_uid AND p.applied = 1
+			WHERE owner.service_id = '' AND owner.parent_uid != '' AND owner.depth < 4
 		)
-		-- Return both the failed components and their original parent components
-		SELECT DISTINCT cc.uid, cc."group", cc.version, cc.kind, cc.namespace, cc.name
-		FROM component_chain cc
-		WHERE (cc.health = 2  -- The component itself is failed
-		   OR cc.uid IN (    -- OR it's a direct parent of a failed component
-			  SELECT parent_uid 
-			  FROM component_chain 
-			  WHERE health = 2 AND parent_uid IS NOT NULL
-		   )
-		   OR (cc.uid IN (  -- OR it's the original root component of a chain with failures
-			  SELECT root_uid FROM failed_roots
-		   ) AND cc.kind IN ('Deployment', 'StatefulSet', 'Ingress', 'DaemonSet', 'Certificate')))
-           AND cc.kind IN ('Deployment', 'StatefulSet', 'Ingress', 'DaemonSet', 'Certificate')
-           AND (cc.service_id IS NULL OR cc.service_id = '')
+		SELECT
+			c.uid,
+			c."group",
+			c.version,
+			c.kind,
+			c.namespace,
+			c.name,
+			COALESCE((SELECT o.service_id FROM owner o WHERE o.root_uid = c.uid AND o.service_id != '' LIMIT 1), ''),
+			COALESCE(c.priority_class, ''),
+			COALESCE(c.health_message, ''),
+			c.desired_replicas,
+			c.ready_replicas,
+			COALESCE(c.created_at, 0),
+			COALESCE(r.failing_since, 0),
+			COALESCE(c.criticality, 0),
+			COALESCE(c.criticality_reason, ''),
+			COALESCE(c.priority_annotation, ''),
+			COALESCE(c.labels, ''),
+			c.health
+		FROM roots r
+		JOIN component c ON c.id = (SELECT MIN(x.id) FROM component x WHERE x.uid = r.root_uid AND x.applied = 1)
+		WHERE (c.kind != 'Node' OR (COALESCE(r.failing_since, 0) > 0 AND r.failing_since <= CAST(strftime('%s', 'now') AS INTEGER) - 300))
+		  AND (c.kind != 'CronJob' OR EXISTS (
+			  SELECT 1 FROM (
+				  SELECT j.health AS health, j.created_at AS created_at FROM component j
+				  WHERE j.parent_uid = c.uid AND j.kind = 'Job' AND j.applied = 1
+				  ORDER BY j.created_at DESC LIMIT 1
+			  ) newest
+			  WHERE newest.health = 2 AND (COALESCE(c.last_success, 0) = 0 OR c.last_success < newest.created_at)
+		  ))
+	`
+
+	// failingRootsDescendants counts the failed and pending objects below every root of failingRoots, by kind.
+	// An object watched through several API versions has a row per version, and each of them can have its own parent,
+	// so every row is walked and the objects are counted once by uid.
+	failingRootsDescendants = failingRootsPrefix + `,
+		down(root_uid, uid, kind, health, depth) AS (
+			SELECT r.root_uid, c.uid, c.kind, c.health, 0
+			FROM roots r
+			JOIN component c ON c.id = (SELECT MIN(x.id) FROM component x WHERE x.uid = r.root_uid AND x.applied = 1)
+
+			UNION ALL
+
+			SELECT down.root_uid, ch.uid, ch.kind, ch.health, down.depth + 1
+			FROM down
+			JOIN component ch ON ch.parent_uid = down.uid AND ch.applied = 1
+			WHERE down.uid != '' AND down.depth < 3 AND down.kind != 'Node'
+		)
+		SELECT root_uid, kind,
+			COUNT(DISTINCT CASE WHEN health = 2 THEN uid END),
+			COUNT(DISTINCT CASE WHEN health = 1 THEN uid END)
+		FROM down
+		WHERE depth > 0 AND health IN (1, 2)
+		GROUP BY root_uid, kind
 	`
 
 	serverCounts = `

@@ -97,6 +97,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :namespace, :string
     field :name,      non_null(:string)
     field :priority,  :insight_component_priority
+    field :service_id, :id, description: "the plural service that manages this component, if any"
   end
 
   input_object :node_statistic_attributes do

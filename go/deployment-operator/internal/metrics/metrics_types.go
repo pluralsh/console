@@ -43,6 +43,10 @@ const (
 	ControllerRestartsMetricName        = "agent_controller_restarts_total"
 	ControllerRestartsMetricDescription = "The total number of controller restarts"
 
+	InsightPriorityFailureMetricName        = "agent_insight_priority_failures_total"
+	InsightPriorityFailureMetricDescription = "The total number of failed evaluations of CustomInsightPriority scripts"
+	MetricLabelInsightPriorityName          = "custom_insight_priority"
+
 	SynchronizerEventMetricName        = "agent_synchronizer_event_total"
 	SynchronizerEventMetricDescription = "The total number of synchronizer events"
 
@@ -92,5 +96,6 @@ type Recorder interface {
 	ResourceCacheHit(serviceID string)
 	ResourceCacheMiss(serviceID string)
 	ControllerRestart(name string)
+	InsightPriorityFailure(name string)
 	SynchronizationEvent(event watch.Event)
 }

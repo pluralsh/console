@@ -5,6 +5,13 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
   - apps
   resources:
   - daemonsets
@@ -34,6 +41,7 @@ rules:
   resources:
   - agentruntimes
   - customhealths
+  - custominsightpriorities
   - imagewarmers
   - kubecostextractors
   - pipelinegates
@@ -50,6 +58,7 @@ rules:
   resources:
   - agentruntimes/finalizers
   - customhealths/finalizers
+  - custominsightpriorities/finalizers
   - imagewarmers/finalizers
   - kubecostextractors/finalizers
   - pipelinegates/finalizers
@@ -60,6 +69,7 @@ rules:
   resources:
   - agentruntimes/status
   - customhealths/status
+  - custominsightpriorities/status
   - imagewarmers/status
   - kubecostextractors/status
   - pipelinegates/status

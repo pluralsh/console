@@ -1,45 +1,71 @@
 import {
-  Card,
+  AppsIcon,
   Chip,
-  ChipSeverity,
   ComponentsIcon,
   EmptyState,
   Flex,
-  IconFrame,
+  ListIcon,
   SubTab,
 } from '@pluralsh/design-system'
-import { ComponentPropsWithRef, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
+import usePersistedState from 'components/hooks/usePersistedState.tsx'
+import { CardGrid } from 'components/self-service/catalog/CatalogsGrid.tsx'
+import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
-import {
-  ClusterInsightComponentFragment,
-  InsightComponentPriority,
-} from 'generated/graphql.ts'
+import { InsightComponentPriority } from 'generated/graphql.ts'
 import { capitalize, countBy, isEmpty } from 'lodash'
-import { Link } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
-import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
+import { useTheme } from 'styled-components'
 import { StackedText } from '../../utils/table/StackedText.tsx'
+import { useSetPageHeaderContent } from '../ContinuousDeployment.tsx'
 import { componentHasInsight } from '../clusters/info-flyover/health/ConfigurationIssuesSection.tsx'
 import {
   useClusterInsightsContext,
   useSetActionContent,
   useSetNavigationContent,
 } from './ClusterInsights.tsx'
+import { ClusterInsightComponentCard } from './ClusterInsightComponentCard.tsx'
+import {
+  priorityToSeverity,
+  sortInsightComponents,
+} from './ClusterInsightComponentParts.tsx'
+import { ClusterInsightComponentsTable } from './ClusterInsightComponentsTable.tsx'
+
+type InsightsView = 'list' | 'board'
+
+const VIEW_STORAGE_KEY = 'cluster-insights-view'
+
+const viewDirectory = [
+  { path: 'list', icon: <ListIcon />, tooltip: 'List view' },
+  { path: 'board', icon: <AppsIcon />, tooltip: 'Board view' },
+]
+
+function parseView(value: unknown): InsightsView {
+  return value === 'board' ? 'board' : 'list'
+}
 
 export function ClusterInsightsComponents() {
   const theme = useTheme()
   const { cluster, clusterLoading } = useClusterInsightsContext()
   const [priorityFilter, setPriorityFilter] =
     useState<InsightComponentPriority | null>(null)
+  const [view, setView] = usePersistedState<InsightsView>(
+    VIEW_STORAGE_KEY,
+    'list',
+    0,
+    parseView
+  )
 
   const { total, filteredComponents, counts } = useMemo(() => {
     const components =
       cluster?.insightComponents?.filter(componentHasInsight) ?? []
     return {
       total: components.length,
-      filteredComponents: components.filter(
-        (component) => !priorityFilter || component.priority === priorityFilter
+      filteredComponents: sortInsightComponents(
+        components.filter(
+          (component) =>
+            !priorityFilter || component.priority === priorityFilter
+        )
       ),
       counts: countBy(components, (component) => component.priority),
     }
@@ -100,115 +126,68 @@ export function ClusterInsightsComponents() {
     )
   )
 
-  if (!loading && isEmpty(filteredComponents))
+  // same place and look as the list/tree switch of the cluster services
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <ButtonGroup
+          directory={viewDirectory}
+          tab={view}
+          onClick={(path) => setView(parseView(path))}
+        />
+      ),
+      [view, setView]
+    )
+  )
+
+  if (loading && view === 'list')
+    return (
+      <ClusterInsightComponentsTable
+        loading
+        components={[]}
+      />
+    )
+
+  if (loading)
+    return (
+      <div
+        css={{
+          display: 'grid',
+          gap: theme.spacing.xsmall,
+          gridTemplateColumns: 'repeat(auto-fill, minmax(370px, 1fr))',
+        }}
+      >
+        {Array.from({ length: 8 }).map((_, i) => (
+          <RectangleSkeleton
+            key={i}
+            $height="xxxlarge"
+            $width="100%"
+          />
+        ))}
+      </div>
+    )
+
+  if (isEmpty(filteredComponents))
     return <EmptyState message="No insights found." />
 
+  if (view === 'list')
+    return <ClusterInsightComponentsTable components={filteredComponents} />
+
   return (
-    <div
-      css={{
-        display: 'grid',
-        gap: theme.spacing.xsmall,
-        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    <CardGrid
+      styles={{
+        gridTemplateColumns: 'repeat(auto-fill, minmax(370px, 1fr))',
+        gridAutoRows: 'min-content',
       }}
     >
-      {loading
-        ? Array.from({ length: 8 }).map((_, i) => (
-            <RectangleSkeleton
-              key={i}
-              $height="xxxlarge"
-              $width="100%"
-            />
-          ))
-        : filteredComponents.map((component) => (
-            <ComponentInsightCardSC
-              key={component.id}
-              clickable
-              forwardedAs={Link}
-              to={component.id}
-            >
-              <ClusterInsightComponentLabel
-                truncate
-                component={component}
-                icon={
-                  <IconFrame
-                    size="medium"
-                    icon={<ComponentsIcon size={16} />}
-                  />
-                }
-                first={
-                  <span>
-                    {component.namespace && (
-                      <span css={{ color: theme.colors['text-light'] }}>
-                        {component.namespace} &gt;{' '}
-                      </span>
-                    )}
-                    {component.name}
-                  </span>
-                }
-                firstPartialType="body2"
-                secondPartialType="caption"
-              />
-              <Flex
-                gap="xsmall"
-                align="center"
-              >
-                {component.priority && (
-                  <Chip
-                    size="small"
-                    severity={priorityToSeverity(component.priority)}
-                  >
-                    {capitalize(component.priority)}
-                  </Chip>
-                )}
-                <AiInsightSummaryIcon insight={component.insight} />
-              </Flex>
-            </ComponentInsightCardSC>
-          ))}
-    </div>
+      {filteredComponents.map((component) => (
+        <ClusterInsightComponentCard
+          key={component.id}
+          component={component}
+        />
+      ))}
+    </CardGrid>
   )
-}
-
-export function ClusterInsightComponentLabel({
-  component,
-  icon = <ComponentsIcon size={16} />,
-  ...props
-}: {
-  component: Nullable<ClusterInsightComponentFragment>
-} & Partial<ComponentPropsWithRef<typeof StackedText>>) {
-  const title = component?.namespace
-    ? `${component.namespace} > ${component.name}`
-    : component?.name
-
-  return (
-    <StackedText
-      first={title}
-      firstPartialType="body2Bold"
-      firstColor="text"
-      second={`${component?.group ?? component?.version ?? 'v1'}/${component?.kind}`}
-      secondPartialType="body2"
-      secondColor="text-light"
-      icon={icon}
-      iconGap="small"
-      iconFlexProps={{ minWidth: 0 }}
-      {...props}
-    />
-  )
-}
-
-function priorityToSeverity(
-  priority: Nullable<InsightComponentPriority>
-): ChipSeverity {
-  switch (priority) {
-    case InsightComponentPriority.Medium:
-      return 'warning'
-    case InsightComponentPriority.High:
-      return 'danger'
-    case InsightComponentPriority.Critical:
-      return 'critical'
-    case InsightComponentPriority.Low:
-    default:
-      return 'neutral'
-  }
 }
 
 const priorityFilterValues: (InsightComponentPriority | 'All')[] = [
@@ -218,13 +197,3 @@ const priorityFilterValues: (InsightComponentPriority | 'All')[] = [
   InsightComponentPriority.Medium,
   InsightComponentPriority.Low,
 ]
-
-const ComponentInsightCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  gap: theme.spacing.xsmall,
-  textDecoration: 'none',
-  '&:any-link': { textDecoration: 'none' },
-}))

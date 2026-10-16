@@ -159,6 +159,10 @@
     "relPath": "/plural-features/continuous-deployment/deployment-operator/custom-health.md",
     "lastmod": "2026-09-02T10:37:22.000Z"
   },
+  "/plural-features/continuous-deployment/deployment-operator/insight-priority": {
+    "relPath": "/plural-features/continuous-deployment/deployment-operator/insight-priority.md",
+    "lastmod": "2026-10-09T13:11:56.743Z"
+  },
   "/plural-features/continuous-deployment/git-service": {
     "relPath": "/plural-features/continuous-deployment/git-service.md",
     "lastmod": "2026-09-02T10:37:22.000Z"

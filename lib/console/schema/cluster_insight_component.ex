@@ -1,6 +1,6 @@
 defmodule Console.Schema.ClusterInsightComponent do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, AiInsight}
+  alias Console.Schema.{Cluster, AiInsight, Service}
 
   @expiry [hours: -4]
 
@@ -15,27 +15,54 @@ defmodule Console.Schema.ClusterInsightComponent do
     field :priority,  Priority
 
     belongs_to :cluster, Cluster
+    belongs_to :service, Service
     belongs_to :insight, AiInsight, on_replace: :update
 
     timestamps()
   end
 
+  # A component that stays in the agent's pings is not touched, so it can only be told apart from a stale one by its cluster:
+  # components leave a cluster's list with the ping that no longer reports them, the ones that are left are those of clusters that went quiet.
   def expired(query \\ __MODULE__) do
     expiry = Timex.now() |> Timex.shift(@expiry)
-    from(cic in query, where: coalesce(cic.updated_at, cic.inserted_at) < ^expiry)
+    from(cic in query,
+      join: c in assoc(cic, :cluster),
+      where: coalesce(c.pinged_at, c.inserted_at) < ^expiry
+    )
   end
 
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(cic in query, where: cic.cluster_id == ^cluster_id)
   end
 
-  @valid ~w(group version kind namespace name priority cluster_id)a
+  # the core group and cluster scoped objects are stored as either nil or an empty string depending on who reported them
+  def for_object(query \\ __MODULE__, {g, v, k, ns, n}) do
+    from(cic in query,
+      where: coalesce(cic.group, "") == ^(g || "")
+         and cic.version == ^v
+         and cic.kind == ^k
+         and coalesce(cic.namespace, "") == ^(ns || "")
+         and cic.name == ^n
+    )
+  end
+
+  def with_insight(query \\ __MODULE__) do
+    from(cic in query,
+      where: not is_nil(cic.insight_id),
+      order_by: [desc: coalesce(cic.updated_at, cic.inserted_at)],
+      preload: [insight: :evidence],
+      limit: 1
+    )
+  end
+
+  @valid ~w(group version kind namespace name priority cluster_id service_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_assoc(:insight)
     |> foreign_key_constraint(:cluster_id)
+    |> foreign_key_constraint(:service_id)
     |> validate_required([:kind, :name])
   end
 end
