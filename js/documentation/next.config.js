@@ -12,7 +12,8 @@ const { redirects } = require('./src/routing/docs-structure')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@pluralsh/design-system'],
+  // layout-elk is ESM-only, so it must be bundled rather than require()d on the server
+  transpilePackages: ['@pluralsh/design-system', '@mermaid-js/layout-elk'],
   reactStrictMode: false,
   experimental: {
     // fail the build instead of silently skipping components the compiler can't handle
