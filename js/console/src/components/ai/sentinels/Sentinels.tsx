@@ -14,9 +14,9 @@ import {
   SentinelFragment,
   SentinelRunStatus,
   SentinelStatisticFragment,
-  useSentinelsQuery,
   useSentinelStatisticsQuery,
 } from '../../../generated/graphql.ts'
+import { SentinelsDocument } from '../../../generated/graphql-documents'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { GqlError } from '../../utils/Alert.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
@@ -32,7 +32,7 @@ export function Sentinels() {
 
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useSentinelsQuery, keyPath: ['sentinels'] },
+      { query: SentinelsDocument, keyPath: ['sentinels'] },
       {
         q: debouncedFilterString || undefined,
         status: statusFilterKey === 'All' ? undefined : statusFilterKey,

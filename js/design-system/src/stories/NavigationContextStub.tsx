@@ -31,10 +31,10 @@ export function NavContextProviderStub({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      useNavigate: () => (location?: string) => {
+      navigate: (location?: string) => {
         setCurrentPath(location ?? null)
       },
-      usePathname: () => currentPath,
+      pathname: currentPath,
       Link,
     }),
     [currentPath]

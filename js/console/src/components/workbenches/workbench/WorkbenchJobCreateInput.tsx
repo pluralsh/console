@@ -32,7 +32,7 @@ import capitalize from 'lodash/capitalize'
 import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
 import type { ComponentProps } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
@@ -91,15 +91,15 @@ export function WorkbenchJobCreateInput({
   const inputRef = useAutofocusRef<ChatInputSimpleRef>()
   const { prompt, promptSyncKey, setPrompt, setPromptSyncKey } =
     useTransientWorkbenchPrompt()
-  const [promptModes, setPromptModes] =
-    useState<WorkbenchJobModesAttributes | null>(null)
+  const [promptModesState, setPromptModesState] = useState<{
+    workbenchId: Nullable<string>
+    modes: WorkbenchJobModesAttributes | null
+  } | null>(null)
   const [attachments, setAttachments] = useState<File[]>([])
   const [selectedModelState, setSelectedModelState] = useState<{
     workbenchId: Nullable<string>
     model: Nullable<WorkbenchJobModelAttributes>
   }>({ workbenchId, model: null })
-  const initializedWorkbenchIdRef = useRef<string | null>(null)
-  const prevWorkbenchIdRef = useRef<string | null>(null)
   const selectedModel =
     selectedModelState.workbenchId === workbenchId
       ? selectedModelState.model
@@ -116,31 +116,16 @@ export function WorkbenchJobCreateInput({
     skip: !workbenchId,
   })
 
-  useEffect(() => {
-    if (!workbenchId) {
-      initializedWorkbenchIdRef.current = null
-      prevWorkbenchIdRef.current = null
-      setPromptModes(null)
-      return
-    }
-
-    if (prevWorkbenchIdRef.current !== workbenchId) {
-      prevWorkbenchIdRef.current = workbenchId
-      initializedWorkbenchIdRef.current = null
-      setPromptModes(null)
-    }
-
-    if (initializedWorkbenchIdRef.current === workbenchId) return
-
-    const defaults = defaultPromptModesFromWorkbench(
-      data?.workbench,
-      workbenchId
-    )
-    if (defaults === undefined) return
-
-    initializedWorkbenchIdRef.current = workbenchId
-    setPromptModes((current) => current ?? defaults)
-  }, [workbenchId, data?.workbench])
+  // user's choice for this workbench, falling back to the workbench defaults
+  const promptModes =
+    promptModesState && promptModesState.workbenchId === workbenchId
+      ? promptModesState.modes
+      : workbenchId
+        ? (defaultPromptModesFromWorkbench(data?.workbench, workbenchId) ??
+          null)
+        : null
+  const setPromptModes = (modes: WorkbenchJobModesAttributes | null) =>
+    setPromptModesState({ workbenchId, modes })
 
   useEffect(() => {
     if (promptSyncKey > 0) inputRef.current?.focus()

@@ -1,8 +1,7 @@
-import { BrowseAppsIcon, Button, Card } from '@pluralsh/design-system'
+import { BrowseAppsIcon, Button, Card, SetInert } from '@pluralsh/design-system'
 import { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { MakeInert } from 'components/utils/MakeInert'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import { DOCS_CD_QUICKSTART_LINK } from 'utils/constants'
 
@@ -20,14 +19,14 @@ export function DemoTable({ mode }: { mode: 'disabled' | 'empty' }) {
         position: 'relative',
       }}
     >
-      <MakeInert inert>
+      <SetInert inert>
         <TableWrapperSC $blurred>
           <ClustersTable
             data={tableData}
             refetch={() => {}}
           />
         </TableWrapperSC>
-      </MakeInert>
+      </SetInert>
 
       {mode === 'disabled' && (
         <OverlayCard

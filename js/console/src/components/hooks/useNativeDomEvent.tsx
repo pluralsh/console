@@ -1,4 +1,4 @@
-import { useEffect, RefObject, useRef } from 'react'
+import { useEffect, RefObject, useEffectEvent } from 'react'
 
 export function useNativeDomEvent<T extends HTMLElement | null>(
   elementRef: RefObject<T>,
@@ -7,11 +7,10 @@ export function useNativeDomEvent<T extends HTMLElement | null>(
   options?: AddEventListenerOptions
 ) {
   // so we don't need to memoize with useCallback, but also don't re-create the listener on every render
-  const callbackRef = useRef(callback)
-  callbackRef.current = callback
+  const onEvent = useEffectEvent(callback)
 
   useEffect(() => {
-    const handler = (e: Event) => callbackRef.current(e)
+    const handler = (e: Event) => onEvent(e)
     const element = elementRef.current
     if (!element) return
 

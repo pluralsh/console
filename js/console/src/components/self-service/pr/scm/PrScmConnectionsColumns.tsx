@@ -16,10 +16,10 @@ import styled, { useTheme } from 'styled-components'
 
 import {
   ScmConnectionFragment,
-  ScmConnectionsDocument,
   ScmType,
   useDeleteScmConnectionMutation,
 } from 'generated/graphql'
+import { ScmConnectionsDocument } from 'generated/graphql-documents'
 
 import { Edge, removeConnection, updateCache } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'

@@ -10,9 +10,9 @@ import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import {
   Persona as PersonaT,
-  PersonasDocument,
   useDeletePersonaMutation,
 } from 'generated/graphql'
+import { PersonasDocument } from 'generated/graphql-documents'
 
 import { useContext, useState } from 'react'
 

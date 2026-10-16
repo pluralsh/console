@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { VisuallyHidden } from 'react-aria'
 import styled, { keyframes, useTheme } from 'styled-components'
-
-import usePrevious from '../hooks/usePrevious'
 
 import { type SwitchProps, type SwitchStyleProps, useSwitch } from './Switch'
 
@@ -219,14 +217,13 @@ export function LightDarkSwitch({
 }: SwitchProps) {
   const { inputProps, styleProps, state } = useSwitch(props)
   const { isSelected } = state
-  const wasSelected = usePrevious(isSelected) ?? isSelected
+  const [lastSelected, setLastSelected] = useState(isSelected)
   const [animate, setAnimate] = useState(false)
 
-  useEffect(() => {
-    if (isSelected !== wasSelected) {
-      setAnimate(true)
-    }
-  }, [isSelected, wasSelected])
+  if (isSelected !== lastSelected) {
+    setLastSelected(isSelected)
+    setAnimate(true)
+  }
 
   return (
     <SwitchSC

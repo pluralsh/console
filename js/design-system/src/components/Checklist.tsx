@@ -113,9 +113,9 @@ function ChecklistUnstyled({
     onFocusChange,
     onOpenChange,
   } = stateProps
-  const [finished, setFinished] = useState(false)
-
-  const isFirstRender = useRef(true)
+  const finished = completedKey === children.length - 1
+  // Render fully expanded until the first measurement so heights can be captured
+  const [measured, setMeasured] = useState(false)
   const itemsContainerRef = useRef<HTMLDivElement>(null)
   const finishedContainerRef = useRef<HTMLDivElement>(null)
 
@@ -165,16 +165,6 @@ function ChecklistUnstyled({
   )
 
   useEffect(() => {
-    setFinished(completedKey === children.length - 1)
-  }, [completedKey, children.length, setFinished])
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-    }
-  })
-
-  useEffect(() => {
     if (!itemsContainerRef.current || !finishedContainerRef.current) return
 
     const maxItemContainerHeight = Math.max(
@@ -188,6 +178,7 @@ function ChecklistUnstyled({
 
     setItemContainerHeight(maxItemContainerHeight)
     setFinishedContainerHeight(maxFinishedContainerHeight)
+    setMeasured(true)
   }, [
     itemsContainerRef,
     finishedContainerRef,
@@ -215,7 +206,7 @@ function ChecklistUnstyled({
           <DropdownArrowIcon className={isOpen ? 'arrowUp' : 'arrowDown'} />
         </div>
         <AnimateHeight
-          height={isFirstRender.current || isOpen ? 'auto' : 0}
+          height={!measured || isOpen ? 'auto' : 0}
           duration={heightAnimationDuration}
         >
           <div className="content">{checklistItemInnerWrapper}</div>
@@ -225,7 +216,7 @@ function ChecklistUnstyled({
       <div
         className={finished ? 'finishContainer grow' : 'finishContainer shrink'}
         style={
-          isFirstRender.current || finished
+          !measured || finished
             ? { maxHeight: finishedContainerHeight }
             : { maxHeight: 0, padding: 0 }
         }

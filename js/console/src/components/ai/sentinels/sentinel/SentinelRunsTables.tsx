@@ -16,6 +16,7 @@ import {
   SentinelRunStatus,
   useSentinelRunsQuery,
 } from 'generated/graphql'
+import { SentinelRunsDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_SENTINELS_RUNS_REL_PATH } from 'routes/aiRoutesConsts'
@@ -31,7 +32,7 @@ export function SentinelRunsTables({ id }: { id: string }) {
   })
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useSentinelRunsQuery, keyPath: ['sentinel', 'runs'] },
+      { query: SentinelRunsDocument, keyPath: ['sentinel', 'runs'] },
       { id }
     )
 

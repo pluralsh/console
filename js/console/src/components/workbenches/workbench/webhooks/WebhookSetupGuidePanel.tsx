@@ -98,23 +98,23 @@ export function WebhookSetupGuidePanelContent() {
   const { isOpen, documentationUrl, markdownPath, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
   useSidePanelWidth(SETUP_GUIDE_SIDE_PANEL_WIDTH)
-  const [markdownText, setMarkdownText] = useState('')
-  const [isMarkdownLoading, setIsMarkdownLoading] = useState(false)
-  const [markdownError, setMarkdownError] = useState<Nullable<string>>(null)
+  const source = isOpen && markdownPath ? markdownPath : null
+  const [result, setResult] = useState<{
+    path: string
+    text?: string
+    error?: string
+  }>()
+  const current = source && result?.path === source ? result : undefined
+  const isMarkdownLoading = !!source && !current
+  const markdownError = current?.error ?? null
+  const markdownText = current?.text ?? ''
 
   useEffect(() => {
-    if (!isOpen || !markdownPath) {
-      setMarkdownText('')
-      setMarkdownError(null)
-      setIsMarkdownLoading(false)
-      return
-    }
+    if (!source) return
 
     const controller = new AbortController()
-    setIsMarkdownLoading(true)
-    setMarkdownError(null)
 
-    fetch(markdownPath, { signal: controller.signal })
+    fetch(source, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) {
           throw new Error(
@@ -124,16 +124,18 @@ export function WebhookSetupGuidePanelContent() {
 
         return response.text()
       })
-      .then((text) => setMarkdownText(text))
+      .then((text) => setResult({ path: source, text }))
       .catch((error: { name?: string }) => {
         if (error?.name === 'AbortError') return
 
-        setMarkdownError('Failed to load setup guide content.')
+        setResult({
+          path: source,
+          error: 'Failed to load setup guide content.',
+        })
       })
-      .finally(() => setIsMarkdownLoading(false))
 
     return () => controller.abort()
-  }, [isOpen, markdownPath])
+  }, [source])
 
   return (
     <SidePanelContent>

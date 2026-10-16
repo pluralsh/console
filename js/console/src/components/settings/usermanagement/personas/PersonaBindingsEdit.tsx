@@ -1,10 +1,8 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import {
   ComponentProps,
-  ReactNode,
   SubmitEventHandler,
   useCallback,
-  useEffect,
   useState,
 } from 'react'
 
@@ -59,23 +57,18 @@ export function EditPersonaBindingsModal({
   onClose: () => void
 }) {
   const theme = useTheme()
-  const [errorMsg, setErrorMsg] = useState<ReactNode>()
   const [bindings, setBindings] = useState(persona.bindings)
 
   const [mutation, { loading, error }] = useUpdatePersonaMutation({
     onCompleted: onClose,
   })
 
-  useEffect(() => {
-    setErrorMsg(
-      error && (
-        <GqlError
-          header="Problem editing persona members"
-          error={error}
-        />
-      )
-    )
-  }, [error])
+  const errorMsg = error && (
+    <GqlError
+      header="Problem editing persona members"
+      error={error}
+    />
+  )
 
   const allowSubmit = true
 

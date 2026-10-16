@@ -1,6 +1,9 @@
 import { Card, Flex, Table } from '@pluralsh/design-system'
 
-import { useScmConnectionsQuery, useScmWebhooksQuery } from 'generated/graphql'
+import {
+  ScmConnectionsDocument,
+  ScmWebhooksDocument,
+} from 'generated/graphql-documents'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -16,12 +19,12 @@ import { columns as webhooksColumns } from './ScmWebhooksColumns'
 
 export function ScmManagement() {
   const connectionsQ = useFetchPaginatedData({
-    queryHook: useScmConnectionsQuery,
+    query: ScmConnectionsDocument,
     keyPath: ['scmConnections'],
   })
 
   const webhooksQ = useFetchPaginatedData({
-    queryHook: useScmWebhooksQuery,
+    query: ScmWebhooksDocument,
     keyPath: ['scmWebhooks'],
   })
 

@@ -22,14 +22,18 @@ interface CloudObjectProps {
 export default function CloudObject({
   type,
   id,
-  icon = (
-    <DistroProviderIconFrame
-      distro={ClusterDistro.Eks}
-      css={{ width: 24, height: 24 }}
-    />
-  ),
+  icon: iconProp,
   json,
 }: CloudObjectProps): ReactElement {
+  const icon =
+    iconProp === undefined ? (
+      <DistroProviderIconFrame
+        distro={ClusterDistro.Eks}
+        css={{ width: 24, height: 24 }}
+      />
+    ) : (
+      iconProp
+    )
   const [openValue, setOpenValue] = useState('')
   const theme = useTheme()
 

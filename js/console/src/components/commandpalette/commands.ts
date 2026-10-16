@@ -40,9 +40,9 @@ import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import {
   ChatThreadTinyFragment,
   PageInfoFragment,
-  useChatThreadsQuery,
   useClustersTinyQuery,
 } from '../../generated/graphql'
+import { ChatThreadsDocument } from '../../generated/graphql-documents'
 import { AI_ABS_PATH } from '../../routes/aiRoutesConsts'
 import {
   CD_ABS_PATH,
@@ -471,7 +471,7 @@ export function useHistory({
   const { loading, data, fetchNextPage, pageInfo } = useFetchPaginatedData(
     {
       pollInterval: 60_000,
-      queryHook: useChatThreadsQuery,
+      query: ChatThreadsDocument,
       keyPath: ['chatThreads'],
       pageSize: 50,
       skip,

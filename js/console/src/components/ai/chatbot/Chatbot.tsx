@@ -2,7 +2,7 @@ import { usePrevious } from '@pluralsh/design-system'
 
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo } from 'react'
-import { useChatThreadMessagesQuery } from '../../../generated/graphql.ts'
+import { ChatThreadMessagesDocument } from '../../../generated/graphql-documents'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { AIViewTypes, useChatbot, useChatbotContext } from '../AIContext.tsx'
@@ -31,7 +31,7 @@ export function ChatbotPanelContent() {
     useFetchPaginatedData(
       {
         skip: !currentThreadId,
-        queryHook: useChatThreadMessagesQuery,
+        query: ChatThreadMessagesDocument,
         keyPath: ['chatThread', 'chats'],
         pollInterval: 0, // don't poll messages, they shouldn't change except when agent is running
       },

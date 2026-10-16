@@ -54,8 +54,8 @@ import {
   StackType,
   TagType,
   useStackQuery,
-  useStacksQuery,
 } from '../../generated/graphql'
+import { StacksDocument } from '../../generated/graphql-documents'
 import {
   getStacksAbsPath,
   STACK_ENV_REL_PATH,
@@ -170,7 +170,7 @@ export function Stacks() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
-      queryHook: useStacksQuery,
+      query: StacksDocument,
       keyPath: ['infrastructureStacks'],
     },
     {

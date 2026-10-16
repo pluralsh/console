@@ -7,6 +7,7 @@ import {
   KeyboardEvent,
   useCallback,
   useEffect,
+  useEffectEvent,
   useRef,
 } from 'react'
 import styled from 'styled-components'
@@ -55,7 +56,8 @@ export function EditableDiv({
 } & ComponentPropsWithRef<'div'>) {
   const internalRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  // One-time hydrate per editor mount — parents that load async prompts bump `syncKey` on ChatInputSimple.
+  const hydrate = useEffectEvent(() => {
     const domNode = internalRef.current
     if (!domNode) return
 
@@ -71,9 +73,10 @@ export function EditableDiv({
         setValue(content === '\n' ? '' : content)
       } else setPlainTextContent(domNode, initialValue)
     } else domNode.innerHTML = ''
+  })
 
-    // One-time hydrate per editor mount — parents that load async prompts bump `syncKey` on ChatInputSimple.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initialValue/`setValue` are mount snapshots only
+  useEffect(() => {
+    hydrate()
   }, [])
 
   const onInput = useCallback(

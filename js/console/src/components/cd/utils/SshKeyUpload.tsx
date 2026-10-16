@@ -1,10 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import {
-  FillLevel,
-  FormField,
-  Input,
-  usePrevious,
-} from '@pluralsh/design-system'
+import { useCallback, useState } from 'react'
+import { FillLevel, FormField, Input } from '@pluralsh/design-system'
 import { FileDrop, FileDropFile } from 'components/utils/FileDrop'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
@@ -29,16 +24,6 @@ function SshKeyUpload({
   const [fileName, setFileName] = useState<string | undefined>()
   const [fileError, setFileError] = useState<Nullable<string>>()
   const [manual, setManual] = useState(false)
-  const wasManual = usePrevious(manual)
-
-  useEffect(() => {
-    if (manual && !wasManual) {
-      setFileName(undefined)
-      setFileError(undefined)
-    } else if (!manual && wasManual) {
-      setPrivateKey(undefined)
-    }
-  }, [manual, setPrivateKey, wasManual])
 
   const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
     async (files) => {
@@ -73,6 +58,12 @@ function SshKeyUpload({
           css={{ cursor: 'pointer' }}
           onClick={(e) => {
             e.preventDefault()
+            if (manual) {
+              setPrivateKey(undefined)
+            } else {
+              setFileName(undefined)
+              setFileError(undefined)
+            }
             setManual(!manual)
           }}
         >

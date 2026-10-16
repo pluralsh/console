@@ -25,9 +25,9 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import {
   PrAutomationFragment,
   PrRole,
-  usePrAutomationsQuery,
   useSuggestScalingRecommendationMutation,
 } from 'generated/graphql'
+import { PrAutomationsDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -111,7 +111,7 @@ export function SelectPrAutomationStep({
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: usePrAutomationsQuery, keyPath: ['prAutomations'] },
+      { query: PrAutomationsDocument, keyPath: ['prAutomations'] },
       { role: PrRole.Cost }
     )
 

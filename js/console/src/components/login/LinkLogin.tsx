@@ -1,5 +1,5 @@
 import { Flex, LoopingLogo } from '@pluralsh/design-system'
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 import { useParams } from 'react-router'
 import { useNavigate } from 'react-router-dom'
 
@@ -25,10 +25,11 @@ export function LinkLogin() {
     onError: console.error,
   })
 
+  const login = useEffectEvent(() => mutation())
+
+  // Only run on first mount
   useEffect(() => {
-    mutation()
-    // Only run on first mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    login()
   }, [])
 
   if (error) {

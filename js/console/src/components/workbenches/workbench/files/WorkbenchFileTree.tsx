@@ -62,13 +62,11 @@ export function WorkbenchFileTree({
       setExpanded(uniq([...expanded, ...required]))
   }
 
-  const refresh = async () => {
+  const refresh = () => {
     setRefreshing(true)
-    try {
-      await client.refetchQueries({ include: ['WorkbenchFiles'] })
-    } finally {
-      setRefreshing(false)
-    }
+    return client
+      .refetchQueries({ include: ['WorkbenchFiles'] })
+      .finally(() => setRefreshing(false))
   }
 
   return (

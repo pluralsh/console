@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-import { Button, DiscordIcon, usePrevious } from '@pluralsh/design-system'
+import { Button, DiscordIcon } from '@pluralsh/design-system'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -23,21 +23,18 @@ function PageHeaderUnstyled({ ...props }) {
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const { asPath } = useRouter()
   const thisPath = getBarePathFromPath(asPath)
-  const prevPath = usePrevious(thisPath)
+  const [prevPath, setPrevPath] = useState(thisPath)
 
   const breakpoint = useBreakpoint()
 
-  useEffect(() => {
-    if (BreakpointIsGreaterOrEqual(breakpoint, 'fullHeader')) {
-      setMenuIsOpen(false)
-    }
-  }, [breakpoint])
+  if (menuIsOpen && BreakpointIsGreaterOrEqual(breakpoint, 'fullHeader')) {
+    setMenuIsOpen(false)
+  }
 
-  useEffect(() => {
-    if (prevPath && thisPath !== prevPath) {
-      setMenuIsOpen(false)
-    }
-  }, [thisPath, prevPath])
+  if (thisPath !== prevPath) {
+    setPrevPath(thisPath)
+    setMenuIsOpen(false)
+  }
 
   useKey(['Escape'], () => {
     setMenuIsOpen(false)

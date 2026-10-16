@@ -88,6 +88,8 @@ function Table({
   onScrollCapture,
   ...props
 }: TableProps) {
+  // TanStack Table returns mutable instances that can't be memoized safely
+  'use no memo'
   const theme = useTheme()
   const tableContainerRef = useRef<HTMLDivElement>(null)
 
@@ -97,6 +99,7 @@ function Table({
     return [...columnsProp, ...(!!getRowLink ? [{ id: GHOST_LINK_ID }] : [])]
   }, [columnsProp, getRowLink])
 
+  // oxlint-disable-next-line react/incompatible-library
   const table = useReactTable({
     data,
     columns,

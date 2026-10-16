@@ -39,6 +39,7 @@ import { TraceWaterfall } from '../job/WorkbenchJobTraces'
 import {
   DashboardPanelGraph,
   useDashboardGraphSource,
+  useGraphData,
 } from './DashboardGraphSource'
 import { DashboardTimeseriesChart } from './DashboardTimeseriesChart'
 import { DashboardToolIcon } from './dashboardToolIcon'
@@ -258,7 +259,7 @@ function DataDashboardPanel({
   onUpdate,
   reserveDescription = false,
 }: DashboardPanelProps) {
-  const { useGraphData, readOnly } = useDashboardGraphSource()
+  const { readOnly } = useDashboardGraphSource()
   const needsFetch = dashboardGraphNeedsFetch(
     graph.type,
     graph.hasDatasource,

@@ -68,11 +68,12 @@ function GlobalSettingsPermissionsCard({
               : null
         })
         .filter(isNonNullable)
+      const bindingsKey = `${type}Bindings`
 
       updateSettings({
         variables: {
           attributes: {
-            [`${type}Bindings`]: finalBindings,
+            [bindingsKey]: finalBindings,
           },
         },
         onCompleted: () => {

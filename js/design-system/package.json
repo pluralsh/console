@@ -97,6 +97,7 @@
     "@types/react-transition-group": "4.4.12",
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/ui": "5.0.1",
+    "babel-plugin-react-compiler": "1.0.0",
     "babel-plugin-styled-components": "2.3.0",
     "chromatic": "18.5.0",
     "fuse.js": "7.5.0",
@@ -118,8 +119,8 @@
   },
   "peerDependencies": {
     "@apollo/client": ">=3.14.1",
-    "react": ">=19.1.1",
-    "react-dom": ">=19.1.1",
+    "react": ">=19.2.0",
+    "react-dom": ">=19.2.0",
     "react-transition-group": ">=4.4.5",
     "styled-components": ">=6.2.0"
   }

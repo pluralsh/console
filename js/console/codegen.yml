@@ -8,6 +8,28 @@ generates:
       - 'typescript-operations'
       - 'typescript-react-apollo'
       - 'named-operations-object'
+    config:
+      # hooks use the documents from graphql-documents.ts instead of embedding a second copy
+      documentMode: external
+      importDocumentNodeExternallyFrom: './graphql-operations'
+  src/generated/graphql-operations.ts:
+    schema: '../../schema/schema.graphql'
+    documents: './src/graph/**/*.graphql'
+    plugins:
+      - './codegen-operations-plugin.cjs'
+  # typed documents (TypedDocumentNode), the single source of every query and fragment
+  src/generated/graphql-documents.ts:
+    schema: '../../schema/schema.graphql'
+    documents: './src/graph/**/*.graphql'
+    plugins:
+      - add:
+          content: "import type * as Types from './graphql'"
+      - 'typed-document-node'
+    config:
+      documentMode: graphQLTag
+      gqlImport: '@apollo/client#gql'
+      importOperationTypesFrom: Types
+      pureMagicComment: true
   src/generated/persisted-queries/client.json:
     schema: '../../schema/schema.graphql'
     documents:

@@ -4,6 +4,8 @@ import { GitHubLogoIcon } from '@pluralsh/design-system'
 
 import styled from 'styled-components'
 
+const CURRENT_YEAR = new Date().getFullYear()
+
 function PageFooter({ className }: { className?: string }) {
   return (
     <footer
@@ -11,7 +13,7 @@ function PageFooter({ className }: { className?: string }) {
       // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/contentinfo_role
       role="contentinfo"
     >
-      <FooterLink as="div">© Plural {new Date().getFullYear()}</FooterLink>
+      <FooterLink as="div">© Plural {CURRENT_YEAR}</FooterLink>
       <FooterLink href="https://plural.sh/legal/privacy-policy">
         Privacy Policy
       </FooterLink>

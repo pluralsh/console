@@ -1,8 +1,8 @@
 import {
   ChatThreadTinyFragment,
-  useClusterSelectorQuery,
   useUpdateChatThreadMutation,
 } from '../../../../generated/graphql.ts'
+import { ClusterSelectorDocument } from '../../../../generated/graphql-documents'
 import {
   ClusterIcon,
   Input,
@@ -42,7 +42,7 @@ export function ChatInputClusterSelect({
 
   const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
-      queryHook: useClusterSelectorQuery,
+      query: ClusterSelectorDocument,
       keyPath: ['clusters'],
       errorPolicy: 'ignore',
     },
@@ -58,24 +58,14 @@ export function ChatInputClusterSelect({
     [data?.clusters?.edges]
   )
 
-  const findCluster = useCallback(
-    (clusterId: Nullable<string>) => {
-      if (!clusterId) {
-        return null
-      }
-      if (data?.cluster && data?.cluster.id === clusterId) {
-        return data.cluster
-      }
+  const findCluster = (clusterId: Nullable<string>) => {
+    if (!clusterId) return null
+    if (data?.cluster?.id === clusterId) return data.cluster
 
-      return clusters?.find((cluster) => cluster?.id === clusterId)
-    },
-    [clusters, data?.cluster]
-  )
+    return clusters?.find((cluster) => cluster?.id === clusterId)
+  }
 
-  const selectedCluster = useMemo(
-    () => findCluster(currentClusterId),
-    [currentClusterId, findCluster]
-  )
+  const selectedCluster = findCluster(currentClusterId)
 
   const onClusterChange = useCallback(
     (clusterId: string | null) => {

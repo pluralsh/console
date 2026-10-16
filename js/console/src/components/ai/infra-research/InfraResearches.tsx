@@ -16,10 +16,8 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP, Title2H1 } from 'components/utils/typography/Text'
-import {
-  InfraResearchFragment,
-  useInfraResearchesQuery,
-} from 'generated/graphql'
+import { InfraResearchFragment } from 'generated/graphql'
+import { InfraResearchesDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -39,7 +37,7 @@ export function InfraResearches() {
   const [published, setPublished] = useState<Nullable<boolean>>(true)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useInfraResearchesQuery, keyPath: ['infraResearches'] },
+      { query: InfraResearchesDocument, keyPath: ['infraResearches'] },
       { published }
     )
   const infraResearches = useMemo(
@@ -89,7 +87,7 @@ export function InfraResearches() {
         <Flex
           gap="xsmall"
           overflow="auto"
-          css={{ [`@container (max-width: ${800}px)`]: { display: 'none' } }}
+          css={{ '@container (max-width: 800px)': { display: 'none' } }}
         >
           {infraResearchExamples.map((card) => (
             <AIExampleCard

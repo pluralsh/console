@@ -27,8 +27,8 @@ describe.each([styledThemeDark, styledThemeLight])(
               <NavigationContextProvider
                 value={{
                   Link,
-                  usePathname: () => '/components',
-                  useNavigate: () => () => {},
+                  pathname: '/components',
+                  navigate: () => {},
                 }}
               >
                 <TreeNav>

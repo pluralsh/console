@@ -1,8 +1,6 @@
 import { Table } from '@pluralsh/design-system'
-import {
-  useGitPullabilityStatisticsQuery,
-  useGitRepositoriesQuery,
-} from 'generated/graphql'
+import { useGitPullabilityStatisticsQuery } from 'generated/graphql'
+import { GitRepositoriesDocument } from 'generated/graphql-documents'
 import { useEffect } from 'react'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
@@ -34,7 +32,7 @@ export function GitRepositoriesTable({
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useGitRepositoriesQuery, keyPath: ['gitRepositories'] },
+      { query: GitRepositoriesDocument, keyPath: ['gitRepositories'] },
       { q: searchStr, health: statusFilterKeyToGitHealth(status) }
     )
   const { data: statsData } = useGitPullabilityStatisticsQuery({

@@ -1,6 +1,6 @@
 import { DeepPartial } from '@apollo/client/utilities'
 import isEqual from 'lodash/isEqual'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { isSubsetEqual } from 'utils/isSubsetEqual'
 
@@ -11,10 +11,7 @@ export function useUpdateState<T extends Record<string, unknown>>(
   initialState: T,
   isDifferentFns?: IsDifferentFns<T>
 ) {
-  const initialStateRef = useRef(initialState)
-
-  initialStateRef.current = initialState
-  const [state, setState] = useState({ ...initialStateRef.current })
+  const [state, setState] = useState({ ...initialState })
   const [errors, setErrors] = useState<Partial<Record<keyof T, boolean>>>({})
 
   const update = useCallback((update: DeepPartial<T>) => {
@@ -28,8 +25,8 @@ export function useUpdateState<T extends Record<string, unknown>>(
   }, [])
 
   const reset = useCallback(() => {
-    setState({ ...initialStateRef.current })
-  }, [])
+    setState({ ...initialState })
+  }, [initialState])
 
   const updateErrors = useCallback((update: typeof errors) => {
     setErrors((e) => ({ ...e, ...update }))

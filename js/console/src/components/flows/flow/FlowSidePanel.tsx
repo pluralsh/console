@@ -146,10 +146,7 @@ function WorkbenchPanelItem({
   const tools = workbench.tools?.filter(isNonNullable) ?? []
 
   useEffect(() => {
-    if (!workbench.description) {
-      setCanExpandDescription(false)
-      return
-    }
+    if (!workbench.description) return
 
     if (showFullDescription) return
 
@@ -195,7 +192,7 @@ function WorkbenchPanelItem({
             >
               {workbench.description}
             </WorkbenchDescriptionSC>
-            {canExpandDescription && (
+            {!!workbench.description && canExpandDescription && (
               <ReadMoreSC
                 type="button"
                 onClick={() => setShowFullDescription((value) => !value)}

@@ -2,10 +2,10 @@ import { Button, Flex } from '@pluralsh/design-system'
 import {
   CustomStackRunFragment,
   StackCommand,
-  StackRunsDocument,
   StackRunsQuery,
   useCreateOnDemandRunMutation,
 } from 'generated/graphql'
+import { StackRunsDocument } from 'generated/graphql-documents'
 
 import { FormEvent, useMemo, useState } from 'react'
 

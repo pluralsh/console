@@ -30,24 +30,32 @@ export default function MarkdocComponent({
       window.location.hash.slice(1)
   )
 
-  // render the remaining in  bigger chunks after the initial render
+  // render the remaining in bigger chunks, one per frame, after the initial render
   useEffect(() => {
-    const element = hashRef.current && document.getElementById(hashRef.current)
+    if (isFullyLoaded) return
 
-    if (!isFullyLoaded)
-      setContent(
+    const frame = requestAnimationFrame(() =>
+      setContent((content) =>
         produce(content, (d: Tag) => {
           d.children.push(
-            ...children.slice(numRendered, numRendered + CHUNK_SIZE)
+            ...children.slice(d.children.length, d.children.length + CHUNK_SIZE)
           )
         })
       )
-    // scroll to element with matching ID once it loads
+    )
+
+    return () => cancelAnimationFrame(frame)
+  }, [children, isFullyLoaded, numRendered])
+
+  // scroll to element with matching ID once it loads
+  useEffect(() => {
+    const element = hashRef.current && document.getElementById(hashRef.current)
+
     if (element) {
       element.scrollIntoView()
       hashRef.current = false
     }
-  }, [children, content, isFullyLoaded, markdoc, numRendered])
+  }, [numRendered])
 
   return renderMarkdoc(content)
 }

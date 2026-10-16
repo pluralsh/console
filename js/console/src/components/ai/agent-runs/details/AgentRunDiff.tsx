@@ -21,7 +21,7 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { parsePatch } from 'diff'
 import pluralize from 'pluralize'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
 import { fetchAgentRunUpload } from 'utils/agentRun'
 import { getFileTypeIconKey } from 'utils/file'
@@ -250,11 +250,11 @@ export function AgentRunDiff({
   )
   const tree = useMemo(() => buildTree(files), [files])
   const [selectedPath, setSelectedPath] = useState<string>()
-  const [parentOfSelectedId, setParentOfSelectedId] = useState<string>()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
   const { nodeMap, parentMap } = useMemo(() => buildNodeLookup(tree), [tree])
   const selectedNode = selectedPath ? nodeMap.get(selectedPath) : undefined
   const selectedFile = selectedNode?.file ?? files[0]
+  const parentOfSelectedId = selectedFile && parentMap.get(selectedFile.path)
 
   const toggleFullscreen = useCallback(() => {
     onFullscreenChange?.(!isFullscreen)
@@ -262,42 +262,43 @@ export function AgentRunDiff({
 
   useKeyDown('Escape', () => isFullscreen && onFullscreenChange?.(false))
 
-  useEffect(() => {
-    setSelectedPath(files[0]?.path)
-    setParentOfSelectedId(
-      files[0]?.path ? parentMap.get(files[0].path) : undefined
-    )
-  }, [files, parentMap])
+  // selects a file and expands its parent directories
+  const selectPath = (path?: string) => {
+    setSelectedPath(path)
+    const parentId = path && parentMap.get(path)
+    if (!parentId) return
 
-  useEffect(() => {
-    if (selectedPath && parentOfSelectedId) {
-      const requiredExpanded: string[] = []
-      let currentParentId: string | undefined = parentOfSelectedId
+    const requiredExpanded: string[] = []
+    let currentParentId: string | undefined = parentId
 
-      while (currentParentId) {
-        requiredExpanded.push(currentParentId)
-        currentParentId = parentMap.get(currentParentId)
-      }
-
-      setExpandedItems((prev) =>
-        Array.from(new Set([...prev, ...requiredExpanded]))
-      )
+    while (currentParentId) {
+      requiredExpanded.push(currentParentId)
+      currentParentId = parentMap.get(currentParentId)
     }
-  }, [selectedPath, parentOfSelectedId, parentMap])
 
-  const handleItemSelection = useCallback(
-    (_event: unknown, itemId: string, isSelected: boolean) => {
-      if (isSelected) {
-        const node = nodeMap.get(itemId)
+    setExpandedItems((prev) =>
+      Array.from(new Set([...prev, ...requiredExpanded]))
+    )
+  }
 
-        if (node?.file) {
-          setSelectedPath(node.path)
-          setParentOfSelectedId(parentMap.get(itemId))
-        }
-      }
-    },
-    [nodeMap, parentMap]
-  )
+  // select the first file whenever the file list changes
+  const [prevFiles, setPrevFiles] = useState<typeof files>()
+
+  if (files !== prevFiles) {
+    setPrevFiles(files)
+    selectPath(files[0]?.path)
+  }
+
+  const handleItemSelection = (
+    _event: unknown,
+    itemId: string,
+    isSelected: boolean
+  ) => {
+    if (!isSelected) return
+    const node = nodeMap.get(itemId)
+
+    if (node?.file) selectPath(node.path)
+  }
 
   if (isLoading && !content) {
     return (

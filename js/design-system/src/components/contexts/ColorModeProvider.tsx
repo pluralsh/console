@@ -9,6 +9,8 @@ import {
   styledThemeLight,
 } from '../../theme'
 
+const DATA_ATTRIBUTE = `data-${COLOR_THEME_KEY}`
+
 const Wrapper = styled.div``
 
 export function ColorModeProvider({
@@ -19,7 +21,7 @@ export function ColorModeProvider({
     <StyledThemeProvider
       theme={mode === 'light' ? styledThemeLight : styledThemeDark}
     >
-      <Wrapper {...{ [`data-${COLOR_THEME_KEY}`]: mode, ...props }} />
+      <Wrapper {...{ [DATA_ATTRIBUTE]: mode, ...props }} />
     </StyledThemeProvider>
   )
 }

@@ -1,9 +1,7 @@
 import { Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import {
-  GlobalServiceFragment,
-  useGlobalServicesQuery,
-} from 'generated/graphql'
+import { GlobalServiceFragment } from 'generated/graphql'
+import { GlobalServicesDocument } from 'generated/graphql-documents'
 import { ComponentProps, memo, useEffect, useMemo } from 'react'
 import { getGlobalServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
@@ -36,7 +34,7 @@ function GlobalServicesTableComponent({
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: useGlobalServicesQuery, keyPath: ['globalServices'] },
+    { query: GlobalServicesDocument, keyPath: ['globalServices'] },
     { projectId, q: debouncedSearchString }
   )
 

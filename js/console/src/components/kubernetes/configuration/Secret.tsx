@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react'
+import { ReactElement, useMemo, useState } from 'react'
 import {
   Button,
   EyeClosedIcon,
@@ -110,11 +110,8 @@ function SecretDataValue({
   forceReveal: boolean
 }) {
   const theme = useTheme()
+  // keyed by forceReveal in the cell, so "reveal all" resets each row
   const [reveal, setReveal] = useState(forceReveal)
-
-  useEffect(() => {
-    setReveal(forceReveal)
-  }, [forceReveal])
 
   return (
     <div
@@ -156,6 +153,7 @@ const columns = [
 
       return (
         <SecretDataValue
+          key={String(!!revealAll)}
           value={getValue()}
           forceReveal={!!revealAll}
         />

@@ -7,8 +7,8 @@ import {
 
 export type NavigationContextValue = {
   Link: ComponentType<ComponentProps<'a'>>
-  usePathname: () => string
-  useNavigate: () => (location?: string) => void
+  pathname: string
+  navigate: (location?: string) => void
 }
 
 const NavigationContext = createContext<NavigationContextValue | null>(null)

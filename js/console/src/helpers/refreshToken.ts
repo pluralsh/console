@@ -1,7 +1,8 @@
 import { FetchResult, Observable } from '@apollo/client'
 import { NetworkError } from '@apollo/client/errors'
 import { ErrorHandler } from '@apollo/client/link/error'
-import { RefreshDocument, RefreshQuery } from 'generated/graphql'
+import { RefreshQuery } from 'generated/graphql'
+import { RefreshDocument } from 'generated/graphql-documents'
 
 import {
   fetchRefreshToken,

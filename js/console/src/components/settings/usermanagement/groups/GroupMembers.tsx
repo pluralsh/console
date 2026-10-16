@@ -1,9 +1,9 @@
 import {
   GroupMemberFragment,
   useDeleteGroupMemberMutation,
-  useGroupMembersQuery,
   UserFragment,
 } from 'generated/graphql'
+import { GroupMembersDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 
 import { mapExistingNodes } from 'utils/graphql'
@@ -47,7 +47,7 @@ export function GroupMembers({
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
-        queryHook: useGroupMembersQuery,
+        query: GroupMembersDocument,
         keyPath: ['groupMembers'],
         skip: !groupId,
         pageSize,

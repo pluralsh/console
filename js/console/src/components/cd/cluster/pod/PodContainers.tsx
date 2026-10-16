@@ -316,7 +316,7 @@ export function PodContainers({
     return [...initContainerData, ...containerData]
   }, [containerStatuses, containers, initContainerStatuses, initContainers])
 
-  columns = useMemo(
+  const tableColumns = useMemo(
     () =>
       columns ?? [
         ColExpander,
@@ -339,7 +339,7 @@ export function PodContainers({
     <Table
       loose
       data={tableData}
-      columns={columns}
+      columns={tableColumns}
       reactTableOptions={{
         meta: {
           clusterId,

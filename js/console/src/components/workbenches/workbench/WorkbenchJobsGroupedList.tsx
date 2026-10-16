@@ -24,12 +24,12 @@ import {
 } from 'components/workbenches/common/WorkbenchGroupedList'
 import {
   SortDirection,
-  useWorkbenchJobsForStatusQuery,
   useWorkbenchJobStatusCountsQuery,
   WorkbenchJobPrState,
   WorkbenchJobStatus,
   WorkbenchJobTinyFragment,
 } from 'generated/graphql'
+import { WorkbenchJobsForStatusDocument } from 'generated/graphql-documents'
 import { includes, startCase } from 'lodash'
 import { memo, ReactElement, useMemo } from 'react'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -172,7 +172,7 @@ function JobStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
     useFetchPaginatedData(
       {
-        queryHook: useWorkbenchJobsForStatusQuery,
+        query: WorkbenchJobsForStatusDocument,
         keyPath: RUNS_KEY_PATH,
         pageSize: WORKBENCH_JOBS_PAGE_SIZE,
         keepLoadedPages: true,

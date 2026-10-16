@@ -9,7 +9,7 @@ import {
   useCreatePullRequestMutation,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 import { parseToBool } from 'utils/parseToBool'
 import { ReviewPrFormState } from './wizard/CreatePrSteps'
@@ -129,12 +129,15 @@ export function usePrAutomationForm({
   const [curPage, setCurPage] = useState(firstPage)
 
   // reapply default states if the prAutomation changes
-  useEffect(() => {
+  // defaults (and firstPage) are recomputed whenever prAutomation changes
+  const [prevDefaults, setPrevDefaults] = useState(defaults)
+  if (defaults !== prevDefaults) {
+    setPrevDefaults(defaults)
     setCurConfigVals(defaults.curConfigVals)
     setReviewFormState(defaults.reviewFormState)
     setVistedPages(new Set([firstPage]))
     setCurPage(firstPage)
-  }, [defaults, firstPage, prAutomation])
+  }
 
   const { isValid: configIsValid, values: filteredConfig } =
     validateAndFilterConfig(prAutomation?.configuration ?? [], curConfigVals)

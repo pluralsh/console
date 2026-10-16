@@ -1,15 +1,10 @@
-import {
-  type ReactNode,
-  Suspense,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { type ReactNode, Suspense, useContext } from 'react'
 
 import { GitHubLogoIcon } from '@pluralsh/design-system'
 
 import styled from 'styled-components'
 
+import { useIsClient } from '@src/hooks/useIsClient'
 import ArticlesInSection from './ArticlesInSection'
 import Breadcrumbs from './Breadcrumbs'
 import { FooterLink } from './PageFooter'
@@ -99,11 +94,7 @@ export default function MainContent({
 }) {
   const pageProps = useContext(PagePropsContext)
   const { markdoc } = pageProps || {}
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  const isClient = useIsClient()
 
   return (
     <>

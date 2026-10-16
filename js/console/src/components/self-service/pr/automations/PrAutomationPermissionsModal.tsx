@@ -1,6 +1,6 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
 import {
@@ -38,17 +38,18 @@ export function PrAutomationPermissionsModal({
   const forLabel = 'PR automation'
   const header = `${forLabel} permissions – ${name}`
 
-  const [createBindings, setCreateBindings] = useState(
-    prAutomation.createBindings
-  )
-  const [writeBindings, setWriteBindings] = useState(prAutomation.writeBindings)
-
-  useEffect(() => {
-    setCreateBindings(prAutomation.createBindings)
-  }, [prAutomation.createBindings])
-  useEffect(() => {
-    setWriteBindings(prAutomation.writeBindings)
-  }, [prAutomation.writeBindings])
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedCreateBindings, setCreateBindings] =
+    useState<typeof prAutomation.createBindings>()
+  const [editedWriteBindings, setWriteBindings] =
+    useState<typeof prAutomation.writeBindings>()
+  const createBindings = editedCreateBindings ?? prAutomation.createBindings
+  const writeBindings = editedWriteBindings ?? prAutomation.writeBindings
+  const close = () => {
+    setCreateBindings(undefined)
+    setWriteBindings(undefined)
+    onClose()
+  }
 
   const uniqueCreateBindings = useMemo(
     () => uniqWith(createBindings, isEqual),
@@ -62,7 +63,7 @@ export function PrAutomationPermissionsModal({
     useUpdatePrAutomationMutation({
       onCompleted: () => {
         refetch?.()
-        onClose()
+        close()
       },
     })
   const allowSubmit = createBindings && writeBindings
@@ -95,7 +96,7 @@ export function PrAutomationPermissionsModal({
     <Modal
       header={header}
       open={open}
-      onClose={onClose}
+      onClose={close}
       onOpenAutoFocus={(e) => e.preventDefault()}
       asForm
       formProps={{ onSubmit }}
@@ -122,7 +123,7 @@ export function PrAutomationPermissionsModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

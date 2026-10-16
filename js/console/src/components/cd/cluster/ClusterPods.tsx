@@ -14,10 +14,8 @@ import { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
 
-import {
-  useClusterNamespacesQuery,
-  useClusterPodsQuery,
-} from '../../../generated/graphql'
+import { useClusterNamespacesQuery } from '../../../generated/graphql'
+import { ClusterPodsDocument } from '../../../generated/graphql-documents'
 import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
 import { TableCaretLink } from '../../cluster/TableElements'
 import { NamespaceListFooter } from '../../utils/NamespaceListFooter'
@@ -105,7 +103,7 @@ export function ClusterPods() {
     useFetchPaginatedData(
       {
         pollInterval: POLL_INTERVAL,
-        queryHook: useClusterPodsQuery,
+        query: ClusterPodsDocument,
         keyPath: ['pods'],
       },
       { clusterId, namespace }

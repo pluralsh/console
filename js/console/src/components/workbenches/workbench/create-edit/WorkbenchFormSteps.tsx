@@ -24,8 +24,8 @@ import {
   useAgentRuntimeReposQuery,
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
-  useWorkbenchToolsQuery,
 } from 'generated/graphql'
+import { WorkbenchToolsDocument } from 'generated/graphql-documents'
 import { produce } from 'immer'
 import {
   Dispatch,
@@ -189,8 +189,9 @@ export function WorkbenchSetupStep({
                 tooltip="Expose stack inspection tools for Plural stack definitions, runs, and related context."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.infrastructure ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
                     d.configuration.infrastructure.stacks = checked
                   })
                 }
@@ -201,8 +202,9 @@ export function WorkbenchSetupStep({
                 tooltip="Expose service inspection tools for Plural-managed services, clusters, and deployment wiring."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.infrastructure ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
                     d.configuration.infrastructure.services = checked
                   })
                 }
@@ -213,8 +215,9 @@ export function WorkbenchSetupStep({
                 tooltip="Expose tools to get and list Kubernetes API resources via the cluster control plane. Respects k8s RBAC."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.infrastructure ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
                     d.configuration.infrastructure.kubernetes = checked
                   })
                 }
@@ -225,8 +228,9 @@ export function WorkbenchSetupStep({
                 tooltip="Expose a tool to fetch container stdout/stderr logs from pods, respecting k8s RBAC. Separate from Plural integrated logs under Observability."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.infrastructure ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
                     d.configuration.infrastructure.podLogs = checked
                   })
                 }
@@ -237,8 +241,9 @@ export function WorkbenchSetupStep({
                 tooltip="Expose a self-service subagent that can list catalogs, search and inspect PR automations, and invoke them while associating generated PRs with this workbench job."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.infrastructure ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
                     d.configuration.infrastructure.selfService = checked
                   })
                 }
@@ -249,8 +254,9 @@ export function WorkbenchSetupStep({
                 tooltip="Lists vulnerabilities from Trivy that are auto-associated with Plural Services."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.infrastructure ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
                     d.configuration.infrastructure.vulnerabilities = checked
                   })
                 }
@@ -276,8 +282,9 @@ export function WorkbenchSetupStep({
                 tooltip="Enable Plural-built metrics exploration for this workbench against your configured metrics backends."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.observability ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.observability =
+                      d.configuration.observability ?? {}
                     d.configuration.observability.metrics = checked
                   })
                 }
@@ -288,8 +295,9 @@ export function WorkbenchSetupStep({
                 tooltip="Enable Plural-built log browsing and aggregates for this workbench against your configured log backends (not Kubernetes pod log streaming)."
                 onCheckedChange={(checked) =>
                   update((d) => {
-                    d.configuration ??= {}
-                    d.configuration.observability ??= {}
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.observability =
+                      d.configuration.observability ?? {}
                     d.configuration.observability.logs = checked
                   })
                 }
@@ -457,7 +465,7 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
             value={gitRef}
             setValue={(ref) =>
               update((d) => {
-                d.skills ??= {}
+                d.skills = d.skills ?? {}
                 if (d.skills.ref) d.skills.ref.ref = ref
                 else d.skills.ref = { ref, folder: '' }
               })
@@ -471,7 +479,7 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
             hint="Folder in the repository to scan for skill files"
             onChange={(e) =>
               update((d) => {
-                d.skills ??= {}
+                d.skills = d.skills ?? {}
                 if (d.skills.ref) d.skills.ref.folder = e.target.value
                 else d.skills.ref = { ref: '', folder: e.target.value }
               })
@@ -488,7 +496,7 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
                 )}
                 setValue={(value) =>
                   update((d) => {
-                    d.skills ??= {}
+                    d.skills = d.skills ?? {}
                     d.skills.files = textToSkillsFiles(value)
                   })
                 }
@@ -608,8 +616,8 @@ export function WorkbenchCodingAgentStep({
 
   const setCodingRepos = (next: string[]) => {
     update((d) => {
-      d.configuration ??= {}
-      d.configuration.coding ??= {}
+      d.configuration = d.configuration ?? {}
+      d.configuration.coding = d.configuration.coding ?? {}
       d.configuration.coding.repositories = next
     })
   }
@@ -825,7 +833,7 @@ export function WorkbenchAttachToolsStep({
   const update = createFormUpdater(setFormState)
 
   const { data, error, loading } = useFetchPaginatedData({
-    queryHook: useWorkbenchToolsQuery,
+    query: WorkbenchToolsDocument,
     keyPath: ['workbenchTools'],
   })
 

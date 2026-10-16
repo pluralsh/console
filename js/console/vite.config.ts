@@ -1,5 +1,5 @@
 import basicSsl from '@vitejs/plugin-basic-ssl'
-import react from '@vitejs/plugin-react'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import { Readable } from 'node:stream'
 import { resolve } from 'path'
@@ -114,6 +114,7 @@ export default defineConfig({
     basicSsl(),
     react(),
     babel({
+      presets: [reactCompilerPreset({ panicThreshold: 'all_errors' })],
       plugins: ['styled-components'],
       exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]generated[/\\]/],
     }),

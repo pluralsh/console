@@ -99,13 +99,6 @@ const HelmValuesInput = memo(
     const [fileName, setFileName] = useState<string | undefined>()
     const [fileError, setFileError] = useState<Nullable<string>>()
 
-    useEffect(() => {
-      if (manual) {
-        setFileName(undefined)
-        setFileError(undefined)
-      }
-    }, [manual])
-
     const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
       async (files) => {
         if (isEmpty(files)) {
@@ -120,8 +113,9 @@ const HelmValuesInput = memo(
 
           return
         }
+        // switching back to manual entry clears the upload state
         setFileError(undefined)
-        setFileName(file.name)
+        setFileName(undefined)
         setHelmValues(content)
         setManual(true)
       },
@@ -136,6 +130,10 @@ const HelmValuesInput = memo(
             css={{ cursor: 'pointer' }}
             onClick={(e) => {
               e.preventDefault()
+              if (!manual) {
+                setFileName(undefined)
+                setFileError(undefined)
+              }
               setManual(!manual)
             }}
           >
@@ -193,17 +191,12 @@ const HelmValuesFilesInput = memo(
     const { visuallyHiddenProps } = useVisuallyHidden()
     const { fileItems, errorCount } = useMemo(() => {
       const filesSet = new Set<string>()
-      let errorCount = 0
 
       const items = helmValuesFiles?.map((file) => {
         const duplicate = !!file && filesSet.has(file)
 
         if (file) {
           filesSet.add(file)
-        }
-
-        if (duplicate) {
-          errorCount++
         }
 
         return {
@@ -213,6 +206,9 @@ const HelmValuesFilesInput = memo(
           },
         }
       })
+
+      const errorCount =
+        items?.filter(({ errors }) => errors.duplicate).length ?? 0
 
       return { fileItems: items, errorCount }
     }, [helmValuesFiles])

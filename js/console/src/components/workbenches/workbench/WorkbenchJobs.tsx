@@ -16,6 +16,7 @@ import {
   useWorkbenchJobSearchQuery,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
+import { WorkbenchJobsDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { mapExistingNodes } from 'utils/graphql'
@@ -72,7 +73,7 @@ export function WorkbenchJobs() {
   const { data, loading, error, pageInfo, fetchNextPage, fetchingMore } =
     useFetchPaginatedData(
       {
-        queryHook: useWorkbenchJobsQuery,
+        query: WorkbenchJobsDocument,
         keyPath: RUNS_KEY_PATH,
         pageSize: WORKBENCH_JOBS_PAGE_SIZE,
         keepLoadedPages: true,

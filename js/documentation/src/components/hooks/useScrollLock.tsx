@@ -1,5 +1,5 @@
 // Modified from https://usehooks-ts.com/react-hook/use-locked-body
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useIsomorphicLayoutEffect } from 'usehooks-ts'
 
@@ -48,14 +48,6 @@ function useLockedBody(initialLocked = false): UseLockedBodyOutput {
       }
     }
   }, [locked])
-
-  // Update state if initialValue changes
-  useEffect(() => {
-    if (locked !== initialLocked) {
-      setLocked(initialLocked)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialLocked])
 
   return [locked, setLocked]
 }

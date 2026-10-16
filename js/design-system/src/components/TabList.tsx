@@ -1,3 +1,7 @@
+// TabList and TabPanel share state imperatively through a stateRef that is read
+// and written during render, so their components opt out of React Compiler
+// ('use no memo') until that API is reworked.
+/* oxlint-disable react/refs, react/immutability */
 import { mergeRefs } from '@react-aria/utils'
 import { type Key, type Node } from '@react-types/shared'
 import { type AriaTabListProps } from '@react-types/tabs'
@@ -75,6 +79,7 @@ function TabList({
   scrollable,
   ...props
 }: TabListProps & FlexProps) {
+  'use no memo'
   const wrappedChildren = useItemWrappedChildren(props.children)
   const finalStateProps: AriaTabListProps<object> = useMemo(
     () => ({
@@ -201,6 +206,7 @@ type TabRendererProps = {
 }
 
 function TabRenderer({ item, state, stateProps, stateRef }: TabRendererProps) {
+  'use no memo'
   const ref = useRef(null)
   const { tabProps: props } = useTab({ key: item.key }, state, ref)
 
