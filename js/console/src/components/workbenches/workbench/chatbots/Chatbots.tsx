@@ -1,8 +1,6 @@
 import {
   ArrowTopRightIcon,
   Button,
-  Card,
-  EmptyState,
   Flex,
   IconFrame,
   PencilIcon,
@@ -10,6 +8,7 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -141,42 +140,40 @@ export function Chatbots() {
           gap="xxsmall"
         />
         {!!data && isEmpty(chatbots) ? (
-          <Card>
-            <EmptyState
-              message="No chatbots created yet"
-              description={
-                hasExistingConnections
-                  ? 'No chatbots connected. Select an existing chatbot connection for this workbench.'
-                  : 'No chatbot connections configured. Create one in global chatbot settings before adding it to this workbench.'
-              }
-              css={{ margin: '0 auto', width: 500 }}
-            >
-              <Flex gap="small">
+          <WorkbenchEmptyState
+            inset={false}
+            message="No chatbots yet"
+            description={
+              hasExistingConnections
+                ? 'Connect a chatbot so people can run this workbench from chat. Select an existing chatbot connection to get started.'
+                : 'There are no chatbot connections yet. Create one in chatbot settings, then add it to this workbench.'
+            }
+          >
+            <Flex gap="small">
+              <Button
+                small
+                secondary={hasExistingConnections}
+                onClick={() =>
+                  hasExistingConnections
+                    ? navigateToManageChatbots()
+                    : navigateToCreateChatbotConnection()
+                }
+                endIcon={<ArrowTopRightIcon />}
+              >
+                Manage chatbots
+              </Button>
+              {hasExistingConnections && (
                 <Button
                   small
-                  secondary={hasExistingConnections}
                   onClick={() =>
-                    hasExistingConnections
-                      ? navigateToManageChatbots()
-                      : navigateToCreateChatbotConnection()
+                    navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
                   }
-                  endIcon={<ArrowTopRightIcon />}
                 >
-                  Manage chatbots
+                  Select existing chatbot
                 </Button>
-                {hasExistingConnections && (
-                  <Button
-                    small
-                    onClick={() =>
-                      navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
-                    }
-                  >
-                    Select existing chatbot
-                  </Button>
-                )}
-              </Flex>
-            </EmptyState>
-          </Card>
+              )}
+            </Flex>
+          </WorkbenchEmptyState>
         ) : (
           <StretchedFlex
             direction="column"

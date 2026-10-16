@@ -4,7 +4,6 @@ import {
   Chip,
   Select,
   SelectButton,
-  EmptyState,
   Flex,
   CodeEditor,
   FormField,
@@ -14,6 +13,7 @@ import {
   PencilIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -244,21 +244,19 @@ export function PluralSkillsSubStep({
       }
     >
       {skills.length === 0 ? (
-        <Card css={{ border: 'none' }}>
-          <EmptyState
-            message="No skills"
-            description="Skills teach Workbench agents what to do and how to do it. Add your first skill to get started, or connect a git repository to manage skills alongside your codebase."
-            css={{ margin: '0 auto', width: 580 }}
+        <WorkbenchEmptyState
+          inset={false}
+          message="No skills yet"
+          description="Skills teach workbench agents what to do and how to do it. Add your first skill, or connect a Git repository to manage skills alongside your codebase."
+        >
+          <Button
+            secondary
+            small
+            onClick={handleCreate}
           >
-            <Button
-              secondary
-              small
-              onClick={handleCreate}
-            >
-              Create new skill
-            </Button>
-          </EmptyState>
-        </Card>
+            Create new skill
+          </Button>
+        </WorkbenchEmptyState>
       ) : (
         <Card
           fillLevel={2}

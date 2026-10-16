@@ -1,10 +1,10 @@
 import {
   Button,
-  EmptyState,
   Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
@@ -81,7 +81,10 @@ export function WorkbenchJob() {
   if (!(job || loading))
     return !jobId ||
       queryError?.message?.includes('could not find resource') ? (
-      <EmptyState message="Workbench job not found." />
+      <WorkbenchEmptyState
+        message="Job not found"
+        description="This job may have been deleted, or the link is out of date."
+      />
     ) : (
       <GqlError
         header="Failed to load workbench job"

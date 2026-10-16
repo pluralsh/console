@@ -3,7 +3,6 @@ import {
   Card,
   Chip,
   CodeEditor,
-  EmptyState,
   Flex,
   FormField,
   IconFrame,
@@ -11,6 +10,7 @@ import {
   PencilIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -199,13 +199,11 @@ export function KnowledgeSubStep({
       </CaptionP>
       <FormField label="Knowledge">
         {entries.length === 0 ? (
-          <Card css={{ border: 'none' }}>
-            <EmptyState
-              message="No knowledge yet"
-              description="Facts discovered in previous runs will appear here. Use them for system understanding, and remove entries that are stale or unused."
-              css={{ margin: '0 auto', width: 580 }}
-            />
-          </Card>
+          <WorkbenchEmptyState
+            inset={false}
+            message="No knowledge yet"
+            description="Facts agents discover during runs will show up here. Remove entries when they go stale."
+          />
         ) : (
           <Card
             fillLevel={2}

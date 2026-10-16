@@ -1,11 +1,17 @@
-import { Card, EmptyState } from '@pluralsh/design-system'
+import { AddIcon, Button } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
+  useWorkbenchDashboardsQuery,
   useWorkbenchMonitoringDashboardQuery,
   useWorkbenchMonitorQuery,
+  useWorkbenchMonitorsQuery,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import {
+  getWorkbenchMonitoringDashboardCreateAbsPath,
+  getWorkbenchMonitoringMonitorCreateAbsPath,
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
   WORKBENCH_MONITORING_MONITOR_PARAM_ID,
   WORKBENCHES_CREATE_REL_PATH,
@@ -114,11 +120,7 @@ export function WorkbenchMonitoring() {
             />
           )
         ) : (
-          <PaddedSC>
-            <Card css={{ padding: 24 }}>
-              <EmptyState message="Select a dashboard or monitor to view details." />
-            </Card>
-          </PaddedSC>
+          <MonitoringEmptyState workbenchId={workbenchId} />
         )}
       </DetailSC>
       {updateTarget && (
@@ -131,6 +133,57 @@ export function WorkbenchMonitoring() {
         />
       )}
     </WorkbenchPageLayout>
+  )
+}
+
+function MonitoringEmptyState({ workbenchId }: { workbenchId: string }) {
+  const navigate = useNavigate()
+  const variables = { id: workbenchId, first: 1 }
+  const { data: dashboardsData } = useWorkbenchDashboardsQuery({
+    variables,
+    fetchPolicy: 'cache-and-network',
+  })
+  const { data: monitorsData } = useWorkbenchMonitorsQuery({
+    variables,
+    fetchPolicy: 'cache-and-network',
+  })
+
+  if (!dashboardsData || !monitorsData) return null
+
+  const hasAny =
+    !isEmpty(dashboardsData.workbench?.workbenchDashboards?.edges) ||
+    !isEmpty(monitorsData.workbench?.monitors?.edges)
+
+  return hasAny ? (
+    <WorkbenchEmptyState
+      message="Nothing selected"
+      description="Select a dashboard or monitor from the list to view it."
+    />
+  ) : (
+    <WorkbenchEmptyState
+      message="No dashboards or monitors yet"
+      description="Dashboards chart this workbench's metrics, logs, and traces. Monitors watch a query and alert when it crosses a threshold."
+    >
+      <Button
+        small
+        startIcon={<AddIcon />}
+        onClick={() =>
+          navigate(getWorkbenchMonitoringDashboardCreateAbsPath(workbenchId))
+        }
+      >
+        Add dashboard
+      </Button>
+      <Button
+        small
+        secondary
+        startIcon={<AddIcon />}
+        onClick={() =>
+          navigate(getWorkbenchMonitoringMonitorCreateAbsPath(workbenchId))
+        }
+      >
+        Add monitor
+      </Button>
+    </WorkbenchEmptyState>
   )
 }
 

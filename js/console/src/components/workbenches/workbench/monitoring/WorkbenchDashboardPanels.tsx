@@ -2,7 +2,6 @@ import {
   Card,
   CloseIcon,
   DocsIcon,
-  EmptyState,
   ExpandIcon,
   Flex,
   IconFrame,
@@ -10,6 +9,7 @@ import {
   ModalWrapper,
   Tooltip,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
 import { GqlError } from 'components/utils/Alert'
 import { MetricsSection } from 'components/utils/metrics/MetricsSection'
@@ -100,9 +100,11 @@ export function WorkbenchDashboardPanels(props: DashboardPanelsProps) {
 
   if (graphs.length === 0) {
     return (
-      <Card css={{ padding: 24 }}>
-        <EmptyState message="No panels yet." />
-      </Card>
+      <WorkbenchEmptyState
+        inset={false}
+        message="No panels yet"
+        description="Panels added to this dashboard will show up here."
+      />
     )
   }
 
@@ -143,7 +145,11 @@ function DashboardSection({
       {props.graphs.length > 0 ? (
         <DashboardGraphGrid {...props} />
       ) : (
-        <EmptyState message="No panels in this section." />
+        <WorkbenchEmptyState
+          inset={false}
+          message="No panels in this section"
+          description="Panels added to this section will show up here."
+        />
       )}
     </MetricsSection>
   )
@@ -393,7 +399,12 @@ function DataDashboardPanel({
       </PanelHeaderSC>
       <PanelBodySC aria-busy={loading}>
         {!graph.hasDatasource ? (
-          <EmptyState message="This panel has no data source." />
+          <WorkbenchEmptyState
+            variant="plain"
+            inset={false}
+            message="No data source"
+            description="Connect a data source to this panel to see data."
+          />
         ) : dashboardPanelIsWaitingForData({
             queriesEnabled,
             loading,
@@ -403,7 +414,12 @@ function DataDashboardPanel({
         ) : error && !data ? (
           readOnly &&
           /not available on public dashboards/i.test(error.message) ? (
-            <EmptyState message="Not available on public dashboards" />
+            <WorkbenchEmptyState
+              variant="plain"
+              inset={false}
+              message="Not available on public dashboards"
+              description="This panel's data can only be viewed while signed in."
+            />
           ) : (
             <GqlError
               error={error}
@@ -737,7 +753,14 @@ function TableContent({
 }
 
 function NoDataState() {
-  return <EmptyState message="No data for this filter and range." />
+  return (
+    <WorkbenchEmptyState
+      variant="plain"
+      inset={false}
+      message="No data"
+      description="Nothing matched this filter and time range."
+    />
+  )
 }
 
 function hasUnit(unit: Nullable<DashboardGraphUnit>) {

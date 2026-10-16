@@ -4,9 +4,9 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
   Flex,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { PageSidecarPortal } from 'components/layout/PageLayout'
 import {
   DisplayButton,
@@ -23,7 +23,7 @@ import Fuse, { type IFuseOptions } from 'fuse.js'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_TOOLS_CREATE_ABS_PATH } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import {
   WORKBENCHES_TOOLS_PROVIDER_PARAM,
   WORKBENCHES_TOOLS_TYPE_PARAM,
@@ -41,7 +41,6 @@ const SEARCH_OPTIONS: IFuseOptions<WorkbenchToolCard> = {
   threshold: 0.25,
 }
 export function WorkbenchesIntegrations() {
-  const theme = useTheme()
   const [query, setQuery] = useState('')
   const [filtersVisible, setFiltersVisible] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -135,23 +134,18 @@ export function WorkbenchesIntegrations() {
           minWidth={0}
         >
           {showEmptyState ? (
-            <Card
-              css={{
-                padding: theme.spacing.large,
-                ...(theme.mode === 'light' && {
-                  backgroundColor: theme.colors['fill-zero'],
-                }),
-              }}
+            <WorkbenchEmptyState
+              inset={false}
+              message="No tools match your filters"
+              description="Try a different search, or reset filters to see all tools."
             >
-              <EmptyState message="There are no results with these filters.">
-                <Button
-                  secondary
-                  onClick={resetSearchAndFilters}
-                >
-                  Reset filters
-                </Button>
-              </EmptyState>
-            </Card>
+              <Button
+                small
+                onClick={resetSearchAndFilters}
+              >
+                Reset filters
+              </Button>
+            </WorkbenchEmptyState>
           ) : (
             <CardGrid styles={workbenchToolCardGridStyles(280)}>
               {filteredCards.map(

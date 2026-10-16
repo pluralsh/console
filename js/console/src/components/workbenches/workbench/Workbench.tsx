@@ -3,7 +3,6 @@ import {
   BookmarkIcon,
   BotIcon,
   Button,
-  EmptyState,
   EventScheduleIcon,
   Flex,
   GearTrainIcon,
@@ -16,6 +15,7 @@ import {
   WebhooksIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
   useWorkbenchJobCountsQuery,
   WorkbenchJobStatus,
@@ -477,15 +477,19 @@ export function Workbench() {
 
   if (notFound)
     return (
-      <EmptyState message="Workbench not found.">
+      <WorkbenchEmptyState
+        message="Workbench not found"
+        description="It may have been deleted, or you may not have access to it."
+      >
         <Button
+          small
           as={Link}
           to={WORKBENCHES_ABS_PATH}
           startIcon={<ReturnIcon />}
         >
           View all workbenches
         </Button>
-      </EmptyState>
+      </WorkbenchEmptyState>
     )
   if (error)
     return (

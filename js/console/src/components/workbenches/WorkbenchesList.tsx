@@ -1,10 +1,5 @@
-import {
-  AddIcon,
-  ArrowRightIcon,
-  Card,
-  EmptyState,
-  Flex,
-} from '@pluralsh/design-system'
+import { AddIcon, ArrowRightIcon, Card, Flex } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import * as DesignSystem from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ToolbarSearchInput } from 'components/layout/PageToolbar'
@@ -57,7 +52,6 @@ const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
 
 export function WorkbenchesList() {
-  const theme = useTheme()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
 
@@ -98,9 +92,11 @@ export function WorkbenchesList() {
           styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
         />
       ) : showSearchEmptyState ? (
-        <Card css={{ padding: theme.spacing.large }}>
-          <EmptyState message="No workbenches found" />
-        </Card>
+        <WorkbenchEmptyState
+          inset={false}
+          message="No workbenches match your search"
+          description="Try a different name, or clear the search to see all workbenches."
+        />
       ) : (
         <CardGrid
           onBottomReached={() =>
