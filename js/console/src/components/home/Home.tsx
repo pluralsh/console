@@ -20,9 +20,8 @@ import {
   useClusterHealthScoresQuery,
   useUpgradeStatisticsQuery,
   VersionCompliance,
-  ClustersDocument,
-  ClustersQuery,
 } from 'generated/graphql.ts'
+import { ClustersDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
@@ -118,7 +117,7 @@ function HomeClusters() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<ClustersQuery, ClustersQueryVariables>(
+  } = useFetchPaginatedData(
     { query: ClustersDocument, keyPath: ['clusters'] },
     {
       projectId,

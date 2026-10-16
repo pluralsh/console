@@ -6,10 +6,8 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import {
   ConstraintViolationField,
   useViolationStatisticsQuery,
-  PolicyConstraintsDocument,
-  PolicyConstraintsQuery,
-  PolicyConstraintsQueryVariables,
 } from 'generated/graphql'
+import { PolicyConstraintsDocument } from 'generated/graphql-documents'
 import { useState } from 'react'
 import {
   GATEKEEPER_ABS_PATH,
@@ -78,10 +76,7 @@ export function Gatekeeper() {
     !!selectedClusters.length
 
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      PolicyConstraintsQuery,
-      PolicyConstraintsQueryVariables
-    >(
+    useFetchPaginatedData(
       { query: PolicyConstraintsDocument, keyPath: ['policyConstraints'] },
       policyQFilters
     )

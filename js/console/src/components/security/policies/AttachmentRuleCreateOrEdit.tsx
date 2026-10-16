@@ -36,10 +36,8 @@ import {
   useCreateBindingPolicyMutation,
   useDeleteBindingPolicyMutation,
   useUpdateBindingPolicyMutation,
-  PoliciesDocument,
-  PoliciesQuery,
-  PoliciesQueryVariables,
 } from 'generated/graphql'
+import { PoliciesDocument } from 'generated/graphql-documents'
 import { isEqual, startCase, truncate } from 'lodash'
 import pluralize from 'pluralize'
 import { KeyboardEvent, ReactNode, useMemo, useState } from 'react'
@@ -441,10 +439,7 @@ function PolicySelect({
   onOpenChange?: (isOpen: boolean) => void
   onSelectionChange: (policy: PolicyTinyFragment) => void
 }) {
-  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData<
-    PoliciesQuery,
-    PoliciesQueryVariables
-  >({
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData({
     query: PoliciesDocument,
     keyPath: ['policies'],
   })

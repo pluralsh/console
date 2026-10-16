@@ -3,10 +3,8 @@ import { GqlError } from 'components/utils/Alert'
 import {
   type ServiceDeploymentsRowFragment,
   useServiceStatusesQuery,
-  ServiceDeploymentsDocument,
-  ServiceDeploymentsQuery,
-  ServiceDeploymentsQueryVariables,
 } from 'generated/graphql'
+import { ServiceDeploymentsDocument } from 'generated/graphql-documents'
 import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
@@ -36,10 +34,7 @@ export default function ServicesTable() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<
-    ServiceDeploymentsQuery,
-    ServiceDeploymentsQueryVariables
-  >(
+  } = useFetchPaginatedData(
     { query: ServiceDeploymentsDocument, keyPath: ['serviceDeployments'] },
     {
       q: q || undefined,

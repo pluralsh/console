@@ -1,8 +1,8 @@
 import {
-  DocumentNode,
   ErrorPolicy,
   NetworkStatus,
   OperationVariables,
+  TypedDocumentNode,
   WatchQueryFetchPolicy,
   useQuery,
 } from '@apollo/client'
@@ -18,9 +18,12 @@ import { Dispatch, useCallback, useMemo, useState } from 'react'
 
 export const DEFAULT_PAGE_SIZE = 100
 
-export type FetchPaginatedDataOptions = {
-  // the generated `...Document`, not the `use...Query` hook, so the compiler can optimize callers
-  query: DocumentNode
+export type FetchPaginatedDataOptions<
+  TQueryType,
+  TVariables extends OperationVariables,
+> = {
+  // a generated typed `...Document`, not the `use...Query` hook, so the compiler can optimize callers
+  query: TypedDocumentNode<TQueryType, TVariables>
   pageSize?: number
   keyPath: string[]
   pollInterval?: number
@@ -59,7 +62,7 @@ export function useFetchPaginatedData<
   TQueryType extends Partial<Record<string, any>>,
   TVariables extends OperationVariables,
 >(
-  options: FetchPaginatedDataOptions,
+  options: FetchPaginatedDataOptions<TQueryType, TVariables>,
   variables: TVariables = {} as TVariables
 ): FetchPaginatedDataResult<TQueryType> {
   const [virtualSlice, setVirtualSlice] = useState<VirtualSlice | undefined>()

@@ -9,12 +9,8 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  ClusterRegistrationFragment,
-  ClusterRegistrationsDocument,
-  ClusterRegistrationsQuery,
-  ClusterRegistrationsQueryVariables,
-} from 'generated/graphql'
+import { ClusterRegistrationFragment } from 'generated/graphql'
+import { ClusterRegistrationsDocument } from 'generated/graphql-documents'
 import { ReactNode, useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
@@ -143,10 +139,7 @@ export default function Clusters(): ReactNode {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<
-    ClusterRegistrationsQuery,
-    ClusterRegistrationsQueryVariables
-  >({
+  } = useFetchPaginatedData({
     query: ClusterRegistrationsDocument,
     keyPath: ['clusterRegistrations'],
   })

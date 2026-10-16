@@ -3,12 +3,8 @@ import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  AgentRunFragment,
-  AgentRunsDocument,
-  AgentRunsQuery,
-  AgentRunsQueryVariables,
-} from 'generated/graphql'
+import { AgentRunFragment } from 'generated/graphql'
+import { AgentRunsDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -25,7 +21,7 @@ export function AIAgentRuns() {
   const [selectedRuntimeId, setSelectedRuntimeId] = useState<Nullable<string>>()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<AgentRunsQuery, AgentRunsQueryVariables>(
+    useFetchPaginatedData(
       { query: AgentRunsDocument, keyPath: ['agentRuns'] },
       { runtimeId: selectedRuntimeId }
     )

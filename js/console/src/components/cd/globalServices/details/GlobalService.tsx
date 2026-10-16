@@ -9,11 +9,9 @@ import {
 import {
   GlobalServiceFragment,
   useGetGlobalServiceQuery,
-  GlobalServicesDocument,
-  GlobalServicesQuery,
-  GlobalServicesQueryVariables,
   SyncGlobalServiceDocument,
 } from 'generated/graphql'
+import { GlobalServicesDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { PageColumnSC } from 'components/layout/PageLayout'
 import { PageToolbar } from 'components/layout/PageToolbar'
@@ -103,10 +101,7 @@ function GlobalServiceSelect({
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const projectId = useProjectId()
-  const { data, loading, error } = useFetchPaginatedData<
-    GlobalServicesQuery,
-    GlobalServicesQueryVariables
-  >(
+  const { data, loading, error } = useFetchPaginatedData(
     { query: GlobalServicesDocument, keyPath: ['globalServices'] },
     { projectId }
   )

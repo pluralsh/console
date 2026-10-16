@@ -1,10 +1,6 @@
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  PoliciesDocument,
-  PoliciesQuery,
-  PoliciesQueryVariables,
-} from 'generated/graphql'
+import { PoliciesDocument } from 'generated/graphql-documents'
 import { useNavigate } from 'react-router-dom'
 import { POLICIES_CREATE_ABS_PATH } from 'routes/securityRoutesConsts'
 import { POLICIES_DESCRIPTION } from './Policies'
@@ -14,7 +10,7 @@ import { PoliciesTabLayout } from './PoliciesTabLayout'
 export function PoliciesList() {
   const navigate = useNavigate()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<PoliciesQuery, PoliciesQueryVariables>({
+    useFetchPaginatedData({
       query: PoliciesDocument,
       keyPath: ['policies'],
     })

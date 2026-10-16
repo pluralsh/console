@@ -26,10 +26,8 @@ import {
   PrAutomationFragment,
   PrRole,
   useSuggestScalingRecommendationMutation,
-  PrAutomationsDocument,
-  PrAutomationsQuery,
-  PrAutomationsQueryVariables,
 } from 'generated/graphql'
+import { PrAutomationsDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -112,7 +110,7 @@ export function SelectPrAutomationStep({
   selectFn: (prAutomation: PrAutomationFragment) => void
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<PrAutomationsQuery, PrAutomationsQueryVariables>(
+    useFetchPaginatedData(
       { query: PrAutomationsDocument, keyPath: ['prAutomations'] },
       { role: PrRole.Cost }
     )

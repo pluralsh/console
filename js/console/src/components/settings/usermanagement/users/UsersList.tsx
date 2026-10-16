@@ -7,11 +7,7 @@ import {
 } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  UsersDocument,
-  UsersQuery,
-  UsersQueryVariables,
-} from 'generated/graphql'
+import { UsersDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -28,7 +24,7 @@ export function UsersList() {
   const throttledQ = useThrottle(q, 300)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<UsersQuery, UsersQueryVariables>(
+    useFetchPaginatedData(
       { query: UsersDocument, keyPath: ['users'] },
       { q: throttledQ }
     )

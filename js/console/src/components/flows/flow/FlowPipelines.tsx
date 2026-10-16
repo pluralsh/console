@@ -4,12 +4,8 @@ import { columns } from 'components/cd/pipelines/PipelinesColumns'
 
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  PipelineFragment,
-  FlowPipelinesDocument,
-  FlowPipelinesQuery,
-  FlowPipelinesQueryVariables,
-} from 'generated/graphql'
+import { PipelineFragment } from 'generated/graphql'
+import { FlowPipelinesDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
@@ -27,7 +23,7 @@ export function FlowPipelines() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<FlowPipelinesQuery, FlowPipelinesQueryVariables>(
+  } = useFetchPaginatedData(
     { query: FlowPipelinesDocument, keyPath: ['flow', 'pipelines'] },
     { id: flow?.id ?? '' }
   )

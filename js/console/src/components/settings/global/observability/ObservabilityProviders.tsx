@@ -1,10 +1,6 @@
 import { Button, Card, Flex, PlusIcon, Table } from '@pluralsh/design-system'
 
-import {
-  ObservabilityProvidersDocument,
-  ObservabilityProvidersQuery,
-  ObservabilityProvidersQueryVariables,
-} from 'generated/graphql'
+import { ObservabilityProvidersDocument } from 'generated/graphql-documents'
 
 import { useState } from 'react'
 
@@ -27,10 +23,7 @@ export function ObservabilityProviders() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<
-    ObservabilityProvidersQuery,
-    ObservabilityProvidersQueryVariables
-  >({
+  } = useFetchPaginatedData({
     query: ObservabilityProvidersDocument,
     keyPath: ['observabilityProviders'],
   })

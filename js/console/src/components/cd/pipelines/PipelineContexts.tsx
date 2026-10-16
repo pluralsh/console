@@ -2,13 +2,8 @@ import { Button, PrOpenIcon, Table, Tooltip } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import {
-  PipelineContextFragment,
-  PipelineFragment,
-  PipelineContextsDocument,
-  PipelineContextsQuery,
-  PipelineContextsQueryVariables,
-} from 'generated/graphql'
+import { PipelineContextFragment, PipelineFragment } from 'generated/graphql'
+import { PipelineContextsDocument } from 'generated/graphql-documents'
 import { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Edge } from 'utils/graphql'
@@ -120,10 +115,7 @@ export function PipelineContexts({
   pipeline: Nullable<PipelineFragment>
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      PipelineContextsQuery,
-      PipelineContextsQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: PipelineContextsDocument,
         keyPath: ['pipeline', 'contexts'],

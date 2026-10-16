@@ -15,10 +15,8 @@ import {
   SentinelRunFragment,
   SentinelRunStatus,
   useSentinelRunsQuery,
-  SentinelRunsDocument,
-  SentinelRunsQuery,
-  SentinelRunsQueryVariables,
 } from 'generated/graphql'
+import { SentinelRunsDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_SENTINELS_RUNS_REL_PATH } from 'routes/aiRoutesConsts'
@@ -33,7 +31,7 @@ export function SentinelRunsTables({ id }: { id: string }) {
     pollInterval: POLL_INTERVAL,
   })
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<SentinelRunsQuery, SentinelRunsQueryVariables>(
+    useFetchPaginatedData(
       { query: SentinelRunsDocument, keyPath: ['sentinel', 'runs'] },
       { id }
     )

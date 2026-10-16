@@ -2,11 +2,7 @@ import { usePrevious } from '@pluralsh/design-system'
 
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo } from 'react'
-import {
-  ChatThreadMessagesDocument,
-  ChatThreadMessagesQuery,
-  ChatThreadMessagesQueryVariables,
-} from '../../../generated/graphql.ts'
+import { ChatThreadMessagesDocument } from '../../../generated/graphql-documents'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { AIViewTypes, useChatbot, useChatbotContext } from '../AIContext.tsx'
@@ -32,10 +28,7 @@ export function ChatbotLauncher() {
 export function ChatbotPanelContent() {
   const { currentThread, currentThreadId, viewType } = useChatbot()
   const { data, loading, error, fetchNextPage, pageInfo, refetch } =
-    useFetchPaginatedData<
-      ChatThreadMessagesQuery,
-      ChatThreadMessagesQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         skip: !currentThreadId,
         query: ChatThreadMessagesDocument,

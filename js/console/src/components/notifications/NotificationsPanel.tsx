@@ -20,10 +20,8 @@ import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
 import {
   AppNotificationFragment,
   useReadAppNotificationsMutation,
-  AppNotificationsDocument,
-  AppNotificationsQuery,
-  AppNotificationsQueryVariables,
 } from '../../generated/graphql'
+import { AppNotificationsDocument } from '../../generated/graphql-documents'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { mapExistingNodes } from '../../utils/graphql'
 
@@ -50,10 +48,7 @@ export function NotificationsPanel({
   const navigate = useNavigate()
 
   const { data, pageInfo, fetchNextPage, setVirtualSlice, loading } =
-    useFetchPaginatedData<
-      AppNotificationsQuery,
-      AppNotificationsQueryVariables
-    >({
+    useFetchPaginatedData({
       query: AppNotificationsDocument,
       keyPath: ['appNotifications'],
     })

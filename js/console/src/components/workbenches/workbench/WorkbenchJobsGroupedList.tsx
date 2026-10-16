@@ -28,10 +28,8 @@ import {
   WorkbenchJobPrState,
   WorkbenchJobStatus,
   WorkbenchJobTinyFragment,
-  WorkbenchJobsForStatusDocument,
-  WorkbenchJobsForStatusQuery,
-  WorkbenchJobsForStatusQueryVariables,
 } from 'generated/graphql'
+import { WorkbenchJobsForStatusDocument } from 'generated/graphql-documents'
 import { includes, startCase } from 'lodash'
 import { memo, ReactElement, useMemo } from 'react'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -172,10 +170,7 @@ function JobStatusGroup({
   scrollEl: HTMLDivElement | null
 }) {
   const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
-    useFetchPaginatedData<
-      WorkbenchJobsForStatusQuery,
-      WorkbenchJobsForStatusQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: WorkbenchJobsForStatusDocument,
         keyPath: RUNS_KEY_PATH,

@@ -23,10 +23,8 @@ import {
   AgentRuntimeType,
   useUpsertFlowMutation,
   WorkbenchTinyFragment,
-  WorkbenchesDocument,
-  WorkbenchesQuery,
-  WorkbenchesQueryVariables,
 } from 'generated/graphql'
+import { WorkbenchesDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -61,7 +59,7 @@ export function AttachWorkbenchesModal({
   const debouncedQuery = useDebounce(query, 200)
 
   const { data, loading, error, pageInfo, fetchNextPage } =
-    useFetchPaginatedData<WorkbenchesQuery, WorkbenchesQueryVariables>(
+    useFetchPaginatedData(
       {
         query: WorkbenchesDocument,
         keyPath: ['workbenches'],

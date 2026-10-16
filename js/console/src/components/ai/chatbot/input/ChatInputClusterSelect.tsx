@@ -1,10 +1,8 @@
 import {
   ChatThreadTinyFragment,
   useUpdateChatThreadMutation,
-  ClusterSelectorDocument,
-  ClusterSelectorQuery,
-  ClusterSelectorQueryVariables,
 } from '../../../../generated/graphql.ts'
+import { ClusterSelectorDocument } from '../../../../generated/graphql-documents'
 import {
   ClusterIcon,
   Input,
@@ -42,10 +40,7 @@ export function ChatInputClusterSelect({
   const throttledInput = useThrottle(inputValue, 100)
   const currentClusterId = currentThread?.session?.cluster?.id
 
-  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData<
-    ClusterSelectorQuery,
-    ClusterSelectorQueryVariables
-  >(
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
       query: ClusterSelectorDocument,
       keyPath: ['clusters'],

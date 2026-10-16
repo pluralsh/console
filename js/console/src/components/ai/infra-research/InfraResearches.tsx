@@ -16,12 +16,8 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP, Title2H1 } from 'components/utils/typography/Text'
-import {
-  InfraResearchFragment,
-  InfraResearchesDocument,
-  InfraResearchesQuery,
-  InfraResearchesQueryVariables,
-} from 'generated/graphql'
+import { InfraResearchFragment } from 'generated/graphql'
+import { InfraResearchesDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -40,7 +36,7 @@ export const getInfraResearchesBreadcrumbs = () =>
 export function InfraResearches() {
   const [published, setPublished] = useState<Nullable<boolean>>(true)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<InfraResearchesQuery, InfraResearchesQueryVariables>(
+    useFetchPaginatedData(
       { query: InfraResearchesDocument, keyPath: ['infraResearches'] },
       { published }
     )

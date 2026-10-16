@@ -13,13 +13,12 @@ import {
   ClusterUsageNamespacesQuery,
   ClusterUsageScalingRecommendationsQuery,
   ScalingRecommendationType,
-  ClusterUsageHistoryDocument,
-  ClusterUsageHistoryQueryVariables,
-  ClusterUsageNamespacesDocument,
-  ClusterUsageNamespacesQueryVariables,
-  ClusterUsageScalingRecommendationsDocument,
-  ClusterUsageScalingRecommendationsQueryVariables,
 } from 'generated/graphql'
+import {
+  ClusterUsageHistoryDocument,
+  ClusterUsageNamespacesDocument,
+  ClusterUsageScalingRecommendationsDocument,
+} from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import {
@@ -58,10 +57,7 @@ export function CostManagementDetails() {
     undefined
   )
 
-  const historyQuery = useFetchPaginatedData<
-    ClusterUsageHistoryQuery,
-    ClusterUsageHistoryQueryVariables
-  >(
+  const historyQuery = useFetchPaginatedData(
     {
       query: ClusterUsageHistoryDocument,
       pageSize: BIG_PAGE_SIZE,
@@ -70,10 +66,7 @@ export function CostManagementDetails() {
     { id }
   )
 
-  const namespacesQuery = useFetchPaginatedData<
-    ClusterUsageNamespacesQuery,
-    ClusterUsageNamespacesQueryVariables
-  >(
+  const namespacesQuery = useFetchPaginatedData(
     {
       query: ClusterUsageNamespacesDocument,
       pageSize: BIG_PAGE_SIZE,
@@ -82,10 +75,7 @@ export function CostManagementDetails() {
     { id, q: throttledNamespaceQ || undefined }
   )
 
-  const recommendationsQuery = useFetchPaginatedData<
-    ClusterUsageScalingRecommendationsQuery,
-    ClusterUsageScalingRecommendationsQueryVariables
-  >(
+  const recommendationsQuery = useFetchPaginatedData(
     {
       query: ClusterUsageScalingRecommendationsDocument,
       pageSize: BIG_PAGE_SIZE,

@@ -24,10 +24,8 @@ import {
   useAgentRuntimeReposQuery,
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
-  WorkbenchToolsDocument,
-  WorkbenchToolsQuery,
-  WorkbenchToolsQueryVariables,
 } from 'generated/graphql'
+import { WorkbenchToolsDocument } from 'generated/graphql-documents'
 import { produce } from 'immer'
 import {
   Dispatch,
@@ -834,10 +832,7 @@ export function WorkbenchAttachToolsStep({
 }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
 
-  const { data, error, loading } = useFetchPaginatedData<
-    WorkbenchToolsQuery,
-    WorkbenchToolsQueryVariables
-  >({
+  const { data, error, loading } = useFetchPaginatedData({
     query: WorkbenchToolsDocument,
     keyPath: ['workbenchTools'],
   })

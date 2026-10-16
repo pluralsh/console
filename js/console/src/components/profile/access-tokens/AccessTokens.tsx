@@ -13,13 +13,11 @@ import { createColumnHelper } from '@tanstack/react-table'
 import {
   AccessTokenAudit,
   AccessTokenFragment,
-  AccessTokensDocument,
   DeleteAccessTokenMutationVariables,
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
-  AccessTokensQuery,
-  AccessTokensQueryVariables,
 } from 'generated/graphql'
+import { AccessTokensDocument } from 'generated/graphql-documents'
 
 import isEmpty from 'lodash/isEmpty'
 import { useMemo, useState } from 'react'
@@ -245,7 +243,7 @@ export function AccessTokens() {
   const isInSettings = useLocation().pathname.includes('settings')
   const openModal = useOpenAccessTokenModal()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<AccessTokensQuery, AccessTokensQueryVariables>({
+    useFetchPaginatedData({
       query: AccessTokensDocument,
       keyPath: ['accessTokens'],
     })

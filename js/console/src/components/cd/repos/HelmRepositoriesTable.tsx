@@ -1,11 +1,6 @@
 import { Table } from '@pluralsh/design-system'
-import {
-  GitHealth,
-  useHelmPullabilityStatisticsQuery,
-  HelmRepositoriesDocument,
-  HelmRepositoriesQuery,
-  HelmRepositoriesQueryVariables,
-} from 'generated/graphql'
+import { GitHealth, useHelmPullabilityStatisticsQuery } from 'generated/graphql'
+import { HelmRepositoriesDocument } from 'generated/graphql-documents'
 import { useEffect } from 'react'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
@@ -34,10 +29,7 @@ export function HelmRepositoriesTable({
   setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      HelmRepositoriesQuery,
-      HelmRepositoriesQueryVariables
-    >(
+    useFetchPaginatedData(
       { query: HelmRepositoriesDocument, keyPath: ['helmRepositories'] },
       { q: searchStr, health: statusFilterKeyToGitHealth(status) }
     )

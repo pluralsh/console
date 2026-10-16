@@ -7,11 +7,7 @@ import {
 } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  GroupsDocument,
-  GroupsQuery,
-  GroupsQueryVariables,
-} from 'generated/graphql'
+import { GroupsDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import {
@@ -37,7 +33,7 @@ export function GroupsList({
   const throttledQ = useThrottle(q, 300)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<GroupsQuery, GroupsQueryVariables>(
+    useFetchPaginatedData(
       { query: GroupsDocument, keyPath: ['groups'], pageSize: 20 },
       { q: throttledQ }
     )

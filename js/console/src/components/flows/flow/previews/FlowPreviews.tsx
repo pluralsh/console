@@ -21,12 +21,8 @@ import { Row } from '@tanstack/react-table'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  PreviewEnvironmentInstance,
-  FlowPreviewEnvironmentInstancesDocument,
-  FlowPreviewEnvironmentInstancesQuery,
-  FlowPreviewEnvironmentInstancesQueryVariables,
-} from 'generated/graphql'
+import { PreviewEnvironmentInstance } from 'generated/graphql'
+import { FlowPreviewEnvironmentInstancesDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
@@ -64,10 +60,7 @@ export function FlowPreviews() {
   )
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      FlowPreviewEnvironmentInstancesQuery,
-      FlowPreviewEnvironmentInstancesQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: FlowPreviewEnvironmentInstancesDocument,
         keyPath: ['flow', 'previewEnvironmentInstances'],

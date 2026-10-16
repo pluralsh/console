@@ -15,12 +15,10 @@ import { GqlError, GqlErrorType } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body1P } from 'components/utils/typography/Text'
 import {
-  ServiceAccountsQuery,
-  ServiceAccountsQueryVariables,
   useImpersonateServiceAccountMutation,
   UserFragment,
-  ServiceAccountsDocument,
 } from 'generated/graphql'
+import { ServiceAccountsDocument } from 'generated/graphql-documents'
 import { startServiceAccountImpersonation } from 'helpers/impersonation'
 import { FormEvent, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -147,7 +145,7 @@ function ServiceAccountSelect({
   const [q, setQ] = useState('')
   const debouncedQ = useDebounce(q, 150)
   const { data, loading, error, pageInfo, fetchNextPage } =
-    useFetchPaginatedData<ServiceAccountsQuery, ServiceAccountsQueryVariables>(
+    useFetchPaginatedData(
       {
         query: ServiceAccountsDocument,
         keyPath: ['serviceAccounts'],

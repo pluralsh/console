@@ -25,13 +25,11 @@ import {
   useWorkbenchMonitorDeltaSubscription,
   WorkbenchDashboardSummaryFragment,
   WorkbenchMonitorSummaryFragment,
-  WorkbenchDashboardsDocument,
-  WorkbenchDashboardsQuery,
-  WorkbenchDashboardsQueryVariables,
-  WorkbenchMonitorsDocument,
-  WorkbenchMonitorsQuery,
-  WorkbenchMonitorsQueryVariables,
 } from 'generated/graphql'
+import {
+  WorkbenchDashboardsDocument,
+  WorkbenchMonitorsDocument,
+} from 'generated/graphql-documents'
 import { times } from 'lodash'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
@@ -65,10 +63,7 @@ export function WorkbenchMonitoringSidebar({
   const trimmedFilter = debouncedFilter.trim()
   const hasFilter = trimmedFilter.length > 0
 
-  const dashboards = useFetchPaginatedData<
-    WorkbenchDashboardsQuery,
-    WorkbenchDashboardsQueryVariables
-  >(
+  const dashboards = useFetchPaginatedData(
     {
       query: WorkbenchDashboardsDocument,
       keyPath: ['workbench', 'workbenchDashboards'],
@@ -76,10 +71,7 @@ export function WorkbenchMonitoringSidebar({
     },
     { id: workbenchId, q: trimmedFilter || undefined }
   )
-  const monitors = useFetchPaginatedData<
-    WorkbenchMonitorsQuery,
-    WorkbenchMonitorsQueryVariables
-  >(
+  const monitors = useFetchPaginatedData(
     {
       query: WorkbenchMonitorsDocument,
       keyPath: ['workbench', 'monitors'],

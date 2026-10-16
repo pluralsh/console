@@ -6,12 +6,8 @@ import {
   Table,
 } from '@pluralsh/design-system'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
-import {
-  ChatThreadTinyFragment,
-  ChatThreadsDocument,
-  ChatThreadsQuery,
-  ChatThreadsQueryVariables,
-} from 'generated/graphql.ts'
+import { ChatThreadTinyFragment } from 'generated/graphql.ts'
+import { ChatThreadsDocument } from 'generated/graphql-documents'
 import { ReactNode, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_SETTINGS_AI_PROVIDER_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
@@ -28,7 +24,7 @@ const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
 
 export function AIThreads() {
   const { error, data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<ChatThreadsQuery, ChatThreadsQueryVariables>({
+    useFetchPaginatedData({
       query: ChatThreadsDocument,
       keyPath: ['chatThreads'],
     })

@@ -20,10 +20,8 @@ import {
   useChatProviderConnectionsQuery,
   useWorkbenchQuery,
   WorkbenchChatbotFragment,
-  WorkbenchChatbotsDocument,
-  WorkbenchChatbotsQuery,
-  WorkbenchChatbotsQueryVariables,
 } from 'generated/graphql'
+import { WorkbenchChatbotsDocument } from 'generated/graphql-documents'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -70,10 +68,7 @@ export function Chatbots() {
   })
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      WorkbenchChatbotsQuery,
-      WorkbenchChatbotsQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: WorkbenchChatbotsDocument,
         keyPath: ['workbench', 'chatbots'],

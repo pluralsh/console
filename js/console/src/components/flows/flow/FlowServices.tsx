@@ -9,12 +9,8 @@ import {
 } from 'components/flows/flowHealth'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  ServiceDeploymentsRowFragment,
-  FlowServicesDocument,
-  FlowServicesQuery,
-  FlowServicesQueryVariables,
-} from 'generated/graphql'
+import { ServiceDeploymentsRowFragment } from 'generated/graphql'
+import { FlowServicesDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import {
   useNavigate,
@@ -37,7 +33,7 @@ export function FlowServices() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<FlowServicesQuery, FlowServicesQueryVariables>(
+  } = useFetchPaginatedData(
     { query: FlowServicesDocument, keyPath: ['flow', 'services'] },
     { id: flow?.id ?? '' }
   )

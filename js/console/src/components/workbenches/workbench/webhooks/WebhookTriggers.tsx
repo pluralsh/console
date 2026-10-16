@@ -16,13 +16,8 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P } from 'components/utils/typography/Text'
-import {
-  useWorkbenchQuery,
-  WorkbenchWebhookFragment,
-  WorkbenchWebhooksDocument,
-  WorkbenchWebhooksQuery,
-  WorkbenchWebhooksQueryVariables,
-} from 'generated/graphql'
+import { useWorkbenchQuery, WorkbenchWebhookFragment } from 'generated/graphql'
+import { WorkbenchWebhooksDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { WEBHOOKS_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
@@ -58,10 +53,7 @@ export function WebhookTriggers() {
   const workbench = workbenchData?.workbench
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      WorkbenchWebhooksQuery,
-      WorkbenchWebhooksQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: WorkbenchWebhooksDocument,
         keyPath: ['workbench', 'webhooks'],

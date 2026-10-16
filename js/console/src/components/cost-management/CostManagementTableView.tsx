@@ -3,12 +3,8 @@ import { Row } from '@tanstack/react-table'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  ClusterUsageTinyFragment,
-  ClusterUsagesDocument,
-  ClusterUsagesQuery,
-  ClusterUsagesQueryVariables,
-} from 'generated/graphql'
+import { ClusterUsageTinyFragment } from 'generated/graphql'
+import { ClusterUsagesDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
@@ -34,7 +30,7 @@ export function CostManagementTableView() {
   const { tagKeysState, tagOpState } = useOutletContext<CMContextType>()
 
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<ClusterUsagesQuery, ClusterUsagesQueryVariables>(
+    useFetchPaginatedData(
       {
         query: ClusterUsagesDocument,
         pageSize: 500,

@@ -15,12 +15,8 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { ClusterProviderIcon } from 'components/utils/Provider'
-import {
-  ClusterTinyFragment,
-  ClusterSelectorDocument,
-  ClusterSelectorQuery,
-  ClusterSelectorQueryVariables,
-} from 'generated/graphql'
+import { ClusterTinyFragment } from 'generated/graphql'
+import { ClusterSelectorDocument } from 'generated/graphql-documents'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentPropsWithRef, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -58,10 +54,7 @@ export default function ClusterSelector({
   const throttledInput = useThrottle(inputValue, 100)
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
-  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData<
-    ClusterSelectorQuery,
-    ClusterSelectorQueryVariables
-  >(
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
       query: ClusterSelectorDocument,
       keyPath: ['clusters'],

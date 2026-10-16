@@ -15,10 +15,8 @@ import {
   useWorkbenchJobCountsQuery,
   useWorkbenchJobSearchQuery,
   useWorkbenchJobsQuery,
-  WorkbenchJobsDocument,
-  WorkbenchJobsQuery,
-  WorkbenchJobsQueryVariables,
 } from 'generated/graphql'
+import { WorkbenchJobsDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { mapExistingNodes } from 'utils/graphql'
@@ -73,7 +71,7 @@ export function WorkbenchJobs() {
   )
 
   const { data, loading, error, pageInfo, fetchNextPage, fetchingMore } =
-    useFetchPaginatedData<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>(
+    useFetchPaginatedData(
       {
         query: WorkbenchJobsDocument,
         keyPath: RUNS_KEY_PATH,

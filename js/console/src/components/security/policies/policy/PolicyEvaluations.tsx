@@ -13,13 +13,8 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { StackedText } from 'components/utils/table/StackedText'
 import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
-import {
-  PolicyEvaluationFragment,
-  PolicyType,
-  PolicyEvaluationsDocument,
-  PolicyEvaluationsQuery,
-  PolicyEvaluationsQueryVariables,
-} from 'generated/graphql'
+import { PolicyEvaluationFragment, PolicyType } from 'generated/graphql'
+import { PolicyEvaluationsDocument } from 'generated/graphql-documents'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import {
@@ -60,10 +55,7 @@ export function PolicyEvaluations() {
   const detailTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      PolicyEvaluationsQuery,
-      PolicyEvaluationsQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: PolicyEvaluationsDocument,
         keyPath: ['policy', 'policyEvaluations'],

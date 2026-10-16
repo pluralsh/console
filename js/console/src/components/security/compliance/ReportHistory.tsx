@@ -11,12 +11,8 @@ import { useState } from 'react'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Edge } from '../../../utils/graphql.ts'
-import {
-  ComplianceReportFragment,
-  ComplianceReportsDocument,
-  ComplianceReportsQuery,
-  ComplianceReportsQueryVariables,
-} from '../../../generated/graphql.ts'
+import { ComplianceReportFragment } from '../../../generated/graphql.ts'
+import { ComplianceReportsDocument } from '../../../generated/graphql-documents'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
@@ -54,10 +50,7 @@ export function ReportHistoryModal({
   onClose: Nullable<() => void>
 }) {
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      ComplianceReportsQuery,
-      ComplianceReportsQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: ComplianceReportsDocument,
         keyPath: ['complianceReportGenerator', 'complianceReports'],

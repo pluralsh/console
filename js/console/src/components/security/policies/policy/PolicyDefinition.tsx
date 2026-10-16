@@ -24,10 +24,8 @@ import {
   useDeletePolicyMutation,
   useEvaluatePolicyLazyQuery,
   useUpdatePolicyMutation,
-  PolicyEvaluationsDocument,
-  PolicyEvaluationsQuery,
-  PolicyEvaluationsQueryVariables,
 } from 'generated/graphql'
+import { PolicyEvaluationsDocument } from 'generated/graphql-documents'
 import {
   useCallback,
   useEffect,
@@ -84,10 +82,7 @@ export function PolicyDefinition() {
   const dirty = editorValue !== savedPolicy
   const inputIsValid = isValidJson(inputJson)
 
-  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData<
-    PolicyEvaluationsQuery,
-    PolicyEvaluationsQueryVariables
-  >(
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
       query: PolicyEvaluationsDocument,
       keyPath: ['policy', 'policyEvaluations'],

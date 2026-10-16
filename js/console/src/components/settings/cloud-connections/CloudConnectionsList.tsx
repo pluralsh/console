@@ -1,11 +1,7 @@
 import { Button, ButtonProps, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  CloudConnectionsDocument,
-  CloudConnectionsQuery,
-  CloudConnectionsQueryVariables,
-} from 'generated/graphql'
+import { CloudConnectionsDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { CLOUD_CONNECTIONS_SETTINGS_CREATE_ABS_PATH } from 'routes/settingsRoutesConst'
@@ -23,10 +19,7 @@ export function CloudConnectionsList() {
     fetchNextPage,
     setVirtualSlice,
     refetch,
-  } = useFetchPaginatedData<
-    CloudConnectionsQuery,
-    CloudConnectionsQueryVariables
-  >({
+  } = useFetchPaginatedData({
     query: CloudConnectionsDocument,
     keyPath: ['cloudConnections'],
     pageSize: CLOUD_CONNECTIONS_PAGE_SIZE,

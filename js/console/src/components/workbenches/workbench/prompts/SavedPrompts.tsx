@@ -22,10 +22,8 @@ import {
   useCreateWorkbenchJobMutation,
   useWorkbenchQuery,
   WorkbenchPromptFragment,
-  WorkbenchPromptsDocument,
-  WorkbenchPromptsQuery,
-  WorkbenchPromptsQueryVariables,
 } from 'generated/graphql'
+import { WorkbenchPromptsDocument } from 'generated/graphql-documents'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -70,10 +68,7 @@ export function SavedPrompts() {
   const workbench = workbenchData?.workbench
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      WorkbenchPromptsQuery,
-      WorkbenchPromptsQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: WorkbenchPromptsDocument,
         keyPath: ['workbench', 'prompts'],

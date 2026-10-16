@@ -54,10 +54,8 @@ import {
   StackType,
   TagType,
   useStackQuery,
-  StacksDocument,
-  StacksQuery,
-  StacksQueryVariables,
 } from '../../generated/graphql'
+import { StacksDocument } from '../../generated/graphql-documents'
 import {
   getStacksAbsPath,
   STACK_ENV_REL_PATH,
@@ -170,7 +168,7 @@ export function Stacks() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<StacksQuery, StacksQueryVariables>(
+  } = useFetchPaginatedData(
     {
       query: StacksDocument,
       keyPath: ['infrastructureStacks'],

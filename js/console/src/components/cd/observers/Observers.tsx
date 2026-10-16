@@ -14,11 +14,9 @@ import {
   ObserverFragment,
   ObserverTargetType,
   useDeleteObserverMutation,
-  ObserversDocument,
-  ObserversQuery,
-  ObserversQueryVariables,
   KickObserverDocument,
 } from 'generated/graphql'
+import { ObserversDocument } from 'generated/graphql-documents'
 import { useState } from 'react'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
@@ -306,7 +304,7 @@ export function Observers() {
   const projectId = useProjectId()
 
   const { data, loading, error, pageInfo, fetchNextPage } =
-    useFetchPaginatedData<ObserversQuery, ObserversQueryVariables>(
+    useFetchPaginatedData(
       { query: ObserversDocument, keyPath: ['observers'] },
       { projectId }
     )

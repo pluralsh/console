@@ -16,13 +16,8 @@ import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  useUpdateWorkbenchMutation,
-  WorkbenchQuery,
-  WorkbenchToolsDocument,
-  WorkbenchToolsQuery,
-  WorkbenchToolsQueryVariables,
-} from 'generated/graphql'
+import { useUpdateWorkbenchMutation, WorkbenchQuery } from 'generated/graphql'
+import { WorkbenchToolsDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -70,7 +65,7 @@ export function WorkbenchToolsEditModal({
     data: toolsData,
     error: toolsError,
     loading: toolsLoading,
-  } = useFetchPaginatedData<WorkbenchToolsQuery, WorkbenchToolsQueryVariables>({
+  } = useFetchPaginatedData({
     query: WorkbenchToolsDocument,
     keyPath: ['workbenchTools'],
     skip: !open,

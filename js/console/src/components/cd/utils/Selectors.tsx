@@ -1,4 +1,4 @@
-import { DocumentNode, OperationVariables } from '@apollo/client/core'
+import { OperationVariables, TypedDocumentNode } from '@apollo/client/core'
 import {
   ClusterIcon,
   ComboBox,
@@ -15,21 +15,13 @@ import {
 import isEmpty from 'lodash/isEmpty'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
+import { InputMaybe } from '../../../generated/graphql.ts'
 import {
-  InputMaybe,
   ClusterSelectorDocument,
-  ClusterSelectorQuery,
-  ClusterSelectorQueryVariables,
-  GroupsDocument,
-  GroupsQuery,
-  GroupsQueryVariables,
-  UsersDocument,
-  UsersQuery,
-  UsersQueryVariables,
   FlowsDocument,
-  FlowsQuery,
-  FlowsQueryVariables,
-} from '../../../generated/graphql.ts'
+  GroupsDocument,
+  UsersDocument,
+} from '../../../generated/graphql-documents'
 import { useThrottle } from '../../hooks/useThrottle.tsx'
 import { FillLevelDiv } from '../../utils/FillLevelDiv.tsx'
 import { ClusterProviderIcon } from '../../utils/Provider.tsx'
@@ -57,7 +49,7 @@ function SelectorBase<
 }: {
   input: string
   setInput: (value: string) => void
-  query: DocumentNode
+  query: TypedDocumentNode<TQueryType, TVariables>
   queryKey: string
   queryInputProp: string
   placeholder?: string
@@ -157,7 +149,7 @@ function ClusterHandleSelector({
   const theme = useTheme()
 
   return (
-    <SelectorBase<ClusterSelectorQuery, ClusterSelectorQueryVariables>
+    <SelectorBase
       input={clusterHandle}
       setInput={setClusterHandle}
       query={ClusterSelectorDocument}
@@ -205,7 +197,7 @@ function GroupSelector({
   const theme = useTheme()
 
   return (
-    <SelectorBase<GroupsQuery, GroupsQueryVariables>
+    <SelectorBase
       input={group}
       setInput={setGroup}
       query={GroupsDocument}
@@ -234,7 +226,7 @@ function UserSelector({
   const theme = useTheme()
 
   return (
-    <SelectorBase<UsersQuery, UsersQueryVariables>
+    <SelectorBase
       input={user}
       setInput={setUser}
       query={UsersDocument}
@@ -263,7 +255,7 @@ function FlowSelector({
   const theme = useTheme()
 
   return (
-    <SelectorBase<FlowsQuery, FlowsQueryVariables>
+    <SelectorBase
       input={flow}
       setInput={setFlow}
       query={FlowsDocument}

@@ -41,10 +41,8 @@ import {
   ChatThreadTinyFragment,
   PageInfoFragment,
   useClustersTinyQuery,
-  ChatThreadsDocument,
-  ChatThreadsQuery,
-  ChatThreadsQueryVariables,
 } from '../../generated/graphql'
+import { ChatThreadsDocument } from '../../generated/graphql-documents'
 import { AI_ABS_PATH } from '../../routes/aiRoutesConsts'
 import {
   CD_ABS_PATH,
@@ -470,10 +468,7 @@ export function useHistory({
   const { goToThread } = useChatbot()
 
   const throttledFilter = useThrottle(filter, 300)
-  const { loading, data, fetchNextPage, pageInfo } = useFetchPaginatedData<
-    ChatThreadsQuery,
-    ChatThreadsQueryVariables
-  >(
+  const { loading, data, fetchNextPage, pageInfo } = useFetchPaginatedData(
     {
       pollInterval: 60_000,
       query: ChatThreadsDocument,

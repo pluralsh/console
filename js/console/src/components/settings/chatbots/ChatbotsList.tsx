@@ -1,11 +1,7 @@
 import { Button, ButtonProps, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  ChatProviderConnectionsDocument,
-  ChatProviderConnectionsQuery,
-  ChatProviderConnectionsQueryVariables,
-} from 'generated/graphql'
+import { ChatProviderConnectionsDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from 'routes/settingsRoutesConst'
@@ -24,10 +20,7 @@ export function ChatbotsList() {
     fetchNextPage,
     setVirtualSlice,
     refetch,
-  } = useFetchPaginatedData<
-    ChatProviderConnectionsQuery,
-    ChatProviderConnectionsQueryVariables
-  >({
+  } = useFetchPaginatedData({
     query: ChatProviderConnectionsDocument,
     keyPath: ['chatProviderConnections'],
     pageSize: CHATBOTS_PAGE_SIZE,

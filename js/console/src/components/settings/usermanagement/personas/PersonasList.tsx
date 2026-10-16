@@ -1,11 +1,7 @@
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import {
-  PersonaFragment,
-  PersonasDocument,
-  PersonasQuery,
-  PersonasQueryVariables,
-} from 'generated/graphql'
+import { PersonaFragment } from 'generated/graphql'
+import { PersonasDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 
 import { GqlError } from '../../../utils/Alert'
@@ -42,7 +38,7 @@ const columns = [
 
 export function PersonasList() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<PersonasQuery, PersonasQueryVariables>({
+    useFetchPaginatedData({
       query: PersonasDocument,
       keyPath: ['personas'],
     })

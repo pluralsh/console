@@ -17,11 +17,7 @@ import {
   CLUSTERS_REL_PATH,
   getBackupsClusterAbsPath,
 } from '../../../routes/backupRoutesConsts'
-import {
-  ClustersObjectStoresDocument,
-  ClustersObjectStoresQuery,
-  ClustersObjectStoresQueryVariables,
-} from '../../../generated/graphql'
+import { ClustersObjectStoresDocument } from '../../../generated/graphql-documents'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { GqlError } from '../../utils/Alert'
 
@@ -50,10 +46,7 @@ export default function Clusters() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData<
-    ClustersObjectStoresQuery,
-    ClustersObjectStoresQueryVariables
-  >(
+  } = useFetchPaginatedData(
     { query: ClustersObjectStoresDocument, keyPath: ['clusters'] },
     { backups: true }
   )

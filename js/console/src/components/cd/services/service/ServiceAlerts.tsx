@@ -1,8 +1,4 @@
-import {
-  ServiceAlertsDocument,
-  ServiceAlertsQuery,
-  ServiceAlertsQueryVariables,
-} from 'generated/graphql'
+import { ServiceAlertsDocument } from 'generated/graphql-documents'
 
 import { AlertsTable } from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -14,7 +10,7 @@ export function ServiceAlerts() {
   const { service, isLoading: serviceLoading } = useServiceContext()
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<ServiceAlertsQuery, ServiceAlertsQueryVariables>(
+    useFetchPaginatedData(
       {
         query: ServiceAlertsDocument,
         keyPath: ['serviceDeployment', 'alerts'],

@@ -3,12 +3,8 @@ import { Key } from '@react-types/shared'
 import { ExpandedState, Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  PreviewEnvironmentTemplateFragment,
-  FlowPreviewEnvironmentTemplatesDocument,
-  FlowPreviewEnvironmentTemplatesQuery,
-  FlowPreviewEnvironmentTemplatesQueryVariables,
-} from 'generated/graphql'
+import { PreviewEnvironmentTemplateFragment } from 'generated/graphql'
+import { FlowPreviewEnvironmentTemplatesDocument } from 'generated/graphql-documents'
 import { useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy, mapExistingNodes } from 'utils/graphql'
@@ -41,10 +37,7 @@ export function PreviewTemplatesTable({
   )
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<
-      FlowPreviewEnvironmentTemplatesQuery,
-      FlowPreviewEnvironmentTemplatesQueryVariables
-    >(
+    useFetchPaginatedData(
       {
         query: FlowPreviewEnvironmentTemplatesDocument,
         keyPath: ['flow', 'previewEnvironmentTemplates'],

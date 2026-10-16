@@ -18,12 +18,8 @@ import {
 } from '../../utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
-import {
-  useWorkbenchAlertCountsQuery,
-  WorkbenchAlertsDocument,
-  WorkbenchAlertsQuery,
-  WorkbenchAlertsQueryVariables,
-} from 'generated/graphql'
+import { useWorkbenchAlertCountsQuery } from 'generated/graphql'
+import { WorkbenchAlertsDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -67,10 +63,7 @@ export function WorkbenchAlerts() {
     fetchNextPage,
     setVirtualSlice,
     fetchingMore,
-  } = useFetchPaginatedData<
-    WorkbenchAlertsQuery,
-    WorkbenchAlertsQueryVariables
-  >(
+  } = useFetchPaginatedData(
     {
       query: WorkbenchAlertsDocument,
       keyPath: ALERTS_KEY_PATH,

@@ -1,10 +1,6 @@
 import { AlertsTable } from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  ClusterAlertsDocument,
-  ClusterAlertsQuery,
-  ClusterAlertsQueryVariables,
-} from 'generated/graphql'
+import { ClusterAlertsDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { useClusterContext } from './Cluster'
@@ -12,7 +8,7 @@ import { useClusterContext } from './Cluster'
 export function ClusterAlerts() {
   const { cluster } = useClusterContext()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData<ClusterAlertsQuery, ClusterAlertsQueryVariables>(
+    useFetchPaginatedData(
       { query: ClusterAlertsDocument, keyPath: ['cluster', 'alerts'] },
       { clusterId: cluster?.id ?? '' }
     )

@@ -20,13 +20,8 @@ import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
-import {
-  AgentRuntimeType,
-  WorkbenchTinyFragment,
-  WorkbenchesDocument,
-  WorkbenchesQuery,
-  WorkbenchesQueryVariables,
-} from 'generated/graphql'
+import { AgentRuntimeType, WorkbenchTinyFragment } from 'generated/graphql'
+import { WorkbenchesDocument } from 'generated/graphql-documents'
 import { Link } from 'react-router-dom'
 import {
   WORKBENCHES_CREATE_REL_PATH,
@@ -64,7 +59,7 @@ export function WorkbenchesList() {
   const debouncedSearchString = useThrottle(searchString, 200)
 
   const { data, error, loading, pageInfo, fetchNextPage } =
-    useFetchPaginatedData<WorkbenchesQuery, WorkbenchesQueryVariables>(
+    useFetchPaginatedData(
       { query: WorkbenchesDocument, keyPath: ['workbenches'] },
       { q: debouncedSearchString }
     )
