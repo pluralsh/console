@@ -14,8 +14,8 @@ import {
   ObserverFragment,
   ObserverTargetType,
   useDeleteObserverMutation,
-  KickObserverDocument,
 } from 'generated/graphql'
+import { KickObserverDocument } from 'generated/graphql-documents'
 import { ObserversDocument } from 'generated/graphql-documents'
 import { useState } from 'react'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'

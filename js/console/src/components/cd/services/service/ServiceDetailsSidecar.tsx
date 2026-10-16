@@ -19,8 +19,8 @@ import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
   ServicePromotion,
-  KickServiceDocument,
 } from 'generated/graphql'
+import { KickServiceDocument } from 'generated/graphql-documents'
 import { Link } from 'react-router-dom'
 import {
   CD_REL_PATH,

@@ -5,9 +5,9 @@ import { removeConnection, updateCache } from 'utils/graphql'
 import { Confirm } from '../../utils/Confirm'
 import {
   PipelineFragment,
-  PipelinesDocument,
   useDeletePipelineMutation,
 } from '../../../generated/graphql'
+import { PipelinesDocument } from '../../../generated/graphql-documents'
 
 export function DeletePipelineModal({
   pipeline,

@@ -9,8 +9,8 @@ import {
   WorkbenchCanvasBlockType,
   WorkbenchCanvasToolGraph,
   WorkbenchJobActivityFragment,
-  WorkbenchJobActivityFragmentDoc,
 } from 'generated/graphql'
+import { WorkbenchJobActivityFragmentDoc } from 'generated/graphql-documents'
 import { groupBy, isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'

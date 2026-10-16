@@ -13,13 +13,15 @@ import { ApolloClient, useApolloClient } from '@apollo/client'
 import styled, { useTheme } from 'styled-components'
 
 import {
-  SearchGroupsDocument,
   SearchGroupsQuery,
   SearchGroupsQueryVariables,
-  SearchUsersDocument,
   SearchUsersQuery,
   SearchUsersQueryVariables,
 } from 'generated/graphql'
+import {
+  SearchGroupsDocument,
+  SearchUsersDocument,
+} from 'generated/graphql-documents'
 
 const ICONS = {
   user: <PersonIcon size={14} />,

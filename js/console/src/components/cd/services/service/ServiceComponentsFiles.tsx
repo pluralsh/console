@@ -202,57 +202,56 @@ export function ComponentsFilesView() {
     }
   }
 
-  const sidenavContent = useMemo(() => {
-    const renderTree = (nodes: TreeNode[]) =>
-      nodes.map((node) => {
-        const isParentOfSelected =
-          !node.isFile && node.id === parentOfSelectedId
-        const isSelectedFile = node.isFile && node.id === selectedFile?.path
+  const renderTree = (nodes: TreeNode[]) =>
+    nodes.map((node) => {
+      const isParentOfSelected = !node.isFile && node.id === parentOfSelectedId
+      const isSelectedFile = node.isFile && node.id === selectedFile?.path
 
-        return (
-          <TreeItem
-            key={node.id}
-            itemId={node.id}
-            className={
-              isParentOfSelected
-                ? 'parent-of-selected'
-                : isSelectedFile
-                  ? 'file-selected'
-                  : undefined
-            }
-            label={
-              <Tooltip
-                label={node.name}
-                css={{ marginLeft: 6 }}
+      return (
+        <TreeItem
+          key={node.id}
+          itemId={node.id}
+          className={
+            isParentOfSelected
+              ? 'parent-of-selected'
+              : isSelectedFile
+                ? 'file-selected'
+                : undefined
+          }
+          label={
+            <Tooltip
+              label={node.name}
+              css={{ marginLeft: 6 }}
+            >
+              <div
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                  minWidth: 0,
+                }}
               >
-                <div
-                  css={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '100%',
-                    minWidth: 0,
-                  }}
-                >
-                  <TreeItemIcon>
-                    {node.isFile ? (
-                      <FileTypeIcon fileName={node.name} />
-                    ) : (
-                      <FolderIcon size={14} />
-                    )}
-                  </TreeItemIcon>
-                  <TreeItemText>{node.name}</TreeItemText>
-                </div>
-              </Tooltip>
-            }
-          >
-            {!node.isFile &&
-              node.children.length > 0 &&
-              renderTree(node.children)}
-          </TreeItem>
-        )
-      })
+                <TreeItemIcon>
+                  {node.isFile ? (
+                    <FileTypeIcon fileName={node.name} />
+                  ) : (
+                    <FolderIcon size={14} />
+                  )}
+                </TreeItemIcon>
+                <TreeItemText>{node.name}</TreeItemText>
+              </div>
+            </Tooltip>
+          }
+        >
+          {!node.isFile &&
+            node.children.length > 0 &&
+            renderTree(node.children)}
+        </TreeItem>
+      )
+    })
 
-    return data?.serviceTarball && treeNodes.length > 0 ? (
+  const sidenavContent =
+    data?.serviceTarball && treeNodes.length > 0 ? (
       <MuiThemeProvider theme={fileTreeMuiTheme}>
         <StyledTreeView
           itemChildrenIndentation={12}
@@ -265,14 +264,6 @@ export function ComponentsFilesView() {
         </StyledTreeView>
       </MuiThemeProvider>
     ) : undefined
-  }, [
-    data,
-    treeNodes,
-    parentOfSelectedId,
-    selectedFile,
-    handleItemSelection,
-    expandedItems,
-  ])
 
   const heading = useMemo(
     () => (

@@ -2,12 +2,12 @@ import { ApolloError, useApolloClient } from '@apollo/client'
 import { Button, Flex } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import {
-  AcceptLoginDocument,
   useLoginInfoQuery,
   useMeQuery,
   User,
   useSignInMutation,
 } from 'generated/graphql'
+import { AcceptLoginDocument } from 'generated/graphql-documents'
 import queryString from 'query-string'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'

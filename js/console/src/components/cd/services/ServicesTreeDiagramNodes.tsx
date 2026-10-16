@@ -29,9 +29,11 @@ import {
   ServiceDeploymentComponentFragment,
   ServiceDeploymentStatus,
   ServiceTreeNodeFragment,
+} from '../../../generated/graphql'
+import {
   SyncGlobalServiceDocument,
   KickServiceDocument,
-} from '../../../generated/graphql'
+} from '../../../generated/graphql-documents'
 import {
   getClusterDetailsPath,
   getGlobalServiceDetailsPath,

@@ -24,7 +24,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
 import {
-  PipelineContextsDocument,
   PipelineContextsQuery,
   PipelineStageFragment,
   PrStatus,
@@ -32,6 +31,7 @@ import {
   ServiceDeploymentStatus,
   useCreatePipelineContextMutation,
 } from 'generated/graphql'
+import { PipelineContextsDocument } from 'generated/graphql-documents'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { GqlError } from 'components/utils/Alert'

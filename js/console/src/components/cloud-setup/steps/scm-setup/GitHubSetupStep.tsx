@@ -10,11 +10,11 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { Body1P } from 'components/utils/typography/Text'
 import {
-  ScmConnectionDocument,
   useCreateScmWebhookMutation,
   useRegisterGitHubAppMutation,
   useScmConnectionSuspenseQuery,
 } from 'generated/graphql'
+import { ScmConnectionDocument } from 'generated/graphql-documents'
 import { use, useLayoutEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'

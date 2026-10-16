@@ -8,7 +8,6 @@ import {
 } from 'components/layout/TopLevelSidePanel.tsx'
 import {
   ChatThreadAttributes,
-  ChatThreadDetailsDocument,
   ChatThreadDetailsFragment,
   CloneChatThreadMutation,
   CloneChatThreadMutationVariables,
@@ -17,6 +16,7 @@ import {
   useCreateChatThreadMutation,
   useInfraResearchQuery,
 } from 'generated/graphql.ts'
+import { ChatThreadDetailsDocument } from 'generated/graphql-documents'
 import {
   createContext,
   Dispatch,

@@ -9,8 +9,8 @@ import {
 import {
   GlobalServiceFragment,
   useGetGlobalServiceQuery,
-  SyncGlobalServiceDocument,
 } from 'generated/graphql'
+import { SyncGlobalServiceDocument } from 'generated/graphql-documents'
 import { GlobalServicesDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { PageColumnSC } from 'components/layout/PageLayout'

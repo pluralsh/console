@@ -10,10 +10,10 @@ import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
 import { Body1P } from 'components/utils/typography/Text'
 import {
   ScmConnectionAttributes,
-  ScmConnectionDocument,
   ScmType,
   useCreateScmConnectionMutation,
 } from 'generated/graphql'
+import { ScmConnectionDocument } from 'generated/graphql-documents'
 import { use } from 'react'
 import { useTheme } from 'styled-components'
 

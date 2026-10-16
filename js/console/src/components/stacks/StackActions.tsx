@@ -13,8 +13,8 @@ import { useTheme } from 'styled-components'
 import {
   StackTinyFragment,
   useTriggerStackRunMutation,
-  KickStackDocument,
 } from '../../generated/graphql'
+import { KickStackDocument } from '../../generated/graphql-documents'
 import KickButton from '../utils/KickButton'
 import { MoreMenu } from '../utils/MoreMenu'
 import StackCustomRun from './customrun/StackCustomRun'

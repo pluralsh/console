@@ -3,9 +3,9 @@ import {
   Delta,
   useWorkbenchJobDeltaSubscription,
   WorkbenchJobTinyFragment,
-  WorkbenchJobsDocument,
   WorkbenchJobsQuery,
 } from 'generated/graphql'
+import { WorkbenchJobsDocument } from 'generated/graphql-documents'
 import { appendConnection } from 'utils/graphql'
 import { WORKBENCH_JOBS_PAGE_SIZE } from './workbenchJobsDisplay'
 import { LAUNCH_RECENT_JOBS_COUNT } from './WorkbenchLaunchRecentJobs'

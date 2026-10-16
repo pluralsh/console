@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom'
 import {
   ScmConnectionFragment,
   ScmType,
-  ScmWebhooksDocument,
   useCreateScmWebhookMutation,
 } from 'generated/graphql'
+import { ScmWebhooksDocument } from 'generated/graphql-documents'
 import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 
 import { PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/selfServiceRoutesConsts'

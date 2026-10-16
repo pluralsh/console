@@ -8,10 +8,10 @@ import { useTheme } from 'styled-components'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   NotificationSinkFragment,
-  NotificationSinksDocument,
   SinkType,
   useUpsertNotificationSinkMutation,
 } from 'generated/graphql'
+import { NotificationSinksDocument } from 'generated/graphql-documents'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { appendConnection, updateCache } from 'utils/graphql'

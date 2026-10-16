@@ -134,7 +134,7 @@ export function ShellCommandEditor({
         {isEditing && (
           <CodeInput
             placeholder={defaultCommand}
-            value={isEditing ? inputVal : command}
+            value={inputVal}
             prefix={
               <div className="prefix">
                 <div className="firstHalf">{commandLeft1}</div>

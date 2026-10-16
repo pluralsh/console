@@ -68,7 +68,14 @@ export function ServiceAccountImpersonationModal({
     const jwt = result.data?.impersonateServiceAccount?.jwt
     if (!jwt) return fail(new Error('Impersonation did not return a JWT.'))
 
-    startServiceAccountImpersonation(jwt, me?.email)
+    // computed outside `try`: React Compiler can't handle `?.` inside try/catch
+    const originalUserEmail = me?.email
+    try {
+      // writes to storage, which can throw (e.g. blocked in private mode)
+      startServiceAccountImpersonation(jwt, originalUserEmail)
+    } catch (err) {
+      return fail(err)
+    }
     ;(window as Window).location.reload()
   }
 

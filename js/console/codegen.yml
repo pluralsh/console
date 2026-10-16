@@ -8,7 +8,16 @@ generates:
       - 'typescript-operations'
       - 'typescript-react-apollo'
       - 'named-operations-object'
-  # typed documents (TypedDocumentNode) for passing queries around, e.g. to useFetchPaginatedData
+    config:
+      # hooks use the documents from graphql-documents.ts instead of embedding a second copy
+      documentMode: external
+      importDocumentNodeExternallyFrom: './graphql-operations'
+  src/generated/graphql-operations.ts:
+    schema: '../../schema/schema.graphql'
+    documents: './src/graph/**/*.graphql'
+    plugins:
+      - './codegen-operations-plugin.cjs'
+  # typed documents (TypedDocumentNode), the single source of every query and fragment
   src/generated/graphql-documents.ts:
     schema: '../../schema/schema.graphql'
     documents: './src/graph/**/*.graphql'
