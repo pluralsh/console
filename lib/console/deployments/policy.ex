@@ -293,36 +293,18 @@ defmodule Console.Deployments.Policy do
   end
 
   defp attach_binding(binding, target, user) do
-    drop_stale_attachment(owned_attachment(binding, target), binding, target, user)
-
-    case fetch_attachment(binding, target) do
-      %{} -> :ok
-      _ -> reconcile_target(:attach, binding, target, user)
-    end
+    reconcile_target(:attach, binding, target, user)
+    :ok
   end
 
   defp detach_binding(binding, target, user) do
     release_attachment(owned_attachment(binding, target), binding, target, user)
   end
 
-  defp fetch_attachment(%BindingPolicy{policy_id: id}, %Workbench{id: wid}),
-    do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
-  defp fetch_attachment(%BindingPolicy{policy_id: id} = binding, %Stack{id: sid}),
-    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid, type: stack_policy_type(binding))
-
   defp owned_attachment(%BindingPolicy{id: id}, %Workbench{id: wid}),
     do: Repo.get_by(WorkbenchPolicy, binding_policy_id: id, workbench_id: wid)
   defp owned_attachment(%BindingPolicy{id: id}, %Stack{id: sid}),
     do: Repo.get_by(StackPolicy, binding_policy_id: id, stack_id: sid)
-
-  defp drop_stale_attachment(%StackPolicy{type: type} = attachment, binding, target, user) do
-    drop_stale_attachment(type, stack_policy_type(binding), attachment, binding, target, user)
-  end
-  defp drop_stale_attachment(_, _, _, _), do: :ok
-
-  defp drop_stale_attachment(type, type, _, _, _, _), do: :ok
-  defp drop_stale_attachment(_, _, attachment, binding, target, user),
-    do: release_attachment(attachment, binding, target, user)
 
   defp release_attachment(nil, _, _, _), do: :ok
   defp release_attachment(%WorkbenchPolicy{}, binding, target, user),
@@ -382,16 +364,58 @@ defmodule Console.Deployments.Policy do
   defp keep_or_release_stack_attachment(_, false, attachment, user),
     do: Stacks.delete_stack_policy(attachment.id, user)
 
-  defp reconcile_target(:attach, %BindingPolicy{id: binding_id, policy_id: id} = binding, %Workbench{} = wb, user),
-    do: Workbenches.create_workbench_policy(%{
+  defp reconcile_target(:attach, %BindingPolicy{id: binding_id, policy_id: id} = binding, %Workbench{} = wb, user) do
+    %{
       policy_id: id,
+      workbench_id: wb.id,
       binding_policy_id: binding_id,
       matches: BindingPolicy.workbench_matches(binding)
-    }, wb.id, user)
-  defp reconcile_target(:attach, %BindingPolicy{} = binding, %Stack{} = stack, user),
-    do: Stacks.create_stack_policy(stack_policy_attrs(binding), stack.id, user)
+    }
+    |> WorkbenchPolicy.upsert()
+    |> notify_workbench_policy(user)
+  end
+  defp reconcile_target(:attach, %BindingPolicy{} = binding, %Stack{} = stack, user) do
+    binding
+    |> stack_policy_attrs()
+    |> Map.put(:stack_id, stack.id)
+    |> StackPolicy.upsert()
+    |> release_taken_stage(binding, stack, user)
+  end
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Workbench{} = wb, user),
     do: Workbenches.delete_workbench_policy(id, wb.id, user)
+
+  defp notify_workbench_policy({:ok, %WorkbenchPolicy{inserted_at: at, updated_at: at} = policy}, user),
+    do: handle_notify(PubSub.WorkbenchPolicyCreated, policy, actor: user)
+  defp notify_workbench_policy({:ok, %WorkbenchPolicy{} = policy}, user),
+    do: handle_notify(PubSub.WorkbenchPolicyUpdated, policy, actor: user)
+  defp notify_workbench_policy(:ok, _), do: :ok
+  defp notify_workbench_policy({:error, %Ecto.Changeset{errors: errors}}, _) do
+    Logger.error("Failed to upsert workbench policy: #{inspect(errors)}")
+    :ok
+  end
+
+  defp release_taken_stage(:ok, _, _, _), do: :ok
+  defp release_taken_stage({:ok, _}, _, _, _), do: :ok
+  defp release_taken_stage({:error, %Ecto.Changeset{errors: errors}}, binding, stack, user) do
+    errors
+    |> stage_taken?()
+    |> release_taken_stage(binding, stack, user)
+  end
+  defp release_taken_stage(true, binding, stack, user),
+    do: release_attachment(owned_attachment(binding, stack), binding, stack, user)
+  defp release_taken_stage(false, binding, _, _) do
+    Logger.error("Failed to attach stack policy for binding #{binding.id}")
+    :ok
+  end
+
+  defp stage_taken?(errors) do
+    Enum.any?(errors, fn
+      {_, {_, opts}} ->
+        opts[:constraint] == :unique &&
+          opts[:constraint_name] == "stack_policies_policy_id_stack_id_type_index"
+      _ -> false
+    end)
+  end
 
   defp authorize_project_change(%Ecto.Changeset{} = cs, user),
     do: authorize_project_change(Ecto.Changeset.get_change(cs, :project_id), cs, user)

@@ -254,6 +254,13 @@ defmodule Console.Deployments.PolicyTest do
 
       [association] = Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.all()
       assert association.binding_policy_id == binding.id
+      assert association.matches.regexes == [".*"]
+
+      :ok = Policy.reconcile(%{binding | matches: %{workbench: %{regexes: ["bound-.*"]}}})
+
+      [association] = Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
+      assert association.matches.regexes == ["bound-.*"]
 
       insert(:workbench_policy, policy: policy, workbench: retained)
 
@@ -354,6 +361,34 @@ defmodule Console.Deployments.PolicyTest do
       assert approval.binding_policy_id == binding.id
     end
 
+    test "drops the previous stage when another binding already owns the new one" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project, name: "bound-stack")
+      policy = insert(:policy, project: project, type: :stack)
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
+      approval_binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
+      run_binding = insert(:binding_policy,
+        policy: policy,
+        bind_policy: bind_policy,
+        type: :stack,
+        matches: %{stack: %{type: :run}}
+      )
+
+      :ok = Policy.reconcile(approval_binding)
+      :ok = Policy.reconcile(run_binding)
+      :ok = Policy.reconcile(%{run_binding | matches: %{stack: %{type: :approval}}})
+
+      [approval] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert approval.type == :approval
+      assert approval.binding_policy_id == approval_binding.id
+    end
+
     test "detaches a stack policy owned by the binding even after its stage changes" do
       insert(:user, bot_name: "console")
       project = insert(:project)
@@ -417,7 +452,7 @@ defmodule Console.Deployments.PolicyTest do
       assert remaining.type == :approval
     end
 
-    test "keeps a shared run attachment when another matching binding still wants that stage" do
+    test "recreates a vacated stage when the other binding reconciles" do
       insert(:user, bot_name: "console")
       project = insert(:project)
       stack = insert(:stack, project: project, name: "bound-stack")
@@ -448,6 +483,12 @@ defmodule Console.Deployments.PolicyTest do
       assert run.binding_policy_id == first.id
 
       :ok = Policy.reconcile(%{first | matches: %{stack: %{type: :approval}}})
+
+      [approval] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert approval.type == :approval
+      assert approval.binding_policy_id == first.id
+
+      :ok = Policy.reconcile(second)
 
       attachments = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
       types = attachments |> Enum.map(& &1.type) |> Enum.sort()
