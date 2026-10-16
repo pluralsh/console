@@ -428,12 +428,6 @@ function AddContextModal({
     [json, mutation, pipelineId]
   )
 
-  const [prevJson, setPrevJson] = useState(json)
-  if (json !== prevJson) {
-    setPrevJson(json)
-    setJsonError('')
-  }
-
   const actions = (
     <Button
       type="submit"
@@ -466,7 +460,10 @@ function AddContextModal({
           <CodeEditor
             value={json}
             language="json"
-            onChange={setJson}
+            onChange={(value) => {
+              setJson(value)
+              setJsonError('')
+            }}
             height="160px"
             options={{ lineNumbers: 'off', minimap: { enabled: false } }}
           />

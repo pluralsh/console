@@ -49,13 +49,6 @@ function useLockedBody(initialLocked = false): UseLockedBodyOutput {
     }
   }, [locked])
 
-  // Update state if initialValue changes
-  const [prevInitialLocked, setPrevInitialLocked] = useState(initialLocked)
-  if (initialLocked !== prevInitialLocked) {
-    setPrevInitialLocked(initialLocked)
-    setLocked(initialLocked)
-  }
-
   return [locked, setLocked]
 }
 

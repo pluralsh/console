@@ -129,17 +129,10 @@ export function usePrAutomationForm({
   const [curPage, setCurPage] = useState(firstPage)
 
   // reapply default states if the prAutomation changes
-  const [prevDeps, setPrevDeps] = useState({
-    defaults,
-    firstPage,
-    prAutomation,
-  })
-  if (
-    prevDeps.defaults !== defaults ||
-    prevDeps.firstPage !== firstPage ||
-    prevDeps.prAutomation !== prAutomation
-  ) {
-    setPrevDeps({ defaults, firstPage, prAutomation })
+  // defaults (and firstPage) are recomputed whenever prAutomation changes
+  const [prevDefaults, setPrevDefaults] = useState(defaults)
+  if (defaults !== prevDefaults) {
+    setPrevDefaults(defaults)
     setCurConfigVals(defaults.curConfigVals)
     setReviewFormState(defaults.reviewFormState)
     setVistedPages(new Set([firstPage]))

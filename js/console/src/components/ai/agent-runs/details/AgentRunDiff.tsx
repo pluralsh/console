@@ -250,11 +250,11 @@ export function AgentRunDiff({
   )
   const tree = useMemo(() => buildTree(files), [files])
   const [selectedPath, setSelectedPath] = useState<string>()
-  const [parentOfSelectedId, setParentOfSelectedId] = useState<string>()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
   const { nodeMap, parentMap } = useMemo(() => buildNodeLookup(tree), [tree])
   const selectedNode = selectedPath ? nodeMap.get(selectedPath) : undefined
   const selectedFile = selectedNode?.file ?? files[0]
+  const parentOfSelectedId = selectedFile && parentMap.get(selectedFile.path)
 
   const toggleFullscreen = useCallback(() => {
     onFullscreenChange?.(!isFullscreen)
@@ -262,10 +262,11 @@ export function AgentRunDiff({
 
   useKeyDown('Escape', () => isFullscreen && onFullscreenChange?.(false))
 
-  const selectPath = (path?: string, parentId?: string) => {
+  // selects a file and expands its parent directories
+  const selectPath = (path?: string) => {
     setSelectedPath(path)
-    setParentOfSelectedId(parentId)
-    if (!path || !parentId) return
+    const parentId = path && parentMap.get(path)
+    if (!parentId) return
 
     const requiredExpanded: string[] = []
     let currentParentId: string | undefined = parentId
@@ -285,10 +286,7 @@ export function AgentRunDiff({
 
   if (files !== prevFiles) {
     setPrevFiles(files)
-    selectPath(
-      files[0]?.path,
-      files[0]?.path ? parentMap.get(files[0].path) : undefined
-    )
+    selectPath(files[0]?.path)
   }
 
   const handleItemSelection = (
@@ -299,7 +297,7 @@ export function AgentRunDiff({
     if (!isSelected) return
     const node = nodeMap.get(itemId)
 
-    if (node?.file) selectPath(node.path, parentMap.get(itemId))
+    if (node?.file) selectPath(node.path)
   }
 
   if (isLoading && !content) {

@@ -124,7 +124,6 @@ function buildNodeLookup(
 export function ComponentsFilesView() {
   const { service, isLoading: serviceLoading } = useServiceContext()
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
-  const [parentOfSelectedId, setParentOfSelectedId] = useState<string>()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
 
   const { data, loading, error } = useServiceTarballQuery({
@@ -158,9 +157,12 @@ export function ComponentsFilesView() {
     return buildNodeLookup(treeNodes)
   }, [treeNodes])
 
-  const selectFile = (file: ServiceFile, parentId?: string) => {
+  const parentOfSelectedId = selectedFile && parentMap.get(selectedFile.path)
+
+  // selects a file and expands its parent directories
+  const selectFile = (file: ServiceFile) => {
     setSelectedFile(file)
-    setParentOfSelectedId(parentId)
+    const parentId = parentMap.get(file.path)
     if (!parentId) return
 
     // Auto-expand parent directories of the selected file
@@ -178,19 +180,13 @@ export function ComponentsFilesView() {
   }
 
   // Auto-select first file when data is loaded
-  const [hasAutoSelected, setHasAutoSelected] = useState(false)
-  if (
-    !isEmpty(data?.serviceTarball) &&
-    !hasAutoSelected &&
-    !selectedFile?.path
-  ) {
+  if (!selectedFile && !isEmpty(data?.serviceTarball)) {
     const firstFile = data?.serviceTarball?.find((f) => f?.path && f?.content)
     if (firstFile?.path && firstFile?.content) {
-      setHasAutoSelected(true)
-      selectFile(
-        { path: firstFile.path, content: decodeBase64(firstFile.content) },
-        parentMap.get(firstFile.path)
-      )
+      selectFile({
+        path: firstFile.path,
+        content: decodeBase64(firstFile.content),
+      })
     }
   }
 
@@ -202,10 +198,7 @@ export function ComponentsFilesView() {
     if (!isSelected) return
     const node = nodeMap.get(itemId)
     if (node?.isFile && node.content) {
-      selectFile(
-        { path: node.path, content: node.content },
-        parentMap.get(itemId)
-      )
+      selectFile({ path: node.path, content: node.content })
     }
   }
 
