@@ -61,7 +61,7 @@ export function WorkbenchJobTriggerIssue({
           trigger={
             <Flex
               align="center"
-              gap="medium"
+              gap="small"
             >
               <TriggerCardIconWrapperSC>
                 <DocumentIcon />

@@ -109,8 +109,12 @@ const CaretSC = styled(CaretDownIcon)<{ $open: boolean }>(({ $open }) => ({
 }))
 
 const PanelSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
+  backgroundColor:
+    theme.mode === 'dark' ? theme.colors['fill-one'] : theme.colors['fill-two'],
+  border:
+    theme.mode === 'dark'
+      ? theme.borders['fill-one']
+      : theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
   boxShadow: theme.boxShadows.moderate,
   display: 'flex',

@@ -23,6 +23,7 @@ import {
   useState,
 } from 'react'
 import type { ExtraProps } from 'react-markdown'
+import { Link } from 'react-router-dom'
 import { getWorkbenchFilesAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
@@ -181,17 +182,30 @@ function FileTooltipContent({
             gap="small"
           >
             <CaptionP $color="text-xlight">{details.join(' · ')}</CaptionP>
-            {downloadUrl && (
+            <Flex
+              gap="xsmall"
+              flexShrink={0}
+            >
               <Button
                 small
                 secondary
-                as="a"
-                href={downloadUrl}
-                startIcon={<DownloadIcon />}
+                as={Link}
+                to={getWorkbenchFilesAbsPath(workbenchId, path)}
               >
-                Download
+                View in files
               </Button>
-            )}
+              {downloadUrl && (
+                <Button
+                  small
+                  secondary
+                  as="a"
+                  href={downloadUrl}
+                  startIcon={<DownloadIcon />}
+                >
+                  Download
+                </Button>
+              )}
+            </Flex>
           </Flex>
         ))}
     </Flex>

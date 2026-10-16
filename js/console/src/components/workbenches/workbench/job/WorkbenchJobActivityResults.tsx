@@ -57,7 +57,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -109,6 +109,7 @@ export function ExpandableUserPrompt({
   attachments?: Nullable<Nullable<AttachmentFragment>[]>
   fullWidth?: boolean
 } & ComponentPropsWithRef<typeof PromptWrapperSC>) {
+  const { mode } = useTheme()
   const workbenchId = useContext(WorkbenchFileContext)
   const [isExpanded, setIsExpanded] = useState(false)
   const [showActions, setShowActions] = useState(false)
@@ -146,6 +147,7 @@ export function ExpandableUserPrompt({
       onMouseLeave={() => setShowActions(false)}
     >
       <PromptCardSC
+        fillLevel={mode === 'dark' ? 0 : undefined}
         cornerSize="large"
         $fullWidth={fullWidth}
         $isExpanded={isExpandable && isExpanded}
