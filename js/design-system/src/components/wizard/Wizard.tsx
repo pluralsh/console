@@ -8,9 +8,8 @@ import {
   useContext,
   useEffect,
   useImperativeHandle,
-  useLayoutEffect,
   useMemo,
-  useRef,
+  useEffectEvent,
 } from 'react'
 import styled from 'styled-components'
 
@@ -125,15 +124,7 @@ function WizardUnstyled({
   )
   useEffect(() => onSelect && onSelect(selected), [onSelect, selected])
   // re-sync steps only when the number of dependency steps changes
-  const dependencyStepsRef = useRef(dependencySteps)
-  useLayoutEffect(() => {
-    dependencyStepsRef.current = dependencySteps
-  })
-  const dependencyStepsLength = dependencySteps?.length
-
-  useEffect(() => {
-    const dependencySteps = dependencyStepsRef.current
-
+  const syncDependencySteps = useEffectEvent(() =>
     setSteps((steps) => {
       if (isEmpty(dependencySteps)) {
         if (steps.some((s) => s.isDependency)) onReset()
@@ -147,6 +138,11 @@ function WizardUnstyled({
 
       return arr
     })
+  )
+  const dependencyStepsLength = dependencySteps?.length
+
+  useEffect(() => {
+    syncDependencySteps()
   }, [dependencyStepsLength, onReset, setSteps])
 
   return (

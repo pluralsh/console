@@ -274,7 +274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apidevtools/swagger-parser@npm:^12.1.0":
+"@apidevtools/swagger-parser@npm:12.1.0":
   version: 12.1.0
   resolution: "@apidevtools/swagger-parser@npm:12.1.0"
   dependencies:
@@ -5190,8 +5190,8 @@ __metadata:
     vitest: "npm:5.0.1"
   peerDependencies:
     "@apollo/client": ">=3.14.1"
-    react: ">=19.1.1"
-    react-dom: ">=19.1.1"
+    react: ">=19.2.0"
+    react-dom: ">=19.2.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.2.0"
   languageName: unknown
@@ -5201,7 +5201,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@pluralsh/documentation@workspace:documentation"
   dependencies:
-    "@apidevtools/swagger-parser": "npm:^12.1.0"
+    "@apidevtools/swagger-parser": "npm:12.1.0"
     "@apollo/client": "npm:3.14.1"
     "@biomejs/biome": "npm:2.5.15"
     "@emotion/react": "npm:11.14.0"
@@ -5223,7 +5223,7 @@ __metadata:
     "@react-stately/list": "npm:3.8.1"
     "@react-stately/select": "npm:3.5.1"
     "@react-stately/selection": "npm:3.19.0"
-    "@styra/highlightjs-rego": "npm:^0.1.2"
+    "@styra/highlightjs-rego": "npm:0.1.2"
     "@types/glob": "npm:8.1.0"
     "@types/node": "npm:24.10.1"
     "@types/react": "npm:19.2.17"
@@ -6725,7 +6725,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@styra/highlightjs-rego@npm:^0.1.2":
+"@styra/highlightjs-rego@npm:0.1.2":
   version: 0.1.2
   resolution: "@styra/highlightjs-rego@npm:0.1.2"
   checksum: 10/5d35cb195e0ec276d43f7c67f7593e97bc59d7c3243e2f820b886063c607b0d7eec69d04f325ecaa5cce964911bd9e8bcfccfd89ec86cb2c09c6c539604f2b56
