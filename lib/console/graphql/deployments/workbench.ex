@@ -267,6 +267,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :atlassian,            :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :jira,                 :workbench_tool_jira_connection_attributes, description: "jira cloud connection (ticketing)"
     field :jira_datacenter,      :workbench_tool_jira_datacenter_connection_attributes, description: "jira data center connection (ticketing)"
+    field :service_now,          :workbench_tool_service_now_connection_attributes, description: "servicenow connection (ticketing)"
     field :exa,                  :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,               :workbench_tool_github_connection_attributes, description: "github connection (integration)"
     field :gitlab,               :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
@@ -418,6 +419,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_tool_jira_datacenter_connection_attributes do
     field :url,       non_null(:string), description: "jira data center base URL"
     field :api_token, :string, description: "jira data center personal access token"
+  end
+
+  input_object :workbench_tool_service_now_connection_attributes do
+    field :url,      non_null(:string), description: "servicenow instance URL (for example, https://example.service-now.com)"
+    field :username, :string, description: "servicenow user for basic auth (required if not using OAuth token exchange)"
+    field :password, :string, description: "servicenow password for basic auth (required if not using OAuth token exchange)"
   end
 
   input_object :workbench_tool_exa_connection_attributes do
@@ -1430,6 +1437,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :jira,      :workbench_tool_jira_connection, description: "jira cloud connection (no secrets)"
     field :jira_datacenter, :workbench_tool_jira_datacenter_connection,
       description: "jira data center connection (no secrets)"
+    field :service_now, :workbench_tool_service_now_connection, description: "servicenow connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
     field :gitlab,    :workbench_tool_gitlab_connection, description: "gitlab connection (no secrets)"
@@ -1562,6 +1570,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_tool_jira_datacenter_connection do
     field :url, non_null(:string), description: "jira data center base URL (PAT never exposed)"
+  end
+
+  object :workbench_tool_service_now_connection do
+    field :url,      non_null(:string), description: "servicenow instance URL"
+    field :username, :string, description: "servicenow basic auth user (password never exposed)"
   end
 
   object :workbench_tool_exa_connection do
