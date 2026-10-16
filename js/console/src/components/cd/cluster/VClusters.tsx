@@ -21,7 +21,11 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { isNonNullable } from 'utils/isNonNullable'
-import { useVClustersQuery } from '../../../generated/graphql'
+import {
+  VClustersDocument,
+  VClustersQuery,
+  VClustersQueryVariables,
+} from '../../../generated/graphql'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { GqlError } from '../../utils/Alert'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
@@ -44,9 +48,9 @@ export function VClusters() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData(
+  } = useFetchPaginatedData<VClustersQuery, VClustersQueryVariables>(
     {
-      queryHook: useVClustersQuery,
+      query: VClustersDocument,
       keyPath: ['clusters'],
     },
     {

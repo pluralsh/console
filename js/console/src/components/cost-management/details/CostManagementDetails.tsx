@@ -13,9 +13,12 @@ import {
   ClusterUsageNamespacesQuery,
   ClusterUsageScalingRecommendationsQuery,
   ScalingRecommendationType,
-  useClusterUsageHistoryQuery,
-  useClusterUsageNamespacesQuery,
-  useClusterUsageScalingRecommendationsQuery,
+  ClusterUsageHistoryDocument,
+  ClusterUsageHistoryQueryVariables,
+  ClusterUsageNamespacesDocument,
+  ClusterUsageNamespacesQueryVariables,
+  ClusterUsageScalingRecommendationsDocument,
+  ClusterUsageScalingRecommendationsQueryVariables,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
@@ -43,7 +46,9 @@ export type CMContextType = {
 }
 
 export function CostManagementDetails() {
-  const { id = '', ['*']: route } = useParams()
+  const params = useParams()
+  const { id = '' } = params
+  const route = params['*']
   const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
   const [namespaceQ, setNamespaceQ] = useState<string>('')
   const throttledNamespaceQ = useThrottle(namespaceQ, 300)
@@ -53,27 +58,36 @@ export function CostManagementDetails() {
     undefined
   )
 
-  const historyQuery = useFetchPaginatedData(
+  const historyQuery = useFetchPaginatedData<
+    ClusterUsageHistoryQuery,
+    ClusterUsageHistoryQueryVariables
+  >(
     {
-      queryHook: useClusterUsageHistoryQuery,
+      query: ClusterUsageHistoryDocument,
       pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'history'],
     },
     { id }
   )
 
-  const namespacesQuery = useFetchPaginatedData(
+  const namespacesQuery = useFetchPaginatedData<
+    ClusterUsageNamespacesQuery,
+    ClusterUsageNamespacesQueryVariables
+  >(
     {
-      queryHook: useClusterUsageNamespacesQuery,
+      query: ClusterUsageNamespacesDocument,
       pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'namespaces'],
     },
     { id, q: throttledNamespaceQ || undefined }
   )
 
-  const recommendationsQuery = useFetchPaginatedData(
+  const recommendationsQuery = useFetchPaginatedData<
+    ClusterUsageScalingRecommendationsQuery,
+    ClusterUsageScalingRecommendationsQueryVariables
+  >(
     {
-      queryHook: useClusterUsageScalingRecommendationsQuery,
+      query: ClusterUsageScalingRecommendationsDocument,
       pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'recommendations'],
     },

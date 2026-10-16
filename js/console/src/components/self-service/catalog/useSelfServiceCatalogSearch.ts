@@ -6,7 +6,7 @@ import {
   useCatalogSearchQuery,
 } from 'generated/graphql'
 import { chain } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 
 export type SearchDropdownItem = {
@@ -64,14 +64,16 @@ export function useSelfServiceCatalogSearch(): SelfServiceSearchState {
 
   const { popToast } = useSimpleToast()
 
+  const toastSearchFailure = useEffectEvent(() =>
+    popToast({
+      heading: 'Search failed, falling back to text search',
+      content: error?.message,
+      severity: 'danger',
+    })
+  )
+
   useEffect(() => {
-    if (semanticSearchFailed)
-      popToast({
-        heading: 'Search failed, falling back to text search',
-        content: error?.message,
-        severity: 'danger',
-      })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (semanticSearchFailed) toastSearchFailure()
   }, [semanticSearchFailed])
 
   const searchResults = useMemo(

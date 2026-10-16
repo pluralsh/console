@@ -325,7 +325,7 @@ export const PodsList = memo(
     clusterId,
     serviceId,
     linkToK8sDashboard = false,
-    linkBasePath = `/pods`,
+    linkBasePath = '/pods',
     refetch,
     reactTableOptions: reactTableOptionsProp,
     ...props

@@ -5,7 +5,9 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ClusterUsageTinyFragment,
-  useClusterUsagesQuery,
+  ClusterUsagesDocument,
+  ClusterUsagesQuery,
+  ClusterUsagesQueryVariables,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
@@ -32,9 +34,9 @@ export function CostManagementTableView() {
   const { tagKeysState, tagOpState } = useOutletContext<CMContextType>()
 
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<ClusterUsagesQuery, ClusterUsagesQueryVariables>(
       {
-        queryHook: useClusterUsagesQuery,
+        query: ClusterUsagesDocument,
         pageSize: 500,
         keyPath: ['clusterUsages'],
       },

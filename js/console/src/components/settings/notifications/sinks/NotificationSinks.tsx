@@ -7,7 +7,11 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { useNotificationSinksQuery } from 'generated/graphql'
+import {
+  NotificationSinksDocument,
+  NotificationSinksQuery,
+  NotificationSinksQueryVariables,
+} from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -44,8 +48,11 @@ export default function NotificationSinks() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useNotificationSinksQuery,
+  } = useFetchPaginatedData<
+    NotificationSinksQuery,
+    NotificationSinksQueryVariables
+  >({
+    query: NotificationSinksDocument,
     keyPath: ['notificationSinks'],
   })
 

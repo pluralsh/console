@@ -3,7 +3,6 @@ import {
   type ComponentType,
   type Ref,
   Suspense,
-  useMemo,
   useState,
 } from 'react'
 
@@ -205,10 +204,9 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
     </>
   )
 
-  const navContextVal = useMemo<NavigationContextValue>(
-    () => ({ useNavigate, usePathname, Link }),
-    []
-  )
+  const navigate = useNavigate()
+  const pathname = usePathname()
+  const navContextVal: NavigationContextValue = { navigate, pathname, Link }
 
   return (
     <SSRProvider>

@@ -24,11 +24,13 @@ import {
 } from 'components/workbenches/common/WorkbenchGroupedList'
 import {
   SortDirection,
-  useWorkbenchJobsForStatusQuery,
   useWorkbenchJobStatusCountsQuery,
   WorkbenchJobPrState,
   WorkbenchJobStatus,
   WorkbenchJobTinyFragment,
+  WorkbenchJobsForStatusDocument,
+  WorkbenchJobsForStatusQuery,
+  WorkbenchJobsForStatusQueryVariables,
 } from 'generated/graphql'
 import { includes, startCase } from 'lodash'
 import { memo, ReactElement, useMemo } from 'react'
@@ -170,9 +172,12 @@ function JobStatusGroup({
   scrollEl: HTMLDivElement | null
 }) {
   const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      WorkbenchJobsForStatusQuery,
+      WorkbenchJobsForStatusQueryVariables
+    >(
       {
-        queryHook: useWorkbenchJobsForStatusQuery,
+        query: WorkbenchJobsForStatusDocument,
         keyPath: RUNS_KEY_PATH,
         pageSize: WORKBENCH_JOBS_PAGE_SIZE,
         keepLoadedPages: true,

@@ -14,8 +14,10 @@ import {
   ObserverFragment,
   ObserverTargetType,
   useDeleteObserverMutation,
-  useKickObserverMutation,
-  useObserversQuery,
+  ObserversDocument,
+  ObserversQuery,
+  ObserversQueryVariables,
+  KickObserverDocument,
 } from 'generated/graphql'
 import { useState } from 'react'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
@@ -271,7 +273,7 @@ const columns = [
           <KickButton
             icon
             pulledAt={node?.lastRunAt}
-            kickMutationHook={useKickObserverMutation}
+            kickMutation={KickObserverDocument}
             tooltipMessage="Resync"
             variables={{ id: node?.id }}
           />
@@ -304,8 +306,8 @@ export function Observers() {
   const projectId = useProjectId()
 
   const { data, loading, error, pageInfo, fetchNextPage } =
-    useFetchPaginatedData(
-      { queryHook: useObserversQuery, keyPath: ['observers'] },
+    useFetchPaginatedData<ObserversQuery, ObserversQueryVariables>(
+      { query: ObserversDocument, keyPath: ['observers'] },
       { projectId }
     )
 

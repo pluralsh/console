@@ -18,8 +18,10 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   useUpdateWorkbenchMutation,
-  useWorkbenchToolsQuery,
   WorkbenchQuery,
+  WorkbenchToolsDocument,
+  WorkbenchToolsQuery,
+  WorkbenchToolsQueryVariables,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import styled from 'styled-components'
@@ -68,8 +70,8 @@ export function WorkbenchToolsEditModal({
     data: toolsData,
     error: toolsError,
     loading: toolsLoading,
-  } = useFetchPaginatedData({
-    queryHook: useWorkbenchToolsQuery,
+  } = useFetchPaginatedData<WorkbenchToolsQuery, WorkbenchToolsQueryVariables>({
+    query: WorkbenchToolsDocument,
     keyPath: ['workbenchTools'],
     skip: !open,
   })

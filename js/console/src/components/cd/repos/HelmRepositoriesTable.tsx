@@ -2,7 +2,9 @@ import { Table } from '@pluralsh/design-system'
 import {
   GitHealth,
   useHelmPullabilityStatisticsQuery,
-  useHelmRepositoriesQuery,
+  HelmRepositoriesDocument,
+  HelmRepositoriesQuery,
+  HelmRepositoriesQueryVariables,
 } from 'generated/graphql'
 import { useEffect } from 'react'
 
@@ -32,8 +34,11 @@ export function HelmRepositoriesTable({
   setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useHelmRepositoriesQuery, keyPath: ['helmRepositories'] },
+    useFetchPaginatedData<
+      HelmRepositoriesQuery,
+      HelmRepositoriesQueryVariables
+    >(
+      { query: HelmRepositoriesDocument, keyPath: ['helmRepositories'] },
       { q: searchStr, health: statusFilterKeyToGitHealth(status) }
     )
   const { data: statsData } = useHelmPullabilityStatisticsQuery({

@@ -1,7 +1,11 @@
 import { Table } from '@pluralsh/design-system'
 import { columns } from '../pr/automations/PrAutomationsColumns.tsx'
 
-import { usePrAutomationsQuery } from 'generated/graphql'
+import {
+  PrAutomationsDocument,
+  PrAutomationsQuery,
+  PrAutomationsQueryVariables,
+} from 'generated/graphql'
 import { useMemo } from 'react'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
@@ -17,8 +21,8 @@ export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: usePrAutomationsQuery, keyPath: ['prAutomations'] },
+  } = useFetchPaginatedData<PrAutomationsQuery, PrAutomationsQueryVariables>(
+    { query: PrAutomationsDocument, keyPath: ['prAutomations'] },
     { catalogId }
   )
 

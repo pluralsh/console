@@ -15,6 +15,9 @@ import {
   SentinelRunFragment,
   SentinelRunStatus,
   useSentinelRunsQuery,
+  SentinelRunsDocument,
+  SentinelRunsQuery,
+  SentinelRunsQueryVariables,
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -30,8 +33,8 @@ export function SentinelRunsTables({ id }: { id: string }) {
     pollInterval: POLL_INTERVAL,
   })
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useSentinelRunsQuery, keyPath: ['sentinel', 'runs'] },
+    useFetchPaginatedData<SentinelRunsQuery, SentinelRunsQueryVariables>(
+      { query: SentinelRunsDocument, keyPath: ['sentinel', 'runs'] },
       { id }
     )
 

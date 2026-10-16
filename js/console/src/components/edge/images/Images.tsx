@@ -3,7 +3,9 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { ReactNode } from 'react'
 import {
   ClusterIsoImageEdge,
-  useClusterIsoImagesQuery,
+  ClusterIsoImagesDocument,
+  ClusterIsoImagesQuery,
+  ClusterIsoImagesQueryVariables,
 } from '../../../generated/graphql.ts'
 import { ObscuredToken } from '../../profile/ObscuredToken.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
@@ -71,9 +73,12 @@ const columns = [
 
 export default function Images(): ReactNode {
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
+    useFetchPaginatedData<
+      ClusterIsoImagesQuery,
+      ClusterIsoImagesQueryVariables
+    >({
       pollInterval: 30_000,
-      queryHook: useClusterIsoImagesQuery,
+      query: ClusterIsoImagesDocument,
       keyPath: ['clusterIsoImages'],
     })
 

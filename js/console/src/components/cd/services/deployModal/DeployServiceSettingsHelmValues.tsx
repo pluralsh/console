@@ -195,17 +195,12 @@ const HelmValuesFilesInput = memo(
     const { visuallyHiddenProps } = useVisuallyHidden()
     const { fileItems, errorCount } = useMemo(() => {
       const filesSet = new Set<string>()
-      let errorCount = 0
 
       const items = helmValuesFiles?.map((file) => {
         const duplicate = !!file && filesSet.has(file)
 
         if (file) {
           filesSet.add(file)
-        }
-
-        if (duplicate) {
-          errorCount++
         }
 
         return {
@@ -215,6 +210,9 @@ const HelmValuesFilesInput = memo(
           },
         }
       })
+
+      const errorCount =
+        items?.filter(({ errors }) => errors.duplicate).length ?? 0
 
       return { fileItems: items, errorCount }
     }, [helmValuesFiles])

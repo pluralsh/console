@@ -5,7 +5,12 @@ import { Link } from 'react-router-dom'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { GqlError } from 'components/utils/Alert'
-import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
+import {
+  PipelineFragment,
+  PipelinesDocument,
+  PipelinesQuery,
+  PipelinesQueryVariables,
+} from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -34,8 +39,8 @@ export function Pipelines() {
   const debouncedSearchString = useThrottle(searchString, 100)
 
   const { data, loading, error, pageInfo, fetchNextPage } =
-    useFetchPaginatedData(
-      { queryHook: usePipelinesQuery, keyPath: ['pipelines'] },
+    useFetchPaginatedData<PipelinesQuery, PipelinesQueryVariables>(
+      { query: PipelinesDocument, keyPath: ['pipelines'] },
       { q: debouncedSearchString, projectId }
     )
 

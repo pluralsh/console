@@ -12,8 +12,8 @@ import { ReactNode, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 import {
   StackTinyFragment,
-  useKickStackMutation,
   useTriggerStackRunMutation,
+  KickStackDocument,
 } from '../../generated/graphql'
 import KickButton from '../utils/KickButton'
 import { MoreMenu } from '../utils/MoreMenu'
@@ -101,7 +101,7 @@ export default function StackActions({
               transition: 'none',
             }}
             pulledAt={stack?.repository?.pulledAt}
-            kickMutationHook={useKickStackMutation}
+            kickMutation={KickStackDocument}
             mutationOptions={{
               refetchQueries: ['Stacks'],
               awaitRefetchQueries: true,

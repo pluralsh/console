@@ -8,7 +8,12 @@ import {
   RadioGroup,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
-import { useClustersQuery, ViolationStatisticsQuery } from 'generated/graphql'
+import {
+  ViolationStatisticsQuery,
+  ClustersDocument,
+  ClustersQuery,
+  ClustersQueryVariables,
+} from 'generated/graphql'
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
@@ -52,9 +57,9 @@ function GatekeeperFilter({
     loading,
     pageInfo,
     fetchNextPage,
-  } = useFetchPaginatedData(
+  } = useFetchPaginatedData<ClustersQuery, ClustersQueryVariables>(
     {
-      queryHook: useClustersQuery,
+      query: ClustersDocument,
       keyPath: ['clusters'],
     },
     {

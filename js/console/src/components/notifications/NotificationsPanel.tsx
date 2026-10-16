@@ -19,8 +19,10 @@ import isEmpty from 'lodash/isEmpty'
 import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
 import {
   AppNotificationFragment,
-  useAppNotificationsQuery,
   useReadAppNotificationsMutation,
+  AppNotificationsDocument,
+  AppNotificationsQuery,
+  AppNotificationsQueryVariables,
 } from '../../generated/graphql'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { mapExistingNodes } from '../../utils/graphql'
@@ -48,8 +50,11 @@ export function NotificationsPanel({
   const navigate = useNavigate()
 
   const { data, pageInfo, fetchNextPage, setVirtualSlice, loading } =
-    useFetchPaginatedData({
-      queryHook: useAppNotificationsQuery,
+    useFetchPaginatedData<
+      AppNotificationsQuery,
+      AppNotificationsQueryVariables
+    >({
+      query: AppNotificationsDocument,
       keyPath: ['appNotifications'],
     })
 

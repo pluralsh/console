@@ -1,6 +1,8 @@
 import {
   CustomStackRunFragment,
-  useCustomStackRunsQuery,
+  CustomStackRunsDocument,
+  CustomStackRunsQuery,
+  CustomStackRunsQueryVariables,
 } from 'generated/graphql'
 
 import { createColumnHelper } from '@tanstack/react-table'
@@ -32,9 +34,9 @@ export function StackCustomRunChooseTemplate({
 }) {
   const theme = useTheme()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<CustomStackRunsQuery, CustomStackRunsQueryVariables>(
       {
-        queryHook: useCustomStackRunsQuery,
+        query: CustomStackRunsDocument,
         keyPath: ['infrastructureStack', 'customStackRuns'],
       },
       { id: stackId }

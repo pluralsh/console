@@ -19,7 +19,9 @@ import {
   Conjunction,
   Homepage,
   useClusterStatusesQuery,
-  useClustersQuery,
+  ClustersDocument,
+  ClustersQuery,
+  ClustersQueryVariables,
 } from 'generated/graphql'
 
 import { useLogin } from 'components/contexts'
@@ -156,8 +158,8 @@ export default function Clusters() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: useClustersQuery, keyPath: ['clusters'] },
+  } = useFetchPaginatedData<ClustersQuery, ClustersQueryVariables>(
+    { query: ClustersDocument, keyPath: ['clusters'] },
     {
       q: debouncedSearchString,
       projectId,

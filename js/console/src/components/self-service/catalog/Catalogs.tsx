@@ -5,7 +5,11 @@ import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import { Body2P, Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useCatalogsQuery } from 'generated/graphql'
+import {
+  CatalogsDocument,
+  CatalogsQuery,
+  CatalogsQueryVariables,
+} from 'generated/graphql'
 import Fuse from 'fuse.js'
 import { chain, countBy, isEmpty } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
@@ -60,8 +64,8 @@ export function Catalogs() {
   const search = useSelfServiceCatalogSearch()
 
   const { data, error, loading, pageInfo, fetchNextPage } =
-    useFetchPaginatedData({
-      queryHook: useCatalogsQuery,
+    useFetchPaginatedData<CatalogsQuery, CatalogsQueryVariables>({
+      query: CatalogsDocument,
       keyPath: ['catalogs'],
     })
 

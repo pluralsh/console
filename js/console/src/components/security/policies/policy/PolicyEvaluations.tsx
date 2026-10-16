@@ -16,7 +16,9 @@ import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
 import {
   PolicyEvaluationFragment,
   PolicyType,
-  usePolicyEvaluationsQuery,
+  PolicyEvaluationsDocument,
+  PolicyEvaluationsQuery,
+  PolicyEvaluationsQueryVariables,
 } from 'generated/graphql'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
@@ -58,9 +60,12 @@ export function PolicyEvaluations() {
   const detailTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      PolicyEvaluationsQuery,
+      PolicyEvaluationsQueryVariables
+    >(
       {
-        queryHook: usePolicyEvaluationsQuery,
+        query: PolicyEvaluationsDocument,
         keyPath: ['policy', 'policyEvaluations'],
         skip: !policyId,
       },

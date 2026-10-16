@@ -11,7 +11,9 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ClusterRegistrationFragment,
-  useClusterRegistrationsQuery,
+  ClusterRegistrationsDocument,
+  ClusterRegistrationsQuery,
+  ClusterRegistrationsQueryVariables,
 } from 'generated/graphql'
 import { ReactNode, useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
@@ -141,8 +143,11 @@ export default function Clusters(): ReactNode {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useClusterRegistrationsQuery,
+  } = useFetchPaginatedData<
+    ClusterRegistrationsQuery,
+    ClusterRegistrationsQueryVariables
+  >({
+    query: ClusterRegistrationsDocument,
     keyPath: ['clusterRegistrations'],
   })
 

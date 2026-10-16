@@ -23,7 +23,9 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   PreviewEnvironmentInstance,
-  useFlowPreviewEnvironmentInstancesQuery,
+  FlowPreviewEnvironmentInstancesDocument,
+  FlowPreviewEnvironmentInstancesQuery,
+  FlowPreviewEnvironmentInstancesQueryVariables,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
@@ -62,9 +64,12 @@ export function FlowPreviews() {
   )
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      FlowPreviewEnvironmentInstancesQuery,
+      FlowPreviewEnvironmentInstancesQueryVariables
+    >(
       {
-        queryHook: useFlowPreviewEnvironmentInstancesQuery,
+        query: FlowPreviewEnvironmentInstancesDocument,
         keyPath: ['flow', 'previewEnvironmentInstances'],
       },
       { id: flow?.id ?? '' }

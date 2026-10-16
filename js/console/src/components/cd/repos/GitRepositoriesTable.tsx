@@ -1,7 +1,9 @@
 import { Table } from '@pluralsh/design-system'
 import {
   useGitPullabilityStatisticsQuery,
-  useGitRepositoriesQuery,
+  GitRepositoriesDocument,
+  GitRepositoriesQuery,
+  GitRepositoriesQueryVariables,
 } from 'generated/graphql'
 import { useEffect } from 'react'
 
@@ -33,8 +35,8 @@ export function GitRepositoriesTable({
   setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useGitRepositoriesQuery, keyPath: ['gitRepositories'] },
+    useFetchPaginatedData<GitRepositoriesQuery, GitRepositoriesQueryVariables>(
+      { query: GitRepositoriesDocument, keyPath: ['gitRepositories'] },
       { q: searchStr, health: statusFilterKeyToGitHealth(status) }
     )
   const { data: statsData } = useGitPullabilityStatisticsQuery({

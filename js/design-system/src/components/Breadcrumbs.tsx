@@ -141,8 +141,7 @@ function CrumbSelect({
   isLast: boolean
   isDisabled?: boolean
 }) {
-  const { useNavigate } = useNavigationContext()
-  const navigate = useNavigate()
+  const { navigate } = useNavigationContext()
 
   return (
     <CrumbLinkWrap>

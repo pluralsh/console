@@ -170,11 +170,12 @@ export function ClusterInsightsComponents() {
 
 export function ClusterInsightComponentLabel({
   component,
-  icon = <ComponentsIcon size={16} />,
+  icon: iconProp,
   ...props
 }: {
   component: Nullable<ClusterInsightComponentFragment>
 } & Partial<ComponentPropsWithRef<typeof StackedText>>) {
+  const icon = iconProp === undefined ? <ComponentsIcon size={16} /> : iconProp
   const title = component?.namespace
     ? `${component.namespace} > ${component.name}`
     : component?.name

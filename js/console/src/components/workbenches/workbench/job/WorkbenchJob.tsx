@@ -33,7 +33,7 @@ import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
 
 export function WorkbenchJob() {
   const theme = useTheme()
-  const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
+  const jobId = useParams()[WORKBENCH_JOBS_PARAM_JOB] ?? ''
   const {
     data,
     loading,

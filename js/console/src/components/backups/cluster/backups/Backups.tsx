@@ -12,8 +12,10 @@ import { useParams } from 'react-router-dom'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import {
-  useClusterBackupsQuery,
   useClusterBasicQuery,
+  ClusterBackupsDocument,
+  ClusterBackupsQuery,
+  ClusterBackupsQueryVariables,
 } from '../../../../generated/graphql'
 import { GqlError } from '../../../utils/Alert'
 import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
@@ -55,8 +57,8 @@ export default function Backups() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: useClusterBackupsQuery, keyPath: ['clusterBackups'] },
+  } = useFetchPaginatedData<ClusterBackupsQuery, ClusterBackupsQueryVariables>(
+    { query: ClusterBackupsDocument, keyPath: ['clusterBackups'] },
     { clusterId }
   )
 

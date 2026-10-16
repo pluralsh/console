@@ -20,7 +20,9 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import {
   useWorkbenchAlertCountsQuery,
-  useWorkbenchAlertsQuery,
+  WorkbenchAlertsDocument,
+  WorkbenchAlertsQuery,
+  WorkbenchAlertsQueryVariables,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
@@ -65,9 +67,12 @@ export function WorkbenchAlerts() {
     fetchNextPage,
     setVirtualSlice,
     fetchingMore,
-  } = useFetchPaginatedData(
+  } = useFetchPaginatedData<
+    WorkbenchAlertsQuery,
+    WorkbenchAlertsQueryVariables
+  >(
     {
-      queryHook: useWorkbenchAlertsQuery,
+      query: WorkbenchAlertsDocument,
       keyPath: ALERTS_KEY_PATH,
       pageSize: PAGE_SIZE,
       keepLoadedPages: true,

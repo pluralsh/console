@@ -2,8 +2,10 @@ import { Flex, TabPanel, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import {
   type ServiceDeploymentsRowFragment,
-  useServiceDeploymentsQuery,
   useServiceStatusesQuery,
+  ServiceDeploymentsDocument,
+  ServiceDeploymentsQuery,
+  ServiceDeploymentsQueryVariables,
 } from 'generated/graphql'
 import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
@@ -34,8 +36,11 @@ export default function ServicesTable() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: useServiceDeploymentsQuery, keyPath: ['serviceDeployments'] },
+  } = useFetchPaginatedData<
+    ServiceDeploymentsQuery,
+    ServiceDeploymentsQueryVariables
+  >(
+    { query: ServiceDeploymentsDocument, keyPath: ['serviceDeployments'] },
     {
       q: q || undefined,
       projectId,

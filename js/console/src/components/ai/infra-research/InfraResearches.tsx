@@ -18,7 +18,9 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { CaptionP, Title2H1 } from 'components/utils/typography/Text'
 import {
   InfraResearchFragment,
-  useInfraResearchesQuery,
+  InfraResearchesDocument,
+  InfraResearchesQuery,
+  InfraResearchesQueryVariables,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
@@ -38,8 +40,8 @@ export const getInfraResearchesBreadcrumbs = () =>
 export function InfraResearches() {
   const [published, setPublished] = useState<Nullable<boolean>>(true)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useInfraResearchesQuery, keyPath: ['infraResearches'] },
+    useFetchPaginatedData<InfraResearchesQuery, InfraResearchesQueryVariables>(
+      { query: InfraResearchesDocument, keyPath: ['infraResearches'] },
       { published }
     )
   const infraResearches = useMemo(
@@ -89,7 +91,7 @@ export function InfraResearches() {
         <Flex
           gap="xsmall"
           overflow="auto"
-          css={{ [`@container (max-width: ${800}px)`]: { display: 'none' } }}
+          css={{ '@container (max-width: 800px)': { display: 'none' } }}
         >
           {infraResearchExamples.map((card) => (
             <AIExampleCard

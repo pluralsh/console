@@ -1,4 +1,4 @@
-import { MutationHookOptions } from '@apollo/client'
+import { DocumentNode, MutationHookOptions, useMutation } from '@apollo/client'
 import {
   Button,
   GraphQLToast,
@@ -12,7 +12,7 @@ import { ComponentPropsWithRef, useCallback, useState } from 'react'
 
 export default function KickButton({
   pulledAt,
-  kickMutationHook,
+  kickMutation,
   message,
   icon = false,
   tooltipMessage,
@@ -21,14 +21,14 @@ export default function KickButton({
   ...props
 }: {
   pulledAt?: string | null
-  kickMutationHook: any
+  kickMutation: DocumentNode
   message?: string
   icon?: boolean
   tooltipMessage: string
   variables: any
   mutationOptions?: MutationHookOptions
 } & ComponentPropsWithRef<typeof Button>) {
-  const [mutation, { loading, error }] = kickMutationHook({
+  const [mutation, { loading, error }] = useMutation(kickMutation, {
     ...mutationOptions,
     variables,
   })

@@ -19,7 +19,7 @@ import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
   ServicePromotion,
-  useKickServiceMutation,
+  KickServiceDocument,
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import {
@@ -81,7 +81,7 @@ export function ServiceDetailsSidecar({
         <KickButton
           secondary
           pulledAt={repository?.pulledAt}
-          kickMutationHook={useKickServiceMutation}
+          kickMutation={KickServiceDocument}
           message="Resync service"
           tooltipMessage="Use this to sync this service now instead of at the next poll interval"
           variables={{ id }}

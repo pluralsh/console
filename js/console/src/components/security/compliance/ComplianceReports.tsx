@@ -16,7 +16,9 @@ import { GqlError } from 'components/utils/Alert.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   ComplianceReportGeneratorFragment,
-  useComplianceReportGeneratorsQuery,
+  ComplianceReportGeneratorsDocument,
+  ComplianceReportGeneratorsQuery,
+  ComplianceReportGeneratorsQueryVariables,
 } from 'generated/graphql.ts'
 import { fetchToken } from 'helpers/auth.ts'
 import streamSaver from 'streamsaver'
@@ -86,8 +88,11 @@ export function ComplianceReports() {
   useSetBreadcrumbs(breadcrumbs)
 
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useComplianceReportGeneratorsQuery,
+    useFetchPaginatedData<
+      ComplianceReportGeneratorsQuery,
+      ComplianceReportGeneratorsQueryVariables
+    >({
+      query: ComplianceReportGeneratorsDocument,
       keyPath: ['complianceReportGenerators'],
     })
 

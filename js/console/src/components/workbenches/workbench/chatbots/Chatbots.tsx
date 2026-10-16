@@ -18,9 +18,11 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2P } from 'components/utils/typography/Text'
 import {
   useChatProviderConnectionsQuery,
-  useWorkbenchChatbotsQuery,
   useWorkbenchQuery,
   WorkbenchChatbotFragment,
+  WorkbenchChatbotsDocument,
+  WorkbenchChatbotsQuery,
+  WorkbenchChatbotsQueryVariables,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo, useState } from 'react'
@@ -68,9 +70,12 @@ export function Chatbots() {
   })
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      WorkbenchChatbotsQuery,
+      WorkbenchChatbotsQueryVariables
+    >(
       {
-        queryHook: useWorkbenchChatbotsQuery,
+        query: WorkbenchChatbotsDocument,
         keyPath: ['workbench', 'chatbots'],
       },
       { id: workbenchId }

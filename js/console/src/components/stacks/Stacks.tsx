@@ -54,7 +54,9 @@ import {
   StackType,
   TagType,
   useStackQuery,
-  useStacksQuery,
+  StacksDocument,
+  StacksQuery,
+  StacksQueryVariables,
 } from '../../generated/graphql'
 import {
   getStacksAbsPath,
@@ -168,9 +170,9 @@ export function Stacks() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData(
+  } = useFetchPaginatedData<StacksQuery, StacksQueryVariables>(
     {
-      queryHook: useStacksQuery,
+      query: StacksDocument,
       keyPath: ['infrastructureStacks'],
     },
     {

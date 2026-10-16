@@ -16,7 +16,9 @@ import { GqlError } from 'components/utils/Alert'
 
 import {
   useClusterNamespacesQuery,
-  useClusterPodsQuery,
+  ClusterPodsDocument,
+  ClusterPodsQuery,
+  ClusterPodsQueryVariables,
 } from '../../../generated/graphql'
 import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
 import { TableCaretLink } from '../../cluster/TableElements'
@@ -102,10 +104,10 @@ export function ClusterPods() {
   })
 
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<ClusterPodsQuery, ClusterPodsQueryVariables>(
       {
         pollInterval: POLL_INTERVAL,
-        queryHook: useClusterPodsQuery,
+        query: ClusterPodsDocument,
         keyPath: ['pods'],
       },
       { clusterId, namespace }

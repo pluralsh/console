@@ -11,7 +11,11 @@ import {
   getColAlertViewJob,
 } from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useFlowAlertsQuery } from 'generated/graphql'
+import {
+  FlowAlertsDocument,
+  FlowAlertsQuery,
+  FlowAlertsQueryVariables,
+} from 'generated/graphql'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { mapExistingNodes } from 'utils/graphql'
@@ -20,8 +24,8 @@ import type { FlowOutletContext } from './Flow'
 export function FlowAlerts() {
   const { flow } = useOutletContext<FlowOutletContext>()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useFlowAlertsQuery, keyPath: ['flow', 'alerts'] },
+    useFetchPaginatedData<FlowAlertsQuery, FlowAlertsQueryVariables>(
+      { query: FlowAlertsDocument, keyPath: ['flow', 'alerts'] },
       { id: flow?.id ?? '' }
     )
 

@@ -7,7 +7,11 @@ import {
 import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { useNotificationRoutersQuery } from 'generated/graphql'
+import {
+  NotificationRoutersDocument,
+  NotificationRoutersQuery,
+  NotificationRoutersQueryVariables,
+} from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -64,8 +68,11 @@ export default function NotificationRouters() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useNotificationRoutersQuery,
+  } = useFetchPaginatedData<
+    NotificationRoutersQuery,
+    NotificationRoutersQueryVariables
+  >({
+    query: NotificationRoutersDocument,
     errorPolicy: 'all',
     keyPath: ['notificationRouters'],
   })

@@ -22,8 +22,10 @@ import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRuntimeType,
   useUpsertFlowMutation,
-  useWorkbenchesQuery,
   WorkbenchTinyFragment,
+  WorkbenchesDocument,
+  WorkbenchesQuery,
+  WorkbenchesQueryVariables,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import {
@@ -59,9 +61,9 @@ export function AttachWorkbenchesModal({
   const debouncedQuery = useDebounce(query, 200)
 
   const { data, loading, error, pageInfo, fetchNextPage } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<WorkbenchesQuery, WorkbenchesQueryVariables>(
       {
-        queryHook: useWorkbenchesQuery,
+        query: WorkbenchesDocument,
         keyPath: ['workbenches'],
       },
       { q: debouncedQuery }

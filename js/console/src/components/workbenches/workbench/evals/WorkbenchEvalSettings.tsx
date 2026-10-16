@@ -135,47 +135,49 @@ export function WorkbenchEvalSettings() {
     },
   }
 
-  const handleSave = async () => {
-    try {
-      if (!evalsEnabled) {
-        if (workbenchEval?.id) {
-          await deleteWorkbenchEval({
-            variables: { id: workbenchEval.id },
-            refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
-            awaitRefetchQueries: true,
-          })
-        }
-      } else {
-        const attributes: WorkbenchEvalAttributes = {
-          promptRules: promptQualityRules || null,
-          conclusionRules: conclusionRules || null,
-          progressRules: progressAndThoughtsRules || null,
-          automation: {
-            enabled: automationEnabled,
-            maxScore,
-            maxSkills,
-            instructions: automationInstructions || null,
-          },
-        }
-
-        if (workbenchEval?.id) {
-          await updateWorkbenchEval({
-            variables: { id: workbenchEval.id, attributes },
-            refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
-            awaitRefetchQueries: true,
-          })
-        } else {
-          await createWorkbenchEval({
-            variables: { workbenchId, attributes },
-            refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
-            awaitRefetchQueries: true,
-          })
-        }
+  const save = async () => {
+    if (!evalsEnabled) {
+      if (workbenchEval?.id) {
+        await deleteWorkbenchEval({
+          variables: { id: workbenchEval.id },
+          refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+          awaitRefetchQueries: true,
+        })
+      }
+    } else {
+      const attributes: WorkbenchEvalAttributes = {
+        promptRules: promptQualityRules || null,
+        conclusionRules: conclusionRules || null,
+        progressRules: progressAndThoughtsRules || null,
+        automation: {
+          enabled: automationEnabled,
+          maxScore,
+          maxSkills,
+          instructions: automationInstructions || null,
+        },
       }
 
-      popToast({ content: 'Eval settings updated', severity: 'success' })
-      navigate(getWorkbenchAbsPath(workbenchId))
-    } catch (e) {
+      if (workbenchEval?.id) {
+        await updateWorkbenchEval({
+          variables: { id: workbenchEval.id, attributes },
+          refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+          awaitRefetchQueries: true,
+        })
+      } else {
+        await createWorkbenchEval({
+          variables: { workbenchId, attributes },
+          refetchQueries: ['WorkbenchEvalSettings', 'Workbench'],
+          awaitRefetchQueries: true,
+        })
+      }
+    }
+
+    popToast({ content: 'Eval settings updated', severity: 'success' })
+    navigate(getWorkbenchAbsPath(workbenchId))
+  }
+
+  const handleSave = () =>
+    save().catch((e) =>
       popToast({
         content:
           e instanceof Error
@@ -183,8 +185,7 @@ export function WorkbenchEvalSettings() {
             : 'Unable to save eval settings. Please try again.',
         severity: 'danger',
       })
-    }
-  }
+    )
 
   return (
     <Flex

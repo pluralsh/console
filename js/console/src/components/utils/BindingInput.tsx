@@ -8,7 +8,7 @@ import {
   PeopleIcon,
   PersonIcon,
 } from '@pluralsh/design-system'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { ApolloClient, useApolloClient } from '@apollo/client'
 import styled, { useTheme } from 'styled-components'
 
@@ -110,11 +110,14 @@ export function BindingInput({
   add,
   hint,
   layout,
-  placeholder = TEXT[type]?.placeholder,
-  label = TEXT[type]?.label,
+  placeholder: placeholderProp,
+  label: labelProp,
   inputProps,
   icon,
 }: any) {
+  const placeholder =
+    placeholderProp === undefined ? TEXT[type]?.placeholder : placeholderProp
+  const label = labelProp === undefined ? TEXT[type]?.label : labelProp
   const { colors } = useTheme()
   const client = useApolloClient()
   const [suggestions, setSuggestions] = useState([])
@@ -161,8 +164,10 @@ function TagInput({
   const [inputValue, setInputValue] = useState('')
 
   // Run only on first render. Make sure there will be data in Combo Box to start with.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => onChange({ target: { value: inputValue } }), [])
+  const loadInitialSuggestions = useEffectEvent(() =>
+    onChange({ target: { value: inputValue } })
+  )
+  useEffect(() => loadInitialSuggestions(), [])
 
   return (
     <TagPicker>

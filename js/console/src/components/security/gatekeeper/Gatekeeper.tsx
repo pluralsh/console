@@ -5,8 +5,10 @@ import { DisplayButton } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ConstraintViolationField,
-  usePolicyConstraintsQuery,
   useViolationStatisticsQuery,
+  PolicyConstraintsDocument,
+  PolicyConstraintsQuery,
+  PolicyConstraintsQueryVariables,
 } from 'generated/graphql'
 import { useState } from 'react'
 import {
@@ -76,8 +78,11 @@ export function Gatekeeper() {
     !!selectedClusters.length
 
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: usePolicyConstraintsQuery, keyPath: ['policyConstraints'] },
+    useFetchPaginatedData<
+      PolicyConstraintsQuery,
+      PolicyConstraintsQueryVariables
+    >(
+      { query: PolicyConstraintsDocument, keyPath: ['policyConstraints'] },
       policyQFilters
     )
 

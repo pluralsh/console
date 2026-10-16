@@ -5,7 +5,9 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import {
   PipelineContextFragment,
   PipelineFragment,
-  usePipelineContextsQuery,
+  PipelineContextsDocument,
+  PipelineContextsQuery,
+  PipelineContextsQueryVariables,
 } from 'generated/graphql'
 import { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -118,9 +120,12 @@ export function PipelineContexts({
   pipeline: Nullable<PipelineFragment>
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      PipelineContextsQuery,
+      PipelineContextsQueryVariables
+    >(
       {
-        queryHook: usePipelineContextsQuery,
+        query: PipelineContextsDocument,
         keyPath: ['pipeline', 'contexts'],
       },
       { id: pipeline?.id ?? '' }

@@ -23,7 +23,9 @@ import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRuntimeType,
   WorkbenchTinyFragment,
-  useWorkbenchesQuery,
+  WorkbenchesDocument,
+  WorkbenchesQuery,
+  WorkbenchesQueryVariables,
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import {
@@ -62,8 +64,8 @@ export function WorkbenchesList() {
   const debouncedSearchString = useThrottle(searchString, 200)
 
   const { data, error, loading, pageInfo, fetchNextPage } =
-    useFetchPaginatedData(
-      { queryHook: useWorkbenchesQuery, keyPath: ['workbenches'] },
+    useFetchPaginatedData<WorkbenchesQuery, WorkbenchesQueryVariables>(
+      { query: WorkbenchesDocument, keyPath: ['workbenches'] },
       { q: debouncedSearchString }
     )
 

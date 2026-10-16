@@ -37,7 +37,11 @@ import {
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
-import { useFlowsQuery } from 'generated/graphql'
+import {
+  FlowsDocument,
+  FlowsQuery,
+  FlowsQueryVariables,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -94,8 +98,8 @@ export function Flows() {
     refetch,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: useFlowsQuery, keyPath: ['flows'] },
+  } = useFetchPaginatedData<FlowsQuery, FlowsQueryVariables>(
+    { query: FlowsDocument, keyPath: ['flows'] },
     { q: debouncedSearchString, ...filterVars }
   )
 

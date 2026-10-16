@@ -37,6 +37,30 @@ export type MermaidRefHandle = {
   svgStr: Nullable<string>
 }
 
+async function renderMermaid(id: string, diagram: string) {
+  try {
+    const mermaid = (await import('mermaid')).default
+    const elkLayouts = (await import('@mermaid-js/layout-elk')).default
+
+    mermaid.initialize({
+      startOnLoad: false,
+      flowchart: { defaultRenderer: 'elk' },
+    })
+
+    try {
+      mermaid.registerLayoutLoaders(elkLayouts)
+    } catch (err) {
+      console.error('Failed to register ELK layout with mermaid:', err)
+    }
+    return (await mermaid.render(id, diagram)).svg
+  } catch (caughtErr) {
+    const err =
+      caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
+    console.error('Error parsing Mermaid (rendering plaintext):', err)
+    return err
+  }
+}
+
 export function Mermaid({
   ref,
   diagram,
@@ -72,34 +96,10 @@ export function Mermaid({
 
     // need to keep track of this since we're dealing with async ops, helps avoid race condition
     let isMounted = true
-    const renderDiagram = async () => {
-      let result: string | Error
-      try {
-        const mermaid = (await import('mermaid')).default
-        const elkLayouts = (await import('@mermaid-js/layout-elk')).default
-
-        mermaid.initialize({
-          startOnLoad: false,
-          flowchart: { defaultRenderer: 'elk' },
-        })
-
-        try {
-          mermaid.registerLayoutLoaders(elkLayouts)
-        } catch (err) {
-          console.error('Failed to register ELK layout with mermaid:', err)
-        }
-        result = (await mermaid.render(id, diagram)).svg
-      } catch (caughtErr) {
-        result =
-          caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
-        if (isMounted)
-          console.error('Error parsing Mermaid (rendering plaintext):', result)
-      }
+    renderMermaid(id, diagram).then((result) => {
       cachedRenders[id] = result
       if (isMounted) setRendered({ id, result })
-    }
-
-    renderDiagram()
+    })
 
     return () => {
       isMounted = false

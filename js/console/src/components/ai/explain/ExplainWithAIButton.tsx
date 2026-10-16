@@ -9,7 +9,7 @@ import { DefaultTheme, useTheme } from 'styled-components'
 
 export default function ExplainWithAIButton({
   active,
-  startIcon = <AiSparkleOutlineIcon size={13} />,
+  startIcon: startIconProp,
   visible,
   children,
   ...props
@@ -19,6 +19,12 @@ export default function ExplainWithAIButton({
   visible: boolean
   children: ReactNode
 } & ComponentPropsWithRef<typeof Button>) {
+  const startIcon =
+    startIconProp === undefined ? (
+      <AiSparkleOutlineIcon size={13} />
+    ) : (
+      startIconProp
+    )
   const theme = useTheme()
   const transitions = useTransition(visible ? [true] : [], {
     from: { opacity: 0, scale: `85%`, marginRight: -100 },

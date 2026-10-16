@@ -20,9 +20,11 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2P } from 'components/utils/typography/Text'
 import {
   useCreateWorkbenchJobMutation,
-  useWorkbenchPromptsQuery,
   useWorkbenchQuery,
   WorkbenchPromptFragment,
+  WorkbenchPromptsDocument,
+  WorkbenchPromptsQuery,
+  WorkbenchPromptsQueryVariables,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo, useState } from 'react'
@@ -68,9 +70,12 @@ export function SavedPrompts() {
   const workbench = workbenchData?.workbench
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      WorkbenchPromptsQuery,
+      WorkbenchPromptsQueryVariables
+    >(
       {
-        queryHook: useWorkbenchPromptsQuery,
+        query: WorkbenchPromptsDocument,
         keyPath: ['workbench', 'prompts'],
       },
       { id: workbenchId }

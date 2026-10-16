@@ -3,7 +3,9 @@ import { CellContext, createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import {
   ClusterAuditLog,
-  useKubernetesClusterAuditLogsQuery,
+  KubernetesClusterAuditLogsDocument,
+  KubernetesClusterAuditLogsQuery,
+  KubernetesClusterAuditLogsQueryVariables,
 } from '../../../generated/graphql.ts'
 import { GqlError } from '../../utils/Alert.tsx'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
@@ -50,10 +52,13 @@ export default function Audit() {
   const cluster = useCluster()
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      KubernetesClusterAuditLogsQuery,
+      KubernetesClusterAuditLogsQueryVariables
+    >(
       {
         skip: !cluster?.id,
-        queryHook: useKubernetesClusterAuditLogsQuery,
+        query: KubernetesClusterAuditLogsDocument,
         keyPath: ['auditLogs'],
         pollInterval: 30_000,
       },

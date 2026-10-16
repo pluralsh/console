@@ -323,12 +323,13 @@ const noop = () => {}
 
 export function ChatSubmitButton({
   bgColor = 'fill-primary',
-  icon = <ArrowUpIcon />,
+  icon: iconProp,
   ...props
 }: { bgColor?: SemanticColorKey; icon?: ReactNode } & Omit<
   ComponentPropsWithRef<typeof ChatSubmitButtonSC>,
   'children' | '$bgColor'
 >) {
+  const icon = iconProp === undefined ? <ArrowUpIcon /> : iconProp
   return (
     <ChatSubmitButtonSC
       $bgColor={bgColor}

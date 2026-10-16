@@ -3,7 +3,9 @@ import { Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import {
   type ServiceDeploymentsRowFragment,
-  useGetGlobalServiceServicesQuery,
+  GetGlobalServiceServicesDocument,
+  GetGlobalServiceServicesQuery,
+  GetGlobalServiceServicesQueryVariables,
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
@@ -21,9 +23,12 @@ export function GlobalServiceServices({
   globalServiceID: string
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      GetGlobalServiceServicesQuery,
+      GetGlobalServiceServicesQueryVariables
+    >(
       {
-        queryHook: useGetGlobalServiceServicesQuery,
+        query: GetGlobalServiceServicesDocument,
         keyPath: ['globalService', 'services'],
       },
       { serviceId: globalServiceID }

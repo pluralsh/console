@@ -3,14 +3,21 @@ import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHe
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { AlertsTable } from '../utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useWorkbenchesAlertsQuery } from 'generated/graphql'
+import {
+  WorkbenchesAlertsDocument,
+  WorkbenchesAlertsQuery,
+  WorkbenchesAlertsQueryVariables,
+} from 'generated/graphql'
 import { useMemo } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 
 export function WorkbenchesAlerts() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useWorkbenchesAlertsQuery,
+    useFetchPaginatedData<
+      WorkbenchesAlertsQuery,
+      WorkbenchesAlertsQueryVariables
+    >({
+      query: WorkbenchesAlertsDocument,
       keyPath: ['workbenchAlerts'],
     })
 

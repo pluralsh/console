@@ -18,8 +18,10 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchQuery,
-  useWorkbenchWebhooksQuery,
   WorkbenchWebhookFragment,
+  WorkbenchWebhooksDocument,
+  WorkbenchWebhooksQuery,
+  WorkbenchWebhooksQueryVariables,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -56,9 +58,12 @@ export function WebhookTriggers() {
   const workbench = workbenchData?.workbench
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      WorkbenchWebhooksQuery,
+      WorkbenchWebhooksQueryVariables
+    >(
       {
-        queryHook: useWorkbenchWebhooksQuery,
+        query: WorkbenchWebhooksDocument,
         keyPath: ['workbench', 'webhooks'],
       },
       { id: workbenchId }

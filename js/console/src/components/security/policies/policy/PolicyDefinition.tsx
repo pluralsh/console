@@ -23,8 +23,10 @@ import { CaptionP, OverlineH1 } from 'components/utils/typography/Text'
 import {
   useDeletePolicyMutation,
   useEvaluatePolicyLazyQuery,
-  usePolicyEvaluationsQuery,
   useUpdatePolicyMutation,
+  PolicyEvaluationsDocument,
+  PolicyEvaluationsQuery,
+  PolicyEvaluationsQueryVariables,
 } from 'generated/graphql'
 import {
   useCallback,
@@ -82,9 +84,12 @@ export function PolicyDefinition() {
   const dirty = editorValue !== savedPolicy
   const inputIsValid = isValidJson(inputJson)
 
-  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData<
+    PolicyEvaluationsQuery,
+    PolicyEvaluationsQueryVariables
+  >(
     {
-      queryHook: usePolicyEvaluationsQuery,
+      query: PolicyEvaluationsDocument,
       keyPath: ['policy', 'policyEvaluations'],
       skip: !policy?.id,
     },

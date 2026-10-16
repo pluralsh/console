@@ -16,9 +16,11 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P } from 'components/utils/typography/Text'
 import {
-  useWorkbenchCronsQuery,
   useWorkbenchQuery,
   WorkbenchCronFragment,
+  WorkbenchCronsDocument,
+  WorkbenchCronsQuery,
+  WorkbenchCronsQueryVariables,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -54,8 +56,8 @@ export function CronSchedules() {
   const workbench = workbenchData?.workbench
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useWorkbenchCronsQuery, keyPath: ['workbench', 'crons'] },
+    useFetchPaginatedData<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>(
+      { query: WorkbenchCronsDocument, keyPath: ['workbench', 'crons'] },
       { id: workbenchId }
     )
 

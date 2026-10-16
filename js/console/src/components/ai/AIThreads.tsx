@@ -8,7 +8,9 @@ import {
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   ChatThreadTinyFragment,
-  useChatThreadsQuery,
+  ChatThreadsDocument,
+  ChatThreadsQuery,
+  ChatThreadsQueryVariables,
 } from 'generated/graphql.ts'
 import { ReactNode, useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -26,8 +28,8 @@ const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
 
 export function AIThreads() {
   const { error, data, loading, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useChatThreadsQuery,
+    useFetchPaginatedData<ChatThreadsQuery, ChatThreadsQueryVariables>({
+      query: ChatThreadsDocument,
       keyPath: ['chatThreads'],
     })
 

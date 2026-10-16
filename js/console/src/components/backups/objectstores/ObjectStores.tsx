@@ -18,7 +18,11 @@ import {
   BACKUPS_ABS_PATH,
   OBJECT_STORES_REL_PATH,
 } from '../../../routes/backupRoutesConsts'
-import { useObjectStoresQuery } from '../../../generated/graphql'
+import {
+  ObjectStoresDocument,
+  ObjectStoresQuery,
+  ObjectStoresQueryVariables,
+} from '../../../generated/graphql'
 
 import { GqlError } from '../../utils/Alert'
 
@@ -46,8 +50,8 @@ export default function ObjectStores() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useObjectStoresQuery,
+  } = useFetchPaginatedData<ObjectStoresQuery, ObjectStoresQueryVariables>({
+    query: ObjectStoresDocument,
     keyPath: ['objectStores'],
   })
 

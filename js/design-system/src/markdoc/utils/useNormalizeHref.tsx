@@ -3,7 +3,7 @@ import { useNavigationContext } from '../../components/contexts/NavigationContex
 import { isRelativeUrl, removeTrailingSlashes, stripMdExtension } from './text'
 
 export function useNormalizeHref(href?: string) {
-  const pathname = useNavigationContext().usePathname()
+  const { pathname } = useNavigationContext()
   let finalHref = stripMdExtension(href)
 
   if (isRelativeUrl(finalHref)) {

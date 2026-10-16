@@ -13,7 +13,9 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { Edge } from '../../../utils/graphql.ts'
 import {
   ComplianceReportFragment,
-  useComplianceReportsQuery,
+  ComplianceReportsDocument,
+  ComplianceReportsQuery,
+  ComplianceReportsQueryVariables,
 } from '../../../generated/graphql.ts'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
@@ -52,9 +54,12 @@ export function ReportHistoryModal({
   onClose: Nullable<() => void>
 }) {
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      ComplianceReportsQuery,
+      ComplianceReportsQueryVariables
+    >(
       {
-        queryHook: useComplianceReportsQuery,
+        query: ComplianceReportsDocument,
         keyPath: ['complianceReportGenerator', 'complianceReports'],
       },
       { name }

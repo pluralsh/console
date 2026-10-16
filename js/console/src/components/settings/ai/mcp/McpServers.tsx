@@ -14,7 +14,9 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   useGenerateMcpTokenLazyQuery,
-  useMcpServersQuery,
+  McpServersDocument,
+  McpServersQuery,
+  McpServersQueryVariables,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -41,8 +43,8 @@ export function McpServers() {
     fetchNextPage,
     setVirtualSlice,
     refetch,
-  } = useFetchPaginatedData({
-    queryHook: useMcpServersQuery,
+  } = useFetchPaginatedData<McpServersQuery, McpServersQueryVariables>({
+    query: McpServersDocument,
     keyPath: ['mcpServers'],
   })
 

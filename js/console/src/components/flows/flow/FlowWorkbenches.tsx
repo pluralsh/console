@@ -11,8 +11,10 @@ import {
 } from 'components/workbenches/workbench/WorkbenchJobsTable'
 import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
 import {
-  useFlowWorkbenchJobsQuery,
   useFlowWorkbenchesQuery,
+  FlowWorkbenchJobsDocument,
+  FlowWorkbenchJobsQuery,
+  FlowWorkbenchJobsQueryVariables,
 } from 'generated/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
@@ -47,9 +49,12 @@ export function FlowWorkbenches() {
     fetchNextPage: fetchNextJobsPage,
     setVirtualSlice: setJobsVirtualSlice,
     fetchingMore: fetchingMoreJobs,
-  } = useFetchPaginatedData(
+  } = useFetchPaginatedData<
+    FlowWorkbenchJobsQuery,
+    FlowWorkbenchJobsQueryVariables
+  >(
     {
-      queryHook: useFlowWorkbenchJobsQuery,
+      query: FlowWorkbenchJobsDocument,
       keyPath: ['flow', 'workbenchJobs'],
       skip: !flow?.id,
     },

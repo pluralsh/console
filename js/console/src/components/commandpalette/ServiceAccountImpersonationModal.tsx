@@ -19,7 +19,7 @@ import {
   ServiceAccountsQueryVariables,
   useImpersonateServiceAccountMutation,
   UserFragment,
-  useServiceAccountsQuery,
+  ServiceAccountsDocument,
 } from 'generated/graphql'
 import { startServiceAccountImpersonation } from 'helpers/impersonation'
 import { FormEvent, useMemo, useState } from 'react'
@@ -58,21 +58,20 @@ export function ServiceAccountImpersonationModal({
     setSwitching(true)
     setError(undefined)
 
-    try {
-      const { data } = await impersonateServiceAccount({
-        variables: { email: selectedServiceAccount.email },
-      })
-      const jwt = data?.impersonateServiceAccount?.jwt
-
-      if (!jwt) throw new Error('Impersonation did not return a JWT.')
-
-      startServiceAccountImpersonation(jwt, me?.email)
-      ;(window as Window).location.reload()
-      return
-    } catch (err) {
+    const fail = (err: unknown) => {
       setError(err as GqlErrorType)
       setSwitching(false)
     }
+    const result = await impersonateServiceAccount({
+      variables: { email: selectedServiceAccount.email },
+    }).catch(fail)
+    if (!result) return
+
+    const jwt = result.data?.impersonateServiceAccount?.jwt
+    if (!jwt) return fail(new Error('Impersonation did not return a JWT.'))
+
+    startServiceAccountImpersonation(jwt, me?.email)
+    ;(window as Window).location.reload()
   }
 
   const onSubmit = (e: FormEvent) => {
@@ -150,7 +149,7 @@ function ServiceAccountSelect({
   const { data, loading, error, pageInfo, fetchNextPage } =
     useFetchPaginatedData<ServiceAccountsQuery, ServiceAccountsQueryVariables>(
       {
-        queryHook: useServiceAccountsQuery,
+        query: ServiceAccountsDocument,
         keyPath: ['serviceAccounts'],
         pageSize: 20,
       },

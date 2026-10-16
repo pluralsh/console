@@ -441,7 +441,7 @@ function Input({
           onKeyDown?.(e)
         }
       },
-      [multiline, onDeleteInputContent, onEnter, onKeyDown]
+      [inputRef, multiline, onDeleteInputContent, onEnter, onKeyDown]
     )
 
   const outerOnClick: NonNullable<InputPropsFull['onClick']> = useCallback(
@@ -449,7 +449,7 @@ function Input({
       e.preventDefault()
       inputRef?.current?.focus()
     },
-    []
+    [inputRef]
   )
 
   useLayoutEffect(() => {

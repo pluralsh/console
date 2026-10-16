@@ -2,7 +2,7 @@ import {
   StackRunFragment,
   StackRunsQuery,
   StackRunsQueryVariables,
-  useStackRunsQuery,
+  StackRunsDocument,
 } from 'generated/graphql'
 
 import { mapExistingNodes } from 'utils/graphql'
@@ -42,14 +42,14 @@ export function StackRunsTable({
   variables: StackRunsQueryVariables
   options: Omit<
     FetchPaginatedDataOptions<StackRunsQuery, StackRunsQueryVariables>,
-    'queryHook' | 'keyPath'
+    'query' | 'keyPath'
   >
 } & Omit<TableProps, 'data' | 'columns'>) {
   const { stackId } = useParams()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<StackRunsQuery, StackRunsQueryVariables>(
       {
-        queryHook: useStackRunsQuery,
+        query: StackRunsDocument,
         keyPath: ['infrastructureStack', 'runs'],
         ...options,
       },

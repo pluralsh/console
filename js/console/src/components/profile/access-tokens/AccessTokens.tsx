@@ -15,9 +15,10 @@ import {
   AccessTokenFragment,
   AccessTokensDocument,
   DeleteAccessTokenMutationVariables,
-  useAccessTokensQuery,
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
+  AccessTokensQuery,
+  AccessTokensQueryVariables,
 } from 'generated/graphql'
 
 import isEmpty from 'lodash/isEmpty'
@@ -244,8 +245,8 @@ export function AccessTokens() {
   const isInSettings = useLocation().pathname.includes('settings')
   const openModal = useOpenAccessTokenModal()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useAccessTokensQuery,
+    useFetchPaginatedData<AccessTokensQuery, AccessTokensQueryVariables>({
+      query: AccessTokensDocument,
       keyPath: ['accessTokens'],
     })
 

@@ -24,7 +24,9 @@ import {
   SentinelRunJobStatus,
   SentinelRunJobTinyFragment,
   SentinelRunResultFragment,
-  useSentinelRunJobsQuery,
+  SentinelRunJobsDocument,
+  SentinelRunJobsQuery,
+  SentinelRunJobsQueryVariables,
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { useMemo, useRef, useState } from 'react'
@@ -113,9 +115,9 @@ function IntegrationTestExpander({
     useState<JobStatusFilterKey>('All')
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<SentinelRunJobsQuery, SentinelRunJobsQueryVariables>(
       {
-        queryHook: useSentinelRunJobsQuery,
+        query: SentinelRunJobsDocument,
         keyPath: ['sentinelRun', 'jobs'],
         pollInterval: isNullish(result?.jobCount) ? 2_000 : undefined,
       },

@@ -3,7 +3,12 @@ import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { AgentRunFragment, useAgentRunsQuery } from 'generated/graphql'
+import {
+  AgentRunFragment,
+  AgentRunsDocument,
+  AgentRunsQuery,
+  AgentRunsQueryVariables,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -20,8 +25,8 @@ export function AIAgentRuns() {
   const [selectedRuntimeId, setSelectedRuntimeId] = useState<Nullable<string>>()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useAgentRunsQuery, keyPath: ['agentRuns'] },
+    useFetchPaginatedData<AgentRunsQuery, AgentRunsQueryVariables>(
+      { query: AgentRunsDocument, keyPath: ['agentRuns'] },
       { runtimeId: selectedRuntimeId }
     )
 
@@ -55,7 +60,7 @@ export function AIAgentRuns() {
         <Flex
           gap="xsmall"
           overflow="auto"
-          css={{ [`@container (max-width: ${800}px)`]: { display: 'none' } }}
+          css={{ '@container (max-width: 800px)': { display: 'none' } }}
         >
           {agentRunExamples.map((card) => (
             <AIExampleCard

@@ -11,7 +11,11 @@ import {
   useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useWorkbenchIssuesQuery } from 'generated/graphql'
+import {
+  WorkbenchIssuesDocument,
+  WorkbenchIssuesQuery,
+  WorkbenchIssuesQueryVariables,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -47,9 +51,9 @@ export function WorkbenchIssues() {
   const filterVars = useMemo(() => toIssueFilterVariables(display), [display])
 
   const { data, loading, error, pageInfo, fetchNextPage, fetchingMore } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<WorkbenchIssuesQuery, WorkbenchIssuesQueryVariables>(
       {
-        queryHook: useWorkbenchIssuesQuery,
+        query: WorkbenchIssuesDocument,
         keyPath: ISSUES_KEY_PATH,
         pageSize: PAGE_SIZE,
         keepLoadedPages: true,

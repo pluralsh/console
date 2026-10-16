@@ -5,7 +5,9 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   PreviewEnvironmentTemplateFragment,
-  useFlowPreviewEnvironmentTemplatesQuery,
+  FlowPreviewEnvironmentTemplatesDocument,
+  FlowPreviewEnvironmentTemplatesQuery,
+  FlowPreviewEnvironmentTemplatesQueryVariables,
 } from 'generated/graphql'
 import { useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -39,9 +41,12 @@ export function PreviewTemplatesTable({
   )
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
+    useFetchPaginatedData<
+      FlowPreviewEnvironmentTemplatesQuery,
+      FlowPreviewEnvironmentTemplatesQueryVariables
+    >(
       {
-        queryHook: useFlowPreviewEnvironmentTemplatesQuery,
+        query: FlowPreviewEnvironmentTemplatesDocument,
         keyPath: ['flow', 'previewEnvironmentTemplates'],
       },
       { id: flowId ?? '' }
