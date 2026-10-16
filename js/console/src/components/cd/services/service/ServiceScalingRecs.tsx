@@ -18,18 +18,19 @@ export function ServiceScalingRecs() {
     service?.scalingRecommendations?.filter(
       (rec): rec is ClusterScalingRecommendationFragment => !!rec
     ) ?? []
+  const cluster = service?.cluster
   const cols = useMemo(
     () =>
-      service?.cluster
+      cluster
         ? [
             ColName,
             ColContainer,
             ColCpuChange,
             ColMemoryChange,
-            getColScalingPr(service.cluster),
+            getColScalingPr(cluster),
           ]
         : [ColName, ColContainer, ColCpuChange, ColMemoryChange],
-    [service?.cluster]
+    [cluster]
   )
 
   return (

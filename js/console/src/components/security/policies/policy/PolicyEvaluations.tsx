@@ -87,9 +87,11 @@ export function PolicyEvaluations() {
     navigate(getPolicyEvalAbsPath(policyId, selectedEval.id), { replace: true })
   }, [evalIdFromPath, navigate, policyId, selectedEval?.id])
 
-  useEffect(() => {
+  const [prevEvalId, setPrevEvalId] = useState(selectedEval?.id)
+  if (selectedEval?.id !== prevEvalId) {
+    setPrevEvalId(selectedEval?.id)
     setDetailTab('input')
-  }, [selectedEval?.id])
+  }
 
   if (error) return <GqlError error={error} />
 

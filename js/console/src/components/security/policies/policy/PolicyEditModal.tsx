@@ -2,7 +2,7 @@ import { Button, Flex, Modal } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { PolicyFragment, useUpdatePolicyMutation } from 'generated/graphql'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   PolicyDescriptionField,
   PolicyNameField,
@@ -21,12 +21,25 @@ export function PolicyEditModal({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
-  useEffect(() => {
-    if (!open) return
-
-    setName(policy?.name ?? '')
-    setDescription(policy?.description ?? '')
-  }, [open, policy?.description, policy?.name])
+  // load the policy into the form whenever the modal opens or the policy changes
+  const policyName = policy?.name
+  const policyDescription = policy?.description
+  const [prevSync, setPrevSync] = useState<{
+    open?: boolean
+    name?: Nullable<string>
+    description?: Nullable<string>
+  }>({})
+  if (
+    prevSync.open !== open ||
+    prevSync.name !== policyName ||
+    prevSync.description !== policyDescription
+  ) {
+    setPrevSync({ open, name: policyName, description: policyDescription })
+    if (open) {
+      setName(policyName ?? '')
+      setDescription(policyDescription ?? '')
+    }
+  }
 
   const [updatePolicy, { loading, error }] = useUpdatePolicyMutation({
     onCompleted: () => {

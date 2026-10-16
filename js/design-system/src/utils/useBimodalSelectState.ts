@@ -19,7 +19,7 @@ import { useFormValidationState } from '@react-stately/form'
 import { useMenuTriggerState } from 'react-stately'
 import { type AriaSelectProps } from '@react-types/select'
 import { type ListProps, type SelectState, useListState } from 'react-stately'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useControlledState } from '@react-stately/utils'
 import { type Key, type Node, type Selection } from '@react-types/shared'
 
@@ -115,10 +115,13 @@ function useBimodalSelectState<T extends object>({
     onSelectionChange,
   })
 
-  listStateRef.current = listState
+  useLayoutEffect(() => {
+    listStateRef.current = listState
+  })
 
+  const allKeys = new Set<Key>(listState.collection.getKeys())
   const selectedKeysIterable =
-    selectedKeys === 'all' ? getAllKeys() : (selectedKeys ?? [])
+    selectedKeys === 'all' ? allKeys : (selectedKeys ?? [])
 
   const validationState = useFormValidationState({
     ...props,
@@ -171,7 +174,7 @@ function useBimodalSelectState<T extends object>({
         ? (props.defaultSelectedKey ?? null)
         : props.selectedKeys
           ? Array.from(
-              props.selectedKeys === 'all' ? getAllKeys() : props.selectedKeys
+              props.selectedKeys === 'all' ? allKeys : props.selectedKeys
             )
           : [],
     setValue: (newValue) => {

@@ -137,6 +137,7 @@
     "@vitejs/plugin-basic-ssl": "2.3.0",
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/ui": "5.0.1",
+    "babel-plugin-react-compiler": "1.0.0",
     "babel-plugin-styled-components": "2.3.0",
     "graphql-tag": "2.12.7",
     "jsdom": "30.0.1",

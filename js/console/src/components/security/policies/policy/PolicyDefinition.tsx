@@ -173,11 +173,9 @@ export function PolicyDefinition() {
   const onEdit = useCallback(() => setEditOpen(true), [])
   const onDelete = useCallback(() => setConfirmDelete(true), [])
 
-  useEffect(() => {
-    if (!evalIdFromSearch || selectedEvalId === evalIdFromSearch) return
-
+  if (evalIdFromSearch && selectedEvalId !== evalIdFromSearch) {
     setSelectedEvalId(evalIdFromSearch)
-  }, [evalIdFromSearch, selectedEvalId])
+  }
 
   useEffect(() => {
     if (!selectedEval || appliedEvalId.current === selectedEval.id) return

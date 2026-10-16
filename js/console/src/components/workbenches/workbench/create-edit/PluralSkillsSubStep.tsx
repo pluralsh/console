@@ -398,9 +398,16 @@ function PluralSkillForm({
     [draft.subagents]
   )
 
-  useEffect(() => {
+  const [prevDraft, setPrevDraft] = useState(draft)
+  if (
+    draft.contents !== prevDraft.contents ||
+    draft.description !== prevDraft.description ||
+    draft.name !== prevDraft.name ||
+    draft.subagents !== prevDraft.subagents
+  ) {
+    setPrevDraft(draft)
     setSaveError(null)
-  }, [draft.contents, draft.description, draft.name, draft.subagents])
+  }
 
   useEffect(() => {
     setFooterActions(

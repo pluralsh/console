@@ -1,11 +1,5 @@
-import { mergeRefs } from 'react-merge-refs'
-import {
-  ReactElement,
-  RefObject,
-  cloneElement,
-  useLayoutEffect,
-  useRef,
-} from 'react'
+import { useInert } from '@pluralsh/design-system'
+import { ReactElement, RefObject, cloneElement } from 'react'
 
 export function MakeInert({
   ref,
@@ -16,16 +10,7 @@ export function MakeInert({
   children: ReactElement<any>
   inert?: boolean
 }) {
-  const innerRef = useRef<any>(null)
-  const finalRef = mergeRefs([innerRef, ref])
-
-  useLayoutEffect(() => {
-    if (inert) {
-      innerRef.current?.setAttribute('inert', '')
-    } else {
-      innerRef.current?.removeAttribute('inert')
-    }
-  }, [inert, innerRef])
+  const finalRef = useInert(inert, ref)
 
   return cloneElement(children, { ref: finalRef })
 }

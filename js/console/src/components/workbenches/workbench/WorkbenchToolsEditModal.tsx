@@ -21,7 +21,7 @@ import {
   useWorkbenchToolsQuery,
   WorkbenchQuery,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -102,9 +102,17 @@ export function WorkbenchToolsEditModal({
     return !associatedToolIds.every((id) => selectedToolIdsSet.has(id))
   }, [associatedToolIds, selectedToolIds])
 
-  useEffect(() => {
+  const [prevSync, setPrevSync] = useState<{
+    open?: boolean
+    associatedToolIds?: string[]
+  }>({})
+  if (
+    prevSync.open !== open ||
+    prevSync.associatedToolIds !== associatedToolIds
+  ) {
+    setPrevSync({ open, associatedToolIds })
     if (open) setSelectedToolIds(associatedToolIds)
-  }, [associatedToolIds, open])
+  }
 
   const [updateWorkbench, { loading: saveLoading, error: saveError }] =
     useUpdateWorkbenchMutation({

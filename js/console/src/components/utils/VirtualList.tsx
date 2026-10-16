@@ -12,6 +12,7 @@ import {
   useCallback,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react'
 import { mergeRefs } from 'react-merge-refs'
 import styled, { useTheme } from 'styled-components'
@@ -75,6 +76,7 @@ export function VirtualList<T, M>({
   const internalRef = useRef<VListHandle>(null)
   const hasInitiallyAligned = useRef(false)
   const shouldStickToBottom = useRef(true)
+  const [nearTopAndNotSticky, setNearTopAndNotSticky] = useState(false)
   const lastEmittedSliceRef = useRef<{
     startIdx: number
     endIdx: number
@@ -142,9 +144,8 @@ export function VirtualList<T, M>({
     ]
 
     // enable sticky bottom when scrolled there (within 5px buffer), otherwise disable
-    if (scrollSize - (offset + viewportSize) < 5)
-      shouldStickToBottom.current = true
-    else shouldStickToBottom.current = false
+    shouldStickToBottom.current = scrollSize - (offset + viewportSize) < 5
+    setNearTopAndNotSticky(offset < 50 && !shouldStickToBottom.current)
 
     // infinite scroll (weird indices add a buffer and account for top/bottom content)
     if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
@@ -173,12 +174,7 @@ export function VirtualList<T, M>({
   return (
     <VList
       // only shift when infinite scrolling up (and not currently at the bottom)
-      shift={
-        isReversed &&
-        hasNextPage &&
-        (internalRef.current?.scrollOffset ?? Infinity) < 50 &&
-        !shouldStickToBottom.current
-      }
+      shift={isReversed && hasNextPage && nearTopAndNotSticky}
       onScroll={onScroll}
       {...props}
       ref={mergeRefs([listRef, internalRef])}

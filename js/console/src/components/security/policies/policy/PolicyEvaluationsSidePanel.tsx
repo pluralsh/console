@@ -104,9 +104,11 @@ export function PolicyEvaluationsSidePanel({
     }
   }, [activeFilter, annotatedEvals, binding, negativeKey, positiveKey])
 
-  useEffect(() => {
+  const [prevBinding, setPrevBinding] = useState(binding)
+  if (binding !== prevBinding) {
+    setPrevBinding(binding)
     setActiveFilter('all')
-  }, [binding])
+  }
 
   useEffect(() => {
     if (isLoadingNextPage || !hasNextPage) return

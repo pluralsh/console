@@ -4,7 +4,6 @@ import {
   KeyboardEvent,
   SetStateAction,
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -31,9 +30,11 @@ export function NamespaceFilter({
 } & Partial<Omit<ComponentProps<typeof ComboBox>, 'onChange'>>) {
   const [value, setValue] = useState<string | undefined>(namespace)
 
-  useEffect(() => {
+  const [prevNamespace, setPrevNamespace] = useState(namespace)
+  if (namespace !== prevNamespace) {
+    setPrevNamespace(namespace)
     setValue(namespace)
-  }, [namespace])
+  }
 
   const trimmedValue = value?.trim() ?? ''
 

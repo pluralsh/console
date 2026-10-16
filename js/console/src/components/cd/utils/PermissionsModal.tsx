@@ -1,13 +1,6 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import {
-  FormEvent,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { FormEvent, ReactNode, useCallback, useMemo, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
 import upperFirst from 'lodash/upperFirst'
@@ -99,12 +92,14 @@ export function PermissionsModal({
   const [readBindings, setReadBindings] = useState(bindings.readBindings)
   const [writeBindings, setWriteBindings] = useState(bindings.writeBindings)
 
-  useEffect(() => {
+  const [prevBindings, setPrevBindings] = useState(bindings)
+  if (bindings.readBindings !== prevBindings.readBindings) {
     setReadBindings(bindings.readBindings)
-  }, [bindings.readBindings])
-  useEffect(() => {
+  }
+  if (bindings.writeBindings !== prevBindings.writeBindings) {
     setWriteBindings(bindings.writeBindings)
-  }, [bindings.writeBindings])
+  }
+  if (bindings !== prevBindings) setPrevBindings(bindings)
 
   const uniqueReadBindings = useMemo(
     () => uniqWith(readBindings, isEqual),

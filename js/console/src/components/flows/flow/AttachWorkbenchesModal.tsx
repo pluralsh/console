@@ -33,7 +33,6 @@ import {
   ReactElement,
   ReactNode,
   UIEvent,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -78,13 +77,24 @@ export function AttachWorkbenchesModal({
       },
     })
 
-  useEffect(() => {
-    if (!open) return
-
-    setSelectedWorkbenches(
-      new Map(attachedWorkbenches.map((workbench) => [workbench.id, workbench]))
-    )
-  }, [attachedWorkbenches, open])
+  // reset the selection to the attached workbenches whenever the modal opens
+  const [prevSync, setPrevSync] = useState<{
+    open?: boolean
+    attachedWorkbenches?: WorkbenchTinyFragment[]
+  }>({})
+  if (
+    prevSync.open !== open ||
+    prevSync.attachedWorkbenches !== attachedWorkbenches
+  ) {
+    setPrevSync({ open, attachedWorkbenches })
+    if (open) {
+      setSelectedWorkbenches(
+        new Map(
+          attachedWorkbenches.map((workbench) => [workbench.id, workbench])
+        )
+      )
+    }
+  }
 
   const allWorkbenches = useMemo(
     () => mapExistingNodes(data?.workbenches),

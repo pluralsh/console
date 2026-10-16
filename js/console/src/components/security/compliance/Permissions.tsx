@@ -5,7 +5,7 @@ import {
   Modal,
   PeopleIcon,
 } from '@pluralsh/design-system'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import {
@@ -33,7 +33,13 @@ export function PermissionsModal({
 }) {
   const [bindings, setBindings] = useState(generator.readBindings)
 
-  useEffect(() => setBindings(generator.readBindings), [generator.readBindings])
+  const [prevReadBindings, setPrevReadBindings] = useState(
+    generator.readBindings
+  )
+  if (generator.readBindings !== prevReadBindings) {
+    setPrevReadBindings(generator.readBindings)
+    setBindings(generator.readBindings)
+  }
 
   const uniqueBindings = useMemo(() => uniqWith(bindings, isEqual), [bindings])
 

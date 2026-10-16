@@ -13,7 +13,7 @@ import {
   PolicyType,
   useCreatePolicyMutation,
 } from 'generated/graphql'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { PolicyDescriptionField, PolicyNameField } from './PolicyIdentityFields'
 
 export function CreateBindingModal({
@@ -31,12 +31,15 @@ export function CreateBindingModal({
   const [description, setDescription] = useState('')
   const [policy, setPolicy] = useState('')
 
-  useEffect(() => {
-    if (open) return
-    setName('')
-    setDescription('')
-    setPolicy('')
-  }, [open])
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
+    if (!open) {
+      setName('')
+      setDescription('')
+      setPolicy('')
+    }
+  }
 
   const [createPolicy, { loading, error }] = useCreatePolicyMutation({
     onCompleted: (data) => {

@@ -9,7 +9,7 @@ import {
   UpsertCatalogMutationVariables,
 } from 'generated/graphql'
 import { uniqWith, isEqual } from 'lodash'
-import { useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
+import { useState, useMemo, useCallback, FormEvent } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { Permissions } from 'components/cd/utils/PermissionsModal.tsx'
@@ -55,15 +55,16 @@ export function CatalogPermissionsModal({
   const [readBindings, setReadBindings] = useState(catalog.readBindings)
   const [writeBindings, setWriteBindings] = useState(catalog.writeBindings)
 
-  useEffect(
-    () => setCreateBindings(catalog.createBindings),
-    [catalog.createBindings]
-  )
-  useEffect(() => setReadBindings(catalog.readBindings), [catalog.readBindings])
-  useEffect(
-    () => setWriteBindings(catalog.writeBindings),
-    [catalog.writeBindings]
-  )
+  const [prevCatalog, setPrevCatalog] = useState(catalog)
+  if (catalog !== prevCatalog) {
+    setPrevCatalog(catalog)
+    if (catalog.createBindings !== prevCatalog.createBindings)
+      setCreateBindings(catalog.createBindings)
+    if (catalog.readBindings !== prevCatalog.readBindings)
+      setReadBindings(catalog.readBindings)
+    if (catalog.writeBindings !== prevCatalog.writeBindings)
+      setWriteBindings(catalog.writeBindings)
+  }
 
   const uniqueCreateBindings = useMemo(
     () => uniqWith(createBindings, isEqual),

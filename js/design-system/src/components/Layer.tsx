@@ -182,11 +182,9 @@ function Layer({
 
   const visible = open || !closeComplete
 
-  useEffect(() => {
-    if (open) {
-      setCloseComplete(false)
-    }
-  }, [open])
+  if (open && closeComplete) {
+    setCloseComplete(false)
+  }
 
   useEffect(() => {
     if (!open && prevOpen) {

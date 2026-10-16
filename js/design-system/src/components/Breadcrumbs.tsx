@@ -15,7 +15,6 @@ import classNames from 'classnames'
 import { SwitchTransition, Transition } from 'react-transition-group'
 
 import useResizeObserver from '../hooks/useResizeObserver'
-import usePrevious from '../hooks/usePrevious'
 
 import { Select } from './Select'
 import { ListBoxItem } from './ListBoxItem'
@@ -410,11 +409,10 @@ export function Breadcrumbs({
       "<Breadcrumbs> must be provided a 'breadcrumbs' prop or used inside a <BreadcrumbProvider>"
     )
   }
-  const prevBreadcrumbs = usePrevious(breadcrumbs)
-  const transitionKey = useRef<number>(0)
+  const [transition, setTransition] = useState({ breadcrumbs, key: 0 })
 
-  if (prevBreadcrumbs !== breadcrumbs) {
-    transitionKey.current++
+  if (transition.breadcrumbs !== breadcrumbs) {
+    setTransition({ breadcrumbs, key: transition.key + 1 })
   }
 
   return (
@@ -426,7 +424,7 @@ export function Breadcrumbs({
       change and waiting for refit before making visible and removing old breadcrumbs */}
       <SwitchTransition mode="in-out">
         <Transition
-          key={String(transitionKey.current)}
+          key={String(transition.key)}
           timeout={200}
           nodeRef={nodeRef}
         >

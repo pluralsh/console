@@ -13,7 +13,7 @@ import {
 import { StackedText } from 'components/utils/table/StackedText'
 import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { getLanguageFromFileName } from 'utils/file'
 import {
   useSetServiceComponentsChatButtonVisible,
@@ -126,7 +126,6 @@ export function ComponentsFilesView() {
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
   const [parentOfSelectedId, setParentOfSelectedId] = useState<string>()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
-  const hasAutoSelectedRef = useRef(false)
 
   const { data, loading, error } = useServiceTarballQuery({
     variables: { id: service?.id ?? '' },
@@ -159,59 +158,56 @@ export function ComponentsFilesView() {
     return buildNodeLookup(treeNodes)
   }, [treeNodes])
 
+  const selectFile = (file: ServiceFile, parentId?: string) => {
+    setSelectedFile(file)
+    setParentOfSelectedId(parentId)
+    if (!parentId) return
+
+    // Auto-expand parent directories of the selected file
+    const requiredExpanded: string[] = []
+    let currentParentId: string | undefined = parentId
+
+    while (currentParentId) {
+      requiredExpanded.push(currentParentId)
+      currentParentId = parentMap.get(currentParentId)
+    }
+
+    setExpandedItems((prev) =>
+      Array.from(new Set([...prev, ...requiredExpanded]))
+    )
+  }
+
   // Auto-select first file when data is loaded
-  useEffect(() => {
-    if (
-      !isEmpty(data?.serviceTarball) &&
-      !hasAutoSelectedRef.current &&
-      !selectedFile?.path
-    ) {
-      const firstFile = data?.serviceTarball?.find((f) => f?.path && f?.content)
-      if (firstFile?.path && firstFile?.content) {
-        const parentId = parentMap.get(firstFile.path)
-        setSelectedFile({
-          path: firstFile.path,
-          content: decodeBase64(firstFile.content),
-        })
-        setParentOfSelectedId(parentId)
-        hasAutoSelectedRef.current = true
-      }
+  const [hasAutoSelected, setHasAutoSelected] = useState(false)
+  if (
+    !isEmpty(data?.serviceTarball) &&
+    !hasAutoSelected &&
+    !selectedFile?.path
+  ) {
+    const firstFile = data?.serviceTarball?.find((f) => f?.path && f?.content)
+    if (firstFile?.path && firstFile?.content) {
+      setHasAutoSelected(true)
+      selectFile(
+        { path: firstFile.path, content: decodeBase64(firstFile.content) },
+        parentMap.get(firstFile.path)
+      )
     }
-  }, [data?.serviceTarball, treeNodes, parentMap, selectedFile?.path])
+  }
 
-  // Auto-expand parent directories when a file is selected
-  useEffect(() => {
-    if (selectedFile?.path && parentOfSelectedId) {
-      const requiredExpanded: string[] = []
-      let currentParentId: string | undefined = parentOfSelectedId
-
-      while (currentParentId) {
-        requiredExpanded.push(currentParentId)
-        currentParentId = parentMap.get(currentParentId)
-      }
-
-      setExpandedItems((prev) => {
-        const merged = new Set([...prev, ...requiredExpanded])
-        return Array.from(merged)
-      })
+  const handleItemSelection = (
+    _event: unknown,
+    itemId: string,
+    isSelected: boolean
+  ) => {
+    if (!isSelected) return
+    const node = nodeMap.get(itemId)
+    if (node?.isFile && node.content) {
+      selectFile(
+        { path: node.path, content: node.content },
+        parentMap.get(itemId)
+      )
     }
-  }, [selectedFile?.path, parentOfSelectedId, parentMap])
-
-  const handleItemSelection = useCallback(
-    (_event: unknown, itemId: string, isSelected: boolean) => {
-      if (isSelected) {
-        const node = nodeMap.get(itemId)
-        if (node?.isFile && node.content) {
-          setSelectedFile({
-            path: node.path,
-            content: node.content,
-          })
-          setParentOfSelectedId(parentMap.get(itemId))
-        }
-      }
-    },
-    [nodeMap, parentMap]
-  )
+  }
 
   const sidenavContent = useMemo(() => {
     const renderTree = (nodes: TreeNode[]) =>

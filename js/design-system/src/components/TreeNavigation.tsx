@@ -281,8 +281,15 @@ export function TreeNavEntry({
   const id = useId()
   const { hasActiveDescendents, setActiveState } = useActiveStates()
   const { setIsActiveDescendant } = useContext(NavEntryContext)
-  const prevHasActiveDescendents = usePrevious(hasActiveDescendents)
   const [isOpen, setIsOpen] = useState(hasActiveDescendents)
+  const [prevHasActiveDescendents, setPrevHasActiveDescendents] =
+    useState(hasActiveDescendents)
+
+  // Auto-expand when a descendant becomes active (doesn't fire onOpenChange)
+  if (hasActiveDescendents !== prevHasActiveDescendents) {
+    setPrevHasActiveDescendents(hasActiveDescendents)
+    if (hasActiveDescendents) setIsOpen(true)
+  }
   const navEntryContextVal = useMemo(
     () => ({ setIsActiveDescendant: setActiveState }),
     [setActiveState]
@@ -310,15 +317,6 @@ export function TreeNavEntry({
   }, [changeOpen, isOpen])
   const [measureRef, { height }] = useMeasure()
   const prevHeight = usePrevious(height)
-
-  useEffect(() => {
-    if (
-      hasActiveDescendents &&
-      hasActiveDescendents !== prevHasActiveDescendents
-    ) {
-      changeOpen(true)
-    }
-  }, [changeOpen, hasActiveDescendents, prevHasActiveDescendents])
 
   const expand = useSpring({
     height: isOpen ? `${height}px` : '0px',

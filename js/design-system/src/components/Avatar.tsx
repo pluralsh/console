@@ -11,23 +11,20 @@ type AvatarProps = {
 } & Omit<ComponentPropsWithRef<'div'>, 'color'>
 
 function useImageLoad(src?: string) {
-  const [loaded, setLoaded] = useState(false)
-  const [error, setError] = useState(false)
+  const [result, setResult] = useState<{ src: string; error: boolean }>()
+  const loaded = !!src && result?.src === src
+  const error = loaded && result.error
 
   useLayoutEffect(() => {
-    setLoaded(false)
-    setError(false)
-
     if (!src) return
 
     const img = document.createElement('img')
 
     img.onload = () => {
-      setLoaded(true)
+      setResult({ src, error: false })
     }
     img.onerror = () => {
-      setLoaded(true)
-      setError(true)
+      setResult({ src, error: true })
     }
     img.src = src
   }, [src])

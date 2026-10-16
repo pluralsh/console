@@ -99,12 +99,14 @@ const HelmValuesInput = memo(
     const [fileName, setFileName] = useState<string | undefined>()
     const [fileError, setFileError] = useState<Nullable<string>>()
 
-    useEffect(() => {
+    const [prevManual, setPrevManual] = useState(manual)
+    if (manual !== prevManual) {
+      setPrevManual(manual)
       if (manual) {
         setFileName(undefined)
         setFileError(undefined)
       }
-    }, [manual])
+    }
 
     const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
       async (files) => {

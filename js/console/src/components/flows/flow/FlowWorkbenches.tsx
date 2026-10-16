@@ -76,16 +76,12 @@ export function FlowWorkbenches() {
     return () => setSidePanelContent(null)
   }, [openAttachModal, workbenches, setSidePanelContent])
 
-  useEffect(() => {
-    if (!workbenchesData) return
-    if (!workbenches.length) {
-      setSelectedWorkbenchId(null)
-      return
-    }
-
-    if (!workbenches.some((workbench) => workbench.id === selectedWorkbenchId))
-      setSelectedWorkbenchId(workbenches[0]?.id ?? null)
-  }, [selectedWorkbenchId, workbenches, workbenchesData])
+  // fall back to the first workbench when the selection isn't in the list
+  const workbenchId =
+    !workbenchesData ||
+    workbenches.some((workbench) => workbench.id === selectedWorkbenchId)
+      ? selectedWorkbenchId
+      : (workbenches[0]?.id ?? null)
 
   if (workbenchesError) return <GqlError error={workbenchesError} />
   if (jobsError) return <GqlError error={jobsError} />
@@ -94,7 +90,7 @@ export function FlowWorkbenches() {
     <>
       <WrapperSC>
         <WorkbenchJobCreateInput
-          workbenchId={selectedWorkbenchId}
+          workbenchId={workbenchId}
           setWorkbenchId={setSelectedWorkbenchId}
           workbenchOptions={workbenches}
           flowId={flow?.id}

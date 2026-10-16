@@ -3,7 +3,6 @@ import {
   type ComponentType,
   type Ref,
   Suspense,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -22,6 +21,8 @@ import { useRouter } from 'next/router'
 
 import { until } from '@open-draft/until'
 import { SSRProvider } from '@react-aria/ssr'
+
+import { useIsClient } from '@src/hooks/useIsClient'
 import '@src/highlight'
 import '@src/styles/globals.css'
 
@@ -119,13 +120,8 @@ const Link = ({
 function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const router = useRouter()
   const markdoc = pageProps?.markdoc
-  const [isClient, setIsClient] = useState(false)
-  const [navData, setNavData] = useState(() => getNavData())
-
-  useEffect(() => {
-    setIsClient(true)
-    setNavData(getNavData())
-  }, [])
+  const isClient = useIsClient()
+  const [navData] = useState(getNavData)
 
   const { metaTitle, metaDescription } = pageProps
 

@@ -104,12 +104,6 @@ export function ShellCommandEditor({
   const inputWrapRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    if (!isEditing) {
-      setInputVal(command)
-    }
-  }, [command, isEditing])
-
-  useEffect(() => {
     if (isEditing && inputWrapRef.current) {
       const input = inputWrapRef.current.querySelector('input')
 
@@ -140,7 +134,7 @@ export function ShellCommandEditor({
         {isEditing && (
           <CodeInput
             placeholder={defaultCommand}
-            value={inputVal}
+            value={isEditing ? inputVal : command}
             prefix={
               <div className="prefix">
                 <div className="firstHalf">{commandLeft1}</div>
@@ -163,6 +157,7 @@ export function ShellCommandEditor({
           floating
           startIcon={<PencilIcon />}
           onClick={() => {
+            setInputVal(command)
             setIsEditing(true)
           }}
         >

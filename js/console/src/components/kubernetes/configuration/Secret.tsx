@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react'
+import { ReactElement, useMemo, useState } from 'react'
 import {
   Button,
   EyeClosedIcon,
@@ -112,9 +112,11 @@ function SecretDataValue({
   const theme = useTheme()
   const [reveal, setReveal] = useState(forceReveal)
 
-  useEffect(() => {
+  const [prevForceReveal, setPrevForceReveal] = useState(forceReveal)
+  if (forceReveal !== prevForceReveal) {
+    setPrevForceReveal(forceReveal)
     setReveal(forceReveal)
-  }, [forceReveal])
+  }
 
   return (
     <div

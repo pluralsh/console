@@ -396,16 +396,15 @@ function Input({
     onInputContentResize
   )
 
-  inputProps = {
-    ...(inputProps ?? {}),
-    ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
-  }
+  const { ref: inputPropsRef, ...restInputProps } = inputProps ?? {}
+  const mergedInputRef = (node: HTMLInputElement & HTMLTextAreaElement) =>
+    mergeRefs([inputRef, inputPropsRef])(node)
 
   const parentFillLevel = useFillLevel()
 
   size = size || (large ? 'large' : small ? 'small' : 'medium')
 
-  inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
+  inputProps = mergeProps(useFormField()?.fieldProps ?? {}, restInputProps)
   const effectiveValue = inputProps?.value ?? value
   const hasValue = !isNil(effectiveValue) && !isEmpty(String(effectiveValue))
 
@@ -578,6 +577,7 @@ function Input({
             {...(inputProps as unknown as ComponentProps<
               typeof TextAreaBaseSC
             >)}
+            ref={mergedInputRef}
           />
         ) : (
           <InputBaseSC
@@ -586,6 +586,7 @@ function Input({
             {...nativeFieldProps}
             {...inputAccessibilityProps}
             {...inputProps}
+            ref={mergedInputRef}
           />
         )}
       </InputAreaSC>

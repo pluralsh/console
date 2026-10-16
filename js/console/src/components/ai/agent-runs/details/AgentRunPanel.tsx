@@ -157,13 +157,9 @@ export function AgentRunPanelContent() {
     clearRequestedTab()
   }, [runId, clearRequestedTab])
 
-  useEffect(() => {
-    if (!runId) setDiffFullscreen(false)
-  }, [runId])
-
-  useEffect(() => {
-    if (selectedTab !== AgentRunPanelTab.Diff) setDiffFullscreen(false)
-  }, [selectedTab])
+  if (diffFullscreen && (!runId || selectedTab !== AgentRunPanelTab.Diff)) {
+    setDiffFullscreen(false)
+  }
 
   const { data, loading } = useAgentRunQuery({
     skip: !runId,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function useSyncCooldown(
   end: Date | null | undefined,
@@ -8,40 +8,27 @@ export function useSyncCooldown(
   disabled: boolean
   secondsRemaining: number | null
 } {
-  const [secondsRemaining, setSecondsRemaining] = useState<number | null>(0)
-  const [disabled, setDisabled] = useState<boolean>(true)
-  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  const [now, setNow] = useState(() => Date.now())
+  const endTime = end ? end.getTime() + cooldown : 0
+  const remaining = endTime - now
+  const active = remaining > 0
 
   useEffect(() => {
-    if (!end) {
-      setDisabled(false)
-      setSecondsRemaining(null)
+    if (!active) return
 
-      return
+    const tick = () => setNow(Date.now())
+    // refresh right away in case `now` is stale from before `end` changed
+    const timeout = setTimeout(tick)
+    const interval = setInterval(tick, timerInterval)
+
+    return () => {
+      clearTimeout(timeout)
+      clearInterval(interval)
     }
-    const updateCountdown = () => {
-      const now = new Date()
-      const remaining = end.getTime() + cooldown - now.getTime()
-
-      if (remaining > 0) {
-        setDisabled(true)
-        setSecondsRemaining(Math.ceil(remaining / 1000))
-      } else {
-        setDisabled(false)
-        setSecondsRemaining(null)
-        if (intervalRef.current) clearInterval(intervalRef.current)
-      }
-    }
-
-    updateCountdown()
-
-    intervalRef.current = setInterval(updateCountdown, timerInterval)
-
-    return () => clearInterval(intervalRef.current)
-  }, [cooldown, end, timerInterval])
+  }, [active, endTime, timerInterval])
 
   return {
-    disabled,
-    secondsRemaining,
+    disabled: active,
+    secondsRemaining: active ? Math.ceil(remaining / 1000) : null,
   }
 }

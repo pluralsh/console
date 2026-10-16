@@ -17,7 +17,6 @@ import {
   ComponentProps,
   FormEvent,
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -429,9 +428,11 @@ function AddContextModal({
     [json, mutation, pipelineId]
   )
 
-  useEffect(() => {
+  const [prevJson, setPrevJson] = useState(json)
+  if (json !== prevJson) {
+    setPrevJson(json)
     setJsonError('')
-  }, [json])
+  }
 
   const actions = (
     <Button

@@ -27,12 +27,12 @@ export function useDisclosure({
   const contentId = id || generatedId
   const [isOpenControlled, setIsOpenControlled] = useState(defaultOpen)
 
-  isOpen = isOpen ?? isOpenControlled
+  const open = isOpen ?? isOpenControlled
 
   const toggleOpen = useCallback(() => {
-    setIsOpenControlled(!isOpen)
-    onOpenChange?.(!isOpen)
-  }, [isOpen, onOpenChange])
+    setIsOpenControlled(!open)
+    onOpenChange?.(!open)
+  }, [open, onOpenChange])
   const { keyboardProps } = useKeyboard({
     onKeyDown(e) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -47,14 +47,14 @@ export function useDisclosure({
       role: 'button',
       tabIndex: 0,
       'aria-controls': contentId,
-      'aria-expanded': !!isOpen,
+      'aria-expanded': !!open,
       onClick: () => {
         toggleOpen()
       },
     }
 
     return mergeProps(keyboardProps, myProps)
-  }, [contentId, isOpen, keyboardProps, toggleOpen])
+  }, [contentId, open, keyboardProps, toggleOpen])
 
   const contentProps = useMemo(
     () => ({
@@ -67,8 +67,8 @@ export function useDisclosure({
     () => ({
       triggerProps,
       contentProps,
-      isOpen,
+      isOpen: open,
     }),
-    [contentProps, isOpen, triggerProps]
+    [contentProps, open, triggerProps]
   )
 }

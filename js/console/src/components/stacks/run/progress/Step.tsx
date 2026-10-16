@@ -59,9 +59,11 @@ export default function Step({ step, open }: StepProps): ReactNode {
       ),
   })
 
-  useEffect(() => {
+  const [prevStepLogs, setPrevStepLogs] = useState(step?.logs)
+  if (step?.logs !== prevStepLogs) {
+    setPrevStepLogs(step?.logs)
     setLogs(step?.logs as Array<RunLogs>)
-  }, [step?.logs])
+  }
 
   useEffect(() => {
     if (open) {

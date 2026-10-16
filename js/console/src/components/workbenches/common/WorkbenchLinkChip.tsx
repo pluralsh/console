@@ -60,6 +60,12 @@ export function WorkbenchLinkChip({
     placement: 'right',
     width: WORKBENCH_LINK_HOVER_CARD_WIDTH,
   })
+  const {
+    refs: { setFloating },
+    strategy,
+    x,
+    y,
+  } = floating
 
   const { data } = useWorkbenchLinkCardQuery({
     variables: { id: workbenchId },
@@ -133,11 +139,11 @@ export function WorkbenchLinkChip({
         <FloatingPortal id={theme.portals.default.id}>
           <HoverCardFloatingSC
             data-workbench-link-hover-card
-            ref={floating.refs.setFloating}
+            ref={setFloating}
             style={{
-              position: floating.strategy,
-              left: floating.x ?? 0,
-              top: floating.y ?? 0,
+              position: strategy,
+              left: x ?? 0,
+              top: y ?? 0,
             }}
             onMouseEnter={handleOpen}
             onMouseLeave={scheduleClose}

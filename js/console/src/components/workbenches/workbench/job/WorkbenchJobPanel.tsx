@@ -312,11 +312,9 @@ export function useSelectedJobTab<T extends string>(
 ) {
   const [selectedTab, setSelectedTab] = useState<T>(initial)
 
-  useEffect(() => {
-    if (tabs.some(({ label }) => label === selectedTab)) return
-
-    if (tabs[0]) setSelectedTab(tabs[0].label)
-  }, [selectedTab, tabs])
+  if (!tabs.some(({ label }) => label === selectedTab) && tabs[0]) {
+    setSelectedTab(tabs[0].label)
+  }
 
   return [selectedTab, setSelectedTab] as const
 }

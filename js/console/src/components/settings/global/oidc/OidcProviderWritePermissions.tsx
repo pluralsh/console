@@ -11,7 +11,7 @@ import {
   useUpdateOidcProviderMutation,
 } from 'generated/graphql'
 import { isEqual, uniqWith } from 'lodash'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export function OidcProviderWritePermissions({
@@ -56,9 +56,11 @@ function OidcProviderWritePermissionsModal({
 }) {
   const [writeBindings, setWriteBindings] = useState(bindings)
 
-  useEffect(() => {
+  const [prevBindings, setPrevBindings] = useState(bindings)
+  if (bindings !== prevBindings) {
+    setPrevBindings(bindings)
     setWriteBindings(bindings)
-  }, [bindings])
+  }
 
   const uniqueWriteBindings = useMemo(
     () => uniqWith(writeBindings, isEqual).filter(isNonNullable),

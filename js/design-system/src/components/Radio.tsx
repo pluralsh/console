@@ -3,7 +3,6 @@ import {
   memo,
   type ComponentPropsWithRef,
   useContext,
-  useEffect,
   useId,
   useRef,
   useState,
@@ -156,9 +155,12 @@ function Radio({
     selectedValue: checkedProp || checked ? value : undefined,
   }) as RadioGroupState
 
-  useEffect(() => {
+  const [prevCheckedProp, setPrevCheckedProp] = useState(checkedProp)
+
+  if (checkedProp !== prevCheckedProp) {
+    setPrevCheckedProp(checkedProp)
     setChecked(checkedProp)
-  }, [checkedProp])
+  }
 
   const labelId = useId()
   const inputRef = useRef<any>(null)

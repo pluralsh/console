@@ -97,6 +97,7 @@
     "@types/react-transition-group": "4.4.12",
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/ui": "5.0.1",
+    "babel-plugin-react-compiler": "1.0.0",
     "babel-plugin-styled-components": "2.3.0",
     "chromatic": "18.5.0",
     "fuse.js": "7.5.0",

@@ -19,7 +19,7 @@ import {
   WorkbenchPromptFragment,
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchSavedPromptsAbsPath,
@@ -88,10 +88,11 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     [prompts, savedPromptId]
   )
 
-  useEffect(() => {
-    if (!savedPrompt) return
-    setFormState(getInitialFormState(savedPrompt))
-  }, [savedPrompt])
+  const [prevSavedPrompt, setPrevSavedPrompt] = useState(savedPrompt)
+  if (savedPrompt !== prevSavedPrompt) {
+    setPrevSavedPrompt(savedPrompt)
+    if (savedPrompt) setFormState(getInitialFormState(savedPrompt))
+  }
 
   const attributes = toAttributes(formState)
 

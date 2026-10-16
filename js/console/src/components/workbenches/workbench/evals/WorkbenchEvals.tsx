@@ -99,9 +99,11 @@ export function WorkbenchEvals() {
     )
   }, [evalResultIdFromPath, navigate, selectedEvalRow?.id, workbenchId])
 
-  useEffect(() => {
+  const [prevEvalRowId, setPrevEvalRowId] = useState(selectedEvalRow?.id)
+  if (selectedEvalRow?.id !== prevEvalRowId) {
+    setPrevEvalRowId(selectedEvalRow?.id)
     setPromptExpanded(false)
-  }, [selectedEvalRow?.id])
+  }
 
   return (
     <WorkbenchPageLayout

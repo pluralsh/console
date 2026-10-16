@@ -21,7 +21,7 @@ import {
   useWorkbenchEvalSettingsQuery,
   useWorkbenchQuery,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   WORKBENCH_PARAM_ID,
@@ -85,8 +85,8 @@ export function WorkbenchEvalSettings() {
   const formLoading =
     (!data && loading) || (!evalData && evalLoading) || !isEvalStateInitialized
 
-  useEffect(() => {
-    if (evalLoading || isEvalStateInitialized) return
+  // initialize the form once the eval has loaded
+  if (!evalLoading && !isEvalStateInitialized) {
     setEvalsEnabled(!!workbenchEval)
     setPromptQualityRules(workbenchEval?.promptRules ?? '')
     setConclusionRules(workbenchEval?.conclusionRules ?? '')
@@ -96,7 +96,7 @@ export function WorkbenchEvalSettings() {
     setMaxSkills(workbenchEval?.automation?.maxSkills ?? DEFAULT_MAX_SKILLS)
     setAutomationInstructions(workbenchEval?.automation?.instructions ?? '')
     setIsEvalStateInitialized(true)
-  }, [evalLoading, isEvalStateInitialized, workbenchEval])
+  }
 
   const [createWorkbenchEval, { loading: createLoading, error: createError }] =
     useCreateWorkbenchEvalMutation()

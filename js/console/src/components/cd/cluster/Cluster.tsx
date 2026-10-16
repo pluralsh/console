@@ -21,7 +21,6 @@ import {
   Suspense,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -250,7 +249,14 @@ export function Cluster() {
   )
 
   useSetBreadcrumbs(crumbs)
-  useEffect(() => setMoreMenuItems(sharedMenuItems), [sharedMenuItems, tab])
+  const [prevMenuDeps, setPrevMenuDeps] = useState({ sharedMenuItems, tab })
+  if (
+    prevMenuDeps.sharedMenuItems !== sharedMenuItems ||
+    prevMenuDeps.tab !== tab
+  ) {
+    setPrevMenuDeps({ sharedMenuItems, tab })
+    setMoreMenuItems(sharedMenuItems)
+  }
 
   if (!(cluster || clusterLoading))
     return <EmptyState message="Cluster not found." />

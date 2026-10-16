@@ -111,12 +111,15 @@ function VirtualJobsGrid({
   jobs: WorkbenchJobTinyFragment[]
   scrollEl: HTMLDivElement | null
 }) {
+  // TanStack Virtual returns mutable instances that can't be memoized safely
+  'use no memo'
   const theme = useTheme()
   const columns = useJobsGridColumns()
   const rows = useMemo(() => chunk(jobs, columns), [jobs, columns])
   const listRef = useRef<HTMLDivElement>(null)
   const scrollMargin = useScrollMargin(listRef, scrollEl)
 
+  // oxlint-disable-next-line react/incompatible-library
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollEl,

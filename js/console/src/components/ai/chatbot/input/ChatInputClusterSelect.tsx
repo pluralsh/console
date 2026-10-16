@@ -58,18 +58,19 @@ export function ChatInputClusterSelect({
     [data?.clusters?.edges]
   )
 
+  const dataCluster = data?.cluster
   const findCluster = useCallback(
     (clusterId: Nullable<string>) => {
       if (!clusterId) {
         return null
       }
-      if (data?.cluster && data?.cluster.id === clusterId) {
-        return data.cluster
+      if (dataCluster && dataCluster.id === clusterId) {
+        return dataCluster
       }
 
       return clusters?.find((cluster) => cluster?.id === clusterId)
     },
-    [clusters, data?.cluster]
+    [clusters, dataCluster]
   )
 
   const selectedCluster = useMemo(

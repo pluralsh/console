@@ -223,17 +223,8 @@ function TopLevelSidePanelProvider({ children }: { children: ReactNode }) {
       : null
   }, [requested, pathname, legacyChatEnabled])
 
-  useEffect(() => {
-    if (requested === 'ai-chat' && !legacyChatEnabled) {
-      setRequested(null)
-      return
-    }
-    if (!requested || requested === 'ai-chat') return
-    const allowed = ALLOWED_ROUTES[requested]?.some((pattern) =>
-      matchPath(pattern, pathname)
-    )
-    if (!allowed) setRequested(null)
-  }, [requested, pathname, legacyChatEnabled])
+  // drop the request once it's no longer allowed here
+  if (requested && !sidePanel) setRequested(null)
 
   const ctx = useMemo(
     () => ({

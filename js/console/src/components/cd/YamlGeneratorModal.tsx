@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
   BrowserIcon,
@@ -63,14 +63,16 @@ export function YamlGeneratorModal({
   >('all')
   const [modalStep, setModalStep] = useState<'configure' | 'copy'>('configure')
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (!open) {
       setModalStep('configure')
       setName('')
       setTags({})
       setDistributionValue('all')
     }
-  }, [open])
+  }
 
   return (
     <ModalAlt

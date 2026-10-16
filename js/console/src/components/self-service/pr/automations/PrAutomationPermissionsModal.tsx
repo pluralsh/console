@@ -1,6 +1,6 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
 import {
@@ -43,12 +43,14 @@ export function PrAutomationPermissionsModal({
   )
   const [writeBindings, setWriteBindings] = useState(prAutomation.writeBindings)
 
-  useEffect(() => {
-    setCreateBindings(prAutomation.createBindings)
-  }, [prAutomation.createBindings])
-  useEffect(() => {
-    setWriteBindings(prAutomation.writeBindings)
-  }, [prAutomation.writeBindings])
+  const [prevPrAutomation, setPrevPrAutomation] = useState(prAutomation)
+  if (prAutomation !== prevPrAutomation) {
+    setPrevPrAutomation(prAutomation)
+    if (prAutomation.createBindings !== prevPrAutomation.createBindings)
+      setCreateBindings(prAutomation.createBindings)
+    if (prAutomation.writeBindings !== prevPrAutomation.writeBindings)
+      setWriteBindings(prAutomation.writeBindings)
+  }
 
   const uniqueCreateBindings = useMemo(
     () => uniqWith(createBindings, isEqual),

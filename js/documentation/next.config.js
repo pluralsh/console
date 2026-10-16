@@ -14,6 +14,9 @@ const { redirects } = require('./src/routing/docs-structure')
 const nextConfig = {
   transpilePackages: ['@pluralsh/design-system'],
   reactStrictMode: false,
+  experimental: {
+    reactCompiler: true,
+  },
   // Linting runs via Biome in the build:next script.
   eslint: { ignoreDuringBuilds: true },
   compiler: {

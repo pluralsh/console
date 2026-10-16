@@ -413,20 +413,12 @@ function SubSection({
   const pathname = removeTrailingSlashes(
     useContext(NavContext).optimisticPathname
   )
-  const prevPathname = usePrevious(pathname)
-  const isSelected = useMemo(
-    () => pathname === removeTrailingSlashes(href),
-    [pathname, href]
-  )
+  const [prevPathname, setPrevPathname] = useState(pathname)
 
-  useEffect(() => {
-    if (
-      prevPathname !== pathname &&
-      isPathnameInSections(pathname, [{ href, sections }])
-    ) {
-      setIsOpen(true)
-    }
-  }, [prevPathname, pathname, isSelected, href, sections])
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname)
+    if (isPathnameInSections(pathname, [{ href, sections }])) setIsOpen(true)
+  }
 
   const expand = useSpring({
     height: isOpen ? `${height}px` : '0px',

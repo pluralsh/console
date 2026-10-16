@@ -35,18 +35,17 @@ export default function PipelineJobLogs() {
   const theme = useTheme()
   const id = useParams().jobId!
   const pods = useJobPods()
-  const containers =
-    useMemo(
-      () =>
-        pods?.flatMap(
-          (p) =>
-            p?.spec?.containers?.flatMap?.((c) => ({
-              id: `${p.metadata.name}++${p.metadata.namespace}++${c?.name}`,
-              ...c,
-            })) ?? []
-        ),
-      [pods]
-    ) || []
+  const containers = useMemo(
+    () =>
+      pods?.flatMap(
+        (p) =>
+          p?.spec?.containers?.flatMap?.((c) => ({
+            id: `${p.metadata.name}++${p.metadata.namespace}++${c?.name}`,
+            ...c,
+          })) ?? []
+      ) ?? [],
+    [pods]
+  )
 
   const [sinceSeconds, setSinceSeconds] = useState(SinceSecondsOptions.HalfHour)
   const [selectedContainer, setSelectedContainer] = useState<string>(

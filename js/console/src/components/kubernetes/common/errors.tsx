@@ -28,14 +28,14 @@ function ErrorToast({ errors }: ErrorToastProps): Nullable<ReactElement<any>> {
     }
   }, [error])
 
-  useEffect(() => {
-    if (!errors) {
-      return
+  const [prevErrors, setPrevErrors] = useState(errors)
+  if (errors !== prevErrors) {
+    setPrevErrors(errors)
+    if (errors) {
+      setQueue(errors.slice(1))
+      setError(errors.at(0))
     }
-
-    setQueue(errors?.slice(1) ?? [])
-    setError(errors?.at(0))
-  }, [errors])
+  }
 
   return (
     error && (

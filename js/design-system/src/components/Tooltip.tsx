@@ -20,9 +20,6 @@ import {
   ComponentPropsWithRef,
   type JSX,
   type ReactNode,
-  cloneElement,
-  useMemo,
-  useRef,
   useState,
 } from 'react'
 import { mergeProps } from 'react-aria'
@@ -94,7 +91,7 @@ function Tooltip({
 }: TooltipProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const arrowRef = useRef<HTMLDivElement>(null)
+  const [arrowEl, setArrowEl] = useState<HTMLDivElement | null>(null)
   const isOpen =
     displayOn === 'none' ? false : displayOn === 'manual' ? manualOpen : open
 
@@ -105,7 +102,7 @@ function Tooltip({
   const {
     x,
     y,
-    refs,
+    refs: { floating: floatingRef, setReference, setFloating },
     strategy: finalStrategy,
     context,
     placement: finalPlacement,
@@ -122,7 +119,7 @@ function Tooltip({
       offset(totalOffset),
       flip(),
       shift({ padding: 12 }),
-      ...(showArrow ? [arrow({ element: arrowRef })] : []),
+      ...(showArrow ? [arrow({ element: arrowEl })] : []),
     ],
     whileElementsMounted: autoUpdate,
   })
@@ -139,11 +136,8 @@ function Tooltip({
     useDismiss(context, { enabled: dismissable === true }),
   ])
 
-  // Preserve the consumer's ref
-  const childrenRef = useMemo(
-    () => mergeRefs([refs.setReference, children?.props?.ref]),
-    [refs.setReference, children]
-  )
+  const { ref: childRef, ...childProps } = children?.props ?? {}
+  const Trigger = children?.type
 
   const finalPlacementSide = `${finalPlacement}`.split('-')[0]
   const arrowRotation = {
@@ -170,16 +164,19 @@ function Tooltip({
     : undefined
   return (
     <>
-      {children &&
-        cloneElement(
-          children,
-          getReferenceProps(
-            mergeProps(passThroughProps, children.props, {
+      {children && (
+        <Trigger
+          {...getReferenceProps(
+            mergeProps(passThroughProps, childProps, {
               [TOOLTIP_TRIGGER_ATTRIBUTE]: 'true',
-              ref: childrenRef,
             })
-          )
-        )}
+          )}
+          // Preserve the consumer's ref
+          ref={(node: Element | null) =>
+            mergeRefs([setReference, childRef])(node)
+          }
+        />
+      )}
       <WrapWithIf
         condition={portal}
         wrapper={
@@ -190,7 +187,7 @@ function Tooltip({
         }
       >
         <CSSTransition
-          nodeRef={refs.floating}
+          nodeRef={floatingRef}
           in={isOpen}
           appear
           timeout={250}
@@ -200,7 +197,7 @@ function Tooltip({
           <TipSC
             className={className}
             css={css}
-            ref={refs.setFloating}
+            ref={setFloating}
             style={{
               position: finalStrategy,
               left: x ?? 0,
@@ -213,7 +210,7 @@ function Tooltip({
             {label}
             {showArrow && staticSide && (
               <div
-                ref={arrowRef}
+                ref={setArrowEl}
                 style={{
                   position: 'absolute',
                   top: middlewareData?.arrow?.y || '',

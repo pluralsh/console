@@ -1,3 +1,7 @@
+// TabList and TabPanel share state imperatively through a stateRef that is read
+// and written during render. Opted out of React Compiler until that API is reworked.
+'use no memo'
+/* oxlint-disable react/refs, react/immutability */
 import { mergeRefs } from '@react-aria/utils'
 import { type Key, type Node } from '@react-types/shared'
 import { type AriaTabListProps } from '@react-types/tabs'

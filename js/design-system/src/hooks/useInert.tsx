@@ -1,17 +1,16 @@
-import { type Ref, type RefCallback, useLayoutEffect, useRef } from 'react'
+import { type Ref, type RefCallback, useLayoutEffect, useState } from 'react'
 import { mergeRefs } from 'react-merge-refs'
 
 export function useInert(inert: boolean, ref?: Ref<any>): RefCallback<any> {
-  const innerRef = useRef<any>(null)
-  const finalRef = mergeRefs([innerRef, ref])
+  const [node, setNode] = useState<any>(null)
 
   useLayoutEffect(() => {
     if (inert) {
-      innerRef.current?.setAttribute?.('inert', '')
+      node?.setAttribute?.('inert', '')
     } else {
-      innerRef.current?.removeAttribute?.('inert')
+      node?.removeAttribute?.('inert')
     }
-  }, [inert, innerRef])
+  }, [inert, node])
 
-  return finalRef
+  return mergeRefs([setNode, ref])
 }

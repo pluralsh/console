@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 const getPlatform = () => {
   if (
@@ -24,11 +24,7 @@ const getPlatform = () => {
 }
 
 export const usePlatform = () => {
-  const [platform, setPlatform] = useState(getPlatform())
-
-  useEffect(() => {
-    setPlatform(getPlatform())
-  }, [])
+  const [platform] = useState(getPlatform)
 
   return platform
 }
