@@ -43,7 +43,9 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.TransitionRecord do
   # Changes are checked against the states they can move to next. Anything that cannot be read
   # (no access to the choices, a response of an unknown shape) is not validated, ServiceNow decides.
   defp target_state(client, %{table: "change_request"} = model, sys_id) do
-    choices = choices(client, model.table)next =
+    choices = choices(client, model.table)
+
+    next =
       case Client.change_get(client, "/change/#{Client.segment(sys_id)}/nextstates") do
         {:ok, next} -> next_states(next)
         {:error, _} -> :unknown
