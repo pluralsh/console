@@ -1,6 +1,6 @@
 // TabList and TabPanel share state imperatively through a stateRef that is read
-// and written during render. Opted out of React Compiler until that API is reworked.
-'use no memo'
+// and written during render, so their components opt out of React Compiler
+// ('use no memo') until that API is reworked.
 /* oxlint-disable react/refs, react/immutability */
 import { mergeRefs } from '@react-aria/utils'
 import {
@@ -83,6 +83,7 @@ function WrappedTabPanel({
   mode,
   ...props
 }: WrappedTabPanelProps) {
+  'use no memo'
   const ref = useRef(null)
   let { tabPanelProps } = useTabPanel(stateProps, state, ref)
   const { visuallyHiddenProps } = useVisuallyHidden()
@@ -129,6 +130,7 @@ function TabPanel({
   mode,
   ...props
 }: TabPanelProps) {
+  'use no memo'
   // https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate
   const [numRechecks, recheckStateRef] = useReducer((x) => x + 1, 0)
   const [, forceUpdate] = useReducer((x) => x + 1, 0)

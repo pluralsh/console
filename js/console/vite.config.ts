@@ -114,7 +114,7 @@ export default defineConfig({
     basicSsl(),
     react(),
     babel({
-      presets: [reactCompilerPreset()],
+      presets: [reactCompilerPreset({ panicThreshold: 'all_errors' })],
       plugins: ['styled-components'],
       exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]generated[/\\]/],
     }),

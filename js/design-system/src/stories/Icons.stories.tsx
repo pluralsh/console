@@ -80,9 +80,10 @@ function Template({ backgroundColor, color, secondaryColor, ...args }: any) {
       (theme.colors as any)[backgroundColor]) ||
     backgroundColor
 
-  // @ts-ignore
-  color = theme.colors[color] ?? (color || undefined)
-  secondaryColor =
+  const iconColor =
+    // @ts-ignore
+    theme.colors[color] ?? (color || undefined)
+  const iconSecondaryColor =
     // @ts-ignore
     theme.colors[secondaryColor as string] ?? (secondaryColor || undefined)
 
@@ -100,7 +101,11 @@ function Template({ backgroundColor, color, secondaryColor, ...args }: any) {
           $backgroundColor={bgColor}
         >
           <div style={{ justifySelf: 'flex-end' }}>
-            {createElement(icon as any, { color, secondaryColor, ...args })}
+            {createElement(icon as any, {
+              color: iconColor,
+              secondaryColor: iconSecondaryColor,
+              ...args,
+            })}
           </div>
           <span
             dangerouslySetInnerHTML={{
@@ -127,9 +132,10 @@ function LogosTemplate({
       (theme.colors as any)[backgroundColor]) ||
     backgroundColor
 
-  // @ts-ignore
-  color = theme.colors[color] ?? (color || undefined)
-  secondaryColor =
+  const iconColor =
+    // @ts-ignore
+    theme.colors[color] ?? (color || undefined)
+  const iconSecondaryColor =
     // @ts-ignore
     theme.colors[secondaryColor as string] ?? (secondaryColor || undefined)
 
@@ -156,7 +162,11 @@ function LogosTemplate({
           }}
         >
           <div style={{ justifySelf: 'flex-end' }}>
-            {createElement(icon as any, { color, secondaryColor, ...args })}
+            {createElement(icon as any, {
+              color: iconColor,
+              secondaryColor: iconSecondaryColor,
+              ...args,
+            })}
           </div>
           <span
             dangerouslySetInnerHTML={{

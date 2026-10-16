@@ -15,7 +15,8 @@ const nextConfig = {
   transpilePackages: ['@pluralsh/design-system'],
   reactStrictMode: false,
   experimental: {
-    reactCompiler: true,
+    // fail the build instead of silently skipping components the compiler can't handle
+    reactCompiler: { panicThreshold: 'ALL_ERRORS' },
   },
   // Linting runs via Biome in the build:next script.
   eslint: { ignoreDuringBuilds: true },
