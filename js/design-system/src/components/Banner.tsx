@@ -81,10 +81,22 @@ const BannerInner = styled.div(({ theme }) => ({
   alignItems: 'flex-start',
 }))
 
-const IconWrap = styled.div((_) => ({
+const BANNER_ICON_SIZE = 20
+
+const IconWrap = styled.div(({ theme }) => ({
   display: 'flex',
-  paddingTop: 2,
-  paddingBottom: 2,
+  flexShrink: 0,
+  width: BANNER_ICON_SIZE,
+  height: BANNER_ICON_SIZE,
+  alignItems: 'flex-start',
+  justifyContent: 'center',
+  paddingTop: 4,
+  boxSizing: 'content-box',
+  marginRight: theme.spacing.medium,
+  '& svg': {
+    width: BANNER_ICON_SIZE,
+    height: BANNER_ICON_SIZE,
+  },
 }))
 
 const Heading = styled.div<{ $bold: boolean }>(({ $bold, theme }) => ({
@@ -103,7 +115,7 @@ const BannerAction = styled.span(({ theme }) => ({
 
 const Content = styled.p<{ $hasHeading: boolean }>(
   ({ $hasHeading: $heading, theme }) => ({
-    ...theme.partials.text.body2LooseLineHeight,
+    ...theme.partials.text.body2,
     marginTop: $heading ? theme.spacing.xxsmall : theme.spacing.xxxsmall,
     marginBottom: 0,
     color: theme.colors['text-light'],
@@ -145,9 +157,8 @@ function Banner({
       <BannerInner>
         <IconWrap>
           <BannerIcon
-            size={20}
+            size={BANNER_ICON_SIZE}
             color={iconColorKey}
-            marginRight="medium"
           />
         </IconWrap>
         <div>
