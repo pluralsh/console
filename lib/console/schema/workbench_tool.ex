@@ -146,10 +146,9 @@ defmodule Console.Schema.WorkbenchTool do
       end
 
       embeds_one :service_now, ServiceNowConnection, on_replace: :update do
-        field :url,          :string
-        field :username,     :string
-        field :password,     EncryptedString
-        field :allow_delete, :boolean, default: false
+        field :url,      :string
+        field :username, :string
+        field :password, EncryptedString
       end
 
       embeds_one :prometheus, PrometheusConnection, on_replace: :update do
@@ -679,7 +678,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp service_now_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url username password allow_delete)a)
+    |> cast(attrs, ~w(url username password)a)
     |> validate_required([:url])
   end
 

@@ -8,13 +8,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
   alias Console.AI.Tools.Workbench.Integration.ServiceNow.{
     AddComment,
     CreateRecord,
-    DeleteRecord,
-    GetChange,
-    GetChangeConflicts,
     GetRecord,
-    ListChangeApprovals,
-    ListChangeModels,
-    ListChangeTasks,
     ListComments,
     ListRecords,
     ListStates,
@@ -27,7 +21,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
   @sys_id "0123456789abcdef0123456789abcdef"
   @base "https://example.service-now.com/api/now"
 
-  test "expands delete only when it is enabled" do
+  test "expands the ticket tools and no destructive ones" do
     names = workbench_tool() |> Tools.expand() |> Enum.map(&Tool.name/1)
 
     assert Enum.sort(names) ==
@@ -39,36 +33,15 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
                "service_now_snow_list_comments",
                "service_now_snow_add_comment",
                "service_now_snow_list_states",
-               "service_now_snow_transition_record",
-               "service_now_snow_get_change",
-               "service_now_snow_list_change_models",
-               "service_now_snow_create_change",
-               "service_now_snow_list_change_tasks",
-               "service_now_snow_save_change_task",
-               "service_now_snow_list_change_approvals",
-               "service_now_snow_get_change_conflicts",
-               "service_now_snow_check_conflicts"
+               "service_now_snow_transition_record"
              ])
-
-    names = workbench_tool(allow_delete: true) |> Tools.expand() |> Enum.map(&Tool.name/1)
-    assert "service_now_snow_delete_record" in names
   end
 
   test "registers with integration tools and classifies only reads as read-only" do
-    tools = WorkbenchTools.integration_tools([workbench_tool(allow_delete: true)])
-    assert length(tools) == 17
+    tools = WorkbenchTools.integration_tools([workbench_tool()])
+    assert length(tools) == 8
 
-    readonly = [
-      ListRecords,
-      GetRecord,
-      ListComments,
-      ListStates,
-      GetChange,
-      ListChangeModels,
-      ListChangeTasks,
-      ListChangeApprovals,
-      GetChangeConflicts
-    ]
+    readonly = [ListRecords, GetRecord, ListComments, ListStates]
 
     for %mod{} = tool <- tools do
       assert Classify.readonly?(tool) == (mod in readonly)
@@ -222,35 +195,17 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
     assert msg =~ "404"
   end
 
-  test "delete_record deletes when enabled" do
-    expect(Req, :request, fn opts ->
-      assert opts[:method] == :delete
-      assert opts[:url] == "#{@base}/table/incident/#{@sys_id}"
-      {:ok, %Req.Response{status: 204, body: ""}}
-    end)
-
-    assert {:ok, encoded} =
-             run(DeleteRecord, %{"table" => "incident", "record_id" => @sys_id}, allow_delete: true)
-
-    assert %{"deleted" => true, "sysId" => @sys_id} = Jason.decode!(encoded)
-  end
-
-  test "delete_record refuses when delete is disabled" do
-    reject(&Req.request/1)
-    assert {:error, _} = run(DeleteRecord, %{"table" => "incident", "record_id" => @sys_id})
-  end
-
-  defp run(mod, attrs, opts \\ []) do
+  defp run(mod, attrs) do
     {:ok, model} =
       mod
-      |> struct(tool: workbench_tool(opts))
+      |> struct(tool: workbench_tool())
       |> mod.changeset(attrs)
       |> Ecto.Changeset.apply_action(:update)
 
     mod.implement(model)
   end
 
-  defp workbench_tool(opts \\ []) do
+  defp workbench_tool() do
     %WorkbenchTool{}
     |> WorkbenchTool.changeset(%{
       tool: :service_now,
@@ -259,8 +214,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
         service_now: %{
           url: "https://example.service-now.com",
           username: "agent",
-          password: "secret",
-          allow_delete: Keyword.get(opts, :allow_delete, false)
+          password: "secret"
         }
       }
     })

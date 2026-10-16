@@ -1,10 +1,10 @@
 # ServiceNow tool setup
 
-The tool reads and writes tickets through the ServiceNow Table API, and change
-requests through the Change Management API. It only touches four tables:
-`incident`, `change_request`, `problem` and `sc_task`. Agents can search, read,
-create, comment on and move tickets between states, and for changes also pick a
-change model, write the plans, manage tasks and read approvals.
+The tool reads and writes tickets through the ServiceNow Table API. It only
+touches four tables: `incident`, `change_request`, `problem` and `sc_task`.
+Agents can search, read, create, update, comment on and move tickets between
+states. For change requests, the Change Management API is only used to read the
+states a change can move to next and to move it. Agents cannot delete tickets.
 
 ## 1) Create an integration user
 
@@ -17,7 +17,8 @@ change model, write the plans, manage tasks and read approvals.
 
 To let the agent read comments and work notes, the user also needs read
 access to `sys_journal_field`. Base instances usually restrict that table, so
-you may need an ACL for it.
+you may need an ACL for it. The same goes for the state choices in
+`sys_choice`, which are read to resolve state labels such as `In Progress`.
 
 ## 2) Optional: use OAuth instead of a password
 
@@ -36,9 +37,6 @@ ServiceNow can issue tokens with the client credentials grant:
 
 - **ServiceNow instance URL:** for example `https://example.service-now.com`.
 - **Username / Password:** the integration user, when not using OAuth.
-- **Allow agents to permanently delete tickets:** off by default. When off,
-  the agent has no delete operation. Turn it on only if the integration user
-  is allowed to delete records and you want agents to do so.
 
 ## Limitations
 
@@ -51,9 +49,11 @@ ServiceNow can issue tokens with the client credentials grant:
   states it can move to next, other tables against the state choices
   (`sys_choice`), and ServiceNow business rules decide the rest. If the user
   cannot read those, the state is sent as given.
-- Normal changes may need approvals that the agent can read but not decide.
-- Changes need the `itil` or `change_manager` role to write, and `itil`,
-  `change_manager` or `sn_change_read` to read.
+- The agent cannot read or decide approvals. Normal changes that need approval
+  have to be approved in ServiceNow, and approval fields should be read-only
+  for the integration user.
+- Moving a change needs the `itil` or `change_manager` role to write, and
+  `itil`, `change_manager` or `sn_change_read` to read.
 - State values can be customized per instance. `list_states` shows them.
 
 ## 4) Check access

@@ -754,14 +754,9 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     return { jiraDatacenter: { url: url ?? '', apiToken: '' } }
   },
   [WorkbenchToolType.ServiceNow]: (config) => {
-    const { url, username, allowDelete } = config?.serviceNow ?? {}
+    const { url, username } = config?.serviceNow ?? {}
     return {
-      serviceNow: {
-        url: url ?? '',
-        username: username ?? '',
-        password: '',
-        allowDelete: !!allowDelete,
-      },
+      serviceNow: { url: url ?? '', username: username ?? '', password: '' },
     }
   },
   [WorkbenchToolType.Exa]: () => ({ exa: { apiKey: '' } }),

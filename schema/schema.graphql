@@ -3966,9 +3966,6 @@ input WorkbenchToolServiceNowConnectionAttributes {
 
   "servicenow password for basic auth (required if not using OAuth token exchange)"
   password: String
-
-  "whether agents may permanently delete tickets (defaults to false)"
-  allowDelete: Boolean
 }
 
 input WorkbenchToolExaConnectionAttributes {
@@ -5863,9 +5860,6 @@ type WorkbenchToolServiceNowConnection {
 
   "servicenow basic auth user (password never exposed)"
   username: String
-
-  "whether agents may permanently delete tickets"
-  allowDelete: Boolean
 }
 
 type WorkbenchToolExaConnection {

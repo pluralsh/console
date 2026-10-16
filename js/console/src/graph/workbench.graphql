@@ -282,7 +282,6 @@ fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
   serviceNow {
     url
     username
-    allowDelete
   }
   linear {
     url

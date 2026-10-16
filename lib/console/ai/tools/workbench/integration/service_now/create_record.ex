@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.CreateRecord do
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
     do:
-      "Create a ServiceNow ticket (incident, change request, problem or catalog task) using the #{name} connection. For change requests prefer create_change, which sets the type and model and takes the change plans."
+      "Create a ServiceNow ticket (incident, change request, problem or catalog task) using the #{name} connection."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 

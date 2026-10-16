@@ -12844,8 +12844,6 @@ type WorkbenchToolServiceNowConnection struct {
 	URL string `json:"url"`
 	// servicenow basic auth user (password never exposed)
 	Username *string `json:"username,omitempty"`
-	// whether agents may permanently delete tickets
-	AllowDelete *bool `json:"allowDelete,omitempty"`
 }
 
 type WorkbenchToolServiceNowConnectionAttributes struct {
@@ -12855,8 +12853,6 @@ type WorkbenchToolServiceNowConnectionAttributes struct {
 	Username *string `json:"username,omitempty"`
 	// servicenow password for basic auth (required if not using OAuth token exchange)
 	Password *string `json:"password,omitempty"`
-	// whether agents may permanently delete tickets (defaults to false)
-	AllowDelete *bool `json:"allowDelete,omitempty"`
 }
 
 type WorkbenchToolSlackConnection struct {

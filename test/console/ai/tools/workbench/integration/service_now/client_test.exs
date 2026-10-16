@@ -22,7 +22,6 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ClientTest do
 
       assert client.base_url == "https://example.service-now.com/api/now"
       assert client.instance_url == "https://example.service-now.com"
-      refute client.allow_delete
 
       expected = Base.encode64("agent:secret")
       assert {"Authorization", "Basic #{expected}"} in client.headers
@@ -49,13 +48,12 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ClientTest do
             client_id: "snow-client",
             client_secret: "client-secret"
           },
-          configuration: %{service_now: %{url: "https://example.service-now.com", allow_delete: true}}
+          configuration: %{service_now: %{url: "https://example.service-now.com"}}
         })
 
       assert changeset.valid?
       assert {:ok, client} = Client.build(Ecto.Changeset.apply_changes(changeset))
       assert {"Authorization", "Bearer oauth-token"} in client.headers
-      assert client.allow_delete
     end
 
     test "rejects a tool without credentials or OAuth" do

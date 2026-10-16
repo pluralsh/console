@@ -216,10 +216,6 @@ function extractServiceNowMetadata(
   return [
     { label: 'URL', value: configuration?.serviceNow?.url },
     { label: 'Username', value: configuration?.serviceNow?.username },
-    {
-      label: 'Delete',
-      value: configuration?.serviceNow?.allowDelete ? 'Allowed' : 'Disabled',
-    },
   ]
 }
 

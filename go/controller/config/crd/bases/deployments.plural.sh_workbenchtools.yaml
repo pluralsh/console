@@ -1574,10 +1574,6 @@ spec:
                   serviceNow:
                     description: ServiceNow connection (ticketing).
                     properties:
-                      allowDelete:
-                        description: AllowDelete lets agents permanently delete tickets.
-                          Defaults to false.
-                        type: boolean
                       passwordSecretRef:
                         description: PasswordSecretRef references the basic auth password
                           when OAuth is not used.

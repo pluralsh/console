@@ -7011,7 +7011,6 @@ _Appears in:_
 | `url` _string_ | ServiceNow instance URL, for example https://example.service-now.com. |  | Required: \{\} <br /> |
 | `username` _string_ | Username for basic auth when OAuth is not used. |  | Optional: \{\} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef references the basic auth password when OAuth is not used. |  | Optional: \{\} <br /> |
-| `allowDelete` _boolean_ | AllowDelete lets agents permanently delete tickets. Defaults to false. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchToolSlackConfig

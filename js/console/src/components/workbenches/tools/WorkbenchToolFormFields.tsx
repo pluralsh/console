@@ -864,13 +864,6 @@ function ServiceNowFormFields({
         setOauth={setOauth}
         persistedType={persistedOauthType}
       />
-      <Switch
-        size="small"
-        checked={!!c.allowDelete}
-        onChange={(checked) => set({ ...c, allowDelete: checked })}
-      >
-        Allow agents to permanently delete tickets
-      </Switch>
     </>
   )
 }

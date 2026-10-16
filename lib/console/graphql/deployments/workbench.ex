@@ -422,10 +422,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_service_now_connection_attributes do
-    field :url,          non_null(:string), description: "servicenow instance URL (for example, https://example.service-now.com)"
-    field :username,     :string, description: "servicenow user for basic auth (required if not using OAuth token exchange)"
-    field :password,     :string, description: "servicenow password for basic auth (required if not using OAuth token exchange)"
-    field :allow_delete, :boolean, description: "whether agents may permanently delete tickets (defaults to false)"
+    field :url,      non_null(:string), description: "servicenow instance URL (for example, https://example.service-now.com)"
+    field :username, :string, description: "servicenow user for basic auth (required if not using OAuth token exchange)"
+    field :password, :string, description: "servicenow password for basic auth (required if not using OAuth token exchange)"
   end
 
   input_object :workbench_tool_exa_connection_attributes do
@@ -1574,9 +1573,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_service_now_connection do
-    field :url,          non_null(:string), description: "servicenow instance URL"
-    field :username,     :string, description: "servicenow basic auth user (password never exposed)"
-    field :allow_delete, :boolean, description: "whether agents may permanently delete tickets"
+    field :url,      non_null(:string), description: "servicenow instance URL"
+    field :username, :string, description: "servicenow basic auth user (password never exposed)"
   end
 
   object :workbench_tool_exa_connection do

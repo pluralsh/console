@@ -22,8 +22,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
           base_url: String.t(),
           change_url: String.t(),
           instance_url: String.t(),
-          headers: [{String.t(), String.t()}],
-          allow_delete: boolean
+          headers: [{String.t(), String.t()}]
         }
 
   @doc "The ServiceNow tables the workbench tool is allowed to touch."
@@ -34,35 +33,34 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   def build(%WorkbenchTool{
         tool: :service_now,
         oauth: %OauthToken{enabled: enabled} = oauth,
-        configuration: %{service_now: %ServiceNowConnection{url: url} = conn}
+        configuration: %{service_now: %ServiceNowConnection{url: url}}
       })
       when enabled != false and is_binary(url) do
     with {:ok, header} <- TokenExchange.authorization_header(oauth),
-         do: {:ok, client(url, header, conn)}
+         do: {:ok, client(url, header)}
   end
 
   def build(%WorkbenchTool{
         tool: :service_now,
         configuration: %{
-          service_now: %ServiceNowConnection{url: url, username: user, password: pass} = conn
+          service_now: %ServiceNowConnection{url: url, username: user, password: pass}
         }
       })
       when is_binary(url) and is_binary(user) and is_binary(pass) do
-    {:ok, client(url, {"Authorization", "Basic #{Base.encode64("#{user}:#{pass}")}"}, conn)}
+    {:ok, client(url, {"Authorization", "Basic #{Base.encode64("#{user}:#{pass}")}"})}
   end
 
   def build(%WorkbenchTool{}),
     do: {:error, "ServiceNow connection is not configured for this workbench tool."}
 
-  defp client(url, auth, %ServiceNowConnection{allow_delete: allow_delete}) do
+  defp client(url, auth) do
     instance = normalize_url(url)
 
     %{
       base_url: instance <> "/api/now",
       change_url: instance <> "/api/sn_chg_rest/v1",
       instance_url: instance,
-      headers: [auth],
-      allow_delete: allow_delete == true
+      headers: [auth]
     }
   end
 
@@ -114,18 +112,12 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   @spec patch(t, String.t(), map(), map()) :: {:ok, term()} | {:error, String.t()}
   def patch(client, path, body, query \\ %{}), do: request(client, :patch, path, json: body, query: query)
 
-  @spec delete(t, String.t()) :: {:ok, term()} | {:error, String.t()}
-  def delete(client, path), do: request(client, :delete, path, [])
-
   @doc """
-  Change Management API (`/api/sn_chg_rest/v1`) variants of `get/3`, `post/4` and `patch/4`.
+  Change Management API (`/api/sn_chg_rest/v1`) variants of `get/3` and `patch/4`, used to
+  read the next states of a change and to move it.
   """
   @spec change_get(t, String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def change_get(client, path, query \\ %{}), do: request(client, :get, path, query: query, api: :change)
-
-  @spec change_post(t, String.t(), map(), map()) :: {:ok, term()} | {:error, String.t()}
-  def change_post(client, path, body \\ %{}, query \\ %{}),
-    do: request(client, :post, path, json: body, query: query, api: :change)
 
   @spec change_patch(t, String.t(), map(), map()) :: {:ok, term()} | {:error, String.t()}
   def change_patch(client, path, body, query \\ %{}),

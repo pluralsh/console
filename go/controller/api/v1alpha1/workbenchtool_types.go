@@ -1275,10 +1275,6 @@ type WorkbenchToolServiceNowConfig struct {
 	// PasswordSecretRef references the basic auth password when OAuth is not used.
 	// +kubebuilder:validation:Optional
 	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
-
-	// AllowDelete lets agents permanently delete tickets. Defaults to false.
-	// +kubebuilder:validation:Optional
-	AllowDelete *bool `json:"allowDelete,omitempty"`
 }
 
 func (c *WorkbenchToolServiceNowConfig) Attributes(ctx context.Context, cl client.Client, namespace string) (*console.WorkbenchToolServiceNowConnectionAttributes, error) {
@@ -1287,9 +1283,8 @@ func (c *WorkbenchToolServiceNowConfig) Attributes(ctx context.Context, cl clien
 	}
 
 	attr := &console.WorkbenchToolServiceNowConnectionAttributes{
-		URL:         c.URL,
-		Username:    c.Username,
-		AllowDelete: c.AllowDelete,
+		URL:      c.URL,
+		Username: c.Username,
 	}
 	if c.PasswordSecretRef != nil {
 		password, err := utils.GetSecretKey(ctx, cl, c.PasswordSecretRef, namespace)
