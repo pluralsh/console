@@ -17,8 +17,33 @@ states a change can move to next and to move it. Agents cannot delete tickets.
 
 To let the agent read comments and work notes, the user also needs read
 access to `sys_journal_field`. Base instances usually restrict that table, so
-you may need an ACL for it. The same goes for the state choices in
-`sys_choice`, which are read to resolve state labels such as `In Progress`.
+you may need an ACL for it.
+
+### State choices (`sys_choice`)
+
+The agent reads `sys_choice` to turn state labels such as `In Progress` into
+values such as `2` for incidents, problems and catalog tasks. The `itil` role
+usually cannot query that table through the API: the request fails with
+`Field(s) present in the query do not have permission to be read`. Without
+access, `list_states` fails for those tables and `transition_record` accepts
+raw state values only. Change requests are not affected.
+
+To allow it:
+
+1. Elevate to `security_admin` and open **System Security → Access Control
+   (ACL)**. Filter **Name** by `sys_choice` to see the existing rules.
+2. Create three rules with **New**, one for each operation `read`,
+   `query_match` and `query_range`. Use type `record` and decision type
+   `Allow If`. For **Name**, pick the table `Choice [sys_choice]` in the first
+   dropdown and `*` (all fields) in the second. Under **Requires role**, click
+   **Insert a new row...** and add the `itil` role or a dedicated role that the
+   integration user has.
+3. Check it as the integration user:
+   `GET /api/now/table/sys_choice?sysparm_query=name=incident^element=state&sysparm_limit=5`
+   should return rows. If it still fails, **System Security → Debug Security
+   Rules** shows which rule blocks the request.
+
+You can skip this and put the state values in the workbench prompt instead.
 
 ## 2) Optional: use OAuth instead of a password
 

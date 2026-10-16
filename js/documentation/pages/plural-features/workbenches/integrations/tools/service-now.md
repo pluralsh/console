@@ -22,7 +22,41 @@ Use a dedicated service account with the narrowest role that works. The agent ca
 3. Set a password.
 4. Grant the `itil` role, or a custom role with read and write access to the four ticket tables.
 
-Comments and work notes are stored in the `sys_journal_field` table. Base instances usually restrict that table, so add an ACL that lets the integration user read it if you want the agent to read ticket history. The same goes for the state choices in `sys_choice`, which `list_states` and `transition_record` read to resolve state labels such as `In Progress`.
+Comments and work notes are stored in the `sys_journal_field` table. Base instances usually restrict that table, so add an ACL that lets the integration user read it if you want the agent to read ticket history. The same goes for the state choices in `sys_choice`, which `list_states` and `transition_record` read to resolve state labels such as `In Progress`. See [Allow reading state choices](#allow-reading-state-choices).
+
+### Allow reading state choices
+
+State values differ per table and per instance, so the agent looks them up in the `sys_choice` table, for example `2` is `In Progress` on an incident. The `itil` role can usually not query that table through the API. The request fails with:
+
+```text
+Insufficient rights to query records
+Field(s) present in the query do not have permission to be read
+```
+
+Without access, `list_states` fails for incidents, problems, and catalog tasks, and `transition_record` accepts raw state values such as `2` but not labels. Change requests are not affected, their states come from the Change Management API.
+
+The tool filters the table on `name`, `element`, `language`, and `inactive`, sorts by `sequence`, and returns `value` and `label`. ServiceNow checks [query ACLs](https://www.servicenow.com/docs/r/platform-security/access-control/query-acl-rule.html) on the filtered fields, and read access on the returned ones. Grant the integration user all three:
+
+1. Sign in as an admin and elevate to the `security_admin` role (user menu → **Elevate role**). Without it you can open the ACL list but not create or edit rules.
+2. Open **System Security → Access Control (ACL)** and filter **Name** by `sys_choice`. Note the existing rules for the `sys_choice` table and its fields and their **Operation**. A rule that requires a role the integration user does not have is what blocks the query.
+3. Click **New** and create a rule for each of these operations: `read`, `query_match`, and `query_range`. For each one:
+   * **Type:** `record`.
+   * **Operation:** `read`, `query_match`, or `query_range`.
+   * **Decision Type:** `Allow If`, which is the default.
+   * **Name:** this is two dropdowns. Pick the table `Choice [sys_choice]` in the first one and `*` (all fields) in the second one. Leave the second one on `-- None --` and the rule applies to the table rows instead of its fields, which does not fix the error.
+   * **Requires role:** in the **Conditions** section, click **Insert a new row...** and add `itil`, or a dedicated role that you also grant to the integration user. A dedicated role keeps the access narrow if you do not want to widen `itil`. ServiceNow warns that a rule needs a role, security attribute, data condition, script, or reference field control, and the role satisfies that.
+   * Leave **Advanced** unchecked and **Admin overrides** on.
+4. Save. Rules are additive: a user passes when any matching rule passes, so you do not need to change the existing ones.
+5. Check access as the integration user:
+
+   ```bash
+   curl -s -u "$USER:$PASSWORD" -H 'Accept: application/json' \
+     "https://<instance>.service-now.com/api/now/table/sys_choice?sysparm_query=name=incident^element=state&sysparm_fields=value,label&sysparm_limit=5"
+   ```
+
+   A `result` list with state values means it works. The same error as above means a rule still blocks it. To find which one, open **System Security → Debug Security Rules**, repeat the request, and read the rules that were evaluated for `sys_choice`.
+
+The agent keeps working without this access, so you can skip it if you give the agent raw state values in the workbench prompt.
 
 ### Optional: OAuth client credentials
 
