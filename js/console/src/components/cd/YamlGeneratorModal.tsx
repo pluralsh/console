@@ -63,15 +63,13 @@ export function YamlGeneratorModal({
   >('all')
   const [modalStep, setModalStep] = useState<'configure' | 'copy'>('configure')
 
-  const [prevOpen, setPrevOpen] = useState(open)
-  if (open !== prevOpen) {
-    setPrevOpen(open)
-    if (!open) {
-      setModalStep('configure')
-      setName('')
-      setTags({})
-      setDistributionValue('all')
-    }
+  // the form is cleared whenever the modal closes, so it opens fresh
+  const close = () => {
+    setModalStep('configure')
+    setName('')
+    setTags({})
+    setDistributionValue('all')
+    onClose?.()
   }
 
   return (
@@ -79,7 +77,7 @@ export function YamlGeneratorModal({
       header={header}
       open={open}
       onClose={() => {
-        onClose?.()
+        close()
         refetch?.()
       }}
       asForm
@@ -93,7 +91,7 @@ export function YamlGeneratorModal({
               e.preventDefault()
               if (modalStep === 'configure') setModalStep('copy')
               else {
-                onClose?.()
+                close()
               }
             }}
           >
@@ -104,7 +102,7 @@ export function YamlGeneratorModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

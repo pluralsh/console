@@ -85,14 +85,15 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     [prompts, savedPromptId]
   )
 
-  const [formState, setFormState] = useState<SavedPromptFormState>(() =>
-    getInitialFormState(savedPrompt, createRouteState?.prompt)
+  // the user's edits, or null to show the saved prompt (which may load after mount)
+  const [editedForm, setEditedForm] = useState<SavedPromptFormState | null>(
+    null
   )
-  const [prevSavedPrompt, setPrevSavedPrompt] = useState(savedPrompt)
-  if (savedPrompt !== prevSavedPrompt) {
-    setPrevSavedPrompt(savedPrompt)
-    if (savedPrompt) setFormState(getInitialFormState(savedPrompt))
-  }
+  const formState =
+    editedForm ?? getInitialFormState(savedPrompt, createRouteState?.prompt)
+  const setFormState = (
+    update: (prev: SavedPromptFormState) => SavedPromptFormState
+  ) => setEditedForm(update(formState))
 
   const attributes = toAttributes(formState)
 

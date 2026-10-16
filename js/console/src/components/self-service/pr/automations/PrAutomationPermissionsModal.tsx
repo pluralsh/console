@@ -38,18 +38,17 @@ export function PrAutomationPermissionsModal({
   const forLabel = 'PR automation'
   const header = `${forLabel} permissions – ${name}`
 
-  const [createBindings, setCreateBindings] = useState(
-    prAutomation.createBindings
-  )
-  const [writeBindings, setWriteBindings] = useState(prAutomation.writeBindings)
-
-  const [prevPrAutomation, setPrevPrAutomation] = useState(prAutomation)
-  if (prAutomation !== prevPrAutomation) {
-    setPrevPrAutomation(prAutomation)
-    if (prAutomation.createBindings !== prevPrAutomation.createBindings)
-      setCreateBindings(prAutomation.createBindings)
-    if (prAutomation.writeBindings !== prevPrAutomation.writeBindings)
-      setWriteBindings(prAutomation.writeBindings)
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedCreateBindings, setCreateBindings] =
+    useState<typeof prAutomation.createBindings>()
+  const [editedWriteBindings, setWriteBindings] =
+    useState<typeof prAutomation.writeBindings>()
+  const createBindings = editedCreateBindings ?? prAutomation.createBindings
+  const writeBindings = editedWriteBindings ?? prAutomation.writeBindings
+  const close = () => {
+    setCreateBindings(undefined)
+    setWriteBindings(undefined)
+    onClose()
   }
 
   const uniqueCreateBindings = useMemo(
@@ -64,7 +63,7 @@ export function PrAutomationPermissionsModal({
     useUpdatePrAutomationMutation({
       onCompleted: () => {
         refetch?.()
-        onClose()
+        close()
       },
     })
   const allowSubmit = createBindings && writeBindings
@@ -97,7 +96,7 @@ export function PrAutomationPermissionsModal({
     <Modal
       header={header}
       open={open}
-      onClose={onClose}
+      onClose={close}
       onOpenAutoFocus={(e) => e.preventDefault()}
       asForm
       formProps={{ onSubmit }}
@@ -124,7 +123,7 @@ export function PrAutomationPermissionsModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

@@ -51,19 +51,21 @@ export function CatalogPermissionsModal({
 }) {
   const theme = useTheme()
 
-  const [createBindings, setCreateBindings] = useState(catalog.createBindings)
-  const [readBindings, setReadBindings] = useState(catalog.readBindings)
-  const [writeBindings, setWriteBindings] = useState(catalog.writeBindings)
-
-  const [prevCatalog, setPrevCatalog] = useState(catalog)
-  if (catalog !== prevCatalog) {
-    setPrevCatalog(catalog)
-    if (catalog.createBindings !== prevCatalog.createBindings)
-      setCreateBindings(catalog.createBindings)
-    if (catalog.readBindings !== prevCatalog.readBindings)
-      setReadBindings(catalog.readBindings)
-    if (catalog.writeBindings !== prevCatalog.writeBindings)
-      setWriteBindings(catalog.writeBindings)
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedCreateBindings, setCreateBindings] =
+    useState<typeof catalog.createBindings>()
+  const [editedReadBindings, setReadBindings] =
+    useState<typeof catalog.readBindings>()
+  const [editedWriteBindings, setWriteBindings] =
+    useState<typeof catalog.writeBindings>()
+  const createBindings = editedCreateBindings ?? catalog.createBindings
+  const readBindings = editedReadBindings ?? catalog.readBindings
+  const writeBindings = editedWriteBindings ?? catalog.writeBindings
+  const close = () => {
+    setCreateBindings(undefined)
+    setReadBindings(undefined)
+    setWriteBindings(undefined)
+    onClose()
   }
 
   const uniqueCreateBindings = useMemo(
@@ -82,7 +84,7 @@ export function CatalogPermissionsModal({
   const [mutation, { loading, error }] = useUpsertCatalogMutation({
     onCompleted: () => {
       refetch?.()
-      onClose()
+      close()
     },
   })
   const allowSubmit = readBindings && writeBindings
@@ -126,7 +128,7 @@ export function CatalogPermissionsModal({
     <Modal
       header={`Catalog permissions - ${catalog.name}`}
       open={open}
-      onClose={onClose}
+      onClose={close}
       asForm
       formProps={{ onSubmit }}
       size="custom"
@@ -155,7 +157,7 @@ export function CatalogPermissionsModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

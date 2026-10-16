@@ -58,7 +58,8 @@ export function WorkbenchToolsEditModal({
   open: boolean
   onClose: () => void
 }) {
-  const [selectedToolIds, setSelectedToolIds] = useState<string[]>([])
+  // the user's selection, or null to show the workbench's current tools
+  const [editedToolIds, setSelectedToolIds] = useState<string[] | null>(null)
   const { popToast } = useSimpleToast()
 
   const {
@@ -80,6 +81,11 @@ export function WorkbenchToolsEditModal({
     () => (workbench?.tools ?? []).filter(isNonNullable).map((tool) => tool.id),
     [workbench?.tools]
   )
+  const selectedToolIds = editedToolIds ?? associatedToolIds
+  const close = () => {
+    setSelectedToolIds(null)
+    onClose()
+  }
   const configuredToolsById = useMemo(
     () => new Map(configuredTools.map((tool) => [tool.id, tool])),
     [configuredTools]
@@ -99,18 +105,6 @@ export function WorkbenchToolsEditModal({
     return !associatedToolIds.every((id) => selectedToolIdsSet.has(id))
   }, [associatedToolIds, selectedToolIds])
 
-  const [prevSync, setPrevSync] = useState<{
-    open?: boolean
-    associatedToolIds?: string[]
-  }>({})
-  if (
-    prevSync.open !== open ||
-    prevSync.associatedToolIds !== associatedToolIds
-  ) {
-    setPrevSync({ open, associatedToolIds })
-    if (open) setSelectedToolIds(associatedToolIds)
-  }
-
   const [updateWorkbench, { loading: saveLoading, error: saveError }] =
     useUpdateWorkbenchMutation({
       refetchQueries: ['WorkbenchTriggersSummary', 'Workbench'],
@@ -120,7 +114,7 @@ export function WorkbenchToolsEditModal({
           content: `${workbench?.name ?? 'workbench tools'} updated`,
           severity: 'success',
         })
-        onClose()
+        close()
       },
     })
 
@@ -139,14 +133,14 @@ export function WorkbenchToolsEditModal({
   }
 
   const handleDeselectTool = (toolId: string) => {
-    setSelectedToolIds((ids) => ids.filter((id) => id !== toolId))
+    setSelectedToolIds(selectedToolIds.filter((id) => id !== toolId))
   }
 
   return (
     <Modal
       open={open}
       size="large"
-      onClose={onClose}
+      onClose={close}
       header={
         <Flex
           align="center"
@@ -159,7 +153,7 @@ export function WorkbenchToolsEditModal({
             size="small"
             icon={<CloseIcon size={12} />}
             tooltip="Close"
-            onClick={onClose}
+            onClick={close}
           />
         </Flex>
       }
@@ -168,7 +162,7 @@ export function WorkbenchToolsEditModal({
           <Button
             destructive
             type="button"
-            onClick={onClose}
+            onClick={close}
             disabled={saveLoading}
           >
             Cancel

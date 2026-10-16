@@ -89,17 +89,18 @@ export function PermissionsModal({
 }) {
   const theme = useTheme()
 
-  const [readBindings, setReadBindings] = useState(bindings.readBindings)
-  const [writeBindings, setWriteBindings] = useState(bindings.writeBindings)
-
-  const [prevBindings, setPrevBindings] = useState(bindings)
-  if (bindings.readBindings !== prevBindings.readBindings) {
-    setReadBindings(bindings.readBindings)
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedReadBindings, setReadBindings] =
+    useState<typeof bindings.readBindings>()
+  const [editedWriteBindings, setWriteBindings] =
+    useState<typeof bindings.writeBindings>()
+  const readBindings = editedReadBindings ?? bindings.readBindings
+  const writeBindings = editedWriteBindings ?? bindings.writeBindings
+  const close = () => {
+    setReadBindings(undefined)
+    setWriteBindings(undefined)
+    onClose()
   }
-  if (bindings.writeBindings !== prevBindings.writeBindings) {
-    setWriteBindings(bindings.writeBindings)
-  }
-  if (bindings !== prevBindings) setPrevBindings(bindings)
 
   const uniqueReadBindings = useMemo(
     () => uniqWith(readBindings, isEqual),
@@ -113,7 +114,7 @@ export function PermissionsModal({
     useUpdateRbacMutation({
       onCompleted: () => {
         refetch?.()
-        onClose()
+        close()
       },
     })
   const allowSubmit = readBindings && writeBindings
@@ -147,7 +148,7 @@ export function PermissionsModal({
     <Modal
       header={header}
       open={open}
-      onClose={onClose}
+      onClose={close}
       asForm
       formProps={{ onSubmit }}
       size="custom"
@@ -176,7 +177,7 @@ export function PermissionsModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

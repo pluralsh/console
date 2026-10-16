@@ -56,7 +56,8 @@ export function WorkbenchEvals() {
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
   const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
     useState(false)
-  const [promptExpanded, setPromptExpanded] = useState(false)
+  // the row whose prompt is expanded, so switching rows collapses it
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null)
   const qualityTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error } = useWorkbenchEvalsQuery({
@@ -74,6 +75,8 @@ export function WorkbenchEvals() {
   const selectedEvalRowFromPath =
     evalRows.find((r) => r.id === evalResultIdFromPath) ?? null
   const selectedEvalRow = selectedEvalRowFromPath ?? evalRows[0] ?? null
+  const promptExpanded =
+    !!selectedEvalRow && expandedRowId === selectedEvalRow.id
 
   const feedback = selectedEvalRow?.feedback
   const grade = selectedEvalRow?.grade ?? 0
@@ -98,12 +101,6 @@ export function WorkbenchEvals() {
       { replace: true }
     )
   }, [evalResultIdFromPath, navigate, selectedEvalRow?.id, workbenchId])
-
-  const [prevEvalRowId, setPrevEvalRowId] = useState(selectedEvalRow?.id)
-  if (selectedEvalRow?.id !== prevEvalRowId) {
-    setPrevEvalRowId(selectedEvalRow?.id)
-    setPromptExpanded(false)
-  }
 
   return (
     <WorkbenchPageLayout
@@ -247,7 +244,13 @@ export function WorkbenchEvals() {
                       )}
                       {canExpandPrompt && (
                         <span
-                          onClick={() => setPromptExpanded((v) => !v)}
+                          onClick={() =>
+                            setExpandedRowId(
+                              promptExpanded
+                                ? null
+                                : (selectedEvalRow?.id ?? null)
+                            )
+                          }
                           css={{
                             ...theme.partials.text.caption,
                             color: theme.colors['text-input-disabled'],

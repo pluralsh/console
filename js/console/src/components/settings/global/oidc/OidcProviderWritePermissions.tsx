@@ -54,12 +54,12 @@ function OidcProviderWritePermissionsModal({
   open: boolean
   onClose: () => void
 }) {
-  const [writeBindings, setWriteBindings] = useState(bindings)
-
-  const [prevBindings, setPrevBindings] = useState(bindings)
-  if (bindings !== prevBindings) {
-    setPrevBindings(bindings)
-    setWriteBindings(bindings)
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedWriteBindings, setWriteBindings] = useState<typeof bindings>()
+  const writeBindings = editedWriteBindings ?? bindings
+  const close = () => {
+    setWriteBindings(undefined)
+    onClose()
   }
 
   const uniqueWriteBindings = useMemo(
@@ -77,7 +77,7 @@ function OidcProviderWritePermissionsModal({
         },
       },
       refetchQueries: ['OidcProviders'],
-      onCompleted: onClose,
+      onCompleted: close,
     })
   const allowSubmit = !!writeBindings
 
@@ -95,7 +95,7 @@ function OidcProviderWritePermissionsModal({
       header={`Write permissions for ${name}`}
       size="large"
       open={open}
-      onClose={onClose}
+      onClose={close}
       asForm
       formProps={{ onSubmit }}
       onOpenAutoFocus={(e) => e.preventDefault()}
@@ -109,7 +109,7 @@ function OidcProviderWritePermissionsModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

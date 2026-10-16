@@ -54,6 +54,7 @@ export function PolicyEvaluationsSidePanel({
   onSelectEvalId: (evalId: string) => void
 }) {
   const theme = useTheme()
+  // keyed by policyType in PolicyEvaluations, so a policy kind change resets the filter
   const [activeFilter, setActiveFilter] = useState<EvalFilter>('all')
   const binding = isBindingPolicyEval(undefined, policyType)
   const negativeKey: PolicyEvalDecisionFilter = binding ? 'no-match' : 'deny'
@@ -103,12 +104,6 @@ export function PolicyEvaluationsSidePanel({
       ],
     }
   }, [activeFilter, annotatedEvals, binding, negativeKey, positiveKey])
-
-  const [prevBinding, setPrevBinding] = useState(binding)
-  if (binding !== prevBinding) {
-    setPrevBinding(binding)
-    setActiveFilter('all')
-  }
 
   useEffect(() => {
     if (isLoadingNextPage || !hasNextPage) return

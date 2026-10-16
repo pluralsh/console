@@ -31,14 +31,15 @@ export function CreateBindingModal({
   const [description, setDescription] = useState('')
   const [policy, setPolicy] = useState('')
 
-  const [prevOpen, setPrevOpen] = useState(open)
-  if (open !== prevOpen) {
-    setPrevOpen(open)
-    if (!open) {
-      setName('')
-      setDescription('')
-      setPolicy('')
-    }
+  // the form is cleared whenever the modal closes, so it opens empty
+  const resetForm = () => {
+    setName('')
+    setDescription('')
+    setPolicy('')
+  }
+  const close = () => {
+    resetForm()
+    onClose()
   }
 
   const [createPolicy, { loading, error }] = useCreatePolicyMutation({
@@ -47,6 +48,7 @@ export function CreateBindingModal({
 
       if (!created) return
       popToast({ content: 'Binding policy created', severity: 'success' })
+      resetForm()
       onCreated(created)
     },
     refetchQueries: ['Policies'],
@@ -73,7 +75,7 @@ export function CreateBindingModal({
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={close}
       header="New Binding"
       size="large"
       asForm
@@ -92,7 +94,7 @@ export function CreateBindingModal({
           <Button
             floating
             type="button"
-            onClick={onClose}
+            onClick={close}
           >
             Cancel
           </Button>

@@ -110,13 +110,8 @@ function SecretDataValue({
   forceReveal: boolean
 }) {
   const theme = useTheme()
+  // keyed by forceReveal in the cell, so "reveal all" resets each row
   const [reveal, setReveal] = useState(forceReveal)
-
-  const [prevForceReveal, setPrevForceReveal] = useState(forceReveal)
-  if (forceReveal !== prevForceReveal) {
-    setPrevForceReveal(forceReveal)
-    setReveal(forceReveal)
-  }
 
   return (
     <div
@@ -158,6 +153,7 @@ const columns = [
 
       return (
         <SecretDataValue
+          key={String(!!revealAll)}
           value={getValue()}
           forceReveal={!!revealAll}
         />

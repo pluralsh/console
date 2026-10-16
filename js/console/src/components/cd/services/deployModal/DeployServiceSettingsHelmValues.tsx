@@ -99,15 +99,6 @@ const HelmValuesInput = memo(
     const [fileName, setFileName] = useState<string | undefined>()
     const [fileError, setFileError] = useState<Nullable<string>>()
 
-    const [prevManual, setPrevManual] = useState(manual)
-    if (manual !== prevManual) {
-      setPrevManual(manual)
-      if (manual) {
-        setFileName(undefined)
-        setFileError(undefined)
-      }
-    }
-
     const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
       async (files) => {
         if (isEmpty(files)) {
@@ -122,8 +113,9 @@ const HelmValuesInput = memo(
 
           return
         }
+        // switching back to manual entry clears the upload state
         setFileError(undefined)
-        setFileName(file.name)
+        setFileName(undefined)
         setHelmValues(content)
         setManual(true)
       },
@@ -138,6 +130,10 @@ const HelmValuesInput = memo(
             css={{ cursor: 'pointer' }}
             onClick={(e) => {
               e.preventDefault()
+              if (!manual) {
+                setFileName(undefined)
+                setFileError(undefined)
+              }
               setManual(!manual)
             }}
           >

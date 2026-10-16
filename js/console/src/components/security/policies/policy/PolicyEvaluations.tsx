@@ -51,7 +51,11 @@ export function PolicyEvaluations() {
   const params = useParams()
   const policyId = policy?.id ?? params[POLICIES_PARAM_ID] ?? ''
   const evalIdFromPath = params[POLICIES_EVAL_PARAM_ID]
-  const [detailTab, setDetailTab] = useState<DetailTab>('input')
+  // the chosen tab and the eval it was chosen for; other evals start on 'input'
+  const [tabChoice, setTabChoice] = useState<{
+    evalId?: string
+    tab: DetailTab
+  }>({ tab: 'input' })
   const detailTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -84,17 +88,17 @@ export function PolicyEvaluations() {
     navigate(getPolicyEvalAbsPath(policyId, selectedEval.id), { replace: true })
   }, [evalIdFromPath, navigate, policyId, selectedEval?.id])
 
-  const [prevEvalId, setPrevEvalId] = useState(selectedEval?.id)
-  if (selectedEval?.id !== prevEvalId) {
-    setPrevEvalId(selectedEval?.id)
-    setDetailTab('input')
-  }
+  const detailTab =
+    tabChoice.evalId === selectedEval?.id ? tabChoice.tab : 'input'
+  const setDetailTab = (tab: DetailTab) =>
+    setTabChoice({ evalId: selectedEval?.id, tab })
 
   if (error) return <GqlError error={error} />
 
   return (
     <WrapperSC>
       <PolicyEvaluationsSidePanel
+        key={policy?.type}
         evals={evals}
         policyType={policy?.type}
         loading={loading && !data}

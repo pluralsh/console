@@ -35,14 +35,6 @@ export function ChatbotChannelSelect({
   const [isOpen, setIsOpen] = useState(false)
   const debouncedQuery = useDebounce(inputValue, 200)
 
-  const [prevChatConnectionId, setPrevChatConnectionId] =
-    useState(chatConnectionId)
-  if (chatConnectionId !== prevChatConnectionId) {
-    setPrevChatConnectionId(chatConnectionId)
-    setManualEntry(false)
-    setInputValue('')
-  }
-
   const { data, loading, error } = useSearchConversationsQuery({
     variables: {
       chatConnectionId,
