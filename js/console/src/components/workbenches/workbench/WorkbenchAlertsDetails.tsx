@@ -154,7 +154,6 @@ export function useWorkbenchAlertsDetails({
                     toggleAlertSeverityChip(severities, severity)
                   )
                 }
-                rounded
               >
                 {ALERT_SEVERITY_LABELS[severity]} ({severityCounts[severity]})
               </Chip>

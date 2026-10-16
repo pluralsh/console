@@ -1,11 +1,9 @@
 import {
   Button,
-  Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { StackedTextSC } from 'components/utils/table/StackedText'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
 import { ChatProviderConnectionType } from 'generated/graphql'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
@@ -13,8 +11,7 @@ import {
   CHATBOTS_SETTINGS_ABS_PATH,
   CHATBOTS_SETTINGS_CREATE_ABS_PATH,
 } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsDescription } from '../Settings'
 import { ChatbotConnectionForm } from './ChatbotConnectionForm'
 import { chatbotSetupGuide } from './chatbotSetupGuide'
 
@@ -25,43 +22,12 @@ const CHATBOTS_SETTINGS_CREATE_BREADCRUMBS = [
 ]
 
 export function ChatbotCreateSettings() {
-  const theme = useTheme()
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
   const [type, setType] = useState(ChatProviderConnectionType.Slack)
   const setupGuide = useMemo(() => chatbotSetupGuide(type), [type])
 
   useSetBreadcrumbs(CHATBOTS_SETTINGS_CREATE_BREADCRUMBS)
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Flex justifyContent="space-between">
-          <StackedTextSC>
-            <span
-              css={{
-                ...theme.partials.text.body2,
-                color: theme.colors['text-light'],
-              }}
-            >
-              Create a chatbot integration that workbenches can use to trigger
-              jobs from chat.
-            </span>
-          </StackedTextSC>
-          {!isOpen && (
-            <Button
-              secondary
-              startIcon={<SidePanelOpenIcon />}
-              onClick={() => openSetupGuidePanel(setupGuide)}
-              css={{ whiteSpace: 'nowrap' }}
-            >
-              Setup guide
-            </Button>
-          )}
-        </Flex>
-      ),
-      [isOpen, openSetupGuidePanel, setupGuide, theme]
-    )
-  )
 
   const onUnmount = useEffectEvent(() => {
     if (isOpen) closeSetupGuidePanel()
@@ -74,5 +40,25 @@ export function ChatbotCreateSettings() {
     openSetupGuidePanel(setupGuide)
   }, [isOpen, openSetupGuidePanel, setupGuide])
 
-  return <ChatbotConnectionForm onTypeChange={setType} />
+  return (
+    <>
+      <SettingsDescription>
+        Create a chatbot integration that workbenches can use to trigger jobs
+        from chat.
+      </SettingsDescription>
+      {!isOpen && (
+        <PageToolbarPortal>
+          <Button
+            secondary
+            small
+            startIcon={<SidePanelOpenIcon />}
+            onClick={() => openSetupGuidePanel(setupGuide)}
+          >
+            Setup guide
+          </Button>
+        </PageToolbarPortal>
+      )}
+      <ChatbotConnectionForm onTypeChange={setType} />
+    </>
+  )
 }

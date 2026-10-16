@@ -221,6 +221,17 @@ fragment AgentPromptFragment on AgentPrompt {
     id
     prompt
     seq
+    attachments {
+        ...AgentAttachmentFragment
+    }
+}
+
+fragment AgentAttachmentFragment on Attachment {
+    id
+    filename
+    filetype
+    size
+    downloadUrl
 }
 
 fragment ScmCredentialFragment on ScmCreds {
@@ -273,6 +284,9 @@ fragment AgentRunFragment on AgentRun {
     }
     prompts {
         ...AgentPromptFragment
+    }
+    attachments {
+        ...AgentAttachmentFragment
     }
     skills {
         name

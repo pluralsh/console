@@ -13,7 +13,6 @@ import type { GetServerSideProps } from 'next'
 
 import { RestApiReference, slugToId } from '@src/components/RestApiReference'
 import { AUTH_PAGE_ID } from '@src/components/RestApiReference/SidebarNav'
-
 import type { ApiSection, EndpointDetail } from '@src/lib/openapi-rest'
 
 type RestPageProps = {

@@ -16,20 +16,19 @@ import {
   ListBoxItem,
 } from '@pluralsh/design-system'
 
-import { useTheme } from 'styled-components'
 import { NamespaceListFooter } from '../../utils/NamespaceListFooter.tsx'
 
 export function NamespaceFilter({
   namespaces,
   namespace,
   onChange,
+  inputProps,
   ...props
 }: {
   namespaces: string[]
   namespace?: string
   onChange: Dispatch<SetStateAction<string | undefined>>
 } & Partial<Omit<ComponentProps<typeof ComboBox>, 'onChange'>>) {
-  const theme = useTheme()
   const [value, setValue] = useState<string | undefined>(namespace)
 
   useEffect(() => {
@@ -73,12 +72,8 @@ export function NamespaceFilter({
       allowsEmptyCollection={isCustomNamespace}
       inputProps={{
         placeholder: 'Filter by namespace',
-        style: {
-          border: 'none',
-          borderRadius: 0,
-          background: theme.colors['fill-two'],
-        },
         onKeyDown: handleEnter,
+        ...inputProps,
       }}
       inputValue={value}
       onInputChange={setValue}

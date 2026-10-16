@@ -513,9 +513,10 @@ func (t *AgentTodoFragment) GetTitle() string {
 }
 
 type AgentPromptFragment struct {
-	ID     string "json:\"id\" graphql:\"id\""
-	Prompt string "json:\"prompt\" graphql:\"prompt\""
-	Seq    int64  "json:\"seq\" graphql:\"seq\""
+	ID          string                     "json:\"id\" graphql:\"id\""
+	Prompt      string                     "json:\"prompt\" graphql:\"prompt\""
+	Seq         int64                      "json:\"seq\" graphql:\"seq\""
+	Attachments []*AgentAttachmentFragment "json:\"attachments,omitempty\" graphql:\"attachments\""
 }
 
 func (t *AgentPromptFragment) GetID() string {
@@ -535,6 +536,51 @@ func (t *AgentPromptFragment) GetSeq() int64 {
 		t = &AgentPromptFragment{}
 	}
 	return t.Seq
+}
+func (t *AgentPromptFragment) GetAttachments() []*AgentAttachmentFragment {
+	if t == nil {
+		t = &AgentPromptFragment{}
+	}
+	return t.Attachments
+}
+
+type AgentAttachmentFragment struct {
+	ID          string  "json:\"id\" graphql:\"id\""
+	Filename    string  "json:\"filename\" graphql:\"filename\""
+	Filetype    *string "json:\"filetype,omitempty\" graphql:\"filetype\""
+	Size        *int64  "json:\"size,omitempty\" graphql:\"size\""
+	DownloadURL *string "json:\"downloadUrl,omitempty\" graphql:\"downloadUrl\""
+}
+
+func (t *AgentAttachmentFragment) GetID() string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.ID
+}
+func (t *AgentAttachmentFragment) GetFilename() string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.Filename
+}
+func (t *AgentAttachmentFragment) GetFiletype() *string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.Filetype
+}
+func (t *AgentAttachmentFragment) GetSize() *int64 {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.Size
+}
+func (t *AgentAttachmentFragment) GetDownloadURL() *string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.DownloadURL
 }
 
 type ScmCredentialFragment struct {
@@ -684,6 +730,7 @@ type AgentRunFragment struct {
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
 	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
 	Prompts         []*AgentPromptFragment     "json:\"prompts,omitempty\" graphql:\"prompts\""
+	Attachments     []*AgentAttachmentFragment "json:\"attachments,omitempty\" graphql:\"attachments\""
 	Skills          []*AgentRunFragment_Skills "json:\"skills,omitempty\" graphql:\"skills\""
 	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
 	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
@@ -769,6 +816,12 @@ func (t *AgentRunFragment) GetPrompts() []*AgentPromptFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Prompts
+}
+func (t *AgentRunFragment) GetAttachments() []*AgentAttachmentFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Attachments
 }
 func (t *AgentRunFragment) GetSkills() []*AgentRunFragment_Skills {
 	if t == nil {
@@ -51688,6 +51741,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -51746,6 +51802,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -51956,6 +52022,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -52014,6 +52083,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -52201,6 +52280,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -52259,6 +52341,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -52433,6 +52525,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -52491,6 +52586,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -52603,6 +52708,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -52661,6 +52769,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name

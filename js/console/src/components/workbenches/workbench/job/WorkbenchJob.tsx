@@ -110,7 +110,7 @@ export function WorkbenchJob() {
             gap="xlarge"
             css={{
               borderBottom: theme.borders.default,
-              paddingBottom: theme.spacing.large,
+              paddingBottom: theme.spacing.medium,
             }}
           >
             <StackedText
@@ -176,4 +176,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   width: '100%',
   minWidth: 0,
   padding: theme.spacing.large,
+  paddingTop: theme.spacing.medium,
 }))

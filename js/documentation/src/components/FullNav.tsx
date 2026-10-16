@@ -1,7 +1,8 @@
 import {
-  type Dispatch,
-  type SetStateAction,
   createContext,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
   useEffect,
   useMemo,
   useState,
@@ -19,13 +20,11 @@ import { useRouter } from 'next/router'
 import styled from 'styled-components'
 
 import { useNavData } from '../contexts/NavDataContext'
+import type { MenuId } from '../NavData'
 import { getBarePathFromPath } from '../utils/text'
-
+import type { PartialBy } from '../utils/typescript'
 import { PluralMenu } from './MobileMenu'
 import { NavPositionWrapper, SideNav } from './SideNav'
-
-import type { MenuId } from '../NavData'
-import type { PartialBy } from '../utils/typescript'
 
 const setIsOpenStub: Dispatch<SetStateAction<boolean>> = () => {}
 
@@ -113,8 +112,8 @@ export function FullNav({
   }, [thisPath, previousPath, setIsOpen])
 
   const showNavButton = !desktop
-  let rightNavButton
-  let leftNavButton
+  let rightNavButton: ReactNode
+  let leftNavButton: ReactNode
 
   if (!desktop) {
     if (menuId === 'plural') {

@@ -280,6 +280,7 @@ func ensureDefaultContainer(containers []corev1.Container, run *v1alpha1.AgentRu
 		containers[index].EnvFrom = getDefaultContainerEnvFrom(runSecretName(run.Name))
 		containers[index].VolumeMounts = ensureDefaultVolumeMounts(containers[index].VolumeMounts)
 		containers[index].Env = ensureDefaultEnvVars(containers[index].Env, runtime)
+		containers[index].TerminationMessagePolicy = corev1.TerminationMessageFallbackToLogsOnError
 
 		// Do not allow command to be overridden. Only args can be overridden.
 		containers[index].Command = nil
@@ -336,12 +337,13 @@ func ensureDefaultPodSecurityContext(psc *corev1.PodSecurityContext) *corev1.Pod
 
 func getDefaultContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) corev1.Container {
 	return corev1.Container{
-		Name:            defaultContainer,
-		Image:           getDefaultContainerImage("", runtime.Spec.Type),
-		VolumeMounts:    ensureDefaultVolumeMounts(nil),
-		SecurityContext: ensureDefaultContainerSecurityContext(nil, runtimeReadOnlyRootFilesystem(runtime)),
-		EnvFrom:         getDefaultContainerEnvFrom(runSecretName(run.Name)),
-		Env:             getDefaultEnvVars(runtime),
+		Name:                     defaultContainer,
+		Image:                    getDefaultContainerImage("", runtime.Spec.Type),
+		VolumeMounts:             ensureDefaultVolumeMounts(nil),
+		SecurityContext:          ensureDefaultContainerSecurityContext(nil, runtimeReadOnlyRootFilesystem(runtime)),
+		EnvFrom:                  getDefaultContainerEnvFrom(runSecretName(run.Name)),
+		Env:                      getDefaultEnvVars(runtime),
+		TerminationMessagePolicy: corev1.TerminationMessageFallbackToLogsOnError,
 	}
 }
 
@@ -475,18 +477,20 @@ func enableAgentBootstrap(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime
 	if len(pod.Spec.InitContainers[index].Args) == 0 {
 		pod.Spec.InitContainers[index].Args = []string{"--working-dir", common.AgentRunSharedWorkDir}
 	}
+	pod.Spec.InitContainers[index].TerminationMessagePolicy = corev1.TerminationMessageFallbackToLogsOnError
 }
 
 func getAgentBootstrapContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, image string) corev1.Container {
 	return corev1.Container{
-		Name:            agentBootstrapContainerName,
-		Image:           image,
-		SecurityContext: ensureAgentBootstrapSecurityContext(nil),
-		EnvFrom:         getPrivilegedContainerEnvFrom(run.Name),
-		Env:             getAgentBootstrapEnvVars(run, runtime),
-		Command:         []string{"/agent-bootstrap"},
-		Args:            []string{"--working-dir", common.AgentRunSharedWorkDir},
-		VolumeMounts:    ensureMCPServerVolumeMounts(nil, runtime),
+		Name:                     agentBootstrapContainerName,
+		Image:                    image,
+		SecurityContext:          ensureAgentBootstrapSecurityContext(nil),
+		EnvFrom:                  getPrivilegedContainerEnvFrom(run.Name),
+		Env:                      getAgentBootstrapEnvVars(run, runtime),
+		Command:                  []string{"/agent-bootstrap"},
+		Args:                     []string{"--working-dir", common.AgentRunSharedWorkDir},
+		VolumeMounts:             ensureMCPServerVolumeMounts(nil, runtime),
+		TerminationMessagePolicy: corev1.TerminationMessageFallbackToLogsOnError,
 	}
 }
 

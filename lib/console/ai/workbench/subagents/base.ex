@@ -120,14 +120,23 @@ defmodule Console.AI.Workbench.Subagents.Base do
     [
       %Context{job: job},
       %Skills{skills: skills},
-      %Skill{skills: skills},
-      %ListKnowledge{job: job},
-      %Knowledge{job: job},
-      %KnowledgeUsed{job: job}
+      %Skill{skills: skills}
+      | knowledge_tools([%ListKnowledge{job: job}, %Knowledge{job: job}, %KnowledgeUsed{job: job}])
     ]
   end
 
   def skill_knowledge_pre_enable do
-    [%Context{}, %Skills{}, %Skill{}, %ListKnowledge{}, %Knowledge{}, %KnowledgeUsed{}]
+    [%Context{}, %Skills{}, %Skill{} | knowledge_tools([%ListKnowledge{}, %Knowledge{}, %KnowledgeUsed{}])]
+  end
+
+  @doc """
+  The workbench knowledge base is superseded by `/workbench/knowledge` in the workbench filesystem, so its
+  tools are only offered when no filesystem is configured.
+  """
+  def knowledge_tools(tools) do
+    case Console.PseudoFS.enabled?() do
+      true -> []
+      false -> tools
+    end
   end
 end

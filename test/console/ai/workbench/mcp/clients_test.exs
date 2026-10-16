@@ -4,6 +4,9 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
   alias Console.AI.Workbench.MCP.Clients
   alias Console.Schema.{McpServer, WorkbenchTool}
 
+  # stopping a client closes its transport, which can outlast assert_receive's default
+  @stop_timeout :timer.seconds(5)
+
   setup do
     on_exit(fn ->
       for {_, pid, _, _} <- DynamicSupervisor.which_children(Clients),
@@ -45,7 +48,7 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
       {:ok, server} = McpServer.changeset(server, %{url: "http://localhost:3002/mcp"}) |> Repo.update()
       {:ok, replacement} = Clients.ensure_started(%{tool | mcp_server: server})
 
-      assert_receive {:DOWN, ^ref, :process, ^pid, _}
+      assert_receive {:DOWN, ^ref, :process, ^pid, _}, @stop_timeout
       refute replacement == pid
     end
 
@@ -75,8 +78,8 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
       :sys.replace_state(pid, fn state -> %{state | used: state.used - :timer.hours(1)} end)
       send(pid, :check)
 
-      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
-      assert_receive {:DOWN, ^client_ref, :process, ^client, _}
+      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, @stop_timeout
+      assert_receive {:DOWN, ^client_ref, :process, ^client, _}, @stop_timeout
       assert DynamicSupervisor.which_children(Clients) == []
 
       {:ok, fresh} = Clients.ensure_started(tool)

@@ -31,7 +31,6 @@ import {
   WorkbenchEvalResultRowFragment,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
-import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
 import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
@@ -107,7 +106,6 @@ export function WorkbenchEvals() {
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
-      tabStripHeight={DETAILS_TAB_STRIP_HEIGHT}
       sidebar={{
         kind: 'custom',
         content: (
@@ -130,6 +128,7 @@ export function WorkbenchEvals() {
         <>
           <Button
             secondary
+            small
             onClick={() =>
               navigate(getWorkbenchEvalSettingsAbsPath(workbenchId))
             }
@@ -137,6 +136,7 @@ export function WorkbenchEvals() {
             Eval settings
           </Button>
           <WorkbenchEvalSkillButton
+            small
             disabled={loading && !data}
             evalResultId={selectedEvalResultIdForSkill}
             workbenchId={workbenchId}

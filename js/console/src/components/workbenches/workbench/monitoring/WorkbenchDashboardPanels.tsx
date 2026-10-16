@@ -290,9 +290,23 @@ function DataDashboardPanel({
   const [fullscreen, setFullscreen] = useState(false)
   const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
-  const metrics = data?.metrics?.filter(isNonNullable) ?? []
-  const logs = data?.logs?.filter(isNonNullable) ?? []
-  const traces = data?.traces?.filter(isNonNullable) ?? []
+  const { metrics, logs, traces } = useMemo(
+    () => ({
+      metrics: data?.metrics?.filter(isNonNullable) ?? [],
+      logs: data?.logs?.filter(isNonNullable) ?? [],
+      traces: data?.traces?.filter(isNonNullable) ?? [],
+    }),
+    [data]
+  )
+  const panelRangeSelect = useMemo(
+    () =>
+      onRangeSelect &&
+      ((start: Date, end: Date) => {
+        setFullscreen(false)
+        onRangeSelect(start, end)
+      }),
+    [onRangeSelect]
+  )
   const tool = graph.datasource?.tool
   const toolType = graph.workbenchTool?.tool ?? tool
 
@@ -405,13 +419,7 @@ function DataDashboardPanel({
             traces={traces}
             fullscreen={fullscreen}
             timeRange={timeRange}
-            onRangeSelect={
-              onRangeSelect &&
-              ((start, end) => {
-                setFullscreen(false)
-                onRangeSelect(start, end)
-              })
-            }
+            onRangeSelect={panelRangeSelect}
             selectedSeriesId={selectedSeriesId}
             onSelectSeries={(id) =>
               setSelectedSeriesId((selected) => (selected === id ? null : id))
@@ -550,14 +558,33 @@ function PanelContent({
   selectedSeriesId: string | null
   onSelectSeries: (id: string) => void
 }) {
-  const series = getMetricSeries(metrics)
+  const series = useMemo(() => getMetricSeries(metrics), [metrics])
   const selectedSeriesIndex = series.findIndex(
     ({ id }) => id === selectedSeriesId
   )
   const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
-  const visibleMetrics = effectiveSelectedId
-    ? metrics.filter((metric) => metricSeriesId(metric) === effectiveSelectedId)
-    : metrics
+  const visibleMetrics = useMemo(
+    () =>
+      effectiveSelectedId
+        ? metrics.filter(
+            (metric) => metricSeriesId(metric) === effectiveSelectedId
+          )
+        : metrics,
+    [metrics, effectiveSelectedId]
+  )
+  const timeWindow = useMemo(
+    () => ({ start: new Date(timeRange.start), end: new Date(timeRange.end) }),
+    [timeRange.start, timeRange.end]
+  )
+  const lineProps = useMemo(
+    () => ({
+      colors:
+        selectedSeriesIndex >= 0
+          ? [COLORS[selectedSeriesIndex % COLORS.length]]
+          : COLORS,
+    }),
+    [selectedSeriesIndex]
+  )
 
   switch (type) {
     case DashboardGraphType.Logs:
@@ -601,10 +628,7 @@ function PanelContent({
         >
           <DashboardTimeseriesChart
             metrics={visibleMetrics}
-            timeWindow={{
-              start: new Date(timeRange.start),
-              end: new Date(timeRange.end),
-            }}
+            timeWindow={timeWindow}
             unit={unit}
             onRangeSelect={onRangeSelect}
             css={{
@@ -612,12 +636,7 @@ function PanelContent({
                 ? 'min(650px, calc(100vh - 260px))'
                 : CHART_HEIGHT_PX,
             }}
-            lineProps={{
-              colors:
-                selectedSeriesIndex >= 0
-                  ? [COLORS[selectedSeriesIndex % COLORS.length]]
-                  : COLORS,
-            }}
+            lineProps={lineProps}
           />
           <WorkbenchJobMetricsLegend
             series={series}

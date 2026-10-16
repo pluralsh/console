@@ -536,7 +536,6 @@ function MatchesChip({ count }: { count: number }) {
       size="small"
       fillLevel={1}
       css={{
-        borderRadius: 20,
         minWidth: 80,
         justifyContent: 'center',
       }}

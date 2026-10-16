@@ -48,7 +48,10 @@ type AgentRun struct {
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	Prompts []*console.AgentPromptFragment
 	Skills  []AgentSkill
-	Usage   *console.AgentRunUsage
+
+	// Attachments are files attached to the initial prompt, downloaded before the run starts.
+	Attachments []*console.AgentAttachmentFragment
+	Usage       *console.AgentRunUsage
 
 	DindEnabled    bool
 	BrowserEnabled bool
@@ -160,6 +163,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		Status:      fragment.Status,
 		Runtime:     &AgentRuntime{},
 		Prompts:     fragment.Prompts,
+		Attachments: fragment.Attachments,
 		Usage:       usageFromFragment(fragment.Usage),
 		Skills: lo.Map(
 			lo.Filter(fragment.Skills, func(skill *console.AgentRunFragment_Skills, _ int) bool { return skill != nil }),

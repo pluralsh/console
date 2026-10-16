@@ -257,7 +257,6 @@ function getColumns({
         return (
           <IconFrame
             type="secondary"
-            css={{ borderRadius: '50%' }}
             icon={chatProviderConnectionIcon(chatbot.chatConnection?.type)}
             tooltip={chatProviderConnectionLabel(chatbot.chatConnection?.type)}
           />

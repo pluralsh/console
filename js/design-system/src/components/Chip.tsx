@@ -86,71 +86,73 @@ const ChipCardSC = styled(Card)<{
   $truncateEdge?: 'start' | 'end'
   $condensed?: boolean
   $rounded?: boolean
-}>(({
-  $size,
-  $severity,
-  $inactive,
-  $truncateWidth,
-  $truncateEdge,
-  $condensed,
-  $rounded,
-  theme,
-}) => {
-  const textColor = $inactive
-    ? theme.colors['text-xlight']
-    : (theme.colors[severityToColor[$severity]] ?? theme.colors.text)
+}>(
+  ({
+    $size,
+    $severity,
+    $inactive,
+    $truncateWidth,
+    $truncateEdge,
+    $condensed,
+    $rounded,
+    theme,
+  }) => {
+    const textColor = $inactive
+      ? theme.colors['text-xlight']
+      : (theme.colors[severityToColor[$severity]] ?? theme.colors.text)
 
-  return {
-    '&&': {
-      backgroundColor:
-        $inactive && $inactive !== 'keep-fill' ? 'transparent' : undefined,
-      padding: `${$size === 'large' ? 6 : theme.spacing.xxxsmall}px ${
-        $size === 'large' && $condensed
-          ? 6
-          : $size === 'small'
-            ? $condensed
-              ? 6
-              : theme.spacing.xsmall
-            : $condensed
-              ? theme.spacing.xsmall
-              : theme.spacing.small
-      }px`,
-      alignItems: 'center',
-      display: 'inline-flex',
-      textDecoration: 'none',
-      gap: $condensed ? 6 : theme.spacing.xsmall,
-      // Chips are dense inline labels — hairline only, no Card elevation shadow
-      ...(theme.mode === 'light' && { boxShadow: 'none' }),
-      ...($rounded && { borderRadius: 999, boxShadow: 'none' }),
-    },
-    '.children': {
-      display: 'flex',
-      ...theme.partials.text.body2,
-      color: textColor,
-      fontSize: $size === 'small' ? 12 : 14,
-      fontWeight: $size === 'small' ? 400 : 600,
-      lineHeight: $size === 'small' ? '16px' : '20px',
-      gap: theme.spacing.xxsmall,
-      ...($condensed
-        ? {
-            letterSpacing: $condensed ? '-0.025em' : undefined,
-          }
-        : {}),
-      ...($truncateWidth
-        ? {
-            display: 'block',
-            maxWidth: $truncateWidth,
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-            ...($truncateEdge === 'start'
-              ? { direction: 'rtl', textAlign: 'left' }
-              : {}),
-          }
-        : {}),
-    },
+    return {
+      '&&': {
+        backgroundColor:
+          $inactive && $inactive !== 'keep-fill' ? 'transparent' : undefined,
+        padding: `${$size === 'large' ? 6 : theme.spacing.xxxsmall}px ${
+          $size === 'large' && $condensed
+            ? 6
+            : $size === 'small'
+              ? $condensed
+                ? 6
+                : theme.spacing.xsmall
+              : $condensed
+                ? theme.spacing.xsmall
+                : theme.spacing.small
+        }px`,
+        alignItems: 'center',
+        display: 'inline-flex',
+        textDecoration: 'none',
+        gap: $condensed ? 6 : theme.spacing.xsmall,
+        // Chips are dense inline labels — hairline only, no Card elevation shadow
+        ...(theme.mode === 'light' && { boxShadow: 'none' }),
+        ...($rounded && { borderRadius: 999, boxShadow: 'none' }),
+      },
+      '.children': {
+        display: 'flex',
+        ...theme.partials.text.body2,
+        color: textColor,
+        fontSize: $size === 'small' ? 12 : 14,
+        fontWeight: $size === 'small' ? 400 : 600,
+        lineHeight: $size === 'small' ? '16px' : '20px',
+        gap: theme.spacing.xxsmall,
+        ...($condensed
+          ? {
+              letterSpacing: $condensed ? '-0.025em' : undefined,
+            }
+          : {}),
+        ...($truncateWidth
+          ? {
+              display: 'block',
+              maxWidth: $truncateWidth,
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              ...($truncateEdge === 'start'
+                ? { direction: 'rtl', textAlign: 'left' }
+                : {}),
+            }
+          : {}),
+      },
+    }
   }
-})
+)
 
 const CloseButtonSC = styled.button<{
   $fillLevel: CardFillLevel

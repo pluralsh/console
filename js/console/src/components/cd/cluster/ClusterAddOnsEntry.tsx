@@ -45,8 +45,6 @@ export default function ClusterAddOnsEntry({
       }}
       css={{
         padding: theme.spacing.medium,
-        borderLeft: theme.borders.default,
-        borderRight: theme.borders.default,
 
         ...(active
           ? {

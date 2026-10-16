@@ -2,14 +2,12 @@ import {
   ArrowTopRightIcon,
   Button,
   EmptyState,
-  Flex,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { getTabCrumb } from 'utils/getTabCrumb'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
-import { SubTabs } from 'components/utils/SubTabs'
-import { StackedText } from 'components/utils/table/StackedText'
 import { PolicyFragment, usePolicyQuery } from 'generated/graphql'
 import { ReactNode, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
@@ -131,39 +129,22 @@ export function PolicyDetails() {
 
   return (
     <PageSC>
-      <HeaderSC>
-        <StackedText
-          loading={loading && !policy}
-          first={policy?.name}
-          firstPartialType="subtitle1"
-          firstColor="text"
-          second={policy?.description}
-          secondPartialType="body2"
-          secondColor="text-xlight"
-          gap="xxsmall"
-        />
-        <Flex
-          align="center"
-          gap="small"
-        >
-          <SubTabs
-            directory={directory}
-            activeFn={(path) => path === getPolicyDetailsAbsPath(id ?? '', tab)}
-          />
-          <Flex grow={1} />
-          {tab === POLICIES_EVALUATIONS_REL_PATH && evalId && (
-            <Button
-              small
-              as={Link}
-              to={`${getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH)}?evalId=${evalId}`}
-              endIcon={<ArrowTopRightIcon />}
-            >
-              Simulate with evaluation
-            </Button>
-          )}
-          {tab === POLICIES_DEFINITION_REL_PATH && headerActions}
-        </Flex>
-      </HeaderSC>
+      <PageToolbar
+        tabs={directory}
+        activeFn={(path) => path === getPolicyDetailsAbsPath(id ?? '', tab)}
+      >
+        {tab === POLICIES_EVALUATIONS_REL_PATH && evalId && (
+          <Button
+            small
+            as={Link}
+            to={`${getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH)}?evalId=${evalId}`}
+            endIcon={<ArrowTopRightIcon />}
+          >
+            Simulate with evaluation
+          </Button>
+        )}
+        {tab === POLICIES_DEFINITION_REL_PATH && headerActions}
+      </PageToolbar>
       <ContentSC
         $flush={
           tab === POLICIES_EVALUATIONS_REL_PATH ||
@@ -193,26 +174,13 @@ const PageSC = styled.div<{ $padded?: boolean }>(({ theme, $padded }) => ({
     : {}),
 }))
 
-const HeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flexShrink: 0,
-  gap: theme.spacing.large,
-  padding: theme.spacing.large,
-}))
-
 const ContentSC = styled.div<{ $flush?: boolean }>(({ theme, $flush }) => ({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
   minHeight: 0,
   minWidth: 0,
-  ...($flush
-    ? {}
-    : {
-        paddingLeft: theme.spacing.large,
-        paddingRight: theme.spacing.large,
-      }),
+  ...($flush ? {} : { padding: theme.spacing.large }),
 }))
 
 function TabLabelWithCount({

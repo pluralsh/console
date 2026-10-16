@@ -81,6 +81,7 @@ fragment WorkbenchWebhookTiny on WorkbenchWebhook {
 fragment Workbench on Workbench {
   ...WorkbenchTiny
   systemPrompt
+  filesystemEnabled
   agentRuntime {
     id
     name
@@ -551,6 +552,9 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  attachments {
+    ...Attachment
+  }
   user {
     ...UserTiny
   }
@@ -1015,6 +1019,53 @@ query WorkbenchJobCounts($id: ID!) {
   }
 }
 
+query WorkbenchJobStatusCounts(
+  $id: ID!
+  $q: String
+  $prStates: [WorkbenchJobPrState]
+) {
+  workbench(id: $id) {
+    id
+    runCounts(q: $q, prStates: $prStates) {
+      statuses {
+        status
+        count
+      }
+    }
+  }
+}
+
+query WorkbenchJobsForStatus(
+  $id: ID!
+  $status: WorkbenchJobStatus!
+  $q: String
+  $prStates: [WorkbenchJobPrState]
+  $direction: SortDirection
+  $first: Int = 50
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    runs(
+      first: $first
+      after: $after
+      q: $q
+      statuses: [$status]
+      prStates: $prStates
+      direction: $direction
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
 query WorkbenchJobSearch(
   $workbenchId: ID!
   $q: String!
@@ -1169,6 +1220,55 @@ query WorkbenchIssues(
       q: $q
       providers: $providers
       statuses: $statuses
+      sort: $sort
+      direction: $direction
+      first: $first
+      after: $after
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchIssueStatusCounts(
+  $id: ID!
+  $q: String
+  $providers: [IssueWebhookProvider]
+) {
+  workbench(id: $id) {
+    id
+    issueCounts(q: $q, providers: $providers) {
+      statuses {
+        status
+        count
+      }
+    }
+  }
+}
+
+query WorkbenchIssuesForStatus(
+  $id: ID!
+  $status: IssueStatus!
+  $q: String
+  $providers: [IssueWebhookProvider]
+  $sort: IssueSort
+  $direction: SortDirection
+  $first: Int = 50
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    issues(
+      q: $q
+      providers: $providers
+      statuses: [$status]
       sort: $sort
       direction: $direction
       first: $first
@@ -1418,6 +1518,9 @@ query WorkbenchJobActivities($id: ID!) {
     status
     prompt
     insertedAt
+    attachments {
+      ...Attachment
+    }
     modes {
       ...WorkbenchJobModesFields
     }
@@ -2001,5 +2104,55 @@ subscription WorkbenchExecStream($activityId: ID!) {
     activityId
     text
     seq
+  }
+}
+
+fragment Attachment on Attachment {
+  id
+  filename
+  filetype
+  path
+  size
+  downloadUrl
+}
+
+fragment WorkbenchFile on WorkbenchFile {
+  path
+  name
+  kind
+  size
+  modifiedAt
+  sandboxPath
+}
+
+query WorkbenchFiles($id: ID!, $path: String) {
+  workbench(id: $id) {
+    id
+    files(path: $path) {
+      ...WorkbenchFile
+    }
+  }
+}
+
+query WorkbenchFile($id: ID!, $path: String!) {
+  workbench(id: $id) {
+    id
+    file(path: $path) {
+      ...WorkbenchFile
+      downloadUrl
+    }
+  }
+}
+
+query WorkbenchFileContents($id: ID!, $path: String!) {
+  workbench(id: $id) {
+    id
+    fileContents(path: $path)
+  }
+}
+
+mutation DeleteWorkbenchFile($workbenchId: ID!, $path: String!) {
+  deleteWorkbenchFile(workbenchId: $workbenchId, path: $path) {
+    ...WorkbenchFile
   }
 }

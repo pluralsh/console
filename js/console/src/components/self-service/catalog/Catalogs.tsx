@@ -1,12 +1,9 @@
-import {
-  Button,
-  Card,
-  CloseIcon,
-  EmptyState,
-  FiltersIcon,
-  Flex,
-} from '@pluralsh/design-system'
+import { Button, Card, EmptyState, Flex } from '@pluralsh/design-system'
+import { PageSidecarPortal } from 'components/layout/PageLayout'
+import { DisplayButton } from 'components/utils/display/DisplayPanel'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
+import { Body2P, Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useCatalogsQuery } from 'generated/graphql'
 import Fuse from 'fuse.js'
@@ -121,98 +118,75 @@ export function Catalogs() {
 
   if (error) return <GqlError error={error} />
 
-  const filtersButton = (
-    <Button
-      onClick={() =>
-        hasActiveFilters ? resetFilters() : setFiltersVisible(!filtersVisible)
-      }
-      secondary
-      startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
-      style={{
-        borderColor: hasActiveFilters
-          ? theme.colors['border-primary']
-          : undefined,
-      }}
-    >
-      {hasActiveFilters ? 'Reset filters' : 'Filters'}
-    </Button>
-  )
-
   return (
-    <Flex
-      css={{
-        height: '100%',
-        width: '100%',
-        overflow: 'hidden',
-        gap: theme.spacing.large,
-      }}
-    >
-      <Flex
-        direction="column"
-        grow={1}
-        height="100%"
-        overflow="hidden"
-        gap="medium"
-      >
-        {semanticSearchEnabled ? (
-          <SelfServiceSearchBar
-            search={search}
-            aside={filtersButton}
-          />
-        ) : (
-          <Flex justify="flex-end">{filtersButton}</Flex>
-        )}
-        <CatalogsGrid
-          catalogs={displayCatalogs}
-          onBottomReached={() => {
-            if (!isSearchPending && !loading && pageInfo?.hasNextPage) {
-              fetchNextPage()
-            }
-          }}
-          loading={loading}
-          emptyState={
-            <Card
-              css={{
-                flexGrow: 1,
-                padding: theme.spacing.xxlarge,
-                ...(theme.mode === 'light' && {
-                  backgroundColor: theme.colors['fill-zero'],
-                }),
-              }}
-            >
-              <EmptyState
-                message={
-                  hasActiveFilters || hasActiveSearch
-                    ? 'There are no results with these filters.'
-                    : 'There are no catalogs available.'
-                }
-              >
-                {(hasActiveFilters || hasActiveSearch) && (
-                  <Button
-                    secondary
-                    onClick={() => {
-                      resetFilters()
-                      search.setSearchQuery('')
-                    }}
-                  >
-                    Reset filters
-                  </Button>
-                )}
-              </EmptyState>
-            </Card>
-          }
+    <>
+      <PageToolbarPortal>
+        {semanticSearchEnabled && <SelfServiceSearchBar search={search} />}
+        <DisplayButton
+          showDot={hasActiveFilters}
+          expanded={filtersVisible}
+          onClick={() => setFiltersVisible(!filtersVisible)}
         />
-      </Flex>
+      </PageToolbarPortal>
       {filtersVisible && (
-        <CatalogsFilters
-          authors={authors}
-          authorFilters={authorFilters}
-          setAuthorFilters={setAuthorFilters}
-          categories={categories}
-          categoryFilters={categoryFilters}
-          setCategoryFilters={setCategoryFilters}
-        />
+        <PageSidecarPortal>
+          <CatalogsFilters
+            authors={authors}
+            authorFilters={authorFilters}
+            setAuthorFilters={setAuthorFilters}
+            categories={categories}
+            categoryFilters={categoryFilters}
+            setCategoryFilters={setCategoryFilters}
+          />
+        </PageSidecarPortal>
       )}
-    </Flex>
+      <Flex direction="column">
+        <Subtitle1H1>Service catalog</Subtitle1H1>
+        <Body2P $color="text-light">
+          Browse catalogs of PR automations to provision infrastructure and
+          services on demand.
+        </Body2P>
+      </Flex>
+      <CatalogsGrid
+        catalogs={displayCatalogs}
+        onBottomReached={() => {
+          if (!isSearchPending && !loading && pageInfo?.hasNextPage) {
+            fetchNextPage()
+          }
+        }}
+        loading={loading}
+        emptyState={
+          <Card
+            css={{
+              flexGrow: 1,
+              padding: theme.spacing.xxlarge,
+              ...(theme.mode === 'light' && {
+                backgroundColor: theme.colors['fill-zero'],
+              }),
+            }}
+          >
+            <EmptyState
+              message={
+                hasActiveFilters || hasActiveSearch
+                  ? 'There are no results with these filters.'
+                  : 'There are no catalogs available.'
+              }
+            >
+              {(hasActiveFilters || hasActiveSearch) && (
+                <Button
+                  secondary
+                  onClick={() => {
+                    resetFilters()
+                    search.setSearchQuery('')
+                  }}
+                >
+                  Reset filters
+                </Button>
+              )}
+            </EmptyState>
+          </Card>
+        }
+      />
+    </>
   )
 }

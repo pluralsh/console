@@ -25,6 +25,7 @@ The `workbench_context` tool is useful when the current objective, an authoritat
 the workbench run URL would help accomplish the delegated task. Use explicit time ranges for
 observability queries.
 
+<%= Console.AI.Workbench.Filesystem.knowledge_prompt() %>
 Once all requested work is complete, call `subagent_result` exactly once with a concise summary of the resulting dashboard or monitor configuration.
 
 <%= if @engine.iteration >= @engine.max_iterations - 5 do %>

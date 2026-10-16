@@ -14,7 +14,6 @@ fragment PrAutomation on PrAutomation {
     name
   }
   role
-  documentation
   connection {
     ...ScmConnection
   }

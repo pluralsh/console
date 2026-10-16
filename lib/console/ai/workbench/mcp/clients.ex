@@ -11,6 +11,9 @@ defmodule Console.AI.Workbench.MCP.Clients do
   alias Console.AI.MCP.ClientSupervisor
   alias Console.Schema.{WorkbenchTool, McpServer}
 
+  @start_attempts 5
+  @registry_settle 10
+
   def registry(), do: __MODULE__.Registry
 
   def start_link(init_arg \\ :ok) do
@@ -41,8 +44,10 @@ defmodule Console.AI.Workbench.MCP.Clients do
     fingerprint = fingerprint(tool)
 
     case Registry.lookup(registry(), {:worker, key}) do
+      # the registry drops a dead process's entries only once it handles the exit, so the
+      # lookup can briefly return a worker that's already gone
       [{pid, ^fingerprint}] ->
-        if GenServer.whereis(name(:client, key)) do
+        if Process.alive?(pid) do
           Client.touch(pid)
           {:ok, pid}
         else
@@ -55,11 +60,19 @@ defmodule Console.AI.Workbench.MCP.Clients do
     end
   end
 
-  defp start(tool, key, fingerprint) do
+  defp start(tool, key, fingerprint, attempts \\ @start_attempts) do
     with {:ok, opts} <- client_opts(tool, key) do
       case DynamicSupervisor.start_child(__MODULE__, {Client, {key, fingerprint, opts}}) do
         {:ok, pid} -> {:ok, pid}
-        {:error, {:already_started, pid}} -> {:ok, pid}
+        {:error, {:already_started, pid}} ->
+          cond do
+            Process.alive?(pid) -> {:ok, pid}
+            attempts > 1 ->
+              # a dead worker still registered under this key, until the registry catches up
+              Process.sleep(@registry_settle)
+              start(tool, key, fingerprint, attempts - 1)
+            true -> {:error, "failed to start MCP client for #{tool.name}: a stale client is still registered"}
+          end
         {:error, error} -> {:error, "failed to start MCP client for #{tool.name}: #{inspect(error)}"}
       end
     end

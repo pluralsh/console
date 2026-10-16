@@ -163,7 +163,9 @@ const GlobalStyleSheet = createGlobalStyle`
     'code, pre, kbd, samp': {
       fontVariantLigatures: 'none',
     },
-    'a, a:visited, a:hover, a:active': {
+    // :where() keeps this at element specificity, so a link's own class
+    // styles (e.g. a muted tab color) still win once it's visited or hovered
+    'a, a:where(:visited, :hover, :active)': {
       color: 'inherit',
       textDecoration: 'inherit',
     },

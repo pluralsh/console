@@ -9,11 +9,12 @@ import {
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
 
-import { Flex, Tooltip } from '@pluralsh/design-system'
+import { Tooltip } from '@pluralsh/design-system'
 import {
   ChatInputSimple,
   ChatInputSimpleRef,
 } from 'components/ai/chatbot/input/ChatInput'
+import { withAttachmentHint } from 'components/ai/chatbot/input/ChatAttachments'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import styled from 'styled-components'
@@ -22,6 +23,11 @@ import {
   WorkbenchJobPromptQueue,
 } from './WorkbenchJobPromptQueue'
 import { WorkbenchModelSelector } from '../WorkbenchModelSelector'
+import {
+  WorkbenchPromptCancelButton,
+  WorkbenchPromptOptionsGroup,
+  WorkbenchPromptSubmitButton,
+} from '../WorkbenchPromptControls'
 import {
   WorkbenchPromptOptionPills,
   WorkbenchPromptOptionsSelector,
@@ -44,6 +50,7 @@ export function WorkbenchJobPromptInput({
   job: Nullable<WorkbenchJobActivitiesQuery['workbenchJob']>
 }) {
   const [newMessage, setNewMessage] = useState('')
+  const [attachments, setAttachments] = useState<File[]>([])
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
@@ -56,6 +63,7 @@ export function WorkbenchJobPromptInput({
     variables: { id: workbenchId },
     skip: !workbenchId,
   })
+  const filesystemEnabled = !!workbenchData?.workbench?.filesystemEnabled
   const effectivePromptModes =
     promptModes ??
     modesAttributes(modesFormValue(job?.modes)) ??
@@ -69,7 +77,10 @@ export function WorkbenchJobPromptInput({
     createQueuedPrompt,
     { loading: createQueuedLoading, error: createQueuedError },
   ] = useCreateQueuedPromptMutation({
-    onCompleted: () => chatInputRef.current?.resetInput?.(),
+    onCompleted: () => {
+      chatInputRef.current?.resetInput?.()
+      setAttachments([])
+    },
     refetchQueries: QUEUE_REFETCH_QUERIES,
   })
 
@@ -105,6 +116,9 @@ export function WorkbenchJobPromptInput({
           prompt: newMessage,
           dequeableAt: new Date().toISOString(),
           ...(modes ? { modes } : {}),
+          ...(filesystemEnabled && attachments.length > 0
+            ? { attachments }
+            : {}),
         },
       },
     })
@@ -120,7 +134,11 @@ export function WorkbenchJobPromptInput({
         <ChatInputSimple
           ref={chatInputRef}
           disabled={!job}
-          placeholder="Send an additional message to this job"
+          placeholder={
+            filesystemEnabled
+              ? withAttachmentHint('Send an additional message to this job')
+              : 'Send an additional message to this job'
+          }
           loading={submitLoading}
           setValue={setNewMessage}
           onSubmit={submitJob}
@@ -137,19 +155,21 @@ export function WorkbenchJobPromptInput({
           enableAutoComplete
           workbenchId={job?.workbench?.id}
           workbenchRepositorySource={job?.workbench}
+          attachments={attachments}
+          onAttachmentsChange={filesystemEnabled ? setAttachments : undefined}
           options={
-            <Flex
-              align="center"
-              gap="small"
-              wrap="wrap"
-              css={{ minHeight: 32, minWidth: 0 }}
-            >
+            <WorkbenchPromptOptionsGroup>
               <WorkbenchPromptOptionsSelector
                 workbenchId={workbenchId}
                 value={effectivePromptModes}
                 onChange={setPromptModes}
                 disabled={!job || submitLoading}
                 workbenchModes={workbenchData?.workbench?.modes}
+                onAttachFiles={
+                  filesystemEnabled
+                    ? () => chatInputRef.current?.openFilePicker()
+                    : undefined
+                }
               />
               <WorkbenchModelSelector
                 value={selectedModel}
@@ -160,19 +180,22 @@ export function WorkbenchJobPromptInput({
                 value={effectivePromptModes}
                 onChange={setPromptModes}
               />
-            </Flex>
+            </WorkbenchPromptOptionsGroup>
           }
           submitButton={
             canCancel ? (
               <Tooltip label="Cancel job">
-                <CancelSquareButtonSC
-                  type="button"
+                <WorkbenchPromptCancelButton
                   onClick={() => setCancelModalOpen(true)}
-                >
-                  <CancelSquareIconSC />
-                </CancelSquareButtonSC>
+                />
               </Tooltip>
-            ) : undefined
+            ) : (
+              <WorkbenchPromptSubmitButton
+                loading={submitLoading}
+                disabled={!job || !newMessage || submitLoading}
+                onClick={submitJob}
+              />
+            )
           }
         />
       </PromptComposerSC>
@@ -206,29 +229,3 @@ const PromptComposerSC = styled.div<{ $hasQueue: boolean }>(
       : {}),
   })
 )
-
-const CancelSquareButtonSC = styled.button(({ theme }) => ({
-  position: 'absolute',
-  bottom: theme.spacing.small,
-  right: theme.spacing.small,
-  padding: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: 28,
-  width: 28,
-  minHeight: 0,
-  borderRadius: 25,
-  border: 'none',
-  background: theme.colors['fill-two'],
-  cursor: 'pointer',
-  '&:hover': { background: theme.colors['fill-three'] },
-}))
-
-const CancelSquareIconSC = styled.div(({ theme }) => ({
-  height: 10,
-  width: 10,
-  borderRadius: 2,
-  background: theme.colors['icon-light'],
-  flexShrink: 0,
-}))

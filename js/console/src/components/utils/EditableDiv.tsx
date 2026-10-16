@@ -38,8 +38,10 @@ export function EditableDiv({
   placeholder,
   disabled,
   deserializePlrlInitialValue = false,
+  onPasteFiles,
   ...props
 }: {
+  onPasteFiles?: (files: File[]) => void
   initialValue?: string
   setValue: (value: string) => void
   onEnter?: () => void
@@ -115,6 +117,11 @@ export function EditableDiv({
   const onPaste = useCallback(
     (e: ClipboardEvent<HTMLDivElement>) => {
       e.preventDefault()
+      const files = Array.from(e.clipboardData?.files ?? [])
+      if (onPasteFiles && files.length > 0) {
+        onPasteFiles(files)
+        return
+      }
       const text = e.clipboardData?.getData('text/plain') ?? ''
       const selection = document.getSelection()
       if (!selection?.rangeCount || !text) return
@@ -123,7 +130,7 @@ export function EditableDiv({
       const node = internalRef.current
       setValue(node ? serializeEditableDiv(node) : '')
     },
-    [setValue]
+    [setValue, onPasteFiles]
   )
 
   const onCopy = useCallback((e: ClipboardEvent<HTMLDivElement>) => {

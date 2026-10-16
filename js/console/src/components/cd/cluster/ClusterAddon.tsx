@@ -96,6 +96,7 @@ export default function ClusterAddon() {
               >
                 <SubTab
                   key={path}
+                  size="small"
                   textValue={label}
                 >
                   {label}

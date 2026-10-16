@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-import { type RenderableTreeNodes, type Tag, renderers } from '@markdoc/markdoc'
+import { type RenderableTreeNodes, renderers, type Tag } from '@markdoc/markdoc'
 import { produce } from 'immer'
 
-import { type MarkdocPage, components } from '../markdoc/mdSchema'
+import { components, type MarkdocPage } from '../markdoc/mdSchema'
 
 const INITIAL_CHUNK_SIZE = 10
 const CHUNK_SIZE = 100
@@ -13,7 +13,7 @@ export default function MarkdocComponent({
 }: {
   markdoc: MarkdocPage
 }) {
-  const { children = [], ...rest } = markdoc?.content as any
+  const { children = [], ...rest } = (markdoc?.content ?? {}) as any
 
   // render a smaller visible chunk right away
   const [content, setContent] = useState<Tag>(() => ({

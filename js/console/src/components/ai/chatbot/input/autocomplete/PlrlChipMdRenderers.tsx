@@ -14,12 +14,7 @@ import {
 } from '@pluralsh/design-system'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterDistro, ScmType } from 'generated/graphql'
-import {
-  ComponentPropsWithoutRef,
-  ComponentType,
-  forwardRef,
-  ReactNode,
-} from 'react'
+import { ComponentPropsWithoutRef, ComponentType, Ref, ReactNode } from 'react'
 import type { ExtraProps } from 'react-markdown'
 import { Link } from 'react-router-dom'
 import {
@@ -45,10 +40,12 @@ type ChipBodyProps = {
   children: ReactNode
 } & ComponentPropsWithoutRef<typeof ChipBodySC>
 
-const ChipBody = forwardRef<HTMLSpanElement, ChipBodyProps>(function ChipBody(
-  { icon, children, ...rest },
-  ref
-) {
+export const ChipBody = function ChipBody({
+  icon,
+  children,
+  ref,
+  ...rest
+}: ChipBodyProps & { ref?: Ref<HTMLSpanElement> }) {
   return (
     <ChipBodySC
       ref={ref}
@@ -58,7 +55,7 @@ const ChipBody = forwardRef<HTMLSpanElement, ChipBodyProps>(function ChipBody(
       <span>{children}</span>
     </ChipBodySC>
   )
-})
+}
 
 // react-markdown picks the component by tag name and spreads only the XML
 // attributes — so `kind` isn't on the rendered props (it's the tag itself)
@@ -318,7 +315,7 @@ const ChipBodySC = styled.span(({ theme }) => ({
   margin: 1,
 }))
 
-const ChipLinkSC = styled(Link)(({ theme }) => ({
+export const ChipLinkSC = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
   '&:hover > *': { background: theme.colors['fill-two-hover'] },
 }))

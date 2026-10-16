@@ -82,6 +82,12 @@ func (in *Server) init() (*Server, error) {
 			Time:                  in.config.KeepAlive,
 			Timeout:               in.config.KeepAliveTimeout,
 		}),
+		// the console pings every 15s (even when idle) to detect dead connections, the grpc-go default
+		// (5m, streams only) would GOAWAY it with too_many_pings
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             10 * time.Second,
+			PermitWithoutStream: true,
+		}),
 	}
 
 	// Add TLS credentials if certificates are provided

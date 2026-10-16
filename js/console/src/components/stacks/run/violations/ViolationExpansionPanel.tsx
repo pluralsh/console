@@ -122,7 +122,7 @@ export default function ViolationExpansionPanel({
                 >
                   {v?.lines
                     ?.map((l) => {
-                      const isEmpty = l?.content == '..'
+                      const isEmpty = l?.content === '..'
                       const firstChar = l?.first ? '┌' : ''
                       const lastChar = l?.last ? '└' : ''
                       const line = l?.line ?? 0

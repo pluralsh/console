@@ -23,12 +23,18 @@ metadata:
   name: gh-actions
 spec:
   issuer: https://token.actions.githubusercontent.com # the oidc issuer url for gh actions, can be swapped for any other platform with oidc federation support
-  user: someone@example.com # should point to the user email you want the federated credential to auth as
+  user: ci-bot@example.com # should point to the user email you want the federated credential to auth as
   scopes:
     - catalog.write
   claimsLike:
-    sub: "repo:pluralsh/console:ref:refs/heads/master" # any regex is supported
+    sub: "repo:pluralsh/console:ref:refs/heads/master" # any regex is supported, and must match the whole claim
 ```
+
+Each `claimsLike` value is a regex matched against the corresponding claim in the incoming JWT, and every listed claim must match. Regexes are always anchored, so they must match the entire claim value: the pattern above won't accept tokens from a branch like `master-evil`. Use `.*` explicitly where you want a wildcard, eg `repo:pluralsh/console:ref:refs/heads/.*`. Claims whose value is a list, like `aud`, match if any element matches.
+
+{% callout severity="warning" %}
+Bind federated credentials to a dedicated, least-privilege user (like `ci-bot@example.com` here) that is only granted the RBAC this workflow needs. Avoid the built-in `console@plural.sh` user: it is a privileged admin used by Plural internally, and actions it takes are excluded from audit logs, so anything exchanged for its credentials would be both overpowered and untraceable.
+{% /callout %}
 
 {% callout severity="info" %}
 You can actually use Plural AI to generate these with its built in Kubernetes API discovery integration! Just be sure to select your management cluster in the chat context.
@@ -136,7 +142,7 @@ jobs:
         id: plural
         uses: pluralsh/setup-plural@v2
         with:
-          email: console@plural.sh
+          email: ci-bot@example.com # must match the user on the federated credential
           consoleUrl: https://my.console.cloud.plural.sh
       - name: Set outputs
         id: sha

@@ -250,14 +250,12 @@ export function Calendar({
       <div className="header">
         <h3 className="title">{title}</h3>
         <div className="button prevButton">
-          {/* @ts-ignore */}
           <NextPrevButton
             icon={<ArrowLeftIcon />}
             {...prevButtonProps}
           />
         </div>
         <div className="button nextButton">
-          {/* @ts-ignore */}
           <NextPrevButton
             icon={<ArrowRightIcon />}
             {...nextButtonProps}

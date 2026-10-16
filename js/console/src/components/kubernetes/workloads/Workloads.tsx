@@ -1,7 +1,3 @@
-import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-import { Suspense, useMemo, useRef } from 'react'
-import { Outlet, useLocation, useMatch } from 'react-router-dom'
-
 import {
   CRON_JOBS_REL_PATH,
   DAEMON_SETS_REL_PATH,
@@ -13,14 +9,10 @@ import {
   STATEFUL_SETS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { LinkTabWrap } from '../../utils/Tabs'
-import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
-import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { useCluster } from '../Cluster'
 import { Maybe } from 'generated/graphql-plural'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { ResourceCategory } from '../common/ResourceCategory'
 import { getBaseBreadcrumbs } from '../common/utils'
 
 const directory = [
@@ -46,59 +38,11 @@ export const getWorkloadsBreadcrumbs = (
 
 export default function Workloads() {
   const cluster = useCluster()
-  const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getWorkloadsAbsPath(cluster?.id)}/:tab/*`)
-  const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
-  const { search } = useLocation()
-
-  const headerContent = useMemo(
-    () => (
-      <TabList
-        scrollable
-        stateRef={tabStateRef}
-        stateProps={{
-          orientation: 'horizontal',
-          selectedKey: currentTab?.path,
-        }}
-      >
-        {directory.map(({ label, path }) => (
-          <LinkTabWrap
-            subTab
-            key={path}
-            textValue={label}
-            to={`${getWorkloadsAbsPath(cluster?.id)}/${path}${search}`}
-          >
-            <SubTab
-              key={path}
-              textValue={label}
-            >
-              {label}
-            </SubTab>
-          </LinkTabWrap>
-        ))}
-      </TabList>
-    ),
-    [cluster?.id, currentTab?.path, search]
-  )
-
-  useSetPageHeaderContent(headerContent)
 
   return (
-    <ScrollablePage
-      fullWidth
-      scrollable={false}
-    >
-      <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
-        >
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
-        </TabPanel>
-      </PluralErrorBoundary>
-    </ScrollablePage>
+    <ResourceCategory
+      basePath={getWorkloadsAbsPath(cluster?.id)}
+      directory={directory}
+    />
   )
 }

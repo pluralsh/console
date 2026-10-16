@@ -70,7 +70,6 @@ export function PodLogs() {
           }}
         >
           <FormField label="Container">
-            {/* @ts-ignore */}
             <Select
               selectedKey={selected}
               onSelectionChange={(key) => setSelected(key)}

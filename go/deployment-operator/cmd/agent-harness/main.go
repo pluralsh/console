@@ -7,6 +7,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent-harness/args"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/controller"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	agentsignals "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/signals"
@@ -34,15 +35,15 @@ func main() {
 
 	ctrl, err := controller.NewAgentRunController(opts...)
 	if err != nil {
-		handleFatalError(err)
+		handleFatalError(consoleClient, err)
 	}
 
 	if err = ctrl.Start(ctx); err != nil {
-		handleFatalError(err)
+		handleFatalError(consoleClient, err)
 	}
 }
 
-func handleFatalError(err error) {
+func handleFatalError(consoleClient client.Client, err error) {
 	switch {
 	case errors.Is(err, internalerrors.ErrTimeout):
 		klog.ErrorS(err, "timed out waiting for agent run to complete", "timeout", args.Timeout())
@@ -56,5 +57,8 @@ func handleFatalError(err error) {
 	}
 
 	klog.ErrorS(err, "agent run failed")
+	if failErr := agentrun.FailAgentRun(consoleClient, args.AgentRunID(), err.Error(), nil); failErr != nil {
+		klog.ErrorS(failErr, "could not mark agent run as failed", "agent-run-id", args.AgentRunID())
+	}
 	os.Exit(signals.ExitCodeOther.Int())
 }

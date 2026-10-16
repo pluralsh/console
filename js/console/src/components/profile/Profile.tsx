@@ -10,7 +10,6 @@ import {
 import { ReactNode, useState } from 'react'
 
 import { useLogin } from 'components/contexts'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { isEmpty } from 'lodash'
 import { isValidEmail } from 'utils/email'
 
@@ -33,46 +32,44 @@ export function Profile() {
   const valid = !isEmpty(name) && isValidEmail(email)
 
   return (
-    <ScrollablePage heading="Profile">
-      <ProfileCard>
+    <ProfileCard>
+      <Flex
+        direction="column"
+        gap="large"
+      >
+        <ValidatedInput
+          label="Full name"
+          width="100%"
+          value={name}
+          onChange={({ target: { value } }) => setName(value)}
+        />
+        <ValidatedInput
+          label="Email address"
+          width="100%"
+          value={email}
+          onChange={({ target: { value } }) => setEmail(value)}
+          validation={(email: string): ValidationResponse =>
+            isValidEmail(email)
+              ? { error: false, message: '' }
+              : { error: true, message: 'Invalid email address' }
+          }
+        />
         <Flex
-          direction="column"
-          gap="large"
+          align="center"
+          justifyContent="flex-end"
+          gap="medium"
         >
-          <ValidatedInput
-            label="Full name"
-            width="100%"
-            value={name}
-            onChange={({ target: { value } }) => setName(value)}
-          />
-          <ValidatedInput
-            label="Email address"
-            width="100%"
-            value={email}
-            onChange={({ target: { value } }) => setEmail(value)}
-            validation={(email: string): ValidationResponse =>
-              isValidEmail(email)
-                ? { error: false, message: '' }
-                : { error: true, message: 'Invalid email address' }
-            }
-          />
-          <Flex
-            align="center"
-            justifyContent="flex-end"
-            gap="medium"
+          {changed && <Body2P $color="text-xlight">Unsaved changes</Body2P>}
+          <Button
+            disabled={!valid || !changed}
+            onClick={() => mutation()}
+            loading={loading}
           >
-            {changed && <Body2P $color="text-xlight">Unsaved changes</Body2P>}
-            <Button
-              disabled={!valid || !changed}
-              onClick={() => mutation()}
-              loading={loading}
-            >
-              Save
-            </Button>
-          </Flex>
+            Save
+          </Button>
         </Flex>
-      </ProfileCard>
-    </ScrollablePage>
+      </Flex>
+    </ProfileCard>
   )
 }
 
@@ -89,6 +86,7 @@ export function ProfileCard({
 const ProfileOuterCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.xlarge,
   overflow: 'auto',
+  flexShrink: 0,
   width: '100%',
   display: 'flex',
   flexDirection: 'column',

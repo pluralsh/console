@@ -45,6 +45,21 @@ addons:
   release_url: https://github.com/argoproj/argo-rollouts/releases/tag/v{vsn}
   helm_repository_url: https://argoproj.github.io/argo-helm
   versions:
+  - version: 1.10.1
+    kube: ['1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: []
+      breaking_changes: ['**Dashboard bind address default changed (security fix)**:
+          The Rollouts dashboard now binds to the local interface by default. If you
+          previously exposed the dashboard via a Service/Ingress using a custom Helm
+          chart or other method, you must add `--address 0.0.0.0` to make it listen
+          on all interfaces again.']
+    chart_version: 2.43.7
+    images: ['quay.io/argoproj/argo-rollouts:v1.10.1']
   - version: 1.10.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -1044,7 +1059,14 @@ addons:
       '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific feature details provided in the release notes; v3.5.1
+          references the project CHANGELOG for the full list of changes.]
+      breaking_changes: [No breaking changes are mentioned in the provided release
+          notes; verify the upstream CHANGELOG for any behavioral or configuration
+          changes between v3.5.0 and v3.5.1.]
     chart_version: 4.5.1
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.7',
       'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7',
@@ -20479,6 +20501,26 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 92.7.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Grafana image tag bumped from v13.5.0 (chart 92.3.0) to v13.6.0
+          (chart 92.7.0)., "No other chart-facing changes were noted in the provided\
+          \ release notes; intermediate versions (92.4.0\u201392.6.x) were not included,\
+          \ so validate diffs if you\u2019re upgrading across them."]
+      features: ['Grafana updated to 13.6.0, which may include upstream fixes and
+          minor enhancements from Grafana.']
+      breaking_changes: []
+    chart_version: 92.7.0
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.4-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 92.3.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -24237,6 +24279,12 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.161.0
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.160.0
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
       '1.28', '1.27', '1.26', '1.25']
@@ -28028,7 +28076,7 @@ addons:
           now honor caller context, PostgreSQL respects `sslmode` when configured,
           and dependencies (moment, golang.org/x/net) were bumped for security fixes.']
       breaking_changes: []
-    chart_version: 2.0.12
+    chart_version: 2.0.13
     images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.5', 'quay.io/argoproj/argocli:v4.1.5',
       'quay.io/argoproj/workflow-controller:v4.1.5']
   - version: 4.1.0
@@ -30956,6 +31004,12 @@ addons:
   helm_values: dcgmExporter.config.name=default
   readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
   versions:
+  - version: 26.7.2
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    chart_version: 26.7.2
+    images: ['nvcr.io/nvidia/gpu-operator:v26.7.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.19.0']
+    incompatibilities: []
   - version: 26.7.1
     kube: ['1.37', '1.36', '1.35']
     requirements: []

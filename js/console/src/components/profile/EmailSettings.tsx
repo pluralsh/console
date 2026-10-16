@@ -5,7 +5,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { LoginContext } from 'components/contexts'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Body2P } from 'components/utils/typography/Text'
 import { useUpdateUserMutation } from 'generated/graphql'
 import { useContext, useState } from 'react'
@@ -26,41 +25,36 @@ export function EmailSettings() {
   const changed = subscribed !== !!me?.emailSettings?.digest
 
   return (
-    <ScrollablePage
-      heading="Profile"
-      contentStyles={{ overflow: 'auto' }}
-    >
-      <ProfileCard css={{ minWidth: 300 }}>
-        <Flex
-          direction="column"
-          gap="large"
+    <ProfileCard css={{ minWidth: 300 }}>
+      <Flex
+        direction="column"
+        gap="large"
+      >
+        <Switch
+          checked={subscribed}
+          onChange={() => setSubscribed(!subscribed)}
+          css={{
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+          }}
         >
-          <Switch
-            checked={subscribed}
-            onChange={() => setSubscribed(!subscribed)}
-            css={{
-              flexDirection: 'row-reverse',
-              justifyContent: 'space-between',
-            }}
+          Subscribe to digest emails
+        </Switch>
+        <Flex
+          align="center"
+          justifyContent="flex-end"
+          gap="medium"
+        >
+          {changed && <Body2P $color="text-xlight">Unsaved changes</Body2P>}
+          <Button
+            disabled={!changed}
+            onClick={() => mutation()}
+            loading={loading}
           >
-            Subscribe to digest emails
-          </Switch>
-          <Flex
-            align="center"
-            justifyContent="flex-end"
-            gap="medium"
-          >
-            {changed && <Body2P $color="text-xlight">Unsaved changes</Body2P>}
-            <Button
-              disabled={!changed}
-              onClick={() => mutation()}
-              loading={loading}
-            >
-              Save
-            </Button>
-          </Flex>
+            Save
+          </Button>
         </Flex>
-      </ProfileCard>
-    </ScrollablePage>
+      </Flex>
+    </ProfileCard>
   )
 }

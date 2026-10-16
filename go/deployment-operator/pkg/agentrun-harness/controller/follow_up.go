@@ -58,7 +58,8 @@ func (in *agentRunController) tryDispatchQueuedUserPrompt(ctx context.Context, r
 		"seq", prompt.Seq,
 		"restorePendingApproval", restorePendingApproval,
 	)
-	return in.runFollowUpPrompt(ctx, prompt.Prompt, restorePendingApproval)
+	text := in.withAttachments(ctx, promptAttachmentsDir(prompt.Seq), prompt.Prompt, prompt.Attachments)
+	return in.runFollowUpPrompt(ctx, text, restorePendingApproval)
 }
 
 // dispatchApprovalGrantedPrompt unlocks PR creation after the user approves.

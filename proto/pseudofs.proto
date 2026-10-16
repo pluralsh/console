@@ -1,0 +1,187 @@
+syntax = "proto3";
+
+package pseudofs.v1;
+
+service PseudoFS {
+  rpc Exists(PathRequest) returns (BoolResponse);
+  rpc IsFile(PathRequest) returns (BoolResponse);
+  rpc IsDir(PathRequest) returns (BoolResponse);
+  rpc IsSymlink(PathRequest) returns (BoolResponse);
+  rpc ReadText(PathRequest) returns (TextResponse);
+  rpc ReadBytes(PathRequest) returns (BytesResponse);
+  rpc WriteText(WriteTextRequest) returns (WriteResponse);
+  rpc WriteBytes(WriteBytesRequest) returns (WriteResponse);
+  rpc AppendText(WriteTextRequest) returns (WriteResponse);
+  rpc AppendBytes(WriteBytesRequest) returns (WriteResponse);
+  rpc Open(OpenRequest) returns (FileHandle);
+  rpc Mkdir(MkdirRequest) returns (Empty);
+  rpc Unlink(MutationPathRequest) returns (Empty);
+  rpc Rmdir(MutationPathRequest) returns (Empty);
+  rpc Iterdir(PathRequest) returns (stream DirectoryEntry);
+  rpc Stat(PathRequest) returns (StatResponse);
+  rpc Rename(RenameRequest) returns (PathResponse);
+  rpc Resolve(PathRequest) returns (PathResponse);
+  rpc Absolute(PathRequest) returns (PathResponse);
+  rpc StreamFile(StreamFileRequest) returns (stream FileChunk);
+  rpc WriteFile(stream WriteFileRequest) returns (WriteResponse);
+  rpc Glob(GlobRequest) returns (stream DirectoryEntry);
+  rpc Grep(GrepRequest) returns (stream GrepMatch);
+}
+
+enum Durability {
+  ACK_UNSPECIFIED = 0;
+  APPLIED = 1;
+  WRITTEN = 2;
+  DURABLE = 3;
+}
+
+enum FileKind {
+  TYPE_UNSPECIFIED = 0;
+  FILE = 1;
+  DIRECTORY = 2;
+}
+
+message Empty {}
+message PathRequest {
+  string path = 1;
+  string tenant = 2;
+}
+message PathResponse { string path = 1; }
+message BoolResponse { bool value = 1; }
+message TextResponse { string value = 1; }
+message BytesResponse { bytes value = 1; }
+message FileChunk { bytes data = 1; }
+
+message WriteTextRequest {
+  string path = 1;
+  string value = 2;
+  Durability durability = 3;
+  string tenant = 4;
+}
+
+message WriteBytesRequest {
+  string path = 1;
+  bytes value = 2;
+  Durability durability = 3;
+  string tenant = 4;
+}
+
+message MutationPathRequest {
+  string path = 1;
+  Durability durability = 2;
+  string tenant = 3;
+}
+
+message WriteResponse { uint64 size = 1; }
+
+message OpenRequest {
+  string path = 1;
+  string mode = 2;
+  Durability durability = 3;
+  string tenant = 4;
+}
+
+message FileHandle {
+  string path = 1;
+  string mode = 2;
+  uint64 position = 3;
+  string tenant = 4;
+}
+
+message MkdirRequest {
+  string path = 1;
+  bool parents = 2;
+  bool exist_ok = 3;
+  string tenant = 4;
+}
+
+message RenameRequest {
+  string source = 1;
+  string target = 2;
+  Durability durability = 3;
+  string tenant = 4;
+}
+
+message DirectoryEntry {
+  string path = 1;
+  string name = 2;
+  FileKind kind = 3;
+}
+
+message StatResponse {
+  FileKind kind = 1;
+  uint32 mode = 2;
+  uint64 size = 3;
+  double atime = 4;
+  double mtime = 5;
+  double ctime = 6;
+}
+
+message WriteFileStart {
+  string path = 1;
+  Durability durability = 2;
+  string tenant = 3;
+}
+
+message WriteFileRequest {
+  oneof payload {
+    WriteFileStart start = 1;
+    bytes chunk = 2;
+  }
+}
+
+// Field numbers 1 and 2 match PathRequest, so older clients that send a
+// PathRequest still read the whole file.
+message StreamFileRequest {
+  string path = 1;
+  string tenant = 2;
+  // Byte offset to start reading from. Offsets past the end yield no chunks.
+  uint64 offset = 3;
+  // Maximum bytes to read. Unset reads to the end of the file.
+  optional uint64 length = 4;
+}
+
+message GlobRequest {
+  string tenant = 1;
+  // Absolute pattern. Supports *, ?, [...], [!...], {a,b}, ** (any number of
+  // directories), and backslash escapes. Matches are streamed depth-first.
+  string pattern = 2;
+  // Zero uses the server default; larger values are capped.
+  uint32 max_results = 3;
+}
+
+message GrepRequest {
+  string tenant = 1;
+  // A file, a directory (searched recursively), or a glob pattern.
+  string path = 2;
+  // Rust regex syntax unless fixed_string is set.
+  string pattern = 3;
+  bool fixed_string = 4;
+  bool case_insensitive = 5;
+  uint32 before_context = 6;
+  uint32 after_context = 7;
+  // Maximum matching lines across all files. Zero uses the server default;
+  // larger values are capped.
+  uint32 max_matches = 8;
+  // Files larger than this are skipped. Zero uses the server default; larger
+  // values are capped.
+  uint64 max_file_size_bytes = 9;
+}
+
+message GrepLine {
+  uint64 line_number = 1;
+  string text = 2;
+}
+
+message GrepMatch {
+  string path = 1;
+  uint64 line_number = 2;
+  string line = 3;
+  repeated GrepLine before = 4;
+  repeated GrepLine after = 5;
+}
+
+message ErrorDetail {
+  string kind = 1;
+  string path = 2;
+}
