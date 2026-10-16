@@ -92,11 +92,11 @@ export function WorkbenchEvalsSidePanel({
       <Flex
         alignItems="center"
         gap="xsmall"
-        // the tab strip's height plus this row's bottom border, so the border
-        // lines up with the one under the tab strip
-        height={DETAILS_TAB_STRIP_HEIGHT + 1}
-        padding="medium"
-        wrap="wrap"
+        height={DETAILS_TAB_STRIP_HEIGHT}
+        flexShrink={0}
+        paddingLeft="medium"
+        paddingRight="medium"
+        overflowX="auto"
         css={{ borderBottom: theme.borders.default }}
       >
         {filterOptions.map(({ key, count, severity }) => (
@@ -192,7 +192,7 @@ function EvalFilterChip({
       inactive={!hasItems}
       onClick={hasItems ? onClick : undefined}
       css={{
-        borderRadius: 12,
+        borderRadius: theme.borderRadiuses.medium,
         backgroundColor: active ? theme.colors['fill-two-selected'] : undefined,
         height: 'fit-content',
       }}

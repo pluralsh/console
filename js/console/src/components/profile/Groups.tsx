@@ -7,7 +7,6 @@ import {
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useMemo, useState } from 'react'
 import { stringify } from 'yaml'
 
@@ -39,29 +38,27 @@ export function Groups() {
 
   return (
     <>
-      <ScrollablePage heading="Groups">
-        <ProfileCard>
-          <Flex
-            wrap="wrap"
-            gap="small"
-          >
-            {data?.me?.groups?.map((group, i) => (
-              <Tooltip
-                key={i}
-                label={group?.description}
-                placement="top"
+      <ProfileCard>
+        <Flex
+          wrap="wrap"
+          gap="small"
+        >
+          {data?.me?.groups?.map((group, i) => (
+            <Tooltip
+              key={i}
+              label={group?.description}
+              placement="top"
+            >
+              <Chip
+                clickable
+                onClick={() => setSelectedGroup(group)}
               >
-                <Chip
-                  clickable
-                  onClick={() => setSelectedGroup(group)}
-                >
-                  {group?.name}
-                </Chip>
-              </Tooltip>
-            ))}
-          </Flex>
-        </ProfileCard>
-      </ScrollablePage>
+                {group?.name}
+              </Chip>
+            </Tooltip>
+          ))}
+        </Flex>
+      </ProfileCard>
       <Modal
         header="Group details"
         open={!!selectedGroup}

@@ -47,12 +47,18 @@ export function FlowPreviews() {
   }
 
   useSetPageHeaderContent(
-    <Button
-      secondary
-      onClick={() => setShowModal(true)}
-    >
-      Spawn a PR preview
-    </Button>
+    useMemo(
+      () => (
+        <Button
+          secondary
+          small
+          onClick={() => setShowModal(true)}
+        >
+          Spawn a PR preview
+        </Button>
+      ),
+      []
+    )
   )
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =

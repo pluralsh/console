@@ -81,7 +81,7 @@ export function ServiceErrors() {
   return (
     <ScrollablePage
       scrollable={false}
-      heading="Errors"
+      noPadding
     >
       {isEmpty(service?.errors) ? (
         <EmptyState message="No errors" />

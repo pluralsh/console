@@ -8,9 +8,13 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
+import { PageColumnSC } from 'components/layout/PageLayout'
+import {
+  PageToolbar,
+  PageToolbarSlotContext,
+} from 'components/layout/PageToolbar'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
+import { SubtabDirectory } from 'components/utils/SubTabs'
 import { useMemo, useState } from 'react'
 import { Link, Navigate, Outlet, useMatch } from 'react-router-dom'
 import {
@@ -51,16 +55,22 @@ export function AI() {
   )
   const [sessionDismissed, setSessionDismissed] = useState(false)
   const [dontShowAgain, setDontShowAgain] = useState(false)
+  const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
   const showEnableAIDialog =
     aiEnabled === false && !dismissedAIDialog && !sessionDismissed
   const loading = useLoadingDeploymentSettings()
   useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
   const directory: SubtabDirectory = useMemo(
     () => [
-      { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
-      { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
+      { label: 'Agent runs', path: `${AI_ABS_PATH}/${AI_AGENT_RUNS_REL_PATH}` },
+      { label: 'Sentinels', path: `${AI_ABS_PATH}/${AI_SENTINELS_REL_PATH}` },
       ...(confirmedNoWorkbenches
-        ? [{ label: 'Chat threads', path: AI_THREADS_REL_PATH }]
+        ? [
+            {
+              label: 'Chat threads',
+              path: `${AI_ABS_PATH}/${AI_THREADS_REL_PATH}`,
+            },
+          ]
         : []),
     ],
     [confirmedNoWorkbenches]
@@ -86,28 +96,34 @@ export function AI() {
   }
 
   return (
-    <WrapperSC>
-      <HeaderSC>
-        <StretchedFlex gap="medium">
-          <SubTabs directory={directory} />
-          <IconFrame
-            clickable
-            icon={<GearTrainIcon />}
-            as={Link}
-            to={AI_SETTINGS_ABS_PATH}
-            tooltip="AI Settings"
-            type="floating"
-          />
-        </StretchedFlex>
-      </HeaderSC>
-      {loading || (tab === AI_THREADS_REL_PATH && workbenchesLoading) ? (
-        <RectangleSkeleton
-          $height="100%"
-          $width="100%"
+    <PageColumnSC>
+      <PageToolbar
+        tabs={directory}
+        activeFn={(path) => path === `${AI_ABS_PATH}/${tab}`}
+        slotRef={setToolbarSlot}
+      >
+        <IconFrame
+          clickable
+          size="medium"
+          icon={<GearTrainIcon />}
+          as={Link}
+          to={AI_SETTINGS_ABS_PATH}
+          tooltip="AI Settings"
+          type="secondary"
         />
-      ) : (
-        <Outlet />
-      )}
+      </PageToolbar>
+      <WrapperSC>
+        {loading || (tab === AI_THREADS_REL_PATH && workbenchesLoading) ? (
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
+        ) : (
+          <PageToolbarSlotContext value={toolbarSlot}>
+            <Outlet />
+          </PageToolbarSlotContext>
+        )}
+      </WrapperSC>
       <Modal
         open={showEnableAIDialog}
         header="Enable Plural AI"
@@ -146,7 +162,7 @@ export function AI() {
       >
         <AIDisabledState showCta={false} />
       </Modal>
-    </WrapperSC>
+    </PageColumnSC>
   )
 }
 
@@ -156,14 +172,9 @@ const WrapperSC = styled.div(({ theme }) => ({
   gap: theme.spacing.large,
   padding: theme.spacing.large,
   overflow: 'hidden',
-  height: '100%',
+  flex: 1,
+  minHeight: 0,
   width: '100%',
   maxWidth: theme.breakpoints.desktop,
   alignSelf: 'center',
-}))
-
-const HeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
 }))

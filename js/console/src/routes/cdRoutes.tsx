@@ -92,7 +92,10 @@ import {
   ServiceMetricsTimeseries,
 } from 'components/cd/services/service/ServiceMetrics.tsx'
 import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
-import { ServiceObservability } from 'components/cd/services/service/ServiceObservability.tsx'
+import {
+  ServiceObservability,
+  ServiceObservabilityIndex,
+} from 'components/cd/services/service/ServiceObservability.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
 import { ServiceHelmSettings } from 'components/cd/services/service/settings/ServiceHelmSettings.tsx'
 import { ServiceSettings } from 'components/cd/services/service/settings/ServiceSettings.tsx'
@@ -622,12 +625,7 @@ export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => {
         >
           <Route
             index
-            element={
-              <Navigate
-                replace
-                to="alerts"
-              />
-            }
+            element={<ServiceObservabilityIndex />}
           />
           <Route
             element={<ServiceAlerts />}
@@ -699,9 +697,6 @@ export const cdRoutes = [
 
 export const MaxWidthWrapperSC = styled.div({
   overflow: 'hidden',
-  maxWidth: 1440,
-  marginLeft: 'auto',
-  marginRight: 'auto',
   height: '100%',
   width: '100%',
 })

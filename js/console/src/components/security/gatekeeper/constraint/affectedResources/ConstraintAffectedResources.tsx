@@ -32,7 +32,6 @@ const columns = [ColResourceName, ColNamespace, ColKind, ColErrorMessage]
 export default function ConstraintAffectedResources() {
   const navigate = useNavigate()
   const { policy, loading } = useOutletContext<ConstraintContextType>()
-  const policyName = policy?.name
   const clusterId = policy?.cluster?.id
   const violations = policy?.violations
 
@@ -59,7 +58,7 @@ export default function ConstraintAffectedResources() {
     <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
       <ScrollablePage
         scrollable={false}
-        heading={policyName}
+        noPadding
       >
         <Table
           fullHeightWrap

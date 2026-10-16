@@ -58,10 +58,7 @@ export default function PipelineJobLogs() {
   }, [pods])
 
   return (
-    <ScrollablePage
-      scrollable={false}
-      heading="Pods"
-    >
+    <ScrollablePage scrollable={false}>
       <PodsList
         fullHeightWrap
         pods={podsWithId}

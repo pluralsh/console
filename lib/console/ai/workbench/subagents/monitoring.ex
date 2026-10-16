@@ -41,7 +41,7 @@ defmodule Console.AI.Workbench.Subagents.Monitoring do
   end
 
   def tools(%Environment{} = environment, %WorkbenchJob{user: user} = job) do
-    skills = Environment.subagent_skills(environment.skills, :monitoring)
+    skills = Environment.with_builtins(environment.skills) |> Environment.subagent_skills(:monitoring)
 
     Observability.core_tools(job, environment, user)
     |> Enum.concat(
@@ -57,7 +57,7 @@ defmodule Console.AI.Workbench.Subagents.Monitoring do
         [
           Scratchpad,
           Result,
-          %Codemode{tools: []},
+          %Codemode{tools: [], workbench_id: job.workbench_id},
           %History{job: job, activities: environment.activities}
         ]
     )

@@ -1,11 +1,5 @@
-import {
-  Flex,
-  Input,
-  SearchIcon,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { useState } from 'react'
+import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
@@ -16,7 +10,12 @@ import { Edge } from 'utils/graphql'
 
 import { useThrottle } from 'components/hooks/useThrottle'
 
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
+
+import {
+  CD_BASE_CRUMBS,
+  useSetPageHeaderContent,
+} from '../ContinuousDeployment'
 
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
@@ -41,37 +40,35 @@ export function Pipelines() {
     )
 
   useSetBreadcrumbs(PIPELINES_CRUMBS)
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <ToolbarSearchInput
+          placeholder="Search pipelines"
+          value={searchString}
+          onChange={setSearchString}
+        />
+      ),
+      [searchString]
+    )
+  )
 
   if (error) return <GqlError error={error} />
 
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      height="100%"
-    >
-      <Input
-        placeholder="Search pipelines"
-        startIcon={<SearchIcon />}
-        showClearButton
-        value={searchString}
-        onChange={(e) => setSearchString(e.currentTarget.value)}
-        css={{ flexGrow: 1 }}
-      />
-      <Table
-        fullHeightWrap
-        columns={columns}
-        loading={!data && loading}
-        data={data?.pipelines?.edges || []}
-        virtualizeRows
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        getRowLink={({ original }) => {
-          const { node } = original as Edge<PipelineFragment>
-          return <Link to={`${PIPELINES_ABS_PATH}/${node?.id}`} />
-        }}
-      />
-    </Flex>
+    <Table
+      fullHeightWrap
+      columns={columns}
+      loading={!data && loading}
+      data={data?.pipelines?.edges || []}
+      virtualizeRows
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      getRowLink={({ original }) => {
+        const { node } = original as Edge<PipelineFragment>
+        return <Link to={`${PIPELINES_ABS_PATH}/${node?.id}`} />
+      }}
+    />
   )
 }

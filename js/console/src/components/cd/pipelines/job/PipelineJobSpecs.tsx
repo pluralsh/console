@@ -38,7 +38,6 @@ export default function PipelineJobSpecs() {
 
   return (
     <ScrollablePage
-      heading="Specs"
       scrollable={currentTab?.path === ''}
       headingContent={
         <TabList

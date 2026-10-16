@@ -1,4 +1,4 @@
-import { MutableRefObject, ReactNode, useRef } from 'react'
+import { ComponentProps, MutableRefObject, ReactNode, useRef } from 'react'
 import {
   CheckOutlineIcon,
   FluxIcon,
@@ -24,12 +24,14 @@ export function RepoKindSelector({
   children,
   validKinds,
   enableFlux = false,
+  size,
 }: {
   onKindChange: any
   selectedKind: Nullable<string>
   children?: ReactNode
   validKinds?: Record<string, boolean>
   enableFlux?: boolean
+  size?: ComponentProps<typeof SubTab>['size']
 }) {
   const theme = useTheme()
   const tabStateRef: MutableRefObject<any> = useRef(undefined)
@@ -57,6 +59,7 @@ export function RepoKindSelector({
       >
         <SelectorSubtabSC
           $active={selectedKind === RepoKind.Git}
+          size={size}
           key={RepoKind.Git}
           textValue={RepoKind.Git}
         >
@@ -71,6 +74,7 @@ export function RepoKindSelector({
         </SelectorSubtabSC>
         <SelectorSubtabSC
           $active={selectedKind === RepoKind.Helm}
+          size={size}
           key={RepoKind.Helm}
           textValue={RepoKind.Helm}
         >
@@ -91,6 +95,7 @@ export function RepoKindSelector({
         {enableFlux ? (
           <SelectorSubtabSC
             $active={selectedKind === RepoKind.Flux}
+            size={size}
             key={RepoKind.Flux}
             textValue={RepoKind.Flux}
           >
@@ -125,6 +130,7 @@ export function RepoKindSelector({
 const SelectorSubtabSC = styled(SubTab)<{ $active?: boolean }>(
   ({ theme, $active }) => ({
     display: 'flex',
+    alignItems: 'center',
     gap: theme.spacing.xsmall,
     outline: $active ? theme.borders.input : undefined,
     outlineOffset: -1,

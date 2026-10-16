@@ -1,18 +1,15 @@
 import {
   AppIcon,
-  Card,
   CaretRightIcon,
   Chip,
   Flex,
-  Markdown,
-  PaperCheckIcon,
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
 import { WorkbenchQueuedPromptChip } from 'components/workbenches/common/WorkbenchQueuedPromptChip'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
-import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
+import { WorkbenchJobPrChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -30,7 +27,6 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { ActivityModalIcon } from './job/WorkbenchJobActivityResults'
 import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
@@ -243,30 +239,6 @@ function JobSourceChips({
   )
 }
 
-export function JobConclusionIcon({
-  result,
-}: {
-  result: WorkbenchJobTinyFragment['result']
-}) {
-  const theme = useTheme()
-
-  if (!result?.conclusion) return null
-
-  return (
-    <ActivityModalIcon
-      icon={PaperCheckIcon}
-      tooltip="View conclusion"
-      modalHeader="Conclusion"
-      modalContent={
-        <Card css={{ padding: theme.spacing.large, overflow: 'auto' }}>
-          <Markdown text={result.conclusion} />
-        </Card>
-      }
-      size={16}
-    />
-  )
-}
-
 function JobEvalBadge({ job }: { job: WorkbenchJobTinyFragment }) {
   const navigate = useNavigate()
   const { evalResult, workbench } = job
@@ -296,19 +268,23 @@ function JobEvalBadge({ job }: { job: WorkbenchJobTinyFragment }) {
 export function WorkbenchJobActionsRow({
   job,
   chipFillLevel = 1,
+  showUsage = false,
 }: {
   job: WorkbenchJobTinyFragment
   chipFillLevel?: 1 | 2 | 3
+  // for layouts without a separate usage column
+  showUsage?: boolean
 }) {
   const theme = useTheme()
   const prs = job.pullRequests?.filter(isNonNullable) ?? []
+  const usage = showUsage ? job.usage : null
   const hasActions =
     !!job.issue ||
     !!job.alert ||
     !!job.chatbotMessage ||
     prs.length > 0 ||
+    !!usage ||
     job.evalResult?.grade != null ||
-    !!job.result?.conclusion ||
     (job.queuedPromptCount ?? 0) > 0
 
   if (!hasActions) return null
@@ -328,12 +304,19 @@ export function WorkbenchJobActionsRow({
         job={job}
         fillLevel={chipFillLevel}
       />
-      <PRsModalIcon
-        prs={prs}
-        type="tertiary"
+      <WorkbenchJobPrChip
+        pullRequests={prs}
+        fillLevel={chipFillLevel}
       />
+      {usage && (
+        <WorkbenchUsageSummaryChip
+          usage={usage}
+          budget={job.modes?.budget}
+          error={job.error}
+          fillLevel={chipFillLevel}
+        />
+      )}
       <JobEvalBadge job={job} />
-      <JobConclusionIcon result={job.result} />
       <WorkbenchQueuedPromptChip
         count={job.queuedPromptCount}
         summary={job.queuedPromptSummary}

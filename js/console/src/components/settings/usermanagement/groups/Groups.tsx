@@ -1,8 +1,8 @@
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
-import { Button, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Body1P } from 'components/utils/typography/Text'
+import { Button, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
+import { SettingsDescription } from 'components/settings/Settings'
 import { GroupFragment } from 'generated/graphql'
 import { use, useState } from 'react'
 import { getUserManagementBreadcrumbs } from '../UserManagement'
@@ -30,23 +30,10 @@ export function Groups() {
     )
 
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      height="100%"
-      minHeight={0}
-    >
-      <StretchedFlex>
-        <Body1P $color="text-light">
-          Create and manage groups for services.
-        </Body1P>
-        <Button
-          floating
-          onClick={() => setGroupEdit(GROUP_CREATE_ID_KEY)}
-        >
-          Create group
-        </Button>
-      </StretchedFlex>
+    <>
+      <SettingsDescription>
+        Create and manage groups for services.
+      </SettingsDescription>
       {isAvailable ? (
         <GroupsList setGroupEdit={setGroupEdit} />
       ) : (
@@ -56,6 +43,14 @@ export function Groups() {
           placeholderImageURL="/placeholder-groups.png"
         />
       )}
-    </Flex>
+      <PageToolbarPortal>
+        <Button
+          small
+          onClick={() => setGroupEdit(GROUP_CREATE_ID_KEY)}
+        >
+          Create group
+        </Button>
+      </PageToolbarPortal>
+    </>
   )
 }

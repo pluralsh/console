@@ -9,6 +9,23 @@ Use `python_sandbox` to write a small Python program that coordinates the config
 - Only the configured functions documented below can cross the sandbox boundary. They may perform external work, subject to their configured policies, so call only the function(s) needed for the task.
 - Execution is limited to 60 seconds, approximately 100 MB per allocation, and 100 levels of recursion.
 
+<%= if @filesystem do %>
+## Workbench filesystem
+
+This workbench has a persistent filesystem mounted at `<%= @fs_root %>`. Unlike `/scratch`, files written there survive across sandbox calls, jobs and conversations, and are visible to users of this workbench (who can browse, upload, edit and delete them too). Use it to store durable artifacts like reports, datasets, runbooks or notes, and to read files users have shared with you.
+
+- Use `pathlib` and `open()` with absolute paths under `<%= @fs_root %>`; relative paths resolve against `<%= @fs_root %>`. Supported operations: `Path.exists/is_file/is_dir/iterdir/stat/mkdir/unlink/rmdir/rename/read_text/read_bytes/write_text/write_bytes`, and `open()` in `r`, `w`, `a` (and binary) modes.
+- Writes create missing parent directories as needed, but `mkdir(parents=True, exist_ok=True)` is safe to call. Paths outside `<%= @fs_root %>` and `/scratch` are not accessible.
+- Files attached to user prompts are uploaded under `<%= @uploads %>`. Treat that directory as user owned: read from it freely, but don't write into it or delete from it unless asked. The one exception is `extract_archive`, which unpacks an upload next to it by default.
+- The sandbox lacks `glob`, recursive directory walks, and the `csv`, `yaml`, `zipfile` and `tarfile` modules, so these builtin functions cover them:
+  - `glob(pattern, max_results=1000)` finds files and directories by an absolute pattern, like `"<%= @fs_root %>/reports/**/*.md"`.
+  - `grep(pattern, path="<%= @fs_root %>", ...)` searches a file, directory or glob for a regex.
+  - `read_csv(path=None, text=None, ...)` and `write_csv(path, rows, ...)` parse and write csv/tsv.
+  - `read_yaml(path=None, text=None)` returns a list of yaml documents.
+  - `extract_archive(path, destination=None)` unpacks a zip or tar archive into the filesystem.
+
+Read the built-in `sandbox-builtins` skill for their full signatures and return values before relying on optional arguments or result fields, and the `filesystem` skill for guidance on organizing files.
+<% end %>
 ## Result and output
 
 The final expression in the script is the result. It must be cleanly JSON encodable: use `None`, booleans, numbers, strings, lists, and dictionaries with string keys. Convert tuples, sets, bytes, dates, and other Python-specific values into JSON-compatible structures before returning them. An assignment is not itself returned, so put the value you want to return on the last line:

@@ -17,7 +17,12 @@ import {
   useResizeObserver,
   WrapWithIf,
 } from '@pluralsh/design-system'
+import {
+  AttachmentShelf,
+  attachmentShelfItems,
+} from 'components/ai/chatbot/input/ChatAttachments'
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { WorkbenchFileContext } from 'components/ai/chatbot/PlrlFileChip'
 import {
   PreviewablePanel,
   ShowMoreSC,
@@ -25,7 +30,7 @@ import {
 } from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
-import { SliceTooltip } from 'components/utils/ChartTooltip'
+import { SeriesSliceTooltip, SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { GraphLegend } from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -39,12 +44,14 @@ import {
   WorkbenchJobActivityResultFragment,
   WorkbenchJobActivityTraceFragment,
   WorkbenchToolQueryData,
+  AttachmentFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import {
   ComponentPropsWithRef,
   ComponentType,
   ReactNode,
+  useContext,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -93,13 +100,16 @@ export function MemoActivityIcon({
 export function ExpandableUserPrompt({
   prompt,
   timestamp,
+  attachments,
   fullWidth = false,
   ...props
 }: {
   prompt: Nullable<string>
   timestamp?: Nullable<string>
+  attachments?: Nullable<Nullable<AttachmentFragment>[]>
   fullWidth?: boolean
 } & ComponentPropsWithRef<typeof PromptWrapperSC>) {
+  const workbenchId = useContext(WorkbenchFileContext)
   const [isExpanded, setIsExpanded] = useState(false)
   const [showActions, setShowActions] = useState(false)
   const [canExpand, setCanExpand] = useState(false)
@@ -140,6 +150,10 @@ export function ExpandableUserPrompt({
         $fullWidth={fullWidth}
         $isExpanded={isExpandable && isExpanded}
       >
+        <PromptAttachmentsSC
+          compact
+          items={attachmentShelfItems(attachments, workbenchId)}
+        />
         <PromptBodySC
           ref={bodyRef}
           $expanded={isExpanded}
@@ -243,6 +257,9 @@ export function JobActivityLogs({
 }
 
 const CANVAS_THRESHOLD = 1000
+// tool results are large and stored on the shared job entity, so caching them
+// makes each response re-diff every other tool result on the page
+const TOOL_RESULT_FETCH_POLICY = 'no-cache'
 
 export type WorkbenchMetricsToolQueryInput = Pick<
   WorkbenchToolQueryData,
@@ -285,6 +302,7 @@ export function JobActivityLogsFromTool({
         : undefined,
     },
     skip: !shouldRunQuery,
+    fetchPolicy: TOOL_RESULT_FETCH_POLICY,
   })
 
   if (!hasWorkbenchMetricsToolQuery(logsQuery)) return null
@@ -405,7 +423,10 @@ export function JobActivityMetricsChart({
             width={size.width}
             height={size.height}
             {...sharedProps}
-            useMesh
+            // one hover target per timestamp rather than a Delaunay mesh over
+            // every point of every series
+            enableSlices="x"
+            sliceTooltip={SeriesSliceTooltip}
             {...lineProps}
           />
         ))}
@@ -562,6 +583,7 @@ export function JobActivityMetrics({
         : undefined,
     },
     skip: !shouldRunQuery,
+    fetchPolicy: TOOL_RESULT_FETCH_POLICY,
   })
 
   if (!hasWorkbenchMetricsToolQuery(metricsQuery)) return null
@@ -729,6 +751,7 @@ export function JobActivityTraces({
         : undefined,
     },
     skip: !shouldRunQuery,
+    fetchPolicy: TOOL_RESULT_FETCH_POLICY,
   })
 
   if (isEmpty(directTraces) && !hasWorkbenchMetricsToolQuery(tracesQuery))
@@ -948,6 +971,10 @@ const CanvasLogPanelSC = styled.div(({ theme }) => ({
   overflowY: 'auto',
   padding: `${theme.spacing.medium}px 0`,
   width: '100%',
+}))
+
+const PromptAttachmentsSC = styled(AttachmentShelf)(({ theme }) => ({
+  marginBottom: theme.spacing.small,
 }))
 
 const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(

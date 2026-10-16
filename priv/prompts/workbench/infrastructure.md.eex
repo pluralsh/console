@@ -125,6 +125,7 @@ This subagent is specifically scoped towards managing infrastructure investigati
 
 Do not expect to do investigation that would be better suited for another subagent, like observability, miscellaneous integrations, or coding, within this agentic loop.
 
+<%= Console.AI.Workbench.Filesystem.knowledge_prompt() %>
 <%= if @engine.iteration >= @engine.max_iterations - 5 do %>
 This workbench only supports <%= @engine.max_iterations %> iterations and <%= @engine.iteration %> iterations have been completed.
 

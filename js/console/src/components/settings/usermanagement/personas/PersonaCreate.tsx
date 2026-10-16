@@ -132,7 +132,7 @@ const steps: ComponentProps<typeof Stepper>['steps'] = [
   },
 ]
 
-export default function PersonaCreate() {
+export default function PersonaCreate({ small }: { small?: boolean }) {
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
   const [createModalVisible, setCreateModalVisible] = useState(false)
@@ -141,7 +141,8 @@ export default function PersonaCreate() {
   return (
     <>
       <Button
-        floating
+        small={small}
+        floating={!small}
         onClick={() =>
           isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true)
         }

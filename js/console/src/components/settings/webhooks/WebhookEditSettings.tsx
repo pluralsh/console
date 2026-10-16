@@ -1,11 +1,10 @@
 import {
   Button,
   EmptyState,
-  Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
@@ -29,14 +28,11 @@ import {
   WEBHOOKS_SETTINGS_ABS_PATH,
   WEBHOOKS_SETTINGS_WEBHOOK_ID_PARAM_ID,
 } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
 
-import { SETTINGS_BREADCRUMBS } from '../Settings'
-import { StackedTextSC } from '../../utils/table/StackedText'
+import { SETTINGS_BREADCRUMBS, SettingsDescription } from '../Settings'
 
 export function WebhookEditSettings() {
   const navigate = useNavigate()
-  const theme = useTheme()
   const params = useParams()
   const webhookId = params[WEBHOOKS_SETTINGS_WEBHOOK_ID_PARAM_ID]
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
@@ -104,47 +100,6 @@ export function WebhookEditSettings() {
       [editPath]
     )
   )
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Flex justifyContent="space-between">
-          <StackedTextSC>
-            <span
-              css={{
-                ...theme.partials.text.body2,
-                color: theme.colors['text-light'],
-              }}
-            >
-              Edit webhook integration details and access policy.
-            </span>
-          </StackedTextSC>
-          {!isOpen && !!setupGuideMarkdownPath && (
-            <Button
-              secondary
-              startIcon={<SidePanelOpenIcon />}
-              onClick={() =>
-                openSetupGuidePanel({
-                  documentationUrl: setupGuideDocumentationUrl,
-                  markdownPath: setupGuideMarkdownPath,
-                })
-              }
-              css={{ whiteSpace: 'nowrap' }}
-            >
-              Setup guide
-            </Button>
-          )}
-        </Flex>
-      ),
-      [
-        isOpen,
-        openSetupGuidePanel,
-        setupGuideDocumentationUrl,
-        setupGuideMarkdownPath,
-        theme,
-      ]
-    )
-  )
-
   const onUnmount = useEffectEvent(() => {
     if (isOpen) closeSetupGuidePanel()
   })
@@ -173,25 +128,50 @@ export function WebhookEditSettings() {
   const error =
     !loading && !existingWebhook ? observabilityError || issueError : undefined
 
-  if (error) return <GqlError error={error} />
-  if (loading && !existingWebhook) return <LoadingIndicator />
-
-  return existingWebhook ? (
-    <WebhookCreateForm
-      existingWebhook={existingWebhook}
-      mode="edit"
-      onGuideSelectionChange={setSetupGuideSelection}
-      onReturn={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-      onSaved={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-      refetchQueries={['ObservabilityWebhooks', 'IssueWebhooks']}
-      returnPathIsList
-      onCreated={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-    />
-  ) : (
-    <EmptyState message="Webhook not found.">
-      <Button onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}>
-        Back to all webhooks
-      </Button>
-    </EmptyState>
+  return (
+    <>
+      <SettingsDescription>
+        Edit webhook integration details and access policy.
+      </SettingsDescription>
+      {!isOpen && !!setupGuideMarkdownPath && (
+        <PageToolbarPortal>
+          <Button
+            secondary
+            small
+            startIcon={<SidePanelOpenIcon />}
+            onClick={() =>
+              openSetupGuidePanel({
+                documentationUrl: setupGuideDocumentationUrl,
+                markdownPath: setupGuideMarkdownPath,
+              })
+            }
+          >
+            Setup guide
+          </Button>
+        </PageToolbarPortal>
+      )}
+      {error ? (
+        <GqlError error={error} />
+      ) : loading && !existingWebhook ? (
+        <LoadingIndicator />
+      ) : existingWebhook ? (
+        <WebhookCreateForm
+          existingWebhook={existingWebhook}
+          mode="edit"
+          onGuideSelectionChange={setSetupGuideSelection}
+          onReturn={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+          onSaved={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+          refetchQueries={['ObservabilityWebhooks', 'IssueWebhooks']}
+          returnPathIsList
+          onCreated={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+        />
+      ) : (
+        <EmptyState message="Webhook not found.">
+          <Button onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}>
+            Back to all webhooks
+          </Button>
+        </EmptyState>
+      )}
+    </>
   )
 }

@@ -23,6 +23,8 @@ import RestoreStackButton from './RestoreStackButton'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Link } from 'react-router-dom'
 
+const menuLabelProps = { style: { fontSize: 13, lineHeight: '20px' } }
+
 enum MenuItemKey {
   None = '',
   Resync = 'resync',
@@ -91,6 +93,7 @@ export default function StackActions({
           <KickButton
             key={stack?.id ?? 'id'}
             floating
+            small
             css={{
               borderRight: 'none',
               borderTopRightRadius: 0,
@@ -109,13 +112,13 @@ export default function StackActions({
             width="max-content"
           />
           <MoreMenu
-            width={350}
+            width={300}
             triggerButton={
               <IconFrame
                 css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                 type="floating"
-                size="large"
-                icon={<CaretDownIcon />}
+                size="medium"
+                icon={<CaretDownIcon size={12} />}
                 clickable
               />
             }
@@ -130,11 +133,13 @@ export default function StackActions({
             <ListBoxItem
               key={MenuItemKey.CustomRun}
               label="Create a custom stack run"
+              labelProps={menuLabelProps}
               description="Start a stack run with custom parameters"
             />
             <ListBoxItem
               key={MenuItemKey.RunNow}
               label="Trigger a stack run"
+              labelProps={menuLabelProps}
               description="Start a new stack run from the newest SHA in the history"
               rightContent={loading ? <Spinner /> : null}
             />
@@ -144,6 +149,7 @@ export default function StackActions({
       {stack?.parent?.id && (
         <Button
           secondary
+          small
           as={Link}
           to={getServiceDetailsPath({ serviceId: stack.parent.id })}
           endIcon={<ArrowTopRightIcon />}

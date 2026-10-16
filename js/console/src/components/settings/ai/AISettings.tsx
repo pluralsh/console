@@ -1,6 +1,6 @@
 import { Outlet, useMatch } from 'react-router-dom'
 
-import { Suspense, useMemo, useRef } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useDeploymentSettingsSuspenseQuery } from 'generated/graphql'
 
 import {
@@ -12,11 +12,9 @@ import {
   AI_SETTINGS_MODEL_ROUTING_REL_PATH,
 } from 'routes/settingsRoutesConst'
 
-import { SubTab, TabList, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { LinkTabWrap } from 'components/utils/Tabs'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsToolbarTabs } from '../Settings'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export const getAISettingsBreadcrumbs = (tab: string) => [
@@ -42,58 +40,36 @@ const directory = [
 ]
 
 export function AISettings() {
-  const tabStateRef = useRef<any>(null)
   const tab = useMatch(`${AI_SETTINGS_ABS_PATH}/:tab`)?.params.tab ?? ''
   const { data: deploymentSettings } = useDeploymentSettingsSuspenseQuery()
   const aiEnabled = deploymentSettings.deploymentSettings?.ai?.enabled ?? false
 
-  useSetBreadcrumbs(useMemo(() => getAISettingsBreadcrumbs(tab ?? ''), [tab]))
-  useSetPageHeaderContent(
-    <TabList
-      scrollable
-      stateRef={tabStateRef}
-      stateProps={{ selectedKey: tab }}
-    >
-      {directory.map(({ label, path, requiresAi }) => {
-        const disabled = !!requiresAi && !aiEnabled
-
-        if (disabled) {
-          return (
-            <SubTab
-              key={path}
-              disabled
-              textValue={label}
-            >
-              {label}
-            </SubTab>
-          )
-        }
-
-        return (
-          <LinkTabWrap
-            subTab
-            key={path}
-            textValue={label}
-            to={getAISettingsAbsPath(path)}
-          >
-            <SubTab textValue={label}>{label}</SubTab>
-          </LinkTabWrap>
-        )
-      })}
-    </TabList>
+  const tabs = useMemo(
+    () =>
+      directory.map(({ path, label, requiresAi }) => ({
+        label,
+        path: getAISettingsAbsPath(path),
+        enabled: !requiresAi || aiEnabled || path === tab,
+      })),
+    [aiEnabled, tab]
   )
 
+  useSetBreadcrumbs(useMemo(() => getAISettingsBreadcrumbs(tab ?? ''), [tab]))
+
   return (
-    <Suspense
-      fallback={
-        <RectangleSkeleton
-          $height="100%"
-          $width="100%"
-        />
-      }
-    >
-      <Outlet />
-    </Suspense>
+    <>
+      <SettingsToolbarTabs directory={tabs} />
+      <Suspense
+        fallback={
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
+        }
+      >
+        <Outlet />
+      </Suspense>
+    </>
   )
 }
 

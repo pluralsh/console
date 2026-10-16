@@ -1,22 +1,13 @@
 import {
-  AppIcon,
   type Breadcrumb,
-  BriefcaseIcon,
   Chip,
   LoopingLogo,
   Sidecar,
   SidecarItem,
-  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { createContext, useContext, useMemo } from 'react'
-import {
-  Outlet,
-  useLocation,
-  useMatch,
-  useOutletContext,
-  useParams,
-} from 'react-router-dom'
+import { createContext, useContext, useMemo, useState } from 'react'
+import { Outlet, useMatch, useOutletContext, useParams } from 'react-router-dom'
 import capitalize from 'lodash/capitalize'
 
 import {
@@ -31,13 +22,13 @@ import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { SideNavEntries } from 'components/layout/SideNavEntries'
+import { PageColumnSC, PageRowSC } from 'components/layout/PageLayout'
+import {
+  PageToolbar,
+  PageToolbarSlotContext,
+} from 'components/layout/PageToolbar'
 
-import { useTheme } from 'styled-components'
-
-import { Body2P, Subtitle2H1 } from 'components/utils/typography/Text'
+import styled from 'styled-components'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
@@ -97,9 +88,8 @@ type OutletContextT = {
 export const usePipelineJob = () => useOutletContext<OutletContextT>()
 
 export default function PipelineJob() {
-  const theme = useTheme()
   const jobId = useParams().jobId!
-  const { pathname } = useLocation()
+  const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
 
   const pathPrefix = `${PIPELINES_ABS_PATH}/jobs/${jobId}`
   const tab = useMatch(`${pathPrefix}/:tab`)?.params?.tab || ''
@@ -143,7 +133,6 @@ export default function PipelineJob() {
   let content = <Outlet context={outletContext} />
   const gate = data?.pipelineGate
   const job = gate?.job
-  const name = gate?.name
 
   if (error) {
     content = <GqlError error={error} />
@@ -152,85 +141,51 @@ export default function PipelineJob() {
   }
 
   return (
-    <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer>
-        <div
-          css={{
-            display: 'flex',
-            alignItem: 'center',
-            gap: theme.spacing.small,
-            marginBottom: theme.spacing.xsmall,
-          }}
-        >
-          <AppIcon
-            size="xsmall"
-            icon={<BriefcaseIcon size={theme.spacing.large} />}
-          />
-          <div
-            css={{
-              minWidth: 0,
-              '&>*': {
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              },
-            }}
-          >
-            <Tooltip label={name}>
-              <Subtitle2H1
-                css={{
-                  margin: 0,
-                }}
-              >
-                {name}
-              </Subtitle2H1>
-            </Tooltip>
-            {name && (
-              <Tooltip label={name}>
-                <Body2P
-                  css={{
-                    color: theme.colors['text-light'],
-                  }}
-                >
-                  Job gate
-                </Body2P>
-              </Tooltip>
+    <PageColumnSC>
+      <PageToolbar
+        tabs={directory.map(({ path, label }) => ({
+          path: `${pathPrefix}/${path}`,
+          label,
+        }))}
+        activeFn={(path) => path === `${pathPrefix}/${tab}`}
+        slotRef={setToolbarSlot}
+      />
+      <PageToolbarSlotContext value={toolbarSlot}>
+        <BodySC>
+          <ResponsiveLayoutSpacer />
+          <ResponsiveLayoutContentContainer role="main">
+            <PodsContext.Provider value={podsContext}>
+              {content}
+            </PodsContext.Provider>
+          </ResponsiveLayoutContentContainer>
+          <ResponsiveLayoutSidecarContainer>
+            {gate && (
+              <Sidecar>
+                {job?.metadata.name && (
+                  <SidecarItem heading="Job name">
+                    {job?.metadata.name}
+                  </SidecarItem>
+                )}
+                {job?.metadata.namespace && (
+                  <SidecarItem heading="Job namespace">
+                    {gate?.job?.metadata.namespace}
+                  </SidecarItem>
+                )}
+                <SidecarItem heading="Status">
+                  <Chip>{capitalize(gate?.state)}</Chip>
+                </SidecarItem>
+                <SidecarItem heading="Build type">Job</SidecarItem>
+                <SidecarItem heading="ID">{gate.id}</SidecarItem>
+              </Sidecar>
             )}
-          </div>
-        </div>
-
-        <SideNavEntries
-          directory={directory}
-          pathname={pathname}
-          pathPrefix={pathPrefix}
-        />
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer>
-        <PodsContext.Provider value={podsContext}>
-          {content}
-        </PodsContext.Provider>
-      </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer>
-        {gate && (
-          <Sidecar>
-            {job?.metadata.name && (
-              <SidecarItem heading="Job name">{job?.metadata.name}</SidecarItem>
-            )}
-            {job?.metadata.namespace && (
-              <SidecarItem heading="Job namespace">
-                {gate?.job?.metadata.namespace}
-              </SidecarItem>
-            )}
-            <SidecarItem heading="Status">
-              <Chip>{capitalize(gate?.state)}</Chip>
-            </SidecarItem>
-            <SidecarItem heading="Build type">Job</SidecarItem>
-            <SidecarItem heading="ID">{gate.id}</SidecarItem>
-          </Sidecar>
-        )}
-      </ResponsiveLayoutSidecarContainer>
-      <ResponsiveLayoutSpacer />
-    </ResponsiveLayoutPage>
+          </ResponsiveLayoutSidecarContainer>
+          <ResponsiveLayoutSpacer />
+        </BodySC>
+      </PageToolbarSlotContext>
+    </PageColumnSC>
   )
 }
+
+const BodySC = styled(PageRowSC)(({ theme }) => ({
+  padding: `${theme.spacing.large}px ${theme.spacing.large}px 0`,
+}))

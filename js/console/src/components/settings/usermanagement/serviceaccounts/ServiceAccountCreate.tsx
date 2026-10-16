@@ -15,13 +15,20 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { SERVICE_ACCOUNTS_QUERY_PAGE_SIZE } from './ServiceAccountsList'
 
-export default function ServiceAccountCreate({ q }: { q: string }) {
+export default function ServiceAccountCreate({
+  q,
+  small,
+}: {
+  q: string
+  small?: boolean
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <>
       <Button
-        floating
+        small={small}
+        floating={!small}
         onClick={() => setIsOpen(true)}
       >
         Create service account

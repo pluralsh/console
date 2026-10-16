@@ -12,7 +12,6 @@ import {
   Select,
   Switch,
 } from '@pluralsh/design-system'
-import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
 import {
@@ -246,12 +245,6 @@ export function CostManagementChartView() {
         direction="column"
         gap="medium"
       >
-        <TagsFilter
-          selectedTagKeys={tagKeysState[0]}
-          setSelectedTagKeys={tagKeysState[1]}
-          searchOp={tagOpState[0]}
-          setSearchOp={tagOpState[1]}
-        />
         {clusterUsagesError ? (
           <GqlError error={clusterUsagesError} />
         ) : (

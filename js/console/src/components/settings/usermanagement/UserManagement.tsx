@@ -1,21 +1,19 @@
-import { SubTab, TabList } from '@pluralsh/design-system'
-import { useRef } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 import { useLogin } from 'components/contexts'
 import { USER_MANAGEMENT_ABS_PATH } from 'routes/settingsRoutesConst'
 
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { LinkTabWrap } from 'components/utils/Tabs'
-
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsToolbarTabs } from '../Settings'
 
 const directory = [
-  { path: 'users', label: 'Users', enabled: true },
-  { path: 'groups', label: 'Groups', enabled: true },
-  { path: 'service-accounts', label: 'Service Accounts', enabled: true },
-  { path: 'personas', label: 'Personas', enabled: true },
-]
+  { path: 'users', label: 'Users' },
+  { path: 'groups', label: 'Groups' },
+  { path: 'service-accounts', label: 'Service Accounts' },
+  { path: 'personas', label: 'Personas' },
+].map(({ path, label }) => ({
+  label,
+  path: `${USER_MANAGEMENT_ABS_PATH}/${path}`,
+}))
 
 export const getUserManagementBreadcrumbs = (page: string) => [
   ...SETTINGS_BREADCRUMBS,
@@ -24,43 +22,12 @@ export const getUserManagementBreadcrumbs = (page: string) => [
 ]
 
 export default function UserManagement() {
-  const tabStateRef = useRef<any>(null)
   const { me } = useLogin()
-  const { pathname } = useLocation()
 
-  const currentTab = directory.find((tab) =>
-    pathname?.startsWith(`${USER_MANAGEMENT_ABS_PATH}/${tab.path}`)
+  return (
+    <>
+      <SettingsToolbarTabs directory={directory} />
+      {me && <Outlet />}
+    </>
   )
-
-  const headerContent = (
-    <TabList
-      scrollable
-      stateRef={tabStateRef}
-      stateProps={{
-        selectedKey: currentTab?.path,
-      }}
-    >
-      {directory.map(({ label, path }) => (
-        <LinkTabWrap
-          subTab
-          key={path}
-          textValue={label}
-          to={`${USER_MANAGEMENT_ABS_PATH}/${path}`}
-        >
-          <SubTab
-            key={path}
-            textValue={label}
-          >
-            {label}
-          </SubTab>
-        </LinkTabWrap>
-      ))}
-    </TabList>
-  )
-
-  useSetPageHeaderContent(headerContent)
-
-  if (!me) return null
-
-  return <Outlet />
 }

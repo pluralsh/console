@@ -278,7 +278,6 @@ export function WorkbenchToolsEditModal({
                             />
                           </Flex>
                           <IconFrame
-                            circle
                             clickable
                             icon={<CloseIcon />}
                             tooltip="Remove from selection"

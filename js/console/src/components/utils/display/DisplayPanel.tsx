@@ -117,6 +117,7 @@ export function DisplayButton({
   return (
     <Button
       secondary
+      small
       startIcon={<FiltersIcon />}
       aria-haspopup="dialog"
       aria-expanded={expanded}
@@ -130,8 +131,25 @@ export function DisplayButton({
   )
 }
 
+// Open state for display options docked in a sidecar: `defaultOpen` until the
+// user toggles it.
+export function useDisplaySidecar(defaultOpen = false) {
+  const [open, setOpen] = useState<boolean | null>(null)
+  const isOpen = open ?? defaultOpen
+
+  return { isOpen, toggle: () => setOpen(!isOpen) }
+}
+
+// display options docked in the page sidecar (see PageWithSidecar)
 export function DisplayPanel({ children }: { children: ReactNode }) {
-  return <PanelSC fillLevel={1}>{children}</PanelSC>
+  return (
+    <PanelSC
+      role="region"
+      aria-label="Display options"
+    >
+      {children}
+    </PanelSC>
+  )
 }
 
 // Display button with its panel floating over the content below it.
@@ -394,10 +412,11 @@ function ViewChip({
   onClick: () => void
   children: string
 }) {
+  const theme = useTheme()
+
   return (
     <Chip
       clickable
-      rounded
       icon={icon}
       fillLevel={selected ? 3 : 1}
       aria-pressed={selected}
@@ -412,6 +431,7 @@ function ViewChip({
           height: 32,
           minWidth: 80,
           padding: '5px 12px',
+          borderRadius: theme.borderRadiuses.medium,
           boxShadow: 'none',
         },
         '& .icon svg': { width: 12, height: 12 },
@@ -455,18 +475,12 @@ const DisplayFilterDotSC = styled.span(({ theme }) => ({
   flexShrink: 0,
 }))
 
-const PanelSC = styled(Card)(({ theme }) => ({
+const PanelSC = styled.div(({ theme }) => ({
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
-  flexShrink: 0,
-  alignSelf: 'stretch',
-  height: '100%',
-  maxHeight: '100%',
-  minHeight: 0,
-  overflowY: 'auto',
   padding: `0 ${theme.spacing.medium}px`,
-  width: 230,
+  '& > :last-child': { borderBottom: 'none' },
 }))
 
 const PopoverPanelSC = styled(Card)(({ theme }) => ({

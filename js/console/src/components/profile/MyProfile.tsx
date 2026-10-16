@@ -1,15 +1,24 @@
-import { PageCard, Tab, TabList, TabPanel } from '@pluralsh/design-system'
+import { PageCard } from '@pluralsh/design-system'
 
-import { useRef } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import { useLogin } from 'components/contexts'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { useTheme } from 'styled-components'
+import {
+  PageContentSC,
+  PageSidebarBodySC,
+  PageSidebarHeaderSC,
+  PageSidebarSC,
+  PageWithSidebar,
+} from 'components/layout/PageLayout'
+import {
+  PageToolbar,
+  PageToolbarSlotContext,
+} from 'components/layout/PageToolbar'
+import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { Body2BoldP } from 'components/utils/typography/Text'
+
+const PROFILE_ABS_PATH = '/profile'
 
 const directory = [
   { path: 'me', label: 'Profile' },
@@ -17,74 +26,50 @@ const directory = [
   { path: 'security', label: 'Security' },
   { path: 'groups', label: 'Groups' },
   { path: 'access-tokens', label: 'Access tokens' },
-]
+].map(({ path, label }) => ({ label, path: `${PROFILE_ABS_PATH}/${path}` }))
 
-export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: '/profile' }]
+export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: PROFILE_ABS_PATH }]
 
 export default function MyProfile() {
-  const theme = useTheme()
-  const tabStateRef = useRef<any>(null)
   const { me } = useLogin()
   const { pathname } = useLocation()
-  const pathPrefix = '/profile'
+  const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
 
   if (!me) return null
 
-  const currentTab = directory.find((tab) =>
-    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
-  )
-
   return (
-    <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer
-        css={{
-          width: 300,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.medium,
-        }}
-      >
-        <PageCard
-          heading={me.name}
-          icon={{
-            name: me.name,
-            url: me.profile,
-            spacing: 'none',
-          }}
-          subheading={me?.email}
+    <PageWithSidebar
+      sidebar={
+        <PageSidebarSC>
+          <PageSidebarHeaderSC>
+            <Body2BoldP>Profile</Body2BoldP>
+          </PageSidebarHeaderSC>
+          <PageSidebarBodySC>
+            <PageCard
+              heading={me.name}
+              icon={{
+                name: me.name,
+                url: me.profile,
+                spacing: 'none',
+              }}
+              subheading={me?.email}
+            />
+          </PageSidebarBodySC>
+        </PageSidebarSC>
+      }
+      toolbar={
+        <PageToolbar
+          tabs={directory}
+          activeFn={(path) => pathname.startsWith(path)}
+          slotRef={setToolbarSlot}
         />
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'vertical',
-            selectedKey: currentTab?.path,
-          }}
-        >
-          {directory.map(({ label, path }) => (
-            <Tab
-              key={path}
-              as={Link}
-              to={path}
-              textDecoration="none"
-            >
-              {label}
-            </Tab>
-          ))}
-        </TabList>
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <TabPanel
-        as={
-          <ResponsiveLayoutContentContainer
-            css={{ paddingBottom: theme.spacing.xlarge }}
-          />
-        }
-        stateRef={tabStateRef}
-      >
-        <Outlet />
-      </TabPanel>
-      <ResponsiveLayoutSidecarContainer />
-      <ResponsiveLayoutSpacer />
-    </ResponsiveLayoutPage>
+      }
+    >
+      <PageContentSC $maxWidth={RESPONSIVE_LAYOUT_CONTENT_WIDTH}>
+        <PageToolbarSlotContext value={toolbarSlot}>
+          <Outlet />
+        </PageToolbarSlotContext>
+      </PageContentSC>
+    </PageWithSidebar>
   )
 }

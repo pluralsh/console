@@ -1,22 +1,26 @@
-import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
+import { DisplayButton } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ConstraintViolationField,
   usePolicyConstraintsQuery,
   useViolationStatisticsQuery,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   GATEKEEPER_ABS_PATH,
   GATEKEEPER_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_REL_PATH,
 } from 'routes/securityRoutesConsts'
-import styled from 'styled-components'
 
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { PageSidecarPortal } from 'components/layout/PageLayout'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import GatekeeperFilter from './GatekeeperFilter'
 import { GatekeeperTable } from './GatekeeperTable'
 
@@ -46,6 +50,7 @@ const violatedParam = (filter: ViolationFilter) => {
 export function Gatekeeper() {
   useSetBreadcrumbs(breadcrumbs)
   const [searchString, setSearchString] = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [violationFilter, setViolationFilter] = useState(ViolationFilter.All)
   const [selectedKinds, setSelectedKinds] = useState<(string | null)[]>([])
   const [selectedNamespaces, setSelectedNamespaces] = useState<
@@ -64,6 +69,11 @@ export function Gatekeeper() {
     ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
     violated: violatedParam(violationFilter),
   }
+  const hasActiveFilters =
+    violationFilter !== ViolationFilter.All ||
+    !!selectedKinds.length ||
+    !!selectedNamespaces.length ||
+    !!selectedClusters.length
 
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -79,59 +89,55 @@ export function Gatekeeper() {
     variables: { field: ConstraintViolationField.Namespace },
   })
 
-  const header = useMemo(
-    () => (
-      <Input
-        startIcon={<SearchIcon />}
-        placeholder="Search policies"
-        value={searchString}
-        onChange={(e) => setSearchString(e.currentTarget.value)}
-        css={{ width: '100%' }}
-      />
-    ),
-    [searchString]
-  )
-
-  useSetPageHeaderContent(header)
-
-  if (error) return <GqlError error={error} />
-
   return (
-    <GatekeeperContainerSC>
-      <GatekeeperTable
-        fullHeightWrap
-        data={data}
-        loading={loading}
-        refetch={refetch}
-        fetchNextPage={fetchNextPage}
-        setVirtualSlice={setVirtualSlice}
-        resetFilters={() => {
-          setSearchString('')
-          setViolationFilter(ViolationFilter.All)
-          setSelectedKinds([])
-          setSelectedNamespaces([])
-          setSelectedClusters([])
-        }}
-      />
-      <GatekeeperFilter
-        violationsFilter={violationFilter}
-        setViolationsFilter={setViolationFilter}
-        selectedNamespaces={selectedNamespaces}
-        setSelectedNamespaces={setSelectedNamespaces}
-        selectedKinds={selectedKinds}
-        setSelectedKinds={setSelectedKinds}
-        selectedClusters={selectedClusters}
-        setSelectedClusters={setSelectedClusters}
-        kindsData={kindsData}
-        namespacesData={namespacesData}
-      />
-    </GatekeeperContainerSC>
+    <>
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search policies"
+          value={searchString}
+          onChange={setSearchString}
+        />
+        <DisplayButton
+          showDot={hasActiveFilters}
+          expanded={filtersOpen}
+          onClick={() => setFiltersOpen(!filtersOpen)}
+        />
+      </PageToolbarPortal>
+      {filtersOpen && (
+        <PageSidecarPortal>
+          <GatekeeperFilter
+            violationsFilter={violationFilter}
+            setViolationsFilter={setViolationFilter}
+            selectedNamespaces={selectedNamespaces}
+            setSelectedNamespaces={setSelectedNamespaces}
+            selectedKinds={selectedKinds}
+            setSelectedKinds={setSelectedKinds}
+            selectedClusters={selectedClusters}
+            setSelectedClusters={setSelectedClusters}
+            kindsData={kindsData}
+            namespacesData={namespacesData}
+          />
+        </PageSidecarPortal>
+      )}
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <GatekeeperTable
+          fullHeightWrap
+          data={data}
+          loading={loading}
+          refetch={refetch}
+          fetchNextPage={fetchNextPage}
+          setVirtualSlice={setVirtualSlice}
+          resetFilters={() => {
+            setSearchString('')
+            setViolationFilter(ViolationFilter.All)
+            setSelectedKinds([])
+            setSelectedNamespaces([])
+            setSelectedClusters([])
+          }}
+        />
+      )}
+    </>
   )
 }
-
-const GatekeeperContainerSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: '1fr 250px',
-  gap: theme.spacing.medium,
-  overflow: 'hidden',
-}))
