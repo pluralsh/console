@@ -58,6 +58,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :disable_ai,     :boolean, description: "whether to disable ai insights for this cluster"
+    field :remediation_workbench_id, :id, description: "workbench that receives auto-remediation jobs for this cluster"
+    field :remediation_min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
+    field :remediation_window, :integer, description: "seconds to suppress another auto-remediation job for the same finding"
+    field :remediation_max_jobs, :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
     field :cloud_settings, :cloud_settings_attributes
     field :project_id,     :id, description: "the project id this cluster will belong to"
     field :upgrade_plan,   :upgrade_plan_attributes, description: "status of the upgrade plan for this cluster"
@@ -123,6 +127,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :distro,       :cluster_distro
     field :metadata,     :json
     field :disable_ai,   :boolean, description: "whether to disable ai insights for this cluster"
+    field :remediation_workbench_id, :id, description: "workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation"
+    field :remediation_min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
+    field :remediation_window, :integer, description: "seconds to suppress another auto-remediation job for the same finding"
+    field :remediation_max_jobs, :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
     field :node_pools,   list_of(:node_pool_attributes)
     field :tags,         list_of(:tag_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -570,6 +578,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
     field :ping_interval,      :integer, description: "the interval in seconds between pings to the cluster"
     field :disable_ai,         :boolean, description: "whether to disable ai insights for this cluster"
+    field :remediation_min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
+    field :remediation_window,       :integer, description: "seconds to suppress another auto-remediation job for the same finding"
+    field :remediation_max_jobs,     :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
 
     field :openshift_version,  :string, description: "The version of OpenShift this cluster is running"
     field :node_count,         :integer, description: "The number of nodes in this cluster"
@@ -645,6 +656,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :object_store,     :object_store, resolve: dataloader(Deployments), description: "the object store connection bound to this cluster for backup/restore"
     field :parent_cluster,   :cluster, resolve: dataloader(Deployments), description: "the parent of this virtual cluster"
     field :insight,          :ai_insight, resolve: dataloader(Deployments), description: "an ai insight generated about issues discovered which might impact the health of this cluster"
+    field :remediation_workbench, :workbench, resolve: dataloader(Deployments), description: "workbench that receives auto-remediation jobs when cluster insights clear this cluster's policy"
     field :current_upgrade,  :cluster_upgrade, resolve: dataloader(Deployments), description: "the current upgrade attempt for this cluster"
 
     field :operational_layout, :operational_layout, resolve: dataloader(Deployments), description: "a high level description of the setup of common resources in a cluster"

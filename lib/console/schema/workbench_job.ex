@@ -12,6 +12,7 @@ defmodule Console.Schema.WorkbenchJob do
     User,
     Alert,
     Issue,
+    Cluster,
     PullRequest,
     Flow,
     ChatbotMessage,
@@ -126,6 +127,8 @@ defmodule Console.Schema.WorkbenchJob do
 
     field :started_at,   :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
+    field :component_key, :string
+    field :insight_sha,   :string
 
     embeds_one :modes, Modes, on_replace: :update
 
@@ -137,6 +140,7 @@ defmodule Console.Schema.WorkbenchJob do
     belongs_to :issue,          Issue
     belongs_to :flow,           Flow
     belongs_to :referenced_job, __MODULE__
+    belongs_to :cluster,        Cluster
 
     has_one  :result,          WorkbenchJobResult, on_replace: :update
     has_one  :eval_result,     WorkbenchEvalResult, on_replace: :update
@@ -194,6 +198,22 @@ defmodule Console.Schema.WorkbenchJob do
   end
 
   defp escape_like(q), do: String.replace(q, ["\\", "%", "_"], &"\\#{&1}")
+
+  def for_cluster(query \\ __MODULE__, cluster_id) do
+    from(j in query, where: j.cluster_id == ^cluster_id)
+  end
+
+  def for_component_key(query \\ __MODULE__, key) do
+    from(j in query, where: j.component_key == ^key)
+  end
+
+  def for_insight_sha(query \\ __MODULE__, sha) do
+    from(j in query, where: j.insight_sha == ^sha)
+  end
+
+  def inserted_since(query \\ __MODULE__, %DateTime{} = since) do
+    from(j in query, where: j.inserted_at >= ^since)
+  end
 
   def for_status(query \\ __MODULE__, status) do
     from(j in query, where: j.status == ^status)
@@ -365,7 +385,7 @@ defmodule Console.Schema.WorkbenchJob do
     )
   end
 
-  @valid ~w(status type prompt workbench_id error user_id started_at completed_at alert_id issue_id referenced_job_id flow_id)a
+  @valid ~w(status type prompt workbench_id error user_id started_at completed_at alert_id issue_id referenced_job_id flow_id cluster_id component_key insight_sha)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -381,6 +401,7 @@ defmodule Console.Schema.WorkbenchJob do
     |> foreign_key_constraint(:issue_id)
     |> foreign_key_constraint(:referenced_job_id)
     |> foreign_key_constraint(:flow_id)
+    |> foreign_key_constraint(:cluster_id)
     |> validate_required([:status, :workbench_id, :user_id])
   end
 

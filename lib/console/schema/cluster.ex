@@ -20,6 +20,7 @@ defmodule Console.Schema.Cluster do
     UpgradeInsight,
     AiInsight,
     ClusterInsightComponent,
+    Workbench,
     CloudAddon,
     OperationalLayout,
     DeprecatedCustomResource,
@@ -102,6 +103,9 @@ defmodule Console.Schema.Cluster do
     field :health_score,    :integer
     field :ping_interval,   :integer
     field :disable_ai,      :boolean, default: false
+    field :remediation_min_priority, ClusterInsightComponent.Priority, default: :high
+    field :remediation_window,       :integer, default: 21_600
+    field :remediation_max_jobs,     :integer, default: 3
 
     field :version,         :string
     field :current_version, :string
@@ -146,6 +150,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :insight,         AiInsight, on_replace: :update
     belongs_to :current_upgrade, ClusterUpgrade
     belongs_to :parent_cluster, __MODULE__
+    belongs_to :remediation_workbench, Workbench
 
     has_one :operational_layout, OperationalLayout, on_replace: :update
 
@@ -488,7 +493,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id ai_poll_at disable_ai distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
+  @valid ~w(provider_id ai_poll_at disable_ai remediation_workbench_id remediation_min_priority remediation_window remediation_max_jobs distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -510,6 +515,9 @@ defmodule Console.Schema.Cluster do
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
+    |> foreign_key_constraint(:remediation_workbench_id)
+    |> validate_number(:remediation_window, greater_than: 0)
+    |> validate_number(:remediation_max_jobs, greater_than: 0)
     |> foreign_key_constraint(:id, name: :global_services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
     |> foreign_key_constraint(:id, name: :services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "cannot delete due to stacks referencing this cluster")

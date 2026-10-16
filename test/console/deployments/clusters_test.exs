@@ -593,6 +593,34 @@ defmodule Console.Deployments.ClustersTest do
 
       assert Enum.find(cluster.write_bindings, & &1.user_id == admin.id)
     end
+
+    test "writers can set a remediation workbench they can read" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      workbench = insert(:workbench)
+
+      {:ok, updated} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation_min_priority: :critical,
+        remediation_window: 3600,
+        remediation_max_jobs: 1
+      }, cluster.id, user)
+
+      assert updated.remediation_workbench_id == workbench.id
+      assert updated.remediation_min_priority == :critical
+      assert updated.remediation_window == 3600
+      assert updated.remediation_max_jobs == 1
+    end
+
+    test "writers cannot target a remediation workbench they cannot read" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: insert(:project))
+
+      {:error, _} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id
+      }, cluster.id, user)
+    end
   end
 
   describe "#upsert_virtual_cluster/3" do

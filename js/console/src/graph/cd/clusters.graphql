@@ -218,6 +218,13 @@ fragment ClustersRow on Cluster {
     extendedFrom
   }
   disableAi
+  remediationMinPriority
+  remediationWindow
+  remediationMaxJobs
+  remediationWorkbench {
+    id
+    name
+  }
 }
 
 fragment ClusterUpgradePlan on ClusterUpgradePlan {
