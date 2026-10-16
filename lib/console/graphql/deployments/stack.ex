@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Deployments.Stack do
   use Console.GraphQl.Schema.Base
-  alias Console.Schema.{Stack, RunStep, StackRun}
+  alias Console.Schema.{Stack, RunStep, StackRun, StackPolicy}
   alias Console.Deployments.Stacks
   alias Console.GraphQl.Resolvers.{Deployments, User}
 
@@ -10,6 +10,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   ecto_enum :step_stage,         RunStep.Stage
   ecto_enum :policy_engine_type, Stack.PolicyEngine.Type
   ecto_enum :approval_result,    StackRun.ApprovalResult
+  ecto_enum :stack_policy_type,  StackPolicy.Type
 
   input_object :stack_attributes do
     field :name,           non_null(:string), description: "the name of the stack"
@@ -206,6 +207,7 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   input_object :stack_policy_attributes do
     field :policy_id, non_null(:id), description: "the policy to associate with this stack"
+    field :type, :stack_policy_type, description: "when this policy is evaluated: approval (after plan) or run (before a run is created). Defaults to APPROVAL"
   end
 
   input_object :custom_step_attributes do
@@ -638,6 +640,7 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   object :stack_policy do
     field :id, non_null(:id)
+    field :type, non_null(:stack_policy_type), description: "when this policy is evaluated: approval (after plan) or run (before a run is created)"
 
     field :policy, :policy, resolve: dataloader(Deployments)
     field :stack,  :infrastructure_stack, resolve: dataloader(Deployments)

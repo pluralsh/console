@@ -87,6 +87,7 @@ query PolicyStackAttachments($id: ID!, $first: Int, $after: String) {
       edges {
         node {
           id
+          type
           stack {
             id
             name
@@ -189,6 +190,9 @@ fragment BindingPolicy on BindingPolicy {
   matches {
     workbench {
       regexes
+    }
+    stack {
+      type
     }
   }
 }

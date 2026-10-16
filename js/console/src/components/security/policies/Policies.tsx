@@ -9,7 +9,7 @@ import {
 import { getPoliciesBreadcrumbs } from './policiesBreadcrumbs'
 
 export const POLICIES_DESCRIPTION =
-  'OPA/Rego documents that govern tool execution. Attach them to workbenches and stacks. If any matching policy denies, the tool call is rejected.'
+  'OPA/Rego documents that govern workbench tools and stack runs. Attach them to workbenches and stacks. If any matching policy denies, the action is rejected.'
 
 export const POLICIES_TABS: SubtabDirectory = [
   { label: 'Policies', path: POLICIES_ABS_PATH },
