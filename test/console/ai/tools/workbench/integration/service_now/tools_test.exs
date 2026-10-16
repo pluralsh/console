@@ -9,9 +9,15 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
     AddComment,
     CreateRecord,
     DeleteRecord,
+    GetChange,
+    GetChangeConflicts,
     GetRecord,
+    ListChangeApprovals,
+    ListChangeModels,
+    ListChangeTasks,
     ListComments,
     ListRecords,
+    ListStates,
     Tools,
     UpdateRecord
   }
@@ -31,7 +37,17 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
                "service_now_snow_create_record",
                "service_now_snow_update_record",
                "service_now_snow_list_comments",
-               "service_now_snow_add_comment"
+               "service_now_snow_add_comment",
+               "service_now_snow_list_states",
+               "service_now_snow_transition_record",
+               "service_now_snow_get_change",
+               "service_now_snow_list_change_models",
+               "service_now_snow_create_change",
+               "service_now_snow_list_change_tasks",
+               "service_now_snow_save_change_task",
+               "service_now_snow_list_change_approvals",
+               "service_now_snow_get_change_conflicts",
+               "service_now_snow_check_conflicts"
              ])
 
     names = workbench_tool(allow_delete: true) |> Tools.expand() |> Enum.map(&Tool.name/1)
@@ -40,10 +56,22 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
 
   test "registers with integration tools and classifies only reads as read-only" do
     tools = WorkbenchTools.integration_tools([workbench_tool(allow_delete: true)])
-    assert length(tools) == 7
+    assert length(tools) == 17
+
+    readonly = [
+      ListRecords,
+      GetRecord,
+      ListComments,
+      ListStates,
+      GetChange,
+      ListChangeModels,
+      ListChangeTasks,
+      ListChangeApprovals,
+      GetChangeConflicts
+    ]
 
     for %mod{} = tool <- tools do
-      assert Classify.readonly?(tool) == (mod in [ListRecords, GetRecord, ListComments])
+      assert Classify.readonly?(tool) == (mod in readonly)
     end
   end
 

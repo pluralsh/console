@@ -20,6 +20,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
 
   @type t :: %{
           base_url: String.t(),
+          change_url: String.t(),
           instance_url: String.t(),
           headers: [{String.t(), String.t()}],
           allow_delete: boolean
@@ -58,6 +59,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
 
     %{
       base_url: instance <> "/api/now",
+      change_url: instance <> "/api/sn_chg_rest/v1",
       instance_url: instance,
       headers: [auth],
       allow_delete: allow_delete == true
@@ -116,6 +118,65 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   def delete(client, path), do: request(client, :delete, path, [])
 
   @doc """
+  Change Management API (`/api/sn_chg_rest/v1`) variants of `get/3`, `post/4` and `patch/4`.
+  """
+  @spec change_get(t, String.t(), map()) :: {:ok, term()} | {:error, String.t()}
+  def change_get(client, path, query \\ %{}), do: request(client, :get, path, query: query, api: :change)
+
+  @spec change_post(t, String.t(), map(), map()) :: {:ok, term()} | {:error, String.t()}
+  def change_post(client, path, body \\ %{}, query \\ %{}),
+    do: request(client, :post, path, json: body, query: query, api: :change)
+
+  @spec change_patch(t, String.t(), map(), map()) :: {:ok, term()} | {:error, String.t()}
+  def change_patch(client, path, body, query \\ %{}),
+    do: request(client, :patch, path, json: body, query: query, api: :change)
+
+  @doc """
+  Lists the choices of the `state` field for a ticket table as `%{"value" => ..., "label" => ...}`.
+  Choices are stored per language, so only English rows are read. Tables that inherit their
+  states from `task` (catalog tasks, sometimes problems) have none of their own, in which case
+  the `task` choices are used.
+  """
+  @spec state_choices(t, String.t()) :: {:ok, [map()]} | {:error, String.t()}
+  def state_choices(client, table) do
+    with {:ok, []} <- choices(client, table),
+         do: choices(client, "task")
+  end
+
+  defp choices(client, name) do
+    query = %{
+      sysparm_query: "name=#{name}^element=state^inactive=false^language=en^ORDERBYsequence",
+      sysparm_fields: "value,label,sequence",
+      sysparm_limit: 100
+    }
+
+    with {:ok, %{"result" => rows}} when is_list(rows) <- get(client, "/table/sys_choice", query) do
+      {:ok,
+       rows
+       |> Enum.map(&Map.take(&1, ~w(value label)))
+       |> Enum.filter(&is_binary(&1["value"]))
+       |> Enum.uniq_by(& &1["value"])}
+    else
+      {:ok, _} -> {:ok, []}
+      error -> error
+    end
+  end
+
+  @doc """
+  Matches a state given as a raw value (`"2"`) or a label (`"In Progress"`) against a list
+  of choices and returns the raw value.
+  """
+  @spec match_state([map()], term()) :: {:ok, String.t()} | :error
+  def match_state(choices, state) do
+    wanted = state |> to_string() |> String.trim() |> String.downcase()
+
+    case Enum.find(choices, &(String.downcase(&1["value"]) == wanted or String.downcase(to_string(&1["label"])) == wanted)) do
+      %{"value" => value} -> {:ok, value}
+      _ -> :error
+    end
+  end
+
+  @doc """
   Parses an offset cursor, where a missing or blank cursor means the first page.
   """
   @spec parse_cursor(String.t() | nil) :: {:ok, non_neg_integer()} | {:error, String.t()}
@@ -142,8 +203,9 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   @doc false
   def segment(value), do: value |> to_string() |> URI.encode_www_form()
 
-  defp request(%{base_url: base, headers: auth_headers}, method, path, opts) do
+  defp request(%{headers: auth_headers} = client, method, path, opts) do
     query = Keyword.get(opts, :query, %{})
+    base = if opts[:api] == :change, do: client.change_url, else: client.base_url
     url = base <> path <> Query.query_string(query)
 
     request_opts = [

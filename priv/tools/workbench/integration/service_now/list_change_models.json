@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Optional encoded query to filter models, for example name=Normal."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "nextCursor from a previous response (a non-negative numeric offset)."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 20,
+      "description": "Maximum models to return."
+    }
+  }
+}

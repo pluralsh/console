@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "description": "Change sys_id (32 hex characters) or number, for example CHG0030002."
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Task sys_id to update. Omit to create a new task on the change."
+    },
+    "short_description": {
+      "type": "string",
+      "description": "Short summary of the task. Required when creating."
+    },
+    "description": {
+      "type": "string",
+      "description": "Full description of the task."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Other task fields keyed by column name, for example {\"assigned_to\": \"<user sys_id>\", \"assignment_group\": \"<group sys_id>\", \"state\": \"3\", \"close_notes\": \"...\"}."
+    }
+  },
+  "required": [
+    "record_id"
+  ]
+}

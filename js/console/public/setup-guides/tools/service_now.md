@@ -1,7 +1,10 @@
 # ServiceNow tool setup
 
-The tool reads and writes tickets through the ServiceNow Table API. It only
-touches four tables: `incident`, `change_request`, `problem` and `sc_task`.
+The tool reads and writes tickets through the ServiceNow Table API, and change
+requests through the Change Management API. It only touches four tables:
+`incident`, `change_request`, `problem` and `sc_task`. Agents can search, read,
+create, comment on and move tickets between states, and for changes also pick a
+change model, write the plans, manage tasks and read approvals.
 
 ## 1) Create an integration user
 
@@ -44,8 +47,14 @@ ServiceNow can issue tokens with the client credentials grant:
   narrowest role that works.
 - Paging is offset based and a full page always returns a next cursor, so the
   last page of an exact multiple is empty.
-- State values can be customized per instance. Have the agent read raw values
-  before updating `state`.
+- State transition checks are best effort. A change is checked against the
+  states it can move to next, other tables against the state choices
+  (`sys_choice`), and ServiceNow business rules decide the rest. If the user
+  cannot read those, the state is sent as given.
+- Normal changes may need approvals that the agent can read but not decide.
+- Changes need the `itil` or `change_manager` role to write, and `itil`,
+  `change_manager` or `sn_change_read` to read.
+- State values can be customized per instance. `list_states` shows them.
 
 ## 4) Check access
 

@@ -19,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.UpdateRecord do
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
     do:
-      "Update fields on a ServiceNow ticket using the #{name} connection, for example state, assignment, priority or resolution details."
+      "Update fields on a ServiceNow ticket using the #{name} connection, for example assignment, priority or resolution details. To change the state use transition_record, which checks the target state first."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 

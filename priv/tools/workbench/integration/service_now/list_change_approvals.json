@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "description": "Change sys_id (32 hex characters) or number, for example CHG0030002."
+    }
+  },
+  "required": [
+    "record_id"
+  ]
+}

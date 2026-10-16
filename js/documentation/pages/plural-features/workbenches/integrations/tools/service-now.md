@@ -35,19 +35,42 @@ Instead of a password, the tool can fetch a bearer token with the OAuth client c
 
 ## Capabilities
 
+### Tickets
+
+These work on all four tables.
+
 | Operation | What it does |
 |---|---|
 | `list_records` | Searches one ticket table with a ServiceNow [encoded query](https://www.servicenow.com/docs/bundle/latest-platform-user-interface/page/use/using-lists/concept/c_EncodedQueryStrings.html), with field selection and offset paging. |
 | `get_record` | Reads one ticket by `sys_id` or by number, such as `INC0010001`. |
 | `create_record` | Creates a ticket with a short description, an optional description, and any other fields. |
-| `update_record` | Changes fields on a ticket: state, assignment, priority, close codes, and so on. |
+| `update_record` | Changes fields on a ticket: assignment, priority, close codes, and so on. |
 | `list_comments` | Lists additional comments and work notes on a ticket, newest first. |
 | `add_comment` | Adds a work note (internal, the default) or an additional comment (visible to the caller). |
+| `list_states` | Lists the states a table can have. For a change request it lists the states that change can move to next. |
+| `transition_record` | Moves a ticket to another state. The target is checked against the states from `list_states` when ServiceNow reports them, and a rejection from ServiceNow, such as a missing `close_code` or `close_notes`, is returned to the agent. |
 | `delete_record` | Permanently deletes a ticket. Only available when **Allow agents to permanently delete tickets** is on. |
 
-`list_records`, `get_record`, and `list_comments` are read-only. The others change data in ServiceNow and are left out of read-only surfaces such as the workbench MCP server.
+### Change requests
 
-Reads return display values (labels such as `In Progress`) by default. The agent can ask for raw values, or both, when it needs the stored value of a field before updating it. State values differ per table and can be customized per instance.
+These use the [Change Management API](https://www.servicenow.com/docs/r/api-reference/rest-apis/change-management-api.html) and only apply to change requests.
+
+| Operation | What it does |
+|---|---|
+| `get_change` | Reads a change with its type, model, state, risk, plans and approval fields. |
+| `list_change_models` | Lists the change models, which define the states and approvals a change goes through. |
+| `create_change` | Creates a normal, emergency, or standard change, optionally from a change model, with the implementation, backout, and test plans. |
+| `list_change_tasks` | Lists the tasks of a change. |
+| `save_change_task` | Creates a task on a change, or updates one when given a task ID. |
+| `list_change_approvals` | Lists the approvals on a change with approver, state, and comments. |
+| `check_conflicts` | Starts a conflict check on a change. |
+| `get_change_conflicts` | Reads the result of the latest conflict check. |
+
+The read-only operations are `list_records`, `get_record`, `list_comments`, `list_states`, `get_change`, `list_change_models`, `list_change_tasks`, `list_change_approvals`, and `get_change_conflicts`. The others change data in ServiceNow and are left out of read-only surfaces such as the workbench MCP server.
+
+Reads return display values (labels such as `In Progress`) by default. The agent can ask for raw values, or both, when it needs the stored value of a field before updating it. State values differ per table and can be customized per instance. `transition_record` accepts either a value or a label.
+
+The change operations need the `itil` or `change_manager` role to write. Reading needs `itil`, `change_manager`, or `sn_change_read`. Reading approvals needs access to `sysapproval_approver`.
 
 ## Create the tool
 
@@ -59,12 +82,15 @@ Reads return display values (labels such as `In Progress`) by default. The agent
 
 ## Limitations
 
-* **Four tables only.** `incident`, `change_request`, `problem`, and `sc_task`. Other tables, including custom ones and child tables such as `change_task`, are rejected.
+* **Four tables only.** `incident`, `change_request`, `problem`, and `sc_task`. Other tables, including custom ones, are rejected. Change tasks are handled through `list_change_tasks` and `save_change_task`.
 * **Paging uses offsets.** `list_records` and `list_comments` return a `nextCursor` whenever a page is full, so reading an exact multiple of the page size ends with one empty page. Page size is capped at 100.
 * **Comment history needs an ACL.** `list_comments` reads `sys_journal_field`, which base instances restrict. Without read access the call returns a 403 or an empty list.
-* **Custom states.** State values and labels can differ per instance. Have the agent read a ticket with raw values before updating `state`.
+* **Transition checks are best effort.** A change is checked against the states it can move to next, as reported by the Change Management API. For incidents, problems, and catalog tasks ServiceNow has no transition API, so `transition_record` checks the target against the table's state choices, and ServiceNow business rules decide whether the move is allowed. When the integration user cannot read the state choices (`sys_choice`) or the next states cannot be read, the state is sent as given and ServiceNow decides. The error message is passed back to the agent.
+* **`list_states` for tables other than changes.** It always returns the state choices of the table. The next states are only available for a change request when a `record_id` is given.
+* **Changes can need approval.** Normal changes are usually gated by approvals that the agent cannot decide. It can read them with `list_change_approvals`, and someone has to approve in ServiceNow before the change can move past authorization. Standard changes created from a template are pre-approved.
+* **Custom states.** State values and labels can differ per instance, and change models can add their own. `list_states` shows what the instance has.
 * **Deletes are permanent.** `delete_record` is only registered when deletion is enabled on the tool, and ServiceNow does not keep the record.
-* **No attachments or approvals.** The tool does not read or write attachments, approvals, or SLA records.
+* **No attachments, approval decisions, or scheduling.** The tool does not read or write attachments or SLA records, approve or reject approvals, or search for change schedule slots.
 * **Basic auth or client credentials only.** Authorization code and JWT grants are not supported.
 
 ## Using it from a workbench
@@ -74,6 +100,8 @@ Example prompts:
 * "List open P1 incidents assigned to the Platform group."
 * "Open a change request for the database upgrade on prod-east and add the rollout plan as a work note."
 * "Resolve INC0010001 with close notes describing the fix."
+* "Which states can CHG0030001 move to next?"
+* "Create a normal change to upgrade the database, with an implementation, backout, and test plan, then add a task for the DBA team."
 
 ## Troubleshooting
 
