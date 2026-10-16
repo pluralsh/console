@@ -427,6 +427,11 @@ func (r *AgentRunReconciler) reconcilePod(ctx context.Context, run *v1alpha1.Age
 		return nil, fmt.Errorf("failed to reconcile run secret: %w", err)
 	}
 
+	pluralSecret, err := r.reconcilePluralSecret(ctx, run)
+	if err != nil {
+		return nil, fmt.Errorf("failed to reconcile plural secret: %w", err)
+	}
+
 	bootstrapCM, err := r.reconcileBootstrapConfigMap(ctx, run, runtime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to reconcile bootstrap config map: %w", err)
@@ -459,6 +464,10 @@ func (r *AgentRunReconciler) reconcilePod(ctx context.Context, run *v1alpha1.Age
 	// add owner ref to pod secret if it doesn't exist
 	if err := utils.TryAddOwnerRef(ctx, r.Client, pod, secret, r.Scheme); err != nil {
 		return pod, fmt.Errorf("failed to add owner ref: %w", err)
+	}
+
+	if err := utils.TryAddOwnerRef(ctx, r.Client, pod, pluralSecret, r.Scheme); err != nil {
+		return pod, fmt.Errorf("failed to add owner ref to plural secret: %w", err)
 	}
 
 	if bootstrapCM != nil {
@@ -568,13 +577,13 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 	}
 
 	secret := &corev1.Secret{}
-	if err := r.Get(ctx, types.NamespacedName{Name: run.Name, Namespace: run.Namespace}, secret); err != nil {
+	if err := r.Get(ctx, types.NamespacedName{Name: runSecretName(run.Name), Namespace: run.Namespace}, secret); err != nil {
 		if !errors.IsNotFound(err) {
 			return nil, fmt.Errorf("failed to get secret: %w", err)
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: run.Name, Namespace: run.Namespace},
+			ObjectMeta: runSecretMeta(runSecretName(run.Name), run),
 			StringData: r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection, mcpServers),
 		}
 
@@ -584,6 +593,10 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 		}
 
 		return secret, nil
+	}
+
+	if err := checkRunSecretOwner(secret, run); err != nil {
+		return nil, err
 	}
 
 	if !r.hasSecretData(secret.Data, run) {
@@ -627,9 +640,8 @@ func (r *AgentRunReconciler) resolveSigningKey(ctx context.Context, runtime *v1a
 
 func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alpha1.AgentRuntimeConfigRaw, runtimeType console.AgentRuntimeType, signingKey []byte, exaConnection *v1alpha1.ExaConnectionRaw, mcpServers []mcp.Server) map[string]string {
 	result := map[string]string{
-		EnvConsoleURL:  r.ConsoleURL,
-		EnvDeployToken: r.DeployToken,
-		EnvAgentRunID:  run.Status.GetID(),
+		EnvConsoleURL: r.ConsoleURL,
+		EnvAgentRunID: run.Status.GetID(),
 	}
 
 	if payload := mcpServersPayload(mcpServers); payload != "" {
@@ -755,10 +767,60 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 	return result
 }
 
+// reconcilePluralSecret keeps the deploy token in a separate secret that is never mounted into the default container.
+func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1alpha1.AgentRun) (*corev1.Secret, error) {
+	secret := &corev1.Secret{}
+	if err := r.Get(ctx, types.NamespacedName{Name: pluralSecretName(run.Name), Namespace: run.Namespace}, secret); err != nil {
+		if !errors.IsNotFound(err) {
+			return nil, fmt.Errorf("failed to get plural secret: %w", err)
+		}
+
+		secret = &corev1.Secret{
+			ObjectMeta: runSecretMeta(pluralSecretName(run.Name), run),
+			StringData: map[string]string{EnvDeployToken: r.DeployToken},
+		}
+		if err = r.Create(ctx, secret); err != nil {
+			return nil, fmt.Errorf("failed to create plural secret: %w", err)
+		}
+		return secret, nil
+	}
+
+	if err := checkRunSecretOwner(secret, run); err != nil {
+		return nil, err
+	}
+
+	if string(secret.Data[EnvDeployToken]) != r.DeployToken {
+		secret.StringData = map[string]string{EnvDeployToken: r.DeployToken}
+		if err := r.Update(ctx, secret); err != nil {
+			return nil, fmt.Errorf("failed to update plural secret: %w", err)
+		}
+	}
+
+	return secret, nil
+}
+
+// agentRunUIDAnnotation records which run a run secret was created for.
+const agentRunUIDAnnotation = "deployments.plural.sh/agent-run-uid"
+
+func runSecretMeta(name string, run *v1alpha1.AgentRun) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name:        name,
+		Namespace:   run.Namespace,
+		Annotations: map[string]string{agentRunUIDAnnotation: string(run.UID)},
+	}
+}
+
+// checkRunSecretOwner refuses a secret this run didn't create, so its data never reaches another run's pod.
+func checkRunSecretOwner(secret *corev1.Secret, run *v1alpha1.AgentRun) error {
+	if uid, ok := secret.Annotations[agentRunUIDAnnotation]; !ok || uid != string(run.UID) {
+		return fmt.Errorf("secret %s/%s was not created for agent run %s", secret.Namespace, secret.Name, run.Name)
+	}
+	return nil
+}
+
 func (r *AgentRunReconciler) hasSecretData(data map[string][]byte, run *v1alpha1.AgentRun) bool {
-	token, hasToken := data[EnvDeployToken]
 	url, hasUrl := data[EnvConsoleURL]
 	id, hasID := data[EnvAgentRunID]
-	return hasToken && hasUrl && hasID &&
-		string(token) == r.DeployToken && string(url) == r.ConsoleURL && string(id) == run.Status.GetID()
+	return hasUrl && hasID &&
+		string(url) == r.ConsoleURL && string(id) == run.Status.GetID()
 }

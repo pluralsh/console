@@ -18,7 +18,7 @@ func TestServerRegistersOpenAIProxyRoute(t *testing.T) {
 	}))
 	defer upstream.Close()
 
-	srv := NewServer(nil, WithOpenAIProxy(upstream.URL, upstream.URL))
+	srv := NewServer(nil, WithOpenAIProxy(upstream.URL, upstream.URL, func() string { return "plural-token" }))
 
 	mux, ok := srv.httpServer.Handler.(*http.ServeMux)
 	if !ok {
@@ -43,7 +43,7 @@ func TestServerRegistersOpenAIResponsesProxyRoute(t *testing.T) {
 	}))
 	defer upstream.Close()
 
-	srv := NewServer(nil, WithOpenAIProxy("", upstream.URL))
+	srv := NewServer(nil, WithOpenAIProxy("", upstream.URL, func() string { return "plural-token" }))
 
 	req := httptest.NewRequest(http.MethodPost, common.AgentOpenAIResponsesPath, strings.NewReader(`{"model":"gpt-5.4","input":"hi"}`))
 	rec := httptest.NewRecorder()

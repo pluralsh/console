@@ -1,7 +1,6 @@
 package pi
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/samber/lo"
@@ -183,5 +182,5 @@ func (agent *Agent) proxyEndpoint(streaming bool) string {
 	if streaming {
 		return common.AgentOpenAIBaseURL
 	}
-	return fmt.Sprintf("%s/ext/ai/v1", agent.consoleURL)
+	return common.AgentConsoleProxyURL + "/ext/ai/v1"
 }

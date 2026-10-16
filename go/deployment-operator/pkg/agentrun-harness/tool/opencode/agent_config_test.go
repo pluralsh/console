@@ -10,6 +10,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func TestAgentConfigurePreservesNativeConfigForBabysit(t *testing.T) {
@@ -30,10 +31,8 @@ func TestAgentConfigurePreservesNativeConfigForBabysit(t *testing.T) {
 		t.Fatalf("ResolveSettings() error = %v", err)
 	}
 	configure := toolv1.ConfigureRequest{
-		Phase:        toolv1.ConfigurePhaseInitial,
-		ConsoleURL:   "https://console.example",
-		ConsoleToken: "console-token",
-		Settings:     settings,
+		Phase:    toolv1.ConfigurePhaseInitial,
+		Settings: settings,
 	}
 	if err := agent.Configure(context.Background(), configure); err != nil {
 		t.Fatalf("Configure(initial) error = %v", err)
@@ -50,7 +49,6 @@ func TestAgentConfigurePreservesNativeConfigForBabysit(t *testing.T) {
 		t.Fatalf("Prepare(babysit) error = %v", err)
 	}
 	configure.Phase = toolv1.ConfigurePhaseBabysit
-	configure.ConsoleToken = ""
 	if err := agent.Configure(context.Background(), configure); err != nil {
 		t.Fatalf("Configure(babysit) error = %v", err)
 	}
@@ -86,9 +84,8 @@ func TestAgentConfigureIncludesPrebakeReadOnlyDirectory(t *testing.T) {
 		t.Fatalf("ResolveSettings() error = %v", err)
 	}
 	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
-		Phase:        toolv1.ConfigurePhaseInitial,
-		ConsoleToken: "console-token",
-		Settings:     settings,
+		Phase:    toolv1.ConfigurePhaseInitial,
+		Settings: settings,
 	}); err != nil {
 		t.Fatalf("Configure(initial) error = %v", err)
 	}
@@ -141,9 +138,8 @@ func TestAgentConfigureUsesOpenAIMethodSDK(t *testing.T) {
 				t.Fatalf("ResolveSettings() error = %v", err)
 			}
 			if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
-				Phase:        toolv1.ConfigurePhaseInitial,
-				ConsoleToken: "console-token",
-				Settings:     settings,
+				Phase:    toolv1.ConfigurePhaseInitial,
+				Settings: settings,
 			}); err != nil {
 				t.Fatalf("Configure(initial) error = %v", err)
 			}
@@ -161,5 +157,31 @@ func TestAgentConfigureUsesOpenAIMethodSDK(t *testing.T) {
 				t.Fatalf("npm = %v, want %q", provider["npm"], tt.npm)
 			}
 		})
+	}
+}
+
+func TestAgentConfigureRoutesProxyThroughSidecar(t *testing.T) {
+	workDir := t.TempDir()
+	run := agentRun("", "gpt-5.4", false, true)
+	agent := NewAgent(toolv1.Config{WorkDir: workDir, RepositoryDir: t.TempDir(), Run: run})
+	settings, err := agent.ResolveSettings(run)
+	if err != nil {
+		t.Fatalf("ResolveSettings() error = %v", err)
+	}
+	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{Phase: toolv1.ConfigurePhaseInitial, Settings: settings}); err != nil {
+		t.Fatalf("Configure(initial) error = %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(workDir, ".opencode", ConfigFileName))
+	if err != nil {
+		t.Fatalf("read native config: %v", err)
+	}
+	var config map[string]any
+	if err := json.Unmarshal(content, &config); err != nil {
+		t.Fatalf("decode native config: %v", err)
+	}
+	options := config["provider"].(map[string]any)[string(ProviderPlural)].(map[string]any)["options"].(map[string]any)
+	if options["baseURL"] != common.AgentConsoleProxyURL+"/ext/ai/v1" || options["apiKey"] != common.AgentAIProxyAPIKey {
+		t.Fatalf("plural provider options = %#v", options)
 	}
 }

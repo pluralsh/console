@@ -117,7 +117,7 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 		return err
 	}
 
-	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token)
+	return in.tool.Configure()
 }
 
 // completeAgentRun updates the agent run status in the Console API

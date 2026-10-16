@@ -110,7 +110,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			// Clean up secret if exists
 			secret := &corev1.Secret{}
-			err = kClient.Get(ctx, runNamespacedName, secret)
+			err = kClient.Get(ctx, types.NamespacedName{Name: runSecretName(runNamespacedName.Name), Namespace: runNamespacedName.Namespace}, secret)
 			if err == nil && !errors.IsNotFound(err) {
 				Expect(kClient.Delete(ctx, secret)).To(Succeed())
 			}
@@ -154,10 +154,14 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			// Verify secret was created
 			secret := &corev1.Secret{}
-			Expect(kClient.Get(ctx, runNamespacedName, secret)).NotTo(HaveOccurred())
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: runSecretName(runNamespacedName.Name), Namespace: runNamespacedName.Namespace}, secret)).NotTo(HaveOccurred())
 			Expect(string(secret.Data[EnvConsoleURL])).Should(Equal(consoleURL))
-			Expect(string(secret.Data[EnvDeployToken])).Should(Equal(deployToken))
+			Expect(secret.Data).ShouldNot(HaveKey(EnvDeployToken))
 			Expect(string(secret.Data[EnvAgentRunID])).Should(Equal(runID))
+
+			pluralSecret := &corev1.Secret{}
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: pluralSecretName(runName), Namespace: runNamespacedName.Namespace}, pluralSecret)).NotTo(HaveOccurred())
+			Expect(string(pluralSecret.Data[EnvDeployToken])).Should(Equal(deployToken))
 
 			// Verify pod was created
 			pod := &corev1.Pod{}
@@ -235,7 +239,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				_ = kClient.Delete(ctx, pod)
 			}
 			secret := &corev1.Secret{}
-			if err := kClient.Get(ctx, finalizerNamespacedName, secret); err == nil {
+			if err := kClient.Get(ctx, types.NamespacedName{Name: runSecretName(finalizerNamespacedName.Name), Namespace: finalizerNamespacedName.Namespace}, secret); err == nil {
 				_ = kClient.Delete(ctx, secret)
 			}
 		})
@@ -293,7 +297,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			pod := &corev1.Pod{}
 			Expect(kClient.Get(ctx, terminalNamespacedName, pod)).NotTo(HaveOccurred())
 			secret := &corev1.Secret{}
-			Expect(kClient.Get(ctx, terminalNamespacedName, secret)).NotTo(HaveOccurred())
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: runSecretName(terminalNamespacedName.Name), Namespace: terminalNamespacedName.Namespace}, secret)).NotTo(HaveOccurred())
 
 			// Now update the mock to return terminal status
 			fakeConsoleClient.ExpectedCalls = nil
@@ -327,7 +331,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				_ = kClient.Delete(ctx, pod)
 			}
 			secret = &corev1.Secret{}
-			if err := kClient.Get(ctx, terminalNamespacedName, secret); err == nil {
+			if err := kClient.Get(ctx, types.NamespacedName{Name: runSecretName(terminalNamespacedName.Name), Namespace: terminalNamespacedName.Namespace}, secret); err == nil {
 				_ = kClient.Delete(ctx, secret)
 			}
 		})
@@ -385,7 +389,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			pod := &corev1.Pod{}
 			Expect(kClient.Get(ctx, terminalFailedNamespacedName, pod)).NotTo(HaveOccurred())
 			secret := &corev1.Secret{}
-			Expect(kClient.Get(ctx, terminalFailedNamespacedName, secret)).NotTo(HaveOccurred())
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: runSecretName(terminalFailedNamespacedName.Name), Namespace: terminalFailedNamespacedName.Namespace}, secret)).NotTo(HaveOccurred())
 
 			// Now update the mock to return terminal status
 			fakeConsoleClient.ExpectedCalls = nil
@@ -419,7 +423,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				_ = kClient.Delete(ctx, pod)
 			}
 			secret = &corev1.Secret{}
-			if err := kClient.Get(ctx, terminalFailedNamespacedName, secret); err == nil {
+			if err := kClient.Get(ctx, types.NamespacedName{Name: runSecretName(terminalFailedNamespacedName.Name), Namespace: terminalFailedNamespacedName.Namespace}, secret); err == nil {
 				_ = kClient.Delete(ctx, secret)
 			}
 		})
@@ -477,7 +481,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			pod := &corev1.Pod{}
 			Expect(kClient.Get(ctx, terminalCancelledNamespacedName, pod)).NotTo(HaveOccurred())
 			secret := &corev1.Secret{}
-			Expect(kClient.Get(ctx, terminalCancelledNamespacedName, secret)).NotTo(HaveOccurred())
+			Expect(kClient.Get(ctx, types.NamespacedName{Name: runSecretName(terminalCancelledNamespacedName.Name), Namespace: terminalCancelledNamespacedName.Namespace}, secret)).NotTo(HaveOccurred())
 
 			// Now update the mock to return terminal status
 			fakeConsoleClient.ExpectedCalls = nil
@@ -511,7 +515,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				_ = kClient.Delete(ctx, pod)
 			}
 			secret = &corev1.Secret{}
-			if err := kClient.Get(ctx, terminalCancelledNamespacedName, secret); err == nil {
+			if err := kClient.Get(ctx, types.NamespacedName{Name: runSecretName(terminalCancelledNamespacedName.Name), Namespace: terminalCancelledNamespacedName.Namespace}, secret); err == nil {
 				_ = kClient.Delete(ctx, secret)
 			}
 		})
@@ -591,7 +595,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				_ = kClient.Delete(ctx, agentRun)
 			}
 			secret := &corev1.Secret{}
-			if err := kClient.Get(ctx, timeoutNamespacedName, secret); err == nil {
+			if err := kClient.Get(ctx, types.NamespacedName{Name: runSecretName(timeoutNamespacedName.Name), Namespace: timeoutNamespacedName.Namespace}, secret); err == nil {
 				_ = kClient.Delete(ctx, secret)
 			}
 		})
@@ -703,7 +707,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				_ = kClient.Delete(ctx, agentRun)
 			}
 			secret := &corev1.Secret{}
-			if err := kClient.Get(ctx, failedInitNamespacedName, secret); err == nil {
+			if err := kClient.Get(ctx, types.NamespacedName{Name: runSecretName(failedInitNamespacedName.Name), Namespace: failedInitNamespacedName.Namespace}, secret); err == nil {
 				_ = kClient.Delete(ctx, secret)
 			}
 		})
@@ -720,9 +724,9 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			run.Status.ID = lo.ToPtr("run-456")
 
 			data := reconciler.getSecretData(run, nil, console.AgentRuntimeTypeClaude, nil, nil, nil)
-			Expect(data).Should(HaveLen(3))
+			Expect(data).Should(HaveLen(2))
 			Expect(data[EnvConsoleURL]).Should(Equal("https://console.test.com"))
-			Expect(data[EnvDeployToken]).Should(Equal("test-token-123"))
+			Expect(data).ShouldNot(HaveKey(EnvDeployToken))
 			Expect(data[EnvAgentRunID]).Should(Equal("run-456"))
 		})
 
@@ -735,26 +739,23 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			run.Status.ID = lo.ToPtr("run-789")
 
 			secretData := map[string][]byte{
-				EnvConsoleURL:  []byte("https://console.test.com"),
-				EnvDeployToken: []byte("test-token-123"),
-				EnvAgentRunID:  []byte("run-789"),
+				EnvConsoleURL: []byte("https://console.test.com"),
+				EnvAgentRunID: []byte("run-789"),
 			}
 
 			Expect(reconciler.hasSecretData(secretData, run)).Should(BeTrue())
 
 			// Wrong URL
 			wrongSecretData := map[string][]byte{
-				EnvConsoleURL:  []byte("https://wrong.url.com"),
-				EnvDeployToken: []byte("test-token-123"),
-				EnvAgentRunID:  []byte("run-789"),
+				EnvConsoleURL: []byte("https://wrong.url.com"),
+				EnvAgentRunID: []byte("run-789"),
 			}
 			Expect(reconciler.hasSecretData(wrongSecretData, run)).Should(BeFalse())
 
 			// Wrong run ID
 			wrongRunIDData := map[string][]byte{
-				EnvConsoleURL:  []byte("https://console.test.com"),
-				EnvDeployToken: []byte("test-token-123"),
-				EnvAgentRunID:  []byte("wrong-run-id"),
+				EnvConsoleURL: []byte("https://console.test.com"),
+				EnvAgentRunID: []byte("wrong-run-id"),
 			}
 			Expect(reconciler.hasSecretData(wrongRunIDData, run)).Should(BeFalse())
 		})

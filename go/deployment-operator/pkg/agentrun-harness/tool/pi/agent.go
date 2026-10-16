@@ -24,20 +24,14 @@ const (
 // Agent owns Pi's native configuration, shared prompt and skills preparation,
 // and staging of Pi's provider-owned session state.
 type Agent struct {
-	config       toolv1.Config
-	consoleURL   string
-	consoleToken string
+	config toolv1.Config
 }
 
 var _ toolv1.Agent = (*Agent)(nil)
 
 // NewAgent creates a Pi Agent for one agent run.
 func NewAgent(config toolv1.Config) *Agent {
-	agent := &Agent{config: config}
-	if config.Run != nil && config.Run.PluralCreds != nil && config.Run.PluralCreds.Token != nil {
-		agent.consoleToken = *config.Run.PluralCreds.Token
-	}
-	return agent
+	return &Agent{config: config}
 }
 
 // Type identifies the Console runtime implemented by Agent.
@@ -103,11 +97,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	if err != nil {
 		return err
 	}
-	agent.consoleURL = request.ConsoleURL
-	if request.ConsoleToken != "" {
-		agent.consoleToken = request.ConsoleToken
-	}
-
 	return agent.writeNativeConfig(config, request.Settings.Model.Name)
 }
 
