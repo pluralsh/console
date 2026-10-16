@@ -9414,12 +9414,26 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.37.0-eksbuild.22
+    compatibilities:
+    - '1.37'
+  - version: v1.37.0-eksbuild.20
+    compatibilities:
+    - '1.37'
   - version: v1.37.0-eksbuild.19
     compatibilities:
     - '1.37'
   - version: v1.37.0-eksbuild.4
     compatibilities:
     - '1.37'
+  - version: v1.36.0-eksbuild.48
+    compatibilities:
+    - '1.37'
+    - '1.36'
+  - version: v1.36.0-eksbuild.46
+    compatibilities:
+    - '1.37'
+    - '1.36'
   - version: v1.36.0-eksbuild.45
     compatibilities:
     - '1.37'
@@ -9464,6 +9478,16 @@
     compatibilities:
     - '1.37'
     - '1.36'
+  - version: v1.35.3-eksbuild.52
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+  - version: v1.35.3-eksbuild.50
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
   - version: v1.35.3-eksbuild.49
     compatibilities:
     - '1.37'
@@ -9534,6 +9558,18 @@
     - '1.37'
     - '1.36'
     - '1.35'
+  - version: v1.34.6-eksbuild.52
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+  - version: v1.34.6-eksbuild.50
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v1.34.6-eksbuild.49
     compatibilities:
     - '1.37'
@@ -9642,6 +9678,18 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v1.33.10-eksbuild.52
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v1.33.10-eksbuild.50
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.33.10-eksbuild.49
     compatibilities:
     - '1.36'
@@ -9762,6 +9810,18 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.32.13-eksbuild.55
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+  - version: v1.32.13-eksbuild.53
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.13-eksbuild.52
     compatibilities:
     - '1.35'
@@ -9906,6 +9966,18 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.59
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+  - version: v1.31.14-eksbuild.57
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.14-eksbuild.56
     compatibilities:
     - '1.34'
@@ -11607,6 +11679,12 @@
   publisher: leaksignal
 - name: metrics-server
   versions:
+  - version: v0.9.0-eksbuild.13
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v0.9.0-eksbuild.12
     compatibilities:
     - '1.37'
