@@ -43,17 +43,15 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.TransitionRecord do
   # Changes are checked against the states they can move to next. Anything that cannot be read
   # (no access to the choices, a response of an unknown shape) is not validated, ServiceNow decides.
   defp target_state(client, %{table: "change_request"} = model, sys_id) do
-    choices = choices(client, model.table)
-
-    allowed =
+    choices = choices(client, model.table)next =
       case Client.change_get(client, "/change/#{Client.segment(sys_id)}/nextstates") do
         {:ok, next} -> next_states(next)
-        {:error, _} -> []
+        {:error, _} -> :unknown
       end
 
-    case allowed do
-      [] -> {:ok, resolve(choices, model.state)}
-      allowed -> pick_next(allowed, choices, model.state)
+    case next do
+      :unknown -> {:ok, resolve(choices, model.state)}
+      {allowed, blocked} -> pick_next(allowed, blocked, choices, model.state)
     end
   end
 
@@ -63,18 +61,25 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.TransitionRecord do
       choices ->
         case Client.match_state(choices, model.state) do
           {:ok, value} -> {:ok, value}
-          :error -> invalid(model.state, Enum.map(choices, &describe/1))
+          :error -> invalid(model.state, choices)
         end
     end
   end
 
-  defp pick_next(allowed, choices, state) do
-    labelled = Enum.map(allowed, &label_from(&1, choices))
+  defp pick_next(allowed, blocked, choices, state) do
+    allowed = Enum.map(allowed, &label_from(&1, choices))
+    blocked = Enum.map(blocked, &label_from(&1, choices))
 
-    case Client.match_state(labelled ++ choices, state) do
+    case Client.match_state(allowed ++ blocked ++ choices, state) do
       {:ok, value} ->
-        if Enum.any?(labelled, &(&1["value"] == value)), do: {:ok, value}, else: invalid(state, Enum.map(labelled, &describe/1))
-      :error -> invalid(state, Enum.map(labelled, &describe/1))
+        cond do
+          Enum.any?(allowed, &(&1["value"] == value)) -> {:ok, value}
+          Enum.any?(blocked, &(&1["value"] == value)) ->
+            unmet = for %{"value" => ^value, "unmet" => unmet} <- blocked, name <- unmet, uniq: true, do: name
+            blocked(state, unmet, allowed)
+          true -> invalid(state, allowed)
+        end
+      :error -> invalid(state, allowed)
     end
   end
 
@@ -98,22 +103,50 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.TransitionRecord do
     end
   end
 
-  # The Change API reports the reachable states as `available_states` (raw values) with a
-  # `state_label` map, and the transitions with their `to_state`. Anything else is ignored.
+  # The Change API reports `state_transitions` as a list of lists (one per transition, each with
+  # `from_state`, `to_state`, `transition_available` and the `conditions` it needs) and a
+  # `state_label` map. `available_states` also lists the current state and states whose conditions
+  # are not met, so it is only used when no transitions are reported (model-only states).
+  # Returns `{allowed, blocked}`, or `:unknown` when the response has no states at all.
   defp next_states(%{"result" => %{} = result}) do
     labels = if is_map(result["state_label"]), do: result["state_label"], else: %{}
 
-    (List.wrap(result["available_states"]) ++ Enum.map(List.wrap(result["state_transitions"]), &transition_state/1))
-    |> Enum.flat_map(&state_value/1)
-    |> Enum.uniq()
-    |> Enum.map(&%{"value" => &1, "label" => label(labels[&1])})
+    case transitions(result["state_transitions"]) do
+      [] -> available_states(result["available_states"], labels)
+      transitions ->
+        {open, blocked} = Enum.split_with(transitions, &transition_available?/1)
+        {Enum.map(open, &transition_state(&1, labels)), Enum.map(blocked, &transition_state(&1, labels))}
+    end
   end
-  defp next_states(_), do: []
+  defp next_states(_), do: :unknown
+
+  defp available_states(states, labels) do
+    case states |> List.wrap() |> Enum.flat_map(&state_value/1) |> Enum.uniq() do
+      [] -> :unknown
+      values -> {Enum.map(values, &%{"value" => &1, "label" => label(labels[&1])}), []}
+    end
+  end
+
+  defp transitions(transitions) when is_list(transitions) do
+    transitions
+    |> List.flatten()
+    |> Enum.filter(&(is_map(&1) and state_value(&1["to_state"]) != []))
+  end
+  defp transitions(_), do: []
 
   # transitions whose conditions are not met are listed too, but cannot be taken
-  defp transition_state(%{"transition_available" => false}), do: nil
-  defp transition_state(%{"to_state" => state}), do: state
-  defp transition_state(_), do: nil
+  defp transition_available?(%{"transition_available" => available}), do: available not in [false, "false"]
+  defp transition_available?(_), do: true
+
+  defp transition_state(%{"to_state" => state} = transition, labels) do
+    [value] = state_value(state)
+    %{"value" => value, "label" => label(labels[value]), "unmet" => unmet_conditions(transition)}
+  end
+
+  defp unmet_conditions(%{"conditions" => conditions}) when is_list(conditions) do
+    for %{"passed" => passed, "condition" => %{"name" => name}} <- conditions, passed in [false, "false"], is_binary(name), do: name
+  end
+  defp unmet_conditions(_), do: []
 
   defp label(label) when is_binary(label), do: label
   defp label(%{"display_value" => label}) when is_binary(label), do: label
@@ -127,9 +160,18 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.TransitionRecord do
   defp describe(%{"value" => value, "label" => label}) when is_binary(label) and label != "", do: "#{value} (#{label})"
   defp describe(%{"value" => value}), do: value
 
+  defp invalid(state, []), do: {:error, "State #{inspect(state)} is not available for this ticket. No state can be reached right now."}
   defp invalid(state, options) do
-    {:error, "State #{inspect(state)} is not available for this ticket. Available states: #{Enum.join(Enum.uniq(options), ", ")}."}
+    {:error, "State #{inspect(state)} is not available for this ticket. Available states: #{options |> Enum.map(&describe/1) |> Enum.uniq() |> Enum.join(", ")}."}
   end
+
+  defp blocked(state, unmet, allowed) do
+    reason = if unmet == [], do: "its conditions are not met", else: "unmet conditions: #{Enum.join(unmet, ", ")}"
+    {:error, "State #{inspect(state)} cannot be reached right now, #{reason}. " <> available(allowed)}
+  end
+
+  defp available([]), do: "No other state can be reached right now."
+  defp available(allowed), do: "Available states: #{allowed |> Enum.map(&describe/1) |> Enum.uniq() |> Enum.join(", ")}."
 
   defp update(client, %{table: "change_request"} = model, sys_id, state),
     do: Client.change_patch(client, "/change/#{Client.segment(sys_id)}", body(model, state))

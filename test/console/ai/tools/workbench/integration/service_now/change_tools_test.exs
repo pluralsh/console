@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ChangeToolsTest do
   @next_states ~s({"result":{
     "available_states":["-5","-4"],
     "state_label":{"-5":"New","-4":"Assess"},
-    "state_transitions":[{"from_state":"-5","to_state":"-4","transition_available":true}]
+    "state_transitions":[[{"from_state":"-5","to_state":"-4","transition_available":true}]]
   }})
 
   @choices ~s({"result":[
@@ -201,21 +201,122 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ChangeToolsTest do
       assert {:ok, _} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => "-1"})
     end
 
-    test "does not accept a transition whose conditions are not met" do
+    test "names the unmet conditions of a blocked transition" do
+      expect(Req, :request, 2, fn _ -> {:ok, %Req.Response{status: 200, body: ~s({"result":[]})}} end)
+
+      expect(Req, :request, fn _ ->
+        body = ~s({"result":{
+          "available_states":["-4","4","-5"],
+          "state_label":{"-4":"Assess","4":{"display_value":"Canceled"},"-5":"New"},
+          "state_transitions":[
+            [{"sys_id":"c05d","display_value":"New to Assess","from_state":"-5","to_state":"-4","transition_available":false,
+              "automatic_transition":false,
+              "conditions":[{"passed":false,"condition":{"name":"Assignment group is not empty","sys_id":"ef4e"}}]}],
+            [{"sys_id":"5d17","display_value":"New to Canceled","from_state":"-5","to_state":"4","transition_available":true,
+              "automatic_transition":false,"conditions":[]}]
+          ]
+        }})
+
+        {:ok, %Req.Response{status: 200, body: body}}
+      end)
+
+      assert {:error, msg} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => "assess"})
+      assert msg =~ "unmet conditions: Assignment group is not empty"
+      assert msg =~ "Available states: 4 (Canceled)."
+    end
+
+    test "refuses the current state and unknown states when transitions are reported" do
+      for state <- ["new", "banana"] do
+        expect(Req, :request, fn _ ->
+          {:ok, %Req.Response{status: 200, body: ~s({"result":[{"value":"-5","label":"New"},{"value":"-4","label":"Assess"}]})}}
+        end)
+
+        expect(Req, :request, fn _ -> {:ok, %Req.Response{status: 200, body: @next_states}} end)
+
+        assert {:error, msg} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => state})
+        assert msg =~ "Available states: -4 (Assess)."
+      end
+    end
+
+    test "takes a state that has both an open and a blocked transition, and merges string booleans" do
+      body = ~s({"result":{"state_label":{"-4":"Assess"},"state_transitions":[
+        [{"to_state":"-4","transition_available":"false","conditions":[{"passed":"false","condition":{"name":"Group set"}}]}],
+        [{"to_state":"-4","transition_available":true,"conditions":[]}]
+      ]}})
+
+      expect(Req, :request, 2, fn _ -> {:ok, %Req.Response{status: 200, body: ~s({"result":[]})}} end)
+      expect(Req, :request, fn _ -> {:ok, %Req.Response{status: 200, body: body}} end)
+
+      expect(Req, :request, fn opts ->
+        assert Jason.decode!(opts[:body]) == %{"state" => "-4"}
+        {:ok, %Req.Response{status: 200, body: ~s({"result":{}})}}
+      end)
+
+      assert {:ok, _} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => "assess"})
+    end
+
+    test "merges the conditions of several blocked transitions to one state" do
+      body = ~s({"result":{"state_transitions":[
+        [{"to_state":"-4","transition_available":"false","conditions":[{"passed":"false","condition":{"name":"Group set"}}]}],
+        [{"to_state":"-4","transition_available":false,"conditions":[{"passed":false,"condition":{"name":"Plan set"}},{"passed":true,"condition":{"name":"Fine"}}]}],
+        [{"to_state":"4","transition_available":true}]
+      ]}})
+
+      expect(Req, :request, 2, fn _ -> {:ok, %Req.Response{status: 200, body: ~s({"result":[]})}} end)
+      expect(Req, :request, fn _ -> {:ok, %Req.Response{status: 200, body: body}} end)
+
+      assert {:error, msg} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => "-4"})
+      assert msg =~ "unmet conditions: Group set, Plan set"
+      refute msg =~ "Fine"
+    end
+
+    test "uses available_states when no transition has a readable target" do
+      body = ~s({"result":{"available_states":["-5","-4"],"state_transitions":[[{"to_state":""}]]}})
+
+      expect(Req, :request, 2, fn _ -> {:ok, %Req.Response{status: 200, body: ~s({"result":[]})}} end)
+      expect(Req, :request, fn _ -> {:ok, %Req.Response{status: 200, body: body}} end)
+
+      expect(Req, :request, fn opts ->
+        assert Jason.decode!(opts[:body]) == %{"state" => "-5"}
+        {:ok, %Req.Response{status: 200, body: ~s({"result":{}})}}
+      end)
+
+      assert {:ok, _} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => "-5"})
+    end
+
+    test "refuses when every reported transition is blocked" do
       expect(Req, :request, 2, fn _ -> {:ok, %Req.Response{status: 200, body: ~s({"result":[]})}} end)
 
       expect(Req, :request, fn _ ->
         body = ~s({"result":{
           "available_states":["-5"],
-          "state_label":{"-5":{"display_value":"New"},"-2":"Scheduled"},
-          "state_transitions":[{"to_state":"-2","transition_available":false}]
+          "state_label":{"-5":"New","-2":"Scheduled"},
+          "state_transitions":[[{"from_state":"-5","to_state":"-2","transition_available":false}]]
         }})
 
         {:ok, %Req.Response{status: 200, body: body}}
       end)
 
       assert {:error, msg} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => "-2"})
-      assert msg =~ "Available states: -5 (New)."
+      assert msg =~ "its conditions are not met"
+      assert msg =~ "No other state can be reached right now."
+    end
+
+    test "reads a flat list of transitions and falls back to available_states when there are none" do
+      for {body, state} <- [
+            {~s({"result":{"available_states":["-5","-4"],"state_transitions":[{"to_state":"-4","transition_available":true}]}}), "-4"},
+            {~s({"result":{"available_states":["-5","-4"],"state_transitions":[]}}), "-4"}
+          ] do
+        expect(Req, :request, 2, fn _ -> {:ok, %Req.Response{status: 200, body: ~s({"result":[]})}} end)
+        expect(Req, :request, fn _ -> {:ok, %Req.Response{status: 200, body: body}} end)
+
+        expect(Req, :request, fn opts ->
+          assert Jason.decode!(opts[:body]) == %{"state" => state}
+          {:ok, %Req.Response{status: 200, body: ~s({"result":{}})}}
+        end)
+
+        assert {:ok, _} = run(TransitionRecord, %{"table" => "change_request", "record_id" => @sys_id, "state" => state})
+      end
     end
 
     test "sends the raw state when the state choices cannot be read" do
