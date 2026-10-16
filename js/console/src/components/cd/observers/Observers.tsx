@@ -15,8 +15,10 @@ import {
   ObserverTargetType,
   useDeleteObserverMutation,
 } from 'generated/graphql'
-import { KickObserverDocument } from 'generated/graphql-documents'
-import { ObserversDocument } from 'generated/graphql-documents'
+import {
+  KickObserverDocument,
+  ObserversDocument,
+} from 'generated/graphql-documents'
 import { useState } from 'react'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'

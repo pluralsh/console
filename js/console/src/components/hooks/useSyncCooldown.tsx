@@ -29,6 +29,9 @@ export function useSyncCooldown(
 
   return {
     disabled: active,
-    secondsRemaining: active ? Math.ceil(remaining / 1000) : null,
+    // clamped: a stale `now` overestimates `remaining` until the first tick
+    secondsRemaining: active
+      ? Math.ceil(Math.min(remaining, cooldown) / 1000)
+      : null,
   }
 }

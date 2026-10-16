@@ -6,7 +6,12 @@ import { defineConfig } from 'vitest/config'
 // https://vitest.dev/config/
 export default defineConfig({
   // run tests against compiled components, same as the production build
-  plugins: [babel({ presets: [reactCompilerPreset()] })],
+  plugins: [
+    babel({
+      presets: [reactCompilerPreset({ panicThreshold: 'all_errors' })],
+      exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]generated[/\\]/],
+    }),
+  ],
   test: {
     globals: true,
     environment: 'jsdom',
