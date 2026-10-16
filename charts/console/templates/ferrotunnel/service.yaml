@@ -1,0 +1,33 @@
+{{- if .Values.ferrotunnel.enabled }}
+{{- $host := .Values.ferrotunnel.host }}
+{{- if not $host }}
+{{- $host = printf "ferrotunnel.%s" (.Values.ingress.console_dns | default "") }}
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ferrotunnel.controlServiceName" . }}
+  labels:
+    {{- include "ferrotunnel.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.ferrotunnel.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with $host }}
+    plural.sh/ferrotunnel-host: {{ . | quote }}
+    external-dns.alpha.kubernetes.io/hostname: {{ . | quote }}
+    {{- end }}
+spec:
+  type: {{ .Values.ferrotunnel.service.type }}
+  ports:
+    - name: control
+      port: {{ .Values.ferrotunnel.service.controlPort }}
+      targetPort: control
+      protocol: TCP
+    - name: http
+      port: {{ .Values.ferrotunnel.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "ferrotunnel.selectorLabels" . | nindent 4 }}
+{{- end }}

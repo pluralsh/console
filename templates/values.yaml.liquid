@@ -43,20 +43,30 @@ extraSecretEnv:
 kas:
   enabled: true
   consoleUrl: {{ configuration.consoleDns }}
-
   secrets:
     api: {{ configuration.kasApi }}
     privateapi: {{ configuration.kasPrivateApi }}
     redis: {{ configuration.kasRedis }}
-
   ingress:
     kas_dns: {{ configuration.kasDns }}
     {% if configuration.clusterIssuer %}
     annotations:
       cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
     {% endif %}
-
   redis:
     auth:
       password: {{ configuration.kasRedis }}
+
+ferrotunnel:
+  enabled: true
+  host: ferrotunnel.{{ configuration.consoleDns }}
+  {% if configuration.provider == "aws" %}
+  # Internet-facing NLB for agent control (7835) and HTTP ingress (80).
+  # Do not set aws-load-balancer-proxy-protocol; it breaks the TLS handshake on 7835.
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: external
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+  {% endif %}
 

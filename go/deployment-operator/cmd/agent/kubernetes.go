@@ -340,6 +340,21 @@ func registerKubeReconcilersOrDie(
 		setupLog.Error(err, "unable to create controller", "controller", "ImageWarmer")
 	}
 
+	if err := (&controller.TunnelControllerReconciler{
+		Client: manager.GetClient(),
+		Scheme: manager.GetScheme(),
+		Config: controller.FerroTunnelConfig{
+			Server:             args.FerroTunnelServer(),
+			ServiceAccountName: args.FerroTunnelServiceAccount(),
+			Token:              args.FerroTunnelToken(),
+			CACert:             args.FerroTunnelCA(),
+			Cert:               args.FerroTunnelCert(),
+			Key:                args.FerroTunnelKey(),
+		},
+	}).SetupWithManager(manager); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "TunnelController")
+	}
+
 	if err := (&controller.AgentRunReconciler{
 		Client:           manager.GetClient(),
 		Scheme:           manager.GetScheme(),

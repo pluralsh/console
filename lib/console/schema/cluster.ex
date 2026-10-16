@@ -107,6 +107,8 @@ defmodule Console.Schema.Cluster do
     field :current_version, :string
     field :kubelet_version, :string
     field :deploy_token,    :string
+    field :tunnel_cert,     Piazza.Ecto.EncryptedString
+    field :tunnel_key,      Piazza.Ecto.EncryptedString
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
     field :deleted_at,      :utc_datetime_usec
@@ -517,6 +519,12 @@ defmodule Console.Schema.Cluster do
     |> validate_vsn()
     |> update_vsn()
     |> validate_required(~w(name handle project_id)a)
+  end
+
+  def tunnel_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(tunnel_cert tunnel_key)a)
+    |> validate_required(~w(tunnel_cert tunnel_key)a)
   end
 
   def update_changeset(model, attrs \\ %{}) do
