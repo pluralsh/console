@@ -94,7 +94,7 @@ export function WorkbenchJobCreateInput({
   const [promptModesState, setPromptModesState] = useState<{
     workbenchId: Nullable<string>
     modes: WorkbenchJobModesAttributes | null
-  }>({ workbenchId, modes: null })
+  } | null>(null)
   const [attachments, setAttachments] = useState<File[]>([])
   const [selectedModelState, setSelectedModelState] = useState<{
     workbenchId: Nullable<string>
@@ -118,12 +118,12 @@ export function WorkbenchJobCreateInput({
 
   // user's choice for this workbench, falling back to the workbench defaults
   const promptModes =
-    (promptModesState.workbenchId === workbenchId
+    promptModesState && promptModesState.workbenchId === workbenchId
       ? promptModesState.modes
-      : null) ??
-    (workbenchId
-      ? (defaultPromptModesFromWorkbench(data?.workbench, workbenchId) ?? null)
-      : null)
+      : workbenchId
+        ? (defaultPromptModesFromWorkbench(data?.workbench, workbenchId) ??
+          null)
+        : null
   const setPromptModes = (modes: WorkbenchJobModesAttributes | null) =>
     setPromptModesState({ workbenchId, modes })
 

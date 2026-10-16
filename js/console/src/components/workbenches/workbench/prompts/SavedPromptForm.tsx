@@ -50,9 +50,6 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     location.state as Nullable<SavedPromptCreateRouteState>
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const savedPromptId = useParams()[WORKBENCHES_SAVED_PROMPT_PARAM_ID]
-  const [formState, setFormState] = useState<SavedPromptFormState>(() =>
-    getInitialFormState(undefined, createRouteState?.prompt)
-  )
   const { popToast } = useSimpleToast()
 
   const {
@@ -88,6 +85,9 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     [prompts, savedPromptId]
   )
 
+  const [formState, setFormState] = useState<SavedPromptFormState>(() =>
+    getInitialFormState(savedPrompt, createRouteState?.prompt)
+  )
   const [prevSavedPrompt, setPrevSavedPrompt] = useState(savedPrompt)
   if (savedPrompt !== prevSavedPrompt) {
     setPrevSavedPrompt(savedPrompt)
