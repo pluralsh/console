@@ -1622,6 +1622,13 @@ export const ClustersRowFragmentDoc = /*#__PURE__*/ gql`
     extendedFrom
   }
   disableAi
+  remediationMinPriority
+  remediationWindow
+  remediationMaxJobs
+  remediationWorkbench {
+    id
+    name
+  }
 }
     ${ClusterUpgradePlanFragmentDoc}
 ${AiInsightSummaryFragmentDoc}` as unknown as DocumentNode<Types.ClustersRowFragment, unknown>;

@@ -4600,6 +4600,15 @@ type WorkbenchJob {
   "the issue this run was spawned from"
   issue: Issue
 
+  "the cluster this job was spawned to remediate"
+  cluster: Cluster
+
+  "identity of the cluster insight component this job remediates"
+  componentKey: String
+
+  "sha of the component insight this job was started from"
+  insightSha: String
+
   "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
   referencedJob: WorkbenchJob
 
@@ -13398,6 +13407,18 @@ input ClusterAttributes {
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
 
+  "workbench that receives auto-remediation jobs for this cluster"
+  remediationWorkbenchId: ID
+
+  "minimum insight component priority required before auto-remediation starts a job"
+  remediationMinPriority: InsightComponentPriority
+
+  "seconds to suppress another auto-remediation job for the same finding"
+  remediationWindow: Int
+
+  "maximum auto-remediation jobs to start for this cluster within the throttle window"
+  remediationMaxJobs: Int
+
   cloudSettings: CloudSettingsAttributes
 
   "the project id this cluster will belong to"
@@ -13508,6 +13529,18 @@ input ClusterUpdateAttributes {
 
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
+
+  "workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation"
+  remediationWorkbenchId: ID
+
+  "minimum insight component priority required before auto-remediation starts a job"
+  remediationMinPriority: InsightComponentPriority
+
+  "seconds to suppress another auto-remediation job for the same finding"
+  remediationWindow: Int
+
+  "maximum auto-remediation jobs to start for this cluster within the throttle window"
+  remediationMaxJobs: Int
 
   nodePools: [NodePoolAttributes]
 
@@ -14242,6 +14275,15 @@ type Cluster {
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
 
+  "minimum insight component priority required before auto-remediation starts a job"
+  remediationMinPriority: InsightComponentPriority
+
+  "seconds to suppress another auto-remediation job for the same finding"
+  remediationWindow: Int
+
+  "maximum auto-remediation jobs to start for this cluster within the throttle window"
+  remediationMaxJobs: Int
+
   "The version of OpenShift this cluster is running"
   openshiftVersion: String
 
@@ -14367,6 +14409,9 @@ type Cluster {
 
   "an ai insight generated about issues discovered which might impact the health of this cluster"
   insight: AiInsight
+
+  "workbench that receives auto-remediation jobs when cluster insights clear this cluster's policy"
+  remediationWorkbench: Workbench
 
   "the current upgrade attempt for this cluster"
   currentUpgrade: ClusterUpgrade

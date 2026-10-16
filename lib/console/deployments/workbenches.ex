@@ -882,6 +882,22 @@ defmodule Console.Deployments.Workbenches do
   defp budget_available?(%Workbench{budget: %Budget{} = budget}), do: Budget.available?(budget)
   defp budget_available?(%Workbench{}), do: true
 
+  @spec create_workbench_bot_job(map, Workbench.t) :: job_resp
+  def create_workbench_bot_job(attrs, %Workbench{} = bench) do
+    bench = Repo.preload(bench, [:bot_user])
+    start_transaction()
+    |> add_operation(:actor, fn _ ->
+      case bench do
+        %Workbench{bot_user: %User{} = bot_user} -> {:ok, Console.Services.Rbac.preload(bot_user)}
+        _ -> {:error, "workbench does not have a bot user"}
+      end
+    end)
+    |> add_operation(:job, fn %{actor: user} ->
+      create_workbench_job(attrs, bench, user)
+    end)
+    |> execute(extract: :job)
+  end
+
   @spec create_workbench_bot_job(map, binary, WorkbenchWebhook.t() | Monitor.t()) :: job_resp
   def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{} = hook),
     do: create_workbench_bot_job(attrs, workbench_id, hook, "workbench webhook")
