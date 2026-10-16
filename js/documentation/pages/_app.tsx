@@ -3,7 +3,6 @@ import {
   type ComponentType,
   type Ref,
   Suspense,
-  useState,
 } from 'react'
 
 import {
@@ -116,11 +115,12 @@ const Link = ({
   />
 )
 
+const NAV_DATA = getNavData()
+
 function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const router = useRouter()
   const markdoc = pageProps?.markdoc
   const isClient = useIsClient()
-  const [navData] = useState(getNavData)
 
   const { metaTitle, metaDescription } = pageProps
 
@@ -213,7 +213,7 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
       <MarkdocContextProvider value={{ variant: 'docs' }}>
         <NavigationContextProvider value={navContextVal}>
           <SWRConfig value={swrConfig}>
-            <NavDataProvider value={navData}>
+            <NavDataProvider value={NAV_DATA}>
               <RestNavProvider>
                 <BreakpointProvider>
                   <StyledThemeProvider theme={docsStyledTheme}>

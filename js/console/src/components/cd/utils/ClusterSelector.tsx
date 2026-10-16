@@ -22,7 +22,7 @@ import {
   ClusterSelectorQueryVariables,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { ComponentPropsWithRef, useCallback, useMemo, useState } from 'react'
+import { ComponentPropsWithRef, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
@@ -83,25 +83,14 @@ export default function ClusterSelector({
     [data?.cluster, data?.clusters?.edges]
   )
 
-  const dataCluster = data?.cluster
-  const findCluster = useCallback(
-    (clusterId: Nullable<string>) => {
-      if (!clusterId) {
-        return null
-      }
-      if (dataCluster && dataCluster.id === clusterId) {
-        return dataCluster
-      }
+  const findCluster = (clusterId: Nullable<string>) => {
+    if (!clusterId) return null
+    if (data?.cluster?.id === clusterId) return data.cluster
 
-      return clusters?.find((cluster) => cluster?.id === clusterId)
-    },
-    [clusters, dataCluster]
-  )
+    return clusters?.find((cluster) => cluster?.id === clusterId)
+  }
 
-  const selectedCluster = useMemo(
-    () => findCluster(clusterId),
-    [clusterId, findCluster]
-  )
+  const selectedCluster = findCluster(clusterId)
 
   return (
     <FillLevelDiv fillLevel={fillLevel}>

@@ -40,10 +40,7 @@ export function StackRunsTable({
   ...props
 }: {
   variables: StackRunsQueryVariables
-  options: Omit<
-    FetchPaginatedDataOptions<StackRunsQuery, StackRunsQueryVariables>,
-    'query' | 'keyPath'
-  >
+  options: Omit<FetchPaginatedDataOptions, 'query' | 'keyPath'>
 } & Omit<TableProps, 'data' | 'columns'>) {
   const { stackId } = useParams()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =

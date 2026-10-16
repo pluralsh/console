@@ -8,7 +8,7 @@ import {
   WorkbenchDashboardGraphQuery,
 } from 'generated/graphql'
 import { authlessClient } from 'helpers/client'
-import { createContext, ReactNode, use, useMemo } from 'react'
+import { createContext, ReactNode, use } from 'react'
 
 type WorkbenchDashboardGraph = NonNullable<
   NonNullable<WorkbenchDashboardDetailsFragment['graphs']>[number]
@@ -124,13 +124,8 @@ export function AuthenticatedGraphSource({
   dashboardId: string
   children: ReactNode
 }) {
-  const value = useMemo(
-    () => ({ dashboardId, readOnly: false as const }),
-    [dashboardId]
-  )
-
   return (
-    <DashboardGraphSourceContext value={value}>
+    <DashboardGraphSourceContext value={{ dashboardId, readOnly: false }}>
       {children}
     </DashboardGraphSourceContext>
   )
@@ -143,13 +138,8 @@ export function PublicGraphSource({
   publicId: string
   children: ReactNode
 }) {
-  const value = useMemo(
-    () => ({ publicId, readOnly: true as const }),
-    [publicId]
-  )
-
   return (
-    <DashboardGraphSourceContext value={value}>
+    <DashboardGraphSourceContext value={{ publicId, readOnly: true }}>
       {children}
     </DashboardGraphSourceContext>
   )

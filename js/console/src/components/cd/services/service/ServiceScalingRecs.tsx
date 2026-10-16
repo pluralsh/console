@@ -1,5 +1,4 @@
 import { ClusterScalingRecommendationFragment } from 'generated/graphql'
-import { useMemo } from 'react'
 
 import { Table } from '@pluralsh/design-system'
 import { useServiceContext } from './ServiceDetailsContext'
@@ -18,20 +17,15 @@ export function ServiceScalingRecs() {
     service?.scalingRecommendations?.filter(
       (rec): rec is ClusterScalingRecommendationFragment => !!rec
     ) ?? []
-  const cluster = service?.cluster
-  const cols = useMemo(
-    () =>
-      cluster
-        ? [
-            ColName,
-            ColContainer,
-            ColCpuChange,
-            ColMemoryChange,
-            getColScalingPr(cluster),
-          ]
-        : [ColName, ColContainer, ColCpuChange, ColMemoryChange],
-    [cluster]
-  )
+  const cols = service?.cluster
+    ? [
+        ColName,
+        ColContainer,
+        ColCpuChange,
+        ColMemoryChange,
+        getColScalingPr(service.cluster),
+      ]
+    : [ColName, ColContainer, ColCpuChange, ColMemoryChange]
 
   return (
     <Table
