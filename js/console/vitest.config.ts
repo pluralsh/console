@@ -1,8 +1,12 @@
+import babel from '@rolldown/plugin-babel'
+import { reactCompilerPreset } from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 
 // https://vitest.dev/config/
 export default defineConfig({
+  // run tests against compiled components, same as the production build
+  plugins: [babel({ presets: [reactCompilerPreset()] })],
   test: {
     globals: true,
     environment: 'jsdom',
