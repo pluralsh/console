@@ -140,12 +140,14 @@ defmodule Console.Deployments.Observability.MetricsTest do
       end
     end
 
-    test "node-exporter series are matched to the node through node_uname_info" do
+    test "node-exporter series are matched on every common node labeling" do
       node = Map.new(Metrics.queries(:node_usage, :node))
 
-      for key <- @host_keys do
-        assert node[key] =~ ~s|group_left () max by (instance) (node_uname_info{cluster="${cluster}",nodename="${node}"})|,
-               "node_usage.#{key} isn't joined to node_uname_info"
+      for key <- @host_keys, matcher <- [~s|instance="${node}"|, ~s|nodename="${node}"|, ~s|,node="${node}"|] do
+        assert node[key] =~ "and on (instance) max by (instance) (", "node_usage.#{key} isn't matched by instance"
+        assert node[key] =~ matcher, "node_usage.#{key} doesn't try #{matcher}"
+        assert node[key] =~ ~s|node_uname_info{cluster="${cluster}",nodename="${node}"}|,
+               "node_usage.#{key} doesn't fall back to node_uname_info"
       end
     end
 

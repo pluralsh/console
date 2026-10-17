@@ -101,9 +101,18 @@ defmodule Console.Deployments.Observability.Metrics do
     memory: ~s|sum(container_memory_working_set_bytes{cluster="${cluster}",image!="",container!=""}) / sum(kube_pod_container_resource_requests_memory_bytes{cluster="${cluster}"}) by (pod)|
   ])
 
-  # node-exporter series are labeled by scrape `instance` rather than node name, so they're
-  # matched to the node through node_uname_info's `nodename`
-  @node_exporter ~s|* on (instance) group_left () max by (instance) (node_uname_info{cluster="${cluster}",nodename="${node}"})|
+  # Shippers label node-exporter series with the node name differently: grafana's k8s-monitoring
+  # sets `instance` to it, kube-prometheus-stack adds `nodename`, victoria-metrics' stack adds
+  # `node`, and bare scrape configs only have node_uname_info's `nodename` to join through (which
+  # k8s-monitoring's default allowlist drops).  Each is tried, keyed by instance.
+  @node_instances [
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",instance="${node}"}|,
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",nodename="${node}"}|,
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",node="${node}"}|,
+                    ~s|node_uname_info{cluster="${cluster}",nodename="${node}"}|
+                  ]
+                  |> Enum.join(" or ")
+  @node_exporter ~s|and on (instance) max by (instance) (#{@node_instances})|
   @node_selector ~s|cluster="${cluster}",node="${node}"|
   @host_fs ~s<fstype!~"tmpfs|overlay|squashfs|ramfs|nsfs|fuse.*",mountpoint!~"/(run|var/lib/kubelet)/.*",cluster="${cluster}">
   # physical interfaces only; virtual pod and overlay interfaces double count pod traffic

@@ -503,8 +503,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   @desc """
-  Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node through
-  node_uname_info's nodename), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
+  Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node by an
+  `instance`, `nodename` or `node` label, or node_uname_info), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
   out by the `groupBy` argument and labeled by `namespace` (and `pod`) accordingly; the rest are node-wide.
   """
   object :node_usage_metrics do

@@ -143,6 +143,7 @@ defmodule Console.GraphQl.Observability do
       arg :limit,      :integer
       arg :operator,   :log_query_operator
       arg :facets,     list_of(:log_facet_input)
+      arg :node,       :string, description: "only logs from pods on this node"
 
       resolve &Observability.list_logs/2
     end
@@ -154,6 +155,7 @@ defmodule Console.GraphQl.Observability do
       arg :query,      :string
       arg :time,       :log_time_range
       arg :field,      non_null(:string)
+      arg :node,       :string, description: "only logs from pods on this node"
 
       resolve &Observability.list_log_labels/2
     end
@@ -167,6 +169,7 @@ defmodule Console.GraphQl.Observability do
       arg :aggregation, :log_aggregation_input
       arg :operator,    :log_query_operator
       arg :facets,      list_of(:log_facet_input)
+      arg :node,        :string, description: "only logs from pods on this node"
 
       resolve &Observability.list_log_aggregations/2
     end

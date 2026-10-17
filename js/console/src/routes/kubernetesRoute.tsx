@@ -38,6 +38,7 @@ import Node, {
   NodeContainerImages,
   NodeEvents,
   NodeInfo,
+  NodeLogs,
   NodeMetricsView,
   NodePods,
 } from '../components/kubernetes/cluster/Node'
@@ -843,6 +844,10 @@ export const kubernetesRoutes = (
       <Route
         path="metrics"
         element={<NodeMetricsView />}
+      />
+      <Route
+        path="logs"
+        element={<NodeLogs />}
       />
       <Route
         path="conditions"

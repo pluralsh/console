@@ -105,6 +105,7 @@ defmodule Console.Logs.Provider.Opensearch do
              |> add_terms(q)
              |> add_range(q)
              |> add_pod(q)
+             |> add_node(q)
              |> add_namespaces(q)
              |> add_facets(q),
       sort: sort(q),
@@ -144,6 +145,19 @@ defmodule Console.Logs.Provider.Opensearch do
   defp add_pod(query, %Query{pod: pod}) when is_binary(pod) and byte_size(pod) > 0,
     do: add_filter(query, %{term: %{"kubernetes.pod.name.keyword" => pod}})
   defp add_pod(query, _), do: query
+
+  # fluent-bit/fluentd: kubernetes.host, filebeat: kubernetes.node.name
+  @node_fields ~w(kubernetes.host.keyword kubernetes.node.name.keyword)
+
+  defp add_node(query, %Query{node: node}) when is_binary(node) and byte_size(node) > 0 do
+    add_filter(query, %{
+      nested: %{
+        path: "kubernetes",
+        query: %{bool: %{should: Enum.map(@node_fields, &%{term: %{&1 => node}}), minimum_should_match: 1}}
+      }
+    })
+  end
+  defp add_node(query, _), do: query
 
   defp add_namespaces(query, %Query{namespaces: [_ | _] = ns}) do
     add_filter(query, %{
