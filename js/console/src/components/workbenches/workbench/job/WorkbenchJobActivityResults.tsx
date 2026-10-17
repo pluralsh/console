@@ -32,7 +32,10 @@ import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SeriesSliceTooltip, SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
-import { GraphLegend } from 'components/utils/GraphLegend'
+import {
+  GraphLegend,
+  type GraphLegendLayout,
+} from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
@@ -797,12 +800,16 @@ export function WorkbenchJobMetricsLegend({
   selectedId,
   onSelect,
   paddingLeft,
+  layout,
+  className,
 }: {
   series: MetricSeries[]
   maxHeight?: number
   selectedId?: string | null
   onSelect?: (id: string) => void
   paddingLeft?: number
+  layout?: GraphLegendLayout
+  className?: string
 }) {
   return (
     <GraphLegend
@@ -815,6 +822,8 @@ export function WorkbenchJobMetricsLegend({
       selectedId={selectedId}
       onSelect={onSelect}
       maxHeight={maxHeight}
+      layout={layout}
+      className={className}
       style={{ paddingLeft }}
     />
   )

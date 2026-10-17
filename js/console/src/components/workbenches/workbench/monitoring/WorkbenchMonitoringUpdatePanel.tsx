@@ -1,6 +1,13 @@
-import { Button, Flex, Flyover } from '@pluralsh/design-system'
+import {
+  AddIcon,
+  Button,
+  ChatOutlineIcon,
+  Flex,
+  Flyover,
+  Tooltip,
+  WrapWithIf,
+} from '@pluralsh/design-system'
 import type { MonitoringResourceType } from 'components/ai/chatbot/input/autocomplete/mentionTypes'
-import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { WorkbenchOutletContext } from '../Workbench'
@@ -11,21 +18,40 @@ import { monitoringUpdatePromptSeed } from './monitoringUpdatePrompt'
 export function WorkbenchMonitoringUpdateButton({
   kind,
   name,
+  hasJob,
   onClick,
 }: {
   kind: MonitoringResourceType
   name: string
+  hasJob: boolean
   onClick: () => void
 }) {
+  const label = kind === 'dashboard' ? 'Update dashboard' : 'Update monitor'
+
   return (
-    <Button
-      primary
-      small
-      onClick={onClick}
-      aria-label={`Update ${kind} ${name}`}
+    <WrapWithIf
+      condition={hasJob}
+      wrapper={
+        <Tooltip
+          label="Return to the update job you started"
+          placement="bottom"
+        />
+      }
     >
-      {kind === 'dashboard' ? 'Update dashboard' : 'Update monitor'}
-    </Button>
+      <Button
+        primary
+        small
+        startIcon={hasJob ? <ChatOutlineIcon /> : undefined}
+        onClick={onClick}
+        aria-label={
+          hasJob
+            ? `Return to the update job for ${kind} ${name}`
+            : `Update ${kind} ${name}`
+        }
+      >
+        {label}
+      </Button>
+    </WrapWithIf>
   )
 }
 
@@ -35,25 +61,19 @@ export function WorkbenchMonitoringUpdatePanel({
   kind,
   id,
   name,
+  jobId,
+  onJobChange,
 }: {
   open: boolean
   onClose: () => void
   kind: MonitoringResourceType
   id: string
   name: string
+  jobId: Nullable<string>
+  onJobChange: (jobId: Nullable<string>) => void
 }) {
   const { workbenchId, isLoading, workbench } =
     useOutletContext<WorkbenchOutletContext>()
-  const [jobId, setJobId] = useState<string | null>(null)
-
-  // Reset the in-flyover chat when the panel closes or is retargeted. Adjusted
-  // during render (React-endorsed) instead of setState-in-effect.
-  const targetKey = `${kind}:${id}:${open ? 'open' : 'closed'}`
-  const [prevTargetKey, setPrevTargetKey] = useState(targetKey)
-  if (prevTargetKey !== targetKey) {
-    setPrevTargetKey(targetKey)
-    setJobId(null)
-  }
 
   return (
     <Flyover
@@ -61,8 +81,20 @@ export function WorkbenchMonitoringUpdatePanel({
       onClose={onClose}
       header={
         <UpdateHeaderSC>
-          {kind === 'dashboard' ? 'Update dashboard' : 'Update monitor'}{' '}
-          <UpdateHeaderNameSC>{name}</UpdateHeaderNameSC>
+          <span>
+            {kind === 'dashboard' ? 'Update dashboard' : 'Update monitor'}{' '}
+            <UpdateHeaderNameSC>{name}</UpdateHeaderNameSC>
+          </span>
+          {jobId && (
+            <Button
+              secondary
+              small
+              startIcon={<AddIcon />}
+              onClick={() => onJobChange(null)}
+            >
+              New request
+            </Button>
+          )}
         </UpdateHeaderSC>
       }
       width="min(720px, 100%)"
@@ -105,7 +137,7 @@ export function WorkbenchMonitoringUpdatePanel({
             })}
             placeholder="Describe the change. Use @ to mention dashboards, monitors, clusters, and more."
             bgColor="fill-one-selected"
-            onCreated={(job) => setJobId(job.id)}
+            onCreated={(job) => onJobChange(job.id)}
           />
         </Flex>
       )}
@@ -116,6 +148,10 @@ export function WorkbenchMonitoringUpdatePanel({
 const UpdateHeaderSC = styled.span(({ theme }) => ({
   ...theme.partials.text.buttonMedium,
   color: theme.colors['text-light'],
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing.small,
 }))
 
 const UpdateHeaderNameSC = styled.span({

@@ -35,6 +35,8 @@ export function WorkbenchMonitoring() {
   const isDashboardCreate = dashboardId === WORKBENCHES_CREATE_REL_PATH
   const isMonitorCreate = monitorId === WORKBENCHES_CREATE_REL_PATH
   const [updateOpen, setUpdateOpen] = useState(false)
+  // keyed by `${kind}:${id}` so closing the panel or switching resources doesn't lose a job
+  const [updateJobs, setUpdateJobs] = useState<Record<string, string>>({})
 
   const dashboardQuery = useWorkbenchMonitoringDashboardQuery({
     variables: { id: dashboardId ?? '' },
@@ -67,6 +69,14 @@ export function WorkbenchMonitoring() {
     monitorData?.monitor?.name,
     monitorId,
   ])
+  const updateKey = updateTarget && `${updateTarget.kind}:${updateTarget.id}`
+  const updateJobId = updateKey ? updateJobs[updateKey] : undefined
+  const setUpdateJobId = (jobId: Nullable<string>) => {
+    if (!updateKey) return
+    setUpdateJobs(({ [updateKey]: _, ...rest }) =>
+      jobId ? { ...rest, [updateKey]: jobId } : rest
+    )
+  }
 
   return (
     <WorkbenchPageLayout
@@ -80,6 +90,7 @@ export function WorkbenchMonitoring() {
           <WorkbenchMonitoringUpdateButton
             kind={updateTarget.kind}
             name={updateTarget.name}
+            hasJob={!!updateJobId}
             onClick={() => setUpdateOpen(true)}
           />
         ) : undefined
@@ -130,6 +141,8 @@ export function WorkbenchMonitoring() {
           kind={updateTarget.kind}
           id={updateTarget.id}
           name={updateTarget.name}
+          jobId={updateJobId}
+          onJobChange={setUpdateJobId}
         />
       )}
     </WorkbenchPageLayout>
